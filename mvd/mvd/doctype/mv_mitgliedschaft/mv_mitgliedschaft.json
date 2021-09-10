@@ -105,7 +105,6 @@
   {
    "fieldname": "mitglied_id",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Mitglied ID",
    "reqd": 1,
    "unique": 1
@@ -127,7 +126,7 @@
    "fieldname": "mitglied_c",
    "fieldtype": "Select",
    "label": "Mitgliedart",
-   "options": "ONLINANMEL\nANGEM\nMITGL\nONLINBEITR\nINAKT\nINTER"
+   "options": "Online-Anmeldung\nAngemeldet\nMitglied\nOnline-Beitritt\nInaktiv\nInteressiert"
   },
   {
    "fieldname": "cb_0",
@@ -137,13 +136,13 @@
    "fieldname": "status_c",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "AREG\nKUNDIG\nMUTATI\nWEGZUG\nAUSSCH\nREAKT\nNEUEIN\nZUZUG\nGESTOR"
+   "options": "Mitglied\nK\u00fcndigung\nMutation\nWegzug\nAusschluss\nReaktiviert\nNeueintritt\nZuzug\nGestorben"
   },
   {
    "fieldname": "mitgliedtyp_c",
    "fieldtype": "Select",
    "label": "Mitgliedtyp",
-   "options": "MVBMINI\nMVBSTANDARD\nGESCH\nPRIV\nKOLL"
+   "options": "Gesch\u00e4ftlich\nPrivat\nKollektiv"
   },
   {
    "collapsible": 1,
@@ -152,6 +151,7 @@
    "label": "Daten"
   },
   {
+   "default": "Today",
    "fieldname": "eintritt",
    "fieldtype": "Date",
    "label": "Eintritt",
@@ -197,6 +197,7 @@
    "depends_on": "eval:doc.kundentyp=='Unternehmen'",
    "fieldname": "firma",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Firma"
   },
   {
@@ -214,11 +215,13 @@
   {
    "fieldname": "nachname_1",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Nachname"
   },
   {
    "fieldname": "vorname_1",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Vorname"
   },
   {
@@ -589,7 +592,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-06-08 21:10:56.251917",
+ "modified": "2021-06-09 11:06:38.477331",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
