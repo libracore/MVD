@@ -43,10 +43,10 @@ function get_adressdaten(frm) {
 
 function sektionswechsel(frm) {
     frappe.prompt([
-        {'fieldname': 'sektion_neu', 'fieldtype': 'Link', 'label': 'Neue Sektion', 'reqd': 1, 'options': 'MV Sektion'}  
+        {'fieldname': 'sektion_neu', 'fieldtype': 'Link', 'label': 'Neue Sektion', 'reqd': 1, 'options': 'Sektion'}  
     ],
     function(values){
-        frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
+        frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt. (TBD!)");
     },
     'Sektionswechsel',
     'Übertragen'

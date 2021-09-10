@@ -1,7 +1,6 @@
 {
- "allow_import": 1,
  "autoname": "field:title",
- "creation": "2021-06-07 10:34:33.349403",
+ "creation": "2021-08-26 13:39:03.647754",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -13,15 +12,15 @@
    "fieldname": "title",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Title",
+   "label": "Titel",
    "reqd": 1,
    "unique": 1
   }
  ],
- "modified": "2021-06-07 10:34:33.349403",
+ "modified": "2021-08-27 13:39:03.647754",
  "modified_by": "Administrator",
  "module": "MVD",
- "name": "MV Sektion",
+ "name": "Sektion",
  "owner": "Administrator",
  "permissions": [
   {
@@ -40,6 +39,5 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "title",
  "track_changes": 1
 }
