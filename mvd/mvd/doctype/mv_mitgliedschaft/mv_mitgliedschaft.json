@@ -72,6 +72,7 @@
   "rg_plz",
   "rg_ort",
   "section_solidarmitglied",
+  "hat_solidarmitglied",
   "anrede_2",
   "nachname_2",
   "vorname_2",
@@ -293,31 +294,37 @@
    "label": "Solidarmitglied"
   },
   {
+   "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "nachname_2",
    "fieldtype": "Data",
    "label": "Nachname"
   },
   {
+   "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "vorname_2",
    "fieldtype": "Data",
    "label": "Vorname"
   },
   {
+   "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "tel_p_2",
    "fieldtype": "Data",
    "label": "Tel. Privat"
   },
   {
+   "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "tel_m_2",
    "fieldtype": "Data",
    "label": "Tel. Mobil"
   },
   {
+   "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "tel_g_2",
    "fieldtype": "Data",
    "label": "Tel. Gesch\u00e4ftlich"
   },
   {
+   "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "e_mail_2",
    "fieldtype": "Data",
    "label": "Email"
@@ -573,6 +580,7 @@
    "label": "Inkl. HV"
   },
   {
+   "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "anrede_2",
    "fieldtype": "Link",
    "label": "Anrede",
@@ -589,10 +597,16 @@
    "fieldname": "objekt_zusatz_adresse",
    "fieldtype": "Data",
    "label": "Zusatz Adresse"
+  },
+  {
+   "default": "0",
+   "fieldname": "hat_solidarmitglied",
+   "fieldtype": "Check",
+   "label": "Solidarmitglied"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-09-10 09:02:40.591578",
+ "modified": "2021-09-10 12:50:14.960514",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
