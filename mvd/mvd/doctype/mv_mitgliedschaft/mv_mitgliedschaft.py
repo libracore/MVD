@@ -107,6 +107,11 @@ def create_objekt_adresse(mitgliedschaft):
     postfach_nummer = ''
     city = mitgliedschaft.objekt_ort
     
+    if not strasse:
+        strasse = address_line1 = "Achtung Fehler!"
+    if not city:
+        city = "Achtung Fehler!"
+    
     new_address = frappe.get_doc({
         'doctype': 'Address',
         'address_title': address_title,
@@ -143,6 +148,11 @@ def update_objekt_adresse(mitgliedschaft):
     plz = mitgliedschaft.objekt_plz
     postfach_nummer = ''
     city = mitgliedschaft.objekt_ort
+    
+    if not strasse:
+        strasse = address_line1 = "Achtung Fehler!"
+    if not city:
+        city = "Achtung Fehler!"
     
     address.address_title = address_title
     address.address_line1 = address_line1
