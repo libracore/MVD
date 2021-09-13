@@ -1,0 +1,31 @@
+Module: mietrechtspraxis,Customers Search Mask,Kunden Suchmaske
+Module: mietrechtspraxis,mp Abo Settings,mp Abo Einstellungen
+Module: mietrechtspraxis,Invoice run and collective printing,Rechnungslauf und Massendruck
+DocType: Address,Zusatz,"Zusatz Adresse"
+DocType: Contact,Last Name,"Nachname"
+DocType: Contact,Sektions Daten,"Verbandsspezifische Angaben"
+DocType: Contact,Mobile No,Mobiltelefon
+DocType: Customer,Customer Addition,"Firmen Zusatz"
+DocType: Customer,Customer Details,"Wichtige Informationen zum Mitglied"
+DocType: Customer,Additional information regarding the customer.,"Wichtige Informationen zum Mitglied (werden beim Sektionswechsel der neuen Sektion übergeben)."
+DocType: Customer,Tax ID,UID-Nummer
+DocType: Customers Search Mask,Firstname,Vorname
+DocType: Customers Search Mask,Lastname,Nachname
+DocType: Customers Search Mask,Search Details,Suchdetails
+DocType: Customers Search Mask,Clear Search Fields,Suchfelder leeren
+DocType: Customers Search Mask,Create new Customer,Neuen Kunden erstellen
+DocType: Customers Search Mask,"Strasse","Strasse und Nr."
+DocType: mp Abo,Magazines Quantity (Total),Anzahl Exemplare (Total)
+DocType: mp Abo,(Total QTY IR + MR),(Total Anzahl IR + MR)
+DocType: mp Abo,Invoice Recipient,"Rechnungsempfänger"
+DocType: mp Abo,Magazines Quantity (IR),Anzahl Exemplare (IR)
+DocType: mp Abo,Magazines Recipient,"Magazin Empfänger"
+DocType: mp Abo,Magazines Quantity (MR),Anzahl Exemplare (MR)
+DocType: mp Abo,Go to Customers Search Mask,"Öffne die Kunden Suchmaske"
+DocType: mp Abo Settings,Corresponding Item for Type Jahres-Abo,Artikel für Abo-Typ Jahres-Abo
+DocType: mp Abo Settings,Corresponding Item for Type Gratis-Abo,Artikel für Abo-Typ Gratis-Abo
+DocType: mp Abo Settings,Corresponding Item for Type Probe-Abo,Artikel für Abo-Typ Probe-Abo
+DocType: mp Abo,Sales Invoices,"Ausgangsrechnungen"
+DocType: mp Abo,Recipient Name,"Empfänger Name"
+DocType: mp Abo,Recipient Contact,"Empfänger Kontakt"
+DocType: mp Abo,Recipient Address,"Empfänger Adresse"
