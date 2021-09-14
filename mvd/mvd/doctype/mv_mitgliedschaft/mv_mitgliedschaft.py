@@ -499,6 +499,7 @@ def update_kunde_mitglied(mitgliedschaft):
         customer.customer_name = (" ").join((mitgliedschaft.vorname_1, mitgliedschaft.nachname_1))
         customer.customer_addition = ''
         customer.customer_type = 'Individual'
+    customer.sektion = mitgliedschaft.sektion_id
     customer.save(ignore_permissions=True)
     return
     
@@ -516,7 +517,8 @@ def create_kunde_mitglied(mitgliedschaft):
         'doctype': 'Customer',
         'customer_name': customer_name,
         'customer_addition': customer_addition,
-        'customer_type': customer_type
+        'customer_type': customer_type,
+        'sektion': mitgliedschaft.sektion_id
     })
     new_customer.insert()
     frappe.db.commit()

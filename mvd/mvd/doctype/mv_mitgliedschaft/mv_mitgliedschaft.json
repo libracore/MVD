@@ -339,25 +339,29 @@
    "fieldname": "kunde_mitglied",
    "fieldtype": "Link",
    "label": "Kunde",
-   "options": "Customer"
+   "options": "Customer",
+   "permlevel": 1
   },
   {
    "fieldname": "kontakt_mitglied",
    "fieldtype": "Link",
    "label": "Kontakt",
-   "options": "Contact"
+   "options": "Contact",
+   "permlevel": 1
   },
   {
    "fieldname": "adresse_mitglied",
    "fieldtype": "Link",
    "label": "Adresse",
-   "options": "Address"
+   "options": "Address",
+   "permlevel": 1
   },
   {
    "fieldname": "kontakt_solidarmitglied",
    "fieldtype": "Link",
    "label": "Kontakt",
-   "options": "Contact"
+   "options": "Contact",
+   "permlevel": 1
   },
   {
    "fieldname": "kundentyp",
@@ -537,7 +541,8 @@
   {
    "fieldname": "title_2",
    "fieldtype": "Heading",
-   "label": "Solidarit\u00e4tsmitglied"
+   "label": "Solidarit\u00e4tsmitglied",
+   "permlevel": 1
   },
   {
    "fieldname": "title_3",
@@ -548,7 +553,8 @@
    "fieldname": "objekt_adresse",
    "fieldtype": "Link",
    "label": "Adresse",
-   "options": "Address"
+   "options": "Address",
+   "permlevel": 1
   },
   {
    "fieldname": "title_4",
@@ -559,19 +565,22 @@
    "fieldname": "rg_kunde",
    "fieldtype": "Link",
    "label": "Kunde",
-   "options": "Customer"
+   "options": "Customer",
+   "permlevel": 1
   },
   {
    "fieldname": "rg_kontakt",
    "fieldtype": "Link",
    "label": "Kontakt",
-   "options": "Contact"
+   "options": "Contact",
+   "permlevel": 1
   },
   {
    "fieldname": "rg_adresse",
    "fieldtype": "Link",
    "label": "Adresse",
-   "options": "Address"
+   "options": "Address",
+   "permlevel": 1
   },
   {
    "default": "0",
@@ -606,7 +615,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-09-10 12:50:14.960514",
+ "modified": "2021-09-14 06:52:36.733328",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
@@ -623,6 +632,23 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "All"
   }
  ],
  "search_fields": "mitglied_nr,mitglied_id",
