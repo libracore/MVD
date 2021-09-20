@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils.data import add_days, getdate
 
 class MVMitgliedschaft(Document):
     def validate(self):
@@ -24,10 +25,45 @@ class MVMitgliedschaft(Document):
         else:
             if self.kontakt_solidarmitglied:
                 self.kontakt_solidarmitglied = self.remove_solidarmitglied()
-        
+
         # Rechnungsempfaenger
-        #...
+        if self.abweichende_rechnungsadresse:
+            if self.unabhaengiger_debitor:
+                self.rg_kunde = self.validate_rg_kunde()
+                self.rg_kontakt = self.validate_rg_kontakt()
+            else:
+                self.rg_kunde = ''
+                self.rg_kontakt = ''
+            self.rg_adresse = self.validate_rg_adresse()
+        else:
+            self.rg_kunde = ''
+            self.rg_kontakt = ''
+            self.rg_adresse = ''
         
+    def validate_rg_kunde(self):
+        if self.rg_kunde:
+            update_rg_kunde(self)
+            return self.rg_kunde
+        else:
+            customer = create_rg_kunde(self)
+            return customer
+    
+    def validate_rg_kontakt(self):
+        if self.rg_kontakt:
+            update_rg_kontakt(self)
+            return self.rg_kontakt
+        else:
+            contact = create_rg_kontakt(self)
+            return contact
+    
+    def validate_rg_adresse(self):
+        if self.rg_adresse:
+            update_rg_adresse(self)
+            return self.rg_adresse
+        else:
+            address = create_rg_adresse(self)
+            return address
+
     def validate_kunde_mitglied(self):
         if self.kunde_mitglied:
             update_kunde_mitglied(self)
@@ -94,7 +130,290 @@ class MVMitgliedschaft(Document):
         contact.links = []
         contact.save(ignore_permissions=True)
         return ''
+
+def update_rg_adresse(mitgliedschaft):
+    address = frappe.get_doc("Address", mitgliedschaft.rg_adresse)
+    if mitgliedschaft.rg_postfach:
+        strasse = address_line1 = 'Postfach'
+        postfach = 1
+    else:
+        strasse = address_line1 = (" ").join((str(mitgliedschaft.rg_strasse or ''), str(mitgliedschaft.rg_nummer or ''), str(mitgliedschaft.rg_nummer_zu or '')))
+        postfach = 0
     
+    is_primary_address = 0
+    is_shipping_address = 0
+    address_title = mitgliedschaft.mitglied_id
+    address_line2 = mitgliedschaft.rg_zusatz_adresse
+    sektion = mitgliedschaft.sektion_id
+    plz = mitgliedschaft.rg_plz
+    postfach_nummer = mitgliedschaft.rg_postfach_nummer
+    city = mitgliedschaft.rg_ort
+    
+    address.address_title = address_title
+    address.address_line1 = address_line1
+    address.address_line2 = address_line2
+    address.strasse = strasse
+    address.sektion = sektion
+    address.pincode = plz
+    address.plz = plz
+    address.postfach = postfach
+    address.postfach_nummer = postfach_nummer
+    address.city = city
+    address.is_primary_address = is_primary_address
+    address.is_shipping_address = is_shipping_address
+    
+    if mitgliedschaft.rg_kunde:
+        link_name = mitgliedschaft.rg_kunde
+    else:
+        link_name = mitgliedschaft.kunde_mitglied
+    
+    address.links = []
+    link = address.append("links", {})
+    link.link_doctype = 'Customer'
+    link.link_name = link_name
+    address.save(ignore_permissions=True)
+    return
+
+def create_rg_adresse(mitgliedschaft):
+    if mitgliedschaft.rg_postfach:
+        strasse = address_line1 = 'Postfach'
+        postfach = 1
+    else:
+        strasse = address_line1 = (" ").join((str(mitgliedschaft.rg_strasse or ''), str(mitgliedschaft.rg_nummer or ''), str(mitgliedschaft.rg_nummer_zu or '')))
+        postfach = 0
+    
+    is_primary_address = 0
+    is_shipping_address = 0
+    address_title = mitgliedschaft.mitglied_id
+    address_line2 = mitgliedschaft.rg_zusatz_adresse
+    sektion = mitgliedschaft.sektion_id
+    plz = mitgliedschaft.rg_plz
+    postfach_nummer = mitgliedschaft.rg_postfach_nummer
+    city = mitgliedschaft.rg_ort
+    
+    new_address = frappe.get_doc({
+        'doctype': 'Address',
+        'address_title': address_title,
+        'address_line1': address_line1,
+        'address_line2': address_line2,
+        'strasse': strasse,
+        'sektion': sektion,
+        'pincode': plz,
+        'plz': plz,
+        'postfach': postfach,
+        'postfach_nummer': postfach_nummer,
+        'city': city,
+        'is_primary_address': is_primary_address,
+        'is_shipping_address': is_shipping_address
+    })
+    
+    if mitgliedschaft.rg_kunde:
+        link_name = mitgliedschaft.rg_kunde
+    else:
+        link_name = mitgliedschaft.kunde_mitglied
+    
+    link = new_address.append("links", {})
+    link.link_doctype = 'Customer'
+    link.link_name = link_name
+    
+    new_address.insert()
+    frappe.db.commit()
+    return new_address.name
+
+def update_rg_kontakt(mitgliedschaft):
+    contact = frappe.get_doc("Contact", mitgliedschaft.rg_kontakt)
+    sektion = mitgliedschaft.sektion_id
+    if mitgliedschaft.rg_kunde:
+        is_primary_contact = 1
+        link_name = mitgliedschaft.rg_kunde
+    else:
+        is_primary_contact = 0
+        link_name = mitgliedschaft.kunde_mitglied
+    
+    if mitgliedschaft.rg_kundentyp == 'Unternehmen':
+        salutation = ''
+        company_name = mitgliedschaft.rg_firma
+        if not mitgliedschaft.rg_nachname and not mitgliedschaft.rg_vorname:
+            first_name = company_name
+        else:
+            company_name = ''
+            salutation = mitgliedschaft.rg_anrede
+            first_name = mitgliedschaft.rg_vorname or mitgliedschaft.rg_nachname
+            if first_name != mitgliedschaft.rg_nachname:
+                last_name = mitgliedschaft.rg_nachname
+            else:
+                last_name = ''
+    else:
+        company_name = ''
+        salutation = mitgliedschaft.rg_anrede
+        first_name = mitgliedschaft.rg_vorname or mitgliedschaft.rg_nachname
+        if first_name != mitgliedschaft.rg_nachname:
+            last_name = mitgliedschaft.rg_nachname
+        else:
+            last_name = ''
+    
+    contact.first_name = first_name
+    contact.last_name = last_name
+    contact.salutation = salutation
+    contact.sektion = sektion
+    contact.company_name = company_name
+    contact.is_primary_contact = is_primary_contact
+    
+    contact.links = []
+    link = contact.append("links", {})
+    link.link_doctype = 'Customer'
+    link.link_name = link_name
+    
+    # email
+    contact.email_ids = []
+    email_id = mitgliedschaft.rg_e_mail
+    if email_id:
+        email_row = contact.append("email_ids", {})
+        email_row.email_id = email_id
+        email_row.is_primary = 1
+        
+    contact.phone_nos = []
+    # private phone
+    is_primary_phone = mitgliedschaft.rg_tel_p
+    if is_primary_phone:
+        is_primary_phone_row = contact.append("phone_nos", {})
+        is_primary_phone_row.phone = is_primary_phone
+        is_primary_phone_row.is_primary_phone = 1
+        
+    # mobile phone
+    is_primary_mobile_no = mitgliedschaft.rg_tel_m
+    if is_primary_mobile_no:
+        is_primary_mobile_no_row = contact.append("phone_nos", {})
+        is_primary_mobile_no_row.phone = is_primary_mobile_no
+        is_primary_mobile_no_row.is_primary_mobile_no = 1
+        
+    # other (company) phone
+    phone = mitgliedschaft.rg_tel_g
+    if phone:
+        phone_row = contact.append("phone_nos", {})
+        phone_row.phone = phone
+    
+    contact.save(ignore_permissions=True)
+    return
+
+def create_rg_kontakt(mitgliedschaft):
+    sektion = mitgliedschaft.sektion_id
+    if mitgliedschaft.rg_kunde:
+        is_primary_contact = 1
+        link_name = mitgliedschaft.rg_kunde
+    else:
+        is_primary_contact = 0
+        link_name = mitgliedschaft.kunde_mitglied
+    
+    if mitgliedschaft.rg_kundentyp == 'Unternehmen':
+        salutation = ''
+        company_name = mitgliedschaft.rg_firma
+        if not mitgliedschaft.rg_nachname and not mitgliedschaft.rg_vorname:
+            first_name = company_name
+        else:
+            company_name = ''
+            salutation = mitgliedschaft.rg_anrede
+            first_name = mitgliedschaft.rg_vorname or mitgliedschaft.rg_nachname
+            if first_name != mitgliedschaft.rg_nachname:
+                last_name = mitgliedschaft.rg_nachname
+            else:
+                last_name = ''
+    else:
+        company_name = ''
+        salutation = mitgliedschaft.rg_anrede
+        first_name = mitgliedschaft.rg_vorname or mitgliedschaft.rg_nachname
+        if first_name != mitgliedschaft.rg_nachname:
+            last_name = mitgliedschaft.rg_nachname
+        else:
+            last_name = ''
+    
+    new_contact = frappe.get_doc({
+        'doctype': 'Contact',
+        'first_name': first_name,
+        'last_name': last_name,
+        'salutation': salutation,
+        'sektion': sektion,
+        'company_name': company_name,
+        'is_primary_contact': is_primary_contact
+    })
+    
+    link = new_contact.append("links", {})
+    link.link_doctype = 'Customer'
+    link.link_name = link_name
+    
+    # email
+    email_id = mitgliedschaft.rg_e_mail
+    if email_id:
+        email_row = new_contact.append("email_ids", {})
+        email_row.email_id = email_id
+        email_row.is_primary = 1
+        
+    # private phone
+    is_primary_phone = mitgliedschaft.rg_tel_p
+    if is_primary_phone:
+        is_primary_phone_row = new_contact.append("phone_nos", {})
+        is_primary_phone_row.phone = is_primary_phone
+        is_primary_phone_row.is_primary_phone = 1
+        
+    # mobile phone
+    is_primary_mobile_no = mitgliedschaft.rg_tel_m
+    if is_primary_mobile_no:
+        is_primary_mobile_no_row = new_contact.append("phone_nos", {})
+        is_primary_mobile_no_row.phone = is_primary_mobile_no
+        is_primary_mobile_no_row.is_primary_mobile_no = 1
+        
+    # other (company) phone
+    phone = mitgliedschaft.rg_tel_g
+    if phone:
+        phone_row = new_contact.append("phone_nos", {})
+        phone_row.phone = phone
+    
+    try:
+        new_contact.insert()
+        frappe.db.commit()
+    except frappe.DuplicateEntryError:
+        frappe.local.message_log = []
+        mitgliedschaft.rg_kontakt = new_contact.name
+        update_rg_kontakt(mitgliedschaft)
+        return new_contact.name
+    
+    return new_contact.name
+
+def update_rg_kunde(mitgliedschaft):
+    customer = frappe.get_doc("Customer", mitgliedschaft.rg_kunde)
+    if mitgliedschaft.rg_kundentyp == 'Unternehmen':
+        customer.customer_name = mitgliedschaft.rg_firma
+        customer.customer_addition = mitgliedschaft.rg_zusatz_firma
+        customer.customer_type = 'Company'
+    else:
+        customer.customer_name = (" ").join((mitgliedschaft.rg_vorname, mitgliedschaft.rg_nachname))
+        customer.customer_addition = ''
+        customer.customer_type = 'Individual'
+    customer.sektion = mitgliedschaft.sektion_id
+    customer.save(ignore_permissions=True)
+    return
+
+def create_rg_kunde(mitgliedschaft):
+    if mitgliedschaft.rg_kundentyp == 'Unternehmen':
+        customer_name = mitgliedschaft.rg_firma
+        customer_addition = mitgliedschaft.rg_zusatz_firma
+        customer_type = 'Company'
+    else:
+        customer_name = (" ").join((mitgliedschaft.rg_vorname, mitgliedschaft.rg_nachname))
+        customer_addition = ''
+        customer_type = 'Individual'
+    
+    new_customer = frappe.get_doc({
+        'doctype': 'Customer',
+        'customer_name': customer_name,
+        'customer_addition': customer_addition,
+        'customer_type': customer_type,
+        'sektion': mitgliedschaft.sektion_id
+    })
+    new_customer.insert()
+    frappe.db.commit()
+    return new_customer.name
+
 def create_objekt_adresse(mitgliedschaft):
     strasse = address_line1 = (" ").join((str(mitgliedschaft.objekt_strasse or ''), str(mitgliedschaft.objekt_hausnummer or ''), str(mitgliedschaft.objekt_nummer_zu or '')))
     postfach = 0
@@ -525,336 +844,6 @@ def create_kunde_mitglied(mitgliedschaft):
     return new_customer.name
 
 @frappe.whitelist()
-def get_address_overview(mvd):
-    try:
-        self = frappe.get_doc("MV Mitgliedschaft", mvd)
-        # Korrespondenz Adresse
-        korrespondenz_adresse = ''
-        if self.kundentyp == 'Einzelperson' and self.postfach != 1:
-            # Adressformat (Korrespondenz, Einzelperson, kein Postfach):
-            '''
-                "Anrede" "Vorname" "Nachname"
-                "Adress Zusatz"
-                "Strasse" "Nummer" "Nummer Zusatz"
-                "PLZ" "Ort"
-                "---"
-                "Tel P"
-                "Tel M"
-                "Tel G"
-                "Email"
-            '''
-            korrespondenz_adresse += self.anrede_c + " "
-            korrespondenz_adresse += self.vorname_1 + " " + self.nachname_1 + "<br>"
-            if self.zusatz_adresse:
-                korrespondenz_adresse += self.zusatz_adresse + "<br>"
-            korrespondenz_adresse += self.strasse + " "
-            if self.nummer:
-                korrespondenz_adresse += str(self.nummer)
-            if self.nummer_zu:
-                korrespondenz_adresse += self.nummer_zu
-            korrespondenz_adresse += "<br>"
-            korrespondenz_adresse += str(self.plz) + " " + self.ort
-        
-        if self.kundentyp == 'Unternehmen' and self.postfach != 1:
-            # Adressformat (Korrespondenz, Unternehmen, kein Postfach):
-            '''
-                "Firma"
-                "Firma Zusatz"
-                "Anrede" "Vorname" "Nachname"
-                "Adress Zusatz"
-                "Strasse" "Nummer" "Nummer Zusatz"
-                "PLZ" "Ort"
-                "---"
-                "Tel P"
-                "Tel M"
-                "Tel G"
-                "Email"
-            '''
-            korrespondenz_adresse += self.firma + "<br>"
-            if self.zusatz_firma:
-                korrespondenz_adresse += self.zusatz_firma + "<br>"
-            korrespondenz_adresse += self.anrede_c + " "
-            korrespondenz_adresse += self.vorname_1 + " " + self.nachname_1 + "<br>"
-            if self.zusatz_adresse:
-                korrespondenz_adresse += self.zusatz_adresse + "<br>"
-            korrespondenz_adresse += self.strasse + " "
-            if self.nummer:
-                korrespondenz_adresse += str(self.nummer)
-            if self.nummer_zu:
-                korrespondenz_adresse += self.nummer_zu
-            korrespondenz_adresse += "<br>"
-            korrespondenz_adresse += str(self.plz) + " " + self.ort
-        
-        if self.kundentyp == 'Einzelperson' and self.postfach == 1:
-            # Adressformat (Korrespondenz, Einzelperson, Postfach):
-            '''
-                "Anrede" "Vorname" "Nachname"
-                "Adress Zusatz"
-                "Postfach" "Postfach Nummer"
-                "PLZ" "Ort"
-                "---"
-                "Tel P"
-                "Tel M"
-                "Tel G"
-                "Email"
-            '''
-            korrespondenz_adresse += self.anrede_c + " "
-            korrespondenz_adresse += self.vorname_1 + " " + self.nachname_1 + "<br>"
-            korrespondenz_adresse += "Postfach "
-            if self.postfach_nummer > 0:
-                korrespondenz_adresse += str(self.postfach_nummer)
-            korrespondenz_adresse += "<br>"
-            korrespondenz_adresse += str(self.plz) + " " + self.ort
-        
-        if self.kundentyp == 'Unternehmen' and self.postfach == 1:
-            # Adressformat (Korrespondenz, Unternehmen, Postfach):
-            '''
-                "Firma"
-                "Firma Zusatz"
-                "Anrede" "Vorname" "Nachname"
-                "Adress Zusatz"
-                "Postfach" "Postfach Nummer"
-                "PLZ" "Ort"
-                "---"
-                "Tel P"
-                "Tel M"
-                "Tel G"
-                "Email"
-            '''
-            korrespondenz_adresse += self.firma + "<br>"
-            if self.zusatz_firma:
-                korrespondenz_adresse += self.zusatz_firma + "<br>"
-            korrespondenz_adresse += self.anrede_c + " "
-            korrespondenz_adresse += self.vorname_1 + " " + self.nachname_1 + "<br>"
-            korrespondenz_adresse += "Postfach "
-            if self.postfach_nummer > 0:
-                korrespondenz_adresse += str(self.postfach_nummer)
-            korrespondenz_adresse += "<br>"
-            korrespondenz_adresse += str(self.plz) + " " + self.ort
-            
-        # Objekt Adresse
-        '''
-            "Strasse" "Nummer" "Nummer Zusatz"
-            "PLZ" "Ort"
-        '''
-        if self.postfach != 1:
-            objekt_adresse = False
-        else:
-            if self.objekt_zusatz_adresse:
-                objekt_adresse = self.objekt_zusatz_adresse + "<br>"
-                objekt_adresse += self.objekt_strasse
-            else:
-                objekt_adresse = self.objekt_strasse
-            if self.objekt_hausnummer:
-                objekt_adresse += " " + str(self.objekt_hausnummer)
-            if self.objekt_nummer_zu:
-                objekt_adresse += self.objekt_nummer_zu
-            objekt_adresse += "<br>"
-            objekt_adresse += str(self.objekt_plz) + " " + self.objekt_ort
-            
-            
-        # Rechnungsadresse
-        if self.abweichende_rechnungsadresse == 1:
-            rechnungs_adresse = ''
-            if self.unabhaengiger_debitor == 1:
-                if self.rg_kundentyp == 'Einzelperson' and self.rg_postfach != 1:
-                    # Adressformat (Rechnungsadresse, Einzelperson, kein Postfach):
-                    '''
-                        "Anrede" "Vorname" "Nachname"
-                        "Adress Zusatz"
-                        "Strasse" "Nummer" "Nummer Zusatz"
-                        "PLZ" "Ort"
-                        "---"
-                        "Tel P"
-                        "Tel M"
-                        "Tel G"
-                        "Email"
-                    '''
-                    rechnungs_adresse += self.rg_anrede + " "
-                    rechnungs_adresse += self.rg_vorname + " " + self.rg_nachname + "<br>"
-                    if self.rg_zusatz_adresse:
-                        rechnungs_adresse += self.rg_zusatz_adresse + "<br>"
-                    rechnungs_adresse += self.rg_strasse + " "
-                    if self.rg_nummer:
-                        rechnungs_adresse += str(self.rg_nummer)
-                    if self.rg_nummer_zu:
-                        rechnungs_adresse += self.rg_nummer_zu
-                    rechnungs_adresse += "<br>"
-                    rechnungs_adresse += str(self.rg_plz) + " " + self.rg_ort
-                
-                if self.rg_kundentyp == 'Unternehmen' and self.rg_postfach != 1:
-                    # Adressformat (Rechnungsadresse, Unternehmen, kein Postfach):
-                    '''
-                        "Firma"
-                        "Firma Zusatz"
-                        "Anrede" "Vorname" "Nachname"
-                        "Adress Zusatz"
-                        "Strasse" "Nummer" "Nummer Zusatz"
-                        "PLZ" "Ort"
-                        "---"
-                        "Tel P"
-                        "Tel M"
-                        "Tel G"
-                        "Email"
-                    '''
-                    rechnungs_adresse += self.rg_firma + "<br>"
-                    if self.rg_zusatz_firma:
-                        rechnungs_adresse += self.rg_zusatz_firma + "<br>"
-                    rechnungs_adresse += self.rg_anrede + " "
-                    rechnungs_adresse += self.rg_vorname + " " + self.rg_nachname + "<br>"
-                    if self.rg_zusatz_adresse:
-                        rechnungs_adresse += self.rg_zusatz_adresse + "<br>"
-                    rechnungs_adresse += self.rg_strasse + " "
-                    if self.rg_nummer:
-                        rechnungs_adresse += str(self.rg_nummer)
-                    if self.rg_nummer_zu:
-                        rechnungs_adresse += self.rg_nummer_zu
-                    rechnungs_adresse += "<br>"
-                    rechnungs_adresse += str(self.rg_plz) + " " + self.rg_ort
-                
-                if self.rg_kundentyp == 'Einzelperson' and self.rg_postfach == 1:
-                    # Adressformat (Rechnungsadresse, Einzelperson, Postfach):
-                    '''
-                        "Anrede" "Vorname" "Nachname"
-                        "Adress Zusatz"
-                        "Postfach" "Postfach Nummer"
-                        "PLZ" "Ort"
-                        "---"
-                        "Tel P"
-                        "Tel M"
-                        "Tel G"
-                        "Email"
-                    '''
-                    rechnungs_adresse += self.rg_anrede + " "
-                    rechnungs_adresse += self.rg_vorname + " " + self.rg_nachname + "<br>"
-                    rechnungs_adresse += "Postfach "
-                    if self.rg_postfach_nummer > 0:
-                        rechnungs_adresse += str(self.rg_postfach_nummer)
-                    rechnungs_adresse += "<br>"
-                    rechnungs_adresse += str(self.rg_plz) + " " + self.rg_ort
-                
-                if self.rg_kundentyp == 'Unternehmen' and self.rg_postfach == 1:
-                    # Adressformat (Rechnungsadresse, Unternehmen, Postfach):
-                    '''
-                        "Firma"
-                        "Firma Zusatz"
-                        "Anrede" "Vorname" "Nachname"
-                        "Adress Zusatz"
-                        "Postfach" "Postfach Nummer"
-                        "PLZ" "Ort"
-                        "---"
-                        "Tel P"
-                        "Tel M"
-                        "Tel G"
-                        "Email"
-                    '''
-                    rechnungs_adresse += self.rg_firma + "<br>"
-                    if self.rg_zusatz_firma:
-                        rechnungs_adresse += self.rg_zusatz_firma + "<br>"
-                    rechnungs_adresse += self.rg_anrede + " "
-                    rechnungs_adresse += self.rg_vorname + " " + self.rg_nachname + "<br>"
-                    rechnungs_adresse += "Postfach "
-                    if self.rg_postfach_nummer > 0:
-                        rechnungs_adresse += str(self.rg_postfach_nummer)
-                    rechnungs_adresse += "<br>"
-                    rechnungs_adresse += str(self.rg_plz) + " " + self.rg_ort
-            else:
-                if self.kundentyp == 'Einzelperson':
-                    # Einzelperson
-                    if self.rg_postfach != 1:
-                        # kein Postfach
-                        rechnungs_adresse += self.anrede_c + " "
-                        rechnungs_adresse += self.vorname_1 + " " + self.nachname_1 + "<br>"
-                        if self.rg_zusatz_adresse:
-                            rechnungs_adresse += self.rg_zusatz_adresse + "<br>"
-                        rechnungs_adresse += self.rg_strasse + " "
-                        if self.rg_nummer:
-                            rechnungs_adresse += str(self.rg_nummer)
-                        if self.rg_nummer_zu:
-                            rechnungs_adresse += self.rg_nummer_zu
-                        rechnungs_adresse += "<br>"
-                        rechnungs_adresse += str(self.rg_plz) + " " + self.rg_ort
-                    else:
-                        # Postfach
-                        rechnungs_adresse += self.anrede_c + " "
-                        rechnungs_adresse += self.vorname_1 + " " + self.nachname_1 + "<br>"
-                        rechnungs_adresse += "Postfach "
-                        if self.rg_postfach_nummer > 0:
-                            rechnungs_adresse += str(self.rg_postfach_nummer)
-                        rechnungs_adresse += "<br>"
-                        rechnungs_adresse += str(self.rg_plz) + " " + self.rg_ort
-                else:
-                    # Unternehmen
-                    if self.rg_postfach != 1:
-                        # kein Postfach
-                        rechnungs_adresse += self.firma + "<br>"
-                        if self.zusatz_firma:
-                            rechnungs_adresse += self.zusatz_firma + "<br>"
-                        rechnungs_adresse += self.anrede_c + " "
-                        rechnungs_adresse += self.vorname_1 + " " + self.nachname_1 + "<br>"
-                        if self.rg_zusatz_adresse:
-                            rechnungs_adresse += self.rg_zusatz_adresse + "<br>"
-                        rechnungs_adresse += self.rg_strasse + " "
-                        if self.nummer:
-                            rechnungs_adresse += str(self.rg_nummer)
-                        if self.rg_nummer_zu:
-                            rechnungs_adresse += self.rg_nummer_zu
-                        rechnungs_adresse += "<br>"
-                        rechnungs_adresse += str(self.rg_plz) + " " + self.rg_ort
-                    else:
-                        # Postfach
-                        rechnungs_adresse += self.firma + "<br>"
-                        if self.zusatz_firma:
-                            rechnungs_adresse += self.zusatz_firma + "<br>"
-                        rechnungs_adresse += self.anrede_c + " "
-                        rechnungs_adresse += self.vorname_1 + " " + self.nachname_1 + "<br>"
-                        rechnungs_adresse += "Postfach "
-                        if self.rg_postfach_nummer > 0:
-                            rechnungs_adresse += str(self.rg_postfach_nummer)
-                        rechnungs_adresse += "<br>"
-                        rechnungs_adresse += str(self.rg_plz) + " " + self.rg_ort
-        else:
-            rechnungs_adresse = False
-            
-        # Solidaritäts Adresse
-        if self.hat_solidarmitglied:
-            soli_adresse = ''
-            soli_adresse += self.anrede_2 + " " + self.vorname_2 + " " + self.nachname_2 + "<br>"
-            if self.postfach != 1:
-                # kein Postfach
-                if self.zusatz_adresse:
-                    soli_adresse += self.zusatz_adresse + "<br>"
-                soli_adresse += self.strasse + " "
-                if self.nummer:
-                    soli_adresse += str(self.nummer)
-                if self.nummer_zu:
-                    soli_adresse += self.nummer_zu
-                soli_adresse += "<br>"
-                soli_adresse += str(self.plz) + " " + self.ort
-            else:
-                # Postfach
-                if self.objekt_zusatz_adresse:
-                    soli_adresse += self.objekt_zusatz_adresse + "<br>"
-                soli_adresse += self.objekt_strasse
-                if self.objekt_hausnummer:
-                    soli_adresse += " " + str(self.objekt_hausnummer)
-                if self.objekt_nummer_zu:
-                    soli_adresse += self.objekt_nummer_zu
-                soli_adresse += "<br>"
-                soli_adresse += str(self.objekt_plz) + " " + self.objekt_ort
-        else:
-            soli_adresse = False
-            
-        return {
-                'korrespondenz_adresse': korrespondenz_adresse,
-                'objekt_adresse': objekt_adresse,
-                'rechnungs_adresse': rechnungs_adresse,
-                'soli_adresse': soli_adresse
-            }
-    except:
-        return {}
-
-@frappe.whitelist()
 def get_timeline_data(doctype, name):
     '''returns timeline data for the past one year'''
     from frappe.desk.form.load import get_communication_data
@@ -879,3 +868,122 @@ def get_timeline_data(doctype, name):
         timestamp = get_timestamp(timeline_item.date)
         out.update({ timestamp: timeline_item.qty })
     return out
+
+@frappe.whitelist()
+def get_uebersicht_html(name):
+    col_qty = 1
+    mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", name)
+    
+    kunde_mitglied = False
+    if mitgliedschaft.kunde_mitglied:
+        kunde_mitglied = frappe.get_doc("Customer", mitgliedschaft.kunde_mitglied).as_dict()
+    
+    kontakt_mitglied = False
+    if mitgliedschaft.kontakt_mitglied:
+        kontakt_mitglied = frappe.get_doc("Contact", mitgliedschaft.kontakt_mitglied).as_dict()
+    
+    adresse_mitglied = False
+    if mitgliedschaft.adresse_mitglied:
+        adresse_mitglied = frappe.get_doc("Address", mitgliedschaft.adresse_mitglied).as_dict()
+    
+    objekt_adresse = False
+    if mitgliedschaft.objekt_adresse:
+        objekt_adresse = frappe.get_doc("Address", mitgliedschaft.objekt_adresse).as_dict()
+        col_qty += 1
+    
+    kontakt_solidarmitglied = False
+    if mitgliedschaft.kontakt_solidarmitglied:
+        kontakt_solidarmitglied = frappe.get_doc("Contact", mitgliedschaft.kontakt_solidarmitglied).as_dict()
+        col_qty += 1
+    
+    rg_kunde = False
+    if mitgliedschaft.rg_kunde:
+        rg_kunde = frappe.get_doc("Customer", mitgliedschaft.rg_kunde).as_dict()
+    
+    rg_kontakt = False
+    if mitgliedschaft.rg_kontakt:
+        rg_kontakt = frappe.get_doc("Contact", mitgliedschaft.rg_kontakt).as_dict()
+    
+    rg_adresse = False
+    if mitgliedschaft.rg_adresse:
+        rg_adresse = frappe.get_doc("Address", mitgliedschaft.rg_adresse).as_dict()
+    
+    rg_sep = False
+    if mitgliedschaft.abweichende_rechnungsadresse:
+        rg_sep = True
+        col_qty += 1
+    
+    ''' mögliche Ampelfarben:
+        - Grün: ampelgruen --> Mitglied kann alle Dienstleistungen beziehen (keine Karenzfristen, keine überfälligen oder offen Rechnungen)
+        - Gelb: ampelgelb --> Karenzfristen oder offene Rechnungen
+        - Rot: ampelrot --> überfällige offene Rechnungen
+    '''
+    
+    rechnungs_kunde = mitgliedschaft.kunde_mitglied
+    ueberfaellige_rechnungen = 0
+    offene_rechnungen = 0
+    sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+    karenzfrist_in_d = sektion.karenzfrist
+    ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintritt), karenzfrist_in_d)
+    if getdate() < ablauf_karenzfrist:
+        karenzfrist = False
+    else:
+        karenzfrist = True
+    if mitgliedschaft.zuzug:
+        zuzug = mitgliedschaft.zuzug
+    else:
+        zuzug = False
+    if mitgliedschaft.wegzug:
+        wegzug = mitgliedschaft.wegzug
+    else:
+        wegzug = False
+    
+    if mitgliedschaft.rg_kunde:
+        rechnungs_kunde = mitgliedschaft.rg_kunde
+    ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
+                                                FROM `tabSales Invoice` 
+                                                WHERE `customer` = '{rechnungs_kunde}'
+                                                AND `due_date` < CURDATE()
+                                                AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
+    
+    if ueberfaellige_rechnungen > 0:
+        ampelfarbe = 'ampelrot'
+    else:
+        offene_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
+                                            FROM `tabSales Invoice` 
+                                            WHERE `customer` = '{rechnungs_kunde}'
+                                            AND `due_date` >= CURDATE()
+                                            AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
+        
+        if offene_rechnungen > 0:
+            ampelfarbe = 'ampelgelb'
+        else:
+            if not karenzfrist:
+                ampelfarbe = 'ampelgelb'
+            else:
+                ampelfarbe = 'ampelgruen'
+    
+    data = {
+        'kunde_mitglied': kunde_mitglied,
+        'kontakt_mitglied': kontakt_mitglied,
+        'adresse_mitglied': adresse_mitglied,
+        'objekt_adresse': objekt_adresse,
+        'kontakt_solidarmitglied': kontakt_solidarmitglied,
+        'rg_kunde': rg_kunde,
+        'rg_kontakt': rg_kontakt,
+        'rg_adresse': rg_adresse,
+        'rg_sep': rg_sep,
+        'col_qty': int(12 / col_qty),
+        'allgemein': {
+            'status': mitgliedschaft.status_c,
+            'eintritt': mitgliedschaft.eintritt,
+            'ampelfarbe': ampelfarbe,
+            'ueberfaellige_rechnungen': ueberfaellige_rechnungen,
+            'offene_rechnungen': offene_rechnungen,
+            'ablauf_karenzfrist': ablauf_karenzfrist,
+            'zuzug': zuzug,
+            'wegzug': wegzug
+        }
+    }
+    
+    return frappe.render_template('templates/includes/mitgliedschaft_overview.html', data)

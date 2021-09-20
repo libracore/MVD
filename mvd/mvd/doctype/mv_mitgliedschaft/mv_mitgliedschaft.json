@@ -6,6 +6,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_uebersicht",
+  "uebersicht_html",
   "section_allgemein",
   "mitglied_nr",
   "sektion_id",
@@ -19,6 +21,7 @@
   "wichtig",
   "section_daten",
   "eintritt",
+  "zuzug",
   "wegzug",
   "cb_1",
   "austritt",
@@ -612,10 +615,24 @@
    "fieldname": "hat_solidarmitglied",
    "fieldtype": "Check",
    "label": "Solidarmitglied"
+  },
+  {
+   "fieldname": "zuzug",
+   "fieldtype": "Date",
+   "label": "Zuzug"
+  },
+  {
+   "fieldname": "section_uebersicht",
+   "fieldtype": "Section Break",
+   "label": "\u00dcbersicht"
+  },
+  {
+   "fieldname": "uebersicht_html",
+   "fieldtype": "HTML"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-09-14 06:52:36.733328",
+ "modified": "2021-09-20 10:16:34.630450",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

@@ -5,7 +5,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "title"
+  "title",
+  "karenzfrist"
  ],
  "fields": [
   {
@@ -15,9 +16,16 @@
    "label": "Titel",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "default": "30",
+   "fieldname": "karenzfrist",
+   "fieldtype": "Int",
+   "label": "Karenzfrist",
+   "reqd": 1
   }
  ],
- "modified": "2021-08-27 13:39:03.647754",
+ "modified": "2021-09-20 12:04:03.119269",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

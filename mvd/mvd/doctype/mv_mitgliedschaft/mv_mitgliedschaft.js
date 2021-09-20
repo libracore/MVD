@@ -28,15 +28,13 @@ frappe.ui.form.on('MV Mitgliedschaft', {
 
 function get_adressdaten(frm) {
     frappe.call({
-        method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.get_address_overview",
+        method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.get_uebersicht_html",
         args:{
-                'mvd': cur_frm.doc.name
+                'name': cur_frm.doc.name
         },
         callback: function(r)
         {
-            cur_frm.dashboard.add_section(frappe.render_template('mv_mitgliedschaft_dashboard', {
-				data: r.message
-			}));
+            cur_frm.set_df_property('uebersicht_html','options', r.message);
         }
     });
 }
