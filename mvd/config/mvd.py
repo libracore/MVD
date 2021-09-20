@@ -36,6 +36,12 @@ def get_data():
                     "name": "Contact",
                     "label": _("Contact"),
                     "description": _("Kontaktpersonen")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Sektion",
+                    "label": _("Sektions Einstellungen"),
+                    "description": _("Sektions Einstellungen")
                 }
             ]
         }
