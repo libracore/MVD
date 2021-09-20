@@ -590,6 +590,7 @@ def update_kontakt_mitglied(mitgliedschaft, primary=True):
             company_name = mitgliedschaft.firma
             if not mitgliedschaft.nachname_1 and not mitgliedschaft.vorname_1:
                 first_name = company_name
+                last_name = ''
             else:
                 company_name = ''
                 salutation = mitgliedschaft.anrede_c
@@ -617,6 +618,12 @@ def update_kontakt_mitglied(mitgliedschaft, primary=True):
             last_name = mitgliedschaft.nachname_2
         else:
             last_name = ''
+    
+    # company fallback
+    if not first_name:
+        if mitgliedschaft.firma and not mitgliedschaft.nachname_1 and not mitgliedschaft.vorname_1:
+            first_name = mitgliedschaft.firma
+            frappe.log_error("{0}\n---\n{1}".format('fallback: first_name was " "', mitgliedschaft.as_json()), 'update_kontakt_mitglied')
     
     contact.first_name = first_name
     contact.last_name = last_name
@@ -701,6 +708,7 @@ def create_kontakt_mitglied(mitgliedschaft, primary=True):
             company_name = mitgliedschaft.firma
             if not mitgliedschaft.nachname_1 and not mitgliedschaft.vorname_1:
                 first_name = company_name
+                last_name = ''
             else:
                 company_name = ''
                 salutation = mitgliedschaft.anrede_c
@@ -727,6 +735,12 @@ def create_kontakt_mitglied(mitgliedschaft, primary=True):
             last_name = mitgliedschaft.nachname_2
         else:
             last_name = ''
+    
+    # company fallback
+    if not first_name:
+        if mitgliedschaft.firma and not mitgliedschaft.nachname_1 and not mitgliedschaft.vorname_1:
+            first_name = mitgliedschaft.firma
+            frappe.log_error("{0}\n---\n{1}".format('fallback: first_name was " "', mitgliedschaft.as_json()), 'create_kontakt_mitglied')
     
     new_contact = frappe.get_doc({
         'doctype': 'Contact',
@@ -819,6 +833,14 @@ def update_kunde_mitglied(mitgliedschaft):
         customer.customer_addition = ''
         customer.customer_type = 'Individual'
     customer.sektion = mitgliedschaft.sektion_id
+    
+    # fallback wrong import data
+    if customer.customer_name == ' ' and mitgliedschaft.firma:
+        customer.customer_name = mitgliedschaft.firma
+        customer.customer_addition = mitgliedschaft.zusatz_firma
+        customer.customer_type = 'Company'
+        frappe.log_error("{0}\n---\n{1}".format('fallback: customer_name was " "', mitgliedschaft.as_json()), 'update_kunde_mitglied')
+    
     customer.save(ignore_permissions=True)
     return
     
@@ -831,6 +853,13 @@ def create_kunde_mitglied(mitgliedschaft):
         customer_name = (" ").join((mitgliedschaft.vorname_1, mitgliedschaft.nachname_1))
         customer_addition = ''
         customer_type = 'Individual'
+        
+    # fallback wrong import data
+    if customer_name == ' ' and mitgliedschaft.firma:
+        customer_name = mitgliedschaft.firma
+        customer_addition = mitgliedschaft.zusatz_firma
+        customer_type = 'Company'
+        frappe.log_error("{0}\n---\n{1}".format('fallback: customer_name was " "', mitgliedschaft.as_json()), 'create_kunde_mitglied')
     
     new_customer = frappe.get_doc({
         'doctype': 'Customer',
@@ -839,6 +868,7 @@ def create_kunde_mitglied(mitgliedschaft):
         'customer_type': customer_type,
         'sektion': mitgliedschaft.sektion_id
     })
+    
     new_customer.insert()
     frappe.db.commit()
     return new_customer.name

@@ -103,8 +103,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Mitglied Nr.",
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "fieldname": "mitglied_id",
@@ -632,7 +631,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-09-20 10:16:34.630450",
+ "modified": "2021-09-20 22:36:58.012835",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

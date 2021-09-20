@@ -111,12 +111,21 @@ def create_mitgliedschaft(data):
         else:
             hat_solidarmitglied = 0
         strasse = get_value(data, 'strasse')
-        if check_postfach(data, 'postfach') == 1:
+        postfach = check_postfach(data, 'postfach')
+        if postfach == 1:
             strasse = 'Postfach'
+        else:
+            if get_value(data, 'postfach_nummer') and not strasse:
+                strasse = 'Postfach'
+                postfach = 1
+        
+        kundentyp = 'Einzelperson'
+        if get_value(data, 'mitgliedtyp_c') == 'GESCH':
+            kundentyp = 'Unternehmen'
         
         new_mitgliedschaft = frappe.get_doc({
             'doctype': 'MV Mitgliedschaft',
-            'mitglied_nr': str(get_value(data, 'mitglied_nr')),
+            'mitglied_nr': str(get_value(data, 'mitglied_nr')).zfill(8),
             'mitglied_id': str(get_value(data, 'mitglied_id')),
             'status_c': get_status_c(get_value(data, 'status_c')),
             'sektion_id': get_sektion(get_value(data, 'sektion_id')),
@@ -127,14 +136,15 @@ def create_mitgliedschaft(data):
             'austritt': get_formatted_datum(get_value(data, 'austritt')),
             'wegzug': get_formatted_datum(get_value(data, 'wegzug')),
             'kuendigung': get_formatted_datum(get_value(data, 'kuendigung')),
+            'kundentyp': kundentyp,
             'firma': get_value(data, 'firma'),
             'zusatz_firma': get_value(data, 'zusatz_firma'),
             #'anrede_c': get_value(data, 'anrede_c'),
             'nachname_1': get_value(data, 'nachname_1'),
             'vorname_1': get_value(data, 'vorname_1'),
-            'tel_p_1': get_value(data, 'tel_p_1'),
-            'tel_m_1': get_value(data, 'tel_m_1'),
-            'tel_g_1': get_value(data, 'tel_g_1'),
+            'tel_p_1': str(get_value(data, 'tel_p_1')),
+            'tel_m_1': str(get_value(data, 'tel_m_1')),
+            'tel_g_1': str(get_value(data, 'tel_g_1')),
             'e_mail_1': get_value(data, 'e_mail_1'),
             'zusatz_adresse': get_value(data, 'zusatz_adresse'),
             'strasse': strasse,
@@ -142,23 +152,23 @@ def create_mitgliedschaft(data):
             'objekt_ort': get_value(data, 'ort'), # fallback
             'nummer': get_value(data, 'nummer'),
             'nummer_zu': get_value(data, 'nummer_zu'),
-            'postfach': check_postfach(data, 'postfach'),
+            'postfach': postfach,
             'postfach_nummer': get_value(data, 'postfach_nummer'),
             'plz': get_value(data, 'plz'),
             'ort': get_value(data, 'ort'),
             'hat_solidarmitglied': hat_solidarmitglied,
             'nachname_2': get_value(data, 'nachname_2'),
             'vorname_2': get_value(data, 'vorname_2'),
-            'tel_p_2': get_value(data, 'tel_p_2'),
-            #'tel_m_2': get_value(data, 'tel_m_2'),
-            'tel_g_2': get_value(data, 'tel_g_2'),
-            'e_mail_2': get_value(data, 'e_mail_2')
+            'tel_p_2': str(get_value(data, 'tel_p_2')),
+            #'tel_m_2': str(get_value(data, 'tel_m_2')),
+            'tel_g_2': str(get_value(data, 'tel_g_2')),
+            'e_mail_2': str(get_value(data, 'e_mail_2'))
         })
         new_mitgliedschaft.insert()
         frappe.db.commit()
         return
     except Exception as err:
-        frappe.log_error("{0}\n{1}".format(err, data), 'create_mitgliedschaft')
+        frappe.log_error("{0}\n---\n{1}".format(err, data), 'create_mitgliedschaft')
         return
 
 def update_mitgliedschaft(data):
@@ -171,10 +181,19 @@ def update_mitgliedschaft(data):
             else:
                 hat_solidarmitglied = 0
             strasse = get_value(data, 'strasse')
-            if check_postfach(data, 'postfach') == 1:
+            postfach = check_postfach(data, 'postfach')
+            if postfach == 1:
                 strasse = 'Postfach'
+            else:
+                if get_value(data, 'postfach_nummer') and not strasse:
+                    strasse = 'Postfach'
+                    postfach = 1
             
-            mitgliedschaft.mitglied_nr = str(get_value(data, 'mitglied_nr'))
+            kundentyp = 'Einzelperson'
+            if get_value(data, 'mitglied_c') == 'GESCH':
+                kundentyp = 'Unternehmen'
+            
+            mitgliedschaft.mitglied_nr = str(get_value(data, 'mitglied_nr')).zfill(8)
             mitgliedschaft.status_c = get_status_c(get_value(data, 'status_c'))
             mitgliedschaft.sektion_id = get_sektion(get_value(data, 'sektion_id'))
             mitgliedschaft.mitgliedtyp_c = get_mitgliedtyp_c(get_value(data, 'mitgliedtyp_c'))
@@ -184,29 +203,30 @@ def update_mitgliedschaft(data):
             mitgliedschaft.austritt = get_formatted_datum(get_value(data, 'austritt'))
             mitgliedschaft.wegzug = get_formatted_datum(get_value(data, 'wegzug'))
             mitgliedschaft.kuendigung = get_formatted_datum(get_value(data, 'kuendigung'))
+            mitgliedschaft.kundentyp = kundentyp
             mitgliedschaft.firma = get_value(data, 'firma')
             mitgliedschaft.zusatz_firma = get_value(data, 'zusatz_firma')
             #mitgliedschaft.anrede_c = get_value(data, 'anrede_c')
             mitgliedschaft.nachname_1 = get_value(data, 'nachname_1')
             mitgliedschaft.vorname_1 = get_value(data, 'vorname_1')
-            mitgliedschaft.tel_p_1 = get_value(data, 'tel_p_1')
-            mitgliedschaft.tel_m_1 = get_value(data, 'tel_m_1')
-            mitgliedschaft.tel_g_1 = get_value(data, 'tel_g_1')
+            mitgliedschaft.tel_p_1 = str(get_value(data, 'tel_p_1'))
+            mitgliedschaft.tel_m_1 = str(get_value(data, 'tel_m_1'))
+            mitgliedschaft.tel_g_1 = str(get_value(data, 'tel_g_1'))
             mitgliedschaft.e_mail_1 = get_value(data, 'e_mail_1')
             mitgliedschaft.zusatz_adresse = get_value(data, 'zusatz_adresse')
             mitgliedschaft.strasse = strasse
             mitgliedschaft.nummer = get_value(data, 'nummer')
             mitgliedschaft.nummer_zu = get_value(data, 'nummer_zu')
-            mitgliedschaft.postfach = check_postfach(data, 'postfach')
+            mitgliedschaft.postfach = postfach
             mitgliedschaft.postfach_nummer = get_value(data, 'postfach_nummer')
             mitgliedschaft.plz = get_value(data, 'plz')
             mitgliedschaft.ort = get_value(data, 'ort')
             mitgliedschaft.hat_solidarmitglied = hat_solidarmitglied
             mitgliedschaft.nachname_2 = get_value(data, 'nachname_2')
             mitgliedschaft.vorname_2 = get_value(data, 'vorname_2')
-            mitgliedschaft.tel_p_2 = get_value(data, 'tel_p_2')
-            #mitgliedschaft.tel_m_2 = get_value(data, 'tel_m_2')
-            mitgliedschaft.tel_g_2 = get_value(data, 'tel_g_2')
+            mitgliedschaft.tel_p_2 = str(get_value(data, 'tel_p_2'))
+            #mitgliedschaft.tel_m_2 = str(get_value(data, 'tel_m_2'))
+            mitgliedschaft.tel_g_2 = str(get_value(data, 'tel_g_2'))
             mitgliedschaft.e_mail_2 = get_value(data, 'e_mail_2')
         elif get_value(data, 'adresstyp_c') == 'OBJEKT':
             # Objekt Adresse
@@ -216,9 +236,27 @@ def update_mitgliedschaft(data):
             mitgliedschaft.objekt_nummer_zu = get_value(data, 'nummer_zu')
             mitgliedschaft.objekt_plz = get_value(data, 'plz')
             mitgliedschaft.objekt_ort = get_value(data, 'ort') or 'Fehlende Angaben!'
-            print(get_value(data, 'ort'))
+        elif get_value(data, 'adresstyp_c') == 'RECHN':
+            # Rechnungs Adresse
+            strasse = get_value(data, 'strasse')
+            postfach = check_postfach(data, 'postfach')
+            if postfach == 1:
+                strasse = 'Postfach'
+            else:
+                if get_value(data, 'postfach_nummer') and not strasse:
+                    strasse = 'Postfach'
+                    postfach = 1
+            mitgliedschaft.abweichende_rechnungsadresse = 1
+            mitgliedschaft.rg_zusatz_adresse = get_value(data, 'zusatz_adresse')
+            mitgliedschaft.rg_strasse = strasse
+            mitgliedschaft.rg_nummer = get_value(data, 'nummer')
+            mitgliedschaft.rg_nummer_zu = get_value(data, 'nummer_zu')
+            mitgliedschaft.rg_postfach = postfach
+            mitgliedschaft.rg_postfach_nummer = get_value(data, 'postfach_nummer')
+            mitgliedschaft.rg_plz = get_value(data, 'plz')
+            mitgliedschaft.rg_ort = get_value(data, 'ort')
         # else:
-            # Rechnungsadresse
+            # TBD!
         
         mitgliedschaft.save(ignore_permissions=True)
         frappe.db.commit()
@@ -235,6 +273,10 @@ def get_sektion(id):
         return 'Bern'
     elif id == 8:
         return 'Basel Stadt'
+    elif id == 14:
+        return 'Luzern'
+    elif id == 3:
+        return 'Aargau'
     else:
         return '!TBD!'
 
