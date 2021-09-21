@@ -22,10 +22,11 @@ hm = {
     'austritt': 'datum_austritt',
     'wegzug': 'datum_wegzug',
     'kuendigung': 'datum_kuend_per',
-    # 'kundentyp':, --> logik implementieren!
+    'adresstyp_c': 'adresstyp_c',
+    'adress_id': 'adress_id',
     'firma': 'firma',
     'zusatz_firma': 'zusatz_firma',
-    #'anrede_c': 'anrede_string', --> info fehlt!
+    'anrede_c': 'anrede_c',
     'nachname_1': 'nachname_1',
     'vorname_1': 'vorname_1',
     'tel_p_1': 'tel_p_1',
@@ -40,26 +41,6 @@ hm = {
     'postfach_nummer': 'postfach_nummer',
     'plz': 'plz',
     'ort': 'ort',
-    # ! rechnungsadressdaten:
-    # 'unabhaengiger_debitor':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_kundentyp':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_firma':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_zusatz_firma':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_anrede':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_nachname':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_vorname':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_tel_p':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_tel_m':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_tel_g':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_e_mail':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_zusatz_adresse':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_strasse':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_nummer':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_nummer_zu':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_postfach':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_postfach_nummer':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_plz':, --> woher kommt diese info? implt. vermtl. über logik
-    # 'rg_ort':, --> woher kommt diese info? implt. vermtl. über logik
     # ! solidarmitglieddaten:
     #'anrede_2':, --> info fehlt!
     'nachname_2': 'nachname_2',
@@ -67,11 +48,9 @@ hm = {
     'tel_p_2': 'tel_p_2',
     'tel_m_2': 'tel_m_2',
     'tel_g_2': 'tel_g_2',
-    'e_mail_2': 'e_mail_2',
+    'e_mail_2': 'e_mail_2'
     # ! nicht zugewiesene felder aus csv:
-    # 'adress_id': 'adress_id'
     # 'adress_identifier': 'adress_identifier'
-    'adresstyp_c': 'adresstyp_c'
     # 'sprache_c': 'sprache_c'
 }
 
@@ -139,7 +118,7 @@ def create_mitgliedschaft(data):
             'kundentyp': kundentyp,
             'firma': get_value(data, 'firma'),
             'zusatz_firma': get_value(data, 'zusatz_firma'),
-            #'anrede_c': get_value(data, 'anrede_c'),
+            'anrede_c': get_anrede_c(get_value(data, 'anrede_c')),
             'nachname_1': get_value(data, 'nachname_1'),
             'vorname_1': get_value(data, 'vorname_1'),
             'tel_p_1': str(get_value(data, 'tel_p_1')),
@@ -206,7 +185,7 @@ def update_mitgliedschaft(data):
             mitgliedschaft.kundentyp = kundentyp
             mitgliedschaft.firma = get_value(data, 'firma')
             mitgliedschaft.zusatz_firma = get_value(data, 'zusatz_firma')
-            #mitgliedschaft.anrede_c = get_value(data, 'anrede_c')
+            mitgliedschaft.anrede_c = get_anrede_c(get_value(data, 'anrede_c'))
             mitgliedschaft.nachname_1 = get_value(data, 'nachname_1')
             mitgliedschaft.vorname_1 = get_value(data, 'vorname_1')
             mitgliedschaft.tel_p_1 = str(get_value(data, 'tel_p_1'))
@@ -228,6 +207,7 @@ def update_mitgliedschaft(data):
             #mitgliedschaft.tel_m_2 = str(get_value(data, 'tel_m_2'))
             mitgliedschaft.tel_g_2 = str(get_value(data, 'tel_g_2'))
             mitgliedschaft.e_mail_2 = get_value(data, 'e_mail_2')
+            mitgliedschaft.adress_id_mitglied = get_value(data, 'adress_id')
         elif get_value(data, 'adresstyp_c') == 'OBJEKT':
             # Objekt Adresse
             mitgliedschaft.objekt_zusatz_adresse = get_value(data, 'zusatz_adresse')
@@ -236,6 +216,7 @@ def update_mitgliedschaft(data):
             mitgliedschaft.objekt_nummer_zu = get_value(data, 'nummer_zu')
             mitgliedschaft.objekt_plz = get_value(data, 'plz')
             mitgliedschaft.objekt_ort = get_value(data, 'ort') or 'Fehlende Angaben!'
+            mitgliedschaft.adress_id_objekt = get_value(data, 'adress_id')
         elif get_value(data, 'adresstyp_c') == 'RECHN':
             # Rechnungs Adresse
             strasse = get_value(data, 'strasse')
@@ -255,6 +236,7 @@ def update_mitgliedschaft(data):
             mitgliedschaft.rg_postfach_nummer = get_value(data, 'postfach_nummer')
             mitgliedschaft.rg_plz = get_value(data, 'plz')
             mitgliedschaft.rg_ort = get_value(data, 'ort')
+            mitgliedschaft.adress_id_rg = get_value(data, 'adress_id')
         # else:
             # TBD!
         
@@ -312,6 +294,25 @@ def get_mitglied_c(mitglied_c):
         return 'Mitglied'
     else:
         return 'Mitglied'
+
+def get_anrede_c(anrede_c):
+    anrede_c = int(anrede_c)
+    if anrede_c == 1:
+        return 'Herr'
+    elif anrede_c == 2:
+        return 'Frau'
+    elif anrede_c == 3:
+        return 'Frau und Herr'
+    elif anrede_c == 4:
+        return 'Herr und Frau'
+    elif anrede_c == 5:
+        return 'Familie'
+    elif anrede_c == 7:
+        return 'Herren'
+    elif anrede_c == 8:
+        return 'Frauen'
+    else:
+        return ''
 
 def get_formatted_datum(datum):
     if datum:

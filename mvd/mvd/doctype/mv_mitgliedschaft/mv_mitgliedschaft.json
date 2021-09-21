@@ -88,14 +88,17 @@
   "kunde_mitglied",
   "kontakt_mitglied",
   "adresse_mitglied",
+  "adress_id_mitglied",
   "title_2",
   "kontakt_solidarmitglied",
   "title_3",
   "objekt_adresse",
+  "adress_id_objekt",
   "title_4",
   "rg_kunde",
   "rg_kontakt",
-  "rg_adresse"
+  "rg_adresse",
+  "adress_id_rg"
  ],
  "fields": [
   {
@@ -628,10 +631,25 @@
   {
    "fieldname": "uebersicht_html",
    "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "adress_id_mitglied",
+   "fieldtype": "Data",
+   "label": "Adress ID"
+  },
+  {
+   "fieldname": "adress_id_objekt",
+   "fieldtype": "Data",
+   "label": "Adress ID"
+  },
+  {
+   "fieldname": "adress_id_rg",
+   "fieldtype": "Data",
+   "label": "Adress ID"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-09-20 22:36:58.012835",
+ "modified": "2021-09-21 09:57:42.702313",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

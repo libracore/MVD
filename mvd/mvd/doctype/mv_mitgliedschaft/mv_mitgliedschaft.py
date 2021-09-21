@@ -58,8 +58,8 @@ class MVMitgliedschaft(Document):
     
     def validate_rg_adresse(self):
         if self.rg_adresse:
-            update_rg_adresse(self)
-            return self.rg_adresse
+            rg_adresse = update_rg_adresse(self)
+            return rg_adresse
         else:
             address = create_rg_adresse(self)
             return address
@@ -90,24 +90,24 @@ class MVMitgliedschaft(Document):
     
     def validate_adresse_mitglied(self):
         if self.adresse_mitglied:
-            update_adresse_mitglied(self)
+            adresse_mitglied = update_adresse_mitglied(self)
             if self.postfach:
                 if self.objekt_adresse:
-                    update_objekt_adresse(self)
-                    return self.adresse_mitglied, self.objekt_adresse
+                    objekt_adresse = update_objekt_adresse(self)
+                    return adresse_mitglied, objekt_adresse
                 else:
                     objekt_adresse = create_objekt_adresse(self)
-                    return self.adresse_mitglied, objekt_adresse
+                    return adresse_mitglied, objekt_adresse
             else:
                 if self.objekt_adresse:
                     self.remove_objekt_adresse()
-                return self.adresse_mitglied, ''
+                return adresse_mitglied, ''
         else:
             address = create_adresse_mitglied(self)
             if self.postfach:
                 if self.objekt_adresse:
-                    update_objekt_adresse(self)
-                    return address, self.objekt_adresse
+                    objekt_adresse = update_objekt_adresse(self)
+                    return address, objekt_adresse
                 else:
                     objekt_adresse = create_objekt_adresse(self)
                     return address, objekt_adresse
@@ -161,6 +161,7 @@ def update_rg_adresse(mitgliedschaft):
     address.city = city
     address.is_primary_address = is_primary_address
     address.is_shipping_address = is_shipping_address
+    address.adress_id = mitgliedschaft.adress_id_rg
     
     if mitgliedschaft.rg_kunde:
         link_name = mitgliedschaft.rg_kunde
@@ -172,9 +173,16 @@ def update_rg_adresse(mitgliedschaft):
     link.link_doctype = 'Customer'
     link.link_name = link_name
     address.save(ignore_permissions=True)
-    return
+    
+    return address.name
 
 def create_rg_adresse(mitgliedschaft):
+    if mitgliedschaft.adress_id_rg:
+        existierende_adresse = existierende_adresse_anhand_id(mitgliedschaft.adress_id_rg)
+        if existierende_adresse:
+            mitgliedschaft.rg_adresse = existierende_adresse
+            return update_rg_adresse(mitgliedschaft)
+    
     if mitgliedschaft.rg_postfach:
         strasse = address_line1 = 'Postfach'
         postfach = 1
@@ -204,7 +212,8 @@ def create_rg_adresse(mitgliedschaft):
         'postfach_nummer': postfach_nummer,
         'city': city,
         'is_primary_address': is_primary_address,
-        'is_shipping_address': is_shipping_address
+        'is_shipping_address': is_shipping_address,
+        'adress_id': mitgliedschaft.adress_id_rg
     })
     
     if mitgliedschaft.rg_kunde:
@@ -218,6 +227,7 @@ def create_rg_adresse(mitgliedschaft):
     
     new_address.insert()
     frappe.db.commit()
+    
     return new_address.name
 
 def update_rg_kontakt(mitgliedschaft):
@@ -415,6 +425,12 @@ def create_rg_kunde(mitgliedschaft):
     return new_customer.name
 
 def create_objekt_adresse(mitgliedschaft):
+    if mitgliedschaft.adress_id_objekt:
+        existierende_adresse = existierende_adresse_anhand_id(mitgliedschaft.adress_id_objekt)
+        if existierende_adresse:
+            mitgliedschaft.objekt_adresse = existierende_adresse
+            return update_objekt_adresse(mitgliedschaft)
+    
     strasse = address_line1 = (" ").join((str(mitgliedschaft.objekt_strasse or ''), str(mitgliedschaft.objekt_hausnummer or ''), str(mitgliedschaft.objekt_nummer_zu or '')))
     postfach = 0
     is_primary_address = 0
@@ -444,7 +460,8 @@ def create_objekt_adresse(mitgliedschaft):
         'postfach_nummer': postfach_nummer,
         'city': city,
         'is_primary_address': is_primary_address,
-        'is_shipping_address': is_shipping_address
+        'is_shipping_address': is_shipping_address,
+        'adress_id': mitgliedschaft.adress_id_objekt
     })
     
     link = new_address.append("links", {})
@@ -453,6 +470,7 @@ def create_objekt_adresse(mitgliedschaft):
     
     new_address.insert()
     frappe.db.commit()
+    
     return new_address.name
 
 def update_objekt_adresse(mitgliedschaft):
@@ -485,13 +503,15 @@ def update_objekt_adresse(mitgliedschaft):
     address.city = city
     address.is_primary_address = is_primary_address
     address.is_shipping_address = is_shipping_address
+    address.adress_id = mitgliedschaft.adress_id_objekt
     
     address.links = []
     link = address.append("links", {})
     link.link_doctype = 'Customer'
     link.link_name = mitgliedschaft.kunde_mitglied
     address.save(ignore_permissions=True)
-    return
+    
+    return address.name
 
 def join_mitglied_contact_and_address(contact, address):
     contact = frappe.get_doc("Contact", contact)
@@ -528,15 +548,23 @@ def update_adresse_mitglied(mitgliedschaft):
     address.city = city
     address.is_primary_address = is_primary_address
     address.is_shipping_address = is_shipping_address
+    address.adress_id = mitgliedschaft.adress_id_mitglied
     
     address.links = []
     link = address.append("links", {})
     link.link_doctype = 'Customer'
     link.link_name = mitgliedschaft.kunde_mitglied
     address.save(ignore_permissions=True)
-    return
+    
+    return address.name
 
 def create_adresse_mitglied(mitgliedschaft):
+    if mitgliedschaft.adress_id_mitglied:
+        existierende_adresse = existierende_adresse_anhand_id(mitgliedschaft.adress_id_mitglied)
+        if existierende_adresse:
+            mitgliedschaft.adresse_mitglied = existierende_adresse
+            return update_adresse_mitglied(mitgliedschaft)
+    
     if mitgliedschaft.postfach:
         strasse = address_line1 = 'Postfach'
         postfach = 1
@@ -566,7 +594,8 @@ def create_adresse_mitglied(mitgliedschaft):
         'postfach_nummer': postfach_nummer,
         'city': city,
         'is_primary_address': is_primary_address,
-        'is_shipping_address': is_shipping_address
+        'is_shipping_address': is_shipping_address,
+        'adress_id': mitgliedschaft.adress_id_mitglied
     })
     
     link = new_address.append("links", {})
@@ -575,6 +604,7 @@ def create_adresse_mitglied(mitgliedschaft):
     
     new_address.insert()
     frappe.db.commit()
+    
     return new_address.name
 
 def remove_solidarmitglied(mitgliedschaft):
@@ -872,6 +902,13 @@ def create_kunde_mitglied(mitgliedschaft):
     new_customer.insert()
     frappe.db.commit()
     return new_customer.name
+
+def existierende_adresse_anhand_id(adress_id):
+    address = False
+    adress_lookup = frappe.db.sql("""SELECT `name` FROM `tabAddress` WHERE `adress_id` = '{adress_id}' LIMIT 1""".format(adress_id=adress_id), as_dict=True)
+    if len(adress_lookup) > 0:
+        address = adress_lookup[0].name
+    return address
 
 @frappe.whitelist()
 def get_timeline_data(doctype, name):
