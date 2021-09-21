@@ -989,6 +989,7 @@ def get_uebersicht_html(name):
     rechnungs_kunde = mitgliedschaft.kunde_mitglied
     ueberfaellige_rechnungen = 0
     offene_rechnungen = 0
+    
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
     karenzfrist_in_d = sektion.karenzfrist
     ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintritt), karenzfrist_in_d)
@@ -996,14 +997,28 @@ def get_uebersicht_html(name):
         karenzfrist = False
     else:
         karenzfrist = True
+        
     if mitgliedschaft.zuzug:
         zuzug = mitgliedschaft.zuzug
+        zuzug_von = mitgliedschaft.zuzug_von
     else:
         zuzug = False
+        zuzug_von = False
+        
     if mitgliedschaft.wegzug:
         wegzug = mitgliedschaft.wegzug
+        wegzug_zu = mitgliedschaft.wegzug_zu
     else:
         wegzug = False
+        wegzug_zu = False
+    
+    if mitgliedschaft.inkl_hv:
+        if mitgliedschaft.zahlung_hv:
+            hv_status = 'HV bezahlt am {0}'.format(frappe.utils.get_datetime(mitgliedschaft.zahlung_hv).strftime('%d.%m.%Y'))
+        else:
+            hv_status = 'HV unbezahlt'
+    else:
+        hv_status = False
     
     if mitgliedschaft.rg_kunde:
         rechnungs_kunde = mitgliedschaft.rg_kunde
@@ -1049,7 +1064,11 @@ def get_uebersicht_html(name):
             'offene_rechnungen': offene_rechnungen,
             'ablauf_karenzfrist': ablauf_karenzfrist,
             'zuzug': zuzug,
-            'wegzug': wegzug
+            'wegzug': wegzug,
+            'zuzug_von': zuzug_von,
+            'wegzug_zu': wegzug_zu,
+            'mitgliedart': mitgliedschaft.mitglied_c,
+            'hv_status': hv_status
         }
     }
     

@@ -23,8 +23,11 @@
   "eintritt",
   "zuzug",
   "wegzug",
+  "zahlung_hv",
   "cb_1",
   "austritt",
+  "zuzug_von",
+  "wegzug_zu",
   "kuendigung",
   "section_kontaktdaten",
   "kundentyp",
@@ -646,10 +649,27 @@
    "fieldname": "adress_id_rg",
    "fieldtype": "Data",
    "label": "Adress ID"
+  },
+  {
+   "fieldname": "zuzug_von",
+   "fieldtype": "Data",
+   "label": "Zuzug von",
+   "read_only": 1
+  },
+  {
+   "fieldname": "wegzug_zu",
+   "fieldtype": "Data",
+   "label": "Wegzug zu",
+   "read_only": 1
+  },
+  {
+   "fieldname": "zahlung_hv",
+   "fieldtype": "Date",
+   "label": "Zahlung HV"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-09-21 09:57:42.702313",
+ "modified": "2021-09-21 11:39:11.255413",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

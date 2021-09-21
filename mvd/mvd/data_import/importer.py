@@ -13,6 +13,7 @@ hm = {
     'mitglied_id': 'mitglied_id',
     'status_c': 'status_c',
     'sektion_id': 'sektion_id',
+    'zuzug_sektion': 'sektion_zq_id',
     'mitgliedtyp_c': 'mitgliedtyp_c',
     'mitglied_c': 'mitglied_c',
     # 'inkl_hv':, --> woher kommt diese Info?
@@ -21,6 +22,7 @@ hm = {
     'eintritt': 'datum_eintritt',
     'austritt': 'datum_austritt',
     'wegzug': 'datum_wegzug',
+    'zuzug': 'datum_zuzug',
     'kuendigung': 'datum_kuend_per',
     'adresstyp_c': 'adresstyp_c',
     'adress_id': 'adress_id',
@@ -102,6 +104,12 @@ def create_mitgliedschaft(data):
         if get_value(data, 'mitgliedtyp_c') == 'GESCH':
             kundentyp = 'Unternehmen'
         
+        zuzug = get_formatted_datum(get_value(data, 'zuzug'))
+        if zuzug:
+            zuzug_von = get_sektion(get_value(data, 'zuzug_sektion'))
+        else:
+            zuzug_von = ''
+        
         new_mitgliedschaft = frappe.get_doc({
             'doctype': 'MV Mitgliedschaft',
             'mitglied_nr': str(get_value(data, 'mitglied_nr')).zfill(8),
@@ -114,6 +122,9 @@ def create_mitgliedschaft(data):
             'eintritt': get_formatted_datum(get_value(data, 'eintritt')),
             'austritt': get_formatted_datum(get_value(data, 'austritt')),
             'wegzug': get_formatted_datum(get_value(data, 'wegzug')),
+            #'wegzug_zu': '', --> woher kommt diese Info?
+            'zuzug': zuzug,
+            'zuzug_von': zuzug_von,
             'kuendigung': get_formatted_datum(get_value(data, 'kuendigung')),
             'kundentyp': kundentyp,
             'firma': get_value(data, 'firma'),
@@ -172,6 +183,12 @@ def update_mitgliedschaft(data):
             if get_value(data, 'mitglied_c') == 'GESCH':
                 kundentyp = 'Unternehmen'
             
+            zuzug = get_formatted_datum(get_value(data, 'zuzug'))
+            if zuzug:
+                zuzug_von = get_sektion(get_value(data, 'zuzug_sektion'))
+            else:
+                zuzug_von = ''
+            
             mitgliedschaft.mitglied_nr = str(get_value(data, 'mitglied_nr')).zfill(8)
             mitgliedschaft.status_c = get_status_c(get_value(data, 'status_c'))
             mitgliedschaft.sektion_id = get_sektion(get_value(data, 'sektion_id'))
@@ -181,6 +198,9 @@ def update_mitgliedschaft(data):
             mitgliedschaft.eintritt = get_formatted_datum(get_value(data, 'eintritt'))
             mitgliedschaft.austritt = get_formatted_datum(get_value(data, 'austritt'))
             mitgliedschaft.wegzug = get_formatted_datum(get_value(data, 'wegzug'))
+            mitgliedschaft.zuzug = zuzug
+            #mitgliedschaft.wegzug_zu = '' --> woher kommt diese Info?
+            mitgliedschaft.zuzug_von = zuzug_von
             mitgliedschaft.kuendigung = get_formatted_datum(get_value(data, 'kuendigung'))
             mitgliedschaft.kundentyp = kundentyp
             mitgliedschaft.firma = get_value(data, 'firma')
@@ -248,7 +268,7 @@ def update_mitgliedschaft(data):
         return
 
 def get_sektion(id):
-    # TBD!!!!!!!!!!
+    # Aufliestung nicht abschliessend, prüfen!
     if id == 25:
         return 'MVD'
     elif id == 4:
@@ -260,7 +280,7 @@ def get_sektion(id):
     elif id == 3:
         return 'Aargau'
     else:
-        return '!TBD!'
+        return 'Sektions-ID unbekannt'
 
 def get_status_c(status_c):
     # Aufliestung vermutlich nicht abschliessend, prüfen!

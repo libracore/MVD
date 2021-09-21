@@ -5,15 +5,19 @@
     <div class="col-sm-5">
         <div class="address-box">
             <p>
+                <b>Mitgliedart:</b> {{ allgemein.mitgliedart }}<br>
                 <b>Status:</b> {{ allgemein.status }}<br>
                 <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
                 {% if allgemein.zuzug %}
-                    <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}<br>
+                    <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }} (von {{ allgemein.zuzug_von }})<br>
                 {% endif %}
                 {% if allgemein.wegzug %}
-                    <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}<br>
+                    <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }} (zu {{ allgemein.wegzug_zu }})<br>
                 {% endif %}
                 <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
+                {% if allgemein.hv_status %}
+                    <br>{{ allgemein.hv_status }}
+                {% endif %}
             </p>
         </div>
     </div>
@@ -35,15 +39,19 @@
                 <span class="css-ampel {{ allgemein.ampelfarbe }}"><span></span></span>
             </p>
             <p>
+                <b>Mitgliedart:</b> {{ allgemein.mitgliedart }}<br>
                 <b>Status:</b> {{ allgemein.status }}<br>
                 <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
                 {% if allgemein.zuzug %}
-                    <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}<br>
+                    <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }} (von {{ allgemein.zuzug_von }})<br>
                 {% endif %}
                 {% if allgemein.wegzug %}
-                    <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}<br>
+                    <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }} (zu {{ allgemein.wegzug_zu }})<br>
                 {% endif %}
                 <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
+                {% if allgemein.hv_status %}
+                    <br>{{ allgemein.hv_status }}
+                {% endif %}
             </p>
         </div>
     </div>
