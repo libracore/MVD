@@ -36,12 +36,30 @@ def get_data():
                     "name": "Contact",
                     "label": _("Contact"),
                     "description": _("Kontaktpersonen")
-                },
+                }
+            ]
+        },
+        {
+            "label": _("Verbands Stammdaten"),
+            "icon": "fa fa-cog",
+            "items": [
                 {
                     "type": "doctype",
                     "name": "Sektion",
-                    "label": _("Sektions Einstellungen"),
+                    "label": _("Sektionen"),
                     "description": _("Sektions Einstellungen")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Region",
+                    "label": _("Regionen"),
+                    "description": _("Regions Einstellungen")
+                },
+                {
+                    "type": "doctype",
+                    "name": "PLZ Sektion Zuordnung",
+                    "label": _("Zuordnung PLZ <-> Sektion"),
+                    "description": _("Zuordnung PLZ <-> Sektion")
                 }
             ]
         }

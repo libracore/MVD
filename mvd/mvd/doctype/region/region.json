@@ -1,18 +1,15 @@
 {
  "allow_rename": 1,
  "autoname": "field:title",
- "creation": "2021-08-26 13:39:03.647754",
+ "creation": "2021-09-22 10:59:25.755984",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "section_sektionsstammdaten",
   "title",
-  "sektion_c",
+  "region_id",
   "cb_1",
-  "sektion_id",
-  "section_sektionseinstellungen",
-  "karenzfrist"
+  "sektion"
  ],
  "fields": [
   {
@@ -24,46 +21,27 @@
    "unique": 1
   },
   {
-   "default": "30",
-   "fieldname": "karenzfrist",
+   "fieldname": "sektion",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "fieldname": "region_id",
    "fieldtype": "Int",
-   "label": "Karenzfrist",
+   "label": "Region ID",
    "reqd": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "section_sektionsstammdaten",
-   "fieldtype": "Section Break",
-   "label": "Sektionsstammdaten"
-  },
-  {
-   "fieldname": "sektion_c",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Sektion Code",
-   "reqd": 1
-  },
-  {
-   "fieldname": "sektion_id",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Sektion ID",
-   "reqd": 1
-  },
-  {
-   "fieldname": "section_sektionseinstellungen",
-   "fieldtype": "Section Break",
-   "label": "Sektionseinstellungen"
   },
   {
    "fieldname": "cb_1",
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2021-09-22 10:53:14.728957",
+ "modified": "2021-09-22 11:11:12.736997",
  "modified_by": "Administrator",
  "module": "MVD",
- "name": "Sektion",
+ "name": "Region",
  "owner": "Administrator",
  "permissions": [
   {
