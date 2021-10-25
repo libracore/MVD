@@ -1,0 +1,165 @@
+{
+ "creation": "2021-10-25 11:02:47.920577",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_allgemein",
+  "mv_mitgliedschaft",
+  "sektion_id",
+  "druck_kopf_fusszeile",
+  "kopf_fusszeile",
+  "seitenzahlen",
+  "section_ansprechperson",
+  "check_ansprechperson",
+  "ansprechperson",
+  "tel_ma",
+  "email_ma",
+  "section_inhalt",
+  "ort",
+  "datum",
+  "brieftitel",
+  "check_anrede",
+  "anrede",
+  "inhalt"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "default": "1",
+   "fieldname": "druck_kopf_fusszeile",
+   "fieldtype": "Check",
+   "label": "Drucken von Kopf- / Fusszeile"
+  },
+  {
+   "depends_on": "eval:doc.druck_kopf_fusszeile",
+   "fetch_from": "sektion_id.default_kopf_fusszeile",
+   "fetch_if_empty": 1,
+   "fieldname": "kopf_fusszeile",
+   "fieldtype": "Link",
+   "label": "Kopf- / Fusszeile",
+   "options": "Letter Head"
+  },
+  {
+   "default": "1",
+   "fieldname": "seitenzahlen",
+   "fieldtype": "Check",
+   "label": "Seitenzahlen"
+  },
+  {
+   "fieldname": "section_ansprechperson",
+   "fieldtype": "Section Break",
+   "label": "Ansprechperson"
+  },
+  {
+   "depends_on": "eval:!doc.check_ansprechperson",
+   "fieldname": "ansprechperson",
+   "fieldtype": "Data",
+   "label": "Ansprechperson"
+  },
+  {
+   "depends_on": "eval:!doc.check_ansprechperson",
+   "fieldname": "tel_ma",
+   "fieldtype": "Data",
+   "label": "Tel. Mitarbeiter:inn"
+  },
+  {
+   "depends_on": "eval:!doc.check_ansprechperson",
+   "fieldname": "email_ma",
+   "fieldtype": "Data",
+   "label": "E-Mail Mitarbeiter:inn"
+  },
+  {
+   "fieldname": "section_inhalt",
+   "fieldtype": "Section Break",
+   "label": "Inhalt"
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Ort",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "datum",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Datum",
+   "reqd": 1
+  },
+  {
+   "fieldname": "brieftitel",
+   "fieldtype": "Data",
+   "label": "Brieftitel",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "check_anrede",
+   "fieldtype": "Check",
+   "label": "Eigene Anrede"
+  },
+  {
+   "depends_on": "eval:doc.check_anrede",
+   "fieldname": "anrede",
+   "fieldtype": "Data",
+   "label": "Anrede"
+  },
+  {
+   "fieldname": "inhalt",
+   "fieldtype": "Text Editor",
+   "label": "Inhalt"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mitgliedschaft",
+   "options": "MV Mitgliedschaft",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.sektion_id",
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "check_ansprechperson",
+   "fieldtype": "Check",
+   "label": "Ansprechperson ausblenden"
+  }
+ ],
+ "modified": "2021-10-25 13:19:45.074957",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "MV Korrespondenz",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

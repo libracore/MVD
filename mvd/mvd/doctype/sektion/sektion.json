@@ -12,7 +12,9 @@
   "cb_1",
   "sektion_id",
   "section_sektionseinstellungen",
-  "karenzfrist"
+  "karenzfrist",
+  "default_kopf_fusszeile",
+  "default_ort"
  ],
  "fields": [
   {
@@ -37,6 +39,7 @@
    "label": "Sektionsstammdaten"
   },
   {
+   "default": "0",
    "fieldname": "sektion_c",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -58,9 +61,20 @@
   {
    "fieldname": "cb_1",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_kopf_fusszeile",
+   "fieldtype": "Link",
+   "label": "Default Kopf- / Fusszeile",
+   "options": "Letter Head"
+  },
+  {
+   "fieldname": "default_ort",
+   "fieldtype": "Data",
+   "label": "Default Ort (Korrespndenz)"
   }
  ],
- "modified": "2021-09-22 10:53:14.728957",
+ "modified": "2021-10-25 15:22:44.219658",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
