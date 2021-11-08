@@ -39,7 +39,7 @@ def suche(suchparameter):
                             OR
                             (`tel_m_1` LIKE '%{tel}%' OR `rg_tel_m` LIKE '%{tel}%' OR `tel_m_2` LIKE '%{tel}%')
                             OR
-                            (`tel_g_1` LIKE '%{tel}%' OR `rg_tel_g` LIKE '%{tel}%' OR `tel_g_2` LIKE '%{tel}%'))""".format(tel=suchparameter["tel"]))
+                            (`tel_g_1` LIKE '%{tel}%' OR `rg_tel_g` LIKE '%{tel}%' OR `tel_g_2` LIKE '%{tel}%'))""".format(tel=suchparameter["tel"].replace(" ", "")))
     if suchparameter["email"]:
         filters_list.append("""(`e_mail_1` LIKE '%{email}%' OR `rg_e_mail` LIKE '%{email}%' OR `e_mail_2` LIKE '%{email}%')""".format(email=suchparameter["email"]))
     

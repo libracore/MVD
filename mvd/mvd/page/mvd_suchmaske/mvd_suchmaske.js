@@ -7,11 +7,10 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     });
     
     me.$user_search_button = me.page.set_secondary_action('Suche zurücksetzen', () => {
-        console.log(me);
+        location.reload();
     });
     me.$user_search_button = me.page.set_primary_action('Suche starten', () => {
         frappe.mvd_such_client.suche(page);
-        console.log("hoii");
     });
     
     //erstelle suchabschnitt
@@ -65,26 +64,37 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
 
 frappe.mvd_such_client = {
     suche: function(page) {
-        var search_data = {};
-        for (const [ key, value ] of Object.entries(cur_page.page.search_fields)) {
-            if (value.get_value()) {
-                search_data[key] = value.get_value();
-            } else {
-                search_data[key] = false;
+        if (cur_page.page.search_fields.sektion_id.get_value()) {
+            frappe.show_alert("Die Suche wurde gestartet, bitte warten...", 5);
+            var search_data = {};
+            for (const [ key, value ] of Object.entries(cur_page.page.search_fields)) {
+                if (value.get_value()) {
+                    search_data[key] = value.get_value();
+                } else {
+                    search_data[key] = false;
+                }
             }
+            console.log(search_data);
+            frappe.call({
+                method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.suche",
+                args:{
+                        'suchparameter': search_data
+                },
+                callback: function(r)
+                {
+                    if (r.message) {
+                        // erstelle resultatabschnitt
+                        cur_page.page.search_fields.suchresultate.set_value(r.message);
+                        frappe.show_alert("Die Suchresultate werden angezeigt.", 5);
+                    } else {
+                        cur_page.page.search_fields.suchresultate.set_value("<center><p>Keine Suchresultate vorhanden.</p></center>");
+                        frappe.show_alert("Keine Suchresultate vorhanden.", 5);
+                    }
+                }
+            });
+        } else {
+            frappe.msgprint("Bitte mindestens eine Sektion angeben");
         }
-        console.log(search_data);
-        frappe.call({
-            method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.suche",
-            args:{
-                    'suchparameter': search_data
-            },
-            callback: function(r)
-            {
-                // erstelle resultatabschnitt
-                cur_page.page.search_fields.suchresultate.set_value(r.message);
-            }
-        });
     },
     create_sektion_id_field: function(page) {
         var sektion_id = frappe.ui.form.make_control({
@@ -93,17 +103,7 @@ frappe.mvd_such_client = {
                 fieldtype: "Link",
                 options: "Sektion",
                 fieldname: "sektion",
-                change: function(){
-                    //if(pid != patient.get_value() && patient.get_value()){
-                        //me.start = 0;
-                        //me.page.main.find(".patient_documents_list").html("");
-                        //get_documents(patient.get_value(), me);
-                        //show_patient_info(patient.get_value(), me);
-                        //show_patient_vital_charts(patient.get_value(), me, "bp", "mmHg", "Blood Pressure");
-                    //}
-                    //pid = patient.get_value();
-                    console.log("ich wurde ausgewählt");
-                }
+                reqd: 1
             },
             only_input: true,
         });
@@ -114,10 +114,7 @@ frappe.mvd_such_client = {
             parent: page.main.find(".mitglied_nr"),
             df: {
                 fieldtype: "Data",
-                fieldname: "mitglied_nr",
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                fieldname: "mitglied_nr"
             },
             only_input: true,
         });
@@ -129,10 +126,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Select",
                 fieldname: "status_c",
-                options: 'Mitglied\nKündigung\nMutation\nWegzug\nAusschluss\nReaktiviert\nNeueintritt\nZuzug\nGestorben',
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                options: 'Mitglied\nKündigung\nMutation\nWegzug\nAusschluss\nReaktiviert\nNeueintritt\nZuzug\nGestorben'
             },
             only_input: true,
         });
@@ -144,10 +138,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Select",
                 fieldname: "mitgliedtyp_c",
-                options: 'Geschäftlich\nPrivat\nKollektiv',
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                options: 'Geschäftlich\nPrivat\nKollektiv'
             },
             only_input: true,
         });
@@ -159,10 +150,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Select",
                 fieldname: "mitglied_c",
-                options: 'Online-Anmeldung\nAngemeldet\nMitglied\nOnline-Beitritt\nInaktiv\nInteressiert',
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                options: 'Online-Anmeldung\nAngemeldet\nMitglied\nOnline-Beitritt\nInaktiv\nInteressiert'
             },
             only_input: true,
         });
@@ -173,10 +161,7 @@ frappe.mvd_such_client = {
             parent: page.main.find(".vorname"),
             df: {
                 fieldtype: "Data",
-                fieldname: "vorname",
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                fieldname: "vorname"
             },
             only_input: true,
         });
@@ -187,10 +172,7 @@ frappe.mvd_such_client = {
             parent: page.main.find(".nachname"),
             df: {
                 fieldtype: "Data",
-                fieldname: "nachname",
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                fieldname: "nachname"
             },
             only_input: true,
         });
@@ -201,10 +183,7 @@ frappe.mvd_such_client = {
             parent: page.main.find(".tel"),
             df: {
                 fieldtype: "Data",
-                fieldname: "tel",
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                fieldname: "tel"
             },
             only_input: true,
         });
@@ -216,10 +195,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Data",
                 options: 'Email',
-                fieldname: "email",
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                fieldname: "email"
             },
             only_input: true,
         });
@@ -230,10 +206,7 @@ frappe.mvd_such_client = {
             parent: page.main.find(".zusatz_adresse"),
             df: {
                 fieldtype: "Data",
-                fieldname: "zusatz_adresse",
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                fieldname: "zusatz_adresse"
             },
             only_input: true,
         });
@@ -245,10 +218,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Data",
                 fieldname: "strasse",
-                hidden: 0,
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                hidden: 0
             },
             only_input: true,
         });
@@ -260,10 +230,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Data",
                 fieldname: "nummer",
-                hidden: 0,
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                hidden: 0
             },
             only_input: true,
         });
@@ -275,10 +242,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Data",
                 fieldname: "nummer_zu",
-                hidden: 0,
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                hidden: 0
             },
             only_input: true,
         });
@@ -322,10 +286,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Data",
                 fieldname: "postfach_nummer",
-                hidden: 1,
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                hidden: 1
             },
             only_input: true,
         });
@@ -336,10 +297,7 @@ frappe.mvd_such_client = {
             parent: page.main.find(".plz"),
             df: {
                 fieldtype: "Data",
-                fieldname: "plz",
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                fieldname: "plz"
             },
             only_input: true,
         });
@@ -350,10 +308,7 @@ frappe.mvd_such_client = {
             parent: page.main.find(".ort"),
             df: {
                 fieldtype: "Data",
-                fieldname: "ort",
-                change: function(){
-                    console.log("ich wurde ausgewählt");
-                }
+                fieldname: "ort"
             },
             only_input: true,
         });
@@ -375,6 +330,5 @@ frappe.mvd_such_client = {
 
 
 function open_mitgliedschaft(mitgliedschaft) {
-    console.log("ich öffne jetzt " + mitgliedschaft);
     frappe.set_route("Form", "MV Mitgliedschaft", mitgliedschaft);
 }

@@ -12,7 +12,13 @@ def get_data():
                     "name": "MV Mitgliedschaft",
                     "label": _("MV Mitgliedschaft"),
                     "description": _("MV Mitgliedschaft")
-                }
+                },
+                {
+                   "type": "page",
+                   "name": "mvd-suchmaske",
+                   "label": _("Mitgliedschaftssuche"),
+                   "description": _("Mitgliedschaftssuche")
+               }
             ]
         },
         {
