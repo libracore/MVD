@@ -65,10 +65,19 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
 
 frappe.mvd_such_client = {
     suche: function(page) {
+        var search_data = {};
+        for (const [ key, value ] of Object.entries(cur_page.page.search_fields)) {
+            if (value.get_value()) {
+                search_data[key] = value.get_value();
+            } else {
+                search_data[key] = false;
+            }
+        }
+        console.log(search_data);
         frappe.call({
-            method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.get_resultate_html",
+            method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.suche",
             args:{
-                    'name': '16373'
+                    'suchparameter': search_data
             },
             callback: function(r)
             {
@@ -362,4 +371,10 @@ frappe.mvd_such_client = {
         });
         return suchresultate
     }
+}
+
+
+function open_mitgliedschaft(mitgliedschaft) {
+    console.log("ich öffne jetzt " + mitgliedschaft);
+    frappe.set_route("Form", "MV Mitgliedschaft", mitgliedschaft);
 }
