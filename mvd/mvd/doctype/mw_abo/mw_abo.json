@@ -1,0 +1,144 @@
+{
+ "autoname": "MW-Abo-.######",
+ "creation": "2021-11-17 16:18:39.522868",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_allgemein",
+  "status",
+  "start",
+  "anzahl",
+  "cb_1",
+  "typ",
+  "ende",
+  "pdf",
+  "section_inhaber",
+  "customer",
+  "cb_2",
+  "contact",
+  "cb_3",
+  "address",
+  "section_overview",
+  "overview_html"
+ ],
+ "fields": [
+  {
+   "default": "Today",
+   "fieldname": "start",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Startdatum",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ende",
+   "fieldtype": "Date",
+   "label": "Enddatum"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Aktiv\nAktiv terminiert\nInaktiv",
+   "read_only": 1
+  },
+  {
+   "fieldname": "typ",
+   "fieldtype": "Select",
+   "label": "Typ",
+   "options": "Zeitungsabonnent*innen\nGratis"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Empf\u00e4nger",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.customer",
+   "fieldname": "contact",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Kontakt",
+   "options": "Contact",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.contact",
+   "fieldname": "address",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Adresse",
+   "options": "Address",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_inhaber",
+   "fieldtype": "Section Break",
+   "label": "Inhaber"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_overview",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "overview_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "default": "1",
+   "fieldname": "anzahl",
+   "fieldtype": "Int",
+   "label": "Anzahl"
+  },
+  {
+   "default": "0",
+   "fieldname": "pdf",
+   "fieldtype": "Check",
+   "label": "PDF"
+  }
+ ],
+ "modified": "2021-11-18 15:37:56.470600",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "MW Abo",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

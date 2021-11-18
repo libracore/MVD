@@ -13,12 +13,12 @@ def get_data():
                     "label": _("MV Mitgliedschaft"),
                     "description": _("MV Mitgliedschaft")
                 },
-                {
-                   "type": "page",
-                   "name": "mvd-suchmaske",
-                   "label": _("Mitgliedschaftssuche"),
-                   "description": _("Mitgliedschaftssuche")
-               }
+               {
+                    "type": "doctype",
+                    "name": "MW Abo",
+                    "label": _("M+W Abo"),
+                    "description": _("M+W Abo")
+                }
             ]
         },
         {
@@ -26,6 +26,12 @@ def get_data():
             "icon": "fa fa-cog",
             "items": [
                 {
+                   "type": "page",
+                   "name": "mvd-suchmaske",
+                   "label": _("Mitgliedschaftssuche"),
+                   "description": _("Mitgliedschaftssuche")
+               },
+               {
                     "type": "doctype",
                     "name": "Customer",
                     "label": _("Kunden"),

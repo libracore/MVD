@@ -17,6 +17,8 @@
   "status_c",
   "mitgliedtyp_c",
   "inkl_hv",
+  "m_und_w",
+  "m_und_w_pdf",
   "section_wichtige_infos",
   "wichtig",
   "section_daten",
@@ -666,10 +668,22 @@
    "fieldname": "zahlung_hv",
    "fieldtype": "Date",
    "label": "Zahlung HV"
+  },
+  {
+   "default": "1",
+   "fieldname": "m_und_w",
+   "fieldtype": "Int",
+   "label": "Anzahl Mitgliederzeitschrift M+W"
+  },
+  {
+   "default": "0",
+   "fieldname": "m_und_w_pdf",
+   "fieldtype": "Check",
+   "label": "M+W als PDF"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-09-21 11:39:11.255413",
+ "modified": "2021-11-18 15:36:08.983534",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

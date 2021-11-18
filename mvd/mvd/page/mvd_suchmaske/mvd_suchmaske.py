@@ -66,149 +66,78 @@ def suche(suchparameter):
         filters = 'WHERE ' + filters
     else:
         filters = ''
-    #frappe.throw("""SELECT `name` FROM `tabMV Mitgliedschaft` {filters}""".format(filters=filters))
+    
     mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMV Mitgliedschaft` {filters}""".format(filters=filters), as_dict=True)
-    resultate_html = ''
+    
+    if len(mitgliedschaften) > 0:
+        resultate_html = get_resultate_html(mitgliedschaften)
+        return resultate_html
+    else:
+        return False
+
+def get_resultate_html(mitgliedschaften):
+    
+    suchresultate = []
     
     for mitgliedschaft in mitgliedschaften:
-        resultate_html += get_resultate_html(mitgliedschaft.name)
+        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft.name)
         
-    return resultate_html
-
-def get_resultate_html(name):
-    col_qty = 1
-    mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", name)
-    
-    kunde_mitglied = False
-    if mitgliedschaft.kunde_mitglied:
-        kunde_mitglied = frappe.get_doc("Customer", mitgliedschaft.kunde_mitglied).as_dict()
-    
-    kontakt_mitglied = False
-    if mitgliedschaft.kontakt_mitglied:
-        kontakt_mitglied = frappe.get_doc("Contact", mitgliedschaft.kontakt_mitglied).as_dict()
-    
-    adresse_mitglied = False
-    if mitgliedschaft.adresse_mitglied:
-        adresse_mitglied = frappe.get_doc("Address", mitgliedschaft.adresse_mitglied).as_dict()
-    
-    objekt_adresse = False
-    if mitgliedschaft.objekt_adresse:
-        objekt_adresse = frappe.get_doc("Address", mitgliedschaft.objekt_adresse).as_dict()
-        col_qty += 1
-    
-    kontakt_solidarmitglied = False
-    if mitgliedschaft.kontakt_solidarmitglied:
-        kontakt_solidarmitglied = frappe.get_doc("Contact", mitgliedschaft.kontakt_solidarmitglied).as_dict()
-        col_qty += 1
-    
-    rg_kunde = False
-    if mitgliedschaft.rg_kunde:
-        rg_kunde = frappe.get_doc("Customer", mitgliedschaft.rg_kunde).as_dict()
-    
-    rg_kontakt = False
-    if mitgliedschaft.rg_kontakt:
-        rg_kontakt = frappe.get_doc("Contact", mitgliedschaft.rg_kontakt).as_dict()
-    
-    rg_adresse = False
-    if mitgliedschaft.rg_adresse:
-        rg_adresse = frappe.get_doc("Address", mitgliedschaft.rg_adresse).as_dict()
-    
-    rg_sep = False
-    if mitgliedschaft.abweichende_rechnungsadresse:
-        rg_sep = True
-        col_qty += 1
-    
-    ''' mögliche Ampelfarben:
+        ''' mögliche Ampelfarben:
         - Grün: ampelgruen --> Mitglied kann alle Dienstleistungen beziehen (keine Karenzfristen, keine überfälligen oder offen Rechnungen)
         - Gelb: ampelgelb --> Karenzfristen oder offene Rechnungen
         - Rot: ampelrot --> überfällige offene Rechnungen
-    '''
-    
-    rechnungs_kunde = mitgliedschaft.kunde_mitglied
-    ueberfaellige_rechnungen = 0
-    offene_rechnungen = 0
-    
-    sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
-    karenzfrist_in_d = sektion.karenzfrist
-    ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintritt), karenzfrist_in_d)
-    if getdate() < ablauf_karenzfrist:
-        karenzfrist = False
-    else:
-        karenzfrist = True
+        '''
         
-    if mitgliedschaft.zuzug:
-        zuzug = mitgliedschaft.zuzug
-        zuzug_von = mitgliedschaft.zuzug_von
-    else:
-        zuzug = False
-        zuzug_von = False
+        rechnungs_kunde = mitgliedschaft.kunde_mitglied
+        ueberfaellige_rechnungen = 0
+        offene_rechnungen = 0
         
-    if mitgliedschaft.wegzug:
-        wegzug = mitgliedschaft.wegzug
-        wegzug_zu = mitgliedschaft.wegzug_zu
-    else:
-        wegzug = False
-        wegzug_zu = False
-    
-    if mitgliedschaft.inkl_hv:
-        if mitgliedschaft.zahlung_hv:
-            hv_status = 'HV bezahlt am {0}'.format(frappe.utils.get_datetime(mitgliedschaft.zahlung_hv).strftime('%d.%m.%Y'))
+        sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+        karenzfrist_in_d = sektion.karenzfrist
+        ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintritt), karenzfrist_in_d)
+        if getdate() < ablauf_karenzfrist:
+            karenzfrist = False
         else:
-            hv_status = 'HV unbezahlt'
-    else:
-        hv_status = False
-    
-    if mitgliedschaft.rg_kunde:
-        rechnungs_kunde = mitgliedschaft.rg_kunde
-    ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
+            karenzfrist = True
+        
+        if mitgliedschaft.rg_kunde:
+            rechnungs_kunde = mitgliedschaft.rg_kunde
+        ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
+                                                    FROM `tabSales Invoice` 
+                                                    WHERE `customer` = '{rechnungs_kunde}'
+                                                    AND `due_date` < CURDATE()
+                                                    AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
+        
+        if ueberfaellige_rechnungen > 0:
+            ampelfarbe = 'red'
+        else:
+            offene_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
                                                 FROM `tabSales Invoice` 
                                                 WHERE `customer` = '{rechnungs_kunde}'
-                                                AND `due_date` < CURDATE()
+                                                AND `due_date` >= CURDATE()
                                                 AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
-    
-    if ueberfaellige_rechnungen > 0:
-        ampelfarbe = 'ampelrot'
-    else:
-        offene_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
-                                            FROM `tabSales Invoice` 
-                                            WHERE `customer` = '{rechnungs_kunde}'
-                                            AND `due_date` >= CURDATE()
-                                            AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
-        
-        if offene_rechnungen > 0:
-            ampelfarbe = 'ampelgelb'
-        else:
-            if not karenzfrist:
-                ampelfarbe = 'ampelgelb'
+            
+            if offene_rechnungen > 0:
+                ampelfarbe = 'yellow'
             else:
-                ampelfarbe = 'ampelgruen'
+                if not karenzfrist:
+                    ampelfarbe = 'yellow'
+                else:
+                    ampelfarbe = 'limegreen'
+        dict_mitgliedschaft = mitgliedschaft.as_dict()
+        dict_mitgliedschaft.ampelfarbe = ampelfarbe
+        suchresultate.append(dict_mitgliedschaft)
+    
+    meine_sektionen = []
+    from frappe.defaults import get_user_permissions
+    restriktionen = frappe.defaults.get_user_permissions(str(frappe.session.user))
+    if "Sektion" in restriktionen:
+        for sektion in restriktionen["Sektion"]:
+            meine_sektionen.append(sektion.doc)
     
     data = {
-        'kunde_mitglied': kunde_mitglied,
-        'kontakt_mitglied': kontakt_mitglied,
-        'adresse_mitglied': adresse_mitglied,
-        'objekt_adresse': objekt_adresse,
-        'kontakt_solidarmitglied': kontakt_solidarmitglied,
-        'rg_kunde': rg_kunde,
-        'rg_kontakt': rg_kontakt,
-        'rg_adresse': rg_adresse,
-        'rg_sep': rg_sep,
-        'col_qty': int(12 / col_qty),
-        'allgemein': {
-            'status': mitgliedschaft.status_c,
-            'eintritt': mitgliedschaft.eintritt,
-            'ampelfarbe': ampelfarbe,
-            'ueberfaellige_rechnungen': ueberfaellige_rechnungen,
-            'offene_rechnungen': offene_rechnungen,
-            'ablauf_karenzfrist': ablauf_karenzfrist,
-            'zuzug': zuzug,
-            'wegzug': wegzug,
-            'zuzug_von': zuzug_von,
-            'wegzug_zu': wegzug_zu,
-            'mitgliedart': mitgliedschaft.mitglied_c,
-            'hv_status': hv_status,
-            'mitglied_link': name
-        }
+        'mitgliedschaften': suchresultate,
+        'meine_sektionen': meine_sektionen if len(meine_sektionen) > 0 else False
     }
     
     return frappe.render_template('templates/includes/mvd_suchresultate.html', data)
