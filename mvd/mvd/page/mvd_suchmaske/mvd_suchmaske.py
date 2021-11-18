@@ -70,8 +70,18 @@ def suche(suchparameter):
     mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMV Mitgliedschaft` {filters}""".format(filters=filters), as_dict=True)
     
     if len(mitgliedschaften) > 0:
-        resultate_html = get_resultate_html(mitgliedschaften)
-        return resultate_html
+        if not suchparameter["sektions_uebergreifend"]:
+            resultate_html = get_resultate_html(mitgliedschaften)
+            return resultate_html
+        else:
+            if len(mitgliedschaften) > 1:
+                return 'too many'
+            else:
+                mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaften[0].name).as_dict()
+                data = {
+                    'mitgliedschaft': mitgliedschaft,
+                }
+                return frappe.render_template('templates/includes/mvd_freizuegigkeitsabfrage.html', data)
     else:
         return False
 

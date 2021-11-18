@@ -91,8 +91,31 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
 
 frappe.mvd_such_client = {
     suche: function(page) {
-        if (cur_page.page.search_fields.sektion_id.get_value()||cur_page.page.search_fields.sektions_uebergreifend.get_value() == 1) {
-            frappe.show_alert("Die Suche wurde gestartet, bitte warten...", 5);
+        if (cur_page.page.search_fields.sektion_id.get_value()) {
+            // normale suche
+            frappe.mvd_such_client.start_suche(page)
+        } else {
+            if (cur_page.page.search_fields.sektions_uebergreifend.get_value() == 1) {
+                // Freizügigkeitsabfrage
+                if (cur_page.page.search_fields.mitglied_nr.get_value()) {
+                    // auf basis mitglieder_nr
+                    frappe.mvd_such_client.start_suche(page)
+                } else {
+                    if (cur_page.page.search_fields.nachname.get_value()&&cur_page.page.search_fields.strasse.get_value()&&(cur_page.page.search_fields.plz.get_value()||cur_page.page.search_fields.ort.get_value())) {
+                        // kombination aus name & strasse & (plz und/oder ort)
+                        frappe.mvd_such_client.start_suche(page)
+                    } else {
+                        // fehlende suchkriterien
+                        frappe.msgprint("Freizügigkeitsabfragen können nur mit folgenden Suchkriterien getätigt werden:<br>- Angabe Mitgliedernummer<br>und/oder<br>- Kombination aus Nachname, Strasse und PLZ und/oder Ort", "Fehlende Suchkriterien");
+                    }
+                }
+            } else {
+                frappe.msgprint("Bitte mindestens eine Sektion angeben");
+            }
+        }
+    },
+    start_suche: function(page) {
+        frappe.show_alert("Die Suche wurde gestartet, bitte warten...", 5);
             var search_data = {};
             for (const [ key, value ] of Object.entries(cur_page.page.search_fields)) {
                 if (value.get_value()) {
@@ -111,17 +134,19 @@ frappe.mvd_such_client = {
                 callback: function(r)
                 {
                     if (r.message) {
-                        cur_page.page.search_fields.suchresultate.set_value(r.message);
-                        frappe.show_alert("Die Suchresultate werden angezeigt.", 5);
+                        if (r.message != 'too many') {
+                            cur_page.page.search_fields.suchresultate.set_value(r.message);
+                            frappe.show_alert({message:"Die Suchresultate werden angezeigt.", indicator:'green'}, 5);
+                        } else {
+                            cur_page.page.search_fields.suchresultate.set_value("<center><p>Zu viele Suchresultate gefunden.<br>Die Freizügigkeitsabfrage ist auf ein Ergebnis limitiert.</p></center>");
+                            frappe.show_alert({message:"Zu viele Suchresultate gefunden.", indicator:'red'}, 5);
+                        }
                     } else {
                         cur_page.page.search_fields.suchresultate.set_value("<center><p>Keine Suchresultate vorhanden.</p></center>");
-                        frappe.show_alert("Keine Suchresultate vorhanden.", 5);
+                        frappe.show_alert({message:"Keine Suchresultate vorhanden.", indicator:'orange'}, 5);
                     }
                 }
             });
-        } else {
-            frappe.msgprint("Bitte mindestens eine Sektion angeben");
-        }
     },
     create_sektion_id_field: function(page) {
         var sektion_id = frappe.ui.form.make_control({
