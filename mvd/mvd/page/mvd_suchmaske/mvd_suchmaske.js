@@ -6,18 +6,31 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
         single_column: true
     });
     
-    me.$user_search_button = me.page.set_secondary_action('Suche zurücksetzen', () => {
-        location.reload();
-    });
-    me.$user_search_button = me.page.set_primary_action('Suche starten', () => {
+    me.$user_search_button = me.page.add_action_item('Suche starten<span class="text-muted pull-right">Ctrl+S</span>', () => {
         frappe.mvd_such_client.suche(page);
     });
+    me.$listenansicht_button = me.page.add_action_item('Listenansicht zeigen<span class="text-muted pull-right">Ctrl+L</span>', () => {
+        frappe.mvd_such_client.goto_list(page);
+    });
+    me.$reset_button = me.page.add_action_item('Suche zurücksetzen<span class="text-muted pull-right">Ctrl+R</span>', () => {
+        location.reload();
+    });
+    //set_primary_action
     
     // trigger für ctrl + s
     frappe.ui.keys.on('ctrl+s', function(e) {
         var route = frappe.get_route();
         if(route[0]==='mvd-suchmaske') {
             me.$user_search_button.click();
+            e.preventDefault();
+            return false;
+        }
+    });
+    // trigger für ctrl + l
+    frappe.ui.keys.on('ctrl+l', function(e) {
+        var route = frappe.get_route();
+        if(route[0]==='mvd-suchmaske') {
+            me.$listenansicht_button.click();
             e.preventDefault();
             return false;
         }
@@ -116,37 +129,63 @@ frappe.mvd_such_client = {
     },
     start_suche: function(page) {
         frappe.show_alert("Die Suche wurde gestartet, bitte warten...", 5);
-            var search_data = {};
-            for (const [ key, value ] of Object.entries(cur_page.page.search_fields)) {
-                if (value.get_value()) {
-                    search_data[key] = value.get_value();
+        var search_data = {};
+        for (const [ key, value ] of Object.entries(cur_page.page.search_fields)) {
+            if (value.get_value()) {
+                search_data[key] = value.get_value();
+            } else {
+                search_data[key] = false;
+            }
+        }
+        frappe.call({
+            method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.suche",
+            args:{
+                    'suchparameter': search_data
+            },
+            freeze: true,
+            freeze_message: 'Suche nach Mitgliedschaften...',
+            callback: function(r)
+            {
+                if (r.message) {
+                    if (r.message != 'too many') {
+                        cur_page.page.search_fields.suchresultate.set_value(r.message);
+                        frappe.show_alert({message:"Die Suchresultate werden angezeigt.", indicator:'green'}, 5);
+                    } else {
+                        cur_page.page.search_fields.suchresultate.set_value("<center><p>Zu viele Suchresultate gefunden.<br>Die Freizügigkeitsabfrage ist auf ein Ergebnis limitiert.<br>Bitte geben sie mehr Suchkriterien ein</p></center>");
+                        frappe.show_alert({message:"Zu viele Suchresultate gefunden.", indicator:'red'}, 5);
+                    }
                 } else {
-                    search_data[key] = false;
+                    cur_page.page.search_fields.suchresultate.set_value("<center><p>Keine Suchresultate vorhanden.</p></center>");
+                    frappe.show_alert({message:"Keine Suchresultate vorhanden.", indicator:'orange'}, 5);
                 }
             }
-            frappe.call({
-                method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.suche",
-                args:{
-                        'suchparameter': search_data
-                },
-                freeze: true,
-                freeze_message: 'Suche nach Mitgliedschaften...',
-                callback: function(r)
-                {
-                    if (r.message) {
-                        if (r.message != 'too many') {
-                            cur_page.page.search_fields.suchresultate.set_value(r.message);
-                            frappe.show_alert({message:"Die Suchresultate werden angezeigt.", indicator:'green'}, 5);
-                        } else {
-                            cur_page.page.search_fields.suchresultate.set_value("<center><p>Zu viele Suchresultate gefunden.<br>Die Freizügigkeitsabfrage ist auf ein Ergebnis limitiert.</p></center>");
-                            frappe.show_alert({message:"Zu viele Suchresultate gefunden.", indicator:'red'}, 5);
-                        }
-                    } else {
-                        cur_page.page.search_fields.suchresultate.set_value("<center><p>Keine Suchresultate vorhanden.</p></center>");
-                        frappe.show_alert({message:"Keine Suchresultate vorhanden.", indicator:'orange'}, 5);
-                    }
+        });
+    },
+    goto_list: function(page) {
+        var search_data = {};
+        for (const [ key, value ] of Object.entries(cur_page.page.search_fields)) {
+            if (value.get_value()) {
+                search_data[key] = value.get_value();
+            } else {
+                search_data[key] = false;
+            }
+        }
+        frappe.call({
+            method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.suche",
+            args:{
+                    'suchparameter': search_data,
+                    'goto_list': true
+            },
+            freeze: true,
+            freeze_message: 'Suche nach Mitgliedschaften...',
+            callback: function(r)
+            {
+                if (r.message) {
+                    frappe.route_options = {"mitglied_nr": ["in", r.message]}
+                    frappe.set_route("List", "MV Mitgliedschaft");
                 }
-            });
+            }
+        });
     },
     create_sektion_id_field: function(page) {
         var sektion_id = frappe.ui.form.make_control({

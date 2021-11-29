@@ -26,19 +26,16 @@
             <tr>
                 <th style="padding-left: 0px !important;">&nbsp;</th>
                 <th>Mitglied</th>
-                <th>Sektion</th>
                 <th>Firma</th>
                 <th>Nachname</th>
                 <th>Vorname</th>
                 <th>Strasse</th>
                 <th>Nr.</th>
-                <th>Zusatz</th>
                 <th>PLZ</th>
                 <th>Wohnort</th>
                 <th>Tel. P</th>
                 <th>Tel. M</th>
                 <th>Tel. G</th>
-                <th>Status</th>
                 <th>Mitgliedtyp</th>
             </tr>
         </thead>
@@ -53,21 +50,41 @@
                             {{ mitgliedschaft.mitglied_nr }}
                         {% endif %}
                     </td>
-                    <td>{{ mitgliedschaft.sektion_id }}</td>
                     <td>{{ mitgliedschaft.firma }}</td>
                     <td>{{ mitgliedschaft.nachname_1 }}</td>
                     <td>{{ mitgliedschaft.vorname_1 }}</td>
                     <td>{{ mitgliedschaft.strasse }}</td>
-                    <td>{% if mitgliedschaft.postfach %}{{ mitgliedschaft.postfach_nummer }}{% else %}{{ mitgliedschaft.nummer }}{% endif %}</td>
-                    <td>{{ mitgliedschaft.nummer_zu }}</td>
+                    <td>{% if mitgliedschaft.postfach %}{{ mitgliedschaft.postfach_nummer }}{% else %}{{ mitgliedschaft.nummer }}{{ mitgliedschaft.nummer_zu }}{% endif %}</td>
                     <td>{{ mitgliedschaft.plz }}</td>
                     <td>{{ mitgliedschaft.ort }}</td>
                     <td>{{ mitgliedschaft.tel_p_1 }}</td>
                     <td>{{ mitgliedschaft.tel_m_1 }}</td>
                     <td>{{ mitgliedschaft.tel_g_1 }}</td>
-                    <td>{{ mitgliedschaft.status_c }}</td>
                     <td>{{ mitgliedschaft.mitgliedtyp_c }}</td>
                 </tr>
+                {% if mitgliedschaft.hat_solidarmitglied %}
+                    <tr>
+                        <td style="padding-left: 0px !important; background: {{ mitgliedschaft.ampelfarbe }};">&nbsp;</td>
+                        <td>
+                            {% if not meine_sektionen or mitgliedschaft.sektion_id in meine_sektionen %}
+                                <a href="/desk#Form/MV Mitgliedschaft/{{ mitgliedschaft.name }}">{{ mitgliedschaft.mitglied_nr }}</a>
+                            {% else %}
+                                {{ mitgliedschaft.mitglied_nr }}
+                            {% endif %}
+                        </td>
+                        <td>{{ mitgliedschaft.firma }}</td>
+                        <td>{{ mitgliedschaft.nachname_2 }}</td>
+                        <td>{{ mitgliedschaft.vorname_2 }}</td>
+                        <td>{{ mitgliedschaft.strasse }}</td>
+                        <td>{% if mitgliedschaft.postfach %}{{ mitgliedschaft.postfach_nummer }}{% else %}{{ mitgliedschaft.nummer }}{{ mitgliedschaft.nummer_zu }}{% endif %}</td>
+                        <td>{{ mitgliedschaft.plz }}</td>
+                        <td>{{ mitgliedschaft.ort }}</td>
+                        <td>{{ mitgliedschaft.tel_p_2 or '' }}</td>
+                        <td>{{ mitgliedschaft.tel_m_2 or '' }}</td>
+                        <td>{{ mitgliedschaft.tel_g_2 or '' }}</td>
+                        <td>{{ mitgliedschaft.mitgliedtyp_c }}</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
         </tbody>
     </table>

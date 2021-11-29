@@ -25,11 +25,11 @@
         <thead>
             <tr>
                 <th>Mitgliedernummer</th>
+                <th>Sektion</th>
                 <th>Name (Mitglied)</th>
                 <th>Name (Solidaritglied)</th>
                 <th>Strasse</th>
                 <th>Nr.</th>
-                <th>Zusatz</th>
                 <th>PLZ</th>
                 <th>Wohnort</th>
                 <th>Eintritt</th>
@@ -40,11 +40,11 @@
         <tbody>
             <tr>
                 <td>{{ mitgliedschaft.mitglied_nr }}</td>
+                <td>{{ mitgliedschaft.sektion_id }}</td>
                 <td>{{ mitgliedschaft.vorname_1 }} {{ mitgliedschaft.nachname_1 }}</td>
                 <td>{{ mitgliedschaft.vorname_2 or '' }} {{ mitgliedschaft.nachname_2 or '' }}</td>
                 <td>{{ mitgliedschaft.strasse }}</td>
-                <td>{% if mitgliedschaft.postfach %}{{ mitgliedschaft.postfach_nummer }}{% else %}{{ mitgliedschaft.nummer }}{% endif %}</td>
-                <td>{{ mitgliedschaft.nummer_zu }}</td>
+                <td>{% if mitgliedschaft.postfach %}{{ mitgliedschaft.postfach_nummer }}{% else %}{{ mitgliedschaft.nummer }}{{ mitgliedschaft.nummer_zu }}{% endif %}</td>
                 <td>{{ mitgliedschaft.plz }}</td>
                 <td>{{ mitgliedschaft.ort }}</td>
                 <td>{% if mitgliedschaft.eintritt %}{{ frappe.utils.get_datetime(mitgliedschaft.eintritt).strftime('%d.%m.%Y') }}{% else %}-{% endif %}</td>
