@@ -1073,3 +1073,80 @@ def get_uebersicht_html(name):
     }
     
     return frappe.render_template('templates/includes/mitgliedschaft_overview.html', data)
+    
+@frappe.whitelist()
+def get_anredekonvention(mitgliedschaft):
+    mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
+    if mitgliedschaft.hat_solidarmitglied:
+        # mit Solidarmitglied
+        if mitgliedschaft.anrede_c not in ('Herr', 'Frau') and mitgliedschaft.anrede_2 not in ('Herr', 'Frau'):
+            # enthält neutrale Anrede
+            if mitgliedschaft.nachname_1 == mitgliedschaft.nachname_2 and mitgliedschaft.vorname_1 == mitgliedschaft.vorname_2:
+                # gleiche Namen Fallback
+                return 'Guten Tag'
+            else:
+                return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+        else:
+            if mitgliedschaft.anrede_c == mitgliedschaft.anrede_2:
+                # selbes Geschlecht
+                if mitgliedschaft.nachname_1 == mitgliedschaft.nachname_2:
+                    # gleiche Nachnamen
+                    if mitgliedschaft.anrede_c == 'Herr':
+                        return 'Sehr geehrter Herr {vorname_1} {nachname_1}, sehr geehrter Herr {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                    elif mitgliedschaft.anrede_c == 'Frau':
+                        return 'Sehr geehrte Frau {vorname_1} {nachname_1}, sehr geehrte Frau {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                    else:
+                        # Fallback
+                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                else:
+                    # unterschiedliche Nachnamen
+                    if mitgliedschaft.anrede_c == 'Herr':
+                        return 'Sehr geehrter Herr {nachname_1}, sehr geehrter Herr {nachname_2}'.format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
+                    elif mitgliedschaft.anrede_c == 'Frau':
+                        return 'Sehr geehrte Frau {nachname_1}, sehr geehrte Frau {nachname_2}'.format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
+                    else:
+                        # Fallback
+                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+            else:
+                # unterschiedliches Geschlecht
+                if mitgliedschaft.nachname_1 == mitgliedschaft.nachname_2:
+                    # gleiche Nachnamen
+                    if mitgliedschaft.anrede_c == 'Herr':
+                        return 'Sehr geehrte Herr und Frau {nachname_1}'.format(nachname_1=mitgliedschaft.nachname_1)
+                    elif mitgliedschaft.anrede_c == 'Frau':
+                        return 'Sehr geehrte Frau und Herr {nachname_1}'.format(nachname_1=mitgliedschaft.nachname_1)
+                    else:
+                        # Fallback
+                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                else:
+                    # unterschiedliche Nachnamen
+                    if mitgliedschaft.anrede_c == 'Herr':
+                        return 'Sehr geehrter Herr {nachname_1}, sehr geehrte Frau {nachname_2}'.format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
+                    elif mitgliedschaft.anrede_c == 'Frau':
+                        return 'Sehr geehrte Frau {nachname_1}, sehr geehrter Herr {nachname_2}'.format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
+                    else:
+                        # Fallback
+                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+        
+    else:
+        # ohne Solidarmitglied
+        if mitgliedschaft.anrede_c == 'Herr':
+            return 'Sehr geehrter Herr {nachname}'.format(nachname=mitgliedschaft.nachname_1)
+        elif mitgliedschaft.anrede_c == 'Frau':
+            return 'Sehr geehrte Frau {nachname}'.format(nachname=mitgliedschaft.nachname_1)
+        else:
+            return 'Guten Tag {vorname} {nachname}'.format(vorname=mitgliedschaft.vorname_1, nachname=mitgliedschaft.nachname_1)
+
+
+# API
+def mvm_neue_mitglieder_nummer(sektion_code):
+    return "Methode in Arbeit"
+
+def mvm_mitglieder(**mitgliedschaft):
+    return "Methode in Arbeit"
+
+def mvm_kuendigung(**mitgliedschaft):
+    return "Methode in Arbeit"
+
+def mvm_sektionswechsel(sektion_code):
+    return "Methode in Arbeit"
