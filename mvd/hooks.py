@@ -33,11 +33,11 @@ doctype_js = {
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
-# ~ jenv = {
-    # ~ "methods": [
-        # ~ "get_anredekonvention:mvd.mvd.doctype.mv_mitgliedschaft.get_anredekonvention"
-    # ~ ]
-# ~ }
+jenv = {
+    "methods": [
+        "get_anredekonvention:mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.get_anredekonvention"
+    ]
+}
 # Home Pages
 # ----------
 

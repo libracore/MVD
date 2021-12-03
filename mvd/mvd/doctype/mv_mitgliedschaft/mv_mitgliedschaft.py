@@ -1074,7 +1074,6 @@ def get_uebersicht_html(name):
     
     return frappe.render_template('templates/includes/mitgliedschaft_overview.html', data)
     
-@frappe.whitelist()
 def get_anredekonvention(mitgliedschaft):
     mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
     if mitgliedschaft.hat_solidarmitglied:
