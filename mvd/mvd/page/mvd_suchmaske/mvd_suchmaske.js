@@ -58,9 +58,6 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.mitgliedtyp_c = frappe.mvd_such_client.create_mitgliedtyp_c_field(page)
     me.search_fields.mitgliedtyp_c.refresh();
     
-    me.search_fields.mitglied_c = frappe.mvd_such_client.create_mitglied_c_field(page)
-    me.search_fields.mitglied_c.refresh();
-    
     me.search_fields.vorname = frappe.mvd_such_client.create_vorname_field(page)
     me.search_fields.vorname.refresh();
     
@@ -241,7 +238,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Select",
                 fieldname: "status_c",
-                options: 'Mitglied\nKündigung\nMutation\nWegzug\nAusschluss\nReaktiviert\nNeueintritt\nZuzug\nGestorben',
+                options: 'Anmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nRegulär\nGestorben\nKündigung\nWegzug\nAusschluss\nInaktiv\nInteressent:In',
                 placeholder: "Status"
             },
             only_input: true,
@@ -260,19 +257,6 @@ frappe.mvd_such_client = {
             only_input: true,
         });
         return mitgliedtyp_c
-    },
-    create_mitglied_c_field: function(page) {
-        var mitglied_c = frappe.ui.form.make_control({
-            parent: page.main.find(".mitglied_c"),
-            df: {
-                fieldtype: "Select",
-                fieldname: "mitglied_c",
-                options: 'Online-Anmeldung\nAngemeldet\nMitglied\nOnline-Beitritt\nInaktiv\nInteressiert',
-                placeholder: "Mitgliedart"
-            },
-            only_input: true,
-        });
-        return mitglied_c
     },
     create_vorname_field: function(page) {
         var vorname = frappe.ui.form.make_control({

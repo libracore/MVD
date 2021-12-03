@@ -1137,15 +1137,232 @@ def get_anredekonvention(mitgliedschaft):
             return 'Guten Tag {vorname} {nachname}'.format(vorname=mitgliedschaft.vorname_1, nachname=mitgliedschaft.nachname_1)
 
 
-# API
-def mvm_neue_mitglieder_nummer(sektion_code):
+# API (eingehend von Service-Platform)
+# -----------------------------------------------
+
+# Neuanlage / Update Mitgliedschaft
+def mvm_mitglieder(**kwargs):
+    if 'mitgliedId' in kwargs:
+        if kwargs["mitgliedId"] > 0:
+            return mvm_update(kwargs)
+        else:
+            return mvm_neuanlage(kwargs)
+    else:
+        return raise_xxx(400, 'Bad Request', 'mitgliedId missing')
+
+# Status Returns
+def raise_xxx(code, title, message):
+    return ['{code} {title}'.format(code=code, title=title), {
+        "error": {
+            "code": code,
+            "message": "{message}".format(message=message)
+        }
+    }]
+    
+def raise_200(answer='Success'):
+    return ['200 Success', answer]
+
+# API Funktionshelfer
+# -----------------------------------------------
+def mvm_update(kwargs):
+    missing_keys = check_main_keys(kwargs)
+    if not missing_keys:
+        try:
+            mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", kwargs["mitgliedId"])
+            # tbd
+            return raise_200()
+        except:
+            return raise_xxx(404, 'Not Found', 'mitgliedId not found')
+    else:
+        return missing_keys
+
+def mvm_neuanlage(kwargs):
+    missing_keys = check_main_keys(kwargs)
+    if not missing_keys:
+        try:
+            sektion_id = get_sektion_id(kwargs['sektionCode'])
+            if not sektion_id:
+                return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['sektionCode']))
+                
+            status_c = get_status_c(kwargs['status'])
+            if not status_c:
+                return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['status']))
+                
+            mitgliedtyp_c = get_mitgliedtyp_c(kwargs['typ'])
+            if not mitgliedtyp_c:
+                return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['typ']))
+            
+            new_mitgliedschaft = frappe.get_doc({
+                'doctype': 'MV Mitgliedschaft',
+                'mitglied_nr': kwargs['mitgliedNummer'],
+                'sektion_id': sektion_id,
+                'status_c': status_c,
+                'mitglied_id': kwargs['mitgliedId'],
+                'mitgliedtyp_c': mitgliedtyp_c,
+                'inkl_hv': get_inkl_hv(kwargs["jahrBezahltHaftpflicht"]),
+                'm_und_w': kwargs['anzahlZeitungen'],
+                'm_und_w_pdf': kwargs['zeitungAlsPdf'],
+                'wichtig': kwargs['bemerkungen'],
+                'eintritt': kwargs['eintrittsdatum'],
+                'zuzug': kwargs['zuzugsdatum'],
+                'wegzug': kwargs['wegzugsdatum'],
+                'austritt': kwargs['austrittsdatum'],
+                #'zuzug_von': kwargs['???'], --> woher erhalte ich diese Info?
+                #'wegzug_zu': kwargs['mitgliedNummer'], --> benötige ich bei neumitglieder nicht
+                'kuendigung': kwargs['kuendigungPer']
+            })
+            
+            new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
+            if not new_mitgliedschaft:
+                return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen')
+            
+            new_mitgliedschaft.insert()
+            return raise_200()
+            
+        except Exception as err:
+            return raise_xxx(500, 'Internal Server Error', err)
+            
+    else:
+        return missing_keys
+
+def check_main_keys(kwargs):
+    mandatory_keys = [
+        'mitgliedNummer',
+        'mitgliedId',
+        'sektionCode',
+        'typ',
+        'status',
+        'regionCode',
+        'istTemporaeresMitglied',
+        'fuerBewirtschaftungGesperrt',
+        'erfassungsdatum',
+        'eintrittsdatum',
+        'austrittsdatum',
+        'zuzugsdatum',
+        'wegzugsdatum',
+        'kuendigungPer',
+        'jahrBezahltMitgliedschaft',
+        'jahrBezahltHaftpflicht',
+        'naechstesJahrGeschuldet',
+        'bemerkungen',
+        'anzahlZeitungen',
+        'zeitungAlsPdf',
+        'adressen'
+    ]
+    for key in mandatory_keys:
+        if key not in kwargs:
+            return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=key))
+    return False
+
+def get_sektion_id(sektion_c):
+    sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` WHERE `sektion_c` = '{sektion_c}'""".format(sektion_c=sektion_c), as_dict=True)
+    if len(sektionen) > 0:
+        return sektionen[0].name
+    else:
+        return False
+
+def get_status_c(status_c):
+    mapper = {
+        'Anmeldung': 'Anmeldung',
+        'OnlineAnmeldung': 'Online-Anmeldung',
+        'OnlineBeitritt': 'Online-Beitritt',
+        'Zuzug': 'Zuzug',
+        'Regulaer': 'Regulär',
+        'Gestorben': 'Gestorben',
+        'Kuendigung': 'Kündigung',
+        'Wegzug': 'Wegzug',
+        'Ausschluss': 'Ausschluss',
+        'Inaktiv': 'Inaktiv',
+        'InteressentIn': 'Interessent:In'
+    }
+    if status_c in mapper:
+        return mapper[status_c]
+    else:
+        return False
+
+def get_mitgliedtyp_c(mitgliedtyp_c):
+    mapper = {
+        'Privat': 'Privat',
+        'Kollektiv': 'Kollektiv',
+        'Geschaeft': 'Geschäft'
+    }
+    if mitgliedtyp_c in mapper:
+        return mapper[mitgliedtyp_c]
+    else:
+        return False
+def get_inkl_hv(inkl_hv):
+    curr_year = int(getdate().strftime("%Y"))
+    if inkl_hv == curr_year:
+        return 1
+    else:
+        return 0
+
+def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
+    mitglied = False
+    objekt = False
+    rechnung = False
+    filiale = False
+    mitbewohner = False
+    zeitung = False
+    
+    for adresse in kwargs["adressen"]:
+        if adresse['typ'] == 'Filiale':
+            filiale = adresse
+        elif adresse['typ'] == 'Mitbewohner':
+            mitbewohner = adresse
+        elif adresse['typ'] == 'Zeitung':
+            zeitung = adresse
+        elif adresse['typ'] == 'Mitglied':
+            mitglied = adresse
+        elif adresse['typ'] == 'Objekt':
+            objekt = adresse
+        elif adresse['typ'] == 'Rechnung':
+            rechnung = adresse
+        else:
+            # unbekannter adresstyp
+            return False
+    
+    if not mitglied and not objekt:
+        # eines von beiden muss zwingend vorhanden sein
+        return False
+    
+    if objekt:
+        if not mitglied:
+            # erfassung mitglied-daten auf basis objektdaten
+            # tbd...
+            return False
+        else:
+            # erfassung objektadresse
+            # tbd...
+            return False
+    if mitglied:
+        # erfassung mitglied-daten
+        # tbd...
+        return False
+    if rechnung:
+        # erfassung rechnungsadresse
+        # tbd...
+        return False
+    if mitbewohner:
+        # erfassung solidarmitglied
+        # tbd...
+        return False
+    '''
+        filiale & zeitung müssen noch geklärt werden
+    '''
+    return new_mitgliedschaft
+
+# API (ausgehend zu Service-Platform)
+# -----------------------------------------------
+
+# Bezug neuer mitgliedId 
+def mvm_neue_mitglieder_nummer(mitgliedschaft):
     return "Methode in Arbeit"
 
-def mvm_mitglieder(**mitgliedschaft):
+# Sektionswechsel
+def mvm_sektionswechsel(mitgliedschaft):
     return "Methode in Arbeit"
 
-def mvm_kuendigung(**mitgliedschaft):
-    return "Methode in Arbeit"
-
-def mvm_sektionswechsel(sektion_code):
+# Kündigungsmutation
+def mvm_kuendigung(mitgliedschaft):
     return "Methode in Arbeit"

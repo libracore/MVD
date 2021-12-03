@@ -11,13 +11,12 @@
   "section_allgemein",
   "mitglied_nr",
   "sektion_id",
-  "mitglied_c",
+  "m_und_w",
   "cb_0",
   "mitglied_id",
   "status_c",
   "mitgliedtyp_c",
   "inkl_hv",
-  "m_und_w",
   "m_und_w_pdf",
   "section_wichtige_infos",
   "wichtig",
@@ -134,12 +133,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "mitglied_c",
-   "fieldtype": "Select",
-   "label": "Mitgliedart",
-   "options": "Online-Anmeldung\nAngemeldet\nMitglied\nOnline-Beitritt\nInaktiv\nInteressiert"
-  },
-  {
    "fieldname": "cb_0",
    "fieldtype": "Column Break"
   },
@@ -147,13 +140,13 @@
    "fieldname": "status_c",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Mitglied\nK\u00fcndigung\nMutation\nWegzug\nAusschluss\nReaktiviert\nNeueintritt\nZuzug\nGestorben"
+   "options": "Anmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nRegul\u00e4r\nGestorben\nK\u00fcndigung\nWegzug\nAusschluss\nInaktiv\nInteressent:In"
   },
   {
    "fieldname": "mitgliedtyp_c",
    "fieldtype": "Select",
    "label": "Mitgliedtyp",
-   "options": "Gesch\u00e4ftlich\nPrivat\nKollektiv"
+   "options": "Gesch\u00e4ft\nPrivat\nKollektiv"
   },
   {
    "collapsible": 1,
@@ -683,7 +676,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-11-18 15:36:08.983534",
+ "modified": "2021-12-03 13:36:40.475258",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

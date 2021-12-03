@@ -25,8 +25,6 @@ def suche(suchparameter, goto_list=False):
         filters_list.append("""`status_c` = '{status_c}'""".format(status_c=suchparameter["status_c"]))
     if suchparameter["mitgliedtyp_c"]:
         filters_list.append("""`mitgliedtyp_c` = '{mitgliedtyp_c}'""".format(mitgliedtyp_c=suchparameter["mitgliedtyp_c"]))
-    if suchparameter["mitglied_c"]:
-        filters_list.append("""`mitglied_c` = '{mitglied_c}'""".format(mitglied_c=suchparameter["mitglied_c"]))
     
     # Kontaktdaten
     if suchparameter["vorname"]:
