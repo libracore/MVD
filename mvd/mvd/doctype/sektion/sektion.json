@@ -21,7 +21,9 @@
   "cb_2",
   "fz_mitte",
   "cb_3",
-  "fz_rechts"
+  "fz_rechts",
+  "section_mitgliederausweis",
+  "ausweis_rueckseite"
  ],
  "fields": [
   {
@@ -122,9 +124,21 @@
   {
    "fieldname": "cb_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_mitgliederausweis",
+   "fieldtype": "Section Break",
+   "label": "Mitgliederausweis"
+  },
+  {
+   "fieldname": "ausweis_rueckseite",
+   "fieldtype": "Text Editor",
+   "label": "Ausweis R\u00fcckseite",
+   "reqd": 1
   }
  ],
- "modified": "2021-12-06 15:55:26.394912",
+ "modified": "2021-12-06 21:05:10.579614",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

@@ -12,6 +12,7 @@
   "ansprechperson",
   "tel_ma",
   "email_ma",
+  "mit_ausweis",
   "section_inhalt",
   "ort",
   "datum",
@@ -121,9 +122,16 @@
    "fieldname": "inhalt_2",
    "fieldtype": "Text Editor",
    "label": "Inhalt 2. Seite"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.check_ansprechperson",
+   "fieldname": "mit_ausweis",
+   "fieldtype": "Check",
+   "label": "inkl. Mitgliederausweis"
   }
  ],
- "modified": "2021-12-06 15:07:09.691595",
+ "modified": "2021-12-06 20:14:04.077955",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Korrespondenz",
