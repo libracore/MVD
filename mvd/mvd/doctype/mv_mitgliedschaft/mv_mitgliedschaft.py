@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils.data import add_days, getdate
+from mvd.mvd.utils.qrr_reference import get_qrr_reference
 
 class MVMitgliedschaft(Document):
     def validate(self):
@@ -1136,6 +1137,42 @@ def get_anredekonvention(mitgliedschaft):
         else:
             return 'Guten Tag {vorname} {nachname}'.format(vorname=mitgliedschaft.vorname_1, nachname=mitgliedschaft.nachname_1)
 
+@frappe.whitelist()
+def create_mitgliedschaftsrechnung(mitgliedschaft):
+    mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
+    sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+    if not mitgliedschaft.rg_kunde:
+        customer = mitgliedschaft.kunde_mitglied
+        contact = mitgliedschaft.kontakt_mitglied
+        if not mitgliedschaft.rg_adresse:
+            address = mitgliedschaft.adresse_mitglied
+        else:
+            address = mitgliedschaft.rg_adresse
+    else:
+        customer = mitgliedschaft.kunde_mitglied
+        address = mitgliedschaft.adresse_mitglied
+        contact = mitgliedschaft.kontakt_mitglied
+    
+    sinv = frappe.get_doc({
+        "doctype": "Sales Invoice",
+        "ist_mitgliedschaftsrechnung": 1,
+        "mitgliedschaft": mitgliedschaft.name,
+        "company": sektion.company,
+        "customer": customer,
+        "customer_address": address,
+        "contact_person": contact,
+        "items": [
+            {
+                "item_code": "1",
+                "qty": 1
+            }
+        ]
+    })
+    sinv.insert()
+    #sinv.esr_reference = get_qrr_reference()
+    
+    return sinv.name
+
 
 # API (eingehend von Service-Platform)
 # -----------------------------------------------
@@ -1366,3 +1403,6 @@ def mvm_sektionswechsel(mitgliedschaft):
 # Kündigungsmutation
 def mvm_kuendigung(mitgliedschaft):
     return "Methode in Arbeit"
+
+# /API
+# -----------------------------------------------

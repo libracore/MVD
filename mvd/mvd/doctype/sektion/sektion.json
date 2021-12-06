@@ -9,6 +9,7 @@
   "section_sektionsstammdaten",
   "title",
   "sektion_c",
+  "company",
   "cb_1",
   "sektion_id",
   "section_sektionseinstellungen",
@@ -72,9 +73,16 @@
    "fieldname": "default_ort",
    "fieldtype": "Data",
    "label": "Default Ort (Korrespndenz)"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Unternehmen",
+   "options": "Company",
+   "reqd": 1
   }
  ],
- "modified": "2021-10-25 15:22:44.219658",
+ "modified": "2021-12-06 10:48:23.505316",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

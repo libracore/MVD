@@ -15,7 +15,7 @@ def get_data():
             },
             {
                 'label': _('Externe Korrespondenz'),
-                'items': ['MV Korrespondenz']
+                'items': ['MV Korrespondenz', 'Sales Invoice']
             }
         ]
     }

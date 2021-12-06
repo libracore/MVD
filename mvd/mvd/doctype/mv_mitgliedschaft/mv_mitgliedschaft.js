@@ -14,7 +14,7 @@ frappe.ui.form.on('MV Mitgliedschaft', {
                     sektionswechsel(frm);
             }, __("Mutation"));
             frm.add_custom_button(__("Mitgliedschafts-Rechnung"),  function() {
-                    frappe.msgprint("tbd...");
+                    erstelle_rechnung(frm);
             }, __("Erstelle"));
             
             get_adressdaten(frm);
@@ -23,6 +23,8 @@ frappe.ui.form.on('MV Mitgliedschaft', {
                     frappe.msgprint("tbd...");
             });
         }
+        
+        remove_sinv_plus(frm);
 	}
 });
 
@@ -51,4 +53,19 @@ function sektionswechsel(frm) {
     )
 }
 
+function erstelle_rechnung(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.create_mitgliedschaftsrechnung",
+        args:{
+                'mitgliedschaft': cur_frm.doc.name
+        },
+        callback: function(r)
+        {
+            console.log(r.message);
+        }
+    });
+}
 
+function remove_sinv_plus(frm) {
+    $(":button[data-doctype='Sales Invoice']").remove();
+}
