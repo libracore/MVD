@@ -12,6 +12,7 @@
   "company",
   "cb_1",
   "sektion_id",
+  "mitgliedschafts_artikel",
   "section_sektionseinstellungen",
   "karenzfrist",
   "default_kopf_fusszeile",
@@ -80,9 +81,16 @@
    "label": "Unternehmen",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "mitgliedschafts_artikel",
+   "fieldtype": "Link",
+   "label": "Mitgliedschafts Artikel",
+   "options": "Item",
+   "reqd": 1
   }
  ],
- "modified": "2021-12-06 10:48:23.505316",
+ "modified": "2021-12-06 11:55:11.548226",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

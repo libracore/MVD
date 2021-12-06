@@ -1163,7 +1163,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft):
         "contact_person": contact,
         "items": [
             {
-                "item_code": "1",
+                "item_code": sektion.mitgliedschafts_artikel,
                 "qty": 1
             }
         ]
