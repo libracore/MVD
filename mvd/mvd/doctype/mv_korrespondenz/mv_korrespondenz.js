@@ -13,7 +13,6 @@ frappe.ui.form.on('MV Korrespondenz', {
                 var sektion_settings = response.message;
 
                 if (sektion_settings) {
-                    cur_frm.set_value('kopf_fusszeile', sektion_settings.default_kopf_fusszeile);
                     cur_frm.set_value('ort', sektion_settings.default_ort);
                 }
             }

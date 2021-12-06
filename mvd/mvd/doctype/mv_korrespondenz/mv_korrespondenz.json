@@ -7,9 +7,6 @@
   "section_allgemein",
   "mv_mitgliedschaft",
   "sektion_id",
-  "druck_kopf_fusszeile",
-  "kopf_fusszeile",
-  "seitenzahlen",
   "section_ansprechperson",
   "check_ansprechperson",
   "ansprechperson",
@@ -21,34 +18,14 @@
   "brieftitel",
   "check_anrede",
   "anrede",
-  "inhalt"
+  "inhalt",
+  "inhalt_2"
  ],
  "fields": [
   {
    "fieldname": "section_allgemein",
    "fieldtype": "Section Break",
    "label": "Allgemein"
-  },
-  {
-   "default": "1",
-   "fieldname": "druck_kopf_fusszeile",
-   "fieldtype": "Check",
-   "label": "Drucken von Kopf- / Fusszeile"
-  },
-  {
-   "depends_on": "eval:doc.druck_kopf_fusszeile",
-   "fetch_from": "sektion_id.default_kopf_fusszeile",
-   "fetch_if_empty": 1,
-   "fieldname": "kopf_fusszeile",
-   "fieldtype": "Link",
-   "label": "Kopf- / Fusszeile",
-   "options": "Letter Head"
-  },
-  {
-   "default": "1",
-   "fieldname": "seitenzahlen",
-   "fieldtype": "Check",
-   "label": "Seitenzahlen"
   },
   {
    "fieldname": "section_ansprechperson",
@@ -114,7 +91,8 @@
   {
    "fieldname": "inhalt",
    "fieldtype": "Text Editor",
-   "label": "Inhalt"
+   "label": "Inhalt 1. Seite",
+   "reqd": 1
   },
   {
    "fieldname": "mv_mitgliedschaft",
@@ -138,9 +116,14 @@
    "fieldname": "check_ansprechperson",
    "fieldtype": "Check",
    "label": "Ansprechperson ausblenden"
+  },
+  {
+   "fieldname": "inhalt_2",
+   "fieldtype": "Text Editor",
+   "label": "Inhalt 2. Seite"
   }
  ],
- "modified": "2021-10-25 13:19:45.074957",
+ "modified": "2021-12-06 15:07:09.691595",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Korrespondenz",
@@ -161,5 +144,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "brieftitel",
  "track_changes": 1
 }

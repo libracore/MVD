@@ -15,8 +15,13 @@
   "mitgliedschafts_artikel",
   "section_sektionseinstellungen",
   "karenzfrist",
-  "default_kopf_fusszeile",
-  "default_ort"
+  "default_ort",
+  "section_fusszeile",
+  "fz_links",
+  "cb_2",
+  "fz_mitte",
+  "cb_3",
+  "fz_rechts"
  ],
  "fields": [
   {
@@ -65,12 +70,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "default_kopf_fusszeile",
-   "fieldtype": "Link",
-   "label": "Default Kopf- / Fusszeile",
-   "options": "Letter Head"
-  },
-  {
    "fieldname": "default_ort",
    "fieldtype": "Data",
    "label": "Default Ort (Korrespndenz)"
@@ -88,9 +87,44 @@
    "label": "Mitgliedschafts Artikel",
    "options": "Item",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_fusszeile",
+   "fieldtype": "Section Break",
+   "label": "Fusszeile"
+  },
+  {
+   "default": "Mieterinnen- und Mieterverband<br>\n[Sektionenname]",
+   "fieldname": "fz_links",
+   "fieldtype": "Code",
+   "label": "Links",
+   "reqd": 1
+  },
+  {
+   "default": "[Strasse]<br>\n[Postfach]<br>\n[PLZ Ort]",
+   "fieldname": "fz_mitte",
+   "fieldtype": "Code",
+   "label": "Mitte",
+   "reqd": 1
+  },
+  {
+   "default": "T [Telefonnummer]<br>\n[E-Mailadresse]<br>\nwww.mieterverband.ch",
+   "fieldname": "fz_rechts",
+   "fieldtype": "Code",
+   "label": "Rechts",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2021-12-06 11:55:11.548226",
+ "modified": "2021-12-06 15:55:26.394912",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
