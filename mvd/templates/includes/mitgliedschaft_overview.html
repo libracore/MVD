@@ -22,7 +22,7 @@
             <p>
                 <b>Wichtig:</b><br>
                 {% if allgemein.wichtig %}
-                    {{ allgemein.wichtig }}
+                    {{ allgemein.wichtig|replace("\n", "<br>") }}
                 {% endif %}
             </p>
         </div>
@@ -62,7 +62,7 @@
             <p>
                 <b>Wichtig:</b><br>
                 {% if allgemein.wichtig %}
-                    {{ allgemein.wichtig }}
+                    {{ allgemein.wichtig|replace("\n", "<br>") }}
                 {% endif %}
             </p>
         </div>
