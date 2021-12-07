@@ -1157,7 +1157,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft):
     sinv = frappe.get_doc({
         "doctype": "Sales Invoice",
         "ist_mitgliedschaftsrechnung": 1,
-        "mitgliedschaft": mitgliedschaft.name,
+        "mv_mitgliedschaft": mitgliedschaft.name,
         "company": sektion.company,
         "customer": customer,
         "customer_address": address,
@@ -1167,7 +1167,8 @@ def create_mitgliedschaftsrechnung(mitgliedschaft):
                 "item_code": sektion.mitgliedschafts_artikel,
                 "qty": 1
             }
-        ]
+        ],
+        "inkl_hv": mitgliedschaft.inkl_hv
     })
     sinv.insert()
     #sinv.esr_reference = get_qrr_reference()

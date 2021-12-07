@@ -61,7 +61,7 @@ function erstelle_rechnung(frm) {
         },
         callback: function(r)
         {
-            console.log(r.message);
+            cur_frm.reload_doc();
         }
     });
 }
