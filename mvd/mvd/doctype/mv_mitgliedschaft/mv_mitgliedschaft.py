@@ -1068,7 +1068,7 @@ def get_uebersicht_html(name):
             'wegzug': wegzug,
             'zuzug_von': zuzug_von,
             'wegzug_zu': wegzug_zu,
-            'mitgliedart': mitgliedschaft.mitglied_c,
+            'mitgliedtyp_c': mitgliedschaft.mitgliedtyp_c,
             'hv_status': hv_status,
             'wichtig': mitgliedschaft.wichtig
         }
