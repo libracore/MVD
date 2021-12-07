@@ -10,36 +10,37 @@ from mvd.mvd.utils.qrr_reference import get_qrr_reference
 
 class MVMitgliedschaft(Document):
     def validate(self):
-        # Mitglied
-        self.kunde_mitglied = self.validate_kunde_mitglied()
-        self.kontakt_mitglied = self.validate_kontakt_mitglied(primary=True)
-        self.adresse_mitglied, self.objekt_adresse = self.validate_adresse_mitglied()
-        join_mitglied_contact_and_address(self.kontakt_mitglied, self.adresse_mitglied)
-        
-        # Solidarmitglied
-        if self.hat_solidarmitglied:
-            self.kontakt_solidarmitglied = self.validate_kontakt_mitglied(primary=False)
-            if self.objekt_adresse:
-                join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.objekt_adresse)
+        if not self.validierung_notwendig:
+            # Mitglied
+            self.kunde_mitglied = self.validate_kunde_mitglied()
+            self.kontakt_mitglied = self.validate_kontakt_mitglied(primary=True)
+            self.adresse_mitglied, self.objekt_adresse = self.validate_adresse_mitglied()
+            join_mitglied_contact_and_address(self.kontakt_mitglied, self.adresse_mitglied)
+            
+            # Solidarmitglied
+            if self.hat_solidarmitglied:
+                self.kontakt_solidarmitglied = self.validate_kontakt_mitglied(primary=False)
+                if self.objekt_adresse:
+                    join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.objekt_adresse)
+                else:
+                    join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.adresse_mitglied)
             else:
-                join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.adresse_mitglied)
-        else:
-            if self.kontakt_solidarmitglied:
-                self.kontakt_solidarmitglied = self.remove_solidarmitglied()
+                if self.kontakt_solidarmitglied:
+                    self.kontakt_solidarmitglied = self.remove_solidarmitglied()
 
-        # Rechnungsempfaenger
-        if self.abweichende_rechnungsadresse:
-            if self.unabhaengiger_debitor:
-                self.rg_kunde = self.validate_rg_kunde()
-                self.rg_kontakt = self.validate_rg_kontakt()
+            # Rechnungsempfaenger
+            if self.abweichende_rechnungsadresse:
+                if self.unabhaengiger_debitor:
+                    self.rg_kunde = self.validate_rg_kunde()
+                    self.rg_kontakt = self.validate_rg_kontakt()
+                else:
+                    self.rg_kunde = ''
+                    self.rg_kontakt = ''
+                self.rg_adresse = self.validate_rg_adresse()
             else:
                 self.rg_kunde = ''
                 self.rg_kontakt = ''
-            self.rg_adresse = self.validate_rg_adresse()
-        else:
-            self.rg_kunde = ''
-            self.rg_kontakt = ''
-            self.rg_adresse = ''
+                self.rg_adresse = ''
         
     def validate_rg_kunde(self):
         if self.rg_kunde:
@@ -92,7 +93,7 @@ class MVMitgliedschaft(Document):
     def validate_adresse_mitglied(self):
         if self.adresse_mitglied:
             adresse_mitglied = update_adresse_mitglied(self)
-            if self.postfach:
+            if self.postfach or self.abweichende_objektadresse:
                 if self.objekt_adresse:
                     objekt_adresse = update_objekt_adresse(self)
                     return adresse_mitglied, objekt_adresse
@@ -105,7 +106,7 @@ class MVMitgliedschaft(Document):
                 return adresse_mitglied, ''
         else:
             address = create_adresse_mitglied(self)
-            if self.postfach:
+            if self.postfach or self.abweichende_objektadresse:
                 if self.objekt_adresse:
                     objekt_adresse = update_objekt_adresse(self)
                     return address, objekt_adresse
@@ -1183,9 +1184,9 @@ def create_mitgliedschaftsrechnung(mitgliedschaft):
 def mvm_mitglieder(**kwargs):
     if 'mitgliedId' in kwargs:
         if kwargs["mitgliedId"] > 0:
-            return mvm_update(kwargs)
+            return check_update_vs_neuanlage(kwargs)
         else:
-            return mvm_neuanlage(kwargs)
+            return raise_xxx(400, 'Bad Request', 'mitgliedId == 0')
     else:
         return raise_xxx(400, 'Bad Request', 'mitgliedId missing')
 
@@ -1203,15 +1204,17 @@ def raise_200(answer='Success'):
 
 # API Funktionshelfer
 # -----------------------------------------------
+def check_update_vs_neuanlage(kwargs):
+    try:
+        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", kwargs["mitgliedId"])
+        return mvm_update(kwargs)
+    except:
+        return mvm_neuanlage(kwargs)
+
 def mvm_update(kwargs):
     missing_keys = check_main_keys(kwargs)
     if not missing_keys:
-        try:
-            mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", kwargs["mitgliedId"])
-            # tbd
-            return raise_200()
-        except:
-            return raise_xxx(404, 'Not Found', 'mitgliedId not found')
+        print("updates noch nicht umgesetzt")
     else:
         return missing_keys
 
@@ -1242,20 +1245,23 @@ def mvm_neuanlage(kwargs):
                 'm_und_w': kwargs['anzahlZeitungen'],
                 'm_und_w_pdf': kwargs['zeitungAlsPdf'],
                 'wichtig': kwargs['bemerkungen'],
-                'eintritt': kwargs['eintrittsdatum'],
-                'zuzug': kwargs['zuzugsdatum'],
-                'wegzug': kwargs['wegzugsdatum'],
-                'austritt': kwargs['austrittsdatum'],
+                'eintritt': kwargs['eintrittsdatum'].split("T")[0],
+                'zuzug': kwargs['zuzugsdatum'].split("T")[0],
+                'wegzug': kwargs['wegzugsdatum'].split("T")[0],
+                'austritt': kwargs['austrittsdatum'].split("T")[0],
                 #'zuzug_von': kwargs['???'], --> woher erhalte ich diese Info?
                 #'wegzug_zu': kwargs['mitgliedNummer'], --> benötige ich bei neumitglieder nicht
-                'kuendigung': kwargs['kuendigungPer']
+                'kuendigung': kwargs['kuendigungPer'].split("T")[0],
+                'validierung_notwendig': 1
             })
+            new_mitgliedschaft.insert()
             
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
             if not new_mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen')
+            new_mitgliedschaft.validierung_notwendig = 0
+            new_mitgliedschaft.save()
             
-            new_mitgliedschaft.insert()
             return raise_200()
             
         except Exception as err:
@@ -1331,7 +1337,7 @@ def get_mitgliedtyp_c(mitgliedtyp_c):
         return False
 def get_inkl_hv(inkl_hv):
     curr_year = int(getdate().strftime("%Y"))
-    if inkl_hv == curr_year:
+    if inkl_hv >= curr_year:
         return 1
     else:
         return 0
@@ -1366,18 +1372,55 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
         return False
     
     if objekt:
-        if not mitglied:
-            # erfassung mitglied-daten auf basis objektdaten
-            # tbd...
-            return False
-        else:
-            # erfassung objektadresse
-            # tbd...
-            return False
+        # erfassung objektadresse
+        new_mitgliedschaft.objekt_zusatz_adresse = objekt["adresszusatz"]
+        new_mitgliedschaft.objekt_strasse = objekt["strasse"]
+        new_mitgliedschaft.objekt_nummer = objekt["hausnummer"]
+        new_mitgliedschaft.objekt_plz = objekt["postleitzahl"]
+        new_mitgliedschaft.objekt_ort = mitglied["ort"]
+        if objekt["fuerKorrespondenzGesperrt"]:
+            new_mitgliedschaft.adressen_gesperrt = 1
+    
     if mitglied:
         # erfassung mitglied-daten
-        # tbd...
-        return False
+        for kontaktdaten in mitglied["kontakte"]:
+            if kontaktdaten["istHauptkontakt"]:
+                # hauptmiglied
+                if kontaktdaten["firma"]:
+                    new_mitgliedschaft.kundentyp = 'Unternehmen'
+                    new_mitgliedschaft.firma = kontaktdaten["firma"]
+                    new_mitgliedschaft.zusatz_firma = kontaktdaten["firmaZusatz"]
+                else:
+                    new_mitgliedschaftkundentyp = 'Einzelperson'
+                if kontaktdaten["anrede"] != 'Unbekannt':
+                    new_mitgliedschaft.anrede_c = kontaktdaten["anrede"]
+                new_mitgliedschaft.nachname_1 = kontaktdaten["nachname"]
+                new_mitgliedschaft.vorname_1 = kontaktdaten["vorname"]
+                new_mitgliedschaft.tel_p_1 = kontaktdaten["telefon"]
+                new_mitgliedschaft.tel_m_1 = kontaktdaten["mobile"]
+                new_mitgliedschaft.tel_g_1 = kontaktdaten["telefonGeschaeft"]
+                new_mitgliedschaft.e_mail_1 = kontaktdaten["email"]
+                new_mitgliedschaft.zusatz_adresse = mitglied["adresszusatz"]
+                new_mitgliedschaft.strasse = mitglied["strasse"]
+                new_mitgliedschaft.nummer = mitglied["hausnummer"]
+                new_mitgliedschaft.postfach = mitglied["postfach"]
+                new_mitgliedschaft.postfach_nummer = mitglied["postfachNummer"]
+                new_mitgliedschaft.plz = mitglied["postleitzahl"]
+                new_mitgliedschaft.ort = mitglied["ort"]
+                if mitglied["fuerKorrespondenzGesperrt"]:
+                    new_mitgliedschaft.adressen_gesperrt = 1
+            else:
+                # solidarmitglied
+                new_mitgliedschaft.hat_solidarmitglied = 1
+                if kontaktdaten["anrede"] != 'Unbekannt':
+                    new_mitgliedschaft.anrede_2 = kontaktdaten["anrede"]
+                new_mitgliedschaft.nachname_2 = kontaktdaten["nachname"]
+                new_mitgliedschaft.vorname_2 = kontaktdaten["vorname"]
+                new_mitgliedschaft.tel_p_2 = kontaktdaten["telefon"]
+                new_mitgliedschaft.tel_m_2 = kontaktdaten["mobile"]
+                new_mitgliedschaft.tel_g_2 = kontaktdaten["telefonGeschaeft"]
+                new_mitgliedschaft.e_mail_2 = kontaktdaten["email"]
+    
     if rechnung:
         # erfassung rechnungsadresse
         # tbd...

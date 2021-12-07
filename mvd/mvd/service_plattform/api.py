@@ -4,7 +4,8 @@
 
 from __future__ import unicode_literals
 import frappe
-from mvd.mvd.doctype.mv_mitgliedschaft import mvm_neue_mitglieder_nummer, mvm_mitglieder, mvm_kuendigung, mvm_sektionswechsel
+from mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft import mvm_mitglieder, mvm_neue_mitglieder_nummer, mvm_kuendigung, mvm_sektionswechsel
+import json
 
 # for test
 # ---------------------------------------------------
@@ -25,12 +26,14 @@ def neue_mitglieder_nummer(sektion_code):
 # create/update existing MV Mitgliedschaft
 @frappe.whitelist()
 def mitglieder(**mitgliedschaft):
+    if isinstance(mitgliedschaft, str):
+      mitgliedschaft = json.loads(mitgliedschaft)
     return mvm_mitglieder(**mitgliedschaft)
 
-@frappe.whitelist()
-def kuendigung(**mitgliedschaft):
-    return mvm_kuendigung(**mitgliedschaft)
+# @frappe.whitelist()
+# def kuendigung(**mitgliedschaft):
+    # return mvm_kuendigung(**mitgliedschaft)
 
-@frappe.whitelist()
-def sektionswechsel(sektion_code):
-    return mvm_sektionswechsel(sektion_code)
+# @frappe.whitelist()
+# def sektionswechsel(sektion_code):
+    # return mvm_sektionswechsel(sektion_code)
