@@ -25,7 +25,8 @@ def neue_mitglieder_nummer(sektion_code):
 
 # create/update existing MV Mitgliedschaft
 @frappe.whitelist()
-def mitglieder(**mitgliedschaft):
+def mitglieder(mitgliedschaft):
+    frappe.log_error("{0}".format(mitgliedschaft), 'eingang api call')
     if isinstance(mitgliedschaft, str):
       mitgliedschaft = json.loads(mitgliedschaft)
     return mvm_mitglieder(**mitgliedschaft)
