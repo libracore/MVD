@@ -300,37 +300,37 @@
    "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "nachname_2",
    "fieldtype": "Data",
-   "label": "Nachname"
+   "label": "Nachname (Solidar)"
   },
   {
    "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "vorname_2",
    "fieldtype": "Data",
-   "label": "Vorname"
+   "label": "Vorname (Solidar)"
   },
   {
    "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "tel_p_2",
    "fieldtype": "Data",
-   "label": "Tel. Privat"
+   "label": "Tel. Privat (Solidar)"
   },
   {
    "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "tel_m_2",
    "fieldtype": "Data",
-   "label": "Tel. Mobil"
+   "label": "Tel. Mobil (Solidar)"
   },
   {
    "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "tel_g_2",
    "fieldtype": "Data",
-   "label": "Tel. Gesch\u00e4ftlich"
+   "label": "Tel. Gesch\u00e4ftlich (Solidar)"
   },
   {
    "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "e_mail_2",
    "fieldtype": "Data",
-   "label": "Email"
+   "label": "Email (Solidar)"
   },
   {
    "collapsible": 1,
@@ -435,106 +435,106 @@
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
    "fieldname": "rg_strasse",
    "fieldtype": "Data",
-   "label": "Strasse"
+   "label": "Strasse (Rechnung)"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
    "fieldname": "rg_nummer",
    "fieldtype": "Int",
-   "label": "Hausnummer"
+   "label": "Hausnummer (Rechnung)"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
    "fieldname": "rg_nummer_zu",
    "fieldtype": "Data",
-   "label": "Nr. Zusatz"
+   "label": "Nr. Zusatz (Rechnung)"
   },
   {
    "default": "0",
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
    "fieldname": "rg_postfach",
    "fieldtype": "Check",
-   "label": "Postfach"
+   "label": "Postfach (Rechnung)"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.rg_postfach=='1'",
    "fieldname": "rg_postfach_nummer",
    "fieldtype": "Int",
-   "label": "Postfach Nummer"
+   "label": "Postfach Nummer (Rechnung)"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
    "fieldname": "rg_plz",
    "fieldtype": "Int",
-   "label": "PLZ"
+   "label": "PLZ (Rechnung)"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
    "fieldname": "rg_ort",
    "fieldtype": "Data",
-   "label": "Ort"
+   "label": "Ort (Rechnung)"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
    "fieldname": "rg_kundentyp",
    "fieldtype": "Select",
-   "label": "Kundentyp",
+   "label": "Kundentyp (Rechnung)",
    "options": "Einzelperson\nUnternehmen"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'&&doc.rg_kundentyp=='Unternehmen'",
    "fieldname": "rg_firma",
    "fieldtype": "Data",
-   "label": "Firma"
+   "label": "Firma (Rechnung)"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'&&doc.rg_kundentyp=='Unternehmen'",
    "fieldname": "rg_zusatz_firma",
    "fieldtype": "Data",
-   "label": "Zusatz Firma"
+   "label": "Zusatz Firma (Rechnung)"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
    "fieldname": "rg_anrede",
    "fieldtype": "Link",
-   "label": "Anrede",
+   "label": "Anrede (Rechnung)",
    "options": "Salutation"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
    "fieldname": "rg_nachname",
    "fieldtype": "Data",
-   "label": "Nachname"
+   "label": "Nachname (Rechnung)"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
    "fieldname": "rg_vorname",
    "fieldtype": "Data",
-   "label": "Vorname"
+   "label": "Vorname (Rechnung)"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
    "fieldname": "rg_tel_p",
    "fieldtype": "Data",
-   "label": "Tel. Privat"
+   "label": "Tel. Privat (Rechnung)"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
    "fieldname": "rg_tel_m",
    "fieldtype": "Data",
-   "label": "Tel. Mobil"
+   "label": "Tel. Mobil (Rechnung)"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
    "fieldname": "rg_tel_g",
    "fieldtype": "Data",
-   "label": "Tel. Gesch\u00e4ftlich"
+   "label": "Tel. Gesch\u00e4ftlich (Rechnung)"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
    "fieldname": "rg_e_mail",
    "fieldtype": "Data",
-   "label": "Email"
+   "label": "Email (Rechnung)"
   },
   {
    "fieldname": "title_1",
@@ -595,14 +595,14 @@
    "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "anrede_2",
    "fieldtype": "Link",
-   "label": "Anrede",
+   "label": "Anrede (Solidar)",
    "options": "Salutation"
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
    "fieldname": "rg_zusatz_adresse",
    "fieldtype": "Data",
-   "label": "Zusatz Adresse"
+   "label": "Zusatz Adresse (Rechnung)"
   },
   {
    "depends_on": "eval:doc.postfach=='1'",
@@ -676,7 +676,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-12-03 13:36:40.475258",
+ "modified": "2021-12-07 07:25:09.497114",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
