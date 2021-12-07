@@ -1069,7 +1069,8 @@ def get_uebersicht_html(name):
             'zuzug_von': zuzug_von,
             'wegzug_zu': wegzug_zu,
             'mitgliedart': mitgliedschaft.mitglied_c,
-            'hv_status': hv_status
+            'hv_status': hv_status,
+            'wichtig': mitgliedschaft.wichtig
         }
     }
     

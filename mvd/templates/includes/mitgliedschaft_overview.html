@@ -19,6 +19,12 @@
                     <br>{{ allgemein.hv_status }}
                 {% endif %}
             </p>
+            <p>
+                <b>Wichtig:</b><br>
+                {% if allgemein.wichtig %}
+                    {{ allgemein.wichtig }}
+                {% endif %}
+            </p>
         </div>
     </div>
     <div class="col-sm-5">
@@ -51,6 +57,12 @@
                 <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
                 {% if allgemein.hv_status %}
                     <br>{{ allgemein.hv_status }}
+                {% endif %}
+            </p>
+            <p>
+                <b>Wichtig:</b><br>
+                {% if allgemein.wichtig %}
+                    {{ allgemein.wichtig }}
                 {% endif %}
             </p>
         </div>
