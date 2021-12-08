@@ -1385,8 +1385,10 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
     filiale = False
     mitbewohner = False
     zeitung = False
-    
+    frappe.log_error("{0}".format(kwargs["Adressen"]), 'adressen für loop')
     for adresse in kwargs["Adressen"]:
+        frappe.log_error("{0}".format(kwargs["Adressen"]), 'adresse innerhalb loop')
+        frappe.log_error("{0}".format(adresse['Typ']), 'adress-typ')
         if adresse['Typ'] == 'Filiale':
             filiale = adresse
         elif adresse['Typ'] == 'Mitbewohner':
