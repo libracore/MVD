@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.data import add_days, getdate
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
+import json
 
 class MVMitgliedschaft(Document):
     def validate(self):
