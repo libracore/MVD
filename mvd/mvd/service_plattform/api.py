@@ -26,13 +26,7 @@ def neue_mitglieder_nummer(sektion_code):
 # create/update existing MV Mitgliedschaft
 @frappe.whitelist()
 def mitglieder(**mitgliedschaft):
-    frappe.log_error("{0}".format(mitgliedschaft), 'eingang api call')
-    frappe.log_error("{0}".format(mitgliedschaft["Adressen"]), 'eingang: [Adressen]')
-    for x in mitgliedschaft["Adressen"]:
-        frappe.log_error("{0}".format(x), 'eingang: for x in mitgliedschaft[Adressen]')
-    # ~ if isinstance(**mitgliedschaft, str):
-      # ~ x_mitgliedschaft = json.loads(mitgliedschaft)
-      # ~ frappe.log_error("{0}".format(x_mitgliedschaft), 'JSON: mitgliedschaft')
+    frappe.log_error("{0}".format(mitgliedschaft), 'Eingang API: mitglieder')
     return mvm_mitglieder(mitgliedschaft)
 
 # @frappe.whitelist()

@@ -1185,7 +1185,6 @@ def create_mitgliedschaftsrechnung(mitgliedschaft):
 def mvm_mitglieder(kwargs):
     if 'MitgliedId' in kwargs:
         if kwargs["MitgliedId"] > 0:
-            frappe.log_error("{0}".format(kwargs), 'weiterleitung an check_update_vs_neuanlage')
             return check_update_vs_neuanlage(kwargs)
         else:
             return raise_xxx(400, 'Bad Request', 'mitgliedId == 0')
@@ -1210,25 +1209,22 @@ def raise_200(answer='Success'):
 # -----------------------------------------------
 def check_update_vs_neuanlage(kwargs):
     if not frappe.db.exists("MV Mitgliedschaft", kwargs["MitgliedId"]):
-        frappe.log_error("{0}".format(kwargs), 'Keine mitgliedschaft gefunden, weiterleitung an mvm_neuanlage')
         return mvm_neuanlage(kwargs)
     else:
         mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", kwargs["MitgliedId"])
-        frappe.log_error("{0}".format(kwargs), 'mitgliedschaft gefunden, weiterleitung an mvm_update')
         return mvm_update(kwargs)
         
 
 def mvm_update(kwargs):
     missing_keys = check_main_keys(kwargs)
     if not missing_keys:
-        print("updates noch nicht umgesetzt")
+        frappe.log_error("mvm_update", 'TBD: mvm_update')
     else:
         return missing_keys
 
 def mvm_neuanlage(kwargs):
     missing_keys = check_main_keys(kwargs)
     if not missing_keys:
-        frappe.log_error("{0}".format(kwargs), 'Keine missing_keys, versuch neuanlage')
         try:
             sektion_id = get_sektion_id(kwargs['SektionCode'])
             if not sektion_id:
@@ -1288,12 +1284,12 @@ def mvm_neuanlage(kwargs):
                 'validierung_notwendig': 1
             })
             new_mitgliedschaft.insert()
-            frappe.log_error("{0}".format(kwargs), 'new_mitgliedschaft angelegt, weiter zur adress/kontakt anlage')
+            
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
             if not new_mitgliedschaft:
-                frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage fehlerhaft')
+                
                 return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen')
-            frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage abgeschlossen')
+            
             new_mitgliedschaft.validierung_notwendig = 0
             new_mitgliedschaft.save()
             
@@ -1387,31 +1383,30 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
     filiale = False
     mitbewohner = False
     zeitung = False
-    frappe.log_error("{0}".format(kwargs["Adressen"]), 'adressen für loop')
-    # ~ for adresse in kwargs["Adressen"]:
-        # ~ frappe.log_error("{0}".format(kwargs["Adressen"]), 'adresse innerhalb loop')
-    adressen_dict = kwargs["Adressen"]
     
-    if isinstance(adressen_dict, str):
-        frappe.log_error("{0}".format(adressen_dict), 'umwandlung str in dict')
-        adressen_dict = json.loads(adressen_dict)
-    frappe.log_error("{0}".format(adressen_dict['Typ']), 'adress-typ')
-    if adressen_dict['Typ'] == 'Filiale':
-        filiale = adressen_dict
-    elif adressen_dict['Typ'] == 'Mitbewohner':
-        mitbewohner = adressen_dict
-    elif adressen_dict['Typ'] == 'Zeitung':
-        zeitung = adressen_dict
-    elif adressen_dict['Typ'] == 'Mitglied':
-        mitglied = adressen_dict
-    elif adressen_dict['Typ'] == 'Objekt':
-        objekt = adressen_dict
-    elif adressen_dict['Typ'] == 'Rechnung':
-        rechnung = adressen_dict
-    else:
-        # unbekannter adresstyp
-        frappe.log_error("{0}".format(adressen_dict), 'unbekannter adresstyp')
-        return False
+    for adresse in kwargs["Adressen"]["AdressenListe"]:
+        adressen_dict = adresse
+    
+        if isinstance(adressen_dict, str):
+            frappe.log_error("{0}".format(adressen_dict), 'umwandlung str in dict')
+            adressen_dict = json.loads(adressen_dict)
+        
+        if adressen_dict['Typ'] == 'Filiale':
+            filiale = adressen_dict
+        elif adressen_dict['Typ'] == 'Mitbewohner':
+            mitbewohner = adressen_dict
+        elif adressen_dict['Typ'] == 'Zeitung':
+            zeitung = adressen_dict
+        elif adressen_dict['Typ'] == 'Mitglied':
+            mitglied = adressen_dict
+        elif adressen_dict['Typ'] == 'Objekt':
+            objekt = adressen_dict
+        elif adressen_dict['Typ'] == 'Rechnung':
+            rechnung = adressen_dict
+        else:
+            # unbekannter adresstyp
+            frappe.log_error("{0}".format(adressen_dict), 'unbekannter adresstyp')
+            return False
     
     if not mitglied and not objekt:
         frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage: weder mitglied noch objekt')
