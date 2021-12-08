@@ -1208,13 +1208,14 @@ def raise_200(answer='Success'):
 # API Funktionshelfer
 # -----------------------------------------------
 def check_update_vs_neuanlage(kwargs):
-    try:
+    if not frappe.db.exists("MV Mitgliedschaft", kwargs["MitgliedId"]):
+        frappe.log_error("{0}".format(kwargs), 'Keine mitgliedschaft gefunden, weiterleitung an mvm_neuanlage')
+        return mvm_neuanlage(kwargs)
+    else:
         mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", kwargs["MitgliedId"])
         frappe.log_error("{0}".format(kwargs), 'mitgliedschaft gefunden, weiterleitung an mvm_update')
         return mvm_update(kwargs)
-    except:
-        frappe.log_error("{0}".format(kwargs), 'Keine mitgliedschaft gefunden, weiterleitung an mvm_neuanlage')
-        return mvm_neuanlage(kwargs)
+        
 
 def mvm_update(kwargs):
     missing_keys = check_main_keys(kwargs)
@@ -1388,8 +1389,10 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
     frappe.log_error("{0}".format(kwargs["Adressen"]), 'adressen für loop')
     for adresse in kwargs["Adressen"]:
         frappe.log_error("{0}".format(kwargs["Adressen"]), 'adresse innerhalb loop')
-        frappe.log_error("", 'umwandlung str in dict')
-        if isinstance(kwargs["Adressen"], str):
+        adressen_dict = adresse
+        
+        if isinstance(adressen_dict, str):
+            frappe.log_error("", 'umwandlung str in dict')
             adressen_dict = json.loads(adresse)
         frappe.log_error("{0}".format(adressen_dict['Typ']), 'adress-typ')
         if adressen_dict['Typ'] == 'Filiale':
