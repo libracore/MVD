@@ -1388,18 +1388,21 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
     frappe.log_error("{0}".format(kwargs["Adressen"]), 'adressen für loop')
     for adresse in kwargs["Adressen"]:
         frappe.log_error("{0}".format(kwargs["Adressen"]), 'adresse innerhalb loop')
-        frappe.log_error("{0}".format(adresse['Typ']), 'adress-typ')
-        if adresse['Typ'] == 'Filiale':
+        frappe.log_error("", 'umwandlung str in dict')
+        if isinstance(kwargs["Adressen"], str):
+            adressen_dict = json.loads(adresse)
+        frappe.log_error("{0}".format(adressen_dict['Typ']), 'adress-typ')
+        if adressen_dict['Typ'] == 'Filiale':
             filiale = adresse
-        elif adresse['Typ'] == 'Mitbewohner':
+        elif adressen_dict['Typ'] == 'Mitbewohner':
             mitbewohner = adresse
-        elif adresse['Typ'] == 'Zeitung':
+        elif adressen_dict['Typ'] == 'Zeitung':
             zeitung = adresse
-        elif adresse['Typ'] == 'Mitglied':
+        elif adressen_dict['Typ'] == 'Mitglied':
             mitglied = adresse
-        elif adresse['Typ'] == 'Objekt':
+        elif adressen_dict['Typ'] == 'Objekt':
             objekt = adresse
-        elif adresse['Typ'] == 'Rechnung':
+        elif adressen_dict['Typ'] == 'Rechnung':
             rechnung = adresse
         else:
             # unbekannter adresstyp
