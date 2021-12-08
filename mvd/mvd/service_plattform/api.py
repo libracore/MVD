@@ -29,6 +29,7 @@ def mitglieder(**mitgliedschaft):
     frappe.log_error("{0}".format(mitgliedschaft), 'eingang api call')
     if isinstance(mitgliedschaft, str):
       mitgliedschaft = json.loads(mitgliedschaft)
+      frappe.log_error("{0}".format(mitgliedschaft), 'JSON: mitgliedschaft')
     return mvm_mitglieder(**mitgliedschaft)
 
 # @frappe.whitelist()

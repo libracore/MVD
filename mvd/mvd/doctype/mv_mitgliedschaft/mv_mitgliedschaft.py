@@ -1184,6 +1184,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft):
 def mvm_mitglieder(**kwargs):
     if 'MitgliedId' in kwargs:
         if kwargs["MitgliedId"] > 0:
+            frappe.log_error("{0}".format(kwargs), 'weiterleitung an check_update_vs_neuanlage')
             return check_update_vs_neuanlage(kwargs)
         else:
             return raise_xxx(400, 'Bad Request', 'mitgliedId == 0')
@@ -1209,8 +1210,10 @@ def raise_200(answer='Success'):
 def check_update_vs_neuanlage(kwargs):
     try:
         mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", kwargs["MitgliedId"])
+        frappe.log_error("{0}".format(kwargs), 'mitgliedschaft gefunden, weiterleitung an mvm_update')
         return mvm_update(kwargs)
     except:
+        frappe.log_error("{0}".format(kwargs), 'Keine mitgliedschaft gefunden, weiterleitung an mvm_neuanlage')
         return mvm_neuanlage(kwargs)
 
 def mvm_update(kwargs):
@@ -1223,6 +1226,7 @@ def mvm_update(kwargs):
 def mvm_neuanlage(kwargs):
     missing_keys = check_main_keys(kwargs)
     if not missing_keys:
+        frappe.log_error("{0}".format(kwargs), 'Keine missing_keys, versuch neuanlage')
         try:
             sektion_id = get_sektion_id(kwargs['SektionCode'])
             if not sektion_id:
@@ -1282,10 +1286,12 @@ def mvm_neuanlage(kwargs):
                 'validierung_notwendig': 1
             })
             new_mitgliedschaft.insert()
-            
+            frappe.log_error("{0}".format(kwargs), 'new_mitgliedschaft angelegt, weiter zur adress/kontakt anlage')
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
             if not new_mitgliedschaft:
+                frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage fehlerhaft')
                 return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen')
+            frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage abgeschlossen')
             new_mitgliedschaft.validierung_notwendig = 0
             new_mitgliedschaft.save()
             
@@ -1398,6 +1404,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
             return False
     
     if not mitglied and not objekt:
+        frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage: weder mitglied noch objekt')
         # eines von beiden muss zwingend vorhanden sein
         return False
     
@@ -1451,14 +1458,14 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 new_mitgliedschaft.tel_g_2 = kontaktdaten["TelefonGeschaeft"]
                 new_mitgliedschaft.e_mail_2 = kontaktdaten["Email"]
     
-    if rechnung:
-        # erfassung rechnungsadresse
-        # tbd...
-        return False
-    if mitbewohner:
-        # erfassung solidarmitglied
-        # tbd...
-        return False
+    # ~ if rechnung:
+        # ~ # erfassung rechnungsadresse
+        # ~ # tbd...
+        # ~ return False
+    # ~ if mitbewohner:
+        # ~ # erfassung solidarmitglied
+        # ~ # tbd...
+        # ~ return False
     '''
         filiale & zeitung müssen noch geklärt werden
     '''
