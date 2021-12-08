@@ -1182,7 +1182,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft):
 # -----------------------------------------------
 
 # Neuanlage / Update Mitgliedschaft
-def mvm_mitglieder(**kwargs):
+def mvm_mitglieder(kwargs):
     if 'MitgliedId' in kwargs:
         if kwargs["MitgliedId"] > 0:
             frappe.log_error("{0}".format(kwargs), 'weiterleitung an check_update_vs_neuanlage')
