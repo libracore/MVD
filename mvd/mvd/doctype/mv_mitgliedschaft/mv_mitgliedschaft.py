@@ -1212,13 +1212,83 @@ def check_update_vs_neuanlage(kwargs):
         return mvm_neuanlage(kwargs)
     else:
         mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", kwargs["MitgliedId"])
-        return mvm_update(kwargs)
+        return mvm_update(mitgliedschaft, kwargs)
         
 
-def mvm_update(kwargs):
+def mvm_update(mitgliedschaft, kwargs):
     missing_keys = check_main_keys(kwargs)
     if not missing_keys:
-        frappe.log_error("mvm_update", 'TBD: mvm_update')
+        try:
+            sektion_id = get_sektion_id(kwargs['SektionCode'])
+            if not sektion_id:
+                return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['SektionCode']))
+                
+            status_c = get_status_c(kwargs['Status'])
+            if not status_c:
+                return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['Status']))
+                
+            mitgliedtyp_c = get_mitgliedtyp_c(kwargs['Typ'])
+            if not mitgliedtyp_c:
+                return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']))
+            
+            if kwargs['Eintrittsdatum']:
+                eintritt = kwargs['Eintrittsdatum'].split("T")[0]
+            else:
+                eintritt = ''
+            
+            if kwargs['Zuzugsdatum']:
+                zuzug = kwargs['Zuzugsdatum'].split("T")[0]
+            else:
+                zuzug = ''
+            
+            if kwargs['Wegzugsdatum']:
+                wegzug = kwargs['Wegzugsdatum'].split("T")[0]
+            else:
+                wegzug = ''
+            
+            if kwargs['Austrittsdatum']:
+                austritt = kwargs['Austrittsdatum'].split("T")[0]
+            else:
+                austritt = ''
+            
+            if kwargs['KuendigungPer']:
+                kuendigung = kwargs['KuendigungPer'].split("T")[0]
+            else:
+                kuendigung = ''
+            
+            if kwargs['ZeitungAlsPdf']:
+                m_und_w_pdf = 1
+            else:
+                m_und_w_pdf = 0
+            
+            mitgliedschaft.mitglied_nr = kwargs['MitgliedNummer']
+            mitgliedschaft.sektion_id = sektion_id
+            mitgliedschaft.status_c = status_c
+            mitgliedschaft.mitglied_id = kwargs['MitgliedId']
+            mitgliedschaft.mitgliedtyp_c = mitgliedtyp_c
+            mitgliedschaft.inkl_hv = get_inkl_hv(kwargs["JahrBezahltHaftpflicht"])
+            mitgliedschaft.m_und_w = kwargs['AnzahlZeitungen']
+            mitgliedschaft.m_und_w_pdf = m_und_w_pdf
+            mitgliedschaft.wichtig = kwargs['Bemerkungen']
+            mitgliedschaft.eintritt = eintritt
+            mitgliedschaft.zuzug = zuzug
+            mitgliedschaft.wegzug = wegzug
+            mitgliedschaft.austritt = austritt
+            mitgliedschaft.kuendigung = kuendigung
+            mitgliedschaft.validierung_notwendig = 1
+            mitgliedschaft.save()
+            
+            mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
+            if not mitgliedschaft:
+                return raise_xxx(500, 'Internal Server Error', 'Bei dem Adressen Update ist etwas schief gelaufen')
+            
+            mitgliedschaft.validierung_notwendig = 0
+            mitgliedschaft.save()
+            
+            return raise_200()
+            
+        except Exception as err:
+            return raise_xxx(500, 'Internal Server Error', err)
     else:
         return missing_keys
 
@@ -1263,6 +1333,11 @@ def mvm_neuanlage(kwargs):
             else:
                 kuendigung = ''
             
+            if kwargs['ZeitungAlsPdf']:
+                m_und_w_pdf = 1
+            else:
+                m_und_w_pdf = 0
+            
             new_mitgliedschaft = frappe.get_doc({
                 'doctype': 'MV Mitgliedschaft',
                 'mitglied_nr': kwargs['MitgliedNummer'],
@@ -1272,7 +1347,7 @@ def mvm_neuanlage(kwargs):
                 'mitgliedtyp_c': mitgliedtyp_c,
                 'inkl_hv': get_inkl_hv(kwargs["JahrBezahltHaftpflicht"]),
                 'm_und_w': kwargs['AnzahlZeitungen'],
-                'm_und_w_pdf': kwargs['ZeitungAlsPdf'],
+                'm_und_w_pdf': m_und_w_pdf,
                 'wichtig': kwargs['Bemerkungen'],
                 'eintritt': eintritt,
                 'zuzug': zuzug,
@@ -1287,7 +1362,6 @@ def mvm_neuanlage(kwargs):
             
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
             if not new_mitgliedschaft:
-                
                 return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen')
             
             new_mitgliedschaft.validierung_notwendig = 0
@@ -1413,16 +1487,6 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
         # eines von beiden muss zwingend vorhanden sein
         return False
     
-    if objekt:
-        # erfassung objektadresse
-        new_mitgliedschaft.objekt_zusatz_adresse = objekt["Adresszusatz"]
-        new_mitgliedschaft.objekt_strasse = objekt["Strasse"]
-        new_mitgliedschaft.objekt_nummer = objekt["Hausnummer"]
-        new_mitgliedschaft.objekt_plz = objekt["Postleitzahl"]
-        new_mitgliedschaft.objekt_ort = mitglied["Ort"]
-        if objekt["FuerKorrespondenzGesperrt"]:
-            new_mitgliedschaft.adressen_gesperrt = 1
-    
     if mitglied:
         # erfassung mitglied-daten
         for kontaktdaten in mitglied["Kontakte"]:
@@ -1462,18 +1526,87 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 new_mitgliedschaft.tel_m_2 = kontaktdaten["Mobile"]
                 new_mitgliedschaft.tel_g_2 = kontaktdaten["TelefonGeschaeft"]
                 new_mitgliedschaft.e_mail_2 = kontaktdaten["Email"]
+        
     
-    # ~ if rechnung:
-        # ~ # erfassung rechnungsadresse
-        # ~ # tbd...
-        # ~ return False
-    # ~ if mitbewohner:
-        # ~ # erfassung solidarmitglied
-        # ~ # tbd...
-        # ~ return False
-    '''
-        filiale & zeitung müssen noch geklärt werden
-    '''
+    if objekt:
+        if mitglied:
+            # erfassung objektadresse
+            new_mitgliedschaft.abweichende_objektadresse = 1
+            new_mitgliedschaft.objekt_zusatz_adresse = objekt["Adresszusatz"]
+            new_mitgliedschaft.objekt_strasse = objekt["Strasse"]
+            new_mitgliedschaft.objekt_nummer = objekt["Hausnummer"]
+            new_mitgliedschaft.objekt_plz = objekt["Postleitzahl"]
+            new_mitgliedschaft.objekt_ort = mitglied["Ort"]
+            if objekt["FuerKorrespondenzGesperrt"]:
+                new_mitgliedschaft.adressen_gesperrt = 1
+        else:
+            # erfassung mitglied-daten auf basis objekt-daten
+            for kontaktdaten in objekt["Kontakte"]:
+                if kontaktdaten["IstHauptkontakt"]:
+                    # hauptmiglied
+                    if kontaktdaten["Firma"]:
+                        new_mitgliedschaft.kundentyp = 'Unternehmen'
+                        new_mitgliedschaft.firma = kontaktdaten["Firma"]
+                        new_mitgliedschaft.zusatz_firma = kontaktdaten["FirmaZusatz"]
+                    else:
+                        new_mitgliedschaftkundentyp = 'Einzelperson'
+                    if kontaktdaten["Anrede"] != 'Unbekannt':
+                        new_mitgliedschaft.anrede_c = kontaktdaten["Anrede"]
+                    new_mitgliedschaft.nachname_1 = kontaktdaten["Nachname"]
+                    new_mitgliedschaft.vorname_1 = kontaktdaten["Vorname"]
+                    new_mitgliedschaft.tel_p_1 = kontaktdaten["Telefon"]
+                    new_mitgliedschaft.tel_m_1 = kontaktdaten["Mobile"]
+                    new_mitgliedschaft.tel_g_1 = kontaktdaten["TelefonGeschaeft"]
+                    new_mitgliedschaft.e_mail_1 = kontaktdaten["Email"]
+                    new_mitgliedschaft.zusatz_adresse = objekt["Adresszusatz"]
+                    new_mitgliedschaft.strasse = objekt["Strasse"]
+                    new_mitgliedschaft.nummer = objekt["Hausnummer"]
+                    new_mitgliedschaft.postfach = objekt["Postfach"]
+                    new_mitgliedschaft.postfach_nummer = objekt["PostfachNummer"]
+                    new_mitgliedschaft.plz = objekt["Postleitzahl"]
+                    new_mitgliedschaft.ort = objekt["Ort"]
+                    if objekt["FuerKorrespondenzGesperrt"]:
+                        new_mitgliedschaft.adressen_gesperrt = 1
+                else:
+                    # solidarmitglied
+                    new_mitgliedschaft.hat_solidarmitglied = 1
+                    if kontaktdaten["Anrede"] != 'Unbekannt':
+                        new_mitgliedschaft.anrede_2 = kontaktdaten["Anrede"]
+                    new_mitgliedschaft.nachname_2 = kontaktdaten["Nachname"]
+                    new_mitgliedschaft.vorname_2 = kontaktdaten["Vorname"]
+                    new_mitgliedschaft.tel_p_2 = kontaktdaten["Telefon"]
+                    new_mitgliedschaft.tel_m_2 = kontaktdaten["Mobile"]
+                    new_mitgliedschaft.tel_g_2 = kontaktdaten["TelefonGeschaeft"]
+                    new_mitgliedschaft.e_mail_2 = kontaktdaten["Email"]
+    else:
+        # reset objektadresse
+        new_mitgliedschaft.abweichende_objektadresse = 0
+        new_mitgliedschaft.objekt_zusatz_adresse = ''
+        new_mitgliedschaft.objekt_strasse = ''
+        new_mitgliedschaft.objekt_nummer = ''
+        new_mitgliedschaft.objekt_plz = ''
+        new_mitgliedschaft.objekt_ort = ''
+    
+    if rechnung:
+        # erfassung rechnungsadresse
+        # tbd...
+        frappe.log_error("{0}".format(rechnung), 'Adressen Handling Typ Rechnung noch nicht umgesetzt')
+        
+    if mitbewohner:
+        # erfassung solidarmitglied
+        # tbd...
+        frappe.log_error("{0}".format(mitbewohner), 'Adressen Handling Typ Mitbewohner noch nicht umgesetzt')
+        
+    if filiale:
+        # erfassung filiale
+        # tbd...
+        frappe.log_error("{0}".format(filiale), 'Adressen Handling Typ Filiale noch nicht umgesetzt')
+        
+    if zeitung:
+        # erfassung zeitung
+        # tbd...
+        frappe.log_error("{0}".format(zeitung), 'Adressen Handling Typ Zeitung noch nicht umgesetzt')
+    
     return new_mitgliedschaft
 
 # API (ausgehend zu Service-Platform)
