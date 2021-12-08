@@ -1388,29 +1388,30 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
     mitbewohner = False
     zeitung = False
     frappe.log_error("{0}".format(kwargs["Adressen"]), 'adressen für loop')
-    for adresse in kwargs["Adressen"]:
-        frappe.log_error("{0}".format(kwargs["Adressen"]), 'adresse innerhalb loop')
-        adressen_dict = adresse
-        
-        if isinstance(adressen_dict, str):
-            frappe.log_error("", 'umwandlung str in dict')
-            adressen_dict = json.loads(adresse)
-        frappe.log_error("{0}".format(adressen_dict['Typ']), 'adress-typ')
-        if adressen_dict['Typ'] == 'Filiale':
-            filiale = adresse
-        elif adressen_dict['Typ'] == 'Mitbewohner':
-            mitbewohner = adresse
-        elif adressen_dict['Typ'] == 'Zeitung':
-            zeitung = adresse
-        elif adressen_dict['Typ'] == 'Mitglied':
-            mitglied = adresse
-        elif adressen_dict['Typ'] == 'Objekt':
-            objekt = adresse
-        elif adressen_dict['Typ'] == 'Rechnung':
-            rechnung = adresse
-        else:
-            # unbekannter adresstyp
-            return False
+    # ~ for adresse in kwargs["Adressen"]:
+        # ~ frappe.log_error("{0}".format(kwargs["Adressen"]), 'adresse innerhalb loop')
+    adressen_dict = kwargs["Adressen"]
+    
+    if isinstance(adressen_dict, str):
+        frappe.log_error("{0}".format(adressen_dict), 'umwandlung str in dict')
+        adressen_dict = json.loads(adressen_dict)
+    frappe.log_error("{0}".format(adressen_dict['Typ']), 'adress-typ')
+    if adressen_dict['Typ'] == 'Filiale':
+        filiale = adressen_dict
+    elif adressen_dict['Typ'] == 'Mitbewohner':
+        mitbewohner = adressen_dict
+    elif adressen_dict['Typ'] == 'Zeitung':
+        zeitung = adressen_dict
+    elif adressen_dict['Typ'] == 'Mitglied':
+        mitglied = adressen_dict
+    elif adressen_dict['Typ'] == 'Objekt':
+        objekt = adressen_dict
+    elif adressen_dict['Typ'] == 'Rechnung':
+        rechnung = adressen_dict
+    else:
+        # unbekannter adresstyp
+        frappe.log_error("{0}".format(adressen_dict), 'unbekannter adresstyp')
+        return False
     
     if not mitglied and not objekt:
         frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage: weder mitglied noch objekt')
