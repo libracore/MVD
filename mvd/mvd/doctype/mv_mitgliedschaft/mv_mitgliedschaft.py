@@ -10,6 +10,15 @@ from mvd.mvd.utils.qrr_reference import get_qrr_reference
 import json
 
 class MVMitgliedschaft(Document):
+    def set_new_name(self):
+        if not self.mitglied_nr:
+            # Mitglied Nr
+            self.mitglied_nr = str(get_mitgliedid(self))
+        
+        if not self.mitglied_id:
+            # Mitglied ID
+            self.mitglied_id = str(get_mitgliedid(self))
+    
     def validate(self):
         if not self.validierung_notwendig:
             # Mitglied
@@ -42,6 +51,12 @@ class MVMitgliedschaft(Document):
                 self.rg_kunde = ''
                 self.rg_kontakt = ''
                 self.rg_adresse = ''
+            
+            # Briefanrede
+            self.briefanrede = get_anredekonvention(self=self)
+            
+            # Adressblock
+            self.adressblock = get_adressblock(self)
         
     def validate_rg_kunde(self):
         if self.rg_kunde:
@@ -134,6 +149,48 @@ class MVMitgliedschaft(Document):
         contact.save(ignore_permissions=True)
         return ''
 
+def get_mitgliedid(mitgliedschaft):
+    # zum testen, nachher via API!
+    anz_mitgliedschaften = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMV Mitgliedschaft`""", as_dict=True)[0].qty
+    anz_mitgliedschaften += 1
+    return anz_mitgliedschaften
+    
+def get_adressblock(mitgliedschaft):
+    adressblock = ''
+    if mitgliedschaft.kundentyp == 'Unternehmen':
+        adressblock += mitgliedschaft.firma or ''
+        adressblock += mitgliedschaft.zusatz_firma or ''
+        adressblock += '\n'
+    
+    if mitgliedschaft.vorname_1:
+        adressblock += mitgliedschaft.vorname_1 or ''
+        adressblock += ' '
+    adressblock += mitgliedschaft.nachname_1 or ''
+    adressblock += '\n'
+    
+    if mitgliedschaft.zusatz_adresse:
+        adressblock += mitgliedschaft.zusatz_adresse or ''
+        adressblock += '\n'
+    
+    adressblock += mitgliedschaft.strasse or ''
+    if mitgliedschaft.nummer:
+        adressblock += ' '
+        adressblock += str(mitgliedschaft.nummer) or ''
+        if mitgliedschaft.nummer_zu:
+            adressblock += str(mitgliedschaft.nummer_zu) or ''
+    adressblock += '\n'
+    
+    if mitgliedschaft.postfach:
+        adressblock += 'Postfach '
+        adressblock += str(mitgliedschaft.postfach_nummer) or ''
+        adressblock += '\n'
+    
+    adressblock += str(mitgliedschaft.plz) or ''
+    adressblock += ' '
+    adressblock += mitgliedschaft.ort or ''
+    
+    return adressblock
+    
 def update_rg_adresse(mitgliedschaft):
     address = frappe.get_doc("Address", mitgliedschaft.rg_adresse)
     if mitgliedschaft.rg_postfach:
@@ -1078,8 +1135,11 @@ def get_uebersicht_html(name):
     
     return frappe.render_template('templates/includes/mitgliedschaft_overview.html', data)
     
-def get_anredekonvention(mitgliedschaft):
-    mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
+def get_anredekonvention(mitgliedschaft=None, self=None):
+    if self:
+        mitgliedschaft = self
+    else:
+        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
     if mitgliedschaft.hat_solidarmitglied:
         # mit Solidarmitglied
         if mitgliedschaft.anrede_c not in ('Herr', 'Frau') and mitgliedschaft.anrede_2 not in ('Herr', 'Frau'):
