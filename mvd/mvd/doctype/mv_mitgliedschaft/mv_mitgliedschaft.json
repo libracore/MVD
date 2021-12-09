@@ -33,7 +33,8 @@
   "zuzug_von",
   "wegzug_zu",
   "kuendigung",
-  "section_kontaktdaten",
+  "section_personen_daten",
+  "heading_hauptmitglied",
   "kundentyp",
   "firma",
   "zusatz_firma",
@@ -44,6 +45,17 @@
   "tel_m_1",
   "tel_g_1",
   "e_mail_1",
+  "cb_3",
+  "heading_solidarmitglied",
+  "hat_solidarmitglied",
+  "anrede_2",
+  "nachname_2",
+  "vorname_2",
+  "tel_p_2",
+  "tel_m_2",
+  "tel_g_2",
+  "e_mail_2",
+  "section_korrespondenz_adresse",
   "zusatz_adresse",
   "strasse",
   "nummer",
@@ -52,18 +64,26 @@
   "postfach_nummer",
   "plz",
   "ort",
+  "section_objekt_adresse",
   "abweichende_objektadresse",
-  "abweichende_rechnungsadresse",
-  "cb_2",
-  "title_objekt_adresse",
   "objekt_zusatz_adresse",
   "objekt_strasse",
   "objekt_hausnummer",
   "objekt_nummer_zu",
   "objekt_plz",
   "objekt_ort",
-  "title_abw_rg_adresse",
+  "section_rechnungs_adresse",
+  "abweichende_rechnungsadresse",
   "unabhaengiger_debitor",
+  "rg_zusatz_adresse",
+  "rg_strasse",
+  "rg_nummer",
+  "rg_nummer_zu",
+  "rg_postfach",
+  "rg_postfach_nummer",
+  "rg_plz",
+  "rg_ort",
+  "cb_2",
   "rg_kundentyp",
   "rg_firma",
   "rg_zusatz_firma",
@@ -74,23 +94,7 @@
   "rg_tel_m",
   "rg_tel_g",
   "rg_e_mail",
-  "rg_zusatz_adresse",
-  "rg_strasse",
-  "rg_nummer",
-  "rg_nummer_zu",
-  "rg_postfach",
-  "rg_postfach_nummer",
-  "rg_plz",
-  "rg_ort",
   "section_solidarmitglied",
-  "hat_solidarmitglied",
-  "anrede_2",
-  "nachname_2",
-  "vorname_2",
-  "tel_p_2",
-  "tel_m_2",
-  "tel_g_2",
-  "e_mail_2",
   "section_links",
   "title_1",
   "kunde_mitglied",
@@ -196,12 +200,6 @@
    "fieldname": "wichtig",
    "fieldtype": "Text",
    "label": "Informationen"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "section_kontaktdaten",
-   "fieldtype": "Section Break",
-   "label": "Kontaktdaten"
   },
   {
    "depends_on": "eval:doc.kundentyp=='Unternehmen'",
@@ -384,12 +382,6 @@
   },
   {
    "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
-   "fieldname": "title_objekt_adresse",
-   "fieldtype": "Heading",
-   "label": "Objekt Adresse"
-  },
-  {
-   "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
    "fieldname": "objekt_strasse",
    "fieldtype": "Data",
    "label": "Strasse"
@@ -422,12 +414,6 @@
    "default": "0",
    "fieldname": "abweichende_rechnungsadresse",
    "fieldtype": "Check",
-   "label": "Abweichende Rechnungsadresse"
-  },
-  {
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
-   "fieldname": "title_abw_rg_adresse",
-   "fieldtype": "Heading",
    "label": "Abweichende Rechnungsadresse"
   },
   {
@@ -706,10 +692,48 @@
    "fieldname": "abweichende_objektadresse",
    "fieldtype": "Check",
    "label": "Abweichende Objektadresse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_personen_daten",
+   "fieldtype": "Section Break",
+   "label": "Personen bezogene Daten"
+  },
+  {
+   "fieldname": "heading_hauptmitglied",
+   "fieldtype": "Heading",
+   "label": "Hauptmitglied"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "heading_solidarmitglied",
+   "fieldtype": "Heading",
+   "label": "Solidarmitglied"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_korrespondenz_adresse",
+   "fieldtype": "Section Break",
+   "label": "Korrespondenz Adresse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_objekt_adresse",
+   "fieldtype": "Section Break",
+   "label": "Objekt Adresse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_rechnungs_adresse",
+   "fieldtype": "Section Break",
+   "label": "Rechnungs Adresse"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-12-07 15:08:23.208446",
+ "modified": "2021-12-09 13:44:27.374492",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
