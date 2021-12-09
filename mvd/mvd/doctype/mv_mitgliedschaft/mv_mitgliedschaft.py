@@ -1119,6 +1119,7 @@ def get_uebersicht_html(name):
         'allgemein': {
             'status': mitgliedschaft.status_c,
             'eintritt': mitgliedschaft.eintritt,
+            'austritt': mitgliedschaft.austritt,
             'ampelfarbe': ampelfarbe,
             'ueberfaellige_rechnungen': ueberfaellige_rechnungen,
             'offene_rechnungen': offene_rechnungen,
@@ -1199,6 +1200,34 @@ def get_anredekonvention(mitgliedschaft=None, self=None):
             return 'Sehr geehrte Frau {nachname}'.format(nachname=mitgliedschaft.nachname_1)
         else:
             return 'Guten Tag {vorname} {nachname}'.format(vorname=mitgliedschaft.vorname_1, nachname=mitgliedschaft.nachname_1)
+
+@frappe.whitelist()
+def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
+    try:
+        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
+        new_mitgliedschaft = frappe.copy_doc(mitgliedschaft)
+        new_mitgliedschaft.mitglied_nr = ''
+        new_mitgliedschaft.mitglied_id = ''
+        new_mitgliedschaft.zuzug_von = new_mitgliedschaft.sektion_id
+        new_mitgliedschaft.sektion_id = neue_sektion
+        new_mitgliedschaft.status_c = 'Zuzug'
+        new_mitgliedschaft.zuzug = zuzug_per
+        new_mitgliedschaft.wegzug = ''
+        new_mitgliedschaft.kunde_mitglied = ''
+        new_mitgliedschaft.kontakt_mitglied = ''
+        new_mitgliedschaft.adresse_mitglied = ''
+        new_mitgliedschaft.adress_id_mitglied = ''
+        new_mitgliedschaft.kontakt_solidarmitglied = ''
+        new_mitgliedschaft.objekt_adresse = ''
+        new_mitgliedschaft.adress_id_objekt = ''
+        new_mitgliedschaft.rg_kunde = ''
+        new_mitgliedschaft.rg_kontakt = ''
+        new_mitgliedschaft.rg_adresse = ''
+        new_mitgliedschaft.adress_id_rg = ''
+        new_mitgliedschaft.insert()
+        return 1
+    except:
+        return 0
 
 @frappe.whitelist()
 def create_mitgliedschaftsrechnung(mitgliedschaft):
