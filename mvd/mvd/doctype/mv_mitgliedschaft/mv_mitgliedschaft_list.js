@@ -82,7 +82,7 @@ function create_serienbrief(mitgliedschaften) {
 
 function get_vorlage(d) {
     frappe.prompt([
-        {'fieldname': 'vorlage', 'fieldtype': 'Link', 'label': 'Vorlage', 'reqd': 1, 'options': 'MV Korrespondenz Vorlage'}  
+        {'fieldname': 'vorlage', 'fieldtype': 'Link', 'label': 'Vorlage', 'reqd': 1, 'options': 'MV Korrespondenz Vorlage'}
     ],
     function(values){
         frappe.call({
@@ -114,6 +114,46 @@ function get_vorlage(d) {
 }
 
 function erstelle_korrespondenzen(mitgliedschaften, d) {
-    console.log(mitgliedschaften);
-    console.log(d);
+    frappe.call({
+        method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.create_korrespondenz_serienbriefe",
+        args:{
+                'mitgliedschaften': mitgliedschaften,
+                'korrespondenzdaten': d.get_values()
+        },
+        callback: function(r)
+        {
+            if (r.message.length > 0) {
+                var erstellte_korrespondenzen = r.message;
+                frappe.prompt([
+                    {'fieldname': 'pdf', 'fieldtype': 'Button', 'label': 'PDF erstellen', 'click': function() {
+                            cur_dialog.hide();
+                            console.log("PDF");
+                            console.log(erstellte_korrespondenzen);
+                            erstelle_korrespondenzen_pdf_oder_csv('pdf', erstellte_korrespondenzen);
+                        }
+                    },
+                    {'fieldname': 'cb_1', 'fieldtype': 'Column Break', 'label': ''},
+                    {'fieldname': 'csv', 'fieldtype': 'Button', 'label': 'CSV erstellen', 'click': function() {
+                            cur_dialog.hide();
+                            console.log("CSV");
+                            console.log(erstellte_korrespondenzen);
+                            erstelle_korrespondenzen_pdf_oder_csv('csv', erstellte_korrespondenzen);
+                        }
+                    }
+                ],
+                function(values){
+                    // manuell
+                },
+                'Wie wollen Sie weiterfahren?',
+                'Manuell'
+                )
+            } else {
+                frappe.msgprint("Oops, da ist etwas schiefgelaufen!");
+            }
+        }
+    });
+}
+
+function erstelle_korrespondenzen_pdf_oder_csv(output_typ, korrespondenzen) {
+    
 }
