@@ -129,15 +129,23 @@ function erstelle_korrespondenzen(mitgliedschaften, d) {
                             cur_dialog.hide();
                             console.log("PDF");
                             console.log(erstellte_korrespondenzen);
-                            erstelle_korrespondenzen_pdf_oder_csv('pdf', erstellte_korrespondenzen);
+                            erstelle_korrespondenzen_sammel_output('pdf', erstellte_korrespondenzen);
                         }
                     },
                     {'fieldname': 'cb_1', 'fieldtype': 'Column Break', 'label': ''},
+                    {'fieldname': 'xlsx', 'fieldtype': 'Button', 'label': 'XLSX erstellen', 'click': function() {
+                            cur_dialog.hide();
+                            console.log("XLSX");
+                            console.log(erstellte_korrespondenzen);
+                            erstelle_korrespondenzen_sammel_output('xlsx', erstellte_korrespondenzen);
+                        }
+                    },
+                    {'fieldname': 'cb_2', 'fieldtype': 'Column Break', 'label': ''},
                     {'fieldname': 'csv', 'fieldtype': 'Button', 'label': 'CSV erstellen', 'click': function() {
                             cur_dialog.hide();
                             console.log("CSV");
                             console.log(erstellte_korrespondenzen);
-                            erstelle_korrespondenzen_pdf_oder_csv('csv', erstellte_korrespondenzen);
+                            erstelle_korrespondenzen_sammel_output('csv', erstellte_korrespondenzen);
                         }
                     }
                 ],
@@ -154,6 +162,41 @@ function erstelle_korrespondenzen(mitgliedschaften, d) {
     });
 }
 
-function erstelle_korrespondenzen_pdf_oder_csv(output_typ, korrespondenzen) {
-    
+function erstelle_korrespondenzen_sammel_output(output_typ, korrespondenzen) {
+    if (output_typ == 'xlsx') {
+        frappe.call({
+            method: "mvd.mvd.doctype.mv_korrespondenz.mv_korrespondenz.create_sammel_xlsx",
+            args:{
+                    'korrespondenzen': korrespondenzen
+            },
+            callback: function(r)
+            {
+                
+            }
+        });
+    }
+    if (output_typ == 'pdf') {
+        frappe.call({
+            method: "mvd.mvd.doctype.mv_korrespondenz.mv_korrespondenz.create_sammel_pdf",
+            args:{
+                    'korrespondenzen': korrespondenzen
+            },
+            callback: function(r)
+            {
+                
+            }
+        });
+    }
+    if (output_typ == 'csv') {
+        frappe.call({
+            method: "mvd.mvd.doctype.mv_korrespondenz.mv_korrespondenz.create_sammel_csv",
+            args:{
+                    'korrespondenzen': korrespondenzen
+            },
+            callback: function(r)
+            {
+                
+            }
+        });
+    }
 }
