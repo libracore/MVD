@@ -120,6 +120,8 @@ function erstelle_korrespondenzen(mitgliedschaften, d) {
                 'mitgliedschaften': mitgliedschaften,
                 'korrespondenzdaten': d.get_values()
         },
+        freeze: true,
+        freeze_message: 'Erstelle Serienbriefe...',
         callback: function(r)
         {
             if (r.message.length > 0) {
@@ -169,9 +171,15 @@ function erstelle_korrespondenzen_sammel_output(output_typ, korrespondenzen) {
             args:{
                     'korrespondenzen': korrespondenzen
             },
+            freeze: true,
+            freeze_message: 'Erstelle XLSX...',
             callback: function(r)
             {
-                
+                if (r.message == 'done') {
+                    window.location = '/desk#List/File/Home/Korrespondenz';
+                } else {
+                    frappe.msgprint("Oops, da ist etwas schiefgelaufen!");
+                }
             }
         });
     }
@@ -181,9 +189,15 @@ function erstelle_korrespondenzen_sammel_output(output_typ, korrespondenzen) {
             args:{
                     'korrespondenzen': korrespondenzen
             },
+            freeze: true,
+            freeze_message: 'Erstelle PDF...',
             callback: function(r)
             {
-                
+                if (r.message == 'done') {
+                    window.location = '/desk#List/File/Home/Korrespondenz';
+                } else {
+                    frappe.msgprint("Oops, da ist etwas schiefgelaufen!");
+                }
             }
         });
     }
@@ -193,9 +207,15 @@ function erstelle_korrespondenzen_sammel_output(output_typ, korrespondenzen) {
             args:{
                     'korrespondenzen': korrespondenzen
             },
+            freeze: true,
+            freeze_message: 'Erstelle CSV...',
             callback: function(r)
             {
-                
+                if (r.message == 'done') {
+                    window.location = '/desk#List/File/Home/Korrespondenz';
+                } else {
+                    frappe.msgprint("Oops, da ist etwas schiefgelaufen!");
+                }
             }
         });
     }

@@ -82,7 +82,7 @@ def create_sammel_pdf(korrespondenzen):
     })
     _file.save()
     
-    return
+    return 'done'
 
 @frappe.whitelist()
 def create_sammel_xlsx(korrespondenzen):
@@ -105,7 +105,7 @@ def create_sammel_xlsx(korrespondenzen):
     })
     _file.save()
     
-    return
+    return 'done'
 
 @frappe.whitelist()
 def create_sammel_csv(korrespondenzen):
@@ -126,7 +126,7 @@ def create_sammel_csv(korrespondenzen):
     })
     _file.save()
     
-    return
+    return 'done'
 
 def get_korrespondenz_data(korrespondenzen):
     data = []
