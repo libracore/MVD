@@ -11,6 +11,7 @@ import openpyxl
 from openpyxl.styles import Font
 from frappe.utils.data import now
 from frappe.utils.csvutils import to_csv as make_csv
+from PyPDF2 import PdfFileWriter
 
 class MVKorrespondenz(Document):
     pass
@@ -65,6 +66,21 @@ def create_sammel_pdf(korrespondenzen):
     
     if isinstance(korrespondenzen, str):
         korrespondenzen = json.loads(korrespondenzen)
+    
+    output = PdfFileWriter()
+    for korrespondenz in korrespondenzen:
+        output = frappe.get_print("MV Korrespondenz", korrespondenz, 'MV Korrespondenz', as_pdf = True, output = output)
+    
+    pdf = frappe.utils.pdf.get_file_data_from_writer(output)
+    
+    _file = frappe.get_doc({
+        "doctype": "File",
+        "file_name": "korrespondenz_export_{datetime}.pdf".format(datetime=now().replace(" ", "_")),
+        "folder": "Home/Korrespondenz",
+        "is_private": 1,
+        "content": pdf
+    })
+    _file.save()
     
     return
 
