@@ -3,7 +3,7 @@
 
 frappe.listview_settings['MV Mitgliedschaft'] = {
     onload: function(listview) {
-        listview.page.add_menu_item(__("Erstelle Serienbrief"), function() {
+        listview.page.add_action_item(__("Erstelle Serienbrief"), function() {
                 var selected = listview.get_checked_items();
                 if (selected.length > 0) {
                     create_serienbrief(selected);
@@ -11,9 +11,30 @@ frappe.listview_settings['MV Mitgliedschaft'] = {
                     frappe.msgprint("Bitte markieren Sie zuerst die gewünschten Mitgliedschaften");
                 }
         });
+        
+        listview.page.add_menu_item(__("Erfasse Interessent:inn"), function() {
+                weiterleitung_suchmaske();
+                
+        });
+        
+        listview.page.add_menu_item(__("Erfasse Neumitglied"), function() {
+                weiterleitung_suchmaske();
+        });
     }
 };
 
+function weiterleitung_suchmaske() {
+    frappe.confirm(
+        'Die Neu-Erfassung erfolgt über die Suchmaske um Duplikate vorzubeugen.<br>Möchten Sie zur Suchmaske weitergeleitet werden?',
+        function(){
+            // on yes
+            window.location = '/desk#mvd-suchmaske';
+        },
+        function(){
+            // on no
+        }
+    )
+}
 function create_serienbrief(mitgliedschaften) {
     var d = new frappe.ui.Dialog({
         'title': __('Serienbrief'),

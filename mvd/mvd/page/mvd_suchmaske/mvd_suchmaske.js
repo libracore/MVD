@@ -96,6 +96,9 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     
     me.search_fields.suchresultate = frappe.mvd_such_client.create_resultate_div(page)
     me.search_fields.suchresultate.refresh();
+    
+    me.search_fields.neuanlage = frappe.mvd_such_client.create_neuanlage_btn(page)
+    me.search_fields.neuanlage.refresh();
 }
 
 
@@ -153,6 +156,8 @@ frappe.mvd_such_client = {
                     }
                 } else {
                     cur_page.page.search_fields.suchresultate.set_value("<center><p>Keine Suchresultate vorhanden.</p></center>");
+                    cur_page.page.search_fields.neuanlage.df.hidden = 0;
+                    cur_page.page.search_fields.neuanlage.refresh();
                     frappe.show_alert({message:"Keine Suchresultate vorhanden.", indicator:'orange'}, 5);
                 }
             }
@@ -438,6 +443,67 @@ frappe.mvd_such_client = {
             only_input: true,
         });
         return suchresultate
+    },
+    create_neuanlage_btn: function(page) {
+        var neuanlage = frappe.ui.form.make_control({
+            parent: page.main.find(".neuanlage"),
+            df: {
+                fieldtype: "Button",
+                fieldname: "neuanlage",
+                label: "Neuanlage",
+                hidden: 1,
+                click: function(){
+                    frappe.prompt([
+                        {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent:In\nRegulär'},
+                        {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value()},
+                        {'fieldname': 's1', 'fieldtype': 'Section Break'},
+                        {'fieldname': 'vorname', 'fieldtype': 'Data', 'label': 'Vorname', 'reqd': 1, 'default': cur_page.page.search_fields.vorname.get_value()},
+                        {'fieldname': 'nachname', 'fieldtype': 'Data', 'label': 'Nachname', 'reqd': 1, 'default': cur_page.page.search_fields.nachname.get_value()},
+                        {'fieldname': 'telefon', 'fieldtype': 'Data', 'label': 'Telefon', 'reqd': 0, 'default': cur_page.page.search_fields.tel.get_value()},
+                        {'fieldname': 'email', 'fieldtype': 'Data', 'label': 'E-Mail', 'reqd': 0, 'options': 'Email', 'default': cur_page.page.search_fields.email.get_value()},
+                        {'fieldname': 's2', 'fieldtype': 'Section Break'},
+                        {'fieldname': 'zusatz_adresse', 'fieldtype': 'Data', 'label': 'Zusatz Adresse', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_adresse.get_value()},
+                        {'fieldname': 'postfach', 'fieldtype': 'Check', 'label': 'Postfach', 'reqd': 0, 'default': cur_page.page.search_fields.postfach.get_value(), 'change': function() {
+                                if (cur_dialog.fields_dict.postfach.get_value() == 1) {
+                                    cur_dialog.fields_dict.strasse.df.reqd = 0;
+                                    cur_dialog.fields_dict.strasse.refresh();
+                                } else {
+                                    cur_dialog.fields_dict.strasse.df.reqd = 1;
+                                    cur_dialog.fields_dict.strasse.refresh();
+                                }
+                            }
+                        },
+                        {'fieldname': 'postfach_nummer', 'fieldtype': 'Data', 'label': 'Postfach Nummer', 'reqd': 0, 'default': cur_page.page.search_fields.postfach_nummer.get_value(), 'depends_on': 'eval:doc.postfach'},
+                        {'fieldname': 'strasse', 'fieldtype': 'Data', 'label': 'Strasse', 'reqd': 1, 'default': cur_page.page.search_fields.strasse.get_value()},
+                        {'fieldname': 'nummer', 'fieldtype': 'Data', 'label': 'Nummer', 'reqd': 0, 'default': cur_page.page.search_fields.nummer.get_value()},
+                        {'fieldname': 'nummer_zu', 'fieldtype': 'Data', 'label': 'Nr. Zusatz', 'reqd': 0, 'default': cur_page.page.search_fields.nummer_zu.get_value()},
+                        {'fieldname': 'plz', 'fieldtype': 'Data', 'label': 'PLZ', 'reqd': 1, 'default': cur_page.page.search_fields.plz.get_value()},
+                        {'fieldname': 'ort', 'fieldtype': 'Data', 'label': 'Ort', 'reqd': 1, 'default': cur_page.page.search_fields.ort.get_value()},
+                    ],
+                    function(values){
+                        frappe.call({
+                            method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.anlage_prozess",
+                            args:{
+                                    'anlage_daten': values
+                            },
+                            freeze: true,
+                            freeze_message: 'Erstelle Mitgliedschaften...',
+                            callback: function(r)
+                            {
+                                if (r.message) {
+                                    frappe.set_route("Form", "MV Mitgliedschaft", r.message);
+                                }
+                            }
+                        });
+                    },
+                    'Neuanlage',
+                    'Anlegen'
+                    )
+                }
+            },
+            only_input: true,
+        });
+        return neuanlage
     }
 }
 

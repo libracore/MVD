@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils.data import add_days, getdate
+from frappe.utils.data import add_days, getdate, now
 import six
 import json
 
@@ -161,3 +161,34 @@ def get_resultate_html(mitgliedschaften):
     }
     
     return frappe.render_template('templates/includes/mvd_suchresultate.html', data)
+
+@frappe.whitelist()
+def anlage_prozess(anlage_daten):
+    if isinstance(anlage_daten, six.string_types):
+        anlage_daten = json.loads(anlage_daten)
+    
+    # erstelle mitgliedschaft
+    mitgliedschaft = frappe.get_doc({
+        "doctype": "MV Mitgliedschaft",
+        "sektion_id": anlage_daten["sektion_id"],
+        "status_c": anlage_daten["status"],
+        "m_und_w": 1,
+        "mitgliedtyp_c": "Privat",
+        "inkl_hv": 1,
+        "eintritt": now(),
+        "kundentyp": "Einzelperson",
+        "nachname_1": anlage_daten["nachname"],
+        "vorname_1": anlage_daten["vorname"],
+        "tel_p_1": anlage_daten["telefon"] if 'telefon' in anlage_daten else '',
+        "e_mail_1": anlage_daten["email"] if 'email' in anlage_daten else '',
+        "zusatz_adresse": anlage_daten["zusatz_adresse"] if 'zusatz_adresse' in anlage_daten else '',
+        "strasse": anlage_daten["strasse"] if 'strasse' in anlage_daten else '',
+        "nummer": anlage_daten["nummer"] if 'nummer' in anlage_daten else '',
+        "nummer_zu": anlage_daten["nummer_zu"] if 'nummer_zu' in anlage_daten else '',
+        "postfach": anlage_daten["postfach"],
+        "postfach_nummer": anlage_daten["postfach_nummer"] if 'postfach_nummer' in anlage_daten else '',
+        "plz": anlage_daten["plz"],
+        "ort": anlage_daten["ort"]
+    })
+    mitgliedschaft.insert()
+    return mitgliedschaft.name
