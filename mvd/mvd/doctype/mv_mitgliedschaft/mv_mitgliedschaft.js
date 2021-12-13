@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('MV Mitgliedschaft', {
-	refresh: function(frm) {
+    refresh: function(frm) {
         if (!frm.doc.__islocal) {
             frm.add_custom_button(__("Kündigung"),  function() {
                     kuendigung(frm);
@@ -28,7 +28,7 @@ frappe.ui.form.on('MV Mitgliedschaft', {
         if (cur_frm.doc.status_c == 'Wegzug') {
             setze_read_only(frm);
         }
-	}
+    }
 });
 
 function get_adressdaten(frm) {
@@ -49,10 +49,21 @@ function kuendigung(frm) {
         {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.year_end()}  
     ],
     function(values){
-        cur_frm.set_value("kuendigung", values.datum);
-        cur_frm.set_value("status_c", 'Kündigung');
-        cur_frm.save();
-        frappe.msgprint("Die Kündigung wurde per " + values.datum + " erfasst.");
+        frappe.call({
+            method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.make_kuendigungs_prozess",
+            args:{
+                    'mitgliedschaft': cur_frm.doc.name,
+                    'datum_kuendigung': values.datum
+            },
+            freeze: true,
+            freeze_message: 'Erstelle Kündigung inkl. Bestätigung...',
+            callback: function(r)
+            {
+                cur_frm.reload_doc();
+                frappe.msgprint("Die Kündigung wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.<br>Die Kündigungsbestätigung finden Sie in den Anhängen.");
+            }
+        });
+        
     },
     'Kündigung',
     'Erfassen'
@@ -67,7 +78,7 @@ function todesfall(frm) {
         cur_frm.set_value("austritt", values.datum);
         cur_frm.set_value("status_c", 'Gestorben');
         cur_frm.save();
-        frappe.msgprint("Der Todesfall wurde per " + values.datum + " erfasst.");
+        frappe.msgprint("Der Todesfall wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
     },
     'Todesfall',
     'Erfassen'

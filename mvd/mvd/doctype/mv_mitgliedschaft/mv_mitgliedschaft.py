@@ -5,9 +5,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils.data import add_days, getdate
+from frappe.utils.data import add_days, getdate, now
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 import json
+from PyPDF2 import PdfFileWriter
 
 class MVMitgliedschaft(Document):
     def set_new_name(self):
@@ -1299,6 +1300,35 @@ def create_korrespondenz_serienbriefe(mitgliedschaften, korrespondenzdaten):
         erstellte_korrespondenzen.append(new_korrespondenz.name)
     
     return erstellte_korrespondenzen
+
+@frappe.whitelist()
+def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung):
+    # erfassung Kündigung
+    mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
+    mitgliedschaft.kuendigung = datum_kuendigung
+    mitgliedschaft.status_c = 'Kündigung'
+    mitgliedschaft.save()
+    
+    # erstellung Kündigungs PDF
+    output = PdfFileWriter()
+    output = frappe.get_print("MV Mitgliedschaft", mitgliedschaft.name, 'Kündigungsbestätigung', as_pdf = True, output = output)
+    
+    pdf = frappe.utils.pdf.get_file_data_from_writer(output)
+    file_name = "Kündigungsbestätigung_{mitgliedschaft}_{datetime}.pdf".format(mitgliedschaft=mitgliedschaft.name, datetime=now().replace(" ", "_"))
+    
+    _file = frappe.get_doc({
+        "doctype": "File",
+        "file_name": file_name,
+        "folder": "Home/Attachments",
+        "is_private": 1,
+        "content": pdf,
+        "attached_to_doctype": 'MV Mitgliedschaft',
+        "attached_to_name": mitgliedschaft.name
+    })
+    
+    _file.save()
+    
+    return 'done'
 
 # API (eingehend von Service-Platform)
 # -----------------------------------------------
