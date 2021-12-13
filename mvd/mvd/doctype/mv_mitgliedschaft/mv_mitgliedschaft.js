@@ -4,14 +4,14 @@
 frappe.ui.form.on('MV Mitgliedschaft', {
     refresh: function(frm) {
         if (!frm.doc.__islocal) {
+            frm.add_custom_button(__("Sektionswechsel"),  function() {
+                    sektionswechsel(frm);
+            }, __("Mutation"));
             frm.add_custom_button(__("Kündigung"),  function() {
                     kuendigung(frm);
             }, __("Mutation"));
             frm.add_custom_button(__("Ausschluss"),  function() {
-                    frappe.msgprint("tbd...");
-            }, __("Mutation"));
-            frm.add_custom_button(__("Sektionswechsel"),  function() {
-                    sektionswechsel(frm);
+                    ausschluss(frm);
             }, __("Mutation"));
             frm.add_custom_button(__("Todesfall"),  function() {
                     todesfall(frm);
@@ -85,6 +85,28 @@ function todesfall(frm) {
         frappe.msgprint("Der Todesfall sowie die damit verbundene Kündigung wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
     },
     'Todesfall',
+    'Erfassen'
+    )
+}
+
+function ausschluss(frm) {
+    frappe.prompt([
+        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Ausschluss per', 'reqd': 1, 'default': frappe.datetime.get_today()},
+        {'fieldname': 'grund', 'fieldtype': 'Text', 'label': 'Ausschluss Begründung'}
+    ],
+    function(values){
+        cur_frm.set_value("austritt", values.datum);
+        cur_frm.set_value("status_c", 'Ausschluss');
+        if (values.grund) {
+            var alte_infos = cur_frm.doc.wichtig;
+            var neue_infos = "Ausschluss:\n" + values.grund + "\n\n";
+            neue_infos = neue_infos + alte_infos;
+            cur_frm.set_value("wichtig", neue_infos);
+        }
+        cur_frm.save();
+        frappe.msgprint("Der Ausschluss wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
+    },
+    'Ausschluss',
     'Erfassen'
     )
 }
