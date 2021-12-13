@@ -491,6 +491,8 @@ frappe.mvd_such_client = {
                             callback: function(r)
                             {
                                 if (r.message) {
+                                    cur_page.page.search_fields.neuanlage.df.hidden = 1;
+                                    cur_page.page.search_fields.neuanlage.refresh();
                                     frappe.set_route("Form", "MV Mitgliedschaft", r.message);
                                 }
                             }
