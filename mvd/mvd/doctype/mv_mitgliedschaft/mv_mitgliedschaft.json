@@ -19,6 +19,7 @@
   "mitglied_id",
   "status_c",
   "mitgliedtyp_c",
+  "todesfall_uebernahme",
   "inkl_hv",
   "m_und_w_pdf",
   "adressen_gesperrt",
@@ -775,10 +776,16 @@
   {
    "fieldname": "cb_6",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.status_c=='Gestorben'",
+   "fieldname": "todesfall_uebernahme",
+   "fieldtype": "Data",
+   "label": "\u00dcbernahem durch (Todesfall)"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-12-09 14:37:33.615927",
+ "modified": "2021-12-13 11:04:36.147883",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

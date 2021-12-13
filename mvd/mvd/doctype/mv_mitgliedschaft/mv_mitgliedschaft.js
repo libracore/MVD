@@ -72,13 +72,17 @@ function kuendigung(frm) {
 
 function todesfall(frm) {
     frappe.prompt([
-        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Todesfall erfolgte per', 'reqd': 1, 'default': frappe.datetime.get_today()}  
+        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Todesfall bedingte Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.year_end()},
+        {'fieldname': 'todesfall_uebernahme', 'fieldtype': 'Data', 'label': 'Übernahem durch'}
     ],
     function(values){
-        cur_frm.set_value("austritt", values.datum);
+        cur_frm.set_value("kuendigung", values.datum);
         cur_frm.set_value("status_c", 'Gestorben');
+        if (values.todesfall_uebernahme) {
+            cur_frm.set_value("todesfall_uebernahme", values.todesfall_uebernahme);
+        }
         cur_frm.save();
-        frappe.msgprint("Der Todesfall wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
+        frappe.msgprint("Der Todesfall sowie die damit verbundene Kündigung wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
     },
     'Todesfall',
     'Erfassen'
