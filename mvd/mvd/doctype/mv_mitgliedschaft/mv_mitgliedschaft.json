@@ -157,7 +157,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Anmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nRegul\u00e4r\nGestorben\nK\u00fcndigung\nWegzug\nAusschluss\nInaktiv\nInteressent:In"
+   "options": "Regul\u00e4r\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nGestorben\nK\u00fcndigung\nWegzug\nAusschluss\nInaktiv\nInteressent:In"
   },
   {
    "fieldname": "mitgliedtyp_c",
@@ -793,7 +793,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-12-15 09:41:55.179924",
+ "modified": "2021-12-15 14:51:14.130889",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

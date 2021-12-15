@@ -24,9 +24,13 @@ frappe.ui.form.on('MV Mitgliedschaft', {
         }
         
         remove_sinv_plus(frm);
+        remove_backlog_plus(frm);
         
-        if (cur_frm.doc.status_c == 'Wegzug') {
+        if (['Wegzug', 'Ausschluss'].includes(cur_frm.doc.status_c)) {
             setze_read_only(frm);
+            frm.disable_save();
+        } else {
+            frm.enable_save();
         }
     }
 });
@@ -105,6 +109,7 @@ function ausschluss(frm) {
             neue_infos = neue_infos + alte_infos;
             cur_frm.set_value("wichtig", neue_infos);
         }
+        cur_frm.set_value("adressen_gesperrt", 1);
         cur_frm.save();
         frappe.msgprint("Der Ausschluss wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
     },
@@ -159,6 +164,9 @@ function erstelle_rechnung(frm) {
 
 function remove_sinv_plus(frm) {
     $(":button[data-doctype='Sales Invoice']").remove();
+}
+function remove_backlog_plus(frm) {
+    $(":button[data-doctype='Arbeits Backlog']").remove();
 }
 
 function setze_read_only(frm) {

@@ -243,7 +243,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Select",
                 fieldname: "status_c",
-                options: 'Anmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nRegulär\nGestorben\nKündigung\nWegzug\nAusschluss\nInaktiv\nInteressent:In',
+                options: 'Regulär\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nGestorben\nKündigung\nWegzug\nAusschluss\nInaktiv\nInteressent:In',
                 placeholder: "Status"
             },
             only_input: true,
