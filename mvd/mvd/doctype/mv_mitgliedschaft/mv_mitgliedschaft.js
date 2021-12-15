@@ -46,14 +46,16 @@ function get_adressdaten(frm) {
 
 function kuendigung(frm) {
     frappe.prompt([
-        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.year_end()}  
+        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.year_end()},
+        {'fieldname': 'massenlauf', 'fieldtype': 'Check', 'label': 'Für Massenlauf vormerken', 'default': 1}
     ],
     function(values){
         frappe.call({
             method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.make_kuendigungs_prozess",
             args:{
                     'mitgliedschaft': cur_frm.doc.name,
-                    'datum_kuendigung': values.datum
+                    'datum_kuendigung': values.datum,
+                    'massenlauf': values.massenlauf
             },
             freeze: true,
             freeze_message: 'Erstelle Kündigung inkl. Bestätigung...',

@@ -12,6 +12,10 @@ frappe.listview_settings['MV Mitgliedschaft'] = {
                 }
         });
         
+        listview.page.add_menu_item(__("Kündigungs Massendruck"), function() {
+                kuendigungs_massendruck();
+        });
+        
         listview.page.add_menu_item(__("Erfasse Interessent:inn"), function() {
                 weiterleitung_suchmaske();
                 
@@ -240,4 +244,35 @@ function erstelle_korrespondenzen_sammel_output(output_typ, korrespondenzen) {
             }
         });
     }
+}
+
+function kuendigungs_massendruck() {
+    frappe.confirm(
+        'Möchten Sie ein Kündigungs Sammel-PDF erstellen?',
+        function(){
+            // on yes
+            frappe.call({
+                method: "mvd.mvd.doctype.arbeits_backlog.arbeits_backlog.kuendigungs_massendruck",
+                args:{},
+                freeze: true,
+                freeze_message: 'Erstelle Kündigungs Sammel-PDF...',
+                callback: function(r)
+                {
+                    if (r.message == 'done') {
+                        window.location = '/desk#List/File/Home/Kündigungen';
+                    } else {
+                        if (r.message == 'keine daten') {
+                            frappe.msgprint("Es existieren keine unverarbeitete Kündigungen");
+                        } else {
+                            frappe.msgprint("Oops, da ist etwas schiefgelaufen!");
+                        }
+                    }
+                }
+            });
+        },
+        function(){
+            // on no
+            frappe.show_alert('Job abgebrochen');
+        }
+    )
 }

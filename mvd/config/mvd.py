@@ -13,11 +13,17 @@ def get_data():
                     "label": _("MV Mitgliedschaft"),
                     "description": _("MV Mitgliedschaft")
                 },
-               {
+                {
                     "type": "doctype",
                     "name": "MW Abo",
                     "label": _("M+W Abo"),
                     "description": _("M+W Abo")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Arbeits Backlog",
+                    "label": _("Arbeits Backlog"),
+                    "description": _("Zu erledigende Aufgaben")
                 }
             ]
         },

@@ -24,6 +24,7 @@
   "m_und_w_pdf",
   "adressen_gesperrt",
   "validierung_notwendig",
+  "kuendigung_verarbeiten",
   "section_wichtige_infos",
   "wichtig",
   "section_daten",
@@ -782,10 +783,17 @@
    "fieldname": "todesfall_uebernahme",
    "fieldtype": "Data",
    "label": "\u00dcbernahem durch (Todesfall)"
+  },
+  {
+   "default": "0",
+   "fieldname": "kuendigung_verarbeiten",
+   "fieldtype": "Check",
+   "label": "K\u00fcndigung verarbeiten",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-12-13 12:08:58.287380",
+ "modified": "2021-12-15 09:41:55.179924",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

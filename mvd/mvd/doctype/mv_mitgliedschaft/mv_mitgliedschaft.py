@@ -9,6 +9,7 @@ from frappe.utils.data import add_days, getdate, now
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 import json
 from PyPDF2 import PdfFileWriter
+from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
 
 class MVMitgliedschaft(Document):
     def set_new_name(self):
@@ -1311,11 +1312,14 @@ def create_korrespondenz_serienbriefe(mitgliedschaften, korrespondenzdaten):
     return erstellte_korrespondenzen
 
 @frappe.whitelist()
-def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung):
+def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf):
     # erfassung Kündigung
     mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
     mitgliedschaft.kuendigung = datum_kuendigung
     mitgliedschaft.status_c = 'Kündigung'
+    if massenlauf == '1':
+        mitgliedschaft.kuendigung_verarbeiten = 1
+        create_abl("Kündigung verarbeiten", mitgliedschaft)
     mitgliedschaft.save()
     
     # erstellung Kündigungs PDF
