@@ -457,11 +457,12 @@ frappe.mvd_such_client = {
                         {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent:In\nRegulär'},
                         {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value()},
                         {'fieldname': 's1', 'fieldtype': 'Section Break'},
+                        {'fieldname': 'anrede', 'fieldtype': 'Link', 'label': 'Anrede', 'reqd': 0, 'options': 'Salutation'},
                         {'fieldname': 'vorname', 'fieldtype': 'Data', 'label': 'Vorname', 'reqd': 1, 'default': cur_page.page.search_fields.vorname.get_value()},
                         {'fieldname': 'nachname', 'fieldtype': 'Data', 'label': 'Nachname', 'reqd': 1, 'default': cur_page.page.search_fields.nachname.get_value()},
                         {'fieldname': 'telefon', 'fieldtype': 'Data', 'label': 'Telefon', 'reqd': 0, 'default': cur_page.page.search_fields.tel.get_value()},
                         {'fieldname': 'email', 'fieldtype': 'Data', 'label': 'E-Mail', 'reqd': 0, 'options': 'Email', 'default': cur_page.page.search_fields.email.get_value()},
-                        {'fieldname': 's2', 'fieldtype': 'Section Break'},
+                        {'fieldname': 'cb_1', 'fieldtype': 'Column Break'},
                         {'fieldname': 'zusatz_adresse', 'fieldtype': 'Data', 'label': 'Zusatz Adresse', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_adresse.get_value()},
                         {'fieldname': 'postfach', 'fieldtype': 'Check', 'label': 'Postfach', 'reqd': 0, 'default': cur_page.page.search_fields.postfach.get_value(), 'change': function() {
                                 if (cur_dialog.fields_dict.postfach.get_value() == 1) {

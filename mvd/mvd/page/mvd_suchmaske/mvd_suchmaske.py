@@ -177,6 +177,7 @@ def anlage_prozess(anlage_daten):
         "inkl_hv": 1,
         "eintritt": now(),
         "kundentyp": "Einzelperson",
+        "anrede_c": anlage_daten["anrede"] if 'anrede' in anlage_daten else '',
         "nachname_1": anlage_daten["nachname"],
         "vorname_1": anlage_daten["vorname"],
         "tel_p_1": anlage_daten["telefon"] if 'telefon' in anlage_daten else '',
