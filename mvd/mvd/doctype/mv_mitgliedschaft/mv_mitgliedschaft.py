@@ -169,6 +169,15 @@ def get_adressblock(mitgliedschaft):
     adressblock += mitgliedschaft.nachname_1 or ''
     adressblock += '\n'
     
+    if mitgliedschaft.hat_solidarmitglied:
+        if mitgliedschaft.vorname_2:
+            adressblock += mitgliedschaft.vorname_2 or ''
+            adressblock += ' '
+        if mitgliedschaft.nachname_2:
+            adressblock += mitgliedschaft.nachname_2 or ''
+        if  mitgliedschaft.vorname_2 or mitgliedschaft.nachname_2:
+            adressblock += '\n'
+    
     if mitgliedschaft.zusatz_adresse:
         adressblock += mitgliedschaft.zusatz_adresse or ''
         adressblock += '\n'
