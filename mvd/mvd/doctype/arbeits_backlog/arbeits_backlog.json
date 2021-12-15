@@ -8,7 +8,8 @@
   "typ",
   "status",
   "mv_mitgliedschaft",
-  "sektion_id"
+  "sektion_id",
+  "amended_from"
  ],
  "fields": [
   {
@@ -17,14 +18,6 @@
    "in_list_view": 1,
    "label": "Typ",
    "options": "Daten Validieren\nK\u00fcndigung verarbeiten",
-   "reqd": 1
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Status",
-   "options": "Open\nCompleted",
    "reqd": 1
   },
   {
@@ -40,9 +33,26 @@
    "label": "Sektion",
    "options": "Sektion",
    "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Arbeits Backlog",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nCompleted",
+   "reqd": 1
   }
  ],
- "modified": "2021-12-15 09:23:19.216278",
+ "modified": "2021-12-15 11:11:57.013113",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Arbeits Backlog",

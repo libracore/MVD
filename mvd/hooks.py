@@ -70,6 +70,7 @@ jenv = {
 # See frappe.core.notifications.get_notification_config
 
 # notification_config = "mvd.notifications.get_notification_config"
+notification_config = "mvd.mvd.utils.notifications.get_notification_config"
 
 # Permissions
 # -----------
