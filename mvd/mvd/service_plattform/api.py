@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft import mvm_mitglieder, mvm_neue_mitglieder_nummer, mvm_kuendigung, mvm_sektionswechsel
+from mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft import mvm_mitglieder, mvm_kuendigung, mvm_sektionswechsel
 import json
 import requests
 

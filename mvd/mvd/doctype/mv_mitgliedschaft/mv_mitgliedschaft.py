@@ -14,6 +14,7 @@ from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
 class MVMitgliedschaft(Document):
     def set_new_name(self):
         if not self.mitglied_nr:
+            # zum Testen, nachher mit naming series!
             # Mitglied Nr
             self.mitglied_nr = str(get_mitgliedid(self))
         
@@ -152,6 +153,8 @@ class MVMitgliedschaft(Document):
         return ''
 
 def get_mitgliedid(mitgliedschaft):
+    # ~ neue_mitglieder_nummer = mvm_neue_mitglieder_nummer(mitgliedschaft)
+    # ~ return neue_mitglieder_nummer
     # zum testen, nachher via API!
     anz_mitgliedschaften = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMV Mitgliedschaft`""", as_dict=True)[0].qty
     anz_mitgliedschaften += 1
@@ -1358,7 +1361,7 @@ def mvm_mitglieder(kwargs):
 
 # Status Returns
 def raise_xxx(code, title, message):
-    frappe.log_error("{0}\n{1}\n{2}".format(code, title, message), 'raise_xxx')
+    frappe.log_error("{0}\n{1}\n{2}".format(code, title, message), 'SP API Error!')
     return ['{code} {title}'.format(code=code, title=title), {
         "error": {
             "code": code,
@@ -1367,15 +1370,17 @@ def raise_xxx(code, title, message):
     }]
     
 def raise_200(answer='Success'):
-    frappe.log_error("200 Success", '200 Success')
+    frappe.log_error("200 Success", 'SP API Success')
     return ['200 Success', answer]
 
 # API Funktionshelfer
 # -----------------------------------------------
 def check_update_vs_neuanlage(kwargs):
     if not frappe.db.exists("MV Mitgliedschaft", kwargs["MitgliedId"]):
+        frappe.log_error("{0}".format(kwargs), 'SP API: Starte Neuanlage')
         return mvm_neuanlage(kwargs)
     else:
+        frappe.log_error("{0}".format(kwargs), 'SP API: Starte Update')
         mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", kwargs["MitgliedId"])
         return mvm_update(mitgliedschaft, kwargs)
         
@@ -1442,12 +1447,15 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.kuendigung = kuendigung
             mitgliedschaft.validierung_notwendig = 1
             mitgliedschaft.save()
+            frappe.db.commit()
             
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
+            
             if not mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Bei dem Adressen Update ist etwas schief gelaufen')
             
-            mitgliedschaft.validierung_notwendig = 0
+            mitgliedschaft.validierung_notwendig = '0'
+            
             mitgliedschaft.save()
             
             return raise_200()
@@ -1464,11 +1472,11 @@ def mvm_neuanlage(kwargs):
             sektion_id = get_sektion_id(kwargs['SektionCode'])
             if not sektion_id:
                 return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['SektionCode']))
-                
+            
             status_c = get_status_c(kwargs['Status'])
             if not status_c:
                 return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['Status']))
-                
+            
             mitgliedtyp_c = get_mitgliedtyp_c(kwargs['Typ'])
             if not mitgliedtyp_c:
                 return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']))
@@ -1518,8 +1526,6 @@ def mvm_neuanlage(kwargs):
                 'zuzug': zuzug,
                 'wegzug': wegzug,
                 'austritt': austritt,
-                #'zuzug_von': kwargs['???'], --> woher erhalte ich diese Info?
-                #'wegzug_zu': kwargs['mitgliedNummer'], --> benötige ich bei neumitglieder nicht
                 'kuendigung': kuendigung,
                 'validierung_notwendig': 1,
                 'nachname_1': 'API',
@@ -1529,16 +1535,12 @@ def mvm_neuanlage(kwargs):
             new_mitgliedschaft.insert()
             
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
-            frappe.log_error("{0}".format(new_mitgliedschaft), 'new_mitgliedschaft vor prüfung')
+            
             if not new_mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen')
             
-            frappe.log_error("{0}".format(new_mitgliedschaft), 'new_mitgliedschaft hat nun adressen')
-            
-            new_mitgliedschaft.validierung_notwendig = 0
+            new_mitgliedschaft.validierung_notwendig = '0'
             new_mitgliedschaft.save()
-            
-            frappe.log_error("{0}".format(new_mitgliedschaft), 'new_mitgliedschaft wurde gespeichert')
             
             return raise_200()
             
@@ -1641,10 +1643,8 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
         
         for adresse in kwargs["Adressen"]["AdressenListe"]:
             adressen_dict = adresse
-            frappe.log_error("{0}".format(adressen_dict), 'adresse vor umwandlung: str in dict')
-        
+            
             if isinstance(adressen_dict, str):
-                frappe.log_error("{0}".format(adressen_dict), 'umwandlung str in dict')
                 adressen_dict = json.loads(adressen_dict)
             
             if adressen_dict['Typ'] == 'Filiale':
@@ -1663,7 +1663,6 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 # unbekannter adresstyp
                 frappe.log_error("{0}".format(adressen_dict), 'unbekannter adresstyp')
                 return False
-            frappe.log_error("{0}".format(adressen_dict['Typ']), 'adresse analysiert und zugewiesen')
         
         if not mitglied and not objekt:
             frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage: weder mitglied noch objekt')
@@ -1673,7 +1672,6 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
         if mitglied:
             # erfassung mitglied-daten
             for kontaktdaten in mitglied["Kontakte"]:
-                frappe.log_error("{0}".format(kontaktdaten), 'kontakt loop innerhalb adresse')
                 if kontaktdaten["IstHauptkontakt"]:
                     # hauptmiglied
                     if kontaktdaten["Firma"]:
@@ -1710,7 +1708,6 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                     new_mitgliedschaft.tel_m_2 = str(kontaktdaten["Mobile"])
                     new_mitgliedschaft.tel_g_2 = str(kontaktdaten["TelefonGeschaeft"])
                     new_mitgliedschaft.e_mail_2 = str(kontaktdaten["Email"])
-            
         
         if objekt:
             if mitglied:
@@ -1793,6 +1790,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
             frappe.log_error("{0}".format(zeitung), 'Adressen Handling Typ Zeitung noch nicht umgesetzt')
         
         return new_mitgliedschaft
+        
     except Exception as err:
         return raise_xxx(500, 'Internal Server Error', err)
 

@@ -707,8 +707,7 @@
    "default": "0",
    "fieldname": "validierung_notwendig",
    "fieldtype": "Check",
-   "label": "Validierung notwendig",
-   "read_only": 1
+   "label": "Validierung notwendig"
   },
   {
    "default": "0",
@@ -793,7 +792,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-12-15 14:51:14.130889",
+ "modified": "2021-12-16 20:24:12.663127",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
