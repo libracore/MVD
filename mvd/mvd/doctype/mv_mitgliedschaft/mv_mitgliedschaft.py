@@ -1529,6 +1529,7 @@ def mvm_neuanlage(kwargs):
             new_mitgliedschaft.insert()
             
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
+            frappe.log_error("{0}".format(new_mitgliedschaft), 'new_mitgliedschaft vor prüfung')
             if not new_mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen')
             
