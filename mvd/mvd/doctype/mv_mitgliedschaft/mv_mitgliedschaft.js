@@ -49,31 +49,88 @@ function get_adressdaten(frm) {
 }
 
 function kuendigung(frm) {
-    frappe.prompt([
-        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.year_end()},
-        {'fieldname': 'massenlauf', 'fieldtype': 'Check', 'label': 'Für Massenlauf vormerken', 'default': 1}
-    ],
-    function(values){
-        frappe.call({
-            method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.make_kuendigungs_prozess",
-            args:{
-                    'mitgliedschaft': cur_frm.doc.name,
-                    'datum_kuendigung': values.datum,
-                    'massenlauf': values.massenlauf
-            },
-            freeze: true,
-            freeze_message: 'Erstelle Kündigung inkl. Bestätigung...',
-            callback: function(r)
-            {
-                cur_frm.reload_doc();
-                frappe.msgprint("Die Kündigung wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.<br>Die Kündigungsbestätigung finden Sie in den Anhängen.");
+    frappe.call({
+        'method': "frappe.client.get",
+        'args': {
+            'doctype': "Sektion",
+            'name': cur_frm.doc.sektion_id
+        },
+        'callback': function(response) {
+            var sektion_settings = response.message;
+
+            if (sektion_settings) {
+                console.log();
+                var kuendigungs_stichtag = frappe.datetime.str_to_obj(sektion_settings.kuendigungs_stichtag);
+                var ks_month = kuendigungs_stichtag.getMonth();
+                var ks_day = kuendigungs_stichtag.getDate();
+                
+                var now = frappe.datetime.str_to_obj(frappe.datetime.now_date());
+                var now_month = now.getMonth();
+                var now_day = now.getDate();
+                
+                var fristgerecht = true;
+                
+                if (now_month > ks_month) {
+                    fristgerecht = false;
+                } else {
+                    if (now_month == ks_month) {
+                        if (now_day == ks_day) {
+                            fristgerecht = false;
+                        }
+                    }
+                }
+                
+                if (fristgerecht) {
+                    var field_list = [
+                        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.year_end()},
+                        {'fieldname': 'massenlauf', 'fieldtype': 'Check', 'label': 'Für Massenlauf vormerken', 'default': 1}
+                    ];
+                } else {
+                    var field_list = [
+                        {'fieldname': 'html_info', 'fieldtype': 'HTML', 'options': '<p style="color: red;">Achtung: Kündigungsfrist verpasst!</p>'},
+                        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.add_months(frappe.datetime.year_end(), 12), 'read_only': 1},
+                        {'fieldname': 'kulanz', 'fieldtype': 'Check', 'label': 'Kulanz anwenden', 'default': 0, 'change': function() {
+                                if (cur_dialog.fields_dict.kulanz.get_value() == 1) {
+                                    cur_dialog.fields_dict.datum.df.read_only = 0;
+                                    cur_dialog.fields_dict.datum.refresh();
+                                } else {
+                                    cur_dialog.fields_dict.datum.set_value(frappe.datetime.add_months(frappe.datetime.year_end(), 12));
+                                    cur_dialog.fields_dict.datum.df.read_only = 1;
+                                    cur_dialog.fields_dict.datum.refresh();
+                                }
+                            }
+                        },
+                        {'fieldname': 'massenlauf', 'fieldtype': 'Check', 'label': 'Für Massenlauf vormerken', 'default': 1}
+                    ];
+                }
+                
+                frappe.prompt(field_list,
+                function(values){
+                    frappe.call({
+                        method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.make_kuendigungs_prozess",
+                        args:{
+                                'mitgliedschaft': cur_frm.doc.name,
+                                'datum_kuendigung': values.datum,
+                                'massenlauf': values.massenlauf
+                        },
+                        freeze: true,
+                        freeze_message: 'Erstelle Kündigung inkl. Bestätigung...',
+                        callback: function(r)
+                        {
+                            cur_frm.reload_doc();
+                            frappe.msgprint("Die Kündigung wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.<br>Die Kündigungsbestätigung finden Sie in den Anhängen.");
+                        }
+                    });
+                    
+                },
+                'Kündigung',
+                'Erfassen'
+                )
             }
-        });
-        
-    },
-    'Kündigung',
-    'Erfassen'
-    )
+        }
+    });
+    
+    
 }
 
 function todesfall(frm) {

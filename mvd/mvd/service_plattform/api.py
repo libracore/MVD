@@ -20,9 +20,18 @@ def whoami(type='light'):
 
 # live functions
 # ---------------------------------------------------
+# ausgehend
+# ---------------------------------------------------
 def neue_mitglieder_nummer(sektion_code):
-    return mvm_neue_mitglieder_nummer(sektion_code)
+    mitglied_id = 'DoSomeMagic'
+    return mitglied_id
 
+def update_mvm(mvm):
+    # DoSomeMagic
+    return True
+
+# eingehend
+# ---------------------------------------------------
 # create/update existing MV Mitgliedschaft
 @frappe.whitelist()
 def mitglieder(**mitgliedschaft):

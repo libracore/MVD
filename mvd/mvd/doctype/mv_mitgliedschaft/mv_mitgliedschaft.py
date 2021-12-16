@@ -1576,6 +1576,13 @@ def get_sektion_id(sektion_c):
     else:
         return False
 
+def get_sektion_code(sektion):
+    sektionen = frappe.db.sql("""SELECT `sektion_c` FROM `tabSektion` WHERE `name` = '{sektion}'""".format(sektion=sektion), as_dict=True)
+    if len(sektionen) > 0:
+        return sektionen[0].sektion_c
+    else:
+        return False
+
 def get_status_c(status_c):
     mapper = {
         'Anmeldung': 'Anmeldung',
@@ -1779,7 +1786,95 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
 
 # Bezug neuer mitgliedId 
 def mvm_neue_mitglieder_nummer(mitgliedschaft):
-    return "Methode in Arbeit"
+    from mvd.mvd.service_plattform.api import neue_mitglieder_nummer
+    sektion_code = get_sektion_code(mitgliedschaft.sektion_id)
+    return neue_mitglieder_nummer(sektion_code)
+
+def send_mvm_to_sp(mitgliedschaft):
+    from mvd.mvd.service_plattform.api import update_mvm
+    prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
+    update_status = update_mvm(prepared_mvm)
+    return update_status
+
+def prepare_mvm_for_sp(mitgliedschaft):
+    adressen = get_adressen_for_sp(mitgliedschaft)
+    prepared_mvm = {
+        "mitgliedNummer": str(mitgliedschaft.mitglied_nr),
+        "mitgliedId": int(mitgliedschaft.mitglied_id),
+        "sektionCode": str(get_sektion_code(mitgliedschaft.sektion_id)),
+        "typ": str(mitgliedschaft.mitgliedtyp_c),
+        "status": str(mitgliedschaftstatus_c),
+        "regionCode": "", # ???
+        "istTemporaeresMitglied": False, # ???
+        "fuerBewirtschaftungGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
+        "erfassungsdatum": "2021-12-15T18:56:17.583Z",
+        "eintrittsdatum": mitgliedschaft.eintritt, # achtung nur date!
+        "austrittsdatum": mitgliedschaft.austritt, # achtung nur date!
+        "zuzugsdatum": mitgliedschaft.zuzug or '', # achtung nur date!
+        "wegzugsdatum": mitgliedschaft.wegzug or '', # achtung nur date!
+        "kuendigungPer": mitgliedschaft.kuendigung or '', # achtung nur date!
+        "jahrBezahltMitgliedschaft": 0, # ???
+        "betragBezahltMitgliedschaft": 0, # ???
+        "jahrBezahltHaftpflicht": 0, # ???
+        "betragBezahltHaftpflicht": 0, # ???
+        "naechstesJahrGeschuldet": True, # ???
+        "bemerkungen": str(mitgliedschaft.wichtig) or '',
+        "anzahlZeitungen": int(mitgliedschaft.m_und_w),
+        "zeitungAlsPdf": True if mitgliedschaft.m_und_w_pdf else False,
+        "adressen": adressen
+    }
+    
+    return prepared_mvm
+
+def get_adressen_for_sp(mitgliedschaft):
+    adressen = []
+    mitglied = {
+        "typ": "Mitglied",
+        "strasse": str(mitgliedschaft.strasse),
+        "hausnummer": str(mitgliedschaft.nummer),
+        "hausnummerZusatz": str(mitgliedschaft.nummer_zu),
+        "postleitzahl": str(mitgliedschaft.plz),
+        "ort": str(mitgliedschaft.ort),
+        "adresszusatz": str(mitgliedschaft.zusatz_adresse),
+        "postfach": True if mitgliedschaft.postfach else False,
+        "postfachNummer": str(mitgliedschaft.postfach_nummer),
+        "fuerKorrespondenzGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
+        "kontakte": [
+            {
+                "anrede": str(mitgliedschaft.anrede_c) if mitgliedschaft.anrede_c else "Unbekannt",
+                "sprache": "Deutsch",
+                "istHauptkontakt": True,
+                "vorname": str(mitgliedschaft.vorname_1),
+                "nachname": str(mitgliedschaft.nachname_1),
+                "email": str(mitgliedschafte_mail_1) or '',
+                "telefon": str(mitgliedschaft.tel_p_1) or '',
+                "mobile": str(mitgliedschafttel_m_1) or '',
+                "telefonGeschaeft": str(mitgliedschaft.tel_g_1) or '',
+                "firma": str(mitgliedschaft.firma) if mitgliedschaft.kundentyp == 'Unternehmen' else '',
+                "firmaZusatz": str(mitgliedschaft.zusatz_firma) if mitgliedschaft.kundentyp == 'Unternehmen' else ''
+            }
+        ]
+    }
+    
+    if mitgliedschaft.hat_solidarmitglied:
+        solidarmitglied = {
+            "anrede": str(mitgliedschaft.anrede_2) if mitgliedschaft.anrede_2 else "Unbekannt",
+            "sprache": "Deutsch",
+            "istHauptkontakt": False,
+            "vorname": str(mitgliedschaft.vorname_2),
+            "nachname": str(mitgliedschaft.nachname_2),
+            "email": str(mitgliedschafte_mail_2) or '',
+            "telefon": str(mitgliedschaft.tel_p_2) or '',
+            "mobile": str(mitgliedschafttel_m_2) or '',
+            "telefonGeschaeft": str(mitgliedschaft.tel_g_2) or '',
+            "firma": '',
+            "firmaZusatz": ''
+        }
+        mitglied['kontakte'].append(solidarmitglied)
+    
+    adressen.append(mitglied)
+    
+    return adressen
 
 # Sektionswechsel
 def mvm_sektionswechsel(mitgliedschaft):
