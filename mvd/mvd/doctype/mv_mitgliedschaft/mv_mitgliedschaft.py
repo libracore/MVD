@@ -1672,6 +1672,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
         if mitglied:
             # erfassung mitglied-daten
             for kontaktdaten in mitglied["Kontakte"]:
+                frappe.log_error("{0}".format(kontaktdaten), 'kontakt loop innerhalb adresse')
                 if kontaktdaten["IstHauptkontakt"]:
                     # hauptmiglied
                     if kontaktdaten["Firma"]:
@@ -1724,6 +1725,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
             else:
                 # erfassung mitglied-daten auf basis objekt-daten
                 for kontaktdaten in objekt["Kontakte"]:
+                    frappe.log_error("{0}".format(kontaktdaten), 'kontakt loop innerhalb adresse')
                     if kontaktdaten["IstHauptkontakt"]:
                         # hauptmiglied
                         if kontaktdaten["Firma"]:
