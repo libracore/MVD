@@ -1626,97 +1626,47 @@ def get_inkl_hv(inkl_hv):
         return 0
 
 def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
-    mitglied = False
-    objekt = False
-    rechnung = False
-    filiale = False
-    mitbewohner = False
-    zeitung = False
-    
-    for adresse in kwargs["Adressen"]["AdressenListe"]:
-        adressen_dict = adresse
-    
-        if isinstance(adressen_dict, str):
-            frappe.log_error("{0}".format(adressen_dict), 'umwandlung str in dict')
-            adressen_dict = json.loads(adressen_dict)
+    try:
+        mitglied = False
+        objekt = False
+        rechnung = False
+        filiale = False
+        mitbewohner = False
+        zeitung = False
         
-        if adressen_dict['Typ'] == 'Filiale':
-            filiale = adressen_dict
-        elif adressen_dict['Typ'] == 'Mitbewohner':
-            mitbewohner = adressen_dict
-        elif adressen_dict['Typ'] == 'Zeitung':
-            zeitung = adressen_dict
-        elif adressen_dict['Typ'] == 'Mitglied':
-            mitglied = adressen_dict
-        elif adressen_dict['Typ'] == 'Objekt':
-            objekt = adressen_dict
-        elif adressen_dict['Typ'] == 'Rechnung':
-            rechnung = adressen_dict
-        else:
-            # unbekannter adresstyp
-            frappe.log_error("{0}".format(adressen_dict), 'unbekannter adresstyp')
-            return False
-    
-    if not mitglied and not objekt:
-        frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage: weder mitglied noch objekt')
-        # eines von beiden muss zwingend vorhanden sein
-        return False
-    
-    if mitglied:
-        # erfassung mitglied-daten
-        for kontaktdaten in mitglied["Kontakte"]:
-            if kontaktdaten["IstHauptkontakt"]:
-                # hauptmiglied
-                if kontaktdaten["Firma"]:
-                    new_mitgliedschaft.kundentyp = 'Unternehmen'
-                    new_mitgliedschaft.firma = kontaktdaten["Firma"]
-                    new_mitgliedschaft.zusatz_firma = kontaktdaten["FirmaZusatz"]
-                else:
-                    new_mitgliedschaftkundentyp = 'Einzelperson'
-                if kontaktdaten["Anrede"] != 'Unbekannt':
-                    new_mitgliedschaft.anrede_c = str(kontaktdaten["Anrede"])
-                new_mitgliedschaft.nachname_1 = str(kontaktdaten["Nachname"])
-                new_mitgliedschaft.vorname_1 = str(kontaktdaten["Vorname"])
-                new_mitgliedschaft.tel_p_1 = str(kontaktdaten["Telefon"])
-                new_mitgliedschaft.tel_m_1 = str(kontaktdaten["Mobile"])
-                new_mitgliedschaft.tel_g_1 = str(kontaktdaten["TelefonGeschaeft"])
-                new_mitgliedschaft.e_mail_1 = str(kontaktdaten["Email"])
-                new_mitgliedschaft.zusatz_adresse = str(mitglied["Adresszusatz"])
-                new_mitgliedschaft.strasse = str(mitglied["Strasse"])
-                new_mitgliedschaft.nummer = str(mitglied["Hausnummer"])
-                new_mitgliedschaft.postfach = str(mitglied["Postfach"])
-                new_mitgliedschaft.postfach_nummer = str(mitglied["PostfachNummer"])
-                new_mitgliedschaft.plz = str(mitglied["Postleitzahl"])
-                new_mitgliedschaft.ort = str(mitglied["Ort"])
-                if mitglied["FuerKorrespondenzGesperrt"]:
-                    new_mitgliedschaft.adressen_gesperrt = 1
+        for adresse in kwargs["Adressen"]["AdressenListe"]:
+            adressen_dict = adresse
+            frappe.log_error("{0}".format(adressen_dict), 'adresse vor umwandlung: str in dict')
+        
+            if isinstance(adressen_dict, str):
+                frappe.log_error("{0}".format(adressen_dict), 'umwandlung str in dict')
+                adressen_dict = json.loads(adressen_dict)
+            
+            if adressen_dict['Typ'] == 'Filiale':
+                filiale = adressen_dict
+            elif adressen_dict['Typ'] == 'Mitbewohner':
+                mitbewohner = adressen_dict
+            elif adressen_dict['Typ'] == 'Zeitung':
+                zeitung = adressen_dict
+            elif adressen_dict['Typ'] == 'Mitglied':
+                mitglied = adressen_dict
+            elif adressen_dict['Typ'] == 'Objekt':
+                objekt = adressen_dict
+            elif adressen_dict['Typ'] == 'Rechnung':
+                rechnung = adressen_dict
             else:
-                # solidarmitglied
-                new_mitgliedschaft.hat_solidarmitglied = 1
-                if kontaktdaten["Anrede"] != 'Unbekannt':
-                    new_mitgliedschaft.anrede_2 = str(kontaktdaten["Anrede"])
-                new_mitgliedschaft.nachname_2 = str(kontaktdaten["Nachname"])
-                new_mitgliedschaft.vorname_2 = str(kontaktdaten["Vorname"])
-                new_mitgliedschaft.tel_p_2 = str(kontaktdaten["Telefon"])
-                new_mitgliedschaft.tel_m_2 = str(kontaktdaten["Mobile"])
-                new_mitgliedschaft.tel_g_2 = str(kontaktdaten["TelefonGeschaeft"])
-                new_mitgliedschaft.e_mail_2 = str(kontaktdaten["Email"])
+                # unbekannter adresstyp
+                frappe.log_error("{0}".format(adressen_dict), 'unbekannter adresstyp')
+                return False
         
-    
-    if objekt:
+        if not mitglied and not objekt:
+            frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage: weder mitglied noch objekt')
+            # eines von beiden muss zwingend vorhanden sein
+            return False
+        
         if mitglied:
-            # erfassung objektadresse
-            new_mitgliedschaft.abweichende_objektadresse = 1
-            new_mitgliedschaft.objekt_zusatz_adresse = objekt["Adresszusatz"]
-            new_mitgliedschaft.objekt_strasse = objekt["Strasse"]
-            new_mitgliedschaft.objekt_nummer = objekt["Hausnummer"]
-            new_mitgliedschaft.objekt_plz = objekt["Postleitzahl"]
-            new_mitgliedschaft.objekt_ort = mitglied["Ort"]
-            if objekt["FuerKorrespondenzGesperrt"]:
-                new_mitgliedschaft.adressen_gesperrt = 1
-        else:
-            # erfassung mitglied-daten auf basis objekt-daten
-            for kontaktdaten in objekt["Kontakte"]:
+            # erfassung mitglied-daten
+            for kontaktdaten in mitglied["Kontakte"]:
                 if kontaktdaten["IstHauptkontakt"]:
                     # hauptmiglied
                     if kontaktdaten["Firma"]:
@@ -1726,63 +1676,117 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                     else:
                         new_mitgliedschaftkundentyp = 'Einzelperson'
                     if kontaktdaten["Anrede"] != 'Unbekannt':
-                        new_mitgliedschaft.anrede_c = kontaktdaten["Anrede"]
-                    new_mitgliedschaft.nachname_1 = kontaktdaten["Nachname"]
-                    new_mitgliedschaft.vorname_1 = kontaktdaten["Vorname"]
-                    new_mitgliedschaft.tel_p_1 = kontaktdaten["Telefon"]
-                    new_mitgliedschaft.tel_m_1 = kontaktdaten["Mobile"]
-                    new_mitgliedschaft.tel_g_1 = kontaktdaten["TelefonGeschaeft"]
-                    new_mitgliedschaft.e_mail_1 = kontaktdaten["Email"]
-                    new_mitgliedschaft.zusatz_adresse = objekt["Adresszusatz"]
-                    new_mitgliedschaft.strasse = objekt["Strasse"]
-                    new_mitgliedschaft.nummer = objekt["Hausnummer"]
-                    new_mitgliedschaft.postfach = objekt["Postfach"]
-                    new_mitgliedschaft.postfach_nummer = objekt["PostfachNummer"]
-                    new_mitgliedschaft.plz = objekt["Postleitzahl"]
-                    new_mitgliedschaft.ort = objekt["Ort"]
-                    if objekt["FuerKorrespondenzGesperrt"]:
+                        new_mitgliedschaft.anrede_c = str(kontaktdaten["Anrede"])
+                    new_mitgliedschaft.nachname_1 = str(kontaktdaten["Nachname"])
+                    new_mitgliedschaft.vorname_1 = str(kontaktdaten["Vorname"])
+                    new_mitgliedschaft.tel_p_1 = str(kontaktdaten["Telefon"])
+                    new_mitgliedschaft.tel_m_1 = str(kontaktdaten["Mobile"])
+                    new_mitgliedschaft.tel_g_1 = str(kontaktdaten["TelefonGeschaeft"])
+                    new_mitgliedschaft.e_mail_1 = str(kontaktdaten["Email"])
+                    new_mitgliedschaft.zusatz_adresse = str(mitglied["Adresszusatz"])
+                    new_mitgliedschaft.strasse = str(mitglied["Strasse"])
+                    new_mitgliedschaft.nummer = str(mitglied["Hausnummer"])
+                    new_mitgliedschaft.postfach = str(mitglied["Postfach"])
+                    new_mitgliedschaft.postfach_nummer = str(mitglied["PostfachNummer"])
+                    new_mitgliedschaft.plz = str(mitglied["Postleitzahl"])
+                    new_mitgliedschaft.ort = str(mitglied["Ort"])
+                    if mitglied["FuerKorrespondenzGesperrt"]:
                         new_mitgliedschaft.adressen_gesperrt = 1
                 else:
                     # solidarmitglied
                     new_mitgliedschaft.hat_solidarmitglied = 1
                     if kontaktdaten["Anrede"] != 'Unbekannt':
-                        new_mitgliedschaft.anrede_2 = kontaktdaten["Anrede"]
-                    new_mitgliedschaft.nachname_2 = kontaktdaten["Nachname"]
-                    new_mitgliedschaft.vorname_2 = kontaktdaten["Vorname"]
-                    new_mitgliedschaft.tel_p_2 = kontaktdaten["Telefon"]
-                    new_mitgliedschaft.tel_m_2 = kontaktdaten["Mobile"]
-                    new_mitgliedschaft.tel_g_2 = kontaktdaten["TelefonGeschaeft"]
-                    new_mitgliedschaft.e_mail_2 = kontaktdaten["Email"]
-    else:
-        # reset objektadresse
-        new_mitgliedschaft.abweichende_objektadresse = 0
-        new_mitgliedschaft.objekt_zusatz_adresse = ''
-        new_mitgliedschaft.objekt_strasse = ''
-        new_mitgliedschaft.objekt_nummer = ''
-        new_mitgliedschaft.objekt_plz = ''
-        new_mitgliedschaft.objekt_ort = ''
-    
-    if rechnung:
-        # erfassung rechnungsadresse
-        # tbd...
-        frappe.log_error("{0}".format(rechnung), 'Adressen Handling Typ Rechnung noch nicht umgesetzt')
+                        new_mitgliedschaft.anrede_2 = str(kontaktdaten["Anrede"])
+                    new_mitgliedschaft.nachname_2 = str(kontaktdaten["Nachname"])
+                    new_mitgliedschaft.vorname_2 = str(kontaktdaten["Vorname"])
+                    new_mitgliedschaft.tel_p_2 = str(kontaktdaten["Telefon"])
+                    new_mitgliedschaft.tel_m_2 = str(kontaktdaten["Mobile"])
+                    new_mitgliedschaft.tel_g_2 = str(kontaktdaten["TelefonGeschaeft"])
+                    new_mitgliedschaft.e_mail_2 = str(kontaktdaten["Email"])
+            
         
-    if mitbewohner:
-        # erfassung solidarmitglied
-        # tbd...
-        frappe.log_error("{0}".format(mitbewohner), 'Adressen Handling Typ Mitbewohner noch nicht umgesetzt')
+        if objekt:
+            if mitglied:
+                # erfassung objektadresse
+                new_mitgliedschaft.abweichende_objektadresse = 1
+                new_mitgliedschaft.objekt_zusatz_adresse = objekt["Adresszusatz"]
+                new_mitgliedschaft.objekt_strasse = objekt["Strasse"]
+                new_mitgliedschaft.objekt_nummer = objekt["Hausnummer"]
+                new_mitgliedschaft.objekt_plz = objekt["Postleitzahl"]
+                new_mitgliedschaft.objekt_ort = mitglied["Ort"]
+                if objekt["FuerKorrespondenzGesperrt"]:
+                    new_mitgliedschaft.adressen_gesperrt = 1
+            else:
+                # erfassung mitglied-daten auf basis objekt-daten
+                for kontaktdaten in objekt["Kontakte"]:
+                    if kontaktdaten["IstHauptkontakt"]:
+                        # hauptmiglied
+                        if kontaktdaten["Firma"]:
+                            new_mitgliedschaft.kundentyp = 'Unternehmen'
+                            new_mitgliedschaft.firma = kontaktdaten["Firma"]
+                            new_mitgliedschaft.zusatz_firma = kontaktdaten["FirmaZusatz"]
+                        else:
+                            new_mitgliedschaftkundentyp = 'Einzelperson'
+                        if kontaktdaten["Anrede"] != 'Unbekannt':
+                            new_mitgliedschaft.anrede_c = kontaktdaten["Anrede"]
+                        new_mitgliedschaft.nachname_1 = kontaktdaten["Nachname"]
+                        new_mitgliedschaft.vorname_1 = kontaktdaten["Vorname"]
+                        new_mitgliedschaft.tel_p_1 = kontaktdaten["Telefon"]
+                        new_mitgliedschaft.tel_m_1 = kontaktdaten["Mobile"]
+                        new_mitgliedschaft.tel_g_1 = kontaktdaten["TelefonGeschaeft"]
+                        new_mitgliedschaft.e_mail_1 = kontaktdaten["Email"]
+                        new_mitgliedschaft.zusatz_adresse = objekt["Adresszusatz"]
+                        new_mitgliedschaft.strasse = objekt["Strasse"]
+                        new_mitgliedschaft.nummer = objekt["Hausnummer"]
+                        new_mitgliedschaft.postfach = objekt["Postfach"]
+                        new_mitgliedschaft.postfach_nummer = objekt["PostfachNummer"]
+                        new_mitgliedschaft.plz = objekt["Postleitzahl"]
+                        new_mitgliedschaft.ort = objekt["Ort"]
+                        if objekt["FuerKorrespondenzGesperrt"]:
+                            new_mitgliedschaft.adressen_gesperrt = 1
+                    else:
+                        # solidarmitglied
+                        new_mitgliedschaft.hat_solidarmitglied = 1
+                        if kontaktdaten["Anrede"] != 'Unbekannt':
+                            new_mitgliedschaft.anrede_2 = kontaktdaten["Anrede"]
+                        new_mitgliedschaft.nachname_2 = kontaktdaten["Nachname"]
+                        new_mitgliedschaft.vorname_2 = kontaktdaten["Vorname"]
+                        new_mitgliedschaft.tel_p_2 = kontaktdaten["Telefon"]
+                        new_mitgliedschaft.tel_m_2 = kontaktdaten["Mobile"]
+                        new_mitgliedschaft.tel_g_2 = kontaktdaten["TelefonGeschaeft"]
+                        new_mitgliedschaft.e_mail_2 = kontaktdaten["Email"]
+        else:
+            # reset objektadresse
+            new_mitgliedschaft.abweichende_objektadresse = 0
+            new_mitgliedschaft.objekt_zusatz_adresse = ''
+            new_mitgliedschaft.objekt_strasse = ''
+            new_mitgliedschaft.objekt_nummer = ''
+            new_mitgliedschaft.objekt_plz = ''
+            new_mitgliedschaft.objekt_ort = ''
         
-    if filiale:
-        # erfassung filiale
-        # tbd...
-        frappe.log_error("{0}".format(filiale), 'Adressen Handling Typ Filiale noch nicht umgesetzt')
+        if rechnung:
+            # erfassung rechnungsadresse
+            # tbd...
+            frappe.log_error("{0}".format(rechnung), 'Adressen Handling Typ Rechnung noch nicht umgesetzt')
+            
+        if mitbewohner:
+            # erfassung solidarmitglied
+            # tbd...
+            frappe.log_error("{0}".format(mitbewohner), 'Adressen Handling Typ Mitbewohner noch nicht umgesetzt')
+            
+        if filiale:
+            # erfassung filiale
+            # tbd...
+            frappe.log_error("{0}".format(filiale), 'Adressen Handling Typ Filiale noch nicht umgesetzt')
+            
+        if zeitung:
+            # erfassung zeitung
+            # tbd...
+            frappe.log_error("{0}".format(zeitung), 'Adressen Handling Typ Zeitung noch nicht umgesetzt')
         
-    if zeitung:
-        # erfassung zeitung
-        # tbd...
-        frappe.log_error("{0}".format(zeitung), 'Adressen Handling Typ Zeitung noch nicht umgesetzt')
-    
-    return new_mitgliedschaft
+        return new_mitgliedschaft
+    except Exception as err:
+        return raise_xxx(500, 'Internal Server Error', err)
 
 # API (ausgehend zu Service-Platform)
 # -----------------------------------------------
