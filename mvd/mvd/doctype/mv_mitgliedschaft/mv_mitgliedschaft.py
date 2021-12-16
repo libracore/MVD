@@ -1662,6 +1662,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 # unbekannter adresstyp
                 frappe.log_error("{0}".format(adressen_dict), 'unbekannter adresstyp')
                 return False
+            frappe.log_error("{0}".format(adressen_dict['Typ']), 'adresse analysiert und zugewiesen')
         
         if not mitglied and not objekt:
             frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage: weder mitglied noch objekt')
