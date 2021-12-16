@@ -1532,8 +1532,12 @@ def mvm_neuanlage(kwargs):
             if not new_mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen')
             
+            frappe.log_error("{0}".format(new_mitgliedschaft), 'new_mitgliedschaft hat nun adressen')
+            
             new_mitgliedschaft.validierung_notwendig = 0
             new_mitgliedschaft.save()
+            
+            frappe.log_error("{0}".format(new_mitgliedschaft), 'new_mitgliedschaft wurde gespeichert')
             
             return raise_200()
             
