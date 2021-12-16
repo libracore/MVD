@@ -1505,10 +1505,10 @@ def mvm_neuanlage(kwargs):
             
             new_mitgliedschaft = frappe.get_doc({
                 'doctype': 'MV Mitgliedschaft',
-                'mitglied_nr': kwargs['MitgliedNummer'],
+                'mitglied_nr': str(kwargs['MitgliedNummer']),
                 'sektion_id': sektion_id,
                 'status_c': status_c,
-                'mitglied_id': kwargs['MitgliedId'],
+                'mitglied_id': str(kwargs['MitgliedId']),
                 'mitgliedtyp_c': mitgliedtyp_c,
                 'inkl_hv': get_inkl_hv(kwargs["JahrBezahltHaftpflicht"]),
                 'm_und_w': kwargs['AnzahlZeitungen'],
@@ -1674,33 +1674,33 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 else:
                     new_mitgliedschaftkundentyp = 'Einzelperson'
                 if kontaktdaten["Anrede"] != 'Unbekannt':
-                    new_mitgliedschaft.anrede_c = kontaktdaten["Anrede"]
-                new_mitgliedschaft.nachname_1 = kontaktdaten["Nachname"]
-                new_mitgliedschaft.vorname_1 = kontaktdaten["Vorname"]
-                new_mitgliedschaft.tel_p_1 = kontaktdaten["Telefon"]
-                new_mitgliedschaft.tel_m_1 = kontaktdaten["Mobile"]
-                new_mitgliedschaft.tel_g_1 = kontaktdaten["TelefonGeschaeft"]
-                new_mitgliedschaft.e_mail_1 = kontaktdaten["Email"]
-                new_mitgliedschaft.zusatz_adresse = mitglied["Adresszusatz"]
-                new_mitgliedschaft.strasse = mitglied["Strasse"]
-                new_mitgliedschaft.nummer = mitglied["Hausnummer"]
-                new_mitgliedschaft.postfach = mitglied["Postfach"]
-                new_mitgliedschaft.postfach_nummer = mitglied["PostfachNummer"]
-                new_mitgliedschaft.plz = mitglied["Postleitzahl"]
-                new_mitgliedschaft.ort = mitglied["Ort"]
+                    new_mitgliedschaft.anrede_c = str(kontaktdaten["Anrede"])
+                new_mitgliedschaft.nachname_1 = str(kontaktdaten["Nachname"])
+                new_mitgliedschaft.vorname_1 = str(kontaktdaten["Vorname"])
+                new_mitgliedschaft.tel_p_1 = str(kontaktdaten["Telefon"])
+                new_mitgliedschaft.tel_m_1 = str(kontaktdaten["Mobile"])
+                new_mitgliedschaft.tel_g_1 = str(kontaktdaten["TelefonGeschaeft"])
+                new_mitgliedschaft.e_mail_1 = str(kontaktdaten["Email"])
+                new_mitgliedschaft.zusatz_adresse = str(mitglied["Adresszusatz"])
+                new_mitgliedschaft.strasse = str(mitglied["Strasse"])
+                new_mitgliedschaft.nummer = str(mitglied["Hausnummer"])
+                new_mitgliedschaft.postfach = str(mitglied["Postfach"])
+                new_mitgliedschaft.postfach_nummer = str(mitglied["PostfachNummer"])
+                new_mitgliedschaft.plz = str(mitglied["Postleitzahl"])
+                new_mitgliedschaft.ort = str(mitglied["Ort"])
                 if mitglied["FuerKorrespondenzGesperrt"]:
                     new_mitgliedschaft.adressen_gesperrt = 1
             else:
                 # solidarmitglied
                 new_mitgliedschaft.hat_solidarmitglied = 1
                 if kontaktdaten["Anrede"] != 'Unbekannt':
-                    new_mitgliedschaft.anrede_2 = kontaktdaten["Anrede"]
-                new_mitgliedschaft.nachname_2 = kontaktdaten["Nachname"]
-                new_mitgliedschaft.vorname_2 = kontaktdaten["Vorname"]
-                new_mitgliedschaft.tel_p_2 = kontaktdaten["Telefon"]
-                new_mitgliedschaft.tel_m_2 = kontaktdaten["Mobile"]
-                new_mitgliedschaft.tel_g_2 = kontaktdaten["TelefonGeschaeft"]
-                new_mitgliedschaft.e_mail_2 = kontaktdaten["Email"]
+                    new_mitgliedschaft.anrede_2 = str(kontaktdaten["Anrede"])
+                new_mitgliedschaft.nachname_2 = str(kontaktdaten["Nachname"])
+                new_mitgliedschaft.vorname_2 = str(kontaktdaten["Vorname"])
+                new_mitgliedschaft.tel_p_2 = str(kontaktdaten["Telefon"])
+                new_mitgliedschaft.tel_m_2 = str(kontaktdaten["Mobile"])
+                new_mitgliedschaft.tel_g_2 = str(kontaktdaten["TelefonGeschaeft"])
+                new_mitgliedschaft.e_mail_2 = str(kontaktdaten["Email"])
         
     
     if objekt:
