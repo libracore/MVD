@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft import mvm_mitglieder, mvm_neue_mitglieder_nummer, mvm_kuendigung, mvm_sektionswechsel
 import json
+import requests
 
 # for test
 # ---------------------------------------------------
@@ -23,12 +24,17 @@ def whoami(type='light'):
 # ausgehend
 # ---------------------------------------------------
 def neue_mitglieder_nummer(sektion_code):
-    mitglied_id = 'DoSomeMagic'
+    url = frappe.db.get_single_value('Service Plattform API', 'api_url')
+    secret = frappe.db.get_single_value('Service Plattform API', 'api_secret')
+    mitglied_id = requests.post(url, json = {"sektionCode": sektion_code})
     return mitglied_id
 
 def update_mvm(mvm):
     # DoSomeMagic
-    return True
+    url = frappe.db.get_single_value('Service Plattform API', 'api_url')
+    secret = frappe.db.get_single_value('Service Plattform API', 'api_secret')
+    sp_connection = requests.post(url, json = mvm)
+    return sp_connection
 
 # eingehend
 # ---------------------------------------------------

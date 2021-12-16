@@ -1521,7 +1521,10 @@ def mvm_neuanlage(kwargs):
                 #'zuzug_von': kwargs['???'], --> woher erhalte ich diese Info?
                 #'wegzug_zu': kwargs['mitgliedNummer'], --> benötige ich bei neumitglieder nicht
                 'kuendigung': kuendigung,
-                'validierung_notwendig': 1
+                'validierung_notwendig': 1,
+                'nachname_1': 'API',
+                'plz': 'API',
+                'ort': 'API'
             })
             new_mitgliedschaft.insert()
             
