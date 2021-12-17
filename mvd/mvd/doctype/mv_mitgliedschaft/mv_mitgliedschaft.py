@@ -1628,7 +1628,10 @@ def get_mitgliedtyp_c(mitgliedtyp_c):
     mapper = {
         'privat': 'Privat',
         'kollektiv': 'Kollektiv',
-        'geschaeft': 'Geschäft'
+        'geschaeft': 'Geschäft',
+        'Privat': 'Privat',
+        'Kollektiv': 'Kollektiv',
+        'Geschaeft': 'Geschäft'
     }
     if mitgliedtyp_c.lower() in mapper:
         return mapper[mitgliedtyp_c.lower()]
