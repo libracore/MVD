@@ -1457,18 +1457,17 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.wegzug = wegzug
             mitgliedschaft.austritt = austritt
             mitgliedschaft.kuendigung = kuendigung
-            mitgliedschaft.validierung_notwendig = 1
-            mitgliedschaft.save()
-            frappe.db.commit()
             
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
             
             if not mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Bei dem Adressen Update ist etwas schief gelaufen')
             
+            # logik ob validiert werde muss oder nicht muss noch implementiert werden!
             mitgliedschaft.validierung_notwendig = '0'
             
             mitgliedschaft.save()
+            frappe.db.commit()
             
             return raise_200()
             
@@ -1539,20 +1538,21 @@ def mvm_neuanlage(kwargs):
                 'wegzug': wegzug,
                 'austritt': austritt,
                 'kuendigung': kuendigung,
-                'validierung_notwendig': 1,
                 'nachname_1': 'API',
                 'plz': 'API',
                 'ort': 'API'
             })
-            new_mitgliedschaft.insert()
             
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
             
             if not new_mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen')
             
+            # logik ob validiert werde muss oder nicht muss noch implementiert werden!
             new_mitgliedschaft.validierung_notwendig = '0'
-            new_mitgliedschaft.save()
+            
+            new_mitgliedschaft.insert()
+            frappe.db.commit()
             
             return raise_200()
             
@@ -1706,8 +1706,8 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                     new_mitgliedschaft.zusatz_adresse = str(mitglied["Adresszusatz"])
                     new_mitgliedschaft.strasse = str(mitglied["Strasse"])
                     new_mitgliedschaft.nummer = str(mitglied["Hausnummer"])
-                    new_mitgliedschaft.postfach = str(mitglied["Postfach"])
-                    new_mitgliedschaft.postfach_nummer = str(mitglied["PostfachNummer"])
+                    new_mitgliedschaft.postfach = 1 if mitglied["Postfach"] else '0'
+                    new_mitgliedschaft.postfach_nummer = str(mitglied["PostfachNummer"]) if mitglied["PostfachNummer"] else ''
                     new_mitgliedschaft.plz = str(mitglied["Postleitzahl"])
                     new_mitgliedschaft.ort = str(mitglied["Ort"])
                     if mitglied["FuerKorrespondenzGesperrt"]:
@@ -1758,8 +1758,8 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                         new_mitgliedschaft.zusatz_adresse = str(objekt["Adresszusatz"])
                         new_mitgliedschaft.strasse = str(objekt["Strasse"])
                         new_mitgliedschaft.nummer = str(objekt["Hausnummer"])
-                        new_mitgliedschaft.postfach = str(objekt["Postfach"])
-                        new_mitgliedschaft.postfach_nummer = str(objekt["PostfachNummer"])
+                        new_mitgliedschaft.postfach = 1 if objekt["Postfach"] else '0'
+                        new_mitgliedschaft.postfach_nummer = str(objekt["PostfachNummer"]) if objekt["PostfachNummer"] else ''
                         new_mitgliedschaft.plz = str(objekt["Postleitzahl"])
                         new_mitgliedschaft.ort = str(objekt["Ort"])
                         if objekt["FuerKorrespondenzGesperrt"]:

@@ -4,21 +4,23 @@
 frappe.ui.form.on('MV Mitgliedschaft', {
     refresh: function(frm) {
         if (!frm.doc.__islocal) {
-            frm.add_custom_button(__("Sektionswechsel"),  function() {
-                    sektionswechsel(frm);
-            }, __("Mutation"));
-            frm.add_custom_button(__("Kündigung"),  function() {
-                    kuendigung(frm);
-            }, __("Mutation"));
-            frm.add_custom_button(__("Ausschluss"),  function() {
-                    ausschluss(frm);
-            }, __("Mutation"));
-            frm.add_custom_button(__("Todesfall"),  function() {
-                    todesfall(frm);
-            }, __("Mutation"));
-            frm.add_custom_button(__("Mitgliedschafts-Rechnung"),  function() {
-                    erstelle_rechnung(frm);
-            }, __("Erstelle"));
+            if (cur_frm.doc.status_c != 'Wegzug') {
+                frm.add_custom_button(__("Sektionswechsel"),  function() {
+                        sektionswechsel(frm);
+                }, __("Mutation"));
+                frm.add_custom_button(__("Kündigung"),  function() {
+                        kuendigung(frm);
+                }, __("Mutation"));
+                frm.add_custom_button(__("Ausschluss"),  function() {
+                        ausschluss(frm);
+                }, __("Mutation"));
+                frm.add_custom_button(__("Todesfall"),  function() {
+                        todesfall(frm);
+                }, __("Mutation"));
+                frm.add_custom_button(__("Mitgliedschafts-Rechnung"),  function() {
+                        erstelle_rechnung(frm);
+                }, __("Erstelle"));
+            }
             
             get_adressdaten(frm);
         }
@@ -194,11 +196,13 @@ function kuendigung(frm) {
 
 function todesfall(frm) {
     frappe.prompt([
+        {'fieldname': 'verstorben_am', 'fieldtype': 'Date', 'label': 'Verstorben am', 'reqd': 0, 'default': frappe.datetime.get_today()},
         {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Todesfall bedingte Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.year_end()},
         {'fieldname': 'todesfall_uebernahme', 'fieldtype': 'Data', 'label': 'Übernahem durch'}
     ],
     function(values){
         cur_frm.set_value("kuendigung", values.datum);
+        cur_frm.set_value("verstorben_am", values.verstorben_am);
         cur_frm.set_value("status_c", 'Gestorben');
         if (values.todesfall_uebernahme) {
             cur_frm.set_value("todesfall_uebernahme", values.todesfall_uebernahme);

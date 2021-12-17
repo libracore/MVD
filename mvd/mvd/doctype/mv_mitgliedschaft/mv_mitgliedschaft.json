@@ -37,6 +37,7 @@
   "zuzug_von",
   "wegzug_zu",
   "kuendigung",
+  "verstorben_am",
   "section_personen_daten",
   "heading_hauptmitglied",
   "kundentyp",
@@ -790,10 +791,16 @@
    "fieldtype": "Check",
    "label": "K\u00fcndigung verarbeiten",
    "read_only": 1
+  },
+  {
+   "fieldname": "verstorben_am",
+   "fieldtype": "Date",
+   "label": "Verstorben am",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-12-17 08:21:28.632131",
+ "modified": "2021-12-17 10:41:06.894839",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
