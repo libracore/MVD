@@ -1833,7 +1833,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "regionCode": "", # ???
         "istTemporaeresMitglied": False, # ???
         "fuerBewirtschaftungGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
-        "erfassungsdatum": "2021-12-15T18:56:17.583Z",
+        "erfassungsdatum": mitgliedschaft.creation,
         "eintrittsdatum": mitgliedschaft.eintritt, # achtung nur date!
         "austrittsdatum": mitgliedschaft.austritt, # achtung nur date!
         "zuzugsdatum": mitgliedschaft.zuzug or '', # achtung nur date!
@@ -1872,9 +1872,9 @@ def get_adressen_for_sp(mitgliedschaft):
                 "istHauptkontakt": True,
                 "vorname": str(mitgliedschaft.vorname_1),
                 "nachname": str(mitgliedschaft.nachname_1),
-                "email": str(mitgliedschafte_mail_1) or '',
+                "email": str(mitgliedschaft.e_mail_1) or '',
                 "telefon": str(mitgliedschaft.tel_p_1) or '',
-                "mobile": str(mitgliedschafttel_m_1) or '',
+                "mobile": str(mitgliedschaft.tel_m_1) or '',
                 "telefonGeschaeft": str(mitgliedschaft.tel_g_1) or '',
                 "firma": str(mitgliedschaft.firma) if mitgliedschaft.kundentyp == 'Unternehmen' else '',
                 "firmaZusatz": str(mitgliedschaft.zusatz_firma) if mitgliedschaft.kundentyp == 'Unternehmen' else ''
@@ -1889,9 +1889,9 @@ def get_adressen_for_sp(mitgliedschaft):
             "istHauptkontakt": False,
             "vorname": str(mitgliedschaft.vorname_2),
             "nachname": str(mitgliedschaft.nachname_2),
-            "email": str(mitgliedschafte_mail_2) or '',
+            "email": str(mitgliedschaft.e_mail_2) or '',
             "telefon": str(mitgliedschaft.tel_p_2) or '',
-            "mobile": str(mitgliedschafttel_m_2) or '',
+            "mobile": str(mitgliedschaft.tel_m_2) or '',
             "telefonGeschaeft": str(mitgliedschaft.tel_g_2) or '',
             "firma": '',
             "firmaZusatz": ''
@@ -1899,6 +1899,55 @@ def get_adressen_for_sp(mitgliedschaft):
         mitglied['kontakte'].append(solidarmitglied)
     
     adressen.append(mitglied)
+    
+    if mitgliedschaft.abweichende_objektadresse:
+        objekt = {
+            "typ": "Mitglied",
+            "strasse": str(mitgliedschaft.objekt_strasse),
+            "hausnummer": str(mitgliedschaft.objekt_hausnummer),
+            "hausnummerZusatz": str(mitgliedschaft.objekt_nummer_zu),
+            "postleitzahl": str(mitgliedschaft.objekt_plz),
+            "ort": str(mitgliedschaft.objekt_ort),
+            "adresszusatz": str(mitgliedschaft.objekt_zusatz_adresse),
+            "postfach": False,
+            "postfachNummer": "",
+            "fuerKorrespondenzGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
+            "kontakte": []
+        }
+        adressen.append(objekt)
+    
+    if mitgliedschaft.abweichende_rechnungsadresse:
+        rechnung = {
+            "typ": "Rechnung",
+            "strasse": str(mitgliedschaft.rg_strasse),
+            "hausnummer": str(mitgliedschaft.rg_nummer),
+            "hausnummerZusatz": str(mitgliedschaft.rg_nummer_zu),
+            "postleitzahl": str(mitgliedschaft.rg_plz),
+            "ort": str(mitgliedschaft.rg_ort),
+            "adresszusatz": str(mitgliedschaft.rg_zusatz_adresse),
+            "postfach": True if mitgliedschaft.rg_postfach else False,
+            "postfachNummer": str(mitgliedschaft.rg_postfach_nummer),
+            "fuerKorrespondenzGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
+            "kontakte": []
+        }
+        
+        if mitgliedschaft.unabhaengiger_debitor:
+            rechnungskontakt = {
+                "anrede": str(mitgliedschaft.rg_anrede) if mitgliedschaft.rg_anrede else "Unbekannt",
+                "sprache": "Deutsch",
+                "istHauptkontakt": False,
+                "vorname": str(mitgliedschaft.rg_vorname),
+                "nachname": str(mitgliedschaft.rg_nachname),
+                "email": str(mitgliedschaft.rg_e_mail) or '',
+                "telefon": str(mitgliedschaft.rg_tel_p) or '',
+                "mobile": str(mitgliedschaft.rg_tel_m) or '',
+                "telefonGeschaeft": str(mitgliedschaft.rg_tel_g) or '',
+                "firma": str(mitgliedschaft.rg_firma) or '',
+                "firmaZusatz": str(mitgliedschaft.rg_zusatz_firma) or ''
+            }
+            rechnung['kontakte'].append(rechnungskontakt)
+        
+        adressen.append(rechnung)
     
     return adressen
 
