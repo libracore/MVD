@@ -12,14 +12,17 @@ from PyPDF2 import PdfFileWriter
 from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
 
 class MVMitgliedschaft(Document):
+    def after_insert(self):
+        send_mvm_to_sp(self, False)
+    
+    def on_update(self):
+        send_mvm_to_sp(self, True)
+    
     def set_new_name(self):
-        if not self.mitglied_nr:
-            # Mitglied Nr
-            self.mitglied_nr = str(get_mitglied_nr(self))
-        
-        if not self.mitglied_id:
-            # Mitglied ID
-            self.mitglied_id = str(get_mitglied_id(self))
+        if not self.mitglied_nr or self.mitglied_id:
+            mitglied_nummer_obj = mvm_neue_mitglieder_nummer(self)
+            self.mitglied_nr = mitglied_nummer_obj["mitgliedNummer"]
+            self.mitglied_id = mitglied_nummer_obj["mitgliedId"]
     
     def validate(self):
         if not self.validierung_notwendig:
@@ -150,21 +153,6 @@ class MVMitgliedschaft(Document):
         contact.links = []
         contact.save(ignore_permissions=True)
         return ''
-
-def get_mitglied_id(mitgliedschaft):
-    # ~ neue_mitglieder_nummer = mvm_neue_mitglieder_nummer(mitgliedschaft)
-    # ~ return neue_mitglieder_nummer
-    
-    # zum testen, nachher via API!
-    anz_mitgliedschaften = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMV Mitgliedschaft`""", as_dict=True)[0].qty
-    anz_mitgliedschaften += 1
-    return anz_mitgliedschaften
-    
-def get_mitglied_nr(mitgliedschaft):
-    anz_mitgliedschaften = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMV Mitgliedschaft`""", as_dict=True)[0].qty
-    anz_mitgliedschaften += 1
-    mitglied_nr = "MV" + str(anz_mitgliedschaften).zfill(8)
-    return mitglied_nr
     
 def get_adressblock(mitgliedschaft):
     adressblock = ''
@@ -1232,7 +1220,6 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
     try:
         mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
         new_mitgliedschaft = frappe.copy_doc(mitgliedschaft)
-        # new_mitgliedschaft.mitglied_nr => bleibt bei Sektionswechsel erhalten, nur mitglied_id wird neu durch SP vergeben
         new_mitgliedschaft.mitglied_id = ''
         new_mitgliedschaft.zuzug_von = new_mitgliedschaft.sektion_id
         new_mitgliedschaft.sektion_id = neue_sektion
@@ -1384,17 +1371,16 @@ def raise_xxx(code, title, message):
     }]
     
 def raise_200(answer='Success'):
-    frappe.log_error("200 Success", 'SP API Success')
+    frappe.local.response.http_status_code = 200
+    frappe.local.response.message = answer
     return ['200 Success', answer]
 
 # API Funktionshelfer
 # -----------------------------------------------
 def check_update_vs_neuanlage(kwargs):
     if not frappe.db.exists("MV Mitgliedschaft", kwargs["MitgliedId"]):
-        frappe.log_error("{0}".format(kwargs), 'SP API: Starte Neuanlage')
         return mvm_neuanlage(kwargs)
     else:
-        frappe.log_error("{0}".format(kwargs), 'SP API: Starte Update')
         mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", kwargs["MitgliedId"])
         return mvm_update(mitgliedschaft, kwargs)
         
@@ -1821,35 +1807,53 @@ def mvm_neue_mitglieder_nummer(mitgliedschaft):
     sektion_code = get_sektion_code(mitgliedschaft.sektion_id)
     return neue_mitglieder_nummer(sektion_code)
 
-def send_mvm_to_sp(mitgliedschaft):
+def send_mvm_to_sp(mitgliedschaft, update):
     from mvd.mvd.service_plattform.api import update_mvm
     prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
-    update_status = update_mvm(prepared_mvm)
+    update_status = update_mvm(prepared_mvm, update)
     return update_status
 
 def prepare_mvm_for_sp(mitgliedschaft):
     adressen = get_adressen_for_sp(mitgliedschaft)
+    typ_mapper = {
+        'Kollektiv': 'Kollektiv',
+        'Privat': 'Privat',
+        'Geschäft': 'Geschaeft'
+    }
+    status_mapper = {
+        'Anmeldung': 'Anmeldung',
+        'Online-Anmeldung': 'OnlineAnmeldung',
+        'Online-Beitritt': 'OnlineBeitritt',
+        'Zuzug': 'Zuzug',
+        'Regulär': 'Regulaer',
+        'Gestorben': 'Gestorben',
+        'Kündigung': 'Kuendigung',
+        'Wegzug': 'Wegzug',
+        'Ausschluss': 'Ausschluss',
+        'Inaktiv': 'Inaktiv',
+        'Interessent:In': 'InteressentIn'
+    }
     prepared_mvm = {
         "mitgliedNummer": str(mitgliedschaft.mitglied_nr),
         "mitgliedId": int(mitgliedschaft.mitglied_id),
         "sektionCode": str(get_sektion_code(mitgliedschaft.sektion_id)),
-        "typ": str(mitgliedschaft.mitgliedtyp_c),
-        "status": str(mitgliedschaftstatus_c),
-        "regionCode": "", # ???
+        "typ": str(typ_mapper[mitgliedschaft.mitgliedtyp_c]),
+        "status": str(status_mapper[mitgliedschaft.status_c]),
+        "regionCode": None, # ???
         "istTemporaeresMitglied": False, # ???
         "fuerBewirtschaftungGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
-        "erfassungsdatum": mitgliedschaft.creation,
-        "eintrittsdatum": mitgliedschaft.eintritt, # achtung nur date!
-        "austrittsdatum": mitgliedschaft.austritt, # achtung nur date!
-        "zuzugsdatum": mitgliedschaft.zuzug or '', # achtung nur date!
-        "wegzugsdatum": mitgliedschaft.wegzug or '', # achtung nur date!
-        "kuendigungPer": mitgliedschaft.kuendigung or '', # achtung nur date!
-        "jahrBezahltMitgliedschaft": 0, # ???
-        "betragBezahltMitgliedschaft": 0, # ???
-        "jahrBezahltHaftpflicht": 0, # ???
-        "betragBezahltHaftpflicht": 0, # ???
+        "erfassungsdatum": str(mitgliedschaft.creation).replace(" ", "T"),
+        "eintrittsdatum": mitgliedschaft.eintritt or None, # achtung nur date!
+        "austrittsdatum": mitgliedschaft.austritt or None, # achtung nur date!
+        "zuzugsdatum": mitgliedschaft.zuzug or None, # achtung nur date!
+        "wegzugsdatum": mitgliedschaft.wegzug or None, # achtung nur date!
+        "kuendigungPer": mitgliedschaft.kuendigung or None, # achtung nur date!
+        "jahrBezahltMitgliedschaft": None, # ???
+        "betragBezahltMitgliedschaft": None, # ???
+        "jahrBezahltHaftpflicht": None, # ???
+        "betragBezahltHaftpflicht": None, # ???
         "naechstesJahrGeschuldet": True, # ???
-        "bemerkungen": str(mitgliedschaft.wichtig) or '',
+        "bemerkungen": str(mitgliedschaft.wichtig) if mitgliedschaft.wichtig else None,
         "anzahlZeitungen": int(mitgliedschaft.m_und_w),
         "zeitungAlsPdf": True if mitgliedschaft.m_und_w_pdf else False,
         "adressen": adressen
@@ -1861,28 +1865,28 @@ def get_adressen_for_sp(mitgliedschaft):
     adressen = []
     mitglied = {
         "typ": "Mitglied",
-        "strasse": str(mitgliedschaft.strasse),
-        "hausnummer": str(mitgliedschaft.nummer),
-        "hausnummerZusatz": str(mitgliedschaft.nummer_zu),
-        "postleitzahl": str(mitgliedschaft.plz),
-        "ort": str(mitgliedschaft.ort),
-        "adresszusatz": str(mitgliedschaft.zusatz_adresse),
+        "strasse": str(mitgliedschaft.strasse) if mitgliedschaft.strasse else None,
+        "hausnummer": str(mitgliedschaft.nummer) if mitgliedschaft.nummer else None,
+        "hausnummerZusatz": str(mitgliedschaft.nummer_zu) if mitgliedschaft.nummer_zu else None,
+        "postleitzahl": str(mitgliedschaft.plz) if mitgliedschaft.plz else None,
+        "ort": str(mitgliedschaft.ort) if mitgliedschaft.ort else None,
+        "adresszusatz": str(mitgliedschaft.zusatz_adresse) if mitgliedschaft.zusatz_adresse else None,
         "postfach": True if mitgliedschaft.postfach else False,
-        "postfachNummer": str(mitgliedschaft.postfach_nummer),
+        "postfachNummer": str(mitgliedschaft.postfach_nummer) if mitgliedschaft.postfach_nummer else None,
         "fuerKorrespondenzGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
         "kontakte": [
             {
                 "anrede": str(mitgliedschaft.anrede_c) if mitgliedschaft.anrede_c else "Unbekannt",
                 "sprache": "Deutsch",
                 "istHauptkontakt": True,
-                "vorname": str(mitgliedschaft.vorname_1),
-                "nachname": str(mitgliedschaft.nachname_1),
-                "email": str(mitgliedschaft.e_mail_1) or '',
-                "telefon": str(mitgliedschaft.tel_p_1) or '',
-                "mobile": str(mitgliedschaft.tel_m_1) or '',
-                "telefonGeschaeft": str(mitgliedschaft.tel_g_1) or '',
-                "firma": str(mitgliedschaft.firma) if mitgliedschaft.kundentyp == 'Unternehmen' else '',
-                "firmaZusatz": str(mitgliedschaft.zusatz_firma) if mitgliedschaft.kundentyp == 'Unternehmen' else ''
+                "vorname": str(mitgliedschaft.vorname_1) if mitgliedschaft.vorname_1 else None,
+                "nachname": str(mitgliedschaft.nachname_1) if mitgliedschaft.nachname_1 else None,
+                "email": str(mitgliedschaft.e_mail_1) if mitgliedschaft.e_mail_1 else None,
+                "telefon": str(mitgliedschaft.tel_p_1) if mitgliedschaft.tel_p_1 else None,
+                "mobile": str(mitgliedschaft.tel_m_1) if mitgliedschaft.tel_m_1 else None,
+                "telefonGeschaeft": str(mitgliedschaft.tel_g_1) if mitgliedschaft.tel_g_1 else None,
+                "firma": str(mitgliedschaft.firma) if mitgliedschaft.kundentyp == 'Unternehmen' else None,
+                "firmaZusatz": str(mitgliedschaft.zusatz_firma) if mitgliedschaft.kundentyp == 'Unternehmen' else None
             }
         ]
     }
@@ -1892,12 +1896,12 @@ def get_adressen_for_sp(mitgliedschaft):
             "anrede": str(mitgliedschaft.anrede_2) if mitgliedschaft.anrede_2 else "Unbekannt",
             "sprache": "Deutsch",
             "istHauptkontakt": False,
-            "vorname": str(mitgliedschaft.vorname_2),
-            "nachname": str(mitgliedschaft.nachname_2),
-            "email": str(mitgliedschaft.e_mail_2) or '',
-            "telefon": str(mitgliedschaft.tel_p_2) or '',
-            "mobile": str(mitgliedschaft.tel_m_2) or '',
-            "telefonGeschaeft": str(mitgliedschaft.tel_g_2) or '',
+            "vorname": str(mitgliedschaft.vorname_2) if mitgliedschaft.vorname_2 else None,
+            "nachname": str(mitgliedschaft.nachname_2) if mitgliedschaft.nachname_2 else None,
+            "email": str(mitgliedschaft.e_mail_2) if mitgliedschaft.e_mail_2 else None,
+            "telefon": str(mitgliedschaft.tel_p_2) if mitgliedschaft.tel_p_2 else None,
+            "mobile": str(mitgliedschaft.tel_m_2) if mitgliedschaft.tel_m_2 else None,
+            "telefonGeschaeft": str(mitgliedschaft.tel_g_2) if mitgliedschaft.tel_g_2 else None,
             "firma": '',
             "firmaZusatz": ''
         }
@@ -1908,12 +1912,12 @@ def get_adressen_for_sp(mitgliedschaft):
     if mitgliedschaft.abweichende_objektadresse:
         objekt = {
             "typ": "Mitglied",
-            "strasse": str(mitgliedschaft.objekt_strasse),
-            "hausnummer": str(mitgliedschaft.objekt_hausnummer),
-            "hausnummerZusatz": str(mitgliedschaft.objekt_nummer_zu),
-            "postleitzahl": str(mitgliedschaft.objekt_plz),
-            "ort": str(mitgliedschaft.objekt_ort),
-            "adresszusatz": str(mitgliedschaft.objekt_zusatz_adresse),
+            "strasse": str(mitgliedschaft.objekt_strasse) if mitgliedschaft.objekt_strasse else None,
+            "hausnummer": str(mitgliedschaft.objekt_hausnummer) if mitgliedschaft.objekt_hausnummer else None,
+            "hausnummerZusatz": str(mitgliedschaft.objekt_nummer_zu) if mitgliedschaft.objekt_nummer_zu else None,
+            "postleitzahl": str(mitgliedschaft.objekt_plz) if mitgliedschaft.objekt_plz else None,
+            "ort": str(mitgliedschaft.objekt_ort) if mitgliedschaft.objekt_ort else None,
+            "adresszusatz": str(mitgliedschaft.objekt_zusatz_adresse) if mitgliedschaft.objekt_zusatz_adresse else None,
             "postfach": False,
             "postfachNummer": "",
             "fuerKorrespondenzGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
@@ -1924,14 +1928,14 @@ def get_adressen_for_sp(mitgliedschaft):
     if mitgliedschaft.abweichende_rechnungsadresse:
         rechnung = {
             "typ": "Rechnung",
-            "strasse": str(mitgliedschaft.rg_strasse),
-            "hausnummer": str(mitgliedschaft.rg_nummer),
-            "hausnummerZusatz": str(mitgliedschaft.rg_nummer_zu),
-            "postleitzahl": str(mitgliedschaft.rg_plz),
-            "ort": str(mitgliedschaft.rg_ort),
-            "adresszusatz": str(mitgliedschaft.rg_zusatz_adresse),
+            "strasse": str(mitgliedschaft.rg_strasse) if mitgliedschaft.rg_strasse else None,
+            "hausnummer": str(mitgliedschaft.rg_nummer) if mitgliedschaft.rg_nummer else None,
+            "hausnummerZusatz": str(mitgliedschaft.rg_nummer_zu) if mitgliedschaft.rg_nummer_zu else None,
+            "postleitzahl": str(mitgliedschaft.rg_plz) if mitgliedschaft.rg_plz else None,
+            "ort": str(mitgliedschaft.rg_ort) if mitgliedschaft.rg_ort else None,
+            "adresszusatz": str(mitgliedschaft.rg_zusatz_adresse) if mitgliedschaft.rg_zusatz_adresse else None,
             "postfach": True if mitgliedschaft.rg_postfach else False,
-            "postfachNummer": str(mitgliedschaft.rg_postfach_nummer),
+            "postfachNummer": str(mitgliedschaft.rg_postfach_nummer) if mitgliedschaft.rg_postfach_nummer else None,
             "fuerKorrespondenzGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
             "kontakte": []
         }
@@ -1941,14 +1945,14 @@ def get_adressen_for_sp(mitgliedschaft):
                 "anrede": str(mitgliedschaft.rg_anrede) if mitgliedschaft.rg_anrede else "Unbekannt",
                 "sprache": "Deutsch",
                 "istHauptkontakt": False,
-                "vorname": str(mitgliedschaft.rg_vorname),
-                "nachname": str(mitgliedschaft.rg_nachname),
-                "email": str(mitgliedschaft.rg_e_mail) or '',
-                "telefon": str(mitgliedschaft.rg_tel_p) or '',
-                "mobile": str(mitgliedschaft.rg_tel_m) or '',
-                "telefonGeschaeft": str(mitgliedschaft.rg_tel_g) or '',
-                "firma": str(mitgliedschaft.rg_firma) or '',
-                "firmaZusatz": str(mitgliedschaft.rg_zusatz_firma) or ''
+                "vorname": str(mitgliedschaft.rg_vorname) if mitgliedschaft.rg_vorname else None,
+                "nachname": str(mitgliedschaft.rg_nachname) if mitgliedschaft.rg_nachname else None,
+                "email": str(mitgliedschaft.rg_e_mail) if mitgliedschaft.rg_e_mail else None,
+                "telefon": str(mitgliedschaft.rg_tel_p) if mitgliedschaft.rg_tel_p else None,
+                "mobile": str(mitgliedschaft.rg_tel_m) if mitgliedschaft.rg_tel_m else None,
+                "telefonGeschaeft": str(mitgliedschaft.rg_tel_g) if mitgliedschaft.rg_tel_g else None,
+                "firma": str(mitgliedschaft.rg_firma) if mitgliedschaft.rg_firma else None,
+                "firmaZusatz": str(mitgliedschaft.rg_zusatz_firma) if mitgliedschaft.rg_zusatz_firma else None,
             }
             rechnung['kontakte'].append(rechnungskontakt)
         

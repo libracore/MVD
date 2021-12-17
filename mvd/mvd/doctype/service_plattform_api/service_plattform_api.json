@@ -5,22 +5,74 @@
  "engine": "InnoDB",
  "field_order": [
   "api_url",
-  "api_secret"
+  "api_secret",
+  "client_id",
+  "api_token_url",
+  "api_token",
+  "section_endpoints",
+  "auth_check",
+  "mitglieder",
+  "neue_mitglieder_nummer"
  ],
  "fields": [
   {
    "fieldname": "api_secret",
    "fieldtype": "Data",
-   "label": "API Secret"
+   "in_list_view": 1,
+   "label": "API Secret",
+   "reqd": 1
   },
   {
    "fieldname": "api_url",
    "fieldtype": "Data",
-   "label": "API URL"
+   "in_list_view": 1,
+   "label": "API URL",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_endpoints",
+   "fieldtype": "Section Break",
+   "label": "Endpoints"
+  },
+  {
+   "fieldname": "auth_check",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Auth Check",
+   "reqd": 1
+  },
+  {
+   "fieldname": "api_token",
+   "fieldtype": "Code",
+   "label": "API Token"
+  },
+  {
+   "fieldname": "client_id",
+   "fieldtype": "Data",
+   "label": "Client ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "api_token_url",
+   "fieldtype": "Data",
+   "label": "Token URL",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mitglieder",
+   "fieldtype": "Data",
+   "label": "Create/Update Mitglieder",
+   "reqd": 1
+  },
+  {
+   "fieldname": "neue_mitglieder_nummer",
+   "fieldtype": "Data",
+   "label": "Neue Mitgliedernummer",
+   "reqd": 1
   }
  ],
  "issingle": 1,
- "modified": "2021-12-16 13:39:30.596542",
+ "modified": "2021-12-17 20:59:11.073479",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",

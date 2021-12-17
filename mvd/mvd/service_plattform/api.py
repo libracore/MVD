@@ -24,17 +24,91 @@ def whoami(type='light'):
 # ausgehend
 # ---------------------------------------------------
 def neue_mitglieder_nummer(sektion_code):
-    url = frappe.db.get_single_value('Service Plattform API', 'api_url')
-    secret = frappe.db.get_single_value('Service Plattform API', 'api_secret')
-    mitglied_id = requests.post(url, json = {"sektionCode": sektion_code})
-    return mitglied_id
+    sub_url = frappe.db.get_single_value('Service Plattform API', 'api_url')
+    endpoint = frappe.db.get_single_value('Service Plattform API', 'neue_mitglieder_nummer')
+    url = sub_url + endpoint + '/{sektion_code}'.format(sektion_code=sektion_code)
+    token = frappe.db.get_single_value('Service Plattform API', 'api_token')
+    headers = {"authorization": "Bearer {token}".format(token=token)}
+    
+    try:
+        mitglied_nr_obj = requests.post(url, headers = headers)
+        mitglied_nr_obj = mitglied_nr_obj.json()
+        return mitglied_nr_obj
+    except Exception as err:
+        frappe.log_error("{0}".format(err), 'neue_mitglieder_nummer failed')
+        frappe.db.commit()
 
-def update_mvm(mvm):
-    # DoSomeMagic
-    url = frappe.db.get_single_value('Service Plattform API', 'api_url')
-    secret = frappe.db.get_single_value('Service Plattform API', 'api_secret')
-    sp_connection = requests.post(url, json = mvm)
-    return sp_connection
+def update_mvm(mvm, update):
+    sub_url = str(frappe.db.get_single_value('Service Plattform API', 'api_url'))
+    endpoint = str(frappe.db.get_single_value('Service Plattform API', 'mitglieder'))
+    url = sub_url + endpoint
+    token = frappe.db.get_single_value('Service Plattform API', 'api_token')
+    headers = {"authorization": "Bearer {token}".format(token=token)}
+    
+    if update:
+        sp_connection = requests.put(url, json = mvm, headers = headers)
+    else:
+        sp_connection = requests.post(url, json = mvm, headers = headers)
+    
+    try:
+        if sp_connection.status_code != 204:
+            frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), 'update_mvm failed')
+            frappe.db.commit()
+            return
+        else:
+            return
+    except Exception as err:
+        frappe.log_error("{0}\n\n{1}".format(err, mvm), 'update_mvm failed')
+        frappe.db.commit()
+        return
+
+def auth_check():
+    sub_url = str(frappe.db.get_single_value('Service Plattform API', 'api_url'))
+    endpoint = str(frappe.db.get_single_value('Service Plattform API', 'auth_check'))
+    url = sub_url + endpoint
+    token = frappe.db.get_single_value('Service Plattform API', 'api_token')
+    
+    headers = {"authorization": "Bearer {token}".format(token=token)}
+    response = requests.get(url, headers = headers)
+    response = response.json()
+    
+    if response["status"] == 'Ok':
+        return
+    else:
+        # get new token and try again
+        get_token()
+        token = frappe.db.get_single_value('Service Plattform API', 'api_token')
+        headers = {"authorization": "Bearer {token}".format(token=token)}
+        response = requests.get(url, headers = headers)
+        response = response.json()
+        
+        if response["status"] == 'Ok':
+            return
+        else:
+            frappe.log_error("{0}".format(response), 'auth_check failed')
+            frappe.db.commit()
+            return
+
+def get_token():
+    url = frappe.db.get_single_value('Service Plattform API', 'api_token_url')
+    client_id = frappe.db.get_single_value('Service Plattform API', 'client_id')
+    client_secret = frappe.db.get_single_value('Service Plattform API', 'api_secret')
+    audience = frappe.db.get_single_value('Service Plattform API', 'api_url')
+    
+    headers = {"content-type": "application/json"}
+    data = {"client_id": "{0}".format(client_id), "client_secret":"{0}".format(client_secret), "audience":"{0}".format(audience), "grant_type":"client_credentials"}
+    
+    response = requests.post(url, json = data, headers = headers)
+    
+    try:
+        response = response.json()
+        token = response["access_token"]
+        frappe.client.set_value('Service Plattform API', 'Service Plattform API', 'api_token', token)
+        frappe.db.commit()
+    except Exception as err:
+        frappe.log_error("{0}\n\n{1}".format(err, response), 'get_token failed')
+    
+    return
 
 # eingehend
 # ---------------------------------------------------
