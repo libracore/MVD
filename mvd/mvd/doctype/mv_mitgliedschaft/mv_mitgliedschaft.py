@@ -14,13 +14,12 @@ from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
 class MVMitgliedschaft(Document):
     def set_new_name(self):
         if not self.mitglied_nr:
-            # zum Testen, nachher mit naming series!
             # Mitglied Nr
-            self.mitglied_nr = str(get_mitgliedid(self))
+            self.mitglied_nr = str(get_mitglied_nr(self))
         
         if not self.mitglied_id:
             # Mitglied ID
-            self.mitglied_id = str(get_mitgliedid(self))
+            self.mitglied_id = str(get_mitglied_id(self))
     
     def validate(self):
         if not self.validierung_notwendig:
@@ -152,13 +151,20 @@ class MVMitgliedschaft(Document):
         contact.save(ignore_permissions=True)
         return ''
 
-def get_mitgliedid(mitgliedschaft):
+def get_mitglied_id(mitgliedschaft):
     # ~ neue_mitglieder_nummer = mvm_neue_mitglieder_nummer(mitgliedschaft)
     # ~ return neue_mitglieder_nummer
+    
     # zum testen, nachher via API!
     anz_mitgliedschaften = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMV Mitgliedschaft`""", as_dict=True)[0].qty
     anz_mitgliedschaften += 1
     return anz_mitgliedschaften
+    
+def get_mitglied_nr(mitgliedschaft):
+    anz_mitgliedschaften = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMV Mitgliedschaft`""", as_dict=True)[0].qty
+    anz_mitgliedschaften += 1
+    mitglied_nr = "MV" + str(anz_mitgliedschaften).zfill(8)
+    return mitglied_nr
     
 def get_adressblock(mitgliedschaft):
     adressblock = ''
@@ -933,7 +939,10 @@ def update_kunde_mitglied(mitgliedschaft):
         customer.customer_addition = mitgliedschaft.zusatz_firma
         customer.customer_type = 'Company'
     else:
-        customer.customer_name = (" ").join((mitgliedschaft.vorname_1, mitgliedschaft.nachname_1))
+        if mitgliedschaft.vorname_1:
+            customer.customer_name = (" ").join((mitgliedschaft.vorname_1, mitgliedschaft.nachname_1))
+        else:
+            customer.customer_name = mitgliedschaft.nachname_1
         customer.customer_addition = ''
         customer.customer_type = 'Individual'
     customer.sektion = mitgliedschaft.sektion_id
@@ -954,7 +963,10 @@ def create_kunde_mitglied(mitgliedschaft):
         customer_addition = mitgliedschaft.zusatz_firma
         customer_type = 'Company'
     else:
-        customer_name = (" ").join((mitgliedschaft.vorname_1, mitgliedschaft.nachname_1))
+        if mitgliedschaft.vorname_1:
+            customer_name = (" ").join((mitgliedschaft.vorname_1, mitgliedschaft.nachname_1))
+        else:
+            customer_name = mitgliedschaft.nachname_1
         customer_addition = ''
         customer_type = 'Individual'
         
@@ -1163,19 +1175,19 @@ def get_anredekonvention(mitgliedschaft=None, self=None):
                 # gleiche Namen Fallback
                 return 'Guten Tag'
             else:
-                return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
         else:
             if mitgliedschaft.anrede_c == mitgliedschaft.anrede_2:
                 # selbes Geschlecht
                 if mitgliedschaft.nachname_1 == mitgliedschaft.nachname_2:
                     # gleiche Nachnamen
                     if mitgliedschaft.anrede_c == 'Herr':
-                        return 'Sehr geehrter Herr {vorname_1} {nachname_1}, sehr geehrter Herr {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                        return 'Sehr geehrter Herr {vorname_1} {nachname_1}, sehr geehrter Herr {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
                     elif mitgliedschaft.anrede_c == 'Frau':
-                        return 'Sehr geehrte Frau {vorname_1} {nachname_1}, sehr geehrte Frau {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                        return 'Sehr geehrte Frau {vorname_1} {nachname_1}, sehr geehrte Frau {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
                     else:
                         # Fallback
-                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
                 else:
                     # unterschiedliche Nachnamen
                     if mitgliedschaft.anrede_c == 'Herr':
@@ -1184,7 +1196,7 @@ def get_anredekonvention(mitgliedschaft=None, self=None):
                         return 'Sehr geehrte Frau {nachname_1}, sehr geehrte Frau {nachname_2}'.format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
                     else:
                         # Fallback
-                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
             else:
                 # unterschiedliches Geschlecht
                 if mitgliedschaft.nachname_1 == mitgliedschaft.nachname_2:
@@ -1195,7 +1207,7 @@ def get_anredekonvention(mitgliedschaft=None, self=None):
                         return 'Sehr geehrte Frau und Herr {nachname_1}'.format(nachname_1=mitgliedschaft.nachname_1)
                     else:
                         # Fallback
-                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
                 else:
                     # unterschiedliche Nachnamen
                     if mitgliedschaft.anrede_c == 'Herr':
@@ -1204,7 +1216,7 @@ def get_anredekonvention(mitgliedschaft=None, self=None):
                         return 'Sehr geehrte Frau {nachname_1}, sehr geehrter Herr {nachname_2}'.format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
                     else:
                         # Fallback
-                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1, nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
         
     else:
         # ohne Solidarmitglied
@@ -1213,14 +1225,14 @@ def get_anredekonvention(mitgliedschaft=None, self=None):
         elif mitgliedschaft.anrede_c == 'Frau':
             return 'Sehr geehrte Frau {nachname}'.format(nachname=mitgliedschaft.nachname_1)
         else:
-            return 'Guten Tag {vorname} {nachname}'.format(vorname=mitgliedschaft.vorname_1, nachname=mitgliedschaft.nachname_1)
+            return 'Guten Tag {vorname} {nachname}'.format(vorname=mitgliedschaft.vorname_1 or '', nachname=mitgliedschaft.nachname_1)
 
 @frappe.whitelist()
 def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
     try:
         mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
         new_mitgliedschaft = frappe.copy_doc(mitgliedschaft)
-        new_mitgliedschaft.mitglied_nr = ''
+        # new_mitgliedschaft.mitglied_nr => bleibt bei Sektionswechsel erhalten, nur mitglied_id wird neu durch SP vergeben
         new_mitgliedschaft.mitglied_id = ''
         new_mitgliedschaft.zuzug_von = new_mitgliedschaft.sektion_id
         new_mitgliedschaft.sektion_id = neue_sektion
@@ -1521,7 +1533,7 @@ def mvm_neuanlage(kwargs):
                 'inkl_hv': get_inkl_hv(kwargs["JahrBezahltHaftpflicht"]),
                 'm_und_w': kwargs['AnzahlZeitungen'],
                 'm_und_w_pdf': m_und_w_pdf,
-                'wichtig': kwargs['Bemerkungen'],
+                'wichtig': str(kwargs['Bemerkungen']),
                 'eintritt': eintritt,
                 'zuzug': zuzug,
                 'wegzug': wegzug,
@@ -1676,8 +1688,8 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                     # hauptmiglied
                     if kontaktdaten["Firma"]:
                         new_mitgliedschaft.kundentyp = 'Unternehmen'
-                        new_mitgliedschaft.firma = kontaktdaten["Firma"]
-                        new_mitgliedschaft.zusatz_firma = kontaktdaten["FirmaZusatz"]
+                        new_mitgliedschaft.firma = str(kontaktdaten["Firma"])
+                        new_mitgliedschaft.zusatz_firma = str(kontaktdaten["FirmaZusatz"])
                     else:
                         new_mitgliedschaftkundentyp = 'Einzelperson'
                     if kontaktdaten["Anrede"] != 'Unbekannt':
@@ -1713,11 +1725,11 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
             if mitglied:
                 # erfassung objektadresse
                 new_mitgliedschaft.abweichende_objektadresse = 1
-                new_mitgliedschaft.objekt_zusatz_adresse = objekt["Adresszusatz"]
-                new_mitgliedschaft.objekt_strasse = objekt["Strasse"]
-                new_mitgliedschaft.objekt_nummer = objekt["Hausnummer"]
-                new_mitgliedschaft.objekt_plz = objekt["Postleitzahl"]
-                new_mitgliedschaft.objekt_ort = mitglied["Ort"]
+                new_mitgliedschaft.objekt_zusatz_adresse = str(objekt["Adresszusatz"])
+                new_mitgliedschaft.objekt_strasse = str(objekt["Strasse"])
+                new_mitgliedschaft.objekt_nummer = str(objekt["Hausnummer"])
+                new_mitgliedschaft.objekt_plz = str(objekt["Postleitzahl"])
+                new_mitgliedschaft.objekt_ort = str(mitglied["Ort"])
                 if objekt["FuerKorrespondenzGesperrt"]:
                     new_mitgliedschaft.adressen_gesperrt = 1
             else:
@@ -1728,38 +1740,38 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                         # hauptmiglied
                         if kontaktdaten["Firma"]:
                             new_mitgliedschaft.kundentyp = 'Unternehmen'
-                            new_mitgliedschaft.firma = kontaktdaten["Firma"]
-                            new_mitgliedschaft.zusatz_firma = kontaktdaten["FirmaZusatz"]
+                            new_mitgliedschaft.firma = str(kontaktdaten["Firma"])
+                            new_mitgliedschaft.zusatz_firma = str(kontaktdaten["FirmaZusatz"])
                         else:
                             new_mitgliedschaftkundentyp = 'Einzelperson'
                         if kontaktdaten["Anrede"] != 'Unbekannt':
-                            new_mitgliedschaft.anrede_c = kontaktdaten["Anrede"]
-                        new_mitgliedschaft.nachname_1 = kontaktdaten["Nachname"]
-                        new_mitgliedschaft.vorname_1 = kontaktdaten["Vorname"]
-                        new_mitgliedschaft.tel_p_1 = kontaktdaten["Telefon"]
-                        new_mitgliedschaft.tel_m_1 = kontaktdaten["Mobile"]
-                        new_mitgliedschaft.tel_g_1 = kontaktdaten["TelefonGeschaeft"]
-                        new_mitgliedschaft.e_mail_1 = kontaktdaten["Email"]
-                        new_mitgliedschaft.zusatz_adresse = objekt["Adresszusatz"]
-                        new_mitgliedschaft.strasse = objekt["Strasse"]
-                        new_mitgliedschaft.nummer = objekt["Hausnummer"]
-                        new_mitgliedschaft.postfach = objekt["Postfach"]
-                        new_mitgliedschaft.postfach_nummer = objekt["PostfachNummer"]
-                        new_mitgliedschaft.plz = objekt["Postleitzahl"]
-                        new_mitgliedschaft.ort = objekt["Ort"]
+                            new_mitgliedschaft.anrede_c = str(kontaktdaten["Anrede"])
+                        new_mitgliedschaft.nachname_1 = str(kontaktdaten["Nachname"])
+                        new_mitgliedschaft.vorname_1 = str(kontaktdaten["Vorname"])
+                        new_mitgliedschaft.tel_p_1 = str(kontaktdaten["Telefon"])
+                        new_mitgliedschaft.tel_m_1 = str(kontaktdaten["Mobile"])
+                        new_mitgliedschaft.tel_g_1 = str(kontaktdaten["TelefonGeschaeft"])
+                        new_mitgliedschaft.e_mail_1 = str(kontaktdaten["Email"])
+                        new_mitgliedschaft.zusatz_adresse = str(objekt["Adresszusatz"])
+                        new_mitgliedschaft.strasse = str(objekt["Strasse"])
+                        new_mitgliedschaft.nummer = str(objekt["Hausnummer"])
+                        new_mitgliedschaft.postfach = str(objekt["Postfach"])
+                        new_mitgliedschaft.postfach_nummer = str(objekt["PostfachNummer"])
+                        new_mitgliedschaft.plz = str(objekt["Postleitzahl"])
+                        new_mitgliedschaft.ort = str(objekt["Ort"])
                         if objekt["FuerKorrespondenzGesperrt"]:
                             new_mitgliedschaft.adressen_gesperrt = 1
                     else:
                         # solidarmitglied
                         new_mitgliedschaft.hat_solidarmitglied = 1
                         if kontaktdaten["Anrede"] != 'Unbekannt':
-                            new_mitgliedschaft.anrede_2 = kontaktdaten["Anrede"]
-                        new_mitgliedschaft.nachname_2 = kontaktdaten["Nachname"]
-                        new_mitgliedschaft.vorname_2 = kontaktdaten["Vorname"]
-                        new_mitgliedschaft.tel_p_2 = kontaktdaten["Telefon"]
-                        new_mitgliedschaft.tel_m_2 = kontaktdaten["Mobile"]
-                        new_mitgliedschaft.tel_g_2 = kontaktdaten["TelefonGeschaeft"]
-                        new_mitgliedschaft.e_mail_2 = kontaktdaten["Email"]
+                            new_mitgliedschaft.anrede_2 = str(kontaktdaten["Anrede"])
+                        new_mitgliedschaft.nachname_2 = str(kontaktdaten["Nachname"])
+                        new_mitgliedschaft.vorname_2 = str(kontaktdaten["Vorname"])
+                        new_mitgliedschaft.tel_p_2 = str(kontaktdaten["Telefon"])
+                        new_mitgliedschaft.tel_m_2 = str(kontaktdaten["Mobile"])
+                        new_mitgliedschaft.tel_g_2 = str(kontaktdaten["TelefonGeschaeft"])
+                        new_mitgliedschaft.e_mail_2 = str(kontaktdaten["Email"])
         else:
             # reset objektadresse
             new_mitgliedschaft.abweichende_objektadresse = 0
@@ -1773,21 +1785,22 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
             # erfassung rechnungsadresse
             # tbd...
             frappe.log_error("{0}".format(rechnung), 'Adressen Handling Typ Rechnung noch nicht umgesetzt')
-            
-        if mitbewohner:
-            # erfassung solidarmitglied
-            # tbd...
-            frappe.log_error("{0}".format(mitbewohner), 'Adressen Handling Typ Mitbewohner noch nicht umgesetzt')
-            
-        if filiale:
-            # erfassung filiale
-            # tbd...
-            frappe.log_error("{0}".format(filiale), 'Adressen Handling Typ Filiale noch nicht umgesetzt')
-            
+        
         if zeitung:
             # erfassung zeitung
             # tbd...
             frappe.log_error("{0}".format(zeitung), 'Adressen Handling Typ Zeitung noch nicht umgesetzt')
+        
+        if mitbewohner:
+            # erfassung solidarmitglied
+            # tbd...
+            frappe.log_error("{0}".format(mitbewohner), 'Adressen Handling Typ Mitbewohner noch nicht umgesetzt')
+        
+        if filiale:
+            # erfassung filiale
+            # tbd...
+            frappe.log_error("{0}".format(filiale), 'Adressen Handling Typ Filiale noch nicht umgesetzt')
+        
         
         return new_mitgliedschaft
         

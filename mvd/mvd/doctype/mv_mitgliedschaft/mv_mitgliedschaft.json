@@ -397,31 +397,31 @@
    "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
    "fieldname": "objekt_strasse",
    "fieldtype": "Data",
-   "label": "Strasse"
+   "label": "Strasse (Objekt)"
   },
   {
    "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
    "fieldname": "objekt_hausnummer",
    "fieldtype": "Int",
-   "label": "Hausnummer"
+   "label": "Hausnummer (Objekt)"
   },
   {
    "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
    "fieldname": "objekt_nummer_zu",
    "fieldtype": "Data",
-   "label": "Nr. Zusatz"
+   "label": "Nr. Zusatz (Objekt)"
   },
   {
    "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
    "fieldname": "objekt_plz",
    "fieldtype": "Int",
-   "label": "PLZ"
+   "label": "PLZ (Objekt)"
   },
   {
    "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
    "fieldname": "objekt_ort",
    "fieldtype": "Data",
-   "label": "Ort"
+   "label": "Ort (Objekt)"
   },
   {
    "default": "0",
@@ -617,7 +617,7 @@
    "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
    "fieldname": "objekt_zusatz_adresse",
    "fieldtype": "Data",
-   "label": "Zusatz Adresse"
+   "label": "Zusatz Adresse (Objekt)"
   },
   {
    "default": "0",
@@ -707,7 +707,8 @@
    "default": "0",
    "fieldname": "validierung_notwendig",
    "fieldtype": "Check",
-   "label": "Validierung notwendig"
+   "label": "Validierung notwendig",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -792,7 +793,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-12-16 20:24:12.663127",
+ "modified": "2021-12-17 08:21:28.632131",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

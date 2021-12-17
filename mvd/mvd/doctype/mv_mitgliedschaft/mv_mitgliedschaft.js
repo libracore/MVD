@@ -32,6 +32,65 @@ frappe.ui.form.on('MV Mitgliedschaft', {
         } else {
             frm.enable_save();
         }
+        
+        // set strasse mandatory
+        if (!cur_frm.doc.postfach) {
+            cur_frm.set_df_property('strasse', 'reqd', 1);
+        }
+    },
+    postfach: function(frm) {
+        // set strasse mandatory
+        if (!cur_frm.doc.postfach) {
+            cur_frm.set_df_property('strasse', 'reqd', 1);
+            cur_frm.set_df_property('abweichende_objektadresse', 'read_only', 0);
+        } else {
+            cur_frm.set_df_property('strasse', 'reqd', 0);
+            cur_frm.set_value("abweichende_objektadresse", 1);
+            cur_frm.set_df_property('abweichende_objektadresse', 'read_only', 1);
+        }
+    },
+    abweichende_objektadresse: function(frm) {
+        if (!cur_frm.doc.abweichende_objektadresse) {
+            cur_frm.set_df_property('objekt_strasse', 'reqd', 0);
+            cur_frm.set_df_property('objekt_plz', 'reqd', 0);
+            cur_frm.set_df_property('objekt_ort', 'reqd', 0);
+        } else {
+            cur_frm.set_df_property('objekt_strasse', 'reqd', 1);
+            cur_frm.set_df_property('objekt_plz', 'reqd', 1);
+            cur_frm.set_df_property('objekt_ort', 'reqd', 1);
+        }
+    },
+    abweichende_rechnungsadresse: function(frm) {
+        if (!cur_frm.doc.abweichende_rechnungsadresse) {
+            cur_frm.set_df_property('rg_strasse', 'reqd', 0);
+            cur_frm.set_df_property('rg_plz', 'reqd', 0);
+            cur_frm.set_df_property('rg_ort', 'reqd', 0);
+        } else {
+            cur_frm.set_df_property('rg_strasse', 'reqd', 1);
+            cur_frm.set_df_property('rg_plz', 'reqd', 1);
+            cur_frm.set_df_property('rg_ort', 'reqd', 1);
+        }
+    },
+    rg_postfach: function(frm) {
+        if (cur_frm.doc.rg_postfach) {
+            cur_frm.set_df_property('rg_strasse', 'reqd', 0);
+        } else {
+            cur_frm.set_df_property('rg_strasse', 'reqd', 1);
+        }
+    },
+    unabhaengiger_debitor: function(frm) {
+        if (!cur_frm.doc.unabhaengiger_debitor) {
+            cur_frm.set_df_property('rg_nachname', 'reqd', 0);
+        } else {
+            cur_frm.set_df_property('rg_nachname', 'reqd', 1);
+        }
+    },
+    hat_solidarmitglied: function(frm) {
+        if (!cur_frm.doc.hat_solidarmitglied) {
+            cur_frm.set_df_property('nachname_2', 'reqd', 0);
+        } else {
+            cur_frm.set_df_property('nachname_2', 'reqd', 1);
+        }
     }
 });
 
