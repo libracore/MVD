@@ -1374,6 +1374,8 @@ def mvm_mitglieder(kwargs):
 # Status Returns
 def raise_xxx(code, title, message):
     frappe.log_error("{0}\n{1}\n{2}".format(code, title, message), 'SP API Error!')
+    frappe.local.response.http_status_code = code
+    frappe.local.response.message = message
     return ['{code} {title}'.format(code=code, title=title), {
         "error": {
             "code": code,
