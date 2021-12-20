@@ -20,7 +20,10 @@ class MVMitgliedschaft(Document):
     def on_update(self):
         if self.creation != self.modified:
             if not self.validierung_notwendig or str(self.validierung_notwendig) == '0':
+                close_open_validations(self.name)
                 send_mvm_to_sp(self, True)
+            else:
+                create_abl("Daten Validieren", self)
     
     def set_new_name(self):
         if not self.mitglied_nr or not self.mitglied_id:
@@ -1350,6 +1353,13 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf):
     
     return 'done'
 
+def close_open_validations(mitgliedschaft):
+    open_abl = frappe.db.sql("""SELECT `name` FROM `tabArbeits Backlog` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Open' AND `typ` = 'Daten Validieren'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
+    for abl in open_abl:
+        abl = frappe.get_doc("Arbeits Backlog", abl.name)
+        abl.status = 'Completed'
+        abl.save()
+
 # API (eingehend von Service-Platform)
 # -----------------------------------------------
 
@@ -1457,7 +1467,7 @@ def mvm_update(mitgliedschaft, kwargs):
                 return raise_xxx(500, 'Internal Server Error', 'Bei dem Adressen Update ist etwas schief gelaufen')
             
             # logik ob validiert werde muss oder nicht muss noch implementiert werden!
-            mitgliedschaft.validierung_notwendig = '0'
+            mitgliedschaft.validierung_notwendig = 1
             mitgliedschaft.save()
             frappe.db.commit()
             
@@ -1722,7 +1732,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
             new_mitgliedschaft.objekt_strasse = str(objekt["Strasse"]) if objekt["Strasse"] else ''
             new_mitgliedschaft.objekt_nummer = str(objekt["Hausnummer"]) if objekt["Hausnummer"] else ''
             new_mitgliedschaft.objekt_plz = str(objekt["Postleitzahl"]) if objekt["Postleitzahl"] else ''
-            new_mitgliedschaft.objekt_ort = str(mitglied["Ort"]) if objekt["Ort"] else ''
+            new_mitgliedschaft.objekt_ort = str(objekt["Ort"]) if objekt["Ort"] else ''
             if objekt["FuerKorrespondenzGesperrt"]:
                 new_mitgliedschaft.adressen_gesperrt = 1
         else:

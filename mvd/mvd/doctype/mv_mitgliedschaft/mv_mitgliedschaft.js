@@ -21,6 +21,11 @@ frappe.ui.form.on('MV Mitgliedschaft', {
                         erstelle_rechnung(frm);
                 }, __("Erstelle"));
             }
+            if (cur_frm.doc.validierung_notwendig) {
+                frm.add_custom_button(__("Daten als validert bestätigen"),  function() {
+                        daten_validiert(frm);
+                });
+            }
             
             get_adressdaten(frm);
         }
@@ -266,6 +271,21 @@ function sektionswechsel(frm) {
     },
     'Sektionswechsel',
     'Übertragen'
+    )
+}
+
+function daten_validiert(frm) {
+    frappe.confirm(
+        'Haben Sie die Daten geprüft und möchten die Validierung bestätigen?',
+        function(){
+            // on yes
+            cur_frm.set_value("validierung_notwendig", '0');
+            cur_frm.save();
+            frappe.msgprint("Die Daten wurden als validert bestätigt.");
+        },
+        function(){
+            // on no
+        }
     )
 }
 
