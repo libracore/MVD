@@ -1467,7 +1467,7 @@ def mvm_update(mitgliedschaft, kwargs):
                 return raise_xxx(500, 'Internal Server Error', 'Bei dem Adressen Update ist etwas schief gelaufen')
             
             # logik ob validiert werde muss oder nicht muss noch implementiert werden!
-            mitgliedschaft.validierung_notwendig = 1
+            mitgliedschaft.validierung_notwendig = '0'
             mitgliedschaft.save()
             frappe.db.commit()
             
