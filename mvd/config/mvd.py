@@ -24,6 +24,12 @@ def get_data():
                     "name": "Arbeits Backlog",
                     "label": _("Arbeits Backlog"),
                     "description": _("Zu erledigende Aufgaben")
+                },
+                {
+                    "type": "doctype",
+                    "name": "MV Jahresversand",
+                    "label": _("Jahresversand"),
+                    "description": _("MV Jahresversand")
                 }
             ]
         },
