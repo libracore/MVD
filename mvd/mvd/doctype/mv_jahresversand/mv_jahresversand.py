@@ -113,7 +113,83 @@ def get_csv(jahresversand=None, draft=True):
     ]
     data.append(header)
     for row in jahresversand.invoices:
-        row_data = ['A','B','C','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','']
+        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", row.mv_mitgliedschaft)
+        row_data = []
+        if mitgliedschaft.kundentyp == 'Unternehmen':
+            row_data.append(mitgliedschaft.firma or '')
+            row_data.append(mitgliedschaft.zusatz_firma or '')
+        else:
+            row_data.append("")
+            row_data.append("")
+        row_data.append(mitgliedschaft.anrede_c or '')
+        row_data.append(mitgliedschaft.vorname_1 or '')
+        row_data.append(mitgliedschaft.nachname_1 or '')
+        if mitgliedschaft.hat_solidarmitglied:
+            row_data.append(mitgliedschaft.vorname_2 or '')
+            row_data.append(mitgliedschaft.nachname_2 or '')
+        else:
+            row_data.append("")
+            row_data.append("")
+        if mitgliedschaft.abweichende_rechnungsadresse:
+            row_data.append(mitgliedschaft.rg_zusatz_adresse or '')
+            strasse = ''
+            strasse += mitgliedschaft.rg_strasse or ''
+            strasse += " " + str(mitgliedschaft.rg_nummer or '')
+            strasse += mitgliedschaft.rg_nummer_zu or ''
+            row_data.append(strasse)
+            if mitgliedschaft.rg_postfach:
+                row_data.append(mitgliedschaft.rg_postfach_nummer or '')
+                row_data.append("")
+                row_data.append("")
+            else:
+                row_data.append("")
+                row_data.append("")
+                row_data.append("")
+            row_data.append(mitgliedschaft.rg_plz or '')
+            row_data.append(mitgliedschaft.rg_ort or '')
+        else:
+            row_data.append(mitgliedschaft.zusatz_adresse or '')
+            strasse = ''
+            strasse += mitgliedschaft.strasse or ''
+            strasse += " " + str(mitgliedschaft.nummer or '')
+            strasse += mitgliedschaft.nummer_zu or ''
+            row_data.append(strasse)
+            if mitgliedschaft.postfach:
+                row_data.append(mitgliedschaft.postfach_nummer or '')
+                row_data.append("")
+                row_data.append("")
+            else:
+                row_data.append("")
+                row_data.append("")
+                row_data.append("")
+            row_data.append(mitgliedschaft.plz or '')
+            row_data.append(mitgliedschaft.ort or '')
+        sinv = frappe.get_doc("Sales Invoice", row.sales_invoice)
+        row_data.append(sinv.grand_total or '')
+        row_data.append(sinv.esr_reference or '')
+        row_data.append('')
+        row_data.append(sinv.grand_total or '')
+        row_data.append(sinv.esr_reference or '')
+        row_data.append('')
+        row_data.append(sinv.name or '')
+        row_data.append(mitgliedschaft.mitglied_nr or '')
+        row_data.append(jahresversand.jahr or '')
+        row_data.append(mitgliedschaft.mitgliedtyp_c or '')
+        row_data.append(mitgliedschaft.sektion_id or '')
+        row_data.append('')
+        row_data.append('')
+        row_data.append(mitgliedschaft.e_mail_1 or '')
+        row_data.append(mitgliedschaft.e_mail_2 or '')
+        row_data.append('')
+        row_data.append(mitgliedschaft.vorname_1 or '')
+        row_data.append(mitgliedschaft.nachname_1 or '')
+        if mitgliedschaft.hat_solidarmitglied:
+            row_data.append(mitgliedschaft.vorname_2 or '')
+            row_data.append(mitgliedschaft.nachname_2 or '')
+        else:
+            row_data.append("")
+            row_data.append("")
+        row_data.append('')
         data.append(row_data)
     
     csv_file = make_csv(data)
