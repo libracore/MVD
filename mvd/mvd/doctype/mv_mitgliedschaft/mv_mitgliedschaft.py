@@ -1699,7 +1699,9 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                     new_mitgliedschaft.nachname_1 = str(kontaktdaten["Nachname"]) if kontaktdaten["Nachname"] else ''
                     new_mitgliedschaft.vorname_1 = str(kontaktdaten["Vorname"]) if kontaktdaten["Vorname"] else ''
                     new_mitgliedschaft.tel_p_1 = str(kontaktdaten["Telefon"]) if kontaktdaten["Telefon"] else ''
-                    new_mitgliedschaft.tel_m_1 = str(kontaktdaten["Mobile"]) if kontaktdaten["Mobile"] else ''
+                    if kontaktdaten["Mobile"]:
+                        if str(kontaktdaten["Mobile"]) != str(kontaktdaten["Telefon"]):
+                            new_mitgliedschaft.tel_m_1 = str(kontaktdaten["Mobile"])
                     new_mitgliedschaft.tel_g_1 = str(kontaktdaten["TelefonGeschaeft"]) if kontaktdaten["TelefonGeschaeft"] else ''
                     new_mitgliedschaft.e_mail_1 = str(kontaktdaten["Email"]) if kontaktdaten["Email"] else ''
                     new_mitgliedschaft.zusatz_adresse = str(mitglied["Adresszusatz"]) if mitglied["Adresszusatz"] else ''
@@ -1719,7 +1721,9 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                     new_mitgliedschaft.nachname_2 = str(kontaktdaten["Nachname"]) if kontaktdaten["Nachname"] else ''
                     new_mitgliedschaft.vorname_2 = str(kontaktdaten["Vorname"]) if kontaktdaten["Vorname"] else ''
                     new_mitgliedschaft.tel_p_2 = str(kontaktdaten["Telefon"]) if kontaktdaten["Telefon"] else ''
-                    new_mitgliedschaft.tel_m_2 = str(kontaktdaten["Mobile"]) if kontaktdaten["Mobile"] else ''
+                    if kontaktdaten["Mobile"]:
+                        if str(kontaktdaten["Mobile"]) != str(kontaktdaten["Telefon"]):
+                            new_mitgliedschaft.tel_m_2 = str(kontaktdaten["Mobile"])
                     new_mitgliedschaft.tel_g_2 = str(kontaktdaten["TelefonGeschaeft"]) if kontaktdaten["TelefonGeschaeft"] else ''
                     new_mitgliedschaft.e_mail_2 = str(kontaktdaten["Email"]) if kontaktdaten["Email"] else ''
         
@@ -1769,7 +1773,9 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                             new_mitgliedschaft.rg_nachname_ = str(kontaktdaten["Nachname"]) if kontaktdaten["Nachname"] else ''
                             new_mitgliedschaft.rg_vorname = str(kontaktdaten["Vorname"]) if kontaktdaten["Vorname"] else ''
                             new_mitgliedschaft.rg_tel_p = str(kontaktdaten["Telefon"]) if kontaktdaten["Telefon"] else ''
-                            new_mitgliedschaft.rg_tel_m = str(kontaktdaten["Mobile"]) if kontaktdaten["Mobile"] else ''
+                            if kontaktdaten["Mobile"]:
+                                if str(kontaktdaten["Mobile"]) != str(kontaktdaten["Telefon"]):
+                                    new_mitgliedschaft.rg_tel_m = str(kontaktdaten["Mobile"])
                             new_mitgliedschaft.rg_tel_g = str(kontaktdaten["TelefonGeschaeft"]) if kontaktdaten["TelefonGeschaeft"] else ''
                             new_mitgliedschaft.rg_e_mail = str(kontaktdaten["Email"]) if kontaktdaten["Email"] else ''
                     
