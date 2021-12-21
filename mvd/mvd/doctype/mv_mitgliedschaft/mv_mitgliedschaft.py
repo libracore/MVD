@@ -122,7 +122,7 @@ class MVMitgliedschaft(Document):
     def validate_adresse_mitglied(self):
         if self.adresse_mitglied:
             adresse_mitglied = update_adresse_mitglied(self)
-            if self.postfach or self.abweichende_objektadresse:
+            if self.postfach == 1 or self.abweichende_objektadresse == 1:
                 if self.objekt_adresse:
                     objekt_adresse = update_objekt_adresse(self)
                     return adresse_mitglied, objekt_adresse
@@ -135,7 +135,7 @@ class MVMitgliedschaft(Document):
                 return adresse_mitglied, ''
         else:
             address = create_adresse_mitglied(self)
-            if self.postfach or self.abweichende_objektadresse:
+            if self.postfach == 1 or self.abweichende_objektadresse == 1:
                 if self.objekt_adresse:
                     objekt_adresse = update_objekt_adresse(self)
                     return address, objekt_adresse
@@ -1539,10 +1539,7 @@ def mvm_neuanlage(kwargs):
                 'zuzug': zuzug,
                 'wegzug': wegzug,
                 'austritt': austritt,
-                'kuendigung': kuendigung,
-                'nachname_1': 'API',
-                'plz': 'API',
-                'ort': 'API'
+                'kuendigung': kuendigung
             })
             
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
@@ -1738,11 +1735,11 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
         else:
             # reset objektadresse
             new_mitgliedschaft.abweichende_objektadresse = '0'
-            new_mitgliedschaft.objekt_zusatz_adresse = ''
-            new_mitgliedschaft.objekt_strasse = ''
-            new_mitgliedschaft.objekt_nummer = ''
-            new_mitgliedschaft.objekt_plz = ''
-            new_mitgliedschaft.objekt_ort = ''
+            new_mitgliedschaft.objekt_zusatz_adresse = None
+            new_mitgliedschaft.objekt_strasse = None
+            new_mitgliedschaft.objekt_nummer = None
+            new_mitgliedschaft.objekt_plz = None
+            new_mitgliedschaft.objekt_ort = None
         
         if rechnung:
             new_mitgliedschaft.abweichende_rechnungsdresse = 1
