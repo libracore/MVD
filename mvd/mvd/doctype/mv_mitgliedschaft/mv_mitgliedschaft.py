@@ -43,10 +43,13 @@ class MVMitgliedschaft(Document):
             # Solidarmitglied
             if self.hat_solidarmitglied:
                 self.kontakt_solidarmitglied = self.validate_kontakt_mitglied(primary=False)
-                if self.objekt_adresse:
-                    join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.objekt_adresse)
+                if not self.kontakt_solidarmitglied:
+                    self.hat_solidarmitglied = '0'
                 else:
-                    join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.adresse_mitglied)
+                    if self.objekt_adresse:
+                        join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.objekt_adresse)
+                    else:
+                        join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.adresse_mitglied)
             else:
                 if self.kontakt_solidarmitglied:
                     self.kontakt_solidarmitglied = self.remove_solidarmitglied()
@@ -832,6 +835,10 @@ def create_kontakt_mitglied(mitgliedschaft, primary=True):
             else:
                 last_name = ''
     else:
+        if not  mitgliedschaft.nachname_2 and not mitgliedschaft.vorname_2:
+            frappe.log_error("{0}\n\n{1}".format('Weder Vor- noch Nachname', mitgliedschaft.as_json()), 'Anlage Solidarmitglied abgebrochen')
+            return ''
+        
         sektion = mitgliedschaft.sektion_id
         is_primary_contact = 0
         company_name = ''
@@ -1374,8 +1381,8 @@ def mvm_mitglieder(kwargs):
         return raise_xxx(400, 'Bad Request', 'mitgliedId missing')
 
 # Status Returns
-def raise_xxx(code, title, message):
-    frappe.log_error("{0}\n{1}\n{2}\n{3}".format(code, title, message, frappe.utils.get_traceback()), 'SP API Error!')
+def raise_xxx(code, title, message, daten=None):
+    frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(code, title, message, frappe.utils.get_traceback(), daten or ''), 'SP API Error!')
     frappe.local.response.http_status_code = code
     frappe.local.response.message = message
     return ['{code} {title}'.format(code=code, title=title), {
@@ -1406,15 +1413,15 @@ def mvm_update(mitgliedschaft, kwargs):
         try:
             sektion_id = get_sektion_id(kwargs['SektionCode'])
             if not sektion_id:
-                return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['SektionCode']))
+                return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['SektionCode']), daten=kwargs)
                 
             status_c = get_status_c(kwargs['Status'])
             if not status_c:
-                return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['Status']))
+                return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['Status']), daten=kwargs)
                 
             mitgliedtyp_c = get_mitgliedtyp_c(kwargs['Typ'])
             if not mitgliedtyp_c:
-                return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']))
+                return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']), daten=kwargs)
             
             if kwargs['Eintrittsdatum']:
                 eintritt = kwargs['Eintrittsdatum'].split("T")[0]
@@ -1464,7 +1471,7 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
             
             if not mitgliedschaft:
-                return raise_xxx(500, 'Internal Server Error', 'Bei dem Adressen Update ist etwas schief gelaufen')
+                return raise_xxx(500, 'Internal Server Error', 'Beim Adressen Update ist etwas schief gelaufen', daten=kwargs)
             
             # logik ob validiert werde muss oder nicht muss noch implementiert werden!
             mitgliedschaft.validierung_notwendig = '0'
@@ -1474,7 +1481,7 @@ def mvm_update(mitgliedschaft, kwargs):
             return raise_200()
             
         except Exception as err:
-            return raise_xxx(500, 'Internal Server Error', err)
+            return raise_xxx(500, 'Internal Server Error', err, daten=kwargs)
     else:
         return missing_keys
 
@@ -1484,15 +1491,15 @@ def mvm_neuanlage(kwargs):
         try:
             sektion_id = get_sektion_id(kwargs['SektionCode'])
             if not sektion_id:
-                return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['SektionCode']))
+                return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['SektionCode']), daten=kwargs)
             
             status_c = get_status_c(kwargs['Status'])
             if not status_c:
-                return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['Status']))
+                return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['Status']), daten=kwargs)
             
             mitgliedtyp_c = get_mitgliedtyp_c(kwargs['Typ'])
             if not mitgliedtyp_c:
-                return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']))
+                return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']), daten=kwargs)
             
             if kwargs['Eintrittsdatum']:
                 eintritt = kwargs['Eintrittsdatum'].split("T")[0]
@@ -1545,7 +1552,7 @@ def mvm_neuanlage(kwargs):
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
             
             if not new_mitgliedschaft:
-                return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen')
+                return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen', daten=kwargs)
             
             # logik ob validiert werde muss oder nicht muss noch implementiert werden!
             new_mitgliedschaft.validierung_notwendig = '0'
@@ -1556,7 +1563,7 @@ def mvm_neuanlage(kwargs):
             return raise_200()
             
         except Exception as err:
-            return raise_xxx(500, 'Internal Server Error', err)
+            return raise_xxx(500, 'Internal Server Error', err, daten=kwargs)
             
     else:
         return missing_keys
@@ -1587,7 +1594,7 @@ def check_main_keys(kwargs):
     ]
     for key in mandatory_keys:
         if key not in kwargs:
-            return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=key))
+            return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=key), daten=kwargs)
     return False
 
 def get_sektion_id(sektion_c):
@@ -1799,7 +1806,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
         return new_mitgliedschaft
         
     except Exception as err:
-        return raise_xxx(500, 'Internal Server Error', err)
+        return raise_xxx(500, 'Internal Server Error', err, daten=kwargs)
 
 # API (ausgehend zu Service-Platform)
 # -----------------------------------------------
@@ -1914,7 +1921,7 @@ def get_adressen_for_sp(mitgliedschaft):
     
     if mitgliedschaft.abweichende_objektadresse:
         objekt = {
-            "typ": "Mitglied",
+            "typ": "Objekt",
             "strasse": str(mitgliedschaft.objekt_strasse) if mitgliedschaft.objekt_strasse else None,
             "hausnummer": str(mitgliedschaft.objekt_hausnummer) if mitgliedschaft.objekt_hausnummer else None,
             "hausnummerZusatz": str(mitgliedschaft.objekt_nummer_zu) if mitgliedschaft.objekt_nummer_zu else None,
