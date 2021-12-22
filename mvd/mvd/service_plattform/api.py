@@ -120,7 +120,6 @@ def get_token():
 # create/update existing MV Mitgliedschaft
 @frappe.whitelist()
 def mitglieder(**mitgliedschaft):
-    frappe.log_error("{0}".format(mitgliedschaft), 'Eingang API: mitglieder')
     return mvm_mitglieder(mitgliedschaft)
 
 # @frappe.whitelist()
