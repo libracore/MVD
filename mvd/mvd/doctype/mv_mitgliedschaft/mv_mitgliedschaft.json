@@ -25,6 +25,7 @@
   "adressen_gesperrt",
   "validierung_notwendig",
   "kuendigung_verarbeiten",
+  "sp_no_update",
   "section_wichtige_infos",
   "wichtig",
   "section_daten",
@@ -796,10 +797,16 @@
    "fieldtype": "Date",
    "label": "Verstorben am",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "sp_no_update",
+   "fieldtype": "Check",
+   "label": "sp_no_update"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-12-23 12:08:50.000352",
+ "modified": "2021-12-23 19:50:40.105392",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

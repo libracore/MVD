@@ -13,17 +13,20 @@ from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
 
 class MVMitgliedschaft(Document):
     def after_insert(self):
-        if self.creation == self.modified:
-            if not self.validierung_notwendig or str(self.validierung_notwendig) == '0':
-                send_mvm_to_sp(self, False)
+        if not self.sp_no_update:
+            if self.creation == self.modified:
+                if not self.validierung_notwendig or str(self.validierung_notwendig) == '0':
+                    send_mvm_to_sp(self, False)
+                    self.sp_no_update = 1
     
     def on_update(self):
-        if self.creation != self.modified:
-            if not self.validierung_notwendig or str(self.validierung_notwendig) == '0':
-                close_open_validations(self.name)
-                send_mvm_to_sp(self, True)
-            else:
-                create_abl("Daten Validieren", self)
+        if not self.sp_no_update:
+            if self.creation != self.modified:
+                if not self.validierung_notwendig or str(self.validierung_notwendig) == '0':
+                    close_open_validations(self.name)
+                    send_mvm_to_sp(self, True)
+                else:
+                    create_abl("Daten Validieren", self)
     
     def set_new_name(self):
         if not self.mitglied_nr or not self.mitglied_id:
@@ -1476,6 +1479,7 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.wegzug = wegzug
             mitgliedschaft.austritt = austritt
             mitgliedschaft.kuendigung = kuendigung
+            mitgliedschaft.sp_no_update = 1
             
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
             
@@ -1566,7 +1570,8 @@ def mvm_neuanlage(kwargs):
                 'zuzug': zuzug,
                 'wegzug': wegzug,
                 'austritt': austritt,
-                'kuendigung': kuendigung
+                'kuendigung': kuendigung,
+                'sp_no_update': 1
             })
             
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)

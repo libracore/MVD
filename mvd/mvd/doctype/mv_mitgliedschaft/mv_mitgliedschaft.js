@@ -115,6 +115,9 @@ frappe.ui.form.on('MV Mitgliedschaft', {
             cur_frm.set_df_property('nachname_1', 'reqd', 1);
             cur_frm.set_df_property('firma', 'reqd', 0);
         }
+    },
+    validate: function(frm) {
+        cur_frm.set_value("sp_no_update", 0);
     }
 });
 
