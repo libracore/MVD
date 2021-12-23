@@ -44,6 +44,14 @@ frappe.ui.form.on('MV Mitgliedschaft', {
         if (!cur_frm.doc.postfach) {
             cur_frm.set_df_property('strasse', 'reqd', 1);
         }
+        // set nachname oder firma mandatory
+        if (cur_frm.doc.kundentyp == 'Unternehmen') {
+            cur_frm.set_df_property('nachname_1', 'reqd', 0);
+            cur_frm.set_df_property('firma', 'reqd', 1);
+        } else {
+            cur_frm.set_df_property('nachname_1', 'reqd', 1);
+            cur_frm.set_df_property('firma', 'reqd', 0);
+        }
     },
     postfach: function(frm) {
         // set strasse mandatory
@@ -97,6 +105,15 @@ frappe.ui.form.on('MV Mitgliedschaft', {
             cur_frm.set_df_property('nachname_2', 'reqd', 0);
         } else {
             cur_frm.set_df_property('nachname_2', 'reqd', 1);
+        }
+    },
+    kundentyp: function(frm) {
+        if (cur_frm.doc.kundentyp == 'Unternehmen') {
+            cur_frm.set_df_property('nachname_1', 'reqd', 0);
+            cur_frm.set_df_property('firma', 'reqd', 1);
+        } else {
+            cur_frm.set_df_property('nachname_1', 'reqd', 1);
+            cur_frm.set_df_property('firma', 'reqd', 0);
         }
     }
 });

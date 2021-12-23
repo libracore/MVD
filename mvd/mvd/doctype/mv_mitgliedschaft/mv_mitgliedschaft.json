@@ -235,8 +235,7 @@
    "fieldname": "nachname_1",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Nachname",
-   "reqd": 1
+   "label": "Nachname"
   },
   {
    "fieldname": "vorname_1",
@@ -800,7 +799,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-12-17 10:41:06.894839",
+ "modified": "2021-12-23 12:08:50.000352",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

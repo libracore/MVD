@@ -732,7 +732,6 @@ def update_kontakt_mitglied(mitgliedschaft, primary=True):
     if not first_name:
         if mitgliedschaft.firma and not mitgliedschaft.nachname_1 and not mitgliedschaft.vorname_1:
             first_name = mitgliedschaft.firma
-            frappe.log_error("{0}\n---\n{1}".format('fallback: first_name was " "', mitgliedschaft.as_json()), 'update_kontakt_mitglied')
     
     contact.first_name = first_name
     contact.last_name = last_name
@@ -836,7 +835,7 @@ def create_kontakt_mitglied(mitgliedschaft, primary=True):
                 last_name = ''
     else:
         if not  mitgliedschaft.nachname_2 and not mitgliedschaft.vorname_2:
-            frappe.log_error("{0}\n\n{1}".format('Weder Vor- noch Nachname', mitgliedschaft.as_json()), 'Anlage Solidarmitglied abgebrochen')
+            # Weder Vor- noch Nachname, Anlage Solidarmitglied abgebrochen
             return ''
         
         sektion = mitgliedschaft.sektion_id
@@ -1788,19 +1787,16 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                     
         
         if zeitung:
-            # erfassung zeitung
-            # tbd...
-            frappe.log_error("{0}".format(zeitung), 'Adressen Handling Typ Zeitung noch nicht umgesetzt')
+            # manuelle erfassung zeitung
+            frappe.log_error("Adressdaten:\n{0}\n\nMitgliedsdaten:\n{1}".format(zeitung, kwargs), 'Adresse Typ Zeitung: Manuelle Verarbeitung')
         
         if mitbewohner:
-            # erfassung solidarmitglied
-            # tbd...
-            frappe.log_error("{0}".format(mitbewohner), 'Adressen Handling Typ Mitbewohner noch nicht umgesetzt')
+            # manuelle erfassung solidarmitglied
+            frappe.log_error("Adressdaten:\n{0}\n\nMitgliedsdaten:\n{1}".format(mitbewohner, kwargs), 'Adresse Typ Mitbewohner: Manuelle Verarbeitung')
         
         if filiale:
-            # erfassung filiale
-            # tbd...
-            frappe.log_error("{0}".format(filiale), 'Adressen Handling Typ Filiale noch nicht umgesetzt')
+            # manuelle erfassung filiale
+            frappe.log_error("Adressdaten:\n{0}\n\nMitgliedsdaten:\n{1}".format(filiale, kwargs), 'Adresse Typ Filiale: Manuelle Verarbeitung')
         
         
         return new_mitgliedschaft
