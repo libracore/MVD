@@ -1410,6 +1410,7 @@ def mvm_update(mitgliedschaft, kwargs):
     missing_keys = check_main_keys(kwargs)
     if not missing_keys:
         try:
+            mitgliedschaft.reload()
             sektion_id = get_sektion_id(kwargs['SektionCode'])
             if not sektion_id:
                 return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['SektionCode']), daten=kwargs)
@@ -1426,6 +1427,11 @@ def mvm_update(mitgliedschaft, kwargs):
                 eintritt = kwargs['Eintrittsdatum'].split("T")[0]
             else:
                 eintritt = ''
+            if status_c in ('Anmeldung', 'Online-Anmeldung'):
+                if kwargs['Erfassungsdatum']:
+                    eintritt = kwargs['Erfassungsdatum'].split("T")[0]
+                else:
+                    eintritt = ''
             
             if kwargs['Zuzugsdatum']:
                 zuzug = kwargs['Zuzugsdatum'].split("T")[0]
@@ -1460,7 +1466,7 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.inkl_hv = get_inkl_hv(kwargs["JahrBezahltHaftpflicht"])
             mitgliedschaft.m_und_w = kwargs['AnzahlZeitungen']
             mitgliedschaft.m_und_w_pdf = m_und_w_pdf
-            mitgliedschaft.wichtig = kwargs['Bemerkungen']
+            mitgliedschaft.wichtig = kwargs['Bemerkungen'] if kwargs['Bemerkungen'] else ''
             mitgliedschaft.eintritt = eintritt
             mitgliedschaft.zuzug = zuzug
             mitgliedschaft.wegzug = wegzug
@@ -1504,6 +1510,11 @@ def mvm_neuanlage(kwargs):
                 eintritt = kwargs['Eintrittsdatum'].split("T")[0]
             else:
                 eintritt = ''
+            if status_c in ('Anmeldung', 'Online-Anmeldung'):
+                if kwargs['Erfassungsdatum']:
+                    eintritt = kwargs['Erfassungsdatum'].split("T")[0]
+                else:
+                    eintritt = ''
             
             if kwargs['Zuzugsdatum']:
                 zuzug = kwargs['Zuzugsdatum'].split("T")[0]
@@ -1540,7 +1551,7 @@ def mvm_neuanlage(kwargs):
                 'inkl_hv': get_inkl_hv(kwargs["JahrBezahltHaftpflicht"]),
                 'm_und_w': kwargs['AnzahlZeitungen'],
                 'm_und_w_pdf': m_und_w_pdf,
-                'wichtig': str(kwargs['Bemerkungen']),
+                'wichtig': str(kwargs['Bemerkungen']) if kwargs['Bemerkungen'] else '',
                 'eintritt': eintritt,
                 'zuzug': zuzug,
                 'wegzug': wegzug,
@@ -1734,14 +1745,24 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                     new_mitgliedschaft.e_mail_2 = str(kontaktdaten["Email"]) if kontaktdaten["Email"] else ''
         
         if objekt:
-            new_mitgliedschaft.abweichende_objektadresse = 1
-            new_mitgliedschaft.objekt_zusatz_adresse = str(objekt["Adresszusatz"]) if objekt["Adresszusatz"] else ''
-            new_mitgliedschaft.objekt_strasse = str(objekt["Strasse"]) if objekt["Strasse"] else ''
-            new_mitgliedschaft.objekt_nummer = str(objekt["Hausnummer"]) if objekt["Hausnummer"] else ''
-            new_mitgliedschaft.objekt_plz = str(objekt["Postleitzahl"]) if objekt["Postleitzahl"] else ''
-            new_mitgliedschaft.objekt_ort = str(objekt["Ort"]) if objekt["Ort"] else ''
-            if objekt["FuerKorrespondenzGesperrt"]:
-                new_mitgliedschaft.adressen_gesperrt = 1
+            if objekt["Strasse"]:
+                new_mitgliedschaft.abweichende_objektadresse = 1
+                new_mitgliedschaft.objekt_zusatz_adresse = str(objekt["Adresszusatz"]) if objekt["Adresszusatz"] else ''
+                new_mitgliedschaft.objekt_strasse = str(objekt["Strasse"]) if objekt["Strasse"] else ''
+                new_mitgliedschaft.objekt_nummer = str(objekt["Hausnummer"]) if objekt["Hausnummer"] else ''
+                new_mitgliedschaft.objekt_plz = str(objekt["Postleitzahl"]) if objekt["Postleitzahl"] else ''
+                new_mitgliedschaft.objekt_ort = str(objekt["Ort"]) if objekt["Ort"] else ''
+                if objekt["FuerKorrespondenzGesperrt"]:
+                    new_mitgliedschaft.adressen_gesperrt = 1
+            else:
+                frappe.log_error("Adressdaten:\n{0}\n\nMitgliedsdaten:\n{1}".format(objekt, kwargs), 'Adresse Typ Objekt: Wurde entfernt; fehlende Strasse')
+                # reset objektadresse
+                new_mitgliedschaft.abweichende_objektadresse = '0'
+                new_mitgliedschaft.objekt_zusatz_adresse = None
+                new_mitgliedschaft.objekt_strasse = None
+                new_mitgliedschaft.objekt_nummer = None
+                new_mitgliedschaft.objekt_plz = None
+                new_mitgliedschaft.objekt_ort = None
         else:
             # reset objektadresse
             new_mitgliedschaft.abweichende_objektadresse = '0'
