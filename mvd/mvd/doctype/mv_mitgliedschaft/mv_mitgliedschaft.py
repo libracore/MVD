@@ -1410,7 +1410,6 @@ def mvm_update(mitgliedschaft, kwargs):
     missing_keys = check_main_keys(kwargs)
     if not missing_keys:
         try:
-            mitgliedschaft.reload()
             sektion_id = get_sektion_id(kwargs['SektionCode'])
             if not sektion_id:
                 return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['SektionCode']), daten=kwargs)
@@ -1426,12 +1425,17 @@ def mvm_update(mitgliedschaft, kwargs):
             if kwargs['Eintrittsdatum']:
                 eintritt = kwargs['Eintrittsdatum'].split("T")[0]
             else:
-                eintritt = ''
+                eintritt = None
             if status_c in ('Anmeldung', 'Online-Anmeldung'):
                 if kwargs['Erfassungsdatum']:
                     eintritt = kwargs['Erfassungsdatum'].split("T")[0]
                 else:
-                    eintritt = ''
+                    eintritt = None
+            if not eintritt and status_c == 'Inaktiv':
+                if kwargs['Erfassungsdatum']:
+                    eintritt = kwargs['Erfassungsdatum'].split("T")[0]
+                else:
+                    eintritt = None
             
             if kwargs['Zuzugsdatum']:
                 zuzug = kwargs['Zuzugsdatum'].split("T")[0]
@@ -1509,12 +1513,18 @@ def mvm_neuanlage(kwargs):
             if kwargs['Eintrittsdatum']:
                 eintritt = kwargs['Eintrittsdatum'].split("T")[0]
             else:
-                eintritt = ''
+                eintritt = None
             if status_c in ('Anmeldung', 'Online-Anmeldung'):
                 if kwargs['Erfassungsdatum']:
                     eintritt = kwargs['Erfassungsdatum'].split("T")[0]
                 else:
-                    eintritt = ''
+                    eintritt = None
+            
+            if not eintritt and status_c == 'Inaktiv':
+                if kwargs['Erfassungsdatum']:
+                    eintritt = kwargs['Erfassungsdatum'].split("T")[0]
+                else:
+                    eintritt = None
             
             if kwargs['Zuzugsdatum']:
                 zuzug = kwargs['Zuzugsdatum'].split("T")[0]
@@ -1771,6 +1781,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
             new_mitgliedschaft.objekt_nummer = None
             new_mitgliedschaft.objekt_plz = None
             new_mitgliedschaft.objekt_ort = None
+        
         
         if rechnung:
             new_mitgliedschaft.abweichende_rechnungsdresse = 1

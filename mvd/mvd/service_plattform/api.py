@@ -7,6 +7,7 @@ import frappe
 from mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft import mvm_mitglieder, mvm_kuendigung, mvm_sektionswechsel
 import json
 import requests
+from frappe.utils.background_jobs import enqueue
 
 # for test
 # ---------------------------------------------------
