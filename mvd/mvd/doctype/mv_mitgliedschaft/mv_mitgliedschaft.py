@@ -215,7 +215,7 @@ def get_adressblock(mitgliedschaft):
     
 def update_rg_adresse(mitgliedschaft):
     address = frappe.get_doc("Address", mitgliedschaft.rg_adresse)
-    if mitgliedschaft.rg_postfach:
+    if mitgliedschaft.rg_postfach == 1:
         strasse = address_line1 = 'Postfach'
         postfach = 1
     else:
@@ -265,7 +265,7 @@ def create_rg_adresse(mitgliedschaft):
             mitgliedschaft.rg_adresse = existierende_adresse
             return update_rg_adresse(mitgliedschaft)
     
-    if mitgliedschaft.rg_postfach:
+    if mitgliedschaft.rg_postfach == 1:
         strasse = address_line1 = 'Postfach'
         postfach = 1
     else:
@@ -602,7 +602,7 @@ def join_mitglied_contact_and_address(contact, address):
     
 def update_adresse_mitglied(mitgliedschaft):
     address = frappe.get_doc("Address", mitgliedschaft.adresse_mitglied)
-    if mitgliedschaft.postfach:
+    if mitgliedschaft.postfach == 1:
         strasse = address_line1 = 'Postfach'
         postfach = 1
     else:
@@ -647,7 +647,7 @@ def create_adresse_mitglied(mitgliedschaft):
             mitgliedschaft.adresse_mitglied = existierende_adresse
             return update_adresse_mitglied(mitgliedschaft)
     
-    if mitgliedschaft.postfach:
+    if mitgliedschaft.postfach == 1:
         strasse = address_line1 = 'Postfach'
         postfach = 1
     else:
