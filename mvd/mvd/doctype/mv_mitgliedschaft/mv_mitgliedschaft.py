@@ -1620,7 +1620,10 @@ def check_main_keys(kwargs):
     for key in mandatory_keys:
         if key not in kwargs:
             return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=key), daten=kwargs)
-    return False
+    if 'Geschenkmitgliedschaft' in kwargs:
+        return raise_xxx(400, 'Bad Request', 'Geschenkmitgliedschaft unbekannt', daten=kwargs)
+    else:
+        return False
 
 def get_sektion_id(sektion_c):
     sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` WHERE `sektion_c` = '{sektion_c}'""".format(sektion_c=sektion_c), as_dict=True)
