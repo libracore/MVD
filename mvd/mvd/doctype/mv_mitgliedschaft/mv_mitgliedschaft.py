@@ -1681,6 +1681,15 @@ def get_inkl_hv(inkl_hv):
     else:
         return 0
 
+def check_email(email=None):
+    import re
+    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    if(re.fullmatch(regex, email)):
+        return True
+    else:
+        frappe.log_error("Folgende E-Mail musste entfernt werden: {0}".format(email), 'Fehlerhafte E-Mail')
+        return False
+    
 def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
     try:
         mitglied = False
@@ -1743,7 +1752,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                         if str(kontaktdaten["Mobile"]) != str(kontaktdaten["Telefon"]):
                             new_mitgliedschaft.tel_m_1 = str(kontaktdaten["Mobile"])
                     new_mitgliedschaft.tel_g_1 = str(kontaktdaten["TelefonGeschaeft"]) if kontaktdaten["TelefonGeschaeft"] else ''
-                    new_mitgliedschaft.e_mail_1 = str(kontaktdaten["Email"]) if kontaktdaten["Email"] else ''
+                    new_mitgliedschaft.e_mail_1 = str(kontaktdaten["Email"]) if check_email(kontaktdaten["Email"]) else ''
                     new_mitgliedschaft.zusatz_adresse = str(mitglied["Adresszusatz"]) if mitglied["Adresszusatz"] else ''
                     new_mitgliedschaft.strasse = str(mitglied["Strasse"]) if mitglied["Strasse"] else ''
                     new_mitgliedschaft.nummer = str(mitglied["Hausnummer"]) if mitglied["Hausnummer"] else ''
@@ -1765,7 +1774,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                         if str(kontaktdaten["Mobile"]) != str(kontaktdaten["Telefon"]):
                             new_mitgliedschaft.tel_m_2 = str(kontaktdaten["Mobile"])
                     new_mitgliedschaft.tel_g_2 = str(kontaktdaten["TelefonGeschaeft"]) if kontaktdaten["TelefonGeschaeft"] else ''
-                    new_mitgliedschaft.e_mail_2 = str(kontaktdaten["Email"]) if kontaktdaten["Email"] else ''
+                    new_mitgliedschaft.e_mail_2 = str(kontaktdaten["Email"]) if check_email(kontaktdaten["Email"]) else ''
         
         if objekt:
             if objekt["Strasse"]:
@@ -1828,7 +1837,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                                 if str(kontaktdaten["Mobile"]) != str(kontaktdaten["Telefon"]):
                                     new_mitgliedschaft.rg_tel_m = str(kontaktdaten["Mobile"])
                             new_mitgliedschaft.rg_tel_g = str(kontaktdaten["TelefonGeschaeft"]) if kontaktdaten["TelefonGeschaeft"] else ''
-                            new_mitgliedschaft.rg_e_mail = str(kontaktdaten["Email"]) if kontaktdaten["Email"] else ''
+                            new_mitgliedschaft.rg_e_mail = str(kontaktdaten["Email"]) if check_email(kontaktdaten["Email"]) else ''
                     
         
         if zeitung:
