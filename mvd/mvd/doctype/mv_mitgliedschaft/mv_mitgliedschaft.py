@@ -243,7 +243,7 @@ def update_rg_adresse(mitgliedschaft):
     address.city = city
     address.is_primary_address = is_primary_address
     address.is_shipping_address = is_shipping_address
-    address.adress_id = mitgliedschaft.adress_id_rg
+    address.adress_id = str(mitgliedschaft.mitglied_id) + "-Rechnung"
     
     if mitgliedschaft.rg_kunde:
         link_name = mitgliedschaft.rg_kunde
@@ -259,11 +259,10 @@ def update_rg_adresse(mitgliedschaft):
     return address.name
 
 def create_rg_adresse(mitgliedschaft):
-    if mitgliedschaft.adress_id_rg:
-        existierende_adresse = existierende_adresse_anhand_id(mitgliedschaft.adress_id_rg)
-        if existierende_adresse:
-            mitgliedschaft.rg_adresse = existierende_adresse
-            return update_rg_adresse(mitgliedschaft)
+    existierende_adresse = existierende_adresse_anhand_id(str(mitgliedschaft.mitglied_id) + "-Rechnung")
+    if existierende_adresse:
+        mitgliedschaft.rg_adresse = existierende_adresse
+        return update_rg_adresse(mitgliedschaft)
     
     if mitgliedschaft.rg_postfach == 1:
         strasse = address_line1 = 'Postfach'
@@ -295,7 +294,7 @@ def create_rg_adresse(mitgliedschaft):
         'city': city,
         'is_primary_address': is_primary_address,
         'is_shipping_address': is_shipping_address,
-        'adress_id': mitgliedschaft.adress_id_rg
+        'adress_id': str(mitgliedschaft.mitglied_id) + "-Rechnung"
     })
     
     if mitgliedschaft.rg_kunde:
@@ -507,11 +506,10 @@ def create_rg_kunde(mitgliedschaft):
     return new_customer.name
 
 def create_objekt_adresse(mitgliedschaft):
-    if mitgliedschaft.adress_id_objekt:
-        existierende_adresse = existierende_adresse_anhand_id(mitgliedschaft.adress_id_objekt)
-        if existierende_adresse:
-            mitgliedschaft.objekt_adresse = existierende_adresse
-            return update_objekt_adresse(mitgliedschaft)
+    existierende_adresse = existierende_adresse_anhand_id(str(mitgliedschaft.mitglied_id) + "-Objekt")
+    if existierende_adresse:
+        mitgliedschaft.objekt_adresse = existierende_adresse
+        return update_objekt_adresse(mitgliedschaft)
     
     strasse = address_line1 = (" ").join((str(mitgliedschaft.objekt_strasse or ''), str(mitgliedschaft.objekt_hausnummer or ''), str(mitgliedschaft.objekt_nummer_zu or '')))
     postfach = 0
@@ -543,7 +541,7 @@ def create_objekt_adresse(mitgliedschaft):
         'city': city,
         'is_primary_address': is_primary_address,
         'is_shipping_address': is_shipping_address,
-        'adress_id': mitgliedschaft.adress_id_objekt
+        'adress_id': str(mitgliedschaft.mitglied_id) + "-Objekt"
     })
     
     link = new_address.append("links", {})
@@ -585,7 +583,7 @@ def update_objekt_adresse(mitgliedschaft):
     address.city = city
     address.is_primary_address = is_primary_address
     address.is_shipping_address = is_shipping_address
-    address.adress_id = mitgliedschaft.adress_id_objekt
+    address.adress_id = str(mitgliedschaft.mitglied_id) + "-Objekt"
     
     address.links = []
     link = address.append("links", {})
@@ -630,7 +628,7 @@ def update_adresse_mitglied(mitgliedschaft):
     address.city = city
     address.is_primary_address = is_primary_address
     address.is_shipping_address = is_shipping_address
-    address.adress_id = mitgliedschaft.adress_id_mitglied
+    address.adress_id = str(mitgliedschaft.mitglied_id) + "-Mitglied"
     
     address.links = []
     link = address.append("links", {})
@@ -641,11 +639,10 @@ def update_adresse_mitglied(mitgliedschaft):
     return address.name
 
 def create_adresse_mitglied(mitgliedschaft):
-    if mitgliedschaft.adress_id_mitglied:
-        existierende_adresse = existierende_adresse_anhand_id(mitgliedschaft.adress_id_mitglied)
-        if existierende_adresse:
-            mitgliedschaft.adresse_mitglied = existierende_adresse
-            return update_adresse_mitglied(mitgliedschaft)
+    existierende_adresse = existierende_adresse_anhand_id(str(mitgliedschaft.mitglied_id) + "-Mitglied")
+    if existierende_adresse:
+        mitgliedschaft.adresse_mitglied = existierende_adresse
+        return update_adresse_mitglied(mitgliedschaft)
     
     if mitgliedschaft.postfach == 1:
         strasse = address_line1 = 'Postfach'
@@ -677,7 +674,7 @@ def create_adresse_mitglied(mitgliedschaft):
         'city': city,
         'is_primary_address': is_primary_address,
         'is_shipping_address': is_shipping_address,
-        'adress_id': mitgliedschaft.adress_id_mitglied
+        'adress_id': str(mitgliedschaft.mitglied_id) + "-Mitglied"
     })
     
     link = new_address.append("links", {})
