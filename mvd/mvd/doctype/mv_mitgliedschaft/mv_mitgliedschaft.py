@@ -1720,6 +1720,11 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
             for kontaktdaten in mitglied["Kontakte"]:
                 if kontaktdaten["IstHauptkontakt"]:
                     # hauptmiglied
+                    if not mitglied["Strasse"] or str(mitglied["Strasse"]) == '':
+                        if not mitglied["Postfach"]:
+                            # eines von beidem muss zwingend vorhanden sein
+                            frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage: Weder Postfach noch Strasse')
+                            return False
                     if kontaktdaten["Firma"]:
                         new_mitgliedschaft.kundentyp = 'Unternehmen'
                         new_mitgliedschaft.firma = str(kontaktdaten["Firma"])
