@@ -100,6 +100,24 @@ class MVMitgliedschaft(Document):
             self.naechstes_jahr_geschuldet = '0'
         else:
             self.naechstes_jahr_geschuldet = 1
+        
+        # prüfe offene Rechnungen bei sektionswechsel
+        if self.status_c == 'Wegzug':
+            sinvs = frappe.db.sql("""SELECT
+                                        `name`
+                                    FROM `tabSales Invoice`
+                                    WHERE `docstatus` != 2
+                                    AND `ist_mitgliedschaftsrechnung` = 1
+                                    AND `mv_mitgliedschaft` = '{mvm}'
+                                    AND `status` != 'Paid'""".format(mvm=self.name), as_dict=True)
+            for sinv in sinvs:
+                sinv = frappe.get_doc("Sales Invoice", sinv.name)
+                if sinv.docstatus == 1:
+                    sinv.cancel()
+                else:
+                    if sinv.docstatus == 0:
+                        sinv.delete()
+        
         return
     
     def check_zahlung_hv(self):
@@ -1281,8 +1299,14 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         new_mitgliedschaft.rg_adresse = ''
         new_mitgliedschaft.adress_id_rg = ''
         new_mitgliedschaft.insert()
+        frappe.db.commit()
+        if new_mitgliedschaft.zahlung_mitgliedschaft < int(now().split("-")[0]):
+            if new_mitgliedschaft.naechstes_jahr_geschuldet == 1:
+                create_mitgliedschaftsrechnung(new_mitgliedschaft.name)
+        
         return 1
-    except:
+    except Exception as err:
+        frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), new_mitgliedschaft.as_dict()), 'Sektionswechsel')
         return 0
 
 @frappe.whitelist()
@@ -1937,11 +1961,11 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "istTemporaeresMitglied": False, # ???
         "fuerBewirtschaftungGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
         "erfassungsdatum": str(mitgliedschaft.creation).replace(" ", "T"),
-        "eintrittsdatum": mitgliedschaft.eintritt or None, # achtung nur date!
-        "austrittsdatum": mitgliedschaft.austritt or None, # achtung nur date!
-        "zuzugsdatum": mitgliedschaft.zuzug or None, # achtung nur date!
-        "wegzugsdatum": mitgliedschaft.wegzug or None, # achtung nur date!
-        "kuendigungPer": mitgliedschaft.kuendigung or None, # achtung nur date!
+        "eintrittsdatum": str(mitgliedschaft.eintritt) if mitgliedschaft.eintritt else None, # achtung nur date!
+        "austrittsdatum": str(mitgliedschaft.austritt) if mitgliedschaft.austritt else None, # achtung nur date!
+        "zuzugsdatum": str(mitgliedschaft.zuzug) if mitgliedschaft.zuzug else None, # achtung nur date!
+        "wegzugsdatum": str(mitgliedschaft.wegzug) if mitgliedschaft.wegzug else None, # achtung nur date!
+        "kuendigungPer": str(mitgliedschaft.kuendigung) if mitgliedschaft.kuendigung else None, # achtung nur date!
         "jahrBezahltMitgliedschaft": mitgliedschaft.zahlung_mitgliedschaft or 0,
         "betragBezahltMitgliedschaft": None, # ???
         "jahrBezahltHaftpflicht": None, # TBD

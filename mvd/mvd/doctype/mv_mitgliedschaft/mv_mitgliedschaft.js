@@ -275,6 +275,8 @@ function sektionswechsel(frm) {
                     'neue_sektion': values.sektion_neu,
                     'zuzug_per': frappe.datetime.get_today()
             },
+            freeze: true,
+            freeze_message: 'Führe Sektionswechsel durch...',
             callback: function(r)
             {
                 if (r.message == 1) {
