@@ -33,6 +33,8 @@
   "zuzug",
   "wegzug",
   "zahlung_hv",
+  "zahlung_mitgliedschaft",
+  "naechstes_jahr_geschuldet",
   "cb_1",
   "austritt",
   "zuzug_von",
@@ -672,8 +674,9 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "zahlung_hv",
-   "fieldtype": "Date",
+   "fieldtype": "Int",
    "label": "Zahlung HV",
    "read_only": 1
   },
@@ -803,10 +806,22 @@
    "fieldname": "sp_no_update",
    "fieldtype": "Check",
    "label": "sp_no_update"
+  },
+  {
+   "default": "0",
+   "fieldname": "zahlung_mitgliedschaft",
+   "fieldtype": "Int",
+   "label": "Zahlung Mitgliedschaft"
+  },
+  {
+   "default": "1",
+   "fieldname": "naechstes_jahr_geschuldet",
+   "fieldtype": "Check",
+   "label": "N\u00e4chstes Jahr geschuldet"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-12-23 19:50:40.105392",
+ "modified": "2021-12-28 21:34:39.301744",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

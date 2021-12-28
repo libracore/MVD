@@ -76,6 +76,35 @@ class MVMitgliedschaft(Document):
             
             # Adressblock
             self.adressblock = get_adressblock(self)
+            
+            if not self.sp_no_update:
+                # update Zahlung Mitgliedschaft
+                self.check_zahlung_mitgliedschaft()
+                # update Zahlung HV
+                self.check_zahlung_hv()
+        
+    def check_zahlung_mitgliedschaft(self):
+        sinvs = frappe.db.sql("""SELECT
+                                    `mitgliedschafts_jahr`
+                                FROM `tabSales Invoice`
+                                WHERE `docstatus` = 1
+                                AND `ist_mitgliedschaftsrechnung` = 1
+                                AND `mv_mitgliedschaft` = '{mvm}'
+                                AND `status` = 'Paid'
+                                ORDER BY `mitgliedschafts_jahr` DESC""".format(mvm=self.name), as_dict=True)
+        if len(sinvs) > 0:
+            sinv = sinvs[0]
+            self.zahlung_mitgliedschaft = sinv.mitgliedschafts_jahr
+        current_year = int(now().split("-")[0])
+        if self.zahlung_mitgliedschaft > current_year:
+            self.naechstes_jahr_geschuldet = '0'
+        else:
+            self.naechstes_jahr_geschuldet = 1
+        return
+    
+    def check_zahlung_hv(self):
+        #tbd
+        return
         
     def validate_rg_kunde(self):
         if self.rg_kunde:
@@ -1476,8 +1505,10 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.wegzug = wegzug
             mitgliedschaft.austritt = austritt
             mitgliedschaft.kuendigung = kuendigung
+            mitgliedschaft.zahlung_hv = int(kwargs['JahrBezahltHaftpflicht'])
+            mitgliedschaft.zahlung_mitgliedschaft = int(kwargs['JahrBezahltMitgliedschaft'])
+            mitgliedschaft.naechstes_jahr_geschuldet = 1 if kwargs['NaechstesJahrGeschuldet'] else '0'
             mitgliedschaft.sp_no_update = 1
-            
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
             
             if not mitgliedschaft:
@@ -1568,6 +1599,9 @@ def mvm_neuanlage(kwargs):
                 'wegzug': wegzug,
                 'austritt': austritt,
                 'kuendigung': kuendigung,
+                'zahlung_hv': int(kwargs['JahrBezahltHaftpflicht']),
+                'zahlung_mitgliedschaft': int(kwargs['JahrBezahltMitgliedschaft']),
+                'naechstes_jahr_geschuldet': 1 if kwargs['NaechstesJahrGeschuldet'] else '0',
                 'sp_no_update': 1
             })
             
@@ -1908,11 +1942,11 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "zuzugsdatum": mitgliedschaft.zuzug or None, # achtung nur date!
         "wegzugsdatum": mitgliedschaft.wegzug or None, # achtung nur date!
         "kuendigungPer": mitgliedschaft.kuendigung or None, # achtung nur date!
-        "jahrBezahltMitgliedschaft": None, # ???
+        "jahrBezahltMitgliedschaft": mitgliedschaft.zahlung_mitgliedschaft or 0,
         "betragBezahltMitgliedschaft": None, # ???
-        "jahrBezahltHaftpflicht": None, # ???
+        "jahrBezahltHaftpflicht": None, # TBD
         "betragBezahltHaftpflicht": None, # ???
-        "naechstesJahrGeschuldet": True, # ???
+        "naechstesJahrGeschuldet": True if mitgliedschaft.naechstes_jahr_geschuldet == 1 else False,
         "bemerkungen": str(mitgliedschaft.wichtig) if mitgliedschaft.wichtig else None,
         "anzahlZeitungen": int(mitgliedschaft.m_und_w),
         "zeitungAlsPdf": True if mitgliedschaft.m_und_w_pdf else False,
