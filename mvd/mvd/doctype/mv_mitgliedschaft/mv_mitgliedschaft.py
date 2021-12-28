@@ -1681,10 +1681,13 @@ def get_inkl_hv(inkl_hv):
 def check_email(email=None):
     import re
     regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-    if(re.fullmatch(regex, email)):
-        return True
+    if email:
+        if(re.fullmatch(regex, email)):
+            return True
+        else:
+            frappe.log_error("Folgende E-Mail musste entfernt werden: {0}".format(email), 'Fehlerhafte E-Mail')
+            return False
     else:
-        frappe.log_error("Folgende E-Mail musste entfernt werden: {0}".format(email), 'Fehlerhafte E-Mail')
         return False
     
 def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
