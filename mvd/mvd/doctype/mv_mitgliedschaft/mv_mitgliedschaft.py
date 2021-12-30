@@ -1529,8 +1529,8 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.wegzug = wegzug
             mitgliedschaft.austritt = austritt
             mitgliedschaft.kuendigung = kuendigung
-            mitgliedschaft.zahlung_hv = int(kwargs['JahrBezahltHaftpflicht'])
-            mitgliedschaft.zahlung_mitgliedschaft = int(kwargs['JahrBezahltMitgliedschaft'])
+            mitgliedschaft.zahlung_hv = int(kwargs['JahrBezahltHaftpflicht']) if kwargs['JahrBezahltHaftpflicht'] else 0
+            mitgliedschaft.zahlung_mitgliedschaft = int(kwargs['JahrBezahltMitgliedschaft']) if kwargs['JahrBezahltMitgliedschaft'] else 0
             mitgliedschaft.naechstes_jahr_geschuldet = 1 if kwargs['NaechstesJahrGeschuldet'] else '0'
             mitgliedschaft.sp_no_update = 1
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
@@ -1623,8 +1623,8 @@ def mvm_neuanlage(kwargs):
                 'wegzug': wegzug,
                 'austritt': austritt,
                 'kuendigung': kuendigung,
-                'zahlung_hv': int(kwargs['JahrBezahltHaftpflicht']),
-                'zahlung_mitgliedschaft': int(kwargs['JahrBezahltMitgliedschaft']),
+                'zahlung_hv': int(kwargs['JahrBezahltHaftpflicht']) if kwargs['JahrBezahltHaftpflicht'] else 0,
+                'zahlung_mitgliedschaft': int(kwargs['JahrBezahltMitgliedschaft']) if kwargs['JahrBezahltMitgliedschaft'] else 0,
                 'naechstes_jahr_geschuldet': 1 if kwargs['NaechstesJahrGeschuldet'] else '0',
                 'sp_no_update': 1
             })
@@ -1968,7 +1968,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "kuendigungPer": str(mitgliedschaft.kuendigung) if mitgliedschaft.kuendigung else None, # achtung nur date!
         "jahrBezahltMitgliedschaft": mitgliedschaft.zahlung_mitgliedschaft or 0,
         "betragBezahltMitgliedschaft": None, # ???
-        "jahrBezahltHaftpflicht": None, # TBD
+        "jahrBezahltHaftpflicht": mitgliedschaft.zahlung_hv, # TBD
         "betragBezahltHaftpflicht": None, # ???
         "naechstesJahrGeschuldet": True if mitgliedschaft.naechstes_jahr_geschuldet == 1 else False,
         "bemerkungen": str(mitgliedschaft.wichtig) if mitgliedschaft.wichtig else None,
