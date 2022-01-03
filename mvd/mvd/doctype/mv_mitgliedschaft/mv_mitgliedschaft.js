@@ -302,6 +302,9 @@ function daten_validiert(frm) {
         function(){
             // on yes
             cur_frm.set_value("validierung_notwendig", '0');
+            if (cur_frm.doc.status_c == 'Zuzug') {
+                cur_frm.set_value("status_c", 'Regulär');
+            }
             cur_frm.save();
             frappe.msgprint("Die Daten wurden als validert bestätigt.");
         },
@@ -312,16 +315,29 @@ function daten_validiert(frm) {
 }
 
 function erstelle_rechnung(frm) {
-    frappe.call({
-        method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.create_mitgliedschaftsrechnung",
-        args:{
-                'mitgliedschaft': cur_frm.doc.name
-        },
-        callback: function(r)
-        {
-            cur_frm.reload_doc();
-        }
-    });
+    frappe.prompt([
+        {'fieldname': 'jahr', 'fieldtype': 'Int', 'label': 'Rechnung gültig für Mitgliedschafts-Jahr', 'reqd': 1}  
+    ],
+    function(values){
+        frappe.call({
+            method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.create_mitgliedschaftsrechnung",
+            args:{
+                    'mitgliedschaft': cur_frm.doc.name,
+                    'jahr': values.jahr
+            },
+            freeze: true,
+            freeze_message: 'Erstelle Rechnung...',
+            callback: function(r)
+            {
+                cur_frm.reload_doc();
+                frappe.msgprint("Vergessen Sie nicht die Rechnung zu Buchen und zu Versenden.", "Die Rechnung wurde erstellt");
+            }
+        });
+    },
+    'Rechnungs Erstellung',
+    'Erstellen'
+    )
+    
 }
 
 function remove_sinv_plus(frm) {

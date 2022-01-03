@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils.data import add_days, getdate, now
+from frappe.utils.data import add_days, getdate, now, today
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 import json
 from PyPDF2 import PdfFileWriter
@@ -1279,6 +1279,7 @@ def get_anredekonvention(mitgliedschaft=None, self=None):
 @frappe.whitelist()
 def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
     try:
+        # erstelle Mitgliedschaft in Zuzugs-Sektion
         mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
         new_mitgliedschaft = frappe.copy_doc(mitgliedschaft)
         new_mitgliedschaft.mitglied_id = ''
@@ -1300,19 +1301,28 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         new_mitgliedschaft.adress_id_rg = ''
         new_mitgliedschaft.insert()
         frappe.db.commit()
+        
+        # erstelle ggf. neue Rechnung
         if new_mitgliedschaft.zahlung_mitgliedschaft < int(now().split("-")[0]):
             if new_mitgliedschaft.naechstes_jahr_geschuldet == 1:
-                create_mitgliedschaftsrechnung(new_mitgliedschaft.name)
+                create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=int(now().split("-")[0]))
+        
+        # markiere neue Mitgliedschaft als zu validieren
+        new_mitgliedschaft.validierung_notwendig = 1
+        new_mitgliedschaft.save()
+        create_abl("Daten Validieren", new_mitgliedschaft)
         
         return 1
+        
     except Exception as err:
         frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), new_mitgliedschaft.as_dict()), 'Sektionswechsel')
         return 0
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft):
+def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None):
     mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+    company = frappe.get_doc("Company", sektion.company)
     if not mitgliedschaft.rg_kunde:
         customer = mitgliedschaft.kunde_mitglied
         contact = mitgliedschaft.kontakt_mitglied
@@ -1321,9 +1331,9 @@ def create_mitgliedschaftsrechnung(mitgliedschaft):
         else:
             address = mitgliedschaft.rg_adresse
     else:
-        customer = mitgliedschaft.kunde_mitglied
-        address = mitgliedschaft.adresse_mitglied
-        contact = mitgliedschaft.kontakt_mitglied
+        customer = mitgliedschaft.rg_kunde_mitglied
+        address = mitgliedschaft.rg_adresse_mitglied
+        contact = mitgliedschaft.rg_kontakt_mitglied
     
     sinv = frappe.get_doc({
         "doctype": "Sales Invoice",
@@ -1333,6 +1343,9 @@ def create_mitgliedschaftsrechnung(mitgliedschaft):
         "customer": customer,
         "customer_address": address,
         "contact_person": contact,
+        'mitgliedschafts_jahr': jahr or 0,
+        'due_date': add_days(today(), 30),
+        'debit_to': company.default_receivable_account,
         "items": [
             {
                 "item_code": sektion.mitgliedschafts_artikel,
@@ -1961,11 +1974,11 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "istTemporaeresMitglied": False, # ???
         "fuerBewirtschaftungGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
         "erfassungsdatum": str(mitgliedschaft.creation).replace(" ", "T"),
-        "eintrittsdatum": str(mitgliedschaft.eintritt) if mitgliedschaft.eintritt else None, # achtung nur date!
-        "austrittsdatum": str(mitgliedschaft.austritt) if mitgliedschaft.austritt else None, # achtung nur date!
-        "zuzugsdatum": str(mitgliedschaft.zuzug) if mitgliedschaft.zuzug else None, # achtung nur date!
-        "wegzugsdatum": str(mitgliedschaft.wegzug) if mitgliedschaft.wegzug else None, # achtung nur date!
-        "kuendigungPer": str(mitgliedschaft.kuendigung) if mitgliedschaft.kuendigung else None, # achtung nur date!
+        "eintrittsdatum": str(mitgliedschaft.eintritt).replace(" ", "T") if mitgliedschaft.eintritt else None,
+        "austrittsdatum": str(mitgliedschaft.austritt).replace(" ", "T") if mitgliedschaft.austritt else None,
+        "zuzugsdatum": str(mitgliedschaft.zuzug).replace(" ", "T") if mitgliedschaft.zuzug else None,
+        "wegzugsdatum": str(mitgliedschaft.wegzug).replace(" ", "T") if mitgliedschaft.wegzug else None,
+        "kuendigungPer": str(mitgliedschaft.kuendigung).replace(" ", "T") if mitgliedschaft.kuendigung else None,
         "jahrBezahltMitgliedschaft": mitgliedschaft.zahlung_mitgliedschaft or 0,
         "betragBezahltMitgliedschaft": None, # ???
         "jahrBezahltHaftpflicht": mitgliedschaft.zahlung_hv, # TBD
