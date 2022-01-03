@@ -88,17 +88,22 @@ notification_config = "mvd.mvd.utils.notifications.get_notification_config"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
+doc_events = {
+    "Sales Invoice": {
+        "on_update": "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.sinv_check_zahlung_mitgliedschaft"
+    },
+    "Payment Entry": {
+        "on_submit": "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.pe_check_zahlung_mitgliedschaft"
+    }
+}
 
 # Scheduled Tasks
 # ---------------
-
+scheduler_events = {
+    "daily": [
+        "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.set_inaktiv"
+    ]
+}
 # scheduler_events = {
 # 	"all": [
 # 		"mvd.tasks.all"

@@ -2101,3 +2101,31 @@ def mvm_kuendigung(mitgliedschaft):
 
 # /API
 # -----------------------------------------------
+
+# Hooks functions
+# -----------------------------------------------
+def sinv_check_zahlung_mitgliedschaft(sinv, event):
+    if sinv.mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", sinv.mv_mitgliedschaft)
+        mitgliedschaft.save()
+
+def pe_check_zahlung_mitgliedschaft(pe, event):
+    for ref in pe.references:
+        if ref.reference_doctype == 'Sales Invoice':
+            sinv = frappe.get_doc("Sales Invoice", ref.reference_name)
+            if sinv.mv_mitgliedschaft:
+                mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", sinv.mv_mitgliedschaft)
+                mitgliedschaft.save()
+
+def set_inaktiv():
+    mvms = frappe.db.sql("""SELECT `name` FROM `tabMV Mitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Kündigung', 'Ausschluss')""", as_dict=True)
+    for mvm in mvms:
+        mv = frappe.get_doc("MV Mitgliedschaft", mvm.name)
+        if mv.status_c in ('Kündigung', 'Gestorben'):
+            if mv.kuendigung and mv.kuendigung <= getdate(today()):
+                mv.status_c = 'Inaktiv'
+                mv.save()
+        elif mv.status_c == 'Ausschluss':
+            if mv.austritt and mv.austritt <= getdate(today()):
+                mv.status_c = 'Inaktiv'
+                mv.save()
