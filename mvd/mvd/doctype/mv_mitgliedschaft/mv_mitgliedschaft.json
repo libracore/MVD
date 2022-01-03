@@ -150,6 +150,7 @@
    "fieldtype": "Link",
    "label": "Sektion",
    "options": "Sektion",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -161,7 +162,8 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Regul\u00e4r\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nGestorben\nK\u00fcndigung\nWegzug\nAusschluss\nInaktiv\nInteressent:In"
+   "options": "Regul\u00e4r\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nGestorben\nK\u00fcndigung\nWegzug\nAusschluss\nInaktiv\nInteressent:In",
+   "read_only": 1
   },
   {
    "fieldname": "mitgliedtyp_c",
@@ -805,13 +807,16 @@
    "default": "0",
    "fieldname": "sp_no_update",
    "fieldtype": "Check",
-   "label": "sp_no_update"
+   "hidden": 1,
+   "label": "sp_no_update",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "zahlung_mitgliedschaft",
    "fieldtype": "Int",
-   "label": "Zahlung Mitgliedschaft"
+   "label": "Zahlung Mitgliedschaft",
+   "read_only": 1
   },
   {
    "default": "1",
@@ -821,7 +826,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2021-12-28 21:34:39.301744",
+ "modified": "2022-01-03 11:03:36.714172",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
