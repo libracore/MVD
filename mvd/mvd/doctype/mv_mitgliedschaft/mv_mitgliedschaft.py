@@ -1346,6 +1346,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None):
         'mitgliedschafts_jahr': jahr or 0,
         'due_date': add_days(today(), 30),
         'debit_to': company.default_receivable_account,
+        'sektions_code': str(sektion.sektion_id) or '00',
         "items": [
             {
                 "item_code": sektion.mitgliedschafts_artikel,
@@ -1355,7 +1356,8 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None):
         "inkl_hv": mitgliedschaft.inkl_hv
     })
     sinv.insert()
-    #sinv.esr_reference = get_qrr_reference()
+    sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
+    sinv.save()
     
     return sinv.name
 
@@ -2129,3 +2131,16 @@ def set_inaktiv():
             if mv.austritt and mv.austritt <= getdate(today()):
                 mv.status_c = 'Inaktiv'
                 mv.save()
+# -----------------------------------------------
+# other helpers
+# -----------------------------------------------
+@frappe.whitelist()
+def get_sektions_code(company):
+    if company:
+        sektion = frappe.db.sql("""SELECT `sektion_id` FROM `tabSektion` WHERE `company` = '{company}' LIMIT 1""".format(company=company), as_dict=True)
+        if len(sektion) > 0:
+            return str(sektion[0].sektion_id)
+        else:
+            return '00'
+    else:
+        return '00'
