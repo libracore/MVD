@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from frappe.utils.data import add_days, getdate, now
 import six
 import json
+from mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft import create_mitgliedschaftsrechnung
 
 @frappe.whitelist()
 def suche(suchparameter, goto_list=False):
@@ -173,7 +174,7 @@ def anlage_prozess(anlage_daten):
         "sektion_id": anlage_daten["sektion_id"],
         "status_c": anlage_daten["status"],
         "m_und_w": 1,
-        "mitgliedtyp_c": "Privat",
+        "mitgliedtyp_c": anlage_daten["mitgliedtyp"],
         "inkl_hv": 1,
         "eintritt": now(),
         "kundentyp": "Einzelperson",
@@ -192,4 +193,12 @@ def anlage_prozess(anlage_daten):
         "ort": anlage_daten["ort"]
     })
     mitgliedschaft.insert()
+    
+    # optional: erstelle Rechnung
+    if int(anlage_daten["autom_rechnung"]) == 1:
+        bezahlt = False
+        if int(anlage_daten["bar_bezahlt"]) == 1:
+            bezahlt = True
+        sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, jahr='2022', bezahlt=bezahlt, submit=True, attach_as_pdf=True)
+    
     return mitgliedschaft.name

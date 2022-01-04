@@ -18,6 +18,8 @@
   "default_ort",
   "cb_4",
   "kuendigungs_stichtag",
+  "gratis_bis_ende_jahr",
+  "reduzierter_mitgliederbeitrag",
   "section_fusszeile",
   "fz_links",
   "cb_2",
@@ -149,9 +151,22 @@
    "fieldtype": "Date",
    "label": "K\u00fcndigungs Stichtag",
    "reqd": 1
+  },
+  {
+   "fieldname": "gratis_bis_ende_jahr",
+   "fieldtype": "Date",
+   "label": "Stichtag Gratis bis ende Jahr",
+   "reqd": 1
+  },
+  {
+   "description": "Das Jahr ist ohne Bedeutung",
+   "fieldname": "reduzierter_mitgliederbeitrag",
+   "fieldtype": "Date",
+   "label": "Stichtag Reduzierter Mitgliederbeitrag",
+   "reqd": 1
   }
  ],
- "modified": "2021-12-16 12:39:29.126481",
+ "modified": "2022-01-04 12:46:47.269198",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

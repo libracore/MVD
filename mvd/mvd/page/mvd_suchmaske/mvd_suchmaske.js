@@ -5,14 +5,14 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
         title: 'Mitgliedschaftssuche',
         single_column: true
     });
-    
-    me.$user_search_button = me.page.add_action_item('Suche starten<span class="text-muted pull-right">Ctrl+S</span>', () => {
+    //add_action_item
+    me.$user_search_button = me.page.set_primary_action('Suche starten<span class="text-muted pull-right" style="padding-left: 5px;">Ctrl+S</span>', () => {
         frappe.mvd_such_client.suche(page);
     });
-    me.$listenansicht_button = me.page.add_action_item('Listenansicht zeigen<span class="text-muted pull-right">Ctrl+L</span>', () => {
+    me.$listenansicht_button = me.page.add_menu_item('Listenansicht zeigen<span class="text-muted pull-right">Ctrl+L</span>', () => {
         frappe.mvd_such_client.goto_list(page);
     });
-    me.$reset_button = me.page.add_action_item('Suche zurücksetzen<span class="text-muted pull-right">Ctrl+R</span>', () => {
+    me.$reset_button = me.page.set_secondary_action('Suche zurücksetzen<span class="text-muted pull-right" style="padding-left: 5px;">Ctrl+R</span>', () => {
         location.reload();
     });
     //set_primary_action
@@ -454,8 +454,11 @@ frappe.mvd_such_client = {
                 hidden: 1,
                 click: function(){
                     frappe.prompt([
-                        {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent:In\nRegulär'},
+                        {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent:In\nRegulär', 'default': 'Regulär'},
+                        {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': 'Privat'},
                         {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value()},
+                        {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 1},
+                        {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.autom_rechnung'},
                         {'fieldname': 's1', 'fieldtype': 'Section Break'},
                         {'fieldname': 'anrede', 'fieldtype': 'Link', 'label': 'Anrede', 'reqd': 0, 'options': 'Salutation'},
                         {'fieldname': 'vorname', 'fieldtype': 'Data', 'label': 'Vorname', 'reqd': 1, 'default': cur_page.page.search_fields.vorname.get_value()},

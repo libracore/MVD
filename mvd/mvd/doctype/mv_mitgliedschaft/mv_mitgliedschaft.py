@@ -1319,7 +1319,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         return 0
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None):
+def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False):
     mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
     company = frappe.get_doc("Company", sektion.company)
@@ -1358,6 +1358,36 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None):
     sinv.insert()
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
     sinv.save()
+    
+    if bezahlt:
+        pos_profile = frappe.get_doc("POS Profile", "Barzahlung-" + sektion.sektion_c)
+        sinv.is_pos = 1
+        sinv.pos_profile = pos_profile.name
+        sinv.payments = pos_profile.payments
+        sinv.payments[0].amount = sinv.grand_total
+        sinv.save()
+    
+    if submit:
+        sinv.submit()
+    
+    if attach_as_pdf:
+        # erstellung Rechnungs PDF
+        output = PdfFileWriter()
+        output = frappe.get_print("Sales Invoice", sinv.name, 'MV-Rechnung mit Zahlteil', as_pdf = True, output = output)
+        
+        file_name = "{sinv}_{datetime}.pdf".format(sinv=sinv.name, datetime=now().replace(" ", "_"))
+        
+        _file = frappe.get_doc({
+            "doctype": "File",
+            "file_name": file_name,
+            "folder": "Home/Attachments",
+            "is_private": 1,
+            "content": output,
+            "attached_to_doctype": 'MV Mitgliedschaft',
+            "attached_to_name": mitgliedschaft.name
+        })
+        
+        _file.save()
     
     return sinv.name
 
