@@ -12,11 +12,13 @@
   "company",
   "cb_1",
   "sektion_id",
-  "mitgliedschafts_artikel",
-  "section_sektionseinstellungen",
-  "karenzfrist",
   "default_ort",
+  "section_sektionseinstellungen",
+  "mitgliedschafts_artikel",
+  "mitgliedschafts_artikel_reduziert",
+  "mitgliedschafts_artikel_gratis",
   "cb_4",
+  "karenzfrist",
   "kuendigungs_stichtag",
   "gratis_bis_ende_jahr",
   "reduzierter_mitgliederbeitrag",
@@ -49,7 +51,7 @@
    "collapsible": 1,
    "fieldname": "section_sektionsstammdaten",
    "fieldtype": "Section Break",
-   "label": "Sektionsstammdaten"
+   "label": "Stammdaten"
   },
   {
    "default": "0",
@@ -67,9 +69,10 @@
    "reqd": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "section_sektionseinstellungen",
    "fieldtype": "Section Break",
-   "label": "Sektionseinstellungen"
+   "label": "Daten und Artikel"
   },
   {
    "fieldname": "cb_1",
@@ -90,7 +93,7 @@
   {
    "fieldname": "mitgliedschafts_artikel",
    "fieldtype": "Link",
-   "label": "Mitgliedschafts Artikel",
+   "label": "Mitgliedschafts Artikel (Normal)",
    "options": "Item",
    "reqd": 1
   },
@@ -153,6 +156,7 @@
    "reqd": 1
   },
   {
+   "description": "Das Jahr ist ohne Bedeutung",
    "fieldname": "gratis_bis_ende_jahr",
    "fieldtype": "Date",
    "label": "Stichtag Gratis bis ende Jahr",
@@ -164,9 +168,23 @@
    "fieldtype": "Date",
    "label": "Stichtag Reduzierter Mitgliederbeitrag",
    "reqd": 1
+  },
+  {
+   "fieldname": "mitgliedschafts_artikel_reduziert",
+   "fieldtype": "Link",
+   "label": "Mitgliedschafts Artikel (Reduziert)",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mitgliedschafts_artikel_gratis",
+   "fieldtype": "Link",
+   "label": "Mitgliedschafts Artikel (Gratis)",
+   "options": "Item",
+   "reqd": 1
   }
  ],
- "modified": "2022-01-04 12:46:47.269198",
+ "modified": "2022-01-05 20:58:50.609316",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

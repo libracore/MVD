@@ -1319,7 +1319,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         return 0
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False):
+def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False):
     mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
     company = frappe.get_doc("Company", sektion.company)
@@ -1335,6 +1335,20 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         address = mitgliedschaft.rg_adresse_mitglied
         contact = mitgliedschaft.rg_kontakt_mitglied
     
+    # finde passenden Artikel
+    item = [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1}]
+    if not ignore_stichtage:
+        reduziert_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.reduzierter_mitgliederbeitrag).strftime("%m") + "-" + getdate(sektion.reduzierter_mitgliederbeitrag).strftime("%d"))
+        gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%d"))
+        if getdate(today()) >= reduziert_ab:
+            item = [{"item_code": sektion.mitgliedschafts_artikel_reduziert,"qty": 1}]
+            if getdate(today()) >= gratis_ab:
+                item = [
+                    {"item_code": sektion.mitgliedschafts_artikel_gratis,"qty": 1},
+                    {"item_code": sektion.mitgliedschafts_artikel,"qty": 1}
+                ]
+                jahr = int(getdate(today()).strftime("%Y")) + 1
+    
     sinv = frappe.get_doc({
         "doctype": "Sales Invoice",
         "ist_mitgliedschaftsrechnung": 1,
@@ -1343,16 +1357,11 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         "customer": customer,
         "customer_address": address,
         "contact_person": contact,
-        'mitgliedschafts_jahr': jahr or 0,
+        'mitgliedschafts_jahr': jahr or int(getdate(today()).strftime("%Y")),
         'due_date': add_days(today(), 30),
         'debit_to': company.default_receivable_account,
         'sektions_code': str(sektion.sektion_id) or '00',
-        "items": [
-            {
-                "item_code": sektion.mitgliedschafts_artikel,
-                "qty": 1
-            }
-        ],
+        "items": item,
         "inkl_hv": mitgliedschaft.inkl_hv
     })
     sinv.insert()
