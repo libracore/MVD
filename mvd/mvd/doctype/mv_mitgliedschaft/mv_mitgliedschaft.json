@@ -211,7 +211,7 @@
    "collapsible": 1,
    "fieldname": "section_wichtige_infos",
    "fieldtype": "Section Break",
-   "label": "Wichtige Informationen zu Mitgliedschaft"
+   "label": "Wichtige Informationen zur Mitgliedschaft"
   },
   {
    "fieldname": "wichtig",
@@ -266,12 +266,12 @@
   {
    "fieldname": "e_mail_1",
    "fieldtype": "Data",
-   "label": "Email"
+   "label": "E-Mail"
   },
   {
    "fieldname": "zusatz_adresse",
    "fieldtype": "Data",
-   "label": "Zusatz Adresse"
+   "label": "Zusatzadresse"
   },
   {
    "fieldname": "strasse",
@@ -298,7 +298,7 @@
    "depends_on": "eval:doc.postfach=='1'",
    "fieldname": "postfach_nummer",
    "fieldtype": "Int",
-   "label": "Postfach Nummer"
+   "label": "Postfach Nr."
   },
   {
    "fieldname": "plz",
@@ -346,13 +346,14 @@
    "depends_on": "eval:doc.hat_solidarmitglied",
    "fieldname": "e_mail_2",
    "fieldtype": "Data",
-   "label": "Email (Solidar)"
+   "label": "E-Mail (Solidar)"
   },
   {
    "collapsible": 1,
    "fieldname": "section_links",
    "fieldtype": "Section Break",
    "label": "Verkn\u00fcpfungen",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -390,7 +391,7 @@
   {
    "fieldname": "kundentyp",
    "fieldtype": "Select",
-   "label": "Kundentyp",
+   "label": "Kontakttyp",
    "options": "Einzelperson\nUnternehmen",
    "reqd": 1
   },
@@ -488,7 +489,7 @@
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
    "fieldname": "rg_kundentyp",
    "fieldtype": "Select",
-   "label": "Kundentyp (Rechnung)",
+   "label": "Kontakttyp (Rechnung)",
    "options": "Einzelperson\nUnternehmen"
   },
   {
@@ -544,7 +545,7 @@
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
    "fieldname": "rg_e_mail",
    "fieldtype": "Data",
-   "label": "Email (Rechnung)"
+   "label": "E-Mail (Rechnung)"
   },
   {
    "fieldname": "title_1",
@@ -616,13 +617,13 @@
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
    "fieldname": "rg_zusatz_adresse",
    "fieldtype": "Data",
-   "label": "Zusatz Adresse (Rechnung)"
+   "label": "Zusatzadresse (Rechnung)"
   },
   {
    "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
    "fieldname": "objekt_zusatz_adresse",
    "fieldtype": "Data",
-   "label": "Zusatz Adresse (Objekt)"
+   "label": "Zusatzadresse (Objekt)"
   },
   {
    "default": "0",
@@ -686,7 +687,7 @@
    "default": "1",
    "fieldname": "m_und_w",
    "fieldtype": "Int",
-   "label": "Anzahl Mitgliederzeitschrift M+W"
+   "label": "Anzahl Zeitschrift M+W"
   },
   {
    "default": "0",
@@ -726,7 +727,7 @@
    "collapsible": 1,
    "fieldname": "section_personen_daten",
    "fieldtype": "Section Break",
-   "label": "Personen bezogene Daten"
+   "label": "Personenbezogene Daten"
   },
   {
    "fieldname": "heading_hauptmitglied",
@@ -746,19 +747,19 @@
    "collapsible": 1,
    "fieldname": "section_korrespondenz_adresse",
    "fieldtype": "Section Break",
-   "label": "Korrespondenz Adresse"
+   "label": "Korrespondenzadresse"
   },
   {
    "collapsible": 1,
    "fieldname": "section_objekt_adresse",
    "fieldtype": "Section Break",
-   "label": "Objekt Adresse"
+   "label": "Objektadresse"
   },
   {
    "collapsible": 1,
    "fieldname": "section_rechnungs_adresse",
    "fieldtype": "Section Break",
-   "label": "Rechnungs Adresse"
+   "label": "Rechnungsadresse"
   },
   {
    "fieldname": "briefanrede",
@@ -788,7 +789,7 @@
    "depends_on": "eval:doc.status_c=='Gestorben'",
    "fieldname": "todesfall_uebernahme",
    "fieldtype": "Data",
-   "label": "\u00dcbernahem durch (Todesfall)"
+   "label": "\u00dcbernahme durch (Todesfall)"
   },
   {
    "default": "0",
@@ -826,7 +827,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-01-03 11:03:36.714172",
+ "modified": "2022-01-06 12:48:21.620109",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

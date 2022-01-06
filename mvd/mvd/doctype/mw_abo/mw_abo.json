@@ -53,7 +53,7 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Empf\u00e4nger",
+   "label": "Empf\u00e4nger*in",
    "options": "Customer",
    "reqd": 1
   },
@@ -87,7 +87,7 @@
   {
    "fieldname": "section_inhaber",
    "fieldtype": "Section Break",
-   "label": "Inhaber"
+   "label": "Abonnent*in"
   },
   {
    "fieldname": "cb_2",
@@ -118,7 +118,7 @@
    "label": "PDF"
   }
  ],
- "modified": "2021-11-18 15:37:56.470600",
+ "modified": "2022-01-06 12:57:21.381855",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MW Abo",
