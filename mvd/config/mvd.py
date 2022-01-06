@@ -34,7 +34,7 @@ def get_data():
                 {
                     "type": "doctype",
                     "name": "Arbeits Backlog",
-                    "label": _("Arbeits Backlog"),
+                    "label": _("Arbeits-Backlog"),
                     "description": _("Zu erledigende Aufgaben")
                 },
                 {
@@ -70,7 +70,7 @@ def get_data():
             ]
         },
         {
-            "label": _("Verbands Stammdaten"),
+            "label": _("Verbands-Stammdaten"),
             "icon": "fa fa-cog",
             "items": [
                 {
