@@ -8,6 +8,12 @@ def get_data():
             "icon": "fa fa-cog",
             "items": [
                 {
+                   "type": "page",
+                   "name": "mvd-suchmaske",
+                   "label": _("Mitgliedschaftssuche"),
+                   "description": _("Mitgliedschaftssuche")
+               },
+               {
                     "type": "doctype",
                     "name": "MV Mitgliedschaft",
                     "label": _("MV Mitgliedschaft"),
@@ -18,7 +24,13 @@ def get_data():
                     "name": "MW Abo",
                     "label": _("M+W Abo"),
                     "description": _("M+W Abo")
-                },
+                }
+            ]
+        },
+        {
+            "label": _("Werkzeuge"),
+            "icon": "fa fa-cog",
+            "items": [
                 {
                     "type": "doctype",
                     "name": "Arbeits Backlog",
@@ -37,12 +49,6 @@ def get_data():
             "label": _("Stammdaten"),
             "icon": "fa fa-cog",
             "items": [
-                {
-                   "type": "page",
-                   "name": "mvd-suchmaske",
-                   "label": _("Mitgliedschaftssuche"),
-                   "description": _("Mitgliedschaftssuche")
-               },
                {
                     "type": "doctype",
                     "name": "Customer",
