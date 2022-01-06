@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 
 @frappe.whitelist()
-def get_qrr_reference(sales_invoice=None, reference_raw='00 00000 00000 00000 00000 0000'):
+def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000 00000 00000 0000'):
     if sales_invoice:
         sinv = frappe.get_doc("Sales Invoice", sales_invoice)
         if sinv.mv_mitgliedschaft:
@@ -24,6 +24,21 @@ def get_qrr_reference(sales_invoice=None, reference_raw='00 00000 00000 00000 00
         reference_raw += sales_invoice.replace("R-", "")[:2]
         reference_raw += ' '
         reference_raw += sales_invoice.replace("R-", "")[2:7]
+    
+    if fr:
+        fr_sinv = frappe.get_doc("Fakultative Rechnung", fr)
+        mvm = frappe.get_doc("MV Mitgliedschaft", fr_sinv.mv_mitgliedschaft)
+        if fr_sinv.typ == 'HV':
+            reference_raw = '11 00'
+        else:
+            reference_raw = '12 00'
+        reference_raw += mvm.mitglied_nr[:3]
+        reference_raw += ' '
+        reference_raw += mvm.mitglied_nr[3:8]
+        reference_raw += ' 000'
+        reference_raw += fr.replace("FR-", "")[:2]
+        reference_raw += ' '
+        reference_raw += fr.replace("FR-", "")[2:7]
     
     check_digit_matrix = {
         '0': [0, 9, 4, 6, 8, 2, 7, 1, 3, 5, 0],

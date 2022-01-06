@@ -1,0 +1,145 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2022-01-06 15:17:34.480662",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_stammdaten",
+  "mv_mitgliedschaft",
+  "qrr_referenz",
+  "sektions_code",
+  "status",
+  "naming_series",
+  "amended_from",
+  "section_rechnung",
+  "typ",
+  "betrag",
+  "cb_1",
+  "posting_date",
+  "due_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mitgliedschaft",
+   "options": "MV Mitgliedschaft",
+   "reqd": 1
+  },
+  {
+   "fieldname": "typ",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Typ",
+   "options": "HV\nSpende",
+   "reqd": 1
+  },
+  {
+   "fieldname": "betrag",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Betrag",
+   "reqd": 1
+  },
+  {
+   "fieldname": "qrr_referenz",
+   "fieldtype": "Data",
+   "label": "QRR Referenz"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Unpaid\nPaid",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Rechnungsdatum",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sektions_code",
+   "fieldtype": "Data",
+   "label": "sektions_code"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Basierend auf",
+   "no_copy": 1,
+   "options": "Fakultative Rechnung",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_stammdaten",
+   "fieldtype": "Section Break",
+   "label": "Stammdaten",
+   "permlevel": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_rechnung",
+   "fieldtype": "Section Break",
+   "label": "Fakultative Rechnung"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Zahlbar bis"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "FR-.{sektions_code}.#####",
+   "reqd": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-01-06 16:02:09.212039",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Fakultative Rechnung",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
