@@ -316,21 +316,28 @@ function daten_validiert(frm) {
 
 function erstelle_rechnung(frm) {
     frappe.prompt([
-        {'fieldname': 'jahr', 'fieldtype': 'Int', 'label': 'Rechnung gültig für Mitgliedschafts-Jahr', 'reqd': 1}  
+        {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0}
     ],
     function(values){
+        if (values.bar_bezahlt == 1) {
+            var bar_bezahlt = true
+        } else {
+            var bar_bezahlt = null
+        }
         frappe.call({
             method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.create_mitgliedschaftsrechnung",
             args:{
                     'mitgliedschaft': cur_frm.doc.name,
-                    'jahr': values.jahr
+                    'bezahlt': bar_bezahlt,
+                    'attach_as_pdf': true,
+                    'submit': true
             },
             freeze: true,
             freeze_message: 'Erstelle Rechnung...',
             callback: function(r)
             {
                 cur_frm.reload_doc();
-                frappe.msgprint("Vergessen Sie nicht die Rechnung zu Buchen und zu Versenden.", "Die Rechnung wurde erstellt");
+                frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
             }
         });
     },

@@ -1372,8 +1372,11 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         pos_profile = frappe.get_doc("POS Profile", sektion.pos_barzahlung)
         sinv.is_pos = 1
         sinv.pos_profile = pos_profile.name
-        sinv.payments = pos_profile.payments
-        sinv.payments[0].amount = sinv.grand_total
+        row = sinv.append('payments', {})
+        row.mode_of_payment = pos_profile.payments[0].mode_of_payment
+        row.account = pos_profile.payments[0].account
+        row.type = pos_profile.payments[0].type
+        row.amount = sinv.grand_total
         sinv.save()
     
     if submit:

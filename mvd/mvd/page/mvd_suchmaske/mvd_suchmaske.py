@@ -187,6 +187,8 @@ def anlage_prozess(anlage_daten):
         "nachname_1": anlage_daten["nachname"],
         "vorname_1": anlage_daten["vorname"],
         "tel_p_1": anlage_daten["telefon"] if 'telefon' in anlage_daten else '',
+        "tel_m_1": anlage_daten["telefon_m"] if 'telefon_m' in anlage_daten else '',
+        "tel_g_1": anlage_daten["telefon_g"] if 'telefon_g' in anlage_daten else '',
         "e_mail_1": anlage_daten["email"] if 'email' in anlage_daten else '',
         "zusatz_adresse": anlage_daten["zusatz_adresse"] if 'zusatz_adresse' in anlage_daten else '',
         "strasse": anlage_daten["strasse"] if 'strasse' in anlage_daten else '',
