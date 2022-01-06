@@ -21,7 +21,7 @@ frappe.listview_settings['MV Mitgliedschaft'] = {
                 frappe.route();
         });
         
-        listview.page.add_menu_item(__("Erfasse Interessent:inn"), function() {
+        listview.page.add_menu_item(__("Erfasse Interessent*in"), function() {
                 weiterleitung_suchmaske();
                 
         });

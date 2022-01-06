@@ -243,7 +243,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Select",
                 fieldname: "status_c",
-                options: 'Regulär\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nGestorben\nKündigung\nWegzug\nAusschluss\nInaktiv\nInteressent:In',
+                options: 'Regulär\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nGestorben\nKündigung\nWegzug\nAusschluss\nInaktiv\nInteressent*in',
                 placeholder: "Status"
             },
             only_input: true,
@@ -454,7 +454,7 @@ frappe.mvd_such_client = {
                 hidden: 1,
                 click: function(){
                     frappe.prompt([
-                        {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent:In\nRegulär', 'default': 'Regulär'},
+                        {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent*in\nRegulär', 'default': 'Regulär'},
                         {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': 'Privat'},
                         {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value()},
                         {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 1},

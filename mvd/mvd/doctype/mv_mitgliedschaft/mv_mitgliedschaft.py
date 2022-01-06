@@ -1760,7 +1760,7 @@ def get_status_c(status_c):
         'Wegzug': 'Wegzug',
         'Ausschluss': 'Ausschluss',
         'Inaktiv': 'Inaktiv',
-        'InteressentIn': 'Interessent:In'
+        'InteressentIn': 'Interessent*in'
     }
     if status_c in mapper:
         return mapper[status_c]
@@ -2003,7 +2003,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         'Wegzug': 'Wegzug',
         'Ausschluss': 'Ausschluss',
         'Inaktiv': 'Inaktiv',
-        'Interessent:In': 'InteressentIn'
+        'Interessent*in': 'InteressentIn'
     }
     prepared_mvm = {
         "mitgliedNummer": str(mitgliedschaft.mitglied_nr),
