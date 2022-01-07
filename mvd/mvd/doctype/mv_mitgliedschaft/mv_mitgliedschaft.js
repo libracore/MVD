@@ -20,6 +20,9 @@ frappe.ui.form.on('MV Mitgliedschaft', {
                 frm.add_custom_button(__("Mitgliedschafts-Rechnung"),  function() {
                         erstelle_rechnung(frm);
                 }, __("Erstelle"));
+                frm.add_custom_button(__("Spenden-Rechnung"),  function() {
+                        erstelle_spenden_rechnung(frm);
+                }, __("Erstelle"));
             }
             if (cur_frm.doc.validierung_notwendig) {
                 frm.add_custom_button(__("Daten als validert bestätigen"),  function() {
@@ -316,13 +319,20 @@ function daten_validiert(frm) {
 
 function erstelle_rechnung(frm) {
     frappe.prompt([
-        {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0}
+        {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0},
+        {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'}
     ],
     function(values){
         if (values.bar_bezahlt == 1) {
-            var bar_bezahlt = true
+            var bar_bezahlt = true;
+            if (values.hv_bar_bezahlt == 1) {
+                var hv_bar_bezahlt = true;
+            } else {
+                var hv_bar_bezahlt = null;
+            }
         } else {
-            var bar_bezahlt = null
+            var bar_bezahlt = null;
+            var hv_bar_bezahlt = null;
         }
         frappe.call({
             method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.create_mitgliedschaftsrechnung",
@@ -330,7 +340,8 @@ function erstelle_rechnung(frm) {
                     'mitgliedschaft': cur_frm.doc.name,
                     'bezahlt': bar_bezahlt,
                     'attach_as_pdf': true,
-                    'submit': true
+                    'submit': true,
+                    'hv_bar_bezahlt': hv_bar_bezahlt
             },
             freeze: true,
             freeze_message: 'Erstelle Rechnung...',
@@ -359,4 +370,29 @@ function setze_read_only(frm) {
     for (i; i<cur_frm.fields.length; i++) {
         cur_frm.set_df_property(cur_frm.fields[i].df.fieldname,'read_only', 1);
     }
+}
+
+function erstelle_spenden_rechnung(frm) {
+    frappe.prompt([
+        {'fieldname': 'betrag', 'fieldtype': 'Currency', 'label': 'Vorgeschlagener Betrag', 'reqd': 1, 'default': 0.0}
+    ],
+    function(values){
+        frappe.call({
+            method: "mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung.create_hv_fr",
+            args:{
+                    'mitgliedschaft': cur_frm.doc.name,
+                    'betrag_spende': values.betrag
+            },
+            freeze: true,
+            freeze_message: 'Erstelle Spendenrechnung...',
+            callback: function(r)
+            {
+                cur_frm.reload_doc();
+                frappe.msgprint("Die Spendenrechnung wurde erstellt, Sie finden sie in den Anhängen.");
+            }
+        });
+    },
+    'Spendenrechnungs Erstellung',
+    'Erstellen'
+    )
 }

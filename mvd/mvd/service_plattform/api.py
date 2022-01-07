@@ -25,45 +25,60 @@ def whoami(type='light'):
 # ausgehend
 # ---------------------------------------------------
 def neue_mitglieder_nummer(sektion_code):
-    if auth_check():
-        sub_url = frappe.db.get_single_value('Service Plattform API', 'api_url')
-        endpoint = frappe.db.get_single_value('Service Plattform API', 'neue_mitglieder_nummer')
-        url = sub_url + endpoint + '/{sektion_code}'.format(sektion_code=sektion_code)
-        token = frappe.db.get_single_value('Service Plattform API', 'api_token')
-        headers = {"authorization": "Bearer {token}".format(token=token)}
-        
-        try:
-            mitglied_nr_obj = requests.post(url, headers = headers)
-            mitglied_nr_obj = mitglied_nr_obj.json()
-            return mitglied_nr_obj
-        except Exception as err:
-            frappe.log_error("{0}".format(err), 'neue_mitglieder_nummer failed')
-            frappe.db.commit()
+    if not int(frappe.db.get_single_value('Service Plattform API', 'not_get_number_and_id')) == 1:
+        if auth_check():
+            sub_url = frappe.db.get_single_value('Service Plattform API', 'api_url')
+            endpoint = frappe.db.get_single_value('Service Plattform API', 'neue_mitglieder_nummer')
+            url = sub_url + endpoint + '/{sektion_code}'.format(sektion_code=sektion_code)
+            token = frappe.db.get_single_value('Service Plattform API', 'api_token')
+            headers = {"authorization": "Bearer {token}".format(token=token)}
+            
+            try:
+                mitglied_nr_obj = requests.post(url, headers = headers)
+                mitglied_nr_obj = mitglied_nr_obj.json()
+                if 'mitgliedNummer' not in mitglied_nr_obj:
+                    frappe.log_error("{0}".format(mitglied_nr_obj), 'neue_mitglieder_nummer failed')
+                    frappe.throw("Zur Zeit können keine Daten von der Serviceplatform bezogen werden.")
+                
+                return mitglied_nr_obj
+            except Exception as err:
+                frappe.log_error("{0}".format(err), 'neue_mitglieder_nummer failed')
+                frappe.db.commit()
+    else:
+        frappe.log_error("SektionsCode: {0}".format(sektion_code), 'neue_mitglieder_nummer deaktiviert: manuelle vergabe')
+        return {
+            'mitgliedNummer': '13467985',
+            'mitgliedId': '97624986'
+        }
 
 def update_mvm(mvm, update):
-    if auth_check():
-        sub_url = str(frappe.db.get_single_value('Service Plattform API', 'api_url'))
-        endpoint = str(frappe.db.get_single_value('Service Plattform API', 'mitglieder'))
-        url = sub_url + endpoint
-        token = frappe.db.get_single_value('Service Plattform API', 'api_token')
-        headers = {"authorization": "Bearer {token}".format(token=token)}
-        
-        if update:
-            sp_connection = requests.put(url, json = mvm, headers = headers)
-        else:
-            sp_connection = requests.post(url, json = mvm, headers = headers)
-        
-        try:
-            if sp_connection.status_code != 204:
-                frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), 'update_mvm failed')
+    if not int(frappe.db.get_single_value('Service Plattform API', 'no_sp_update')) == 1:
+        if auth_check():
+            sub_url = str(frappe.db.get_single_value('Service Plattform API', 'api_url'))
+            endpoint = str(frappe.db.get_single_value('Service Plattform API', 'mitglieder'))
+            url = sub_url + endpoint
+            token = frappe.db.get_single_value('Service Plattform API', 'api_token')
+            headers = {"authorization": "Bearer {token}".format(token=token)}
+            
+            if update:
+                sp_connection = requests.put(url, json = mvm, headers = headers)
+            else:
+                sp_connection = requests.post(url, json = mvm, headers = headers)
+            
+            try:
+                if sp_connection.status_code != 204:
+                    frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), 'update_mvm failed')
+                    frappe.db.commit()
+                    return
+                else:
+                    return
+            except Exception as err:
+                frappe.log_error("{0}\n\n{1}".format(err, mvm), 'update_mvm failed')
                 frappe.db.commit()
                 return
-            else:
-                return
-        except Exception as err:
-            frappe.log_error("{0}\n\n{1}".format(err, mvm), 'update_mvm failed')
-            frappe.db.commit()
-            return
+    else:
+        frappe.log_error("{0}".format(mvm), 'update_mvm deaktiviert')
+        return
 
 def auth_check():
     sub_url = str(frappe.db.get_single_value('Service Plattform API', 'api_url'))

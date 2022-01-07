@@ -10,6 +10,7 @@ from mvd.mvd.utils.qrr_reference import get_qrr_reference
 import json
 from PyPDF2 import PdfFileWriter
 from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
+from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
 
 class MVMitgliedschaft(Document):
     def after_insert(self):
@@ -31,8 +32,11 @@ class MVMitgliedschaft(Document):
     def set_new_name(self):
         if not self.mitglied_nr or not self.mitglied_id:
             mitglied_nummer_obj = mvm_neue_mitglieder_nummer(self)
-            self.mitglied_nr = mitglied_nummer_obj["mitgliedNummer"]
-            self.mitglied_id = mitglied_nummer_obj["mitgliedId"]
+            if mitglied_nummer_obj:
+                self.mitglied_nr = mitglied_nummer_obj["mitgliedNummer"]
+                self.mitglied_id = mitglied_nummer_obj["mitgliedId"]
+            else:
+                frappe.throw("Die gewünschte Mitgliedschaft konnte nicht erstellt werden.")
         return
     
     def validate(self):
@@ -1319,7 +1323,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         return 0
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False):
+def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False):
     mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
     company = frappe.get_doc("Company", sektion.company)
@@ -1381,6 +1385,9 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
     
     if submit:
         sinv.submit()
+    
+    if inkl_hv:
+        fr_rechnung = create_hv_fr(mitgliedschaft=mitgliedschaft.name, sales_invoice=sinv.name, bezahlt=hv_bar_bezahlt)
     
     if attach_as_pdf:
         # erstellung Rechnungs PDF

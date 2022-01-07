@@ -204,8 +204,11 @@ def anlage_prozess(anlage_daten):
     # optional: erstelle Rechnung
     if int(anlage_daten["autom_rechnung"]) == 1:
         bezahlt = False
+        hv_bar_bezahlt = False
         if int(anlage_daten["bar_bezahlt"]) == 1:
             bezahlt = True
-        sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True)
+            if int(anlage_daten["hv_bar_bezahlt"]) == 1:
+                hv_bar_bezahlt = True
+        sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt)
     
     return mitgliedschaft.name

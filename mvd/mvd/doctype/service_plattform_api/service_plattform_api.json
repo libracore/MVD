@@ -12,7 +12,10 @@
   "section_endpoints",
   "auth_check",
   "mitglieder",
-  "neue_mitglieder_nummer"
+  "neue_mitglieder_nummer",
+  "section_danger",
+  "not_get_number_and_id",
+  "no_sp_update"
  ],
  "fields": [
   {
@@ -69,10 +72,28 @@
    "fieldtype": "Data",
    "label": "Neue Mitgliedernummer",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_danger",
+   "fieldtype": "Section Break",
+   "label": "Danger Zone"
+  },
+  {
+   "default": "0",
+   "fieldname": "not_get_number_and_id",
+   "fieldtype": "Check",
+   "label": "Mitglied Nr. & ID Bezug deaktivieren"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_sp_update",
+   "fieldtype": "Check",
+   "label": "Updates zu SP Deaktivieren"
   }
  ],
  "issingle": 1,
- "modified": "2021-12-17 20:59:11.073479",
+ "modified": "2022-01-07 09:09:51.868342",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",
