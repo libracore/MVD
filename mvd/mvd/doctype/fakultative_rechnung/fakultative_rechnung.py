@@ -90,6 +90,7 @@ def create_paid_sinv(fr, mitgliedschaft, sektion):
     sinv = frappe.get_doc({
         "doctype": "Sales Invoice",
         "ist_mitgliedschaftsrechnung": 0,
+        "ist_hv_rechnung": 1,
         "mv_mitgliedschaft": fr.mv_mitgliedschaft,
         "company": sektion.company,
         "customer": customer,

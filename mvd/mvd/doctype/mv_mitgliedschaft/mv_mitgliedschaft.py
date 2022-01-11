@@ -92,7 +92,9 @@ class MVMitgliedschaft(Document):
         
     def check_zahlung_mitgliedschaft(self):
         sinvs = frappe.db.sql("""SELECT
-                                    `mitgliedschafts_jahr`
+                                    `name`,
+                                    `is_pos`,
+                                    `posting_date`
                                 FROM `tabSales Invoice`
                                 WHERE `docstatus` = 1
                                 AND `ist_mitgliedschaftsrechnung` = 1
@@ -101,9 +103,18 @@ class MVMitgliedschaft(Document):
                                 ORDER BY `mitgliedschafts_jahr` DESC""".format(mvm=self.name), as_dict=True)
         if len(sinvs) > 0:
             sinv = sinvs[0]
-            self.zahlung_mitgliedschaft = sinv.mitgliedschafts_jahr
+            if sinv.is_pos == 1:
+                sinv_year = getdate(sinv.posting_date).strftime("%Y")
+            else:
+                pes = frappe.db.sql("""SELECT `parent` FROM `tabPayment Entry Reference`
+                                        WHERE `reference_doctype` = 'Sales Invoice'
+                                        AND `reference_name` = '{sinv}' ORDER BY `creation` DESC""".format(sinv=sinv.name), as_dict=True)
+                if len(pes) > 0:
+                    pe = frappe.get_doc("Payment Entry", pes[0].parent)
+                    sinv_year = getdate(pe.reference_date).strftime("%Y")
+            self.zahlung_mitgliedschaft = sinv_year
         current_year = int(now().split("-")[0])
-        if self.zahlung_mitgliedschaft > current_year:
+        if int(self.zahlung_mitgliedschaft) > current_year:
             self.naechstes_jahr_geschuldet = '0'
         else:
             self.naechstes_jahr_geschuldet = 1
@@ -128,7 +139,28 @@ class MVMitgliedschaft(Document):
         return
     
     def check_zahlung_hv(self):
-        #tbd
+        sinvs = frappe.db.sql("""SELECT
+                                    `name`,
+                                    `is_pos`,
+                                    `posting_date`
+                                FROM `tabSales Invoice`
+                                WHERE `docstatus` = 1
+                                AND `ist_hv_rechnung` = 1
+                                AND `mv_mitgliedschaft` = '{mvm}'
+                                AND `status` = 'Paid'
+                                ORDER BY `posting_date` DESC""".format(mvm=self.name), as_dict=True)
+        if len(sinvs) > 0:
+            sinv = sinvs[0]
+            if sinv.is_pos == 1:
+                sinv_year = getdate(sinv.posting_date).strftime("%Y")
+            else:
+                pes = frappe.db.sql("""SELECT `parent` FROM `tabPayment Entry Reference`
+                                        WHERE `reference_doctype` = 'Sales Invoice'
+                                        AND `reference_name` = '{sinv}' ORDER BY `creation` DESC""".format(sinv=sinv.name), as_dict=True)
+                if len(pes) > 0:
+                    pe = frappe.get_doc("Payment Entry", pes[0].parent)
+                    sinv_year = getdate(pe.reference_date).strftime("%Y")
+            self.zahlung_hv = sinv_year
         return
         
     def validate_rg_kunde(self):
