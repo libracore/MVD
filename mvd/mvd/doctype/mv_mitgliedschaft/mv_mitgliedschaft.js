@@ -267,36 +267,44 @@ function ausschluss(frm) {
 }
 
 function sektionswechsel(frm) {
-    frappe.prompt([
-        {'fieldname': 'sektion_neu', 'fieldtype': 'Link', 'label': 'Neue Sektion', 'reqd': 1, 'options': 'Sektion'}  
-    ],
-    function(values){
-        frappe.call({
-            method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.sektionswechsel",
-            args:{
-                    'mitgliedschaft': cur_frm.doc.name,
-                    'neue_sektion': values.sektion_neu,
-                    'zuzug_per': frappe.datetime.get_today()
+    frappe.call({
+        method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.get_sektionen_zur_auswahl",
+        args:{},
+        callback: function(r)
+        {
+            var sektionen_zur_auswahl = r.message;
+            frappe.prompt([
+                {'fieldname': 'sektion_neu', 'fieldtype': 'Select', 'label': 'Neue Sektion', 'reqd': 1, 'options': sektionen_zur_auswahl}  
+            ],
+            function(values){
+                frappe.call({
+                    method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.sektionswechsel",
+                    args:{
+                            'mitgliedschaft': cur_frm.doc.name,
+                            'neue_sektion': values.sektion_neu,
+                            'zuzug_per': frappe.datetime.get_today()
+                    },
+                    freeze: true,
+                    freeze_message: 'Führe Sektionswechsel durch...',
+                    callback: function(r)
+                    {
+                        if (r.message == 1) {
+                            cur_frm.set_value("wegzug", frappe.datetime.get_today());
+                            cur_frm.set_value("wegzug_zu", values.sektion_neu);
+                            cur_frm.set_value("status_c", 'Wegzug');
+                            cur_frm.save();
+                            frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
+                        } else {
+                            frappe.msgprint("oops, da ist etwas schiefgelaufen!");
+                        }
+                    }
+                });
             },
-            freeze: true,
-            freeze_message: 'Führe Sektionswechsel durch...',
-            callback: function(r)
-            {
-                if (r.message == 1) {
-                    cur_frm.set_value("wegzug", frappe.datetime.get_today());
-                    cur_frm.set_value("wegzug_zu", values.sektion_neu);
-                    cur_frm.set_value("status_c", 'Wegzug');
-                    cur_frm.save();
-                    frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
-                } else {
-                    frappe.msgprint("oops, da ist etwas schiefgelaufen!");
-                }
-            }
-        });
-    },
-    'Sektionswechsel',
-    'Übertragen'
-    )
+            'Sektionswechsel',
+            'Übertragen'
+            )
+        }
+    });
 }
 
 function daten_validiert(frm) {

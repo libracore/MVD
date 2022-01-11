@@ -30,12 +30,12 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spend
         'betrag': betrag_spende or sektion.betrag_hv,
         'posting_date': today()
     })
-    fr.insert()
+    fr.insert(ignore_permissions=True)
     
     if bezahlt:
         fr.status = 'Paid'
         fr.bezahlt_via = create_paid_sinv(fr, mitgliedschaft, sektion)
-        fr.save()
+        fr.save(ignore_permissions=True)
     
     fr.submit()
     
@@ -58,7 +58,7 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spend
             "attached_to_name": mitgliedschaft.name
         })
         
-        _file.save()
+        _file.save(ignore_permissions=True)
         
     return fr.name
 
@@ -103,7 +103,7 @@ def create_paid_sinv(fr, mitgliedschaft, sektion):
         "inkl_hv": 0,
         "esr_reference": fr.qrr_referenz or get_qrr_reference(fr=fr.name)
     })
-    sinv.insert()
+    sinv.insert(ignore_permissions=True)
     
     pos_profile = frappe.get_doc("POS Profile", sektion.pos_barzahlung)
     sinv.is_pos = 1
@@ -113,7 +113,7 @@ def create_paid_sinv(fr, mitgliedschaft, sektion):
     row.account = pos_profile.payments[0].account
     row.type = pos_profile.payments[0].type
     row.amount = sinv.grand_total
-    sinv.save()
+    sinv.save(ignore_permissions=True)
     
     sinv.submit()
     return sinv.name

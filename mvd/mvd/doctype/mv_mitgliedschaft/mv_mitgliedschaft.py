@@ -357,7 +357,7 @@ def create_rg_adresse(mitgliedschaft):
     link.link_doctype = 'Customer'
     link.link_name = link_name
     
-    new_address.insert()
+    new_address.insert(ignore_permissions=True)
     frappe.db.commit()
     
     return new_address.name
@@ -511,7 +511,7 @@ def create_rg_kontakt(mitgliedschaft):
         phone_row.phone = phone
     
     try:
-        new_contact.insert()
+        new_contact.insert(ignore_permissions=True)
         frappe.db.commit()
     except frappe.DuplicateEntryError:
         frappe.local.message_log = []
@@ -552,7 +552,7 @@ def create_rg_kunde(mitgliedschaft):
         'customer_type': customer_type,
         'sektion': mitgliedschaft.sektion_id
     })
-    new_customer.insert()
+    new_customer.insert(ignore_permissions=True)
     frappe.db.commit()
     return new_customer.name
 
@@ -599,7 +599,7 @@ def create_objekt_adresse(mitgliedschaft):
     link.link_doctype = 'Customer'
     link.link_name = mitgliedschaft.kunde_mitglied
     
-    new_address.insert()
+    new_address.insert(ignore_permissions=True)
     frappe.db.commit()
     
     return new_address.name
@@ -732,7 +732,7 @@ def create_adresse_mitglied(mitgliedschaft):
     link.link_doctype = 'Customer'
     link.link_name = mitgliedschaft.kunde_mitglied
     
-    new_address.insert()
+    new_address.insert(ignore_permissions=True)
     frappe.db.commit()
     
     return new_address.name
@@ -975,7 +975,7 @@ def create_kontakt_mitglied(mitgliedschaft, primary=True):
             phone_row.phone = phone
     
     try:
-        new_contact.insert()
+        new_contact.insert(ignore_permissions=True)
         frappe.db.commit()
     except frappe.DuplicateEntryError:
         frappe.local.message_log = []
@@ -1038,7 +1038,7 @@ def create_kunde_mitglied(mitgliedschaft):
         'sektion': mitgliedschaft.sektion_id
     })
     
-    new_customer.insert()
+    new_customer.insert(ignore_permissions=True)
     frappe.db.commit()
     return new_customer.name
 
@@ -1153,7 +1153,9 @@ def get_uebersicht_html(name):
     
     if mitgliedschaft.inkl_hv:
         if mitgliedschaft.zahlung_hv:
-            hv_status = 'HV bezahlt am {0}'.format(frappe.utils.get_datetime(mitgliedschaft.zahlung_hv).strftime('%d.%m.%Y'))
+            # im moment umgeschrieben von Datum auf Jahreszahl, muss nach dem Update der API wieder angepasst werden!
+            # hv_status = 'HV bezahlt am {0}'.format(frappe.utils.get_datetime(mitgliedschaft.zahlung_hv).strftime('%d.%m.%Y'))
+            hv_status = 'HV bezahlt am {0}'.format(mitgliedschaft.zahlung_hv)
         else:
             hv_status = 'HV unbezahlt'
     else:
@@ -1303,7 +1305,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         new_mitgliedschaft.rg_kontakt = ''
         new_mitgliedschaft.rg_adresse = ''
         new_mitgliedschaft.adress_id_rg = ''
-        new_mitgliedschaft.insert()
+        new_mitgliedschaft.insert(ignore_permissions=True)
         frappe.db.commit()
         
         # erstelle ggf. neue Rechnung
@@ -1312,8 +1314,9 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
                 create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=int(now().split("-")[0]))
         
         # markiere neue Mitgliedschaft als zu validieren
+        new_mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", new_mitgliedschaft.name)
         new_mitgliedschaft.validierung_notwendig = 1
-        new_mitgliedschaft.save()
+        new_mitgliedschaft.save(ignore_permissions=True)
         create_abl("Daten Validieren", new_mitgliedschaft)
         
         return 1
@@ -1368,9 +1371,9 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         "items": item,
         "inkl_hv": mitgliedschaft.inkl_hv
     })
-    sinv.insert()
+    sinv.insert(ignore_permissions=True)
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
-    sinv.save()
+    sinv.save(ignore_permissions=True)
     
     if bezahlt:
         pos_profile = frappe.get_doc("POS Profile", sektion.pos_barzahlung)
@@ -1381,7 +1384,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         row.account = pos_profile.payments[0].account
         row.type = pos_profile.payments[0].type
         row.amount = sinv.grand_total
-        sinv.save()
+        sinv.save(ignore_permissions=True)
     
     if submit:
         sinv.submit()
@@ -1406,7 +1409,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
             "attached_to_name": mitgliedschaft.name
         })
         
-        _file.save()
+        _file.save(ignore_permissions=True)
     
     return sinv.name
 
@@ -1438,7 +1441,7 @@ def create_korrespondenz_serienbriefe(mitgliedschaften, korrespondenzdaten):
             "inhalt": korrespondenzdaten['inhalt'],
             "inhalt_2": korrespondenzdaten['inhalt_2'] if 'inhalt_2' in korrespondenzdaten else ''
         })
-        new_korrespondenz.insert()
+        new_korrespondenz.insert(ignore_permissions=True)
         frappe.db.commit()
         erstellte_korrespondenzen.append(new_korrespondenz.name)
     
@@ -1453,7 +1456,7 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf):
     if massenlauf == '1':
         mitgliedschaft.kuendigung_verarbeiten = 1
         create_abl("Kündigung verarbeiten", mitgliedschaft)
-    mitgliedschaft.save()
+    mitgliedschaft.save(ignore_permissions=True)
     
     # erstellung Kündigungs PDF
     output = PdfFileWriter()
@@ -1472,7 +1475,7 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf):
         "attached_to_name": mitgliedschaft.name
     })
     
-    _file.save()
+    _file.save(ignore_permissions=True)
     
     return 'done'
 
@@ -1481,7 +1484,7 @@ def close_open_validations(mitgliedschaft):
     for abl in open_abl:
         abl = frappe.get_doc("Arbeits Backlog", abl.name)
         abl.status = 'Completed'
-        abl.save()
+        abl.save(ignore_permissions=True)
 
 # API (eingehend von Service-Platform)
 # -----------------------------------------------
@@ -2158,7 +2161,7 @@ def mvm_kuendigung(mitgliedschaft):
 def sinv_check_zahlung_mitgliedschaft(sinv, event):
     if sinv.mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", sinv.mv_mitgliedschaft)
-        mitgliedschaft.save()
+        mitgliedschaft.save(ignore_permissions=True)
 
 def pe_check_zahlung_mitgliedschaft(pe, event):
     for ref in pe.references:
@@ -2166,7 +2169,7 @@ def pe_check_zahlung_mitgliedschaft(pe, event):
             sinv = frappe.get_doc("Sales Invoice", ref.reference_name)
             if sinv.mv_mitgliedschaft:
                 mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", sinv.mv_mitgliedschaft)
-                mitgliedschaft.save()
+                mitgliedschaft.save(ignore_permissions=True)
 
 def set_inaktiv():
     mvms = frappe.db.sql("""SELECT `name` FROM `tabMV Mitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Kündigung', 'Ausschluss')""", as_dict=True)
@@ -2175,11 +2178,11 @@ def set_inaktiv():
         if mv.status_c in ('Kündigung', 'Gestorben'):
             if mv.kuendigung and mv.kuendigung <= getdate(today()):
                 mv.status_c = 'Inaktiv'
-                mv.save()
+                mv.save(ignore_permissions=True)
         elif mv.status_c == 'Ausschluss':
             if mv.austritt and mv.austritt <= getdate(today()):
                 mv.status_c = 'Inaktiv'
-                mv.save()
+                mv.save(ignore_permissions=True)
 # -----------------------------------------------
 # other helpers
 # -----------------------------------------------
@@ -2193,3 +2196,11 @@ def get_sektions_code(company):
             return '00'
     else:
         return '00'
+
+@frappe.whitelist()
+def get_sektionen_zur_auswahl():
+    sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` ORDER BY `name` ASC""", as_dict=True)
+    sektionen_zur_auswahl = ''
+    for sektion in sektionen:
+        sektionen_zur_auswahl += "\n" + sektion.name
+    return sektionen_zur_auswahl

@@ -199,7 +199,7 @@ def anlage_prozess(anlage_daten):
         "plz": anlage_daten["plz"],
         "ort": anlage_daten["ort"]
     })
-    mitgliedschaft.insert()
+    mitgliedschaft.insert(ignore_permissions=True)
     
     # optional: erstelle Rechnung
     if int(anlage_daten["autom_rechnung"]) == 1:

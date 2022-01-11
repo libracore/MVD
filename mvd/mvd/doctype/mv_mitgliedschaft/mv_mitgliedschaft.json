@@ -353,7 +353,7 @@
    "fieldname": "section_links",
    "fieldtype": "Section Break",
    "label": "Verkn\u00fcpfungen",
-   "permlevel": 1,
+   "permlevel": 2,
    "read_only": 1
   },
   {
@@ -827,7 +827,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-01-06 13:05:42.387021",
+ "modified": "2022-01-11 10:08:02.308570",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
