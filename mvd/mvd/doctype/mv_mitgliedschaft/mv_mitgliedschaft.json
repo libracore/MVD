@@ -35,6 +35,7 @@
   "zahlung_hv",
   "zahlung_mitgliedschaft",
   "naechstes_jahr_geschuldet",
+  "ampel_farbe",
   "cb_1",
   "austritt",
   "zuzug_von",
@@ -824,10 +825,17 @@
    "fieldname": "naechstes_jahr_geschuldet",
    "fieldtype": "Check",
    "label": "N\u00e4chstes Jahr geschuldet"
+  },
+  {
+   "fieldname": "ampel_farbe",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Ampel Farbe",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-01-11 10:08:02.308570",
+ "modified": "2022-01-11 13:14:12.730040",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

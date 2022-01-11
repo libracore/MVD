@@ -42,7 +42,15 @@
         <tbody>
             {% for mitgliedschaft in mitgliedschaften %}
                 <tr>
-                    <td style="padding-left: 0px !important; background: {{ mitgliedschaft.ampelfarbe }};">&nbsp;</td>
+                    {% if mitgliedschaft.ampel_farbe == 'ampelgruen' %}
+                        <td style="padding-left: 0px !important; background: limegreen;">&nbsp;</td>
+                    {% else %}
+                        {% if mitgliedschaft.ampel_farbe == 'ampelgelb' %}
+                            <td style="padding-left: 0px !important; background: yellow;">&nbsp;</td>
+                        {% else %}
+                            <td style="padding-left: 0px !important; background: red;">&nbsp;</td>
+                        {% endif %}
+                    {% endif %}
                     <td>
                         {% if not meine_sektionen or mitgliedschaft.sektion_id in meine_sektionen %}
                             <a href="/desk#Form/MV Mitgliedschaft/{{ mitgliedschaft.name }}">{{ mitgliedschaft.mitglied_nr }}</a>
@@ -64,7 +72,15 @@
                 </tr>
                 {% if mitgliedschaft.hat_solidarmitglied %}
                     <tr>
-                        <td style="padding-left: 0px !important; background: {{ mitgliedschaft.ampelfarbe }};">&nbsp;</td>
+                        {% if mitgliedschaft.ampel_farbe == 'ampelgruen' %}
+                            <td style="padding-left: 0px !important; background: limegreen;">&nbsp;</td>
+                        {% else %}
+                            {% if mitgliedschaft.ampel_farbe == 'ampelgelb' %}
+                                <td style="padding-left: 0px !important; background: yellow;">&nbsp;</td>
+                            {% else %}
+                                <td style="padding-left: 0px !important; background: red;">&nbsp;</td>
+                            {% endif %}
+                        {% endif %}
                         <td>
                             {% if not meine_sektionen or mitgliedschaft.sektion_id in meine_sektionen %}
                                 <a href="/desk#Form/MV Mitgliedschaft/{{ mitgliedschaft.name }}">{{ mitgliedschaft.mitglied_nr }}</a>

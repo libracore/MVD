@@ -81,6 +81,9 @@ class MVMitgliedschaft(Document):
             # Adressblock
             self.adressblock = get_adressblock(self)
             
+            # ampelfarbe
+            self.ampel_farbe = get_ampelfarbe(self)
+            
             if not self.sp_no_update:
                 # update Zahlung Mitgliedschaft
                 self.check_zahlung_mitgliedschaft()
@@ -1119,12 +1122,6 @@ def get_uebersicht_html(name):
         rg_sep = True
         col_qty += 1
     
-    ''' mögliche Ampelfarben:
-        - Grün: ampelgruen --> Mitglied kann alle Dienstleistungen beziehen (keine Karenzfristen, keine überfälligen oder offen Rechnungen)
-        - Gelb: ampelgelb --> Karenzfristen oder offene Rechnungen
-        - Rot: ampelrot --> überfällige offene Rechnungen
-    '''
-    
     rechnungs_kunde = mitgliedschaft.kunde_mitglied
     ueberfaellige_rechnungen = 0
     offene_rechnungen = 0
@@ -1163,28 +1160,18 @@ def get_uebersicht_html(name):
     
     if mitgliedschaft.rg_kunde:
         rechnungs_kunde = mitgliedschaft.rg_kunde
+    
     ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
                                                 FROM `tabSales Invoice` 
                                                 WHERE `customer` = '{rechnungs_kunde}'
                                                 AND `due_date` < CURDATE()
                                                 AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
     
-    if ueberfaellige_rechnungen > 0:
-        ampelfarbe = 'ampelrot'
-    else:
-        offene_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
-                                            FROM `tabSales Invoice` 
-                                            WHERE `customer` = '{rechnungs_kunde}'
-                                            AND `due_date` >= CURDATE()
-                                            AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
-        
-        if offene_rechnungen > 0:
-            ampelfarbe = 'ampelgelb'
-        else:
-            if not karenzfrist:
-                ampelfarbe = 'ampelgelb'
-            else:
-                ampelfarbe = 'ampelgruen'
+    offene_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
+                                        FROM `tabSales Invoice` 
+                                        WHERE `customer` = '{rechnungs_kunde}'
+                                        AND `due_date` >= CURDATE()
+                                        AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
     
     data = {
         'kunde_mitglied': kunde_mitglied,
@@ -1201,7 +1188,7 @@ def get_uebersicht_html(name):
             'status': mitgliedschaft.status_c,
             'eintritt': mitgliedschaft.eintritt,
             'austritt': mitgliedschaft.austritt,
-            'ampelfarbe': ampelfarbe,
+            'ampelfarbe': mitgliedschaft.ampel_farbe or 'ampelrot',
             'ueberfaellige_rechnungen': ueberfaellige_rechnungen,
             'offene_rechnungen': offene_rechnungen,
             'ablauf_karenzfrist': ablauf_karenzfrist,
@@ -2204,3 +2191,51 @@ def get_sektionen_zur_auswahl():
     for sektion in sektionen:
         sektionen_zur_auswahl += "\n" + sektion.name
     return sektionen_zur_auswahl
+
+def get_ampelfarbe(mitgliedschaft):
+    ''' mögliche Ampelfarben:
+        - Grün: ampelgruen --> Mitglied kann alle Dienstleistungen beziehen (keine Karenzfristen, keine überfälligen oder offen Rechnungen)
+        - Gelb: ampelgelb --> Karenzfristen oder offene Rechnungen
+        - Rot: ampelrot --> überfällige offene Rechnungen
+    '''
+    
+    rechnungs_kunde = mitgliedschaft.kunde_mitglied
+    if mitgliedschaft.rg_kunde:
+        rechnungs_kunde = mitgliedschaft.rg_kunde
+    
+    ueberfaellige_rechnungen = 0
+    offene_rechnungen = 0
+    
+    sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+    karenzfrist_in_d = sektion.karenzfrist
+    ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintritt), karenzfrist_in_d)
+    
+    if getdate() < ablauf_karenzfrist:
+        karenzfrist = False
+    else:
+        karenzfrist = True
+    
+    ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
+                                                FROM `tabSales Invoice` 
+                                                WHERE `customer` = '{rechnungs_kunde}'
+                                                AND `due_date` < CURDATE()
+                                                AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
+    
+    if ueberfaellige_rechnungen > 0:
+        ampelfarbe = 'ampelrot'
+    else:
+        offene_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
+                                            FROM `tabSales Invoice` 
+                                            WHERE `customer` = '{rechnungs_kunde}'
+                                            AND `due_date` >= CURDATE()
+                                            AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
+        
+        if offene_rechnungen > 0:
+            ampelfarbe = 'ampelgelb'
+        else:
+            if not karenzfrist:
+                ampelfarbe = 'ampelgelb'
+            else:
+                ampelfarbe = 'ampelgruen'
+    
+    return ampelfarbe
