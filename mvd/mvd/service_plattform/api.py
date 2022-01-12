@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2021, libracore and contributors
+# Copyright (c) 2021-2022, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -8,6 +8,7 @@ from mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft import mvm_mitglieder, 
 import json
 import requests
 from frappe.utils.background_jobs import enqueue
+from datetime import datetime
 
 # for test
 # ---------------------------------------------------
@@ -27,10 +28,11 @@ def whoami(type='light'):
 def neue_mitglieder_nummer(sektion_code):
     if not int(frappe.db.get_single_value('Service Plattform API', 'not_get_number_and_id')) == 1:
         if auth_check():
-            sub_url = frappe.db.get_single_value('Service Plattform API', 'api_url')
-            endpoint = frappe.db.get_single_value('Service Plattform API', 'neue_mitglieder_nummer')
+            config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+            sub_url = config.get_value("ServicePF", "api_url")
+            endpoint = config.get('neue_mitglieder_nummer')
             url = sub_url + endpoint + '/{sektion_code}'.format(sektion_code=sektion_code)
-            token = frappe.db.get_single_value('Service Plattform API', 'api_token')
+            token = config.get_value("ServicePF", 'api_token')
             headers = {"authorization": "Bearer {token}".format(token=token)}
             
             try:
@@ -54,10 +56,11 @@ def neue_mitglieder_nummer(sektion_code):
 def update_mvm(mvm, update):
     if not int(frappe.db.get_single_value('Service Plattform API', 'no_sp_update')) == 1:
         if auth_check():
-            sub_url = str(frappe.db.get_single_value('Service Plattform API', 'api_url'))
-            endpoint = str(frappe.db.get_single_value('Service Plattform API', 'mitglieder'))
+            config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+            sub_url = str(config.get_value("ServicePF", "api_url"))
+            endpoint = str(config.get('mitglieder'))
             url = sub_url + endpoint
-            token = frappe.db.get_single_value('Service Plattform API', 'api_token')
+            token = config.get_value("ServicePF", 'api_token')
             headers = {"authorization": "Bearer {token}".format(token=token)}
             
             if update:
@@ -80,11 +83,12 @@ def update_mvm(mvm, update):
         frappe.log_error("{0}".format(mvm), 'update_mvm deaktiviert')
         return
 
-def auth_check():
-    sub_url = str(frappe.db.get_single_value('Service Plattform API', 'api_url'))
-    endpoint = str(frappe.db.get_single_value('Service Plattform API', 'auth_check'))
+def auth_check(scope="ServicePF"):
+    config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+    sub_url = str(config.get_value(scope, "api_url"))
+    endpoint = str(config.get('auth_check'))
     url = sub_url + endpoint
-    token = frappe.db.get_single_value('Service Plattform API', 'api_token')
+    token = config.get_value(scope, 'api_token')
     
     headers = {"authorization": "Bearer {token}".format(token=token)}
     response = requests.get(url, headers = headers)
@@ -97,8 +101,8 @@ def auth_check():
     except:
         frappe.log_error("{0}".format(response), 'auth_check failed, get new token')
         # get new token and try again
-        get_token()
-        token = frappe.db.get_single_value('Service Plattform API', 'api_token')
+        get_token(scope)
+        token = config.get_value(scope, 'api_token')
         headers = {"authorization": "Bearer {token}".format(token=token)}
         response = requests.get(url, headers = headers)
         response = response.json()
@@ -111,22 +115,31 @@ def auth_check():
             frappe.db.commit()
             return False
 
-def get_token():
-    url = frappe.db.get_single_value('Service Plattform API', 'api_token_url')
-    client_id = frappe.db.get_single_value('Service Plattform API', 'client_id')
-    client_secret = frappe.db.get_single_value('Service Plattform API', 'api_secret')
-    audience = frappe.db.get_single_value('Service Plattform API', 'api_url')
+@frappe.whitelist()
+def get_token(scope="ServicePF"):
+    config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+    url = config.get_value(scope, 'api_token_url')
+    client_id = config.get_value(scope, 'client_id')
+    client_secret = config.get_value(scope, 'api_secret')
+    audience = config.get_value(scope, 'api_url')
     
-    headers = {"content-type": "application/json"}
-    data = {"client_id": "{0}".format(client_id), "client_secret":"{0}".format(client_secret), "audience":"{0}".format(audience), "grant_type":"client_credentials"}
+    headers = {
+        "content-type": "application/json"
+    }
+    data = {
+        "client_id": "{0}".format(client_id), 
+        "client_secret":"{0}".format(client_secret), 
+        "audience":"{0}".format(audience), 
+        "grant_type":"client_credentials"
+    }
     
     response = requests.post(url, json = data, headers = headers)
     
     try:
         response = response.json()
         token = response["access_token"]
-        frappe.db.set_value('Service Plattform API', 'Service Plattform API', 'api_token', token)
-        frappe.db.commit()
+        config.set_value(scope, 'api_token', token)
+        config.set_value(scope, 'token_date', datetime.now())
     except Exception as err:
         frappe.log_error("{0}\n\n{1}".format(err, response), 'get_token failed')
     return

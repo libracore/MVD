@@ -1,0 +1,95 @@
+{
+ "creation": "2022-01-12 21:58:43.534990",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "connection",
+  "api_url",
+  "column_main",
+  "api_token_url",
+  "client_id",
+  "api_secret",
+  "section_token",
+  "api_token",
+  "token_date",
+  "get_token"
+ ],
+ "fields": [
+  {
+   "default": "ServicePF",
+   "fieldname": "connection",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Connection",
+   "options": "ServicePF\nAuth0",
+   "reqd": 1
+  },
+  {
+   "description": "Audience",
+   "fieldname": "api_url",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "API URL",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "api_secret",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Client Secret",
+   "reqd": 1
+  },
+  {
+   "fieldname": "client_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Client ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "api_token_url",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Access Token URL",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_token",
+   "fieldtype": "Section Break",
+   "label": "Token"
+  },
+  {
+   "fieldname": "api_token",
+   "fieldtype": "Code",
+   "label": "API Token",
+   "read_only": 1
+  },
+  {
+   "fieldname": "token_date",
+   "fieldtype": "Datetime",
+   "label": "Token Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "get_token",
+   "fieldtype": "Button",
+   "label": "Get Token"
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-01-12 22:42:12.000105",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Service Plattform API Connection",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
