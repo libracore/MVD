@@ -9,6 +9,11 @@ import json
 import requests
 from frappe.utils.background_jobs import enqueue
 from datetime import datetime
+import random
+import string
+
+AUTH0_SCOPE = "Auth0"
+SVCPF_SCOPE = "ServicePF"
 
 # for test
 # ---------------------------------------------------
@@ -27,12 +32,12 @@ def whoami(type='light'):
 # ---------------------------------------------------
 def neue_mitglieder_nummer(sektion_code):
     if not int(frappe.db.get_single_value('Service Plattform API', 'not_get_number_and_id')) == 1:
-        if auth_check():
+        if auth_check(SVCPF_SCOPE):
             config = frappe.get_doc("Service Plattform API", "Service Plattform API")
-            sub_url = config.get_value("ServicePF", "api_url")
+            sub_url = config.get_value(SVCPF_SCOPE, "api_url")
             endpoint = config.get('neue_mitglieder_nummer')
             url = sub_url + endpoint + '/{sektion_code}'.format(sektion_code=sektion_code)
-            token = config.get_value("ServicePF", 'api_token')
+            token = config.get_value(SVCPF_SCOPE, 'api_token')
             headers = {"authorization": "Bearer {token}".format(token=token)}
             
             try:
@@ -55,12 +60,12 @@ def neue_mitglieder_nummer(sektion_code):
 
 def update_mvm(mvm, update):
     if not int(frappe.db.get_single_value('Service Plattform API', 'no_sp_update')) == 1:
-        if auth_check():
+        if auth_check(SVCPF_SCOPE):
             config = frappe.get_doc("Service Plattform API", "Service Plattform API")
-            sub_url = str(config.get_value("ServicePF", "api_url"))
+            sub_url = str(config.get_value(SVCPF_SCOPE, "api_url"))
             endpoint = str(config.get('mitglieder'))
             url = sub_url + endpoint
-            token = config.get_value("ServicePF", 'api_token')
+            token = config.get_value(SVCPF_SCOPE, 'api_token')
             headers = {"authorization": "Bearer {token}".format(token=token)}
             
             if update:
@@ -83,7 +88,7 @@ def update_mvm(mvm, update):
         frappe.log_error("{0}".format(mvm), 'update_mvm deaktiviert')
         return
 
-def auth_check(scope="ServicePF"):
+def auth_check(scope=SVCPF_SCOPE):
     config = frappe.get_doc("Service Plattform API", "Service Plattform API")
     sub_url = str(config.get_value(scope, "api_url"))
     endpoint = str(config.get('auth_check'))
@@ -115,8 +120,15 @@ def auth_check(scope="ServicePF"):
             frappe.db.commit()
             return False
 
+def token_check(scope):
+    config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+    token_date = config.get_value(scope, "token_date")
+    if (datetime.now() - token_date).total_seconds() > 86400:
+        # more than 86400 sec = 24 h ago
+        get_token(scope)
+        
 @frappe.whitelist()
-def get_token(scope="ServicePF"):
+def get_token(scope=SVCPF_SCOPE):
     config = frappe.get_doc("Service Plattform API", "Service Plattform API")
     url = config.get_value(scope, 'api_token_url')
     client_id = config.get_value(scope, 'client_id')
@@ -158,3 +170,108 @@ def mitglieder(**mitgliedschaft):
 # @frappe.whitelist()
 # def sektionswechsel(sektion_code):
     # return mvm_sektionswechsel(sektion_code)
+
+#
+# User and role deployment
+#
+@frappe.whitelist()
+def create_user(email, first_name, last_name, debug=False):
+    token_check(AUTH0_SCOPE)
+    config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+    sub_url = config.get_value(AUTH0_SCOPE, "api_url")
+    url = sub_url + "users"
+    token = config.get_value(AUTH0_SCOPE, 'api_token')
+    headers = {
+        "authorization": "Bearer {token}".format(token=token),
+        "Content-Type": "application/json"
+    }
+    characters = string.ascii_letters + string.digits + string.punctuation
+    password = ''.join(random.choice(characters) for i in range(16))
+    payload = json.dumps({
+        "email": email,
+        "given_name": first_name,
+        "family_name": last_name,
+        "connection": "Username-Password-Authentication",
+        "verify_email": False,
+        "password": password
+    })
+    if debug:
+        print("{0}".format(payload))
+    try:
+        response = requests.post(url, headers=headers, data=payload)
+
+        if debug:
+            print("Status code: {0}".format(response.status_code))
+            print(response.text)
+            
+        if response.status_code == 201 or response.status_code == 200:
+            # store auth0 key
+            data = response.json()
+            user_id = data['user_id']
+            user_key = frappe.get_doc({
+                'doctype': "Auth0 Key",
+                'key_type': "User",
+                'key_name': email,
+                'key': user_id
+            })
+            user_key.insert(ignore_permissions=True)
+            
+            # successfully created -> trigger pw reset
+            url = sub_url + "tickets/password-change"
+
+            payload = json.dumps({
+                "result_url": "https://{0}/login".format(frappe.utils.get_host_name()),
+                "user_id": user_id
+            })
+            if debug:
+                print("{0}".format(payload))
+            response_reset_pw = requests.post(url, headers=headers, data=payload)
+
+            
+        return
+    except Exception as err:
+        if debug:
+            print("Error: {0}".format(err))
+        frappe.log_error("{0}".format(err), 'update user to auth0 failed')
+
+@frappe.whitelist()
+def create_role(role, description, debug=False):
+    token_check(AUTH0_SCOPE)
+    config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+    sub_url = config.get_value(AUTH0_SCOPE, "api_url")
+    url = sub_url + "roles"
+    token = config.get_value(AUTH0_SCOPE, 'api_token')
+    headers = {
+        "authorization": "Bearer {token}".format(token=token),
+        "Content-Type": "application/json"
+    }
+    payload = json.dumps({
+        "name": role,
+        "description": description
+    })
+    if debug:
+        print("{0}".format(payload))
+    try:
+        response = requests.post(url, headers=headers, data=payload)
+
+        if debug:
+            print("Status code: {0}".format(response.status_code))
+            print(response.text)
+        
+        if response.status_code == 201 or response.status_code == 200:
+            # store auth0 key
+            data = response.json()
+            role_id = data['id']
+            role_key = frappe.get_doc({
+                'doctype': "Auth0 Key",
+                'key_type': "Role",
+                'key_name': role,
+                'key': role_id
+            })
+            role_key.insert(ignore_permissions=True)
+            
+        return
+    except Exception as err:
+        if debug:
+            print("Error: {0}".format(err))
+        frappe.log_error("{0}".format(err), 'create role to auth0 failed')
