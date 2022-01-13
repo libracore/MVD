@@ -43,11 +43,24 @@ def lese_camt_file(camt_import, file_path):
     }
     
     # lese und prüfe camt file
-    camt_file = get_camt_file(file_path)
+    camt_file = get_camt_file(file_path, test=True)
     if not camt_file:
         master_data['status'] = 'Failed'
         master_data['errors'].append("Das CAMT File konnte nicht gelesen werden.")
         return update_camt_import_record(camt_import, master_data)
+    
+    args = {
+        'master_data': master_data,
+        'camt_file': file_path,
+        'camt_import': camt_import
+    }
+    enqueue("mvd.mvd.doctype.camt_import.camt_import.verarbeite_camt_file", queue='long', job_name='Verarbeite CAMT Import {0}'.format(camt_import), timeout=5000, **args)
+
+def verarbeite_camt_file(master_data, camt_file, camt_import):
+    frappe.publish_realtime('msgprint', 'Verarbeitung CAMT Import {0} gestartet'.format(camt_import))
+    
+    # lese und prüfe camt file
+    camt_file = get_camt_file(camt_file)
     
     # verarbeite camt file
     master_data = process_camt_file(master_data, camt_file, camt_import)
@@ -55,14 +68,17 @@ def lese_camt_file(camt_import, file_path):
     # update camt import datensatz
     update_camt_import_record(camt_import, master_data)
 
-def get_camt_file(file_path):
+def get_camt_file(file_path, test=False):
     try:
         physical_path = "/home/frappe/frappe-bench/sites/{0}{1}".format(frappe.local.site_path.replace("./", ""), file_path)
         with open(physical_path, 'r') as f:
             content = f.read()
         soup = BeautifulSoup(content, 'lxml')
         iban = soup.document.bktocstmrdbtcdtntfctn.ntfctn.acct.id.iban.get_text()
-        return soup
+        if test:
+            return True
+        else:
+            return soup
     except:
         return False
 
@@ -150,7 +166,7 @@ def process_camt_file(master_data, camt_file, camt_import):
                 if credit_debit == "CRDT":
                     # starte import/matching flow für zahlung
                     master_data = create_payment_entry(date=date, to_account=account, received_amount=amount, 
-                        transaction_id=unique_reference, remarks="ESR/QRR: {0}, {1}, {2}, IBAN: {3}".format(
+                        transaction_id=unique_reference, remarks="QRR: {0}, {1}, {2}, IBAN: {3}".format(
                         transaction_reference, customer_name, customer_address, customer_iban), company=company, sektion=sektion, qrr=transaction_reference, master_data=master_data)
                         
             except Exception as e:
@@ -279,7 +295,7 @@ def get_default_customer(sektion):
     default_customer = frappe.get_doc("Sektion", sektion).default_customer
     return default_customer
 
-def update_camt_import_record(camt_import, master_data):
+def update_camt_import_record(camt_import, master_data, aktualisierung=False):
     camt_import = frappe.get_doc("CAMT Import", camt_import)
     if master_data['status'] == 'Failed':
         camt_import.status = 'Failed'
@@ -307,6 +323,8 @@ def update_camt_import_record(camt_import, master_data):
     camt_import.master_data = str(master_data)
     camt_import.save()
     
+    if not aktualisierung:
+        frappe.publish_realtime('msgprint', 'Verarbeitung CAMT Import {0} beendet'.format(camt_import.name))
     return
 
 @frappe.whitelist()
@@ -347,7 +365,7 @@ def aktualisiere_camt_uebersicht(camt_import):
                         master_data['unassigned_payments'].append(imported_payment)
                         master_data['unsubmitted_payments'].append(imported_payment)
     
-    return update_camt_import_record(camt_import.name, master_data)
+    return update_camt_import_record(camt_import.name, master_data, aktualisierung=True)
 
 def check_if_payment_is_cancelled(imported_payment):
     pe = frappe.get_doc("Payment Entry", imported_payment)

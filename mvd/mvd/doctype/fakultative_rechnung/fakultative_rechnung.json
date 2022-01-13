@@ -30,6 +30,7 @@
    "in_list_view": 1,
    "label": "Mitgliedschaft",
    "options": "MV Mitgliedschaft",
+   "permlevel": 1,
    "reqd": 1
   },
   {
@@ -50,7 +51,8 @@
   {
    "fieldname": "qrr_referenz",
    "fieldtype": "Data",
-   "label": "QRR Referenz"
+   "label": "QRR Referenz",
+   "permlevel": 1
   },
   {
    "allow_on_submit": 1,
@@ -59,6 +61,7 @@
    "in_list_view": 1,
    "label": "Status",
    "options": "Unpaid\nPaid",
+   "permlevel": 1,
    "reqd": 1
   },
   {
@@ -71,7 +74,8 @@
   {
    "fieldname": "sektions_code",
    "fieldtype": "Data",
-   "label": "sektions_code"
+   "label": "sektions_code",
+   "permlevel": 1
   },
   {
    "fieldname": "amended_from",
@@ -79,6 +83,7 @@
    "label": "Basierend auf",
    "no_copy": 1,
    "options": "Fakultative Rechnung",
+   "permlevel": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -108,13 +113,15 @@
    "fieldtype": "Select",
    "label": "Naming Series",
    "options": "FR-.{sektions_code}.#####",
+   "permlevel": 1,
    "reqd": 1
   },
   {
    "fieldname": "sales_invoice",
    "fieldtype": "Link",
    "label": "Rechnung",
-   "options": "Sales Invoice"
+   "options": "Sales Invoice",
+   "permlevel": 1
   },
   {
    "fieldname": "cb_2",
@@ -132,17 +139,19 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "permlevel": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-01-12 07:14:14.913541",
+ "modified": "2022-01-13 20:17:20.924662",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Fakultative Rechnung",
  "owner": "Administrator",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -152,6 +161,7 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
@@ -164,6 +174,19 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MVD Sektionsmitarbeiter*in",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
