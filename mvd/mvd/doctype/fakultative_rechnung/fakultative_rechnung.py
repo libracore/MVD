@@ -125,7 +125,7 @@ def create_paid_sinv(fr, mitgliedschaft, sektion):
     sinv.submit()
     return sinv.name
 
-def create_unpaid_sinv(fr):
+def create_unpaid_sinv(fr, betrag=False):
     fr = frappe.get_doc("Fakultative Rechnung", fr)
     mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", fr.mv_mitgliedschaft)
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
@@ -141,11 +141,15 @@ def create_unpaid_sinv(fr):
         customer = mitgliedschaft.rg_kunde_mitglied
         address = mitgliedschaft.rg_adresse_mitglied
         contact = mitgliedschaft.rg_kontakt_mitglied
+    
     if fr.typ == 'HV':
-        item = [{"item_code": sektion.hv_artikel, "qty": 1, "rate": sektion.betrag_hv}]
+        betrag = sektion.betrag_hv
+        item = [{"item_code": sektion.hv_artikel, "qty": 1, "rate": betrag}]
     else:
-        # TBD!!!!!!
-        item = [{"item_code": sektion.hv_artikel, "qty": 1, "rate": sektion.betrag_hv}]
+        if not betrag:
+            # tbd!!!
+            betrag = sektion.betrag_hv
+        item = [{"item_code": sektion.spenden_artikel, "qty": 1, "rate": betrag}]
     sinv = frappe.get_doc({
         "doctype": "Sales Invoice",
         "ist_mitgliedschaftsrechnung": 0,
