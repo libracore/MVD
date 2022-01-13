@@ -28,7 +28,9 @@ app_license = "MIT"
 # include js in doctype views
 doctype_js = {
     "Address" : "public/js/custom_scripts/address.js",
-    "Sales Invoice" : "public/js/custom_scripts/sales_invoice.js"
+    "Sales Invoice" : "public/js/custom_scripts/sales_invoice.js",
+    "User" : "public/js/custom_scripts/user.js",
+    "Role" : "public/js/custom_scripts/role.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
