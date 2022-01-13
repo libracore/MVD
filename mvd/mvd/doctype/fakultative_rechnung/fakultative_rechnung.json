@@ -10,6 +10,7 @@
   "status",
   "sektions_code",
   "cb_1",
+  "company",
   "sales_invoice",
   "qrr_referenz",
   "naming_series",
@@ -52,6 +53,7 @@
    "label": "QRR Referenz"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -119,14 +121,22 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "bezahlt_via",
    "fieldtype": "Link",
    "label": "Bezahlt via",
-   "options": "Sales Invoice"
+   "options": "Sales Invoice",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-01-07 10:15:48.787296",
+ "modified": "2022-01-12 07:14:14.913541",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Fakultative Rechnung",

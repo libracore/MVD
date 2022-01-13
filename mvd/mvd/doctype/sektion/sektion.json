@@ -25,6 +25,10 @@
   "kuendigungs_stichtag",
   "reduzierter_mitgliederbeitrag",
   "gratis_bis_ende_jahr",
+  "section_camt_import",
+  "default_customer",
+  "cb_5",
+  "account",
   "section_fusszeile",
   "fz_links",
   "cb_2",
@@ -206,9 +210,33 @@
    "fieldtype": "Currency",
    "label": "Betrag HV",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_camt_import",
+   "fieldtype": "Section Break",
+   "label": "CAMT Import"
+  },
+  {
+   "fieldname": "default_customer",
+   "fieldtype": "Link",
+   "label": "Standard Kunde",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Standard Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_5",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-01-07 10:11:51.007210",
+ "modified": "2022-01-11 21:28:00.369598",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
@@ -227,7 +255,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

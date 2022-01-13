@@ -42,6 +42,12 @@ def get_data():
                     "name": "MV Jahresversand",
                     "label": _("Jahresversand"),
                     "description": _("MV Jahresversand")
+                },
+                {
+                    "type": "doctype",
+                    "name": "CAMT Import",
+                    "label": _("CAMT Importer"),
+                    "description": _("CAMT Importer")
                 }
             ]
         },

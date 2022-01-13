@@ -28,7 +28,8 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spend
         'sales_invoice': sales_invoice,
         'typ': 'HV' if not betrag_spende else 'Spende',
         'betrag': betrag_spende or sektion.betrag_hv,
-        'posting_date': today()
+        'posting_date': today(),
+        'company': sektion.company
     })
     fr.insert(ignore_permissions=True)
     
@@ -86,11 +87,16 @@ def create_paid_sinv(fr, mitgliedschaft, sektion):
         customer = mitgliedschaft.rg_kunde_mitglied
         address = mitgliedschaft.rg_adresse_mitglied
         contact = mitgliedschaft.rg_kontakt_mitglied
-    item = [{"item_code": sektion.hv_artikel, "qty": 1, "rate": sektion.betrag_hv}]
+    if fr.typ == 'HV':
+        item = [{"item_code": sektion.hv_artikel, "qty": 1, "rate": sektion.betrag_hv}]
+    else:
+        # TBD!!!!!!
+        item = [{"item_code": sektion.hv_artikel, "qty": 1, "rate": sektion.betrag_hv}]
     sinv = frappe.get_doc({
         "doctype": "Sales Invoice",
         "ist_mitgliedschaftsrechnung": 0,
-        "ist_hv_rechnung": 1,
+        "ist_hv_rechnung": 1 if fr.typ == 'HV' else 0,
+        "ist_spenden_rechnung": 0 if fr.typ == 'HV' else 1,
         "mv_mitgliedschaft": fr.mv_mitgliedschaft,
         "company": sektion.company,
         "customer": customer,
@@ -117,4 +123,52 @@ def create_paid_sinv(fr, mitgliedschaft, sektion):
     sinv.save(ignore_permissions=True)
     
     sinv.submit()
+    return sinv.name
+
+def create_unpaid_sinv(fr):
+    fr = frappe.get_doc("Fakultative Rechnung", fr)
+    mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", fr.mv_mitgliedschaft)
+    sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+    company = frappe.get_doc("Company", sektion.company)
+    if not mitgliedschaft.rg_kunde:
+        customer = mitgliedschaft.kunde_mitglied
+        contact = mitgliedschaft.kontakt_mitglied
+        if not mitgliedschaft.rg_adresse:
+            address = mitgliedschaft.adresse_mitglied
+        else:
+            address = mitgliedschaft.rg_adresse
+    else:
+        customer = mitgliedschaft.rg_kunde_mitglied
+        address = mitgliedschaft.rg_adresse_mitglied
+        contact = mitgliedschaft.rg_kontakt_mitglied
+    if fr.typ == 'HV':
+        item = [{"item_code": sektion.hv_artikel, "qty": 1, "rate": sektion.betrag_hv}]
+    else:
+        # TBD!!!!!!
+        item = [{"item_code": sektion.hv_artikel, "qty": 1, "rate": sektion.betrag_hv}]
+    sinv = frappe.get_doc({
+        "doctype": "Sales Invoice",
+        "ist_mitgliedschaftsrechnung": 0,
+        "ist_hv_rechnung": 1 if fr.typ == 'HV' else 0,
+        "ist_spenden_rechnung": 0 if fr.typ == 'HV' else 1,
+        "mv_mitgliedschaft": fr.mv_mitgliedschaft,
+        "company": sektion.company,
+        "customer": customer,
+        "customer_address": address,
+        "contact_person": contact,
+        'mitgliedschafts_jahr': int(getdate(today()).strftime("%Y")),
+        'due_date': add_days(today(), 30),
+        'debit_to': company.default_receivable_account,
+        'sektions_code': str(sektion.sektion_id) or '00',
+        "items": item,
+        "inkl_hv": 0,
+        "esr_reference": fr.qrr_referenz or get_qrr_reference(fr=fr.name)
+    })
+    sinv.insert(ignore_permissions=True)
+    
+    sinv.submit()
+    
+    fr.status = 'Paid'
+    fr.bezahlt_via = sinv.name
+    fr.save(ignore_permissions=True)
     return sinv.name
