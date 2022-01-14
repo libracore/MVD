@@ -48,6 +48,12 @@ def get_data():
                     "name": "CAMT Import",
                     "label": _("CAMT Importer"),
                     "description": _("CAMT Importer")
+                },
+                {
+                    "type": "doctype",
+                    "name": "MV Help Links",
+                    "label": _("Hilfe Verknüpfungen"),
+                    "description": _("Hilfe Verknüpfungen direkt zur MVD Wiki")
                 }
             ]
         },
