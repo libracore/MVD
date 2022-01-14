@@ -835,7 +835,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-01-11 13:14:12.730040",
+ "modified": "2022-01-14 11:35:13.670422",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
@@ -869,6 +869,16 @@
    "permlevel": 1,
    "read": 1,
    "role": "All"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "permlevel": 2,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
   }
  ],
  "search_fields": "mitglied_nr,mitglied_id",

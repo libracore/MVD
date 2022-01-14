@@ -1389,7 +1389,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         'debit_to': company.default_receivable_account,
         'sektions_code': str(sektion.sektion_id) or '00',
         "items": item,
-        "inkl_hv": mitgliedschaft.inkl_hv
+        "inkl_hv": 1 if inkl_hv else 0
     })
     sinv.insert(ignore_permissions=True)
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
