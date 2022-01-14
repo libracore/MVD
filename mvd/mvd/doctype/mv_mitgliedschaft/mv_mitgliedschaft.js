@@ -56,6 +56,14 @@ frappe.ui.form.on('MV Mitgliedschaft', {
             cur_frm.set_df_property('firma', 'reqd', 0);
         }
     },
+    m_und_w: function(frm) {
+        if (![0, 1].includes(cur_frm.doc.m_und_w)) {
+            if (!frappe.user.has_role("System Manager")) {
+                cur_frm.set_value("m_und_w", 1);
+                frappe.msgprint("Sie dürfen als Anzahl nur '0' oder '1' auswählen");
+            }
+        }
+    },
     postfach: function(frm) {
         // set strasse mandatory
         if (!cur_frm.doc.postfach) {
