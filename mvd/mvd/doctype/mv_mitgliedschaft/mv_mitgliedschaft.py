@@ -11,6 +11,7 @@ import json
 from PyPDF2 import PdfFileWriter
 from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
 from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
+from frappe.utils.pdf import get_file_data_from_writer
 
 class MVMitgliedschaft(Document):
     def after_insert(self):
@@ -1414,16 +1415,21 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
     if attach_as_pdf:
         # erstellung Rechnungs PDF
         output = PdfFileWriter()
-        output = frappe.get_print("Sales Invoice", sinv.name, 'MV-Rechnung mit Zahlteil', as_pdf = True, output = output)
+        output = frappe.get_print("Sales Invoice", sinv.name, 'MV-Rechnung mit Zahlteil', as_pdf = True, output = output, ignore_zugferd=True)
         
-        file_name = "{sinv}_{datetime}.pdf".format(sinv=sinv.name, datetime=now().replace(" ", "_"))
+        file_name = "{sinv}_{datetime}".format(sinv=sinv.name, datetime=now().replace(" ", "_"))
+        file_name = file_name.split(".")[0]
+        file_name = file_name.replace(":", "-")
+        file_name = file_name + ".pdf"
+        
+        filedata = get_file_data_from_writer(output)
         
         _file = frappe.get_doc({
             "doctype": "File",
             "file_name": file_name,
             "folder": "Home/Attachments",
             "is_private": 1,
-            "content": output,
+            "content": filedata,
             "attached_to_doctype": 'MV Mitgliedschaft',
             "attached_to_name": mitgliedschaft.name
         })
