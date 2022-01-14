@@ -4,25 +4,33 @@
 frappe.ui.form.on('MV Mitgliedschaft', {
     refresh: function(frm) {
         if (!frm.doc.__islocal) {
-            if (cur_frm.doc.status_c != 'Wegzug') {
-                frm.add_custom_button(__("Sektionswechsel"),  function() {
-                        sektionswechsel(frm);
-                }, __("Mutation"));
-                frm.add_custom_button(__("Kündigung"),  function() {
-                        kuendigung(frm);
-                }, __("Mutation"));
+            if (!['Wegzug', 'Ausschluss'].includes(cur_frm.doc.status_c)) {
+                if (!['Kündigung', 'Gestorben'].includes(cur_frm.doc.status_c)) {
+                    frm.add_custom_button(__("Sektionswechsel"),  function() {
+                            sektionswechsel(frm);
+                    }, __("Mutation"));
+                }
+                if (!['Kündigung', 'Gestorben'].includes(cur_frm.doc.status_c)) {
+                    frm.add_custom_button(__("Kündigung"),  function() {
+                            kuendigung(frm);
+                    }, __("Mutation"));
+                }
                 frm.add_custom_button(__("Ausschluss"),  function() {
                         ausschluss(frm);
                 }, __("Mutation"));
-                frm.add_custom_button(__("Todesfall"),  function() {
-                        todesfall(frm);
-                }, __("Mutation"));
-                frm.add_custom_button(__("Mitgliedschafts-Rechnung"),  function() {
-                        erstelle_rechnung(frm);
-                }, __("Erstelle"));
-                frm.add_custom_button(__("Spenden-Rechnung"),  function() {
-                        erstelle_spenden_rechnung(frm);
-                }, __("Erstelle"));
+                if (!['Gestorben'].includes(cur_frm.doc.status_c)) {
+                    frm.add_custom_button(__("Todesfall"),  function() {
+                            todesfall(frm);
+                    }, __("Mutation"));
+                }
+                if (!['Gestorben', 'Kündigung'].includes(cur_frm.doc.status_c)) {
+                    frm.add_custom_button(__("Mitgliedschafts-Rechnung"),  function() {
+                            erstelle_rechnung(frm);
+                    }, __("Erstelle"));
+                    frm.add_custom_button(__("Spenden-Rechnung"),  function() {
+                            erstelle_spenden_rechnung(frm);
+                    }, __("Erstelle"));
+                }
             }
             if (cur_frm.doc.validierung_notwendig) {
                 frm.add_custom_button(__("Daten als validert bestätigen"),  function() {
@@ -215,6 +223,7 @@ function kuendigung(frm) {
                         callback: function(r)
                         {
                             cur_frm.reload_doc();
+                            cur_frm.timeline.insert_comment("Kündigung erfasst.");
                             frappe.msgprint("Die Kündigung wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.<br>Die Kündigungsbestätigung finden Sie in den Anhängen.");
                         }
                     });
@@ -244,6 +253,7 @@ function todesfall(frm) {
             cur_frm.set_value("todesfall_uebernahme", values.todesfall_uebernahme);
         }
         cur_frm.save();
+        cur_frm.timeline.insert_comment("Todesfall erfasst.");
         frappe.msgprint("Der Todesfall sowie die damit verbundene Kündigung wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
     },
     'Todesfall',
@@ -267,6 +277,7 @@ function ausschluss(frm) {
         }
         cur_frm.set_value("adressen_gesperrt", 1);
         cur_frm.save();
+        cur_frm.timeline.insert_comment("Ausschluss vollzogen.");
         frappe.msgprint("Der Ausschluss wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
     },
     'Ausschluss',
@@ -301,6 +312,7 @@ function sektionswechsel(frm) {
                             cur_frm.set_value("wegzug_zu", values.sektion_neu);
                             cur_frm.set_value("status_c", 'Wegzug');
                             cur_frm.save();
+                            cur_frm.timeline.insert_comment("Sektionswechsel zu " + values.sektion_neu + " vollzogen.");
                             frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
                         } else {
                             frappe.msgprint("oops, da ist etwas schiefgelaufen!");
@@ -325,6 +337,7 @@ function daten_validiert(frm) {
                 cur_frm.set_value("status_c", 'Regulär');
             }
             cur_frm.save();
+            cur_frm.timeline.insert_comment("Validierung durchgeführt.");
             frappe.msgprint("Die Daten wurden als validert bestätigt.");
         },
         function(){
@@ -363,6 +376,7 @@ function erstelle_rechnung(frm) {
             freeze_message: 'Erstelle Rechnung...',
             callback: function(r)
             {
+                cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung " + r.message + " erstellt.");
                 cur_frm.reload_doc();
                 frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
             }
@@ -403,6 +417,7 @@ function erstelle_spenden_rechnung(frm) {
             freeze_message: 'Erstelle Spendenrechnung...',
             callback: function(r)
             {
+                cur_frm.timeline.insert_comment("Spendenrechnung " + r.message + " erstellt.");
                 cur_frm.reload_doc();
                 frappe.msgprint("Die Spendenrechnung wurde erstellt, Sie finden sie in den Anhängen.");
             }

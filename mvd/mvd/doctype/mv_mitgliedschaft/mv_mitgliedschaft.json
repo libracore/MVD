@@ -1,5 +1,6 @@
 {
  "allow_copy": 1,
+ "allow_events_in_timeline": 1,
  "allow_import": 1,
  "autoname": "field:mitglied_id",
  "creation": "2021-06-07 10:22:04.606968",
@@ -837,7 +838,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-01-14 13:08:45.526677",
+ "modified": "2022-01-14 20:34:18.170083",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
