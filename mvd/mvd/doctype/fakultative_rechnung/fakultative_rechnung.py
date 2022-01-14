@@ -24,6 +24,7 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spend
         "doctype": "Fakultative Rechnung",
         "mv_mitgliedschaft": mitgliedschaft.name,
         'due_date': add_days(today(), 30),
+        'sektion_id': str(sektion.name),
         'sektions_code': str(sektion.sektion_id) or '00',
         'sales_invoice': sales_invoice,
         'typ': 'HV' if not betrag_spende else 'Spende',
@@ -43,7 +44,7 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spend
     if betrag_spende:
         # erstellung Rechnungs PDF auf Basis FR
         output = PdfFileWriter()
-        output = frappe.get_print("Fakultative Rechnung", fr.name, 'Standard', as_pdf = True, output = output)
+        output = frappe.get_print("Fakultative Rechnung", fr.name, "Standard", as_pdf = True, output = output)
         
         file_name = "{sinv}_{datetime}.pdf".format(sinv=fr.name, datetime=now().replace(" ", "_"))
         

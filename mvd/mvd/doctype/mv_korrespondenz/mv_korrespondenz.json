@@ -101,6 +101,7 @@
    "in_list_view": 1,
    "label": "Mitgliedschaft",
    "options": "MV Mitgliedschaft",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -110,6 +111,7 @@
    "in_list_view": 1,
    "label": "Sektion",
    "options": "Sektion",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -131,7 +133,7 @@
    "label": "inkl. Mitgliederausweis"
   }
  ],
- "modified": "2022-01-06 12:55:48.869703",
+ "modified": "2022-01-14 09:03:04.947490",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Korrespondenz",
@@ -147,6 +149,17 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MVD Sektionsmitarbeiter*in",
    "write": 1
   }
  ],

@@ -8,6 +8,7 @@
   "section_stammdaten",
   "mv_mitgliedschaft",
   "status",
+  "sektion_id",
   "sektions_code",
   "cb_1",
   "company",
@@ -141,10 +142,17 @@
    "label": "Company",
    "options": "Company",
    "permlevel": 1
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-01-13 20:17:20.924662",
+ "modified": "2022-01-14 08:58:06.001955",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Fakultative Rechnung",

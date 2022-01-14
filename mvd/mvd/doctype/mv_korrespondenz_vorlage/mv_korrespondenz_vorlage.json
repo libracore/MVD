@@ -101,7 +101,7 @@
    "label": "Inhalt 2. Seite"
   }
  ],
- "modified": "2022-01-06 12:54:55.415060",
+ "modified": "2022-01-14 09:03:40.960449",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Korrespondenz Vorlage",
@@ -117,6 +117,12 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "MVD Sektionsmitarbeiter*in",
    "write": 1
   }
  ],

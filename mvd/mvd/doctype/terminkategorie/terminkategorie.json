@@ -25,7 +25,7 @@
    "reqd": 1
   }
  ],
- "modified": "2022-01-07 14:12:24.720848",
+ "modified": "2022-01-14 08:54:25.755878",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Terminkategorie",
@@ -42,6 +42,10 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "MVD Sektionsmitarbeiter*in"
   }
  ],
  "quick_entry": 1,
