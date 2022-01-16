@@ -94,6 +94,12 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.ort = frappe.mvd_such_client.create_ort_field(page)
     me.search_fields.ort.refresh();
     
+    me.search_fields.firma = frappe.mvd_such_client.create_firma_field(page)
+    me.search_fields.firma.refresh();
+    
+    me.search_fields.zusatz_firma = frappe.mvd_such_client.create_zusatz_firma_field(page)
+    me.search_fields.zusatz_firma.refresh();
+    
     me.search_fields.suchresultate = frappe.mvd_such_client.create_resultate_div(page)
     me.search_fields.suchresultate.refresh();
     
@@ -432,6 +438,30 @@ frappe.mvd_such_client = {
         });
         return ort
     },
+    create_firma_field: function(page) {
+        var ort = frappe.ui.form.make_control({
+            parent: page.main.find(".firma"),
+            df: {
+                fieldtype: "Data",
+                fieldname: "firma",
+                placeholder: "Firma"
+            },
+            only_input: true,
+        });
+        return ort
+    },
+    create_zusatz_firma_field: function(page) {
+        var ort = frappe.ui.form.make_control({
+            parent: page.main.find(".zusatz_firma"),
+            df: {
+                fieldtype: "Data",
+                fieldname: "zusatz_firma",
+                placeholder: "Zusatz Firma"
+            },
+            only_input: true,
+        });
+        return ort
+    },
     create_resultate_div: function(page) {
         var suchresultate = frappe.ui.form.make_control({
             parent: page.main.find(".suchresultate"),
@@ -455,12 +485,31 @@ frappe.mvd_such_client = {
                 click: function(){
                     frappe.prompt([
                         {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent*in\nRegulär', 'default': 'Regulär'},
-                        {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': 'Privat'},
+                        {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': 'Privat', 'change': function() {
+                                if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Privat') {
+                                    console.log("HALLO????");
+                                    cur_dialog.fields_dict.firma.df.reqd = 0;
+                                    cur_dialog.fields_dict.firma.df.hidden = 1;
+                                    cur_dialog.fields_dict.firma.refresh();
+                                    cur_dialog.fields_dict.zusatz_firma.df.reqd = 0;
+                                    cur_dialog.fields_dict.zusatz_firma.df.hidden = 1;
+                                    cur_dialog.fields_dict.zusatz_firma.refresh();
+                                } else {
+                                    cur_dialog.fields_dict.firma.df.reqd = 1;
+                                    cur_dialog.fields_dict.firma.df.hidden = 0;
+                                    cur_dialog.fields_dict.firma.refresh();
+                                    cur_dialog.fields_dict.zusatz_firma.df.reqd = 1;
+                                    cur_dialog.fields_dict.zusatz_firma.df.hidden = 0;
+                                    cur_dialog.fields_dict.zusatz_firma.refresh();
+                                }
+                            }
+                        },
                         {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'hidden': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value()},
                         {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 1},
                         {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.autom_rechnung'},
                         {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt'},
                         {'fieldname': 's1', 'fieldtype': 'Section Break'},
+                        {'fieldname': 'firma', 'fieldtype': 'Data', 'label': 'Firma', 'reqd': 0, 'default': cur_page.page.search_fields.firma.get_value(), 'hidden': 1},
                         {'fieldname': 'anrede', 'fieldtype': 'Link', 'label': 'Anrede', 'reqd': 0, 'options': 'Salutation'},
                         {'fieldname': 'vorname', 'fieldtype': 'Data', 'label': 'Vorname', 'reqd': 1, 'default': cur_page.page.search_fields.vorname.get_value()},
                         {'fieldname': 'nachname', 'fieldtype': 'Data', 'label': 'Nachname', 'reqd': 1, 'default': cur_page.page.search_fields.nachname.get_value()},
@@ -468,7 +517,8 @@ frappe.mvd_such_client = {
                         {'fieldname': 'telefon_g', 'fieldtype': 'Data', 'label': 'Telefon Geschäft', 'reqd': 0},
                         {'fieldname': 'telefon_m', 'fieldtype': 'Data', 'label': 'Telefon Mobile', 'reqd': 0},
                         {'fieldname': 'email', 'fieldtype': 'Data', 'label': 'E-Mail', 'reqd': 0, 'options': 'Email', 'default': cur_page.page.search_fields.email.get_value()},
-                        {'fieldname': 'cb_1', 'fieldtype': 'Column Break'},
+                        {'fieldname': 'cb_2', 'fieldtype': 'Column Break'},
+                        {'fieldname': 'zusatz_firma', 'fieldtype': 'Data', 'label': 'Zusatz Firma', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_firma.get_value(), 'hidden': 1},
                         {'fieldname': 'zusatz_adresse', 'fieldtype': 'Data', 'label': 'Zusatz Adresse', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_adresse.get_value()},
                         {'fieldname': 'postfach', 'fieldtype': 'Check', 'label': 'Postfach', 'reqd': 0, 'default': cur_page.page.search_fields.postfach.get_value(), 'change': function() {
                                 if (cur_dialog.fields_dict.postfach.get_value() == 1) {

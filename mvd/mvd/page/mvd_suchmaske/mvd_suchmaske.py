@@ -34,13 +34,22 @@ def suche(suchparameter, goto_list=False):
         filters_list.append("""(`nachname_1` LIKE '{nachname}%' OR `rg_nachname` LIKE '{nachname}%' OR `nachname_2` LIKE '{nachname}%')""".format(nachname=suchparameter["nachname"]))
     if suchparameter["tel"]:
         filters_list.append("""
-                            ((`tel_p_1` LIKE '{tel}%' OR `rg_tel_p` LIKE '{tel}%' OR `tel_p_2` LIKE '{tel}%')
+                            ((REPLACE(`tel_p_1`, ' ', '') LIKE '{tel}%' OR REPLACE(`rg_tel_p`, ' ', '') LIKE '{tel}%' OR REPLACE(`tel_p_2`, ' ', '') LIKE '{tel}%')
                             OR
-                            (`tel_m_1` LIKE '{tel}%' OR `rg_tel_m` LIKE '{tel}%' OR `tel_m_2` LIKE '{tel}%')
+                            (REPLACE(`tel_m_1`, ' ', '') LIKE '{tel}%' OR REPLACE(`rg_tel_m`, ' ', '') LIKE '{tel}%' OR REPLACE(`tel_m_2`, ' ', '') LIKE '{tel}%')
                             OR
-                            (`tel_g_1` LIKE '{tel}%' OR `rg_tel_g` LIKE '{tel}%' OR `tel_g_2` LIKE '{tel}%'))""".format(tel=suchparameter["tel"].replace(" ", "")))
+                            (REPLACE(`tel_g_1`, ' ', '') LIKE '{tel}%' OR REPLACE(`rg_tel_g`, ' ', '') LIKE '{tel}%' OR REPLACE(`tel_g_2`, ' ', '') LIKE '{tel}%'))""".format(tel=suchparameter["tel"].replace(" ", "")))
     if suchparameter["email"]:
         filters_list.append("""(`e_mail_1` LIKE '{email}%' OR `rg_e_mail` LIKE '{email}%' OR `e_mail_2` LIKE '{email}%')""".format(email=suchparameter["email"]))
+    if suchparameter["firma"]:
+        if suchparameter["zusatz_firma"]:
+            firma = str(suchparameter["firma"] + "%" + suchparameter["zusatz_firma"]).replace(" ", "")
+            filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{firma}%')""".format(firma=firma))
+        else:
+            filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{firma}%')""".format(firma=suchparameter["firma"]))
+    else:
+        if suchparameter["zusatz_firma"]:
+            filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{zusatz_firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{zusatz_firma}%')""".format(zusatz_firma=suchparameter["zusatz_firma"]))
     
     # Adressdaten
     if suchparameter["zusatz_adresse"]:
@@ -125,7 +134,9 @@ def anlage_prozess(anlage_daten):
         "mitgliedtyp_c": anlage_daten["mitgliedtyp"],
         "inkl_hv": 1,
         "eintritt": now(),
-        "kundentyp": "Einzelperson",
+        "kundentyp": "Einzelperson" if anlage_daten["mitgliedtyp"] == 'Privat' else 'Unternehmen',
+        "firma": anlage_daten["firma"] if anlage_daten["firma"] else '',
+        "zusatz_firma": anlage_daten["zusatz_firma"] if anlage_daten["zusatz_firma"] else '',
         "anrede_c": anlage_daten["anrede"] if 'anrede' in anlage_daten else '',
         "nachname_1": anlage_daten["nachname"],
         "vorname_1": anlage_daten["vorname"],
