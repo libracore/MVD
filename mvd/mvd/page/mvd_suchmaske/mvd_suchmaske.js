@@ -85,7 +85,7 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.strasse = frappe.mvd_such_client.create_strasse_field(page)
     me.search_fields.strasse.refresh();
     
-    me.search_fields.postfach = frappe.mvd_such_client.create_postfach_field(page, me.search_fields.postfach_nummer, me.search_fields.strasse, me.search_fields.nummer, me.search_fields.nummer_zu)
+    me.search_fields.postfach = frappe.mvd_such_client.create_postfach_field(page, me.search_fields.postfach_nummer)
     me.search_fields.postfach.refresh();
     
     me.search_fields.plz = frappe.mvd_such_client.create_plz_field(page)
@@ -369,7 +369,7 @@ frappe.mvd_such_client = {
         });
         return nummer_zu
     },
-    create_postfach_field: function(page, postfach_nummer, strasse, nummer, nummer_zu) {
+    create_postfach_field: function(page, postfach_nummer) {
         var postfach = frappe.ui.form.make_control({
             parent: page.main.find(".postfach"),
             df: {
@@ -379,21 +379,9 @@ frappe.mvd_such_client = {
                     if (postfach.get_value() == 1) {
                         postfach_nummer.df.hidden = 0;
                         postfach_nummer.refresh();
-                        strasse.df.hidden = 1;
-                        strasse.refresh();
-                        nummer.df.hidden = 1;
-                        nummer.refresh();
-                        nummer_zu.df.hidden = 1;
-                        nummer_zu.refresh();
                     } else {
                         postfach_nummer.df.hidden = 1;
                         postfach_nummer.refresh();
-                        strasse.df.hidden = 0;
-                        strasse.refresh();
-                        nummer.df.hidden = 0;
-                        nummer.refresh();
-                        nummer_zu.df.hidden = 0;
-                        nummer_zu.refresh();
                     }
                 }
             },
@@ -487,7 +475,6 @@ frappe.mvd_such_client = {
                         {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent*in\nRegulär', 'default': 'Regulär'},
                         {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': 'Privat', 'change': function() {
                                 if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Privat') {
-                                    console.log("HALLO????");
                                     cur_dialog.fields_dict.firma.df.reqd = 0;
                                     cur_dialog.fields_dict.firma.df.hidden = 1;
                                     cur_dialog.fields_dict.firma.refresh();
@@ -520,16 +507,7 @@ frappe.mvd_such_client = {
                         {'fieldname': 'cb_2', 'fieldtype': 'Column Break'},
                         {'fieldname': 'zusatz_firma', 'fieldtype': 'Data', 'label': 'Zusatz Firma', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_firma.get_value(), 'hidden': 1},
                         {'fieldname': 'zusatz_adresse', 'fieldtype': 'Data', 'label': 'Zusatz Adresse', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_adresse.get_value()},
-                        {'fieldname': 'postfach', 'fieldtype': 'Check', 'label': 'Postfach', 'reqd': 0, 'default': cur_page.page.search_fields.postfach.get_value(), 'change': function() {
-                                if (cur_dialog.fields_dict.postfach.get_value() == 1) {
-                                    cur_dialog.fields_dict.strasse.df.reqd = 0;
-                                    cur_dialog.fields_dict.strasse.refresh();
-                                } else {
-                                    cur_dialog.fields_dict.strasse.df.reqd = 1;
-                                    cur_dialog.fields_dict.strasse.refresh();
-                                }
-                            }
-                        },
+                        {'fieldname': 'postfach', 'fieldtype': 'Check', 'label': 'Postfach', 'reqd': 0, 'default': cur_page.page.search_fields.postfach.get_value()},
                         {'fieldname': 'postfach_nummer', 'fieldtype': 'Data', 'label': 'Postfach Nummer', 'reqd': 0, 'default': cur_page.page.search_fields.postfach_nummer.get_value(), 'depends_on': 'eval:doc.postfach'},
                         {'fieldname': 'strasse', 'fieldtype': 'Data', 'label': 'Strasse', 'reqd': 1, 'default': cur_page.page.search_fields.strasse.get_value()},
                         {'fieldname': 'nummer', 'fieldtype': 'Data', 'label': 'Nummer', 'reqd': 0, 'default': cur_page.page.search_fields.nummer.get_value()},

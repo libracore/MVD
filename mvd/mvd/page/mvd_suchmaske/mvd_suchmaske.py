@@ -41,15 +41,20 @@ def suche(suchparameter, goto_list=False):
                             (REPLACE(`tel_g_1`, ' ', '') LIKE '{tel}%' OR REPLACE(`rg_tel_g`, ' ', '') LIKE '{tel}%' OR REPLACE(`tel_g_2`, ' ', '') LIKE '{tel}%'))""".format(tel=suchparameter["tel"].replace(" ", "")))
     if suchparameter["email"]:
         filters_list.append("""(`e_mail_1` LIKE '{email}%' OR `rg_e_mail` LIKE '{email}%' OR `e_mail_2` LIKE '{email}%')""".format(email=suchparameter["email"]))
-    if suchparameter["firma"]:
-        if suchparameter["zusatz_firma"]:
-            firma = str(suchparameter["firma"] + "%" + suchparameter["zusatz_firma"]).replace(" ", "")
-            filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{firma}%')""".format(firma=firma))
+    if 'firma' in suchparameter:
+        if 'zusatz_firma' in suchparameter:
+            if suchparameter["firma"]:
+                if suchparameter["zusatz_firma"]:
+                    firma = str(suchparameter["firma"] + "%" + suchparameter["zusatz_firma"]).replace(" ", "")
+                    filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{firma}%')""".format(firma=firma))
+                else:
+                    filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{firma}%')""".format(firma=suchparameter["firma"]))
+            else:
+                if suchparameter["zusatz_firma"]:
+                    filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{zusatz_firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{zusatz_firma}%')""".format(zusatz_firma=suchparameter["zusatz_firma"]))
         else:
-            filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{firma}%')""".format(firma=suchparameter["firma"]))
-    else:
-        if suchparameter["zusatz_firma"]:
-            filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{zusatz_firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{zusatz_firma}%')""".format(zusatz_firma=suchparameter["zusatz_firma"]))
+            if suchparameter["firma"]:
+                filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{firma}%')""".format(firma=suchparameter["firma"]))
     
     # Adressdaten
     if suchparameter["zusatz_adresse"]:
@@ -125,6 +130,13 @@ def anlage_prozess(anlage_daten):
     if isinstance(anlage_daten, six.string_types):
         anlage_daten = json.loads(anlage_daten)
     
+    firma = ''
+    if 'firma' in anlage_daten:
+        firma = anlage_daten["firma"] if anlage_daten["firma"] else ''
+    zusatz_firma = ''
+    if 'zusatz_firma' in anlage_daten:
+        zusatz_firma = anlage_daten["zusatz_firma"] if anlage_daten["zusatz_firma"] else ''
+    
     # erstelle mitgliedschaft
     mitgliedschaft = frappe.get_doc({
         "doctype": "MV Mitgliedschaft",
@@ -135,8 +147,8 @@ def anlage_prozess(anlage_daten):
         "inkl_hv": 1,
         "eintritt": now(),
         "kundentyp": "Einzelperson" if anlage_daten["mitgliedtyp"] == 'Privat' else 'Unternehmen',
-        "firma": anlage_daten["firma"] if anlage_daten["firma"] else '',
-        "zusatz_firma": anlage_daten["zusatz_firma"] if anlage_daten["zusatz_firma"] else '',
+        "firma": firma,
+        "zusatz_firma": zusatz_firma,
         "anrede_c": anlage_daten["anrede"] if 'anrede' in anlage_daten else '',
         "nachname_1": anlage_daten["nachname"],
         "vorname_1": anlage_daten["vorname"],
@@ -151,7 +163,11 @@ def anlage_prozess(anlage_daten):
         "postfach": anlage_daten["postfach"],
         "postfach_nummer": anlage_daten["postfach_nummer"] if 'postfach_nummer' in anlage_daten else '',
         "plz": anlage_daten["plz"],
-        "ort": anlage_daten["ort"]
+        "ort": anlage_daten["ort"],
+        "objekt_strasse": anlage_daten["strasse"] if int(anlage_daten["postfach"]) == 1 else '',
+        "objekt_plz": anlage_daten["plz"] if int(anlage_daten["postfach"]) == 1 else '',
+        "objekt_ort": anlage_daten["ort"] if int(anlage_daten["postfach"]) == 1 else '',
+        "abweichende_objektadresse": 1 if int(anlage_daten["postfach"]) == 1 else '0'
     })
     mitgliedschaft.insert(ignore_permissions=True)
     
