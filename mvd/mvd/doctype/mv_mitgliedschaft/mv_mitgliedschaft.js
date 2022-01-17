@@ -73,14 +73,43 @@ frappe.ui.form.on('MV Mitgliedschaft', {
         }
     },
     postfach: function(frm) {
-        // set strasse mandatory
         if (!cur_frm.doc.postfach) {
+            // kein Postfach -> Strasse pflicht
             cur_frm.set_df_property('strasse', 'reqd', 1);
+            
+            // kein Postfach -> abweichende_objektadresse bearbeitbar
             cur_frm.set_df_property('abweichende_objektadresse', 'read_only', 0);
+            
+            if (cur_frm.doc.abweichende_objektadresse) {
+                var objekt_strassen_bez = cur_frm.doc.objekt_strasse + cur_frm.doc.objekt_hausnummer + cur_frm.doc.objekt_nummer_zu + cur_frm.doc.objekt_plz + cur_frm.doc.objekt_ort;
+                var korrespondenz_strasse_bez = cur_frm.doc.strasse + cur_frm.doc.nummer + cur_frm.doc.nummer_zu + cur_frm.doc.plz + cur_frm.doc.ort;
+                if (objekt_strassen_bez == korrespondenz_strasse_bez) {
+                    // adressdetails korrespondenz == objekt -> objekt entfernen
+                    cur_frm.set_value("abweichende_objektadresse", 0);
+                    cur_frm.set_value("objekt_strasse", '');
+                    cur_frm.set_value("objekt_hausnummer", '');
+                    cur_frm.set_value("objekt_nummer_zu", '');
+                    cur_frm.set_value("objekt_plz", '');
+                    cur_frm.set_value("objekt_ort", '');
+                }
+            }
+            
         } else {
+            // mit postfach -> strasse nicht zwingend
             cur_frm.set_df_property('strasse', 'reqd', 0);
+            
+            // mit postfach -> objekt zwingend
             cur_frm.set_value("abweichende_objektadresse", 1);
             cur_frm.set_df_property('abweichende_objektadresse', 'read_only', 1);
+            
+            // übertrage korrespondenz werte zu objekt wenn objekt strasse noch leer
+            if (!cur_frm.doc.objekt_strasse) {
+                cur_frm.set_value("objekt_strasse", cur_frm.doc.strasse);
+                cur_frm.set_value("objekt_hausnummer", cur_frm.doc.nummer);
+                cur_frm.set_value("objekt_nummer_zu", cur_frm.doc.nummer_zu);
+                cur_frm.set_value("objekt_plz", cur_frm.doc.plz);
+                cur_frm.set_value("objekt_ort", cur_frm.doc.ort);
+            }
         }
     },
     abweichende_objektadresse: function(frm) {
