@@ -88,11 +88,11 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.postfach = frappe.mvd_such_client.create_postfach_field(page, me.search_fields.postfach_nummer)
     me.search_fields.postfach.refresh();
     
-    me.search_fields.plz = frappe.mvd_such_client.create_plz_field(page)
-    me.search_fields.plz.refresh();
-    
     me.search_fields.ort = frappe.mvd_such_client.create_ort_field(page)
     me.search_fields.ort.refresh();
+    
+    me.search_fields.plz = frappe.mvd_such_client.create_plz_field(page, me.search_fields.ort)
+    me.search_fields.plz.refresh();
     
     me.search_fields.firma = frappe.mvd_such_client.create_firma_field(page)
     me.search_fields.firma.refresh();
@@ -402,13 +402,16 @@ frappe.mvd_such_client = {
         });
         return postfach_nummer
     },
-    create_plz_field: function(page) {
+    create_plz_field: function(page, ort) {
         var plz = frappe.ui.form.make_control({
             parent: page.main.find(".plz"),
             df: {
                 fieldtype: "Data",
                 fieldname: "plz",
-                placeholder: "PLZ"
+                placeholder: "PLZ",
+                change: function(){
+                    pincode_lookup(plz.get_value(), ort);
+                }
             },
             only_input: true,
         });
@@ -512,7 +515,10 @@ frappe.mvd_such_client = {
                         {'fieldname': 'strasse', 'fieldtype': 'Data', 'label': 'Strasse', 'reqd': 1, 'default': cur_page.page.search_fields.strasse.get_value()},
                         {'fieldname': 'nummer', 'fieldtype': 'Data', 'label': 'Nummer', 'reqd': 0, 'default': cur_page.page.search_fields.nummer.get_value()},
                         {'fieldname': 'nummer_zu', 'fieldtype': 'Data', 'label': 'Nr. Zusatz', 'reqd': 0, 'default': cur_page.page.search_fields.nummer_zu.get_value()},
-                        {'fieldname': 'plz', 'fieldtype': 'Data', 'label': 'PLZ', 'reqd': 1, 'default': cur_page.page.search_fields.plz.get_value()},
+                        {'fieldname': 'plz', 'fieldtype': 'Data', 'label': 'PLZ', 'reqd': 1, 'default': cur_page.page.search_fields.plz.get_value(), 'change': function() {
+                                pincode_lookup(cur_dialog.fields_dict.plz.get_value(), cur_dialog.fields_dict.ort);
+                            }
+                        },
                         {'fieldname': 'ort', 'fieldtype': 'Data', 'label': 'Ort', 'reqd': 1, 'default': cur_page.page.search_fields.ort.get_value()},
                     ],
                     function(values){
@@ -555,4 +561,55 @@ function get_default_sektion() {
         });
     }
     return default_sektion
+}
+
+function pincode_lookup(pincode, ort) {
+    var filters = [['pincode','=', pincode]];
+    // find cities
+    if (pincode) {
+        frappe.call({
+            method: 'frappe.client.get_list',
+            args: {
+                doctype: 'Pincode',
+                filters: filters,
+                fields: ['name', 'pincode', 'city', 'canton_code']
+            },
+            async: false,
+            callback: function(response) {
+                if (response.message) {
+                    if (response.message.length == 1) {
+                        // got exactly one city
+                        var city = response.message[0].city;
+                        ort.set_value(city);
+                    } else {
+                        // multiple cities found, show selection
+                        var cities = "";
+                        response.message.forEach(function (record) {
+                            cities += (record.city + "\n");
+                        });
+                        cities = cities.substring(0, cities.length - 1);
+                        frappe.prompt([
+                                {'fieldname': 'city', 
+                                 'fieldtype': 'Select', 
+                                 'label': 'City', 
+                                 'reqd': 1,
+                                 'options': cities,
+                                 'default': response.message[0].city
+                                }  
+                            ],
+                            function(values){
+                                var city = values.city;
+                                ort.set_value(city);
+                            },
+                            __('City'),
+                            __('Set')
+                        );
+                    }
+                } else {
+                    // got no match
+                    ort.set_value(city);
+                }
+            }
+        });
+    }
 }
