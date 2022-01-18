@@ -1924,6 +1924,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                     new_mitgliedschaft.zusatz_adresse = str(mitglied["Adresszusatz"]) if mitglied["Adresszusatz"] else ''
                     new_mitgliedschaft.strasse = str(mitglied["Strasse"]) if mitglied["Strasse"] else ''
                     new_mitgliedschaft.nummer = str(mitglied["Hausnummer"]) if mitglied["Hausnummer"] else ''
+                    new_mitgliedschaft.nummer_zu = str(mitglied["HausnummerZusatz"]) if mitglied["HausnummerZusatz"] else ''
                     new_mitgliedschaft.postfach = 1 if mitglied["Postfach"] else '0'
                     new_mitgliedschaft.postfach_nummer = str(mitglied["PostfachNummer"]) if mitglied["PostfachNummer"] else ''
                     new_mitgliedschaft.plz = str(mitglied["Postleitzahl"]) if mitglied["Postleitzahl"] else ''
@@ -1950,6 +1951,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 new_mitgliedschaft.objekt_zusatz_adresse = str(objekt["Adresszusatz"]) if objekt["Adresszusatz"] else ''
                 new_mitgliedschaft.objekt_strasse = str(objekt["Strasse"]) if objekt["Strasse"] else ''
                 new_mitgliedschaft.objekt_nummer = str(objekt["Hausnummer"]) if objekt["Hausnummer"] else ''
+                new_mitgliedschaft.objekt_nummer_zu = str(objekt["HausnummerZusatz"]) if objekt["HausnummerZusatz"] else ''
                 new_mitgliedschaft.objekt_plz = str(objekt["Postleitzahl"]) if objekt["Postleitzahl"] else ''
                 new_mitgliedschaft.objekt_ort = str(objekt["Ort"]) if objekt["Ort"] else ''
                 if objekt["FuerKorrespondenzGesperrt"]:
@@ -1978,6 +1980,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
             new_mitgliedschaft.rg_zusatz_adresse = str(rechnung["Adresszusatz"]) if rechnung["Adresszusatz"] else ''
             new_mitgliedschaft.rg_strasse = str(rechnung["Strasse"]) if rechnung["Strasse"] else ''
             new_mitgliedschaft.rg_nummer = str(rechnung["Hausnummer"]) if rechnung["Hausnummer"] else ''
+            new_mitgliedschaft.rg_nummer_zu = str(rechnung["HausnummerZusatz"]) if rechnung["HausnummerZusatz"] else ''
             new_mitgliedschaft.rg_postfach = 1 if rechnung["Postfach"] else '0'
             new_mitgliedschaft.rg_postfach_nummer = str(rechnung["PostfachNummer"]) if rechnung["PostfachNummer"] else ''
             new_mitgliedschaft.rg_plz = str(rechnung["Postleitzahl"]) if rechnung["Postleitzahl"] else ''
