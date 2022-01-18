@@ -39,6 +39,14 @@ frappe.ui.form.on('MV Mitgliedschaft', {
             }
             
             get_adressdaten(frm);
+            
+            // create E-Mail Button
+            cur_page.page.page.add_menu_item(__("Email"), function() {
+                create_email_popup(frm);
+            }, true, {
+                shortcut: 'Ctrl+E',
+                condition: () => !frm.doc.__islocal
+            });
         }
         
         remove_sinv_plus(frm);
@@ -515,4 +523,8 @@ function pincode_lookup(pincode, ort) {
             }
         });
     }
+}
+
+function create_email_popup(frm) {
+    frappe.msgprint("Nun würde dann das E-Mail Pop-Up kommen...");
 }
