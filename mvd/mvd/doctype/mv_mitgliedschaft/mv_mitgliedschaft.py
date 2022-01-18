@@ -1632,7 +1632,7 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.zahlung_mitgliedschaft = int(kwargs['JahrBezahltMitgliedschaft']) if kwargs['JahrBezahltMitgliedschaft'] else 0
             mitgliedschaft.naechstes_jahr_geschuldet = 1 if kwargs['NaechstesJahrGeschuldet'] else '0'
             mitgliedschaft.sp_no_update = 1
-            mitgliedschaft.language = get_sprache_abk(language=kwargs['sprache']) if kwargs['sprache'] else 'de'
+            mitgliedschaft.language = get_sprache_abk(language=kwargs['Sprache']) if kwargs['Sprache'] else 'de'
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
             
             if not mitgliedschaft:
@@ -1727,7 +1727,7 @@ def mvm_neuanlage(kwargs):
                 'zahlung_mitgliedschaft': int(kwargs['JahrBezahltMitgliedschaft']) if kwargs['JahrBezahltMitgliedschaft'] else 0,
                 'naechstes_jahr_geschuldet': 1 if kwargs['NaechstesJahrGeschuldet'] else '0',
                 'sp_no_update': 1,
-                'language': get_sprache_abk(language=kwargs['sprache'])
+                'language': get_sprache_abk(language=kwargs['Sprache'])
             })
             
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
@@ -1772,7 +1772,7 @@ def check_main_keys(kwargs):
         'AnzahlZeitungen',
         'ZeitungAlsPdf',
         'Adressen',
-        'sprache'
+        'Sprache'
     ]
     for key in mandatory_keys:
         if key not in kwargs:
