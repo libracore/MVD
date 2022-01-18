@@ -259,6 +259,7 @@ def get_adressblock(mitgliedschaft):
     adressblock = ''
     if mitgliedschaft.kundentyp == 'Unternehmen':
         adressblock += mitgliedschaft.firma or ''
+        adressblock += ' '
         adressblock += mitgliedschaft.zusatz_firma or ''
         adressblock += '\n'
     
@@ -1358,23 +1359,29 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         else:
             address = mitgliedschaft.rg_adresse
     else:
-        customer = mitgliedschaft.rg_kunde_mitglied
-        address = mitgliedschaft.rg_adresse_mitglied
-        contact = mitgliedschaft.rg_kontakt_mitglied
+        customer = mitgliedschaft.rg_kunde
+        address = mitgliedschaft.rg_adresse
+        contact = mitgliedschaft.rg_kontakt
     
     # finde passenden Artikel
-    item = [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1}]
-    if not ignore_stichtage:
-        reduziert_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.reduzierter_mitgliederbeitrag).strftime("%m") + "-" + getdate(sektion.reduzierter_mitgliederbeitrag).strftime("%d"))
-        gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%d"))
-        if getdate(today()) >= reduziert_ab:
-            item = [{"item_code": sektion.mitgliedschafts_artikel_reduziert,"qty": 1}]
-            if getdate(today()) >= gratis_ab:
-                item = [
-                    {"item_code": sektion.mitgliedschafts_artikel_gratis,"qty": 1},
-                    {"item_code": sektion.mitgliedschafts_artikel,"qty": 1}
-                ]
-                jahr = int(getdate(today()).strftime("%Y")) + 1
+    if mitgliedschaft.mitgliedtyp_c == 'Privat':
+        item = [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1}]
+        if not ignore_stichtage:
+            reduziert_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.reduzierter_mitgliederbeitrag).strftime("%m") + "-" + getdate(sektion.reduzierter_mitgliederbeitrag).strftime("%d"))
+            gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%d"))
+            if getdate(today()) >= reduziert_ab:
+                item = [{"item_code": sektion.mitgliedschafts_artikel_reduziert,"qty": 1}]
+                if getdate(today()) >= gratis_ab:
+                    item = [
+                        {"item_code": sektion.mitgliedschafts_artikel_gratis,"qty": 1},
+                        {"item_code": sektion.mitgliedschafts_artikel,"qty": 1}
+                    ]
+                    jahr = int(getdate(today()).strftime("%Y")) + 1
+    
+    if mitgliedschaft.mitgliedtyp_c == 'Geschäft':
+        item = [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1}]
+    if mitgliedschaft.mitgliedtyp_c == 'Kollektiv':
+        item = [{"item_code": sektion.mitgliedschafts_artikel_kollektiv,"qty": 1}]
     
     sinv = frappe.get_doc({
         "doctype": "Sales Invoice",
@@ -1409,7 +1416,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
     if submit:
         sinv.submit()
     
-    if inkl_hv:
+    if inkl_hv and mitgliedschaft.mitgliedtyp_c != 'Geschäft':
         fr_rechnung = create_hv_fr(mitgliedschaft=mitgliedschaft.name, sales_invoice=sinv.name, bezahlt=hv_bar_bezahlt)
     
     if attach_as_pdf:
@@ -2099,7 +2106,6 @@ def get_adressen_for_sp(mitgliedschaft):
         "kontakte": [
             {
                 "anrede": str(mitgliedschaft.anrede_c) if mitgliedschaft.anrede_c else "Unbekannt",
-                "sprache": "Deutsch",
                 "istHauptkontakt": True,
                 "vorname": str(mitgliedschaft.vorname_1) if mitgliedschaft.vorname_1 else None,
                 "nachname": str(mitgliedschaft.nachname_1) if mitgliedschaft.nachname_1 else None,
@@ -2116,7 +2122,6 @@ def get_adressen_for_sp(mitgliedschaft):
     if mitgliedschaft.hat_solidarmitglied:
         solidarmitglied = {
             "anrede": str(mitgliedschaft.anrede_2) if mitgliedschaft.anrede_2 else "Unbekannt",
-            "sprache": "Deutsch",
             "istHauptkontakt": False,
             "vorname": str(mitgliedschaft.vorname_2) if mitgliedschaft.vorname_2 else None,
             "nachname": str(mitgliedschaft.nachname_2) if mitgliedschaft.nachname_2 else None,
@@ -2165,7 +2170,6 @@ def get_adressen_for_sp(mitgliedschaft):
         if mitgliedschaft.unabhaengiger_debitor:
             rechnungskontakt = {
                 "anrede": str(mitgliedschaft.rg_anrede) if mitgliedschaft.rg_anrede else "Unbekannt",
-                "sprache": "Deutsch",
                 "istHauptkontakt": False,
                 "vorname": str(mitgliedschaft.rg_vorname) if mitgliedschaft.rg_vorname else None,
                 "nachname": str(mitgliedschaft.rg_nachname) if mitgliedschaft.rg_nachname else None,
