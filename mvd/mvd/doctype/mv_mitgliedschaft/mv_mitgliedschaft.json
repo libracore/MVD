@@ -27,6 +27,7 @@
   "validierung_notwendig",
   "kuendigung_verarbeiten",
   "sp_no_update",
+  "language",
   "section_wichtige_infos",
   "wichtig",
   "section_daten",
@@ -835,10 +836,17 @@
    "hidden": 1,
    "label": "Ampel Farbe",
    "read_only": 1
+  },
+  {
+   "default": "de",
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Sprache",
+   "options": "Language"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-01-18 16:27:47.541345",
+ "modified": "2022-01-18 16:30:14.832650",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

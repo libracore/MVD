@@ -142,6 +142,7 @@ def anlage_prozess(anlage_daten):
         "doctype": "MV Mitgliedschaft",
         "sektion_id": anlage_daten["sektion_id"],
         "status_c": anlage_daten["status"],
+        "language": anlage_daten["language"],
         "m_und_w": 1,
         "mitgliedtyp_c": anlage_daten["mitgliedtyp"],
         "inkl_hv": 1,

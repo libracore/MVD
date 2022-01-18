@@ -1625,6 +1625,7 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.zahlung_mitgliedschaft = int(kwargs['JahrBezahltMitgliedschaft']) if kwargs['JahrBezahltMitgliedschaft'] else 0
             mitgliedschaft.naechstes_jahr_geschuldet = 1 if kwargs['NaechstesJahrGeschuldet'] else '0'
             mitgliedschaft.sp_no_update = 1
+            mitgliedschaft.language = get_sprache_abk(language=kwargs['sprache']) if kwargs['sprache'] else 'de'
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
             
             if not mitgliedschaft:
@@ -1718,7 +1719,8 @@ def mvm_neuanlage(kwargs):
                 'zahlung_hv': int(kwargs['JahrBezahltHaftpflicht']) if kwargs['JahrBezahltHaftpflicht'] else 0,
                 'zahlung_mitgliedschaft': int(kwargs['JahrBezahltMitgliedschaft']) if kwargs['JahrBezahltMitgliedschaft'] else 0,
                 'naechstes_jahr_geschuldet': 1 if kwargs['NaechstesJahrGeschuldet'] else '0',
-                'sp_no_update': 1
+                'sp_no_update': 1,
+                'language': get_sprache_abk(language=kwargs['sprache'])
             })
             
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
@@ -1762,7 +1764,8 @@ def check_main_keys(kwargs):
         'Bemerkungen',
         'AnzahlZeitungen',
         'ZeitungAlsPdf',
-        'Adressen'
+        'Adressen',
+        'sprache'
     ]
     for key in mandatory_keys:
         if key not in kwargs:
@@ -1778,6 +1781,13 @@ def get_sektion_id(sektion_c):
         return sektionen[0].name
     else:
         return False
+
+def get_sprache_abk(language='Deutsch'):
+    language = frappe.db.sql("""SELECT `name` FROM `tabLanguage` WHERE `language_name` = '{language}'""".format(language=language), as_list=True)
+    if len(language) > 0:
+        return language[0][0]
+    else:
+        return 'de'
 
 def get_sektion_code(sektion):
     sektionen = frappe.db.sql("""SELECT `sektion_c` FROM `tabSektion` WHERE `name` = '{sektion}'""".format(sektion=sektion), as_dict=True)
@@ -1818,6 +1828,7 @@ def get_mitgliedtyp_c(mitgliedtyp_c):
         return mapper[mitgliedtyp_c.lower()]
     else:
         return False
+
 def get_inkl_hv(inkl_hv):
     curr_year = int(getdate().strftime("%Y"))
     if inkl_hv:
@@ -2049,6 +2060,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "sektionCode": str(get_sektion_code(mitgliedschaft.sektion_id)),
         "typ": str(typ_mapper[mitgliedschaft.mitgliedtyp_c]),
         "status": str(status_mapper[mitgliedschaft.status_c]),
+        "sprache": get_sprache(language=mitgliedschaft.language) if mitgliedschaft.language else 'Deutsch',
         "regionCode": None, # ???
         "istTemporaeresMitglied": False, # ???
         "fuerBewirtschaftungGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
@@ -2169,6 +2181,13 @@ def get_adressen_for_sp(mitgliedschaft):
         adressen.append(rechnung)
     
     return adressen
+
+def get_sprache(language='de'):
+    language = frappe.db.sql("""SELECT `language_name` FROM `tabLanguage` WHERE `name` = '{language}'""".format(language=language), as_list=True)
+    if len(language) > 0:
+        return language[0][0]
+    else:
+        return 'Deutsch'
 
 # Sektionswechsel
 def mvm_sektionswechsel(mitgliedschaft):

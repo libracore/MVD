@@ -55,6 +55,9 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.status_c = frappe.mvd_such_client.create_status_c_field(page)
     me.search_fields.status_c.refresh();
     
+    me.search_fields.language = frappe.mvd_such_client.create_language_field(page)
+    me.search_fields.language.refresh();
+    
     me.search_fields.mitgliedtyp_c = frappe.mvd_such_client.create_mitgliedtyp_c_field(page)
     me.search_fields.mitgliedtyp_c.refresh();
     
@@ -208,6 +211,20 @@ frappe.mvd_such_client = {
             only_input: true,
         });
         return sektion_id
+    },
+    create_language_field: function(page) {
+        var language = frappe.ui.form.make_control({
+            parent: page.main.find(".language"),
+            df: {
+                fieldtype: "Link",
+                options: "Language",
+                fieldname: "language",
+                placeholder: "Sprache",
+                read_only: 0
+            },
+            only_input: true,
+        });
+        return language
     },
     create_mitglied_nr_field: function(page) {
         var mitglied_nr = frappe.ui.form.make_control({
@@ -494,6 +511,7 @@ frappe.mvd_such_client = {
                                 }
                             }
                         },
+                        {'fieldname': 'language', 'fieldtype': 'Link', 'label': 'Sprache', 'reqd': 1, 'hidden': 0, 'options': 'Language', 'default': cur_page.page.search_fields.language.get_value()||'de'},
                         {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'hidden': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value()},
                         {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 0},
                         {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.autom_rechnung'},

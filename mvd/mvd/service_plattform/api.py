@@ -31,18 +31,23 @@ def whoami(type='light'):
 # ---------------------------------------------------
 # ausgehend
 # ---------------------------------------------------
-def neue_mitglieder_nummer(sektion_code):
+def neue_mitglieder_nummer(sektion_code, sprache='Deutsch', typ='Privat'):
     if not int(frappe.db.get_single_value('Service Plattform API', 'not_get_number_and_id')) == 1:
         if auth_check(SVCPF_SCOPE):
             config = frappe.get_doc("Service Plattform API", "Service Plattform API")
             sub_url = config.get_value(SVCPF_SCOPE, "api_url")
             endpoint = config.get('neue_mitglieder_nummer')
-            url = sub_url + endpoint + '/{sektion_code}'.format(sektion_code=sektion_code)
+            url = sub_url + endpoint
+            json = {
+                "sektionCode": sektion_code,
+                "sprache": sprache,
+                "typ": typ
+            }
             token = config.get_value(SVCPF_SCOPE, 'api_token')
             headers = {"authorization": "Bearer {token}".format(token=token)}
             
             try:
-                mitglied_nr_obj = requests.post(url, headers = headers)
+                mitglied_nr_obj = requests.post(url, json = json, headers = headers)
                 mitglied_nr_obj = mitglied_nr_obj.json()
                 if 'mitgliedNummer' not in mitglied_nr_obj:
                     frappe.log_error("{0}".format(mitglied_nr_obj), 'neue_mitglieder_nummer failed')
