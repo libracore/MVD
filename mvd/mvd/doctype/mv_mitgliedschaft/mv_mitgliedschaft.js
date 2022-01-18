@@ -38,15 +38,11 @@ frappe.ui.form.on('MV Mitgliedschaft', {
                 });
             }
             
+            // load html overview
             get_adressdaten(frm);
             
-            // create E-Mail Button
-            cur_page.page.page.add_menu_item(__("Email"), function() {
-                create_email_popup(frm);
-            }, true, {
-                shortcut: 'Ctrl+E',
-                condition: () => !frm.doc.__islocal
-            });
+            // override_default_email_dialog
+            override_default_email_dialog(frm);
         }
         
         remove_sinv_plus(frm);
@@ -525,6 +521,76 @@ function pincode_lookup(pincode, ort) {
     }
 }
 
-function create_email_popup(frm) {
-    frappe.msgprint("Nun würde dann das E-Mail Pop-Up kommen...");
+function override_default_email_dialog(frm) {
+    document.addEventListener('click',function(event) {
+        // Replace email dialog to get a more sensible draft message and recipients
+        var on_email_menutext = event.target.classList.contains('menu-item-label') && ['E-Mail','Email'].includes(event.target.innerText);
+        var on_email_menuitem = event.target.children.length > 0
+                                                 && event.target.children[0].classList.contains('menu-item-label')
+                                                 && ['E-Mail','Email'].includes(event.target.children[0].innerText);
+                                                 
+      if(on_email_menutext || on_email_menuitem) {
+          custom_email_dialog(event);
+            $('.menu-item-label[data-label="Email"]').parent().off('click');
+            $('.menu-item-label[data-label="E-Mail"]').parent().off('click');
+        }
+     
+    }, true);
+    
+    // Catch Ctrl+E
+    document.addEventListener('keydown',function(event) {
+        if (event.key == 'e' && event.ctrlKey){
+            custom_email_dialog(event);
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    }, true);
+}
+
+function custom_email_dialog(e) {
+    var recipient = '';
+    var cc = '';
+    var bcc = '';
+    if (cur_frm.doc.abweichende_rechnungsadresse && cur_frm.doc.unabhaengiger_debitor && cur_frm.doc.rg_e_mail) {
+        recipient = cur_frm.doc.rg_e_mail;
+        if (cur_frm.doc.e_mail_1 && cur_frm.doc.e_mail_2) {
+            cc = [cur_frm.doc.e_mail_1, cur_frm.doc.e_mail_2].join(", ");
+        } else {
+            if (cur_frm.doc.e_mail_1) {
+                cc = cur_frm.doc.e_mail_1;
+            } else {
+                if (cur_frm.doc.e_mail_2) {
+                    cc = cur_frm.doc.e_mail_2;
+                }
+            }
+        }
+    } else {
+        if (cur_frm.doc.e_mail_1 && cur_frm.doc.e_mail_2) {
+            recipient = cur_frm.doc.e_mail_1;
+            cc = cur_frm.doc.e_mail_2;
+        } else {
+            if (cur_frm.doc.e_mail_1) {
+                recipient = cur_frm.doc.e_mail_1;
+            } else {
+                if (cur_frm.doc.e_mail_2) {
+                    recipient = cur_frm.doc.e_mail_2;
+                }
+            }
+        }
+    }
+    frappe.last_edited_communication = {};
+    localStorage.clear(); /* Not strictly necessary, just clear localStorage to avoid "drafts" showing up */
+    var comcom = new frappe.views.CommunicationComposer({
+        title: "Neues E-Mail",
+        doc: cur_frm.doc,
+        frm: cur_frm,
+        subject: 'Ihre Mitgliedschaft: ' + cur_frm.doc.mitglied_nr,
+        recipients: recipient,
+        cc: cc,
+        bcc: bcc,
+        attach_document_print: true, /* This tick is changed by JS along with the attachment ticks - which can't be passed as arguments */
+        message: '', /* Gets overwritten by txt (txt must be passed to avoid loading draft messages from LocalStorage) */
+        real_name: '', /* Do not pass this as it triggers automatic salutation with "Dear" */
+        txt: '<div>' + cur_frm.doc.briefanrede + '</div>'
+    });
 }

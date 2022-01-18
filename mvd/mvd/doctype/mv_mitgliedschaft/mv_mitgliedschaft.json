@@ -838,7 +838,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-01-18 11:24:41.669653",
+ "modified": "2022-01-18 16:27:47.541345",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
@@ -847,6 +847,7 @@
   {
    "create": 1,
    "delete": 1,
+   "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
@@ -857,6 +858,7 @@
   },
   {
    "delete": 1,
+   "email": 1,
    "export": 1,
    "permlevel": 1,
    "print": 1,
@@ -867,6 +869,7 @@
    "write": 1
   },
   {
+   "email": 1,
    "export": 1,
    "permlevel": 2,
    "print": 1,
@@ -876,6 +879,7 @@
    "share": 1
   },
   {
+   "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
@@ -884,6 +888,7 @@
    "write": 1
   },
   {
+   "email": 1,
    "permlevel": 1,
    "read": 1,
    "role": "MVD Sektionsmitarbeiter*in"
