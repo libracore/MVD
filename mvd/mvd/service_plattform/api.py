@@ -311,7 +311,7 @@ def assign_roles(user, roles, debug=False):
     token_check(AUTH0_SCOPE)
     config = frappe.get_doc("Service Plattform API", "Service Plattform API")
     sub_url = config.get_value(AUTH0_SCOPE, "api_url")
-    url = "{0}users/{1}".format(sub_url, user_id)
+    url = "{0}users/{1}/roles".format(sub_url, user_id)
     token = config.get_value(AUTH0_SCOPE, 'api_token')
     headers = {
         "authorization": "Bearer {token}".format(token=token),
