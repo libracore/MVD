@@ -124,21 +124,21 @@ def analyse_error_log():
         elif error_log.method == 'create_kontakt_mitglied':
             # ec1
             # empty (or just a space) contact first name
-            if 'fallback: first_name was' in error_log.error:
+            if 'fallback: first_name was' in str(error_log.error):
                 summary['ec1']['qty'] += 1
                 summary['ec1']['logs'].append(error_log.name)
         
         elif error_log.method == 'update_kunde_mitglied':
             # ec2
             # empty (or just a space) customer name, but with company
-            if 'fallback: customer_name was' in error_log.error:
+            if 'fallback: customer_name was' in str(error_log.error):
                 summary['ec2']['qty'] += 1
                 summary['ec2']['logs'].append(error_log.name)
         
         elif error_log.method == 'create_kunde_mitglied':
             # ec3
             # same as ec2, but in create method
-            if 'fallback: customer_name was' in error_log.error:
+            if 'fallback: customer_name was' in str(error_log.error):
                 summary['ec3']['qty'] += 1
                 summary['ec3']['logs'].append(error_log.name)
         
@@ -184,8 +184,8 @@ def analyse_error_log():
             summary['ec13']['qty'] += 1
             summary['ec13']['logs'].append(error_log.name)
         
-        elif 'frappe.exceptions.MandatoryError:' in error_log.error:
-            if ': eintritt' in error_log.error:
+        elif 'frappe.exceptions.MandatoryError:' in str(error_log.error):
+            if ': eintritt' in str(error_log.error):
                 # ec14
                 summary['ec14']['qty'] += 1
                 summary['ec14']['logs'].append(error_log.name)
