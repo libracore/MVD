@@ -1523,8 +1523,8 @@ def close_open_validations(mitgliedschaft):
 
 # Neuanlage / Update Mitgliedschaft
 def mvm_mitglieder(kwargs):
-    if 'MitgliedId' in kwargs:
-        if kwargs["MitgliedId"] > 0:
+    if 'mitgliedId' in kwargs:
+        if kwargs["mitgliedId"] > 0:
             return check_update_vs_neuanlage(kwargs)
         else:
             return raise_xxx(400, 'Bad Request', 'mitgliedId == 0')
@@ -1551,10 +1551,10 @@ def raise_200(answer='Success'):
 # API Funktionshelfer
 # -----------------------------------------------
 def check_update_vs_neuanlage(kwargs):
-    if not frappe.db.exists("MV Mitgliedschaft", kwargs["MitgliedId"]):
+    if not frappe.db.exists("MV Mitgliedschaft", kwargs["mitgliedId"]):
         return mvm_neuanlage(kwargs)
     else:
-        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", kwargs["MitgliedId"])
+        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", kwargs["mitgliedId"])
         return mvm_update(mitgliedschaft, kwargs)
         
 
@@ -1562,84 +1562,84 @@ def mvm_update(mitgliedschaft, kwargs):
     missing_keys = check_main_keys(kwargs)
     if not missing_keys:
         try:
-            sektion_id = get_sektion_id(kwargs['SektionCode'])
+            sektion_id = get_sektion_id(kwargs['sektionCode'])
             if not sektion_id:
-                return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['SektionCode']), daten=kwargs)
+                return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['sektionCode']), daten=kwargs)
                 
-            status_c = get_status_c(kwargs['Status'])
+            status_c = get_status_c(kwargs['status'])
             if not status_c:
-                return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['Status']), daten=kwargs)
+                return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['status']), daten=kwargs)
                 
             mitgliedtyp_c = get_mitgliedtyp_c(kwargs['Typ'])
             if not mitgliedtyp_c:
                 return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']), daten=kwargs)
             
-            if kwargs['Eintrittsdatum']:
-                eintritt = kwargs['Eintrittsdatum'].split("T")[0]
+            if kwargs['eintrittsdatum']:
+                eintritt = kwargs['eintrittsdatum'].split("T")[0]
             else:
                 eintritt = None
             if status_c in ('Anmeldung', 'Online-Anmeldung'):
-                if kwargs['Erfassungsdatum']:
-                    eintritt = kwargs['Erfassungsdatum'].split("T")[0]
+                if kwargs['erfassungsdatum']:
+                    eintritt = kwargs['erfassungsdatum'].split("T")[0]
                 else:
                     eintritt = None
             if not eintritt and status_c == 'Inaktiv':
-                if kwargs['Erfassungsdatum']:
-                    eintritt = kwargs['Erfassungsdatum'].split("T")[0]
+                if kwargs['erfassungsdatum']:
+                    eintritt = kwargs['erfassungsdatum'].split("T")[0]
                 else:
                     eintritt = None
             
-            if kwargs['Zuzugsdatum']:
-                zuzug = kwargs['Zuzugsdatum'].split("T")[0]
+            if kwargs['zuzugsdatum']:
+                zuzug = kwargs['zuzugsdatum'].split("T")[0]
             else:
                 zuzug = ''
             
-            if kwargs['Wegzugsdatum']:
-                wegzug = kwargs['Wegzugsdatum'].split("T")[0]
+            if kwargs['wegzugsdatum']:
+                wegzug = kwargs['wegzugsdatum'].split("T")[0]
             else:
                 wegzug = ''
             
-            if kwargs['Austrittsdatum']:
-                austritt = kwargs['Austrittsdatum'].split("T")[0]
+            if kwargs['austrittsdatum']:
+                austritt = kwargs['austrittsdatum'].split("T")[0]
             else:
                 austritt = ''
             
-            if kwargs['KuendigungPer']:
-                kuendigung = kwargs['KuendigungPer'].split("T")[0]
+            if kwargs['kuendigungPer']:
+                kuendigung = kwargs['kuendigungPer'].split("T")[0]
             else:
                 kuendigung = ''
             
-            if kwargs['ZeitungAlsPdf']:
+            if kwargs['zeitungAlsPdf']:
                 m_und_w_pdf = 1
             else:
                 m_und_w_pdf = 0
             
-            mitgliedschaft.mitglied_nr = kwargs['MitgliedNummer']
+            mitgliedschaft.mitglied_nr = kwargs['mitgliedNummer']
             mitgliedschaft.sektion_id = sektion_id
             mitgliedschaft.status_c = status_c
-            mitgliedschaft.mitglied_id = kwargs['MitgliedId']
+            mitgliedschaft.mitglied_id = kwargs['mitgliedId']
             mitgliedschaft.mitgliedtyp_c = mitgliedtyp_c
-            mitgliedschaft.inkl_hv = get_inkl_hv(kwargs["JahrBezahltHaftpflicht"])
-            mitgliedschaft.m_und_w = kwargs['AnzahlZeitungen']
+            mitgliedschaft.inkl_hv = get_inkl_hv(kwargs["jahrBezahltHaftpflicht"])
+            mitgliedschaft.m_und_w = kwargs['anzahlZeitungen']
             mitgliedschaft.m_und_w_pdf = m_und_w_pdf
-            mitgliedschaft.wichtig = kwargs['Bemerkungen'] if kwargs['Bemerkungen'] else ''
+            mitgliedschaft.wichtig = kwargs['bemerkungen'] if kwargs['bemerkungen'] else ''
             mitgliedschaft.eintritt = eintritt
             mitgliedschaft.zuzug = zuzug
             mitgliedschaft.wegzug = wegzug
             mitgliedschaft.austritt = austritt
             mitgliedschaft.kuendigung = kuendigung
-            mitgliedschaft.zahlung_hv = int(kwargs['JahrBezahltHaftpflicht']) if kwargs['JahrBezahltHaftpflicht'] else 0
-            mitgliedschaft.zahlung_mitgliedschaft = int(kwargs['JahrBezahltMitgliedschaft']) if kwargs['JahrBezahltMitgliedschaft'] else 0
-            mitgliedschaft.naechstes_jahr_geschuldet = 1 if kwargs['NaechstesJahrGeschuldet'] else '0'
+            mitgliedschaft.zahlung_hv = int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0
+            mitgliedschaft.zahlung_mitgliedschaft = int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0
+            mitgliedschaft.naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
+            mitgliedschaft.validierung_notwendig = 1 if kwargs['needsValidation'] else '0'
             mitgliedschaft.sp_no_update = 1
-            mitgliedschaft.language = get_sprache_abk(language=kwargs['Sprache']) if kwargs['Sprache'] else 'de'
+            mitgliedschaft.language = get_sprache_abk(language=kwargs['sprache']) if kwargs['sprache'] else 'de'
+            
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
             
             if not mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Beim Adressen Update ist etwas schief gelaufen', daten=kwargs)
             
-            # logik ob validiert werde muss oder nicht muss noch implementiert werden!
-            mitgliedschaft.validierung_notwendig = '0'
             mitgliedschaft.save()
             frappe.db.commit()
             
@@ -1654,89 +1654,87 @@ def mvm_neuanlage(kwargs):
     missing_keys = check_main_keys(kwargs)
     if not missing_keys:
         try:
-            sektion_id = get_sektion_id(kwargs['SektionCode'])
+            sektion_id = get_sektion_id(kwargs['sektionCode'])
             if not sektion_id:
-                return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['SektionCode']), daten=kwargs)
+                return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['sektionCode']), daten=kwargs)
             
-            status_c = get_status_c(kwargs['Status'])
+            status_c = get_status_c(kwargs['status'])
             if not status_c:
-                return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['Status']), daten=kwargs)
+                return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['status']), daten=kwargs)
             
             mitgliedtyp_c = get_mitgliedtyp_c(kwargs['Typ'])
             if not mitgliedtyp_c:
                 return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']), daten=kwargs)
             
-            if kwargs['Eintrittsdatum']:
-                eintritt = kwargs['Eintrittsdatum'].split("T")[0]
+            if kwargs['eintrittsdatum']:
+                eintritt = kwargs['eintrittsdatum'].split("T")[0]
             else:
                 eintritt = None
             if status_c in ('Anmeldung', 'Online-Anmeldung'):
-                if kwargs['Erfassungsdatum']:
-                    eintritt = kwargs['Erfassungsdatum'].split("T")[0]
+                if kwargs['erfassungsdatum']:
+                    eintritt = kwargs['erfassungsdatum'].split("T")[0]
                 else:
                     eintritt = None
             
             if not eintritt and status_c == 'Inaktiv':
-                if kwargs['Erfassungsdatum']:
-                    eintritt = kwargs['Erfassungsdatum'].split("T")[0]
+                if kwargs['erfassungsdatum']:
+                    eintritt = kwargs['erfassungsdatum'].split("T")[0]
                 else:
                     eintritt = None
             
-            if kwargs['Zuzugsdatum']:
-                zuzug = kwargs['Zuzugsdatum'].split("T")[0]
+            if kwargs['zuzugsdatum']:
+                zuzug = kwargs['zuzugsdatum'].split("T")[0]
             else:
                 zuzug = ''
             
-            if kwargs['Wegzugsdatum']:
-                wegzug = kwargs['Wegzugsdatum'].split("T")[0]
+            if kwargs['wegzugsdatum']:
+                wegzug = kwargs['wegzugsdatum'].split("T")[0]
             else:
                 wegzug = ''
             
-            if kwargs['Austrittsdatum']:
-                austritt = kwargs['Austrittsdatum'].split("T")[0]
+            if kwargs['austrittsdatum']:
+                austritt = kwargs['austrittsdatum'].split("T")[0]
             else:
                 austritt = ''
             
-            if kwargs['KuendigungPer']:
-                kuendigung = kwargs['KuendigungPer'].split("T")[0]
+            if kwargs['kuendigungPer']:
+                kuendigung = kwargs['kuendigungPer'].split("T")[0]
             else:
                 kuendigung = ''
             
-            if kwargs['ZeitungAlsPdf']:
+            if kwargs['zeitungAlsPdf']:
                 m_und_w_pdf = 1
             else:
                 m_und_w_pdf = 0
             
             new_mitgliedschaft = frappe.get_doc({
                 'doctype': 'MV Mitgliedschaft',
-                'mitglied_nr': str(kwargs['MitgliedNummer']),
+                'mitglied_nr': str(kwargs['mitgliedNummer']),
                 'sektion_id': sektion_id,
                 'status_c': status_c,
-                'mitglied_id': str(kwargs['MitgliedId']),
+                'mitglied_id': str(kwargs['mitgliedId']),
                 'mitgliedtyp_c': mitgliedtyp_c,
-                'inkl_hv': get_inkl_hv(kwargs["JahrBezahltHaftpflicht"]),
-                'm_und_w': kwargs['AnzahlZeitungen'],
+                'inkl_hv': get_inkl_hv(kwargs["jahrBezahltHaftpflicht"]),
+                'm_und_w': kwargs['anzahlZeitungen'],
                 'm_und_w_pdf': m_und_w_pdf,
-                'wichtig': str(kwargs['Bemerkungen']) if kwargs['Bemerkungen'] else '',
+                'wichtig': str(kwargs['bemerkungen']) if kwargs['bemerkungen'] else '',
                 'eintritt': eintritt,
                 'zuzug': zuzug,
                 'wegzug': wegzug,
                 'austritt': austritt,
                 'kuendigung': kuendigung,
-                'zahlung_hv': int(kwargs['JahrBezahltHaftpflicht']) if kwargs['JahrBezahltHaftpflicht'] else 0,
-                'zahlung_mitgliedschaft': int(kwargs['JahrBezahltMitgliedschaft']) if kwargs['JahrBezahltMitgliedschaft'] else 0,
-                'naechstes_jahr_geschuldet': 1 if kwargs['NaechstesJahrGeschuldet'] else '0',
+                'zahlung_hv': int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0,
+                'zahlung_mitgliedschaft': int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0,
+                'naechstes_jahr_geschuldet': 1 if kwargs['naechstesJahrGeschuldet'] else '0',
                 'sp_no_update': 1,
-                'language': get_sprache_abk(language=kwargs['Sprache'])
+                'validierung_notwendig': 1 if kwargs['needsValidation'] else '0',
+                'language': get_sprache_abk(language=kwargs['sprache'])
             })
             
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
             
             if not new_mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen', daten=kwargs)
-            
-            # logik ob validiert werde muss oder nicht muss noch implementiert werden!
-            new_mitgliedschaft.validierung_notwendig = '0'
             
             new_mitgliedschaft.insert()
             frappe.db.commit()
@@ -1751,28 +1749,29 @@ def mvm_neuanlage(kwargs):
 
 def check_main_keys(kwargs):
     mandatory_keys = [
-        'MitgliedNummer',
-        'MitgliedId',
-        'SektionCode',
-        'Typ',
-        'Status',
-        'RegionCode',
-        'IstTemporaeresMitglied',
-        'FuerBewirtschaftungGesperrt',
-        'Erfassungsdatum',
-        'Eintrittsdatum',
-        'Austrittsdatum',
-        'Zuzugsdatum',
-        'Wegzugsdatum',
-        'KuendigungPer',
-        'JahrBezahltMitgliedschaft',
-        'JahrBezahltHaftpflicht',
-        'NaechstesJahrGeschuldet',
-        'Bemerkungen',
-        'AnzahlZeitungen',
-        'ZeitungAlsPdf',
-        'Adressen',
-        'Sprache'
+        'mitgliedNummer',
+        'mitgliedId',
+        'sektionCode',
+        'typ',
+        'status',
+        'regionCode',
+        'istTemporaeresMitglied',
+        'fuerBewirtschaftungGesperrt',
+        'erfassungsdatum',
+        'eintrittsdatum',
+        'austrittsdatum',
+        'zuzugsdatum',
+        'wegzugsdatum',
+        'kuendigungPer',
+        'jahrBezahltMitgliedschaft',
+        'jahrBezahltHaftpflicht',
+        'naechstesJahrGeschuldet',
+        'bemerkungen',
+        'anzahlZeitungen',
+        'zeitungAlsPdf',
+        'adressen',
+        'sprache',
+        'needsValidation'
     ]
     for key in mandatory_keys:
         if key not in kwargs:
@@ -1867,23 +1866,23 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
         mitbewohner = False
         zeitung = False
         
-        for adresse in kwargs["Adressen"]["AdressenListe"]:
+        for adresse in kwargs["adressen"]["adressenListe"]:
             adressen_dict = adresse
             
             if isinstance(adressen_dict, str):
                 adressen_dict = json.loads(adressen_dict)
             
-            if adressen_dict['Typ'] == 'Filiale':
+            if adressen_dict['typ'] == 'Filiale':
                 filiale = adressen_dict
-            elif adressen_dict['Typ'] == 'Mitbewohner':
+            elif adressen_dict['typ'] == 'Mitbewohner':
                 mitbewohner = adressen_dict
-            elif adressen_dict['Typ'] == 'Zeitung':
+            elif adressen_dict['typ'] == 'Zeitung':
                 zeitung = adressen_dict
-            elif adressen_dict['Typ'] == 'Mitglied':
+            elif adressen_dict['typ'] == 'Mitglied':
                 mitglied = adressen_dict
-            elif adressen_dict['Typ'] == 'Objekt':
+            elif adressen_dict['typ'] == 'Objekt':
                 objekt = adressen_dict
-            elif adressen_dict['Typ'] == 'Rechnung':
+            elif adressen_dict['typ'] == 'Rechnung':
                 rechnung = adressen_dict
             else:
                 # unbekannter adresstyp
@@ -1897,64 +1896,64 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
         
         if mitglied:
             # erfassung mitglied-daten
-            for kontaktdaten in mitglied["Kontakte"]:
-                if kontaktdaten["IstHauptkontakt"]:
+            for kontaktdaten in mitglied["kontakte"]:
+                if kontaktdaten["istHauptkontakt"]:
                     # hauptmiglied
-                    if not mitglied["Strasse"] or str(mitglied["Strasse"]) == '':
+                    if not mitglied["strasse"] or str(mitglied["strasse"]) == '':
                         if not mitglied["Postfach"]:
                             # eines von beidem muss zwingend vorhanden sein
                             frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage: Weder Postfach noch Strasse')
                             return False
-                    if kontaktdaten["Firma"]:
+                    if kontaktdaten["firma"]:
                         new_mitgliedschaft.kundentyp = 'Unternehmen'
-                        new_mitgliedschaft.firma = str(kontaktdaten["Firma"])
-                        new_mitgliedschaft.zusatz_firma = str(kontaktdaten["FirmaZusatz"]) if kontaktdaten["FirmaZusatz"] else ''
+                        new_mitgliedschaft.firma = str(kontaktdaten["firma"])
+                        new_mitgliedschaft.zusatz_firma = str(kontaktdaten["firmaZusatz"]) if kontaktdaten["firmaZusatz"] else ''
                     else:
                         new_mitgliedschaft.kundentyp = 'Einzelperson'
-                    if kontaktdaten["Anrede"] != 'Unbekannt':
-                        new_mitgliedschaft.anrede_c = str(kontaktdaten["Anrede"]) if kontaktdaten["Anrede"] else ''
-                    new_mitgliedschaft.nachname_1 = str(kontaktdaten["Nachname"]) if kontaktdaten["Nachname"] else ''
-                    new_mitgliedschaft.vorname_1 = str(kontaktdaten["Vorname"]) if kontaktdaten["Vorname"] else ''
-                    new_mitgliedschaft.tel_p_1 = str(kontaktdaten["Telefon"]) if kontaktdaten["Telefon"] else ''
-                    if kontaktdaten["Mobile"]:
-                        if str(kontaktdaten["Mobile"]) != str(kontaktdaten["Telefon"]):
-                            new_mitgliedschaft.tel_m_1 = str(kontaktdaten["Mobile"])
-                    new_mitgliedschaft.tel_g_1 = str(kontaktdaten["TelefonGeschaeft"]) if kontaktdaten["TelefonGeschaeft"] else ''
-                    new_mitgliedschaft.e_mail_1 = str(kontaktdaten["Email"]) if check_email(kontaktdaten["Email"]) else ''
-                    new_mitgliedschaft.zusatz_adresse = str(mitglied["Adresszusatz"]) if mitglied["Adresszusatz"] else ''
-                    new_mitgliedschaft.strasse = str(mitglied["Strasse"]) if mitglied["Strasse"] else ''
-                    new_mitgliedschaft.nummer = str(mitglied["Hausnummer"]) if mitglied["Hausnummer"] else ''
-                    new_mitgliedschaft.nummer_zu = str(mitglied["HausnummerZusatz"]) if mitglied["HausnummerZusatz"] else ''
-                    new_mitgliedschaft.postfach = 1 if mitglied["Postfach"] else '0'
-                    new_mitgliedschaft.postfach_nummer = str(mitglied["PostfachNummer"]) if mitglied["PostfachNummer"] else ''
-                    new_mitgliedschaft.plz = str(mitglied["Postleitzahl"]) if mitglied["Postleitzahl"] else ''
-                    new_mitgliedschaft.ort = str(mitglied["Ort"]) if mitglied["Ort"] else ''
-                    if mitglied["FuerKorrespondenzGesperrt"]:
+                    if kontaktdaten["anrede"] != 'Unbekannt':
+                        new_mitgliedschaft.anrede_c = str(kontaktdaten["anrede"]) if kontaktdaten["anrede"] else ''
+                    new_mitgliedschaft.nachname_1 = str(kontaktdaten["nachname"]) if kontaktdaten["nachname"] else ''
+                    new_mitgliedschaft.vorname_1 = str(kontaktdaten["vorname"]) if kontaktdaten["vorname"] else ''
+                    new_mitgliedschaft.tel_p_1 = str(kontaktdaten["telefon"]) if kontaktdaten["telefon"] else ''
+                    if kontaktdaten["mobile"]:
+                        if str(kontaktdaten["mobile"]) != str(kontaktdaten["telefon"]):
+                            new_mitgliedschaft.tel_m_1 = str(kontaktdaten["mobile"])
+                    new_mitgliedschaft.tel_g_1 = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
+                    new_mitgliedschaft.e_mail_1 = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
+                    new_mitgliedschaft.zusatz_adresse = str(mitglied["adresszusatz"]) if mitglied["adresszusatz"] else ''
+                    new_mitgliedschaft.strasse = str(mitglied["strasse"]) if mitglied["strasse"] else ''
+                    new_mitgliedschaft.nummer = str(mitglied["hausnummer"]) if mitglied["hausnummer"] else ''
+                    new_mitgliedschaft.nummer_zu = str(mitglied["hausnummerZusatz"]) if mitglied["hausnummerZusatz"] else ''
+                    new_mitgliedschaft.postfach = 1 if mitglied["postfach"] else '0'
+                    new_mitgliedschaft.postfach_nummer = str(mitglied["postfachNummer"]) if mitglied["postfachNummer"] else ''
+                    new_mitgliedschaft.plz = str(mitglied["postleitzahl"]) if mitglied["postleitzahl"] else ''
+                    new_mitgliedschaft.ort = str(mitglied["ort"]) if mitglied["ort"] else ''
+                    if mitglied["fuerKorrespondenzGesperrt"]:
                         new_mitgliedschaft.adressen_gesperrt = 1
                 else:
                     # solidarmitglied
                     new_mitgliedschaft.hat_solidarmitglied = 1
-                    if kontaktdaten["Anrede"] != 'Unbekannt':
-                        new_mitgliedschaft.anrede_2 = str(kontaktdaten["Anrede"]) if kontaktdaten["Anrede"] else ''
-                    new_mitgliedschaft.nachname_2 = str(kontaktdaten["Nachname"]) if kontaktdaten["Nachname"] else ''
-                    new_mitgliedschaft.vorname_2 = str(kontaktdaten["Vorname"]) if kontaktdaten["Vorname"] else ''
-                    new_mitgliedschaft.tel_p_2 = str(kontaktdaten["Telefon"]) if kontaktdaten["Telefon"] else ''
-                    if kontaktdaten["Mobile"]:
-                        if str(kontaktdaten["Mobile"]) != str(kontaktdaten["Telefon"]):
-                            new_mitgliedschaft.tel_m_2 = str(kontaktdaten["Mobile"])
-                    new_mitgliedschaft.tel_g_2 = str(kontaktdaten["TelefonGeschaeft"]) if kontaktdaten["TelefonGeschaeft"] else ''
-                    new_mitgliedschaft.e_mail_2 = str(kontaktdaten["Email"]) if check_email(kontaktdaten["Email"]) else ''
+                    if kontaktdaten["anrede"] != 'Unbekannt':
+                        new_mitgliedschaft.anrede_2 = str(kontaktdaten["anrede"]) if kontaktdaten["anrede"] else ''
+                    new_mitgliedschaft.nachname_2 = str(kontaktdaten["nachname"]) if kontaktdaten["nachname"] else ''
+                    new_mitgliedschaft.vorname_2 = str(kontaktdaten["vorname"]) if kontaktdaten["vorname"] else ''
+                    new_mitgliedschaft.tel_p_2 = str(kontaktdaten["telefon"]) if kontaktdaten["telefon"] else ''
+                    if kontaktdaten["mobile"]:
+                        if str(kontaktdaten["mobile"]) != str(kontaktdaten["telefon"]):
+                            new_mitgliedschaft.tel_m_2 = str(kontaktdaten["mobile"])
+                    new_mitgliedschaft.tel_g_2 = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
+                    new_mitgliedschaft.e_mail_2 = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
         
         if objekt:
-            if objekt["Strasse"]:
+            if objekt["strasse"]:
                 new_mitgliedschaft.abweichende_objektadresse = 1
-                new_mitgliedschaft.objekt_zusatz_adresse = str(objekt["Adresszusatz"]) if objekt["Adresszusatz"] else ''
-                new_mitgliedschaft.objekt_strasse = str(objekt["Strasse"]) if objekt["Strasse"] else ''
-                new_mitgliedschaft.objekt_nummer = str(objekt["Hausnummer"]) if objekt["Hausnummer"] else ''
-                new_mitgliedschaft.objekt_nummer_zu = str(objekt["HausnummerZusatz"]) if objekt["HausnummerZusatz"] else ''
-                new_mitgliedschaft.objekt_plz = str(objekt["Postleitzahl"]) if objekt["Postleitzahl"] else ''
-                new_mitgliedschaft.objekt_ort = str(objekt["Ort"]) if objekt["Ort"] else ''
-                if objekt["FuerKorrespondenzGesperrt"]:
+                new_mitgliedschaft.objekt_zusatz_adresse = str(objekt["adresszusatz"]) if objekt["adresszusatz"] else ''
+                new_mitgliedschaft.objekt_strasse = str(objekt["strasse"]) if objekt["strasse"] else ''
+                new_mitgliedschaft.objekt_nummer = str(objekt["hausnummer"]) if objekt["hausnummer"] else ''
+                new_mitgliedschaft.objekt_nummer_zu = str(objekt["hausnummerZusatz"]) if objekt["hausnummerZusatz"] else ''
+                new_mitgliedschaft.objekt_plz = str(objekt["postleitzahl"]) if objekt["postleitzahl"] else ''
+                new_mitgliedschaft.objekt_ort = str(objekt["ort"]) if objekt["ort"] else ''
+                if objekt["fuerKorrespondenzGesperrt"]:
                     new_mitgliedschaft.adressen_gesperrt = 1
             else:
                 frappe.log_error("Adressdaten:\n{0}\n\nMitgliedsdaten:\n{1}".format(objekt, kwargs), 'Adresse Typ Objekt: Wurde entfernt; fehlende Strasse')
@@ -1977,38 +1976,38 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
         
         if rechnung:
             new_mitgliedschaft.abweichende_rechnungsdresse = 1
-            new_mitgliedschaft.rg_zusatz_adresse = str(rechnung["Adresszusatz"]) if rechnung["Adresszusatz"] else ''
-            new_mitgliedschaft.rg_strasse = str(rechnung["Strasse"]) if rechnung["Strasse"] else ''
-            new_mitgliedschaft.rg_nummer = str(rechnung["Hausnummer"]) if rechnung["Hausnummer"] else ''
-            new_mitgliedschaft.rg_nummer_zu = str(rechnung["HausnummerZusatz"]) if rechnung["HausnummerZusatz"] else ''
-            new_mitgliedschaft.rg_postfach = 1 if rechnung["Postfach"] else '0'
-            new_mitgliedschaft.rg_postfach_nummer = str(rechnung["PostfachNummer"]) if rechnung["PostfachNummer"] else ''
-            new_mitgliedschaft.rg_plz = str(rechnung["Postleitzahl"]) if rechnung["Postleitzahl"] else ''
-            new_mitgliedschaft.rg_ort = str(rechnung["Ort"]) if rechnung["Ort"] else ''
-            if rechnung["FuerKorrespondenzGesperrt"]:
+            new_mitgliedschaft.rg_zusatz_adresse = str(rechnung["adresszusatz"]) if rechnung["adresszusatz"] else ''
+            new_mitgliedschaft.rg_strasse = str(rechnung["strasse"]) if rechnung["strasse"] else ''
+            new_mitgliedschaft.rg_nummer = str(rechnung["hausnummer"]) if rechnung["hausnummer"] else ''
+            new_mitgliedschaft.rg_nummer_zu = str(rechnung["hausnummerZusatz"]) if rechnung["hausnummerZusatz"] else ''
+            new_mitgliedschaft.rg_postfach = 1 if rechnung["postfach"] else '0'
+            new_mitgliedschaft.rg_postfach_nummer = str(rechnung["postfachNummer"]) if rechnung["postfachNummer"] else ''
+            new_mitgliedschaft.rg_plz = str(rechnung["postleitzahl"]) if rechnung["postleitzahl"] else ''
+            new_mitgliedschaft.rg_ort = str(rechnung["ort"]) if rechnung["ort"] else ''
+            if rechnung["fuerKorrespondenzGesperrt"]:
                 new_mitgliedschaft.adressen_gesperrt = 1
-            for kontaktdaten in rechnung["Kontakte"]:
-                if kontaktdaten["IstHauptkontakt"]:
-                    if str(kontaktdaten["Nachname"]) != new_mitgliedschaft.nachname_1:
-                        if str(kontaktdaten["Vorname"]) != new_mitgliedschaft.vorname_1:
+            for kontaktdaten in rechnung["kontakte"]:
+                if kontaktdaten["istHauptkontakt"]:
+                    if str(kontaktdaten["nachname"]) != new_mitgliedschaft.nachname_1:
+                        if str(kontaktdaten["vorname"]) != new_mitgliedschaft.vorname_1:
                             # unabhängiger debitor
                             new_mitgliedschaft.unabhaengiger_debitor = 1
-                            if kontaktdaten["Firma"]:
+                            if kontaktdaten["firma"]:
                                 new_mitgliedschaft.rg_kundentyp = 'Unternehmen'
-                                new_mitgliedschaft.rg_firma = str(kontaktdaten["Firma"])
-                                new_mitgliedschaft.rg_zusatz_firma = str(kontaktdaten["FirmaZusatz"]) if kontaktdaten["FirmaZusatz"] else ''
+                                new_mitgliedschaft.rg_firma = str(kontaktdaten["firma"])
+                                new_mitgliedschaft.rg_zusatz_firma = str(kontaktdaten["firmaZusatz"]) if kontaktdaten["firmaZusatz"] else ''
                             else:
                                 new_mitgliedschaft.rg_kundentyp = 'Einzelperson'
-                            if kontaktdaten["Anrede"] != 'Unbekannt':
-                                new_mitgliedschaft.rg_anrede = str(kontaktdaten["Anrede"]) if kontaktdaten["Anrede"] else ''
-                            new_mitgliedschaft.rg_nachname_ = str(kontaktdaten["Nachname"]) if kontaktdaten["Nachname"] else ''
-                            new_mitgliedschaft.rg_vorname = str(kontaktdaten["Vorname"]) if kontaktdaten["Vorname"] else ''
-                            new_mitgliedschaft.rg_tel_p = str(kontaktdaten["Telefon"]) if kontaktdaten["Telefon"] else ''
-                            if kontaktdaten["Mobile"]:
-                                if str(kontaktdaten["Mobile"]) != str(kontaktdaten["Telefon"]):
-                                    new_mitgliedschaft.rg_tel_m = str(kontaktdaten["Mobile"])
-                            new_mitgliedschaft.rg_tel_g = str(kontaktdaten["TelefonGeschaeft"]) if kontaktdaten["TelefonGeschaeft"] else ''
-                            new_mitgliedschaft.rg_e_mail = str(kontaktdaten["Email"]) if check_email(kontaktdaten["Email"]) else ''
+                            if kontaktdaten["anrede"] != 'Unbekannt':
+                                new_mitgliedschaft.rg_anrede = str(kontaktdaten["anrede"]) if kontaktdaten["anrede"] else ''
+                            new_mitgliedschaft.rg_nachname_ = str(kontaktdaten["nachname"]) if kontaktdaten["nachname"] else ''
+                            new_mitgliedschaft.rg_vorname = str(kontaktdaten["vorname"]) if kontaktdaten["vorname"] else ''
+                            new_mitgliedschaft.rg_tel_p = str(kontaktdaten["telefon"]) if kontaktdaten["telefon"] else ''
+                            if kontaktdaten["mobile"]:
+                                if str(kontaktdaten["mobile"]) != str(kontaktdaten["telefon"]):
+                                    new_mitgliedschaft.rg_tel_m = str(kontaktdaten["mobile"])
+                            new_mitgliedschaft.rg_tel_g = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
+                            new_mitgliedschaft.rg_e_mail = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
                     
         
         if zeitung:
