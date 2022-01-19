@@ -90,6 +90,11 @@ def analyse_error_log():
             'logs': [],
             'beschreibung': 'Adresse vom Typ "Filiale" muss manuell verarbeitet werden'
         },
+        'ec14': {
+            'qty': 0,
+            'logs': [],
+            'beschreibung': 'Kein Eintrittsdatum'
+        },
         'ec99': {
             'qty': 0,
             'logs': [],
@@ -174,6 +179,10 @@ def analyse_error_log():
             summary['ec13']['qty'] += 1
             summary['ec13']['logs'].append(error_log.name)
         
+        elif 'frappe.exceptions.MandatoryError:' in error_log.error and ': eintritt' in error_log.error:
+            # ec14
+            summary['ec14']['qty'] += 1
+            summary['ec14']['logs'].append(error_log.name)
         else:
             # ec99
             # noch keine einzelauswertung
