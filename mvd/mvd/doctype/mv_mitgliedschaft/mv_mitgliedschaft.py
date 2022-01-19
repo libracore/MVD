@@ -1570,7 +1570,7 @@ def mvm_update(mitgliedschaft, kwargs):
             if not status_c:
                 return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['status']), daten=kwargs)
                 
-            mitgliedtyp_c = get_mitgliedtyp_c(kwargs['Typ'])
+            mitgliedtyp_c = get_mitgliedtyp_c(kwargs['typ'])
             if not mitgliedtyp_c:
                 return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']), daten=kwargs)
             
@@ -1662,7 +1662,7 @@ def mvm_neuanlage(kwargs):
             if not status_c:
                 return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['status']), daten=kwargs)
             
-            mitgliedtyp_c = get_mitgliedtyp_c(kwargs['Typ'])
+            mitgliedtyp_c = get_mitgliedtyp_c(kwargs['typ'])
             if not mitgliedtyp_c:
                 return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']), daten=kwargs)
             
