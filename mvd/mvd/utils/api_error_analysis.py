@@ -48,7 +48,7 @@ def analyse_error_log():
         'ec5': {
             'qty': 0,
             'logs': [],
-            'beschreibung': 'Allgemeiner API Fehler; immer nach raise_xxx'
+            'beschreibung': '(Obsolet) Allgemeiner API Fehler; immer nach raise_xxx'
         },
         'ec6': {
             'qty': 0,
@@ -109,13 +109,13 @@ def analyse_error_log():
     
     error_logs = frappe.db.sql("""SELECT * FROM `tabError Log`""", as_dict=True)
     for error_log in error_logs:
-        if error_log.method == 'SP API Error!':
-            # ec5
-            # allgemeiner API Fehler; immer nach raise_xxx
-            summary['ec5']['qty'] += 1
-            summary['ec5']['logs'].append(error_log.name)
+        # ~ if error_log.method == 'SP API Error!':
+            # ~ # ec5
+            # ~ # allgemeiner API Fehler; immer nach raise_xxx
+            # ~ summary['ec5']['qty'] += 1
+            # ~ summary['ec5']['logs'].append(error_log.name)
         
-        elif error_log.method == 'Fehlerhafte E-Mail':
+        if error_log.method == 'Fehlerhafte E-Mail':
             # ec6
             # email regex failed
             summary['ec6']['qty'] += 1
