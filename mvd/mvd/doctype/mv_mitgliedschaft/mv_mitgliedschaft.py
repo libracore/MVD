@@ -1578,7 +1578,7 @@ def mvm_update(mitgliedschaft, kwargs):
                 eintritt = kwargs['eintrittsdatum'].split("T")[0]
             else:
                 eintritt = None
-            if status_c in ('Anmeldung', 'Online-Anmeldung'):
+            if status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in') and not eintritt:
                 if kwargs['erfassungsdatum']:
                     eintritt = kwargs['erfassungsdatum'].split("T")[0]
                 else:
@@ -1670,7 +1670,7 @@ def mvm_neuanlage(kwargs):
                 eintritt = kwargs['eintrittsdatum'].split("T")[0]
             else:
                 eintritt = None
-            if status_c in ('Anmeldung', 'Online-Anmeldung'):
+            if status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in') and not eintritt:
                 if kwargs['erfassungsdatum']:
                     eintritt = kwargs['erfassungsdatum'].split("T")[0]
                 else:
