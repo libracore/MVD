@@ -6,6 +6,14 @@ frappe.listview_settings['Error Log'] = {
         listview.page.add_menu_item(__("Analyse SP API Logs"), function() {
             analyse();
         });
+        listview.page.add_menu_item(__("Clear Error Logs"), function() {
+            frappe.call({
+                method:'frappe.core.doctype.error_log.error_log.clear_error_logs',
+                callback: function() {
+                    listview.refresh();
+                }
+            });
+        });
     }
 }
 
