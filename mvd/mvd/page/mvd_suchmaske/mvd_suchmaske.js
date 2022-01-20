@@ -279,7 +279,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Select",
                 fieldname: "mitgliedtyp_c",
-                options: 'Geschäftlich\nPrivat\nKollektiv',
+                options: 'Geschäftlich\nPrivat',
                 placeholder: "Mitgliedtyp"
             },
             only_input: true,
