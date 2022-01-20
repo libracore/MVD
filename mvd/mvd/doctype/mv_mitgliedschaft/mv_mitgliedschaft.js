@@ -169,6 +169,12 @@ frappe.ui.form.on('MV Mitgliedschaft', {
         }
     },
     validate: function(frm) {
+        if (cur_frm.doc.kundentyp == 'Unternehmen') {
+            if (cur_frm.doc.mitgliedtyp_c != 'Geschäft') {
+                frappe.msgprint( "Unternehmen können nur Mitgliedschaften vom Typ Geschäft besitzen!", __("Validation") );
+                frappe.validated=false;
+            }
+        }
         cur_frm.set_value("sp_no_update", 0);
     },
     plz: function(frm) {

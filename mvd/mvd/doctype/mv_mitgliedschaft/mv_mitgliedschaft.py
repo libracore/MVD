@@ -672,6 +672,7 @@ def update_objekt_adresse(mitgliedschaft):
     address.is_primary_address = is_primary_address
     address.is_shipping_address = is_shipping_address
     address.adress_id = str(mitgliedschaft.mitglied_id) + "-Objekt"
+    address.disabled = '0'
     
     address.links = []
     link = address.append("links", {})

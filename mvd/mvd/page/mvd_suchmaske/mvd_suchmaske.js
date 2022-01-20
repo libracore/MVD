@@ -493,7 +493,7 @@ frappe.mvd_such_client = {
                 click: function(){
                     frappe.prompt([
                         {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent*in\nRegulär', 'default': 'Regulär'},
-                        {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': 'Privat', 'change': function() {
+                        {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': cur_page.page.search_fields.firma.get_value() ? 'Geschäft':'Privat', 'change': function() {
                                 if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Privat') {
                                     cur_dialog.fields_dict.firma.df.reqd = 0;
                                     cur_dialog.fields_dict.firma.df.hidden = 1;
@@ -505,7 +505,6 @@ frappe.mvd_such_client = {
                                     cur_dialog.fields_dict.firma.df.reqd = 1;
                                     cur_dialog.fields_dict.firma.df.hidden = 0;
                                     cur_dialog.fields_dict.firma.refresh();
-                                    cur_dialog.fields_dict.zusatz_firma.df.reqd = 1;
                                     cur_dialog.fields_dict.zusatz_firma.df.hidden = 0;
                                     cur_dialog.fields_dict.zusatz_firma.refresh();
                                 }
@@ -517,7 +516,7 @@ frappe.mvd_such_client = {
                         {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.autom_rechnung'},
                         {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt'},
                         {'fieldname': 's1', 'fieldtype': 'Section Break'},
-                        {'fieldname': 'firma', 'fieldtype': 'Data', 'label': 'Firma', 'reqd': 0, 'default': cur_page.page.search_fields.firma.get_value(), 'hidden': 1},
+                        {'fieldname': 'firma', 'fieldtype': 'Data', 'label': 'Firma', 'reqd': cur_page.page.search_fields.firma.get_value() ? 1:0, 'default': cur_page.page.search_fields.firma.get_value(), 'hidden': cur_page.page.search_fields.firma.get_value() ? 0:1},
                         {'fieldname': 'anrede', 'fieldtype': 'Link', 'label': 'Anrede', 'reqd': 0, 'options': 'Salutation'},
                         {'fieldname': 'vorname', 'fieldtype': 'Data', 'label': 'Vorname', 'reqd': 1, 'default': cur_page.page.search_fields.vorname.get_value()},
                         {'fieldname': 'nachname', 'fieldtype': 'Data', 'label': 'Nachname', 'reqd': 1, 'default': cur_page.page.search_fields.nachname.get_value()},
@@ -526,7 +525,7 @@ frappe.mvd_such_client = {
                         {'fieldname': 'telefon_m', 'fieldtype': 'Data', 'label': 'Telefon Mobile', 'reqd': 0},
                         {'fieldname': 'email', 'fieldtype': 'Data', 'label': 'E-Mail', 'reqd': 0, 'options': 'Email', 'default': cur_page.page.search_fields.email.get_value()},
                         {'fieldname': 'cb_2', 'fieldtype': 'Column Break'},
-                        {'fieldname': 'zusatz_firma', 'fieldtype': 'Data', 'label': 'Zusatz Firma', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_firma.get_value(), 'hidden': 1},
+                        {'fieldname': 'zusatz_firma', 'fieldtype': 'Data', 'label': 'Zusatz Firma', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_firma.get_value(), 'hidden': cur_page.page.search_fields.firma.get_value() ? 0:1},
                         {'fieldname': 'zusatz_adresse', 'fieldtype': 'Data', 'label': 'Zusatz Adresse', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_adresse.get_value()},
                         {'fieldname': 'postfach', 'fieldtype': 'Check', 'label': 'Postfach', 'reqd': 0, 'default': cur_page.page.search_fields.postfach.get_value()},
                         {'fieldname': 'postfach_nummer', 'fieldtype': 'Data', 'label': 'Postfach Nummer', 'reqd': 0, 'default': cur_page.page.search_fields.postfach_nummer.get_value(), 'depends_on': 'eval:doc.postfach'},
