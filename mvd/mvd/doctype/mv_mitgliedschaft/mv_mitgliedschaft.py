@@ -1901,7 +1901,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 if kontaktdaten["istHauptkontakt"]:
                     # hauptmiglied
                     if not mitglied["strasse"] or str(mitglied["strasse"]) == '':
-                        if not mitglied["Postfach"]:
+                        if not mitglied["postfach"]:
                             # eines von beidem muss zwingend vorhanden sein
                             frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage: Weder Postfach noch Strasse')
                             return False
