@@ -46,27 +46,44 @@ def suche(suchparameter, goto_list=False):
             if suchparameter["firma"]:
                 if suchparameter["zusatz_firma"]:
                     firma = str(suchparameter["firma"] + "%" + suchparameter["zusatz_firma"]).replace(" ", "")
-                    filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{firma}%')""".format(firma=firma))
+                    filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE '{firma}%'
+                                            OR
+                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE '{firma}%')""".format(firma=firma))
                 else:
-                    filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{firma}%')""".format(firma=suchparameter["firma"]))
+                    filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE '{firma}%'
+                                            OR
+                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE '{firma}%')""".format(firma=str(suchparameter["firma"]).replace(" ", "")))
             else:
                 if suchparameter["zusatz_firma"]:
-                    filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{zusatz_firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{zusatz_firma}%')""".format(zusatz_firma=suchparameter["zusatz_firma"]))
+                    filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE '{zusatz_firma}%'
+                                            OR
+                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE '{zusatz_firma}%')""".format(zusatz_firma=str(suchparameter["zusatz_firma"]).replace(" ", "")))
         else:
             if suchparameter["firma"]:
-                filters_list.append("""(REPLACE(CONCAT(`firma`, `zusatz_firma`), ' ', '') LIKE '{firma}%' OR REPLACE(CONCAT(`rg_firma`, `rg_zusatz_firma`), ' ', '') LIKE '{firma}%')""".format(firma=suchparameter["firma"]))
+                filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE '{firma}%'
+                                        OR
+                                        REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE '{firma}%')""".format(firma=str(suchparameter["firma"]).replace(" ", "")))
     
     # Adressdaten
     if suchparameter["zusatz_adresse"]:
         filters_list.append("""(`zusatz_adresse` LIKE '{zusatz_adresse}%' OR `rg_zusatz_adresse` LIKE '{zusatz_adresse}%' OR `objekt_zusatz_adresse` LIKE '{zusatz_adresse}%')""".format(zusatz_adresse=suchparameter["zusatz_adresse"]))
+    
+    strassensuchwert = ''
+    if suchparameter["strasse"]:
+        strassensuchwert += suchparameter["strasse"] + "%"
     if suchparameter["nummer"]:
-        filters_list.append("""(`nummer` LIKE '{nummer}%' OR `rg_nummer` LIKE '{nummer}%' OR `objekt_hausnummer` LIKE '{nummer}%')""".format(nummer=suchparameter["nummer"]))
+        strassensuchwert += suchparameter["nummer"] + "%"
     if suchparameter["nummer_zu"]:
-        filters_list.append("""(`nummer_zu` LIKE '{nummer_zu}%' OR `rg_nummer_zu` LIKE '{nummer_zu}%' OR `objekt_nummer_zu` LIKE '{nummer_zu}%')""".format(nummer_zu=suchparameter["nummer_zu"]))
+        strassensuchwert += suchparameter["nummer_zu"] + "%"
+    if strassensuchwert:
+        filters_list.append("""(REPLACE(CONCAT(IFNULL(`strasse`, ''), IFNULL(`nummer`, ''), IFNULL(`nummer_zu`, '')), ' ', '') LIKE '{strassensuchwert}'
+                                OR
+                                REPLACE(CONCAT(IFNULL(`rg_strasse`, ''), IFNULL(`rg_nummer`, ''), IFNULL(`rg_nummer_zu`, '')), ' ', '') LIKE '{strassensuchwert}'
+                                OR
+                                REPLACE(CONCAT(IFNULL(`objekt_strasse`, ''), IFNULL(`objekt_hausnummer`, ''), IFNULL(`objekt_nummer_zu`, '')), ' ', '') LIKE '{strassensuchwert}')""".format(strassensuchwert=strassensuchwert.replace(" ", "")))
+    
     if suchparameter["postfach_nummer"]:
         filters_list.append("""(`postfach_nummer` LIKE '{postfach_nummer}%' OR `rg_postfach_nummer` LIKE '{postfach_nummer}%')""".format(postfach_nummer=suchparameter["postfach_nummer"]))
-    if suchparameter["strasse"]:
-        filters_list.append("""(`strasse` LIKE '{strasse}%' OR `rg_strasse` LIKE '{strasse}%' OR `objekt_strasse` LIKE '{strasse}%')""".format(strasse=suchparameter["strasse"]))
     if suchparameter["postfach"]:
         filters_list.append("""(`postfach` = 1 OR `rg_postfach` = 1)""")
     if suchparameter["plz"]:
