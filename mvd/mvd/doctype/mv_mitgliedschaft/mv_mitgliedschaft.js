@@ -554,36 +554,8 @@ function override_default_email_dialog(frm) {
 }
 
 function custom_email_dialog(e) {
-    var recipient = '';
     var cc = '';
     var bcc = '';
-    if (cur_frm.doc.abweichende_rechnungsadresse && cur_frm.doc.unabhaengiger_debitor && cur_frm.doc.rg_e_mail) {
-        recipient = cur_frm.doc.rg_e_mail;
-        if (cur_frm.doc.e_mail_1 && cur_frm.doc.e_mail_2) {
-            cc = [cur_frm.doc.e_mail_1, cur_frm.doc.e_mail_2].join(", ");
-        } else {
-            if (cur_frm.doc.e_mail_1) {
-                cc = cur_frm.doc.e_mail_1;
-            } else {
-                if (cur_frm.doc.e_mail_2) {
-                    cc = cur_frm.doc.e_mail_2;
-                }
-            }
-        }
-    } else {
-        if (cur_frm.doc.e_mail_1 && cur_frm.doc.e_mail_2) {
-            recipient = cur_frm.doc.e_mail_1;
-            cc = cur_frm.doc.e_mail_2;
-        } else {
-            if (cur_frm.doc.e_mail_1) {
-                recipient = cur_frm.doc.e_mail_1;
-            } else {
-                if (cur_frm.doc.e_mail_2) {
-                    recipient = cur_frm.doc.e_mail_2;
-                }
-            }
-        }
-    }
     frappe.last_edited_communication = {};
     localStorage.clear(); /* Not strictly necessary, just clear localStorage to avoid "drafts" showing up */
     var comcom = new frappe.views.CommunicationComposer({
@@ -591,7 +563,7 @@ function custom_email_dialog(e) {
         doc: cur_frm.doc,
         frm: cur_frm,
         subject: 'Ihre Mitgliedschaft: ' + cur_frm.doc.mitglied_nr,
-        recipients: recipient,
+        recipients: cur_frm.doc.e_mail_1 || '',
         cc: cc,
         bcc: bcc,
         attach_document_print: true, /* This tick is changed by JS along with the attachment ticks - which can't be passed as arguments */
