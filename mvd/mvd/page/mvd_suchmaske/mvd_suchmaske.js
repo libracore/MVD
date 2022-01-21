@@ -206,7 +206,46 @@ frappe.mvd_such_client = {
                 options: "Sektion",
                 fieldname: "sektion",
                 placeholder: "Sektion",
-                read_only: 0
+                read_only: 0,
+                change: function(){
+                    // check permissions
+                    if (cur_page.page.search_fields.sektion_id.get_value()) {
+                        let permission_promis = new Promise(function(go, nogo) {
+                            var sektion_selection = [];
+                            frappe.call({
+                                method:"frappe.client.get_list",
+                                args:{
+                                    doctype: "Sektion"
+                                },
+                                callback: function(r) {
+                                    if (r.message.length > 0) {
+                                        var sektionen = r.message;
+                                        sektionen.forEach(function(entry) {
+                                            sektion_selection.push(entry.name);
+                                        });
+                                        if (sektion_selection.includes(cur_page.page.search_fields.sektion_id.get_value())) {
+                                            go();
+                                        } else {
+                                            nogo(cur_page.page.search_fields.sektion_id.get_value());
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                        permission_promis.then(
+                            function(value) {
+                                // all good
+                            },
+                            function(error) {
+                                frappe.msgprint("Sie haben keine Berechtigung für " + error + "<br>Benutzen Sie die Freizügigkeitsabfrage");
+                                cur_page.page.search_fields.sektion_id.set_value('');
+                                cur_page.page.search_fields.sektion_id.refresh();
+                                cur_page.page.search_fields.sektion_id.set_value(get_default_sektion());
+                                cur_page.page.search_fields.sektion_id.refresh();
+                            }
+                        );
+                    }
+                }
             },
             only_input: true,
         });
