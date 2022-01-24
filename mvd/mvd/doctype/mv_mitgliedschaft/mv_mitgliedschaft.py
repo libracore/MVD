@@ -1389,6 +1389,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         "ist_mitgliedschaftsrechnung": 1,
         "mv_mitgliedschaft": mitgliedschaft.name,
         "company": sektion.company,
+        "cost_center": company.cost_center,
         "customer": customer,
         "customer_address": address,
         "contact_person": contact,

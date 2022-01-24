@@ -123,7 +123,8 @@
   "rg_kunde",
   "rg_kontakt",
   "rg_adresse",
-  "adress_id_rg"
+  "adress_id_rg",
+  "section_kommunikation"
  ],
  "fields": [
   {
@@ -832,10 +833,16 @@
    "fieldtype": "Link",
    "label": "Sprache",
    "options": "Language"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_kommunikation",
+   "fieldtype": "Section Break",
+   "label": "Kommunikations\u00fcbersicht"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-01-20 13:33:55.033859",
+ "modified": "2022-01-24 21:46:55.753569",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
