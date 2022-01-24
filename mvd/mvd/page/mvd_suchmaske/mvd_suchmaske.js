@@ -53,12 +53,15 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.sektions_uebergreifend.refresh();
     
     me.search_fields.status_c = frappe.mvd_such_client.create_status_c_field(page)
+    me.search_fields.status_c.set_value('Regulär');
     me.search_fields.status_c.refresh();
     
     me.search_fields.language = frappe.mvd_such_client.create_language_field(page)
+    me.search_fields.language.set_value('de');
     me.search_fields.language.refresh();
     
     me.search_fields.mitgliedtyp_c = frappe.mvd_such_client.create_mitgliedtyp_c_field(page)
+    me.search_fields.mitgliedtyp_c.set_value('Privat');
     me.search_fields.mitgliedtyp_c.refresh();
     
     me.search_fields.vorname = frappe.mvd_such_client.create_vorname_field(page)
@@ -318,8 +321,8 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Select",
                 fieldname: "mitgliedtyp_c",
-                options: 'Geschäftlich\nPrivat',
-                placeholder: "Mitgliedtyp"
+                options: 'Geschäft\nPrivat',
+                placeholder: "Privat"
             },
             only_input: true,
         });
@@ -532,20 +535,10 @@ frappe.mvd_such_client = {
                 click: function(){
                     frappe.prompt([
                         {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent*in\nRegulär', 'default': 'Regulär'},
-                        {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': cur_page.page.search_fields.firma.get_value() ? 'Geschäft':'Privat', 'change': function() {
+                        {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': cur_page.page.search_fields.mitgliedtyp_c.get_value(), 'change': function() {
                                 if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Privat') {
-                                    cur_dialog.fields_dict.firma.df.reqd = 0;
-                                    cur_dialog.fields_dict.firma.df.hidden = 1;
-                                    cur_dialog.fields_dict.firma.refresh();
-                                    cur_dialog.fields_dict.zusatz_firma.df.reqd = 0;
-                                    cur_dialog.fields_dict.zusatz_firma.df.hidden = 1;
-                                    cur_dialog.fields_dict.zusatz_firma.refresh();
-                                } else {
-                                    cur_dialog.fields_dict.firma.df.reqd = 1;
-                                    cur_dialog.fields_dict.firma.df.hidden = 0;
-                                    cur_dialog.fields_dict.firma.refresh();
-                                    cur_dialog.fields_dict.zusatz_firma.df.hidden = 0;
-                                    cur_dialog.fields_dict.zusatz_firma.refresh();
+                                    cur_dialog.fields_dict.kundentyp.set_value("Einzelperson");
+                                    cur_dialog.fields_dict.kundentyp.refresh();
                                 }
                             }
                         },
@@ -555,7 +548,28 @@ frappe.mvd_such_client = {
                         {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.autom_rechnung'},
                         {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt'},
                         {'fieldname': 's1', 'fieldtype': 'Section Break'},
-                        {'fieldname': 'firma', 'fieldtype': 'Data', 'label': 'Firma', 'reqd': cur_page.page.search_fields.firma.get_value() ? 1:0, 'default': cur_page.page.search_fields.firma.get_value(), 'hidden': cur_page.page.search_fields.firma.get_value() ? 0:1},
+                        {'fieldname': 'kundentyp', 'fieldtype': 'Select', 'label': 'Kontakttyp', 'reqd': 1, 'options': 'Einzelperson\nUnternehmen', 'default': cur_page.page.search_fields.mitgliedtyp_c.get_value() == 'Geschäft' ? 'Unternehmen':'Einzelperson', 'change': function() {
+                                if (cur_dialog.fields_dict.kundentyp.get_value() == 'Einzelperson') {
+                                    cur_dialog.fields_dict.firma.df.hidden = 1;
+                                    cur_dialog.fields_dict.firma.df.reqd = 0;
+                                    cur_dialog.fields_dict.firma.refresh();
+                                    cur_dialog.fields_dict.zusatz_firma.df.hidden = 1;
+                                    cur_dialog.fields_dict.zusatz_firma.refresh();
+                                } else {
+                                    if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Privat') {
+                                        cur_dialog.fields_dict.mitgliedtyp.set_value("Geschäft");
+                                        cur_dialog.fields_dict.mitgliedtyp.refresh();
+                                        frappe.msgprint("Der Mitgliedtyp wurde auf Geschäft geändert, da Unternehmen keine Privat Mitgliedschaften besitzen können");
+                                    }
+                                    cur_dialog.fields_dict.firma.df.hidden = 0;
+                                    cur_dialog.fields_dict.firma.df.reqd = 1;
+                                    cur_dialog.fields_dict.firma.refresh();
+                                    cur_dialog.fields_dict.zusatz_firma.df.hidden = 0;
+                                    cur_dialog.fields_dict.zusatz_firma.refresh();
+                                }
+                            }
+                        },
+                        {'fieldname': 'firma', 'fieldtype': 'Data', 'label': 'Firma', 'reqd': cur_page.page.search_fields.mitgliedtyp_c.get_value() == 'Geschäft' ? 1:0, 'default': cur_page.page.search_fields.firma.get_value(), 'hidden': cur_page.page.search_fields.mitgliedtyp_c.get_value() == 'Geschäft' ? 0:1},
                         {'fieldname': 'anrede', 'fieldtype': 'Link', 'label': 'Anrede', 'reqd': 0, 'options': 'Salutation'},
                         {'fieldname': 'vorname', 'fieldtype': 'Data', 'label': 'Vorname', 'reqd': 1, 'default': cur_page.page.search_fields.vorname.get_value()},
                         {'fieldname': 'nachname', 'fieldtype': 'Data', 'label': 'Nachname', 'reqd': 1, 'default': cur_page.page.search_fields.nachname.get_value()},
@@ -564,7 +578,7 @@ frappe.mvd_such_client = {
                         {'fieldname': 'telefon_m', 'fieldtype': 'Data', 'label': 'Telefon Mobile', 'reqd': 0},
                         {'fieldname': 'email', 'fieldtype': 'Data', 'label': 'E-Mail', 'reqd': 0, 'options': 'Email', 'default': cur_page.page.search_fields.email.get_value()},
                         {'fieldname': 'cb_2', 'fieldtype': 'Column Break'},
-                        {'fieldname': 'zusatz_firma', 'fieldtype': 'Data', 'label': 'Zusatz Firma', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_firma.get_value(), 'hidden': cur_page.page.search_fields.firma.get_value() ? 0:1},
+                        {'fieldname': 'zusatz_firma', 'fieldtype': 'Data', 'label': 'Zusatz Firma', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_firma.get_value(), 'hidden': cur_page.page.search_fields.mitgliedtyp_c.get_value() == 'Geschäft' ? 0:1},
                         {'fieldname': 'zusatz_adresse', 'fieldtype': 'Data', 'label': 'Zusatz Adresse', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_adresse.get_value()},
                         {'fieldname': 'postfach', 'fieldtype': 'Check', 'label': 'Postfach', 'reqd': 0, 'default': cur_page.page.search_fields.postfach.get_value()},
                         {'fieldname': 'postfach_nummer', 'fieldtype': 'Data', 'label': 'Postfach Nummer', 'reqd': 0, 'default': cur_page.page.search_fields.postfach_nummer.get_value(), 'depends_on': 'eval:doc.postfach'},

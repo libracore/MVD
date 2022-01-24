@@ -164,7 +164,7 @@ def anlage_prozess(anlage_daten):
         "mitgliedtyp_c": anlage_daten["mitgliedtyp"],
         "inkl_hv": 1,
         "eintritt": now(),
-        "kundentyp": "Einzelperson" if anlage_daten["mitgliedtyp"] == 'Privat' else 'Unternehmen',
+        "kundentyp": anlage_daten["kundentyp"],
         "firma": firma,
         "zusatz_firma": zusatz_firma,
         "anrede_c": anlage_daten["anrede"] if 'anrede' in anlage_daten else '',
