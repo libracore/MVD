@@ -285,7 +285,7 @@
    "label": "Haftpflichtrechnung"
   }
  ],
- "modified": "2022-01-25 11:09:56.121596",
+ "modified": "2022-01-25 14:38:47.526873",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
@@ -300,6 +300,28 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MV Admin",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MV Sektion Gesch\u00e4ftsleitung",
    "share": 1,
    "write": 1
   }
