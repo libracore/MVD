@@ -95,7 +95,7 @@ def create_paid_sinv(fr, mitgliedschaft, sektion):
         item = [{"item_code": sektion.hv_artikel, "qty": 1, "rate": sektion.betrag_hv}]
     else:
         # TBD!!!!!!
-        item = [{"item_code": sektion.hv_artikel, "qty": 1, "rate": sektion.betrag_hv}]
+        item = [{"item_code": sektion.spenden_artikel, "qty": 1, "rate": fr.betrag}]
     sinv = frappe.get_doc({
         "doctype": "Sales Invoice",
         "ist_mitgliedschaftsrechnung": 0,

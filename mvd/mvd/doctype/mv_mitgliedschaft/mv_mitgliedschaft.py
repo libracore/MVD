@@ -1424,7 +1424,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
     if attach_as_pdf:
         # erstellung Rechnungs PDF
         output = PdfFileWriter()
-        output = frappe.get_print("Sales Invoice", sinv.name, 'MV-Rechnung mit Zahlteil', as_pdf = True, output = output, ignore_zugferd=True)
+        output = frappe.get_print("Sales Invoice", sinv.name, 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)
         
         file_name = "{sinv}_{datetime}".format(sinv=sinv.name, datetime=now().replace(" ", "_"))
         file_name = file_name.split(".")[0]
