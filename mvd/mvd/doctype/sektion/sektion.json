@@ -39,11 +39,7 @@
   "cb_3",
   "fz_rechts",
   "section_mitgliederausweis",
-  "ausweis_rueckseite",
-  "section_textkonserven",
-  "mitgliedschaftsrechnung_txt",
-  "haftpflichtrechnung_txt",
-  "spendenrechnung_txt"
+  "ausweis_rueckseite"
  ],
  "fields": [
   {
@@ -262,30 +258,9 @@
    "label": "Artikel Mitgliedschaft (Kollektiv)",
    "options": "Item",
    "reqd": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "section_textkonserven",
-   "fieldtype": "Section Break",
-   "label": "Textkonserven"
-  },
-  {
-   "fieldname": "mitgliedschaftsrechnung_txt",
-   "fieldtype": "Text Editor",
-   "label": "Mitgliedschaftsrechnung"
-  },
-  {
-   "fieldname": "spendenrechnung_txt",
-   "fieldtype": "Text Editor",
-   "label": "Spendenrechnung"
-  },
-  {
-   "fieldname": "haftpflichtrechnung_txt",
-   "fieldtype": "Text Editor",
-   "label": "Haftpflichtrechnung"
   }
  ],
- "modified": "2022-01-25 14:38:47.526873",
+ "modified": "2022-01-25 21:21:36.985523",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
@@ -310,7 +285,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "MV Admin",
+   "role": "MVD Admin",
    "share": 1,
    "write": 1
   },
@@ -321,7 +296,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "MV Sektion Gesch\u00e4ftsleitung",
+   "role": "MVD Sektion Gesch\u00e4ftsleitung",
    "share": 1,
    "write": 1
   }
