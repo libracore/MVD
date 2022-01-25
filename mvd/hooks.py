@@ -103,7 +103,8 @@ doc_events = {
 # ---------------
 scheduler_events = {
     "daily": [
-        "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.set_inaktiv"
+        "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.set_inaktiv",
+        "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.entferne_alte_reduzierungen"
     ]
 }
 # scheduler_events = {

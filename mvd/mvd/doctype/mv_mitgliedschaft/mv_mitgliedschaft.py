@@ -88,8 +88,83 @@ class MVMitgliedschaft(Document):
             if not self.sp_no_update:
                 # update Zahlung Mitgliedschaft
                 self.check_zahlung_mitgliedschaft()
+                
                 # update Zahlung HV
                 self.check_zahlung_hv()
+                
+                # preisregel
+                self.check_preisregel()
+    
+    def check_preisregel(self):
+        if int(self.reduzierte_mitgliedschaft) == 1:
+            if not self.existing_preisregel():
+                self.erstelle_preisregel()
+            else:
+                self.update_preisregel()
+        else:
+            if self.existing_preisregel():
+                self.deaktiviere_preisregel()
+    
+    def existing_preisregel(self):
+        qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabPricing Rule`
+                                WHERE `name` = 'Reduzierung {mitglied_id}'""".format(mitglied_id=str(self.mitglied_id)), as_dict=True)[0].qty
+        if int(qty) > 0:
+            return True
+        else:
+            return False
+    
+    def deaktiviere_preisregel(self):
+        customer = self.rg_kunde if self.rg_kunde else self.kunde_mitglied
+        _pr = frappe.db.sql("""SELECT `name` FROM `tabPricing Rule`
+                                WHERE `name` = 'Reduzierung {mitglied_id}'""".format(mitglied_id=str(self.mitglied_id)), as_dict=True)
+        if len(_pr) > 0:
+            pr = frappe.get_doc("Pricing Rule", _pr[0].name)
+            pr.disable = 1
+            pr.save(ignore_permissions=True)
+            return
+        else:
+            return
+    
+    def erstelle_preisregel(self):
+        customer = self.rg_kunde if self.rg_kunde else self.kunde_mitglied
+        sektion = frappe.get_doc("Sektion", self.sektion_id)
+        new_pr = frappe.get_doc({
+            'doctype': 'Pricing Rule',
+            'title': 'Reduzierung ' + str(self.mitglied_id),
+            'selling': 1,
+            'applicable_for': 'Customer',
+            'customer': customer,
+            'valid_from': '',
+            'valid_upto': self.reduzierung_bis,
+            'rate_or_discount': 'Rate',
+            'rate': self.reduzierter_betrag,
+            'items': [
+                {
+                    'item_code': sektion.mitgliedschafts_artikel if self.mitgliedtyp_c == 'Privat' else sektion.mitgliedschafts_artikel_geschaeft
+                }
+            ]
+        })
+        
+        new_pr.insert(ignore_permissions=True)
+        frappe.db.commit()
+        return
+    
+    def update_preisregel(self):
+        customer = self.rg_kunde if self.rg_kunde else self.kunde_mitglied
+        sektion = frappe.get_doc("Sektion", self.sektion_id)
+        _pr = frappe.db.sql("""SELECT `name` FROM `tabPricing Rule`
+                                WHERE `name` = 'Reduzierung {mitglied_id}'""".format(mitglied_id=str(self.mitglied_id)), as_dict=True)
+        if len(_pr) > 0:
+            pr = frappe.get_doc("Pricing Rule", _pr[0].name)
+            pr.disable = 0
+            pr.customer = customer
+            pr.valid_upto = self.reduzierung_bis
+            pr.rate = self.reduzierter_betrag
+            pr.items[0].item_code = sektion.mitgliedschafts_artikel if self.mitgliedtyp_c == 'Privat' else sektion.mitgliedschafts_artikel_geschaeft
+            pr.save(ignore_permissions=True)
+            return
+        else:
+            return
         
     def check_zahlung_mitgliedschaft(self):
         sinvs = frappe.db.sql("""SELECT
@@ -2304,3 +2379,11 @@ def get_ampelfarbe(mitgliedschaft):
                 ampelfarbe = 'ampelgruen'
     
     return ampelfarbe
+
+def entferne_alte_reduzierungen():
+    alte_preisregeln = frappe.db.sql("""SELECT `name` FROM `tabPricing Rule` WHERE `name` LIKE 'Reduzierung%' AND `disable` = 0 AND `valid_upto` < CURDATE()""", as_dict=True)
+    for alte_preisregel in alte_preisregeln:
+        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", alte_preisregel.name.replace("Reduzierung ", ""))
+        mitgliedschaft.reduzierte_mitgliedschaft = 0
+        mitgliedschaft.save()
+    return

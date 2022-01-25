@@ -24,6 +24,9 @@
   "inkl_hv",
   "m_und_w_pdf",
   "adressen_gesperrt",
+  "reduzierte_mitgliedschaft",
+  "reduzierter_betrag",
+  "reduzierung_bis",
   "validierung_notwendig",
   "kuendigung_verarbeiten",
   "sp_no_update",
@@ -709,6 +712,7 @@
    "default": "0",
    "fieldname": "validierung_notwendig",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Validierung notwendig",
    "read_only": 1
   },
@@ -790,6 +794,7 @@
    "default": "0",
    "fieldname": "kuendigung_verarbeiten",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "K\u00fcndigung verarbeiten",
    "read_only": 1
   },
@@ -839,10 +844,28 @@
    "fieldname": "section_kommunikation",
    "fieldtype": "Section Break",
    "label": "Kommunikations\u00fcbersicht"
+  },
+  {
+   "default": "0",
+   "fieldname": "reduzierte_mitgliedschaft",
+   "fieldtype": "Check",
+   "label": "Reduzierte Mitgliedschaft"
+  },
+  {
+   "depends_on": "eval:doc.reduzierte_mitgliedschaft",
+   "fieldname": "reduzierter_betrag",
+   "fieldtype": "Currency",
+   "label": "Reduzierter Betrag"
+  },
+  {
+   "depends_on": "eval:doc.reduzierte_mitgliedschaft",
+   "fieldname": "reduzierung_bis",
+   "fieldtype": "Date",
+   "label": "Reduzierung g\u00fcltig bis"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-01-24 21:46:55.753569",
+ "modified": "2022-01-25 12:49:45.250940",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",
