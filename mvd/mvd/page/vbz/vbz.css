@@ -1,0 +1,17 @@
+.control-card {
+    /*float: left;
+    width: 180px;*/
+    height: 180px;
+    /*border: 1px solid black;*/
+    padding: 5px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.control-card .fa {
+    font-size: 5em;
+}
+
+.fa-chevron-left.pull-left {
+    cursor: pointer;
+}

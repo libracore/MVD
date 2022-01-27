@@ -2052,7 +2052,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
         
         
         if rechnung:
-            new_mitgliedschaft.abweichende_rechnungsdresse = 1
+            new_mitgliedschaft.abweichende_rechnungsadresse = 1
             new_mitgliedschaft.rg_zusatz_adresse = str(rechnung["adresszusatz"]) if rechnung["adresszusatz"] else ''
             new_mitgliedschaft.rg_strasse = str(rechnung["strasse"]) if rechnung["strasse"] else ''
             new_mitgliedschaft.rg_nummer = str(rechnung["hausnummer"]) if rechnung["hausnummer"] else ''
@@ -2065,26 +2065,25 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 new_mitgliedschaft.adressen_gesperrt = 1
             for kontaktdaten in rechnung["kontakte"]:
                 if kontaktdaten["istHauptkontakt"]:
-                    if str(kontaktdaten["nachname"]) != new_mitgliedschaft.nachname_1:
-                        if str(kontaktdaten["vorname"]) != new_mitgliedschaft.vorname_1:
-                            # unabhängiger debitor
-                            new_mitgliedschaft.unabhaengiger_debitor = 1
-                            if kontaktdaten["firma"]:
-                                new_mitgliedschaft.rg_kundentyp = 'Unternehmen'
-                                new_mitgliedschaft.rg_firma = str(kontaktdaten["firma"])
-                                new_mitgliedschaft.rg_zusatz_firma = str(kontaktdaten["firmaZusatz"]) if kontaktdaten["firmaZusatz"] else ''
-                            else:
-                                new_mitgliedschaft.rg_kundentyp = 'Einzelperson'
-                            if kontaktdaten["anrede"] != 'Unbekannt':
-                                new_mitgliedschaft.rg_anrede = str(kontaktdaten["anrede"]) if kontaktdaten["anrede"] else ''
-                            new_mitgliedschaft.rg_nachname_ = str(kontaktdaten["nachname"]) if kontaktdaten["nachname"] else ''
-                            new_mitgliedschaft.rg_vorname = str(kontaktdaten["vorname"]) if kontaktdaten["vorname"] else ''
-                            new_mitgliedschaft.rg_tel_p = str(kontaktdaten["telefon"]) if kontaktdaten["telefon"] else ''
-                            if kontaktdaten["mobile"]:
-                                if str(kontaktdaten["mobile"]) != str(kontaktdaten["telefon"]):
-                                    new_mitgliedschaft.rg_tel_m = str(kontaktdaten["mobile"])
-                            new_mitgliedschaft.rg_tel_g = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
-                            new_mitgliedschaft.rg_e_mail = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
+                    if str(kontaktdaten["nachname"]) != new_mitgliedschaft.nachname_1 and str(kontaktdaten["vorname"]) != new_mitgliedschaft.vorname_1:
+                        # unabhängiger debitor
+                        new_mitgliedschaft.unabhaengiger_debitor = 1
+                        if kontaktdaten["firma"]:
+                            new_mitgliedschaft.rg_kundentyp = 'Unternehmen'
+                            new_mitgliedschaft.rg_firma = str(kontaktdaten["firma"])
+                            new_mitgliedschaft.rg_zusatz_firma = str(kontaktdaten["firmaZusatz"]) if kontaktdaten["firmaZusatz"] else ''
+                        else:
+                            new_mitgliedschaft.rg_kundentyp = 'Einzelperson'
+                        if kontaktdaten["anrede"] != 'Unbekannt':
+                            new_mitgliedschaft.rg_anrede = str(kontaktdaten["anrede"]) if kontaktdaten["anrede"] else ''
+                        new_mitgliedschaft.rg_nachname_ = str(kontaktdaten["nachname"]) if kontaktdaten["nachname"] else ''
+                        new_mitgliedschaft.rg_vorname = str(kontaktdaten["vorname"]) if kontaktdaten["vorname"] else ''
+                        new_mitgliedschaft.rg_tel_p = str(kontaktdaten["telefon"]) if kontaktdaten["telefon"] else ''
+                        if kontaktdaten["mobile"]:
+                            if str(kontaktdaten["mobile"]) != str(kontaktdaten["telefon"]):
+                                new_mitgliedschaft.rg_tel_m = str(kontaktdaten["mobile"])
+                        new_mitgliedschaft.rg_tel_g = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
+                        new_mitgliedschaft.rg_e_mail = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
                     
         
         if zeitung:
