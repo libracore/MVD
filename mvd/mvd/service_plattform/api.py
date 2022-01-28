@@ -116,9 +116,9 @@ def auth_check(scope=SVCPF_SCOPE):
         token = config.get_value(scope, 'api_token')
         headers = {"authorization": "Bearer {token}".format(token=token)}
         response = requests.get(url, headers = headers)
-        response = response.json()
         
         try:
+            response = response.json()
             if response["status"] == 'Ok':
                 return True
         except:

@@ -12,9 +12,9 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
         if sinv.mv_mitgliedschaft:
             mvm = frappe.get_doc("MV Mitgliedschaft", sinv.mv_mitgliedschaft)
             reference_raw = '00 00'
-            reference_raw += mvm.mitglied_nr[:3]
+            reference_raw += mvm.mitglied_nr.replace("MV", "")[:3]
             reference_raw += ' '
-            reference_raw += mvm.mitglied_nr[3:8]
+            reference_raw += mvm.mitglied_nr.replace("MV", "")[3:8]
         else:
             reference_raw = '00 0000'
             reference_raw += sinv.customer.replace("K-", "")[:1]
@@ -32,9 +32,9 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
             reference_raw = '11 00'
         else:
             reference_raw = '12 00'
-        reference_raw += mvm.mitglied_nr[:3]
+        reference_raw += mvm.mitglied_nr.replace("MV", "")[:3]
         reference_raw += ' '
-        reference_raw += mvm.mitglied_nr[3:8]
+        reference_raw += mvm.mitglied_nr.replace("MV", "")[3:8]
         reference_raw += ' 000'
         reference_raw += fr.replace("FR-", "")[:2]
         reference_raw += ' '

@@ -27,9 +27,6 @@
   "reduzierte_mitgliedschaft",
   "reduzierter_betrag",
   "reduzierung_bis",
-  "validierung_notwendig",
-  "kuendigung_verarbeiten",
-  "sp_no_update",
   "language",
   "section_wichtige_infos",
   "wichtig",
@@ -127,7 +124,11 @@
   "rg_kontakt",
   "rg_adresse",
   "adress_id_rg",
-  "section_kommunikation"
+  "section_kommunikation",
+  "section_workflow_helpers",
+  "validierung_notwendig",
+  "kuendigung_verarbeiten",
+  "letzte_bearbeitung_von"
  ],
  "fields": [
   {
@@ -712,9 +713,7 @@
    "default": "0",
    "fieldname": "validierung_notwendig",
    "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Validierung notwendig",
-   "read_only": 1
+   "label": "Validierung notwendig"
   },
   {
    "default": "0",
@@ -794,22 +793,12 @@
    "default": "0",
    "fieldname": "kuendigung_verarbeiten",
    "fieldtype": "Check",
-   "hidden": 1,
-   "label": "K\u00fcndigung verarbeiten",
-   "read_only": 1
+   "label": "K\u00fcndigung verarbeiten"
   },
   {
    "fieldname": "verstorben_am",
    "fieldtype": "Date",
    "label": "Verstorben am",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "sp_no_update",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "sp_no_update",
    "read_only": 1
   },
   {
@@ -862,10 +851,24 @@
    "fieldname": "reduzierung_bis",
    "fieldtype": "Date",
    "label": "Reduzierung g\u00fcltig bis"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_workflow_helpers",
+   "fieldtype": "Section Break",
+   "label": "Workflow Helpers",
+   "permlevel": 2
+  },
+  {
+   "default": "User",
+   "fieldname": "letzte_bearbeitung_von",
+   "fieldtype": "Select",
+   "label": "Letzte Bearbeitung durch",
+   "options": "User\nSP"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-01-25 12:49:45.250940",
+ "modified": "2022-01-28 10:22:42.155784",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

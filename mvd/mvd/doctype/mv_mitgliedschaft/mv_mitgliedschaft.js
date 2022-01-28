@@ -175,7 +175,8 @@ frappe.ui.form.on('MV Mitgliedschaft', {
                 frappe.validated=false;
             }
         }
-        cur_frm.set_value("sp_no_update", 0);
+        //cur_frm.set_value("sp_no_update", 0);
+        cur_frm.set_value("letzte_bearbeitung_von", 'User');
     },
     plz: function(frm) {
         pincode_lookup(cur_frm.doc.plz, 'ort');

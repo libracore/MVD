@@ -14,22 +14,6 @@ from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_
 from frappe.utils.pdf import get_file_data_from_writer
 
 class MVMitgliedschaft(Document):
-    def after_insert(self):
-        if not self.sp_no_update:
-            if self.creation == self.modified:
-                if not self.validierung_notwendig or str(self.validierung_notwendig) == '0':
-                    send_mvm_to_sp(self, False)
-                    self.sp_no_update = 1
-    
-    def on_update(self):
-        if not self.sp_no_update:
-            if self.creation != self.modified:
-                if not self.validierung_notwendig or str(self.validierung_notwendig) == '0':
-                    close_open_validations(self.name)
-                    send_mvm_to_sp(self, True)
-                else:
-                    create_abl("Daten Validieren", self)
-    
     def set_new_name(self):
         if not self.mitglied_nr or not self.mitglied_id:
             mitglied_nummer_obj = mvm_neue_mitglieder_nummer(self)
@@ -42,39 +26,8 @@ class MVMitgliedschaft(Document):
     
     def validate(self):
         if not self.validierung_notwendig or str(self.validierung_notwendig) == '0':
-            # Mitglied
-            self.kunde_mitglied = self.validate_kunde_mitglied()
-            self.kontakt_mitglied = self.validate_kontakt_mitglied(primary=True)
-            self.adresse_mitglied, self.objekt_adresse = self.validate_adresse_mitglied()
-            join_mitglied_contact_and_address(self.kontakt_mitglied, self.adresse_mitglied)
-            
-            # Solidarmitglied
-            if self.hat_solidarmitglied:
-                self.kontakt_solidarmitglied = self.validate_kontakt_mitglied(primary=False)
-                if not self.kontakt_solidarmitglied:
-                    self.hat_solidarmitglied = '0'
-                else:
-                    if self.objekt_adresse:
-                        join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.objekt_adresse)
-                    else:
-                        join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.adresse_mitglied)
-            else:
-                if self.kontakt_solidarmitglied:
-                    self.kontakt_solidarmitglied = self.remove_solidarmitglied()
-
-            # Rechnungsempfaenger
-            if self.abweichende_rechnungsadresse:
-                if self.unabhaengiger_debitor:
-                    self.rg_kunde = self.validate_rg_kunde()
-                    self.rg_kontakt = self.validate_rg_kontakt()
-                else:
-                    self.rg_kunde = ''
-                    self.rg_kontakt = ''
-                self.rg_adresse = self.validate_rg_adresse()
-            else:
-                self.rg_kunde = ''
-                self.rg_kontakt = ''
-                self.rg_adresse = ''
+            # handling von Kontakt(en), Adresse(n) und Kunde(n)
+            self.handling_kontakt_adresse_kunde()
             
             # Briefanrede
             self.briefanrede = get_anredekonvention(self=self)
@@ -82,18 +35,67 @@ class MVMitgliedschaft(Document):
             # Adressblock
             self.adressblock = get_adressblock(self)
             
+            # update Zahlung Mitgliedschaft
+            self.check_zahlung_mitgliedschaft()
+            
+            # update Zahlung HV
+            self.check_zahlung_hv()
+            
+            # preisregel
+            self.check_preisregel()
+            
             # ampelfarbe
             self.ampel_farbe = get_ampelfarbe(self)
             
-            if not self.sp_no_update:
-                # update Zahlung Mitgliedschaft
-                self.check_zahlung_mitgliedschaft()
-                
-                # update Zahlung HV
-                self.check_zahlung_hv()
-                
-                # preisregel
-                self.check_preisregel()
+            # schliesse offene abreits backlogs: Zu Validieren
+            close_open_validations(self.name)
+            
+            # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
+            if self.letzte_bearbeitung_von == 'User':
+                if self.creation == self.modified:
+                    # sende neuanlage an SP
+                    send_mvm_to_sp(self, False)
+                else:
+                    # sende update an SP
+                    send_mvm_to_sp(self, True)
+        else:
+            # erstelle abreits backlog: Zu Validieren
+            create_abl("Daten Validieren", self)
+    
+    def handling_kontakt_adresse_kunde(self):
+        # Mitglied
+        self.kunde_mitglied = self.validate_kunde_mitglied()
+        self.kontakt_mitglied = self.validate_kontakt_mitglied(primary=True)
+        self.adresse_mitglied, self.objekt_adresse = self.validate_adresse_mitglied()
+        join_mitglied_contact_and_address(self.kontakt_mitglied, self.adresse_mitglied)
+        
+        # Solidarmitglied
+        if self.hat_solidarmitglied:
+            self.kontakt_solidarmitglied = self.validate_kontakt_mitglied(primary=False)
+            if not self.kontakt_solidarmitglied:
+                self.hat_solidarmitglied = '0'
+            else:
+                if self.objekt_adresse:
+                    join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.objekt_adresse)
+                else:
+                    join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.adresse_mitglied)
+        else:
+            if self.kontakt_solidarmitglied:
+                self.kontakt_solidarmitglied = self.remove_solidarmitglied()
+        
+        # Rechnungsempfaenger
+        if self.abweichende_rechnungsadresse:
+            if self.unabhaengiger_debitor:
+                self.rg_kunde = self.validate_rg_kunde()
+                self.rg_kontakt = self.validate_rg_kontakt()
+            else:
+                self.rg_kunde = ''
+                self.rg_kontakt = ''
+            self.rg_adresse = self.validate_rg_adresse()
+        else:
+            self.rg_kunde = ''
+            self.rg_kontakt = ''
+            self.rg_adresse = ''
     
     def check_preisregel(self):
         if int(self.reduzierte_mitgliedschaft) == 1:
@@ -207,6 +209,11 @@ class MVMitgliedschaft(Document):
             for sinv in sinvs:
                 sinv = frappe.get_doc("Sales Invoice", sinv.name)
                 if sinv.docstatus == 1:
+                    linked_fr = frappe.db.sql("""SELECT `name` FROM `tabFakultative Rechnung` WHERE `sales_invoice` = '{sinv}' AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
+                    if len(linked_fr) > 0:
+                        for _fr in linked_fr:
+                            fr = frappe.get_doc("Fakultative Rechnung", _fr.name)
+                            fr.cancel()
                     sinv.cancel()
                 else:
                     if sinv.docstatus == 0:
@@ -1402,19 +1409,22 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         new_mitgliedschaft.rg_kontakt = ''
         new_mitgliedschaft.rg_adresse = ''
         new_mitgliedschaft.adress_id_rg = ''
+        new_mitgliedschaft.letzte_bearbeitung_von = 'SP'
         new_mitgliedschaft.insert(ignore_permissions=True)
         frappe.db.commit()
         
         # erstelle ggf. neue Rechnung
         if new_mitgliedschaft.zahlung_mitgliedschaft < int(now().split("-")[0]):
             if new_mitgliedschaft.naechstes_jahr_geschuldet == 1:
-                create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=int(now().split("-")[0]))
+                create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True)
         
         # markiere neue Mitgliedschaft als zu validieren
         new_mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", new_mitgliedschaft.name)
         new_mitgliedschaft.validierung_notwendig = 1
+        new_mitgliedschaft.letzte_bearbeitung_von = 'User'
         new_mitgliedschaft.save(ignore_permissions=True)
-        create_abl("Daten Validieren", new_mitgliedschaft)
+        
+        # hier muss noch die Meldung an SP bezgl. Sektionswechsel erfolgen!!!!!!!!!!
         
         return 1
         
@@ -1709,8 +1719,8 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.zahlung_mitgliedschaft = int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0
             mitgliedschaft.naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
             mitgliedschaft.validierung_notwendig = 1 if kwargs['needsValidation'] else '0'
-            mitgliedschaft.sp_no_update = 1
             mitgliedschaft.language = get_sprache_abk(language=kwargs['sprache']) if kwargs['sprache'] else 'de'
+            mitgliedschaft.letzte_bearbeitung_von = 'SP'
             
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
             
@@ -1803,9 +1813,9 @@ def mvm_neuanlage(kwargs):
                 'zahlung_hv': int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0,
                 'zahlung_mitgliedschaft': int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0,
                 'naechstes_jahr_geschuldet': 1 if kwargs['naechstesJahrGeschuldet'] else '0',
-                'sp_no_update': 1,
                 'validierung_notwendig': 1 if kwargs['needsValidation'] else '0',
-                'language': get_sprache_abk(language=kwargs['sprache'])
+                'language': get_sprache_abk(language=kwargs['sprache']),
+                'letzte_bearbeitung_von': 'SP'
             })
             
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
