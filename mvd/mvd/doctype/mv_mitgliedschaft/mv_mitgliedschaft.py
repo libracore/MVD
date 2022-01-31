@@ -1388,49 +1388,51 @@ def get_anredekonvention(mitgliedschaft=None, self=None):
 
 @frappe.whitelist()
 def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
-    try:
-        # erstelle Mitgliedschaft in Zuzugs-Sektion
-        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
-        new_mitgliedschaft = frappe.copy_doc(mitgliedschaft)
-        new_mitgliedschaft.mitglied_id = ''
-        new_mitgliedschaft.zuzug_von = new_mitgliedschaft.sektion_id
-        new_mitgliedschaft.sektion_id = neue_sektion
-        new_mitgliedschaft.status_c = 'Zuzug'
-        new_mitgliedschaft.zuzug = zuzug_per
-        new_mitgliedschaft.wegzug = ''
-        new_mitgliedschaft.kunde_mitglied = ''
-        new_mitgliedschaft.kontakt_mitglied = ''
-        new_mitgliedschaft.adresse_mitglied = ''
-        new_mitgliedschaft.adress_id_mitglied = ''
-        new_mitgliedschaft.kontakt_solidarmitglied = ''
-        new_mitgliedschaft.objekt_adresse = ''
-        new_mitgliedschaft.adress_id_objekt = ''
-        new_mitgliedschaft.rg_kunde = ''
-        new_mitgliedschaft.rg_kontakt = ''
-        new_mitgliedschaft.rg_adresse = ''
-        new_mitgliedschaft.adress_id_rg = ''
-        new_mitgliedschaft.letzte_bearbeitung_von = 'SP'
-        new_mitgliedschaft.insert(ignore_permissions=True)
-        frappe.db.commit()
-        
-        # erstelle ggf. neue Rechnung
-        if new_mitgliedschaft.zahlung_mitgliedschaft < int(now().split("-")[0]):
-            if new_mitgliedschaft.naechstes_jahr_geschuldet == 1:
-                create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True)
-        
-        # markiere neue Mitgliedschaft als zu validieren
-        new_mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", new_mitgliedschaft.name)
-        new_mitgliedschaft.validierung_notwendig = 1
-        new_mitgliedschaft.letzte_bearbeitung_von = 'User'
-        new_mitgliedschaft.save(ignore_permissions=True)
-        
+    if str(get_sektion_code(neue_sektion)) != 'ZH':
+        try:
+            # erstelle Mitgliedschaft in Zuzugs-Sektion
+            mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
+            new_mitgliedschaft = frappe.copy_doc(mitgliedschaft)
+            new_mitgliedschaft.mitglied_id = ''
+            new_mitgliedschaft.zuzug_von = new_mitgliedschaft.sektion_id
+            new_mitgliedschaft.sektion_id = neue_sektion
+            new_mitgliedschaft.status_c = 'Zuzug'
+            new_mitgliedschaft.zuzug = zuzug_per
+            new_mitgliedschaft.wegzug = ''
+            new_mitgliedschaft.kunde_mitglied = ''
+            new_mitgliedschaft.kontakt_mitglied = ''
+            new_mitgliedschaft.adresse_mitglied = ''
+            new_mitgliedschaft.adress_id_mitglied = ''
+            new_mitgliedschaft.kontakt_solidarmitglied = ''
+            new_mitgliedschaft.objekt_adresse = ''
+            new_mitgliedschaft.adress_id_objekt = ''
+            new_mitgliedschaft.rg_kunde = ''
+            new_mitgliedschaft.rg_kontakt = ''
+            new_mitgliedschaft.rg_adresse = ''
+            new_mitgliedschaft.adress_id_rg = ''
+            new_mitgliedschaft.letzte_bearbeitung_von = 'SP'
+            new_mitgliedschaft.insert(ignore_permissions=True)
+            frappe.db.commit()
+            
+            # erstelle ggf. neue Rechnung
+            if new_mitgliedschaft.zahlung_mitgliedschaft < int(now().split("-")[0]):
+                if new_mitgliedschaft.naechstes_jahr_geschuldet == 1:
+                    create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True)
+            
+            # markiere neue Mitgliedschaft als zu validieren
+            new_mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", new_mitgliedschaft.name)
+            new_mitgliedschaft.validierung_notwendig = 1
+            new_mitgliedschaft.letzte_bearbeitung_von = 'User'
+            new_mitgliedschaft.save(ignore_permissions=True)
+            
+            return 1
+            
+        except Exception as err:
+            frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), new_mitgliedschaft.as_dict()), 'Sektionswechsel')
+            return 0
+    else:
         # hier muss noch die Meldung an SP bezgl. Sektionswechsel erfolgen!!!!!!!!!!
-        
         return 1
-        
-    except Exception as err:
-        frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), new_mitgliedschaft.as_dict()), 'Sektionswechsel')
-        return 0
 
 @frappe.whitelist()
 def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False):
@@ -1729,6 +1731,8 @@ def mvm_update(mitgliedschaft, kwargs):
             
             mitgliedschaft.save()
             frappe.db.commit()
+            
+            # Wenn sektion = ZH und status_c = wegzug DANN Rechnung stornieren wenn unbezahlt!!!!!!!!
             
             return raise_200()
             
@@ -2124,10 +2128,11 @@ def mvm_neue_mitglieder_nummer(mitgliedschaft):
     return neue_mitglieder_nummer(sektion_code)
 
 def send_mvm_to_sp(mitgliedschaft, update):
-    from mvd.mvd.service_plattform.api import update_mvm
-    prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
-    update_status = update_mvm(prepared_mvm, update)
-    return update_status
+    if str(get_sektion_code(mitgliedschaft.sektion_id)) != 'ZH':
+        from mvd.mvd.service_plattform.api import update_mvm
+        prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
+        update_status = update_mvm(prepared_mvm, update)
+        return update_status
 
 def prepare_mvm_for_sp(mitgliedschaft):
     adressen = get_adressen_for_sp(mitgliedschaft)

@@ -9,7 +9,7 @@ def get_data():
         'transactions': [
             {
                 'label': _('Vorlagen'),
-                'items': ['MV Korrespondenz Vorlage', 'Terminkategorie', 'Textkonserven']
+                'items': ['MV Korrespondenz Vorlage', 'Terminkategorie', 'Druckvorlage']
             }
         ]
     }
