@@ -16,19 +16,20 @@ frappe.listview_settings['MV Mitgliedschaft'] = {
                 kuendigungs_massendruck();
         });
         
-        listview.page.add_menu_item(__("Zeige alle zu Validieren"), function() {
-                frappe.route_options = {"validierung_notwendig": 1};
-                frappe.route();
-        });
+        // Obsolet aufgrund VBZ Page
+        //~ listview.page.add_menu_item(__("Zeige alle zu Validieren"), function() {
+                //~ frappe.route_options = {"validierung_notwendig": 1};
+                //~ frappe.route();
+        //~ });
         
-        listview.page.add_menu_item(__("Erfasse Interessent*in"), function() {
-                weiterleitung_suchmaske();
+        //~ listview.page.add_menu_item(__("Erfasse Interessent*in"), function() {
+                //~ weiterleitung_suchmaske();
                 
-        });
+        //~ });
         
-        listview.page.add_menu_item(__("Erfasse Neumitglied"), function() {
-                weiterleitung_suchmaske();
-        });
+        //~ listview.page.add_menu_item(__("Erfasse Neumitglied"), function() {
+                //~ weiterleitung_suchmaske();
+        //~ });
     }
 };
 

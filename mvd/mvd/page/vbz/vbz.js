@@ -5,28 +5,55 @@ frappe.pages['vbz'].on_page_load = function(wrapper) {
         single_column: true
     });
     frappe.vbz.add_views(page);
-    
 }
 frappe.pages['vbz'].refresh= function(wrapper){
     frappe.vbz.show_view('overview');
-    if (!frappe.vbz.click_handlers_added) {
-        frappe.vbz.add_click_handlers();
-    }
 } 
 
 frappe.vbz = {
     add_views: function(page) {
-        page.add_view('overview', frappe.render_template("overview", {}))
-        page.add_view('validierung', frappe.render_template("validierung", {}))
-        page.add_view('kuendigung', frappe.render_template("kuendigung", {}))
-        
+        frappe.call({
+            method: "mvd.mvd.page.vbz.vbz.get_open_data",
+            args:{
+                'sektion': frappe.vbz.get_default_sektion()
+            },
+            freeze: true,
+            freeze_message: 'Lade Verarbeitungszentrale...',
+            async: false,
+            callback: function(r)
+            {
+                if (r.message) {
+                    page.add_view('overview', frappe.render_template("overview", eval(r.message)))
+                    page.add_view('validierung', frappe.render_template("validierung", eval(r.message.validierung)))
+                    page.add_view('kuendigung', frappe.render_template("kuendigung", eval(r.message.kuendigung)))
+                    page.add_view('kuendigung_massen_verarbeitung', frappe.render_template("kuendigung_massen_verarbeitung", {}))
+                    frappe.vbz.add_click_handlers();
+                }
+            }
+        });
     },
     show_view: function(view) {
-        cur_page.page.page.set_view(view);
+        cur_page.page.page.set_view(view);;
+    },
+    remove_click_handlers: function() {
+        $(".fa-chevron-left.pull-left").off("click");
+        $(".fa-home.pull-left").off("click");
+        $("#mitglieder").off("click");
+        $("#suchmaske").off("click");
+        $("#arbeitsbacklog").off("click");
+        $("#validieren").off("click");
+        $("#kuendigung").off("click");
+        $("#massen_kuendigung").off("click");
+        $("#validierung_allgemein").off("click");
+        $("#kuendigung_mitglieder").off("click");
+        $("#neuanlage").off("click");
     },
     add_click_handlers: function() {
-        frappe.vbz.click_handlers_added = true;
+        frappe.vbz.remove_click_handlers();
         $(".fa-chevron-left.pull-left").click(function(){
+            frappe.vbz.show_view('overview');
+        });
+        $(".fa-home.pull-left").click(function(){
             frappe.vbz.show_view('overview');
         });
         $("#mitglieder").click(function(){
@@ -46,6 +73,9 @@ frappe.vbz = {
         $("#kuendigung").click(function(){
             frappe.vbz.show_view('kuendigung');
         });
+        $("#massen_kuendigung").click(function(){
+            frappe.vbz.show_view('kuendigung_massen_verarbeitung');
+        });
         $("#validierung_allgemein").click(function(){
             frappe.route_options = {"validierung_notwendig": 1}
             frappe.set_route("List", "MV Mitgliedschaft");
@@ -53,9 +83,6 @@ frappe.vbz = {
         $("#kuendigung_mitglieder").click(function(){
             frappe.route_options = {"kuendigung_verarbeiten": 1}
             frappe.set_route("List", "MV Mitgliedschaft");
-        });
-        $("#massen_kuendigung").click(function(){
-            frappe.msgprint("Dies Massenverarbeitung wird durchgeführt");
         });
         $("#neuanlage").click(function(){
             frappe.set_route("mvd-suchmaske");
@@ -72,6 +99,5 @@ frappe.vbz = {
             });
         }
         return default_sektion
-    },
-    click_handlers_added: false
+    }
 }

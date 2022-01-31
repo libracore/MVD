@@ -1,10 +1,13 @@
-<center><h1><i class="fa fa-chevron-left pull-left"></i> Zu Validierende Mitgliedschaften</h1></center>
+<center><h1><i class="fa fa-home pull-left"></i><i class="fa fa-chevron-left pull-left"></i> Zu Validierende Mitgliedschaften</h1></center>
 <div class="row">
     <div class="col-sm-6">
         <div class="control-card" id="validierung_allgemein">
             <center>
                 <i class="fa fa-users"></i>
                 <p>Validierung Allgemein</p>
+                {% if allgemein > 0 %}
+                    <div class="vbz-indikator"><span>{{ allgemein }}</span></div>
+                {% endif %}
             </center>
         </div>
     </div>
@@ -13,6 +16,9 @@
             <center>
                 <i class="fa fa-users"></i>
                 <p>Beitritts Validierung</p>
+                {% if beitritt > 0 %}
+                    <div class="vbz-indikator"><span>{{ beitritt }}</span></div>
+                {% endif %}
             </center>
         </div>
     </div>

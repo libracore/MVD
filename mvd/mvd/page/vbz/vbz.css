@@ -1,6 +1,7 @@
 .control-card {
-    /*float: left;
-    width: 180px;*/
+    /*float: left;*/
+    width: 50%;
+    margin-left: 25% !important;
     height: 180px;
     /*border: 1px solid black;*/
     padding: 5px;
@@ -14,4 +15,23 @@
 
 .fa-chevron-left.pull-left {
     cursor: pointer;
+}
+
+.fa-home.pull-left {
+    cursor: pointer;
+}
+
+.vbz-indikator {
+    /*border: 1px solid black;*/
+    height: 4em;
+    border-radius: 4em;
+    width: 4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ff5858;
+    color: white;
+}
+.vbz-indikator span {
+    font-size: 2em;
 }
