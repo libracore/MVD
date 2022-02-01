@@ -16,12 +16,15 @@
   "m_und_w",
   "briefanrede",
   "adressblock",
+  "rg_briefanrede",
+  "rg_adressblock",
   "cb_0",
   "mitglied_id",
   "status_c",
   "mitgliedtyp_c",
   "todesfall_uebernahme",
   "inkl_hv",
+  "statuten_ok",
   "m_und_w_pdf",
   "adressen_gesperrt",
   "reduzierte_mitgliedschaft",
@@ -838,19 +841,19 @@
    "default": "0",
    "fieldname": "reduzierte_mitgliedschaft",
    "fieldtype": "Check",
-   "label": "Reduzierte Mitgliedschaft"
+   "label": "Abweichender Mitgliederbeitrag"
   },
   {
    "depends_on": "eval:doc.reduzierte_mitgliedschaft",
    "fieldname": "reduzierter_betrag",
    "fieldtype": "Currency",
-   "label": "Reduzierter Betrag"
+   "label": "Abweichender Betrag"
   },
   {
    "depends_on": "eval:doc.reduzierte_mitgliedschaft",
    "fieldname": "reduzierung_bis",
    "fieldtype": "Date",
-   "label": "Reduzierung g\u00fcltig bis"
+   "label": "Abweichung g\u00fcltig bis"
   },
   {
    "collapsible": 1,
@@ -865,10 +868,28 @@
    "fieldtype": "Select",
    "label": "Letzte Bearbeitung durch",
    "options": "User\nSP"
+  },
+  {
+   "fieldname": "rg_adressblock",
+   "fieldtype": "Code",
+   "label": "Rechnungs-Adressblock",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "statuten_ok",
+   "fieldtype": "Check",
+   "label": "Statuten ok"
+  },
+  {
+   "fieldname": "rg_briefanrede",
+   "fieldtype": "Data",
+   "label": "Rechnungs Briefanrede",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-01-28 10:22:42.155784",
+ "modified": "2022-02-01 21:08:11.747259",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

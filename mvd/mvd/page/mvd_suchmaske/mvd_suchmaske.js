@@ -53,7 +53,7 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.sektions_uebergreifend.refresh();
     
     me.search_fields.status_c = frappe.mvd_such_client.create_status_c_field(page)
-    me.search_fields.status_c.set_value('Regulär');
+    me.search_fields.status_c.set_value('Alle');
     me.search_fields.status_c.refresh();
     
     me.search_fields.language = frappe.mvd_such_client.create_language_field(page)
@@ -61,7 +61,7 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.language.refresh();
     
     me.search_fields.mitgliedtyp_c = frappe.mvd_such_client.create_mitgliedtyp_c_field(page)
-    me.search_fields.mitgliedtyp_c.set_value('Privat');
+    me.search_fields.mitgliedtyp_c.set_value('Alle');
     me.search_fields.mitgliedtyp_c.refresh();
     
     me.search_fields.vorname = frappe.mvd_such_client.create_vorname_field(page)
@@ -308,7 +308,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Select",
                 fieldname: "status_c",
-                options: 'Regulär\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nGestorben\nKündigung\nWegzug\nAusschluss\nInaktiv\nInteressent*in',
+                options: 'Alle\nRegulär\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nGestorben\nKündigung\nWegzug\nAusschluss\nInaktiv\nInteressent*in',
                 placeholder: "Status"
             },
             only_input: true,
@@ -321,7 +321,7 @@ frappe.mvd_such_client = {
             df: {
                 fieldtype: "Select",
                 fieldname: "mitgliedtyp_c",
-                options: 'Geschäft\nPrivat',
+                options: 'Alle\nGeschäft\nPrivat',
                 placeholder: "Privat"
             },
             only_input: true,
@@ -534,7 +534,7 @@ frappe.mvd_such_client = {
                 hidden: 1,
                 click: function(){
                     frappe.prompt([
-                        {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent*in\nRegulär', 'default': 'Regulär'},
+                        {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent*in\nRegulär', 'default': cur_page.page.search_fields.status_c.get_value() == 'Interessent*in' ? 'Interessent*in':'Regulär'},
                         {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': cur_page.page.search_fields.mitgliedtyp_c.get_value(), 'change': function() {
                                 if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Privat') {
                                     cur_dialog.fields_dict.kundentyp.set_value("Einzelperson");

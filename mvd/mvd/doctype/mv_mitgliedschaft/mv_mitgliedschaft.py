@@ -32,8 +32,14 @@ class MVMitgliedschaft(Document):
             # Briefanrede
             self.briefanrede = get_anredekonvention(self=self)
             
+            # Rechnungs Briefanrede
+            self.rg_briefanrede = get_anredekonvention(self=self, rg=True)
+            
             # Adressblock
             self.adressblock = get_adressblock(self)
+            
+            # Rechnungs Adressblock
+            self.rg_adressblock = get_rg_adressblock(self)
             
             # update Zahlung Mitgliedschaft
             self.check_zahlung_mitgliedschaft()
@@ -340,10 +346,13 @@ class MVMitgliedschaft(Document):
 def get_adressblock(mitgliedschaft):
     adressblock = ''
     if mitgliedschaft.kundentyp == 'Unternehmen':
-        adressblock += mitgliedschaft.firma or ''
-        adressblock += ' '
-        adressblock += mitgliedschaft.zusatz_firma or ''
-        adressblock += '\n'
+        if mitgliedschaft.firma:
+            adressblock += mitgliedschaft.firma or ''
+            adressblock += ' '
+        if mitgliedschaft.zusatz_firma:
+            adressblock += mitgliedschaft.zusatz_firma or ''
+        if mitgliedschaft.firma or mitgliedschaft.zusatz_firma:
+            adressblock += '\n'
     
     if mitgliedschaft.vorname_1:
         adressblock += mitgliedschaft.vorname_1 or ''
@@ -372,7 +381,7 @@ def get_adressblock(mitgliedschaft):
             adressblock += str(mitgliedschaft.nummer_zu) or ''
     adressblock += '\n'
     
-    if mitgliedschaft.postfach:
+    if int(mitgliedschaft.postfach) == 1:
         adressblock += 'Postfach '
         adressblock += str(mitgliedschaft.postfach_nummer) or ''
         adressblock += '\n'
@@ -380,6 +389,75 @@ def get_adressblock(mitgliedschaft):
     adressblock += str(mitgliedschaft.plz) or ''
     adressblock += ' '
     adressblock += mitgliedschaft.ort or ''
+    
+    return adressblock
+
+def get_rg_adressblock(mitgliedschaft):
+    if int(mitgliedschaft.abweichende_rechnungsadresse) != 1:
+        return get_adressblock(mitgliedschaft)
+    
+    adressblock = ''
+    
+    if int(mitgliedschaft.unabhaengiger_debitor) != 1:
+        if mitgliedschaft.kundentyp == 'Unternehmen':
+            if mitgliedschaft.firma:
+                adressblock += mitgliedschaft.firma or ''
+                adressblock += ' '
+            if mitgliedschaft.zusatz_firma:
+                adressblock += mitgliedschaft.zusatz_firma or ''
+            if mitgliedschaft.firma or mitgliedschaft.zusatz_firma:
+                adressblock += '\n'
+        
+        if mitgliedschaft.vorname_1:
+            adressblock += mitgliedschaft.vorname_1 or ''
+            adressblock += ' '
+        adressblock += mitgliedschaft.nachname_1 or ''
+        adressblock += '\n'
+        
+        if mitgliedschaft.hat_solidarmitglied:
+            if mitgliedschaft.vorname_2:
+                adressblock += mitgliedschaft.vorname_2 or ''
+                adressblock += ' '
+            if mitgliedschaft.nachname_2:
+                adressblock += mitgliedschaft.nachname_2 or ''
+            if  mitgliedschaft.vorname_2 or mitgliedschaft.nachname_2:
+                adressblock += '\n'
+    else:
+        if mitgliedschaft.rg_kundentyp == 'Unternehmen':
+            if mitgliedschaft.rg_firma:
+                adressblock += mitgliedschaft.rg_firma or ''
+                adressblock += ' '
+            if mitgliedschaft.rg_zusatz_firma:
+                adressblock += mitgliedschaft.rg_zusatz_firma or ''
+            if mitgliedschaft.rg_firma or mitgliedschaft.rg_zusatz_firma:
+                adressblock += '\n'
+        
+        if mitgliedschaft.rg_vorname:
+            adressblock += mitgliedschaft.rg_vorname or ''
+            adressblock += ' '
+        adressblock += mitgliedschaft.rg_nachname or ''
+        adressblock += '\n'
+    
+    if mitgliedschaft.rg_zusatz_adresse:
+        adressblock += mitgliedschaft.rg_zusatz_adresse or ''
+        adressblock += '\n'
+    
+    adressblock += mitgliedschaft.rg_strasse or ''
+    if mitgliedschaft.rg_nummer:
+        adressblock += ' '
+        adressblock += str(mitgliedschaft.rg_nummer) or ''
+        if mitgliedschaft.rg_nummer_zu:
+            adressblock += str(mitgliedschaft.rg_nummer_zu) or ''
+    adressblock += '\n'
+    
+    if int(mitgliedschaft.rg_postfach) == 1:
+        adressblock += 'Postfach '
+        adressblock += str(mitgliedschaft.rg_postfach_nummer) or ''
+        adressblock += '\n'
+    
+    adressblock += str(mitgliedschaft.rg_plz) or ''
+    adressblock += ' '
+    adressblock += mitgliedschaft.rg_ort or ''
     
     return adressblock
     
@@ -647,7 +725,7 @@ def update_rg_kunde(mitgliedschaft):
         customer.customer_addition = mitgliedschaft.rg_zusatz_firma
         customer.customer_type = 'Company'
     else:
-        customer.customer_name = (" ").join((mitgliedschaft.rg_vorname, mitgliedschaft.rg_nachname))
+        customer.customer_name = (" ").join((mitgliedschaft.rg_vorname or '', mitgliedschaft.rg_nachname or ''))
         customer.customer_addition = ''
         customer.customer_type = 'Individual'
     customer.sektion = mitgliedschaft.sektion_id
@@ -660,7 +738,7 @@ def create_rg_kunde(mitgliedschaft):
         customer_addition = mitgliedschaft.rg_zusatz_firma
         customer_type = 'Company'
     else:
-        customer_name = (" ").join((mitgliedschaft.rg_vorname, mitgliedschaft.rg_nachname))
+        customer_name = (" ").join((mitgliedschaft.rg_vorname or '', mitgliedschaft.rg_nachname or ''))
         customer_addition = ''
         customer_type = 'Individual'
     
@@ -1321,12 +1399,12 @@ def get_uebersicht_html(name):
     
     return frappe.render_template('templates/includes/mitgliedschaft_overview.html', data)
     
-def get_anredekonvention(mitgliedschaft=None, self=None):
+def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
     if self:
         mitgliedschaft = self
     else:
         mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
-    if mitgliedschaft.hat_solidarmitglied:
+    if mitgliedschaft.hat_solidarmitglied and not rg:
         # mit Solidarmitglied
         if mitgliedschaft.anrede_c not in ('Herr', 'Frau') and mitgliedschaft.anrede_2 not in ('Herr', 'Frau'):
             # enthält neutrale Anrede
@@ -1378,13 +1456,25 @@ def get_anredekonvention(mitgliedschaft=None, self=None):
                         return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
         
     else:
-        # ohne Solidarmitglied
-        if mitgliedschaft.anrede_c == 'Herr':
-            return 'Sehr geehrter Herr {nachname}'.format(nachname=mitgliedschaft.nachname_1)
-        elif mitgliedschaft.anrede_c == 'Frau':
-            return 'Sehr geehrte Frau {nachname}'.format(nachname=mitgliedschaft.nachname_1)
+        if not rg:
+            # ohne Solidarmitglied
+            if mitgliedschaft.anrede_c == 'Herr':
+                return 'Sehr geehrter Herr {nachname}'.format(nachname=mitgliedschaft.nachname_1)
+            elif mitgliedschaft.anrede_c == 'Frau':
+                return 'Sehr geehrte Frau {nachname}'.format(nachname=mitgliedschaft.nachname_1)
+            else:
+                return 'Guten Tag {vorname} {nachname}'.format(vorname=mitgliedschaft.vorname_1 or '', nachname=mitgliedschaft.nachname_1)
         else:
-            return 'Guten Tag {vorname} {nachname}'.format(vorname=mitgliedschaft.vorname_1 or '', nachname=mitgliedschaft.nachname_1)
+            if int(mitgliedschaft.unabhaengiger_debitor) == 1:
+                # Rechnungs Anrede
+                if mitgliedschaft.rg_anrede == 'Herr':
+                    return 'Sehr geehrter Herr {nachname}'.format(nachname=mitgliedschaft.rg_nachname)
+                elif mitgliedschaft.rg_anrede == 'Frau':
+                    return 'Sehr geehrte Frau {nachname}'.format(nachname=mitgliedschaft.rg_nachname)
+                else:
+                    return 'Guten Tag {vorname} {nachname}'.format(vorname=mitgliedschaft.rg_vorname or '', nachname=mitgliedschaft.rg_nachname)
+            else:
+                return get_anredekonvention(self=mitgliedschaft)
 
 @frappe.whitelist()
 def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):

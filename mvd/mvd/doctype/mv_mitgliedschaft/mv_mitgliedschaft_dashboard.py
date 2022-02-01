@@ -10,8 +10,8 @@ def get_data():
         'fieldname': 'mv_mitgliedschaft',
         'transactions': [
             {
-                'label': _('Beratung'),
-                'items': ['MV Beratung']
+                'label': _('Termine / Beratungen'),
+                'items': ['Termin']
             },
             {
                 'label': _('Externe Korrespondenz'),

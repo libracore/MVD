@@ -1,7 +1,7 @@
 // Copyright (c) 2021, libracore and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('MV Beratung', {
+frappe.ui.form.on('Termin', {
 	// refresh: function(frm) {
 
 	// }

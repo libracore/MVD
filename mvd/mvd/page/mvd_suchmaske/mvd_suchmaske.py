@@ -22,10 +22,12 @@ def suche(suchparameter, goto_list=False):
         filters_list.append("""`sektion_id` = '{sektion_id}'""".format(sektion_id=suchparameter["sektion_id"]))
     if suchparameter["mitglied_nr"]:
         filters_list.append("""`mitglied_nr` LIKE '{mitglied_nr}%'""".format(mitglied_nr=suchparameter["mitglied_nr"]))
-    if suchparameter["status_c"]:
-        filters_list.append("""`status_c` = '{status_c}'""".format(status_c=suchparameter["status_c"]))
-    if suchparameter["mitgliedtyp_c"]:
-        filters_list.append("""`mitgliedtyp_c` = '{mitgliedtyp_c}'""".format(mitgliedtyp_c=suchparameter["mitgliedtyp_c"]))
+    if suchparameter["status_c"] and suchparameter["sektion_id"]:
+        if suchparameter["status_c"] != 'Alle':
+            filters_list.append("""`status_c` = '{status_c}'""".format(status_c=suchparameter["status_c"]))
+    if suchparameter["mitgliedtyp_c"] and suchparameter["sektion_id"]:
+        if suchparameter["mitgliedtyp_c"] != 'Alle':
+            filters_list.append("""`mitgliedtyp_c` = '{mitgliedtyp_c}'""".format(mitgliedtyp_c=suchparameter["mitgliedtyp_c"]))
     
     # Kontaktdaten
     if suchparameter["vorname"]:
@@ -105,12 +107,10 @@ def suche(suchparameter, goto_list=False):
                 resultate_html = get_resultate_html(mitgliedschaften)
                 return resultate_html
             else:
-                route_options_list = '('
+                _route_options_list = []
                 for mitgliedschaft in mitgliedschaften:
-                    route_options_list += mitgliedschaft.mitglied_nr + ', '
-                route_options_list += ')'
-                route_options_list.replace("(,", "(")
-                route_options_list.replace(", )", ")")
+                    _route_options_list.append(mitgliedschaft.mitglied_nr)
+                route_options_list = (",").join(_route_options_list)
                 return route_options_list
         else:
             if not goto_list:

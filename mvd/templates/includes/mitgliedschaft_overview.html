@@ -1,80 +1,99 @@
 <div class="clearfix"></div>
-<div class="row">
-    <!-- Card Allgemein -->
-    {% if allgemein.ueberfaellige_rechnungen > 0 or allgemein.offene_rechnungen > 0 %}
-    <div class="col-sm-5">
-        <div class="address-box">
-            <p>
-                <b>Status:</b> {{ allgemein.status }}<br>
-                <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
-                <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
-                {% if allgemein.austritt %}
-                    <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
-                {% endif %}
-                {% if allgemein.zuzug %}
-                    <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}{% if allgemein.zuzug_von %} (von {{ allgemein.zuzug_von }}){% endif %}<br>
-                {% endif %}
-                {% if allgemein.wegzug %}
-                    <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
-                {% endif %}
-                <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
-                {% if allgemein.hv_status %}
-                    <br>{{ allgemein.hv_status }}
-                {% endif %}
-            </p>
-            <p>
-                <b>Wichtig:</b><br>
-                {% if allgemein.wichtig %}
-                    {{ allgemein.wichtig|replace("\n", "<br>") }}
-                {% endif %}
-            </p>
+{% if allgemein.status == 'Interessent*in' %}
+    <div class="row">
+        <!-- Card Allgemein -->
+        <div class="col-sm-12">
+            <div class="address-box">
+                <p>
+                    <b>Status:</b> {{ allgemein.status }}
+                </p>
+                <p>
+                    <b>Wichtig:</b><br>
+                    {% if allgemein.wichtig %}
+                        {{ allgemein.wichtig|replace("\n", "<br>") }}
+                    {% endif %}
+                </p>
+            </div>
         </div>
     </div>
-    <div class="col-sm-5">
-        <div class="address-box">
-            <p style="position: absolute; top: -13px; right: -90px;">
-                <span class="css-ampel {{ allgemein.ampelfarbe }}"><span></span></span>
-            </p>
-            <p>
-                {% if allgemein.ueberfaellige_rechnungen > 0 %}<b>Überfällige Rechnungen:</b> {{ allgemein.ueberfaellige_rechnungen }}<br>{% endif %}
-                {% if allgemein.offene_rechnungen > 0 %}<b>Offene Rechnungen:</b> {{ allgemein.offene_rechnungen }}<br>{% endif %}
-            </p>
+{% else %}
+    <div class="row">
+        <!-- Card Allgemein -->
+        {% if allgemein.ueberfaellige_rechnungen > 0 or allgemein.offene_rechnungen > 0 %}
+        <div class="col-sm-5">
+            <div class="address-box">
+                <p>
+                    <b>Status:</b> {{ allgemein.status }}<br>
+                    <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
+                    <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
+                    {% if allgemein.austritt %}
+                        <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
+                    {% endif %}
+                    {% if allgemein.zuzug %}
+                        <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}{% if allgemein.zuzug_von %} (von {{ allgemein.zuzug_von }}){% endif %}<br>
+                    {% endif %}
+                    {% if allgemein.wegzug %}
+                        <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
+                    {% endif %}
+                    <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
+                    {% if allgemein.hv_status %}
+                        <br>{{ allgemein.hv_status }}
+                    {% endif %}
+                </p>
+                <p>
+                    <b>Wichtig:</b><br>
+                    {% if allgemein.wichtig %}
+                        {{ allgemein.wichtig|replace("\n", "<br>") }}
+                    {% endif %}
+                </p>
+            </div>
         </div>
-    </div>
-    {% else %}
-    <div class="col-sm-10">
-        <div class="address-box">
-            <p style="position: absolute; top: -13px; right: -90px;">
-                <span class="css-ampel {{ allgemein.ampelfarbe }}"><span></span></span>
-            </p>
-            <p>
-                <b>Status:</b> {{ allgemein.status }}<br>
-                <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
-                <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
-                {% if allgemein.austritt %}
-                    <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
-                {% endif %}
-                {% if allgemein.zuzug %}
-                    <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}{% if allgemein.zuzug_von %} (von {{ allgemein.zuzug_von }}){% endif %}<br>
-                {% endif %}
-                {% if allgemein.wegzug %}
-                    <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
-                {% endif %}
-                <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
-                {% if allgemein.hv_status %}
-                    <br>{{ allgemein.hv_status }}
-                {% endif %}
-            </p>
-            <p>
-                <b>Wichtig:</b><br>
-                {% if allgemein.wichtig %}
-                    {{ allgemein.wichtig|replace("\n", "<br>") }}
-                {% endif %}
-            </p>
+        <div class="col-sm-5">
+            <div class="address-box">
+                <p style="position: absolute; top: -13px; right: -90px;">
+                    <span class="css-ampel {{ allgemein.ampelfarbe }}"><span></span></span>
+                </p>
+                <p>
+                    {% if allgemein.ueberfaellige_rechnungen > 0 %}<b>Überfällige Rechnungen:</b> {{ allgemein.ueberfaellige_rechnungen }}<br>{% endif %}
+                    {% if allgemein.offene_rechnungen > 0 %}<b>Offene Rechnungen:</b> {{ allgemein.offene_rechnungen }}<br>{% endif %}
+                </p>
+            </div>
         </div>
+        {% else %}
+        <div class="col-sm-10">
+            <div class="address-box">
+                <p style="position: absolute; top: -13px; right: -90px;">
+                    <span class="css-ampel {{ allgemein.ampelfarbe }}"><span></span></span>
+                </p>
+                <p>
+                    <b>Status:</b> {{ allgemein.status }}<br>
+                    <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
+                    <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
+                    {% if allgemein.austritt %}
+                        <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
+                    {% endif %}
+                    {% if allgemein.zuzug %}
+                        <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}{% if allgemein.zuzug_von %} (von {{ allgemein.zuzug_von }}){% endif %}<br>
+                    {% endif %}
+                    {% if allgemein.wegzug %}
+                        <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
+                    {% endif %}
+                    <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
+                    {% if allgemein.hv_status %}
+                        <br>{{ allgemein.hv_status }}
+                    {% endif %}
+                </p>
+                <p>
+                    <b>Wichtig:</b><br>
+                    {% if allgemein.wichtig %}
+                        {{ allgemein.wichtig|replace("\n", "<br>") }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
-</div>
+{% endif %}
 <div class="clearfix"></div>
 <div class="row">
 <!-- Card Mitglied (Inhaber) -->

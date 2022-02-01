@@ -28,7 +28,7 @@
    "fieldtype": "Link",
    "label": "Basierend auf",
    "no_copy": 1,
-   "options": "MV Beratung",
+   "options": "Termin",
    "print_hide": 1,
    "read_only": 1
   },
@@ -75,10 +75,10 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-01-07 14:06:46.682422",
+ "modified": "2022-02-01 21:26:55.125400",
  "modified_by": "Administrator",
  "module": "MVD",
- "name": "MV Beratung",
+ "name": "Termin",
  "owner": "Administrator",
  "permissions": [
   {

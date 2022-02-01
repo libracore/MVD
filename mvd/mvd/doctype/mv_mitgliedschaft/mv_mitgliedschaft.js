@@ -600,20 +600,3 @@ function custom_email_dialog(e) {
     });
 }
 
-//~ function get_druckvorlage(frm) {
-    //~ frappe.call({
-        //~ method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
-        //~ args:{
-                //~ 'sektion': cur_frm.doc.sektion_id,
-                //~ 'dokument': 'Beitritt mit EZ',
-                //~ 'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
-                //~ 'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft
-        //~ },
-        //~ async: false,
-        //~ callback: function(r)
-        //~ {
-            //~ return r.message
-        //~ }
-    //~ });
-//~ }
-
