@@ -13,7 +13,9 @@
             <center>
                 <i class="fa fa-filter"></i>
                 <p>Massen Verarbeitung</p>
-                <div class="vbz-indikator"><span>{{ qty }}</span></div>
+                {% if qty > 0 %}
+                    <div class="vbz-indikator"><span>{{ qty }}</span></div>
+                {% endif %}
             </center>
         </div>
     </div>
