@@ -1435,7 +1435,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         return 1
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False):
+def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False):
     mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
     company = frappe.get_doc("Company", sektion.company)
@@ -1485,7 +1485,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         'debit_to': company.default_receivable_account,
         'sektions_code': str(sektion.sektion_id) or '00',
         "items": item,
-        "inkl_hv": 1 if inkl_hv else 0
+        "druckvorlage": druckvorlage if druckvorlage else ''
     })
     sinv.insert(ignore_permissions=True)
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)

@@ -592,22 +592,71 @@ frappe.mvd_such_client = {
                         {'fieldname': 'ort', 'fieldtype': 'Data', 'label': 'Ort', 'reqd': 1, 'default': cur_page.page.search_fields.ort.get_value()},
                     ],
                     function(values){
-                        frappe.call({
-                            method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.anlage_prozess",
-                            args:{
-                                    'anlage_daten': values
-                            },
-                            freeze: true,
-                            freeze_message: 'Erstelle Mitgliedschaften...',
-                            callback: function(r)
-                            {
-                                if (r.message) {
-                                    cur_page.page.search_fields.neuanlage.df.hidden = 1;
-                                    cur_page.page.search_fields.neuanlage.refresh();
-                                    frappe.set_route("Form", "MV Mitgliedschaft", r.message);
-                                }
+                        if (values.autom_rechnung) {
+                            var dokument = 'Beitritt mit EZ';
+                            if (values.status == 'Interessent*in') {
+                                dokument = 'Interessent*Innenbrief mit EZ';
                             }
-                        });
+                            frappe.call({
+                                method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+                                args:{
+                                        'sektion': values.sektion_id,
+                                        'dokument': dokument,
+                                        'mitgliedtyp': values.mitgliedtyp
+                                },
+                                async: false,
+                                callback: function(response)
+                                {
+                                    var druckvorlagen = response.message
+                                    frappe.prompt([
+                                        {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                                            'get_query': function() {
+                                                return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                                            }
+                                        }
+                                    ],
+                                    function(prompt_values){
+                                        frappe.call({
+                                            method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.anlage_prozess",
+                                            args:{
+                                                    'anlage_daten': values,
+                                                    'druckvorlage': prompt_values.druckvorlage
+                                            },
+                                            freeze: true,
+                                            freeze_message: 'Erstelle Mitgliedschaften...',
+                                            callback: function(r)
+                                            {
+                                                if (r.message) {
+                                                    cur_page.page.search_fields.neuanlage.df.hidden = 1;
+                                                    cur_page.page.search_fields.neuanlage.refresh();
+                                                    frappe.set_route("Form", "MV Mitgliedschaft", r.message);
+                                                }
+                                            }
+                                        });
+                                    },
+                                    'Auswahl Druckvorlage',
+                                    'Auswahl'
+                                    )
+                                }
+                            });
+                        } else {
+                            frappe.call({
+                                method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.anlage_prozess",
+                                args:{
+                                        'anlage_daten': values
+                                },
+                                freeze: true,
+                                freeze_message: 'Erstelle Mitgliedschaften...',
+                                callback: function(r)
+                                {
+                                    if (r.message) {
+                                        cur_page.page.search_fields.neuanlage.df.hidden = 1;
+                                        cur_page.page.search_fields.neuanlage.refresh();
+                                        frappe.set_route("Form", "MV Mitgliedschaft", r.message);
+                                    }
+                                }
+                            });
+                        }
                     },
                     'Neuanlage',
                     'Anlegen'

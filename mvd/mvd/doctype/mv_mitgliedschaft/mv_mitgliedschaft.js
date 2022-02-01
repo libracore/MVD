@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('MV Mitgliedschaft', {
+    onload: function(frm) {
+        // override_default_email_dialog
+        override_default_email_dialog(frm);
+    },
     refresh: function(frm) {
        if (!frm.doc.__islocal) {
             if (!['Wegzug', 'Ausschluss'].includes(cur_frm.doc.status_c)) {
@@ -40,9 +44,6 @@ frappe.ui.form.on('MV Mitgliedschaft', {
             
             // load html overview
             get_adressdaten(frm);
-            
-            // override_default_email_dialog
-            override_default_email_dialog(frm);
         }
         
         remove_sinv_plus(frm);
@@ -396,44 +397,69 @@ function daten_validiert(frm) {
 }
 
 function erstelle_rechnung(frm) {
-    frappe.prompt([
-        {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0},
-        {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'}
-    ],
-    function(values){
-        if (values.bar_bezahlt == 1) {
-            var bar_bezahlt = true;
-            if (values.hv_bar_bezahlt == 1) {
-                var hv_bar_bezahlt = true;
-            } else {
-                var hv_bar_bezahlt = null;
-            }
-        } else {
-            var bar_bezahlt = null;
-            var hv_bar_bezahlt = null;
-        }
-        frappe.call({
-            method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.create_mitgliedschaftsrechnung",
-            args:{
-                    'mitgliedschaft': cur_frm.doc.name,
-                    'bezahlt': bar_bezahlt,
-                    'attach_as_pdf': true,
-                    'submit': true,
-                    'hv_bar_bezahlt': hv_bar_bezahlt
+    var dokument = 'Beitritt mit EZ';
+    if (cur_frm.doc.status_c == 'Interessent*in') {
+        dokument = 'Interessent*Innenbrief mit EZ';
+    }
+    frappe.call({
+        method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+        args:{
+                'sektion': cur_frm.doc.sektion_id,
+                'dokument': dokument,
+                'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft
+        },
+        async: false,
+        callback: function(r)
+        {
+            var druckvorlagen = r.message
+            frappe.prompt([
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                    'get_query': function() {
+                        return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                    }
+                },
+                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0},
+                {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'}
+            ],
+            function(values){
+                if (values.bar_bezahlt == 1) {
+                    var bar_bezahlt = true;
+                    if (values.hv_bar_bezahlt == 1) {
+                        var hv_bar_bezahlt = true;
+                    } else {
+                        var hv_bar_bezahlt = null;
+                    }
+                } else {
+                    var bar_bezahlt = null;
+                    var hv_bar_bezahlt = null;
+                }
+                frappe.call({
+                    method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.create_mitgliedschaftsrechnung",
+                    args:{
+                            'mitgliedschaft': cur_frm.doc.name,
+                            'bezahlt': bar_bezahlt,
+                            'attach_as_pdf': true,
+                            'submit': true,
+                            'hv_bar_bezahlt': hv_bar_bezahlt,
+                            'druckvorlage': values.druckvorlage
+                    },
+                    freeze: true,
+                    freeze_message: 'Erstelle Rechnung...',
+                    callback: function(r)
+                    {
+                        cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung " + r.message + " erstellt.");
+                        cur_frm.reload_doc();
+                        frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
+                    }
+                });
             },
-            freeze: true,
-            freeze_message: 'Erstelle Rechnung...',
-            callback: function(r)
-            {
-                cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung " + r.message + " erstellt.");
-                cur_frm.reload_doc();
-                frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
-            }
-        });
-    },
-    'Rechnungs Erstellung',
-    'Erstellen'
-    )
+            'Rechnungs Erstellung',
+            'Erstellen'
+            )
+        }
+    });
+    
     
 }
 
@@ -573,3 +599,21 @@ function custom_email_dialog(e) {
         txt: '<div>' + cur_frm.doc.briefanrede + '</div>'
     });
 }
+
+//~ function get_druckvorlage(frm) {
+    //~ frappe.call({
+        //~ method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+        //~ args:{
+                //~ 'sektion': cur_frm.doc.sektion_id,
+                //~ 'dokument': 'Beitritt mit EZ',
+                //~ 'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                //~ 'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft
+        //~ },
+        //~ async: false,
+        //~ callback: function(r)
+        //~ {
+            //~ return r.message
+        //~ }
+    //~ });
+//~ }
+

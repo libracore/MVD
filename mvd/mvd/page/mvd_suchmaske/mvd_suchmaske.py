@@ -143,7 +143,7 @@ def get_resultate_html(mitgliedschaften):
     return frappe.render_template('templates/includes/mvd_suchresultate.html', data)
 
 @frappe.whitelist()
-def anlage_prozess(anlage_daten):
+def anlage_prozess(anlage_daten, druckvorlage=False):
     if isinstance(anlage_daten, six.string_types):
         anlage_daten = json.loads(anlage_daten)
     
@@ -197,6 +197,6 @@ def anlage_prozess(anlage_daten):
             bezahlt = True
             if int(anlage_daten["hv_bar_bezahlt"]) == 1:
                 hv_bar_bezahlt = True
-        sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt)
+        sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage)
     
     return mitgliedschaft.name
