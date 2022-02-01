@@ -1453,16 +1453,16 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
     
     # finde passenden Artikel
     if mitgliedschaft.mitgliedtyp_c == 'Privat':
-        item = [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1}]
+        item = [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center}]
         if not ignore_stichtage:
             reduziert_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.reduzierter_mitgliederbeitrag).strftime("%m") + "-" + getdate(sektion.reduzierter_mitgliederbeitrag).strftime("%d"))
             gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%d"))
             if getdate(today()) >= reduziert_ab:
-                item = [{"item_code": sektion.mitgliedschafts_artikel_reduziert,"qty": 1}]
+                item = [{"item_code": sektion.mitgliedschafts_artikel_reduziert,"qty": 1, "cost_center": company.cost_center}]
                 if getdate(today()) >= gratis_ab:
                     item = [
-                        {"item_code": sektion.mitgliedschafts_artikel_gratis,"qty": 1},
-                        {"item_code": sektion.mitgliedschafts_artikel,"qty": 1}
+                        {"item_code": sektion.mitgliedschafts_artikel_gratis,"qty": 1, "cost_center": company.cost_center},
+                        {"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center}
                     ]
                     jahr = int(getdate(today()).strftime("%Y")) + 1
     
