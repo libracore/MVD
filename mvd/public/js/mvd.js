@@ -26,17 +26,17 @@ frappe.call({
 
 setTimeout(function(){$('.nav.navbar-nav.navbar-right').prepend('<li class="dropdown dropdown-mobile"><a class"dropdown-toggle" href="#vbz"><span id="ts_indicator" class=""><i class="fa fa-inbox"></i></span></a></li>');}, 1000);
 
-$(document).ready(function() {
-    // Redirect to VBZ after login
-    if(frappe._cur_route==""||frappe._cur_route=="#") {
-        window.location.href = "#vbz";
-    }
-});
+//~ $(document).ready(function() {
+    //~ // Redirect to VBZ after login
+    //~ if(frappe._cur_route==""||frappe._cur_route=="#") {
+        //~ window.location.href = "#vbz";
+    //~ }
+//~ });
 
-$(document).on('click','#navbar-breadcrumbs a, a.navbar-home',function(event){
-    var navURL = event.currentTarget.href;
+//~ $(document).on('click','#navbar-breadcrumbs a, a.navbar-home',function(event){
+    //~ var navURL = event.currentTarget.href;
 
-    if(navURL.endsWith("#")) {
-        event.currentTarget.href = '#vbz';
-    }
-});
+    //~ if(navURL.endsWith("#")) {
+        //~ event.currentTarget.href = '#vbz';
+    //~ }
+//~ });
