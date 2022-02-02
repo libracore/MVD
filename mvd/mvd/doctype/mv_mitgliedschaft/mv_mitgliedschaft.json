@@ -131,6 +131,7 @@
   "section_workflow_helpers",
   "validierung_notwendig",
   "kuendigung_verarbeiten",
+  "kuendigung_druckvorlage",
   "letzte_bearbeitung_von"
  ],
  "fields": [
@@ -886,10 +887,16 @@
    "fieldtype": "Data",
    "label": "Rechnungs Briefanrede",
    "read_only": 1
+  },
+  {
+   "fieldname": "kuendigung_druckvorlage",
+   "fieldtype": "Link",
+   "label": "Druckvorlage K\u00fcndigung",
+   "options": "Druckvorlage"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-01 21:08:11.747259",
+ "modified": "2022-02-02 14:26:36.005663",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Mitgliedschaft",

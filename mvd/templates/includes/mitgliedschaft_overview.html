@@ -26,6 +26,9 @@
                     <b>Status:</b> {{ allgemein.status }}<br>
                     <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
                     <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
+                    {% if allgemein.kuendigung %}
+                        <b>Kündigung:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}<br>
+                    {% endif %}
                     {% if allgemein.austritt %}
                         <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
                     {% endif %}
@@ -69,6 +72,9 @@
                     <b>Status:</b> {{ allgemein.status }}<br>
                     <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
                     <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
+                    {% if allgemein.kuendigung %}
+                        <b>Kündigung:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}<br>
+                    {% endif %}
                     {% if allgemein.austritt %}
                         <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
                     {% endif %}

@@ -14,6 +14,7 @@
   "cb1",
   "dokument",
   "default",
+  "deaktiviert",
   "section_seitenmanagement",
   "anzahl_seiten",
   "cb_2",
@@ -62,7 +63,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Dokument",
-   "options": "Beitritt mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung",
+   "options": "Beitritt mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ",
    "reqd": 1
   },
   {
@@ -275,9 +276,15 @@
    "fieldname": "reduzierte_mitgliedschaft",
    "fieldtype": "Check",
    "label": "Reduzierte Mitgliedschaft"
+  },
+  {
+   "default": "0",
+   "fieldname": "deaktiviert",
+   "fieldtype": "Check",
+   "label": "Deaktiviert"
   }
  ],
- "modified": "2022-02-01 09:03:23.762422",
+ "modified": "2022-02-02 15:55:12.519772",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

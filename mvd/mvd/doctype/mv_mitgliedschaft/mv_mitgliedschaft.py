@@ -1343,6 +1343,11 @@ def get_uebersicht_html(name):
         wegzug = False
         wegzug_zu = False
     
+    if mitgliedschaft.kuendigung:
+        kuendigung = mitgliedschaft.kuendigung
+    else:
+        kuendigung = False
+    
     if mitgliedschaft.inkl_hv:
         if mitgliedschaft.zahlung_hv:
             # im moment umgeschrieben von Datum auf Jahreszahl, muss nach dem Update der API wieder angepasst werden!
@@ -1393,7 +1398,8 @@ def get_uebersicht_html(name):
             'wegzug_zu': wegzug_zu,
             'mitgliedtyp_c': mitgliedschaft.mitgliedtyp_c,
             'hv_status': hv_status,
-            'wichtig': mitgliedschaft.wichtig
+            'wichtig': mitgliedschaft.wichtig,
+            'kuendigung': kuendigung
         }
     }
     
@@ -1659,11 +1665,12 @@ def create_korrespondenz_serienbriefe(mitgliedschaften, korrespondenzdaten):
     return erstellte_korrespondenzen
 
 @frappe.whitelist()
-def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf):
+def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druckvorlage):
     # erfassung Kündigung
     mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
     mitgliedschaft.kuendigung = datum_kuendigung
     mitgliedschaft.status_c = 'Kündigung'
+    mitgliedschaft.kuendigung_druckvorlage = druckvorlage
     if massenlauf == '1':
         mitgliedschaft.kuendigung_verarbeiten = 1
         create_abl("Kündigung verarbeiten", mitgliedschaft)

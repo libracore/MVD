@@ -15,7 +15,7 @@ class FakultativeRechnung(Document):
         self.qrr_referenz = get_qrr_reference(fr=self.name)
 
 @frappe.whitelist()
-def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False):
+def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False, druckvorlage=''):
     if not betrag_spende:
         cancel_old_hv_fr(mitgliedschaft)
     mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
@@ -30,7 +30,8 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spend
         'typ': 'HV' if not betrag_spende else 'Spende',
         'betrag': betrag_spende or sektion.betrag_hv,
         'posting_date': today(),
-        'company': sektion.company
+        'company': sektion.company,
+        'druckvorlage': druckvorlage
     })
     fr.insert(ignore_permissions=True)
     

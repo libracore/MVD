@@ -8,9 +8,12 @@ from frappe.model.document import Document
 
 class Druckvorlage(Document):
     def validate(self):
-        self.validiere_inhalt()
-        self.set_validierungsstring()
-        self.check_default()
+        if not self.deaktiviert:
+            self.validiere_inhalt()
+            self.set_validierungsstring()
+            self.check_default()
+        else:
+            self.default = '0'
     
     def validiere_inhalt(self):
         if self.dokument in ('Beitritt mit EZ', 'Interessent*Innenbrief mit EZ'):
@@ -140,7 +143,8 @@ def get_druckvorlagen(sektion, dokument, mitgliedtyp, reduzierte_mitgliedschaft=
                                         FROM `tabDruckvorlage`
                                         WHERE `sektion_id` = '{sektion}'
                                         AND `mitgliedtyp_c` = '{mitgliedtyp}'
-                                        AND `reduzierte_mitgliedschaft` = '{reduzierte_mitgliedschaft}'""".format(sektion=sektion, mitgliedtyp=mitgliedtyp, reduzierte_mitgliedschaft=reduzierte_mitgliedschaft), as_dict=True)
+                                        AND `reduzierte_mitgliedschaft` = '{reduzierte_mitgliedschaft}
+                                        AND `deaktiviert` != 1'""".format(sektion=sektion, mitgliedtyp=mitgliedtyp, reduzierte_mitgliedschaft=reduzierte_mitgliedschaft), as_dict=True)
     
     alle_druckvorlagen = []
     default_druckvorlage = ''

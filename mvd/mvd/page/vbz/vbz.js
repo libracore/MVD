@@ -26,7 +26,7 @@ frappe.vbz = {
                     page.add_view('overview', frappe.render_template("overview", eval(r.message)))
                     page.add_view('validierung', frappe.render_template("validierung", eval(r.message.validierung)))
                     page.add_view('kuendigung', frappe.render_template("kuendigung", eval(r.message.kuendigung)))
-                    page.add_view('kuendigung_massen_verarbeitung', frappe.render_template("kuendigung_massen_verarbeitung", {}))
+                    page.add_view('kuendigung_massen_verarbeitung', frappe.render_template("kuendigung_massen_verarbeitung", eval(r.message.kuendigung)))
                     frappe.vbz.add_click_handlers();
                 }
             }

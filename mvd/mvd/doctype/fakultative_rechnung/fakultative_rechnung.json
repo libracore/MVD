@@ -10,6 +10,7 @@
   "status",
   "sektion_id",
   "sektions_code",
+  "druckvorlage",
   "cb_1",
   "company",
   "sales_invoice",
@@ -149,10 +150,17 @@
    "label": "Sektion",
    "options": "Sektion",
    "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "druckvorlage",
+   "fieldtype": "Link",
+   "label": "Druckvorlage",
+   "options": "Druckvorlage"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-01-14 11:26:47.333301",
+ "modified": "2022-02-02 14:58:56.142085",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Fakultative Rechnung",
