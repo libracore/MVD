@@ -36,8 +36,8 @@ frappe.vbz = {
         cur_page.page.page.set_view(view);;
     },
     remove_click_handlers: function() {
-        $(".fa-chevron-left.pull-left").off("click");
-        $(".fa-home.pull-left").off("click");
+        $(".back-to-overview").off("click");
+        $(".back-to-kuendigung").off("click");
         $("#mitglieder").off("click");
         $("#suchmaske").off("click");
         $("#arbeitsbacklog").off("click");
@@ -50,11 +50,11 @@ frappe.vbz = {
     },
     add_click_handlers: function() {
         frappe.vbz.remove_click_handlers();
-        $(".fa-chevron-left.pull-left").click(function(){
+        $(".back-to-overview").click(function(){
             frappe.vbz.show_view('overview');
         });
-        $(".fa-home.pull-left").click(function(){
-            frappe.vbz.show_view('overview');
+        $(".back-to-kuendigung").click(function(){
+            frappe.vbz.show_view('kuendigung');
         });
         $("#mitglieder").click(function(){
             frappe.route_options = {"sektion_id": frappe.vbz.get_default_sektion()};

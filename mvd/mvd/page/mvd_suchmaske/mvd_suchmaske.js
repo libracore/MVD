@@ -5,6 +5,7 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
         title: 'Mitgliedschaftssuche',
         single_column: true
     });
+    var default_sektion = get_default_sektion();
     //add_action_item
     me.$user_search_button = me.page.set_primary_action('Suche starten<span class="text-muted pull-right" style="padding-left: 5px;">Ctrl+S</span>', () => {
         frappe.mvd_such_client.suche(page);
@@ -43,17 +44,16 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields = {};
     
     me.search_fields.sektion_id = frappe.mvd_such_client.create_sektion_id_field(page)
-    me.search_fields.sektion_id.set_value(get_default_sektion());
-    me.search_fields.sektion_id.refresh();
+    me.search_fields.sektion_id.set_value(default_sektion).then(function(){me.search_fields.sektion_id.refresh();});
     
     me.search_fields.mitglied_nr = frappe.mvd_such_client.create_mitglied_nr_field(page)
     me.search_fields.mitglied_nr.refresh();
     
-    me.search_fields.sektions_uebergreifend = frappe.mvd_such_client.create_sektions_uebergreifend_field(page, me.search_fields.sektion_id)
+    me.search_fields.sektions_uebergreifend = frappe.mvd_such_client.create_sektions_uebergreifend_field(page, me.search_fields.sektion_id, default_sektion)
     me.search_fields.sektions_uebergreifend.refresh();
     
     me.search_fields.status_c = frappe.mvd_such_client.create_status_c_field(page)
-    me.search_fields.status_c.set_value('Alle');
+    me.search_fields.status_c.set_value('Regulär');
     me.search_fields.status_c.refresh();
     
     me.search_fields.language = frappe.mvd_such_client.create_language_field(page)
@@ -280,7 +280,7 @@ frappe.mvd_such_client = {
         });
         return mitglied_nr
     },
-    create_sektions_uebergreifend_field: function(page, sektion_id) {
+    create_sektions_uebergreifend_field: function(page, sektion_id, default_sektion) {
         var sektions_uebergreifend = frappe.ui.form.make_control({
             parent: page.main.find(".sektions_uebergreifend"),
             df: {
@@ -292,7 +292,7 @@ frappe.mvd_such_client = {
                         sektion_id.df.read_only = 1;
                         sektion_id.refresh();
                     } else {
-                        sektion_id.set_value(get_default_sektion());
+                        sektion_id.set_value(default_sektion);
                         sektion_id.df.read_only = 0;
                         sektion_id.refresh();
                     }

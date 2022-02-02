@@ -13,11 +13,11 @@
     font-size: 5em;
 }
 
-.fa-chevron-left.pull-left {
+.back-to-overview {
     cursor: pointer;
 }
 
-.fa-home.pull-left {
+.back-to-kuendigung {
     cursor: pointer;
 }
 
