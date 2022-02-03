@@ -17,20 +17,12 @@
  ],
  "fields": [
   {
-   "fieldname": "mv_mitgliedschaft",
+   "fieldname": "kategorie",
    "fieldtype": "Link",
-   "label": "MV Mitgliedschaft",
-   "options": "Mitgliedschaft",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Basierend auf",
-   "no_copy": 1,
-   "options": "Termin",
-   "print_hide": 1,
-   "read_only": 1
+   "in_list_view": 1,
+   "label": "Terminkategorie",
+   "options": "Terminkategorie",
+   "reqd": 1
   },
   {
    "fieldname": "von",
@@ -38,23 +30,25 @@
    "label": "Datum von"
   },
   {
-   "fieldname": "bis",
-   "fieldtype": "Datetime",
-   "label": "Datum bis"
-  },
-  {
    "fieldname": "kontakt",
    "fieldtype": "Data",
    "label": "Kontaktperson"
   },
   {
-   "fieldname": "notitz",
-   "fieldtype": "Text Editor",
-   "label": "Notiz"
-  },
-  {
    "fieldname": "cb_1",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "MV Mitgliedschaft",
+   "options": "Mitgliedschaft",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bis",
+   "fieldtype": "Datetime",
+   "label": "Datum bis"
   },
   {
    "fieldname": "erinnerung",
@@ -66,19 +60,25 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "kategorie",
+   "fieldname": "notitz",
+   "fieldtype": "Text Editor",
+   "label": "Notiz"
+  },
+  {
+   "fieldname": "amended_from",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Terminkategorie",
-   "options": "Terminkategorie",
-   "reqd": 1
+   "label": "Basierend auf",
+   "no_copy": 1,
+   "options": "MV Beratung",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-02-03 08:49:25.797088",
+ "modified": "2022-02-03 08:49:25.420758",
  "modified_by": "Administrator",
  "module": "MVD",
- "name": "Termin",
+ "name": "MV Beratung",
  "owner": "Administrator",
  "permissions": [
   {

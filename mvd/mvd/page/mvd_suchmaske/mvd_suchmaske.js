@@ -196,7 +196,7 @@ frappe.mvd_such_client = {
             {
                 if (r.message) {
                     frappe.route_options = {"mitglied_nr": ["in", r.message]}
-                    frappe.set_route("List", "MV Mitgliedschaft");
+                    frappe.set_route("List", "Mitgliedschaft");
                 }
             }
         });
@@ -629,7 +629,7 @@ frappe.mvd_such_client = {
                                                 if (r.message) {
                                                     cur_page.page.search_fields.neuanlage.df.hidden = 1;
                                                     cur_page.page.search_fields.neuanlage.refresh();
-                                                    frappe.set_route("Form", "MV Mitgliedschaft", r.message);
+                                                    frappe.set_route("Form", "Mitgliedschaft", r.message);
                                                 }
                                             }
                                         });
@@ -652,7 +652,7 @@ frappe.mvd_such_client = {
                                     if (r.message) {
                                         cur_page.page.search_fields.neuanlage.df.hidden = 1;
                                         cur_page.page.search_fields.neuanlage.refresh();
-                                        frappe.set_route("Form", "MV Mitgliedschaft", r.message);
+                                        frappe.set_route("Form", "Mitgliedschaft", r.message);
                                     }
                                 }
                             });

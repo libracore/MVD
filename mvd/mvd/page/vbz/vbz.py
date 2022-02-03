@@ -42,9 +42,9 @@ def get_open_data(sektion=None):
     kuendigung_qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabArbeits Backlog` WHERE `status` = 'Open' AND `typ` = 'Kündigung verarbeiten'{sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
     alle_kuendigungen = frappe.db.sql("""SELECT
                                             `tabArbeits Backlog`.`mv_mitgliedschaft`,
-                                            DATE_FORMAT(`tabMV Mitgliedschaft`.`kuendigung`, '%d.%m.%Y') AS `datum`
+                                            DATE_FORMAT(`tabMitgliedschaft`.`kuendigung`, '%d.%m.%Y') AS `datum`
                                         FROM `tabArbeits Backlog`
-                                        LEFT JOIN `tabMV Mitgliedschaft` ON `tabArbeits Backlog`.`mv_mitgliedschaft` = `tabMV Mitgliedschaft`.`name`
+                                        LEFT JOIN `tabMitgliedschaft` ON `tabArbeits Backlog`.`mv_mitgliedschaft` = `tabMitgliedschaft`.`name`
                                         WHERE `tabArbeits Backlog`.`status` = 'Open'
                                         AND `tabArbeits Backlog`.`typ` = 'Kündigung verarbeiten'
                                         {sektion_filter}""".format(sektion_filter=sektion_filter.replace("AND `sektion_id`", "AND `tabArbeits Backlog`.`sektion_id`")), as_dict=True)

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils.data import now
-from mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft import create_mitgliedschaftsrechnung
+from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung
 from frappe.utils.background_jobs import enqueue
 import time
 from frappe.utils.csvutils import to_csv as make_csv
@@ -59,7 +59,7 @@ def submit_invoices(jahresversand):
 def create_invoices(jahresversand):
     time.sleep(3)
     jahresversand = frappe.get_doc("MV Jahresversand", jahresversand)
-    mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMV Mitgliedschaft` WHERE `sektion_id` = '{sektion_id}' AND `status_c` = 'Regulär'""".format(sektion_id=jahresversand.sektion_id), as_dict=True)
+    mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `sektion_id` = '{sektion_id}' AND `status_c` = 'Regulär'""".format(sektion_id=jahresversand.sektion_id), as_dict=True)
     for mitgliedschaft in mitgliedschaften:
         sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name)
         row = jahresversand.append('invoices', {})
@@ -113,7 +113,7 @@ def get_csv(jahresversand=None, draft=True):
     ]
     data.append(header)
     for row in jahresversand.invoices:
-        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", row.mv_mitgliedschaft)
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", row.mv_mitgliedschaft)
         row_data = []
         if mitgliedschaft.kundentyp == 'Unternehmen':
             row_data.append(mitgliedschaft.firma or '')

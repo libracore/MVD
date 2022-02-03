@@ -1,7 +1,7 @@
 // Copyright (c) 2021, libracore and contributors
 // For license information, please see license.txt
 
-frappe.listview_settings['MV Mitgliedschaft'] = {
+frappe.listview_settings['Mitgliedschaft'] = {
     onload: function(listview) {
         listview.page.add_action_item(__("Erstelle Serienbrief"), function() {
                 var selected = listview.get_checked_items();
@@ -146,7 +146,7 @@ function get_vorlage(d) {
 
 function erstelle_korrespondenzen(mitgliedschaften, d) {
     frappe.call({
-        method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.create_korrespondenz_serienbriefe",
+        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_korrespondenz_serienbriefe",
         args:{
                 'mitgliedschaften': mitgliedschaften,
                 'korrespondenzdaten': d.get_values()

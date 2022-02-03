@@ -10,7 +10,7 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
     if sales_invoice:
         sinv = frappe.get_doc("Sales Invoice", sales_invoice)
         if sinv.mv_mitgliedschaft:
-            mvm = frappe.get_doc("MV Mitgliedschaft", sinv.mv_mitgliedschaft)
+            mvm = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
             reference_raw = '00 00'
             reference_raw += mvm.mitglied_nr.replace("MV", "")[:3]
             reference_raw += ' '
@@ -27,7 +27,7 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
     
     if fr:
         fr_sinv = frappe.get_doc("Fakultative Rechnung", fr)
-        mvm = frappe.get_doc("MV Mitgliedschaft", fr_sinv.mv_mitgliedschaft)
+        mvm = frappe.get_doc("Mitgliedschaft", fr_sinv.mv_mitgliedschaft)
         if fr_sinv.typ == 'HV':
             reference_raw = '11 00'
         else:

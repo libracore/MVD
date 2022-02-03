@@ -27,7 +27,7 @@ function get_qrr_reference(frm) {
 
 function get_sektions_code(frm) {
     frappe.call({
-        "method": "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.get_sektions_code",
+        "method": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_sektions_code",
         "args": {
             "company": cur_frm.doc.company
         },

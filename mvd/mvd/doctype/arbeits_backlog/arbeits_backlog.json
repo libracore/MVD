@@ -24,7 +24,7 @@
    "fieldname": "mv_mitgliedschaft",
    "fieldtype": "Link",
    "label": "Mitgliedschaft",
-   "options": "MV Mitgliedschaft"
+   "options": "Mitgliedschaft"
   },
   {
    "fieldname": "sektion_id",
@@ -52,7 +52,7 @@
    "reqd": 1
   }
  ],
- "modified": "2021-12-15 11:11:57.013113",
+ "modified": "2022-02-03 08:49:25.142798",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Arbeits Backlog",

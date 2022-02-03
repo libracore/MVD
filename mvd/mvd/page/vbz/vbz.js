@@ -58,7 +58,7 @@ frappe.vbz = {
         });
         $("#mitglieder").click(function(){
             frappe.route_options = {"sektion_id": frappe.vbz.get_default_sektion()};
-            frappe.set_route("List", "MV Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft");
         });
         $("#suchmaske").click(function(){
             frappe.set_route("mvd-suchmaske");
@@ -78,11 +78,11 @@ frappe.vbz = {
         });
         $("#validierung_allgemein").click(function(){
             frappe.route_options = {"validierung_notwendig": 1}
-            frappe.set_route("List", "MV Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft");
         });
         $("#kuendigung_mitglieder").click(function(){
             frappe.route_options = {"kuendigung_verarbeiten": 1}
-            frappe.set_route("List", "MV Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft");
         });
         $("#neuanlage").click(function(){
             frappe.set_route("mvd-suchmaske");

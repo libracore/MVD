@@ -18,7 +18,7 @@ class FakultativeRechnung(Document):
 def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False, druckvorlage=''):
     if not betrag_spende:
         cancel_old_hv_fr(mitgliedschaft)
-    mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
+    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
     fr = frappe.get_doc({
         "doctype": "Fakultative Rechnung",
@@ -60,7 +60,7 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spend
             "folder": "Home/Attachments",
             "is_private": 1,
             "content": filedata,
-            "attached_to_doctype": 'MV Mitgliedschaft',
+            "attached_to_doctype": 'Mitgliedschaft',
             "attached_to_name": mitgliedschaft.name
         })
         
@@ -133,7 +133,7 @@ def create_paid_sinv(fr, mitgliedschaft, sektion):
 
 def create_unpaid_sinv(fr, betrag=False):
     fr = frappe.get_doc("Fakultative Rechnung", fr)
-    mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", fr.mv_mitgliedschaft)
+    mitgliedschaft = frappe.get_doc("Mitgliedschaft", fr.mv_mitgliedschaft)
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
     company = frappe.get_doc("Company", sektion.company)
     if not mitgliedschaft.rg_kunde:

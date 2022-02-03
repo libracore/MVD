@@ -100,7 +100,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Mitgliedschaft",
-   "options": "MV Mitgliedschaft",
+   "options": "Mitgliedschaft",
    "read_only": 1,
    "reqd": 1
   },
@@ -133,7 +133,7 @@
    "label": "inkl. Mitgliederausweis"
   }
  ],
- "modified": "2022-01-14 09:03:04.947490",
+ "modified": "2022-02-03 08:49:24.563659",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Korrespondenz",

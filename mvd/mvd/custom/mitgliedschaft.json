@@ -1,7 +1,7 @@
 {
  "custom_fields": [],
  "custom_perms": [],
- "doctype": "MV Mitgliedschaft",
+ "doctype": "Mitgliedschaft",
  "property_setters": [
   {
    "_assign": null,
@@ -10,14 +10,14 @@
    "_user_tags": null,
    "creation": "2022-01-17 10:34:37.788939",
    "default_value": null,
-   "doc_type": "MV Mitgliedschaft",
+   "doc_type": "Mitgliedschaft",
    "docstatus": 0,
    "doctype_or_field": "DocType",
    "field_name": null,
    "idx": 0,
    "modified": "2022-01-17 10:34:37.788939",
    "modified_by": "Administrator",
-   "name": "MV Mitgliedschaft-default_print_format",
+   "name": "Mitgliedschaft-default_print_format",
    "owner": "Administrator",
    "parent": null,
    "parentfield": null,

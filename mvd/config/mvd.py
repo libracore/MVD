@@ -15,9 +15,9 @@ def get_data():
                },
                {
                     "type": "doctype",
-                    "name": "MV Mitgliedschaft",
-                    "label": _("MV Mitgliedschaft"),
-                    "description": _("MV Mitgliedschaft")
+                    "name": "Mitgliedschaft",
+                    "label": _("Mitgliedschaft"),
+                    "description": _("Mitgliedschaft")
                 },
                 {
                     "type": "doctype",

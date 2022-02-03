@@ -7,7 +7,7 @@ frappe.ui.form.on('Fakultative Rechnung', {
            frappe.call({
                method: "frappe.client.get",
                args: {
-                    "doctype": "MV Mitgliedschaft",
+                    "doctype": "Mitgliedschaft",
                     "name": cur_frm.doc.mv_mitgliedschaft
                },
                callback: function(response) {

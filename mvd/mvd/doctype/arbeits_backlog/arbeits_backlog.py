@@ -37,9 +37,9 @@ def kuendigungs_massendruck():
         output = PdfFileWriter()
         
         for ausstehender_druck in ausstehende_drucke:
-            mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", ausstehender_druck.mv_mitgliedschaft)
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", ausstehender_druck.mv_mitgliedschaft)
             abl = frappe.get_doc("Arbeits Backlog", ausstehender_druck.name)
-            output = frappe.get_print("MV Mitgliedschaft", mitgliedschaft.name, 'Kündigungsbestätigung', as_pdf = True, output = output)
+            output = frappe.get_print("Mitgliedschaft", mitgliedschaft.name, 'Kündigungsbestätigung', as_pdf = True, output = output)
             mitgliedschaft.kuendigung_verarbeiten = 0
             mitgliedschaft.save()
             abl.status = 'Completed'

@@ -1,7 +1,7 @@
 // Copyright (c) 2021, libracore and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('MV Mitgliedschaft', {
+frappe.ui.form.on('Mitgliedschaft', {
     onload: function(frm) {
         // override_default_email_dialog
         override_default_email_dialog(frm);
@@ -192,7 +192,7 @@ frappe.ui.form.on('MV Mitgliedschaft', {
 
 function get_adressdaten(frm) {
     frappe.call({
-        method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.get_uebersicht_html",
+        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_uebersicht_html",
         args:{
                 'name': cur_frm.doc.name
         },
@@ -283,7 +283,7 @@ function kuendigung(frm) {
                         frappe.prompt(field_list,
                         function(values){
                             frappe.call({
-                                method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.make_kuendigungs_prozess",
+                                method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.make_kuendigungs_prozess",
                                 args:{
                                         'mitgliedschaft': cur_frm.doc.name,
                                         'datum_kuendigung': values.datum,
@@ -359,7 +359,7 @@ function ausschluss(frm) {
 
 function sektionswechsel(frm) {
     frappe.call({
-        method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.get_sektionen_zur_auswahl",
+        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_sektionen_zur_auswahl",
         args:{},
         callback: function(r)
         {
@@ -369,7 +369,7 @@ function sektionswechsel(frm) {
             ],
             function(values){
                 frappe.call({
-                    method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.sektionswechsel",
+                    method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.sektionswechsel",
                     args:{
                             'mitgliedschaft': cur_frm.doc.name,
                             'neue_sektion': values.sektion_neu,
@@ -457,7 +457,7 @@ function erstelle_rechnung(frm) {
                     var hv_bar_bezahlt = null;
                 }
                 frappe.call({
-                    method: "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.create_mitgliedschaftsrechnung",
+                    method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung",
                     args:{
                             'mitgliedschaft': cur_frm.doc.name,
                             'bezahlt': bar_bezahlt,

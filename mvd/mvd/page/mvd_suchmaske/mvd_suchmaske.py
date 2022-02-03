@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe.utils.data import add_days, getdate, now
 import six
 import json
-from mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft import create_mitgliedschaftsrechnung
+from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung
 
 @frappe.whitelist()
 def suche(suchparameter, goto_list=False):
@@ -99,7 +99,7 @@ def suche(suchparameter, goto_list=False):
     else:
         filters = ''
     
-    mitgliedschaften = frappe.db.sql("""SELECT * FROM `tabMV Mitgliedschaft` {filters} ORDER BY `nachname_1` ASC""".format(filters=filters), as_dict=True)
+    mitgliedschaften = frappe.db.sql("""SELECT * FROM `tabMitgliedschaft` {filters} ORDER BY `nachname_1` ASC""".format(filters=filters), as_dict=True)
     
     if len(mitgliedschaften) > 0:
         if not suchparameter["sektions_uebergreifend"]:
@@ -117,7 +117,7 @@ def suche(suchparameter, goto_list=False):
                 if len(mitgliedschaften) > 1:
                     return 'too many'
                 else:
-                    mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaften[0].name).as_dict()
+                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaften[0].name).as_dict()
                     data = {
                         'mitgliedschaft': mitgliedschaft,
                     }
@@ -156,7 +156,7 @@ def anlage_prozess(anlage_daten, druckvorlage=False):
     
     # erstelle mitgliedschaft
     mitgliedschaft = frappe.get_doc({
-        "doctype": "MV Mitgliedschaft",
+        "doctype": "Mitgliedschaft",
         "sektion_id": anlage_daten["sektion_id"],
         "status_c": anlage_daten["status"],
         "language": anlage_daten["language"],

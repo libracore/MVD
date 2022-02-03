@@ -13,7 +13,7 @@ from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
 from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
 from frappe.utils.pdf import get_file_data_from_writer
 
-class MVMitgliedschaft(Document):
+class Mitgliedschaft(Document):
     def set_new_name(self):
         if not self.mitglied_nr or not self.mitglied_id:
             mitglied_nummer_obj = mvm_neue_mitglieder_nummer(self)
@@ -1276,7 +1276,7 @@ def get_timeline_data(doctype, name):
 @frappe.whitelist()
 def get_uebersicht_html(name):
     col_qty = 1
-    mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", name)
+    mitgliedschaft = frappe.get_doc("Mitgliedschaft", name)
     
     kunde_mitglied = False
     if mitgliedschaft.kunde_mitglied:
@@ -1409,7 +1409,7 @@ def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
     if self:
         mitgliedschaft = self
     else:
-        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     if mitgliedschaft.hat_solidarmitglied and not rg:
         # mit Solidarmitglied
         if mitgliedschaft.anrede_c not in ('Herr', 'Frau') and mitgliedschaft.anrede_2 not in ('Herr', 'Frau'):
@@ -1487,7 +1487,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
     if str(get_sektion_code(neue_sektion)) != 'ZH':
         try:
             # erstelle Mitgliedschaft in Zuzugs-Sektion
-            mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
             new_mitgliedschaft = frappe.copy_doc(mitgliedschaft)
             new_mitgliedschaft.mitglied_id = ''
             new_mitgliedschaft.zuzug_von = new_mitgliedschaft.sektion_id
@@ -1516,7 +1516,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
                     create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True)
             
             # markiere neue Mitgliedschaft als zu validieren
-            new_mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", new_mitgliedschaft.name)
+            new_mitgliedschaft = frappe.get_doc("Mitgliedschaft", new_mitgliedschaft.name)
             new_mitgliedschaft.validierung_notwendig = 1
             new_mitgliedschaft.letzte_bearbeitung_von = 'User'
             new_mitgliedschaft.save(ignore_permissions=True)
@@ -1532,7 +1532,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
 
 @frappe.whitelist()
 def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False):
-    mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
+    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
     company = frappe.get_doc("Company", sektion.company)
     if not mitgliedschaft.rg_kunde:
@@ -1622,7 +1622,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
             "folder": "Home/Attachments",
             "is_private": 1,
             "content": filedata,
-            "attached_to_doctype": 'MV Mitgliedschaft',
+            "attached_to_doctype": 'Mitgliedschaft',
             "attached_to_name": mitgliedschaft.name
         })
         
@@ -1667,7 +1667,7 @@ def create_korrespondenz_serienbriefe(mitgliedschaften, korrespondenzdaten):
 @frappe.whitelist()
 def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druckvorlage):
     # erfassung Kündigung
-    mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", mitgliedschaft)
+    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     mitgliedschaft.kuendigung = datum_kuendigung
     mitgliedschaft.status_c = 'Kündigung'
     mitgliedschaft.kuendigung_druckvorlage = druckvorlage
@@ -1678,7 +1678,7 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druck
     
     # erstellung Kündigungs PDF
     output = PdfFileWriter()
-    output = frappe.get_print("MV Mitgliedschaft", mitgliedschaft.name, 'Kündigungsbestätigung', as_pdf = True, output = output)
+    output = frappe.get_print("Mitgliedschaft", mitgliedschaft.name, 'Kündigungsbestätigung', as_pdf = True, output = output)
     
     pdf = frappe.utils.pdf.get_file_data_from_writer(output)
     file_name = "Kündigungsbestätigung_{mitgliedschaft}_{datetime}.pdf".format(mitgliedschaft=mitgliedschaft.name, datetime=now().replace(" ", "_"))
@@ -1689,7 +1689,7 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druck
         "folder": "Home/Attachments",
         "is_private": 1,
         "content": pdf,
-        "attached_to_doctype": 'MV Mitgliedschaft',
+        "attached_to_doctype": 'Mitgliedschaft',
         "attached_to_name": mitgliedschaft.name
     })
     
@@ -1737,10 +1737,10 @@ def raise_200(answer='Success'):
 # API Funktionshelfer
 # -----------------------------------------------
 def check_update_vs_neuanlage(kwargs):
-    if not frappe.db.exists("MV Mitgliedschaft", kwargs["mitgliedId"]):
+    if not frappe.db.exists("Mitgliedschaft", kwargs["mitgliedId"]):
         return mvm_neuanlage(kwargs)
     else:
-        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", kwargs["mitgliedId"])
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", kwargs["mitgliedId"])
         return mvm_update(mitgliedschaft, kwargs)
         
 
@@ -1896,7 +1896,7 @@ def mvm_neuanlage(kwargs):
                 m_und_w_pdf = 0
             
             new_mitgliedschaft = frappe.get_doc({
-                'doctype': 'MV Mitgliedschaft',
+                'doctype': 'Mitgliedschaft',
                 'mitglied_nr': str(kwargs['mitgliedNummer']),
                 'sektion_id': sektion_id,
                 'status_c': status_c,
@@ -2398,7 +2398,7 @@ def mvm_kuendigung(mitgliedschaft):
 # -----------------------------------------------
 def sinv_check_zahlung_mitgliedschaft(sinv, event):
     if sinv.mv_mitgliedschaft:
-        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", sinv.mv_mitgliedschaft)
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
         mitgliedschaft.save(ignore_permissions=True)
 
 def pe_check_zahlung_mitgliedschaft(pe, event):
@@ -2406,13 +2406,13 @@ def pe_check_zahlung_mitgliedschaft(pe, event):
         if ref.reference_doctype == 'Sales Invoice':
             sinv = frappe.get_doc("Sales Invoice", ref.reference_name)
             if sinv.mv_mitgliedschaft:
-                mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", sinv.mv_mitgliedschaft)
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
                 mitgliedschaft.save(ignore_permissions=True)
 
 def set_inaktiv():
-    mvms = frappe.db.sql("""SELECT `name` FROM `tabMV Mitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Kündigung', 'Ausschluss')""", as_dict=True)
+    mvms = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Kündigung', 'Ausschluss')""", as_dict=True)
     for mvm in mvms:
-        mv = frappe.get_doc("MV Mitgliedschaft", mvm.name)
+        mv = frappe.get_doc("Mitgliedschaft", mvm.name)
         if mv.status_c in ('Kündigung', 'Gestorben'):
             if mv.kuendigung and mv.kuendigung <= getdate(today()):
                 mv.status_c = 'Inaktiv'
@@ -2494,7 +2494,7 @@ def get_ampelfarbe(mitgliedschaft):
 def entferne_alte_reduzierungen():
     alte_preisregeln = frappe.db.sql("""SELECT `name` FROM `tabPricing Rule` WHERE `name` LIKE 'Reduzierung%' AND `disable` = 0 AND `valid_upto` < CURDATE()""", as_dict=True)
     for alte_preisregel in alte_preisregeln:
-        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", alte_preisregel.name.replace("Reduzierung ", ""))
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", alte_preisregel.name.replace("Reduzierung ", ""))
         mitgliedschaft.reduzierte_mitgliedschaft = 0
         mitgliedschaft.save()
     return

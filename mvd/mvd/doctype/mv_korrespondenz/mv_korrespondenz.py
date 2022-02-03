@@ -135,7 +135,7 @@ def get_korrespondenz_data(korrespondenzen):
     
     for _korrespondenz in korrespondenzen:
         korrespondenz = frappe.get_doc("MV Korrespondenz", _korrespondenz)
-        mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", korrespondenz.mv_mitgliedschaft)
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", korrespondenz.mv_mitgliedschaft)
         _data = [
             mitgliedschaft.mitglied_nr,
             mitgliedschaft.sektion_id,

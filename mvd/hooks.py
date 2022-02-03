@@ -38,7 +38,7 @@ doctype_list_js = {"Error Log" : "public/js/custom_scripts/error_log_list.js"}
 
 jenv = {
     "methods": [
-        "get_anredekonvention:mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.get_anredekonvention"
+        "get_anredekonvention:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_anredekonvention"
     ]
 }
 # Home Pages
@@ -92,10 +92,10 @@ notification_config = "mvd.mvd.utils.notifications.get_notification_config"
 
 doc_events = {
     "Sales Invoice": {
-        "on_update": "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.sinv_check_zahlung_mitgliedschaft"
+        "on_update": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.sinv_check_zahlung_mitgliedschaft"
     },
     "Payment Entry": {
-        "on_submit": "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.pe_check_zahlung_mitgliedschaft"
+        "on_submit": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.pe_check_zahlung_mitgliedschaft"
     }
 }
 
@@ -103,8 +103,8 @@ doc_events = {
 # ---------------
 scheduler_events = {
     "daily": [
-        "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.set_inaktiv",
-        "mvd.mvd.doctype.mv_mitgliedschaft.mv_mitgliedschaft.entferne_alte_reduzierungen"
+        "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.set_inaktiv",
+        "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.entferne_alte_reduzierungen"
     ]
 }
 # scheduler_events = {
