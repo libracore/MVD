@@ -1,9 +1,8 @@
 // Copyright (c) 2021-2022, libracore AG and contributors
 // For license information, please see license.txt
 
-// add links to senstech wiki
+// add links to MVD wiki
 frappe.provide('frappe.help.help_links');
-
 frappe.call({
     method: 'mvd.mvd.doctype.mv_help_links.mv_help_links.get_help_links',
     callback: function(r) {
@@ -24,15 +23,17 @@ frappe.call({
     }
 });
 
-setTimeout(function(){$('.nav.navbar-nav.navbar-right').prepend('<li class="dropdown dropdown-mobile"><a class"dropdown-toggle" href="#vbz"><span id="ts_indicator" class=""><i class="fa fa-inbox"></i></span></a></li>');}, 1000);
+//~ // Add VBZ Shortcut to Navbar
+//~ setTimeout(function(){$('.nav.navbar-nav.navbar-right').prepend('<li class="dropdown dropdown-mobile"><a class"dropdown-toggle" href="#vbz"><span id="ts_indicator" class=""><i class="fa fa-inbox"></i></span></a></li>');}, 1000);
 
+//~ // Redirect to VBZ after login
 //~ $(document).ready(function() {
-    //~ // Redirect to VBZ after login
     //~ if(frappe._cur_route==""||frappe._cur_route=="#") {
         //~ window.location.href = "#vbz";
     //~ }
 //~ });
 
+//~ // Redirect to VBZ after click on Navbar Desk Shortcut
 //~ $(document).on('click','#navbar-breadcrumbs a, a.navbar-home',function(event){
     //~ var navURL = event.currentTarget.href;
 
