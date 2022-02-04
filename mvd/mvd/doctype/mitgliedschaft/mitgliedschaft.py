@@ -2360,7 +2360,7 @@ def get_adressen_for_sp(mitgliedschaft):
         if mitgliedschaft.unabhaengiger_debitor:
             rechnungskontakt = {
                 "anrede": str(mitgliedschaft.rg_anrede) if mitgliedschaft.rg_anrede else "Unbekannt",
-                "istHauptkontakt": False,
+                "istHauptkontakt": True,
                 "vorname": str(mitgliedschaft.rg_vorname) if mitgliedschaft.rg_vorname else None,
                 "nachname": str(mitgliedschaft.rg_nachname) if mitgliedschaft.rg_nachname else None,
                 "email": str(mitgliedschaft.rg_e_mail) if mitgliedschaft.rg_e_mail else None,
@@ -2369,6 +2369,20 @@ def get_adressen_for_sp(mitgliedschaft):
                 "telefonGeschaeft": str(mitgliedschaft.rg_tel_g) if mitgliedschaft.rg_tel_g else None,
                 "firma": str(mitgliedschaft.rg_firma) if mitgliedschaft.rg_firma else None,
                 "firmaZusatz": str(mitgliedschaft.rg_zusatz_firma) if mitgliedschaft.rg_zusatz_firma else None,
+            }
+            rechnung['kontakte'].append(rechnungskontakt)
+        else:
+            rechnungskontakt = {
+                "anrede": str(mitgliedschaft.anrede_c) if mitgliedschaft.anrede_c else "Unbekannt",
+                "istHauptkontakt": True,
+                "vorname": str(mitgliedschaft.vorname_1) if mitgliedschaft.vorname_1 else None,
+                "nachname": str(mitgliedschaft.nachname_1) if mitgliedschaft.nachname_1 else None,
+                "email": str(mitgliedschaft.e_mail_1) if mitgliedschaft.e_mail_1 else None,
+                "telefon": str(mitgliedschaft.tel_p_1) if mitgliedschaft.tel_p_1 else None,
+                "mobile": str(mitgliedschaft.tel_m_1) if mitgliedschaft.tel_m_1 else None,
+                "telefonGeschaeft": str(mitgliedschaft.tel_g_1) if mitgliedschaft.tel_g_1 else None,
+                "firma": str(mitgliedschaft.firma) if mitgliedschaft.kundentyp == 'Unternehmen' else None,
+                "firmaZusatz": str(mitgliedschaft.zusatz_firma) if mitgliedschaft.kundentyp == 'Unternehmen' else None
             }
             rechnung['kontakte'].append(rechnungskontakt)
         
