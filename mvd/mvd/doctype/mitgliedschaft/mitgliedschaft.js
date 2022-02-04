@@ -210,7 +210,8 @@ function kuendigung(frm) {
                 'sektion': cur_frm.doc.sektion_id,
                 'dokument': 'Kündigung',
                 'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
-                'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft
+                'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                'language': cur_frm.doc.language
         },
         async: false,
         callback: function(res)
@@ -429,7 +430,8 @@ function erstelle_rechnung(frm) {
                 'sektion': cur_frm.doc.sektion_id,
                 'dokument': dokument,
                 'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
-                'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft
+                'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                'language': cur_frm.doc.language
         },
         async: false,
         callback: function(r)
@@ -504,7 +506,8 @@ function erstelle_spenden_rechnung(frm) {
                 'sektion': cur_frm.doc.sektion_id,
                 'dokument': 'Spende mit EZ',
                 'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
-                'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft
+                'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                'language': cur_frm.doc.language
         },
         async: false,
         callback: function(res)

@@ -602,7 +602,8 @@ frappe.mvd_such_client = {
                                 args:{
                                         'sektion': values.sektion_id,
                                         'dokument': dokument,
-                                        'mitgliedtyp': values.mitgliedtyp
+                                        'mitgliedtyp': values.mitgliedtyp,
+                                        'language': values.language
                                 },
                                 async: false,
                                 callback: function(response)

@@ -136,15 +136,16 @@ class Druckvorlage(Document):
                 self.default = 1
 
 @frappe.whitelist()
-def get_druckvorlagen(sektion, dokument, mitgliedtyp, reduzierte_mitgliedschaft=0):
+def get_druckvorlagen(sektion, dokument, mitgliedtyp, reduzierte_mitgliedschaft=0, language='de'):
     _alle_druckvorlagen = frappe.db.sql("""SELECT
                                             `name`,
                                             `default`
                                         FROM `tabDruckvorlage`
                                         WHERE `sektion_id` = '{sektion}'
                                         AND `mitgliedtyp_c` = '{mitgliedtyp}'
-                                        AND `reduzierte_mitgliedschaft` = '{reduzierte_mitgliedschaft}
-                                        AND `deaktiviert` != 1'""".format(sektion=sektion, mitgliedtyp=mitgliedtyp, reduzierte_mitgliedschaft=reduzierte_mitgliedschaft), as_dict=True)
+                                        AND `reduzierte_mitgliedschaft` = '{reduzierte_mitgliedschaft}'
+                                        AND `deaktiviert` != 1
+                                        AND `language` = '{language}'""".format(sektion=sektion, mitgliedtyp=mitgliedtyp, reduzierte_mitgliedschaft=reduzierte_mitgliedschaft, language=language), as_dict=True)
     
     alle_druckvorlagen = []
     default_druckvorlage = ''

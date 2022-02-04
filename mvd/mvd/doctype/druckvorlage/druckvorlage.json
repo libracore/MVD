@@ -10,6 +10,7 @@
   "section_allgemein",
   "sektion_id",
   "mitgliedtyp_c",
+  "language",
   "reduzierte_mitgliedschaft",
   "cb1",
   "dokument",
@@ -344,9 +345,16 @@
    "fieldname": "logo_ausblenden",
    "fieldtype": "Check",
    "label": "Logo Ausblenden"
+  },
+  {
+   "default": "de",
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Sprache",
+   "options": "Language"
   }
  ],
- "modified": "2022-02-04 10:29:21.237067",
+ "modified": "2022-02-04 12:59:47.475805",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",
