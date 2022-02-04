@@ -8,6 +8,7 @@ Allgemein
     margin: 5px;
     cursor: pointer;
     width: 150px;
+    border-radius: 5px;
 }
 
 .green-card:hover {
