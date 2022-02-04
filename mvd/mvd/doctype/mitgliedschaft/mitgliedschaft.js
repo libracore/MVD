@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Mitgliedschaft', {
-    onload: function(frm) {
+    setup: function(frm) {
         // override_default_email_dialog
         override_default_email_dialog(frm);
     },
@@ -598,6 +598,8 @@ function pincode_lookup(pincode, ort) {
 }
 
 function override_default_email_dialog(frm) {
+    $('.menu-item-label[data-label="Email"]').parent().off('click');
+            $('.menu-item-label[data-label="E-Mail"]').parent().off('click');
     document.addEventListener('click',function(event) {
         // Replace email dialog to get a more sensible draft message and recipients
         var on_email_menutext = event.target.classList.contains('menu-item-label') && ['E-Mail','Email'].includes(event.target.innerText);
