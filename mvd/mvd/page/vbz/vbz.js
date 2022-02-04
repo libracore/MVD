@@ -45,13 +45,31 @@ frappe.vbz = {
         $("#handbuch").off("click");
         $("#massenlauf").off("click");
         $("#adresspflege").off("click");
+        $("#serienbrief").off("click");
+        $("#camt").off("click");
+        $("#adresspflege_second").off("click");
     },
     add_click_handlers: function() {
         frappe.vbz.remove_click_handlers();
+        $("#camt").click(function(){
+            var default_sektion = frappe.vbz.get_default_sektion();
+            if (default_sektion) {
+                frappe.route_options = {"sektion_id": default_sektion};
+            } else {
+                frappe.route_options = {};
+            }
+            frappe.set_route("List", "CAMT Import");
+        });
+        $("#serienbrief").click(function(){
+            frappe.msgprint("wie weiter?");
+        });
         $("#massenlauf").click(function(){
             frappe.vbz.show_view('massenlauf');
         });
         $("#adresspflege").click(function(){
+            frappe.vbz.show_view('adresspflege');
+        });
+        $("#adresspflege_second").click(function(){
             frappe.vbz.show_view('adresspflege');
         });
         $(".back-to-overview").click(function(){
@@ -61,7 +79,12 @@ frappe.vbz = {
             window.open('https://wiki.mieterverband.ch/pages/viewpage.action?pageId=74744863', '_blank').focus();
         });
         $("#mitglieder").click(function(){
-            frappe.route_options = {"sektion_id": frappe.vbz.get_default_sektion()};
+            var default_sektion = frappe.vbz.get_default_sektion();
+            if (default_sektion) {
+                frappe.route_options = {"sektion_id": default_sektion};
+            } else {
+                frappe.route_options = {};
+            }
             frappe.set_route("List", "Mitgliedschaft");
         });
         $("#suchmaske").click(function(){

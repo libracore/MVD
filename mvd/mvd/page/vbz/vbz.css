@@ -1,11 +1,9 @@
+/*
+Allgemein
+*/
 .control-card {
     float: left;
-/*
-    width: 50%;
-    margin-left: 25% !important;
-*/
     height: 180px;
-    /*border: 1px solid black;*/
     padding: 5px;
     margin: 5px;
     cursor: pointer;
@@ -24,8 +22,12 @@
 .place-holder-left {
     padding-left: 10em;
 }
+
+h2.place-holder-left {
+    padding-left: 7em;
+}
+
 .vbz-indikator {
-    /*border: 1px solid black;*/
     height: 2em;
     border-radius: 2em;
     width: 2em;
@@ -35,6 +37,7 @@
     background-color: #ff5858;
     color: white;
 }
+
 .vbz-indikator span {
     font-size: 1em;
     font-weight: bold;
@@ -60,11 +63,17 @@ h1 {
     font-weight: bold;
 }
 
-#table_validierungs_uebersicht, #table_massenlauf_uebersicht {
+/*
+Validierung, Massenlauf, Adresspflege
+*/
+#table_validierungs_uebersicht, #table_massenlauf_uebersicht, #table_adressrecherche_uebersicht, #table_adresspflege_uebersicht {
     margin-left: 10em;
     width: 50%;
 }
 
+/*
+Validierung
+*/
 #table_validierungs_uebersicht > tbody > tr > td:nth-child(odd) {
     text-align: left;
 }
@@ -82,10 +91,21 @@ h1 {
     cursor: pointer;
 }
 
+/*
+Massenlauf
+*/
 #table_massenlauf_uebersicht > tbody > tr:nth-child(n+2):hover {
     background-color: #91bf1f;
 }
 
 #table_massenlauf_uebersicht > tbody > tr:nth-child(n+2) > td:nth-child(n+3) > i:hover {
+    cursor: pointer;
+}
+
+/*
+Adresspflege
+*/
+#einmal_unzustellbar:hover, #zweimal_unzustellbar:hover, #umzugsanzeige_objekt:hover, #umzugsanzeige_solidarmitglied:hover, #verstorben_erloschen:hover, #weggezogen_unbekannt:hover, #treffer_ausland:hover, #personen_nicht_bekannt:hover {
+    background-color: #91bf1f;
     cursor: pointer;
 }
