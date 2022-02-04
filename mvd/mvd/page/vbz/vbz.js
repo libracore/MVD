@@ -48,6 +48,7 @@ frappe.vbz = {
         $("#serienbrief").off("click");
         $("#camt").off("click");
         $("#adresspflege_second").off("click");
+        $("#goto_klassisch").off("click");
     },
     add_click_handlers: function() {
         frappe.vbz.remove_click_handlers();
@@ -59,6 +60,9 @@ frappe.vbz = {
                 frappe.route_options = {};
             }
             frappe.set_route("List", "CAMT Import");
+        });
+        $("#goto_klassisch").click(function(){
+            frappe.set_route("modules/MVD");
         });
         $("#serienbrief").click(function(){
             frappe.msgprint("wie weiter?");
