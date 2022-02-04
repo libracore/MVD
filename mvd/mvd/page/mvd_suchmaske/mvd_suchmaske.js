@@ -46,6 +46,9 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.sektion_id = frappe.mvd_such_client.create_sektion_id_field(page)
     me.search_fields.sektion_id.set_value(default_sektion).then(function(){me.search_fields.sektion_id.refresh();});
     
+    me.search_fields.alle_sektionen = frappe.mvd_such_client.create_alle_sektionen_field(page, me.search_fields.sektion_id, default_sektion)
+    me.search_fields.alle_sektionen.refresh();
+    
     me.search_fields.mitglied_nr = frappe.mvd_such_client.create_mitglied_nr_field(page)
     me.search_fields.mitglied_nr.refresh();
     
@@ -135,7 +138,12 @@ frappe.mvd_such_client = {
                     }
                 }
             } else {
-                frappe.msgprint("Bitte mindestens eine Sektion angeben");
+                if (cur_page.page.search_fields.alle_sektionen.get_value() == 1&&frappe.user.has_role("System Manager")) {
+                    // suche über alle sektionen ahnand spezial rechte
+                    frappe.mvd_such_client.start_suche(page)
+                } else {
+                    frappe.msgprint("Bitte mindestens eine Sektion angeben");
+                }
             }
         }
     },
@@ -523,6 +531,29 @@ frappe.mvd_such_client = {
             only_input: true,
         });
         return suchresultate
+    },
+    create_alle_sektionen_field: function(page, sektion_id, default_sektion) {
+        var alle_sektionen = frappe.ui.form.make_control({
+            parent: page.main.find(".alle_sektionen"),
+            df: {
+                fieldtype: "Check",
+                fieldname: "alle_sektionen",
+                change: function(){
+                    if (alle_sektionen.get_value() == 1) {
+                        sektion_id.set_value('');
+                        sektion_id.df.read_only = 1;
+                        sektion_id.refresh();
+                    } else {
+                        sektion_id.set_value(default_sektion);
+                        sektion_id.df.read_only = 0;
+                        sektion_id.refresh();
+                    }
+                },
+                read_only: frappe.user.has_role("System Manager") ? 0:1
+            },
+            only_input: true,
+        });
+        return alle_sektionen
     },
     create_neuanlage_btn: function(page) {
         var neuanlage = frappe.ui.form.make_control({
