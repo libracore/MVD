@@ -53,7 +53,7 @@
                     {% endif %}
                     <td>
                         {% if not meine_sektionen or mitgliedschaft.sektion_id in meine_sektionen %}
-                            <a href="/desk#Form/MV Mitgliedschaft/{{ mitgliedschaft.name }}">{{ mitgliedschaft.mitglied_nr }}</a>
+                            <a href="/desk#Form/Mitgliedschaft/{{ mitgliedschaft.name }}">{{ mitgliedschaft.mitglied_nr }}</a>
                         {% else %}
                             {{ mitgliedschaft.mitglied_nr }}
                         {% endif %}
@@ -83,7 +83,7 @@
                         {% endif %}
                         <td>
                             {% if not meine_sektionen or mitgliedschaft.sektion_id in meine_sektionen %}
-                                <a href="/desk#Form/MV Mitgliedschaft/{{ mitgliedschaft.name }}">{{ mitgliedschaft.mitglied_nr }}</a>
+                                <a href="/desk#Form/Mitgliedschaft/{{ mitgliedschaft.name }}">{{ mitgliedschaft.mitglied_nr }}</a>
                             {% else %}
                                 {{ mitgliedschaft.mitglied_nr }}
                             {% endif %}

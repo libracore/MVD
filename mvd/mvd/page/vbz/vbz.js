@@ -25,8 +25,8 @@ frappe.vbz = {
                 if (r.message) {
                     page.add_view('overview', frappe.render_template("overview", eval(r.message)))
                     page.add_view('validierung', frappe.render_template("validierung", eval(r.message.validierung)))
-                    page.add_view('kuendigung', frappe.render_template("kuendigung", eval(r.message.kuendigung)))
-                    page.add_view('kuendigung_massen_verarbeitung', frappe.render_template("kuendigung_massen_verarbeitung", eval(r.message.kuendigung)))
+                    page.add_view('massenlauf', frappe.render_template("massenlauf", {}))
+                    page.add_view('adresspflege', frappe.render_template("adresspflege", {}))
                     frappe.vbz.add_click_handlers();
                 }
             }
@@ -37,24 +37,28 @@ frappe.vbz = {
     },
     remove_click_handlers: function() {
         $(".back-to-overview").off("click");
-        $(".back-to-kuendigung").off("click");
         $("#mitglieder").off("click");
         $("#suchmaske").off("click");
         $("#arbeitsbacklog").off("click");
         $("#validieren").off("click");
-        $("#kuendigung").off("click");
-        $("#massen_kuendigung").off("click");
-        $("#validierung_allgemein").off("click");
-        $("#kuendigung_mitglieder").off("click");
         $("#neuanlage").off("click");
+        $("#handbuch").off("click");
+        $("#massenlauf").off("click");
+        $("#adresspflege").off("click");
     },
     add_click_handlers: function() {
         frappe.vbz.remove_click_handlers();
+        $("#massenlauf").click(function(){
+            frappe.vbz.show_view('massenlauf');
+        });
+        $("#adresspflege").click(function(){
+            frappe.vbz.show_view('adresspflege');
+        });
         $(".back-to-overview").click(function(){
             frappe.vbz.show_view('overview');
         });
-        $(".back-to-kuendigung").click(function(){
-            frappe.vbz.show_view('kuendigung');
+        $("#handbuch").click(function(){
+            window.open('https://wiki.mieterverband.ch/pages/viewpage.action?pageId=74744863', '_blank').focus();
         });
         $("#mitglieder").click(function(){
             frappe.route_options = {"sektion_id": frappe.vbz.get_default_sektion()};
@@ -70,18 +74,8 @@ frappe.vbz = {
         $("#validieren").click(function(){
             frappe.vbz.show_view('validierung');
         });
-        $("#kuendigung").click(function(){
-            frappe.vbz.show_view('kuendigung');
-        });
-        $("#massen_kuendigung").click(function(){
-            frappe.vbz.show_view('kuendigung_massen_verarbeitung');
-        });
         $("#validierung_allgemein").click(function(){
             frappe.route_options = {"validierung_notwendig": 1}
-            frappe.set_route("List", "Mitgliedschaft");
-        });
-        $("#kuendigung_mitglieder").click(function(){
-            frappe.route_options = {"kuendigung_verarbeiten": 1}
             frappe.set_route("List", "Mitgliedschaft");
         });
         $("#neuanlage").click(function(){

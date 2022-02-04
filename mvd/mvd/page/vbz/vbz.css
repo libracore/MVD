@@ -1,12 +1,15 @@
 .control-card {
-    /*float: left;*/
+    float: left;
+/*
     width: 50%;
     margin-left: 25% !important;
+*/
     height: 180px;
     /*border: 1px solid black;*/
     padding: 5px;
     margin: 5px;
     cursor: pointer;
+    width: 150px;
 }
 
 .control-card .fa {
@@ -15,17 +18,17 @@
 
 .back-to-overview {
     cursor: pointer;
+    padding-right: 4em;
 }
 
-.back-to-kuendigung {
-    cursor: pointer;
+.place-holder-left {
+    padding-left: 10em;
 }
-
 .vbz-indikator {
     /*border: 1px solid black;*/
-    height: 4em;
-    border-radius: 4em;
-    width: 4em;
+    height: 2em;
+    border-radius: 2em;
+    width: 2em;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -33,5 +36,56 @@
     color: white;
 }
 .vbz-indikator span {
-    font-size: 2em;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+#page-vbz {
+    background-color: #fafad9;
+}
+
+.green-icon {
+    color: #91bf1f;
+}
+
+.blue-icon {
+    color: #0063ae;
+}
+
+.first-card {
+    margin-left: -35px;
+}
+
+h1 {
+    font-weight: bold;
+}
+
+#table_validierungs_uebersicht, #table_massenlauf_uebersicht {
+    margin-left: 10em;
+    width: 50%;
+}
+
+#table_validierungs_uebersicht > tbody > tr > td:nth-child(odd) {
+    text-align: left;
+}
+
+#table_validierungs_uebersicht > tbody > tr > td:nth-child(even) {
+    text-align: right;
+}
+
+#table_validierungs_uebersicht > tbody > tr > th:nth-child(even) {
+    text-align: right;
+}
+
+#online_beitritte:hover, #online_anmeldungen:hover, #online_kuendigungen:hover, #online_mutationen:hover, #geschenk_mitgliedschaften:hover, #zuzuege:hover, #autom_adressaenderungen:hover {
+    background-color: #91bf1f;
+    cursor: pointer;
+}
+
+#table_massenlauf_uebersicht > tbody > tr:nth-child(n+2):hover {
+    background-color: #91bf1f;
+}
+
+#table_massenlauf_uebersicht > tbody > tr:nth-child(n+2) > td:nth-child(n+3) > i:hover {
+    cursor: pointer;
 }

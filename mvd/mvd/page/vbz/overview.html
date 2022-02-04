@@ -1,75 +1,80 @@
 <div class="row">
-    <center><h1>Shortcuts</h1></center>
+    <h1>Shortcuts</h1>
 </div>
 <div class="row">
-    <div class="col-sm-4">
-        <div class="control-card" id="suchmaske">
-            <center>
-                <i class="fa fa-search"></i>
-                <p>Suchmaske</p>
-            </center>
-        </div>
+    <div class="control-card first-card" id="suchmaske">
+        <center>
+            <i class="fa fa-search blue-icon"></i>
+            <p>Suchmaske</p>
+        </center>
     </div>
-    <div class="col-sm-4">
-        <div class="control-card" id="mitglieder">
-            <center>
-                <i class="fa fa-users"></i>
-                <p>Mitglieder</p>
-            </center>
-        </div>
+    <div class="control-card" id="mitglieder">
+        <center>
+            <i class="fa fa-users blue-icon"></i>
+            <p>Mitglieder</p>
+        </center>
     </div>
-    <div class="col-sm-4">
-        <div class="control-card" id="arbeitsbacklog">
-            <center>
-                <i class="fa fa-list-ol"></i>
-                <p>Arbeits Backlog</p>
-                {% if arbeits_backlog.qty > 0 %}
-                    <div class="vbz-indikator"><span>{{ arbeits_backlog.qty }}</span></div>
-                {% endif %}
-            </center>
-        </div>
+    <div class="control-card" id="arbeitsbacklog">
+        <center>
+            <i class="fa fa-list-ol blue-icon"></i>
+            <p>Arbeits Backlog</p>
+            {% if arbeits_backlog.qty > 0 %}
+                <div class="vbz-indikator"><span>{{ arbeits_backlog.qty }}</span></div>
+            {% endif %}
+        </center>
+    </div>
+    <div class="control-card" id="handbuch">
+        <center>
+            <i class="fa fa-book blue-icon"></i>
+            <p>Handbuch</p>
+        </center>
     </div>
 </div>
 <div class="row">
-    <center><h1>Aktionen</h1></center>
+    <h1>Aktionen</h1>
 </div>
 <div class="row">
-    <div class="col-sm-3">
-        <div class="control-card" id="validieren">
-            <center>
-                <i class="fa fa-check-square"></i>
-                <p>Validieren</p>
-                {% if validierung.qty > 0 %}
-                    <div class="vbz-indikator"><span>{{ validierung.qty }}</span></div>
-                {% endif %}
-            </center>
-        </div>
+    <div class="control-card first-card" id="neuanlage">
+        <center>
+            <i class="fa fa-user-plus green-icon"></i>
+            <p>Neuanlage</p>
+        </center>
     </div>
-    <div class="col-sm-3">
-        <div class="control-card" id="kuendigung">
-            <center>
-                <i class="fa fa-power-off"></i>
-                <p>Kündigungen</p>
-                {% if kuendigung.qty > 0 %}
-                    <div class="vbz-indikator"><span>{{ kuendigung.qty }}</span></div>
-                {% endif %}
-            </center>
-        </div>
+    <div class="control-card" id="validieren">
+        <center>
+            <i class="fa fa-check-square green-icon"></i>
+            <p>Validieren</p>
+            {% if validierung.qty > 0 %}
+                <div class="vbz-indikator"><span>{{ validierung.qty }}</span></div>
+            {% endif %}
+        </center>
     </div>
-    <div class="col-sm-3">
-        <div class="control-card" id="neuanlage">
-            <center>
-                <i class="fa fa-user-plus"></i>
-                <p>Neuanlage</p>
-            </center>
-        </div>
+    <div class="control-card" id="massenlauf">
+        <center>
+            <i class="fa fa-print green-icon"></i>
+            <p>Massenlauf</p>
+        </center>
     </div>
-    <div class="col-sm-3">
-        <div class="control-card" id="serienbrief">
-            <center>
-                <i class="fa fa-envelope-open"></i>
-                <p>Serienbrief</p>
-            </center>
-        </div>
+    <div class="control-card" id="adresspflege">
+        <center>
+            <i class="fa fa-address-book green-icon"></i>
+            <p>Adresspflege</p>
+        </center>
+    </div>
+    <div class="control-card" id="serienbrief">
+        <center>
+            <i class="fa fa-envelope-open green-icon"></i>
+            <p>Serienbrief</p>
+        </center>
+    </div>
+    <div class="control-card" id="camt">
+        <center>
+            <i class="fa fa-university green-icon"></i>
+            <p>
+                CAMT einlesen<br>
+                Letzter import:<br>
+                xx.xx.xxxx
+            </p>
+        </center>
     </div>
 </div>

@@ -2309,7 +2309,7 @@ def get_adressen_for_sp(mitgliedschaft):
         ]
     }
     
-    if mitgliedschaft.hat_solidarmitglied:
+    if int(mitgliedschaft.hat_solidarmitglied) == 1:
         solidarmitglied = {
             "anrede": str(mitgliedschaft.anrede_2) if mitgliedschaft.anrede_2 else "Unbekannt",
             "istHauptkontakt": False,
@@ -2326,7 +2326,7 @@ def get_adressen_for_sp(mitgliedschaft):
     
     adressen.append(mitglied)
     
-    if mitgliedschaft.abweichende_objektadresse:
+    if int(mitgliedschaft.abweichende_objektadresse) == 1:
         objekt = {
             "typ": "Objekt",
             "strasse": str(mitgliedschaft.objekt_strasse) if mitgliedschaft.objekt_strasse else None,
@@ -2342,7 +2342,7 @@ def get_adressen_for_sp(mitgliedschaft):
         }
         adressen.append(objekt)
     
-    if mitgliedschaft.abweichende_rechnungsadresse:
+    if int(mitgliedschaft.abweichende_rechnungsadresse) == 1:
         rechnung = {
             "typ": "Rechnung",
             "strasse": str(mitgliedschaft.rg_strasse) if mitgliedschaft.rg_strasse else None,
@@ -2357,7 +2357,7 @@ def get_adressen_for_sp(mitgliedschaft):
             "kontakte": []
         }
         
-        if mitgliedschaft.unabhaengiger_debitor:
+        if int(mitgliedschaft.unabhaengiger_debitor) == 1:
             rechnungskontakt = {
                 "anrede": str(mitgliedschaft.rg_anrede) if mitgliedschaft.rg_anrede else "Unbekannt",
                 "istHauptkontakt": True,
