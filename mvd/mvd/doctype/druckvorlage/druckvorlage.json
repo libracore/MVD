@@ -19,6 +19,7 @@
   "anzahl_seiten",
   "cb_2",
   "doppelseitiger_druck",
+  "logo_ausblenden",
   "section_tipps",
   "tipps",
   "section_inhalt_1",
@@ -29,6 +30,7 @@
   "seite_1_qrr_spende_hv",
   "seite_1_ausweis",
   "seite_1_fusszeile_ausblenden",
+  "seite_1_referenzblock_ausblenden",
   "h2",
   "seite_2a",
   "seite_2b",
@@ -36,13 +38,19 @@
   "seite_2_qrr_spende_hv",
   "seite_2_ausweis",
   "seite_2_fusszeile_ausblenden",
+  "seite_2_referenzblock_ausblenden",
+  "seite_2_adressblock_ausblenden",
+  "seite_2_datum_ausblenden",
   "h3",
   "seite_3a",
   "seite_3b",
   "seite_3_qrr",
   "seite_3_qrr_spende_hv",
   "seite_3_ausweis",
-  "seite_3_fusszeile_ausblenden"
+  "seite_3_fusszeile_ausblenden",
+  "seite_3_referenzblock_ausblenden",
+  "seite_3_adressblock_ausblenden",
+  "seite_3_datum_ausblenden"
  ],
  "fields": [
   {
@@ -63,7 +71,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Dokument",
-   "options": "Beitritt mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ",
+   "options": "Anmeldung mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ",
    "reqd": 1
   },
   {
@@ -75,7 +83,7 @@
    "fieldname": "anzahl_seiten",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Anzahl Seiten",
+   "label": "Anzahl Bl\u00e4tter",
    "options": "1\n2\n3",
    "reqd": 1
   },
@@ -88,7 +96,7 @@
   {
    "fieldname": "h1",
    "fieldtype": "Heading",
-   "label": "Seite 1"
+   "label": "Blatt 1"
   },
   {
    "fieldname": "seite_1a",
@@ -102,7 +110,7 @@
    "label": "R\u00fcckseite"
   },
   {
-   "depends_on": "eval:doc.anzahl_seiten!='3'&&in_list(['Beitritt mit EZ', 'Interessent*Innenbrief mit EZ'], doc.dokument)",
+   "depends_on": "eval:doc.anzahl_seiten!='3'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ'], doc.dokument)",
    "fieldname": "seite_1_qrr",
    "fieldtype": "Select",
    "label": "QRR EZ",
@@ -112,7 +120,7 @@
    "depends_on": "eval:doc.anzahl_seiten!='1'",
    "fieldname": "h2",
    "fieldtype": "Heading",
-   "label": "Seite 2"
+   "label": "Blatt 2"
   },
   {
    "depends_on": "eval:doc.anzahl_seiten!='1'",
@@ -127,7 +135,7 @@
    "label": "R\u00fcckseite"
   },
   {
-   "depends_on": "eval:doc.anzahl_seiten!='1'&&in_list(['Beitritt mit EZ', 'Interessent*Innenbrief mit EZ'], doc.dokument)",
+   "depends_on": "eval:doc.anzahl_seiten!='1'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ'], doc.dokument)",
    "fieldname": "seite_2_qrr",
    "fieldtype": "Select",
    "label": "QRR EZ",
@@ -137,7 +145,7 @@
    "depends_on": "eval:doc.anzahl_seiten=='3'",
    "fieldname": "h3",
    "fieldtype": "Heading",
-   "label": "Seite 3"
+   "label": "Blatt 3"
   },
   {
    "depends_on": "eval:doc.anzahl_seiten=='3'",
@@ -152,7 +160,7 @@
    "label": "R\u00fcckseite"
   },
   {
-   "depends_on": "eval:doc.anzahl_seiten=='3'&&in_list(['Beitritt mit EZ', 'Interessent*Innenbrief mit EZ'], doc.dokument)",
+   "depends_on": "eval:doc.anzahl_seiten=='3'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ'], doc.dokument)",
    "fieldname": "seite_3_qrr",
    "fieldtype": "Select",
    "label": "QRR EZ",
@@ -162,21 +170,21 @@
    "default": "0",
    "fieldname": "seite_1_fusszeile_ausblenden",
    "fieldtype": "Check",
-   "label": "Fusszeile Seite 1 ausblenden"
+   "label": "Fusszeile Blatt 1 ausblenden"
   },
   {
    "default": "0",
    "depends_on": "eval:doc.anzahl_seiten!='1'",
    "fieldname": "seite_2_fusszeile_ausblenden",
    "fieldtype": "Check",
-   "label": "Fusszeile Seite 2 ausblenden"
+   "label": "Fusszeile Blatt 2 ausblenden"
   },
   {
    "default": "0",
    "depends_on": "eval:doc.anzahl_seiten=='3'",
    "fieldname": "seite_3_fusszeile_ausblenden",
    "fieldtype": "Check",
-   "label": "Fusszeile Seite 3 ausblenden"
+   "label": "Fusszeile Blatt 3 ausblenden"
   },
   {
    "fieldname": "section_inhalt_1",
@@ -196,21 +204,21 @@
    "depends_on": "eval:in_list(['Begr\u00fcssung mit Ausweis', 'Korrespondenz'], doc.dokument)",
    "fieldname": "seite_1_ausweis",
    "fieldtype": "Check",
-   "label": "Ausweis auf Seite 1 andrucken"
+   "label": "Ausweis auf Blatt 1 andrucken"
   },
   {
    "default": "0",
    "depends_on": "eval:in_list(['Begr\u00fcssung mit Ausweis', 'Korrespondenz'], doc.dokument)&&doc.anzahl_seiten!='1'",
    "fieldname": "seite_2_ausweis",
    "fieldtype": "Check",
-   "label": "Ausweis auf Seite 2 andrucken"
+   "label": "Ausweis auf Blatt 2 andrucken"
   },
   {
    "default": "0",
    "depends_on": "eval:in_list(['Begr\u00fcssung mit Ausweis', 'Korrespondenz'], doc.dokument)&&doc.anzahl_seiten=='3'",
    "fieldname": "seite_3_ausweis",
    "fieldtype": "Check",
-   "label": "Ausweis auf Seite 3 andrucken"
+   "label": "Ausweis auf Blatt 3 andrucken"
   },
   {
    "default": "0",
@@ -249,7 +257,7 @@
   {
    "fieldname": "tipps",
    "fieldtype": "HTML",
-   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n</ul>"
+   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n</ul>"
   },
   {
    "default": "0",
@@ -282,9 +290,63 @@
    "fieldname": "deaktiviert",
    "fieldtype": "Check",
    "label": "Deaktiviert"
+  },
+  {
+   "default": "0",
+   "fieldname": "seite_1_referenzblock_ausblenden",
+   "fieldtype": "Check",
+   "label": "Referenzblock auf Seite 1 ausblenden"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten!='1'",
+   "fieldname": "seite_2_referenzblock_ausblenden",
+   "fieldtype": "Check",
+   "label": "Referenzblock auf Seite 2 ausblenden"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten=='3'",
+   "fieldname": "seite_3_referenzblock_ausblenden",
+   "fieldtype": "Check",
+   "label": "Referenzblock auf Seite 3 ausblenden"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten!='1'",
+   "fieldname": "seite_2_adressblock_ausblenden",
+   "fieldtype": "Check",
+   "label": "Adressblock (und Personalisierter Block) auf Blatt 2 ausblenden"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten=='3'",
+   "fieldname": "seite_3_adressblock_ausblenden",
+   "fieldtype": "Check",
+   "label": "Adressblock (und Personalisierter Block) auf Blatt 3 ausblenden"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten!='1'",
+   "fieldname": "seite_2_datum_ausblenden",
+   "fieldtype": "Check",
+   "label": "Datum auf Blatt 2 ausblenden"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten=='3'",
+   "fieldname": "seite_3_datum_ausblenden",
+   "fieldtype": "Check",
+   "label": "Datum auf Blatt 3 ausblenden"
+  },
+  {
+   "default": "0",
+   "fieldname": "logo_ausblenden",
+   "fieldtype": "Check",
+   "label": "Logo Ausblenden"
   }
  ],
- "modified": "2022-02-02 15:55:12.519772",
+ "modified": "2022-02-04 10:29:21.237067",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

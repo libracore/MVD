@@ -593,7 +593,7 @@ frappe.mvd_such_client = {
                     ],
                     function(values){
                         if (values.autom_rechnung) {
-                            var dokument = 'Beitritt mit EZ';
+                            var dokument = 'Anmeldung mit EZ';
                             if (values.status == 'Interessent*in') {
                                 dokument = 'Interessent*Innenbrief mit EZ';
                             }

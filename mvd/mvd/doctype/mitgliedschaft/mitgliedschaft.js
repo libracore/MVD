@@ -419,7 +419,7 @@ function daten_validiert(frm) {
 }
 
 function erstelle_rechnung(frm) {
-    var dokument = 'Beitritt mit EZ';
+    var dokument = 'Anmeldung mit EZ mit EZ';
     if (cur_frm.doc.status_c == 'Interessent*in') {
         dokument = 'Interessent*Innenbrief mit EZ';
     }
