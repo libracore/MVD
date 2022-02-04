@@ -18,13 +18,15 @@
    "in_list_view": 1,
    "label": "Typ",
    "options": "Daten Validieren\nK\u00fcndigung verarbeiten",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "mv_mitgliedschaft",
    "fieldtype": "Link",
    "label": "Mitgliedschaft",
-   "options": "Mitgliedschaft"
+   "options": "Mitgliedschaft",
+   "read_only": 1
   },
   {
    "fieldname": "sektion_id",
@@ -32,11 +34,13 @@
    "in_list_view": 1,
    "label": "Sektion",
    "options": "Sektion",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "amended_from",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Amended From",
    "no_copy": 1,
    "options": "Arbeits Backlog",
@@ -49,10 +53,11 @@
    "in_list_view": 1,
    "label": "Status",
    "options": "Open\nCompleted",
+   "read_only": 1,
    "reqd": 1
   }
  ],
- "modified": "2022-02-03 08:49:25.142798",
+ "modified": "2022-02-04 22:13:15.236882",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Arbeits Backlog",
@@ -67,6 +72,17 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MVD Sektionsmitarbeiter*in",
    "share": 1,
    "write": 1
   }
