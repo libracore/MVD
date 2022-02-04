@@ -3,11 +3,21 @@ Allgemein
 */
 .control-card {
     float: left;
-    height: 180px;
+    height: 150px;
     padding: 5px;
     margin: 5px;
     cursor: pointer;
     width: 150px;
+}
+
+.green-card:hover {
+    box-shadow: 10px 10px 5px #91bf1f;
+    border: 1px solid #91bf1f;
+}
+
+.blue-card:hover {
+    box-shadow: 10px 10px 5px #0063ae;
+    border: 1px solid #0063ae;
 }
 
 .control-card .fa {
@@ -55,12 +65,9 @@ h2.place-holder-left {
     color: #0063ae;
 }
 
-.first-card {
-    margin-left: -35px;
-}
-
 h1.vbz {
     font-weight: bold;
+    padding-left: 15px;
 }
 
 #goto_klassisch {
