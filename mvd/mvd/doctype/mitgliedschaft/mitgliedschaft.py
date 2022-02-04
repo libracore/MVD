@@ -55,10 +55,12 @@ class Mitgliedschaft(Document):
             
             # schliesse offene abreits backlogs
             close_open_validations(self.name, 'Daten Validieren')
-            
-            # schliesse offene abreits backlogs
             if not int(self.kuendigung_verarbeiten) == 1:
                 close_open_validations(self.name, 'Kündigung verarbeiten')
+            if not int(self.interessent_innenbrief_mit_ez) == 1:
+                close_open_validations(self.name, 'Interessent*Innenbrief mit EZ')
+            if not int(self.anmeldung_mit_ez) == 1:
+                close_open_validations(self.name, 'Anmeldung mit EZ')
             
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':

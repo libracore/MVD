@@ -1,778 +1,12 @@
 {
- "editable_grid": 1,
- "show_name_in_global_search": 1,
- "modified_by": "Administrator",
- "fields": [
-  {
-   "label": "Mitglied Nr.",
-   "fieldname": "mitglied_nr",
-   "read_only": 1,
-   "fieldtype": "Data",
-   "in_list_view": 1
-  },
-  {
-   "label": "Mitglied ID",
-   "fieldname": "mitglied_id",
-   "read_only": 1,
-   "fieldtype": "Data",
-   "unique": 1
-  },
-  {
-   "label": "Allgemein",
-   "fieldname": "section_allgemein",
-   "collapsible": 1,
-   "fieldtype": "Section Break"
-  },
-  {
-   "label": "Sektion",
-   "fieldtype": "Link",
-   "reqd": 1,
-   "options": "Sektion",
-   "fieldname": "sektion_id",
-   "read_only": 1
-  },
-  {
-   "fieldname": "cb_0",
-   "fieldtype": "Column Break"
-  },
-  {
-   "options": "Regul\u00e4r\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nGestorben\nK\u00fcndigung\nWegzug\nAusschluss\nInaktiv\nInteressent*in",
-   "label": "Status",
-   "fieldtype": "Select",
-   "in_standard_filter": 1,
-   "fieldname": "status_c",
-   "read_only": 1
-  },
-  {
-   "options": "Gesch\u00e4ft\nPrivat",
-   "label": "Mitgliedtyp",
-   "fieldname": "mitgliedtyp_c",
-   "fieldtype": "Select"
-  },
-  {
-   "label": "Daten",
-   "fieldname": "section_daten",
-   "collapsible": 1,
-   "fieldtype": "Section Break"
-  },
-  {
-   "label": "Eintritt",
-   "fieldtype": "Date",
-   "reqd": 1,
-   "default": "Today",
-   "fieldname": "eintritt",
-   "set_only_once": 1
-  },
-  {
-   "label": "Wegzug",
-   "fieldname": "wegzug",
-   "read_only": 1,
-   "fieldtype": "Date"
-  },
-  {
-   "fieldname": "cb_1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "label": "Austritt/Ausschluss",
-   "fieldname": "austritt",
-   "read_only": 1,
-   "fieldtype": "Date"
-  },
-  {
-   "label": "K\u00fcndigung",
-   "fieldname": "kuendigung",
-   "read_only": 1,
-   "fieldtype": "Date"
-  },
-  {
-   "label": "Wichtige Informationen zur Mitgliedschaft",
-   "fieldname": "section_wichtige_infos",
-   "collapsible": 1,
-   "fieldtype": "Section Break"
-  },
-  {
-   "label": "Informationen",
-   "fieldname": "wichtig",
-   "fieldtype": "Text"
-  },
-  {
-   "label": "Firma",
-   "fieldname": "firma",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.kundentyp=='Unternehmen'"
-  },
-  {
-   "label": "Zusatz Firma",
-   "fieldname": "zusatz_firma",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.kundentyp=='Unternehmen'"
-  },
-  {
-   "options": "Salutation",
-   "label": "Anrede",
-   "fieldname": "anrede_c",
-   "fieldtype": "Link"
-  },
-  {
-   "label": "Nachname",
-   "fieldname": "nachname_1",
-   "fieldtype": "Data",
-   "in_list_view": 1
-  },
-  {
-   "label": "Vorname",
-   "fieldname": "vorname_1",
-   "fieldtype": "Data",
-   "in_list_view": 1
-  },
-  {
-   "label": "Tel. Privat",
-   "fieldname": "tel_p_1",
-   "fieldtype": "Data"
-  },
-  {
-   "label": "Tel. Mobil",
-   "fieldname": "tel_m_1",
-   "fieldtype": "Data"
-  },
-  {
-   "label": "Tel. Gesch\u00e4ftlich",
-   "fieldname": "tel_g_1",
-   "fieldtype": "Data"
-  },
-  {
-   "label": "E-Mail",
-   "fieldname": "e_mail_1",
-   "fieldtype": "Data"
-  },
-  {
-   "label": "Zusatzadresse",
-   "fieldname": "zusatz_adresse",
-   "fieldtype": "Data"
-  },
-  {
-   "label": "Strasse",
-   "fieldname": "strasse",
-   "fieldtype": "Data"
-  },
-  {
-   "label": "Hausnummer",
-   "fieldname": "nummer",
-   "fieldtype": "Data"
-  },
-  {
-   "label": "Nr. Zusatz",
-   "fieldname": "nummer_zu",
-   "fieldtype": "Data"
-  },
-  {
-   "default": "0",
-   "label": "Postfach",
-   "fieldname": "postfach",
-   "fieldtype": "Check"
-  },
-  {
-   "label": "Postfach Nr.",
-   "fieldname": "postfach_nummer",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.postfach=='1'"
-  },
-  {
-   "label": "PLZ",
-   "fieldname": "plz",
-   "fieldtype": "Data",
-   "reqd": 1
-  },
-  {
-   "label": "Wohnort",
-   "fieldname": "ort",
-   "fieldtype": "Data",
-   "reqd": 1
-  },
-  {
-   "label": "Nachname (Solidar)",
-   "fieldname": "nachname_2",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.hat_solidarmitglied"
-  },
-  {
-   "label": "Vorname (Solidar)",
-   "fieldname": "vorname_2",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.hat_solidarmitglied"
-  },
-  {
-   "label": "Tel. Privat (Solidar)",
-   "fieldname": "tel_p_2",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.hat_solidarmitglied"
-  },
-  {
-   "label": "Tel. Mobil (Solidar)",
-   "fieldname": "tel_m_2",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.hat_solidarmitglied"
-  },
-  {
-   "label": "Tel. Gesch\u00e4ftlich (Solidar)",
-   "fieldname": "tel_g_2",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.hat_solidarmitglied"
-  },
-  {
-   "label": "E-Mail (Solidar)",
-   "fieldname": "e_mail_2",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.hat_solidarmitglied"
-  },
-  {
-   "read_only": 1,
-   "label": "Verkn\u00fcpfungen",
-   "fieldtype": "Section Break",
-   "permlevel": 2,
-   "fieldname": "section_links",
-   "collapsible": 1
-  },
-  {
-   "label": "Kunde",
-   "fieldtype": "Link",
-   "options": "Customer",
-   "permlevel": 1,
-   "fieldname": "kunde_mitglied",
-   "read_only": 1
-  },
-  {
-   "label": "Kontakt",
-   "fieldtype": "Link",
-   "options": "Contact",
-   "permlevel": 1,
-   "fieldname": "kontakt_mitglied",
-   "read_only": 1
-  },
-  {
-   "label": "Adresse",
-   "fieldtype": "Link",
-   "options": "Address",
-   "permlevel": 1,
-   "fieldname": "adresse_mitglied",
-   "read_only": 1
-  },
-  {
-   "label": "Kontakt",
-   "fieldtype": "Link",
-   "options": "Contact",
-   "permlevel": 1,
-   "fieldname": "kontakt_solidarmitglied",
-   "read_only": 1
-  },
-  {
-   "options": "Einzelperson\nUnternehmen",
-   "label": "Kontakttyp",
-   "fieldname": "kundentyp",
-   "fieldtype": "Select",
-   "reqd": 1
-  },
-  {
-   "fieldname": "cb_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "label": "Strasse (Objekt)",
-   "fieldname": "objekt_strasse",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse"
-  },
-  {
-   "label": "Hausnummer (Objekt)",
-   "fieldname": "objekt_hausnummer",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse"
-  },
-  {
-   "label": "Nr. Zusatz (Objekt)",
-   "fieldname": "objekt_nummer_zu",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse"
-  },
-  {
-   "label": "PLZ (Objekt)",
-   "fieldname": "objekt_plz",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse"
-  },
-  {
-   "label": "Ort (Objekt)",
-   "fieldname": "objekt_ort",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse"
-  },
-  {
-   "default": "0",
-   "label": "Abweichende Rechnungsadresse",
-   "fieldname": "abweichende_rechnungsadresse",
-   "fieldtype": "Check"
-  },
-  {
-   "default": "0",
-   "label": "Unabh\u00e4ngiger Debitor",
-   "fieldname": "unabhaengiger_debitor",
-   "fieldtype": "Check",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'"
-  },
-  {
-   "label": "Strasse (Rechnung)",
-   "fieldname": "rg_strasse",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'"
-  },
-  {
-   "label": "Hausnummer (Rechnung)",
-   "fieldname": "rg_nummer",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'"
-  },
-  {
-   "label": "Nr. Zusatz (Rechnung)",
-   "fieldname": "rg_nummer_zu",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'"
-  },
-  {
-   "default": "0",
-   "label": "Postfach (Rechnung)",
-   "fieldname": "rg_postfach",
-   "fieldtype": "Check",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'"
-  },
-  {
-   "label": "Postfach Nummer (Rechnung)",
-   "fieldname": "rg_postfach_nummer",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.rg_postfach=='1'"
-  },
-  {
-   "label": "PLZ (Rechnung)",
-   "fieldname": "rg_plz",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'"
-  },
-  {
-   "label": "Ort (Rechnung)",
-   "fieldname": "rg_ort",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'"
-  },
-  {
-   "options": "Einzelperson\nUnternehmen",
-   "label": "Kontakttyp (Rechnung)",
-   "fieldname": "rg_kundentyp",
-   "fieldtype": "Select",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'"
-  },
-  {
-   "label": "Firma (Rechnung)",
-   "fieldname": "rg_firma",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'&&doc.rg_kundentyp=='Unternehmen'"
-  },
-  {
-   "label": "Zusatz Firma (Rechnung)",
-   "fieldname": "rg_zusatz_firma",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'&&doc.rg_kundentyp=='Unternehmen'"
-  },
-  {
-   "options": "Salutation",
-   "label": "Anrede (Rechnung)",
-   "fieldname": "rg_anrede",
-   "fieldtype": "Link",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'"
-  },
-  {
-   "label": "Nachname (Rechnung)",
-   "fieldname": "rg_nachname",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'"
-  },
-  {
-   "label": "Vorname (Rechnung)",
-   "fieldname": "rg_vorname",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'"
-  },
-  {
-   "label": "Tel. Privat (Rechnung)",
-   "fieldname": "rg_tel_p",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'"
-  },
-  {
-   "label": "Tel. Mobil (Rechnung)",
-   "fieldname": "rg_tel_m",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'"
-  },
-  {
-   "label": "Tel. Gesch\u00e4ftlich (Rechnung)",
-   "fieldname": "rg_tel_g",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'"
-  },
-  {
-   "label": "E-Mail (Rechnung)",
-   "fieldname": "rg_e_mail",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'"
-  },
-  {
-   "label": "Mitglied",
-   "fieldname": "title_1",
-   "fieldtype": "Heading"
-  },
-  {
-   "permlevel": 1,
-   "label": "Solidarit\u00e4tsmitglied",
-   "fieldname": "title_2",
-   "fieldtype": "Heading"
-  },
-  {
-   "label": "Objekt",
-   "fieldname": "title_3",
-   "fieldtype": "Heading"
-  },
-  {
-   "label": "Adresse",
-   "fieldtype": "Link",
-   "options": "Address",
-   "permlevel": 1,
-   "fieldname": "objekt_adresse",
-   "read_only": 1
-  },
-  {
-   "label": "Rechnungsempf\u00e4nger",
-   "fieldname": "title_4",
-   "fieldtype": "Heading"
-  },
-  {
-   "label": "Kunde",
-   "fieldtype": "Link",
-   "options": "Customer",
-   "permlevel": 1,
-   "fieldname": "rg_kunde",
-   "read_only": 1
-  },
-  {
-   "label": "Kontakt",
-   "fieldtype": "Link",
-   "options": "Contact",
-   "permlevel": 1,
-   "fieldname": "rg_kontakt",
-   "read_only": 1
-  },
-  {
-   "label": "Adresse",
-   "fieldtype": "Link",
-   "options": "Address",
-   "permlevel": 1,
-   "fieldname": "rg_adresse",
-   "read_only": 1
-  },
-  {
-   "label": "Inkl. HV",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "default": "1",
-   "fieldname": "inkl_hv",
-   "read_only": 1
-  },
-  {
-   "options": "Salutation",
-   "label": "Anrede (Solidar)",
-   "fieldname": "anrede_2",
-   "fieldtype": "Link",
-   "depends_on": "eval:doc.hat_solidarmitglied"
-  },
-  {
-   "label": "Zusatzadresse (Rechnung)",
-   "fieldname": "rg_zusatz_adresse",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'"
-  },
-  {
-   "label": "Zusatzadresse (Objekt)",
-   "fieldname": "objekt_zusatz_adresse",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse"
-  },
-  {
-   "default": "0",
-   "label": "Solidarmitglied",
-   "fieldname": "hat_solidarmitglied",
-   "fieldtype": "Check"
-  },
-  {
-   "label": "Zuzug",
-   "fieldname": "zuzug",
-   "read_only": 1,
-   "fieldtype": "Date"
-  },
-  {
-   "label": "\u00dcbersicht",
-   "fieldname": "section_uebersicht",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "uebersicht_html",
-   "fieldtype": "HTML"
-  },
-  {
-   "label": "Adress ID",
-   "fieldname": "adress_id_mitglied",
-   "read_only": 1,
-   "fieldtype": "Data"
-  },
-  {
-   "label": "Adress ID",
-   "fieldname": "adress_id_objekt",
-   "read_only": 1,
-   "fieldtype": "Data"
-  },
-  {
-   "label": "Adress ID",
-   "fieldname": "adress_id_rg",
-   "read_only": 1,
-   "fieldtype": "Data"
-  },
-  {
-   "label": "Zuzug von",
-   "fieldname": "zuzug_von",
-   "read_only": 1,
-   "fieldtype": "Data"
-  },
-  {
-   "label": "Wegzug zu",
-   "fieldname": "wegzug_zu",
-   "read_only": 1,
-   "fieldtype": "Data"
-  },
-  {
-   "default": "0",
-   "label": "Zahlung HV",
-   "fieldname": "zahlung_hv",
-   "read_only": 1,
-   "fieldtype": "Int"
-  },
-  {
-   "default": "1",
-   "label": "Anzahl Zeitschrift M+W",
-   "fieldname": "m_und_w",
-   "fieldtype": "Int"
-  },
-  {
-   "default": "0",
-   "label": "M+W als PDF",
-   "fieldname": "m_und_w_pdf",
-   "fieldtype": "Check"
-  },
-  {
-   "default": "0",
-   "label": "Adressen gesperrt",
-   "fieldname": "adressen_gesperrt",
-   "fieldtype": "Check"
-  },
-  {
-   "default": "0",
-   "label": "Validierung notwendig",
-   "fieldname": "validierung_notwendig",
-   "fieldtype": "Check"
-  },
-  {
-   "default": "0",
-   "label": "Abweichende Objektadresse",
-   "fieldname": "abweichende_objektadresse",
-   "fieldtype": "Check"
-  },
-  {
-   "label": "Personenbezogene Daten",
-   "fieldname": "section_personen_daten",
-   "collapsible": 1,
-   "fieldtype": "Section Break"
-  },
-  {
-   "label": "Hauptmitglied",
-   "fieldname": "heading_hauptmitglied",
-   "fieldtype": "Heading"
-  },
-  {
-   "fieldname": "cb_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "label": "Solidarmitglied",
-   "fieldname": "heading_solidarmitglied",
-   "fieldtype": "Heading"
-  },
-  {
-   "label": "Korrespondenzadresse",
-   "fieldname": "section_korrespondenz_adresse",
-   "collapsible": 1,
-   "fieldtype": "Section Break"
-  },
-  {
-   "label": "Objektadresse",
-   "fieldname": "section_objekt_adresse",
-   "collapsible": 1,
-   "fieldtype": "Section Break"
-  },
-  {
-   "label": "Rechnungsadresse",
-   "fieldname": "section_rechnungs_adresse",
-   "collapsible": 1,
-   "fieldtype": "Section Break"
-  },
-  {
-   "label": "Briefanrede",
-   "fieldname": "briefanrede",
-   "read_only": 1,
-   "fieldtype": "Data"
-  },
-  {
-   "label": "Adressblock",
-   "fieldname": "adressblock",
-   "read_only": 1,
-   "fieldtype": "Code"
-  },
-  {
-   "fieldname": "cb_4",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "cb_5",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "cb_6",
-   "fieldtype": "Column Break"
-  },
-  {
-   "label": "\u00dcbernahme durch (Todesfall)",
-   "fieldname": "todesfall_uebernahme",
-   "fieldtype": "Data",
-   "depends_on": "eval:doc.status_c=='Gestorben'"
-  },
-  {
-   "default": "0",
-   "label": "K\u00fcndigung verarbeiten",
-   "fieldname": "kuendigung_verarbeiten",
-   "fieldtype": "Check"
-  },
-  {
-   "label": "Verstorben am",
-   "fieldname": "verstorben_am",
-   "read_only": 1,
-   "fieldtype": "Date"
-  },
-  {
-   "default": "0",
-   "label": "Zahlung Mitgliedschaft",
-   "fieldname": "zahlung_mitgliedschaft",
-   "read_only": 1,
-   "fieldtype": "Int"
-  },
-  {
-   "default": "1",
-   "label": "N\u00e4chstes Jahr geschuldet",
-   "fieldname": "naechstes_jahr_geschuldet",
-   "fieldtype": "Check"
-  },
-  {
-   "label": "Ampel Farbe",
-   "fieldname": "ampel_farbe",
-   "read_only": 1,
-   "fieldtype": "Data",
-   "hidden": 1
-  },
-  {
-   "options": "Language",
-   "default": "de",
-   "label": "Sprache",
-   "fieldname": "language",
-   "fieldtype": "Link"
-  },
-  {
-   "label": "Kommunikations\u00fcbersicht",
-   "fieldname": "section_kommunikation",
-   "collapsible": 1,
-   "fieldtype": "Section Break"
-  },
-  {
-   "default": "0",
-   "label": "Abweichender Mitgliederbeitrag",
-   "fieldname": "reduzierte_mitgliedschaft",
-   "fieldtype": "Check"
-  },
-  {
-   "label": "Abweichender Betrag",
-   "fieldname": "reduzierter_betrag",
-   "fieldtype": "Currency",
-   "depends_on": "eval:doc.reduzierte_mitgliedschaft"
-  },
-  {
-   "label": "Abweichung g\u00fcltig bis",
-   "fieldname": "reduzierung_bis",
-   "fieldtype": "Date",
-   "depends_on": "eval:doc.reduzierte_mitgliedschaft"
-  },
-  {
-   "permlevel": 2,
-   "label": "Workflow Helpers",
-   "fieldname": "section_workflow_helpers",
-   "collapsible": 1,
-   "fieldtype": "Section Break"
-  },
-  {
-   "options": "User\nSP",
-   "default": "User",
-   "label": "Letzte Bearbeitung durch",
-   "fieldname": "letzte_bearbeitung_von",
-   "fieldtype": "Select"
-  },
-  {
-   "label": "Rechnungs-Adressblock",
-   "fieldname": "rg_adressblock",
-   "read_only": 1,
-   "fieldtype": "Code"
-  },
-  {
-   "default": "0",
-   "label": "Statuten ok",
-   "fieldname": "statuten_ok",
-   "fieldtype": "Check"
-  },
-  {
-   "label": "Rechnungs Briefanrede",
-   "fieldname": "rg_briefanrede",
-   "read_only": 1,
-   "fieldtype": "Data"
-  },
-  {
-   "options": "Druckvorlage",
-   "label": "Druckvorlage K\u00fcndigung",
-   "fieldname": "kuendigung_druckvorlage",
-   "fieldtype": "Link"
-  }
- ],
- "engine": "InnoDB",
- "track_changes": 1,
- "module": "MVD",
  "allow_copy": 1,
- "sort_field": "modified",
- "creation": "2021-06-07 10:22:04.606968",
- "name": "Mitgliedschaft",
- "icon": "fa fa-tag",
+ "allow_events_in_timeline": 1,
+ "allow_import": 1,
  "autoname": "field:mitglied_id",
- "owner": "Administrator",
+ "creation": "2021-06-07 10:22:04.606968",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "section_uebersicht",
   "uebersicht_html",
@@ -897,66 +131,846 @@
   "section_workflow_helpers",
   "validierung_notwendig",
   "kuendigung_verarbeiten",
+  "interessent_innenbrief_mit_ez",
+  "anmeldung_mit_ez",
   "kuendigung_druckvorlage",
   "letzte_bearbeitung_von"
  ],
- "sort_order": "DESC",
- "allow_events_in_timeline": 1,
- "show_preview_popup": 1,
- "allow_import": 1,
- "doctype": "DocType",
- "modified": "2022-02-02 14:26:36.005663",
- "search_fields": "mitglied_nr,mitglied_id",
- "title_field": "mitglied_nr",
+ "fields": [
+  {
+   "fieldname": "mitglied_nr",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mitglied Nr.",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mitglied_id",
+   "fieldtype": "Data",
+   "label": "Mitglied ID",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status_c",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Regul\u00e4r\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nZuzug\nGestorben\nK\u00fcndigung\nWegzug\nAusschluss\nInaktiv\nInteressent*in",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mitgliedtyp_c",
+   "fieldtype": "Select",
+   "label": "Mitgliedtyp",
+   "options": "Gesch\u00e4ft\nPrivat"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_daten",
+   "fieldtype": "Section Break",
+   "label": "Daten"
+  },
+  {
+   "default": "Today",
+   "fieldname": "eintritt",
+   "fieldtype": "Date",
+   "label": "Eintritt",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "wegzug",
+   "fieldtype": "Date",
+   "label": "Wegzug",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "austritt",
+   "fieldtype": "Date",
+   "label": "Austritt/Ausschluss",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kuendigung",
+   "fieldtype": "Date",
+   "label": "K\u00fcndigung",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_wichtige_infos",
+   "fieldtype": "Section Break",
+   "label": "Wichtige Informationen zur Mitgliedschaft"
+  },
+  {
+   "fieldname": "wichtig",
+   "fieldtype": "Text",
+   "label": "Informationen"
+  },
+  {
+   "depends_on": "eval:doc.kundentyp=='Unternehmen'",
+   "fieldname": "firma",
+   "fieldtype": "Data",
+   "label": "Firma"
+  },
+  {
+   "depends_on": "eval:doc.kundentyp=='Unternehmen'",
+   "fieldname": "zusatz_firma",
+   "fieldtype": "Data",
+   "label": "Zusatz Firma"
+  },
+  {
+   "fieldname": "anrede_c",
+   "fieldtype": "Link",
+   "label": "Anrede",
+   "options": "Salutation"
+  },
+  {
+   "fieldname": "nachname_1",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nachname"
+  },
+  {
+   "fieldname": "vorname_1",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Vorname"
+  },
+  {
+   "fieldname": "tel_p_1",
+   "fieldtype": "Data",
+   "label": "Tel. Privat"
+  },
+  {
+   "fieldname": "tel_m_1",
+   "fieldtype": "Data",
+   "label": "Tel. Mobil"
+  },
+  {
+   "fieldname": "tel_g_1",
+   "fieldtype": "Data",
+   "label": "Tel. Gesch\u00e4ftlich"
+  },
+  {
+   "fieldname": "e_mail_1",
+   "fieldtype": "Data",
+   "label": "E-Mail"
+  },
+  {
+   "fieldname": "zusatz_adresse",
+   "fieldtype": "Data",
+   "label": "Zusatzadresse"
+  },
+  {
+   "fieldname": "strasse",
+   "fieldtype": "Data",
+   "label": "Strasse"
+  },
+  {
+   "fieldname": "nummer",
+   "fieldtype": "Data",
+   "label": "Hausnummer"
+  },
+  {
+   "fieldname": "nummer_zu",
+   "fieldtype": "Data",
+   "label": "Nr. Zusatz"
+  },
+  {
+   "default": "0",
+   "fieldname": "postfach",
+   "fieldtype": "Check",
+   "label": "Postfach"
+  },
+  {
+   "depends_on": "eval:doc.postfach=='1'",
+   "fieldname": "postfach_nummer",
+   "fieldtype": "Data",
+   "label": "Postfach Nr."
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "label": "PLZ",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "label": "Wohnort",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.hat_solidarmitglied",
+   "fieldname": "nachname_2",
+   "fieldtype": "Data",
+   "label": "Nachname (Solidar)"
+  },
+  {
+   "depends_on": "eval:doc.hat_solidarmitglied",
+   "fieldname": "vorname_2",
+   "fieldtype": "Data",
+   "label": "Vorname (Solidar)"
+  },
+  {
+   "depends_on": "eval:doc.hat_solidarmitglied",
+   "fieldname": "tel_p_2",
+   "fieldtype": "Data",
+   "label": "Tel. Privat (Solidar)"
+  },
+  {
+   "depends_on": "eval:doc.hat_solidarmitglied",
+   "fieldname": "tel_m_2",
+   "fieldtype": "Data",
+   "label": "Tel. Mobil (Solidar)"
+  },
+  {
+   "depends_on": "eval:doc.hat_solidarmitglied",
+   "fieldname": "tel_g_2",
+   "fieldtype": "Data",
+   "label": "Tel. Gesch\u00e4ftlich (Solidar)"
+  },
+  {
+   "depends_on": "eval:doc.hat_solidarmitglied",
+   "fieldname": "e_mail_2",
+   "fieldtype": "Data",
+   "label": "E-Mail (Solidar)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_links",
+   "fieldtype": "Section Break",
+   "label": "Verkn\u00fcpfungen",
+   "permlevel": 2,
+   "read_only": 1
+  },
+  {
+   "fieldname": "kunde_mitglied",
+   "fieldtype": "Link",
+   "label": "Kunde",
+   "options": "Customer",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "kontakt_mitglied",
+   "fieldtype": "Link",
+   "label": "Kontakt",
+   "options": "Contact",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "adresse_mitglied",
+   "fieldtype": "Link",
+   "label": "Adresse",
+   "options": "Address",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "kontakt_solidarmitglied",
+   "fieldtype": "Link",
+   "label": "Kontakt",
+   "options": "Contact",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "kundentyp",
+   "fieldtype": "Select",
+   "label": "Kontakttyp",
+   "options": "Einzelperson\nUnternehmen",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
+   "fieldname": "objekt_strasse",
+   "fieldtype": "Data",
+   "label": "Strasse (Objekt)"
+  },
+  {
+   "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
+   "fieldname": "objekt_hausnummer",
+   "fieldtype": "Data",
+   "label": "Hausnummer (Objekt)"
+  },
+  {
+   "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
+   "fieldname": "objekt_nummer_zu",
+   "fieldtype": "Data",
+   "label": "Nr. Zusatz (Objekt)"
+  },
+  {
+   "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
+   "fieldname": "objekt_plz",
+   "fieldtype": "Data",
+   "label": "PLZ (Objekt)"
+  },
+  {
+   "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
+   "fieldname": "objekt_ort",
+   "fieldtype": "Data",
+   "label": "Ort (Objekt)"
+  },
+  {
+   "default": "0",
+   "fieldname": "abweichende_rechnungsadresse",
+   "fieldtype": "Check",
+   "label": "Abweichende Rechnungsadresse"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "unabhaengiger_debitor",
+   "fieldtype": "Check",
+   "label": "Unabh\u00e4ngiger Debitor"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_strasse",
+   "fieldtype": "Data",
+   "label": "Strasse (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_nummer",
+   "fieldtype": "Data",
+   "label": "Hausnummer (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_nummer_zu",
+   "fieldtype": "Data",
+   "label": "Nr. Zusatz (Rechnung)"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_postfach",
+   "fieldtype": "Check",
+   "label": "Postfach (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.rg_postfach=='1'",
+   "fieldname": "rg_postfach_nummer",
+   "fieldtype": "Data",
+   "label": "Postfach Nummer (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_plz",
+   "fieldtype": "Data",
+   "label": "PLZ (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_ort",
+   "fieldtype": "Data",
+   "label": "Ort (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_kundentyp",
+   "fieldtype": "Select",
+   "label": "Kontakttyp (Rechnung)",
+   "options": "Einzelperson\nUnternehmen"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'&&doc.rg_kundentyp=='Unternehmen'",
+   "fieldname": "rg_firma",
+   "fieldtype": "Data",
+   "label": "Firma (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'&&doc.rg_kundentyp=='Unternehmen'",
+   "fieldname": "rg_zusatz_firma",
+   "fieldtype": "Data",
+   "label": "Zusatz Firma (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_anrede",
+   "fieldtype": "Link",
+   "label": "Anrede (Rechnung)",
+   "options": "Salutation"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_nachname",
+   "fieldtype": "Data",
+   "label": "Nachname (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_vorname",
+   "fieldtype": "Data",
+   "label": "Vorname (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_tel_p",
+   "fieldtype": "Data",
+   "label": "Tel. Privat (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_tel_m",
+   "fieldtype": "Data",
+   "label": "Tel. Mobil (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_tel_g",
+   "fieldtype": "Data",
+   "label": "Tel. Gesch\u00e4ftlich (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_e_mail",
+   "fieldtype": "Data",
+   "label": "E-Mail (Rechnung)"
+  },
+  {
+   "fieldname": "title_1",
+   "fieldtype": "Heading",
+   "label": "Mitglied"
+  },
+  {
+   "fieldname": "title_2",
+   "fieldtype": "Heading",
+   "label": "Solidarit\u00e4tsmitglied",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "title_3",
+   "fieldtype": "Heading",
+   "label": "Objekt"
+  },
+  {
+   "fieldname": "objekt_adresse",
+   "fieldtype": "Link",
+   "label": "Adresse",
+   "options": "Address",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "title_4",
+   "fieldtype": "Heading",
+   "label": "Rechnungsempf\u00e4nger"
+  },
+  {
+   "fieldname": "rg_kunde",
+   "fieldtype": "Link",
+   "label": "Kunde",
+   "options": "Customer",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rg_kontakt",
+   "fieldtype": "Link",
+   "label": "Kontakt",
+   "options": "Contact",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rg_adresse",
+   "fieldtype": "Link",
+   "label": "Adresse",
+   "options": "Address",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "inkl_hv",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Inkl. HV",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.hat_solidarmitglied",
+   "fieldname": "anrede_2",
+   "fieldtype": "Link",
+   "label": "Anrede (Solidar)",
+   "options": "Salutation"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_zusatz_adresse",
+   "fieldtype": "Data",
+   "label": "Zusatzadresse (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
+   "fieldname": "objekt_zusatz_adresse",
+   "fieldtype": "Data",
+   "label": "Zusatzadresse (Objekt)"
+  },
+  {
+   "default": "0",
+   "fieldname": "hat_solidarmitglied",
+   "fieldtype": "Check",
+   "label": "Solidarmitglied"
+  },
+  {
+   "fieldname": "zuzug",
+   "fieldtype": "Date",
+   "label": "Zuzug",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_uebersicht",
+   "fieldtype": "Section Break",
+   "label": "\u00dcbersicht"
+  },
+  {
+   "fieldname": "uebersicht_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "adress_id_mitglied",
+   "fieldtype": "Data",
+   "label": "Adress ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "adress_id_objekt",
+   "fieldtype": "Data",
+   "label": "Adress ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "adress_id_rg",
+   "fieldtype": "Data",
+   "label": "Adress ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "zuzug_von",
+   "fieldtype": "Data",
+   "label": "Zuzug von",
+   "read_only": 1
+  },
+  {
+   "fieldname": "wegzug_zu",
+   "fieldtype": "Data",
+   "label": "Wegzug zu",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "zahlung_hv",
+   "fieldtype": "Int",
+   "label": "Zahlung HV",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "m_und_w",
+   "fieldtype": "Int",
+   "label": "Anzahl Zeitschrift M+W"
+  },
+  {
+   "default": "0",
+   "fieldname": "m_und_w_pdf",
+   "fieldtype": "Check",
+   "label": "M+W als PDF"
+  },
+  {
+   "default": "0",
+   "fieldname": "adressen_gesperrt",
+   "fieldtype": "Check",
+   "label": "Adressen gesperrt"
+  },
+  {
+   "default": "0",
+   "fieldname": "validierung_notwendig",
+   "fieldtype": "Check",
+   "label": "Validierung notwendig"
+  },
+  {
+   "default": "0",
+   "fieldname": "abweichende_objektadresse",
+   "fieldtype": "Check",
+   "label": "Abweichende Objektadresse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_personen_daten",
+   "fieldtype": "Section Break",
+   "label": "Personenbezogene Daten"
+  },
+  {
+   "fieldname": "heading_hauptmitglied",
+   "fieldtype": "Heading",
+   "label": "Hauptmitglied"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "heading_solidarmitglied",
+   "fieldtype": "Heading",
+   "label": "Solidarmitglied"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_korrespondenz_adresse",
+   "fieldtype": "Section Break",
+   "label": "Korrespondenzadresse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_objekt_adresse",
+   "fieldtype": "Section Break",
+   "label": "Objektadresse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_rechnungs_adresse",
+   "fieldtype": "Section Break",
+   "label": "Rechnungsadresse"
+  },
+  {
+   "fieldname": "briefanrede",
+   "fieldtype": "Data",
+   "label": "Briefanrede",
+   "read_only": 1
+  },
+  {
+   "fieldname": "adressblock",
+   "fieldtype": "Code",
+   "label": "Adressblock",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.status_c=='Gestorben'",
+   "fieldname": "todesfall_uebernahme",
+   "fieldtype": "Data",
+   "label": "\u00dcbernahme durch (Todesfall)"
+  },
+  {
+   "default": "0",
+   "fieldname": "kuendigung_verarbeiten",
+   "fieldtype": "Check",
+   "label": "K\u00fcndigung verarbeiten"
+  },
+  {
+   "fieldname": "verstorben_am",
+   "fieldtype": "Date",
+   "label": "Verstorben am",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "zahlung_mitgliedschaft",
+   "fieldtype": "Int",
+   "label": "Zahlung Mitgliedschaft",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "naechstes_jahr_geschuldet",
+   "fieldtype": "Check",
+   "label": "N\u00e4chstes Jahr geschuldet"
+  },
+  {
+   "fieldname": "ampel_farbe",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Ampel Farbe",
+   "read_only": 1
+  },
+  {
+   "default": "de",
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Sprache",
+   "options": "Language"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_kommunikation",
+   "fieldtype": "Section Break",
+   "label": "Kommunikations\u00fcbersicht"
+  },
+  {
+   "default": "0",
+   "fieldname": "reduzierte_mitgliedschaft",
+   "fieldtype": "Check",
+   "label": "Abweichender Mitgliederbeitrag"
+  },
+  {
+   "depends_on": "eval:doc.reduzierte_mitgliedschaft",
+   "fieldname": "reduzierter_betrag",
+   "fieldtype": "Currency",
+   "label": "Abweichender Betrag"
+  },
+  {
+   "depends_on": "eval:doc.reduzierte_mitgliedschaft",
+   "fieldname": "reduzierung_bis",
+   "fieldtype": "Date",
+   "label": "Abweichung g\u00fcltig bis"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_workflow_helpers",
+   "fieldtype": "Section Break",
+   "label": "Workflow Helpers",
+   "permlevel": 2
+  },
+  {
+   "default": "User",
+   "fieldname": "letzte_bearbeitung_von",
+   "fieldtype": "Select",
+   "label": "Letzte Bearbeitung durch",
+   "options": "User\nSP"
+  },
+  {
+   "fieldname": "rg_adressblock",
+   "fieldtype": "Code",
+   "label": "Rechnungs-Adressblock",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "statuten_ok",
+   "fieldtype": "Check",
+   "label": "Statuten ok"
+  },
+  {
+   "fieldname": "rg_briefanrede",
+   "fieldtype": "Data",
+   "label": "Rechnungs Briefanrede",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kuendigung_druckvorlage",
+   "fieldtype": "Link",
+   "label": "Druckvorlage K\u00fcndigung",
+   "options": "Druckvorlage"
+  },
+  {
+   "default": "0",
+   "fieldname": "interessent_innenbrief_mit_ez",
+   "fieldtype": "Check",
+   "label": "Interessent*Innenbrief mit EZ"
+  },
+  {
+   "default": "0",
+   "fieldname": "anmeldung_mit_ez",
+   "fieldtype": "Check",
+   "label": "Anmeldung mit EZ"
+  }
+ ],
+ "icon": "fa fa-tag",
+ "modified": "2022-02-05 00:06:30.568059",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Mitgliedschaft",
+ "owner": "Administrator",
  "permissions": [
   {
-   "write": 1,
    "create": 1,
-   "role": "System Manager",
-   "email": 1,
-   "report": 1,
-   "share": 1,
-   "read": 1,
    "delete": 1,
+   "email": 1,
    "export": 1,
-   "print": 1
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
   },
   {
-   "share": 1,
-   "write": 1,
-   "print": 1,
-   "role": "System Manager",
-   "email": 1,
-   "report": 1,
-   "permlevel": 1,
-   "read": 1,
    "delete": 1,
-   "export": 1
-  },
-  {
-   "share": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
    "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
    "email": 1,
-   "report": 1,
+   "export": 1,
    "permlevel": 2,
-   "read": 1,
-   "export": 1
-  },
-  {
    "print": 1,
-   "role": "MVD Sektionsmitarbeiter*in",
-   "email": 1,
-   "report": 1,
-   "write": 1,
    "read": 1,
-   "export": 1
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
   },
   {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MVD Sektionsmitarbeiter*in",
+   "write": 1
+  },
+  {
+   "email": 1,
    "permlevel": 1,
    "read": 1,
-   "role": "MVD Sektionsmitarbeiter*in",
-   "email": 1
+   "role": "MVD Sektionsmitarbeiter*in"
   }
- ]
+ ],
+ "search_fields": "mitglied_nr,mitglied_id",
+ "show_name_in_global_search": 1,
+ "show_preview_popup": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "mitglied_nr",
+ "track_changes": 1
 }

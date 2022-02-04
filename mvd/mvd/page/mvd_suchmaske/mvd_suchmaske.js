@@ -16,7 +16,6 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.$reset_button = me.page.set_secondary_action('Suche zurücksetzen<span class="text-muted pull-right" style="padding-left: 5px;">Ctrl+R</span>', () => {
         location.reload();
     });
-    //set_primary_action
     
     // trigger für ctrl + s
     frappe.ui.keys.on('ctrl+s', function(e) {
@@ -565,7 +564,46 @@ frappe.mvd_such_client = {
                 hidden: 1,
                 click: function(){
                     frappe.prompt([
-                        {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent*in\nRegulär', 'default': cur_page.page.search_fields.status_c.get_value() == 'Interessent*in' ? 'Interessent*in':'Regulär'},
+                        {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent*in\nRegulär\nAnmeldung',
+                            'default': cur_page.page.search_fields.status_c.get_value() == 'Interessent*in' ? 'Interessent*in':cur_page.page.search_fields.status_c.get_value() == 'Anmeldung' ? 'Anmeldung':'Regulär',
+                            'change': function() {
+                                if (cur_dialog.fields_dict.status.get_value() == 'Regulär') {
+                                    // auto rg
+                                    cur_dialog.fields_dict.autom_rechnung.set_value(1);
+                                    cur_dialog.fields_dict.autom_rechnung.df.hidden = 0;
+                                    cur_dialog.fields_dict.autom_rechnung.df.read_only = 1;
+                                    cur_dialog.fields_dict.autom_rechnung.refresh();
+                                    // rg bez
+                                    setTimeout(function(){
+                                        cur_dialog.fields_dict.bar_bezahlt.set_value(1);
+                                        cur_dialog.fields_dict.bar_bezahlt.df.hidden = 0;
+                                        cur_dialog.fields_dict.bar_bezahlt.df.read_only = 1;
+                                        cur_dialog.fields_dict.bar_bezahlt.refresh();
+                                        // hv
+                                        setTimeout(function(){
+                                            cur_dialog.fields_dict.hv_bar_bezahlt.df.hidden = 0;
+                                            cur_dialog.fields_dict.hv_bar_bezahlt.refresh();
+                                        }, 100);
+                                    }, 100);
+                                } else {
+                                    // auto rg
+                                    cur_dialog.fields_dict.autom_rechnung.set_value(1);
+                                    cur_dialog.fields_dict.autom_rechnung.df.hidden = 0;
+                                    cur_dialog.fields_dict.autom_rechnung.df.read_only = 0;
+                                    cur_dialog.fields_dict.autom_rechnung.refresh();
+                                    // rg bez
+                                    cur_dialog.fields_dict.bar_bezahlt.set_value(0);
+                                    cur_dialog.fields_dict.bar_bezahlt.df.hidden = 0;
+                                    cur_dialog.fields_dict.bar_bezahlt.df.read_only = 0;
+                                    cur_dialog.fields_dict.bar_bezahlt.refresh();
+                                    // hv
+                                    setTimeout(function(){
+                                        cur_dialog.fields_dict.hv_bar_bezahlt.df.hidden = 1;
+                                        cur_dialog.fields_dict.hv_bar_bezahlt.refresh();
+                                    }, 100);
+                                }
+                            }
+                        },
                         {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': cur_page.page.search_fields.mitgliedtyp_c.get_value(), 'change': function() {
                                 if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Privat') {
                                     cur_dialog.fields_dict.kundentyp.set_value("Einzelperson");
@@ -575,9 +613,44 @@ frappe.mvd_such_client = {
                         },
                         {'fieldname': 'language', 'fieldtype': 'Link', 'label': 'Sprache', 'reqd': 1, 'hidden': 0, 'options': 'Language', 'default': cur_page.page.search_fields.language.get_value()||'de'},
                         {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'hidden': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value()},
-                        {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 0},
-                        {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.autom_rechnung'},
-                        {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt'},
+                        {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 1,
+                            'read_only': !['Interessent*in', 'Anmeldung'].includes(cur_page.page.search_fields.status_c.get_value()) ? 1:0,
+                            'change': function() {
+                                if (cur_dialog.fields_dict.autom_rechnung.get_value() == 1) {
+                                    cur_dialog.fields_dict.bar_bezahlt.set_value(0);
+                                    cur_dialog.fields_dict.bar_bezahlt.df.hidden = 0;
+                                    cur_dialog.fields_dict.bar_bezahlt.df.read_only = 0;
+                                    cur_dialog.fields_dict.bar_bezahlt.refresh();
+                                } else {
+                                    cur_dialog.fields_dict.bar_bezahlt.set_value(0);
+                                    cur_dialog.fields_dict.bar_bezahlt.df.hidden = 1;
+                                    cur_dialog.fields_dict.bar_bezahlt.df.read_only = 0;
+                                    cur_dialog.fields_dict.bar_bezahlt.refresh();
+                                }
+                            }
+                        },
+                        {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0,
+                            'default': ['Interessent*in', 'Anmeldung'].includes(cur_page.page.search_fields.status_c.get_value()) ? 0:1,
+                            'hidden': 0,
+                            'read_only': ['Interessent*in', 'Anmeldung'].includes(cur_page.page.search_fields.status_c.get_value()) ? 0:1,
+                            'change': function() {
+                                if (cur_dialog.fields_dict.bar_bezahlt.get_value() == 1) {
+                                    cur_dialog.fields_dict.status.set_value('Regulär');
+                                    cur_dialog.fields_dict.status.refresh();
+                                }
+                            }
+                        },
+                        {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0,
+                            'hidden': ['Interessent*in', 'Anmeldung'].includes(cur_page.page.search_fields.status_c.get_value()) ? 1:0,
+                            'change': function() {
+                                if (cur_dialog.fields_dict.hv_bar_bezahlt.get_value() == 1) {
+                                    if (cur_dialog.fields_dict.status.get_value() != 'Regulär') {
+                                        cur_dialog.fields_dict.status.set_value('Regulär');
+                                        cur_dialog.fields_dict.status.refresh();
+                                    }
+                                }
+                            }
+                        },
                         {'fieldname': 's1', 'fieldtype': 'Section Break'},
                         {'fieldname': 'kundentyp', 'fieldtype': 'Select', 'label': 'Kontakttyp', 'reqd': 1, 'options': 'Einzelperson\nUnternehmen', 'default': cur_page.page.search_fields.mitgliedtyp_c.get_value() == 'Geschäft' ? 'Unternehmen':'Einzelperson', 'change': function() {
                                 if (cur_dialog.fields_dict.kundentyp.get_value() == 'Einzelperson') {
@@ -623,7 +696,8 @@ frappe.mvd_such_client = {
                         {'fieldname': 'ort', 'fieldtype': 'Data', 'label': 'Ort', 'reqd': 1, 'default': cur_page.page.search_fields.ort.get_value()},
                     ],
                     function(values){
-                        if (values.autom_rechnung) {
+                        //~ console.log(values);
+                        if (values.status == 'Regulär'||values.autom_rechnung) {
                             var dokument = 'Anmeldung mit EZ';
                             if (values.status == 'Interessent*in') {
                                 dokument = 'Interessent*Innenbrief mit EZ';

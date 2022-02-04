@@ -46,6 +46,16 @@ frappe.ui.form.on('Mitgliedschaft', {
                         kuendigung_verarbeitet(frm);
                 });
             }
+            if (cur_frm.doc.interessent_innenbrief_mit_ez) {
+                frm.add_custom_button(__("Interessent*Innenbrief mit EZ als verarbeitet bestätigen"),  function() {
+                        interessent_innenbrief_mit_ez_verarbeitet(frm);
+                });
+            }
+            if (cur_frm.doc.anmeldung_mit_ez) {
+                frm.add_custom_button(__("Anmeldung mit EZ als verarbeitet bestätigen"),  function() {
+                        anmeldung_mit_ez_verarbeitet(frm);
+                });
+            }
             
             // load html overview
             get_adressdaten(frm);
@@ -433,6 +443,38 @@ function kuendigung_verarbeitet(frm) {
             cur_frm.save();
             cur_frm.timeline.insert_comment("Kündigung verarbeitet.");
             frappe.msgprint("Die Kündigung wurde als verarbeitet bestätigt.");
+        },
+        function(){
+            // on no
+        }
+    )
+}
+
+function interessent_innenbrief_mit_ez_verarbeitet(frm) {
+    frappe.confirm(
+        'Haben Sie den Interessent*Innenbrief mit EZ erstellt und möchten diesen als verarbeitet bestätigen?',
+        function(){
+            // on yes
+            cur_frm.set_value("interessent_innenbrief_mit_ez", '0');
+            cur_frm.save();
+            cur_frm.timeline.insert_comment("Interessent*Innenbrief mit EZ erstellt.");
+            frappe.msgprint("Der Interessent*Innenbrief mit EZ wurde als verarbeitet bestätigt.");
+        },
+        function(){
+            // on no
+        }
+    )
+}
+
+function anmeldung_mit_ez_verarbeitet(frm) {
+    frappe.confirm(
+        'Haben Sie die Anmeldung mit EZ erstellt und möchten diesen als verarbeitet bestätigen?',
+        function(){
+            // on yes
+            cur_frm.set_value("anmeldung_mit_ez", '0');
+            cur_frm.save();
+            cur_frm.timeline.insert_comment("Anmeldung mit EZ erstellt.");
+            frappe.msgprint("Die Anmeldung mit EZ wurde als verarbeitet bestätigt.");
         },
         function(){
             // on no

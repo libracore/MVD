@@ -9,6 +9,7 @@ from frappe.utils.data import add_days, getdate, now
 import six
 import json
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung
+from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
 
 @frappe.whitelist()
 def suche(suchparameter, goto_list=False):
@@ -190,13 +191,29 @@ def anlage_prozess(anlage_daten, druckvorlage=False):
     mitgliedschaft.insert(ignore_permissions=True)
     
     # optional: erstelle Rechnung
-    if int(anlage_daten["autom_rechnung"]) == 1:
-        bezahlt = False
+    if anlage_daten["status"] == 'Regulär':
+        bezahlt = True
         hv_bar_bezahlt = False
-        if int(anlage_daten["bar_bezahlt"]) == 1:
-            bezahlt = True
-            if int(anlage_daten["hv_bar_bezahlt"]) == 1:
-                hv_bar_bezahlt = True
+        if int(anlage_daten["hv_bar_bezahlt"]) == 1:
+            hv_bar_bezahlt = True
         sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage)
+    else:
+        if int(anlage_daten["autom_rechnung"]) == 1:
+            bezahlt = False
+            hv_bar_bezahlt = False
+            sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage)
+        else:
+            if anlage_daten["status"] == 'Interessent*in':
+                # erstelle ABL für Interessent*Innenbrief mit EZ
+                create_abl("Interessent*Innenbrief mit EZ", mitgliedschaft)
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                mitgliedschaft.interessent_innenbrief_mit_ez = 1
+                mitgliedschaft.save()
+            if anlage_daten["status"] == 'Anmeldung':
+                # erstelle ABL für Anmeldung mit EZ
+                create_abl("Anmeldung mit EZ", mitgliedschaft)
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                mitgliedschaft.anmeldung_mit_ez = 1
+                mitgliedschaft.save()
     
     return mitgliedschaft.name
