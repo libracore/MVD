@@ -53,8 +53,12 @@ class Mitgliedschaft(Document):
             # ampelfarbe
             self.ampel_farbe = get_ampelfarbe(self)
             
-            # schliesse offene abreits backlogs: Zu Validieren
-            close_open_validations(self.name)
+            # schliesse offene abreits backlogs
+            close_open_validations(self.name, 'Daten Validieren')
+            
+            # schliesse offene abreits backlogs
+            if not int(self.kuendigung_verarbeiten) == 1:
+                close_open_validations(self.name, 'Kündigung verarbeiten')
             
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
@@ -1697,8 +1701,9 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druck
     
     return 'done'
 
-def close_open_validations(mitgliedschaft):
-    open_abl = frappe.db.sql("""SELECT `name` FROM `tabArbeits Backlog` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Open' AND `typ` = 'Daten Validieren'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
+def close_open_validations(mitgliedschaft, typ):
+    open_abl = frappe.db.sql("""SELECT `name` FROM `tabArbeits Backlog` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Open' AND `typ` = '{typ}'""".format(mitgliedschaft=mitgliedschaft, typ=typ), as_dict=True)
+    
     for abl in open_abl:
         abl = frappe.get_doc("Arbeits Backlog", abl.name)
         abl.status = 'Completed'

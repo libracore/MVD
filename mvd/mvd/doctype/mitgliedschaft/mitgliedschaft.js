@@ -41,6 +41,11 @@ frappe.ui.form.on('Mitgliedschaft', {
                         daten_validiert(frm);
                 });
             }
+            if (cur_frm.doc.kuendigung_verarbeiten) {
+                frm.add_custom_button(__("Kündigung als verarbeitet bestätigen"),  function() {
+                        kuendigung_verarbeitet(frm);
+                });
+            }
             
             // load html overview
             get_adressdaten(frm);
@@ -412,6 +417,22 @@ function daten_validiert(frm) {
             cur_frm.save();
             cur_frm.timeline.insert_comment("Validierung durchgeführt.");
             frappe.msgprint("Die Daten wurden als validert bestätigt.");
+        },
+        function(){
+            // on no
+        }
+    )
+}
+
+function kuendigung_verarbeitet(frm) {
+    frappe.confirm(
+        'Haben Sie alle notwendigen Aktionen getroffen und möchten die Kündigung als verarbeitet bestätigen?',
+        function(){
+            // on yes
+            cur_frm.set_value("kuendigung_verarbeiten", '0');
+            cur_frm.save();
+            cur_frm.timeline.insert_comment("Kündigung verarbeitet.");
+            frappe.msgprint("Die Kündigung wurde als verarbeitet bestätigt.");
         },
         function(){
             // on no
