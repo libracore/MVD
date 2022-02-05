@@ -53,6 +53,9 @@
         <center>
             <i class="fa fa-print green-icon"></i>
             <p>Massenlauf</p>
+            {% if massenlauf_total > 0 %}
+                <div class="vbz-indikator"><span>{{ massenlauf_total }}</span></div>
+            {% endif %}
         </center>
     </div>
     <div class="control-card green-card" id="adresspflege">
