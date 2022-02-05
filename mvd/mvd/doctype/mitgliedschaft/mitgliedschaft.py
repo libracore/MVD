@@ -2519,3 +2519,49 @@ def entferne_alte_reduzierungen():
         mitgliedschaft.reduzierte_mitgliedschaft = 0
         mitgliedschaft.save()
     return
+
+@frappe.whitelist()
+def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False):
+    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+    if druckvorlage == 'keine':
+        new_korrespondenz = frappe.get_doc({
+            "doctype": "Korrespondenz",
+            "mv_mitgliedschaft": mitgliedschaft.name,
+            "sektion_id": mitgliedschaft.sektion_id,
+            "titel": titel
+        })
+        new_korrespondenz.insert(ignore_permissions=True)
+        frappe.db.commit()
+        return new_korrespondenz.name
+    else:
+        druckvorlage = frappe.get_doc("Druckvorlage", druckvorlage)
+        _new_korrespondenz = frappe.copy_doc(druckvorlage)
+        _new_korrespondenz.doctype = 'Korrespondenz'
+        _new_korrespondenz.sektion_id = mitgliedschaft.sektion_id
+        _new_korrespondenz.titel = titel
+        
+        new_korrespondenz = frappe._dict(_new_korrespondenz.as_dict())
+        keys_to_remove = [
+            'mitgliedtyp_c',
+            'validierungsstring',
+            'language',
+            'reduzierte_mitgliedschaft',
+            'dokument',
+            'default',
+            'deaktiviert',
+            'seite_1_qrr',
+            'seite_1_qrr_spende_hv',
+            'seite_2_qrr',
+            'seite_2_qrr_spende_hv',
+            'seite_3_qrr',
+            'seite_3_qrr_spende_hv'
+        ]
+        for key in keys_to_remove:
+            new_korrespondenz.pop(key)
+        
+        new_korrespondenz['mv_mitgliedschaft'] = mitgliedschaft.name
+        
+        new_korrespondenz = frappe.get_doc(new_korrespondenz)
+        new_korrespondenz.insert(ignore_permissions=True)
+        frappe.db.commit()
+        return new_korrespondenz.name

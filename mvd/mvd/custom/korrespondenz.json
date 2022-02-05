@@ -1,30 +1,30 @@
 {
  "custom_fields": [],
  "custom_perms": [],
- "doctype": "MV Korrespondenz",
+ "doctype": "Korrespondenz",
  "property_setters": [
   {
    "_assign": null,
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2021-10-25 20:47:17.570373",
+   "creation": "2022-02-05 23:19:53.923704",
    "default_value": null,
-   "doc_type": "MV Korrespondenz",
+   "doc_type": "Korrespondenz",
    "docstatus": 0,
    "doctype_or_field": "DocType",
    "field_name": null,
    "idx": 0,
-   "modified": "2021-10-25 20:47:17.570373",
+   "modified": "2022-02-05 23:19:53.923704",
    "modified_by": "Administrator",
-   "name": "MV Korrespondenz-default_print_format",
+   "name": "Korrespondenz-default_print_format",
    "owner": "Administrator",
    "parent": null,
    "parentfield": null,
    "parenttype": null,
    "property": "default_print_format",
    "property_type": "Data",
-   "value": "MV Korrespondenz"
+   "value": "Korrespondenz"
   }
  ],
  "sync_on_migrate": 1

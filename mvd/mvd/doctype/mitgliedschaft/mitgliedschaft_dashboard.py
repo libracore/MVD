@@ -15,7 +15,7 @@ def get_data():
             },
             {
                 'label': _('Externe Korrespondenz'),
-                'items': ['MV Korrespondenz', 'Sales Invoice', 'Fakultative Rechnung']
+                'items': ['Korrespondenz', 'Sales Invoice', 'Fakultative Rechnung']
             },
             {
                 'label': _('Zu erledigen'),

@@ -101,6 +101,23 @@ class Druckvorlage(Document):
                 frappe.throw("Bitte mindestens eine Seite zum Andruck des Ausweises auswählen.")
             elif ausweis_druck > 1:
                 frappe.throw("Bitte maximal eine Seite zum Andruck des Ausweises auswählen.")
+            
+            if ausweis_druck > 0:
+                if self.doppelseitiger_druck != 1:
+                    frappe.throw("Aufgrund des Ausweises muss diese Druckvorlage doppelseitig sein.")
+                if self.seite_1_ausweis:
+                    if not self.seite_1_referenzblock_ausblenden:
+                        frappe.throw("Aufgrund des Ausweises muss der Referenzblock ausgeblendet sein.")
+                if self.seite_2_ausweis:
+                    if self.anzahl_seiten != '1':
+                        if not self.seite_2_referenzblock_ausblenden:
+                            if not self.seite_2_adressblock_ausblenden:
+                                frappe.throw("Aufgrund des Ausweises muss der Referenzblock ausgeblendet sein.")
+                if self.seite_3_ausweis:
+                   if self.anzahl_seiten == '3':
+                        if not self.seite_3_referenzblock_ausblenden:
+                            if not self.seite_3_adressblock_ausblenden:
+                                frappe.throw("Aufgrund des Ausweises muss der Referenzblock ausgeblendet sein.")
                 
         elif self.dokument in ('HV mit EZ', 'Spende mit EZ'):
             qrr_druck = 0
@@ -114,6 +131,31 @@ class Druckvorlage(Document):
                 frappe.throw("Bitte mindestens eine Seite zum Andruck des QRR Zahlteils auswählen.")
             elif qrr_druck > 1:
                 frappe.throw("Bitte maximal eine Seite zum Andruck des QRR Zahlteils auswählen.")
+        elif self.dokument == 'Korrespondenz':
+            ausweis_druck = 0
+            if self.seite_1_ausweis:
+                ausweis_druck += 1
+            if self.seite_2_ausweis:
+                ausweis_druck += 1
+            if self.seite_3_ausweis:
+                ausweis_druck += 1
+            if ausweis_druck > 0:
+                if self.doppelseitiger_druck != 1:
+                    frappe.throw("Aufgrund des Ausweises muss diese Druckvorlage doppelseitig sein.")
+                if self.seite_1_ausweis:
+                    if not self.seite_1_referenzblock_ausblenden:
+                        frappe.throw("Aufgrund des Ausweises muss der Referenzblock ausgeblendet sein.")
+                if self.seite_2_ausweis:
+                    if self.anzahl_seiten != '1':
+                        if not self.seite_2_referenzblock_ausblenden:
+                            if not self.seite_2_adressblock_ausblenden:
+                                frappe.throw("Aufgrund des Ausweises muss der Referenzblock ausgeblendet sein.")
+                if self.seite_3_ausweis:
+                   if self.anzahl_seiten == '3':
+                        if not self.seite_3_referenzblock_ausblenden:
+                            if not self.seite_3_adressblock_ausblenden:
+                                frappe.throw("Aufgrund des Ausweises muss der Referenzblock ausgeblendet sein.")
+                
     
     def set_validierungsstring(self):
         validierungsstring = ''

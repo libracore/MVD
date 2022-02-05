@@ -34,6 +34,12 @@ frappe.ui.form.on('Mitgliedschaft', {
                     frm.add_custom_button(__("Spenden-Rechnung"),  function() {
                             erstelle_spenden_rechnung(frm);
                     }, __("Erstelle"));
+                    frm.add_custom_button(__("HV-Rechnung"),  function() {
+                            erstelle_hv_rechnung(frm);
+                    }, __("Erstelle"));
+                    frm.add_custom_button(__("Korrespondenz"),  function() {
+                            erstelle_korrespondenz(frm);
+                    }, __("Erstelle"));
                 }
             }
             if (cur_frm.doc.validierung_notwendig) {
@@ -60,9 +66,6 @@ frappe.ui.form.on('Mitgliedschaft', {
             // load html overview
             get_adressdaten(frm);
         }
-        
-        remove_sinv_plus(frm);
-        remove_backlog_plus(frm);
         
         if (['Wegzug', 'Ausschluss'].includes(cur_frm.doc.status_c)) {
             setze_read_only(frm);
@@ -548,13 +551,6 @@ function erstelle_rechnung(frm) {
     });
 }
 
-function remove_sinv_plus(frm) {
-    $(":button[data-doctype='Sales Invoice']").remove();
-}
-function remove_backlog_plus(frm) {
-    $(":button[data-doctype='Arbeits Backlog']").remove();
-}
-
 function setze_read_only(frm) {
     var i = 0;
     for (i; i<cur_frm.fields.length; i++) {
@@ -705,6 +701,102 @@ function custom_email_dialog(e) {
         message: '', /* Gets overwritten by txt (txt must be passed to avoid loading draft messages from LocalStorage) */
         real_name: '', /* Do not pass this as it triggers automatic salutation with "Dear" */
         txt: '<div>' + cur_frm.doc.briefanrede + '</div>'
+    });
+}
+
+function erstelle_hv_rechnung(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+        args:{
+                'sektion': cur_frm.doc.sektion_id,
+                'dokument': 'HV mit EZ',
+                'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                'language': cur_frm.doc.language
+        },
+        async: false,
+        callback: function(res)
+        {
+            var druckvorlagen = res.message;
+            frappe.prompt([
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                    'get_query': function() {
+                        return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                    }
+                }
+            ],
+            function(values){
+                frappe.call({
+                    method: "mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung.create_hv_fr",
+                    args:{
+                            'mitgliedschaft': cur_frm.doc.name,
+                            'druckvorlage': values.druckvorlage,
+                            'asap_print': true
+                    },
+                    freeze: true,
+                    freeze_message: 'Erstelle HV-Rechnung...',
+                    callback: function(r)
+                    {
+                        cur_frm.timeline.insert_comment("HV-Rechnung " + r.message + " erstellt.");
+                        cur_frm.reload_doc();
+                        frappe.msgprint("Die HV-Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
+                    }
+                });
+            },
+            'HV-Rechnung Erstellung',
+            'Erstellen'
+            )
+        }
+    });
+}
+
+function erstelle_korrespondenz(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+        args:{
+                'sektion': cur_frm.doc.sektion_id,
+                'dokument': 'Korrespondenz',
+                'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                'language': cur_frm.doc.language
+        },
+        async: false,
+        callback: function(res)
+        {
+            var druckvorlagen = res.message;
+            frappe.prompt([
+                {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1},
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                    'get_query': function() {
+                        return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                    }
+                }
+            ],
+            function(values){
+                if (values.druckvorlage) {
+                    var druckvorlage = values.druckvorlage;
+                } else {
+                    var druckvorlage = 'keine'
+                }
+                frappe.call({
+                    method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_korrespondenz",
+                    args:{
+                            'mitgliedschaft': cur_frm.doc.name,
+                            'druckvorlage': druckvorlage,
+                            'titel': values.titel
+                    },
+                    freeze: true,
+                    freeze_message: 'Erstelle Korrespondenz...',
+                    callback: function(r)
+                    {
+                        frappe.set_route("Form", "Korrespondenz", r.message);
+                    }
+                });
+            },
+            'Korrespondenz Erstellung',
+            'Erstellen'
+            )
+        }
     });
 }
 

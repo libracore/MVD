@@ -1,0 +1,292 @@
+{
+ "autoname": "format:{titel}-{sektion_id}-{#####}",
+ "creation": "2022-02-05 22:30:44.714870",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_allgemein",
+  "titel",
+  "sektion_id",
+  "mv_mitgliedschaft",
+  "section_seitenmanagement",
+  "anzahl_seiten",
+  "cb_2",
+  "doppelseitiger_druck",
+  "logo_ausblenden",
+  "section_tipps",
+  "tipps",
+  "section_inhalt_1",
+  "h1",
+  "seite_1a",
+  "seite_1b",
+  "seite_1_ausweis",
+  "seite_1_fusszeile_ausblenden",
+  "seite_1_referenzblock_ausblenden",
+  "h2",
+  "seite_2a",
+  "seite_2b",
+  "seite_2_ausweis",
+  "seite_2_fusszeile_ausblenden",
+  "seite_2_referenzblock_ausblenden",
+  "seite_2_adressblock_ausblenden",
+  "seite_2_datum_ausblenden",
+  "h3",
+  "seite_3a",
+  "seite_3b",
+  "seite_3_ausweis",
+  "seite_3_fusszeile_ausblenden",
+  "seite_3_referenzblock_ausblenden",
+  "seite_3_adressblock_ausblenden",
+  "seite_3_datum_ausblenden"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "titel",
+   "fieldtype": "Data",
+   "label": "Titel",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.sektion_id",
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sektion",
+   "options": "Sektion",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Mitgliedschaft",
+   "options": "Mitgliedschaft",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_seitenmanagement",
+   "fieldtype": "Section Break",
+   "label": "Seitenmanagement"
+  },
+  {
+   "fieldname": "anzahl_seiten",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Anzahl Bl\u00e4tter",
+   "options": "1\n2\n3",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "doppelseitiger_druck",
+   "fieldtype": "Check",
+   "label": "Doppelseitiger Druck"
+  },
+  {
+   "default": "0",
+   "fieldname": "logo_ausblenden",
+   "fieldtype": "Check",
+   "label": "Logo Ausblenden"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_tipps",
+   "fieldtype": "Section Break",
+   "label": "Tipps"
+  },
+  {
+   "fieldname": "tipps",
+   "fieldtype": "HTML",
+   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n</ul>"
+  },
+  {
+   "fieldname": "section_inhalt_1",
+   "fieldtype": "Section Break",
+   "label": "Inhalt"
+  },
+  {
+   "fieldname": "h1",
+   "fieldtype": "Heading",
+   "label": "Blatt 1"
+  },
+  {
+   "fieldname": "seite_1a",
+   "fieldtype": "Text Editor",
+   "label": "Vorderseite"
+  },
+  {
+   "depends_on": "eval:doc.doppelseitiger_druck",
+   "fieldname": "seite_1b",
+   "fieldtype": "Text Editor",
+   "label": "R\u00fcckseite"
+  },
+  {
+   "default": "0",
+   "fieldname": "seite_1_ausweis",
+   "fieldtype": "Check",
+   "label": "Ausweis auf Blatt 1 andrucken"
+  },
+  {
+   "default": "0",
+   "fieldname": "seite_1_fusszeile_ausblenden",
+   "fieldtype": "Check",
+   "label": "Fusszeile Blatt 1 ausblenden"
+  },
+  {
+   "default": "0",
+   "fieldname": "seite_1_referenzblock_ausblenden",
+   "fieldtype": "Check",
+   "label": "Referenzblock auf Seite 1 ausblenden"
+  },
+  {
+   "depends_on": "eval:doc.anzahl_seiten!='1'",
+   "fieldname": "h2",
+   "fieldtype": "Heading",
+   "label": "Blatt 2"
+  },
+  {
+   "depends_on": "eval:doc.anzahl_seiten!='1'",
+   "fieldname": "seite_2a",
+   "fieldtype": "Text Editor",
+   "label": "Vorderseite"
+  },
+  {
+   "depends_on": "eval:doc.anzahl_seiten!='1'&&doc.doppelseitiger_druck",
+   "fieldname": "seite_2b",
+   "fieldtype": "Text Editor",
+   "label": "R\u00fcckseite"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten!='1'",
+   "fieldname": "seite_2_ausweis",
+   "fieldtype": "Check",
+   "label": "Ausweis auf Blatt 2 andrucken"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten!='1'",
+   "fieldname": "seite_2_fusszeile_ausblenden",
+   "fieldtype": "Check",
+   "label": "Fusszeile Blatt 2 ausblenden"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten!='1'",
+   "fieldname": "seite_2_referenzblock_ausblenden",
+   "fieldtype": "Check",
+   "label": "Referenzblock auf Seite 2 ausblenden"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten!='1'",
+   "fieldname": "seite_2_adressblock_ausblenden",
+   "fieldtype": "Check",
+   "label": "Adressblock (und Personalisierter Block) auf Blatt 2 ausblenden"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten!='1'",
+   "fieldname": "seite_2_datum_ausblenden",
+   "fieldtype": "Check",
+   "label": "Datum auf Blatt 2 ausblenden"
+  },
+  {
+   "depends_on": "eval:doc.anzahl_seiten=='3'",
+   "fieldname": "h3",
+   "fieldtype": "Heading",
+   "label": "Blatt 3"
+  },
+  {
+   "depends_on": "eval:doc.anzahl_seiten=='3'",
+   "fieldname": "seite_3a",
+   "fieldtype": "Text Editor",
+   "label": "Vorderseite"
+  },
+  {
+   "depends_on": "eval:doc.anzahl_seiten=='3'&&doc.doppelseitiger_druck",
+   "fieldname": "seite_3b",
+   "fieldtype": "Text Editor",
+   "label": "R\u00fcckseite"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten=='3'",
+   "fieldname": "seite_3_ausweis",
+   "fieldtype": "Check",
+   "label": "Ausweis auf Blatt 3 andrucken"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten=='3'",
+   "fieldname": "seite_3_fusszeile_ausblenden",
+   "fieldtype": "Check",
+   "label": "Fusszeile Blatt 3 ausblenden"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten=='3'",
+   "fieldname": "seite_3_referenzblock_ausblenden",
+   "fieldtype": "Check",
+   "label": "Referenzblock auf Seite 3 ausblenden"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten=='3'",
+   "fieldname": "seite_3_adressblock_ausblenden",
+   "fieldtype": "Check",
+   "label": "Adressblock (und Personalisierter Block) auf Blatt 3 ausblenden"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.anzahl_seiten=='3'",
+   "fieldname": "seite_3_datum_ausblenden",
+   "fieldtype": "Check",
+   "label": "Datum auf Blatt 3 ausblenden"
+  }
+ ],
+ "modified": "2022-02-05 23:12:26.430660",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Korrespondenz",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MVD Sektionsmitarbeiter*in",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "titel",
+ "track_changes": 1
+}

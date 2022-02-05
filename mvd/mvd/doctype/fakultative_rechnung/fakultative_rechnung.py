@@ -15,7 +15,7 @@ class FakultativeRechnung(Document):
         self.qrr_referenz = get_qrr_reference(fr=self.name)
 
 @frappe.whitelist()
-def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False, druckvorlage=''):
+def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False, druckvorlage='', asap_print=False):
     if not betrag_spende:
         cancel_old_hv_fr(mitgliedschaft)
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
@@ -42,7 +42,7 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spend
     
     fr.submit()
     
-    if betrag_spende:
+    if betrag_spende or asap_print:
         # erstellung Rechnungs PDF auf Basis FR
         output = PdfFileWriter()
         output = frappe.get_print("Fakultative Rechnung", fr.name, "Fakultative Rechnung", as_pdf = True, output = output, ignore_zugferd=True)
