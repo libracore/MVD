@@ -65,7 +65,15 @@ frappe.vbz = {
             frappe.set_route("modules/MVD");
         });
         $("#serienbrief").click(function(){
-            frappe.msgprint("wie weiter?");
+            frappe.prompt([
+                {'fieldname': 'html', 'fieldtype': 'HTML', 'label': '', 'options': '<p>Durch Bestätigung mit "Weiter" können Sie folgenden Workflow verfolgen:</p><ol><li>Suchen nach Mitgliedschaften</li><li>Selektieren der Mitgliedschaften</li><li>Auswahl der Druckvorlage</li><li>Erhalt Sammel-PDF</li></ol>'}  
+            ],
+            function(values){
+                frappe.msgprint("muss noch programmiert werden");
+            },
+            'Wollen Sie weiterfahren?',
+            'Weiter'
+            )
         });
         $("#massenlauf").click(function(){
             frappe.vbz.show_view('massenlauf');
