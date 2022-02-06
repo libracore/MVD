@@ -62,6 +62,9 @@ frappe.ui.form.on('Mitgliedschaft', {
                         anmeldung_mit_ez_verarbeitet(frm);
                 });
             }
+            frm.add_custom_button(__("Mitgliedschaft an Sektion zuweisen"),  function() {
+                assign(frm);
+            });
             
             // load html overview
             get_adressdaten(frm);
@@ -795,6 +798,47 @@ function erstelle_korrespondenz(frm) {
             },
             'Korrespondenz Erstellung',
             'Erstellen'
+            )
+        }
+    });
+}
+
+function assign(frm) {
+    frappe.call({
+        'method': "frappe.client.get",
+        'args': {
+            'doctype': "Sektion",
+            'name': frm.doc.sektion_id
+        },
+        'callback': function(response) {
+            var sektion = response.message;
+            if (!sektion.virtueller_user) {
+                frappe.throw("Es muss zuerst ein virtueller Sektions-User in den Sektionseinstellungen hinterlegt werden!");
+            }
+            frappe.prompt([
+                {'fieldname': 'description', 'fieldtype': 'Text', 'label': 'Beschreibung', 'reqd': 0},
+                {'fieldname': 'date', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0},
+                {'fieldname': 'notify', 'fieldtype': 'Check', 'label': 'Per E-Mail benachrichtigen', 'default': 0}
+            ],
+            function(values){
+                frappe.call({
+                    "method": "frappe.desk.form.assign_to.add",
+                    "args": {
+                        "assign_to": sektion.virtueller_user,
+                        "doctype": "Mitgliedschaft",
+                        "name": frm.doc.name,
+                        "description": values.description,
+                        "date": values.date,
+                        "notify": values.notify
+                    },
+                    "callback": function(response) {
+                        frappe.msgprint( "Die Sektions-Zuweisung wurde erstellt." );
+                        cur_frm.reload_doc();
+                    }
+                });
+            },
+            'An Sektion Zuweisen',
+            'Zuweisen'
             )
         }
     });
