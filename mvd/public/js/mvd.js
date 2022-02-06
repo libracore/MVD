@@ -23,21 +23,21 @@ frappe.call({
     }
 });
 
-//~ // Add VBZ Shortcut to Navbar
+// Add VBZ Shortcut to Navbar
 //~ setTimeout(function(){$('.nav.navbar-nav.navbar-right').prepend('<li class="dropdown dropdown-mobile"><a class"dropdown-toggle" href="#vbz"><span id="ts_indicator" class=""><i class="fa fa-inbox"></i></span></a></li>');}, 1000);
 
-//~ // Redirect to VBZ after login
-//~ $(document).ready(function() {
-    //~ if(frappe._cur_route==""||frappe._cur_route=="#") {
-        //~ window.location.href = "#vbz";
-    //~ }
-//~ });
+// Redirect to VBZ after login
+$(document).ready(function() {
+    if(frappe._cur_route==""||frappe._cur_route=="#") {
+        window.location.href = "#vbz";
+    }
+});
 
-//~ // Redirect to VBZ after click on Navbar Desk Shortcut
-//~ $(document).on('click','#navbar-breadcrumbs a, a.navbar-home',function(event){
-    //~ var navURL = event.currentTarget.href;
+// Redirect to VBZ after click on Navbar Desk Shortcut
+$(document).on('click','#navbar-breadcrumbs a, a.navbar-home',function(event){
+    var navURL = event.currentTarget.href;
 
-    //~ if(navURL.endsWith("#")) {
-        //~ event.currentTarget.href = '#vbz';
-    //~ }
-//~ });
+    if(navURL.endsWith("#")) {
+        event.currentTarget.href = '#vbz';
+    }
+});
