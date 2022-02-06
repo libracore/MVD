@@ -4,6 +4,9 @@
 
 from __future__ import unicode_literals
 import frappe
+from PyPDF2 import PdfFileWriter
+from frappe.utils.data import add_days, getdate, now, today
+from frappe.utils.pdf import get_file_data_from_writer
 
 @frappe.whitelist()
 def get_open_data(sektion=None):
@@ -124,8 +127,27 @@ def get_open_data(sektion=None):
     else:
         kuendigung = ''
     
+    # korrespondenz massenlauf
+    korrespondenz_qty = frappe.db.sql("""SELECT
+                                        COUNT(`name`) AS `qty`
+                                    FROM `tabKorrespondenz`
+                                    WHERE `massenlauf` = 1
+                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
+    _korrespondenz = frappe.db.sql("""SELECT
+                                        `name`
+                                    FROM `tabKorrespondenz`
+                                    WHERE `massenlauf` = 1
+                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
+    korrespondenz = 'x'
+    for k in _korrespondenz:
+        korrespondenz += ',' + k.name
+    if len(_korrespondenz) > 0:
+        korrespondenz = korrespondenz.replace("x,", "")
+    else:
+        korrespondenz = ''
+    
     # massenlauf total
-    massenlauf_total = kuendigung_qty
+    massenlauf_total = kuendigung_qty + korrespondenz_qty
     
     return {
         'arbeits_backlog': {
@@ -154,5 +176,77 @@ def get_open_data(sektion=None):
         'kuendigung_massenlauf': {
             'qty': kuendigung_qty,
             'names': kuendigung
+        },
+        'korrespondenz_massenlauf': {
+            'qty': korrespondenz_qty,
+            'names': korrespondenz
         }
     }
+
+@frappe.whitelist()
+def korrespondenz_massenlauf():
+    korrespondenzen = frappe.get_list('Korrespondenz', filters={'massenlauf': 1}, fields=['name'])
+    if len(korrespondenzen) > 0:
+        output = PdfFileWriter()
+        for korrespondenz in korrespondenzen:
+            output = frappe.get_print("Korrespondenz", korrespondenz['name'], 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+            
+        file_name = "Korrespondenz_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+        file_name = file_name.split(".")[0]
+        file_name = file_name.replace(":", "-")
+        file_name = file_name + ".pdf"
+        
+        filedata = get_file_data_from_writer(output)
+        
+        _file = frappe.get_doc({
+            "doctype": "File",
+            "file_name": file_name,
+            "folder": "Home",
+            "is_private": 1,
+            "content": filedata
+        })
+        
+        _file.save(ignore_permissions=True)
+        
+        for korrespondenz in korrespondenzen:
+            k = frappe.get_doc("Korrespondenz", korrespondenz['name'])
+            k.massenlauf = '0'
+            k.save(ignore_permissions=True)
+        
+        return _file.name
+    else:
+        frappe.throw("Es gibt keine Korrespondenzen die für einen Massenlauf vorgemerkt sind.")
+
+@frappe.whitelist()
+def kuendigung_massenlauf():
+    mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'kuendigung_verarbeiten': 1}, fields=['name'])
+    if len(mitgliedschaften) > 0:
+        output = PdfFileWriter()
+        for mitgliedschaft in mitgliedschaften:
+            output = frappe.get_print("Mitgliedschaft", mitgliedschaft['name'], 'Kündigungsbestätigung', as_pdf = True, output = output, ignore_zugferd=True)
+            
+        file_name = "Kündigungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+        file_name = file_name.split(".")[0]
+        file_name = file_name.replace(":", "-")
+        file_name = file_name + ".pdf"
+        
+        filedata = get_file_data_from_writer(output)
+        
+        _file = frappe.get_doc({
+            "doctype": "File",
+            "file_name": file_name,
+            "folder": "Home",
+            "is_private": 1,
+            "content": filedata
+        })
+        
+        _file.save(ignore_permissions=True)
+        
+        for mitgliedschaft in mitgliedschaften:
+            m = frappe.get_doc("Mitgliedschaft", mitgliedschaft['name'])
+            m.kuendigung_verarbeiten = '0'
+            m.save(ignore_permissions=True)
+        
+        return _file.name
+    else:
+        frappe.throw("Es gibt keine Mitgliedschaften die für einen Kündigungs-Massenlauf vorgemerkt sind.")

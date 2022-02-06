@@ -9,6 +9,7 @@
   "titel",
   "sektion_id",
   "mv_mitgliedschaft",
+  "massenlauf",
   "section_seitenmanagement",
   "anzahl_seiten",
   "cb_2",
@@ -254,9 +255,15 @@
    "fieldname": "seite_3_datum_ausblenden",
    "fieldtype": "Check",
    "label": "Datum auf Blatt 3 ausblenden"
+  },
+  {
+   "default": "0",
+   "fieldname": "massenlauf",
+   "fieldtype": "Check",
+   "label": "Massenlauf vormerkung"
   }
  ],
- "modified": "2022-02-05 23:12:26.430660",
+ "modified": "2022-02-06 20:06:54.275700",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Korrespondenz",

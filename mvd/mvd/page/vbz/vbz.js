@@ -13,19 +13,22 @@ frappe.pages['vbz'].refresh= function(wrapper){
 frappe.vbz = {
     add_views: function(page) {
         frappe.call({
-            method: "mvd.mvd.page.vbz.vbz.get_open_data",
-            args:{
+            'method': "mvd.mvd.page.vbz.vbz.get_open_data",
+            'args': {
                 'sektion': frappe.vbz.get_default_sektion()
             },
-            freeze: true,
-            freeze_message: 'Lade Verarbeitungszentrale...',
-            async: false,
-            callback: function(r)
+            'freeze': true,
+            'freeze_message': 'Lade Verarbeitungszentrale...',
+            'async': false,
+            'callback': function(r)
             {
                 if (r.message) {
                     page.add_view('overview', frappe.render_template("overview", eval(r.message)))
                     page.add_view('validierung', frappe.render_template("validierung", eval(r.message.validierung)))
-                    page.add_view('massenlauf', frappe.render_template("massenlauf", {'kuendigung': eval(r.message.kuendigung_massenlauf)}))
+                    page.add_view('massenlauf', frappe.render_template("massenlauf", {
+                        'kuendigung': eval(r.message.kuendigung_massenlauf),
+                        'korrespondenz': eval(r.message.korrespondenz_massenlauf)
+                    }))
                     page.add_view('adresspflege', frappe.render_template("adresspflege", {}))
                     frappe.vbz.add_click_handlers(eval(r.message));
                 }
@@ -49,6 +52,8 @@ frappe.vbz = {
         $("#camt").off("click");
         $("#adresspflege_second").off("click");
         $("#goto_klassisch").off("click");
+        $("#korrespondenz_qty").off("click");
+        $("#korrespondenz_print").off("click");
     },
     add_click_handlers: function(open_datas) {
         frappe.vbz.remove_click_handlers();
@@ -66,10 +71,10 @@ frappe.vbz = {
         });
         $("#serienbrief").click(function(){
             frappe.prompt([
-                {'fieldname': 'html', 'fieldtype': 'HTML', 'label': '', 'options': '<p>Durch Bestätigung mit "Weiter" können Sie folgenden Workflow verfolgen:</p><ol><li>Suchen nach Mitgliedschaften</li><li>Selektieren der Mitgliedschaften</li><li>Auswahl der Druckvorlage</li><li>Erhalt Sammel-PDF</li></ol>'}  
+                {'fieldname': 'html', 'fieldtype': 'HTML', 'label': '', 'options': '<p>Durch Bestätigung mit "Weiter" können Sie folgenden Workflow verfolgen:</p><ol><li>Suchen nach Mitgliedschaften</li><li>Selektieren der Mitgliedschaften</li><li>Auswahl der Druckvorlage</li><li>Generierung Korrespondenzen mit Massenvermerkung</li></ol><p>Im Anschluss an den obigen Workflow können in der Verarbeitungszentrale unter "Massenlauf > Korrespondenz" ein entsprechendes Sammel-PDF erzeugen und downloaden.</p>'}  
             ],
             function(values){
-                frappe.msgprint("muss noch programmiert werden");
+                frappe.set_route("mvd-suchmaske");
             },
             'Wollen Sie weiterfahren?',
             'Weiter'
@@ -141,7 +146,7 @@ frappe.vbz = {
             frappe.set_route("List", "Mitgliedschaft");
         });
         $("#kuendigung_print").click(function(){
-            frappe.msgprint("Das muss noch programmiert werden!");
+            frappe.vbz.kuendigung_massenlauf();
         });
         $("#zuzug_qty").click(function(){
             frappe.msgprint("Das muss noch programmiert werden!");
@@ -155,6 +160,13 @@ frappe.vbz = {
         $("#begruessung_print").click(function(){
             frappe.msgprint("Das muss noch programmiert werden!");
         });
+        $("#korrespondenz_qty").click(function(){
+            frappe.route_options = {"massenlauf": 1}
+            frappe.set_route("List", "Korrespondenz");
+        });
+        $("#korrespondenz_print").click(function(){
+            frappe.vbz.korrespondenz_massenlauf();
+        });
     },
     get_default_sektion: function() {
         var default_sektion = '';
@@ -167,5 +179,37 @@ frappe.vbz = {
             });
         }
         return default_sektion
+    },
+    korrespondenz_massenlauf: function() {
+        frappe.dom.freeze('Erstelle Sammel-PDF...');
+        frappe.call({
+            method: "mvd.mvd.page.vbz.vbz.korrespondenz_massenlauf",
+            args:{},
+            freeze: true,
+            freeze_message: 'Erstelle Sammel-PDF...',
+            async: false,
+            callback: function(r)
+            {
+                frappe.dom.unfreeze();
+                frappe.route_options = {"name": r.message}
+                frappe.set_route("List", "File");
+            }
+        });
+    },
+    kuendigung_massenlauf: function() {
+        frappe.dom.freeze('Erstelle Sammel-PDF...');
+        frappe.call({
+            method: "mvd.mvd.page.vbz.vbz.kuendigung_massenlauf",
+            args:{},
+            freeze: true,
+            freeze_message: 'Erstelle Sammel-PDF...',
+            async: false,
+            callback: function(r)
+            {
+                frappe.dom.unfreeze();
+                frappe.route_options = {"name": r.message}
+                frappe.set_route("List", "File");
+            }
+        });
     }
 }

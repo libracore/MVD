@@ -178,25 +178,42 @@ class Druckvorlage(Document):
                 self.default = 1
 
 @frappe.whitelist()
-def get_druckvorlagen(sektion, dokument, mitgliedtyp, reduzierte_mitgliedschaft=0, language='de'):
-    _alle_druckvorlagen = frappe.db.sql("""SELECT
-                                            `name`,
-                                            `default`
-                                        FROM `tabDruckvorlage`
-                                        WHERE `sektion_id` = '{sektion}'
-                                        AND `mitgliedtyp_c` = '{mitgliedtyp}'
-                                        AND `reduzierte_mitgliedschaft` = '{reduzierte_mitgliedschaft}'
-                                        AND `deaktiviert` != 1
-                                        AND `language` = '{language}'""".format(sektion=sektion, mitgliedtyp=mitgliedtyp, reduzierte_mitgliedschaft=reduzierte_mitgliedschaft, language=language), as_dict=True)
-    
-    alle_druckvorlagen = []
-    default_druckvorlage = ''
-    for druckvorlage in _alle_druckvorlagen:
-        if int(druckvorlage.default) == 1:
-            default_druckvorlage = druckvorlage.name
-        alle_druckvorlagen.append(druckvorlage.name)
-    
-    return {
-        'alle_druckvorlagen': alle_druckvorlagen,
-        'default_druckvorlage': default_druckvorlage
-    }
+def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp='Regulär', reduzierte_mitgliedschaft=0, language='de', serienbrief=False):
+    if not serienbrief:
+        _alle_druckvorlagen = frappe.db.sql("""SELECT
+                                                `name`,
+                                                `default`
+                                            FROM `tabDruckvorlage`
+                                            WHERE `sektion_id` = '{sektion}'
+                                            AND `mitgliedtyp_c` = '{mitgliedtyp}'
+                                            AND `reduzierte_mitgliedschaft` = '{reduzierte_mitgliedschaft}'
+                                            AND `deaktiviert` != 1
+                                            AND `language` = '{language}'
+                                            AND `dokument` = '{dokument}'""".format(sektion=sektion, mitgliedtyp=mitgliedtyp, reduzierte_mitgliedschaft=reduzierte_mitgliedschaft, language=language, dokument=dokument), as_dict=True)
+        
+        alle_druckvorlagen = []
+        default_druckvorlage = ''
+        for druckvorlage in _alle_druckvorlagen:
+            if int(druckvorlage.default) == 1:
+                default_druckvorlage = druckvorlage.name
+            alle_druckvorlagen.append(druckvorlage.name)
+        
+        return {
+            'alle_druckvorlagen': alle_druckvorlagen,
+            'default_druckvorlage': default_druckvorlage
+        }
+    else:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", sektion)
+        sektion = mitgliedschaft.sektion_id
+        druckvorlagen = frappe.db.sql("""SELECT
+                                                `name`
+                                            FROM `tabDruckvorlage`
+                                            WHERE `sektion_id` = '{sektion}'
+                                            AND `deaktiviert` != 1
+                                            AND `dokument` = '{dokument}'""".format(sektion=sektion, dokument=dokument), as_dict=True)
+        
+        alle_druckvorlagen = []
+        for druckvorlage in druckvorlagen:
+            alle_druckvorlagen.append(druckvorlage.name)
+        
+        return alle_druckvorlagen

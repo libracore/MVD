@@ -10,8 +10,8 @@
         <tr>
             <td>Kündigung</td>
             <td>{{ kuendigung.qty }}</td>
-            <td><i id="keundigung_qty" class="fa fa-eye"></i></td>
-            <td><i id="kuendigung_print" class="fa fa-file"></i></td>
+            <td>{% if kuendigung.qty > 0 %}<i id="keundigung_qty" class="fa fa-eye"></i>{% endif %}</td>
+            <td>{% if kuendigung.qty > 0 %}<i id="kuendigung_print" class="fa fa-file"></i>{% endif %}</td>
         </tr>
         <tr>
             <td>Zuzug (mit und ohne EZ)</td>
@@ -24,5 +24,11 @@
             <td>tbd</td>
             <td><i id="begruessung_qty" class="fa fa-eye"></i></td>
             <td><i id="begruessung_print" class="fa fa-file"></i></td>
+        </tr>
+        <tr>
+            <td>Korrespondenz</td>
+            <td>{{ korrespondenz.qty }}</td>
+            <td>{% if korrespondenz.qty > 0 %}<i id="korrespondenz_qty" class="fa fa-eye"></i>{% endif %}</td>
+            <td>{% if korrespondenz.qty > 0 %}<i id="korrespondenz_print" class="fa fa-file"></i>{% endif %}</td>
         </tr>
 </div>

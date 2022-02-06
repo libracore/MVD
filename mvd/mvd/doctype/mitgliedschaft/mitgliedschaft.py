@@ -1636,39 +1636,39 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
     
     return sinv.name
 
-@frappe.whitelist()
-def create_korrespondenz_serienbriefe(mitgliedschaften, korrespondenzdaten):
-    if isinstance(korrespondenzdaten, str):
-        korrespondenzdaten = json.loads(korrespondenzdaten)
+# ~ @frappe.whitelist()
+# ~ def create_korrespondenz_serienbriefe(mitgliedschaften, korrespondenzdaten):
+    # ~ if isinstance(korrespondenzdaten, str):
+        # ~ korrespondenzdaten = json.loads(korrespondenzdaten)
     
-    if isinstance(mitgliedschaften, str):
-        mitgliedschaften = json.loads(mitgliedschaften)
+    # ~ if isinstance(mitgliedschaften, str):
+        # ~ mitgliedschaften = json.loads(mitgliedschaften)
     
-    erstellte_korrespondenzen = []
+    # ~ erstellte_korrespondenzen = []
     
-    for mitgliedschaft in mitgliedschaften:
-        new_korrespondenz = frappe.get_doc({
-            "doctype": "MV Korrespondenz",
-            "mv_mitgliedschaft": mitgliedschaft['name'],
-            "sektion_id": korrespondenzdaten['sektion_id'],
-            "check_ansprechperson": korrespondenzdaten['check_ansprechperson'] if 'check_ansprechperson' in korrespondenzdaten else 0,
-            "ansprechperson": korrespondenzdaten['ansprechperson'] if 'ansprechperson' in korrespondenzdaten else '',
-            "tel_ma": korrespondenzdaten['tel_ma'] if 'tel_ma' in korrespondenzdaten else '',
-            "email_ma": korrespondenzdaten['email_ma'] if 'email_ma' in korrespondenzdaten else '',
-            "mit_ausweis": korrespondenzdaten['mit_ausweis'] if 'mit_ausweis' in korrespondenzdaten else 0,
-            "ort": korrespondenzdaten['ort'],
-            "datum": korrespondenzdaten['datum'],
-            "brieftitel": korrespondenzdaten['brieftitel'],
-            "check_anrede": korrespondenzdaten['check_anrede'] if 'check_anrede' in korrespondenzdaten else 0,
-            "anrede": korrespondenzdaten['anrede'] if 'anrede' in korrespondenzdaten else '',
-            "inhalt": korrespondenzdaten['inhalt'],
-            "inhalt_2": korrespondenzdaten['inhalt_2'] if 'inhalt_2' in korrespondenzdaten else ''
-        })
-        new_korrespondenz.insert(ignore_permissions=True)
-        frappe.db.commit()
-        erstellte_korrespondenzen.append(new_korrespondenz.name)
+    # ~ for mitgliedschaft in mitgliedschaften:
+        # ~ new_korrespondenz = frappe.get_doc({
+            # ~ "doctype": "MV Korrespondenz",
+            # ~ "mv_mitgliedschaft": mitgliedschaft['name'],
+            # ~ "sektion_id": korrespondenzdaten['sektion_id'],
+            # ~ "check_ansprechperson": korrespondenzdaten['check_ansprechperson'] if 'check_ansprechperson' in korrespondenzdaten else 0,
+            # ~ "ansprechperson": korrespondenzdaten['ansprechperson'] if 'ansprechperson' in korrespondenzdaten else '',
+            # ~ "tel_ma": korrespondenzdaten['tel_ma'] if 'tel_ma' in korrespondenzdaten else '',
+            # ~ "email_ma": korrespondenzdaten['email_ma'] if 'email_ma' in korrespondenzdaten else '',
+            # ~ "mit_ausweis": korrespondenzdaten['mit_ausweis'] if 'mit_ausweis' in korrespondenzdaten else 0,
+            # ~ "ort": korrespondenzdaten['ort'],
+            # ~ "datum": korrespondenzdaten['datum'],
+            # ~ "brieftitel": korrespondenzdaten['brieftitel'],
+            # ~ "check_anrede": korrespondenzdaten['check_anrede'] if 'check_anrede' in korrespondenzdaten else 0,
+            # ~ "anrede": korrespondenzdaten['anrede'] if 'anrede' in korrespondenzdaten else '',
+            # ~ "inhalt": korrespondenzdaten['inhalt'],
+            # ~ "inhalt_2": korrespondenzdaten['inhalt_2'] if 'inhalt_2' in korrespondenzdaten else ''
+        # ~ })
+        # ~ new_korrespondenz.insert(ignore_permissions=True)
+        # ~ frappe.db.commit()
+        # ~ erstellte_korrespondenzen.append(new_korrespondenz.name)
     
-    return erstellte_korrespondenzen
+    # ~ return erstellte_korrespondenzen
 
 @frappe.whitelist()
 def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druckvorlage):
@@ -2521,7 +2521,7 @@ def entferne_alte_reduzierungen():
     return
 
 @frappe.whitelist()
-def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False):
+def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=False):
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     if druckvorlage == 'keine':
         new_korrespondenz = frappe.get_doc({
@@ -2560,8 +2560,18 @@ def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False):
             new_korrespondenz.pop(key)
         
         new_korrespondenz['mv_mitgliedschaft'] = mitgliedschaft.name
+        new_korrespondenz['massenlauf'] = 1 if massenlauf else 0
         
         new_korrespondenz = frappe.get_doc(new_korrespondenz)
         new_korrespondenz.insert(ignore_permissions=True)
         frappe.db.commit()
         return new_korrespondenz.name
+
+@frappe.whitelist()
+def create_korrespondenz_massenlauf(mitgliedschaften, druckvorlage, titel):
+    if isinstance(mitgliedschaften, str):
+        mitgliedschaften = json.loads(mitgliedschaften)
+    
+    for mitgliedschaft in mitgliedschaften:
+        create_korrespondenz(mitgliedschaft["name"], titel, druckvorlage, massenlauf=True)
+    return
