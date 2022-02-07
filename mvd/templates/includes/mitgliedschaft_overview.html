@@ -3,7 +3,7 @@
     <div class="row">
         <!-- Card Allgemein -->
         <div class="col-sm-12">
-            <div class="address-box">
+            <div class="address-box"{% if allgemein.validierung == 1 %} style="background-color: #fafad9;"{% endif %}>
                 <p>
                     <b>Status:</b> {{ allgemein.status }}
                 </p>
@@ -21,7 +21,7 @@
         <!-- Card Allgemein -->
         {% if allgemein.ueberfaellige_rechnungen > 0 or allgemein.offene_rechnungen > 0 %}
         <div class="col-sm-5">
-            <div class="address-box">
+            <div class="address-box"{% if allgemein.validierung == 1 %} style="background-color: #fafad9;"{% endif %}>
                 <p>
                     <b>Status:</b> {{ allgemein.status }}<br>
                     <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
@@ -64,7 +64,7 @@
         </div>
         {% else %}
         <div class="col-sm-10">
-            <div class="address-box">
+            <div class="address-box"{% if allgemein.validierung == 1 %} style="background-color: #fafad9;"{% endif %}>
                 <p style="position: absolute; top: -13px; right: -90px;">
                     <span class="css-ampel {{ allgemein.ampelfarbe }}"><span></span></span>
                 </p>

@@ -61,6 +61,9 @@ frappe.vbz = {
         $("#rechnungen_qty").off("click");
         $("#rechnungen_print").off("click");
         $("#todo").off("click");
+        $("#online_mutationen").off("click");
+        $("#geschenk_mitgliedschaften").off("click");
+        $("#autom_adressaenderungen").off("click");
     },
     add_click_handlers: function(open_datas) {
         frappe.vbz.remove_click_handlers();
@@ -149,6 +152,15 @@ frappe.vbz = {
         $("#zuzuege").click(function(){
             frappe.route_options = {"name": ['in', open_datas.validierung.zuzug.names], "validierung_notwendig": 1}
             frappe.set_route("List", "Mitgliedschaft");
+        });
+        $("#online_mutationen").click(function(){
+            frappe.msgprint("Wird noch umgesetzt");
+        });
+        $("#geschenk_mitgliedschaften").click(function(){
+            frappe.msgprint("Wird noch umgesetzt");
+        });
+        $("#autom_adressaenderungen").click(function(){
+            frappe.msgprint("Wird noch umgesetzt");
         });
         
         // massenlauf

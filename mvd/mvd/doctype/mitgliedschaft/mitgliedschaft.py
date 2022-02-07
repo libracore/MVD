@@ -69,9 +69,9 @@ class Mitgliedschaft(Document):
                 else:
                     # sende update an SP
                     send_mvm_to_sp(self, True)
-        else:
-            # erstelle abreits backlog: Zu Validieren
-            create_abl("Daten Validieren", self)
+        # ~ else:
+            # ~ # erstelle abreits backlog: Zu Validieren
+            # ~ create_abl("Daten Validieren", self)
     
     def handling_kontakt_adresse_kunde(self):
         # Mitglied
@@ -1404,7 +1404,8 @@ def get_uebersicht_html(name):
             'mitgliedtyp_c': mitgliedschaft.mitgliedtyp_c,
             'hv_status': hv_status,
             'wichtig': mitgliedschaft.wichtig,
-            'kuendigung': kuendigung
+            'kuendigung': kuendigung,
+            'validierung': int(mitgliedschaft.validierung_notwendig)
         }
     }
     
@@ -1979,15 +1980,19 @@ def mvm_neuanlage(kwargs):
             
             # ~ if status_c in ('Online-Anmeldung', 'Online-Beitritt') or new_mitgliedschaft.validierung_notwendig == 1:
                 # ~ new_mitgliedschaft.validierung_notwendig = 1
-            
-            new_mitgliedschaft.insert()
-            frappe.db.commit()
-            
             if status_c in ('Online-Anmeldung', 'Online-Beitritt'):
                 # erstelle abreits backlog: Zu Validieren
                 # ~ create_abl("Daten Validieren", new_mitgliedschaft)
                 new_mitgliedschaft.validierung_notwendig = 1
-                new_mitgliedschaft.save()
+            
+            new_mitgliedschaft.insert()
+            frappe.db.commit()
+            
+            # ~ if status_c in ('Online-Anmeldung', 'Online-Beitritt'):
+                # ~ # erstelle abreits backlog: Zu Validieren
+                # ~ create_abl("Daten Validieren", new_mitgliedschaft)
+                # ~ new_mitgliedschaft.validierung_notwendig = 1
+                # ~ new_mitgliedschaft.save()
             
             return raise_200()
             
