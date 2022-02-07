@@ -23,6 +23,15 @@
             {% endif %}
         </center>
     </div>
+    <div class="control-card blue-card" id="todo">
+        <center>
+            <i class="fa fa-tasks blue-icon"></i>
+            <p>ToDo</p>
+            {% if todo.qty > 0 %}
+                <div class="vbz-indikator"><span>{{ todo.qty }}</span></div>
+            {% endif %}
+        </center>
+    </div>
     <div class="control-card blue-card" id="handbuch">
         <center>
             <i class="fa fa-book blue-icon"></i>

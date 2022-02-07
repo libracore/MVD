@@ -60,6 +60,7 @@ frappe.vbz = {
         $("#zuzug_print").off("click");
         $("#rechnungen_qty").off("click");
         $("#rechnungen_print").off("click");
+        $("#todo").off("click");
     },
     add_click_handlers: function(open_datas) {
         frappe.vbz.remove_click_handlers();
@@ -116,6 +117,10 @@ frappe.vbz = {
         $("#arbeitsbacklog").click(function(){
             frappe.route_options = {"status": "Open"};
             frappe.set_route("List", "Arbeits Backlog");
+        });
+        $("#todo").click(function(){
+            frappe.route_options = {"owner": ['in', open_datas.todo.todo_users], 'status': 'Open'};
+            frappe.set_route("List", "ToDo");
         });
         $("#validieren").click(function(){
             frappe.vbz.show_view('validierung');

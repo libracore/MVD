@@ -21,6 +21,19 @@ def get_open_data(sektion=None):
                                 WHERE `status` = 'Open'
                                 {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
     
+    # ToDo
+    allowed_sektionen = frappe.get_list('Sektion', fields=['virtueller_user'])
+    todo_users = "'" + str(frappe.session.user) + "'"
+    for allowed_sektion in allowed_sektionen:
+        if allowed_sektion.virtueller_user:
+            todo_users += ",'" + allowed_sektion.virtueller_user + "'"
+    
+    todo_qty = frappe.db.sql("""SELECT
+                                    COUNT(`name`) AS `qty`
+                                FROM `tabToDo`
+                                WHERE `status` = 'Open'
+                                AND `owner` IN ({todo_users})""".format(todo_users=todo_users), as_dict=True)[0].qty
+    
     # Validierung
     validierung_total = frappe.db.sql("""SELECT
                                             COUNT(`name`) AS `qty`
@@ -190,6 +203,10 @@ def get_open_data(sektion=None):
     return {
         'arbeits_backlog': {
             'qty': abl_qty
+        },
+        'todo': {
+            'qty': todo_qty,
+            'todo_users': todo_users.replace("'", "")
         },
         'massenlauf_total': massenlauf_total,
         'validierung': {
