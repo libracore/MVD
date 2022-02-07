@@ -489,7 +489,7 @@ function anmeldung_mit_ez_verarbeitet(frm) {
 }
 
 function erstelle_rechnung(frm) {
-    var dokument = 'Anmeldung mit EZ mit EZ';
+    var dokument = 'Anmeldung mit EZ';
     if (cur_frm.doc.status_c == 'Interessent*in') {
         dokument = 'Interessent*Innenbrief mit EZ';
     }
