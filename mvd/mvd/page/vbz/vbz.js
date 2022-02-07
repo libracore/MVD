@@ -135,11 +135,11 @@ frappe.vbz = {
         
         // validierungen
         $("#online_beitritte").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.validierung.online_beitritt.names]}
+            frappe.route_options = {"name": ['in', open_datas.validierung.online_beitritt.names], "validierung_notwendig": 1}
             frappe.set_route("List", "Mitgliedschaft");
         });
         $("#online_anmeldungen").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.validierung.online_anmeldung.names]}
+            frappe.route_options = {"name": ['in', open_datas.validierung.online_anmeldung.names], "validierung_notwendig": 1}
             frappe.set_route("List", "Mitgliedschaft");
         });
         $("#online_kuendigungen").click(function(){

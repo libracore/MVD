@@ -1877,6 +1877,11 @@ def mvm_update(mitgliedschaft, kwargs):
             if not mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Beim Adressen Update ist etwas schief gelaufen', daten=kwargs)
             
+            if status_c in ('Online-Anmeldung', 'Online-Beitritt'):
+                # erstelle abreits backlog: Zu Validieren
+                # ~ create_abl("Daten Validieren", mitgliedschaft)
+                mitgliedschaft.validierung_notwendig = 1
+            
             mitgliedschaft.save()
             frappe.db.commit()
             
@@ -1975,8 +1980,17 @@ def mvm_neuanlage(kwargs):
             if not new_mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen', daten=kwargs)
             
+            # ~ if status_c in ('Online-Anmeldung', 'Online-Beitritt') or new_mitgliedschaft.validierung_notwendig == 1:
+                # ~ new_mitgliedschaft.validierung_notwendig = 1
+            
             new_mitgliedschaft.insert()
             frappe.db.commit()
+            
+            if status_c in ('Online-Anmeldung', 'Online-Beitritt'):
+                # erstelle abreits backlog: Zu Validieren
+                # ~ create_abl("Daten Validieren", new_mitgliedschaft)
+                new_mitgliedschaft.validierung_notwendig = 1
+                new_mitgliedschaft.save()
             
             return raise_200()
             

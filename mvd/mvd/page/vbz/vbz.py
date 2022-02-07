@@ -76,7 +76,7 @@ def get_open_data(sektion=None):
     v_online_anmeldung = 'x'
     for online_anmeldung in _v_online_anmeldung:
         v_online_anmeldung += ',' + online_anmeldung.name
-    if len(_v_online_beitritt) > 0:
+    if len(_v_online_anmeldung) > 0:
         v_online_anmeldung = v_online_anmeldung.replace("x,", "")
     else:
         v_online_anmeldung = ''

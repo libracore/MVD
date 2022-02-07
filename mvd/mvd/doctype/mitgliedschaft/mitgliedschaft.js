@@ -452,6 +452,17 @@ function daten_validiert(frm) {
                         frappe.msgprint("Die Daten wurden als validert bestätigt.");
                     }
                 )
+            } else if (cur_frm.doc.status_c == 'Online-Anmeldung') {
+                cur_frm.set_value("validierung_notwendig", '0');
+                cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                cur_frm.save();
+                erstelle_rechnung(frm);
+            } else if (cur_frm.doc.status_c == 'Online-Beitritt') {
+                cur_frm.set_value("validierung_notwendig", '0');
+                cur_frm.set_value("status_c", 'Regulär');
+                cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                cur_frm.save();
+                frappe.msgprint("Die Daten wurden als validert bestätigt.");
             } else {
                 cur_frm.set_value("validierung_notwendig", '0');
                 cur_frm.set_value("status_c", 'Regulär');
@@ -591,17 +602,8 @@ function erstelle_rechnung(frm) {
                     freeze_message: 'Erstelle Rechnung...',
                     callback: function(r)
                     {
-                        
-                        
                         cur_frm.reload_doc();
-                        //cur_frm.set_value("rg_massendruck", r.message);
-                        //cur_frm.save();
                         cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung " + r.message + " erstellt.");
-                        //~ cur_frm.reload_doc().then(function(cur_frm) {
-                            //~ cur_frm.set_value("rg_massendruck", r.message);
-                            //~ cur_frm.save();
-                        //~ });
-                        
                         if (massendruck) {
                             frappe.msgprint("Die Rechnung wurde erstellt und für den Massenlauf vorgemerkt, Sie finden sie in den Anhängen.");
                         } else {
