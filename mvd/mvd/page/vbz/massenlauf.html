@@ -15,9 +15,9 @@
         </tr>
         <tr>
             <td>Zuzug (mit und ohne EZ)</td>
-            <td>tbd</td>
-            <td><i id="zuzug_qty" class="fa fa-eye"></i></td>
-            <td><i id="zuzug_print" class="fa fa-file"></i></td>
+            <td>{{ zuzug.qty }}</td>
+            <td>{% if zuzug.qty > 0 %}<i id="zuzug_qty" class="fa fa-eye"></i>{% endif %}</td>
+            <td>{% if zuzug.qty > 0 %}<i id="zuzug_print" class="fa fa-file"></i>{% endif %}</td>
         </tr>
         <tr>
             <td>Begrüssung (Bezahlte Mitgliedschaft:<br>Anmeldung und Interessent*in)</td>

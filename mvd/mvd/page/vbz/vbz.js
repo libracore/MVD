@@ -27,7 +27,8 @@ frappe.vbz = {
                     page.add_view('validierung', frappe.render_template("validierung", eval(r.message.validierung)))
                     page.add_view('massenlauf', frappe.render_template("massenlauf", {
                         'kuendigung': eval(r.message.kuendigung_massenlauf),
-                        'korrespondenz': eval(r.message.korrespondenz_massenlauf)
+                        'korrespondenz': eval(r.message.korrespondenz_massenlauf),
+                        'zuzug': eval(r.message.zuzug_massenlauf)
                     }))
                     page.add_view('adresspflege', frappe.render_template("adresspflege", {}))
                     frappe.vbz.add_click_handlers(eval(r.message));
@@ -54,6 +55,8 @@ frappe.vbz = {
         $("#goto_klassisch").off("click");
         $("#korrespondenz_qty").off("click");
         $("#korrespondenz_print").off("click");
+        $("#zuzug_qty").off("click");
+        $("#zuzug_print").off("click");
     },
     add_click_handlers: function(open_datas) {
         frappe.vbz.remove_click_handlers();
@@ -136,7 +139,7 @@ frappe.vbz = {
             frappe.set_route("List", "Mitgliedschaft");
         });
         $("#zuzuege").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.validierung.zuzug.names]}
+            frappe.route_options = {"name": ['in', open_datas.validierung.zuzug.names], "validierung_notwendig": 1}
             frappe.set_route("List", "Mitgliedschaft");
         });
         
@@ -149,10 +152,11 @@ frappe.vbz = {
             frappe.vbz.kuendigung_massenlauf();
         });
         $("#zuzug_qty").click(function(){
-            frappe.msgprint("Das muss noch programmiert werden!");
+            frappe.route_options = {"name": ['in', open_datas.zuzug_massenlauf.names]}
+            frappe.set_route("List", "Mitgliedschaft");
         });
         $("#zuzug_print").click(function(){
-            frappe.msgprint("Das muss noch programmiert werden!");
+            frappe.vbz.zuzug_massenlauf();
         });
         $("#begruessung_qty").click(function(){
             frappe.msgprint("Das muss noch programmiert werden!");
@@ -200,6 +204,22 @@ frappe.vbz = {
         frappe.dom.freeze('Erstelle Sammel-PDF...');
         frappe.call({
             method: "mvd.mvd.page.vbz.vbz.kuendigung_massenlauf",
+            args:{},
+            freeze: true,
+            freeze_message: 'Erstelle Sammel-PDF...',
+            async: false,
+            callback: function(r)
+            {
+                frappe.dom.unfreeze();
+                frappe.route_options = {"name": r.message}
+                frappe.set_route("List", "File");
+            }
+        });
+    },
+    zuzug_massenlauf: function() {
+        frappe.dom.freeze('Erstelle Sammel-PDF...');
+        frappe.call({
+            method: "mvd.mvd.page.vbz.vbz.zuzug_massenlauf",
             args:{},
             freeze: true,
             freeze_message: 'Erstelle Sammel-PDF...',

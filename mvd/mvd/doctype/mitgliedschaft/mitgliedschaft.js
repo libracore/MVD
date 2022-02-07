@@ -62,7 +62,7 @@ frappe.ui.form.on('Mitgliedschaft', {
                         anmeldung_mit_ez_verarbeitet(frm);
                 });
             }
-            frm.add_custom_button(__("Mitgliedschaft an Sektion zuweisen"),  function() {
+            frm.add_custom_button(__("Zuweisung an Sektion"),  function() {
                 assign(frm);
             });
             
@@ -426,13 +426,34 @@ function daten_validiert(frm) {
         'Haben Sie die Daten geprüft und möchten die Validierung bestätigen?',
         function(){
             // on yes
-            cur_frm.set_value("validierung_notwendig", '0');
             if (cur_frm.doc.status_c == 'Zuzug') {
+                frappe.confirm(
+                    'Möchten Sie den Druck des Zuzugsdokument für den Massenlauf vormerken?',
+                    function(){
+                        // on yes
+                        cur_frm.set_value("zuzug_massendruck", '1');
+                        cur_frm.set_value("validierung_notwendig", '0');
+                        cur_frm.set_value("status_c", 'Regulär');
+                        cur_frm.save();
+                        cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                        frappe.msgprint("Die Daten wurden als validert bestätigt und der Druck des Zuzugsdokument für den Massenlauf vorgemerkt.");
+                    },
+                    function(){
+                        // on no
+                        cur_frm.set_value("validierung_notwendig", '0');
+                        cur_frm.set_value("status_c", 'Regulär');
+                        cur_frm.save();
+                        cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                        frappe.msgprint("Die Daten wurden als validert bestätigt.");
+                    }
+                )
+            } else {
+                cur_frm.set_value("validierung_notwendig", '0');
                 cur_frm.set_value("status_c", 'Regulär');
+                cur_frm.save();
+                cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                frappe.msgprint("Die Daten wurden als validert bestätigt.");
             }
-            cur_frm.save();
-            cur_frm.timeline.insert_comment("Validierung durchgeführt.");
-            frappe.msgprint("Die Daten wurden als validert bestätigt.");
         },
         function(){
             // on no
@@ -832,8 +853,8 @@ function assign(frm) {
                         "notify": values.notify
                     },
                     "callback": function(response) {
-                        frappe.msgprint( "Die Sektions-Zuweisung wurde erstellt." );
                         cur_frm.reload_doc();
+                        frappe.msgprint( "Die Sektions-Zuweisung wurde erstellt." );
                     }
                 });
             },

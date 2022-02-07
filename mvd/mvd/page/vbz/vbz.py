@@ -146,8 +146,27 @@ def get_open_data(sektion=None):
     else:
         korrespondenz = ''
     
+    # zuzugs massenlauf
+    zuzug_qty = frappe.db.sql("""SELECT
+                                        COUNT(`name`) AS `qty`
+                                    FROM `tabMitgliedschaft`
+                                    WHERE `zuzug_massendruck` = 1
+                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
+    _zuzug = frappe.db.sql("""SELECT
+                                        `name`
+                                    FROM `tabMitgliedschaft`
+                                    WHERE `zuzug_massendruck` = 1
+                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
+    zuzug = 'x'
+    for z in _zuzug:
+        zuzug += ',' + z.name
+    if len(_zuzug) > 0:
+        zuzug = zuzug.replace("x,", "")
+    else:
+        zuzug = ''
+    
     # massenlauf total
-    massenlauf_total = kuendigung_qty + korrespondenz_qty
+    massenlauf_total = kuendigung_qty + korrespondenz_qty + zuzug_qty
     
     return {
         'arbeits_backlog': {
@@ -180,6 +199,10 @@ def get_open_data(sektion=None):
         'korrespondenz_massenlauf': {
             'qty': korrespondenz_qty,
             'names': korrespondenz
+        },
+        'zuzug_massenlauf': {
+            'qty': zuzug_qty,
+            'names': zuzug
         }
     }
 
@@ -250,3 +273,40 @@ def kuendigung_massenlauf():
         return _file.name
     else:
         frappe.throw("Es gibt keine Mitgliedschaften die für einen Kündigungs-Massenlauf vorgemerkt sind.")
+
+@frappe.whitelist()
+def zuzug_massenlauf():
+    mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'zuzug_massendruck': 1}, fields=['name', 'zuzugs_rechnung', 'zuzug_korrespondenz'])
+    if len(mitgliedschaften) > 0:
+        output = PdfFileWriter()
+        for mitgliedschaft in mitgliedschaften:
+            if mitgliedschaft['zuzugs_rechnung']:
+                output = frappe.get_print("Sales Invoice", mitgliedschaft['zuzugs_rechnung'], 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)
+            else:
+                output = frappe.get_print("Korrespondenz", mitgliedschaft['zuzug_korrespondenz'], 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+            
+        file_name = "Zuzugs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+        file_name = file_name.split(".")[0]
+        file_name = file_name.replace(":", "-")
+        file_name = file_name + ".pdf"
+        
+        filedata = get_file_data_from_writer(output)
+        
+        _file = frappe.get_doc({
+            "doctype": "File",
+            "file_name": file_name,
+            "folder": "Home",
+            "is_private": 1,
+            "content": filedata
+        })
+        
+        _file.save(ignore_permissions=True)
+        
+        for mitgliedschaft in mitgliedschaften:
+            m = frappe.get_doc("Mitgliedschaft", mitgliedschaft['name'])
+            m.zuzug_massendruck = '0'
+            m.save(ignore_permissions=True)
+        
+        return _file.name
+    else:
+        frappe.throw("Es gibt keine Mitgliedschaften die für einen Zuzugs-Massenlauf vorgemerkt sind.")

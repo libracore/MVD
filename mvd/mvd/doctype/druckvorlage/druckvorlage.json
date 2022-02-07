@@ -111,7 +111,7 @@
    "label": "R\u00fcckseite"
   },
   {
-   "depends_on": "eval:doc.anzahl_seiten!='3'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ'], doc.dokument)",
+   "depends_on": "eval:doc.anzahl_seiten!='3'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ'], doc.dokument)",
    "fieldname": "seite_1_qrr",
    "fieldtype": "Select",
    "label": "QRR EZ",
@@ -136,7 +136,7 @@
    "label": "R\u00fcckseite"
   },
   {
-   "depends_on": "eval:doc.anzahl_seiten!='1'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ'], doc.dokument)",
+   "depends_on": "eval:doc.anzahl_seiten!='1'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ'], doc.dokument)",
    "fieldname": "seite_2_qrr",
    "fieldtype": "Select",
    "label": "QRR EZ",
@@ -161,7 +161,7 @@
    "label": "R\u00fcckseite"
   },
   {
-   "depends_on": "eval:doc.anzahl_seiten=='3'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ'], doc.dokument)",
+   "depends_on": "eval:doc.anzahl_seiten=='3'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ'], doc.dokument)",
    "fieldname": "seite_3_qrr",
    "fieldtype": "Select",
    "label": "QRR EZ",
@@ -202,21 +202,21 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:in_list(['Begr\u00fcssung mit Ausweis', 'Korrespondenz'], doc.dokument)",
+   "depends_on": "eval:in_list(['Begr\u00fcssung mit Ausweis', 'Korrespondenz', 'Zuzug ohne EZ'], doc.dokument)",
    "fieldname": "seite_1_ausweis",
    "fieldtype": "Check",
    "label": "Ausweis auf Blatt 1 andrucken"
   },
   {
    "default": "0",
-   "depends_on": "eval:in_list(['Begr\u00fcssung mit Ausweis', 'Korrespondenz'], doc.dokument)&&doc.anzahl_seiten!='1'",
+   "depends_on": "eval:in_list(['Begr\u00fcssung mit Ausweis', 'Korrespondenz', 'Zuzug ohne EZ'], doc.dokument)&&doc.anzahl_seiten!='1'",
    "fieldname": "seite_2_ausweis",
    "fieldtype": "Check",
    "label": "Ausweis auf Blatt 2 andrucken"
   },
   {
    "default": "0",
-   "depends_on": "eval:in_list(['Begr\u00fcssung mit Ausweis', 'Korrespondenz'], doc.dokument)&&doc.anzahl_seiten=='3'",
+   "depends_on": "eval:in_list(['Begr\u00fcssung mit Ausweis', 'Korrespondenz', 'Zuzug ohne EZ'], doc.dokument)&&doc.anzahl_seiten=='3'",
    "fieldname": "seite_3_ausweis",
    "fieldtype": "Check",
    "label": "Ausweis auf Blatt 3 andrucken"
@@ -354,7 +354,7 @@
    "options": "Language"
   }
  ],
- "modified": "2022-02-04 12:59:47.475805",
+ "modified": "2022-02-07 12:46:28.512696",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

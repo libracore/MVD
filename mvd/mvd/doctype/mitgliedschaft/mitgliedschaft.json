@@ -133,6 +133,9 @@
   "kuendigung_verarbeiten",
   "interessent_innenbrief_mit_ez",
   "anmeldung_mit_ez",
+  "zuzug_massendruck",
+  "zuzugs_rechnung",
+  "zuzug_korrespondenz",
   "kuendigung_druckvorlage",
   "letzte_bearbeitung_von"
  ],
@@ -907,10 +910,28 @@
    "fieldname": "anmeldung_mit_ez",
    "fieldtype": "Check",
    "label": "Anmeldung mit EZ"
+  },
+  {
+   "default": "0",
+   "fieldname": "zuzug_massendruck",
+   "fieldtype": "Check",
+   "label": "Zuzug als Massendruck"
+  },
+  {
+   "fieldname": "zuzugs_rechnung",
+   "fieldtype": "Link",
+   "label": "Zuzugs Rechnung",
+   "options": "Sales Invoice"
+  },
+  {
+   "fieldname": "zuzug_korrespondenz",
+   "fieldtype": "Link",
+   "label": "Korrespondenz Zuzug ohne EZ",
+   "options": "Korrespondenz"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-05 20:58:46.321204",
+ "modified": "2022-02-07 12:39:27.036721",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

@@ -12,6 +12,7 @@ from PyPDF2 import PdfFileWriter
 from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
 from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
 from frappe.utils.pdf import get_file_data_from_writer
+from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
@@ -1517,14 +1518,52 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             frappe.db.commit()
             
             # erstelle ggf. neue Rechnung
+            mit_rechnung = False
             if new_mitgliedschaft.zahlung_mitgliedschaft < int(now().split("-")[0]):
                 if new_mitgliedschaft.naechstes_jahr_geschuldet == 1:
-                    create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True)
+                    mit_rechnung = create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug mit EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
             
             # markiere neue Mitgliedschaft als zu validieren
             new_mitgliedschaft = frappe.get_doc("Mitgliedschaft", new_mitgliedschaft.name)
             new_mitgliedschaft.validierung_notwendig = 1
             new_mitgliedschaft.letzte_bearbeitung_von = 'User'
+            if mit_rechnung:
+                new_mitgliedschaft.zuzugs_rechnung = mit_rechnung
+            else:
+                druckvorlage = frappe.get_doc("Druckvorlage", get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug ohne EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
+                _new_korrespondenz = frappe.copy_doc(druckvorlage)
+                _new_korrespondenz.doctype = 'Korrespondenz'
+                _new_korrespondenz.sektion_id = new_mitgliedschaft.sektion_id
+                _new_korrespondenz.titel = 'Zuzug ohne EZ'
+                
+                new_korrespondenz = frappe._dict(_new_korrespondenz.as_dict())
+                keys_to_remove = [
+                    'mitgliedtyp_c',
+                    'validierungsstring',
+                    'language',
+                    'reduzierte_mitgliedschaft',
+                    'dokument',
+                    'default',
+                    'deaktiviert',
+                    'seite_1_qrr',
+                    'seite_1_qrr_spende_hv',
+                    'seite_2_qrr',
+                    'seite_2_qrr_spende_hv',
+                    'seite_3_qrr',
+                    'seite_3_qrr_spende_hv'
+                ]
+                for key in keys_to_remove:
+                    new_korrespondenz.pop(key)
+                
+                new_korrespondenz['mv_mitgliedschaft'] = new_mitgliedschaft.name
+                new_korrespondenz['massenlauf'] = 0
+                
+                new_korrespondenz = frappe.get_doc(new_korrespondenz)
+                new_korrespondenz.insert(ignore_permissions=True)
+                frappe.db.commit()
+                
+                new_mitgliedschaft.zuzug_korrespondenz = new_korrespondenz.name
+            
             new_mitgliedschaft.save(ignore_permissions=True)
             
             return 1

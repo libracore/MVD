@@ -16,7 +16,7 @@ class Druckvorlage(Document):
             self.default = '0'
     
     def validiere_inhalt(self):
-        if self.dokument in ('Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ'):
+        if self.dokument in ('Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ'):
             if self.mitgliedtyp_c == 'Privat':
                 if self.anzahl_seiten == '1':
                     frappe.throw("Es müssen mindestens 2 Seiten aktiviert werden (Mitgliedschaftsrechnung & HV Rechnung)")
@@ -28,6 +28,7 @@ class Druckvorlage(Document):
                         frappe.throw("Es kann nicht derselbe QRR Typ für Seite 1 wie auch Seite 2 gewählt werden.")
                 
                 if self.anzahl_seiten == '3':
+                    self.seite_1_qrr = 'Keiner'
                     if self.seite_2_qrr == self.seite_3_qrr:
                         frappe.throw("Es kann nicht derselbe QRR Typ für Seite 2 wie auch Seite 3 gewählt werden.")
                 
@@ -101,6 +102,32 @@ class Druckvorlage(Document):
                 frappe.throw("Bitte mindestens eine Seite zum Andruck des Ausweises auswählen.")
             elif ausweis_druck > 1:
                 frappe.throw("Bitte maximal eine Seite zum Andruck des Ausweises auswählen.")
+            
+            if ausweis_druck > 0:
+                if self.doppelseitiger_druck != 1:
+                    frappe.throw("Aufgrund des Ausweises muss diese Druckvorlage doppelseitig sein.")
+                if self.seite_1_ausweis:
+                    if not self.seite_1_referenzblock_ausblenden:
+                        frappe.throw("Aufgrund des Ausweises muss der Referenzblock ausgeblendet sein.")
+                if self.seite_2_ausweis:
+                    if self.anzahl_seiten != '1':
+                        if not self.seite_2_referenzblock_ausblenden:
+                            if not self.seite_2_adressblock_ausblenden:
+                                frappe.throw("Aufgrund des Ausweises muss der Referenzblock ausgeblendet sein.")
+                if self.seite_3_ausweis:
+                   if self.anzahl_seiten == '3':
+                        if not self.seite_3_referenzblock_ausblenden:
+                            if not self.seite_3_adressblock_ausblenden:
+                                frappe.throw("Aufgrund des Ausweises muss der Referenzblock ausgeblendet sein.")
+                                
+        elif self.dokument == 'Zuzug ohne EZ':
+            ausweis_druck = 0
+            if self.seite_1_ausweis:
+                ausweis_druck += 1
+            if self.seite_2_ausweis:
+                ausweis_druck += 1
+            if self.seite_3_ausweis:
+                ausweis_druck += 1
             
             if ausweis_druck > 0:
                 if self.doppelseitiger_druck != 1:
