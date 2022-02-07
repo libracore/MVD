@@ -40,9 +40,8 @@ def get_open_data(sektion=None):
     # Validierung
     validierung_total = frappe.db.sql("""SELECT
                                             COUNT(`name`) AS `qty`
-                                        FROM `tabArbeits Backlog`
-                                        WHERE `status` = 'Open'
-                                        AND `typ` = 'Daten Validieren'
+                                        FROM `tabMitgliedschaft`
+                                        WHERE `validierung_notwendig` = 1
                                         {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
     v_online_beitritt_qty = frappe.db.sql("""SELECT
                                             COUNT(`name`) AS `qty`

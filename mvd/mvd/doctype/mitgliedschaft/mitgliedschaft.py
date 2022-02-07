@@ -56,8 +56,6 @@ class Mitgliedschaft(Document):
             
             # schliesse offene abreits backlogs
             close_open_validations(self.name, 'Daten Validieren')
-            if not int(self.kuendigung_verarbeiten) == 1:
-                close_open_validations(self.name, 'Kündigung verarbeiten')
             if not int(self.interessent_innenbrief_mit_ez) == 1:
                 close_open_validations(self.name, 'Interessent*Innenbrief mit EZ')
             if not int(self.anmeldung_mit_ez) == 1:
@@ -1723,7 +1721,6 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druck
     mitgliedschaft.kuendigung_druckvorlage = druckvorlage
     if massenlauf == '1':
         mitgliedschaft.kuendigung_verarbeiten = 1
-        create_abl("Kündigung verarbeiten", mitgliedschaft)
     mitgliedschaft.save(ignore_permissions=True)
     
     # erstellung Kündigungs PDF

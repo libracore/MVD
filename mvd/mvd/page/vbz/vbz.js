@@ -153,14 +153,14 @@ frappe.vbz = {
         
         // massenlauf
         $("#keundigung_qty").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.kuendigung_massenlauf.names]}
+            frappe.route_options = {"name": ['in', open_datas.kuendigung_massenlauf.names], 'kuendigung_verarbeiten': 1}
             frappe.set_route("List", "Mitgliedschaft");
         });
         $("#kuendigung_print").click(function(){
             frappe.vbz.kuendigung_massenlauf();
         });
         $("#zuzug_qty").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.zuzug_massenlauf.names]}
+            frappe.route_options = {"name": ['in', open_datas.zuzug_massenlauf.names], 'zuzug_massendruck': 1}
             frappe.set_route("List", "Mitgliedschaft");
         });
         $("#zuzug_print").click(function(){
@@ -180,7 +180,7 @@ frappe.vbz = {
             frappe.vbz.korrespondenz_massenlauf();
         });
         $("#rechnungen_qty").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.rg_massenlauf.names]}
+            frappe.route_options = {"name": ['in', open_datas.rg_massenlauf.names], 'rg_massendruck_vormerkung': 1}
             frappe.set_route("List", "Mitgliedschaft");
         });
         $("#rechnungen_print").click(function(){

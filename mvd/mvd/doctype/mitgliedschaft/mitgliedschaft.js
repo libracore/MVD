@@ -48,22 +48,22 @@ frappe.ui.form.on('Mitgliedschaft', {
                 });
             }
             if (cur_frm.doc.kuendigung_verarbeiten) {
-                frm.add_custom_button(__("Kündigung als verarbeitet bestätigen"),  function() {
+                frm.add_custom_button(__("Von Massenlauf (Kündigung) entfernen"),  function() {
                         kuendigung_verarbeitet(frm);
                 });
             }
             if (cur_frm.doc.interessent_innenbrief_mit_ez) {
-                frm.add_custom_button(__("Interessent*Innenbrief mit EZ als verarbeitet bestätigen"),  function() {
+                frm.add_custom_button(__("Interessent*Innenbrief mit EZ als erstellt bestätigen"),  function() {
                         interessent_innenbrief_mit_ez_verarbeitet(frm);
                 });
             }
             if (cur_frm.doc.anmeldung_mit_ez) {
-                frm.add_custom_button(__("Anmeldung mit EZ als verarbeitet bestätigen"),  function() {
+                frm.add_custom_button(__("Anmeldung mit EZ als erstellt bestätigen"),  function() {
                         anmeldung_mit_ez_verarbeitet(frm);
                 });
             }
             if (cur_frm.doc.rg_massendruck_vormerkung) {
-                frm.add_custom_button(__("Mitgliedschaftsrechnung-Druck als verarbeitet bestätigen"),  function() {
+                frm.add_custom_button(__("Von Massenlauf (Mitgliedschaftsrechnung) entfernen"),  function() {
                         rg_massendruck_verarbeitet(frm);
                 });
             }
@@ -479,13 +479,13 @@ function daten_validiert(frm) {
 
 function kuendigung_verarbeitet(frm) {
     frappe.confirm(
-        'Haben Sie alle notwendigen Aktionen getroffen und möchten die Kündigung als verarbeitet bestätigen?',
+        'Haben Sie die Kündigung manuell gedruckt und möchten Sie sie aus dem Massenlauf entfernen?',
         function(){
             // on yes
             cur_frm.set_value("kuendigung_verarbeiten", '0');
             cur_frm.save();
             cur_frm.timeline.insert_comment("Kündigung verarbeitet.");
-            frappe.msgprint("Die Kündigung wurde als verarbeitet bestätigt.");
+            frappe.msgprint("Die Kündigung wurde aus dem Massenlauf entfernt.");
         },
         function(){
             // on no
@@ -527,13 +527,13 @@ function anmeldung_mit_ez_verarbeitet(frm) {
 
 function rg_massendruck_verarbeitet(frm) {
     frappe.confirm(
-        'Haben Sie die Mitgliedschaftsrechnung gedruckt und möchten dies als verarbeitet bestätigen?',
+        'Haben Sie die Mitgliedschaftsrechnung manuell gedruckt und möchten Sie sie aus dem Massenlauf entfernen?',
         function(){
             // on yes
             cur_frm.set_value("rg_massendruck_vormerkung", '0');
             cur_frm.set_value("rg_massendruck", '');
             cur_frm.save();
-            frappe.msgprint("Der Druck der Mitgliedschaftsrechnung wurde als verarbeitet bestätigt.");
+            frappe.msgprint("Der Druck der Mitgliedschaftsrechnung wurde aus dem Massenlauf entfernt.");
         },
         function(){
             // on no

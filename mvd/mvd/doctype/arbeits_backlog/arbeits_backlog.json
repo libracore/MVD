@@ -17,7 +17,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Typ",
-   "options": "Daten Validieren\nK\u00fcndigung verarbeiten\nInteressent*Innenbrief mit EZ\nAnmeldung mit EZ",
+   "options": "Daten Validieren\nInteressent*Innenbrief mit EZ\nAnmeldung mit EZ",
    "read_only": 1,
    "reqd": 1
   },
@@ -57,7 +57,7 @@
    "reqd": 1
   }
  ],
- "modified": "2022-02-04 23:39:18.145682",
+ "modified": "2022-02-07 21:58:54.929200",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Arbeits Backlog",
