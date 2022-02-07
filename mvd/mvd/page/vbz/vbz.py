@@ -10,9 +10,12 @@ from frappe.utils.pdf import get_file_data_from_writer
 
 @frappe.whitelist()
 def get_open_data(sektion=None):
-    sektion_filter = ''
-    if sektion:
-        sektion_filter = " AND `sektion_id` = '{sektion}'".format(sektion=sektion)
+    allowed_sektionen = frappe.get_list('Sektion', fields=['name'])
+    sektionen = "x,"
+    for _sektion in allowed_sektionen:
+        sektionen += ",'" + _sektion.name + "'"
+    sektionen = sektionen.replace("x,,", "")
+    sektion_filter = " AND `sektion_id` IN ({sektionen})".format(sektionen=sektionen)
     
     # arbeits backlog
     abl_qty = frappe.db.sql("""SELECT
