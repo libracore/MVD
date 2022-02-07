@@ -1576,7 +1576,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         return 1
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False):
+def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False):
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
     company = frappe.get_doc("Company", sektion.company)
@@ -1642,6 +1642,11 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         row.type = pos_profile.payments[0].type
         row.amount = sinv.grand_total
         sinv.save(ignore_permissions=True)
+    
+    if massendruck:
+        frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `rg_massendruck` = '{sinv}', `rg_massendruck_vormerkung` = 1 WHERE `name` = '{mitgliedschaft}'""".format(sinv=sinv.name, mitgliedschaft=mitgliedschaft.name), as_list=True)
+    else:
+        frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `rg_massendruck` = '', `rg_massendruck_vormerkung` = 0 WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=mitgliedschaft.name), as_list=True)
     
     if submit:
         sinv.submit()

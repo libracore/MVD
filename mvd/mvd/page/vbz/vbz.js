@@ -28,7 +28,8 @@ frappe.vbz = {
                     page.add_view('massenlauf', frappe.render_template("massenlauf", {
                         'kuendigung': eval(r.message.kuendigung_massenlauf),
                         'korrespondenz': eval(r.message.korrespondenz_massenlauf),
-                        'zuzug': eval(r.message.zuzug_massenlauf)
+                        'zuzug': eval(r.message.zuzug_massenlauf),
+                        'rechnungen': eval(r.message.rg_massenlauf)
                     }))
                     page.add_view('adresspflege', frappe.render_template("adresspflege", {}))
                     frappe.vbz.add_click_handlers(eval(r.message));
@@ -57,6 +58,8 @@ frappe.vbz = {
         $("#korrespondenz_print").off("click");
         $("#zuzug_qty").off("click");
         $("#zuzug_print").off("click");
+        $("#rechnungen_qty").off("click");
+        $("#rechnungen_print").off("click");
     },
     add_click_handlers: function(open_datas) {
         frappe.vbz.remove_click_handlers();
@@ -171,6 +174,13 @@ frappe.vbz = {
         $("#korrespondenz_print").click(function(){
             frappe.vbz.korrespondenz_massenlauf();
         });
+        $("#rechnungen_qty").click(function(){
+            frappe.route_options = {"name": ['in', open_datas.rg_massenlauf.names]}
+            frappe.set_route("List", "Mitgliedschaft");
+        });
+        $("#rechnungen_print").click(function(){
+            frappe.vbz.rg_massenlauf();
+        });
     },
     get_default_sektion: function() {
         var default_sektion = '';
@@ -220,6 +230,22 @@ frappe.vbz = {
         frappe.dom.freeze('Erstelle Sammel-PDF...');
         frappe.call({
             method: "mvd.mvd.page.vbz.vbz.zuzug_massenlauf",
+            args:{},
+            freeze: true,
+            freeze_message: 'Erstelle Sammel-PDF...',
+            async: false,
+            callback: function(r)
+            {
+                frappe.dom.unfreeze();
+                frappe.route_options = {"name": r.message}
+                frappe.set_route("List", "File");
+            }
+        });
+    },
+    rg_massenlauf: function() {
+        frappe.dom.freeze('Erstelle Sammel-PDF...');
+        frappe.call({
+            method: "mvd.mvd.page.vbz.vbz.rg_massenlauf",
             args:{},
             freeze: true,
             freeze_message: 'Erstelle Sammel-PDF...',

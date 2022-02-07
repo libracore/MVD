@@ -62,6 +62,11 @@ frappe.ui.form.on('Mitgliedschaft', {
                         anmeldung_mit_ez_verarbeitet(frm);
                 });
             }
+            if (cur_frm.doc.rg_massendruck_vormerkung) {
+                frm.add_custom_button(__("Mitgliedschaftsrechnung-Druck als verarbeitet bestätigen"),  function() {
+                        rg_massendruck_verarbeitet(frm);
+                });
+            }
             frm.add_custom_button(__("Zuweisung an Sektion"),  function() {
                 assign(frm);
             });
@@ -509,6 +514,23 @@ function anmeldung_mit_ez_verarbeitet(frm) {
     )
 }
 
+function rg_massendruck_verarbeitet(frm) {
+    frappe.confirm(
+        'Haben Sie die Mitgliedschaftsrechnung gedruckt und möchten dies als verarbeitet bestätigen?',
+        function(){
+            // on yes
+            cur_frm.set_value("rg_massendruck_vormerkung", '0');
+            cur_frm.set_value("rg_massendruck", '');
+            cur_frm.save();
+            frappe.msgprint("Der Druck der Mitgliedschaftsrechnung wurde als verarbeitet bestätigt.");
+        },
+        function(){
+            // on no
+        }
+    )
+}
+
+
 function erstelle_rechnung(frm) {
     var dokument = 'Anmeldung mit EZ';
     if (cur_frm.doc.status_c == 'Interessent*in') {
@@ -534,7 +556,8 @@ function erstelle_rechnung(frm) {
                     }
                 },
                 {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0},
-                {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'}
+                {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
+                {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0}
             ],
             function(values){
                 if (values.bar_bezahlt == 1) {
@@ -548,6 +571,11 @@ function erstelle_rechnung(frm) {
                     var bar_bezahlt = null;
                     var hv_bar_bezahlt = null;
                 }
+                if (values.massendruck == 1) {
+                    var massendruck = true;
+                } else {
+                    var massendruck = null;
+                }
                 frappe.call({
                     method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung",
                     args:{
@@ -556,15 +584,29 @@ function erstelle_rechnung(frm) {
                             'attach_as_pdf': true,
                             'submit': true,
                             'hv_bar_bezahlt': hv_bar_bezahlt,
-                            'druckvorlage': values.druckvorlage
+                            'druckvorlage': values.druckvorlage,
+                            'massendruck': massendruck
                     },
                     freeze: true,
                     freeze_message: 'Erstelle Rechnung...',
                     callback: function(r)
                     {
-                        cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung " + r.message + " erstellt.");
+                        
+                        
                         cur_frm.reload_doc();
-                        frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
+                        //cur_frm.set_value("rg_massendruck", r.message);
+                        //cur_frm.save();
+                        cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung " + r.message + " erstellt.");
+                        //~ cur_frm.reload_doc().then(function(cur_frm) {
+                            //~ cur_frm.set_value("rg_massendruck", r.message);
+                            //~ cur_frm.save();
+                        //~ });
+                        
+                        if (massendruck) {
+                            frappe.msgprint("Die Rechnung wurde erstellt und für den Massenlauf vorgemerkt, Sie finden sie in den Anhängen.");
+                        } else {
+                            frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
+                        }
                     }
                 });
             },

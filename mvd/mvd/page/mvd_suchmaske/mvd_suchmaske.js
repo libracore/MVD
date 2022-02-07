@@ -719,14 +719,16 @@ frappe.mvd_such_client = {
                                             'get_query': function() {
                                                 return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
                                             }
-                                        }
+                                        },
+                                        {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0}
                                     ],
                                     function(prompt_values){
                                         frappe.call({
                                             method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.anlage_prozess",
                                             args:{
                                                     'anlage_daten': values,
-                                                    'druckvorlage': prompt_values.druckvorlage
+                                                    'druckvorlage': prompt_values.druckvorlage,
+                                                    'massendruck': prompt_values.massendruck
                                             },
                                             freeze: true,
                                             freeze_message: 'Erstelle Mitgliedschaften...',

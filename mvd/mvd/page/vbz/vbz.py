@@ -165,8 +165,27 @@ def get_open_data(sektion=None):
     else:
         zuzug = ''
     
+    # mitgliedschaftsrechnung massenlauf
+    rg_massendruck_qty = frappe.db.sql("""SELECT
+                                        COUNT(`name`) AS `qty`
+                                    FROM `tabMitgliedschaft`
+                                    WHERE `rg_massendruck_vormerkung` = 1
+                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
+    _rg_massendruck = frappe.db.sql("""SELECT
+                                        `name`
+                                    FROM `tabMitgliedschaft`
+                                    WHERE `rg_massendruck_vormerkung` = 1
+                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
+    rg_massendruck = 'x'
+    for rgm in _rg_massendruck:
+        rg_massendruck += ',' + rgm.name
+    if len(_rg_massendruck) > 0:
+        rg_massendruck = rg_massendruck.replace("x,", "")
+    else:
+        rg_massendruck = ''
+    
     # massenlauf total
-    massenlauf_total = kuendigung_qty + korrespondenz_qty + zuzug_qty
+    massenlauf_total = kuendigung_qty + korrespondenz_qty + zuzug_qty + rg_massendruck_qty
     
     return {
         'arbeits_backlog': {
@@ -203,6 +222,10 @@ def get_open_data(sektion=None):
         'zuzug_massenlauf': {
             'qty': zuzug_qty,
             'names': zuzug
+        },
+        'rg_massenlauf': {
+            'qty': rg_massendruck_qty,
+            'names': rg_massendruck
         }
     }
 
@@ -310,3 +333,39 @@ def zuzug_massenlauf():
         return _file.name
     else:
         frappe.throw("Es gibt keine Mitgliedschaften die für einen Zuzugs-Massenlauf vorgemerkt sind.")
+
+@frappe.whitelist()
+def rg_massenlauf():
+    sinvs = frappe.get_list('Mitgliedschaft', filters={'rg_massendruck_vormerkung': 1}, fields=['rg_massendruck', 'name'])
+    if len(sinvs) > 0:
+        output = PdfFileWriter()
+        for sinv in sinvs:
+            if sinv['rg_massendruck']:
+                output = frappe.get_print("Sales Invoice", sinv['rg_massendruck'], 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)
+            
+        file_name = "Mitgliedschaftsrechnungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+        file_name = file_name.split(".")[0]
+        file_name = file_name.replace(":", "-")
+        file_name = file_name + ".pdf"
+        
+        filedata = get_file_data_from_writer(output)
+        
+        _file = frappe.get_doc({
+            "doctype": "File",
+            "file_name": file_name,
+            "folder": "Home",
+            "is_private": 1,
+            "content": filedata
+        })
+        
+        _file.save(ignore_permissions=True)
+        
+        for sinv in sinvs:
+            m = frappe.get_doc("Mitgliedschaft", sinv['name'])
+            m.rg_massendruck_vormerkung = '0'
+            m.rg_massendruck = ''
+            m.save(ignore_permissions=True)
+        
+        return _file.name
+    else:
+        frappe.throw("Es gibt keine Mitgliedschaften die für einen Rechnungs-Massenlauf vorgemerkt sind.")

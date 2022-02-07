@@ -137,6 +137,8 @@
   "zuzugs_rechnung",
   "zuzug_korrespondenz",
   "kuendigung_druckvorlage",
+  "rg_massendruck_vormerkung",
+  "rg_massendruck",
   "letzte_bearbeitung_von"
  ],
  "fields": [
@@ -928,10 +930,22 @@
    "fieldtype": "Link",
    "label": "Korrespondenz Zuzug ohne EZ",
    "options": "Korrespondenz"
+  },
+  {
+   "default": "0",
+   "fieldname": "rg_massendruck_vormerkung",
+   "fieldtype": "Check",
+   "label": "Rechnungs Massendruck Vormerkung"
+  },
+  {
+   "fieldname": "rg_massendruck",
+   "fieldtype": "Link",
+   "label": "Rechnung Massendruck",
+   "options": "Sales Invoice"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-07 12:39:27.036721",
+ "modified": "2022-02-07 14:59:04.502456",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

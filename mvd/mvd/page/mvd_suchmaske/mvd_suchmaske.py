@@ -144,7 +144,7 @@ def get_resultate_html(mitgliedschaften):
     return frappe.render_template('templates/includes/mvd_suchresultate.html', data)
 
 @frappe.whitelist()
-def anlage_prozess(anlage_daten, druckvorlage=False):
+def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False):
     if isinstance(anlage_daten, six.string_types):
         anlage_daten = json.loads(anlage_daten)
     
@@ -196,12 +196,16 @@ def anlage_prozess(anlage_daten, druckvorlage=False):
         hv_bar_bezahlt = False
         if int(anlage_daten["hv_bar_bezahlt"]) == 1:
             hv_bar_bezahlt = True
-        sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage)
+        if int(massendruck) == 1:
+            massendruck = True
+        sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck)
     else:
         if int(anlage_daten["autom_rechnung"]) == 1:
             bezahlt = False
             hv_bar_bezahlt = False
-            sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage)
+            if int(massendruck) == 1:
+                massendruck = True
+            sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck)
         else:
             if anlage_daten["status"] == 'Interessent*in':
                 # erstelle ABL für Interessent*Innenbrief mit EZ
