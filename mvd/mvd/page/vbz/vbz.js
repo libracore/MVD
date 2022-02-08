@@ -149,7 +149,7 @@ frappe.vbz = {
             frappe.set_route("List", "Mitgliedschaft");
         });
         $("#online_kuendigungen").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.validierung.online_kuendigung.names]}
+            frappe.route_options = {"name": ['in', open_datas.validierung.online_kuendigung.names], "validierung_notwendig": 1}
             frappe.set_route("List", "Mitgliedschaft");
         });
         $("#zuzuege").click(function(){

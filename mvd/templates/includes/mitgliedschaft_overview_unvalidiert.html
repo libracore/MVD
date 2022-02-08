@@ -6,7 +6,11 @@
             <p>
                 <b>Status:</b> {{ allgemein.status }}<br>
                 <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp }}<br>
-                <b>Erfassung:</b> {{ frappe.utils.get_datetime(allgemein.erfassung).strftime('%d.%m.%Y') }}
+                {% if allgemein.kuendigung %}
+                    <b>Kündigung per:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}
+                {% else %}
+                    <b>Erfassung/Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}
+                {% endif %}
             </p>
         </div>
     </div>

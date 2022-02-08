@@ -1430,7 +1430,8 @@ def get_uebersicht_html(name):
         allgemein = {
             'status': mitgliedschaft.status_c,
             'mitgliedtyp': mitgliedschaft.mitgliedtyp_c,
-            'erfassung': mitgliedschaft.eintritt
+            'eintritt': mitgliedschaft.eintritt,
+            'kuendigung': mitgliedschaft.kuendigung or False
         }
         
         # Hauptmitglied
@@ -1860,6 +1861,7 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druck
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     mitgliedschaft.kuendigung = datum_kuendigung
     mitgliedschaft.status_c = 'Kündigung'
+    mitgliedschaft.validierung_notwendig = 0
     mitgliedschaft.kuendigung_druckvorlage = druckvorlage
     if massenlauf == '1':
         mitgliedschaft.kuendigung_verarbeiten = 1
@@ -1965,6 +1967,16 @@ def mvm_update(mitgliedschaft, kwargs):
                 else:
                     eintritt = None
             
+            if kwargs['neueSektionCode']:
+                wegzug_zu = get_sektion_id(kwargs['neueSektionCode'])
+            else:
+                wegzug_zu = ''
+            
+            if kwargs['alteSektionCode']:
+                zuzug_von = get_sektion_id(kwargs['alteSektionCode'])
+            else:
+                zuzug_von = ''
+            
             if kwargs['zuzugsdatum']:
                 zuzug = kwargs['zuzugsdatum'].split("T")[0]
             else:
@@ -2001,7 +2013,9 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.wichtig = kwargs['bemerkungen'] if kwargs['bemerkungen'] else ''
             mitgliedschaft.eintritt = eintritt
             mitgliedschaft.zuzug = zuzug
+            mitgliedschaft.zuzug_von = zuzug_von
             mitgliedschaft.wegzug = wegzug
+            mitgliedschaft.wegzug_zu = wegzug_zu
             mitgliedschaft.austritt = austritt
             mitgliedschaft.kuendigung = kuendigung
             mitgliedschaft.zahlung_hv = int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0
@@ -2053,6 +2067,16 @@ def mvm_neuanlage(kwargs):
             status_c = get_status_c(kwargs['status'])
             if not status_c:
                 return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['status']), daten=kwargs)
+            
+            if kwargs['neueSektionCode']:
+                wegzug_zu = get_sektion_id(kwargs['neueSektionCode'])
+            else:
+                wegzug_zu = ''
+            
+            if kwargs['alteSektionCode']:
+                zuzug_von = get_sektion_id(kwargs['alteSektionCode'])
+            else:
+                zuzug_von = ''
             
             mitgliedtyp_c = get_mitgliedtyp_c(kwargs['typ'])
             if not mitgliedtyp_c:
@@ -2112,7 +2136,9 @@ def mvm_neuanlage(kwargs):
                 'wichtig': str(kwargs['bemerkungen']) if kwargs['bemerkungen'] else '',
                 'eintritt': eintritt,
                 'zuzug': zuzug,
+                'zuzug_von': zuzug_von,
                 'wegzug': wegzug,
+                'wegzug_zu': wegzug_zu,
                 'austritt': austritt,
                 'kuendigung': kuendigung,
                 'zahlung_hv': int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0,
@@ -2492,7 +2518,9 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "erfassungsdatum": str(mitgliedschaft.creation).replace(" ", "T"),
         "eintrittsdatum": str(mitgliedschaft.eintritt).replace(" ", "T") if mitgliedschaft.eintritt else None,
         "austrittsdatum": str(mitgliedschaft.austritt).replace(" ", "T") if mitgliedschaft.austritt else None,
+        "alteSektionCode": str(get_sektion_code(mitgliedschaft.zuzug_von)) if mitgliedschaft.zuzug_von else None,
         "zuzugsdatum": str(mitgliedschaft.zuzug).replace(" ", "T") if mitgliedschaft.zuzug else None,
+        "neueSektionCode": str(get_sektion_code(mitgliedschaft.wegzug_zu)) if mitgliedschaft.wegzug_zu else None,
         "wegzugsdatum": str(mitgliedschaft.wegzug).replace(" ", "T") if mitgliedschaft.wegzug else None,
         "kuendigungPer": str(mitgliedschaft.kuendigung).replace(" ", "T") if mitgliedschaft.kuendigung else None,
         "jahrBezahltMitgliedschaft": mitgliedschaft.zahlung_mitgliedschaft or 0,

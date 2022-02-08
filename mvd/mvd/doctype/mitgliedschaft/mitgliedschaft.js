@@ -8,7 +8,7 @@ frappe.ui.form.on('Mitgliedschaft', {
     },
     refresh: function(frm) {
        if (!frm.doc.__islocal) {
-            if (!['Wegzug', 'Ausschluss'].includes(cur_frm.doc.status_c)) {
+            if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
                 if (!['Kündigung', 'Gestorben'].includes(cur_frm.doc.status_c)) {
                     frm.add_custom_button(__("Sektionswechsel"),  function() {
                             sektionswechsel(frm);
@@ -43,9 +43,15 @@ frappe.ui.form.on('Mitgliedschaft', {
                 }
             }
             if (cur_frm.doc.validierung_notwendig) {
-                frm.add_custom_button(__("Daten als validert bestätigen"),  function() {
-                        daten_validiert(frm);
-                });
+                if (cur_frm.doc.status_c == 'Online-Kündigung') {
+                    frm.add_custom_button(__("Online-Kündigung verarbeiten"),  function() {
+                            kuendigung(frm);
+                    });
+                } else {
+                    frm.add_custom_button(__("Daten als validert bestätigen"),  function() {
+                            daten_validiert(frm);
+                    });
+                }
             }
             if (cur_frm.doc.kuendigung_verarbeiten) {
                 frm.add_custom_button(__("Von Massenlauf (Kündigung) entfernen"),  function() {
@@ -257,7 +263,12 @@ function kuendigung(frm) {
                         var ks_month = kuendigungs_stichtag.getMonth();
                         var ks_day = kuendigungs_stichtag.getDate();
                         
-                        var now = frappe.datetime.str_to_obj(frappe.datetime.now_date());
+                        if (cur_frm.doc.kuendigung) {
+                            var now = frappe.datetime.str_to_obj(cur_frm.doc.kuendigung);
+                        } else {
+                            var now = frappe.datetime.str_to_obj(frappe.datetime.now_date());
+                        }
+                        
                         var now_month = now.getMonth();
                         var now_day = now.getDate();
                         
@@ -275,7 +286,7 @@ function kuendigung(frm) {
                         
                         if (fristgerecht) {
                             var field_list = [
-                                {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.year_end()},
+                                {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': cur_frm.doc.kuendigung ? cur_frm.doc.kuendigung:frappe.datetime.year_end()},
                                 {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
                                     'get_query': function() {
                                         return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
