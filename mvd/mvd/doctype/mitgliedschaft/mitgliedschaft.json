@@ -825,6 +825,7 @@
    "default": "1",
    "fieldname": "naechstes_jahr_geschuldet",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "N\u00e4chstes Jahr geschuldet"
   },
   {
@@ -959,7 +960,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-08 11:20:32.100111",
+ "modified": "2022-02-08 13:51:15.813991",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
