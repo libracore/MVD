@@ -73,6 +73,12 @@ frappe.ui.form.on('Mitgliedschaft', {
                         rg_massendruck_verarbeitet(frm);
                 });
             }
+            if (cur_frm.doc.begruessung_massendruck) {
+                frm.add_custom_button(__("Von Massenlauf (Begrüssung Online-Beitritt) entfernen"),  function() {
+                        begruessung_massendruck_verarbeitet(frm);
+                });
+            }
+            
             frm.add_custom_button(__("Zuweisung an Sektion"),  function() {
                 assign(frm);
             });
@@ -476,6 +482,7 @@ function daten_validiert(frm) {
             } else if (cur_frm.doc.status_c == 'Online-Mutation') {
                 cur_frm.set_value("status_c", cur_frm.doc.status_vor_onl_mutation);
                 cur_frm.set_value("status_vor_onl_mutation", '');
+                cur_frm.set_value("validierung_notwendig", '0');
                 cur_frm.save();
                 cur_frm.timeline.insert_comment("Validierung durchgeführt.");
             } else {
@@ -555,6 +562,23 @@ function rg_massendruck_verarbeitet(frm) {
         }
     )
 }
+
+function begruessung_massendruck_verarbeitet(frm) {
+    frappe.confirm(
+        'Haben Sie das Begrüssungsschreiben manuell gedruckt und möchten Sie dies aus dem Massenlauf entfernen?',
+        function(){
+            // on yes
+            cur_frm.set_value("begruessung_massendruck", '0');
+            cur_frm.set_value("begruessung_massendruck_dokument", '');
+            cur_frm.save();
+            frappe.msgprint("Der Druck des Begrüssungsschreibens wurde aus dem Massenlauf entfernt.");
+        },
+        function(){
+            // on no
+        }
+    )
+}
+
 
 
 function erstelle_rechnung(frm) {
