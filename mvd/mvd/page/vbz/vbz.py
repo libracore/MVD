@@ -199,8 +199,27 @@ def get_open_data(sektion=None):
     else:
         rg_massendruck = ''
     
+    # begruessung_online massenlauf
+    begruessung_online_qty = frappe.db.sql("""SELECT
+                                        COUNT(`name`) AS `qty`
+                                    FROM `tabMitgliedschaft`
+                                    WHERE `begruessung_massendruck` = 1
+                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
+    _begruessung_online = frappe.db.sql("""SELECT
+                                        `name`
+                                    FROM `tabMitgliedschaft`
+                                    WHERE `begruessung_massendruck` = 1
+                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
+    begruessung_online = 'x'
+    for bo in _begruessung_online:
+        begruessung_online += ',' + bo.name
+    if len(_begruessung_online) > 0:
+        begruessung_online = begruessung_online.replace("x,", "")
+    else:
+        begruessung_online = ''
+    
     # massenlauf total
-    massenlauf_total = kuendigung_qty + korrespondenz_qty + zuzug_qty + rg_massendruck_qty
+    massenlauf_total = kuendigung_qty + korrespondenz_qty + zuzug_qty + rg_massendruck_qty + begruessung_online_qty
     
     return {
         'arbeits_backlog': {
@@ -245,6 +264,10 @@ def get_open_data(sektion=None):
         'rg_massenlauf': {
             'qty': rg_massendruck_qty,
             'names': rg_massendruck
+        },
+        'begruessung_online_massenlauf': {
+            'qty': begruessung_online_qty,
+            'names': begruessung_online
         }
     }
 
@@ -388,3 +411,39 @@ def rg_massenlauf():
         return _file.name
     else:
         frappe.throw("Es gibt keine Mitgliedschaften die für einen Rechnungs-Massenlauf vorgemerkt sind.")
+
+@frappe.whitelist()
+def begruessung_online_massenlauf():
+    mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'begruessung_massendruck': 1}, fields=['name', 'begruessung_massendruck_dokument'])
+    if len(mitgliedschaften) > 0:
+        output = PdfFileWriter()
+        for mitgliedschaft in mitgliedschaften:
+            if mitgliedschaft['begruessung_massendruck_dokument']:
+                output = frappe.get_print("Korrespondenz", mitgliedschaft['begruessung_massendruck_dokument'], 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+            
+        file_name = "Begüssungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+        file_name = file_name.split(".")[0]
+        file_name = file_name.replace(":", "-")
+        file_name = file_name + ".pdf"
+        
+        filedata = get_file_data_from_writer(output)
+        
+        _file = frappe.get_doc({
+            "doctype": "File",
+            "file_name": file_name,
+            "folder": "Home",
+            "is_private": 1,
+            "content": filedata
+        })
+        
+        _file.save(ignore_permissions=True)
+        
+        for mitgliedschaft in mitgliedschaften:
+            m = frappe.get_doc("Mitgliedschaft", mitgliedschaft['name'])
+            m.begruessung_massendruck = '0'
+            m.begruessung_massendruck_dokument = ''
+            m.save(ignore_permissions=True)
+        
+        return _file.name
+    else:
+        frappe.throw("Es gibt keine Mitgliedschaften die für einen Begrüssungs-Massenlauf vorgemerkt sind.")

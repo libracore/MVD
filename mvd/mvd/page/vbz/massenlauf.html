@@ -26,6 +26,12 @@
             <td><i id="begruessung_print" class="fa fa-file"></i></td>
         </tr>
         <tr>
+            <td>Begrüssung (Online-Beitritt)</td>
+            <td>{{ begruessung_online.qty }}</td>
+            <td>{% if begruessung_online.qty > 0 %}<i id="begruessung_online_qty" class="fa fa-eye"></i>{% endif %}</td>
+            <td>{% if begruessung_online.qty > 0 %}<i id="begruessung_online_print" class="fa fa-file"></i>{% endif %}</td>
+        </tr>
+        <tr>
             <td>Korrespondenz</td>
             <td>{{ korrespondenz.qty }}</td>
             <td>{% if korrespondenz.qty > 0 %}<i id="korrespondenz_qty" class="fa fa-eye"></i>{% endif %}</td>

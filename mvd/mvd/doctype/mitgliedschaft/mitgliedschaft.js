@@ -458,11 +458,10 @@ function daten_validiert(frm) {
                 cur_frm.save();
                 erstelle_rechnung(frm);
             } else if (cur_frm.doc.status_c == 'Online-Beitritt') {
-                cur_frm.set_value("validierung_notwendig", '0');
                 cur_frm.set_value("status_c", 'Regulär');
-                cur_frm.timeline.insert_comment("Validierung durchgeführt.");
                 cur_frm.save();
-                frappe.msgprint("Die Daten wurden als validert bestätigt.");
+                cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                erstelle_begruessungs_korrespondenz(frm);
             } else {
                 cur_frm.set_value("validierung_notwendig", '0');
                 cur_frm.set_value("status_c", 'Regulär');
@@ -566,7 +565,7 @@ function erstelle_rechnung(frm) {
                         return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
                     }
                 },
-                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0},
+                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1},
                 {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
                 {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0}
             ],
@@ -866,6 +865,76 @@ function erstelle_korrespondenz(frm) {
             )
         }
     });
+}
+
+function erstelle_begruessungs_korrespondenz(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+        args:{
+                'sektion': cur_frm.doc.sektion_id,
+                'dokument': 'Begrüssung mit Ausweis',
+                'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                'language': cur_frm.doc.language
+        },
+        async: false,
+        callback: function(res)
+        {
+            var druckvorlagen = res.message;
+            frappe.prompt([
+                {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1},
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                    'get_query': function() {
+                        return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                    }
+                }
+            ],
+            function(values){
+                if (values.druckvorlage) {
+                    var druckvorlage = values.druckvorlage;
+                } else {
+                    var druckvorlage = 'keine'
+                }
+                frappe.call({
+                    method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_korrespondenz",
+                    args:{
+                            'mitgliedschaft': cur_frm.doc.name,
+                            'druckvorlage': druckvorlage,
+                            'titel': values.titel
+                    },
+                    freeze: true,
+                    freeze_message: 'Erstelle Korrespondenz...',
+                    callback: function(r)
+                    {
+                        frappe.confirm(
+                            'Möchten Sie den Druck des Begrüssungsdokument für den Massenlauf vormerken?',
+                            function(){
+                                // on yes
+                                cur_frm.set_value("begruessung_massendruck", '1');
+                                cur_frm.set_value("begruessung_massendruck_dokument", r.message);
+                                cur_frm.set_value("validierung_notwendig", '0');
+                                cur_frm.save();
+                                frappe.msgprint("Die Daten wurden als validert bestätigt und der Druck des Begrüssungsdokument für den Massenlauf vorgemerkt.");
+                            },
+                            function(){
+                                // on no
+                                cur_frm.set_value("validierung_notwendig", '0');
+                                cur_frm.save();
+                                frappe.msgprint("Die Daten wurden als validert bestätigt, das erstellte Begrüssungsdokument finden Sie unter Korrespondenz.");
+                            }
+                        )
+                    }
+                });
+            },
+            'Begrüssungsdokument Erstellung',
+            'Erstellen'
+            )
+        }
+    });
+    if (cur_frm.is_dirty()) {
+        cur_frm.set_value("validierung_notwendig", '0');
+        cur_frm.save();
+    }
 }
 
 function assign(frm) {
