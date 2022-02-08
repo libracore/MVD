@@ -177,6 +177,33 @@ def mitglieder(**mitgliedschaft):
 # def sektionswechsel(sektion_code):
     # return mvm_sektionswechsel(sektion_code)
 
+def sektionswechsel(mvm, sektion_code):
+    if not int(frappe.db.get_single_value('Service Plattform API', 'no_sp_update')) == 1:
+        if auth_check(SVCPF_SCOPE):
+            config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+            sub_url = str(config.get_value(SVCPF_SCOPE, "api_url"))
+            endpoint = '/mitglieder/sektionswechsel/{sektion_code}'.format(sektion_code=sektion_code)
+            url = sub_url + endpoint
+            token = config.get_value(SVCPF_SCOPE, 'api_token')
+            headers = {"authorization": "Bearer {token}".format(token=token)}
+            
+            sp_connection = requests.post(url, json = mvm, headers = headers)
+            
+            try:
+                if sp_connection.status_code != 204:
+                    frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), 'sektionswechsel failed')
+                    frappe.db.commit()
+                    return
+                else:
+                    return
+            except Exception as err:
+                frappe.log_error("{0}\n\n{1}".format(err, mvm), 'sektionswechsel failed')
+                frappe.db.commit()
+                return
+    else:
+        frappe.log_error("{0}".format(mvm), 'update_mvm deaktiviert')
+        return
+
 #
 # User and role deployment
 #

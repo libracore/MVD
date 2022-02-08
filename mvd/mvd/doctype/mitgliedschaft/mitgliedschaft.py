@@ -69,6 +69,9 @@ class Mitgliedschaft(Document):
                 else:
                     # sende update an SP
                     send_mvm_to_sp(self, True)
+                    # special case sektionswechsel nach ZH
+                    if self.wegzug_zu == 'MVZH' and self.status_c == 'Wegzug':
+                        send_mvm_sektionswechsel(self)
         # ~ else:
             # ~ # erstelle abreits backlog: Zu Validieren
             # ~ create_abl("Daten Validieren", self)
@@ -2435,6 +2438,12 @@ def send_mvm_to_sp(mitgliedschaft, update):
         prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
         update_status = update_mvm(prepared_mvm, update)
         return update_status
+
+def send_mvm_sektionswechsel(mitgliedschaft):
+    from mvd.mvd.service_plattform.api import sektionswechsel
+    prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
+    sektionswechsel(prepared_mvm, 'ZH')
+    frappe.log_error("sektionswechsel", 'sektionswechsel')
 
 def prepare_mvm_for_sp(mitgliedschaft):
     adressen = get_adressen_for_sp(mitgliedschaft)
