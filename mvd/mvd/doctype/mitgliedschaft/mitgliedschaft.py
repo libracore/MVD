@@ -1280,136 +1280,274 @@ def get_timeline_data(doctype, name):
 
 @frappe.whitelist()
 def get_uebersicht_html(name):
-    col_qty = 1
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", name)
     
-    kunde_mitglied = False
-    if mitgliedschaft.kunde_mitglied:
-        kunde_mitglied = frappe.get_doc("Customer", mitgliedschaft.kunde_mitglied).as_dict()
-    
-    kontakt_mitglied = False
-    if mitgliedschaft.kontakt_mitglied:
-        kontakt_mitglied = frappe.get_doc("Contact", mitgliedschaft.kontakt_mitglied).as_dict()
-    
-    adresse_mitglied = False
-    if mitgliedschaft.adresse_mitglied:
-        adresse_mitglied = frappe.get_doc("Address", mitgliedschaft.adresse_mitglied).as_dict()
-    
-    objekt_adresse = False
-    if mitgliedschaft.objekt_adresse:
-        objekt_adresse = frappe.get_doc("Address", mitgliedschaft.objekt_adresse).as_dict()
-        col_qty += 1
-    
-    kontakt_solidarmitglied = False
-    if mitgliedschaft.kontakt_solidarmitglied:
-        kontakt_solidarmitglied = frappe.get_doc("Contact", mitgliedschaft.kontakt_solidarmitglied).as_dict()
-        col_qty += 1
-    
-    rg_kunde = False
-    if mitgliedschaft.rg_kunde:
-        rg_kunde = frappe.get_doc("Customer", mitgliedschaft.rg_kunde).as_dict()
-    
-    rg_kontakt = False
-    if mitgliedschaft.rg_kontakt:
-        rg_kontakt = frappe.get_doc("Contact", mitgliedschaft.rg_kontakt).as_dict()
-    
-    rg_adresse = False
-    if mitgliedschaft.rg_adresse:
-        rg_adresse = frappe.get_doc("Address", mitgliedschaft.rg_adresse).as_dict()
-    
-    rg_sep = False
-    if mitgliedschaft.abweichende_rechnungsadresse:
-        rg_sep = True
-        col_qty += 1
-    
-    rechnungs_kunde = mitgliedschaft.kunde_mitglied
-    ueberfaellige_rechnungen = 0
-    offene_rechnungen = 0
-    
-    sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
-    karenzfrist_in_d = sektion.karenzfrist
-    ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintritt), karenzfrist_in_d)
-    if getdate() < ablauf_karenzfrist:
-        karenzfrist = False
-    else:
-        karenzfrist = True
+    if not mitgliedschaft.validierung_notwendig:
+        # vaidiertes mitglied
+        col_qty = 1
         
-    if mitgliedschaft.zuzug:
-        zuzug = mitgliedschaft.zuzug
-        zuzug_von = mitgliedschaft.zuzug_von
-    else:
-        zuzug = False
-        zuzug_von = False
+        kunde_mitglied = False
+        if mitgliedschaft.kunde_mitglied:
+            kunde_mitglied = frappe.get_doc("Customer", mitgliedschaft.kunde_mitglied).as_dict()
         
-    if mitgliedschaft.wegzug:
-        wegzug = mitgliedschaft.wegzug
-        wegzug_zu = mitgliedschaft.wegzug_zu
-    else:
-        wegzug = False
-        wegzug_zu = False
-    
-    if mitgliedschaft.kuendigung:
-        kuendigung = mitgliedschaft.kuendigung
-    else:
-        kuendigung = False
-    
-    if mitgliedschaft.inkl_hv:
-        if mitgliedschaft.zahlung_hv:
-            # im moment umgeschrieben von Datum auf Jahreszahl, muss nach dem Update der API wieder angepasst werden!
-            # hv_status = 'HV bezahlt am {0}'.format(frappe.utils.get_datetime(mitgliedschaft.zahlung_hv).strftime('%d.%m.%Y'))
-            hv_status = 'HV bezahlt am {0}'.format(mitgliedschaft.zahlung_hv)
+        kontakt_mitglied = False
+        if mitgliedschaft.kontakt_mitglied:
+            kontakt_mitglied = frappe.get_doc("Contact", mitgliedschaft.kontakt_mitglied).as_dict()
+        
+        adresse_mitglied = False
+        if mitgliedschaft.adresse_mitglied:
+            adresse_mitglied = frappe.get_doc("Address", mitgliedschaft.adresse_mitglied).as_dict()
+        
+        objekt_adresse = False
+        if mitgliedschaft.objekt_adresse:
+            objekt_adresse = frappe.get_doc("Address", mitgliedschaft.objekt_adresse).as_dict()
+            col_qty += 1
+        
+        kontakt_solidarmitglied = False
+        if mitgliedschaft.kontakt_solidarmitglied:
+            kontakt_solidarmitglied = frappe.get_doc("Contact", mitgliedschaft.kontakt_solidarmitglied).as_dict()
+            col_qty += 1
+        
+        rg_kunde = False
+        if mitgliedschaft.rg_kunde:
+            rg_kunde = frappe.get_doc("Customer", mitgliedschaft.rg_kunde).as_dict()
+        
+        rg_kontakt = False
+        if mitgliedschaft.rg_kontakt:
+            rg_kontakt = frappe.get_doc("Contact", mitgliedschaft.rg_kontakt).as_dict()
+        
+        rg_adresse = False
+        if mitgliedschaft.rg_adresse:
+            rg_adresse = frappe.get_doc("Address", mitgliedschaft.rg_adresse).as_dict()
+        
+        rg_sep = False
+        if mitgliedschaft.abweichende_rechnungsadresse:
+            rg_sep = True
+            col_qty += 1
+        
+        rechnungs_kunde = mitgliedschaft.kunde_mitglied
+        ueberfaellige_rechnungen = 0
+        offene_rechnungen = 0
+        
+        sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+        karenzfrist_in_d = sektion.karenzfrist
+        ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintritt), karenzfrist_in_d)
+        if getdate() < ablauf_karenzfrist:
+            karenzfrist = False
         else:
-            hv_status = 'HV unbezahlt'
-    else:
-        hv_status = False
-    
-    if mitgliedschaft.rg_kunde:
-        rechnungs_kunde = mitgliedschaft.rg_kunde
-    
-    ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
-                                                FROM `tabSales Invoice` 
-                                                WHERE `customer` = '{rechnungs_kunde}'
-                                                AND `due_date` < CURDATE()
-                                                AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
-    
-    offene_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
-                                        FROM `tabSales Invoice` 
-                                        WHERE `customer` = '{rechnungs_kunde}'
-                                        AND `due_date` >= CURDATE()
-                                        AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
-    
-    data = {
-        'kunde_mitglied': kunde_mitglied,
-        'kontakt_mitglied': kontakt_mitglied,
-        'adresse_mitglied': adresse_mitglied,
-        'objekt_adresse': objekt_adresse,
-        'kontakt_solidarmitglied': kontakt_solidarmitglied,
-        'rg_kunde': rg_kunde,
-        'rg_kontakt': rg_kontakt,
-        'rg_adresse': rg_adresse,
-        'rg_sep': rg_sep,
-        'col_qty': int(12 / col_qty),
-        'allgemein': {
-            'status': mitgliedschaft.status_c,
-            'eintritt': mitgliedschaft.eintritt,
-            'austritt': mitgliedschaft.austritt,
-            'ampelfarbe': mitgliedschaft.ampel_farbe or 'ampelrot',
-            'ueberfaellige_rechnungen': ueberfaellige_rechnungen,
-            'offene_rechnungen': offene_rechnungen,
-            'ablauf_karenzfrist': ablauf_karenzfrist,
-            'zuzug': zuzug,
-            'wegzug': wegzug,
-            'zuzug_von': zuzug_von,
-            'wegzug_zu': wegzug_zu,
-            'mitgliedtyp_c': mitgliedschaft.mitgliedtyp_c,
-            'hv_status': hv_status,
-            'wichtig': mitgliedschaft.wichtig,
-            'kuendigung': kuendigung,
-            'validierung': int(mitgliedschaft.validierung_notwendig)
+            karenzfrist = True
+            
+        if mitgliedschaft.zuzug:
+            zuzug = mitgliedschaft.zuzug
+            zuzug_von = mitgliedschaft.zuzug_von
+        else:
+            zuzug = False
+            zuzug_von = False
+            
+        if mitgliedschaft.wegzug:
+            wegzug = mitgliedschaft.wegzug
+            wegzug_zu = mitgliedschaft.wegzug_zu
+        else:
+            wegzug = False
+            wegzug_zu = False
+        
+        if mitgliedschaft.kuendigung:
+            kuendigung = mitgliedschaft.kuendigung
+        else:
+            kuendigung = False
+        
+        if mitgliedschaft.inkl_hv:
+            if mitgliedschaft.zahlung_hv:
+                # im moment umgeschrieben von Datum auf Jahreszahl, muss nach dem Update der API wieder angepasst werden!
+                # hv_status = 'HV bezahlt am {0}'.format(frappe.utils.get_datetime(mitgliedschaft.zahlung_hv).strftime('%d.%m.%Y'))
+                hv_status = 'HV bezahlt am {0}'.format(mitgliedschaft.zahlung_hv)
+            else:
+                hv_status = 'HV unbezahlt'
+        else:
+            hv_status = False
+        
+        if mitgliedschaft.rg_kunde:
+            rechnungs_kunde = mitgliedschaft.rg_kunde
+        
+        ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
+                                                    FROM `tabSales Invoice` 
+                                                    WHERE `customer` = '{rechnungs_kunde}'
+                                                    AND `due_date` < CURDATE()
+                                                    AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
+        
+        offene_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
+                                            FROM `tabSales Invoice` 
+                                            WHERE `customer` = '{rechnungs_kunde}'
+                                            AND `due_date` >= CURDATE()
+                                            AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
+        
+        data = {
+            'kunde_mitglied': kunde_mitglied,
+            'kontakt_mitglied': kontakt_mitglied,
+            'adresse_mitglied': adresse_mitglied,
+            'objekt_adresse': objekt_adresse,
+            'kontakt_solidarmitglied': kontakt_solidarmitglied,
+            'rg_kunde': rg_kunde,
+            'rg_kontakt': rg_kontakt,
+            'rg_adresse': rg_adresse,
+            'rg_sep': rg_sep,
+            'col_qty': int(12 / col_qty),
+            'allgemein': {
+                'status': mitgliedschaft.status_c,
+                'eintritt': mitgliedschaft.eintritt,
+                'austritt': mitgliedschaft.austritt,
+                'ampelfarbe': mitgliedschaft.ampel_farbe or 'ampelrot',
+                'ueberfaellige_rechnungen': ueberfaellige_rechnungen,
+                'offene_rechnungen': offene_rechnungen,
+                'ablauf_karenzfrist': ablauf_karenzfrist,
+                'zuzug': zuzug,
+                'wegzug': wegzug,
+                'zuzug_von': zuzug_von,
+                'wegzug_zu': wegzug_zu,
+                'mitgliedtyp_c': mitgliedschaft.mitgliedtyp_c,
+                'hv_status': hv_status,
+                'wichtig': mitgliedschaft.wichtig,
+                'kuendigung': kuendigung,
+                'validierung': int(mitgliedschaft.validierung_notwendig)
+            }
         }
-    }
-    
-    return frappe.render_template('templates/includes/mitgliedschaft_overview.html', data)
+        
+        return frappe.render_template('templates/includes/mitgliedschaft_overview.html', data)
+    else:
+        # unvaidiertes mitglied
+        col_qty = 1
+        allgemein = False
+        mitglied = False
+        solidarmitglied = False
+        korrespondenzadresse = False
+        objektadresse = False
+        rechnungsempfaenger = False
+        rechnungsadresse = False
+        
+        allgemein = {
+            'status': mitgliedschaft.status_c,
+            'mitgliedtyp': mitgliedschaft.mitgliedtyp_c,
+            'erfassung': mitgliedschaft.eintritt
+        }
+        
+        # Hauptmitglied
+        if mitgliedschaft.kundentyp == 'Einzelperson':
+            mitglied = {
+                'firma': False,
+                'zusatz_firma': False,
+                'anrede': mitgliedschaft.anrede_c if mitgliedschaft.anrede_c else False,
+                'vorname': mitgliedschaft.vorname_1 if mitgliedschaft.vorname_1 else False,
+                'nachname': mitgliedschaft.nachname_1,
+                'tel_p': mitgliedschaft.tel_p_1 if mitgliedschaft.tel_p_1 else False,
+                'tel_m': mitgliedschaft.tel_m_1 if mitgliedschaft.tel_m_1 else False,
+                'tel_g': mitgliedschaft.tel_g_1 if mitgliedschaft.tel_g_1 else False,
+                'mail': mitgliedschaft.e_mail_1 if mitgliedschaft.e_mail_1 else False
+            }
+        else:
+            mitglied = {
+                'firma': mitgliedschaft.firma,
+                'zusatz_firma': mitgliedschaft.zusatz_firma if mitgliedschaft.zusatz_firma else False,
+                'anrede': mitgliedschaft.anrede_c if mitgliedschaft.anrede_c else False,
+                'vorname': mitgliedschaft.vorname_1 if mitgliedschaft.vorname_1 else False,
+                'nachname': mitgliedschaft.nachname_1,
+                'tel_p': mitgliedschaft.tel_p_1 if mitgliedschaft.tel_p_1 else False,
+                'tel_m': mitgliedschaft.tel_m_1 if mitgliedschaft.tel_m_1 else False,
+                'tel_g': mitgliedschaft.tel_g_1 if mitgliedschaft.tel_g_1 else False,
+                'mail': mitgliedschaft.e_mail_1 if mitgliedschaft.e_mail_1 else False
+            }
+        
+        # Solidarmitglied
+        if int(mitgliedschaft.hat_solidarmitglied) == 1:
+            solidarmitglied = {
+                'anrede': mitgliedschaft.anrede_2 if mitgliedschaft.anrede_2 else False,
+                'nachname': mitgliedschaft.nachname_2,
+                'vorname': mitgliedschaft.vorname_2 if mitgliedschaft.vorname_2 else False,
+                'tel_p': mitgliedschaft.tel_p_2 if mitgliedschaft.tel_p_2 else False,
+                'tel_m': mitgliedschaft.tel_m_2 if mitgliedschaft.tel_m_2 else False,
+                'tel_g': mitgliedschaft.tel_g_2 if mitgliedschaft.tel_g_2 else False,
+                'mail': mitgliedschaft.e_mail_2 if mitgliedschaft.e_mail_2 else False
+            }
+            col_qty += 1
+        
+        # Korrespondenzadresse
+        korrespondenzadresse = {
+            'zusatz': mitgliedschaft.zusatz_adresse if mitgliedschaft.zusatz_adresse else False,
+            'strasse': mitgliedschaft.strasse if mitgliedschaft.strasse else False,
+            'nummer': mitgliedschaft.nummer if mitgliedschaft.nummer else False,
+            'nummer_zu': mitgliedschaft.nummer_zu if mitgliedschaft.nummer_zu else False,
+            'postfach': 1 if int(mitgliedschaft.postfach) == 1 else 0,
+            'postfach_nummer': mitgliedschaft.postfach_nummer if mitgliedschaft.postfach_nummer else False,
+            'plz': mitgliedschaft.plz,
+            'ort': mitgliedschaft.ort
+        }
+        
+        # Objektadresse
+        if int(mitgliedschaft.abweichende_objektadresse) == 1:
+            objektadresse = {
+                'zusatz': mitgliedschaft.objekt_zusatz_adresse if mitgliedschaft.objekt_zusatz_adresse else False,
+                'strasse': mitgliedschaft.objekt_strasse if mitgliedschaft.objekt_strasse else False,
+                'nummer': mitgliedschaft.objekt_hausnummer if mitgliedschaft.objekt_hausnummer else False,
+                'nummer_zu': mitgliedschaft.objekt_nummer_zu if mitgliedschaft.objekt_nummer_zu else False,
+                'plz': mitgliedschaft.objekt_plz,
+                'ort': mitgliedschaft.objekt_ort
+            }
+        else:
+            objektadresse = korrespondenzadresse
+        col_qty += 1
+        
+        # Rechnungsadresse
+        if int(mitgliedschaft.abweichende_rechnungsadresse) == 1:
+            rechnungsadresse = {
+                'zusatz': mitgliedschaft.rg_zusatz_adresse if mitgliedschaft.rg_zusatz_adresse else False,
+                'strasse': mitgliedschaft.rg_strasse if mitgliedschaft.rg_strasse else False,
+                'nummer': mitgliedschaft.rg_nummer if mitgliedschaft.rg_nummer else False,
+                'nummer_zu': mitgliedschaft.rg_nummer_zu if mitgliedschaft.rg_nummer_zu else False,
+                'postfach': 1 if int(mitgliedschaft.rg_postfach) == 1 else 0,
+                'postfach_nummer': mitgliedschaft.rg_postfach_nummer if mitgliedschaft.rg_postfach_nummer else False,
+                'plz': mitgliedschaft.rg_plz,
+                'ort': mitgliedschaft.rg_ort
+            }
+            col_qty += 1
+        
+        # Rechnungsempfänger
+        if int(mitgliedschaft.unabhaengiger_debitor) == 1:
+            if mitgliedschaft.rg_kundentyp == 'Einzelperson':
+                rechnungsempfaenger = {
+                    'firma': False,
+                    'zusatz_firma': False,
+                    'anrede': mitgliedschaft.rg_anrede if mitgliedschaft.rg_anrede else False,
+                    'vorname': mitgliedschaft.rg_vorname if mitgliedschaft.rg_vorname else False,
+                    'nachname': mitgliedschaft.rg_nachname,
+                    'tel_p': mitgliedschaft.rg_tel_p if mitgliedschaft.rg_tel_p else False,
+                    'tel_m': mitgliedschaft.rg_tel_m if mitgliedschaft.rg_tel_m else False,
+                    'tel_g': mitgliedschaft.rg_tel_g if mitgliedschaft.rg_tel_g else False,
+                    'mail': mitgliedschaft.rg_e_mail if mitgliedschaft.rg_e_mail else False
+                }
+            else:
+                rechnungsempfaenger = {
+                    'firma': mitgliedschaft.rg_firma if mitgliedschaft.rg_firma else False,
+                    'zusatz_firma': mitgliedschaft.rg_zusatz_firma if mitgliedschaft.rg_zusatz_firma else False,
+                    'anrede': mitgliedschaft.rg_anrede if mitgliedschaft.rg_anrede else False,
+                    'vorname': mitgliedschaft.rg_vorname if mitgliedschaft.rg_vorname else False,
+                    'nachname': mitgliedschaft.rg_nachname,
+                    'tel_p': mitgliedschaft.rg_tel_p if mitgliedschaft.rg_tel_p else False,
+                    'tel_m': mitgliedschaft.rg_tel_m if mitgliedschaft.rg_tel_m else False,
+                    'tel_g': mitgliedschaft.rg_tel_g if mitgliedschaft.rg_tel_g else False,
+                    'mail': mitgliedschaft.rg_e_mail if mitgliedschaft.rg_e_mail else False
+                }
+        
+        data = {
+            'col_qty': int(12 / col_qty),
+            'allgemein': allgemein,
+            'mitglied': mitglied,
+            'solidarmitglied': solidarmitglied,
+            'korrespondenzadresse': korrespondenzadresse,
+            'objektadresse': objektadresse,
+            'rechnungsempfaenger': rechnungsempfaenger,
+            'rechnungsadresse': rechnungsadresse
+        }
+        
+        return frappe.render_template('templates/includes/mitgliedschaft_overview_unvalidiert.html', data)
     
 def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
     if self:

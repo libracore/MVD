@@ -1,0 +1,207 @@
+<div class="clearfix"></div>
+<div class="row">
+    <!-- Card Allgemein -->
+    <div class="col-sm-12">
+        <div class="address-box" style="background-color: #fafad9;">
+            <p>
+                <b>Status:</b> {{ allgemein.status }}<br>
+                <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp }}<br>
+                <b>Erfassung:</b> {{ frappe.utils.get_datetime(allgemein.erfassung).strftime('%d.%m.%Y') }}
+            </p>
+        </div>
+    </div>
+</div>
+<div class="clearfix"></div>
+<div class="row">
+<!-- Card Mitglied (Inhaber) -->
+{% if mitglied %}
+    <div class="col-sm-{{ col_qty }}">
+        <div class="address-box" style="background-color: #fafad9;">
+            <p><b>Mitglied</b></p>
+            <!-- Unternehmen -->
+            {% if mitglied.firma %}
+                <p>
+                    {{ mitglied.firma }}
+                    {% if mitglied.zusatz_firma %}
+                        <br>{{ mitglied.zusatz_firma }}
+                    {% endif %}
+                </p>
+            {% endif %}
+            <!-- Anrede/Vorname/Nachname -->
+            <p>
+                {% if mitglied.anrede %}
+                    {{ mitglied.anrede }}<br>
+                {% endif %}
+                {{ mitglied.vorname or '' }} {{ mitglied.nachname or '' }}
+            </p>
+            <!-- Korrespondenzdresse -->
+            <p>
+                {% if korrespondenzadresse.zusatz %}
+                    {{ korrespondenzadresse.zusatz }}<br>
+                {% endif %}
+                {{ korrespondenzadresse.strasse or '' }} {{ korrespondenzadresse.nummer or '' }}{{ korrespondenzadresse.nummer_zu or '' }}<br>
+                {% if korrespondenzadresse.postfach == 1 %}
+                    Postfach {% if korrespondenzadresse.postfach_nummer %}{{ korrespondenzadresse.postfach_nummer }}{% endif %}<br>
+                {% endif %}
+                {{ korrespondenzadresse.plz }} {{ korrespondenzadresse.ort }}
+            </p>
+            <!-- Mail/Telefon -->
+            <p>
+                {% if mitglied.mail %}{{ mitglied.mail }}<br>{% endif %}
+                {% if mitglied.tel_p %}{{ mitglied.tel_p }}<br>{% endif %}
+                {% if mitglied.tel_m %}{{ mitglied.tel_m }}<br>{% endif %}
+                {% if mitglied.tel_g %}{{ mitglied.tel_g }}{% endif %}
+            </p>
+        </div>
+    </div>
+{% endif %}
+<!-- Card Solidarmitglied -->
+{% if solidarmitglied %}
+    <div class="col-sm-{{ col_qty }}">
+        <div class="address-box" style="background-color: #fafad9;">
+            <p><b>Solidarmitglied</b></p>
+            <!-- Anrede/Vorname/Nachname -->
+            <p>
+                {% if solidarmitglied.anrede %}
+                    {{ solidarmitglied.anrede }}<br>
+                {% endif %}
+                {{ solidarmitglied.vorname or '' }} {{ solidarmitglied.nachname or '' }}
+            </p>
+            <!-- Objekadresse -->
+            <p>
+                {% if objektadresse.zusatz %}
+                    {{ objektadresse.zusatz }}<br>
+                {% endif %}
+                {{ objektadresse.strasse or '' }} {{ objektadresse.nummer or '' }}{{ objektadresse.nummer_zu or '' }}<br>
+                {{ objektadresse.plz }} {{ objektadresse.ort }}
+            </p>
+            <!-- Mail/Telefon -->
+            <p>
+                {% if solidarmitglied.mail %}{{ solidarmitglied.mail }}<br>{% endif %}
+                {% if solidarmitglied.tel_p %}{{ solidarmitglied.tel_p }}<br>{% endif %}
+                {% if solidarmitglied.tel_m %}{{ solidarmitglied.tel_m }}<br>{% endif %}
+                {% if solidarmitglied.tel_g %}{{ solidarmitglied.tel_g }}{% endif %}
+            </p>
+        </div>
+    </div>
+{% endif %}
+<!-- Card Objekt -->
+{% if objektadresse %}
+    <div class="col-sm-{{ col_qty }}">
+        <div class="address-box" style="background-color: #fafad9;">
+            <p><b>Objekt</b></p>
+            <!-- Objekadresse -->
+            <p>
+                {% if objektadresse.zusatz %}
+                    {{ objektadresse.zusatz }}<br>
+                {% endif %}
+                {{ objektadresse.strasse or '' }} {{ objektadresse.nummer or '' }}{{ objektadresse.nummer_zu or '' }}<br>
+                {{ objektadresse.plz }} {{ objektadresse.ort }}
+            </p>
+        </div>
+    </div>
+{% endif %}
+<!-- Card Rechnungsadresse -->
+{% if rechnungsadresse %}
+    <div class="col-sm-{{ col_qty }}">
+        <div class="address-box" style="background-color: #fafad9;">
+            <p><b>Rechnungsadresse</b></p>
+            {% if rechnungsempfaenger %}
+                <!-- Unternehmen -->
+                {% if rechnungsempfaenger.firma %}
+                    <p>
+                        {{ rechnungsempfaenger.firma }}
+                        {% if rechnungsempfaenger.zusatz_firma %}
+                            <br>{{ rechnungsempfaenger.zusatz_firma }}
+                        {% endif %}
+                    </p>
+                {% endif %}
+                <!-- Anrede/Vorname/Nachname -->
+                <p>
+                    {% if rechnungsempfaenger.anrede %}
+                        {{ rechnungsempfaenger.anrede }}<br>
+                    {% endif %}
+                    {{ rechnungsempfaenger.vorname or '' }} {{ rechnungsempfaenger.nachname or '' }}
+                </p>
+            {% endif %}
+            <!-- Adresse -->
+            <p>
+                {% if rechnungsadresse.zusatz %}
+                    {{ rechnungsadresse.zusatz }}<br>
+                {% endif %}
+                {{ rechnungsadresse.strasse or '' }} {{ rechnungsadresse.nummer or '' }}{{ rechnungsadresse.nummer_zu or '' }}<br>
+                {% if rechnungsadresse.postfach == 1 %}
+                    Postfach {% if rechnungsadresse.postfach_nummer %}{{ rechnungsadresse.postfach_nummer }}{% endif %}<br>
+                {% endif %}
+                {{ rechnungsadresse.plz }} {{ rechnungsadresse.ort }}
+            </p>
+            {% if rechnungsempfaenger %}
+                <!-- Mail/Telefon -->
+                <p>
+                    {% if rechnungsempfaenger.mail %}{{ rechnungsempfaenger.mail }}<br>{% endif %}
+                    {% if rechnungsempfaenger.tel_p %}{{ rechnungsempfaenger.tel_p }}<br>{% endif %}
+                    {% if rechnungsempfaenger.tel_m %}{{ rechnungsempfaenger.tel_m }}<br>{% endif %}
+                    {% if rechnungsempfaenger.tel_g %}{{ rechnungsempfaenger.tel_g }}{% endif %}
+                </p>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+</div>
+<!-- Ampel CSS -->
+<style>
+    .css-ampel {
+      display: inline-block;
+      width: 30px;
+      height: 90px;
+      border-radius: 6px;
+      position: relative;
+      background-color: black;
+      zoom: 1.7;
+    }
+
+    .css-ampel span,
+    .css-ampel:before,
+    .css-ampel:after {
+        content: "";
+        color: white;
+        position: absolute;
+        border-radius: 15px;
+        width: 22px;
+        height: 22px;
+        left: 4px;
+    }    
+
+    .css-ampel:before {
+        top: 6px;
+        background-color: red;
+        background-color: dimgrey;
+    }
+
+    .css-ampel:after {
+        top: 34px;
+        background-color: yellow;
+        background-color: dimgrey;
+    }
+
+    .css-ampel span {
+        top: 62px;
+        background-color: green;
+        background-color: dimgrey;
+    }    
+
+    .ampelrot:before {
+        background-color: red;
+        box-shadow: 0 0 20px red;
+    }
+
+    .ampelgelb:after {
+        background-color: yellow;
+        box-shadow: 0 0 20px yellow;
+    }
+
+    .ampelgruen span {
+        background-color: limegreen;
+        box-shadow: 0 0 20px limegreen;
+    }
+</style>
