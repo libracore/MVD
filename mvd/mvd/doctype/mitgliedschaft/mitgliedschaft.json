@@ -141,7 +141,8 @@
   "rg_massendruck",
   "begruessung_massendruck",
   "begruessung_massendruck_dokument",
-  "letzte_bearbeitung_von"
+  "letzte_bearbeitung_von",
+  "status_vor_onl_mutation"
  ],
  "fields": [
   {
@@ -181,7 +182,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Regul\u00e4r\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nOnline-K\u00fcndigung\nZuzug\nGestorben\nK\u00fcndigung\nWegzug\nAusschluss\nInaktiv\nInteressent*in",
+   "options": "Regul\u00e4r\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nOnline-K\u00fcndigung\nOnline-Mutation\nZuzug\nGestorben\nK\u00fcndigung\nWegzug\nAusschluss\nInaktiv\nInteressent*in",
    "read_only": 1
   },
   {
@@ -957,10 +958,16 @@
    "fieldtype": "Link",
    "label": "Begr\u00fcssung Dokument",
    "options": "Korrespondenz"
+  },
+  {
+   "default": "Regul\u00e4r",
+   "fieldname": "status_vor_onl_mutation",
+   "fieldtype": "Data",
+   "label": "Status vor Online-Mutation"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-08 13:51:15.813991",
+ "modified": "2022-02-08 16:54:53.432494",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

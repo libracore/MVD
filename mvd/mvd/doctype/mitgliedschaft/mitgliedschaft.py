@@ -2007,7 +2007,7 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.zahlung_hv = int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0
             mitgliedschaft.zahlung_mitgliedschaft = int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0
             mitgliedschaft.naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
-            mitgliedschaft.validierung_notwendig = 1 if kwargs['needsValidation'] else '0'
+            mitgliedschaft.validierung_notwendig = 0
             mitgliedschaft.language = get_sprache_abk(language=kwargs['sprache']) if kwargs['sprache'] else 'de'
             mitgliedschaft.letzte_bearbeitung_von = 'SP'
             
@@ -2017,9 +2017,18 @@ def mvm_update(mitgliedschaft, kwargs):
                 return raise_xxx(500, 'Internal Server Error', 'Beim Adressen Update ist etwas schief gelaufen', daten=kwargs)
             
             if status_c in ('Online-Anmeldung', 'Online-Beitritt'):
-                # erstelle abreits backlog: Zu Validieren
-                # ~ create_abl("Daten Validieren", mitgliedschaft)
                 mitgliedschaft.validierung_notwendig = 1
+            elif status_c == 'Kündigung':
+                if kwargs['needsValidation']:
+                    mitgliedschaft.validierung_notwendig = 1
+                    mitgliedschaft.status_c = 'Online-Kündigung'
+            else:
+                if kwargs['needsValidation']:
+                    mitgliedschaft.validierung_notwendig = 1
+                    mitgliedschaft.status_vor_onl_mutation = status_c
+                    mitgliedschaft.status_c = 'Online-Mutation'
+                    
+                
             
             mitgliedschaft.save()
             frappe.db.commit()
@@ -2109,7 +2118,7 @@ def mvm_neuanlage(kwargs):
                 'zahlung_hv': int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0,
                 'zahlung_mitgliedschaft': int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0,
                 'naechstes_jahr_geschuldet': 1 if kwargs['naechstesJahrGeschuldet'] else '0',
-                'validierung_notwendig': 1 if kwargs['needsValidation'] else '0',
+                'validierung_notwendig': 0,
                 'language': get_sprache_abk(language=kwargs['sprache']),
                 'letzte_bearbeitung_von': 'SP'
             })
@@ -2119,12 +2128,17 @@ def mvm_neuanlage(kwargs):
             if not new_mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen', daten=kwargs)
             
-            # ~ if status_c in ('Online-Anmeldung', 'Online-Beitritt') or new_mitgliedschaft.validierung_notwendig == 1:
-                # ~ new_mitgliedschaft.validierung_notwendig = 1
             if status_c in ('Online-Anmeldung', 'Online-Beitritt'):
-                # erstelle abreits backlog: Zu Validieren
-                # ~ create_abl("Daten Validieren", new_mitgliedschaft)
                 new_mitgliedschaft.validierung_notwendig = 1
+            elif status_c == 'Kündigung':
+                if kwargs['needsValidation']:
+                    new_mitgliedschaft.validierung_notwendig = 1
+                    new_mitgliedschaft.status_c = 'Online-Kündigung'
+            else:
+                if kwargs['needsValidation']:
+                    new_mitgliedschaft.validierung_notwendig = 1
+                    new_mitgliedschaft.status_vor_onl_mutation = status_c
+                    new_mitgliedschaft.status_c = 'Online-Mutation'
             
             new_mitgliedschaft.insert()
             frappe.db.commit()

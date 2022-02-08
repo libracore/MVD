@@ -39,7 +39,7 @@ frappe.vbz = {
         });
     },
     show_view: function(view) {
-        cur_page.page.page.set_view(view);;
+        cur_page.page.page.set_view(view);
     },
     remove_click_handlers: function() {
         $(".back-to-overview").off("click");
@@ -157,7 +157,8 @@ frappe.vbz = {
             frappe.set_route("List", "Mitgliedschaft");
         });
         $("#online_mutationen").click(function(){
-            frappe.msgprint("Wird noch umgesetzt");
+            frappe.route_options = {"name": ['in', open_datas.validierung.online_mutation.names], "validierung_notwendig": 1}
+            frappe.set_route("List", "Mitgliedschaft");
         });
         $("#geschenk_mitgliedschaften").click(function(){
             frappe.msgprint("Wird noch umgesetzt");

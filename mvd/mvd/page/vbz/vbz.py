@@ -103,6 +103,26 @@ def get_open_data(sektion=None):
     else:
         v_online_kuendigung = ''
     
+    v_online_mutation_qty = frappe.db.sql("""SELECT
+                                            COUNT(`name`) AS `qty`
+                                        FROM `tabMitgliedschaft`
+                                        WHERE `validierung_notwendig` = 1
+                                        AND `status_c` = 'Online-Mutation'
+                                        {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
+    _v_online_mutation = frappe.db.sql("""SELECT
+                                            `name`
+                                        FROM `tabMitgliedschaft`
+                                        WHERE `validierung_notwendig` = 1
+                                        AND `status_c` = 'Online-Mutation'
+                                        {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
+    v_online_mutation = 'x'
+    for online_mutation in _v_online_mutation:
+        v_online_mutation += ',' + online_mutation.name
+    if len(_v_online_mutation) > 0:
+        v_online_mutation = v_online_mutation.replace("x,", "")
+    else:
+        v_online_mutation = ''
+    
     v_zuzug_qty = frappe.db.sql("""SELECT
                                         COUNT(`name`) AS `qty`
                                     FROM `tabMitgliedschaft`
@@ -243,6 +263,10 @@ def get_open_data(sektion=None):
             'online_kuendigung': {
                 'qty': v_online_kuendigung_qty,
                 'names': v_online_kuendigung
+            },
+            'online_mutation': {
+                'qty': v_online_mutation_qty,
+                'names': v_online_mutation
             },
             'zuzug': {
                 'qty': v_zuzug_qty,

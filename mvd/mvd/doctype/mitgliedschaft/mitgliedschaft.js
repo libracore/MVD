@@ -462,6 +462,11 @@ function daten_validiert(frm) {
                 cur_frm.save();
                 cur_frm.timeline.insert_comment("Validierung durchgeführt.");
                 erstelle_begruessungs_korrespondenz(frm);
+            } else if (cur_frm.doc.status_c == 'Online-Mutation') {
+                cur_frm.set_value("status_c", cur_frm.doc.status_vor_onl_mutation);
+                cur_frm.set_value("status_vor_onl_mutation", '');
+                cur_frm.save();
+                cur_frm.timeline.insert_comment("Validierung durchgeführt.");
             } else {
                 cur_frm.set_value("validierung_notwendig", '0');
                 cur_frm.set_value("status_c", 'Regulär');
