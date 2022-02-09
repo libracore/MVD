@@ -922,7 +922,7 @@ function erstelle_begruessungs_korrespondenz(frm) {
         {
             var druckvorlagen = res.message;
             frappe.prompt([
-                {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1},
+                {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1, 'default': 'Begrüssung mit Ausweis'},
                 {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
                     'get_query': function() {
                         return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };

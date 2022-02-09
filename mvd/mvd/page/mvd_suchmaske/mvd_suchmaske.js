@@ -604,7 +604,7 @@ frappe.mvd_such_client = {
                                 }
                             }
                         },
-                        {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': cur_page.page.search_fields.mitgliedtyp_c.get_value(), 'change': function() {
+                        {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': cur_page.page.search_fields.mitgliedtyp_c.get_value() == 'Geschäft' ? 'Geschäft':'Privat', 'change': function() {
                                 if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Privat') {
                                     cur_dialog.fields_dict.kundentyp.set_value("Einzelperson");
                                     cur_dialog.fields_dict.kundentyp.refresh();
