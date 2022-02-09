@@ -296,21 +296,21 @@
    "default": "0",
    "fieldname": "seite_1_referenzblock_ausblenden",
    "fieldtype": "Check",
-   "label": "Referenzblock auf Seite 1 ausblenden"
+   "label": "Referenzblock auf Blatt 1 ausblenden"
   },
   {
    "default": "0",
    "depends_on": "eval:doc.anzahl_seiten!='1'",
    "fieldname": "seite_2_referenzblock_ausblenden",
    "fieldtype": "Check",
-   "label": "Referenzblock auf Seite 2 ausblenden"
+   "label": "Referenzblock auf Blatt 2 ausblenden"
   },
   {
    "default": "0",
    "depends_on": "eval:doc.anzahl_seiten=='3'",
    "fieldname": "seite_3_referenzblock_ausblenden",
    "fieldtype": "Check",
-   "label": "Referenzblock auf Seite 3 ausblenden"
+   "label": "Referenzblock auf Blatt 3 ausblenden"
   },
   {
    "default": "0",
@@ -354,7 +354,7 @@
    "options": "Language"
   }
  ],
- "modified": "2022-02-07 12:46:28.512696",
+ "modified": "2022-02-09 13:12:37.254374",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

@@ -698,9 +698,12 @@ frappe.mvd_such_client = {
                     function(values){
                         //~ console.log(values);
                         if (values.status == 'Regulär'||values.autom_rechnung) {
-                            var dokument = 'Anmeldung mit EZ';
-                            if (values.status == 'Interessent*in') {
-                                dokument = 'Interessent*Innenbrief mit EZ';
+                            if (values.status == 'Regulär') {
+                                var dokument = 'Begrüssung mit Ausweis';
+                            } else if (values.status == 'Interessent*in') {
+                                var dokument = 'Interessent*Innenbrief mit EZ';
+                            } else {
+                                var dokument = 'Anmeldung mit EZ';
                             }
                             frappe.call({
                                 method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
