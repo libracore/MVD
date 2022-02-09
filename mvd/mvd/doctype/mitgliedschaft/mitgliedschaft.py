@@ -204,6 +204,8 @@ class Mitgliedschaft(Document):
                 if len(pes) > 0:
                     pe = frappe.get_doc("Payment Entry", pes[0].parent)
                     sinv_year = getdate(pe.reference_date).strftime("%Y")
+                else:
+                    sinv_year = 0
             self.zahlung_mitgliedschaft = sinv_year
         current_year = int(now().split("-")[0])
         if int(self.zahlung_mitgliedschaft) > current_year:
