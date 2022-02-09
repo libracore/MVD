@@ -74,6 +74,9 @@ def update_mvm(mvm, update):
             token = config.get_value(SVCPF_SCOPE, 'api_token')
             headers = {"authorization": "Bearer {token}".format(token=token)}
             
+            if int(frappe.db.get_single_value('Service Plattform API', 'json_error_log')) == 1:
+                frappe.log_error("{0}".format(json.dumps(mvm)), 'json for ChLa')
+            
             if update:
                 sp_connection = requests.put(url, json = mvm, headers = headers)
             else:

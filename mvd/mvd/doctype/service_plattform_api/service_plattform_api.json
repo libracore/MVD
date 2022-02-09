@@ -11,7 +11,8 @@
   "neue_mitglieder_nummer",
   "section_danger",
   "not_get_number_and_id",
-  "no_sp_update"
+  "no_sp_update",
+  "json_error_log"
  ],
  "fields": [
   {
@@ -61,10 +62,16 @@
    "fieldtype": "Table",
    "label": "Connections",
    "options": "Service Plattform API Connection"
+  },
+  {
+   "default": "0",
+   "fieldname": "json_error_log",
+   "fieldtype": "Check",
+   "label": "json Error Log"
   }
  ],
  "issingle": 1,
- "modified": "2022-01-12 22:09:36.817767",
+ "modified": "2022-02-09 21:18:08.679958",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",
