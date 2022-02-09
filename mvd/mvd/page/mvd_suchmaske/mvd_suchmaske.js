@@ -587,7 +587,7 @@ frappe.mvd_such_client = {
                                     }, 100);
                                 } else {
                                     // auto rg
-                                    cur_dialog.fields_dict.autom_rechnung.set_value(1);
+                                    cur_dialog.fields_dict.autom_rechnung.set_value(0);
                                     cur_dialog.fields_dict.autom_rechnung.df.hidden = 0;
                                     cur_dialog.fields_dict.autom_rechnung.df.read_only = 0;
                                     cur_dialog.fields_dict.autom_rechnung.refresh();
@@ -613,7 +613,7 @@ frappe.mvd_such_client = {
                         },
                         {'fieldname': 'language', 'fieldtype': 'Link', 'label': 'Sprache', 'reqd': 1, 'hidden': 0, 'options': 'Language', 'default': cur_page.page.search_fields.language.get_value()||'de'},
                         {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'hidden': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value()},
-                        {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 1,
+                        {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': cur_page.page.search_fields.status_c.get_value() == 'Interessent*in' ? 0:cur_page.page.search_fields.status_c.get_value() == 'Anmeldung' ? 0:1,
                             'read_only': !['Interessent*in', 'Anmeldung'].includes(cur_page.page.search_fields.status_c.get_value()) ? 1:0,
                             'change': function() {
                                 if (cur_dialog.fields_dict.autom_rechnung.get_value() == 1) {
