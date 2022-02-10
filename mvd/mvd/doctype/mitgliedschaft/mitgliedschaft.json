@@ -188,6 +188,7 @@
   {
    "fieldname": "mitgliedtyp_c",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Mitgliedtyp",
    "options": "Gesch\u00e4ft\nPrivat"
   },
@@ -967,7 +968,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-08 16:54:53.432494",
+ "modified": "2022-02-10 20:25:06.884284",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

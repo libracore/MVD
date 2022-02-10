@@ -9,7 +9,7 @@ frappe.ui.form.on('Mitgliedschaft', {
     refresh: function(frm) {
        if (!frm.doc.__islocal) {
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
-                if (!['Kündigung', 'Gestorben'].includes(cur_frm.doc.status_c)) {
+                if ((!['Kündigung', 'Gestorben'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.mitgliedtyp_c == 'Privat')) {
                     frm.add_custom_button(__("Sektionswechsel"),  function() {
                             sektionswechsel(frm);
                     }, __("Mutation"));
