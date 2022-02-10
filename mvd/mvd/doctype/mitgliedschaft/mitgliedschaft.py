@@ -1768,6 +1768,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         'due_date': add_days(today(), 30),
         'debit_to': company.default_receivable_account,
         'sektions_code': str(sektion.sektion_id) or '00',
+        'sektion_id': mitgliedschaft.sektion_id,
         "items": item,
         "druckvorlage": druckvorlage if druckvorlage else ''
     })
@@ -1792,12 +1793,17 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `rg_massendruck` = '', `rg_massendruck_vormerkung` = 0 WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=mitgliedschaft.name), as_list=True)
     
     if submit:
-        sinv.submit()
+        # submit workaround weil submit ignore_permissions=True nicht kennt
+        sinv.docstatus = 1
+        sinv.save(ignore_permissions=True)
     
     if inkl_hv and mitgliedschaft.mitgliedtyp_c != 'Geschäft':
         fr_rechnung = create_hv_fr(mitgliedschaft=mitgliedschaft.name, sales_invoice=sinv.name, bezahlt=hv_bar_bezahlt)
     
     if attach_as_pdf:
+        # add doc signature to allow print
+        frappe.form_dict.key = sinv.get_signature()
+        
         # erstellung Rechnungs PDF
         output = PdfFileWriter()
         output = frappe.get_print("Sales Invoice", sinv.name, 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)

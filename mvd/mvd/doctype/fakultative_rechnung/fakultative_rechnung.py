@@ -112,6 +112,7 @@ def create_paid_sinv(fr, mitgliedschaft, sektion):
         'due_date': add_days(today(), 30),
         'debit_to': company.default_receivable_account,
         'sektions_code': str(sektion.sektion_id) or '00',
+        'sektion_id': fr.sektion_id,
         "items": item,
         "inkl_hv": 0,
         "esr_reference": fr.qrr_referenz or get_qrr_reference(fr=fr.name)
@@ -128,7 +129,10 @@ def create_paid_sinv(fr, mitgliedschaft, sektion):
     row.amount = sinv.grand_total
     sinv.save(ignore_permissions=True)
     
-    sinv.submit()
+    # submit workaround weil submit ignore_permissions=True nicht kennt
+    sinv.docstatus = 1
+    sinv.save(ignore_permissions=True)
+    
     return sinv.name
 
 def create_unpaid_sinv(fr, betrag=False):
@@ -171,13 +175,16 @@ def create_unpaid_sinv(fr, betrag=False):
         'due_date': add_days(today(), 30),
         'debit_to': company.default_receivable_account,
         'sektions_code': str(sektion.sektion_id) or '00',
+        'sektion_id': fr.sektion_id,
         "items": item,
         "inkl_hv": 0,
         "esr_reference": fr.qrr_referenz or get_qrr_reference(fr=fr.name)
     })
     sinv.insert(ignore_permissions=True)
     
-    sinv.submit()
+    # submit workaround weil submit ignore_permissions=True nicht kennt
+    sinv.docstatus = 1
+    sinv.save(ignore_permissions=True)
     
     fr.status = 'Paid'
     fr.bezahlt_via = sinv.name
