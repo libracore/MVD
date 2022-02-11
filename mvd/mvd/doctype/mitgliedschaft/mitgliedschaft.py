@@ -1694,7 +1694,9 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
                     'seite_2_qrr',
                     'seite_2_qrr_spende_hv',
                     'seite_3_qrr',
-                    'seite_3_qrr_spende_hv'
+                    'seite_3_qrr_spende_hv',
+                    'blatt_2_info_mahnung',
+                    'tipps_mahnung'
                 ]
                 for key in keys_to_remove:
                     new_korrespondenz.pop(key)

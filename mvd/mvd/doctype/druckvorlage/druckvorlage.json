@@ -23,6 +23,7 @@
   "logo_ausblenden",
   "section_tipps",
   "tipps",
+  "tipps_mahnung",
   "section_inhalt_1",
   "h1",
   "seite_1a",
@@ -33,6 +34,7 @@
   "seite_1_fusszeile_ausblenden",
   "seite_1_referenzblock_ausblenden",
   "h2",
+  "blatt_2_info_mahnung",
   "seite_2a",
   "seite_2b",
   "seite_2_qrr",
@@ -72,7 +74,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Dokument",
-   "options": "Anmeldung mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ",
+   "options": "Anmeldung mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ\nMahnung",
    "reqd": 1
   },
   {
@@ -256,6 +258,7 @@
    "label": "Tipps"
   },
   {
+   "depends_on": "eval:doc.dokument!='Mahnung'",
    "fieldname": "tipps",
    "fieldtype": "HTML",
    "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n</ul>"
@@ -352,9 +355,21 @@
    "fieldtype": "Link",
    "label": "Sprache",
    "options": "Language"
+  },
+  {
+   "depends_on": "eval:doc.dokument=='Mahnung'",
+   "fieldname": "blatt_2_info_mahnung",
+   "fieldtype": "HTML",
+   "options": "<p>Falls mehr als 1 Rechnung gemahnt werden muss, wird automatisch ein weiteres Blatt gem\u00e4ss der nachfolgenden Definition erzeugt. Muss nur eine Rechnung gemahnt werden, wird die Definition von \"Blatt 2\" ignoriert.</p>"
+  },
+  {
+   "depends_on": "eval:doc.dokument=='Mahnung'",
+   "fieldname": "tipps_mahnung",
+   "fieldtype": "HTML",
+   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Gesamtbetrag der gemahnten Rechnung(en) -&gt; <b>%%Gesamtbetrag_gemahnte_Rechnungen%%</b></li>\n<li>Jahr der gemahnten Jahresrechnung auf Seite 1 -&gt; <b>%%Jahresrechnung_Jahr%%</b></li>\n</ul>"
   }
  ],
- "modified": "2022-02-09 13:12:37.254374",
+ "modified": "2022-02-11 12:17:00.853115",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",
