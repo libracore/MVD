@@ -51,6 +51,12 @@ def get_data():
                 },
                 {
                     "type": "doctype",
+                    "name": "Mahnung",
+                    "label": _("Mahnungen"),
+                    "description": _("Mahnungen")
+                },
+                {
+                    "type": "doctype",
                     "name": "MV Help Links",
                     "label": _("Hilfe Verknüpfungen"),
                     "description": _("Hilfe Verknüpfungen direkt zur MVD Wiki")
