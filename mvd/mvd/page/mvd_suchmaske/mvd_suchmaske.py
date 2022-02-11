@@ -22,7 +22,10 @@ def suche(suchparameter, goto_list=False):
     if suchparameter["sektion_id"]:
         filters_list.append("""`sektion_id` = '{sektion_id}'""".format(sektion_id=suchparameter["sektion_id"]))
     if suchparameter["mitglied_nr"]:
-        filters_list.append("""`mitglied_nr` LIKE '{mitglied_nr}%'""".format(mitglied_nr=suchparameter["mitglied_nr"]))
+        mitglied_nr_bereinigt = suchparameter["mitglied_nr"]
+        if 'MV' not in suchparameter["mitglied_nr"]:
+            mitglied_nr_bereinigt = "MV" + suchparameter["mitglied_nr"]
+        filters_list.append("""`mitglied_nr` LIKE '{mitglied_nr}%'""".format(mitglied_nr=mitglied_nr_bereinigt))
     if suchparameter["status_c"] and suchparameter["sektion_id"]:
         if suchparameter["status_c"] != 'Alle':
             filters_list.append("""`status_c` = '{status_c}'""".format(status_c=suchparameter["status_c"]))
