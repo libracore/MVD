@@ -8,7 +8,7 @@
   "naming_series",
   "customer",
   "customer_name",
-  "mv_mitgliedschaft",
+  "mitgliedschaften",
   "column_general",
   "sektion_id",
   "company",
@@ -23,7 +23,9 @@
   "reminder_charge",
   "column_values",
   "total_before_charge",
-  "total_with_charge"
+  "total_with_charge",
+  "section_hidden_linking",
+  "hidden_linking"
  ],
  "fields": [
   {
@@ -147,14 +149,26 @@
    "options": "currency"
   },
   {
-   "fieldname": "mv_mitgliedschaft",
+   "fieldname": "section_hidden_linking",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "hidden_linking",
+   "fieldtype": "Table",
+   "label": "Hidden Linking",
+   "options": "mahnung mitgliedschaft linking"
+  },
+  {
+   "fieldname": "mitgliedschaften",
    "fieldtype": "Table MultiSelect",
    "label": "Mitgliedschaft(en)",
    "options": "Mitgliedschaft MultiSelect"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-02-11 21:38:20.199216",
+ "modified": "2022-02-11 23:02:19.273022",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnung",

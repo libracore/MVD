@@ -15,6 +15,21 @@ frappe.ui.form.on('Payment Reminder', {
     }
 });
 
+//~ vorbereitung für auto add/remove mitgliedschaft links
+//~ frappe.ui.form.on('Payment Reminder Invoice', {
+    //~ sales_invoices_add: function(frm) {
+      //~ console.log(frm.doc.sales_invoices);
+      //~ console.log(frm.doc.mitgliedschaften);
+   //~ },
+   //~ sales_invoices_remove: function(frm) {
+      //~ console.log(frm.doc.sales_invoices);
+      //~ console.log(frm.doc.mitgliedschaften);
+      //~ frm.doc.mitgliedschaften.forEach(function(entry){
+         //~ if (entry.mv_mitgliedschaft 
+      //~ });
+   //~ }
+//~ });
+
 function update_total(frm) {
     cur_frm.set_value("total_with_charge", ((frm.doc.total_before_charge || 0) + (frm.doc.reminder_charge || 0)));
 }

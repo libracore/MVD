@@ -8,6 +8,9 @@ def get_data():
         'heatmap': True,
         'heatmap_message': _('Diese Heatmap zeigt alle Interaktionen mit dieser Mitgliedschaft im vergangenen Jahr'),
         'fieldname': 'mv_mitgliedschaft',
+        # ~ 'non_standard_fieldnames': {
+            # ~ 'Mahnung': 'hidden_linking'
+        # ~ },
         'transactions': [
             {
                 'label': _('Termine / Beratungen'),
@@ -15,7 +18,7 @@ def get_data():
             },
             {
                 'label': _('Externe Korrespondenz'),
-                'items': ['Korrespondenz', 'Sales Invoice', 'Fakultative Rechnung']
+                'items': ['Korrespondenz', 'Sales Invoice', 'Fakultative Rechnung', 'Mahnung']
             },
             {
                 'label': _('Zu erledigen'),

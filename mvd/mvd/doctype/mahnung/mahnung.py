@@ -99,7 +99,8 @@ def create_payment_reminders(sektion_id):
                     "doctype": "Mahnung",
                     "sektion_id": sektion_id,
                     "customer": customer.customer,
-                    "mv_mitgliedschaft": mitgliedschaften,
+                    "mitgliedschaften": mitgliedschaften,
+                    "hidden_linking": mitgliedschaften,
                     "date": "{year:04d}-{month:02d}-{day:02d}".format(
                         year=now.year, month=now.month, day=now.day),
                     "title": "{customer} {year:04d}-{month:02d}-{day:02d}".format(
