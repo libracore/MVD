@@ -28,7 +28,10 @@ def suche(suchparameter, goto_list=False):
         filters_list.append("""`mitglied_nr` LIKE '{mitglied_nr}%'""".format(mitglied_nr=mitglied_nr_bereinigt))
     if suchparameter["status_c"] and suchparameter["sektion_id"]:
         if suchparameter["status_c"] != 'Alle':
-            filters_list.append("""`status_c` = '{status_c}'""".format(status_c=suchparameter["status_c"]))
+            if 'Regulär' in suchparameter["status_c"]:
+                filters_list.append("""`status_c` IN ('Regulär', 'Online-Mutation')""")
+            else:
+                filters_list.append("""`status_c` = '{status_c}'""".format(status_c=suchparameter["status_c"]))
     if suchparameter["mitgliedtyp_c"] and suchparameter["sektion_id"]:
         if suchparameter["mitgliedtyp_c"] != 'Alle':
             filters_list.append("""`mitgliedtyp_c` = '{mitgliedtyp_c}'""".format(mitgliedtyp_c=suchparameter["mitgliedtyp_c"]))
