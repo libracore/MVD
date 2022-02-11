@@ -172,14 +172,6 @@ def get_token(scope=SVCPF_SCOPE):
 def mitglieder(**mitgliedschaft):
     return mvm_mitglieder(mitgliedschaft)
 
-# @frappe.whitelist()
-# def kuendigung(**mitgliedschaft):
-    # return mvm_kuendigung(**mitgliedschaft)
-
-# @frappe.whitelist()
-# def sektionswechsel(sektion_code):
-    # return mvm_sektionswechsel(sektion_code)
-
 def sektionswechsel(mvm, sektion_code):
     if not int(frappe.db.get_single_value('Service Plattform API', 'no_sp_update')) == 1:
         if auth_check(SVCPF_SCOPE):

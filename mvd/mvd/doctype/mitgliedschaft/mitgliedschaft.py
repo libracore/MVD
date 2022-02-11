@@ -16,11 +16,12 @@ from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
-        if not self.mitglied_nr or not self.mitglied_id:
+        if not self.mitglied_id:
             mitglied_nummer_obj = mvm_neue_mitglieder_nummer(self)
             if mitglied_nummer_obj:
-                self.mitglied_nr = mitglied_nummer_obj["mitgliedNummer"]
                 self.mitglied_id = mitglied_nummer_obj["mitgliedId"]
+                if not self.mitglied_nr:
+                    self.mitglied_nr = mitglied_nummer_obj["mitgliedNummer"]
             else:
                 frappe.throw("Die gewünschte Mitgliedschaft konnte nicht erstellt werden.")
         return
@@ -1715,7 +1716,8 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), new_mitgliedschaft.as_dict()), 'Sektionswechsel')
             return 0
     else:
-        # hier muss noch die Meldung an SP bezgl. Sektionswechsel erfolgen!!!!!!!!!!
+        # Sektionswechsel nach ZH --> kein neues Mtiglied in ERPNext, Meldung Sektionswechsel erfolgt vie validate Trigger von Mitgliedschaft
+        # Sobald ZH neues Mitglied verarbeitet erhält ERPNext via SP eine Neuanlage von/für ZH und ist mittels Freizügigkeitsabfrage wieder verfügbar
         return 1
 
 @frappe.whitelist()
@@ -1828,40 +1830,6 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         _file.save(ignore_permissions=True)
     
     return sinv.name
-
-# ~ @frappe.whitelist()
-# ~ def create_korrespondenz_serienbriefe(mitgliedschaften, korrespondenzdaten):
-    # ~ if isinstance(korrespondenzdaten, str):
-        # ~ korrespondenzdaten = json.loads(korrespondenzdaten)
-    
-    # ~ if isinstance(mitgliedschaften, str):
-        # ~ mitgliedschaften = json.loads(mitgliedschaften)
-    
-    # ~ erstellte_korrespondenzen = []
-    
-    # ~ for mitgliedschaft in mitgliedschaften:
-        # ~ new_korrespondenz = frappe.get_doc({
-            # ~ "doctype": "MV Korrespondenz",
-            # ~ "mv_mitgliedschaft": mitgliedschaft['name'],
-            # ~ "sektion_id": korrespondenzdaten['sektion_id'],
-            # ~ "check_ansprechperson": korrespondenzdaten['check_ansprechperson'] if 'check_ansprechperson' in korrespondenzdaten else 0,
-            # ~ "ansprechperson": korrespondenzdaten['ansprechperson'] if 'ansprechperson' in korrespondenzdaten else '',
-            # ~ "tel_ma": korrespondenzdaten['tel_ma'] if 'tel_ma' in korrespondenzdaten else '',
-            # ~ "email_ma": korrespondenzdaten['email_ma'] if 'email_ma' in korrespondenzdaten else '',
-            # ~ "mit_ausweis": korrespondenzdaten['mit_ausweis'] if 'mit_ausweis' in korrespondenzdaten else 0,
-            # ~ "ort": korrespondenzdaten['ort'],
-            # ~ "datum": korrespondenzdaten['datum'],
-            # ~ "brieftitel": korrespondenzdaten['brieftitel'],
-            # ~ "check_anrede": korrespondenzdaten['check_anrede'] if 'check_anrede' in korrespondenzdaten else 0,
-            # ~ "anrede": korrespondenzdaten['anrede'] if 'anrede' in korrespondenzdaten else '',
-            # ~ "inhalt": korrespondenzdaten['inhalt'],
-            # ~ "inhalt_2": korrespondenzdaten['inhalt_2'] if 'inhalt_2' in korrespondenzdaten else ''
-        # ~ })
-        # ~ new_korrespondenz.insert(ignore_permissions=True)
-        # ~ frappe.db.commit()
-        # ~ erstellte_korrespondenzen.append(new_korrespondenz.name)
-    
-    # ~ return erstellte_korrespondenzen
 
 @frappe.whitelist()
 def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druckvorlage):
@@ -2491,7 +2459,6 @@ def send_mvm_sektionswechsel(mitgliedschaft):
     from mvd.mvd.service_plattform.api import sektionswechsel
     prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
     sektionswechsel(prepared_mvm, 'ZH')
-    frappe.log_error("sektionswechsel", 'sektionswechsel')
 
 def prepare_mvm_for_sp(mitgliedschaft):
     adressen = get_adressen_for_sp(mitgliedschaft)
