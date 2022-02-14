@@ -158,7 +158,6 @@
    "fetch_from": "sektion_id.company",
    "fieldname": "company",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Company",
    "options": "Company",
    "read_only": 1
@@ -270,7 +269,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-01-13 20:43:51.458234",
+ "modified": "2022-02-14 20:11:03.154203",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",
