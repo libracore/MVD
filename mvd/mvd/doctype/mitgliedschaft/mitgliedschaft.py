@@ -1699,7 +1699,10 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
                     'tipps_mahnung'
                 ]
                 for key in keys_to_remove:
-                    new_korrespondenz.pop(key)
+                    try:
+                        new_korrespondenz.pop(key)
+                    except:
+                        pass
                 
                 new_korrespondenz['mv_mitgliedschaft'] = new_mitgliedschaft.name
                 new_korrespondenz['massenlauf'] = 0
