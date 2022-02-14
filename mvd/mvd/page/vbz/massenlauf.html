@@ -43,4 +43,10 @@
             <td>{% if rechnungen.qty > 0 %}<i id="rechnungen_qty" class="fa fa-eye"></i>{% endif %}</td>
             <td>{% if rechnungen.qty > 0 %}<i id="rechnungen_print" class="fa fa-file"></i>{% endif %}</td>
         </tr>
+        <tr>
+            <td>Mahnungen</td>
+            <td>{{ mahnungen.qty }}</td>
+            <td>{% if mahnungen.qty > 0 %}<i id="mahnungen_qty" class="fa fa-eye"></i>{% endif %}</td>
+            <td>{% if mahnungen.qty > 0 %}<i id="mahnungen_print" class="fa fa-file"></i>{% endif %}</td>
+        </tr>
 </div>

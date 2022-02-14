@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from PyPDF2 import PdfFileWriter
-from frappe.utils.data import add_days, getdate, now, today
+from frappe.utils.data import add_days, getdate, now, today, now_datetime
 from frappe.utils.pdf import get_file_data_from_writer
 
 @frappe.whitelist()
@@ -238,8 +238,29 @@ def get_open_data(sektion=None):
     else:
         begruessung_online = ''
     
+    # mahnung massenlauf
+    mahnung_qty = frappe.db.sql("""SELECT
+                                        COUNT(`name`) AS `qty`
+                                    FROM `tabMahnung`
+                                    WHERE `massenlauf` = 1
+                                    AND `docstatus` = 1
+                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
+    _mahnung = frappe.db.sql("""SELECT
+                                        `name`
+                                    FROM `tabMahnung`
+                                    WHERE `massenlauf` = 1
+                                    AND `docstatus` = 1
+                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
+    mahnung = 'x'
+    for m in _mahnung:
+        mahnung += ',' + m.name
+    if len(_mahnung) > 0:
+        mahnung = mahnung.replace("x,", "")
+    else:
+        mahnung = ''
+    
     # massenlauf total
-    massenlauf_total = kuendigung_qty + korrespondenz_qty + zuzug_qty + rg_massendruck_qty + begruessung_online_qty
+    massenlauf_total = kuendigung_qty + korrespondenz_qty + zuzug_qty + rg_massendruck_qty + begruessung_online_qty + mahnung_qty
     
     return {
         'arbeits_backlog': {
@@ -250,6 +271,7 @@ def get_open_data(sektion=None):
             'todo_users': todo_users.replace("'", "")
         },
         'massenlauf_total': massenlauf_total,
+        'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'validierung': {
             'qty': validierung_total,
             'online_beitritt': {
@@ -292,6 +314,10 @@ def get_open_data(sektion=None):
         'begruessung_online_massenlauf': {
             'qty': begruessung_online_qty,
             'names': begruessung_online
+        },
+        'mahnung_massenlauf': {
+            'qty': mahnung_qty,
+            'names': mahnung
         }
     }
 
@@ -471,3 +497,37 @@ def begruessung_online_massenlauf():
         return _file.name
     else:
         frappe.throw("Es gibt keine Mitgliedschaften die für einen Begrüssungs-Massenlauf vorgemerkt sind.")
+
+@frappe.whitelist()
+def mahnung_massenlauf():
+    mahnungen = frappe.get_list('Mahnung', filters={'massenlauf': 1}, fields=['name'])
+    if len(mahnungen) > 0:
+        output = PdfFileWriter()
+        for mahnung in mahnungen:
+            output = frappe.get_print("Mahnung", mahnung['name'], 'Mahnung', as_pdf = True, output = output, ignore_zugferd=True)
+            
+        file_name = "Mahnungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+        file_name = file_name.split(".")[0]
+        file_name = file_name.replace(":", "-")
+        file_name = file_name + ".pdf"
+        
+        filedata = get_file_data_from_writer(output)
+        
+        _file = frappe.get_doc({
+            "doctype": "File",
+            "file_name": file_name,
+            "folder": "Home",
+            "is_private": 1,
+            "content": filedata
+        })
+        
+        _file.save(ignore_permissions=True)
+        
+        for mahnung in mahnungen:
+            m = frappe.get_doc("Mahnung", mahnung['name'])
+            m.massenlauf = '0'
+            m.save(ignore_permissions=True)
+        
+        return _file.name
+    else:
+        frappe.throw("Es gibt keine Mahnungen die für einen Massenlauf vorgemerkt sind.")

@@ -77,6 +77,11 @@ h1.vbz {
     cursor: pointer;
 }
 
+#datenstand {
+    font-weight: normal !important;
+    font-size: 15px !important;
+}
+
 /*
 Validierung, Massenlauf, Adresspflege
 */

@@ -30,7 +30,8 @@ frappe.vbz = {
                         'korrespondenz': eval(r.message.korrespondenz_massenlauf),
                         'zuzug': eval(r.message.zuzug_massenlauf),
                         'rechnungen': eval(r.message.rg_massenlauf),
-                        'begruessung_online': eval(r.message.begruessung_online_massenlauf)
+                        'begruessung_online': eval(r.message.begruessung_online_massenlauf),
+                        'mahnungen': eval(r.message.mahnung_massenlauf)
                     }))
                     page.add_view('adresspflege', frappe.render_template("adresspflege", {}))
                     frappe.vbz.add_click_handlers(eval(r.message));
@@ -67,6 +68,8 @@ frappe.vbz = {
         $("#autom_adressaenderungen").off("click");
         $("#begruessung_online_qty").off("click");
         $("#begruessung_online_print").off("click");
+        $("#mahnungen_qty").off("click");
+        $("#mahnungen_print").off("click");
     },
     add_click_handlers: function(open_datas) {
         frappe.vbz.remove_click_handlers();
@@ -209,6 +212,13 @@ frappe.vbz = {
         $("#begruessung_online_print").click(function(){
             frappe.vbz.begruessung_online_massenlauf();
         });
+        $("#mahnungen_qty").click(function(){
+            frappe.route_options = {"name": ['in', open_datas.mahnung_massenlauf.names], 'massenlauf': 1}
+            frappe.set_route("List", "Mahnung");
+        });
+        $("#mahnungen_print").click(function(){
+            frappe.vbz.mahnung_massenlauf();
+        });
     },
     get_default_sektion: function() {
         var default_sektion = '';
@@ -290,6 +300,22 @@ frappe.vbz = {
         frappe.dom.freeze('Erstelle Sammel-PDF...');
         frappe.call({
             method: "mvd.mvd.page.vbz.vbz.begruessung_online_massenlauf",
+            args:{},
+            freeze: true,
+            freeze_message: 'Erstelle Sammel-PDF...',
+            async: false,
+            callback: function(r)
+            {
+                frappe.dom.unfreeze();
+                frappe.route_options = {"name": r.message}
+                frappe.set_route("List", "File");
+            }
+        });
+    },
+    mahnung_massenlauf: function() {
+        frappe.dom.freeze('Erstelle Sammel-PDF...');
+        frappe.call({
+            method: "mvd.mvd.page.vbz.vbz.mahnung_massenlauf",
             args:{},
             freeze: true,
             freeze_message: 'Erstelle Sammel-PDF...',

@@ -9,6 +9,7 @@
   "customer",
   "customer_name",
   "mitgliedschaften",
+  "massenlauf",
   "column_general",
   "sektion_id",
   "company",
@@ -165,10 +166,17 @@
    "fieldtype": "Table MultiSelect",
    "label": "Mitgliedschaft(en)",
    "options": "Mitgliedschaft MultiSelect"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "1",
+   "fieldname": "massenlauf",
+   "fieldtype": "Check",
+   "label": "F\u00fcr Massenlauf vormerken"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-02-11 23:02:19.273022",
+ "modified": "2022-02-14 17:39:38.139998",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnung",
