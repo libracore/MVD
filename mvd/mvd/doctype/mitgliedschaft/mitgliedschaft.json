@@ -26,6 +26,7 @@
   "inkl_hv",
   "statuten_ok",
   "m_und_w_pdf",
+  "kein_email",
   "adressen_gesperrt",
   "reduzierte_mitgliedschaft",
   "reduzierter_betrag",
@@ -965,10 +966,16 @@
    "fieldname": "status_vor_onl_mutation",
    "fieldtype": "Data",
    "label": "Status vor Online-Mutation"
+  },
+  {
+   "default": "0",
+   "fieldname": "kein_email",
+   "fieldtype": "Check",
+   "label": "Will trotz Emailadresse Briefpost"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-10 20:25:06.884284",
+ "modified": "2022-02-14 10:47:24.604220",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
