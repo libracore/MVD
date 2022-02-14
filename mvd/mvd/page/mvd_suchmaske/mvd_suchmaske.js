@@ -718,7 +718,9 @@ frappe.mvd_such_client = {
                                 {
                                     var druckvorlagen = response.message
                                     frappe.prompt([
-                                        {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                                        // Default Druckvorlage für den Moment deaktiviert!
+                                        //{'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                                        {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 
                                             'get_query': function() {
                                                 return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
                                             }

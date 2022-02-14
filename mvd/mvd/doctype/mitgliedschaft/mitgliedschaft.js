@@ -291,9 +291,19 @@ function kuendigung(frm) {
                         }
                         
                         if (fristgerecht) {
+                            // Default Druckvorlage für den Moment deaktiviert!
+                            //~ var field_list = [
+                                //~ {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': cur_frm.doc.kuendigung ? cur_frm.doc.kuendigung:frappe.datetime.year_end()},
+                                //~ {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                                    //~ 'get_query': function() {
+                                        //~ return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                                    //~ }
+                                //~ },
+                                //~ {'fieldname': 'massenlauf', 'fieldtype': 'Check', 'label': 'Für Massenlauf vormerken', 'default': 1}
+                            //~ ];
                             var field_list = [
                                 {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': cur_frm.doc.kuendigung ? cur_frm.doc.kuendigung:frappe.datetime.year_end()},
-                                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                                     'get_query': function() {
                                         return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
                                     }
@@ -301,10 +311,32 @@ function kuendigung(frm) {
                                 {'fieldname': 'massenlauf', 'fieldtype': 'Check', 'label': 'Für Massenlauf vormerken', 'default': 1}
                             ];
                         } else {
+                            // Default Druckvorlage für den Moment deaktiviert!
+                            //~ var field_list = [
+                                //~ {'fieldname': 'html_info', 'fieldtype': 'HTML', 'options': '<p style="color: red;">Achtung: Kündigungsfrist verpasst!</p>'},
+                                //~ {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.add_months(frappe.datetime.year_end(), 12), 'read_only': 1},
+                                //~ {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                                    //~ 'get_query': function() {
+                                        //~ return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                                    //~ }
+                                //~ },
+                                //~ {'fieldname': 'kulanz', 'fieldtype': 'Check', 'label': 'Kulanz anwenden', 'default': 0, 'change': function() {
+                                        //~ if (cur_dialog.fields_dict.kulanz.get_value() == 1) {
+                                            //~ cur_dialog.fields_dict.datum.df.read_only = 0;
+                                            //~ cur_dialog.fields_dict.datum.refresh();
+                                        //~ } else {
+                                            //~ cur_dialog.fields_dict.datum.set_value(frappe.datetime.add_months(frappe.datetime.year_end(), 12));
+                                            //~ cur_dialog.fields_dict.datum.df.read_only = 1;
+                                            //~ cur_dialog.fields_dict.datum.refresh();
+                                        //~ }
+                                    //~ }
+                                //~ },
+                                //~ {'fieldname': 'massenlauf', 'fieldtype': 'Check', 'label': 'Für Massenlauf vormerken', 'default': 1}
+                            //~ ];
                             var field_list = [
                                 {'fieldname': 'html_info', 'fieldtype': 'HTML', 'options': '<p style="color: red;">Achtung: Kündigungsfrist verpasst!</p>'},
                                 {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.add_months(frappe.datetime.year_end(), 12), 'read_only': 1},
-                                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                                     'get_query': function() {
                                         return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
                                     }
@@ -599,8 +631,19 @@ function erstelle_rechnung(frm) {
         callback: function(r)
         {
             var druckvorlagen = r.message
+            // Default Druckvorlage für den Moment deaktiviert!
+            //~ frappe.prompt([
+                //~ {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                    //~ 'get_query': function() {
+                        //~ return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                    //~ }
+                //~ },
+                //~ {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1},
+                //~ {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
+                //~ {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0}
+            //~ ],
             frappe.prompt([
-                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                     'get_query': function() {
                         return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
                     }
@@ -679,9 +722,18 @@ function erstelle_spenden_rechnung(frm) {
         callback: function(res)
         {
             var druckvorlagen = res.message;
+            // Default Druckvorlage für den Moment deaktiviert!
+            //~ frappe.prompt([
+                //~ {'fieldname': 'betrag', 'fieldtype': 'Currency', 'label': 'Vorgeschlagener Betrag', 'reqd': 1, 'default': 0.0},
+                //~ {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                    //~ 'get_query': function() {
+                        //~ return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                    //~ }
+                //~ }
+            //~ ],
             frappe.prompt([
                 {'fieldname': 'betrag', 'fieldtype': 'Currency', 'label': 'Vorgeschlagener Betrag', 'reqd': 1, 'default': 0.0},
-                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                     'get_query': function() {
                         return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
                     }
@@ -825,8 +877,16 @@ function erstelle_hv_rechnung(frm) {
         callback: function(res)
         {
             var druckvorlagen = res.message;
+            // Default Druckvorlage für den Moment deaktiviert!
+            //~ frappe.prompt([
+                //~ {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                    //~ 'get_query': function() {
+                        //~ return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                    //~ }
+                //~ }
+            //~ ],
             frappe.prompt([
-                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                     'get_query': function() {
                         return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
                     }
@@ -871,9 +931,18 @@ function erstelle_korrespondenz(frm) {
         callback: function(res)
         {
             var druckvorlagen = res.message;
+            // Default Druckvorlage für den Moment deaktiviert!
+            //~ frappe.prompt([
+                //~ {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1},
+                //~ {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                    //~ 'get_query': function() {
+                        //~ return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                    //~ }
+                //~ }
+            //~ ],
             frappe.prompt([
                 {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1},
-                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage',
                     'get_query': function() {
                         return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
                     }
@@ -921,9 +990,17 @@ function erstelle_begruessungs_korrespondenz(frm) {
         callback: function(res)
         {
             var druckvorlagen = res.message;
+            // Default Druckvorlage für den Moment deaktiviert!
+            //~ frappe.prompt([
+                //~ {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1, 'default': 'Begrüssung mit Ausweis'},
+                //~ {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                    //~ 'get_query': function() {
+                        //~ return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                    //~ }
+                //~ }
             frappe.prompt([
                 {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1, 'default': 'Begrüssung mit Ausweis'},
-                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage',
                     'get_query': function() {
                         return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
                     }
