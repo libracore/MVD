@@ -57,7 +57,7 @@ def lese_camt_file(camt_import, file_path):
     enqueue("mvd.mvd.doctype.camt_import.camt_import.verarbeite_camt_file", queue='long', job_name='Verarbeite CAMT Import {0}'.format(camt_import), timeout=5000, **args)
 
 def verarbeite_camt_file(master_data, camt_file, camt_import):
-    #frappe.publish_realtime('msgprint', 'Verarbeitung CAMT Import {0} gestartet'.format(camt_import))
+    frappe.publish_realtime('msgprint', 'Verarbeitung CAMT Import {0} gestartet'.format(camt_import))
     
     # lese und prüfe camt file
     camt_file = get_camt_file(camt_file)
@@ -90,10 +90,8 @@ def process_camt_file(master_data, camt_file, camt_import):
     company = camt_import.company
     
     transaction_entries = camt_file.find_all('ntry')
-    count = 0
+    
     for entry in transaction_entries:
-        count += 1
-        frappe.publish_progress(count*100/len(transaction_entries), title = _("Importiere Zahlungen..."))
         entry_soup = BeautifulSoup(six.text_type(entry), 'lxml')
         date = entry_soup.bookgdt.dt.get_text()
         transactions = entry_soup.find_all('txdtls')
@@ -325,8 +323,8 @@ def update_camt_import_record(camt_import, master_data, aktualisierung=False):
     camt_import.master_data = str(master_data)
     camt_import.save()
     
-    # ~ if not aktualisierung:
-        # ~ frappe.publish_realtime('msgprint', 'Verarbeitung CAMT Import {0} beendet'.format(camt_import.name))
+    if not aktualisierung:
+        frappe.publish_realtime('msgprint', 'Verarbeitung CAMT Import {0} beendet'.format(camt_import.name))
     return
 
 @frappe.whitelist()
