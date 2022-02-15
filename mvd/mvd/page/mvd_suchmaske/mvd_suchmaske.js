@@ -43,7 +43,10 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields = {};
     
     me.search_fields.sektion_id = frappe.mvd_such_client.create_sektion_id_field(page)
-    me.search_fields.sektion_id.set_value(default_sektion).then(function(){me.search_fields.sektion_id.refresh();});
+    me.search_fields.sektion_id.set_value(frappe.boot.default_sektion);
+    me.search_fields.sektion_id.refresh();
+    //~ me.search_fields.sektion_id = frappe.mvd_such_client.create_sektion_id_field(page)
+    //~ me.search_fields.sektion_id.set_value(default_sektion).then(function(){me.search_fields.sektion_id.refresh();});
     
     me.search_fields.alle_sektionen = frappe.mvd_such_client.create_alle_sektionen_field(page, me.search_fields.sektion_id, default_sektion)
     me.search_fields.alle_sektionen.refresh();
@@ -216,6 +219,7 @@ frappe.mvd_such_client = {
                 options: "Sektion",
                 fieldname: "sektion",
                 placeholder: "Sektion",
+                default: frappe.boot.default_sektion,
                 read_only: 0,
                 change: function(){
                     // check permissions

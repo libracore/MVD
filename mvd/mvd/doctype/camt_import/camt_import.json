@@ -53,7 +53,7 @@
    "label": "CAMT File"
   },
   {
-   "depends_on": "eval:doc.camt_file&&doc.status=='Open'",
+   "depends_on": "eval:doc.camt_file&&doc.status=='Open'&&doc.sektion_id",
    "fieldname": "import",
    "fieldtype": "Button",
    "label": "Verarbeite CAMT File"
@@ -269,7 +269,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-02-14 20:11:03.154203",
+ "modified": "2022-02-15 08:45:56.345414",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",

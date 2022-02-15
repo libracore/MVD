@@ -182,8 +182,9 @@ def create_payment_entry(date, to_account, received_amount, transaction_id, rema
         # create new payment entry
         new_payment_entry = frappe.get_doc({'doctype': 'Payment Entry'})
         new_payment_entry.payment_type = "Receive"
-        new_payment_entry.party_type = "Customer";
+        new_payment_entry.party_type = "Customer"
         new_payment_entry.party = default_customer
+        new_payment_entry.sektion_id = sektion
         new_payment_entry.company = company
         # date is in DD.MM.YYYY
         new_payment_entry.posting_date = date

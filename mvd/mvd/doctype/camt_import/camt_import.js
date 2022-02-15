@@ -139,10 +139,18 @@ function import_payments(frm) {
                 'file_path': cur_frm.doc.camt_file,
                 'camt_import': cur_frm.doc.name
             },
-            freeze: true,
-            freeze_message: 'Importiere Zahlungen...',
             callback: function(r) {
-                cur_frm.reload_doc();
+                frappe.dom.freeze('Bitte warten, die Zahlungen werden importiert...');
+                let import_refresher = setInterval(import_refresh_handler, 3000);
+                function import_refresh_handler() {
+                    if (cur_frm.doc.status == 'In Verarbeitung') {
+                        cur_frm.reload_doc();
+                    } else {
+                        clearInterval(import_refresher);
+                        frappe.dom.unfreeze();
+                    }
+                }
+                
             }
         });
     });
