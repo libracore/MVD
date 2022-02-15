@@ -262,6 +262,18 @@ def get_open_data(sektion=None):
     # massenlauf total
     massenlauf_total = kuendigung_qty + korrespondenz_qty + zuzug_qty + rg_massendruck_qty + begruessung_online_qty + mahnung_qty
     
+    # letzter CAMT Import
+    _last_camt_import = frappe.db.sql("""SELECT
+                                        `creation`
+                                    FROM `tabCAMT Import`
+                                    WHERE `status` != 'Open'
+                                    {sektion_filter}
+                                    ORDER BY `creation` DESC""".format(sektion_filter=sektion_filter), as_dict=True)
+    if len(_last_camt_import) > 0:
+        last_camt_import = getdate(_last_camt_import[0].creation).strftime("%d.%m.%Y")
+    else:
+        last_camt_import = ''
+    
     return {
         'arbeits_backlog': {
             'qty': abl_qty
@@ -272,6 +284,7 @@ def get_open_data(sektion=None):
         },
         'massenlauf_total': massenlauf_total,
         'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
+        'last_camt_import': last_camt_import,
         'validierung': {
             'qty': validierung_total,
             'online_beitritt': {
