@@ -45,8 +45,6 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.sektion_id = frappe.mvd_such_client.create_sektion_id_field(page)
     me.search_fields.sektion_id.set_value(frappe.boot.default_sektion);
     me.search_fields.sektion_id.refresh();
-    //~ me.search_fields.sektion_id = frappe.mvd_such_client.create_sektion_id_field(page)
-    //~ me.search_fields.sektion_id.set_value(default_sektion).then(function(){me.search_fields.sektion_id.refresh();});
     
     me.search_fields.alle_sektionen = frappe.mvd_such_client.create_alle_sektionen_field(page, me.search_fields.sektion_id, default_sektion)
     me.search_fields.alle_sektionen.refresh();
@@ -116,6 +114,12 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     
     me.search_fields.neuanlage = frappe.mvd_such_client.create_neuanlage_btn(page)
     me.search_fields.neuanlage.refresh();
+    
+    // hotfix weil offenbar manchmal die Werte nicht gesetzt werden
+    if (!me.search_fields.sektion_id.get_value()||!me.search_fields.language.get_value()) {
+        me.search_fields.sektion_id.set_value(frappe.boot.default_sektion);
+        me.search_fields.language.set_value('de');
+    }
 }
 
 
@@ -219,7 +223,7 @@ frappe.mvd_such_client = {
                 options: "Sektion",
                 fieldname: "sektion",
                 placeholder: "Sektion",
-                default: frappe.boot.default_sektion,
+                'default': frappe.boot.default_sektion,
                 read_only: 0,
                 change: function(){
                     // check permissions
@@ -273,6 +277,7 @@ frappe.mvd_such_client = {
                 options: "Language",
                 fieldname: "language",
                 placeholder: "Sprache",
+                'default': 'de',
                 read_only: 0
             },
             only_input: true,
