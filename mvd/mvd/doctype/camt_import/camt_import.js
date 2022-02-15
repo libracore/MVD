@@ -44,8 +44,7 @@ frappe.ui.form.on('CAMT Import', {
     },
     show_overpaid: function(frm) {
         frappe.route_options = {
-            "name": ["in", eval(cur_frm.doc.matched_payments)],
-            "unallocated_amount": [">", 0]
+            "name": ["in", eval(cur_frm.doc.overpaid)]
         }
         frappe.set_route("List", "Payment Entry");
     },

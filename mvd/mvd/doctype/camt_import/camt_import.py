@@ -30,6 +30,8 @@ def lese_camt_file(camt_import, file_path):
     unsubmitted_payments = []
     unimported_payments = []
     deleted_payments = []
+    overpaid = []
+    doppelte_mitgliedschaft = []
     master_data = {
         'status': 'Open',
         'errors': errors,
@@ -39,8 +41,21 @@ def lese_camt_file(camt_import, file_path):
         'unassigned_payments': unassigned_payments,
         'submitted_payments': submitted_payments,
         'unsubmitted_payments': unsubmitted_payments,
-        'deleted_payments': deleted_payments
+        'deleted_payments': deleted_payments,
+        'overpaid': overpaid,
+        'doppelte_mitgliedschaft': doppelte_mitgliedschaft
     }
+    '''
+        imported_payments = Alle importierten Zahlungen aus dem CAMT-File
+        unimported_payments = Alle Zahlungen aus dem CAMT-File welche nicht importiert werden konnten, da die entsprechende Transaktions-ID bereits verwendet wurde
+        assigned_payments = Alle Zahlungen die einem effektiven Debitor zugewiesen werden konnten
+        unassigned_payments = Alle Zahlungen zu denen kein Debitor gefunden werden konnten und weiterhin auf den Standard-Debitor zugewiesen sind
+        submitted_payments = Alle verbuchten Zahlungen
+        unsubmitted_payments = importierte, aber nicht verbuchte Zahlungen (zugewiesene wie auch unzugewiesene)
+        deleted_payments = Zahlungen die einst importiert wurden, danach aber entweder gelöscht oder abgebrochen wurden
+        overpaid = Zahlungen die importiert & zugewiesen wurden, aber überbezahlt sind
+        doppelte_mitgliedschaft = Zahlungen die importiert & zugewiesen wurden, sowie der überbezahlte Wert exakt dem zugewiesenen Wert entspricht
+    '''
     
     # lese und prüfe camt file
     camt_file = get_camt_file(file_path, test=True)
@@ -253,7 +268,7 @@ def match(sales_invoice, payment_entry, master_data):
     payment_entry_record.save()
     
     # now, add the reference to the sales invoice
-    submittable = create_reference(payment_entry, sales_invoice)
+    submittable, master_data = create_reference(payment_entry, sales_invoice, master_data)
     
     master_data['assigned_payments'].append(payment_entry_record.name)
     
@@ -266,7 +281,7 @@ def match(sales_invoice, payment_entry, master_data):
         
     return master_data
 
-def create_reference(payment_entry, sales_invoice):
+def create_reference(payment_entry, sales_invoice, master_data):
     # create a new payment entry reference
     reference_entry = frappe.get_doc({"doctype": "Payment Entry Reference"})
     reference_entry.parent = payment_entry
@@ -288,9 +303,53 @@ def create_reference(payment_entry, sales_invoice):
     payment_record.save()
     
     if payment_record.unallocated_amount > 0:
-        return False
+        # exakt um HV Betrag überzahlt
+        if payment_record.unallocated_amount == 12:
+            fr = fr_lookup_based_on_sinv(sales_invoice)
+            if fr:
+                sinv = create_unpaid_sinv(fr, betrag=12)
+                hv_reference_entry = frappe.get_doc({"doctype": "Payment Entry Reference"})
+                hv_reference_entry.parent = payment_entry
+                hv_reference_entry.parentfield = "references"
+                hv_reference_entry.parenttype = "Payment Entry"
+                hv_reference_entry.reference_doctype = "Sales Invoice"
+                hv_reference_entry.reference_name = sinv
+                hv_reference_entry.total_amount = frappe.get_value("Sales Invoice", sinv, "base_grand_total")
+                hv_reference_entry.outstanding_amount = frappe.get_value("Sales Invoice", sinv, "outstanding_amount")
+                paid_amount = frappe.get_value("Payment Entry", payment_entry, "paid_amount")
+                hv_reference_entry.allocated_amount = 12
+                hv_reference_entry.insert();
+                # update unallocated amount
+                payment_record = frappe.get_doc("Payment Entry", payment_entry)
+                payment_record.unallocated_amount -= hv_reference_entry.allocated_amount
+                payment_record.save()
+                
+                return True, master_data
+            else:
+                master_data['overpaid'].append(payment_record.name)
+                return False, master_data
+        # Doppelter Mitgliedschaftsbetrag
+        elif payment_record.unallocated_amount == reference_entry.allocated_amount:
+            master_data['doppelte_mitgliedschaft'].append(payment_record.name)
+            return False, master_data
+        else:
+            master_data['overpaid'].append(payment_record.name)
+            return False, master_data
     else:
-        return True
+        # nicht über rechnungsbetrag, soweit so gut
+        return True, master_data
+
+def fr_lookup_based_on_sinv(sinv):
+    fr = frappe.db.sql("""SELECT `name`
+                            FROM `tabFakultative Rechnung`
+                            WHERE `docstatus` = 1
+                            AND `status` = 'Unpaid'
+                            AND `typ` = 'HV'
+                            AND `sales_invoice` = '{sinv}'""".format(sinv=sinv), as_dict=True)
+    if len(fr) > 0:
+        return fr[0].name
+    else:
+        return False
 
 def get_default_customer(sektion):
     default_customer = frappe.get_doc("Sektion", sektion).default_customer
@@ -314,12 +373,16 @@ def update_camt_import_record(camt_import, master_data, aktualisierung=False):
     camt_import.anz_submitted_payments = len(master_data['submitted_payments'])
     camt_import.anz_unsubmitted_payments = len(master_data['unsubmitted_payments'])
     camt_import.anz_deleted_payments = len(master_data['deleted_payments'])
+    camt_import.anz_overpaid = len(master_data['overpaid'])
+    camt_import.anz_doppelte_mitgliedschaft = len(master_data['doppelte_mitgliedschaft'])
     camt_import.importet_payments = str(master_data['imported_payments'])
     camt_import.matched_payments = str(master_data['assigned_payments'])
     camt_import.unmatched_payments = str(master_data['unassigned_payments'])
     camt_import.submitted_payments = str(master_data['submitted_payments'])
     camt_import.unsubmitted_payments = str(master_data['unsubmitted_payments'])
     camt_import.deleted_payments = str(master_data['deleted_payments'])
+    camt_import.overpaid = str(master_data['overpaid'])
+    camt_import.doppelte_mitgliedschaft = str(master_data['doppelte_mitgliedschaft'])
     camt_import.errors = str(master_data['errors'])
     camt_import.master_data = str(master_data)
     camt_import.save()
@@ -341,7 +404,9 @@ def aktualisiere_camt_uebersicht(camt_import):
         'unassigned_payments': [],
         'submitted_payments': [],
         'unsubmitted_payments': [],
-        'deleted_payments': []
+        'deleted_payments': [],
+        'overpaid': [],
+        'doppelte_mitgliedschaft': []
     }
     default_customer = get_default_customer(camt_import.sektion_id)
     
@@ -362,6 +427,12 @@ def aktualisiere_camt_uebersicht(camt_import):
                     if assigned:
                         master_data['assigned_payments'].append(imported_payment)
                         master_data['unsubmitted_payments'].append(imported_payment)
+                        overpaid, doppelte_mitgliedschaft = check_if_payment_is_overpaid(imported_payment)
+                        if overpaid:
+                            if doppelte_mitgliedschaft:
+                                master_data['doppelte_mitgliedschaft'].append(imported_payment)
+                            else:
+                                master_data['overpaid'].append(imported_payment)
                     else:
                         master_data['unassigned_payments'].append(imported_payment)
                         master_data['unsubmitted_payments'].append(imported_payment)
@@ -388,3 +459,13 @@ def check_if_payment_is_assigned(imported_payment, default_customer):
         return True
     else:
         return False
+
+def check_if_payment_is_overpaid(imported_payment):
+    pe = frappe.get_doc("Payment Entry", imported_payment)
+    if pe.unallocated_amount > 0:
+        if (pe.paid_amount / 2) == pe.unallocated_amount:
+            return True, True
+        else:
+            return True, False
+    else:
+        return False, False
