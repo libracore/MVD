@@ -95,7 +95,8 @@ extend_bootinfo = "mvd.mvd.utils.mvd_bootinfo.boot_session"
 
 doc_events = {
     "Sales Invoice": {
-        "on_update": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.sinv_check_zahlung_mitgliedschaft"
+        "on_update": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.sinv_check_zahlung_mitgliedschaft",
+        "on_update_after_submit": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.sinv_check_zahlung_mitgliedschaft"
     },
     "Payment Entry": {
         "on_submit": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.pe_check_zahlung_mitgliedschaft"

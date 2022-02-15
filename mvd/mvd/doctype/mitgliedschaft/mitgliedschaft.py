@@ -2647,9 +2647,22 @@ def mvm_kuendigung(mitgliedschaft):
 # Hooks functions
 # -----------------------------------------------
 def sinv_check_zahlung_mitgliedschaft(sinv, event):
+    frappe.log_error("Here i am", 'here i am')
+    # mitgliedschaft speichern um SP Update zu triggern und höchste Mahnstufe zu setzen
     if sinv.mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
+        try:
+            sql_query = ("""SELECT MAX(`payment_reminder_level`) AS `max` FROM `tabSales Invoice` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Overdue'""".format(mitgliedschaft=mitgliedschaft.name))
+            max_level = frappe.db.sql(sql_query, as_dict=True)[0]['max']
+            if not max_level:
+                max_level = 0
+        except:
+            max_level = 0
+        if max_level < sinv.payment_reminder_level:
+            max_level = sinv.payment_reminder_level
+        mitgliedschaft.max_reminder_level = max_level
         mitgliedschaft.save(ignore_permissions=True)
+        frappe.log_error("M:\n{0}\nR:\n{1}\nL:\n{2}".format(mitgliedschaft.name, sinv.name, max_level), 'sinv_check_zahlung_mitgliedschaft')
 
 def pe_check_zahlung_mitgliedschaft(pe, event):
     for ref in pe.references:

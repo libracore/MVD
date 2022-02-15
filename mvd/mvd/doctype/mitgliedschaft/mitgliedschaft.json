@@ -48,6 +48,7 @@
   "wegzug_zu",
   "kuendigung",
   "verstorben_am",
+  "max_reminder_level",
   "section_personen_daten",
   "heading_hauptmitglied",
   "kundentyp",
@@ -972,10 +973,17 @@
    "fieldname": "kein_email",
    "fieldtype": "Check",
    "label": "Will trotz Emailadresse Briefpost"
+  },
+  {
+   "default": "0",
+   "fieldname": "max_reminder_level",
+   "fieldtype": "Int",
+   "label": "H\u00f6chste Mahnstufe",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-14 10:47:24.604220",
+ "modified": "2022-02-15 20:17:56.841732",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
