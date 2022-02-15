@@ -205,7 +205,7 @@ class Druckvorlage(Document):
                 self.default = 1
 
 @frappe.whitelist()
-def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp='Regulär', reduzierte_mitgliedschaft=0, language='de', serienbrief=False):
+def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp='Privat', reduzierte_mitgliedschaft=0, language='de', serienbrief=False):
     if not serienbrief:
         _alle_druckvorlagen = frappe.db.sql("""SELECT
                                                 `name`,

@@ -2633,21 +2633,12 @@ def get_sprache(language='de'):
     else:
         return 'Deutsch'
 
-# Sektionswechsel
-def mvm_sektionswechsel(mitgliedschaft):
-    return "Methode in Arbeit"
-
-# Kündigungsmutation
-def mvm_kuendigung(mitgliedschaft):
-    return "Methode in Arbeit"
-
 # /API
 # -----------------------------------------------
 
 # Hooks functions
 # -----------------------------------------------
 def sinv_check_zahlung_mitgliedschaft(sinv, event):
-    frappe.log_error("Here i am", 'here i am')
     # mitgliedschaft speichern um SP Update zu triggern und höchste Mahnstufe zu setzen
     if sinv.mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
@@ -2662,7 +2653,6 @@ def sinv_check_zahlung_mitgliedschaft(sinv, event):
             max_level = sinv.payment_reminder_level
         mitgliedschaft.max_reminder_level = max_level
         mitgliedschaft.save(ignore_permissions=True)
-        frappe.log_error("M:\n{0}\nR:\n{1}\nL:\n{2}".format(mitgliedschaft.name, sinv.name, max_level), 'sinv_check_zahlung_mitgliedschaft')
 
 def pe_check_zahlung_mitgliedschaft(pe, event):
     for ref in pe.references:
@@ -2783,6 +2773,7 @@ def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=F
         _new_korrespondenz.titel = titel
         
         new_korrespondenz = frappe._dict(_new_korrespondenz.as_dict())
+        
         keys_to_remove = [
             'mitgliedtyp_c',
             'validierungsstring',
@@ -2796,10 +2787,15 @@ def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=F
             'seite_2_qrr',
             'seite_2_qrr_spende_hv',
             'seite_3_qrr',
-            'seite_3_qrr_spende_hv'
+            'seite_3_qrr_spende_hv',
+            'blatt_2_info_mahnung',
+            'tipps_mahnung'
         ]
         for key in keys_to_remove:
-            new_korrespondenz.pop(key)
+            try:
+                new_korrespondenz.pop(key)
+            except:
+                pass
         
         new_korrespondenz['mv_mitgliedschaft'] = mitgliedschaft.name
         new_korrespondenz['massenlauf'] = 1 if massenlauf else 0

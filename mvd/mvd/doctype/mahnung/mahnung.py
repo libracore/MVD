@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from datetime import datetime
 import json
+from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
 
 class Mahnung(Document):
     # this will apply all payment reminder levels in the sales invoices
@@ -95,6 +96,7 @@ def create_payment_reminders(sektion_id):
                 reminder_charge = 0
                 if charge_matches:
                     reminder_charge = charge_matches[0]['reminder_charge']
+                druckvorlage = get_default_druckvorlage(sektion_id, frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['mv_mitgliedschaft'], "language"))
                 new_reminder = frappe.get_doc({
                     "doctype": "Mahnung",
                     "sektion_id": sektion_id,
@@ -111,7 +113,8 @@ def create_payment_reminders(sektion_id):
                     'reminder_charge': reminder_charge,
                     'total_with_charge': (total_before_charges + reminder_charge),
                     'company': company,
-                    'currency': currency
+                    'currency': currency,
+                    'druckvorlage': druckvorlage
                 })
                 reminder_record = new_reminder.insert(ignore_permissions=True)
                 # ~ if int(auto_submit) == 1:
@@ -131,3 +134,8 @@ def bulk_submit(names):
         payment_reminder.update_reminder_levels()
         payment_reminder.submit()
     return
+
+def get_default_druckvorlage(sektion, language):
+    druckvorlage = get_druckvorlagen(sektion, dokument='Mahnung', language=language, serienbrief=False)
+    frappe.log_error("{0}".format(druckvorlage), 'xxx')
+    return druckvorlage['default_druckvorlage']
