@@ -55,9 +55,6 @@ frappe.ui.form.on('CAMT Import', {
         }
         frappe.set_route("List", "Payment Entry");
     },
-    show_manual_match: function(frm) {
-        frappe.set_route("match_payments");
-    },
     close_camt_import: function(frm) {
         frappe.confirm(
             'Es wurden nicht alle Zahlungen zugewiesen/verbucht, möchten Sie den CAMT Import trotzdem schliessen?',

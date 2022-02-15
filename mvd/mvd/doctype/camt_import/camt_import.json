@@ -17,8 +17,6 @@
   "close_camt_import",
   "aktualisiere_camt_uebersicht",
   "generate_report",
-  "cb_2",
-  "show_manual_match",
   "overview",
   "anz_importet_payments",
   "show_imported_payments",
@@ -28,7 +26,7 @@
   "show_submitted_payments",
   "anz_overpaid",
   "show_overpaid",
-  "cb_3",
+  "cb_2",
   "anz_deleted_payments",
   "show_canceled_payments",
   "anz_unmatched_payments",
@@ -140,12 +138,6 @@
    "fieldname": "close_camt_import",
    "fieldtype": "Button",
    "label": "Schliese CAMT Import"
-  },
-  {
-   "depends_on": "eval:doc.anz_unsubmitted_payments>0",
-   "fieldname": "show_manual_match",
-   "fieldtype": "Button",
-   "label": "\u00d6ffne manuelle Verbuchung"
   },
   {
    "depends_on": "eval:doc.status=='Closed'",
@@ -264,10 +256,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "cb_3",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "overpaid",
    "fieldtype": "Code",
    "label": "\u00dcberbezahlte",
@@ -297,7 +285,7 @@
    "label": "Zeige Doppelte Mitgliedschaft"
   }
  ],
- "modified": "2022-02-15 16:15:50.536620",
+ "modified": "2022-02-15 16:57:52.759711",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",
