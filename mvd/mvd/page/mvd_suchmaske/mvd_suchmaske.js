@@ -180,8 +180,6 @@ frappe.mvd_such_client = {
                     }
                 } else {
                     cur_page.page.search_fields.suchresultate.set_value("<center><p>Keine Suchresultate vorhanden.</p></center>");
-                    cur_page.page.search_fields.status_c.set_value('Anmeldung');
-                    cur_page.page.search_fields.status_c.refresh();
                     cur_page.page.search_fields.neuanlage.df.hidden = 0;
                     cur_page.page.search_fields.neuanlage.refresh();
                     frappe.show_alert({message:"Keine Suchresultate vorhanden.", indicator:'orange'}, 5);
@@ -573,7 +571,7 @@ frappe.mvd_such_client = {
                 click: function(){
                     frappe.prompt([
                         {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent*in\nRegulär\nAnmeldung',
-                            'default': cur_page.page.search_fields.status_c.get_value() == 'Interessent*in' ? 'Interessent*in':cur_page.page.search_fields.status_c.get_value() == 'Anmeldung' ? 'Anmeldung':'Regulär',
+                            'default': cur_page.page.search_fields.status_c.get_value() == 'Interessent*in' ? 'Interessent*in':'Anmeldung',
                             'change': function() {
                                 if (cur_dialog.fields_dict.status.get_value() == 'Regulär') {
                                     // auto rg
@@ -621,8 +619,7 @@ frappe.mvd_such_client = {
                         },
                         {'fieldname': 'language', 'fieldtype': 'Link', 'label': 'Sprache', 'reqd': 1, 'hidden': 0, 'options': 'Language', 'default': cur_page.page.search_fields.language.get_value()||'de'},
                         {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'hidden': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value()},
-                        {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': cur_page.page.search_fields.status_c.get_value() == 'Interessent*in' ? 0:cur_page.page.search_fields.status_c.get_value() == 'Anmeldung' ? 0:1,
-                            'read_only': !['Interessent*in', 'Anmeldung'].includes(cur_page.page.search_fields.status_c.get_value()) ? 1:0,
+                        {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 0, 'read_only': 0,
                             'change': function() {
                                 if (cur_dialog.fields_dict.autom_rechnung.get_value() == 1) {
                                     cur_dialog.fields_dict.bar_bezahlt.set_value(0);
@@ -638,9 +635,9 @@ frappe.mvd_such_client = {
                             }
                         },
                         {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0,
-                            'default': ['Interessent*in', 'Anmeldung'].includes(cur_page.page.search_fields.status_c.get_value()) ? 0:1,
-                            'hidden': 0,
-                            'read_only': ['Interessent*in', 'Anmeldung'].includes(cur_page.page.search_fields.status_c.get_value()) ? 0:1,
+                            'default': 0,
+                            'hidden': 1,
+                            'read_only': 0,
                             'change': function() {
                                 if (cur_dialog.fields_dict.bar_bezahlt.get_value() == 1) {
                                     cur_dialog.fields_dict.status.set_value('Regulär');
@@ -649,7 +646,7 @@ frappe.mvd_such_client = {
                             }
                         },
                         {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0,
-                            'hidden': ['Interessent*in', 'Anmeldung'].includes(cur_page.page.search_fields.status_c.get_value()) ? 1:0,
+                            'hidden': 1,
                             'change': function() {
                                 if (cur_dialog.fields_dict.hv_bar_bezahlt.get_value() == 1) {
                                     if (cur_dialog.fields_dict.status.get_value() != 'Regulär') {
@@ -704,7 +701,6 @@ frappe.mvd_such_client = {
                         {'fieldname': 'ort', 'fieldtype': 'Data', 'label': 'Ort', 'reqd': 1, 'default': cur_page.page.search_fields.ort.get_value()},
                     ],
                     function(values){
-                        //~ console.log(values);
                         if (values.status == 'Regulär'||values.autom_rechnung) {
                             if (values.status == 'Regulär') {
                                 var dokument = 'Begrüssung mit Ausweis';
