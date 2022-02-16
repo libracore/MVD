@@ -111,6 +111,9 @@ scheduler_events = {
     "daily": [
         "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.set_inaktiv",
         "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.entferne_alte_reduzierungen"
+    ],
+    "all": [
+        "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue"
     ]
 }
 # scheduler_events = {

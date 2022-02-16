@@ -2455,10 +2455,25 @@ def mvm_neue_mitglieder_nummer(mitgliedschaft):
 
 def send_mvm_to_sp(mitgliedschaft, update):
     if str(get_sektion_code(mitgliedschaft.sektion_id)) != 'ZH':
-        from mvd.mvd.service_plattform.api import update_mvm
-        prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
-        update_status = update_mvm(prepared_mvm, update)
-        return update_status
+        if not int(frappe.db.get_single_value('Service Plattform API', 'queue')) == 1:
+            from mvd.mvd.service_plattform.api import update_mvm
+            prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
+            update_status = update_mvm(prepared_mvm, update)
+            return update_status
+        else:
+            create_sp_queue(mitgliedschaft, update)
+
+def create_sp_queue(mitgliedschaft, update):
+    queue = frappe.get_doc({
+        "doctype": "Service Platform Queue",
+        "status": "Open",
+        "mv_mitgliedschaft": mitgliedschaft.mitglied_id
+    })
+    queue.insert(ignore_permissions=True)
+    if update:
+        queue.update = 1
+        queue.save(ignore_permissions=True)
+    return
 
 def send_mvm_sektionswechsel(mitgliedschaft):
     from mvd.mvd.service_plattform.api import sektionswechsel
