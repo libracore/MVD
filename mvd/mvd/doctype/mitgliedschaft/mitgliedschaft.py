@@ -2649,8 +2649,9 @@ def sinv_check_zahlung_mitgliedschaft(sinv, event):
                 max_level = 0
         except:
             max_level = 0
-        if max_level < sinv.payment_reminder_level:
-            max_level = sinv.payment_reminder_level
+        sinv_max_level = int(sinv.payment_reminder_level or 0)
+        if max_level < sinv_max_level:
+            max_level = sinv_max_level
         mitgliedschaft.max_reminder_level = max_level
         mitgliedschaft.save(ignore_permissions=True)
 
