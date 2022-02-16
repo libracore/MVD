@@ -180,6 +180,8 @@ frappe.mvd_such_client = {
                     }
                 } else {
                     cur_page.page.search_fields.suchresultate.set_value("<center><p>Keine Suchresultate vorhanden.</p></center>");
+                    cur_page.page.search_fields.status_c.set_value('Anmeldung');
+                    cur_page.page.search_fields.status_c.refresh();
                     cur_page.page.search_fields.neuanlage.df.hidden = 0;
                     cur_page.page.search_fields.neuanlage.refresh();
                     frappe.show_alert({message:"Keine Suchresultate vorhanden.", indicator:'orange'}, 5);
