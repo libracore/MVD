@@ -60,7 +60,6 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.status_c.refresh();
     
     me.search_fields.language = frappe.mvd_such_client.create_language_field(page)
-    me.search_fields.language.set_value('de');
     me.search_fields.language.refresh();
     
     me.search_fields.mitgliedtyp_c = frappe.mvd_such_client.create_mitgliedtyp_c_field(page)
@@ -116,9 +115,8 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.neuanlage.refresh();
     
     // hotfix weil offenbar manchmal die Werte nicht gesetzt werden
-    if (!me.search_fields.sektion_id.get_value()||!me.search_fields.language.get_value()) {
+    if (!me.search_fields.sektion_id.get_value()) {
         me.search_fields.sektion_id.set_value(frappe.boot.default_sektion);
-        me.search_fields.language.set_value('de');
     }
 }
 
@@ -277,7 +275,6 @@ frappe.mvd_such_client = {
                 options: "Language",
                 fieldname: "language",
                 placeholder: "Sprache",
-                'default': 'de',
                 read_only: 0
             },
             only_input: true,
