@@ -78,7 +78,9 @@ def create_payment_reminders(sektion_id):
                         'outstanding_amount': invoice.outstanding_amount,
                         'posting_date': invoice.posting_date,
                         'due_date': invoice.due_date,
-                        'reminder_level': level
+                        'reminder_level': level,
+                        'ist_mitgliedschaftsrechnung': invoice.ist_mitgliedschaftsrechnung,
+                        'mitgliedschafts_jahr': invoice.mitgliedschafts_jahr
                     }
                     if level > highest_level:
                         highest_level = level

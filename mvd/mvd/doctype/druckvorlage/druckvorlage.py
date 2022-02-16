@@ -245,7 +245,7 @@ def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp='Privat', r
         
         return alle_druckvorlagen
 
-def replace_mv_keywords(txt, mitgliedschaft, mahnung=False):
+def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False):
     key_words = [
         {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede},
         {'key_word': '%%MIETGLIEDERNUMMER%%', 'value': mitgliedschaft.mitglied_nr}
@@ -256,9 +256,24 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False):
         key_words.append({
             'key_word': '%%Gesamtbetrag_gemahnte_Rechnungen%%', 'value': "{:,.2f}".format(mahnung.total_with_charge).replace(",", "'")
         })
-        key_words.append({
-            'key_word': '%%Jahresrechnung_Jahr%%', 'value': str(frappe.get_value("Sales Invoice", mahnung.sales_invoices[0].sales_invoice, "mitgliedschafts_jahr"))
-        })
+        if mahnung.sales_invoices[idx].ist_mitgliedschaftsrechnung:
+            if mahnung.sales_invoices[idx].amount == mahnung.sales_invoices[idx].outstanding_amount:
+                key_words.append({
+                    'key_word': '%%Jahresrechnung_Jahr%%', 'value': 'Jahresrechnung ' + str(mahnung.sales_invoices[idx].mitgliedschafts_jahr)
+                })
+            else:
+                key_words.append({
+                    'key_word': '%%Jahresrechnung_Jahr%%', 'value': 'Jahresrechnung ' + str(mahnung.sales_invoices[idx].mitgliedschafts_jahr) + ' (Restbetrag)'
+                })
+        else:
+            if mahnung.sales_invoices[idx].amount == mahnung.sales_invoices[idx].outstanding_amount:
+                key_words.append({
+                    'key_word': '%%Jahresrechnung_Jahr%%', 'value': 'Rechnung vom ' + frappe.utils.get_datetime(mahnung.sales_invoices[idx].posting_date).strftime('%d.%m.%Y')
+                })
+            else:
+                key_words.append({
+                    'key_word': '%%Jahresrechnung_Jahr%%', 'value': 'Rechnung vom ' + frappe.utils.get_datetime(mahnung.sales_invoices[idx].posting_date).strftime('%d.%m.%Y') + ' (Restbetrag)'
+                })
     for key_word in key_words:
         txt = txt.replace(key_word['key_word'], key_word['value'])
     

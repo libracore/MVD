@@ -1,0 +1,99 @@
+{
+ "creation": "2022-02-16 17:43:23.365076",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sales_invoice",
+  "posting_date",
+  "due_date",
+  "ist_mitgliedschaftsrechnung",
+  "column_main",
+  "currency",
+  "amount",
+  "outstanding_amount",
+  "reminder_level",
+  "mitgliedschafts_jahr"
+ ],
+ "fields": [
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "sales_invoice.posting_date",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fetch_from": "sales_invoice.due_date",
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Due Date"
+  },
+  {
+   "default": "0",
+   "fetch_from": "sales_invoice.ist_mitgliedschaftsrechnung",
+   "fieldname": "ist_mitgliedschaftsrechnung",
+   "fieldtype": "Check",
+   "label": "Mitgliedschaftsrechnung"
+  },
+  {
+   "fieldname": "column_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "sales_invoice.currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fetch_from": "sales_invoice.grand_total",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "currency"
+  },
+  {
+   "fetch_from": "sales_invoice.outstanding_amount",
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "options": "currency"
+  },
+  {
+   "fieldname": "reminder_level",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Level"
+  },
+  {
+   "default": "0",
+   "fetch_from": "sales_invoice.mitgliedschafts_jahr",
+   "fieldname": "mitgliedschafts_jahr",
+   "fieldtype": "Int",
+   "label": "Mitgliedschafts-Jahr"
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-02-16 17:43:23.365076",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Mahnung Invoices",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -110,7 +110,7 @@
    "fieldname": "sales_invoices",
    "fieldtype": "Table",
    "label": "Sales Invoices",
-   "options": "Payment Reminder Invoice"
+   "options": "Mahnung Invoices"
   },
   {
    "fieldname": "section_values",
@@ -185,7 +185,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-02-15 21:14:20.982470",
+ "modified": "2022-02-16 17:43:43.314129",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnung",
