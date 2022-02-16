@@ -21,6 +21,8 @@ def suche(suchparameter, goto_list=False):
     # allgemein
     if suchparameter["sektion_id"]:
         filters_list.append("""`sektion_id` = '{sektion_id}'""".format(sektion_id=suchparameter["sektion_id"]))
+    if suchparameter["language"]:
+        filters_list.append("""`language` = '{language}'""".format(language=suchparameter["language"]))
     if suchparameter["mitglied_nr"]:
         mitglied_nr_bereinigt = suchparameter["mitglied_nr"]
         if 'MV' not in suchparameter["mitglied_nr"]:
