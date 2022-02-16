@@ -245,12 +245,20 @@ def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp='Privat', r
         
         return alle_druckvorlagen
 
-def replace_mv_keywords(txt, mitgliedschaft):
+def replace_mv_keywords(txt, mitgliedschaft, mahnung=False):
     key_words = [
         {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede},
         {'key_word': '%%MIETGLIEDERNUMMER%%', 'value': mitgliedschaft.mitglied_nr}
     ]
     
+    if mahnung:
+        mahnung = frappe.get_doc("Mahnung", mahnung)
+        key_words.append({
+            'key_word': '%%Gesamtbetrag_gemahnte_Rechnungen%%', 'value': "{:,.2f}".format(mahnung.total_with_charge).replace(",", "'")
+        })
+        key_words.append({
+            'key_word': '%%Jahresrechnung_Jahr%%', 'value': str(frappe.get_value("Sales Invoice", mahnung.sales_invoices[0].sales_invoice, "mitgliedschafts_jahr"))
+        })
     for key_word in key_words:
         txt = txt.replace(key_word['key_word'], key_word['value'])
     

@@ -137,5 +137,118 @@ def bulk_submit(names):
 
 def get_default_druckvorlage(sektion, language):
     druckvorlage = get_druckvorlagen(sektion, dokument='Mahnung', language=language, serienbrief=False)
-    frappe.log_error("{0}".format(druckvorlage), 'xxx')
     return druckvorlage['default_druckvorlage']
+
+def get_mahnungs_qrrs(mahnung):
+    mahnung = frappe.get_doc("Mahnung", mahnung)
+    sektion = frappe.get_doc("Sektion", mahnung.sektion_id)
+    bankkonto = frappe.get_doc("Account", sektion.account)
+    qrrs = []
+    for _sinv in mahnung.sales_invoices:
+        sinv = frappe.get_doc("Sales Invoice", _sinv.sales_invoice)
+        
+        # receiver
+        if sinv.company_address:
+            cmp_addr = frappe.get_doc("Address", sinv.company_address)
+            if cmp_addr:
+                address_array = cmp_addr.address_line1.split(" ")
+                address_line_item_count = len(address_array)
+                cmp_country = frappe.get_doc("Country", cmp_addr.country)
+                cmp_country_code = str(cmp_country.code).upper()
+                cmp_address_line_detail = {'name': sinv.company, 'street': '', 'number': '', 'plz': cmp_addr.plz, 'city': cmp_addr.city, 'country': cmp_country_code }
+                for i in range(0, (address_line_item_count - 1)):
+                    cmp_address_line_detail['street'] = cmp_address_line_detail['street'] + " " + address_array[i]
+                
+                cmp_address_line_detail['number'] = address_array[address_line_item_count - 1]
+                
+                receiver_name = cmp_address_line_detail['name']
+                receiver_street = cmp_address_line_detail['street']
+                receiver_number = cmp_address_line_detail['number']
+                receiver_pincode = cmp_address_line_detail['plz']
+                receiver_town = cmp_address_line_detail['city']
+                receiver_country = cmp_address_line_detail['country']
+                
+                if cmp_addr.postfach:
+                    if cmp_addr.postfach_nummer:
+                        receiver_street = 'Postfach'
+                        receiver_number = cmp_addr['postfach_nummer']
+                    else:
+                        receiver_street = 'Postfach'
+                        receiver_number = ' '
+        else:
+            receiver_name = False
+            receiver_street = False
+            receiver_number = False
+            receiver_pincode = False
+            receiver_town = False
+            receiver_country = False
+        
+        # payer
+        if sinv.customer_address:
+            pay_addr = frappe.get_doc("Address", sinv.customer_address)
+            if pay_addr:
+                if pay_addr.postfach:
+                    pay_country = frappe.get_doc("Country", pay_addr.country)
+                    pay_country_code = str(pay_country.code).upper()
+                    if pay_addr.postfach_nummer:
+                        postfach_nummer = pay_addr.postfach_nummer
+                    else:
+                        postfach_nummer = ' '
+                    
+                    pay_address_line_detail = {'name': sinv.customer, 'street': 'Postfach', 'number': postfach_nummer, 'pin': pay_addr.pincode, 'city': pay_addr.city, 'country': pay_country_code }
+                else:
+                    pay_address_trimed = str(pay_addr.address_line1).strip()
+                    pay_address_array = pay_address_trimed.split(" ")
+                    pay_address_line_item_count = len(pay_address_array)
+                    pay_country = frappe.get_doc("Country", pay_addr.country)
+                    pay_country_code = str(pay_country.code).upper()
+                    pay_address_line_detail = {'name': sinv.customer, 'street': '', 'number': '', 'pin': pay_addr.pincode, 'city': pay_addr.city, 'country': pay_country_code }
+                    for i in range(0, (pay_address_line_item_count - 1)):
+                        pay_address_line_detail['street'] = pay_address_line_detail['street'] + " " + pay_address_array[i]
+                    
+                    pay_address_line_detail['number'] = pay_address_array[pay_address_line_item_count - 1]
+                
+                payer_name = sinv.customer_name
+                payer_street = pay_address_line_detail['street']
+                payer_number = pay_address_line_detail['number']
+                payer_pincode = pay_address_line_detail['pin']
+                payer_town = pay_address_line_detail['city']
+                payer_country = pay_address_line_detail['country']
+                
+                
+                if not payer_street:
+                    if payer_number:
+                        payer_street = payer_number
+                        payer_number = ' '
+        else:
+            payer_name = False
+            payer_street = False
+            payer_number = False
+            payer_pincode = False
+            payer_town = False
+            payer_country = False
+        
+        qrr_dict = {
+            'top_position': '191mm',
+            'iban': bankkonto.iban or '',
+            'reference': sinv.esr_reference,
+            'reference_type': 'QRR',
+            'currency': sinv.currency,
+            'amount': "{:,.2f}".format(sinv.outstanding_amount).replace(",", "'"),
+            'message': sinv.name,
+            'additional_information': ' ',
+            'receiver_name': receiver_name,
+            'receiver_street': receiver_street,
+            'receiver_number': receiver_number,
+            'receiver_country': receiver_country,
+            'receiver_pincode': receiver_pincode,
+            'receiver_town': receiver_town,
+            'payer_name': payer_name,
+            'payer_street': payer_street,
+            'payer_number': payer_number,
+            'payer_country': payer_country,
+            'payer_pincode': payer_pincode,
+            'payer_town': payer_town
+        }
+        qrrs.append(qrr_dict)
+    return qrrs

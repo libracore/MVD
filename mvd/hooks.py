@@ -40,7 +40,8 @@ doctype_list_js = {"Error Log" : "public/js/custom_scripts/error_log_list.js"}
 jenv = {
     "methods": [
         "get_anredekonvention:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_anredekonvention",
-        "replace_mv_keywords:mvd.mvd.doctype.druckvorlage.druckvorlage.replace_mv_keywords"
+        "replace_mv_keywords:mvd.mvd.doctype.druckvorlage.druckvorlage.replace_mv_keywords",
+        "get_mahnungs_qrrs:mvd.mvd.doctype.mahnung.mahnung.get_mahnungs_qrrs"
     ]
 }
 # Home Pages
