@@ -244,3 +244,14 @@ def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp='Privat', r
             alle_druckvorlagen.append(druckvorlage.name)
         
         return alle_druckvorlagen
+
+def replace_mv_keywords(txt, mitgliedschaft):
+    key_words = [
+        {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede},
+        {'key_word': '%%MIETGLIEDERNUMMER%%', 'value': mitgliedschaft.mitglied_nr}
+    ]
+    
+    for key_word in key_words:
+        txt = txt.replace(key_word['key_word'], key_word['value'])
+    
+    return txt
