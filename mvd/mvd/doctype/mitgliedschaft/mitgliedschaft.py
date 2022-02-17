@@ -1983,8 +1983,16 @@ def mvm_update(mitgliedschaft, kwargs):
             else:
                 m_und_w_pdf = 0
             
+            region = ''
+            if kwargs['regionCode']:
+                regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
+                if len(regionen) > 0:
+                    region = regionen[0].name
+            
             mitgliedschaft.mitglied_nr = kwargs['mitgliedNummer']
             mitgliedschaft.sektion_id = sektion_id
+            mitgliedschaft.region = region
+            mitgliedschaft.region_manuell = 1 if kwargs['regionManuell'] else '0'
             mitgliedschaft.status_c = status_c
             mitgliedschaft.mitglied_id = kwargs['mitgliedId']
             mitgliedschaft.mitgliedtyp_c = mitgliedtyp_c
@@ -2104,10 +2112,18 @@ def mvm_neuanlage(kwargs):
             else:
                 m_und_w_pdf = 0
             
+            region = ''
+            if kwargs['regionCode']:
+                regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
+                if len(regionen) > 0:
+                    region = regionen[0].name
+            
             new_mitgliedschaft = frappe.get_doc({
                 'doctype': 'Mitgliedschaft',
                 'mitglied_nr': str(kwargs['mitgliedNummer']),
                 'sektion_id': sektion_id,
+                'region': region,
+                'region_manuell': 1 if kwargs['regionManuell'] else '0',
                 'status_c': status_c,
                 'mitglied_id': str(kwargs['mitgliedId']),
                 'mitgliedtyp_c': mitgliedtyp_c,
@@ -2508,6 +2524,8 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "mitgliedNummer": str(mitgliedschaft.mitglied_nr),
         "mitgliedId": int(mitgliedschaft.mitglied_id),
         "sektionCode": str(get_sektion_code(mitgliedschaft.sektion_id)),
+        "regionCode": frappe.get_value("Region", mitgliedschaft.region, "region_c") if mitgliedschaft.region else None,
+        "regionManuell": True if mitgliedschaft.region_manuell else False,
         "typ": str(typ_mapper[mitgliedschaft.mitgliedtyp_c]),
         "status": str(status_mapper[mitgliedschaft.status_c]),
         "sprache": get_sprache(language=mitgliedschaft.language) if mitgliedschaft.language else 'Deutsch',

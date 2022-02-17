@@ -13,6 +13,8 @@
   "section_allgemein",
   "mitglied_nr",
   "sektion_id",
+  "region",
+  "region_manuell",
   "m_und_w",
   "briefanrede",
   "adressblock",
@@ -980,10 +982,22 @@
    "fieldtype": "Int",
    "label": "H\u00f6chste Mahnstufe",
    "read_only": 1
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Link",
+   "label": "Region",
+   "options": "Region"
+  },
+  {
+   "default": "0",
+   "fieldname": "region_manuell",
+   "fieldtype": "Check",
+   "label": "Region manuell festgelegt"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-15 20:17:56.841732",
+ "modified": "2022-02-17 20:25:08.118723",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
