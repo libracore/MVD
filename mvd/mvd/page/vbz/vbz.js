@@ -71,6 +71,7 @@ frappe.vbz = {
         $("#mahnungen_qty").off("click");
         $("#mahnungen_print").off("click");
         $("#termin").off("click");
+        $("#mahnung").off("click");
     },
     add_click_handlers: function(open_datas) {
         frappe.vbz.remove_click_handlers();
@@ -82,6 +83,9 @@ frappe.vbz = {
                 frappe.route_options = {};
             }
             frappe.set_route("List", "CAMT Import", "List");
+        });
+        $("#mahnung").click(function(){
+            frappe.set_route("List", "Mahnung", "List");
         });
         $("#goto_klassisch").click(function(){
             frappe.set_route("modules/MVD");
