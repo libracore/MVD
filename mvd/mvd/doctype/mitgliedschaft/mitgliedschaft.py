@@ -2833,3 +2833,17 @@ def create_korrespondenz_massenlauf(mitgliedschaften, druckvorlage, titel):
     for mitgliedschaft in mitgliedschaften:
         create_korrespondenz(mitgliedschaft["name"], titel, druckvorlage, massenlauf=True)
     return
+
+@frappe.whitelist()
+def erstelle_todo(owner, mitglied, description, datum):
+    todo = frappe.get_doc({
+        "doctype":"ToDo",
+        "owner": owner,
+        "reference_type": "Mitgliedschaft",
+        "reference_name": mitglied,
+        "description": description,
+        "priority": "Medium",
+        "status": "Open",
+        "date": datum,
+        "assigned_by": frappe.session.user
+    }).insert(ignore_permissions=True)
