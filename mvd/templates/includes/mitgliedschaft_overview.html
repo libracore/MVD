@@ -25,22 +25,26 @@
                 <p>
                     <b>Status:</b> {{ allgemein.status }}<br>
                     <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
-                    <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
-                    {% if allgemein.kuendigung %}
-                        <b>Kündigung:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}<br>
-                    {% endif %}
-                    {% if allgemein.austritt %}
-                        <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
-                    {% endif %}
-                    {% if allgemein.zuzug %}
-                        <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}{% if allgemein.zuzug_von %} (von {{ allgemein.zuzug_von }}){% endif %}<br>
-                    {% endif %}
-                    {% if allgemein.wegzug %}
-                        <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
-                    {% endif %}
-                    <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
-                    {% if allgemein.hv_status %}
-                        <br>{{ allgemein.hv_status }}
+                    {% if allgemein.status not in ['Anmeldung', 'Online-Anmeldung'] %}
+                        <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
+                        {% if allgemein.kuendigung %}
+                            <b>Kündigung:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}<br>
+                        {% endif %}
+                        {% if allgemein.austritt %}
+                            <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
+                        {% endif %}
+                        {% if allgemein.zuzug %}
+                            <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}{% if allgemein.zuzug_von %} (von {{ allgemein.zuzug_von }}){% endif %}<br>
+                        {% endif %}
+                        {% if allgemein.wegzug %}
+                            <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
+                        {% endif %}
+                        <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
+                        {% if allgemein.hv_status %}
+                            <br>{{ allgemein.hv_status }}
+                        {% endif %}
+                    {% else %}
+                        <b>Erfassung:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
                     {% endif %}
                 </p>
                 <p>
@@ -71,22 +75,26 @@
                 <p>
                     <b>Status:</b> {{ allgemein.status }}<br>
                     <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
-                    <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
-                    {% if allgemein.kuendigung %}
-                        <b>Kündigung:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}<br>
-                    {% endif %}
-                    {% if allgemein.austritt %}
-                        <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
-                    {% endif %}
-                    {% if allgemein.zuzug %}
-                        <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}{% if allgemein.zuzug_von %} (von {{ allgemein.zuzug_von }}){% endif %}<br>
-                    {% endif %}
-                    {% if allgemein.wegzug %}
-                        <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
-                    {% endif %}
-                    <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
-                    {% if allgemein.hv_status %}
-                        <br>{{ allgemein.hv_status }}
+                    {% if allgemein.status not in ['Anmeldung', 'Online-Anmeldung'] %}
+                        <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
+                        {% if allgemein.kuendigung %}
+                            <b>Kündigung:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}<br>
+                        {% endif %}
+                        {% if allgemein.austritt %}
+                            <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
+                        {% endif %}
+                        {% if allgemein.zuzug %}
+                            <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}{% if allgemein.zuzug_von %} (von {{ allgemein.zuzug_von }}){% endif %}<br>
+                        {% endif %}
+                        {% if allgemein.wegzug %}
+                            <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
+                        {% endif %}
+                        <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
+                        {% if allgemein.hv_status %}
+                            <br>{{ allgemein.hv_status }}
+                        {% endif %}
+                    {% else %}
+                        <b>Erfassung:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
                     {% endif %}
                 </p>
                 <p>
