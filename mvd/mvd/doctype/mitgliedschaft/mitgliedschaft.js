@@ -1055,47 +1055,61 @@ function erstelle_begruessungs_korrespondenz(frm) {
 }
 
 function erstelle_todo(frm) {
-    //~ frappe.call({
-        //~ 'method': "frappe.client.get",
-        //~ 'args': {
-            //~ 'doctype': "Sektion",
-            //~ 'name': frm.doc.sektion_id
-        //~ },
-        //~ 'callback': function(response) {
-            //~ var sektion = response.message;
-            //~ if (!sektion.virtueller_user) {
-                //~ frappe.throw("Es muss zuerst ein virtueller Sektions-User in den Sektionseinstellungen hinterlegt werden!");
-            //~ }
-            //~ frappe.prompt([
-                //~ {'fieldname': 'owner', 'fieldtype': 'Link', 'label': 'Benutzer', 'reqd': 0, 'options': 'User', 'depends_on': 'eval:!doc.virtueller_user&&!doc.me'},
-                //~ {'fieldname': 'me', 'fieldtype': 'Check', 'label': 'An mich zuweisen', 'default': 0, 'depends_on': 'eval:!doc.owner&&!doc.virtueller_user'},
-                //~ {'fieldname': 'virtueller_user', 'fieldtype': 'Check', 'label': 'An virtueller Sektions-User zuweisen', 'default': 0, 'depends_on': 'eval:!doc.owner&&!doc.me'},
-                //~ {'fieldname': 'description', 'fieldtype': 'Text', 'label': 'Beschreibung', 'reqd': 0},
-                //~ {'fieldname': 'date', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0},
-                //~ {'fieldname': 'notify', 'fieldtype': 'Check', 'label': 'Per E-Mail benachrichtigen', 'default': 0}
-            //~ ],
-            //~ function(values){
-                //~ frappe.call({
-                    //~ "method": "frappe.desk.form.assign_to.add",
-                    //~ "args": {
-                        //~ "assign_to": sektion.virtueller_user,
-                        //~ "doctype": "Mitgliedschaft",
-                        //~ "name": frm.doc.name,
-                        //~ "description": values.description,
-                        //~ "date": values.date,
-                        //~ "notify": values.notify
-                    //~ },
-                    //~ "callback": function(response) {
-                        //~ cur_frm.reload_doc();
-                        //~ frappe.msgprint( "Die Sektions-Zuweisung wurde erstellt." );
-                    //~ }
-                //~ });
-            //~ },
-            //~ 'ToDo erstellen',
-            //~ 'Erstellen'
-            //~ )
-        //~ }
-    //~ });
-    frappe.msgprint( "tbd" );
+    frappe.call({
+        'method': "frappe.client.get",
+        'args': {
+            'doctype': "Sektion",
+            'name': frm.doc.sektion_id
+        },
+        'callback': function(response) {
+            var sektion = response.message;
+            if (!sektion.virtueller_user) {
+                frappe.throw("Es muss zuerst ein virtueller Sektions-User in den Sektionseinstellungen hinterlegt werden!");
+            }
+            frappe.prompt([
+                {'fieldname': 'owner', 'fieldtype': 'Link', 'label': 'Benutzer', 'reqd': 0, 'options': 'User', 'depends_on': 'eval:!doc.virtueller_user&&!doc.me', 'filters': { 'user_type': 'System User', 'name': ['!=', frappe.session.user] }},
+                {'fieldname': 'me', 'fieldtype': 'Check', 'label': 'An mich zuweisen', 'default': 0, 'depends_on': 'eval:!doc.virtueller_user', 'change': function() {
+                        if(cur_dialog.fields_dict.me.get_value()) {
+                            cur_dialog.fields_dict.owner.set_value(frappe.session.user);
+                        } else {
+                            cur_dialog.fields_dict.owner.set_value('');
+                        }
+                    }
+                },
+                {'fieldname': 'virtueller_user', 'fieldtype': 'Check', 'label': 'An virtueller Sektions-User zuweisen', 'default': 0, 'depends_on': 'eval:!doc.me', 'hidden': !sektion.virtueller_user ? 1:0, 'change': function() {
+                        if(cur_dialog.fields_dict.virtueller_user.get_value()) {
+                            cur_dialog.fields_dict.owner.set_value(sektion.virtueller_user);
+                        } else {
+                            cur_dialog.fields_dict.owner.set_value('');
+                        }
+                    }
+                },
+                {'fieldname': 'description', 'fieldtype': 'Text', 'label': 'Beschreibung', 'reqd': 0},
+                {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0},
+                {'fieldname': 'notify', 'fieldtype': 'Check', 'label': 'Per E-Mail benachrichtigen', 'default': 0}
+            ],
+            function(values){
+                frappe.call({
+                    "method": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.erstelle_todo",
+                    "args": {
+                        "owner": values.owner,
+                        "doctype": "Mitgliedschaft",
+                        "mitglied": frm.doc.name,
+                        "description": values.description,
+                        "datum": values.datum,
+                        "notify": values.notify
+                    },
+                    "callback": function(response) {
+                        cur_frm.reload_doc();
+                        frappe.msgprint( "Das ToDo wurde erstellt." );
+                    }
+                });
+            },
+            'ToDo erstellen',
+            'Erstellen'
+            )
+        }
+    });
+    //~ frappe.msgprint( "tbd" );
 }
 

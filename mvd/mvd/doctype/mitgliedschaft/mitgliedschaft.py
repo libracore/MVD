@@ -2835,15 +2835,17 @@ def create_korrespondenz_massenlauf(mitgliedschaften, druckvorlage, titel):
     return
 
 @frappe.whitelist()
-def erstelle_todo(owner, mitglied, description, datum):
+def erstelle_todo(owner, mitglied, description=False, datum=False, notify=0):
     todo = frappe.get_doc({
         "doctype":"ToDo",
         "owner": owner,
         "reference_type": "Mitgliedschaft",
         "reference_name": mitglied,
-        "description": description,
+        "description": description or '',
         "priority": "Medium",
         "status": "Open",
-        "date": datum,
-        "assigned_by": frappe.session.user
+        "date": datum or '',
+        "assigned_by": frappe.session.user,
+        "mv_mitgliedschaft": mitglied
     }).insert(ignore_permissions=True)
+    return
