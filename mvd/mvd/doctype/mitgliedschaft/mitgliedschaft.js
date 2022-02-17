@@ -85,6 +85,9 @@ frappe.ui.form.on('Mitgliedschaft', {
             
             // load html overview
             get_adressdaten(frm);
+            
+            // assign hack
+            $(".add-assignment.text-muted").remove();
         }
         
         if (['Wegzug', 'Ausschluss'].includes(cur_frm.doc.status_c)) {
@@ -1084,7 +1087,7 @@ function erstelle_todo(frm) {
                         }
                     }
                 },
-                {'fieldname': 'description', 'fieldtype': 'Text', 'label': 'Beschreibung', 'reqd': 0},
+                {'fieldname': 'description', 'fieldtype': 'Text', 'label': 'Beschreibung', 'reqd': 1},
                 {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0},
                 {'fieldname': 'notify', 'fieldtype': 'Check', 'label': 'Per E-Mail benachrichtigen', 'default': 0}
             ],
