@@ -2464,16 +2464,20 @@ def send_mvm_to_sp(mitgliedschaft, update):
             create_sp_queue(mitgliedschaft, update)
 
 def create_sp_queue(mitgliedschaft, update):
-    queue = frappe.get_doc({
-        "doctype": "Service Platform Queue",
-        "status": "Open",
-        "mv_mitgliedschaft": mitgliedschaft.mitglied_id
-    })
-    queue.insert(ignore_permissions=True)
-    if update:
-        queue.update = 1
-        queue.save(ignore_permissions=True)
-    return
+    existing_queue = frappe.db.sql("""SELECT COUNT(`name`) as `qty` FROM `tabService Platform Queue` WHERE `status` = 'Open' AND `mv_mitgliedschaft` = '{mitgliedschaft}'""".format(mitgliedschaft=mitgliedschaft.mitglied_id), as_dict=True)[0].qty
+    if existing_queue > 0 and update:
+        return
+    else:
+        queue = frappe.get_doc({
+            "doctype": "Service Platform Queue",
+            "status": "Open",
+            "mv_mitgliedschaft": mitgliedschaft.mitglied_id
+        })
+        queue.insert(ignore_permissions=True)
+        if update:
+            queue.update = 1
+            queue.save(ignore_permissions=True)
+        return
 
 def send_mvm_sektionswechsel(mitgliedschaft):
     from mvd.mvd.service_plattform.api import sektionswechsel
