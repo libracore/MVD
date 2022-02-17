@@ -80,7 +80,7 @@ frappe.vbz = {
             } else {
                 frappe.route_options = {};
             }
-            frappe.set_route("List", "CAMT Import");
+            frappe.set_route("List", "CAMT Import", "List");
         });
         $("#goto_klassisch").click(function(){
             frappe.set_route("modules/MVD");
@@ -118,25 +118,25 @@ frappe.vbz = {
             } else {
                 frappe.route_options = {};
             }
-            frappe.set_route("List", "Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#suchmaske").click(function(){
             frappe.set_route("mvd-suchmaske");
         });
         $("#arbeitsbacklog").click(function(){
             frappe.route_options = {"status": "Open"};
-            frappe.set_route("List", "Arbeits Backlog");
+            frappe.set_route("List", "Arbeits Backlog", "List");
         });
         $("#todo").click(function(){
             frappe.route_options = {"owner": ['in', open_datas.todo.todo_users], 'status': 'Open'};
-            frappe.set_route("List", "ToDo");
+            frappe.set_route("List", "ToDo", "List");
         });
         $("#validieren").click(function(){
             frappe.vbz.show_view('validierung');
         });
         $("#validierung_allgemein").click(function(){
             frappe.route_options = {"validierung_notwendig": 1}
-            frappe.set_route("List", "Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#neuanlage").click(function(){
             frappe.set_route("mvd-suchmaske");
@@ -145,23 +145,23 @@ frappe.vbz = {
         // validierungen
         $("#online_beitritte").click(function(){
             frappe.route_options = {"name": ['in', open_datas.validierung.online_beitritt.names], "validierung_notwendig": 1}
-            frappe.set_route("List", "Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#online_anmeldungen").click(function(){
             frappe.route_options = {"name": ['in', open_datas.validierung.online_anmeldung.names], "validierung_notwendig": 1}
-            frappe.set_route("List", "Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#online_kuendigungen").click(function(){
             frappe.route_options = {"name": ['in', open_datas.validierung.online_kuendigung.names], "validierung_notwendig": 1}
-            frappe.set_route("List", "Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#zuzuege").click(function(){
             frappe.route_options = {"name": ['in', open_datas.validierung.zuzug.names], "validierung_notwendig": 1}
-            frappe.set_route("List", "Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#online_mutationen").click(function(){
             frappe.route_options = {"name": ['in', open_datas.validierung.online_mutation.names], "validierung_notwendig": 1}
-            frappe.set_route("List", "Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#geschenk_mitgliedschaften").click(function(){
             frappe.msgprint("Wird noch umgesetzt");
@@ -173,14 +173,14 @@ frappe.vbz = {
         // massenlauf
         $("#keundigung_qty").click(function(){
             frappe.route_options = {"name": ['in', open_datas.kuendigung_massenlauf.names], 'kuendigung_verarbeiten': 1}
-            frappe.set_route("List", "Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#kuendigung_print").click(function(){
             frappe.vbz.kuendigung_massenlauf();
         });
         $("#zuzug_qty").click(function(){
             frappe.route_options = {"name": ['in', open_datas.zuzug_massenlauf.names], 'zuzug_massendruck': 1}
-            frappe.set_route("List", "Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#zuzug_print").click(function(){
             frappe.vbz.zuzug_massenlauf();
@@ -193,28 +193,28 @@ frappe.vbz = {
         });
         $("#korrespondenz_qty").click(function(){
             frappe.route_options = {"massenlauf": 1}
-            frappe.set_route("List", "Korrespondenz");
+            frappe.set_route("List", "Korrespondenz", "List");
         });
         $("#korrespondenz_print").click(function(){
             frappe.vbz.korrespondenz_massenlauf();
         });
         $("#rechnungen_qty").click(function(){
             frappe.route_options = {"name": ['in', open_datas.rg_massenlauf.names], 'rg_massendruck_vormerkung': 1}
-            frappe.set_route("List", "Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#rechnungen_print").click(function(){
             frappe.vbz.rg_massenlauf();
         });
         $("#begruessung_online_qty").click(function(){
             frappe.route_options = {"name": ['in', open_datas.begruessung_online_massenlauf.names], 'begruessung_massendruck': 1}
-            frappe.set_route("List", "Mitgliedschaft");
+            frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#begruessung_online_print").click(function(){
             frappe.vbz.begruessung_online_massenlauf();
         });
         $("#mahnungen_qty").click(function(){
             frappe.route_options = {"name": ['in', open_datas.mahnung_massenlauf.names], 'massenlauf': 1}
-            frappe.set_route("List", "Mahnung");
+            frappe.set_route("List", "Mahnung", "List");
         });
         $("#mahnungen_print").click(function(){
             frappe.vbz.mahnung_massenlauf();
@@ -244,7 +244,7 @@ frappe.vbz = {
             {
                 frappe.dom.unfreeze();
                 frappe.route_options = {"name": r.message}
-                frappe.set_route("List", "File");
+                frappe.set_route("List", "File", "List");
             }
         });
     },
@@ -260,7 +260,7 @@ frappe.vbz = {
             {
                 frappe.dom.unfreeze();
                 frappe.route_options = {"name": r.message}
-                frappe.set_route("List", "File");
+                frappe.set_route("List", "File", "List");
             }
         });
     },
@@ -276,7 +276,7 @@ frappe.vbz = {
             {
                 frappe.dom.unfreeze();
                 frappe.route_options = {"name": r.message}
-                frappe.set_route("List", "File");
+                frappe.set_route("List", "File", "List");
             }
         });
     },
@@ -292,7 +292,7 @@ frappe.vbz = {
             {
                 frappe.dom.unfreeze();
                 frappe.route_options = {"name": r.message}
-                frappe.set_route("List", "File");
+                frappe.set_route("List", "File", "List");
             }
         });
     },
@@ -308,7 +308,7 @@ frappe.vbz = {
             {
                 frappe.dom.unfreeze();
                 frappe.route_options = {"name": r.message}
-                frappe.set_route("List", "File");
+                frappe.set_route("List", "File", "List");
             }
         });
     },
@@ -324,7 +324,7 @@ frappe.vbz = {
             {
                 frappe.dom.unfreeze();
                 frappe.route_options = {"name": r.message}
-                frappe.set_route("List", "File");
+                frappe.set_route("List", "File", "List");
             }
         });
     }
