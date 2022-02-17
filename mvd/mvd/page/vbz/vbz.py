@@ -24,6 +24,13 @@ def get_open_data(sektion=None):
                                 WHERE `status` = 'Open'
                                 {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
     
+    # termine
+    termin_qty = frappe.db.sql("""SELECT
+                                    COUNT(`name`) AS `qty`
+                                FROM `tabTermin`
+                                WHERE `von` >= CURDATE()
+                                {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
+    
     # ToDo
     allowed_sektionen = frappe.get_list('Sektion', fields=['virtueller_user'])
     todo_users = "'" + str(frappe.session.user) + "'"
@@ -281,6 +288,9 @@ def get_open_data(sektion=None):
         'todo': {
             'qty': todo_qty,
             'todo_users': todo_users.replace("'", "")
+        },
+        'termin': {
+            'qty': termin_qty
         },
         'massenlauf_total': massenlauf_total,
         'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),

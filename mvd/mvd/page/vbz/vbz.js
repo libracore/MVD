@@ -70,6 +70,7 @@ frappe.vbz = {
         $("#begruessung_online_print").off("click");
         $("#mahnungen_qty").off("click");
         $("#mahnungen_print").off("click");
+        $("#termin").off("click");
     },
     add_click_handlers: function(open_datas) {
         frappe.vbz.remove_click_handlers();
@@ -126,6 +127,12 @@ frappe.vbz = {
         $("#arbeitsbacklog").click(function(){
             frappe.route_options = {"status": "Open"};
             frappe.set_route("List", "Arbeits Backlog", "List");
+        });
+        $("#termin").click(function(){
+            frappe.route_options = {
+                "von": ['between', [frappe.datetime.nowdate(), frappe.datetime.add_days(frappe.datetime.nowdate(), 7)]],
+            };
+            frappe.set_route("List", "Termin", "List");
         });
         $("#todo").click(function(){
             frappe.route_options = {"owner": ['in', open_datas.todo.todo_users], 'status': 'Open'};

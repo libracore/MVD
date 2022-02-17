@@ -9,6 +9,7 @@
   "kontakt",
   "cb_1",
   "mv_mitgliedschaft",
+  "sektion_id",
   "bis",
   "erinnerung",
   "section_notitz",
@@ -72,10 +73,17 @@
    "label": "Terminkategorie",
    "options": "Terminkategorie",
    "reqd": 1
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.sektion_id",
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Sektion",
+   "options": "Sektion"
   }
  ],
- "is_submittable": 1,
- "modified": "2022-02-03 08:49:25.797088",
+ "modified": "2022-02-17 18:01:17.044903",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin",

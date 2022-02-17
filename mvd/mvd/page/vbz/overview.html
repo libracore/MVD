@@ -23,6 +23,15 @@
             {% endif %}
         </center>
     </div>
+    <div class="control-card blue-card" id="termin">
+        <center>
+            <i class="fa fa-calendar-check-o blue-icon"></i>
+            <p>Termine</p>
+            {% if termin.qty > 0 %}
+                <div class="vbz-indikator"><span>{{ termin.qty }}</span></div>
+            {% endif %}
+        </center>
+    </div>
     <div class="control-card blue-card" id="handbuch">
         <center>
             <i class="fa fa-book blue-icon"></i>
