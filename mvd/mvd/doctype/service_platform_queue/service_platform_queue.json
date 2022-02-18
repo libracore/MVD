@@ -5,8 +5,13 @@
  "engine": "InnoDB",
  "field_order": [
   "status",
+  "section_ausgehend",
   "mv_mitgliedschaft",
-  "update"
+  "update",
+  "section_eingehend",
+  "eingehend",
+  "objekt",
+  "sektion"
  ],
  "fields": [
   {
@@ -21,17 +26,42 @@
    "fieldname": "mv_mitgliedschaft",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Mitgliedschaft",
-   "reqd": 1
+   "label": "Mitgliedschaft"
   },
   {
    "default": "0",
    "fieldname": "update",
    "fieldtype": "Check",
    "label": "Update"
+  },
+  {
+   "fieldname": "section_ausgehend",
+   "fieldtype": "Section Break",
+   "label": "Ausgehend"
+  },
+  {
+   "fieldname": "section_eingehend",
+   "fieldtype": "Section Break",
+   "label": "Eingehend"
+  },
+  {
+   "default": "0",
+   "fieldname": "eingehend",
+   "fieldtype": "Check",
+   "label": "Eingehend"
+  },
+  {
+   "fieldname": "objekt",
+   "fieldtype": "Code",
+   "label": "Objekt"
+  },
+  {
+   "fieldname": "sektion",
+   "fieldtype": "Data",
+   "label": "Sektion"
   }
  ],
- "modified": "2022-02-17 11:48:33.141172",
+ "modified": "2022-02-18 14:47:08.325110",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Platform Queue",
