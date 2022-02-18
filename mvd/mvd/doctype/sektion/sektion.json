@@ -98,15 +98,13 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Unternehmen",
-   "options": "Company",
-   "reqd": 1
+   "options": "Company"
   },
   {
    "fieldname": "mitgliedschafts_artikel",
    "fieldtype": "Link",
    "label": "Artikel Mitgliedschaft (Normal)",
-   "options": "Item",
-   "reqd": 1
+   "options": "Item"
   },
   {
    "collapsible": 1,
@@ -184,29 +182,25 @@
    "fieldname": "mitgliedschafts_artikel_reduziert",
    "fieldtype": "Link",
    "label": "Artikel Mitgliedschafts (Reduziert)",
-   "options": "Item",
-   "reqd": 1
+   "options": "Item"
   },
   {
    "fieldname": "mitgliedschafts_artikel_gratis",
    "fieldtype": "Link",
    "label": "Artikel Mitgliedschafts (Gratis)",
-   "options": "Item",
-   "reqd": 1
+   "options": "Item"
   },
   {
    "fieldname": "pos_barzahlung",
    "fieldtype": "Link",
    "label": "POS Profil f\u00fcr Barzahlungen",
-   "options": "POS Profile",
-   "reqd": 1
+   "options": "POS Profile"
   },
   {
    "fieldname": "hv_artikel",
    "fieldtype": "Link",
    "label": "Artikel HV",
-   "options": "Item",
-   "reqd": 1
+   "options": "Item"
   },
   {
    "default": "12",
@@ -225,15 +219,13 @@
    "fieldname": "default_customer",
    "fieldtype": "Link",
    "label": "Standard Kunde",
-   "options": "Customer",
-   "reqd": 1
+   "options": "Customer"
   },
   {
    "fieldname": "account",
    "fieldtype": "Link",
    "label": "Standard Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "cb_5",
@@ -243,32 +235,28 @@
    "fieldname": "spenden_artikel",
    "fieldtype": "Link",
    "label": "Artikel Spende",
-   "options": "Item",
-   "reqd": 1
+   "options": "Item"
   },
   {
    "fieldname": "mitgliedschafts_artikel_geschaeft",
    "fieldtype": "Link",
    "label": "Artikel Mitgliedschaft (Gesch\u00e4ft)",
-   "options": "Item",
-   "reqd": 1
+   "options": "Item"
   },
   {
    "fieldname": "mitgliedschafts_artikel_kollektiv",
    "fieldtype": "Link",
    "label": "Artikel Mitgliedschaft (Kollektiv)",
-   "options": "Item",
-   "reqd": 1
+   "options": "Item"
   },
   {
    "fieldname": "virtueller_user",
    "fieldtype": "Link",
    "label": "Virtueller User",
-   "options": "User",
-   "reqd": 1
+   "options": "User"
   }
  ],
- "modified": "2022-02-11 14:13:32.864914",
+ "modified": "2022-02-18 11:26:36.753520",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
