@@ -1015,8 +1015,8 @@ def update_kontakt_mitglied(mitgliedschaft, primary=True):
             email_row.is_primary = 1
             
         contact.phone_nos = []
-        contact.save(ignore_permissions=True)
-        frappe.db.commit()
+        contact.phone = ''
+        contact.mobile_no = ''
         # private phone
         is_primary_phone = mitgliedschaft.tel_p_1
         if is_primary_phone:
@@ -1046,8 +1046,8 @@ def update_kontakt_mitglied(mitgliedschaft, primary=True):
             email_row.is_primary = 1
             
         contact.phone_nos = []
-        contact.save(ignore_permissions=True)
-        frappe.db.commit()
+        contact.phone = ''
+        contact.mobile_no = ''
         # private phone
         is_primary_phone = mitgliedschaft.tel_p_2
         if is_primary_phone:
