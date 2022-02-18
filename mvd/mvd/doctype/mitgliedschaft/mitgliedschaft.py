@@ -2355,6 +2355,10 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                     if kontaktdaten["mobile"]:
                         if str(kontaktdaten["mobile"]) != str(kontaktdaten["telefon"]):
                             new_mitgliedschaft.tel_m_1 = str(kontaktdaten["mobile"])
+                        else:
+                            new_mitgliedschaft.tel_m_1 = ''
+                    else:
+                        new_mitgliedschaft.tel_m_1 = ''
                     new_mitgliedschaft.tel_g_1 = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
                     new_mitgliedschaft.e_mail_1 = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
                     new_mitgliedschaft.zusatz_adresse = str(mitglied["adresszusatz"]) if mitglied["adresszusatz"] else ''
@@ -2378,6 +2382,10 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                     if kontaktdaten["mobile"]:
                         if str(kontaktdaten["mobile"]) != str(kontaktdaten["telefon"]):
                             new_mitgliedschaft.tel_m_2 = str(kontaktdaten["mobile"])
+                        else:
+                            new_mitgliedschaft.tel_m_2 = ''
+                    else:
+                        new_mitgliedschaft.tel_m_2 = ''
                     new_mitgliedschaft.tel_g_2 = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
                     new_mitgliedschaft.e_mail_2 = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
         
@@ -2442,6 +2450,10 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                         if kontaktdaten["mobile"]:
                             if str(kontaktdaten["mobile"]) != str(kontaktdaten["telefon"]):
                                 new_mitgliedschaft.rg_tel_m = str(kontaktdaten["mobile"])
+                            else:
+                                new_mitgliedschaft.rg_tel_m = ''
+                        else:
+                            new_mitgliedschaft.rg_tel_m = ''
                         new_mitgliedschaft.rg_tel_g = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
                         new_mitgliedschaft.rg_e_mail = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
                     
