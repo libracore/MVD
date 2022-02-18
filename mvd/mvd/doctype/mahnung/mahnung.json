@@ -1,0 +1,239 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2022-02-11 20:52:15.232161",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "customer",
+  "customer_name",
+  "mitgliedschaften",
+  "druckvorlage",
+  "massenlauf",
+  "column_general",
+  "sektion_id",
+  "company",
+  "title",
+  "date",
+  "amended_from",
+  "section_sales_invoices",
+  "sales_invoices",
+  "section_values",
+  "currency",
+  "highest_level",
+  "reminder_charge",
+  "column_values",
+  "total_before_charge",
+  "total_with_charge",
+  "section_hidden_linking",
+  "hidden_linking"
+ ],
+ "fields": [
+  {
+   "default": "MNG-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Naming Series",
+   "options": "MNG-.#####"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer Name",
+   "options": "customer.customer_name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_general",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Sektion",
+   "options": "Sektion",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "sektion_id.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "print_hide": 1,
+   "read_only": 1,
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Mahnung",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_sales_invoices",
+   "fieldtype": "Section Break",
+   "label": "Sales Invoices"
+  },
+  {
+   "fieldname": "sales_invoices",
+   "fieldtype": "Table",
+   "label": "Sales Invoices",
+   "options": "Mahnung Invoices"
+  },
+  {
+   "fieldname": "section_values",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "highest_level",
+   "fieldtype": "Int",
+   "label": "Highest Level"
+  },
+  {
+   "fieldname": "reminder_charge",
+   "fieldtype": "Currency",
+   "label": "Reminder Charge",
+   "options": "currency"
+  },
+  {
+   "fieldname": "column_values",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_before_charge",
+   "fieldtype": "Currency",
+   "label": "Total before Charge",
+   "options": "currency"
+  },
+  {
+   "fieldname": "total_with_charge",
+   "fieldtype": "Currency",
+   "label": "Total with Charge",
+   "options": "currency"
+  },
+  {
+   "fieldname": "section_hidden_linking",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "hidden_linking",
+   "fieldtype": "Table",
+   "label": "Hidden Linking",
+   "options": "mahnung mitgliedschaft linking"
+  },
+  {
+   "fieldname": "mitgliedschaften",
+   "fieldtype": "Table MultiSelect",
+   "label": "Mitgliedschaft(en)",
+   "options": "Mitgliedschaft MultiSelect"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "1",
+   "fieldname": "massenlauf",
+   "fieldtype": "Check",
+   "label": "F\u00fcr Massenlauf vormerken"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "druckvorlage",
+   "fieldtype": "Link",
+   "label": "Druckvorlage",
+   "options": "Druckvorlage",
+   "reqd": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-02-16 17:43:43.314129",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Mahnung",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MVD Sektionsmitarbeiter*in",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MVD Sektion Gesch\u00e4ftsleitung",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "title",
+ "track_changes": 1
+}

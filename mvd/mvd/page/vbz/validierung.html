@@ -1,0 +1,44 @@
+<h1 class="vbz"><span class="back-to-overview"><i class="fa fa-home pull-left"></i><i class="fa fa-chevron-left pull-left"></i></span> Zu Validierende Mitgliedschaften</h1>
+<div class="row">
+    <p class="place-holder-left">Alle Änderungen, die nicht von der Sektion von Hand vorgenommen werden, müssen validiert werden.</p>
+    <table id="table_validierungs_uebersicht">
+        <tr>
+            <th><b>Verarbeitung von</b></th>
+            <th><b>Anzahl</b></th>
+        </tr>
+        <tr id="online_beitritte">
+            <td>Online-Beitritte</td>
+            <td>{{ online_beitritt.qty }}</td>
+        </tr>
+        <tr id="online_anmeldungen">
+            <td>Online-Anmeldungen</td>
+            <td>{{ online_anmeldung.qty }}</td>
+        </tr>
+        <tr id="online_kuendigungen">
+            <td>Online-Kündigungen</td>
+            <td>{{ online_kuendigung.qty }}</td>
+        </tr>
+        <tr id="online_mutationen">
+            <td>Online-Mutationen</td>
+            <td>{{ online_mutation.qty }}</td>
+        </tr>
+        <tr id="geschenk_mitgliedschaften">
+            <td>Geschenk-Mitgliedschaften</td>
+            <td>0</td>
+        </tr>
+        <tr id="zuzuege">
+            <td>Zuzüge</td>
+            <td>{{ zuzug.qty }}</td>
+        </tr>
+        <tr id="autom_adressaenderungen">
+            <td>Automatische Adressänderungen (Post)</td>
+            <td>0</td>
+        </tr>
+    </table>
+    <div class="control-card green-card pull-right" id="adresspflege_second">
+        <center>
+            <i class="fa fa-address-book green-icon"></i>
+            <p>Adresspflege</p>
+        </center>
+    </div>
+</div>

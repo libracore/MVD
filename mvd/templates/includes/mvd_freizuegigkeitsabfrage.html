@@ -1,0 +1,56 @@
+<style>
+    table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #f5f7fa;
+        padding-right: 5px;
+        padding-left: 5px;
+        max-width: 100px;
+    }
+    td {
+        padding-right: 5px;
+        padding-left: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100px;
+    }
+    tr {
+        border-bottom: 1px solid silver;
+    }
+</style>
+<div style='width: 100%; height: 50vH; overflow: auto;'>
+    <table style="width: 100%;">
+        <thead>
+            <tr>
+                <th>Mitgliedernummer</th>
+                <th>Sektion</th>
+                <th>Name (Mitglied)</th>
+                <th>Name (Solidarmitglied)</th>
+                <th>Strasse</th>
+                <th>Nr.</th>
+                <th>PLZ</th>
+                <th>Wohnort</th>
+                <th>Eintritt</th>
+                <th>Austritt</th>
+                <th>Zuletzt bezahlt</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ mitgliedschaft.mitglied_nr }}</td>
+                <td>{{ mitgliedschaft.sektion_id }}</td>
+                <td>{{ mitgliedschaft.vorname_1 }} {{ mitgliedschaft.nachname_1 }}</td>
+                <td>{{ mitgliedschaft.vorname_2 or '' }} {{ mitgliedschaft.nachname_2 or '' }}</td>
+                <td>{{ mitgliedschaft.strasse }}</td>
+                <td>{% if mitgliedschaft.postfach %}{{ mitgliedschaft.postfach_nummer }}{% else %}{{ mitgliedschaft.nummer }}{{ mitgliedschaft.nummer_zu }}{% endif %}</td>
+                <td>{{ mitgliedschaft.plz }}</td>
+                <td>{{ mitgliedschaft.ort }}</td>
+                <td>{% if mitgliedschaft.eintritt %}{{ frappe.utils.get_datetime(mitgliedschaft.eintritt).strftime('%d.%m.%Y') }}{% else %}-{% endif %}</td>
+                <td>{% if mitgliedschaft.austritt %}{{ frappe.utils.get_datetime(mitgliedschaft.austritt).strftime('%d.%m.%Y') }}{% else %}-{% endif %}</td>
+                <td>-</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

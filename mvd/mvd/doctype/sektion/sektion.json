@@ -1,0 +1,303 @@
+{
+ "allow_rename": 1,
+ "autoname": "field:title",
+ "creation": "2021-08-26 13:39:03.647754",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_sektionsstammdaten",
+  "title",
+  "sektion_c",
+  "company",
+  "virtueller_user",
+  "cb_1",
+  "sektion_id",
+  "default_ort",
+  "section_sektionseinstellungen",
+  "mitgliedschafts_artikel",
+  "mitgliedschafts_artikel_geschaeft",
+  "mitgliedschafts_artikel_kollektiv",
+  "mitgliedschafts_artikel_reduziert",
+  "mitgliedschafts_artikel_gratis",
+  "hv_artikel",
+  "spenden_artikel",
+  "cb_4",
+  "karenzfrist",
+  "kuendigungs_stichtag",
+  "reduzierter_mitgliederbeitrag",
+  "gratis_bis_ende_jahr",
+  "pos_barzahlung",
+  "betrag_hv",
+  "section_camt_import",
+  "default_customer",
+  "cb_5",
+  "account",
+  "section_fusszeile",
+  "fz_links",
+  "cb_2",
+  "fz_mitte",
+  "cb_3",
+  "fz_rechts",
+  "section_mitgliederausweis",
+  "ausweis_rueckseite"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Titel",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "30",
+   "fieldname": "karenzfrist",
+   "fieldtype": "Int",
+   "label": "Karenzfrist",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_sektionsstammdaten",
+   "fieldtype": "Section Break",
+   "label": "Stammdaten"
+  },
+  {
+   "default": "0",
+   "fieldname": "sektion_c",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Sektionscode",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Sektion ID",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_sektionseinstellungen",
+   "fieldtype": "Section Break",
+   "label": "Daten und Artikel"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_ort",
+   "fieldtype": "Data",
+   "label": "Ort Korrespndenz (Default)"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Unternehmen",
+   "options": "Company"
+  },
+  {
+   "fieldname": "mitgliedschafts_artikel",
+   "fieldtype": "Link",
+   "label": "Artikel Mitgliedschaft (Normal)",
+   "options": "Item"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_fusszeile",
+   "fieldtype": "Section Break",
+   "label": "Fusszeile"
+  },
+  {
+   "default": "Mieterinnen- und Mieterverband<br>\n[Sektionenname]",
+   "fieldname": "fz_links",
+   "fieldtype": "Code",
+   "label": "Links",
+   "reqd": 1
+  },
+  {
+   "default": "[Strasse]<br>\n[Postfach]<br>\n[PLZ Ort]",
+   "fieldname": "fz_mitte",
+   "fieldtype": "Code",
+   "label": "Mitte",
+   "reqd": 1
+  },
+  {
+   "default": "T [Telefonnummer]<br>\n[E-Mailadresse]<br>\nwww.mieterverband.ch",
+   "fieldname": "fz_rechts",
+   "fieldtype": "Code",
+   "label": "Rechts",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_mitgliederausweis",
+   "fieldtype": "Section Break",
+   "label": "Mitgliederausweis"
+  },
+  {
+   "fieldname": "ausweis_rueckseite",
+   "fieldtype": "HTML Editor",
+   "label": "Ausweis R\u00fcckseite",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Das Jahr ist ohne Bedeutung",
+   "fieldname": "kuendigungs_stichtag",
+   "fieldtype": "Date",
+   "label": "Stichtag K\u00fcndigung",
+   "reqd": 1
+  },
+  {
+   "description": "Das Jahr ist ohne Bedeutung",
+   "fieldname": "gratis_bis_ende_jahr",
+   "fieldtype": "Date",
+   "label": "Stichtag Gratis bis ende Jahr",
+   "reqd": 1
+  },
+  {
+   "description": "Das Jahr ist ohne Bedeutung. Falls kein Reduzierter Beitrag, gleich mit Stichtag Gratis setzen.",
+   "fieldname": "reduzierter_mitgliederbeitrag",
+   "fieldtype": "Date",
+   "label": "Stichtag Reduzierter Mitgliederbeitrag",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mitgliedschafts_artikel_reduziert",
+   "fieldtype": "Link",
+   "label": "Artikel Mitgliedschafts (Reduziert)",
+   "options": "Item"
+  },
+  {
+   "fieldname": "mitgliedschafts_artikel_gratis",
+   "fieldtype": "Link",
+   "label": "Artikel Mitgliedschafts (Gratis)",
+   "options": "Item"
+  },
+  {
+   "fieldname": "pos_barzahlung",
+   "fieldtype": "Link",
+   "label": "POS Profil f\u00fcr Barzahlungen",
+   "options": "POS Profile"
+  },
+  {
+   "fieldname": "hv_artikel",
+   "fieldtype": "Link",
+   "label": "Artikel HV",
+   "options": "Item"
+  },
+  {
+   "default": "12",
+   "fieldname": "betrag_hv",
+   "fieldtype": "Currency",
+   "label": "Betrag HV",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_camt_import",
+   "fieldtype": "Section Break",
+   "label": "CAMT Import"
+  },
+  {
+   "fieldname": "default_customer",
+   "fieldtype": "Link",
+   "label": "Standard Kunde",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Standard Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "cb_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "spenden_artikel",
+   "fieldtype": "Link",
+   "label": "Artikel Spende",
+   "options": "Item"
+  },
+  {
+   "fieldname": "mitgliedschafts_artikel_geschaeft",
+   "fieldtype": "Link",
+   "label": "Artikel Mitgliedschaft (Gesch\u00e4ft)",
+   "options": "Item"
+  },
+  {
+   "fieldname": "mitgliedschafts_artikel_kollektiv",
+   "fieldtype": "Link",
+   "label": "Artikel Mitgliedschaft (Kollektiv)",
+   "options": "Item"
+  },
+  {
+   "fieldname": "virtueller_user",
+   "fieldtype": "Link",
+   "label": "Virtueller User",
+   "options": "User"
+  }
+ ],
+ "modified": "2022-02-18 11:26:36.753520",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Sektion",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MVD Admin",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MVD Sektion Gesch\u00e4ftsleitung",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -4,20 +4,70 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "kategorie",
+  "von",
+  "kontakt",
+  "cb_1",
   "mv_mitgliedschaft",
+  "bis",
+  "erinnerung",
+  "section_notitz",
+  "notitz",
   "amended_from"
  ],
  "fields": [
   {
+   "fieldname": "kategorie",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Terminkategorie",
+   "options": "Terminkategorie",
+   "reqd": 1
+  },
+  {
+   "fieldname": "von",
+   "fieldtype": "Datetime",
+   "label": "Datum von"
+  },
+  {
+   "fieldname": "kontakt",
+   "fieldtype": "Data",
+   "label": "Kontaktperson"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "mv_mitgliedschaft",
    "fieldtype": "Link",
    "label": "MV Mitgliedschaft",
-   "options": "MV Mitgliedschaft"
+   "options": "Mitgliedschaft",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bis",
+   "fieldtype": "Datetime",
+   "label": "Datum bis"
+  },
+  {
+   "fieldname": "erinnerung",
+   "fieldtype": "Date",
+   "label": "Datum Erinnerung"
+  },
+  {
+   "fieldname": "section_notitz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "notitz",
+   "fieldtype": "Text Editor",
+   "label": "Notiz"
   },
   {
    "fieldname": "amended_from",
    "fieldtype": "Link",
-   "label": "Amended From",
+   "label": "Basierend auf",
    "no_copy": 1,
    "options": "MV Beratung",
    "print_hide": 1,
@@ -25,7 +75,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-06-07 13:09:39.415229",
+ "modified": "2022-02-03 08:49:25.420758",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Beratung",
@@ -44,7 +94,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

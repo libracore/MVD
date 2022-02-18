@@ -1,0 +1,108 @@
+{
+ "creation": "2021-06-07 13:09:39.415229",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "kategorie",
+  "von",
+  "kontakt",
+  "cb_1",
+  "mv_mitgliedschaft",
+  "sektion_id",
+  "bis",
+  "erinnerung",
+  "section_notitz",
+  "notitz",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "MV Mitgliedschaft",
+   "options": "Mitgliedschaft",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Basierend auf",
+   "no_copy": 1,
+   "options": "Termin",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "von",
+   "fieldtype": "Datetime",
+   "label": "Datum von"
+  },
+  {
+   "fieldname": "bis",
+   "fieldtype": "Datetime",
+   "label": "Datum bis"
+  },
+  {
+   "fieldname": "kontakt",
+   "fieldtype": "Data",
+   "label": "Kontaktperson"
+  },
+  {
+   "fieldname": "notitz",
+   "fieldtype": "Text Editor",
+   "label": "Notiz"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "erinnerung",
+   "fieldtype": "Date",
+   "label": "Datum Erinnerung"
+  },
+  {
+   "fieldname": "section_notitz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "kategorie",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Terminkategorie",
+   "options": "Terminkategorie",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.sektion_id",
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Sektion",
+   "options": "Sektion"
+  }
+ ],
+ "modified": "2022-02-17 18:01:17.044903",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Termin",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

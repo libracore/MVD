@@ -1,0 +1,31 @@
+{
+ "custom_fields": [],
+ "custom_perms": [],
+ "doctype": "Korrespondenz",
+ "property_setters": [
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2022-02-05 23:19:53.923704",
+   "default_value": null,
+   "doc_type": "Korrespondenz",
+   "docstatus": 0,
+   "doctype_or_field": "DocType",
+   "field_name": null,
+   "idx": 0,
+   "modified": "2022-02-05 23:19:53.923704",
+   "modified_by": "Administrator",
+   "name": "Korrespondenz-default_print_format",
+   "owner": "Administrator",
+   "parent": null,
+   "parentfield": null,
+   "parenttype": null,
+   "property": "default_print_format",
+   "property_type": "Data",
+   "value": "Korrespondenz"
+  }
+ ],
+ "sync_on_migrate": 1
+}

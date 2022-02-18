@@ -16,7 +16,7 @@ app_license = "MIT"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/mvd/css/mvd.css"
-# app_include_js = "/assets/mvd/js/mvd.js"
+app_include_js = "/assets/mvd/js/mvd.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/mvd/css/mvd.css"
@@ -26,11 +26,24 @@ app_license = "MIT"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_js = {
+    "Address" : "public/js/custom_scripts/address.js",
+    "Sales Invoice" : "public/js/custom_scripts/sales_invoice.js",
+    "User" : "public/js/custom_scripts/user.js",
+    "Role" : "public/js/custom_scripts/role.js",
+    "Payment Entry" : "public/js/custom_scripts/payment_entry.js"
+}
+doctype_list_js = {"Error Log" : "public/js/custom_scripts/error_log_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
+jenv = {
+    "methods": [
+        "get_anredekonvention:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_anredekonvention",
+        "replace_mv_keywords:mvd.mvd.doctype.druckvorlage.druckvorlage.replace_mv_keywords",
+        "get_mahnungs_qrrs:mvd.mvd.doctype.mahnung.mahnung.get_mahnungs_qrrs"
+    ]
+}
 # Home Pages
 # ----------
 
@@ -62,6 +75,9 @@ app_license = "MIT"
 # See frappe.core.notifications.get_notification_config
 
 # notification_config = "mvd.notifications.get_notification_config"
+notification_config = "mvd.mvd.utils.notifications.get_notification_config"
+
+extend_bootinfo = "mvd.mvd.utils.mvd_bootinfo.boot_session"
 
 # Permissions
 # -----------
@@ -79,17 +95,27 @@ app_license = "MIT"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
+doc_events = {
+    "Sales Invoice": {
+        "on_update": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.sinv_check_zahlung_mitgliedschaft",
+        "on_update_after_submit": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.sinv_check_zahlung_mitgliedschaft"
+    },
+    "Payment Entry": {
+        "on_submit": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.pe_check_zahlung_mitgliedschaft"
+    }
+}
 
 # Scheduled Tasks
 # ---------------
-
+scheduler_events = {
+    "daily": [
+        "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.set_inaktiv",
+        "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.entferne_alte_reduzierungen"
+    ],
+    "all": [
+        "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue"
+    ]
+}
 # scheduler_events = {
 # 	"all": [
 # 		"mvd.tasks.all"
@@ -126,4 +152,3 @@ app_license = "MIT"
 # override_doctype_dashboards = {
 # 	"Task": "mvd.task.get_dashboard_data"
 # }
-

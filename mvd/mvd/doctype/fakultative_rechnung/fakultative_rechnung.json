@@ -1,0 +1,218 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2022-01-06 15:17:34.480662",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_stammdaten",
+  "mv_mitgliedschaft",
+  "status",
+  "sektion_id",
+  "sektions_code",
+  "druckvorlage",
+  "cb_1",
+  "company",
+  "sales_invoice",
+  "qrr_referenz",
+  "naming_series",
+  "amended_from",
+  "section_rechnung",
+  "typ",
+  "betrag",
+  "posting_date",
+  "cb_2",
+  "due_date",
+  "bezahlt_via"
+ ],
+ "fields": [
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mitgliedschaft",
+   "options": "Mitgliedschaft",
+   "permlevel": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "typ",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Typ",
+   "options": "HV\nSpende",
+   "reqd": 1
+  },
+  {
+   "fieldname": "betrag",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Betrag",
+   "reqd": 1
+  },
+  {
+   "fieldname": "qrr_referenz",
+   "fieldtype": "Data",
+   "label": "QRR Referenz",
+   "permlevel": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Unpaid\nPaid",
+   "permlevel": 1,
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Rechnungsdatum",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sektions_code",
+   "fieldtype": "Data",
+   "label": "sektions_code",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Basierend auf",
+   "no_copy": 1,
+   "options": "Fakultative Rechnung",
+   "permlevel": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_stammdaten",
+   "fieldtype": "Section Break",
+   "label": "Stammdaten",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "section_rechnung",
+   "fieldtype": "Section Break",
+   "label": "Fakultative Rechnung"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Zahlbar bis"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "FR-.{sektions_code}.#####",
+   "permlevel": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Rechnung",
+   "options": "Sales Invoice",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "bezahlt_via",
+   "fieldtype": "Link",
+   "label": "Bezahlt via",
+   "options": "Sales Invoice",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "druckvorlage",
+   "fieldtype": "Link",
+   "label": "Druckvorlage",
+   "options": "Druckvorlage"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-02-03 08:49:25.583173",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Fakultative Rechnung",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MVD Sektionsmitarbeiter*in",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MVD Sektionsmitarbeiter*in"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,101 @@
+{
+ "creation": "2021-09-22 11:07:11.666802",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_sektion_region",
+  "dachverband",
+  "cb_1",
+  "sektion",
+  "cb_2",
+  "region",
+  "section_plz",
+  "plz",
+  "cb_3",
+  "plz_bis"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_sektion_region",
+   "fieldtype": "Section Break",
+   "label": "Sektion / Region"
+  },
+  {
+   "fieldname": "dachverband",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Dachverband",
+   "options": "MVD",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sektion",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Region",
+   "options": "Region",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_plz",
+   "fieldtype": "Section Break",
+   "label": "PLZ Zuordnung"
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "PLZ",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "plz_bis",
+   "fieldtype": "Int",
+   "label": "PLZ bis"
+  }
+ ],
+ "modified": "2021-09-22 11:07:11.666802",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "PLZ Sektion Zuordnung",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

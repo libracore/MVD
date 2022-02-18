@@ -1,0 +1,31 @@
+{
+ "custom_fields": [],
+ "custom_perms": [],
+ "doctype": "Mahnung",
+ "property_setters": [
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2022-02-14 17:46:15.607937",
+   "default_value": null,
+   "doc_type": "Mahnung",
+   "docstatus": 0,
+   "doctype_or_field": "DocType",
+   "field_name": null,
+   "idx": 0,
+   "modified": "2022-02-14 17:46:15.607937",
+   "modified_by": "Administrator",
+   "name": "Mahnung-default_print_format",
+   "owner": "Administrator",
+   "parent": null,
+   "parentfield": null,
+   "parenttype": null,
+   "property": "default_print_format",
+   "property_type": "Data",
+   "value": "Mahnung"
+  }
+ ],
+ "sync_on_migrate": 1
+}

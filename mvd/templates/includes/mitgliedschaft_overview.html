@@ -1,0 +1,339 @@
+<div class="clearfix"></div>
+{% if allgemein.status == 'Interessent*in' %}
+    <div class="row">
+        <!-- Card Allgemein -->
+        <div class="col-sm-12">
+            <div class="address-box">
+                <p>
+                    <b>Status:</b> {{ allgemein.status }}
+                </p>
+                <p>
+                    <b>Wichtig:</b><br>
+                    {% if allgemein.wichtig %}
+                        {{ allgemein.wichtig|replace("\n", "<br>") }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="row">
+        <!-- Card Allgemein -->
+        {% if allgemein.ueberfaellige_rechnungen > 0 or allgemein.offene_rechnungen > 0 %}
+        <div class="col-sm-5">
+            <div class="address-box">
+                <p>
+                    <b>Status:</b> {{ allgemein.status }}<br>
+                    <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
+                    {% if allgemein.status not in ['Anmeldung', 'Online-Anmeldung'] %}
+                        <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
+                        {% if allgemein.kuendigung %}
+                            <b>Kündigung:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}<br>
+                        {% endif %}
+                        {% if allgemein.austritt %}
+                            <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
+                        {% endif %}
+                        {% if allgemein.zuzug %}
+                            <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}{% if allgemein.zuzug_von %} (von {{ allgemein.zuzug_von }}){% endif %}<br>
+                        {% endif %}
+                        {% if allgemein.wegzug %}
+                            <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
+                        {% endif %}
+                        <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
+                        {% if allgemein.hv_status %}
+                            <br>{{ allgemein.hv_status }}
+                        {% endif %}
+                    {% else %}
+                        <b>Erfassung:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
+                    {% endif %}
+                </p>
+                <p>
+                    <b>Wichtig:</b><br>
+                    {% if allgemein.wichtig %}
+                        {{ allgemein.wichtig|replace("\n", "<br>") }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="col-sm-5">
+            <div class="address-box">
+                <p style="position: absolute; top: -13px; right: -90px;">
+                    <span class="css-ampel {{ allgemein.ampelfarbe }}"><span></span></span>
+                </p>
+                <p>
+                    {% if allgemein.ueberfaellige_rechnungen > 0 %}<b>Überfällige Rechnungen:</b> CHF {{ "{:,.2f}".format(allgemein.ueberfaellige_rechnungen).replace(",", "'") }}<br>{% endif %}
+                    {% if allgemein.offene_rechnungen > 0 %}<b>Offene Rechnungen:</b> CHF {{ "{:,.2f}".format(allgemein.offene_rechnungen).replace(",", "'") }}<br>{% endif %}
+                </p>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-sm-10">
+            <div class="address-box"{% if allgemein.validierung == 1 %} style="background-color: #fafad9;"{% endif %}>
+                <p style="position: absolute; top: -13px; right: -90px;">
+                    <span class="css-ampel {{ allgemein.ampelfarbe }}"><span></span></span>
+                </p>
+                <p>
+                    <b>Status:</b> {{ allgemein.status }}<br>
+                    <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
+                    {% if allgemein.status not in ['Anmeldung', 'Online-Anmeldung'] %}
+                        <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
+                        {% if allgemein.kuendigung %}
+                            <b>Kündigung:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}<br>
+                        {% endif %}
+                        {% if allgemein.austritt %}
+                            <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
+                        {% endif %}
+                        {% if allgemein.zuzug %}
+                            <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}{% if allgemein.zuzug_von %} (von {{ allgemein.zuzug_von }}){% endif %}<br>
+                        {% endif %}
+                        {% if allgemein.wegzug %}
+                            <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
+                        {% endif %}
+                        <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
+                        {% if allgemein.hv_status %}
+                            <br>{{ allgemein.hv_status }}
+                        {% endif %}
+                    {% else %}
+                        <b>Erfassung:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
+                    {% endif %}
+                </p>
+                <p>
+                    <b>Wichtig:</b><br>
+                    {% if allgemein.wichtig %}
+                        {{ allgemein.wichtig|replace("\n", "<br>") }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+{% endif %}
+<div class="clearfix"></div>
+<div class="row">
+<!-- Card Mitglied (Inhaber) -->
+{% if kunde_mitglied %}
+    <div class="col-sm-{{ col_qty }}">
+        <div class="address-box">
+            <p><b>Mitglied</b></p>
+            <!-- Unternehmen -->
+            {% if kunde_mitglied.customer_type == 'Company' %}
+                <p>
+                    {{ kunde_mitglied.customer_name }}
+                    {% if kunde_mitglied.customer_addition %}
+                        <br>{{ kunde_mitglied.customer_addition }}
+                    {% endif %}
+                </p>
+            {% endif %}
+            <!-- Anrede/Vorname/Nachname -->
+            {% if kontakt_mitglied %}
+                <p>
+                    {% if kontakt_mitglied.salutation %}
+                        {{ kontakt_mitglied.salutation }}<br>
+                    {% endif %}
+                    {{ kontakt_mitglied.first_name or '' }} {{ kontakt_mitglied.last_name or '' }}
+                </p>
+            {% endif %}
+            <!-- Adresse (nicht zwingend Objekt) -->
+            {% if adresse_mitglied %}
+                <p>
+                    {% if adresse_mitglied.zusatz %}
+                        {{ adresse_mitglied.zusatz }}<br>
+                    {% endif %}
+                    {% if not adresse_mitglied.postfach %}
+                        {{ adresse_mitglied.strasse }}<br>
+                    {% else %}
+                        Postfach {% if adresse_mitglied.postfach_nummer %}{{ adresse_mitglied.postfach_nummer }}{% endif %}<br>
+                    {% endif %}
+                    {{ adresse_mitglied.plz }} {{ adresse_mitglied.city }}
+                </p>
+            {% endif %}
+            <!-- Mail/Telefon -->
+            {% if kontakt_mitglied %}
+                <p>
+                    {% if kontakt_mitglied.email_id %}{{ kontakt_mitglied.email_id }}<br>{% endif %}
+                    {% if kontakt_mitglied.phone %}{{ kontakt_mitglied.phone }}<br>{% endif %}
+                    {% if kontakt_mitglied.mobile_no %}{{ kontakt_mitglied.mobile_no }}{% endif %}
+                </p>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+<!-- Card Solidaritäts-Mitglied -->
+{% if kontakt_solidarmitglied %}
+    <div class="col-sm-{{ col_qty }}">
+        <div class="address-box">
+            <p><b>Solidarmitglied</b></p>
+            <!-- Anrede/Vorname/Nachname -->
+            <p>
+                {% if kontakt_solidarmitglied.salutation %}
+                    {{ kontakt_solidarmitglied.salutation }}<br>
+                {% endif %}
+                {{ kontakt_solidarmitglied.first_name or '' }} {{ kontakt_solidarmitglied.last_name or '' }}
+            </p>
+            <!-- Adresse (von Objekt) -->
+            {% if objekt_adresse %}
+                <p>
+                    {% if objekt_adresse.zusatz %}
+                        {{ objekt_adresse.zusatz }}<br>
+                    {% endif %}
+                    {% if not objekt_adresse.postfach %}
+                        {{ objekt_adresse.strasse }}<br>
+                    {% else %}
+                        Postfach {% if objekt_adresse.postfach_nummer %}{{ objekt_adresse.postfach_nummer }}{% endif %}<br>
+                    {% endif %}
+                    {{ objekt_adresse.plz }} {{ objekt_adresse.city }}
+                </p>
+            {% else %}
+            <!-- Adresse (von Mitglied) -->
+                {% if adresse_mitglied %}
+                    <p>
+                        {% if adresse_mitglied.zusatz %}
+                            {{ adresse_mitglied.zusatz }}<br>
+                        {% endif %}
+                        {% if not adresse_mitglied.postfach %}
+                            {{ adresse_mitglied.strasse }}<br>
+                        {% else %}
+                            Postfach {% if adresse_mitglied.postfach_nummer %}{{ adresse_mitglied.postfach_nummer }}{% endif %}<br>
+                        {% endif %}
+                        {{ adresse_mitglied.plz }} {{ adresse_mitglied.city }}
+                    </p>
+                {% endif %}
+            {% endif %}
+            <!-- Mail/Telefon -->
+            {% if kontakt_mitglied %}
+                <p>
+                    {% if kontakt_solidarmitglied.email_id %}{{ kontakt_solidarmitglied.email_id }}<br>{% endif %}
+                    {% if kontakt_solidarmitglied.phone %}{{ kontakt_solidarmitglied.phone }}<br>{% endif %}
+                    {% if kontakt_solidarmitglied.mobile_no %}{{ kontakt_solidarmitglied.mobile_no }}{% endif %}
+                </p>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+<!-- Card Objekt (nur adresse) -->
+{% if objekt_adresse %}
+    <div class="col-sm-{{ col_qty }}">
+        <div class="address-box">
+            <p><b>Objekt</b></p>
+            <!-- Adresse (zwingend Objekt) -->
+            <p>
+                {% if objekt_adresse.zusatz %}
+                    {{ objekt_adresse.zusatz }}<br>
+                {% endif %}
+                {{ objekt_adresse.strasse }}<br>
+                {{ objekt_adresse.plz }} {{ objekt_adresse.city }}
+            </p>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Card Rechnung -->
+{% if rg_sep %}
+    <div class="col-sm-{{ col_qty }}">
+        <div class="address-box">
+            <p><b>Rechnungsadresse</b></p>
+            {% if rg_kunde %}
+                <!-- Unternehmen -->
+                {% if rg_kunde.customer_type == 'Company' %}
+                    <p>
+                        {{ rg_kunde.customer_name }}
+                        {% if rg_kunde.customer_addition %}
+                            <br>{{ rg_kunde.customer_addition }}
+                        {% endif %}
+                    </p>
+                {% endif %}
+                <!-- Anrede/Vorname/Nachname -->
+                {% if rg_kontakt %}
+                    <p>
+                        {% if rg_kontakt.salutation %}
+                            {{ rg_kontakt.salutation }}<br>
+                        {% endif %}
+                        {{ rg_kontakt.first_name or '' }} {{ rg_kontakt.last_name or '' }}
+                    </p>
+                {% endif %}
+            {% endif %}
+            <!-- Adresse -->
+            {% if rg_adresse %}
+                <p>
+                    {% if rg_adresse.zusatz %}
+                        {{ rg_adresse.zusatz }}<br>
+                    {% endif %}
+                    {% if not rg_adresse.postfach %}
+                        {{ rg_adresse.strasse }}<br>
+                    {% else %}
+                        Postfach {% if rg_adresse.postfach_nummer %}{{ rg_adresse.postfach_nummer }}{% endif %}<br>
+                    {% endif %}
+                    {{ rg_adresse.plz }} {{ rg_adresse.city }}
+                </p>
+            {% endif %}
+            <!-- Mail/Telefon -->
+            {% if rg_kontakt %}
+                <p>
+                    {% if rg_kontakt.email_id %}{{ rg_kontakt.email_id }}<br>{% endif %}
+                    {% if rg_kontakt.phone %}{{ rg_kontakt.phone }}<br>{% endif %}
+                    {% if rg_kontakt.mobile_no %}{{ rg_kontakt.mobile_no }}{% endif %}
+                </p>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+</div>
+<!-- Ampel CSS -->
+<style>
+    .css-ampel {
+      display: inline-block;
+      width: 30px;
+      height: 90px;
+      border-radius: 6px;
+      position: relative;
+      background-color: black;
+      zoom: 1.7;
+    }
+
+    .css-ampel span,
+    .css-ampel:before,
+    .css-ampel:after {
+        content: "";
+        color: white;
+        position: absolute;
+        border-radius: 15px;
+        width: 22px;
+        height: 22px;
+        left: 4px;
+    }    
+
+    .css-ampel:before {
+        top: 6px;
+        background-color: red;
+        background-color: dimgrey;
+    }
+
+    .css-ampel:after {
+        top: 34px;
+        background-color: yellow;
+        background-color: dimgrey;
+    }
+
+    .css-ampel span {
+        top: 62px;
+        background-color: green;
+        background-color: dimgrey;
+    }    
+
+    .ampelrot:before {
+        background-color: red;
+        box-shadow: 0 0 20px red;
+    }
+
+    .ampelgelb:after {
+        background-color: yellow;
+        box-shadow: 0 0 20px yellow;
+    }
+
+    .ampelgruen span {
+        background-color: limegreen;
+        box-shadow: 0 0 20px limegreen;
+    }
+</style>

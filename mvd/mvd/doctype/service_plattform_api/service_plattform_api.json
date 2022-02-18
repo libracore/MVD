@@ -1,0 +1,102 @@
+{
+ "creation": "2021-12-16 13:37:26.274902",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "connections",
+  "section_endpoints",
+  "auth_check",
+  "mitglieder",
+  "neue_mitglieder_nummer",
+  "section_danger",
+  "not_get_number_and_id",
+  "no_sp_update",
+  "json_error_log",
+  "queue"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_endpoints",
+   "fieldtype": "Section Break",
+   "label": "Endpoints"
+  },
+  {
+   "fieldname": "auth_check",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Auth Check",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mitglieder",
+   "fieldtype": "Data",
+   "label": "Create/Update Mitglieder",
+   "reqd": 1
+  },
+  {
+   "fieldname": "neue_mitglieder_nummer",
+   "fieldtype": "Data",
+   "label": "Neue Mitgliedernummer",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_danger",
+   "fieldtype": "Section Break",
+   "label": "Danger Zone"
+  },
+  {
+   "default": "0",
+   "fieldname": "not_get_number_and_id",
+   "fieldtype": "Check",
+   "label": "Mitglied Nr. & ID Bezug deaktivieren"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_sp_update",
+   "fieldtype": "Check",
+   "label": "Updates zu SP Deaktivieren"
+  },
+  {
+   "fieldname": "connections",
+   "fieldtype": "Table",
+   "label": "Connections",
+   "options": "Service Plattform API Connection"
+  },
+  {
+   "default": "0",
+   "fieldname": "json_error_log",
+   "fieldtype": "Check",
+   "label": "json Error Log"
+  },
+  {
+   "default": "0",
+   "fieldname": "queue",
+   "fieldtype": "Check",
+   "label": "Queue aktiv"
+  }
+ ],
+ "issingle": 1,
+ "modified": "2022-02-16 23:05:35.332686",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Service Plattform API",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
