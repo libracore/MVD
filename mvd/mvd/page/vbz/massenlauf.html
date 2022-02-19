@@ -9,13 +9,21 @@
         </tr>
         <tr>
             <td>Kündigung</td>
-            <td>{{ kuendigung.qty }}</td>
+            {% if kuendigung.qty > 99 %}
+                <td>99+</td>
+            {% else %}
+                <td>{{ kuendigung.qty }}</td>
+            {% endif %}
             <td>{% if kuendigung.qty > 0 %}<i id="keundigung_qty" class="fa fa-eye"></i>{% endif %}</td>
             <td>{% if kuendigung.qty > 0 %}<i id="kuendigung_print" class="fa fa-file"></i>{% endif %}</td>
         </tr>
         <tr>
             <td>Zuzug (mit und ohne EZ)</td>
-            <td>{{ zuzug.qty }}</td>
+            {% if zuzug.qty > 99 %}
+                <td>99+</td>
+            {% else %}
+                <td>{{ zuzug.qty }}</td>
+            {% endif %}
             <td>{% if zuzug.qty > 0 %}<i id="zuzug_qty" class="fa fa-eye"></i>{% endif %}</td>
             <td>{% if zuzug.qty > 0 %}<i id="zuzug_print" class="fa fa-file"></i>{% endif %}</td>
         </tr>
@@ -27,25 +35,41 @@
         </tr>
         <tr>
             <td>Begrüssung (Online-Beitritt)</td>
-            <td>{{ begruessung_online.qty }}</td>
+            {% if begruessung_online.qty > 99 %}
+                <td>99+</td>
+            {% else %}
+                <td>{{ begruessung_online.qty }}</td>
+            {% endif %}
             <td>{% if begruessung_online.qty > 0 %}<i id="begruessung_online_qty" class="fa fa-eye"></i>{% endif %}</td>
             <td>{% if begruessung_online.qty > 0 %}<i id="begruessung_online_print" class="fa fa-file"></i>{% endif %}</td>
         </tr>
         <tr>
             <td>Korrespondenz</td>
-            <td>{{ korrespondenz.qty }}</td>
+            {% if korrespondenz.qty > 99 %}
+                <td>99+</td>
+            {% else %}
+                <td>{{ korrespondenz.qty }}</td>
+            {% endif %}
             <td>{% if korrespondenz.qty > 0 %}<i id="korrespondenz_qty" class="fa fa-eye"></i>{% endif %}</td>
             <td>{% if korrespondenz.qty > 0 %}<i id="korrespondenz_print" class="fa fa-file"></i>{% endif %}</td>
         </tr>
         <tr>
             <td>Mitgliedschafts-Rechnungen</td>
-            <td>{{ rechnungen.qty }}</td>
+            {% if rechnungen.qty > 99 %}
+                <td>99+</td>
+            {% else %}
+                <td>{{ rechnungen.qty }}</td>
+            {% endif %}
             <td>{% if rechnungen.qty > 0 %}<i id="rechnungen_qty" class="fa fa-eye"></i>{% endif %}</td>
             <td>{% if rechnungen.qty > 0 %}<i id="rechnungen_print" class="fa fa-file"></i>{% endif %}</td>
         </tr>
         <tr>
             <td>Mahnungen</td>
-            <td>{{ mahnungen.qty }}</td>
+            {% if mahnungen.qty > 99 %}
+                <td>99+</td>
+            {% else %}
+                <td>{{ mahnungen.qty }}</td>
+            {% endif %}
             <td>{% if mahnungen.qty > 0 %}<i id="mahnungen_qty" class="fa fa-eye"></i>{% endif %}</td>
             <td>{% if mahnungen.qty > 0 %}<i id="mahnungen_print" class="fa fa-file"></i>{% endif %}</td>
         </tr>

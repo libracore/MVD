@@ -14,9 +14,7 @@ frappe.vbz = {
     add_views: function(page) {
         frappe.call({
             'method': "mvd.mvd.page.vbz.vbz.get_open_data",
-            'args': {
-                'sektion': frappe.vbz.get_default_sektion()
-            },
+            'args': {},
             'freeze': true,
             'freeze_message': 'Lade Verarbeitungszentrale...',
             'async': false,
@@ -76,15 +74,11 @@ frappe.vbz = {
     add_click_handlers: function(open_datas) {
         frappe.vbz.remove_click_handlers();
         $("#camt").click(function(){
-            var default_sektion = frappe.vbz.get_default_sektion();
-            if (default_sektion) {
-                frappe.route_options = {"sektion_id": default_sektion};
-            } else {
-                frappe.route_options = {};
-            }
+            frappe.route_options = {"status": ['!=', 'Closed']};
             frappe.set_route("List", "CAMT Import", "List");
         });
         $("#mahnung").click(function(){
+            frappe.route_options = {"docstatus": 0};
             frappe.set_route("List", "Mahnung", "List");
         });
         $("#goto_klassisch").click(function(){
@@ -117,12 +111,7 @@ frappe.vbz = {
             window.open('https://wiki.mieterverband.ch/pages/viewpage.action?pageId=74744863', '_blank').focus();
         });
         $("#mitglieder").click(function(){
-            var default_sektion = frappe.vbz.get_default_sektion();
-            if (default_sektion) {
-                frappe.route_options = {"sektion_id": default_sektion};
-            } else {
-                frappe.route_options = {};
-            }
+            frappe.route_options = {};
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#suchmaske").click(function(){
@@ -139,7 +128,7 @@ frappe.vbz = {
             frappe.set_route("List", "Termin", "List");
         });
         $("#todo").click(function(){
-            frappe.route_options = {"owner": ['in', open_datas.todo.todo_users], 'status': 'Open'};
+            frappe.route_options = {'status': 'Open'};
             frappe.set_route("List", "ToDo", "List");
         });
         $("#validieren").click(function(){
@@ -155,23 +144,23 @@ frappe.vbz = {
         
         // validierungen
         $("#online_beitritte").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.validierung.online_beitritt.names], "validierung_notwendig": 1}
+            frappe.route_options = {"status_c": 'Online-Beitritt', "validierung_notwendig": 1}
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#online_anmeldungen").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.validierung.online_anmeldung.names], "validierung_notwendig": 1}
+            frappe.route_options = {"status_c": 'Online-Anmeldung', "validierung_notwendig": 1}
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#online_kuendigungen").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.validierung.online_kuendigung.names], "validierung_notwendig": 1}
+            frappe.route_options = {"status_c": 'Online-Kündigung', "validierung_notwendig": 1}
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#zuzuege").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.validierung.zuzug.names], "validierung_notwendig": 1}
+            frappe.route_options = {"status_c": 'Zuzug', "validierung_notwendig": 1}
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#online_mutationen").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.validierung.online_mutation.names], "validierung_notwendig": 1}
+            frappe.route_options = {"status_c": 'Online-Mutation', "validierung_notwendig": 1}
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#geschenk_mitgliedschaften").click(function(){
@@ -183,14 +172,14 @@ frappe.vbz = {
         
         // massenlauf
         $("#keundigung_qty").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.kuendigung_massenlauf.names], 'kuendigung_verarbeiten': 1}
+            frappe.route_options = {"kuendigung_verarbeiten": 1, 'kuendigung_verarbeiten': 1}
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#kuendigung_print").click(function(){
             frappe.vbz.kuendigung_massenlauf();
         });
         $("#zuzug_qty").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.zuzug_massenlauf.names], 'zuzug_massendruck': 1}
+            frappe.route_options = {"zuzug_massendruck": 1, 'zuzug_massendruck': 1}
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#zuzug_print").click(function(){
@@ -210,38 +199,26 @@ frappe.vbz = {
             frappe.vbz.korrespondenz_massenlauf();
         });
         $("#rechnungen_qty").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.rg_massenlauf.names], 'rg_massendruck_vormerkung': 1}
+            frappe.route_options = {"rg_massendruck_vormerkung": 1, 'rg_massendruck_vormerkung': 1}
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#rechnungen_print").click(function(){
             frappe.vbz.rg_massenlauf();
         });
         $("#begruessung_online_qty").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.begruessung_online_massenlauf.names], 'begruessung_massendruck': 1}
+            frappe.route_options = {"begruessung_massendruck": 1, 'begruessung_massendruck': 1}
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#begruessung_online_print").click(function(){
             frappe.vbz.begruessung_online_massenlauf();
         });
         $("#mahnungen_qty").click(function(){
-            frappe.route_options = {"name": ['in', open_datas.mahnung_massenlauf.names], 'massenlauf': 1}
+            frappe.route_options = {"docstatus": 1, 'massenlauf': 1}
             frappe.set_route("List", "Mahnung", "List");
         });
         $("#mahnungen_print").click(function(){
             frappe.vbz.mahnung_massenlauf();
         });
-    },
-    get_default_sektion: function() {
-        var default_sektion = '';
-        if (frappe.defaults.get_user_permissions()["Sektion"]) {
-            var sektionen = frappe.defaults.get_user_permissions()["Sektion"];
-            sektionen.forEach(function(entry) {
-                if (entry.is_default == 1) {
-                    default_sektion = entry.doc;
-                }
-            });
-        }
-        return default_sektion
     },
     korrespondenz_massenlauf: function() {
         frappe.dom.freeze('Erstelle Sammel-PDF...');
