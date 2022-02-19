@@ -33,6 +33,7 @@
   "default_customer",
   "cb_5",
   "account",
+  "zwischen_konto",
   "section_fusszeile",
   "fz_links",
   "cb_2",
@@ -254,9 +255,15 @@
    "fieldtype": "Link",
    "label": "Virtueller User",
    "options": "User"
+  },
+  {
+   "fieldname": "zwischen_konto",
+   "fieldtype": "Link",
+   "label": "Zwischen Konto",
+   "options": "Account"
   }
  ],
- "modified": "2022-02-18 11:26:36.753520",
+ "modified": "2022-02-19 15:39:03.181640",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

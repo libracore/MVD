@@ -42,6 +42,7 @@
   "wegzug",
   "zahlung_hv",
   "zahlung_mitgliedschaft",
+  "bezahltes_mitgliedschaftsjahr",
   "naechstes_jahr_geschuldet",
   "ampel_farbe",
   "cb_1",
@@ -994,10 +995,17 @@
    "fieldname": "region_manuell",
    "fieldtype": "Check",
    "label": "Region manuell festgelegt"
+  },
+  {
+   "default": "0",
+   "fieldname": "bezahltes_mitgliedschaftsjahr",
+   "fieldtype": "Int",
+   "label": "Bezahltes Mitgliedschaftsjahr",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-17 20:25:08.118723",
+ "modified": "2022-02-19 14:43:07.137750",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
