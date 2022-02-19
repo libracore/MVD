@@ -19,7 +19,11 @@
             <i class="fa fa-tasks blue-icon"></i>
             <p>ToDo</p>
             {% if todo.qty > 0 %}
-                <div class="vbz-indikator"><span>{{ todo.qty }}</span></div>
+                {% if todo.qty > 99 %}
+                    <div class="vbz-indikator"><span>99+</span></div>
+                {% else %}
+                    <div class="vbz-indikator"><span>{{ todo.qty }}</span></div>
+                {% endif %}
             {% endif %}
         </center>
     </div>
@@ -28,7 +32,11 @@
             <i class="fa fa-calendar-check-o blue-icon"></i>
             <p>Termine</p>
             {% if termin.qty > 0 %}
-                <div class="vbz-indikator"><span>{{ termin.qty }}</span></div>
+                {% if termin.qty > 99 %}
+                <div class="vbz-indikator"><span>99+</span></div>
+                {% else %}
+                    <div class="vbz-indikator"><span>{{ termin.qty }}</span></div>
+                {% endif %}
             {% endif %}
         </center>
     </div>
@@ -54,7 +62,11 @@
             <i class="fa fa-check-square green-icon"></i>
             <p>Validieren</p>
             {% if validierung.qty > 0 %}
-                <div class="vbz-indikator"><span>{{ validierung.qty }}</span></div>
+                {% if validierung.qty > 99 %}
+                    <div class="vbz-indikator"><span>99+</span></div>
+                {% else %}
+                    <div class="vbz-indikator"><span>{{ validierung.qty }}</span></div>
+                {% endif %}
             {% endif %}
         </center>
     </div>
@@ -63,7 +75,11 @@
             <i class="fa fa-list-ol green-icon"></i>
             <p>Arbeits Backlog</p>
             {% if arbeits_backlog.qty > 0 %}
-                <div class="vbz-indikator"><span>{{ arbeits_backlog.qty }}</span></div>
+                {% if arbeits_backlog.qty > 99 %}
+                    <div class="vbz-indikator"><span>99+</span></div>
+                {% else %}
+                    <div class="vbz-indikator"><span>{{ arbeits_backlog.qty }}</span></div>
+                {% endif %}
             {% endif %}
         </center>
     </div>
@@ -72,7 +88,11 @@
             <i class="fa fa-print green-icon"></i>
             <p>Massenlauf</p>
             {% if massenlauf_total > 0 %}
-                <div class="vbz-indikator"><span>{{ massenlauf_total }}</span></div>
+                {% if massenlauf_total > 99 %}
+                    <div class="vbz-indikator"><span>99+</span></div>
+                {% else %}
+                    <div class="vbz-indikator"><span>{{ massenlauf_total }}</span></div>
+                {% endif %}
             {% endif %}
         </center>
     </div>
@@ -95,7 +115,6 @@
             <i class="fa fa-university green-icon"></i>
             <p>
                 CAMT einlesen<br>
-                Letzter import:<br>
                 {{ last_camt_import }}
             </p>
         </center>

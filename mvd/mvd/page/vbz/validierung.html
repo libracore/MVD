@@ -8,19 +8,35 @@
         </tr>
         <tr id="online_beitritte">
             <td>Online-Beitritte</td>
-            <td>{{ online_beitritt.qty }}</td>
+            {% if online_beitritt.qty > 99 %}
+                <td>99+</td>
+            {% else %}
+                <td>{{ online_beitritt.qty }}</td>
+            {% endif %}
         </tr>
         <tr id="online_anmeldungen">
             <td>Online-Anmeldungen</td>
-            <td>{{ online_anmeldung.qty }}</td>
+            {% if online_anmeldung.qty > 99 %}
+                <td>99+</td>
+            {% else %}
+                <td>{{ online_anmeldung.qty }}</td>
+            {% endif %}
         </tr>
         <tr id="online_kuendigungen">
             <td>Online-Kündigungen</td>
-            <td>{{ online_kuendigung.qty }}</td>
+            {% if online_kuendigung.qty > 99 %}
+                <td>99+</td>
+            {% else %}
+                <td>{{ online_kuendigung.qty }}</td>
+            {% endif %}
         </tr>
         <tr id="online_mutationen">
             <td>Online-Mutationen</td>
-            <td>{{ online_mutation.qty }}</td>
+            {% if online_mutation.qty > 99 %}
+                <td>99+</td>
+            {% else %}
+                <td>{{ online_mutation.qty }}</td>
+            {% endif %}
         </tr>
         <tr id="geschenk_mitgliedschaften">
             <td>Geschenk-Mitgliedschaften</td>
@@ -28,7 +44,11 @@
         </tr>
         <tr id="zuzuege">
             <td>Zuzüge</td>
-            <td>{{ zuzug.qty }}</td>
+            {% if zuzug.qty > 99 %}
+                <td>99+</td>
+            {% else %}
+                <td>{{ zuzug.qty }}</td>
+            {% endif %}
         </tr>
         <tr id="autom_adressaenderungen">
             <td>Automatische Adressänderungen (Post)</td>

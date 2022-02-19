@@ -83,9 +83,9 @@ extend_bootinfo = "mvd.mvd.utils.mvd_bootinfo.boot_session"
 # -----------
 # Permissions evaluated in scripted ways
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
+permission_query_conditions = {
+    "ToDo": "mvd.mvd.utils.notifications.get_todo_permission_query_conditions"
+}
 #
 # has_permission = {
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",

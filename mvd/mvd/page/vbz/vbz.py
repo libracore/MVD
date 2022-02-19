@@ -9,340 +9,76 @@ from frappe.utils.data import add_days, getdate, now, today, now_datetime
 from frappe.utils.pdf import get_file_data_from_writer
 
 @frappe.whitelist()
-def get_open_data(sektion=None):
-    allowed_sektionen = frappe.get_list('Sektion', fields=['name'])
-    sektionen = "x,"
-    for _sektion in allowed_sektionen:
-        sektionen += ",'" + _sektion.name + "'"
-    sektionen = sektionen.replace("x,,", "")
-    sektion_filter = " AND `sektion_id` IN ({sektionen})".format(sektionen=sektionen)
+def get_open_data():
     
-    # arbeits backlog
-    abl_qty = frappe.db.sql("""SELECT
-                                    COUNT(`name`) AS `qty`
-                                FROM `tabArbeits Backlog`
-                                WHERE `status` = 'Open'
-                                {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    
-    # termine
-    termin_qty = frappe.db.sql("""SELECT
-                                    COUNT(`name`) AS `qty`
-                                FROM `tabTermin`
-                                WHERE `von` >= CURDATE()
-                                {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    
-    # ToDo
-    allowed_sektionen = frappe.get_list('Sektion', fields=['virtueller_user'])
-    todo_users = "'" + str(frappe.session.user) + "'"
-    for allowed_sektion in allowed_sektionen:
-        if allowed_sektion.virtueller_user:
-            todo_users += ",'" + allowed_sektion.virtueller_user + "'"
-    
-    todo_qty = frappe.db.sql("""SELECT
-                                    COUNT(`name`) AS `qty`
-                                FROM `tabToDo`
-                                WHERE `status` = 'Open'
-                                AND `owner` IN ({todo_users})""".format(todo_users=todo_users), as_dict=True)[0].qty
-    
-    # Validierung
-    validierung_total = frappe.db.sql("""SELECT
-                                            COUNT(`name`) AS `qty`
-                                        FROM `tabMitgliedschaft`
-                                        WHERE `validierung_notwendig` = 1
-                                        {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    v_online_beitritt_qty = frappe.db.sql("""SELECT
-                                            COUNT(`name`) AS `qty`
-                                        FROM `tabMitgliedschaft`
-                                        WHERE `validierung_notwendig` = 1
-                                        AND `status_c` = 'Online-Beitritt'
-                                        {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    _v_online_beitritt = frappe.db.sql("""SELECT
-                                            `name`
-                                        FROM `tabMitgliedschaft`
-                                        WHERE `validierung_notwendig` = 1
-                                        AND `status_c` = 'Online-Beitritt'
-                                        {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
-    v_online_beitritt = 'x'
-    for online_beitritt in _v_online_beitritt:
-        v_online_beitritt += ',' + online_beitritt.name
-    if len(_v_online_beitritt) > 0:
-        v_online_beitritt = v_online_beitritt.replace("x,", "")
-    else:
-        v_online_beitritt = ''
-    
-    v_online_anmeldung_qty = frappe.db.sql("""SELECT
-                                            COUNT(`name`) AS `qty`
-                                        FROM `tabMitgliedschaft`
-                                        WHERE `validierung_notwendig` = 1
-                                        AND `status_c` = 'Online-Anmeldung'
-                                        {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    _v_online_anmeldung = frappe.db.sql("""SELECT
-                                            `name`
-                                        FROM `tabMitgliedschaft`
-                                        WHERE `validierung_notwendig` = 1
-                                        AND `status_c` = 'Online-Anmeldung'
-                                        {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
-    v_online_anmeldung = 'x'
-    for online_anmeldung in _v_online_anmeldung:
-        v_online_anmeldung += ',' + online_anmeldung.name
-    if len(_v_online_anmeldung) > 0:
-        v_online_anmeldung = v_online_anmeldung.replace("x,", "")
-    else:
-        v_online_anmeldung = ''
-    
-    v_online_kuendigung_qty = frappe.db.sql("""SELECT
-                                            COUNT(`name`) AS `qty`
-                                        FROM `tabMitgliedschaft`
-                                        WHERE `validierung_notwendig` = 1
-                                        AND `status_c` = 'Online-Kündigung'
-                                        {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    _v_online_kuendigung = frappe.db.sql("""SELECT
-                                            `name`
-                                        FROM `tabMitgliedschaft`
-                                        WHERE `validierung_notwendig` = 1
-                                        AND `status_c` = 'Online-Kündigung'
-                                        {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
-    v_online_kuendigung = 'x'
-    for online_kuendigung in _v_online_kuendigung:
-        v_online_kuendigung += ',' + online_kuendigung.name
-    if len(_v_online_kuendigung) > 0:
-        v_online_kuendigung = v_online_kuendigung.replace("x,", "")
-    else:
-        v_online_kuendigung = ''
-    
-    v_online_mutation_qty = frappe.db.sql("""SELECT
-                                            COUNT(`name`) AS `qty`
-                                        FROM `tabMitgliedschaft`
-                                        WHERE `validierung_notwendig` = 1
-                                        AND `status_c` = 'Online-Mutation'
-                                        {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    _v_online_mutation = frappe.db.sql("""SELECT
-                                            `name`
-                                        FROM `tabMitgliedschaft`
-                                        WHERE `validierung_notwendig` = 1
-                                        AND `status_c` = 'Online-Mutation'
-                                        {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
-    v_online_mutation = 'x'
-    for online_mutation in _v_online_mutation:
-        v_online_mutation += ',' + online_mutation.name
-    if len(_v_online_mutation) > 0:
-        v_online_mutation = v_online_mutation.replace("x,", "")
-    else:
-        v_online_mutation = ''
-    
-    v_zuzug_qty = frappe.db.sql("""SELECT
-                                        COUNT(`name`) AS `qty`
-                                    FROM `tabMitgliedschaft`
-                                    WHERE `validierung_notwendig` = 1
-                                    AND `status_c` = 'Zuzug'
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    _v_zuzug = frappe.db.sql("""SELECT
-                                        `name`
-                                    FROM `tabMitgliedschaft`
-                                    WHERE `validierung_notwendig` = 1
-                                    AND `status_c` = 'Zuzug'
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
-    v_zuzug = 'x'
-    for zuzug in _v_zuzug:
-        v_zuzug += ',' + zuzug.name
-    if len(_v_zuzug) > 0:
-        v_zuzug = v_zuzug.replace("x,", "")
-    else:
-        v_zuzug = ''
-    
-    # kündigung massenlauf
-    kuendigung_qty = frappe.db.sql("""SELECT
-                                        COUNT(`name`) AS `qty`
-                                    FROM `tabMitgliedschaft`
-                                    WHERE `kuendigung_verarbeiten` = 1
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    _kuendigung = frappe.db.sql("""SELECT
-                                        `name`
-                                    FROM `tabMitgliedschaft`
-                                    WHERE `kuendigung_verarbeiten` = 1
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
-    kuendigung = 'x'
-    for k in _kuendigung:
-        kuendigung += ',' + k.name
-    if len(_kuendigung) > 0:
-        kuendigung = kuendigung.replace("x,", "")
-    else:
-        kuendigung = ''
-    
-    # korrespondenz massenlauf
-    korrespondenz_qty = frappe.db.sql("""SELECT
-                                        COUNT(`name`) AS `qty`
-                                    FROM `tabKorrespondenz`
-                                    WHERE `massenlauf` = 1
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    _korrespondenz = frappe.db.sql("""SELECT
-                                        `name`
-                                    FROM `tabKorrespondenz`
-                                    WHERE `massenlauf` = 1
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
-    korrespondenz = 'x'
-    for k in _korrespondenz:
-        korrespondenz += ',' + k.name
-    if len(_korrespondenz) > 0:
-        korrespondenz = korrespondenz.replace("x,", "")
-    else:
-        korrespondenz = ''
-    
-    # zuzugs massenlauf
-    zuzug_qty = frappe.db.sql("""SELECT
-                                        COUNT(`name`) AS `qty`
-                                    FROM `tabMitgliedschaft`
-                                    WHERE `zuzug_massendruck` = 1
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    _zuzug = frappe.db.sql("""SELECT
-                                        `name`
-                                    FROM `tabMitgliedschaft`
-                                    WHERE `zuzug_massendruck` = 1
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
-    zuzug = 'x'
-    for z in _zuzug:
-        zuzug += ',' + z.name
-    if len(_zuzug) > 0:
-        zuzug = zuzug.replace("x,", "")
-    else:
-        zuzug = ''
-    
-    # mitgliedschaftsrechnung massenlauf
-    rg_massendruck_qty = frappe.db.sql("""SELECT
-                                        COUNT(`name`) AS `qty`
-                                    FROM `tabMitgliedschaft`
-                                    WHERE `rg_massendruck_vormerkung` = 1
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    _rg_massendruck = frappe.db.sql("""SELECT
-                                        `name`
-                                    FROM `tabMitgliedschaft`
-                                    WHERE `rg_massendruck_vormerkung` = 1
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
-    rg_massendruck = 'x'
-    for rgm in _rg_massendruck:
-        rg_massendruck += ',' + rgm.name
-    if len(_rg_massendruck) > 0:
-        rg_massendruck = rg_massendruck.replace("x,", "")
-    else:
-        rg_massendruck = ''
-    
-    # begruessung_online massenlauf
-    begruessung_online_qty = frappe.db.sql("""SELECT
-                                        COUNT(`name`) AS `qty`
-                                    FROM `tabMitgliedschaft`
-                                    WHERE `begruessung_massendruck` = 1
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    _begruessung_online = frappe.db.sql("""SELECT
-                                        `name`
-                                    FROM `tabMitgliedschaft`
-                                    WHERE `begruessung_massendruck` = 1
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
-    begruessung_online = 'x'
-    for bo in _begruessung_online:
-        begruessung_online += ',' + bo.name
-    if len(_begruessung_online) > 0:
-        begruessung_online = begruessung_online.replace("x,", "")
-    else:
-        begruessung_online = ''
-    
-    # mahnung massenlauf
-    mahnung_qty = frappe.db.sql("""SELECT
-                                        COUNT(`name`) AS `qty`
-                                    FROM `tabMahnung`
-                                    WHERE `massenlauf` = 1
-                                    AND `docstatus` = 1
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)[0].qty
-    _mahnung = frappe.db.sql("""SELECT
-                                        `name`
-                                    FROM `tabMahnung`
-                                    WHERE `massenlauf` = 1
-                                    AND `docstatus` = 1
-                                    {sektion_filter}""".format(sektion_filter=sektion_filter), as_dict=True)
-    mahnung = 'x'
-    for m in _mahnung:
-        mahnung += ',' + m.name
-    if len(_mahnung) > 0:
-        mahnung = mahnung.replace("x,", "")
-    else:
-        mahnung = ''
-    
+    kuendigung_qty = len(frappe.get_list('Mitgliedschaft', fields='name', filters={'kuendigung_verarbeiten': 1}, limit=100, distinct=True, ignore_ifnull=True))
+    korrespondenz_qty = len(frappe.get_list('Korrespondenz', fields='name', filters={'massenlauf': 1}, limit=100, distinct=True, ignore_ifnull=True))
+    zuzug_qty = len(frappe.get_list('Mitgliedschaft', fields='name', filters={'zuzug_massendruck': 1}, limit=100, distinct=True, ignore_ifnull=True))
+    rg_massendruck_qty = len(frappe.get_list('Mitgliedschaft', fields='name', filters={'rg_massendruck_vormerkung': 1}, limit=100, distinct=True, ignore_ifnull=True))
+    begruessung_online_qty = len(frappe.get_list('Mitgliedschaft', fields='name', filters={'begruessung_massendruck': 1}, limit=100, distinct=True, ignore_ifnull=True))
+    mahnung_qty = len(frappe.get_list('Mahnung', fields='name', filters={'massenlauf': 1, 'docstatus': 1}, limit=100, distinct=True, ignore_ifnull=True))
     # massenlauf total
     massenlauf_total = kuendigung_qty + korrespondenz_qty + zuzug_qty + rg_massendruck_qty + begruessung_online_qty + mahnung_qty
     
     # letzter CAMT Import
-    _last_camt_import = frappe.db.sql("""SELECT
-                                        `creation`
-                                    FROM `tabCAMT Import`
-                                    WHERE `status` != 'Open'
-                                    {sektion_filter}
-                                    ORDER BY `creation` DESC""".format(sektion_filter=sektion_filter), as_dict=True)
-    if len(_last_camt_import) > 0:
-        last_camt_import = getdate(_last_camt_import[0].creation).strftime("%d.%m.%Y")
+    last_camt_import = frappe.get_list('CAMT Import', fields='creation', filters={'status': ['!=', 'Open']}, order_by='creation DESC', ignore_ifnull=True)
+    if len(last_camt_import) > 0:
+        last_camt_import = 'Letzer Import:<br>' + getdate(last_camt_import[0].creation).strftime("%d.%m.%Y")
     else:
         last_camt_import = ''
     
-    return {
-        'arbeits_backlog': {
-            'qty': abl_qty
-        },
-        'todo': {
-            'qty': todo_qty,
-            'todo_users': todo_users.replace("'", "")
-        },
-        'termin': {
-            'qty': termin_qty
-        },
+    open_data = {
         'massenlauf_total': massenlauf_total,
         'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'last_camt_import': last_camt_import,
+        'arbeits_backlog': {
+            'qty': len(frappe.get_list('Arbeits Backlog', fields='name', filters={'status': 'Open'}, limit=100, distinct=True, ignore_ifnull=True))
+        },
+        'todo': {
+            'qty': len(frappe.get_list('ToDo', fields='name', filters={'status': 'Open'}, limit=100, distinct=True, ignore_ifnull=True))
+        },
+        'termin': {
+            'qty': len(frappe.get_list('Termin', fields='name', filters={'von': ['>', today()]}, limit=100, distinct=True, ignore_ifnull=True))
+        },
         'validierung': {
-            'qty': validierung_total,
+            'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1}, limit=100, distinct=True, ignore_ifnull=True)),
             'online_beitritt': {
-                'qty': v_online_beitritt_qty,
-                'names': v_online_beitritt
+                'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Online-Beitritt'}, limit=100, distinct=True, ignore_ifnull=True))
             },
             'online_anmeldung': {
-                'qty': v_online_anmeldung_qty,
-                'names': v_online_anmeldung
+                'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Online-Anmeldung'}, limit=100, distinct=True, ignore_ifnull=True))
             },
             'online_kuendigung': {
-                'qty': v_online_kuendigung_qty,
-                'names': v_online_kuendigung
+                'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Online-Kündigung'}, limit=100, distinct=True, ignore_ifnull=True))
             },
             'online_mutation': {
-                'qty': v_online_mutation_qty,
-                'names': v_online_mutation
+                'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Online-Mutation'}, limit=100, distinct=True, ignore_ifnull=True))
             },
             'zuzug': {
-                'qty': v_zuzug_qty,
-                'names': v_zuzug
+                'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Zuzug'}, limit=100, distinct=True, ignore_ifnull=True))
             }
         },
         'kuendigung_massenlauf': {
-            'qty': kuendigung_qty,
-            'names': kuendigung
+            'qty': kuendigung_qty
         },
         'korrespondenz_massenlauf': {
-            'qty': korrespondenz_qty,
-            'names': korrespondenz
+            'qty': korrespondenz_qty
         },
         'zuzug_massenlauf': {
-            'qty': zuzug_qty,
-            'names': zuzug
+            'qty': zuzug_qty
         },
         'rg_massenlauf': {
-            'qty': rg_massendruck_qty,
-            'names': rg_massendruck
+            'qty': rg_massendruck_qty
         },
         'begruessung_online_massenlauf': {
-            'qty': begruessung_online_qty,
-            'names': begruessung_online
+            'qty': begruessung_online_qty
         },
         'mahnung_massenlauf': {
-            'qty': mahnung_qty,
-            'names': mahnung
+            'qty': mahnung_qty
         }
     }
+    
+    return open_data
 
 @frappe.whitelist()
 def korrespondenz_massenlauf():

@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from mvd.mvd.service_plattform.api import update_mvm
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import prepare_mvm_for_sp
-from frappe.utils.background_jobs import enqueu
+from frappe.utils.background_jobs import enqueue
 
 class ServicePlatformQueue(Document):
     pass

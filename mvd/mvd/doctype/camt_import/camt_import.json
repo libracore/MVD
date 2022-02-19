@@ -24,8 +24,6 @@
   "show_matched_payments",
   "anz_submitted_payments",
   "show_submitted_payments",
-  "anz_overpaid",
-  "show_overpaid",
   "cb_2",
   "anz_deleted_payments",
   "show_canceled_payments",
@@ -33,6 +31,12 @@
   "show_unassigned",
   "anz_unsubmitted_payments",
   "show_unsubmitted_payments",
+  "section_ungebucht",
+  "gebucht_weggezogen",
+  "show_wegzuege",
+  "cb_3",
+  "anz_overpaid",
+  "show_overpaid",
   "anz_doppelte_mitgliedschaft",
   "show_doppelte_mitgliedschaft",
   "section_import",
@@ -283,9 +287,29 @@
    "fieldname": "show_doppelte_mitgliedschaft",
    "fieldtype": "Button",
    "label": "Zeige Doppelte Mitgliedschaft"
+  },
+  {
+   "fieldname": "section_ungebucht",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "gebucht_weggezogen",
+   "fieldtype": "Int",
+   "label": "Gebuchte Zahlungen (Wegz\u00fcge)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "show_wegzuege",
+   "fieldtype": "Button",
+   "label": "Zeige gebuchte Zahlungen Wegz\u00fcge"
   }
  ],
- "modified": "2022-02-15 16:57:52.759711",
+ "modified": "2022-02-18 23:55:47.107716",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",

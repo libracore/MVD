@@ -42,6 +42,10 @@ frappe.ui.form.on('Mitgliedschaft', {
                     }, __("Erstelle"));
                 }
             }
+            frm.add_custom_button(__("Zahlungen"),  function() {
+                frappe.route_options = {"party": cur_frm.doc.rg_kunde ? cur_frm.doc.rg_kunde:cur_frm.doc.kunde_mitglied}
+                frappe.set_route("List", "Payment Entry", "List");
+            });
             if (cur_frm.doc.validierung_notwendig) {
                 if (cur_frm.doc.status_c == 'Online-Kündigung') {
                     frm.add_custom_button(__("Online-Kündigung verarbeiten"),  function() {

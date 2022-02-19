@@ -123,6 +123,12 @@ frappe.ui.form.on('CAMT Import', {
             "docstatus": 2
         }
         frappe.set_route("List", "Payment Entry");
+    },
+    show_doppelte_mitgliedschaft: function(frm) {
+        frappe.route_options = {
+            "name": ["in", eval(cur_frm.doc.doppelte_mitgliedschaft)]
+        }
+        frappe.set_route("List", "Payment Entry");
     }
 });
 
