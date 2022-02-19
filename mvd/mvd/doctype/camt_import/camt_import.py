@@ -15,6 +15,7 @@ import re
 import six
 from frappe.utils.background_jobs import enqueue
 from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_unpaid_sinv
+from decimal import Decimal, ROUND_HALF_UP
 
 class CAMTImport(Document):
     pass
@@ -434,6 +435,7 @@ def update_camt_import_record(camt_import, master_data, aktualisierung=False):
     camt_import.anz_overpaid = len(master_data['overpaid'])
     camt_import.anz_doppelte_mitgliedschaft = len(master_data['doppelte_mitgliedschaft'])
     camt_import.gebucht_weggezogen = len(master_data['gebucht_weggezogen'])
+    camt_import.gebucht_weggezogen_list = str(master_data['gebucht_weggezogen'])
     camt_import.importet_payments = str(master_data['imported_payments'])
     camt_import.matched_payments = str(master_data['assigned_payments'])
     camt_import.unmatched_payments = str(master_data['unassigned_payments'])
@@ -445,6 +447,7 @@ def update_camt_import_record(camt_import, master_data, aktualisierung=False):
     camt_import.errors = str(master_data['errors'])
     camt_import.master_data = str(master_data)
     camt_import.save()
+    erstelle_report(camt_import.name)
     
     if not aktualisierung:
         frappe.publish_realtime('msgprint', 'Verarbeitung CAMT Import {0} beendet'.format(camt_import.name))
@@ -579,4 +582,130 @@ def mit_folgejahr_ausgleichen(pe):
     payment_entry.save()
     payment_entry.submit()
     return
+
+@frappe.whitelist()
+def rueckzahlung(pe):
+    payment_entry = frappe.get_doc("Payment Entry", pe)
+    row = payment_entry.append('deductions', {})
+    row.amount = payment_entry.unallocated_amount * -1
+    row.account = frappe.get_value("Sektion", payment_entry.sektion_id, "zwischen_konto")
+    row.cost_center = frappe.get_value("Company", payment_entry.company, "cost_center")
+    payment_entry.unallocated_amount = 0
+    payment_entry.save()
+    payment_entry.submit()
+    return
     
+@frappe.whitelist()
+def erstelle_report(camt):
+    camt_record = frappe.get_doc("CAMT Import", camt)
+    
+    allgemein = {
+        'filename': str(camt_record.camt_file).split("/")[3],
+        'filedatum': '',
+        'taxen': 0,
+        'anzahl': 0,
+        'total': 0,
+        'sammlungen': []
+    }
+    
+    verbuchte_zahlungen = {
+        'mitgliedschaften': 0,
+        'fremd_sektionen': 0,
+        'haftpflicht': 0,
+        'spenden': 0,
+        'anzahl': 0,
+        'total': 0
+    }
+    
+    nicht_verbuchte_zahlungen = {
+        'doppelt_bezahlt': 0,
+        'ueberzahlt': 0,
+        'unbekannte_referenz': 0,
+        'anzahl': 0,
+        'total': 0
+    }
+    
+    physical_path = "/home/frappe/frappe-bench/sites/{0}{1}".format(frappe.local.site_path.replace("./", ""), camt_record.camt_file)
+    with open(physical_path, 'r') as f:
+        content = f.read()
+    soup = BeautifulSoup(content, 'lxml')
+    allgemein['filedatum'] = frappe.utils.get_datetime(soup.document.bktocstmrdbtcdtntfctn.grphdr.credttm.get_text().split("T")[0]).strftime('%d.%m.%Y')
+    transaction_entries = soup.find_all('ntry')
+    for entry in transaction_entries:
+        entry_soup = BeautifulSoup(six.text_type(entry), 'lxml')
+        date = entry_soup.bookgdt.dt.get_text()
+        transactions = entry_soup.find_all('txdtls')
+        # fetch entry amount as fallback
+        entry_amount = float(entry_soup.amt.get_text())
+        allgemein['sammlungen'].append('Datum: ' + frappe.utils.get_datetime(date).strftime('%d.%m.%Y') + ", Betrag: " + "{:,.2f}".format(proper_round(entry_amount, Decimal('0.01'))).replace(",", "'"))
+        for transaction in transactions:
+            transaction_soup = BeautifulSoup(six.text_type(transaction), 'lxml')
+            unique_reference = transaction_soup.refs.acctsvcrref.get_text()
+            allgemein['total'] += float(transaction_soup.amt.get_text())
+            allgemein['anzahl'] += 1
+            try:
+                allgemein['taxen'] += float(transaction_soup.chrgs.ttlchrgsandtaxamt.get_text())
+            except:
+                allgemein['taxen'] += 0.0
+            _pe = frappe.db.sql("""SELECT `name` FROM `tabPayment Entry` WHERE `reference_no` = '{unique_reference}'""".format(unique_reference=unique_reference), as_dict=True)
+            try:
+                pe = frappe.get_doc("Payment Entry", _pe[0].name)
+                if pe.docstatus == 1:
+                    verbuchte_zahlungen['total'] += float(pe.paid_amount)
+                    verbuchte_zahlungen['anzahl'] += 1
+                    for _sinv in pe.references:
+                        sinv = frappe.get_doc("Sales Invoice", _sinv.reference_name)
+                        if camt_record.sektion_id == pe.sektion_id:
+                            if sinv.ist_mitgliedschaftsrechnung:
+                                verbuchte_zahlungen['mitgliedschaften'] += 1
+                            elif sinv.ist_hv_rechnung:
+                                verbuchte_zahlungen['haftpflicht'] += 1
+                            elif sinv.ist_spenden_rechnung:
+                                verbuchte_zahlungen['spenden'] += 1
+                        else:
+                            verbuchte_zahlungen['fremd_sektionen'] += 1
+                else:
+                    nicht_verbuchte_zahlungen['total'] += float(pe.paid_amount)
+                    nicht_verbuchte_zahlungen['anzahl'] += 1
+                    if pe.name in eval(camt_record.overpaid):
+                        nicht_verbuchte_zahlungen['ueberzahlt'] += 1
+                    elif pe.name in eval(camt_record.doppelte_mitgliedschaft):
+                        nicht_verbuchte_zahlungen['doppelt_bezahlt'] += 1
+                    elif pe.name in eval(camt_record.unmatched_payments):
+                        nicht_verbuchte_zahlungen['unbekannte_referenz'] += 1
+                    
+            except:
+                pass
+    
+    template_data = {
+        'sektion': camt_record.sektion_id,
+        'allgemein': {
+            'filename': allgemein['filename'],
+            'filedatum': allgemein['filedatum'],
+            'taxen': "{:,.2f}".format(proper_round(allgemein['taxen'], Decimal('0.01'))).replace(",", "'"),
+            'anzahl': str(allgemein['anzahl']),
+            'total': "{:,.2f}".format(proper_round(allgemein['total'], Decimal('0.01'))).replace(",", "'")
+        },
+        'verbuchte_zahlungen': {
+            'mitgliedschaften': str(verbuchte_zahlungen['mitgliedschaften']),
+            'fremd_sektionen': str(verbuchte_zahlungen['fremd_sektionen']),
+            'haftpflicht': str(verbuchte_zahlungen['haftpflicht']),
+            'spenden': str(verbuchte_zahlungen['spenden']),
+            'anzahl': str(verbuchte_zahlungen['anzahl']),
+            'total': "{:,.2f}".format(proper_round(verbuchte_zahlungen['total'], Decimal('0.01'))).replace(",", "'")
+        },
+        'nicht_verbuchte_zahlungen': {
+            'doppelt_bezahlt': str(nicht_verbuchte_zahlungen['doppelt_bezahlt']),
+            'ueberzahlt': str(nicht_verbuchte_zahlungen['ueberzahlt']),
+            'unbekannte_referenz': str(nicht_verbuchte_zahlungen['unbekannte_referenz']),
+            'anzahl': str(nicht_verbuchte_zahlungen['anzahl']),
+            'total': "{:,.2f}".format(proper_round(nicht_verbuchte_zahlungen['total'], Decimal('0.01'))).replace(",", "'")
+        }
+    }
+    zahlungsreport = frappe.render_template('templates/includes/camt_report.html', template_data)
+    camt_record.report = zahlungsreport
+    camt_record.save()
+    return
+    
+def proper_round(number, decimals):
+    return float(Decimal(number).quantize(decimals, ROUND_HALF_UP))

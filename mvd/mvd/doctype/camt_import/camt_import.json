@@ -14,9 +14,7 @@
   "status",
   "section_steuerung",
   "import",
-  "close_camt_import",
   "aktualisiere_camt_uebersicht",
-  "generate_report",
   "overview",
   "anz_importet_payments",
   "show_imported_payments",
@@ -39,6 +37,9 @@
   "show_overpaid",
   "anz_doppelte_mitgliedschaft",
   "show_doppelte_mitgliedschaft",
+  "section_report",
+  "html_report",
+  "report",
   "section_import",
   "importet_payments",
   "unmatched_payments",
@@ -47,6 +48,7 @@
   "unsubmitted_payments",
   "overpaid",
   "doppelte_mitgliedschaft",
+  "gebucht_weggezogen_list",
   "deleted_payments",
   "errors",
   "master_data"
@@ -136,18 +138,6 @@
    "fieldname": "show_unassigned",
    "fieldtype": "Button",
    "label": "Zeige unzugewiesene Zahlungen"
-  },
-  {
-   "depends_on": "eval:doc.status=='Partially Matched'",
-   "fieldname": "close_camt_import",
-   "fieldtype": "Button",
-   "label": "Schliese CAMT Import"
-  },
-  {
-   "depends_on": "eval:doc.status=='Closed'",
-   "fieldname": "generate_report",
-   "fieldtype": "Button",
-   "label": "Generiere Bericht"
   },
   {
    "fieldname": "cb_1",
@@ -307,9 +297,30 @@
    "fieldname": "show_wegzuege",
    "fieldtype": "Button",
    "label": "Zeige gebuchte Zahlungen Wegz\u00fcge"
+  },
+  {
+   "fieldname": "gebucht_weggezogen_list",
+   "fieldtype": "Code",
+   "label": "Gebuchte Weggezogene",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.report",
+   "fieldname": "section_report",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "report",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "html_report",
+   "fieldtype": "HTML"
   }
  ],
- "modified": "2022-02-18 23:55:47.107716",
+ "modified": "2022-02-19 20:54:09.760700",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",

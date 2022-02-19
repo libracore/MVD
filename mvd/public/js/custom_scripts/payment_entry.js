@@ -19,7 +19,7 @@ frappe.ui.form.on('Payment Entry', {
                     mit_spende_ausgleichen(frm);
                 });
                 frm.add_custom_button(__("Mit Rückzahlung ausgleichen"), function() {
-                    frappe.msgprint("Muss noch programmiert werden!");
+                    rueckzahlung(frm);
                 });
             }
         }
@@ -137,6 +137,30 @@ function mit_folgejahr_ausgleichen(frm) {
                 },
                 freeze: true,
                 freeze_message: 'Gleiche Zahlung mit Folgejahr-Mitgliedschaft aus...',
+                callback: function(r)
+                {
+                    cur_frm.reload_doc();
+                }
+            });
+        },
+        function(){
+            // on no
+        }
+    )
+}
+
+function rueckzahlung(frm) {
+    frappe.confirm(
+        'Wollen Sie die Zahlung mit einer Rückzahlung ausgleichen?',
+        function(){
+            // on yes
+            frappe.call({
+                method: "mvd.mvd.doctype.camt_import.camt_import.rueckzahlung",
+                args:{
+                    'pe': cur_frm.doc.name
+                },
+                freeze: true,
+                freeze_message: 'Gleiche Zahlung mittels Rückzahlung aus...',
                 callback: function(r)
                 {
                     cur_frm.reload_doc();
