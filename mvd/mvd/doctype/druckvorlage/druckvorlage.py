@@ -187,6 +187,7 @@ class Druckvorlage(Document):
     def set_validierungsstring(self):
         validierungsstring = ''
         validierungsstring += self.sektion_id + "-"
+        validierungsstring += self.language + "-"
         validierungsstring += self.dokument + "-"
         validierungsstring += self.mitgliedtyp_c + "-"
         validierungsstring += str(self.reduzierte_mitgliedschaft)
