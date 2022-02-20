@@ -1,0 +1,22 @@
+<div style="padding-right: 25%;">
+    <h1>Zahlungsreport {{ sektion }}</h1>
+    <h2>Zahlungsdatei</h2>
+    <p><span class="pull-left">Filename</span><span class="pull-right">{{ allgemein.filename }}</span></p><br>
+    <p><span class="pull-left">Filedatum</span><span class="pull-right">{{ allgemein.filedatum }}</span></p><br>
+    <p><span class="pull-left">Einzahlungstaxen</span><span class="pull-right">{{ allgemein.taxen }}</span></p><br>
+    <p><span class="pull-left">Anzahl Zahlungen</span><span class="pull-right">{{ allgemein.anzahl }}</span></p><br>
+    <p><span class="pull-left">Totalbetrag</span><span class="pull-right">{{ allgemein.total }}</span></p><br>
+    <h2>Verbuchte Zahlungen</h2>
+    <p><span class="pull-left">Mitgliedschaften</span><span class="pull-right">{{ verbuchte_zahlungen.mitgliedschaften }}</span></p><br>
+    <p><span class="pull-left">Haftpflichtversicherung</span><span class="pull-right">{{ verbuchte_zahlungen.haftpflicht }}</span></p><br>
+    <p><span class="pull-left">Spenden</span><span class="pull-right">{{ verbuchte_zahlungen.spenden }}</span></p><br>
+    <p><span class="pull-left">Gebuchte Zahlungen (Wegzüge)</span><span class="pull-right">{{ verbuchte_zahlungen.fremd_sektionen }}</span></p><br>
+    <p><span class="pull-left">Anzahl verbuchte Zahlungen</span><span class="pull-right">{{ verbuchte_zahlungen.anzahl }}</span></p><br>
+    <p><span class="pull-left">Verbuchter Betrag</span><span class="pull-right">{{ verbuchte_zahlungen.total }}</span></p><br>
+    <h2>Nicht verbuchte Zahlungen</h2>
+    <p><span class="pull-left">Mitgliedschaften doppelt bezahlt</span><span class="pull-right">{{ nicht_verbuchte_zahlungen.doppelt_bezahlt }}</span></p><br>
+    <p><span class="pull-left">Überbezahlt</span><span class="pull-right">{{ nicht_verbuchte_zahlungen.ueberzahlt }}</span></p><br>
+    <p><span class="pull-left">Unbekannte Referenz</span><span class="pull-right">{{ nicht_verbuchte_zahlungen.unbekannte_referenz }}</span></p><br>
+    <p><span class="pull-left">Anzahl unverbuchte Zahlungen</span><span class="pull-right">{{ nicht_verbuchte_zahlungen.anzahl }}</span></p><br>
+    <p><span class="pull-left">Nicht verbuchter Betrag</span><span class="pull-right">{{ nicht_verbuchte_zahlungen.total }}</span></p><br>
+</div>

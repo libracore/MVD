@@ -28,6 +28,10 @@ frappe.call({
 
 // Redirect to VBZ after login
 $(document).ready(function() {
+    // reset user company default
+    frappe.defaults.set_user_default_local("Company", '');
+    
+    
     if(frappe._cur_route==""||frappe._cur_route=="#") {
         window.location.href = "#vbz";
         

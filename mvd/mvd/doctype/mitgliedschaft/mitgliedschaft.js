@@ -88,7 +88,7 @@ frappe.ui.form.on('Mitgliedschaft', {
             });
             
             // load html overview
-            get_adressdaten(frm);
+            load_html_overview(frm);
             
             // assign hack
             $(".add-assignment.text-muted").remove();
@@ -235,7 +235,7 @@ frappe.ui.form.on('Mitgliedschaft', {
     }
 });
 
-function get_adressdaten(frm) {
+function load_html_overview(frm) {
     frappe.call({
         method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_uebersicht_html",
         args:{

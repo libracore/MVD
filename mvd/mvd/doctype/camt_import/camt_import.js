@@ -25,6 +25,7 @@ frappe.ui.form.on('CAMT Import', {
             if (cur_frm.doc.status == 'Aktualisierung notwendig') {
                 aktualisiere_camt_uebersicht(frm);
             }
+            cur_frm.set_df_property('html_report','options', cur_frm.doc.report);
         }
     },
     account: function(frm) {
@@ -68,28 +69,6 @@ frappe.ui.form.on('CAMT Import', {
             }
         )
     },
-    generate_report: function(frm) {
-        //~ frappe.call({
-            //~ method: 'mvd.mvd.doctype.camt_import.camt_import.generate_report',
-            //~ args: {
-                //~ 'camt_record': cur_frm.doc.name
-            //~ },
-            //~ freeze: true,
-            //~ freeze_message: 'Analysiere Daten und erstelle Bericht...',
-            //~ callback: function(r) {
-                //~ if (r.message) {
-                    //~ var feedback = r.message;
-                    //~ if (feedback.status == 'ok') {
-                        //~ frappe.msgprint("Bericht erstellt");
-                    //~ } else {
-                        //~ frappe.msgprint(feedback.feedback_message);
-                    //~ }
-                //~ } else {
-                    //~ frappe.msgprint("Etwas ist schief gelaufen...");
-                //~ }
-            //~ }
-        //~ });
-    },
     aktualisiere_camt_uebersicht: function(frm) {
         aktualisiere_camt_uebersicht(frm);
     },
@@ -127,6 +106,12 @@ frappe.ui.form.on('CAMT Import', {
     show_doppelte_mitgliedschaft: function(frm) {
         frappe.route_options = {
             "name": ["in", eval(cur_frm.doc.doppelte_mitgliedschaft)]
+        }
+        frappe.set_route("List", "Payment Entry");
+    },
+    show_wegzuege: function(frm) {
+        frappe.route_options = {
+            "name": ["in", eval(cur_frm.doc.gebucht_weggezogen_list)]
         }
         frappe.set_route("List", "Payment Entry");
     }

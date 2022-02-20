@@ -187,7 +187,8 @@ class Mitgliedschaft(Document):
         sinvs = frappe.db.sql("""SELECT
                                     `name`,
                                     `is_pos`,
-                                    `posting_date`
+                                    `posting_date`,
+                                    `mitgliedschafts_jahr`
                                 FROM `tabSales Invoice`
                                 WHERE `docstatus` = 1
                                 AND `ist_mitgliedschaftsrechnung` = 1
@@ -208,11 +209,21 @@ class Mitgliedschaft(Document):
                 else:
                     sinv_year = 0
             self.zahlung_mitgliedschaft = sinv_year
+            
+            if self.bezahltes_mitgliedschaftsjahr < sinv.mitgliedschafts_jahr:
+                self.bezahltes_mitgliedschaftsjahr = sinv.mitgliedschafts_jahr
+        
         current_year = int(now().split("-")[0])
         if int(self.zahlung_mitgliedschaft) > current_year:
             self.naechstes_jahr_geschuldet = '0'
         else:
             self.naechstes_jahr_geschuldet = 1
+        
+        
+        
+        if self.bezahltes_mitgliedschaftsjahr > 0 and self.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
+            self.status_c = 'Regulär'
+            
         
         # prüfe offene Rechnungen bei sektionswechsel
         if self.status_c == 'Wegzug':
@@ -1366,7 +1377,7 @@ def get_uebersicht_html(name):
         else:
             kuendigung = False
         
-        if mitgliedschaft.inkl_hv:
+        if mitgliedschaft.mitgliedtyp_c == 'Privat':
             if mitgliedschaft.zahlung_hv:
                 # im moment umgeschrieben von Datum auf Jahreszahl, muss nach dem Update der API wieder angepasst werden!
                 # hv_status = 'HV bezahlt am {0}'.format(frappe.utils.get_datetime(mitgliedschaft.zahlung_hv).strftime('%d.%m.%Y'))
