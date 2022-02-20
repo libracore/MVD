@@ -138,8 +138,8 @@ def bulk_submit(names):
     return
 
 def get_default_druckvorlage(sektion, language):
-    druckvorlage = get_druckvorlagen(sektion, dokument='Mahnung', language=language, serienbrief=False)
-    return druckvorlage['default_druckvorlage']
+    druckvorlage = frappe.get_list('Druckvorlage', fields='name', filters={'dokument': 'Mahnung', 'sektion_id': sektion, 'language': language or 'de', 'default': 1}, limit=1, ignore_ifnull=True)
+    return druckvorlage[0].name
 
 def get_mahnungs_qrrs(mahnung):
     mahnung = frappe.get_doc("Mahnung", mahnung)
