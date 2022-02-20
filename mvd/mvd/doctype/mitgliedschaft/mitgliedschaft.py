@@ -2752,7 +2752,7 @@ def get_ampelfarbe(mitgliedschaft):
         - Rot: ampelrot --> überfällige offene Rechnungen
     '''
     
-    if mitgliedschaft.status_c in ['Anmeldung', 'Online-Anmeldung', 'Interessent*in']:
+    if mitgliedschaft.status_c == 'Interessent*in':
         ampelfarbe = 'ampelgelb'
     else:
         rechnungs_kunde = mitgliedschaft.kunde_mitglied
