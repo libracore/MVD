@@ -176,14 +176,22 @@ frappe.vbz = {
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#kuendigung_print").click(function(){
-            frappe.vbz.kuendigung_massenlauf();
+            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                frappe.vbz.kuendigung_massenlauf();
+            } else {
+                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+            }
         });
         $("#zuzug_qty").click(function(){
             frappe.route_options = {"zuzug_massendruck": 1, 'zuzug_massendruck': 1}
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#zuzug_print").click(function(){
-            frappe.vbz.zuzug_massenlauf();
+            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                frappe.vbz.zuzug_massenlauf();
+            } else {
+                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+            }
         });
         $("#begruessung_qty").click(function(){
             frappe.msgprint("Das muss noch programmiert werden!");
@@ -196,28 +204,44 @@ frappe.vbz = {
             frappe.set_route("List", "Korrespondenz", "List");
         });
         $("#korrespondenz_print").click(function(){
-            frappe.vbz.korrespondenz_massenlauf();
+            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                frappe.vbz.korrespondenz_massenlauf();
+            } else {
+                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+            }
         });
         $("#rechnungen_qty").click(function(){
             frappe.route_options = {"rg_massendruck_vormerkung": 1, 'rg_massendruck_vormerkung': 1}
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#rechnungen_print").click(function(){
-            frappe.vbz.rg_massenlauf();
+            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                frappe.vbz.rg_massenlauf();
+            } else {
+                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+            }
         });
         $("#begruessung_online_qty").click(function(){
             frappe.route_options = {"begruessung_massendruck": 1, 'begruessung_massendruck': 1}
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#begruessung_online_print").click(function(){
-            frappe.vbz.begruessung_online_massenlauf();
+            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                frappe.vbz.begruessung_online_massenlauf();
+            } else {
+                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+            }
         });
         $("#mahnungen_qty").click(function(){
             frappe.route_options = {"docstatus": 1, 'massenlauf': 1}
             frappe.set_route("List", "Mahnung", "List");
         });
         $("#mahnungen_print").click(function(){
-            frappe.vbz.mahnung_massenlauf();
+            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                frappe.vbz.mahnung_massenlauf();
+            } else {
+                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+            }
         });
     },
     korrespondenz_massenlauf: function() {

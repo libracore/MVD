@@ -6,7 +6,11 @@ frappe.listview_settings['Mahnung'] = {
                     {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'options': 'Sektion', 'label': __('Sektion'), 'reqd': 1, 'default': get_default_sektion()}
                 ],
                 function(values){
-                    create_payment_reminders(values);
+                    if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                        create_payment_reminders(values);
+                    } else {
+                        frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                    }
                 },
                 __("Erstelle Mahnungen"),
                 __("Erstelle")
