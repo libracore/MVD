@@ -561,15 +561,15 @@ frappe.mvd_such_client = {
         return alle_sektionen
     },
     create_neuanlage_btn: function(page) {
-        if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
-            var neuanlage = frappe.ui.form.make_control({
-                parent: page.main.find(".neuanlage"),
-                df: {
-                    fieldtype: "Button",
-                    fieldname: "neuanlage",
-                    label: "Neuanlage",
-                    hidden: 1,
-                    click: function(){
+        var neuanlage = frappe.ui.form.make_control({
+            parent: page.main.find(".neuanlage"),
+            df: {
+                fieldtype: "Button",
+                fieldname: "neuanlage",
+                label: "Neuanlage",
+                hidden: 1,
+                click: function(){
+                    if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
                         frappe.prompt([
                             {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent*in\nRegulär\nAnmeldung',
                                 'default': cur_page.page.search_fields.status_c.get_value() == 'Interessent*in' ? 'Interessent*in':'Anmeldung',
@@ -779,14 +779,14 @@ frappe.mvd_such_client = {
                         'Neuanlage',
                         'Anlegen'
                         )
+                    } else {
+                        frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
                     }
-                },
-                only_input: true,
-            });
-            return neuanlage
-        } else {
-            frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
-        }
+                }
+            },
+            only_input: true,
+        });
+        return neuanlage
     }
 }
 
