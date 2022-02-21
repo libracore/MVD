@@ -279,6 +279,7 @@
    "label": "Zeige Doppelte Mitgliedschaft"
   },
   {
+   "depends_on": "eval:doc.importet_payments",
    "fieldname": "section_ungebucht",
    "fieldtype": "Section Break"
   },
@@ -320,7 +321,7 @@
    "fieldtype": "HTML"
   }
  ],
- "modified": "2022-02-19 20:54:09.760700",
+ "modified": "2022-02-21 20:30:07.718022",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",

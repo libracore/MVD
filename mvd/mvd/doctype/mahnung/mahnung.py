@@ -116,7 +116,8 @@ def create_payment_reminders(sektion_id):
                     'total_with_charge': (total_before_charges + reminder_charge),
                     'company': company,
                     'currency': currency,
-                    'druckvorlage': druckvorlage
+                    'druckvorlage': druckvorlage,
+                    'status_c': frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['mv_mitgliedschaft'], "status_c")
                 })
                 reminder_record = new_reminder.insert(ignore_permissions=True)
                 # ~ if int(auto_submit) == 1:

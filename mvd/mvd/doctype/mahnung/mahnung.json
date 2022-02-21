@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "status_c",
   "customer",
   "customer_name",
   "mitgliedschaften",
@@ -126,6 +127,7 @@
   {
    "fieldname": "highest_level",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "Highest Level"
   },
   {
@@ -147,6 +149,7 @@
   {
    "fieldname": "total_with_charge",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Total with Charge",
    "options": "currency"
   },
@@ -182,10 +185,17 @@
    "label": "Druckvorlage",
    "options": "Druckvorlage",
    "reqd": 1
+  },
+  {
+   "fieldname": "status_c",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Mitgliedstatus"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-02-16 17:43:43.314129",
+ "modified": "2022-02-21 20:13:23.997713",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnung",
@@ -232,7 +242,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "highest_level",
  "sort_order": "DESC",
  "title_field": "title",
  "track_changes": 1
