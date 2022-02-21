@@ -200,3 +200,16 @@ def analyse_error_log():
             summary['ec99']['logs'].append(error_log.name)
     
     return summary
+
+@frappe.whitelist()
+def get_mitglied_id():
+    error_logs = frappe.db.sql("""SELECT * FROM `tabError Log`""", as_dict=True)
+    mitglied_ids = []
+    for error_log in error_logs:
+        try:
+            json = eval(error_log.error.split("\n")[len(error_log.error.split("\n")) - 1])
+            if str(json['mitgliedId']) not in mitglied_ids:
+                mitglied_ids.append(str(json['mitgliedId']))
+        except:
+            pass
+    return mitglied_ids
