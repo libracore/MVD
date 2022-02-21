@@ -1429,7 +1429,10 @@ def get_uebersicht_html(name):
                 'hv_status': hv_status,
                 'wichtig': mitgliedschaft.wichtig,
                 'kuendigung': kuendigung,
-                'validierung': int(mitgliedschaft.validierung_notwendig)
+                'validierung': int(mitgliedschaft.validierung_notwendig),
+                'tel_g_1': mitgliedschaft.tel_g_1 or '',
+                'tel_g_2': mitgliedschaft.tel_g_2 or '',
+                'rg_tel_g': mitgliedschaft.rg_tel_g or ''
             }
         }
         

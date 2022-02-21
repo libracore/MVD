@@ -152,7 +152,8 @@
                 <p>
                     {% if kontakt_mitglied.email_id %}{{ kontakt_mitglied.email_id }}<br>{% endif %}
                     {% if kontakt_mitglied.phone %}{{ kontakt_mitglied.phone }}<br>{% endif %}
-                    {% if kontakt_mitglied.mobile_no %}{{ kontakt_mitglied.mobile_no }}{% endif %}
+                    {% if kontakt_mitglied.mobile_no %}{{ kontakt_mitglied.mobile_no }}<br>{% endif %}
+                    {{ allgemein.tel_g_1 }}
                 </p>
             {% endif %}
         </div>
@@ -205,7 +206,8 @@
                 <p>
                     {% if kontakt_solidarmitglied.email_id %}{{ kontakt_solidarmitglied.email_id }}<br>{% endif %}
                     {% if kontakt_solidarmitglied.phone %}{{ kontakt_solidarmitglied.phone }}<br>{% endif %}
-                    {% if kontakt_solidarmitglied.mobile_no %}{{ kontakt_solidarmitglied.mobile_no }}{% endif %}
+                    {% if kontakt_solidarmitglied.mobile_no %}{{ kontakt_solidarmitglied.mobile_no }}<br>{% endif %}
+                    {{ allgemein.tel_g_2 }}
                 </p>
             {% endif %}
         </div>
@@ -273,7 +275,8 @@
                 <p>
                     {% if rg_kontakt.email_id %}{{ rg_kontakt.email_id }}<br>{% endif %}
                     {% if rg_kontakt.phone %}{{ rg_kontakt.phone }}<br>{% endif %}
-                    {% if rg_kontakt.mobile_no %}{{ rg_kontakt.mobile_no }}{% endif %}
+                    {% if rg_kontakt.mobile_no %}{{ rg_kontakt.mobile_no }}<br>{% endif %}
+                    {{ allgemein.rg_tel_g }}
                 </p>
             {% endif %}
         </div>
