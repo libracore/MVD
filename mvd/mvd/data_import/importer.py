@@ -61,7 +61,8 @@ hm = {
     'notiz_termin': 'notiz_termin',
     'erledigt': 'erledigt',
     'nkategorie_d': 'nkategorie_d',
-    'notiz': 'notiz'
+    'notiz': 'notiz',
+    'weitere_kontaktinfos': 'weitere_kontaktinfos'
 }
 
 def read_csv(site_name, file_name, limit=False):
@@ -626,9 +627,9 @@ def create_notiz(row):
 def create_comment(row):
     try:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
-        description = str(get_value(row, 'nkategorie_d')) + "\n"
-        description += str(get_value(row, 'datum_von')) + "\n"
-        description += str(get_value(row, 'notiz')) + "\n"
+        description = str(get_value(row, 'nkategorie_d')) + "<br>"
+        description += str(get_value(row, 'datum_von')) + "<br>"
+        description += str(get_value(row, 'notiz')) + "<br>"
         mitgliedschaft.add_comment('Comment', text=description)
         frappe.db.commit()
     except Exception as err:
@@ -636,9 +637,9 @@ def create_comment(row):
 
 def create_todo(row):
     try:
-        description = str(get_value(row, 'nkategorie_d')) + "\n"
-        description += str(get_value(row, 'datum_von')) + "\n"
-        description += str(get_value(row, 'notiz')) + "\n"
+        description = str(get_value(row, 'nkategorie_d')) + "<br>"
+        description += str(get_value(row, 'datum_von')) + "<br>"
+        description += str(get_value(row, 'notiz')) + "<br>"
         
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
         owner = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "virtueller_user")
@@ -658,3 +659,50 @@ def create_todo(row):
         return
     except Exception as err:
         frappe.log_error("{0}\n\n{1}".format(err, row), 'ToDo konnte nicht erstellt werden')
+
+# --------------------------------------------------------------
+# Weitere Kontaktinfos Importer
+# --------------------------------------------------------------
+def import_weitere_kontaktinfos(site_name, file_name, limit=False):
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.import_weitere_kontaktinfos --kwargs "{'site_name': 'site1.local', 'file_name': 'weitere_kontaktinfos.csv'}"
+    '''
+    
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    max_loop = limit
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            if frappe.db.exists("Mitgliedschaft", str(get_value(row, 'mitglied_id'))):
+                try:
+                    erstelle_weitere_kontaktinformation(row)
+                except Exception as err:
+                    frappe.log_error("{0}\n\n{1}".format(err, row), 'Weitere Kontaktinformation konnte nicht erstellt werden')
+            else:
+                frappe.log_error("{0}".format(row), 'Mitgliedschaft existiert nicht')
+            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+            count += 1
+        else:
+            break
+
+def erstelle_weitere_kontaktinformation(row):
+    try:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
+        description = str(get_value(row, 'weitere_kontaktinfos')).replace("\n", "<br>")
+        mitgliedschaft.add_comment('Comment', text=description)
+        frappe.db.commit()
+    except Exception as err:
+        frappe.log_error("{0}\n\n{1}".format(err, row), 'Kommentar konnte nicht erstellt werden')
+
