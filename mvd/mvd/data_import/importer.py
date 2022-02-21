@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 import pandas as pd
+from frappe.utils.data import add_days, getdate
 
 
 # Header mapping (ERPNext <> MVD)
@@ -16,8 +17,6 @@ hm = {
     'zuzug_sektion': 'sektion_zq_id',
     'mitgliedtyp_c': 'mitgliedtyp_c',
     'mitglied_c': 'mitglied_c',
-    # 'inkl_hv':, --> woher kommt diese Info?
-    # 'm_und_w': 'zeitung_anzahl', --> Checkbox noch nicht implementiert --> zeitung_anzahl = 1 oder 0
     'wichtig': 'wichtig',
     'eintritt': 'datum_eintritt',
     'austritt': 'datum_austritt',
@@ -43,17 +42,24 @@ hm = {
     'postfach_nummer': 'postfach_nummer',
     'plz': 'plz',
     'ort': 'ort',
-    # ! solidarmitglieddaten:
-    #'anrede_2':, --> info fehlt!
     'nachname_2': 'nachname_2',
     'vorname_2': 'vorname_2',
     'tel_p_2': 'tel_p_2',
     'tel_m_2': 'tel_m_2',
     'tel_g_2': 'tel_g_2',
-    'e_mail_2': 'e_mail_2'
-    # ! nicht zugewiesene felder aus csv:
-    # 'adress_identifier': 'adress_identifier'
-    # 'sprache_c': 'sprache_c'
+    'e_mail_2': 'e_mail_2',
+    'datum': 'datum',
+    'jahr': 'jahr',
+    'offen': 'offen',
+    'ref_nr_five_1': 'ref_nr_five_1',
+    'kz_1': 'kz_1',
+    'tkategorie_d': 'tkategorie_d',
+    'pers_name': 'pers_name',
+    'datum_von': 'datum_von',
+    'datum_bis': 'datum_bis',
+    'datum_erinnerung': 'datum_erinnerung',
+    'notiz_termin': 'notiz_termin',
+    'erledigt': 'erledigt'
 }
 
 def read_csv(site_name, file_name, limit=False):
@@ -369,8 +375,200 @@ def get_value(row, value):
         return ''
 
 def migliedschaft_existiert(mitglied_id):
-    anz = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMV Mitgliedschaft` WHERE `mitglied_id` = '{mitglied_id}'""".format(mitglied_id=mitglied_id), as_dict=True)[0].qty
+    anz = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMitgliedschaft` WHERE `mitglied_id` = '{mitglied_id}'""".format(mitglied_id=mitglied_id), as_dict=True)[0].qty
     if anz > 0:
         return True
     else:
         return False
+
+
+
+
+# --------------------------------------------------------------
+# Debitor Importer
+# --------------------------------------------------------------
+def import_debitoren(site_name, file_name, limit=False):
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.import_debitoren --kwargs "{'site_name': 'site1.local', 'file_name': 'offene_rechnungen.csv'}"
+    '''
+    
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    max_loop = limit
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            if get_value(row, 'offen') > 0:
+                if not migliedschaft_existiert(str(get_value(row, 'mitglied_id'))):
+                    frappe.log_error("{0}".format(row), 'Mitglied existiert nicht')
+                else:
+                    erstelle_rechnung(row)
+                print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+            count += 1
+        else:
+            break
+
+def erstelle_rechnung(row):
+    try:
+        qrr_2 = str(get_value(row, 'ref_nr_five_1'))
+        qrr_false = "X" + str(get_value(row, 'kz_1')).split(">")[0]
+        qrr_1 = qrr_false.replace("X01", "")
+        qrr = qrr_1 + qrr_2
+        qrr = qrr.replace(" ", "")
+        
+        existing_sinv_query = ("""SELECT `name` FROM `tabSales Invoice` WHERE REPLACE(`esr_reference`, ' ', '') = '{qrr}'""".format(qrr=qrr))
+        if len(frappe.db.sql(existing_sinv_query, as_list=True)) > 0:
+            frappe.log_error("{0}".format(row), 'Rechnung wurde bereits erstellt')
+        else:
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
+            posting_date = str(get_value(row, 'datum')).split(" ")[0]
+            item = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "mitgliedschafts_artikel")
+            company = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "company")
+            cost_center = frappe.get_value("Company", company, "cost_center")
+            sektions_code = str(frappe.get_value("Sektion", mitgliedschaft.sektion_id, "sektion_id"))
+            
+            sinv = frappe.get_doc({
+                "doctype": "Sales Invoice",
+                "company": company,
+                "customer": mitgliedschaft.rg_kunde or mitgliedschaft.kunde_mitglied,
+                "set_posting_time": 1,
+                "posting_date": posting_date,
+                "posting_time": str(get_value(row, 'datum')).split(" ")[1],
+                "ist_mitgliedschaftsrechnung": 1,
+                "mv_mitgliedschaft": mitgliedschaft.name,
+                "sektion_id": mitgliedschaft.sektion_id,
+                "sektions_code": sektions_code,
+                "mitgliedschafts_jahr": str(get_value(row, 'jahr')),
+                "due_date": add_days(posting_date, 30),
+                "esr_reference": qrr,
+                "items": [
+                    {
+                        "item_code": item,
+                        "qty": 1,
+                        "rate": get_value(row, 'offen'),
+                        "cost_center": cost_center
+                    }
+                ]
+            })
+            sinv.insert()
+            sinv.submit()
+            frappe.db.commit()
+            return
+    except Exception as err:
+        frappe.log_error("{0}\n\n{1}".format(err, row), 'Rechnung konnte nicht erstellt werden')
+
+# --------------------------------------------------------------
+# Miveba-Termin Importer
+# --------------------------------------------------------------
+def import_termine(site_name, file_name, limit=False):
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.import_termine --kwargs "{'site_name': 'site1.local', 'file_name': 'termine.csv'}"
+    '''
+    
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    max_loop = limit
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            if frappe.db.exists("Mitgliedschaft", str(get_value(row, 'mitglied_id'))):
+                try:
+                    create_termin(row)
+                except Exception as err:
+                    frappe.log_error("{0}\n\n{1}".format(err, row), 'Termin konnte nicht erstellt werden')
+            else:
+                frappe.log_error("{0}".format(row), 'Mitgliedschaft existiert nicht')
+            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+            count += 1
+        else:
+            break
+
+def create_termin(row):
+    try:
+        kategorie = check_kategorie(row)
+        kontakt = check_kontakt(row)
+        termin_status = check_termin_status(row, 'erledigt')
+        sektion_id = frappe.get_value("Mitgliedschaft", str(get_value(row, 'mitglied_id')), "sektion_id")
+        new = frappe.get_doc({
+            "doctype": "Termin",
+            "kategorie": kategorie,
+            "kontakt": kontakt,
+            "sektion_id": sektion_id,
+            "von": str(get_value(row, 'datum_von')),
+            "bis": str(get_value(row, 'datum_bis')),
+            "erinnerung": str(get_value(row, 'datum_erinnerung')),
+            "notitz": str(get_value(row, 'notiz_termin')),
+            "status": termin_status
+        })
+        new.insert()
+        frappe.db.commit()
+        return
+    except Exception as err:
+        frappe.log_error("{0}\n\n{1}".format(err, row), 'Termin konnte nicht erstellt werden')
+
+def check_kategorie(row):
+    kategorie = str(get_value(row, 'tkategorie_d'))
+    sektion_id = frappe.get_value("Mitgliedschaft", str(get_value(row, 'mitglied_id')), "sektion_id")
+    query = ("""SELECT `name` FROM `tabTerminkategorie` WHERE `kategorie` = '{kategorie}' AND `sektion_id` = '{sektion_id}'""".format(kategorie=kategorie, sektion_id=sektion_id))
+    kat = frappe.db.sql(query, as_list=True)
+    if len(kat) > 0:
+        return kat[0][0]
+    else:
+        new = frappe.get_doc({
+            "doctype": "Terminkategorie",
+            "kategorie": kategorie,
+            "sektion_id": sektion_id
+        })
+        new.insert()
+        frappe.db.commit()
+        return new.name
+
+def check_kontakt(row):
+    kontakt = str(get_value(row, 'pers_name'))
+    sektion_id = frappe.get_value("Mitgliedschaft", str(get_value(row, 'mitglied_id')), "sektion_id")
+    query = ("""SELECT `name` FROM `tabTermin Kontaktperson` WHERE `kontakt` = '{kontakt}' AND `sektion_id` = '{sektion_id}'""".format(kontakt=kontakt, sektion_id=sektion_id))
+    kat = frappe.db.sql(query, as_list=True)
+    if len(kat) > 0:
+        return kat[0][0]
+    else:
+        new = frappe.get_doc({
+            "doctype": "Termin Kontaktperson",
+            "kontakt": kontakt,
+            "sektion_id": sektion_id
+        })
+        new.insert()
+        frappe.db.commit()
+        return new.name
+
+def check_termin_status(row, value):
+    value = row[hm[value]]
+    if not pd.isnull(value):
+        termin_status = int(value)
+        if termin_status < 0:
+            return 'Closed'
+        else:
+            return 'Open'
+    else:
+        return 'Open'

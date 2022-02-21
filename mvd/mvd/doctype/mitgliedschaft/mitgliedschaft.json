@@ -208,8 +208,7 @@
    "fieldname": "eintritt",
    "fieldtype": "Date",
    "label": "Eintritt",
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "fieldname": "wegzug",
@@ -1005,7 +1004,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-19 14:43:07.137750",
+ "modified": "2022-02-21 15:22:48.556154",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

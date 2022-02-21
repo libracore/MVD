@@ -4,3 +4,4 @@
 *.swp
 tags
 mvd/docs/current
+__pycache__

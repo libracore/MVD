@@ -1,0 +1,65 @@
+{
+ "autoname": "format:{kontakt} ({sektion_id})",
+ "creation": "2022-02-21 14:53:40.184118",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "kontakt",
+  "sektion_id",
+  "disabled"
+ ],
+ "fields": [
+  {
+   "fieldname": "kontakt",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Kontakt",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Deaktiviert"
+  }
+ ],
+ "modified": "2022-02-21 14:53:40.184118",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Termin Kontaktperson",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All"
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
