@@ -1773,6 +1773,11 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
     if mitgliedschaft.mitgliedtyp_c == 'Kollektiv':
         item = [{"item_code": sektion.mitgliedschafts_artikel_kollektiv,"qty": 1}]
     
+    if mitgliedschaft.status_c == 'Interessent*in':
+        exclude_from_payment_reminder_until = '2099-12-31'
+    else:
+        exclude_from_payment_reminder_until = ''
+    
     sinv = frappe.get_doc({
         "doctype": "Sales Invoice",
         "ist_mitgliedschaftsrechnung": 1,
@@ -1788,7 +1793,8 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         'sektions_code': str(sektion.sektion_id) or '00',
         'sektion_id': mitgliedschaft.sektion_id,
         "items": item,
-        "druckvorlage": druckvorlage if druckvorlage else ''
+        "druckvorlage": druckvorlage if druckvorlage else '',
+        "exclude_from_payment_reminder_until": exclude_from_payment_reminder_until
     })
     sinv.insert(ignore_permissions=True)
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
