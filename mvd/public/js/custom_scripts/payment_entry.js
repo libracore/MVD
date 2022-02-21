@@ -22,10 +22,24 @@ frappe.ui.form.on('Payment Entry', {
                     rueckzahlung(frm);
                 });
             }
+            if (check_underpaid(frm)) {
+                frm.add_custom_button(__("Differenz als Kulanz ausgleichen"), function() {
+                    kulanz_ausgleich(frm);
+                });
+            }
         }
     }
 });
 
+function check_underpaid(frm) {
+    var underpaid = false;
+    cur_frm.doc.references.forEach(function(entry) {
+       if (entry.allocated_amount < entry.outstanding_amount) {
+           underpaid = true;
+       }
+    });
+    return underpaid
+}
 
 function erstelle_korrespondenz(frm) {
     frappe.call({
@@ -161,6 +175,30 @@ function rueckzahlung(frm) {
                 },
                 freeze: true,
                 freeze_message: 'Gleiche Zahlung mittels Rückzahlung aus...',
+                callback: function(r)
+                {
+                    cur_frm.reload_doc();
+                }
+            });
+        },
+        function(){
+            // on no
+        }
+    )
+}
+
+function kulanz_ausgleich(frm) {
+    frappe.confirm(
+        'Wollen Sie die Zahlung aus Kulanz ausgleichen?',
+        function(){
+            // on yes
+            frappe.call({
+                method: "mvd.mvd.doctype.camt_import.camt_import.kulanz_ausgleich",
+                args:{
+                    'pe': cur_frm.doc.name
+                },
+                freeze: true,
+                freeze_message: 'Gleiche Zahlung mittels Kulanz aus...',
                 callback: function(r)
                 {
                     cur_frm.reload_doc();
