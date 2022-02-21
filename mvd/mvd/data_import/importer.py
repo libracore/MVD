@@ -414,40 +414,45 @@ def import_debitoren(site_name, file_name, limit=False):
             break
 
 def erstelle_rechnung(row):
-    mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
-    posting_date = str(get_value(row, 'datum')).split(" ")[0]
-    qrr_2 = str(get_value(row, 'ref_nr_five_1'))
-    qrr_false = "X" + str(get_value(row, 'kz_1')).split(">")[0]
-    qrr_1 = qrr_false.replace("X01", "")
-    qrr = qrr_1 + qrr_2
-    qrr = qrr.replace(" ", "")
-    item = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "mitgliedschafts_artikel")
-    company = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "company")
-    cost_center = frappe.get_value("Company", company, "cost_center")
-    
-    
-    sinv = frappe.get_doc({
-        "doctype": "Sales Invoice",
-        "company": company,
-        "customer": mitgliedschaft.rg_kunde or mitgliedschaft.kunde_mitglied,
-        "set_posting_time": 1,
-        "posting_date": posting_date,
-        "posting_time": str(get_value(row, 'datum')).split(" ")[1],
-        "ist_mitgliedschaftsrechnung": 1,
-        "mv_mitgliedschaft": mitgliedschaft.name,
-        "sektion_id": mitgliedschaft.sektion_id,
-        "mitgliedschafts_jahr": str(get_value(row, 'jahr')),
-        "due_date": add_days(posting_date, 30),
-        "esr_reference": qrr,
-        "items": [
-            {
-                "item_code": item,
-                "qty": 1,
-                "rate": get_value(row, 'offen'),
-                "cost_center": cost_center
-            }
-        ]
-    })
-    sinv.insert()
-    sinv.submit()
-    frappe.db.commit()
+    try:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
+        posting_date = str(get_value(row, 'datum')).split(" ")[0]
+        qrr_2 = str(get_value(row, 'ref_nr_five_1'))
+        qrr_false = "X" + str(get_value(row, 'kz_1')).split(">")[0]
+        qrr_1 = qrr_false.replace("X01", "")
+        qrr = qrr_1 + qrr_2
+        qrr = qrr.replace(" ", "")
+        item = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "mitgliedschafts_artikel")
+        company = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "company")
+        cost_center = frappe.get_value("Company", company, "cost_center")
+        sektions_code = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "sektion_id")
+        
+        sinv = frappe.get_doc({
+            "doctype": "Sales Invoice",
+            "company": company,
+            "customer": mitgliedschaft.rg_kunde or mitgliedschaft.kunde_mitglied,
+            "set_posting_time": 1,
+            "posting_date": posting_date,
+            "posting_time": str(get_value(row, 'datum')).split(" ")[1],
+            "ist_mitgliedschaftsrechnung": 1,
+            "mv_mitgliedschaft": mitgliedschaft.name,
+            "sektion_id": mitgliedschaft.sektion_id,
+            "sektions_code": sektions_code,
+            "mitgliedschafts_jahr": str(get_value(row, 'jahr')),
+            "due_date": add_days(posting_date, 30),
+            "esr_reference": qrr,
+            "items": [
+                {
+                    "item_code": item,
+                    "qty": 1,
+                    "rate": get_value(row, 'offen'),
+                    "cost_center": cost_center
+                }
+            ]
+        })
+        sinv.insert()
+        sinv.submit()
+        frappe.db.commit()
+        return
+    except:
+        frappe.log_error("{0}".format(row), 'Rechnung konnte nicht erstellt werden')
