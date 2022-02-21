@@ -20,5 +20,8 @@ def get_todo_permission_query_conditions(user):
     if "System Manager" in frappe.get_roles(user):
         return None
     else:
-        return """(`tabToDo`.owner IN {user} or `tabToDo`.assigned_by IN {user})"""\
-            .format(user=tuple(todo_users))
+        if allowed_sektionen:
+            return """(`tabToDo`.owner IN {user} or `tabToDo`.assigned_by IN {user})"""\
+                .format(user=tuple(todo_users))
+        else:
+            None
