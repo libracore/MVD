@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 import pandas as pd
-from frappe.utils.data import add_days, getdate
+from frappe.utils.data import add_days, getdate, get_datetime, now_datetime
 
 
 # Header mapping (ERPNext <> MVD)
@@ -59,7 +59,9 @@ hm = {
     'datum_bis': 'datum_bis',
     'datum_erinnerung': 'datum_erinnerung',
     'notiz_termin': 'notiz_termin',
-    'erledigt': 'erledigt'
+    'erledigt': 'erledigt',
+    'nkategorie_d': 'nkategorie_d',
+    'notiz': 'notiz'
 }
 
 def read_csv(site_name, file_name, limit=False):
@@ -572,3 +574,87 @@ def check_termin_status(row, value):
             return 'Open'
     else:
         return 'Open'
+
+# --------------------------------------------------------------
+# Miveba-Notizen Importer
+# --------------------------------------------------------------
+def import_notizen(site_name, file_name, limit=False):
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.import_notizen --kwargs "{'site_name': 'site1.local', 'file_name': 'notizen.csv'}"
+    '''
+    
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    max_loop = limit
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            if frappe.db.exists("Mitgliedschaft", str(get_value(row, 'mitglied_id'))):
+                try:
+                    create_notiz(row)
+                except Exception as err:
+                    frappe.log_error("{0}\n\n{1}".format(err, row), 'Notiz konnte nicht erstellt werden')
+            else:
+                frappe.log_error("{0}".format(row), 'Mitgliedschaft existiert nicht')
+            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+            count += 1
+        else:
+            break
+
+def create_notiz(row):
+    try:
+        datum_erinnerung = str(get_value(row, 'datum_erinnerung'))
+        if get_datetime(datum_erinnerung) > now_datetime():
+            create_todo(row)
+        else:
+            create_comment(row)
+        return
+    except Exception as err:
+        frappe.log_error("{0}\n\n{1}".format(err, row), 'Termin konnte nicht erstellt werden')
+
+def create_comment(row):
+    try:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
+        description = str(get_value(row, 'nkategorie_d')) + "\n"
+        description += str(get_value(row, 'datum_von')) + "\n"
+        description += str(get_value(row, 'notiz')) + "\n"
+        mitgliedschaft.add_comment('Comment', text=description)
+        frappe.db.commit()
+    except Exception as err:
+        frappe.log_error("{0}\n\n{1}".format(err, row), 'Kommentar konnte nicht erstellt werden')
+
+def create_todo(row):
+    try:
+        description = str(get_value(row, 'nkategorie_d')) + "\n"
+        description += str(get_value(row, 'datum_von')) + "\n"
+        description += str(get_value(row, 'notiz')) + "\n"
+        
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
+        owner = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "virtueller_user")
+        todo = frappe.get_doc({
+            "doctype":"ToDo",
+            "owner": owner,
+            "reference_type": "Mitgliedschaft",
+            "reference_name": str(get_value(row, 'mitglied_id')),
+            "description": description or '',
+            "priority": "Medium",
+            "status": "Open",
+            "date": str(get_value(row, 'datum_erinnerung')),
+            "assigned_by": owner,
+            "mv_mitgliedschaft": str(get_value(row, 'mitglied_id'))
+        }).insert(ignore_permissions=True)
+        frappe.db.commit()
+        return
+    except Exception as err:
+        frappe.log_error("{0}\n\n{1}".format(err, row), 'ToDo konnte nicht erstellt werden')
