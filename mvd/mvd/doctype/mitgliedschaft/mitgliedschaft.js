@@ -11,34 +11,66 @@ frappe.ui.form.on('Mitgliedschaft', {
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
                 if ((!['Kündigung', 'Gestorben'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.mitgliedtyp_c == 'Privat')) {
                     frm.add_custom_button(__("Sektionswechsel"),  function() {
-                            sektionswechsel(frm);
+                            if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                            } else {
+                                sektionswechsel(frm);
+                            }
                     }, __("Mutation"));
                 }
                 if (!['Kündigung', 'Gestorben'].includes(cur_frm.doc.status_c)) {
                     frm.add_custom_button(__("Kündigung"),  function() {
-                            kuendigung(frm);
+                            if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                            } else {
+                                kuendigung(frm);
+                            }
                     }, __("Mutation"));
                 }
                 frm.add_custom_button(__("Ausschluss"),  function() {
-                        ausschluss(frm);
+                        if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                            frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                        } else {
+                            ausschluss(frm);
+                        }
                 }, __("Mutation"));
                 if (!['Gestorben'].includes(cur_frm.doc.status_c)) {
                     frm.add_custom_button(__("Todesfall"),  function() {
-                            todesfall(frm);
+                            if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                            } else {
+                                todesfall(frm);
+                            }
                     }, __("Mutation"));
                 }
                 if (!['Gestorben', 'Kündigung'].includes(cur_frm.doc.status_c)) {
                     frm.add_custom_button(__("Mitgliedschafts-Rechnung"),  function() {
-                            erstelle_rechnung(frm);
+                            if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                            } else {
+                                erstelle_rechnung(frm);
+                            }
                     }, __("Erstelle"));
                     frm.add_custom_button(__("Spenden-Rechnung"),  function() {
-                            erstelle_spenden_rechnung(frm);
+                            if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                            } else {
+                                erstelle_spenden_rechnung(frm);
+                            }
                     }, __("Erstelle"));
                     frm.add_custom_button(__("HV-Rechnung"),  function() {
-                            erstelle_hv_rechnung(frm);
+                            if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                            } else {
+                                erstelle_hv_rechnung(frm);
+                            }
                     }, __("Erstelle"));
                     frm.add_custom_button(__("Korrespondenz"),  function() {
-                            erstelle_korrespondenz(frm);
+                            if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                            } else {
+                                erstelle_korrespondenz(frm);
+                            }
                     }, __("Erstelle"));
                 }
             }
@@ -49,42 +81,74 @@ frappe.ui.form.on('Mitgliedschaft', {
             if (cur_frm.doc.validierung_notwendig) {
                 if (cur_frm.doc.status_c == 'Online-Kündigung') {
                     frm.add_custom_button(__("Online-Kündigung verarbeiten"),  function() {
-                            kuendigung(frm);
+                            if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                            } else {
+                                kuendigung(frm);
+                            }
                     });
                 } else {
                     frm.add_custom_button(__("Daten als validert bestätigen"),  function() {
-                            daten_validiert(frm);
+                            if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                                frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                            } else {
+                                daten_validiert(frm);
+                            }
                     });
                 }
             }
             if (cur_frm.doc.kuendigung_verarbeiten) {
                 frm.add_custom_button(__("Von Massenlauf (Kündigung) entfernen"),  function() {
-                        kuendigung_verarbeitet(frm);
+                        if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                            frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                        } else {
+                            kuendigung_verarbeitet(frm);
+                        }
                 });
             }
             if (cur_frm.doc.interessent_innenbrief_mit_ez) {
                 frm.add_custom_button(__("Interessent*Innenbrief mit EZ als erstellt bestätigen"),  function() {
-                        interessent_innenbrief_mit_ez_verarbeitet(frm);
+                        if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                            frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                        } else {
+                            interessent_innenbrief_mit_ez_verarbeitet(frm);
+                        }
                 });
             }
             if (cur_frm.doc.anmeldung_mit_ez) {
                 frm.add_custom_button(__("Anmeldung mit EZ als erstellt bestätigen"),  function() {
-                        anmeldung_mit_ez_verarbeitet(frm);
+                        if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                            frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                        } else {
+                            anmeldung_mit_ez_verarbeitet(frm);
+                        }
                 });
             }
             if (cur_frm.doc.rg_massendruck_vormerkung) {
                 frm.add_custom_button(__("Von Massenlauf (Mitgliedschaftsrechnung) entfernen"),  function() {
-                        rg_massendruck_verarbeitet(frm);
+                        if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                            frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                        } else {
+                            rg_massendruck_verarbeitet(frm);
+                        }
                 });
             }
             if (cur_frm.doc.begruessung_massendruck) {
                 frm.add_custom_button(__("Von Massenlauf (Begrüssung Online-Beitritt) entfernen"),  function() {
-                        begruessung_massendruck_verarbeitet(frm);
+                        if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                            frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                        } else {
+                            begruessung_massendruck_verarbeitet(frm);
+                        }
                 });
             }
             
             frm.add_custom_button(__("Erstelle ToDo"),  function() {
-                erstelle_todo(frm);
+                if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                    frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                } else {
+                    erstelle_todo(frm);
+                }
             });
             
             // load html overview
