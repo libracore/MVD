@@ -6,7 +6,11 @@ frappe.listview_settings['Mitgliedschaft'] = {
         listview.page.add_action_item(__("Erstelle Serienbrief"), function() {
                 var selected = listview.get_checked_items();
                 if (selected.length > 0) {
-                    create_serienbrief(selected);
+                    if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                        create_serienbrief(selected);
+                    } else {
+                        frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                    }
                 } else {
                     frappe.msgprint("Bitte markieren Sie zuerst die gewünschten Mitgliedschaften");
                 }
