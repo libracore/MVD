@@ -734,11 +734,14 @@ def import_miveba_buchungen(site_name, file_name, limit=False):
         if count <= max_loop:
             if frappe.db.exists("Mitgliedschaft", str(get_value(row, 'mitglied_id'))):
                 try:
-                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
-                    mitgliedschaft.letzte_bearbeitung_von = 'SP'
-                    mitgliedschaft.miveba_buchungen = str(get_value(row, 'weitere_kontaktinfos'))
-                    mitgliedschaft.save()
-                    frappe.db.commit()
+                    #mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
+                    #mitgliedschaft.letzte_bearbeitung_von = 'SP'
+                    #mitgliedschaft.miveba_buchungen = str(get_value(row, 'weitere_kontaktinfos'))
+                    #mitgliedschaft.save()
+                    #frappe.db.commit()
+                    mitglied_id = str(get_value(row, 'mitglied_id'))
+                    miveba_buchungen = str(get_value(row, 'weitere_kontaktinfos'))
+                    frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `miveba_buchungen` = '{miveba_buchungen}' WHERE `name` = '{mitglied_id}'""".format(miveba_buchungen=miveba_buchungen, mitglied_id=mitglied_id), as_list=True)
                 except Exception as err:
                     frappe.log_error("{0}\n\n{1}".format(err, row), 'Miveba Buchung konnte nicht erstellt werden')
             else:
