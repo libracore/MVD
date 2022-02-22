@@ -74,10 +74,6 @@ frappe.ui.form.on('Mitgliedschaft', {
                     }, __("Erstelle"));
                 }
             }
-            frm.add_custom_button(__("Zahlungen"),  function() {
-                frappe.route_options = {"party": cur_frm.doc.rg_kunde ? cur_frm.doc.rg_kunde:cur_frm.doc.kunde_mitglied}
-                frappe.set_route("List", "Payment Entry", "List");
-            });
             if (cur_frm.doc.validierung_notwendig) {
                 if (cur_frm.doc.status_c == 'Online-Kündigung') {
                     frm.add_custom_button(__("Online-Kündigung verarbeiten"),  function() {
@@ -156,6 +152,11 @@ frappe.ui.form.on('Mitgliedschaft', {
             
             // assign hack
             $(".add-assignment.text-muted").remove();
+            
+            // hack to remove "+" in dashboard
+            $(":button[data-doctype='Sales Invoice']").remove();
+            $(":button[data-doctype='Fakultative Rechnung']").remove();
+            $(":button[data-doctype='Payment Entry']").remove();
         }
         
         if (['Wegzug', 'Ausschluss'].includes(cur_frm.doc.status_c)) {
