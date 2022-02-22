@@ -269,7 +269,7 @@ def kulanz_ausgleich(mahnung, sinv, amount, outstanding_amount, due_date):
         "sektion_id": mahnung.sektion_id,
         "party_type": "Customer",
         "party": mahnung.customer,
-        "paid_to": frappe.get_value("Sektion", mahnung.sektion_id, "zwischen_konto"),
+        "paid_to": frappe.get_value("Sektion", mahnung.sektion_id, "kulanz_konto"),
         "paid_amount": outstanding_amount,
         "received_amount": outstanding_amount,
         "references": [
