@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from datetime import datetime
 import json
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
+from frappe.utils.data import today
 
 class Mahnung(Document):
     # this will apply all payment reminder levels in the sales invoices
@@ -255,3 +256,37 @@ def get_mahnungs_qrrs(mahnung):
         }
         qrrs.append(qrr_dict)
     return qrrs
+
+@frappe.whitelist()
+def kulanz_ausgleich(mahnung, sinv, amount, outstanding_amount, due_date):
+    mahnung = frappe.get_doc("Mahnung", mahnung)
+    
+    pe = frappe.get_doc({
+        "doctype": "Payment Entry",
+        "payment_type": "Receive",
+        "posting_date": today(),
+        "company": mahnung.company,
+        "sektion_id": mahnung.sektion_id,
+        "party_type": "Customer",
+        "party": mahnung.customer,
+        "paid_to": frappe.get_value("Sektion", mahnung.sektion_id, "zwischen_konto"),
+        "paid_amount": outstanding_amount,
+        "received_amount": outstanding_amount,
+        "references": [
+            {
+                "reference_doctype": "Sales Invoice",
+                "reference_name": sinv,
+                "due_date": due_date,
+                "total_amount": amount,
+                "outstanding_amount": outstanding_amount,
+                "allocated_amount": outstanding_amount
+            }
+        ],
+        "reference_no": "Kulanzausgleich via Mahnlauf {0}".format(mahnung.name),
+        "reference_date": today(),
+        "remarks": "Kulanzausgleich via Mahnlauf {0}".format(mahnung.name)
+    })
+    pe.insert()
+    pe.submit()
+    frappe.db.commit()
+    return

@@ -7,24 +7,44 @@ frappe.ui.form.on('Payment Entry', {
             if (cur_frm.doc.unallocated_amount > 0) {
                 if (!cur_frm.doc.korrespondenz) {
                     frm.add_custom_button(__("Mitgliedschafts-Korrespondenz erstellen"), function() {
-                        erstelle_korrespondenz(frm);
+                        if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                            frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                        } else {
+                            erstelle_korrespondenz(frm);
+                        }
                     });
                 }
                 if ((cur_frm.doc.paid_amount / cur_frm.doc.unallocated_amount) == 2) {
                     frm.add_custom_button(__("Mit Folgejahr-Mitgliedschaft ausgleichen"), function() {
-                        mit_folgejahr_ausgleichen(frm);
+                        if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                            frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                        } else {
+                            mit_folgejahr_ausgleichen(frm);
+                        }
                     });
                 }
                 frm.add_custom_button(__("Mit Spende ausgleichen"), function() {
-                    mit_spende_ausgleichen(frm);
+                    if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                        frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                    } else {
+                        mit_spende_ausgleichen(frm);
+                    }
                 });
                 frm.add_custom_button(__("Mit Rückzahlung ausgleichen"), function() {
-                    rueckzahlung(frm);
+                    if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                        frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                    } else {
+                        rueckzahlung(frm);
+                    }
                 });
             }
             if (check_underpaid(frm)) {
                 frm.add_custom_button(__("Differenz als Kulanz ausgleichen"), function() {
-                    kulanz_ausgleich(frm);
+                    if (frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                        frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+                    } else {
+                        kulanz_ausgleich(frm);
+                    }
                 });
             }
         }
