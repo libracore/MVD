@@ -927,11 +927,19 @@ function custom_email_dialog(e) {
         recipients: cur_frm.doc.e_mail_1 || '',
         cc: cc,
         bcc: bcc,
-        attach_document_print: true, /* This tick is changed by JS along with the attachment ticks - which can't be passed as arguments */
+        attach_document_print: false, /* This tick is changed by JS along with the attachment ticks - which can't be passed as arguments */
         message: '', /* Gets overwritten by txt (txt must be passed to avoid loading draft messages from LocalStorage) */
         real_name: '', /* Do not pass this as it triggers automatic salutation with "Dear" */
         txt: '<div>' + cur_frm.doc.briefanrede + '</div>'
     });
+    /* hack to remove attach_document_print */
+    setTimeout(function(){
+        if (cur_dialog) {
+            cur_dialog.fields_dict.attach_document_print.set_value(0);
+        } else {
+            setTimeout(function(){cur_dialog.fields_dict.attach_document_print.set_value(0);}, 500);
+        }
+    }, 500);
 }
 
 function erstelle_hv_rechnung(frm) {
