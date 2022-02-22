@@ -746,6 +746,8 @@ def import_miveba_buchungen(site_name, file_name, limit=False):
                     if commit_count == 1000:
                         frappe.db.commit()
                         commit_count = 1
+                    else:
+                        commit_count += 1
                 except Exception as err:
                     frappe.log_error("{0}\n\n{1}".format(err, row), 'Miveba Buchung konnte nicht erstellt werden')
             else:
