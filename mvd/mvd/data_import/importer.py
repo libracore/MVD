@@ -62,7 +62,8 @@ hm = {
     'erledigt': 'erledigt',
     'nkategorie_d': 'nkategorie_d',
     'notiz': 'notiz',
-    'weitere_kontaktinfos': 'weitere_kontaktinfos'
+    'weitere_kontaktinfos': 'weitere_kontaktinfos',
+    'mkategorie_d': 'mkategorie_d'
 }
 
 def read_csv(site_name, file_name, limit=False):
@@ -706,3 +707,78 @@ def erstelle_weitere_kontaktinformation(row):
     except Exception as err:
         frappe.log_error("{0}\n\n{1}".format(err, row), 'Kommentar konnte nicht erstellt werden')
 
+# --------------------------------------------------------------
+# Miveba Buchungen Importer
+# --------------------------------------------------------------
+def import_miveba_buchungen(site_name, file_name, limit=False):
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.import_miveba_buchungen --kwargs "{'site_name': 'site1.local', 'file_name': 'miveba_buchungen.csv'}"
+    '''
+    
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    max_loop = limit
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            if frappe.db.exists("Mitgliedschaft", str(get_value(row, 'mitglied_id'))):
+                try:
+                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
+                    mitgliedschaft.letzte_bearbeitung_von = 'SP'
+                    mitgliedschaft.miveba_buchungen = str(get_value(row, 'weitere_kontaktinfos'))
+                except Exception as err:
+                    frappe.log_error("{0}\n\n{1}".format(err, row), 'Miveba Buchung konnte nicht erstellt werden')
+            else:
+                frappe.log_error("{0}".format(row), 'Mitgliedschaft existiert nicht')
+            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+            count += 1
+        else:
+            break
+
+# --------------------------------------------------------------
+# Tags Importer
+# --------------------------------------------------------------
+def import_tags(site_name, file_name, limit=False):
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.import_tags --kwargs "{'site_name': 'site1.local', 'file_name': 'kategorien.csv'}"
+    '''
+    from frappe.desk.tags import add_tag
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    max_loop = limit
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            if frappe.db.exists("Mitgliedschaft", str(get_value(row, 'mitglied_id'))):
+                try:
+                    add_tag(str(get_value(row, 'mkategorie_d')), "Mitgliedschaft", str(get_value(row, 'mitglied_id')))
+                except Exception as err:
+                    frappe.log_error("{0}\n\n{1}".format(err, row), 'Tag konnte nicht erstellt werden')
+            else:
+                frappe.log_error("{0}".format(row), 'Mitgliedschaft existiert nicht')
+            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+            count += 1
+        else:
+            break

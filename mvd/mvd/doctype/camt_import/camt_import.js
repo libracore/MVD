@@ -5,6 +5,9 @@ frappe.ui.form.on('CAMT Import', {
     refresh: function(frm) {
         // auto save
         if (frm.doc.__islocal) {
+           if (frappe.boot.default_sektion) {
+               cur_frm.set_value("sektion_id", frappe.boot.default_sektion);
+           }
            cur_frm.save();
         }
         // filter account

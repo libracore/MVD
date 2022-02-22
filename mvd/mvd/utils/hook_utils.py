@@ -18,3 +18,9 @@ def suche_nach_mitgliedschaft(customer):
         return mitgliedschaften[0][0]
     else:
         return False
+
+def resave_mitgliedschaft(sinv, event):
+    if sinv.mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
+        mitgliedschaft.letzte_bearbeitung_von = 'SP'
+        mitgliedschaft.save()
