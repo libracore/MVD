@@ -30,6 +30,8 @@
   "anz_unsubmitted_payments",
   "show_unsubmitted_payments",
   "section_ungebucht",
+  "anz_underpaid",
+  "show_underpaid",
   "gebucht_weggezogen",
   "show_wegzuege",
   "cb_3",
@@ -47,6 +49,7 @@
   "submitted_payments",
   "unsubmitted_payments",
   "overpaid",
+  "underpaid",
   "doppelte_mitgliedschaft",
   "gebucht_weggezogen_list",
   "deleted_payments",
@@ -319,9 +322,27 @@
   {
    "fieldname": "html_report",
    "fieldtype": "HTML"
+  },
+  {
+   "default": "0",
+   "fieldname": "anz_underpaid",
+   "fieldtype": "Int",
+   "label": "Unterbezahlte",
+   "read_only": 1
+  },
+  {
+   "fieldname": "show_underpaid",
+   "fieldtype": "Button",
+   "label": "Zeige Unterbezahlte"
+  },
+  {
+   "fieldname": "underpaid",
+   "fieldtype": "Code",
+   "label": "Unterbezahlte",
+   "read_only": 1
   }
  ],
- "modified": "2022-02-21 20:30:07.718022",
+ "modified": "2022-02-21 21:27:44.134904",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",

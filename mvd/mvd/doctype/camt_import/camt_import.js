@@ -114,6 +114,12 @@ frappe.ui.form.on('CAMT Import', {
             "name": ["in", eval(cur_frm.doc.gebucht_weggezogen_list)]
         }
         frappe.set_route("List", "Payment Entry");
+    },
+    show_underpaid: function(frm) {
+        frappe.route_options = {
+            "name": ["in", eval(cur_frm.doc.underpaid)]
+        }
+        frappe.set_route("List", "Payment Entry");
     }
 });
 

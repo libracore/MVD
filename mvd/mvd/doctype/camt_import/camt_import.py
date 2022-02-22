@@ -34,6 +34,7 @@ def lese_camt_file(camt_import, file_path):
     overpaid = []
     doppelte_mitgliedschaft = []
     gebucht_weggezogen = []
+    underpaid = []
     master_data = {
         'status': 'Open',
         'errors': errors,
@@ -46,7 +47,8 @@ def lese_camt_file(camt_import, file_path):
         'deleted_payments': deleted_payments,
         'overpaid': overpaid,
         'doppelte_mitgliedschaft': doppelte_mitgliedschaft,
-        'gebucht_weggezogen': gebucht_weggezogen
+        'gebucht_weggezogen': gebucht_weggezogen,
+        'underpaid': underpaid
     }
     '''
         imported_payments = Alle importierten Zahlungen aus dem CAMT-File
@@ -337,10 +339,11 @@ def create_reference(payment_entry, sales_invoice, master_data, fremdsektion):
     reference_entry.outstanding_amount = frappe.get_value("Sales Invoice", sales_invoice, "outstanding_amount")
     if not fremdsektion:
         paid_amount = frappe.get_value("Payment Entry", payment_entry, "paid_amount")
-        if paid_amount > reference_entry.outstanding_amount:
+        if paid_amount >= reference_entry.outstanding_amount:
             reference_entry.allocated_amount = reference_entry.outstanding_amount
         else:
             reference_entry.allocated_amount = paid_amount
+            master_data['underpaid'].append(payment_entry)
     else:
         paid_amount = reference_entry.outstanding_amount
         reference_entry.allocated_amount = paid_amount
@@ -433,6 +436,8 @@ def update_camt_import_record(camt_import, master_data, aktualisierung=False):
     camt_import.anz_unsubmitted_payments = len(master_data['unsubmitted_payments'])
     camt_import.anz_deleted_payments = len(master_data['deleted_payments'])
     camt_import.anz_overpaid = len(master_data['overpaid'])
+    camt_import.anz_underpaid = len(master_data['underpaid'])
+    camt_import.underpaid = str(master_data['underpaid'])
     camt_import.anz_doppelte_mitgliedschaft = len(master_data['doppelte_mitgliedschaft'])
     camt_import.gebucht_weggezogen = len(master_data['gebucht_weggezogen'])
     camt_import.gebucht_weggezogen_list = str(master_data['gebucht_weggezogen'])
@@ -469,7 +474,8 @@ def aktualisiere_camt_uebersicht(camt_import):
         'unsubmitted_payments': [],
         'deleted_payments': [],
         'overpaid': [],
-        'doppelte_mitgliedschaft': []
+        'doppelte_mitgliedschaft': [],
+        'underpaid': []
     }
     default_customer = get_default_customer(camt_import.sektion_id)
     
@@ -485,6 +491,9 @@ def aktualisiere_camt_uebersicht(camt_import):
                 if submitted:
                     master_data['submitted_payments'].append(imported_payment)
                     master_data['assigned_payments'].append(imported_payment)
+                    underpaid = check_if_payment_is_underpaid(imported_payment)
+                    if underpaid:
+                        master_data['underpaid'].append(imported_payment)
                 else:
                     assigned = check_if_payment_is_assigned(imported_payment, default_customer)
                     if assigned:
@@ -496,6 +505,10 @@ def aktualisiere_camt_uebersicht(camt_import):
                                 master_data['doppelte_mitgliedschaft'].append(imported_payment)
                             else:
                                 master_data['overpaid'].append(imported_payment)
+                        else:
+                            underpaid = check_if_payment_is_underpaid(imported_payment)
+                            if underpaid:
+                                master_data['underpaid'].append(imported_payment)
                     else:
                         master_data['unassigned_payments'].append(imported_payment)
                         master_data['unsubmitted_payments'].append(imported_payment)
@@ -532,6 +545,13 @@ def check_if_payment_is_overpaid(imported_payment):
             return True, False
     else:
         return False, False
+
+def check_if_payment_is_underpaid(imported_payment):
+    pe = frappe.get_doc("Payment Entry", imported_payment)
+    for sinv in pe.references:
+        if sinv.allocated_amount < sinv.outstanding_amount:
+            return True
+    return False
 
 @frappe.whitelist()
 def mit_spende_ausgleichen(pe):
@@ -584,6 +604,30 @@ def mit_folgejahr_ausgleichen(pe):
     return
 
 @frappe.whitelist()
+def kulanz_ausgleich(pe):
+    payment_entry = frappe.get_doc("Payment Entry", pe)
+    pe = frappe.copy_doc(payment_entry)
+    pe.reference_no = 'Kulanzausgleich {0}'.format(payment_entry.name)
+    
+    new_payment = 0
+    for sinv in pe.references:
+        if sinv.outstanding_amount > sinv.allocated_amount:
+            outstanding_amount = frappe.get_value("Sales Invoice", sinv.reference_name, "outstanding_amount")
+            if outstanding_amount > 0:
+                new_payment += outstanding_amount
+                sinv.allocated_amount = outstanding_amount
+                sinv.outstanding_amount = outstanding_amount
+    if new_payment > 0:
+        pe.paid_amount = new_payment
+        pe.insert()
+        pe.save()
+        pe.submit()
+        payment_entry.add_comment('Comment', text='Kulanzausgleich erfolgte mittels {0}'.format(pe.name))
+        return
+    else:
+        frappe.throw("Die Rechnung wurde bereits andersweitig beglichen!")
+
+@frappe.whitelist()
 def rueckzahlung(pe):
     payment_entry = frappe.get_doc("Payment Entry", pe)
     row = payment_entry.append('deductions', {})
@@ -614,7 +658,8 @@ def erstelle_report(camt):
         'haftpflicht': 0,
         'spenden': 0,
         'anzahl': 0,
-        'total': 0
+        'total': 0,
+        'underpaid': 0
     }
     
     nicht_verbuchte_zahlungen = {
@@ -662,6 +707,8 @@ def erstelle_report(camt):
                                 verbuchte_zahlungen['haftpflicht'] += 1
                             elif sinv.ist_spenden_rechnung:
                                 verbuchte_zahlungen['spenden'] += 1
+                            if _sinv.allocated_amount < _sinv.outstanding_amount:
+                                verbuchte_zahlungen['underpaid'] += 1
                         else:
                             verbuchte_zahlungen['fremd_sektionen'] += 1
                 else:
@@ -692,6 +739,7 @@ def erstelle_report(camt):
             'haftpflicht': str(verbuchte_zahlungen['haftpflicht']),
             'spenden': str(verbuchte_zahlungen['spenden']),
             'anzahl': str(verbuchte_zahlungen['anzahl']),
+            'underpaid': str(verbuchte_zahlungen['underpaid']),
             'total': "{:,.2f}".format(proper_round(verbuchte_zahlungen['total'], Decimal('0.01'))).replace(",", "'")
         },
         'nicht_verbuchte_zahlungen': {
