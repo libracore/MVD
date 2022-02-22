@@ -737,6 +737,8 @@ def import_miveba_buchungen(site_name, file_name, limit=False):
                     mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
                     mitgliedschaft.letzte_bearbeitung_von = 'SP'
                     mitgliedschaft.miveba_buchungen = str(get_value(row, 'weitere_kontaktinfos'))
+                    mitgliedschaft.save()
+                    frappe.db.commit()
                 except Exception as err:
                     frappe.log_error("{0}\n\n{1}".format(err, row), 'Miveba Buchung konnte nicht erstellt werden')
             else:
