@@ -96,7 +96,7 @@ doc_events = {
         "on_update_after_submit": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.sinv_check_zahlung_mitgliedschaft"
     },
     "Payment Entry": {
-        "on_submit": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.pe_check_zahlung_mitgliedschaft"
+        "on_submit": ["mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.pe_check_zahlung_mitgliedschaft", "mvd.mvd.utils.hook_utils.check_mitgliedschaft_in_pe"]
     }
 }
 

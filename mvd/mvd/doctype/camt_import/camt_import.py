@@ -608,6 +608,7 @@ def kulanz_ausgleich(pe):
     payment_entry = frappe.get_doc("Payment Entry", pe)
     pe = frappe.copy_doc(payment_entry)
     pe.reference_no = 'Kulanzausgleich {0}'.format(payment_entry.name)
+    pe.paid_to = frappe.get_value("Sektion", pe.sektion_id, "kulanz_konto")
     
     new_payment = 0
     for sinv in pe.references:

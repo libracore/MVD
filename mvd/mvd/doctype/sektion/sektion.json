@@ -34,6 +34,7 @@
   "cb_5",
   "account",
   "zwischen_konto",
+  "kulanz_konto",
   "section_fusszeile",
   "fz_links",
   "cb_2",
@@ -261,9 +262,15 @@
    "fieldtype": "Link",
    "label": "Zwischen Konto",
    "options": "Account"
+  },
+  {
+   "fieldname": "kulanz_konto",
+   "fieldtype": "Link",
+   "label": "Kulanz Konto",
+   "options": "Account"
   }
  ],
- "modified": "2022-02-19 15:39:03.181640",
+ "modified": "2022-02-22 12:43:37.049729",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
