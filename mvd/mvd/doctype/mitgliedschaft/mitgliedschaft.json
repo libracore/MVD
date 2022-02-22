@@ -133,6 +133,8 @@
   "rg_adresse",
   "adress_id_rg",
   "section_kommunikation",
+  "section_miveba_buchungen",
+  "miveba_buchungen",
   "section_workflow_helpers",
   "validierung_notwendig",
   "kuendigung_verarbeiten",
@@ -1001,10 +1003,21 @@
    "fieldtype": "Int",
    "label": "Bezahltes Mitgliedschaftsjahr",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_miveba_buchungen",
+   "fieldtype": "Section Break",
+   "label": "Miveba Buchungen"
+  },
+  {
+   "fieldname": "miveba_buchungen",
+   "fieldtype": "Text",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-21 15:22:48.556154",
+ "modified": "2022-02-22 13:26:56.757432",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
