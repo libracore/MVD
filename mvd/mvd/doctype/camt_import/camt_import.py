@@ -193,6 +193,24 @@ def process_camt_file(master_data, camt_file, camt_import):
                 master_data['errors'].append("Parsing error: {0}:{1}".format(six.text_type(transaction), e))
                 pass
     
+    # prüfe overpaids nach offenen mitgliedschaftsrechnungen
+    if len(master_data['overpaid']) > 0:
+        for overpaid in master_data['overpaid']:
+            pe = frappe.get_doc("Payment Entry", overpaid)
+            if pe.unallocated_amount > 0:
+                mitgliedschaftsrechnungen = frappe.db.sql("""SELECT
+                                                                `name`
+                                                            FROM `tabSales Invoice`
+                                                            WHERE `outstanding_amount` = '{outstanding_amount}'
+                                                            AND `ist_mitgliedschaftsrechnung` = 1
+                                                            AND `customer` = '{customer}'""".format(outstanding_amount=pe.unallocated_amount, customer=pe.party), as_dict=True)
+                if len(mitgliedschaftsrechnungen) > 0:
+                    master_data['overpaid'].remove(overpaid)
+                    master_data['assigned_payments'].remove(overpaid)
+                    master_data['unsubmitted_payments'].remove(overpaid)
+                    
+                    master_data = match(mitgliedschaftsrechnungen[0].name, pe.name, master_data)
+    
     return master_data
 
 def create_payment_entry(date, to_account, received_amount, transaction_id, remarks, company, sektion, qrr, master_data):
