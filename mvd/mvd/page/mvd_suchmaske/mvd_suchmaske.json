@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2021-11-05 13:36:17.807929",
+ "modified": "2022-02-22 22:13:41.338815",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "mvd-suchmaske",
@@ -13,6 +13,12 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "RB (Rechtsberater*in)"
+  },
+  {
+   "role": "MA (Mitarbeiter*in Administration)"
   }
  ],
  "script": null,

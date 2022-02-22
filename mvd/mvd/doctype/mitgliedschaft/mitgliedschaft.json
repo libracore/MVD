@@ -1017,7 +1017,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-22 13:26:56.757432",
+ "modified": "2022-02-22 21:25:48.294258",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
@@ -1063,14 +1063,27 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "MVD Sektionsmitarbeiter*in",
+   "role": "MV Sektionsmitarbeiter*in",
    "write": 1
   },
   {
    "email": 1,
    "permlevel": 1,
    "read": 1,
-   "role": "MVD Sektionsmitarbeiter*in"
+   "role": "MV Sektionsmitarbeiter*in"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "RB (Rechtsberater*in)"
+  },
+  {
+   "export": 1,
+   "permlevel": 1,
+   "read": 1,
+   "report": 1,
+   "role": "RB (Rechtsberater*in)"
   }
  ],
  "search_fields": "mitglied_nr,mitglied_id",

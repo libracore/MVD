@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2022-01-27 15:48:35.240769",
+ "modified": "2022-02-22 22:13:32.007343",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "vbz",
@@ -13,6 +13,12 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "RB (Rechtsberater*in)"
+  },
+  {
+   "role": "MA (Mitarbeiter*in Administration)"
   }
  ],
  "script": null,

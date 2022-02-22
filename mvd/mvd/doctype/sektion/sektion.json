@@ -270,7 +270,7 @@
    "options": "Account"
   }
  ],
- "modified": "2022-02-22 12:43:37.049729",
+ "modified": "2022-02-22 21:16:54.284035",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
@@ -285,28 +285,6 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "MVD Admin",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "MVD Sektion Gesch\u00e4ftsleitung",
    "share": 1,
    "write": 1
   }

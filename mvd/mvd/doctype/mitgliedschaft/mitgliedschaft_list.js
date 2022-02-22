@@ -6,7 +6,7 @@ frappe.listview_settings['Mitgliedschaft'] = {
         listview.page.add_action_item(__("Erstelle Serienbrief"), function() {
                 var selected = listview.get_checked_items();
                 if (selected.length > 0) {
-                    if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+                    if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")&&!frappe.user.has_role("RB (Rechtsberater*in)")) {
                         create_serienbrief(selected);
                     } else {
                         frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");

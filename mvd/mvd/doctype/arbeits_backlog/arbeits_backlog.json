@@ -57,7 +57,7 @@
    "reqd": 1
   }
  ],
- "modified": "2022-02-07 21:58:54.929200",
+ "modified": "2022-02-22 21:31:23.362596",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Arbeits Backlog",
@@ -82,8 +82,21 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "MVD Sektionsmitarbeiter*in",
+   "role": "MV Sektionsmitarbeiter*in",
    "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "RB (Rechtsberater*in)"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MA (Mitarbeiter*in Administration)",
    "write": 1
   }
  ],

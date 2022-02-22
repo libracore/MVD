@@ -92,7 +92,7 @@
    "reqd": 1
   }
  ],
- "modified": "2022-02-21 14:54:03.692328",
+ "modified": "2022-02-22 21:26:20.431077",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin",
@@ -109,6 +109,12 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "RB (Rechtsberater*in)"
   }
  ],
  "sort_field": "modified",

@@ -176,7 +176,7 @@ frappe.vbz = {
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#kuendigung_print").click(function(){
-            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")&&!frappe.user.has_role("RB (Rechtsberater*in)")) {
                 frappe.vbz.kuendigung_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
@@ -187,7 +187,7 @@ frappe.vbz = {
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#zuzug_print").click(function(){
-            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")&&!frappe.user.has_role("RB (Rechtsberater*in)")) {
                 frappe.vbz.zuzug_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
@@ -204,7 +204,7 @@ frappe.vbz = {
             frappe.set_route("List", "Korrespondenz", "List");
         });
         $("#korrespondenz_print").click(function(){
-            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")&&!frappe.user.has_role("RB (Rechtsberater*in)")) {
                 frappe.vbz.korrespondenz_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
@@ -215,7 +215,7 @@ frappe.vbz = {
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#rechnungen_print").click(function(){
-            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")&&!frappe.user.has_role("RB (Rechtsberater*in)")) {
                 frappe.vbz.rg_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
@@ -226,7 +226,7 @@ frappe.vbz = {
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#begruessung_online_print").click(function(){
-            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")&&!frappe.user.has_role("RB (Rechtsberater*in)")) {
                 frappe.vbz.begruessung_online_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
@@ -237,7 +237,7 @@ frappe.vbz = {
             frappe.set_route("List", "Mahnung", "List");
         });
         $("#mahnungen_print").click(function(){
-            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
+            if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")&&!frappe.user.has_role("RB (Rechtsberater*in)")) {
                 frappe.vbz.mahnung_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
