@@ -195,7 +195,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-02-22 21:17:12.095069",
+ "modified": "2022-02-23 10:37:38.138156",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnung",
@@ -212,6 +212,32 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "if_owner": 1,
+   "read": 1,
+   "role": "MV_RB"
+  },
+  {
+   "if_owner": 1,
+   "read": 1,
+   "role": "MV_MA"
+  },
+  {
+   "cancel": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "MV_RW",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "MV_GL",
    "submit": 1,
    "write": 1
   }

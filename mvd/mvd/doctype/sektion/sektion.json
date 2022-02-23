@@ -270,7 +270,7 @@
    "options": "Account"
   }
  ],
- "modified": "2022-02-22 21:16:54.284035",
+ "modified": "2022-02-23 10:44:59.078654",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
@@ -287,6 +287,22 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "MV_RB"
+  },
+  {
+   "read": 1,
+   "role": "MV_MA"
+  },
+  {
+   "read": 1,
+   "role": "MV_RW"
+  },
+  {
+   "read": 1,
+   "role": "MV_GL"
   }
  ],
  "sort_field": "modified",

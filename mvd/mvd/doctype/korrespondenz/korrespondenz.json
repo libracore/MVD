@@ -263,7 +263,7 @@
    "label": "Massenlauf vormerkung"
   }
  ],
- "modified": "2022-02-22 21:27:46.447290",
+ "modified": "2022-02-23 10:24:09.741755",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Korrespondenz",
@@ -282,20 +282,14 @@
    "write": 1
   },
   {
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
    "read": 1,
-   "report": 1,
-   "role": "MV Sektionsmitarbeiter*in",
-   "write": 1
+   "role": "MV_RB"
   },
   {
-   "export": 1,
+   "delete": 1,
    "read": 1,
-   "report": 1,
-   "role": "RB (Rechtsberater*in)"
+   "role": "MV_MA",
+   "write": 1
   }
  ],
  "sort_field": "modified",

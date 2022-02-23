@@ -92,7 +92,7 @@
    "reqd": 1
   }
  ],
- "modified": "2022-02-22 21:26:20.431077",
+ "modified": "2022-02-23 10:27:35.598585",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin",
@@ -111,10 +111,27 @@
    "write": 1
   },
   {
-   "export": 1,
    "read": 1,
-   "report": 1,
-   "role": "RB (Rechtsberater*in)"
+   "role": "MV_RB"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "MV_MA",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "MV_RW",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "MV_GL",
+   "write": 1
   }
  ],
  "sort_field": "modified",
