@@ -1013,12 +1013,12 @@
   },
   {
    "fieldname": "miveba_buchungen",
-   "fieldtype": "Text",
+   "fieldtype": "Code",
    "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-23 11:49:48.485368",
+ "modified": "2022-02-23 12:35:47.337814",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
