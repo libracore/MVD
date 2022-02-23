@@ -16,6 +16,7 @@ import six
 from frappe.utils.background_jobs import enqueue
 from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_unpaid_sinv
 from decimal import Decimal, ROUND_HALF_UP
+from frappe.utils.data import today
 
 class CAMTImport(Document):
     pass
@@ -776,3 +777,52 @@ def erstelle_report(camt):
     
 def proper_round(number, decimals):
     return float(Decimal(number).quantize(decimals, ROUND_HALF_UP))
+
+@frappe.whitelist()
+def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False):
+    sinv = frappe.get_doc("Sales Invoice", sinv)
+    if hv:
+        hv_sinv = create_unpaid_sinv(hv, betrag=12)
+    
+    customer = sinv.customer
+    mitgliedschaft = sinv.mv_mitgliedschaft
+    payment_entry_record = frappe.get_doc({
+        'doctype': "Payment Entry",
+        'party_type': 'Customer',
+        'party': customer,
+        'mv_mitgliedschaft': mitgliedschaft,
+        'company': sinv.company,
+        'sektion_id': sinv.sektion_id,
+        'paid_from': sinv.debit_to,
+        'paid_amount': sinv.outstanding_amount,
+        'paid_to': frappe.get_value("Sektion", sinv.sektion_id, "account"),
+        'received_amount': sinv.outstanding_amount,
+        'references': [
+            {
+                'reference_doctype': "Sales Invoice",
+                'reference_name': sinv.name,
+                'total_amount': sinv.base_grand_total,
+                'outstanding_amount': sinv.outstanding_amount,
+                'allocated_amount': sinv.outstanding_amount
+            }
+        ],
+        'reference_no': 'Barzahlung {0}'.format(sinv.name) if bar else 'EZS-Zahlung {0}'.format(sinv.name),
+        'reference_date': today()
+    }).insert()
+    
+    if hv:
+        hv_sinv = frappe.get_doc("Sales Invoice", hv_sinv)
+        hv_row = payment_entry_record.append('references', {})
+        hv_row.reference_doctype = "Sales Invoice"
+        hv_row.reference_name = hv_sinv.name
+        hv_row.total_amount = hv_sinv.base_grand_total
+        hv_row.outstanding_amount = hv_sinv.outstanding_amount
+        hv_row.allocated_amount = hv_sinv.outstanding_amount
+        payment_entry_record.paid_amount += hv_sinv.outstanding_amount
+        payment_entry_record.received_amount += hv_sinv.outstanding_amount
+        payment_entry_record.total_allocated_amount = payment_entry_record.paid_amount
+        payment_entry_record.reference_no = payment_entry_record.reference_no + " & {0}".format(hv_sinv.name)
+        payment_entry_record.save()
+    
+    payment_entry_record.submit()
+    
