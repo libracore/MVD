@@ -71,7 +71,7 @@ class Mitgliedschaft(Document):
                     # sende update an SP
                     send_mvm_to_sp(self, True)
                     # special case sektionswechsel nach ZH
-                    if self.wegzug_zu == 'MVZH' and self.status_c == 'Wegzug':
+                    if self.wegzug_zu in ('MVZH', 'MVBE', 'MVSO') and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
         # ~ else:
             # ~ # erstelle abreits backlog: Zu Validieren
@@ -1653,7 +1653,7 @@ def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
 
 @frappe.whitelist()
 def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
-    if str(get_sektion_code(neue_sektion)) != 'ZH':
+    if str(get_sektion_code(neue_sektion)) not in ('ZH', 'BE', 'SO'):
         try:
             # erstelle Mitgliedschaft in Zuzugs-Sektion
             mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
@@ -1739,8 +1739,8 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), new_mitgliedschaft.as_dict()), 'Sektionswechsel')
             return 0
     else:
-        # Sektionswechsel nach ZH --> kein neues Mtiglied in ERPNext, Meldung Sektionswechsel erfolgt vie validate Trigger von Mitgliedschaft
-        # Sobald ZH neues Mitglied verarbeitet erhält ERPNext via SP eine Neuanlage von/für ZH und ist mittels Freizügigkeitsabfrage wieder verfügbar
+        # Sektionswechsel nach ZH, BE, SO --> kein neues Mtiglied in ERPNext, Meldung Sektionswechsel erfolgt vie validate Trigger von Mitgliedschaft
+        # Sobald ZH, BE oder SO neues Mitglied verarbeitet erhält ERPNext via SP eine Neuanlage von/für ZH, BE oder SO und ist mittels Freizügigkeitsabfrage wieder verfügbar
         return 1
 
 @frappe.whitelist()
@@ -2534,7 +2534,14 @@ def create_sp_queue(mitgliedschaft, update):
 def send_mvm_sektionswechsel(mitgliedschaft):
     from mvd.mvd.service_plattform.api import sektionswechsel
     prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
-    sektionswechsel(prepared_mvm, 'ZH')
+    neue_sektion = ''
+    if mitgliedschaft.wegzug_zu == 'MVZH':
+        neue_sektion = 'ZH'
+    elif mitgliedschaft.wegzug_zu == 'MVSO':
+        neue_sektion = 'SO'
+    elif mitgliedschaft.wegzug_zu == 'MVBE':
+        neue_sektion = 'BE'
+    sektionswechsel(prepared_mvm, neue_sektion)
 
 def prepare_mvm_for_sp(mitgliedschaft):
     adressen = get_adressen_for_sp(mitgliedschaft)
