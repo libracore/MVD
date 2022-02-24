@@ -868,3 +868,16 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False):
     
     payment_entry_record.submit()
     
+@frappe.whitelist()
+def get_filter_for_doppelte():
+    pe_mit_doppelzahlungen = frappe.db.sql("""SELECT
+                                                `name`
+                                            FROM `tabPayment Entry`
+                                            WHERE `unallocated_amount` = `total_allocated_amount`
+                                            AND `total_allocated_amount` > 0
+                                            AND `docstatus` = 0""", as_list=True)
+    return pe_mit_doppelzahlungen
+
+@frappe.whitelist()
+def get_filter_for_unassigned():
+    return frappe.get_list('Sektion', fields='default_customer', as_list=True)
