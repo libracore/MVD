@@ -271,7 +271,7 @@ function kuendigung(frm) {
             args:{
                     'sektion': cur_frm.doc.sektion_id,
                     'dokument': 'Kündigung',
-                    'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                    //'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
                     'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
                     'language': cur_frm.doc.language
             },
@@ -687,7 +687,7 @@ function erstelle_rechnung(frm) {
             args:{
                     'sektion': cur_frm.doc.sektion_id,
                     'dokument': dokument,
-                    'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                    //'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
                     'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
                     'language': cur_frm.doc.language
             },
@@ -782,7 +782,7 @@ function erstelle_spenden_rechnung(frm) {
             args:{
                     'sektion': cur_frm.doc.sektion_id,
                     'dokument': 'Spende mit EZ',
-                    'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                    //'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
                     'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
                     'language': cur_frm.doc.language
             },
@@ -949,7 +949,7 @@ function erstelle_hv_rechnung(frm) {
             args:{
                     'sektion': cur_frm.doc.sektion_id,
                     'dokument': 'HV mit EZ',
-                    'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                    //'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
                     'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
                     'language': cur_frm.doc.language
             },
@@ -1007,7 +1007,7 @@ function erstelle_korrespondenz(frm) {
             args:{
                     'sektion': cur_frm.doc.sektion_id,
                     'dokument': 'Korrespondenz',
-                    'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                    //'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
                     'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
                     'language': cur_frm.doc.language
             },
@@ -1069,7 +1069,7 @@ function erstelle_begruessungs_korrespondenz(frm) {
         args:{
                 'sektion': cur_frm.doc.sektion_id,
                 'dokument': 'Begrüssung mit Ausweis',
-                'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                //'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
                 'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
                 'language': cur_frm.doc.language
         },
