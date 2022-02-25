@@ -337,7 +337,7 @@
                         <span class="ueberschrift-z">Referenz</span><br>
                         {{ qrr.reference }}<br><br>
                         <span class="ueberschrift-z">Zusätzliche Informationen</span><br>
-                        {{ qrr.message }}<br><br>
+                        {{ qrr.message|replace(" // ", "<br>") }}<br><br>
                         <span class="ueberschrift-z">Zahlbar durch</span><br>
                         {{ qrr.payer_name }}<br>
                         {{ qrr.payer_street | trim }} {{ qrr.payer_number }}<br>
