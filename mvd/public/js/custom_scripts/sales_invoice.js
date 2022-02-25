@@ -130,8 +130,6 @@ function check_for_hv(frm) {
 }
 
 function erstelle_zahlung(hv, ezs) {
-    console.log(hv);
-    console.log(ezs);
     var args;
     if (ezs) {
         if (hv) {
@@ -165,7 +163,7 @@ function erstelle_zahlung(hv, ezs) {
         'args': args,
         'async': false,
         'callback': function(r) {
-            //
+            cur_frm.reload_doc();
         }
     });
 }

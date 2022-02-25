@@ -223,6 +223,10 @@ class Mitgliedschaft(Document):
         
         if self.bezahltes_mitgliedschaftsjahr > 0 and self.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
             self.status_c = 'Regulär'
+            # erstellung Begrüssungsschreiben
+            self.begruessung_massendruck = 1
+            druckvorlage = get_druckvorlagen(sektion=self.sektion_id, dokument='Begrüssung mit Ausweis', mitgliedtyp=self.mitgliedtyp_c, language=self.language)['default_druckvorlage']
+            self.begruessung_massendruck_dokument = create_korrespondenz(mitgliedschaft=self.name, druckvorlage=druckvorlage, titel='Begrüssung (Autom.)')
             
         
         # prüfe offene Rechnungen bei sektionswechsel
