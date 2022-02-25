@@ -126,7 +126,7 @@
    "reqd": 1
   }
  ],
- "modified": "2022-01-14 13:07:35.197800",
+ "modified": "2022-02-23 10:42:39.287153",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MW Abo",
@@ -143,6 +143,22 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "MV_RB"
+  },
+  {
+   "read": 1,
+   "role": "MV_MA"
+  },
+  {
+   "read": 1,
+   "role": "MV_RW"
+  },
+  {
+   "read": 1,
+   "role": "MV_GL"
   }
  ],
  "show_name_in_global_search": 1,

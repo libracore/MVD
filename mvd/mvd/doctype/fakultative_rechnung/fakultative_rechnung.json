@@ -160,7 +160,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-02-03 08:49:25.583173",
+ "modified": "2022-02-23 10:35:31.072176",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Fakultative Rechnung",
@@ -193,23 +193,41 @@
    "write": 1
   },
   {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
    "read": 1,
-   "report": 1,
-   "role": "MVD Sektionsmitarbeiter*in",
-   "share": 1,
+   "role": "MV_MA",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "permlevel": 1,
+   "read": 1,
+   "role": "MV_MA"
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "role": "MV_RW",
    "submit": 1,
    "write": 1
   },
   {
    "permlevel": 1,
    "read": 1,
-   "report": 1,
-   "role": "MVD Sektionsmitarbeiter*in"
+   "role": "MV_RW"
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "role": "MV_GL",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "MV_GL"
   }
  ],
  "sort_field": "modified",

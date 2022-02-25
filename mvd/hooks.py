@@ -33,7 +33,10 @@ doctype_js = {
     "Role" : "public/js/custom_scripts/role.js",
     "Payment Entry" : "public/js/custom_scripts/payment_entry.js"
 }
-doctype_list_js = {"Error Log" : "public/js/custom_scripts/error_log_list.js"}
+doctype_list_js = {
+    "Error Log" : "public/js/custom_scripts/error_log_list.js",
+    "Payment Entry" : "public/js/custom_scripts/payment_entry_list.js"
+}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 

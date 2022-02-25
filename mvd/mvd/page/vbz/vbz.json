@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2022-01-27 15:48:35.240769",
+ "modified": "2022-02-23 10:22:36.468452",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "vbz",
@@ -13,6 +13,18 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "MV_RB"
+  },
+  {
+   "role": "MV_MA"
+  },
+  {
+   "role": "MV_RW"
+  },
+  {
+   "role": "MV_GL"
   }
  ],
  "script": null,

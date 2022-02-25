@@ -49,6 +49,7 @@
   "submitted_payments",
   "unsubmitted_payments",
   "overpaid",
+  "splittet_overpaid",
   "underpaid",
   "doppelte_mitgliedschaft",
   "gebucht_weggezogen_list",
@@ -340,9 +341,15 @@
    "fieldtype": "Code",
    "label": "Unterbezahlte",
    "read_only": 1
+  },
+  {
+   "fieldname": "splittet_overpaid",
+   "fieldtype": "Code",
+   "label": "Aufgeteilte \u00dcberbezahlte",
+   "read_only": 1
   }
  ],
- "modified": "2022-02-21 21:27:44.134904",
+ "modified": "2022-02-24 11:42:43.800997",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",
@@ -361,15 +368,24 @@
    "write": 1
   },
   {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
+   "if_owner": 1,
    "read": 1,
-   "report": 1,
-   "role": "MVD Sektionsmitarbeiter*in",
-   "share": 1,
+   "role": "MV_RB"
+  },
+  {
+   "read": 1,
+   "role": "MV_MA"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "MV_RW",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "MV_GL",
    "write": 1
   }
  ],

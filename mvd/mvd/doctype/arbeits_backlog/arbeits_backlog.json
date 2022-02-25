@@ -57,7 +57,7 @@
    "reqd": 1
   }
  ],
- "modified": "2022-02-07 21:58:54.929200",
+ "modified": "2022-02-23 10:29:32.516759",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Arbeits Backlog",
@@ -76,15 +76,20 @@
    "write": 1
   },
   {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
    "read": 1,
-   "report": 1,
-   "role": "MVD Sektionsmitarbeiter*in",
-   "share": 1,
-   "write": 1
+   "role": "MV_RB"
+  },
+  {
+   "read": 1,
+   "role": "MV_MA"
+  },
+  {
+   "read": 1,
+   "role": "MV_RW"
+  },
+  {
+   "read": 1,
+   "role": "MV_GL"
   }
  ],
  "sort_field": "modified",

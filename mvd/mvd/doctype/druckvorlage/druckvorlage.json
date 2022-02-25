@@ -369,7 +369,7 @@
    "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Gesamtbetrag der gemahnten Rechnung(en) -&gt; <b>%%Gesamtbetrag_gemahnte_Rechnungen%%</b></li>\n<li>Jahr der gemahnten Jahresrechnung auf Seite 1 -&gt; <b>%%Jahresrechnung_Jahr%%</b></li>\n</ul>"
   }
  ],
- "modified": "2022-02-15 20:44:17.064552",
+ "modified": "2022-02-23 10:32:45.142933",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",
@@ -385,6 +385,25 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "MV_RB"
+  },
+  {
+   "read": 1,
+   "role": "MV_MA"
+  },
+  {
+   "read": 1,
+   "role": "MV_RW"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "MV_GL",
    "write": 1
   }
  ],

@@ -92,7 +92,7 @@
    "reqd": 1
   }
  ],
- "modified": "2022-02-21 14:54:03.692328",
+ "modified": "2022-02-23 10:27:35.598585",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin",
@@ -108,6 +108,29 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "MV_RB"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "MV_MA",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "MV_RW",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "MV_GL",
    "write": 1
   }
  ],

@@ -16,6 +16,7 @@ import six
 from frappe.utils.background_jobs import enqueue
 from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_unpaid_sinv
 from decimal import Decimal, ROUND_HALF_UP
+from frappe.utils.data import today
 
 class CAMTImport(Document):
     pass
@@ -48,7 +49,8 @@ def lese_camt_file(camt_import, file_path):
         'overpaid': overpaid,
         'doppelte_mitgliedschaft': doppelte_mitgliedschaft,
         'gebucht_weggezogen': gebucht_weggezogen,
-        'underpaid': underpaid
+        'underpaid': underpaid,
+        'splittet_overpaid': []
     }
     '''
         imported_payments = Alle importierten Zahlungen aus dem CAMT-File
@@ -210,6 +212,39 @@ def process_camt_file(master_data, camt_file, camt_import):
                     master_data['unsubmitted_payments'].remove(overpaid)
                     
                     master_data = match(mitgliedschaftsrechnungen[0].name, pe.name, master_data)
+    
+    # splitte overpaids, mit zuweisung zu mitgliedschaftsrechnung, nach 1. pe mit Mitgliedschaftsrechnung = Submitted und 2. Rest auf neue Zahlung als Draft
+    if len(master_data['overpaid']) > 0:
+        for overpaid in master_data['overpaid']:
+            pe = frappe.get_doc("Payment Entry", overpaid)
+            for sinv in pe.references:
+                if sinv.reference_doctype == 'Sales Invoice':
+                    sinv = frappe.get_doc("Sales Invoice", sinv.reference_name)
+                    if sinv.ist_mitgliedschaftsrechnung:
+                        # dupliziere Zahlung
+                        new_pe = frappe.copy_doc(pe)
+                        new_pe.reference_no = pe.reference_no + ' Überzahlung von {0}'.format(pe.name)
+                        new_pe.references = []
+                        new_pe.received_amount = pe.unallocated_amount
+                        new_pe.paid_amount = pe.unallocated_amount
+                        new_pe.unallocated_amount = pe.unallocated_amount
+                        new_pe.insert()
+                        master_data['overpaid'].append(new_pe.name)
+                        master_data['assigned_payments'].append(new_pe.name)
+                        master_data['unsubmitted_payments'].append(new_pe.name)
+                        master_data['imported_payments'].append(new_pe.name)
+                        master_data['splittet_overpaid'].append(new_pe.name)
+                        
+                        # reduziere urspungszahlung um neu zugewiesenen Betrag und verbuche
+                        pe.received_amount = pe.received_amount - pe.unallocated_amount
+                        pe.paid_amount = pe.paid_amount - pe.unallocated_amount
+                        pe.unallocated_amount = 0
+                        pe.save()
+                        pe.submit()
+                        master_data['overpaid'].remove(pe.name)
+                        master_data['unsubmitted_payments'].remove(pe.name)
+                        master_data['submitted_payments'].append(pe.name)
+                        
     
     return master_data
 
@@ -466,6 +501,7 @@ def update_camt_import_record(camt_import, master_data, aktualisierung=False):
     camt_import.unsubmitted_payments = str(master_data['unsubmitted_payments'])
     camt_import.deleted_payments = str(master_data['deleted_payments'])
     camt_import.overpaid = str(master_data['overpaid'])
+    camt_import.splittet_overpaid = str(master_data['splittet_overpaid'])
     camt_import.doppelte_mitgliedschaft = str(master_data['doppelte_mitgliedschaft'])
     camt_import.errors = str(master_data['errors'])
     camt_import.master_data = str(master_data)
@@ -493,7 +529,8 @@ def aktualisiere_camt_uebersicht(camt_import):
         'deleted_payments': [],
         'overpaid': [],
         'doppelte_mitgliedschaft': [],
-        'underpaid': []
+        'underpaid': [],
+        'splittet_overpaid': master_data['splittet_overpaid']
     }
     default_customer = get_default_customer(camt_import.sektion_id)
     
@@ -743,6 +780,12 @@ def erstelle_report(camt):
             except:
                 pass
     
+    for pe in eval(camt_record.splittet_overpaid):
+        pe = frappe.get_doc("Payment Entry", pe)
+        nicht_verbuchte_zahlungen['total'] += float(pe.paid_amount)
+        nicht_verbuchte_zahlungen['anzahl'] += 1
+        nicht_verbuchte_zahlungen['ueberzahlt'] += 1
+    
     template_data = {
         'sektion': camt_record.sektion_id,
         'allgemein': {
@@ -776,3 +819,65 @@ def erstelle_report(camt):
     
 def proper_round(number, decimals):
     return float(Decimal(number).quantize(decimals, ROUND_HALF_UP))
+
+@frappe.whitelist()
+def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False):
+    sinv = frappe.get_doc("Sales Invoice", sinv)
+    if hv:
+        hv_sinv = create_unpaid_sinv(hv, betrag=12)
+    
+    customer = sinv.customer
+    mitgliedschaft = sinv.mv_mitgliedschaft
+    payment_entry_record = frappe.get_doc({
+        'doctype': "Payment Entry",
+        'party_type': 'Customer',
+        'party': customer,
+        'mv_mitgliedschaft': mitgliedschaft,
+        'company': sinv.company,
+        'sektion_id': sinv.sektion_id,
+        'paid_from': sinv.debit_to,
+        'paid_amount': sinv.outstanding_amount,
+        'paid_to': frappe.get_value("Sektion", sinv.sektion_id, "account"),
+        'received_amount': sinv.outstanding_amount,
+        'references': [
+            {
+                'reference_doctype': "Sales Invoice",
+                'reference_name': sinv.name,
+                'total_amount': sinv.base_grand_total,
+                'outstanding_amount': sinv.outstanding_amount,
+                'allocated_amount': sinv.outstanding_amount
+            }
+        ],
+        'reference_no': 'Barzahlung {0}'.format(sinv.name) if bar else 'EZS-Zahlung {0}'.format(sinv.name),
+        'reference_date': today()
+    }).insert()
+    
+    if hv:
+        hv_sinv = frappe.get_doc("Sales Invoice", hv_sinv)
+        hv_row = payment_entry_record.append('references', {})
+        hv_row.reference_doctype = "Sales Invoice"
+        hv_row.reference_name = hv_sinv.name
+        hv_row.total_amount = hv_sinv.base_grand_total
+        hv_row.outstanding_amount = hv_sinv.outstanding_amount
+        hv_row.allocated_amount = hv_sinv.outstanding_amount
+        payment_entry_record.paid_amount += hv_sinv.outstanding_amount
+        payment_entry_record.received_amount += hv_sinv.outstanding_amount
+        payment_entry_record.total_allocated_amount = payment_entry_record.paid_amount
+        payment_entry_record.reference_no = payment_entry_record.reference_no + " & {0}".format(hv_sinv.name)
+        payment_entry_record.save()
+    
+    payment_entry_record.submit()
+    
+@frappe.whitelist()
+def get_filter_for_doppelte():
+    pe_mit_doppelzahlungen = frappe.db.sql("""SELECT
+                                                `name`
+                                            FROM `tabPayment Entry`
+                                            WHERE `unallocated_amount` = `total_allocated_amount`
+                                            AND `total_allocated_amount` > 0
+                                            AND `docstatus` = 0""", as_list=True)
+    return pe_mit_doppelzahlungen
+
+@frappe.whitelist()
+def get_filter_for_unassigned():
+    return frappe.get_list('Sektion', fields='default_customer', as_list=True)

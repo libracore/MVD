@@ -6,11 +6,7 @@ frappe.listview_settings['Mahnung'] = {
                     {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'options': 'Sektion', 'label': __('Sektion'), 'reqd': 1, 'default': get_default_sektion()}
                 ],
                 function(values){
-                    if (!frappe.user.has_role("MV Sektionsmitarbeiter*in RO")) {
-                        create_payment_reminders(values);
-                    } else {
-                        frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
-                    }
+                    create_payment_reminders(values);
                 },
                 __("Erstelle Mahnungen"),
                 __("Erstelle")
@@ -20,16 +16,20 @@ frappe.listview_settings['Mahnung'] = {
 }
 
 function create_payment_reminders(values) {
-    frappe.call({
-        'method': "mvd.mvd.doctype.mahnung.mahnung.create_payment_reminders",
-        'args': {
-            'sektion_id': values.sektion_id
-        },
-        'callback': function(response) {
-            frappe.msgprint(response.message);
-            cur_list.refresh();
-        }
-    });
+    if (frappe.user.has_role("MV_MA")) {
+        frappe.call({
+            'method': "mvd.mvd.doctype.mahnung.mahnung.create_payment_reminders",
+            'args': {
+                'sektion_id': values.sektion_id
+            },
+            'callback': function(response) {
+                frappe.msgprint(response.message);
+                cur_list.refresh();
+            }
+        });
+    } else {
+        frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
+    }
 }
 
 function get_default_sektion() {

@@ -206,18 +206,24 @@ class Druckvorlage(Document):
                 self.default = 1
 
 @frappe.whitelist()
-def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp='Privat', reduzierte_mitgliedschaft=0, language='de', serienbrief=False):
+def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, reduzierte_mitgliedschaft=False, language=False, serienbrief=False):
     if not serienbrief:
+        additional_filters = ''
+        if mitgliedtyp:
+            additional_filters += """ AND `mitgliedtyp_c` = '{mitgliedtyp}'""".format(mitgliedtyp=mitgliedtyp)
+        if reduzierte_mitgliedschaft:
+            additional_filters += """ AND `reduzierte_mitgliedschaft` = '{reduzierte_mitgliedschaft}'""".format(reduzierte_mitgliedschaft=reduzierte_mitgliedschaft)
+        if language:
+            additional_filters += """ AND `language` = '{language}'""".format(language=language)
+        
         _alle_druckvorlagen = frappe.db.sql("""SELECT
                                                 `name`,
                                                 `default`
                                             FROM `tabDruckvorlage`
                                             WHERE `sektion_id` = '{sektion}'
-                                            AND `mitgliedtyp_c` = '{mitgliedtyp}'
-                                            AND `reduzierte_mitgliedschaft` = '{reduzierte_mitgliedschaft}'
                                             AND `deaktiviert` != 1
-                                            AND `language` = '{language}'
-                                            AND `dokument` = '{dokument}'""".format(sektion=sektion, mitgliedtyp=mitgliedtyp, reduzierte_mitgliedschaft=reduzierte_mitgliedschaft, language=language, dokument=dokument), as_dict=True)
+                                            AND `dokument` = '{dokument}'
+                                            {additional_filters}""".format(sektion=sektion, dokument=dokument, additional_filters=additional_filters), as_dict=True)
         
         alle_druckvorlagen = []
         default_druckvorlage = ''

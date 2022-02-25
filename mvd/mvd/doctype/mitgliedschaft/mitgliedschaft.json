@@ -210,6 +210,7 @@
    "fieldname": "eintritt",
    "fieldtype": "Date",
    "label": "Eintritt",
+   "permlevel": 1,
    "reqd": 1
   },
   {
@@ -1012,12 +1013,12 @@
   },
   {
    "fieldname": "miveba_buchungen",
-   "fieldtype": "Text",
+   "fieldtype": "Code",
    "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-22 13:26:56.757432",
+ "modified": "2022-02-23 12:35:47.337814",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
@@ -1058,19 +1059,43 @@
    "share": 1
   },
   {
-   "email": 1,
-   "export": 1,
-   "print": 1,
    "read": 1,
-   "report": 1,
-   "role": "MVD Sektionsmitarbeiter*in",
+   "role": "MV_RB"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "MV_RB"
+  },
+  {
+   "read": 1,
+   "role": "MV_MA",
    "write": 1
   },
   {
-   "email": 1,
    "permlevel": 1,
    "read": 1,
-   "role": "MVD Sektionsmitarbeiter*in"
+   "role": "MV_MA"
+  },
+  {
+   "read": 1,
+   "role": "MV_RW",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "MV_RW"
+  },
+  {
+   "read": 1,
+   "role": "MV_GL",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "MV_GL"
   }
  ],
  "search_fields": "mitglied_nr,mitglied_id",
