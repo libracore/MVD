@@ -1436,7 +1436,8 @@ def get_uebersicht_html(name):
                 'validierung': int(mitgliedschaft.validierung_notwendig),
                 'tel_g_1': mitgliedschaft.tel_g_1 or '',
                 'tel_g_2': mitgliedschaft.tel_g_2 or '',
-                'rg_tel_g': mitgliedschaft.rg_tel_g or ''
+                'rg_tel_g': mitgliedschaft.rg_tel_g or '',
+                'language': mitgliedschaft.language or 'de'
             }
         }
         
@@ -1456,7 +1457,8 @@ def get_uebersicht_html(name):
             'status': mitgliedschaft.status_c,
             'mitgliedtyp': mitgliedschaft.mitgliedtyp_c,
             'eintritt': mitgliedschaft.eintritt,
-            'kuendigung': mitgliedschaft.kuendigung or False
+            'kuendigung': mitgliedschaft.kuendigung or False,
+            'language': mitgliedschaft.language or 'de'
         }
         
         # Hauptmitglied

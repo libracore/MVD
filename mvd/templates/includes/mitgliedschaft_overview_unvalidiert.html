@@ -11,6 +11,7 @@
                 {% else %}
                     <b>Erfassung/Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}
                 {% endif %}
+                <br><b>Sprache:</b> {{ allgemein.language }}<br>
             </p>
         </div>
     </div>
