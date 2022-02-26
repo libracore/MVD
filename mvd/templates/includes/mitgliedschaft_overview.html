@@ -46,6 +46,7 @@
                     {% else %}
                         <b>Erfassung:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
                     {% endif %}
+                    <br><b>Sprache:</b> {{ allgemein.language }}<br>
                 </p>
                 <p>
                     <b>Wichtig:</b><br>
@@ -96,6 +97,7 @@
                     {% else %}
                         <b>Erfassung:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
                     {% endif %}
+                    <br><b>Sprache:</b> {{ allgemein.language }}<br>
                 </p>
                 <p>
                     <b>Wichtig:</b><br>
