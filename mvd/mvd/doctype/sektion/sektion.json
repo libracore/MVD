@@ -17,7 +17,7 @@
   "section_sektionseinstellungen",
   "mitgliedschafts_artikel",
   "mitgliedschafts_artikel_geschaeft",
-  "mitgliedschafts_artikel_kollektiv",
+  "mitgliedschafts_artikel_beitritt",
   "mitgliedschafts_artikel_reduziert",
   "mitgliedschafts_artikel_gratis",
   "hv_artikel",
@@ -183,13 +183,13 @@
   {
    "fieldname": "mitgliedschafts_artikel_reduziert",
    "fieldtype": "Link",
-   "label": "Artikel Mitgliedschafts (Reduziert)",
+   "label": "Artikel Mitgliedschaft (Abweichend / Reduziert)",
    "options": "Item"
   },
   {
    "fieldname": "mitgliedschafts_artikel_gratis",
    "fieldtype": "Link",
-   "label": "Artikel Mitgliedschafts (Gratis)",
+   "label": "Artikel Mitgliedschaft (Gratis)",
    "options": "Item"
   },
   {
@@ -246,12 +246,6 @@
    "options": "Item"
   },
   {
-   "fieldname": "mitgliedschafts_artikel_kollektiv",
-   "fieldtype": "Link",
-   "label": "Artikel Mitgliedschaft (Kollektiv)",
-   "options": "Item"
-  },
-  {
    "fieldname": "virtueller_user",
    "fieldtype": "Link",
    "label": "Virtueller User",
@@ -268,9 +262,15 @@
    "fieldtype": "Link",
    "label": "Kulanz Konto",
    "options": "Account"
+  },
+  {
+   "fieldname": "mitgliedschafts_artikel_beitritt",
+   "fieldtype": "Link",
+   "label": "Artikel Beitrittsgeb\u00fchr",
+   "options": "Item"
   }
  ],
- "modified": "2022-02-23 10:44:59.078654",
+ "modified": "2022-02-28 11:11:48.162015",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
