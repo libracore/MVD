@@ -23,14 +23,20 @@ frappe.call({
     }
 });
 
-// Add VBZ Shortcut to Navbar
-//~ setTimeout(function(){$('.nav.navbar-nav.navbar-right').prepend('<li class="dropdown dropdown-mobile"><a class"dropdown-toggle" href="#vbz"><span id="ts_indicator" class=""><i class="fa fa-inbox"></i></span></a></li>');}, 1000);
-
-// Redirect to VBZ after login
+// Redirect to VBZ after login, reset user default and set navbar color to red if test
 $(document).ready(function() {
     // reset user company default
     frappe.defaults.set_user_default_local("Company", '');
     
+    // mark navbar in specific colour
+    setTimeout(function(){
+        var navbars = document.getElementsByClassName("navbar");
+        if (navbars.length > 0) {
+            if ((window.location.hostname.includes("test-libracore")) || (window.location.hostname.includes("localhost")) || (window.location.hostname.includes("192.168.0.18"))) {
+                navbars[0].style.backgroundColor = "#B0473A";
+            }
+        }
+    }, 2000);
     
     if(frappe._cur_route==""||frappe._cur_route=="#") {
         window.location.href = "#vbz";
@@ -42,6 +48,8 @@ $(document).ready(function() {
             //~ location.reload();
         //~ }, 100);
     }
+    
+    
 });
 
 // Redirect to VBZ after click on Navbar Desk Shortcut
