@@ -425,52 +425,58 @@ def import_debitoren(site_name, file_name, limit=False):
 
 def erstelle_rechnung(row):
     try:
-        qrr_2 = str(get_value(row, 'ref_nr_five_1'))
-        qrr_false = "X" + str(get_value(row, 'kz_1')).split(">")[0]
-        qrr_1 = qrr_false.replace("X01", "")
-        qrr = qrr_1 + qrr_2
-        qrr = qrr.replace(" ", "")
+        file_qrr = int(str(get_value(row, 'ref_nr_five_1')).replace(" ", ""))
+        qrr = '{num:027d}'.format(num=file_qrr)
         
         existing_sinv_query = ("""SELECT `name` FROM `tabSales Invoice` WHERE REPLACE(`esr_reference`, ' ', '') = '{qrr}'""".format(qrr=qrr))
         if len(frappe.db.sql(existing_sinv_query, as_list=True)) > 0:
             frappe.log_error("{0}".format(row), 'Rechnung wurde bereits erstellt')
-        else:
-            mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
-            posting_date = str(get_value(row, 'datum')).split(" ")[0]
-            item = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "mitgliedschafts_artikel")
-            company = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "company")
-            cost_center = frappe.get_value("Company", company, "cost_center")
-            sektions_code = str(frappe.get_value("Sektion", mitgliedschaft.sektion_id, "sektion_id"))
-            
-            sinv = frappe.get_doc({
-                "doctype": "Sales Invoice",
-                "company": company,
-                "customer": mitgliedschaft.rg_kunde or mitgliedschaft.kunde_mitglied,
-                "set_posting_time": 1,
-                "posting_date": posting_date,
-                "posting_time": str(get_value(row, 'datum')).split(" ")[1],
-                "ist_mitgliedschaftsrechnung": 1,
-                "mv_mitgliedschaft": mitgliedschaft.name,
-                "sektion_id": mitgliedschaft.sektion_id,
-                "sektions_code": sektions_code,
-                "mitgliedschafts_jahr": str(get_value(row, 'jahr')),
-                "due_date": add_days(posting_date, 30),
-                "esr_reference": qrr,
-                "items": [
-                    {
-                        "item_code": item,
-                        "qty": 1,
-                        "rate": get_value(row, 'offen'),
-                        "cost_center": cost_center
-                    }
-                ]
-            })
-            sinv.insert()
-            sinv.submit()
-            frappe.db.commit()
             return
+        else:
+            existing_sinv_query = ("""SELECT `name` FROM `tabSales Invoice` WHERE `mv_mitgliedschaft` = '{mitglied_id}'""".format(mitglied_id=str(get_value(row, 'mitglied_id'))))
+            existing_sinv = frappe.db.sql(existing_sinv_query, as_dict=True)
+            if len(existing_sinv) > 0:
+                frappe.db.sql("""UPDATE `tabSales Invoice` SET `esr_reference` = '{qrr}' WHERE `name` = '{name}'""".format(qrr=qrr, name=existing_sinv[0].name), as_list=True)
+                frappe.log_error("{0}".format(row), 'Update QRR')
+                return
+            else:
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
+                posting_date = str(get_value(row, 'datum')).split(" ")[0]
+                item = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "mitgliedschafts_artikel")
+                company = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "company")
+                cost_center = frappe.get_value("Company", company, "cost_center")
+                sektions_code = str(frappe.get_value("Sektion", mitgliedschaft.sektion_id, "sektion_id"))
+                
+                sinv = frappe.get_doc({
+                    "doctype": "Sales Invoice",
+                    "company": company,
+                    "customer": mitgliedschaft.rg_kunde or mitgliedschaft.kunde_mitglied,
+                    "set_posting_time": 1,
+                    "posting_date": posting_date,
+                    "posting_time": str(get_value(row, 'datum')).split(" ")[1],
+                    "ist_mitgliedschaftsrechnung": 1,
+                    "mv_mitgliedschaft": mitgliedschaft.name,
+                    "sektion_id": mitgliedschaft.sektion_id,
+                    "sektions_code": sektions_code,
+                    "mitgliedschafts_jahr": str(get_value(row, 'jahr')),
+                    "due_date": add_days(posting_date, 30),
+                    "esr_reference": qrr,
+                    "items": [
+                        {
+                            "item_code": item,
+                            "qty": 1,
+                            "rate": get_value(row, 'offen'),
+                            "cost_center": cost_center
+                        }
+                    ]
+                })
+                sinv.insert()
+                sinv.submit()
+                frappe.db.commit()
+                return
     except Exception as err:
         frappe.log_error("{0}\n\n{1}".format(err, row), 'Rechnung konnte nicht erstellt werden')
+        return
 
 # --------------------------------------------------------------
 # Miveba-Termin Importer
