@@ -65,3 +65,17 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
     qrr_reference_raw = reference_raw + str(check_digit)
     qrr_reference = qrr_reference_raw[:2] + " " + qrr_reference_raw[2:7] + " " + qrr_reference_raw[7:12] + " " + qrr_reference_raw[12:17] + " " + qrr_reference_raw[17:22] + " " + qrr_reference_raw[22:27]
     return qrr_reference
+
+# hotfix cleanup importierte ESR Referenzen
+def cleanup_esr_ref():
+    sinvs = frappe.db.sql("""SELECT `name`, `esr_reference` FROM `tabSales Invoice` WHERE `docstatus` = 1 AND `status` = 'Overdue'""", as_dict=True)
+    total = len(sinvs)
+    count = 1
+    for sinv in sinvs:
+        old_esr = sinv.esr_reference
+        new_esr = old_esr[11:27]
+        new_esr = '00000000000' + new_esr
+        frappe.db.sql("""UPDATE `tabSales Invoice` SET `esr_reference` = '{new_esr}' WHERE `name` = '{name}'""".format(new_esr=new_esr, name=sinv.name), as_list=True)
+        frappe.db.commit()
+        print("{count} of {total}".format(count=count, total=total))
+        count += 1
