@@ -2367,6 +2367,8 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                             # eines von beidem muss zwingend vorhanden sein
                             frappe.log_error("{0}".format(kwargs), 'adress/kontakt anlage: Weder Postfach noch Strasse')
                             return False
+                        else:
+                            mitglied["strasse"] = 'Postfach'
                     if kontaktdaten["firma"]:
                         new_mitgliedschaft.kundentyp = 'Unternehmen'
                         new_mitgliedschaft.firma = str(kontaktdaten["firma"])
