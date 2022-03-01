@@ -675,7 +675,7 @@ def create_rg_kontakt(mitgliedschaft):
         company_name = mitgliedschaft.rg_firma
         if not mitgliedschaft.rg_nachname and not mitgliedschaft.rg_vorname:
             first_name = company_name
-            last_name = ''
+            last_name = mitgliedschaft.rg_nachname or ''
         else:
             company_name = ''
             salutation = mitgliedschaft.rg_anrede
