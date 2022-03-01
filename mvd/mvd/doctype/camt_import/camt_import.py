@@ -318,7 +318,18 @@ def sinv_lookup(qrr):
         else:
             return False, False
     else:
-        return False, False
+        #fallback lookup alte Deibtoren
+        qrr = qrr[11:24]
+        sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `status`
+                                FROM `tabSales Invoice`
+                                WHERE REPLACE(`esr_reference`, ' ', '') LIKE '%{qrr}%'""".format(qrr=qrr), as_dict=True)
+        if len(sinv) > 0:
+            if sinv[0].docstatus == 1 and sinv[0].status != 'Paid':
+                return sinv[0].name, False
+            else:
+                return False, False
+        else:
+            return False, False
 
 def find_potenzieller_wegzug(mitgliedschaft):
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)

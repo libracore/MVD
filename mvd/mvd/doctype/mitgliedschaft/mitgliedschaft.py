@@ -2613,7 +2613,7 @@ def get_adressen_for_sp(mitgliedschaft):
         "ort": str(mitgliedschaft.ort) if mitgliedschaft.ort else None,
         "adresszusatz": str(mitgliedschaft.zusatz_adresse) if mitgliedschaft.zusatz_adresse else None,
         "postfach": True if mitgliedschaft.postfach else False,
-        "postfachNummer": str(mitgliedschaft.postfach_nummer) if mitgliedschaft.postfach_nummer else None,
+        "postfachNummer": str(mitgliedschaft.postfach_nummer) if mitgliedschaft.postfach_nummer and mitgliedschaft.postfach else None,
         "fuerKorrespondenzGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
         "kontakte": [
             {
