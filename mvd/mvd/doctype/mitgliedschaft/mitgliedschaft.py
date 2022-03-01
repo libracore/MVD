@@ -329,6 +329,7 @@ class Mitgliedschaft(Document):
     def validate_adresse_mitglied(self):
         if self.adresse_mitglied:
             adresse_mitglied = update_adresse_mitglied(self)
+            
             if self.postfach == 1 or self.abweichende_objektadresse == 1:
                 if self.objekt_adresse:
                     objekt_adresse = update_objekt_adresse(self)
@@ -518,6 +519,7 @@ def update_rg_adresse(mitgliedschaft):
     address.is_primary_address = is_primary_address
     address.is_shipping_address = is_shipping_address
     address.adress_id = str(mitgliedschaft.mitglied_id) + "-Rechnung"
+    address.disabled = 0
     
     if mitgliedschaft.rg_kunde:
         link_name = mitgliedschaft.rg_kunde
@@ -600,6 +602,7 @@ def update_rg_kontakt(mitgliedschaft):
         company_name = mitgliedschaft.rg_firma
         if not mitgliedschaft.rg_nachname and not mitgliedschaft.rg_vorname:
             first_name = company_name
+            last_name = company_name
         else:
             company_name = ''
             salutation = mitgliedschaft.rg_anrede
@@ -859,7 +862,7 @@ def update_objekt_adresse(mitgliedschaft):
     address.is_primary_address = is_primary_address
     address.is_shipping_address = is_shipping_address
     address.adress_id = str(mitgliedschaft.mitglied_id) + "-Objekt"
-    address.disabled = '0'
+    address.disabled = 0
     
     address.links = []
     link = address.append("links", {})
@@ -2063,7 +2066,7 @@ def mvm_update(mitgliedschaft, kwargs):
                     mitgliedschaft.status_c = 'Online-Mutation'
                     
                 
-            
+            mitgliedschaft.flags.ignore_links=True
             mitgliedschaft.save()
             frappe.db.commit()
             
@@ -2432,7 +2435,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
             else:
                 frappe.log_error("Adressdaten:\n{0}\n\nMitgliedsdaten:\n{1}".format(objekt, kwargs), 'Adresse Typ Objekt: Wurde entfernt; fehlende Strasse')
                 # reset objektadresse
-                new_mitgliedschaft.abweichende_objektadresse = '0'
+                new_mitgliedschaft.abweichende_objektadresse = 0
                 new_mitgliedschaft.objekt_zusatz_adresse = None
                 new_mitgliedschaft.objekt_strasse = None
                 new_mitgliedschaft.objekt_nummer = None
@@ -2440,7 +2443,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 new_mitgliedschaft.objekt_ort = None
         else:
             # reset objektadresse
-            new_mitgliedschaft.abweichende_objektadresse = '0'
+            new_mitgliedschaft.abweichende_objektadresse = 0
             new_mitgliedschaft.objekt_zusatz_adresse = None
             new_mitgliedschaft.objekt_strasse = None
             new_mitgliedschaft.objekt_nummer = None
