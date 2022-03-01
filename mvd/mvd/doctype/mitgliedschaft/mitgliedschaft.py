@@ -675,6 +675,7 @@ def create_rg_kontakt(mitgliedschaft):
         company_name = mitgliedschaft.rg_firma
         if not mitgliedschaft.rg_nachname and not mitgliedschaft.rg_vorname:
             first_name = company_name
+            last_name = ''
         else:
             company_name = ''
             salutation = mitgliedschaft.rg_anrede
@@ -2450,7 +2451,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
         if rechnung:
             new_mitgliedschaft.abweichende_rechnungsadresse = 1
             new_mitgliedschaft.rg_zusatz_adresse = str(rechnung["adresszusatz"]) if rechnung["adresszusatz"] else ''
-            new_mitgliedschaft.rg_strasse = str(rechnung["strasse"]) if rechnung["strasse"] else ''
+            new_mitgliedschaft.rg_strasse = str(rechnung["strasse"]) if rechnung["strasse"] else 'Postfach' if rechnung["postfach"] else ''
             new_mitgliedschaft.rg_nummer = str(rechnung["hausnummer"]) if rechnung["hausnummer"] else ''
             new_mitgliedschaft.rg_nummer_zu = str(rechnung["hausnummerZusatz"]) if rechnung["hausnummerZusatz"] else ''
             new_mitgliedschaft.rg_postfach = 1 if rechnung["postfach"] else '0'
