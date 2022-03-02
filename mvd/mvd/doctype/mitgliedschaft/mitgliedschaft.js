@@ -45,7 +45,8 @@ frappe.ui.form.on('Mitgliedschaft', {
                     frm.add_custom_button(__("HV-Rechnung"),  function() {
                         erstelle_hv_rechnung(frm);
                     }, __("Erstelle"));
-                    
+                }
+                if (!['Gestorben'].includes(cur_frm.doc.status_c)) {
                     frm.add_custom_button(__("Korrespondenz"),  function() {
                         erstelle_korrespondenz(frm);
                     }, __("Erstelle"));
