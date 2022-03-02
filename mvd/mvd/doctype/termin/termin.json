@@ -21,6 +21,7 @@
   {
    "fieldname": "mv_mitgliedschaft",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "MV Mitgliedschaft",
    "options": "Mitgliedschaft",
    "read_only": 1
@@ -37,6 +38,7 @@
   {
    "fieldname": "von",
    "fieldtype": "Datetime",
+   "in_list_view": 1,
    "label": "Datum von"
   },
   {
@@ -47,6 +49,7 @@
   {
    "fieldname": "kontakt",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Kontaktperson",
    "options": "Termin Kontaktperson"
   },
@@ -92,7 +95,7 @@
    "reqd": 1
   }
  ],
- "modified": "2022-02-23 10:27:35.598585",
+ "modified": "2022-03-02 16:54:43.961809",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin",

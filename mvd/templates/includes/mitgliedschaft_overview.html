@@ -138,8 +138,8 @@
             <!-- Adresse (nicht zwingend Objekt) -->
             {% if adresse_mitglied %}
                 <p>
-                    {% if adresse_mitglied.zusatz %}
-                        {{ adresse_mitglied.zusatz }}<br>
+                    {% if adresse_mitglied.address_line2 %}
+                        {{ adresse_mitglied.address_line2 }}<br>
                     {% endif %}
                     {% if not adresse_mitglied.postfach %}
                         {{ adresse_mitglied.strasse }}<br>
@@ -177,8 +177,8 @@
             <!-- Adresse (von Objekt) -->
             {% if objekt_adresse %}
                 <p>
-                    {% if objekt_adresse.zusatz %}
-                        {{ objekt_adresse.zusatz }}<br>
+                    {% if objekt_adresse.address_line2 %}
+                        {{ objekt_adresse.address_line2 }}<br>
                     {% endif %}
                     {% if not objekt_adresse.postfach %}
                         {{ objekt_adresse.strasse }}<br>
@@ -191,8 +191,8 @@
             <!-- Adresse (von Mitglied) -->
                 {% if adresse_mitglied %}
                     <p>
-                        {% if adresse_mitglied.zusatz %}
-                            {{ adresse_mitglied.zusatz }}<br>
+                        {% if adresse_mitglied.address_line2 %}
+                            {{ adresse_mitglied.address_line2 }}<br>
                         {% endif %}
                         {% if not adresse_mitglied.postfach %}
                             {{ adresse_mitglied.strasse }}<br>
@@ -223,8 +223,8 @@
             <p><b>Objekt</b></p>
             <!-- Adresse (zwingend Objekt) -->
             <p>
-                {% if objekt_adresse.zusatz %}
-                    {{ objekt_adresse.zusatz }}<br>
+                {% if objekt_adresse.address_line2 %}
+                    {{ objekt_adresse.address_line2 }}<br>
                 {% endif %}
                 {{ objekt_adresse.strasse }}<br>
                 {{ objekt_adresse.plz }} {{ objekt_adresse.city }}
@@ -261,8 +261,8 @@
             <!-- Adresse -->
             {% if rg_adresse %}
                 <p>
-                    {% if rg_adresse.zusatz %}
-                        {{ rg_adresse.zusatz }}<br>
+                    {% if rg_adresse.address_line2 %}
+                        {{ rg_adresse.address_line2 }}<br>
                     {% endif %}
                     {% if not rg_adresse.postfach %}
                         {{ rg_adresse.strasse }}<br>

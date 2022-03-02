@@ -144,6 +144,7 @@ function import_payments(frm) {
                     } else {
                         clearInterval(import_refresher);
                         frappe.dom.unfreeze();
+                        aktualisiere_camt_uebersicht(frm);
                     }
                 }
                 
