@@ -18,7 +18,7 @@ frappe.listview_settings['Payment Entry'] = {
                 callback: function(r)
                 {
                     var standard_kunden = eval(r.message);
-                    cur_list.filter_area.add("Payment Entry", "party", "not in", standard_kunden);
+                    cur_list.filter_area.add("Payment Entry", "party", "in", standard_kunden);
                 }
             });
         });

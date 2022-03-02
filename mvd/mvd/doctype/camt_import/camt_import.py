@@ -16,7 +16,7 @@ import six
 from frappe.utils.background_jobs import enqueue
 from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_unpaid_sinv
 from decimal import Decimal, ROUND_HALF_UP
-from frappe.utils.data import today
+from frappe.utils.data import add_days, today, getdate, now
 
 class CAMTImport(Document):
     pass
@@ -24,45 +24,7 @@ class CAMTImport(Document):
 @frappe.whitelist()
 def lese_camt_file(camt_import, file_path):
     # erstelle master daten
-    errors = []
-    imported_payments = []
-    assigned_payments = []
-    unassigned_payments = []
-    submitted_payments = []
-    unsubmitted_payments = []
-    unimported_payments = []
-    deleted_payments = []
-    overpaid = []
-    doppelte_mitgliedschaft = []
-    gebucht_weggezogen = []
-    underpaid = []
-    master_data = {
-        'status': 'Open',
-        'errors': errors,
-        'imported_payments': imported_payments,
-        'unimported_payments': unimported_payments,
-        'assigned_payments': assigned_payments,
-        'unassigned_payments': unassigned_payments,
-        'submitted_payments': submitted_payments,
-        'unsubmitted_payments': unsubmitted_payments,
-        'deleted_payments': deleted_payments,
-        'overpaid': overpaid,
-        'doppelte_mitgliedschaft': doppelte_mitgliedschaft,
-        'gebucht_weggezogen': gebucht_weggezogen,
-        'underpaid': underpaid,
-        'splittet_overpaid': []
-    }
-    '''
-        imported_payments = Alle importierten Zahlungen aus dem CAMT-File
-        unimported_payments = Alle Zahlungen aus dem CAMT-File welche nicht importiert werden konnten, da die entsprechende Transaktions-ID bereits verwendet wurde
-        assigned_payments = Alle Zahlungen die einem effektiven Debitor zugewiesen werden konnten
-        unassigned_payments = Alle Zahlungen zu denen kein Debitor gefunden werden konnten und weiterhin auf den Standard-Debitor zugewiesen sind
-        submitted_payments = Alle verbuchten Zahlungen
-        unsubmitted_payments = importierte, aber nicht verbuchte Zahlungen (zugewiesene wie auch unzugewiesene)
-        deleted_payments = Zahlungen die einst importiert wurden, danach aber entweder gelöscht oder abgebrochen wurden
-        overpaid = Zahlungen die importiert & zugewiesen wurden, aber überbezahlt sind
-        doppelte_mitgliedschaft = Zahlungen die importiert & zugewiesen wurden, sowie der überbezahlte Wert exakt dem zugewiesenen Wert entspricht
-    '''
+    master_data = erstelle_master_data()
     
     # lese und prüfe camt file
     camt_file = get_camt_file(file_path, test=True)
@@ -79,32 +41,22 @@ def lese_camt_file(camt_import, file_path):
     enqueue("mvd.mvd.doctype.camt_import.camt_import.verarbeite_camt_file", queue='long', job_name='Verarbeite CAMT Import {0}'.format(camt_import), timeout=5000, **args)
 
 def verarbeite_camt_file(master_data, camt_file, camt_import):
-    frappe.publish_realtime('msgprint', 'Verarbeitung CAMT Import {0} gestartet'.format(camt_import))
-    
     # lese und prüfe camt file
     camt_file = get_camt_file(camt_file)
     
-    # verarbeite camt file
-    master_data = process_camt_file(master_data, camt_file, camt_import)
+    # Zahlungen von CAMT-File einlesen
+    master_data = zahlungen_einlesen(master_data, camt_file, camt_import)
+    
+    # Zahlungen zuweisen
+    master_data = zahlungen_zuweisen(master_data)
     
     # update camt import datensatz
     update_camt_import_record(camt_import, master_data)
 
-def get_camt_file(file_path, test=False):
-    try:
-        physical_path = "/home/frappe/frappe-bench/sites/{0}{1}".format(frappe.local.site_path.replace("./", ""), file_path)
-        with open(physical_path, 'r') as f:
-            content = f.read()
-        soup = BeautifulSoup(content, 'lxml')
-        iban = soup.document.bktocstmrdbtcdtntfctn.ntfctn.acct.id.iban.get_text()
-        if test:
-            return True
-        else:
-            return soup
-    except:
-        return False
-
-def process_camt_file(master_data, camt_file, camt_import):
+# --------------------------------------
+# Haupt Funktionen
+# --------------------------------------
+def zahlungen_einlesen(master_data, camt_file, camt_import):
     master_data['status'] = 'In Bearbeitung'
     camt_import = frappe.get_doc("CAMT Import", camt_import)
     account = camt_import.account
@@ -162,7 +114,6 @@ def process_camt_file(master_data, camt_file, camt_import):
                         customer_iban = transaction_soup.dbtracct.id.iban.get_text()
                     except Exception as e:
                         customer_iban = ""
-                        frappe.log_error("Error parsing customer info: {0} ({1})".format(e, six.text_type(transaction_soup.dbtr)))
                         # key related parties not found / no customer info
                         customer_name = "Postschalter"
                         customer_address = ""
@@ -187,70 +138,21 @@ def process_camt_file(master_data, camt_file, camt_import):
                             transaction_reference = unique_reference
                 if credit_debit == "CRDT":
                     # starte import/matching flow für zahlung
-                    master_data = create_payment_entry(date=date, to_account=account, received_amount=amount, 
+                    master_data = erstelle_zahlung(date=date, to_account=account, received_amount=amount, 
                         transaction_id=unique_reference, remarks="QRR: {0}, {1}, {2}, IBAN: {3}".format(
                         transaction_reference, customer_name, customer_address, customer_iban), company=company, sektion=sektion, qrr=transaction_reference, master_data=master_data)
                         
             except Exception as e:
                 master_data['errors'].append("Parsing error: {0}:{1}".format(six.text_type(transaction), e))
                 pass
-    
-    # prüfe overpaids nach offenen mitgliedschaftsrechnungen
-    if len(master_data['overpaid']) > 0:
-        for overpaid in master_data['overpaid']:
-            pe = frappe.get_doc("Payment Entry", overpaid)
-            if pe.unallocated_amount > 0:
-                mitgliedschaftsrechnungen = frappe.db.sql("""SELECT
-                                                                `name`
-                                                            FROM `tabSales Invoice`
-                                                            WHERE `outstanding_amount` = '{outstanding_amount}'
-                                                            AND `ist_mitgliedschaftsrechnung` = 1
-                                                            AND `customer` = '{customer}'""".format(outstanding_amount=pe.unallocated_amount, customer=pe.party), as_dict=True)
-                if len(mitgliedschaftsrechnungen) > 0:
-                    master_data['overpaid'].remove(overpaid)
-                    master_data['assigned_payments'].remove(overpaid)
-                    master_data['unsubmitted_payments'].remove(overpaid)
-                    
-                    master_data = match(mitgliedschaftsrechnungen[0].name, pe.name, master_data)
-    
-    # splitte overpaids, mit zuweisung zu mitgliedschaftsrechnung, nach 1. pe mit Mitgliedschaftsrechnung = Submitted und 2. Rest auf neue Zahlung als Draft
-    if len(master_data['overpaid']) > 0:
-        for overpaid in master_data['overpaid']:
-            pe = frappe.get_doc("Payment Entry", overpaid)
-            for sinv in pe.references:
-                if sinv.reference_doctype == 'Sales Invoice':
-                    sinv = frappe.get_doc("Sales Invoice", sinv.reference_name)
-                    if sinv.ist_mitgliedschaftsrechnung:
-                        # dupliziere Zahlung
-                        new_pe = frappe.copy_doc(pe)
-                        new_pe.reference_no = pe.reference_no + ' Überzahlung von {0}'.format(pe.name)
-                        new_pe.references = []
-                        new_pe.received_amount = pe.unallocated_amount
-                        new_pe.paid_amount = pe.unallocated_amount
-                        new_pe.unallocated_amount = pe.unallocated_amount
-                        new_pe.insert()
-                        master_data['overpaid'].append(new_pe.name)
-                        master_data['assigned_payments'].append(new_pe.name)
-                        master_data['unsubmitted_payments'].append(new_pe.name)
-                        master_data['imported_payments'].append(new_pe.name)
-                        master_data['splittet_overpaid'].append(new_pe.name)
-                        
-                        # reduziere urspungszahlung um neu zugewiesenen Betrag und verbuche
-                        pe.received_amount = pe.received_amount - pe.unallocated_amount
-                        pe.paid_amount = pe.paid_amount - pe.unallocated_amount
-                        pe.unallocated_amount = 0
-                        pe.save()
-                        pe.submit()
-                        master_data['overpaid'].remove(pe.name)
-                        master_data['unsubmitted_payments'].remove(pe.name)
-                        master_data['submitted_payments'].append(pe.name)
-                        
-    
     return master_data
+    # ~ return zahlungen_zuweisen(master_data)
 
-def create_payment_entry(date, to_account, received_amount, transaction_id, remarks, company, sektion, qrr, master_data):
+def erstelle_zahlung(date, to_account, received_amount, transaction_id, remarks, company, sektion, qrr, master_data):
     # get default customer
     default_customer = get_default_customer(sektion)
+    
+    # erstelle Zahlung wenn noch nicht vorhanden
     if not frappe.db.exists('Payment Entry', {'reference_no': transaction_id}):
         # create new payment entry
         new_payment_entry = frappe.get_doc({'doctype': 'Payment Entry'})
@@ -267,219 +169,332 @@ def create_payment_entry(date, to_account, received_amount, transaction_id, rema
         new_payment_entry.reference_no = transaction_id
         new_payment_entry.reference_date = date
         new_payment_entry.remarks = remarks
+        new_payment_entry.esr_reference = qrr
+        
         inserted_payment_entry = new_payment_entry.insert()
+        # ~ frappe.db.commit()
         
         master_data['imported_payments'].append(inserted_payment_entry.name)
         
-        # suche nach sinv anhand qrr
-        sinv, wegzug = sinv_lookup(qrr)
-        if sinv and not wegzug:
-            # matche sinv & payment
-            master_data = match(sinv, inserted_payment_entry.name, master_data)
-            return master_data
-        
-        if wegzug:
-            # matche sinv & payment in fremdsektion (zuzugssektion)
-            master_data = match(wegzug, inserted_payment_entry.name, master_data, fremdsektion=True)
-            return master_data
-        
-        # suche nach fr anhand qrr
-        fr = fr_lookup(qrr)
-        if fr:
-            # erstelle sinv aus fr
-            sinv = create_unpaid_sinv(fr, betrag=received_amount)
-            # matche sinv & payment
-            master_data = match(sinv, inserted_payment_entry.name, master_data)
-            return master_data
-        
-        # weder sinv noch fr
-        master_data['unassigned_payments'].append(inserted_payment_entry.name)
-        master_data['unsubmitted_payments'].append(inserted_payment_entry.name)
         return master_data
-        
     else:
         master_data['unimported_payments'].append([qrr, transaction_id])
         return master_data
 
-def sinv_lookup(qrr):
-    sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`
-                            FROM `tabSales Invoice`
-                            WHERE REPLACE(`esr_reference`, ' ', '') = '{qrr}'""".format(qrr=qrr), as_dict=True)
-    if len(sinv) > 0:
-        if sinv[0].docstatus == 1:
-            return sinv[0].name, False
-        elif sinv[0].docstatus == 2:
-            # potenzieller wegzug
-            potenzieller_wegzug = find_potenzieller_wegzug(sinv[0].mv_mitgliedschaft)
-            if potenzieller_wegzug:
-                return False, potenzieller_wegzug
-            else:
-                return False, False
-        else:
-            return False, False
-    else:
-        #fallback lookup alte Deibtoren
-        qrr = qrr[11:24]
-        sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `status`
-                                FROM `tabSales Invoice`
-                                WHERE REPLACE(`esr_reference`, ' ', '') LIKE '%{qrr}%'""".format(qrr=qrr), as_dict=True)
-        if len(sinv) > 0:
-            if sinv[0].docstatus == 1 and sinv[0].status != 'Paid':
-                return sinv[0].name, False
-            else:
-                return False, False
-        else:
-            return False, False
-
-def find_potenzieller_wegzug(mitgliedschaft):
-    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
-    if mitgliedschaft.status_c == 'Wegzug':
-        if mitgliedschaft.wegzug_zu:
-            umzugs_mitgliedschaft = frappe.db.sql("""SELECT
-                                                        `name`
-                                                    FROM `tabMitgliedschaft`
-                                                    WHERE `sektion_id` = '{wegzug_zu}'
-                                                    AND `mitglied_nr` = '{mitglied_nr}'""".format(wegzug_zu=mitgliedschaft.wegzug_zu, mitglied_nr=mitgliedschaft.mitglied_nr), as_dict=True)
-            if len(umzugs_mitgliedschaft) > 0:
-                umzugs_mitgliedschaft = umzugs_mitgliedschaft[0].name
-                sinv = frappe.db.sql("""SELECT `name` FROM `tabSales Invoice` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `docstatus` = 1 AND `status` != 'Paid'""".format(mitgliedschaft=umzugs_mitgliedschaft), as_dict=True)
-                if len(sinv) > 0:
-                    return sinv[0].name
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
-    else:
-        return False
-
-def fr_lookup(qrr):
-    fr = frappe.db.sql("""SELECT `name`
-                            FROM `tabFakultative Rechnung`
-                            WHERE `docstatus` = 1
-                            AND `status` = 'Unpaid'
-                            AND REPLACE(`qrr_referenz`, ' ', '') = '{qrr}'""".format(qrr=qrr), as_dict=True)
-    if len(fr) > 0:
-        return fr[0].name
-    else:
-        return False
-
-def match(sales_invoice, payment_entry, master_data, fremdsektion=False):
-    # get the customer
-    customer = frappe.get_value("Sales Invoice", sales_invoice, "customer")
-    mitgliedschaft = frappe.get_value("Sales Invoice", sales_invoice, "mv_mitgliedschaft")
-    payment_entry_record = frappe.get_doc("Payment Entry", payment_entry)
-    # assign the actual customer
-    payment_entry_record.party = customer
-    payment_entry_record.mv_mitgliedschaft = mitgliedschaft
-    payment_entry_record.save()
+def zahlungen_zuweisen(master_data):
+    '''
+        Ablauf:
+        1. Suche nach offener Rechnung -> Bei Erfolg: 4., sonst 2.
+            1.1 Anhand QRR/ESR
+            1.2 Hack Anhand stellen 11-24 von QRR/ESR
+        2. Prüfe HV Zahlung
+            2.1 Betrag = 12? -> Suche nach HV FAK Rechnung -> Bei Erfolg: 4., sonst 3.
+        3. Prüfe Spenden Zahlung
+            3.1 suche nach Spenden FAK Rechnung anhand QRR/ESR -> Bei Erfolg: 4., sonst 5.
+        4. Verbuchen / Splitten
+            (4.0) Hack
+            4.1 Verbuchen Zahlung mit Rechnung
+            4.2 Wenn überzahlt --> Überzahlung in eigene Zahlung umwandeln
+            4.3 Wenn Überzahlung = CHF 12 und keine HV FAK vorhanden --> HV Fak erstellen, umwandeln und zuweisen
+        5. Umzugshandling
+    '''
     
-    # now, add the reference to the sales invoice
-    submittable, master_data = create_reference(payment_entry, sales_invoice, master_data, fremdsektion=fremdsektion)
-    
-    master_data['assigned_payments'].append(payment_entry_record.name)
-    if fremdsektion:
-        master_data['gebucht_weggezogen'].append(payment_entry_record.name)
-    
-    if submittable:
-        pe = frappe.get_doc("Payment Entry", payment_entry_record.name)
-        pe.submit()
-        master_data['submitted_payments'].append(pe.name)
-    else:
-        master_data['unsubmitted_payments'].append(payment_entry_record.name)
+    importierte = master_data['imported_payments']
+    for imp_pe in importierte:
+        pe = frappe.get_doc("Payment Entry", imp_pe)
         
+        # 1.1
+        qrr = pe.esr_reference
+        sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`
+                            FROM `tabSales Invoice`
+                            WHERE REPLACE(`esr_reference`, ' ', '') = '{qrr}'
+                            AND `status` != 'Paid'""".format(qrr=qrr), as_dict=True)
+        
+        # 1.2
+        if not len(sinv) > 0:
+            # HACK (alte Debitoren)
+            qrr = pe.esr_reference[11:24]
+            
+            sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`
+                                FROM `tabSales Invoice`
+                                WHERE `esr_reference` LIKE '%{qrr}%'
+                                AND `status` != 'Paid'""".format(qrr=qrr), as_dict=True)
+        
+        # 2.1 / 3.1
+        if not len(sinv) > 0 and pe.paid_amount == 12:
+            qrr = pe.esr_reference
+            fr = frappe.db.sql("""SELECT `name`
+                                FROM `tabFakultative Rechnung`
+                                WHERE `docstatus` = 1
+                                AND `status` = 'Unpaid'
+                                AND REPLACE(`qrr_referenz`, ' ', '') = '{qrr}'""".format(qrr=qrr), as_dict=True)
+            if len(fr) > 0:
+                fr_sinv = create_unpaid_sinv(fr, betrag=12)
+                sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`
+                                        FROM `tabSales Invoice`
+                                        WHERE `name` = '{fr_sinv}'""".format(fr_sinv=fr_sinv), as_dict=True)
+        # 4.
+        if len(sinv) > 0:
+            if sinv[0].docstatus == 1:
+                # Kunde zu Payment Entry zuweisen
+                pe.party = sinv[0].customer
+                pe.mv_mitgliedschaft = sinv[0].mv_mitgliedschaft
+                
+                # HACK 2
+                if pe.paid_amount < sinv[0].outstanding_amount and pe.paid_amount == 12:
+                    if pe.esr_reference[11:14] != '000':
+                        # erstelle fr
+                        from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
+                        fr = create_hv_fr(pe.mv_mitgliedschaft)
+                        # erstelle sinv aus fr
+                        hv_sinv = create_unpaid_sinv(fr)
+                        sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`
+                                                FROM `tabSales Invoice`
+                                                WHERE `name` = '{hv_sinv}'""".format(hv_sinv=hv_sinv), as_dict=True)
+                
+                # 4.1
+                # Referenz Rechnung <> Zahlung hinzufügen
+                row = pe.append('references', {})
+                row.reference_doctype = "Sales Invoice"
+                row.reference_name = sinv[0].name
+                row.due_date = sinv[0].due_date
+                row.total_amount = sinv[0].base_grand_total
+                row.outstanding_amount = sinv[0].outstanding_amount
+                
+                
+                if pe.paid_amount <= sinv[0].outstanding_amount:
+                    row.allocated_amount = pe.paid_amount
+                    pe.total_allocated_amount = pe.paid_amount
+                    pe.unallocated_amount = 0
+                    if pe.paid_amount < sinv[0].outstanding_amount:
+                        master_data['underpaid'].append(pe.name)
+                else:
+                    row.allocated_amount = sinv[0].outstanding_amount
+                    pe.total_allocated_amount = sinv[0].outstanding_amount
+                    pe.unallocated_amount = pe.paid_amount - sinv[0].outstanding_amount
+                    
+                    # prüfe doppelte Mitgliedschaft
+                    doppelte_mitgliedschaft = False
+                    if pe.total_allocated_amount == pe.unallocated_amount:
+                        doppelte_mitgliedschaft = True
+                    
+                    # 4.2
+                    # dupliziere (splitte) Zahlung (überzahlter Betrag auf eigene Zahlung)
+                    new_pe = frappe.copy_doc(pe)
+                    new_pe.reference_no = pe.reference_no + ' Überzahlung von {0}'.format(pe.name)
+                    new_pe.references = []
+                    new_pe.received_amount = pe.unallocated_amount
+                    new_pe.paid_amount = pe.unallocated_amount
+                    new_pe.unallocated_amount = pe.unallocated_amount
+                    
+                    new_pe.insert()
+                    
+                    # 4.3
+                    if new_pe.unallocated_amount == 12:
+                        fr = frappe.db.sql("""SELECT `name`
+                                                FROM `tabFakultative Rechnung`
+                                                WHERE `docstatus` = 1
+                                                AND `status` = 'Unpaid'
+                                                AND `typ` = 'HV'
+                                                AND `mv_mitgliedschaft` = '{mv_mitgliedschaft}'""".format(mv_mitgliedschaft=new_pe.mv_mitgliedschaft), as_dict=True)
+                        if len(fr) > 0:
+                            fr_sinv = create_unpaid_sinv(fr)
+                            sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`
+                                                    FROM `tabSales Invoice`
+                                                    WHERE `name` = '{fr_sinv}'""".format(fr_sinv=fr_sinv), as_dict=True)
+                        else:
+                            mitgliedschaft = new_pe.mv_mitgliedschaft
+                            
+                            # erstelle fr
+                            from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
+                            fr = create_hv_fr(mitgliedschaft)
+                            # erstelle sinv aus fr
+                            sinv = create_unpaid_sinv(fr)
+                            
+                        # match sinv mit pe
+                        reference_entry = new_pe.append('references', {})
+                        reference_entry.reference_doctype = "Sales Invoice"
+                        reference_entry.reference_name = sinv
+                        reference_entry.total_amount = frappe.get_value("Sales Invoice", sinv, "base_grand_total")
+                        reference_entry.outstanding_amount = frappe.get_value("Sales Invoice", sinv, "outstanding_amount")
+                        reference_entry.allocated_amount = reference_entry.outstanding_amount
+                        
+                        # update unallocated amount
+                        new_pe.unallocated_amount = 0
+                        new_pe.save()
+                        new_pe.submit()
+                        master_data['assigned_payments'].append(new_pe.name)
+                        master_data['imported_payments'].append(new_pe.name)
+                        master_data['submitted_payments'].append(new_pe.name)
+                            
+                    else:
+                        master_data['overpaid'].append(new_pe.name)
+                        master_data['assigned_payments'].append(new_pe.name)
+                        master_data['unsubmitted_payments'].append(new_pe.name)
+                        master_data['imported_payments'].append(new_pe.name)
+                        if doppelte_mitgliedschaft:
+                            master_data['doppelte_mitgliedschaft'].append(new_pe.name)
+                    
+                    pe.received_amount = pe.total_allocated_amount
+                    pe.paid_amount = pe.total_allocated_amount
+                    pe.unallocated_amount = 0
+                try:
+                    pe.save()
+                    master_data['assigned_payments'].append(pe.name)
+                
+                    if pe.unallocated_amount == 0:
+                        pe.submit()
+                        master_data['submitted_payments'].append(pe.name)
+                    else:
+                        master_data['unsubmitted_payments'].append(pe.name)
+                except Exception as err:
+                    frappe.log_error("{0}\n{1}".format(err, str(pe.as_dict())), "Zahlung konnte nicht verarbeitet werden")
+            
+            else:
+                # 5.
+                potenzieller_umzug = False
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+                if mitgliedschaft.status_c == 'Wegzug':
+                    if mitgliedschaft.wegzug_zu:
+                        umzugs_mitgliedschaft = frappe.db.sql("""SELECT
+                                                                    `name`
+                                                                FROM `tabMitgliedschaft`
+                                                                WHERE `sektion_id` = '{wegzug_zu}'
+                                                                AND `mitglied_nr` = '{mitglied_nr}'""".format(wegzug_zu=mitgliedschaft.wegzug_zu, mitglied_nr=mitgliedschaft.mitglied_nr), as_dict=True)
+                        if len(umzugs_mitgliedschaft) > 0:
+                            umzugs_mitgliedschaft = umzugs_mitgliedschaft[0].name
+                            sinv = frappe.db.sql("""SELECT `name` FROM `tabSales Invoice` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `docstatus` = 1 AND `status` != 'Paid'""".format(mitgliedschaft=umzugs_mitgliedschaft), as_dict=True)
+                            if len(sinv) > 0:
+                                potenzieller_umzug = sinv[0].name
+                
+                if potenzieller_umzug:
+                    sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`, `company`, `sektion_id`, `debit_to`
+                                            FROM `tabSales Invoice`
+                                            WHERE `name` = '{potenzieller_umzug}'""".format(potenzieller_umzug=potenzieller_umzug), as_dict=True)
+                    
+                    pe.party = sinv[0].customer
+                    pe.mv_mitgliedschaft = sinv[0].mv_mitgliedschaft
+                    pe.company = sinv[0].company
+                    pe.sektion_id = sinv[0].sektion_id
+                    pe.paid_from = sinv[0].debit_to
+                    pe.paid_to = frappe.get_value("Sektion", pe.sektion_id, "account")
+                    differenz = pe.paid_amount - paid_amount
+                    row = pe.append('deductions', {})
+                    row.amount = differenz * -1
+                    row.account = frappe.get_value("Sektion", pe.sektion_id, "zwischen_konto")
+                    row.cost_center = frappe.get_value("Company", pe.company, "cost_center")
+                    
+                    pe.save()
+                    pe.submit()
+                    
+                    master_data['gebucht_weggezogen'].append(pe.name)
+                    master_data['assigned_payments'].append(pe.name)
+                    master_data['submitted_payments'].append(pe.name)
+                else:
+                    master_data['unsubmitted_payments'].append(pe.name)
+                    master_data['unassigned_payments'].append(pe.name)
+        else:
+            master_data['unsubmitted_payments'].append(pe.name)
+            master_data['unassigned_payments'].append(pe.name)
+    
     return master_data
 
-def create_reference(payment_entry, sales_invoice, master_data, fremdsektion):
-    # create a new payment entry reference
-    reference_entry = frappe.get_doc({"doctype": "Payment Entry Reference"})
-    reference_entry.parent = payment_entry
-    reference_entry.parentfield = "references"
-    reference_entry.parenttype = "Payment Entry"
-    reference_entry.reference_doctype = "Sales Invoice"
-    reference_entry.reference_name = sales_invoice
-    reference_entry.total_amount = frappe.get_value("Sales Invoice", sales_invoice, "base_grand_total")
-    reference_entry.outstanding_amount = frappe.get_value("Sales Invoice", sales_invoice, "outstanding_amount")
-    if not fremdsektion:
-        paid_amount = frappe.get_value("Payment Entry", payment_entry, "paid_amount")
-        if paid_amount >= reference_entry.outstanding_amount:
-            reference_entry.allocated_amount = reference_entry.outstanding_amount
+# --------------------------------------
+# Hilfs-Funktionen
+# --------------------------------------
+def get_camt_file(file_path, test=False):
+    try:
+        physical_path = "/home/frappe/frappe-bench/sites/{0}{1}".format(frappe.local.site_path.replace("./", ""), file_path)
+        with open(physical_path, 'r') as f:
+            content = f.read()
+        soup = BeautifulSoup(content, 'lxml')
+        iban = soup.document.bktocstmrdbtcdtntfctn.ntfctn.acct.id.iban.get_text()
+        if test:
+            return True
         else:
-            reference_entry.allocated_amount = paid_amount
-            master_data['underpaid'].append(payment_entry)
-    else:
-        paid_amount = reference_entry.outstanding_amount
-        reference_entry.allocated_amount = paid_amount
-    reference_entry.insert();
-    # update unallocated amount
-    payment_record = frappe.get_doc("Payment Entry", payment_entry)
-    payment_record.unallocated_amount -= reference_entry.allocated_amount
-    if fremdsektion:
-        payment_record.company = frappe.get_value("Sales Invoice", sales_invoice, "company")
-        payment_record.sektion_id = frappe.get_value("Sales Invoice", sales_invoice, "sektion_id")
-        payment_record.paid_from = frappe.get_value("Sales Invoice", sales_invoice, "debit_to")
-        payment_record.paid_to = frappe.get_value("Sektion", payment_record.sektion_id, "account")
-        differenz = payment_record.paid_amount - paid_amount
-        row = payment_record.append('deductions', {})
-        row.amount = differenz * -1
-        row.account = frappe.get_value("Sektion", payment_record.sektion_id, "zwischen_konto")
-        row.cost_center = frappe.get_value("Company", payment_record.company, "cost_center")
-        
-    payment_record.save()
-    
-    if payment_record.unallocated_amount > 0:
-        # exakt um HV Betrag überzahlt
-        if payment_record.unallocated_amount == 12:
-            fr = fr_lookup_based_on_sinv(sales_invoice)
-            if fr:
-                sinv = create_unpaid_sinv(fr, betrag=12)
-                hv_reference_entry = frappe.get_doc({"doctype": "Payment Entry Reference"})
-                hv_reference_entry.parent = payment_entry
-                hv_reference_entry.parentfield = "references"
-                hv_reference_entry.parenttype = "Payment Entry"
-                hv_reference_entry.reference_doctype = "Sales Invoice"
-                hv_reference_entry.reference_name = sinv
-                hv_reference_entry.total_amount = frappe.get_value("Sales Invoice", sinv, "base_grand_total")
-                hv_reference_entry.outstanding_amount = frappe.get_value("Sales Invoice", sinv, "outstanding_amount")
-                paid_amount = frappe.get_value("Payment Entry", payment_entry, "paid_amount")
-                hv_reference_entry.allocated_amount = 12
-                hv_reference_entry.insert();
-                # update unallocated amount
-                payment_record = frappe.get_doc("Payment Entry", payment_entry)
-                payment_record.unallocated_amount -= hv_reference_entry.allocated_amount
-                payment_record.save()
-                
-                return True, master_data
-            else:
-                master_data['overpaid'].append(payment_record.name)
-                return False, master_data
-        # Doppelter Mitgliedschaftsbetrag
-        elif payment_record.unallocated_amount == reference_entry.allocated_amount:
-            master_data['doppelte_mitgliedschaft'].append(payment_record.name)
-            return False, master_data
-        else:
-            master_data['overpaid'].append(payment_record.name)
-            return False, master_data
-    else:
-        # nicht über rechnungsbetrag, soweit so gut
-        return True, master_data
-
-def fr_lookup_based_on_sinv(sinv):
-    fr = frappe.db.sql("""SELECT `name`
-                            FROM `tabFakultative Rechnung`
-                            WHERE `docstatus` = 1
-                            AND `status` = 'Unpaid'
-                            AND `typ` = 'HV'
-                            AND `sales_invoice` = '{sinv}'""".format(sinv=sinv), as_dict=True)
-    if len(fr) > 0:
-        return fr[0].name
-    else:
+            return soup
+    except:
         return False
+
+def erstelle_master_data():
+    '''
+        imported_payments = Alle importierten Zahlungen aus dem CAMT-File
+        unimported_payments = Alle Zahlungen aus dem CAMT-File welche nicht importiert werden konnten, da die entsprechende Transaktions-ID bereits verwendet wurde
+        assigned_payments = Alle Zahlungen die einem effektiven Debitor zugewiesen werden konnten
+        unassigned_payments = Alle Zahlungen zu denen kein Debitor gefunden werden konnten und weiterhin auf den Standard-Debitor zugewiesen sind
+        submitted_payments = Alle verbuchten Zahlungen
+        unsubmitted_payments = importierte, aber nicht verbuchte Zahlungen (zugewiesene wie auch unzugewiesene)
+        deleted_payments = Zahlungen die einst importiert wurden, danach aber entweder gelöscht oder abgebrochen wurden
+        overpaid = Zahlungen die importiert & zugewiesen wurden, aber überbezahlt sind
+        doppelte_mitgliedschaft = Zahlungen die importiert & zugewiesen wurden, sowie der überbezahlte Wert exakt dem zugewiesenen Wert entspricht
+    '''
+    master_data = {
+        'status': 'Open',
+        'errors': [],
+        'imported_payments': [],
+        'unimported_payments': [],
+        'assigned_payments': [],
+        'unassigned_payments': [],
+        'submitted_payments': [],
+        'unsubmitted_payments': [],
+        'deleted_payments': [],
+        'overpaid': [],
+        'doppelte_mitgliedschaft': [],
+        'gebucht_weggezogen': [],
+        'underpaid': [],
+        'splittet_overpaid': []
+    }
+    
+    return master_data
+
+def proper_round(number, decimals):
+    return float(Decimal(number).quantize(decimals, ROUND_HALF_UP))
 
 def get_default_customer(sektion):
     default_customer = frappe.get_doc("Sektion", sektion).default_customer
     return default_customer
+
+def check_if_payment_is_cancelled(imported_payment):
+    pe = frappe.get_doc("Payment Entry", imported_payment)
+    if pe.docstatus == 2:
+        return True
+    else:
+        return False
+
+def check_if_payment_is_submitted(imported_payment):
+    pe = frappe.get_doc("Payment Entry", imported_payment)
+    if pe.docstatus == 1:
+        return True
+    else:
+        return False
+
+def check_if_payment_is_assigned(imported_payment, default_customer):
+    pe = frappe.get_doc("Payment Entry", imported_payment)
+    if pe.party != default_customer:
+        return True
+    else:
+        return False
+
+def check_if_payment_is_overpaid(imported_payment):
+    pe = frappe.get_doc("Payment Entry", imported_payment)
+    if pe.unallocated_amount > 0:
+        if (pe.paid_amount / 2) == pe.unallocated_amount:
+            return True, True
+        else:
+            return True, False
+    else:
+        return False, False
+
+def check_if_payment_is_underpaid(imported_payment):
+    pe = frappe.get_doc("Payment Entry", imported_payment)
+    for sinv in pe.references:
+        if sinv.allocated_amount < sinv.outstanding_amount:
+            return True
+    return False
+
+# --------------------------------------
+# CAMT Aktualisierungs- / CAMT Report Erstellungs- Funktionen
+# --------------------------------------
 
 def update_camt_import_record(camt_import, master_data, aktualisierung=False):
     camt_import = frappe.get_doc("CAMT Import", camt_import)
@@ -519,8 +534,6 @@ def update_camt_import_record(camt_import, master_data, aktualisierung=False):
     camt_import.save()
     erstelle_report(camt_import.name)
     
-    if not aktualisierung:
-        frappe.publish_realtime('msgprint', 'Verarbeitung CAMT Import {0} beendet'.format(camt_import.name))
     return
 
 @frappe.whitelist()
@@ -581,131 +594,6 @@ def aktualisiere_camt_uebersicht(camt_import):
     
     return update_camt_import_record(camt_import.name, master_data, aktualisierung=True)
 
-def check_if_payment_is_cancelled(imported_payment):
-    pe = frappe.get_doc("Payment Entry", imported_payment)
-    if pe.docstatus == 2:
-        return True
-    else:
-        return False
-
-def check_if_payment_is_submitted(imported_payment):
-    pe = frappe.get_doc("Payment Entry", imported_payment)
-    if pe.docstatus == 1:
-        return True
-    else:
-        return False
-
-def check_if_payment_is_assigned(imported_payment, default_customer):
-    pe = frappe.get_doc("Payment Entry", imported_payment)
-    if pe.party != default_customer:
-        return True
-    else:
-        return False
-
-def check_if_payment_is_overpaid(imported_payment):
-    pe = frappe.get_doc("Payment Entry", imported_payment)
-    if pe.unallocated_amount > 0:
-        if (pe.paid_amount / 2) == pe.unallocated_amount:
-            return True, True
-        else:
-            return True, False
-    else:
-        return False, False
-
-def check_if_payment_is_underpaid(imported_payment):
-    pe = frappe.get_doc("Payment Entry", imported_payment)
-    for sinv in pe.references:
-        if sinv.allocated_amount < sinv.outstanding_amount:
-            return True
-    return False
-
-@frappe.whitelist()
-def mit_spende_ausgleichen(pe):
-    payment_entry = frappe.get_doc("Payment Entry", pe)
-    mitgliedschaft = payment_entry.mv_mitgliedschaft
-    
-    # erstelle fr
-    from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
-    fr = create_hv_fr(mitgliedschaft, betrag_spende=payment_entry.unallocated_amount)
-    # erstelle sinv aus fr
-    sinv = create_unpaid_sinv(fr, betrag=payment_entry.unallocated_amount)
-    
-    # match sinv mit pe
-    reference_entry = frappe.get_doc({"doctype": "Payment Entry Reference"})
-    reference_entry = payment_entry.append('references', {})
-    reference_entry.reference_doctype = "Sales Invoice"
-    reference_entry.reference_name = sinv
-    reference_entry.total_amount = frappe.get_value("Sales Invoice", sinv, "base_grand_total")
-    reference_entry.outstanding_amount = frappe.get_value("Sales Invoice", sinv, "outstanding_amount")
-    reference_entry.allocated_amount = reference_entry.outstanding_amount
-    #reference_entry.insert();
-    # update unallocated amount
-    payment_entry.unallocated_amount -= reference_entry.allocated_amount
-    payment_entry.save()
-    payment_entry.submit()
-    return
-
-@frappe.whitelist()
-def mit_folgejahr_ausgleichen(pe):
-    payment_entry = frappe.get_doc("Payment Entry", pe)
-    sinv_to_copy = frappe.get_doc("Sales Invoice", payment_entry.references[0].reference_name)
-    sinv = frappe.copy_doc(sinv_to_copy)
-    sinv.mitgliedschafts_jahr = sinv_to_copy.mitgliedschafts_jahr + 1
-    sinv.insert()
-    sinv.submit()
-    
-    # match sinv mit pe
-    reference_entry = frappe.get_doc({"doctype": "Payment Entry Reference"})
-    reference_entry = payment_entry.append('references', {})
-    reference_entry.reference_doctype = "Sales Invoice"
-    reference_entry.reference_name = sinv.name
-    reference_entry.total_amount = sinv.base_grand_total
-    reference_entry.outstanding_amount = sinv.outstanding_amount
-    reference_entry.allocated_amount = reference_entry.outstanding_amount
-    #reference_entry.insert();
-    # update unallocated amount
-    payment_entry.unallocated_amount -= reference_entry.allocated_amount
-    payment_entry.save()
-    payment_entry.submit()
-    return
-
-@frappe.whitelist()
-def kulanz_ausgleich(pe):
-    payment_entry = frappe.get_doc("Payment Entry", pe)
-    pe = frappe.copy_doc(payment_entry)
-    pe.reference_no = 'Kulanzausgleich {0}'.format(payment_entry.name)
-    pe.paid_to = frappe.get_value("Sektion", pe.sektion_id, "kulanz_konto")
-    
-    new_payment = 0
-    for sinv in pe.references:
-        if sinv.outstanding_amount > sinv.allocated_amount:
-            outstanding_amount = frappe.get_value("Sales Invoice", sinv.reference_name, "outstanding_amount")
-            if outstanding_amount > 0:
-                new_payment += outstanding_amount
-                sinv.allocated_amount = outstanding_amount
-                sinv.outstanding_amount = outstanding_amount
-    if new_payment > 0:
-        pe.paid_amount = new_payment
-        pe.insert()
-        pe.save()
-        pe.submit()
-        payment_entry.add_comment('Comment', text='Kulanzausgleich erfolgte mittels {0}'.format(pe.name))
-        return
-    else:
-        frappe.throw("Die Rechnung wurde bereits andersweitig beglichen!")
-
-@frappe.whitelist()
-def rueckzahlung(pe):
-    payment_entry = frappe.get_doc("Payment Entry", pe)
-    row = payment_entry.append('deductions', {})
-    row.amount = payment_entry.unallocated_amount * -1
-    row.account = frappe.get_value("Sektion", payment_entry.sektion_id, "zwischen_konto")
-    row.cost_center = frappe.get_value("Company", payment_entry.company, "cost_center")
-    payment_entry.unallocated_amount = 0
-    payment_entry.save()
-    payment_entry.submit()
-    return
-    
 @frappe.whitelist()
 def erstelle_report(camt):
     camt_record = frappe.get_doc("CAMT Import", camt)
@@ -759,37 +647,38 @@ def erstelle_report(camt):
                 allgemein['taxen'] += float(transaction_soup.chrgs.ttlchrgsandtaxamt.get_text())
             except:
                 allgemein['taxen'] += 0.0
-            _pe = frappe.db.sql("""SELECT `name` FROM `tabPayment Entry` WHERE `reference_no` = '{unique_reference}'""".format(unique_reference=unique_reference), as_dict=True)
-            try:
-                pe = frappe.get_doc("Payment Entry", _pe[0].name)
-                if pe.docstatus == 1:
-                    verbuchte_zahlungen['total'] += float(pe.paid_amount)
-                    verbuchte_zahlungen['anzahl'] += 1
-                    for _sinv in pe.references:
-                        sinv = frappe.get_doc("Sales Invoice", _sinv.reference_name)
-                        if camt_record.sektion_id == pe.sektion_id:
-                            if sinv.ist_mitgliedschaftsrechnung:
-                                verbuchte_zahlungen['mitgliedschaften'] += 1
-                            elif sinv.ist_hv_rechnung:
-                                verbuchte_zahlungen['haftpflicht'] += 1
-                            elif sinv.ist_spenden_rechnung:
-                                verbuchte_zahlungen['spenden'] += 1
-                            if _sinv.allocated_amount < _sinv.outstanding_amount:
-                                verbuchte_zahlungen['underpaid'] += 1
-                        else:
-                            verbuchte_zahlungen['fremd_sektionen'] += 1
-                else:
-                    nicht_verbuchte_zahlungen['total'] += float(pe.paid_amount)
-                    nicht_verbuchte_zahlungen['anzahl'] += 1
-                    if pe.name in eval(camt_record.overpaid):
-                        nicht_verbuchte_zahlungen['ueberzahlt'] += 1
-                    elif pe.name in eval(camt_record.doppelte_mitgliedschaft):
-                        nicht_verbuchte_zahlungen['doppelt_bezahlt'] += 1
-                    elif pe.name in eval(camt_record.unmatched_payments):
-                        nicht_verbuchte_zahlungen['unbekannte_referenz'] += 1
-                    
-            except:
-                pass
+            pes = frappe.db.sql("""SELECT `name` FROM `tabPayment Entry` WHERE `reference_no` LIKE '{unique_reference}%'""".format(unique_reference=unique_reference), as_dict=True)
+            for pe in pes:
+                try:
+                    pe = frappe.get_doc("Payment Entry", pe.name)
+                    if pe.docstatus == 1:
+                        verbuchte_zahlungen['total'] += float(pe.paid_amount)
+                        verbuchte_zahlungen['anzahl'] += 1
+                        for _sinv in pe.references:
+                            sinv = frappe.get_doc("Sales Invoice", _sinv.reference_name)
+                            if camt_record.sektion_id == pe.sektion_id:
+                                if sinv.ist_mitgliedschaftsrechnung:
+                                    verbuchte_zahlungen['mitgliedschaften'] += 1
+                                elif sinv.ist_hv_rechnung:
+                                    verbuchte_zahlungen['haftpflicht'] += 1
+                                elif sinv.ist_spenden_rechnung:
+                                    verbuchte_zahlungen['spenden'] += 1
+                                if _sinv.allocated_amount < _sinv.outstanding_amount:
+                                    verbuchte_zahlungen['underpaid'] += 1
+                            else:
+                                verbuchte_zahlungen['fremd_sektionen'] += 1
+                    else:
+                        nicht_verbuchte_zahlungen['total'] += float(pe.paid_amount)
+                        nicht_verbuchte_zahlungen['anzahl'] += 1
+                        if pe.name in eval(camt_record.overpaid):
+                            nicht_verbuchte_zahlungen['ueberzahlt'] += 1
+                        elif pe.name in eval(camt_record.doppelte_mitgliedschaft):
+                            nicht_verbuchte_zahlungen['doppelt_bezahlt'] += 1
+                        elif pe.name in eval(camt_record.unmatched_payments):
+                            nicht_verbuchte_zahlungen['unbekannte_referenz'] += 1
+                        
+                except:
+                    pass
     
     for pe in eval(camt_record.splittet_overpaid):
         pe = frappe.get_doc("Payment Entry", pe)
@@ -827,9 +716,110 @@ def erstelle_report(camt):
     camt_record.report = zahlungsreport
     camt_record.save()
     return
+
+# --------------------------------------
+# Client Whitelist Funktionen
+# --------------------------------------
+@frappe.whitelist()
+def mit_spende_ausgleichen(pe):
+    payment_entry = frappe.get_doc("Payment Entry", pe)
+    mitgliedschaft = payment_entry.mv_mitgliedschaft
     
-def proper_round(number, decimals):
-    return float(Decimal(number).quantize(decimals, ROUND_HALF_UP))
+    # erstelle fr
+    from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
+    fr = create_hv_fr(mitgliedschaft, betrag_spende=payment_entry.unallocated_amount)
+    # erstelle sinv aus fr
+    sinv = create_unpaid_sinv(fr, betrag=payment_entry.unallocated_amount)
+    
+    # match sinv mit pe
+    reference_entry = frappe.get_doc({"doctype": "Payment Entry Reference"})
+    reference_entry = payment_entry.append('references', {})
+    reference_entry.reference_doctype = "Sales Invoice"
+    reference_entry.reference_name = sinv
+    reference_entry.total_amount = frappe.get_value("Sales Invoice", sinv, "base_grand_total")
+    reference_entry.outstanding_amount = frappe.get_value("Sales Invoice", sinv, "outstanding_amount")
+    reference_entry.allocated_amount = reference_entry.outstanding_amount
+    #reference_entry.insert();
+    # update unallocated amount
+    payment_entry.unallocated_amount -= reference_entry.allocated_amount
+    payment_entry.save()
+    payment_entry.submit()
+    return
+
+@frappe.whitelist()
+def mit_folgejahr_ausgleichen(pe):
+    payment_entry = frappe.get_doc("Payment Entry", pe)
+    sinv_to_copy = frappe.get_doc("Sales Invoice", payment_entry.references[0].reference_name)
+    sinv = frappe.copy_doc(sinv_to_copy)
+    sinv.mitgliedschafts_jahr = sinv_to_copy.mitgliedschafts_jahr + 1
+    sinv.insert()
+    sinv.submit()
+    
+    # match sinv mit pe
+    reference_entry = frappe.get_doc({"doctype": "Payment Entry Reference"})
+    reference_entry = payment_entry.append('references', {})
+    reference_entry.reference_doctype = "Sales Invoice"
+    reference_entry.reference_name = sinv.name
+    reference_entry.total_amount = sinv.base_grand_total
+    reference_entry.outstanding_amount = sinv.outstanding_amount
+    reference_entry.allocated_amount = reference_entry.outstanding_amount
+    #reference_entry.insert();
+    # update unallocated amount
+    payment_entry.unallocated_amount -= reference_entry.allocated_amount
+    payment_entry.save()
+    payment_entry.submit()
+    return
+
+@frappe.whitelist()
+def rueckzahlung(pe):
+    payment_entry = frappe.get_doc("Payment Entry", pe)
+    row = payment_entry.append('deductions', {})
+    row.amount = payment_entry.unallocated_amount * -1
+    row.account = frappe.get_value("Sektion", payment_entry.sektion_id, "zwischen_konto")
+    row.cost_center = frappe.get_value("Company", payment_entry.company, "cost_center")
+    payment_entry.unallocated_amount = 0
+    payment_entry.save()
+    payment_entry.submit()
+    return
+
+@frappe.whitelist()
+def kulanz_ausgleich(pe):
+    payment_entry = frappe.get_doc("Payment Entry", pe)
+    pe = frappe.copy_doc(payment_entry)
+    pe.reference_no = 'Kulanzausgleich {0}'.format(payment_entry.name)
+    pe.paid_to = frappe.get_value("Sektion", pe.sektion_id, "kulanz_konto")
+    
+    new_payment = 0
+    for sinv in pe.references:
+        if sinv.outstanding_amount > sinv.allocated_amount:
+            outstanding_amount = frappe.get_value("Sales Invoice", sinv.reference_name, "outstanding_amount")
+            if outstanding_amount > 0:
+                new_payment += outstanding_amount
+                sinv.allocated_amount = outstanding_amount
+                sinv.outstanding_amount = outstanding_amount
+    if new_payment > 0:
+        pe.paid_amount = new_payment
+        pe.insert()
+        pe.save()
+        pe.submit()
+        payment_entry.add_comment('Comment', text='Kulanzausgleich erfolgte mittels {0}'.format(pe.name))
+        return
+    else:
+        frappe.throw("Die Rechnung wurde bereits andersweitig beglichen!")
+
+@frappe.whitelist()
+def get_filter_for_doppelte():
+    pe_mit_doppelzahlungen = frappe.db.sql("""SELECT
+                                                `name`
+                                            FROM `tabPayment Entry`
+                                            WHERE `unallocated_amount` = `total_allocated_amount`
+                                            AND `total_allocated_amount` > 0
+                                            AND `docstatus` = 0""", as_list=True)
+    return pe_mit_doppelzahlungen
+
+@frappe.whitelist()
+def get_filter_for_unassigned():
+    return frappe.get_list('Sektion', fields='default_customer', as_list=True)
 
 @frappe.whitelist()
 def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False):
@@ -878,17 +868,3 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False):
         payment_entry_record.save()
     
     payment_entry_record.submit()
-    
-@frappe.whitelist()
-def get_filter_for_doppelte():
-    pe_mit_doppelzahlungen = frappe.db.sql("""SELECT
-                                                `name`
-                                            FROM `tabPayment Entry`
-                                            WHERE `unallocated_amount` = `total_allocated_amount`
-                                            AND `total_allocated_amount` > 0
-                                            AND `docstatus` = 0""", as_list=True)
-    return pe_mit_doppelzahlungen
-
-@frappe.whitelist()
-def get_filter_for_unassigned():
-    return frappe.get_list('Sektion', fields='default_customer', as_list=True)
