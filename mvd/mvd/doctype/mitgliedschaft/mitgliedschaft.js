@@ -271,7 +271,7 @@ function kuendigung(frm) {
             args:{
                     'sektion': cur_frm.doc.sektion_id,
                     'dokument': 'Kündigung',
-                    //'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                    'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
                     'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
                     'language': cur_frm.doc.language
             },
