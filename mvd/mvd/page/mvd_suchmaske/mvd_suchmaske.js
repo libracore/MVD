@@ -578,7 +578,7 @@ frappe.mvd_such_client = {
                                         // auto rg
                                         cur_dialog.fields_dict.autom_rechnung.set_value(1);
                                         cur_dialog.fields_dict.autom_rechnung.df.hidden = 0;
-                                        cur_dialog.fields_dict.autom_rechnung.df.read_only = 1;
+                                        //~ cur_dialog.fields_dict.autom_rechnung.df.read_only = 1;
                                         cur_dialog.fields_dict.autom_rechnung.refresh();
                                         // rg bez
                                         setTimeout(function(){
@@ -623,15 +623,27 @@ frappe.mvd_such_client = {
                             {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 0, 'read_only': 0,
                                 'change': function() {
                                     if (cur_dialog.fields_dict.autom_rechnung.get_value() == 1) {
-                                        cur_dialog.fields_dict.bar_bezahlt.set_value(0);
+                                        if (cur_dialog.fields_dict.status.get_value() == 'Regulär') {
+                                            cur_dialog.fields_dict.bar_bezahlt.set_value(1);
+                                            cur_dialog.fields_dict.bar_bezahlt.df.read_only = 1;
+                                            cur_dialog.fields_dict.hv_bar_bezahlt.set_value(0);
+                                            cur_dialog.fields_dict.hv_bar_bezahlt.df.hidden = 0;
+                                            cur_dialog.fields_dict.hv_bar_bezahlt.refresh();
+                                        } else {
+                                            cur_dialog.fields_dict.bar_bezahlt.set_value(0);
+                                            cur_dialog.fields_dict.bar_bezahlt.df.read_only = 0;
+                                        }
                                         cur_dialog.fields_dict.bar_bezahlt.df.hidden = 0;
-                                        cur_dialog.fields_dict.bar_bezahlt.df.read_only = 0;
                                         cur_dialog.fields_dict.bar_bezahlt.refresh();
                                     } else {
                                         cur_dialog.fields_dict.bar_bezahlt.set_value(0);
                                         cur_dialog.fields_dict.bar_bezahlt.df.hidden = 1;
                                         cur_dialog.fields_dict.bar_bezahlt.df.read_only = 0;
                                         cur_dialog.fields_dict.bar_bezahlt.refresh();
+                                        
+                                        cur_dialog.fields_dict.hv_bar_bezahlt.set_value(0);
+                                        cur_dialog.fields_dict.hv_bar_bezahlt.df.hidden = 1;
+                                        cur_dialog.fields_dict.hv_bar_bezahlt.refresh();
                                     }
                                 }
                             },
@@ -641,8 +653,10 @@ frappe.mvd_such_client = {
                                 'read_only': 0,
                                 'change': function() {
                                     if (cur_dialog.fields_dict.bar_bezahlt.get_value() == 1) {
-                                        cur_dialog.fields_dict.status.set_value('Regulär');
-                                        cur_dialog.fields_dict.status.refresh();
+                                        if (cur_dialog.fields_dict.status.get_value() != 'Regulär') {
+                                            cur_dialog.fields_dict.status.set_value('Regulär');
+                                            cur_dialog.fields_dict.status.refresh();
+                                        }
                                     }
                                 }
                             },
