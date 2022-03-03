@@ -8,6 +8,7 @@ frappe.pages['vbz'].on_page_load = function(wrapper) {
 }
 frappe.pages['vbz'].refresh= function(wrapper){
     frappe.vbz.show_view('overview');
+    frappe.dom.unfreeze();
 } 
 
 frappe.vbz = {
@@ -243,6 +244,8 @@ frappe.vbz = {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
             }
         });
+        
+        frappe.dom.unfreeze();
     },
     korrespondenz_massenlauf: function() {
         frappe.dom.freeze('Erstelle Sammel-PDF...');
