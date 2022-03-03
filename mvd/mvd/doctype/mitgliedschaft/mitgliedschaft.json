@@ -53,6 +53,7 @@
   "kuendigung",
   "verstorben_am",
   "max_reminder_level",
+  "ist_kollektiv",
   "section_personen_daten",
   "heading_hauptmitglied",
   "kundentyp",
@@ -1015,6 +1016,7 @@
   {
    "fieldname": "miveba_buchungen",
    "fieldtype": "Code",
+   "label": "Miveba Buchungen",
    "read_only": 1
   },
   {
@@ -1024,10 +1026,17 @@
    "fieldtype": "Select",
    "label": "Grund f\u00fcr abweichenden Betrag",
    "options": "Sonstiges\nKollektiv"
+  },
+  {
+   "default": "0",
+   "fieldname": "ist_kollektiv",
+   "fieldtype": "Check",
+   "label": "Ist Kollektiv",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-28 11:15:19.954214",
+ "modified": "2022-03-03 11:49:04.575183",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

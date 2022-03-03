@@ -38,15 +38,9 @@ $(document).ready(function() {
         }
     }, 2000);
     
+    // redirect from desk to vbz
     if(frappe._cur_route==""||frappe._cur_route=="#") {
         window.location.href = "#vbz";
-        
-        // zwangs reload für den Moment ausgesetzt
-        //~ frappe.dom.freeze('Lade Verarbeitungszentrale...');
-        //~ setTimeout(function(){
-            //~ frappe.dom.freeze('Lade Verarbeitungszentrale...');
-            //~ location.reload();
-        //~ }, 100);
     }
     
     
@@ -57,13 +51,7 @@ $(document).on('click','#navbar-breadcrumbs a, a.navbar-home',function(event){
     var navURL = event.currentTarget.href;
 
     if(navURL.endsWith("#")) {
+        frappe.dom.freeze('Lade Verarbeitungszentrale...');
         event.currentTarget.href = '#vbz';
-        
-        // zwangs reload für den Moment ausgesetzt
-        //~ frappe.dom.freeze('Lade Verarbeitungszentrale...');
-        //~ setTimeout(function(){
-            //~ frappe.dom.freeze('Lade Verarbeitungszentrale...');
-            //~ location.reload();
-        //~ }, 100);
     }
 });
