@@ -1015,6 +1015,7 @@
   {
    "fieldname": "miveba_buchungen",
    "fieldtype": "Code",
+   "label": "Miveba Buchungen",
    "read_only": 1
   },
   {
@@ -1027,7 +1028,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-02-28 11:15:19.954214",
+ "modified": "2022-03-03 11:04:35.994412",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
