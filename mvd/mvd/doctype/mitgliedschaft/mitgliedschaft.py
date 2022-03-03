@@ -2017,6 +2017,11 @@ def mvm_update(mitgliedschaft, kwargs):
             else:
                 m_und_w_pdf = 0
             
+            if kwargs['isKollektiv']:
+                ist_kollektiv = 1
+            else:
+                ist_kollektiv = '0'
+            
             region = ''
             if kwargs['regionCode']:
                 regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
@@ -2046,6 +2051,7 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
             mitgliedschaft.validierung_notwendig = 0
             mitgliedschaft.language = get_sprache_abk(language=kwargs['sprache']) if kwargs['sprache'] else 'de'
+            mitgliedschaft.ist_kollektiv = ist_kollektiv
             mitgliedschaft.letzte_bearbeitung_von = 'SP'
             
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
@@ -2146,6 +2152,11 @@ def mvm_neuanlage(kwargs):
             else:
                 m_und_w_pdf = 0
             
+            if kwargs['isKollektiv']:
+                ist_kollektiv = 1
+            else:
+                ist_kollektiv = '0'
+            
             region = ''
             if kwargs['regionCode']:
                 regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
@@ -2177,6 +2188,7 @@ def mvm_neuanlage(kwargs):
                 'naechstes_jahr_geschuldet': 1 if kwargs['naechstesJahrGeschuldet'] else '0',
                 'validierung_notwendig': 0,
                 'language': get_sprache_abk(language=kwargs['sprache']),
+                'ist_kollektiv': ist_kollektiv,
                 'letzte_bearbeitung_von': 'SP'
             })
             
@@ -2238,7 +2250,8 @@ def check_main_keys(kwargs):
         'zeitungAlsPdf',
         'adressen',
         'sprache',
-        'needsValidation'
+        'needsValidation',
+        'isKollektiv'
     ]
     for key in mandatory_keys:
         if key not in kwargs:
@@ -2603,6 +2616,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "bemerkungen": str(mitgliedschaft.wichtig) if mitgliedschaft.wichtig else None,
         "anzahlZeitungen": int(mitgliedschaft.m_und_w),
         "zeitungAlsPdf": True if mitgliedschaft.m_und_w_pdf else False,
+        "isKollektiv": True if int(mitgliedschaft.ist_kollektiv) == 1 else False,
         "adressen": adressen
     }
     
