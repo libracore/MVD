@@ -9,6 +9,7 @@ from datetime import datetime
 import json
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
 from frappe.utils.data import today
+from frappe.utils.background_jobs import enqueue
 
 class Mahnung(Document):
     # this will apply all payment reminder levels in the sales invoices
@@ -129,15 +130,6 @@ def create_payment_reminders(sektion_id):
     else:
         return 'Keine Rechnungen zum Mahnen vorhanden'
 
-# this allows to submit multiple payment reminders at once
-@frappe.whitelist()
-def bulk_submit(names):
-    docnames = json.loads(names)
-    for name in docnames:
-        payment_reminder = frappe.get_doc("Payment Reminder", name)
-        payment_reminder.update_reminder_levels()
-        payment_reminder.submit()
-    return
 
 def get_default_druckvorlage(sektion, language):
     druckvorlage = frappe.get_list('Druckvorlage', fields='name', filters={'dokument': 'Mahnung', 'sektion_id': sektion, 'language': language or 'de', 'default': 1}, limit=1, ignore_ifnull=True)
@@ -290,3 +282,74 @@ def kulanz_ausgleich(mahnung, sinv, amount, outstanding_amount, due_date):
     pe.submit()
     frappe.db.commit()
     return
+
+@frappe.whitelist()
+def bulk_submit(mahnungen):
+    mahnungen = json.loads(mahnungen)
+    args = {
+        'mahnungen': mahnungen
+    }
+    enqueue("mvd.mvd.doctype.mahnung.mahnung.bulk_submit_bgj", queue='long', job_name='Buche Mahnungen {0}'.format(mahnungen[0]["name"]), timeout=5000, **args)
+    return mahnungen[0]["name"]
+    
+def bulk_submit_bgj(mahnungen):
+    for mahnung in mahnungen:
+        mahnung = frappe.get_doc("Mahnung", mahnung["name"])
+        mahnung.update_reminder_levels()
+        mahnung.submit()
+    return
+
+@frappe.whitelist()
+def is_buhchungs_job_running(mahnung):
+    from frappe.utils.background_jobs import get_jobs
+    running = get_info(mahnung)
+    return running
+
+def get_info(mahnung):
+    from rq import Queue, Worker
+    from frappe.utils.background_jobs import get_redis_conn
+    from frappe.utils import format_datetime, cint, convert_utc_to_user_timezone
+    colors = {
+        'queued': 'orange',
+        'failed': 'red',
+        'started': 'blue',
+        'finished': 'green'
+    }
+    conn = get_redis_conn()
+    queues = Queue.all(conn)
+    workers = Worker.all(conn)
+    jobs = []
+    show_failed=False
+
+    def add_job(j, name):
+        if j.kwargs.get('site')==frappe.local.site:
+            jobs.append({
+                'job_name': j.kwargs.get('kwargs', {}).get('playbook_method') \
+                    or str(j.kwargs.get('job_name')),
+                'status': j.status, 'queue': name,
+                'creation': format_datetime(convert_utc_to_user_timezone(j.created_at)),
+                'color': colors[j.status]
+            })
+            if j.exc_info:
+                jobs[-1]['exc_info'] = j.exc_info
+
+    for w in workers:
+        j = w.get_current_job()
+        if j:
+            add_job(j, w.name)
+
+    for q in queues:
+        if q.name != 'failed':
+            for j in q.get_jobs(): add_job(j, q.name)
+
+    if cint(show_failed):
+        for q in queues:
+            if q.name == 'failed':
+                for j in q.get_jobs()[:10]: add_job(j, q.name)
+    
+    found_job = 'refresh'
+    for job in jobs:
+        if job['job_name'] == 'Buche Mahnungen {0}'.format(mahnung):
+            found_job = True
+
+    return found_job
