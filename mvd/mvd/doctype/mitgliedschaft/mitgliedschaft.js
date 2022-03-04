@@ -46,9 +46,16 @@ frappe.ui.form.on('Mitgliedschaft', {
                         erstelle_hv_rechnung(frm);
                     }, __("Erstelle"));
                 }
+                
                 if (!['Gestorben'].includes(cur_frm.doc.status_c)) {
                     frm.add_custom_button(__("Korrespondenz"),  function() {
                         erstelle_korrespondenz(frm);
+                    }, __("Erstelle"));
+                }
+                
+                if (cur_frm.doc.ist_geschenkmitgliedschaft) {
+                    frm.add_custom_button(__("Geschenk-Korrespondenz"),  function() {
+                        erstelle_geschenk_korrespondenz(frm);
                     }, __("Erstelle"));
                 }
             }
@@ -1057,6 +1064,87 @@ function erstelle_korrespondenz(frm) {
                 'Korrespondenz Erstellung',
                 'Erstellen'
                 )
+            }
+        });
+    } else {
+        frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
+    }
+}
+
+function erstelle_geschenk_korrespondenz(frm) {
+    if (frappe.user.has_role("MV_MA")) {
+        frappe.call({
+            method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+            args:{
+                    'sektion': cur_frm.doc.sektion_id,
+                    'dokument': 'Geschenkmitgliedschaft',
+                    'language': cur_frm.doc.language
+            },
+            async: false,
+            callback: function(res)
+            {
+                var druckvorlagen = res.message;
+                if (cur_frm.doc.geschenkunterlagen_an_schenker) {
+                    frappe.prompt([
+                        {'fieldname': 'druckvorlage_inhaber', 'fieldtype': 'Link', 'label': 'Druckvorlage Beschenkte*r', 'reqd': 1, 'options': 'Druckvorlage',
+                            'get_query': function() {
+                                return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                            }
+                        },
+                        {'fieldname': 'druckvorlage_zahler', 'fieldtype': 'Link', 'label': 'Druckvorlage Schenkende*r', 'reqd': 1, 'options': 'Druckvorlage',
+                            'get_query': function() {
+                                return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                            }
+                        }
+                    ],
+                    function(values){
+                        frappe.call({
+                            method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_geschenk_korrespondenz",
+                            args:{
+                                    'mitgliedschaft': cur_frm.doc.name,
+                                    'druckvorlage_inhaber': values.druckvorlage_inhaber,
+                                    'druckvorlage_zahler': values.druckvorlage_zahler
+                            },
+                            freeze: true,
+                            freeze_message: 'Erstelle Geschenk-Korrespondenz...',
+                            callback: function(r)
+                            {
+                                frappe.msgprint("Die Geschenk-Korrespondenzen wurden erstellt und bei den Korrespondenzen abgelegt.");
+                                cur_frm.reload_doc();
+                            }
+                        });
+                    },
+                    'Geschenk-Korrespondenz Erstellung',
+                    'Erstellen'
+                    )
+                } else {
+                    frappe.prompt([
+                        {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage Beschenkte*r', 'reqd': 1, 'options': 'Druckvorlage',
+                            'get_query': function() {
+                                return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                            }
+                        }
+                    ],
+                    function(values){
+                        frappe.call({
+                            method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_geschenk_korrespondenz",
+                            args:{
+                                    'mitgliedschaft': cur_frm.doc.name,
+                                    'druckvorlage_inhaber': values.druckvorlage
+                            },
+                            freeze: true,
+                            freeze_message: 'Erstelle Geschenk-Korrespondenz...',
+                            callback: function(r)
+                            {
+                                frappe.msgprint("Die Geschenk-Korrespondenz wurde erstellt und bei den Korrespondenzen abgelegt.");
+                                cur_frm.reload_doc();
+                            }
+                        });
+                    },
+                    'Geschenk-Korrespondenz Erstellung',
+                    'Erstellen'
+                    )
+                }
             }
         });
     } else {

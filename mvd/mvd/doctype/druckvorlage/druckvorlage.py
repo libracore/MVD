@@ -185,12 +185,19 @@ class Druckvorlage(Document):
                 
     
     def set_validierungsstring(self):
-        validierungsstring = ''
-        validierungsstring += self.sektion_id + "-"
-        validierungsstring += self.language + "-"
-        validierungsstring += self.dokument + "-"
-        validierungsstring += self.mitgliedtyp_c + "-"
-        validierungsstring += str(self.reduzierte_mitgliedschaft)
+        if self.dokument != 'Geschenkmitgliedschaft':
+            validierungsstring = ''
+            validierungsstring += self.sektion_id + "-"
+            validierungsstring += self.language + "-"
+            validierungsstring += self.dokument + "-"
+            validierungsstring += self.mitgliedtyp_c + "-"
+            validierungsstring += str(self.reduzierte_mitgliedschaft)
+        else:
+            validierungsstring = ''
+            validierungsstring += self.sektion_id + "-"
+            validierungsstring += self.language + "-"
+            validierungsstring += self.dokument + "-"
+            validierungsstring += self.geschenkmitgliedschaft_dok_empfaenger
         
         self.validierungsstring = validierungsstring
     
@@ -253,9 +260,18 @@ def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, redu
         return alle_druckvorlagen
 
 def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False):
+    try:
+        mitgliedschaft.name
+    except:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+    
     key_words = [
         {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede},
-        {'key_word': '%%MIETGLIEDERNUMMER%%', 'value': mitgliedschaft.mitglied_nr}
+        {'key_word': '%%MIETGLIEDERNUMMER%%', 'value': mitgliedschaft.mitglied_nr},
+        {'key_word': '%%ANREDE BESCHENKTE%%', 'value': mitgliedschaft.briefanrede},
+        {'key_word': '%%ANREDE SCHENKENDE%%', 'value': mitgliedschaft.rg_briefanrede},
+        {'key_word': '%%VOR- NACHNAME BESCHENKTE%%', 'value': " ".join((mitgliedschaft.vorname_1 or '', mitgliedschaft.nachname_1))},
+        {'key_word': '%%VOR- NACHNAME SCHENKENDE%%', 'value': " ".join((mitgliedschaft.rg_vorname or '', mitgliedschaft.rg_nachname))}
     ]
     
     if mahnung:
