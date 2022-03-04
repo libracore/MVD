@@ -623,7 +623,6 @@ def update_rg_kontakt(mitgliedschaft):
             last_name = mitgliedschaft.rg_nachname
         else:
             last_name = ''
-    
     contact.first_name = first_name
     contact.last_name = last_name
     contact.salutation = salutation
@@ -2522,7 +2521,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 new_mitgliedschaft.adressen_gesperrt = 1
             for kontaktdaten in rechnung["kontakte"]:
                 if kontaktdaten["istHauptkontakt"]:
-                    if str(kontaktdaten["nachname"]) != new_mitgliedschaft.nachname_1 and str(kontaktdaten["vorname"]) != new_mitgliedschaft.vorname_1:
+                    if (str(kontaktdaten["nachname"]) + str(kontaktdaten["vorname"])) != (new_mitgliedschaft.nachname_1 + new_mitgliedschaft.vorname_1):
                         # unabhängiger debitor
                         new_mitgliedschaft.unabhaengiger_debitor = 1
                         if kontaktdaten["firma"]:
@@ -2533,7 +2532,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                             new_mitgliedschaft.rg_kundentyp = 'Einzelperson'
                         if kontaktdaten["anrede"] != 'Unbekannt':
                             new_mitgliedschaft.rg_anrede = str(kontaktdaten["anrede"]) if kontaktdaten["anrede"] else ''
-                        new_mitgliedschaft.rg_nachname_ = str(kontaktdaten["nachname"]) if kontaktdaten["nachname"] else ''
+                        new_mitgliedschaft.rg_nachname = str(kontaktdaten["nachname"]) if kontaktdaten["nachname"] else ''
                         new_mitgliedschaft.rg_vorname = str(kontaktdaten["vorname"]) if kontaktdaten["vorname"] else ''
                         new_mitgliedschaft.rg_tel_p = str(kontaktdaten["telefon"]) if kontaktdaten["telefon"] else ''
                         if kontaktdaten["mobile"]:
