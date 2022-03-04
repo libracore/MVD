@@ -45,7 +45,9 @@
   "zuzug",
   "wegzug",
   "zahlung_hv",
+  "datum_hv_zahlung",
   "zahlung_mitgliedschaft",
+  "datum_zahlung_mitgliedschaft",
   "bezahltes_mitgliedschaftsjahr",
   "naechstes_jahr_geschuldet",
   "ampel_farbe",
@@ -1056,10 +1058,22 @@
    "fieldname": "geschenkunterlagen_an_schenker",
    "fieldtype": "Check",
    "label": "Geschenkunterlagen an Schenker"
+  },
+  {
+   "fieldname": "datum_hv_zahlung",
+   "fieldtype": "Date",
+   "label": "Datum HV Zahlung",
+   "read_only": 1
+  },
+  {
+   "fieldname": "datum_zahlung_mitgliedschaft",
+   "fieldtype": "Date",
+   "label": "Datum Zahlung Mitgliedschaft",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-03-04 12:43:13.922500",
+ "modified": "2022-03-04 17:47:20.121235",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

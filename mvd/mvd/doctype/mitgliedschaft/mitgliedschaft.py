@@ -203,6 +203,7 @@ class Mitgliedschaft(Document):
             sinv = sinvs[0]
             if sinv.is_pos == 1:
                 sinv_year = getdate(sinv.posting_date).strftime("%Y")
+                self.datum_zahlung_mitgliedschaft = sinv.posting_date
             else:
                 pes = frappe.db.sql("""SELECT `parent` FROM `tabPayment Entry Reference`
                                         WHERE `reference_doctype` = 'Sales Invoice'
@@ -210,6 +211,7 @@ class Mitgliedschaft(Document):
                 if len(pes) > 0:
                     pe = frappe.get_doc("Payment Entry", pes[0].parent)
                     sinv_year = getdate(pe.reference_date).strftime("%Y")
+                    self.datum_zahlung_mitgliedschaft = pe.reference_date
                 else:
                     sinv_year = 0
             self.zahlung_mitgliedschaft = sinv_year
@@ -272,6 +274,7 @@ class Mitgliedschaft(Document):
             sinv = sinvs[0]
             if sinv.is_pos == 1:
                 sinv_year = getdate(sinv.posting_date).strftime("%Y")
+                self.datum_hv_zahlung = sinv.posting_date
             else:
                 pes = frappe.db.sql("""SELECT `parent` FROM `tabPayment Entry Reference`
                                         WHERE `reference_doctype` = 'Sales Invoice'
@@ -279,6 +282,7 @@ class Mitgliedschaft(Document):
                 if len(pes) > 0:
                     pe = frappe.get_doc("Payment Entry", pes[0].parent)
                     sinv_year = getdate(pe.reference_date).strftime("%Y")
+                    self.datum_hv_zahlung = pe.reference_date
             self.zahlung_hv = sinv_year
         return
         
@@ -1392,7 +1396,9 @@ def get_uebersicht_html(name):
             if mitgliedschaft.zahlung_hv:
                 # im moment umgeschrieben von Datum auf Jahreszahl, muss nach dem Update der API wieder angepasst werden!
                 # hv_status = 'HV bezahlt am {0}'.format(frappe.utils.get_datetime(mitgliedschaft.zahlung_hv).strftime('%d.%m.%Y'))
-                hv_status = 'HV bezahlt am {0}'.format(mitgliedschaft.zahlung_hv)
+                hv_status = 'HV bezahlt im {0}'.format(mitgliedschaft.zahlung_hv)
+                if mitgliedschaft.datum_hv_zahlung:
+                    hv_status = 'HV bezahlt am {0}'.format(frappe.utils.get_datetime(mitgliedschaft.datum_hv_zahlung).strftime('%d.%m.%Y'))
             else:
                 hv_status = 'HV unbezahlt'
         else:
@@ -2040,6 +2046,11 @@ def mvm_update(mitgliedschaft, kwargs):
             else:
                 geschenkunterlagen_an_schenker = '0'
             
+            if kwargs['datumBezahltHaftpflicht']:
+                datum_hv_zahlung = kwargs['datumBezahltHaftpflicht'].split("T")[0]
+            else:
+                datum_hv_zahlung = None
+            
             region = ''
             if kwargs['regionCode']:
                 regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
@@ -2073,6 +2084,7 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.ist_geschenkmitgliedschaft = ist_geschenkmitgliedschaft
             mitgliedschaft.ist_einmalige_schenkung = ist_einmalige_schenkung
             mitgliedschaft.geschenkunterlagen_an_schenker = geschenkunterlagen_an_schenker
+            mitgliedschaft.datum_hv_zahlung = datum_hv_zahlung
             mitgliedschaft.letzte_bearbeitung_von = 'SP'
             
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
@@ -2193,6 +2205,11 @@ def mvm_neuanlage(kwargs):
             else:
                 geschenkunterlagen_an_schenker = '0'
             
+            if kwargs['datumBezahltHaftpflicht']:
+                datum_hv_zahlung = kwargs['datumBezahltHaftpflicht'].split("T")[0]
+            else:
+                datum_hv_zahlung = None
+            
             region = ''
             if kwargs['regionCode']:
                 regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
@@ -2228,6 +2245,7 @@ def mvm_neuanlage(kwargs):
                 'ist_geschenkmitgliedschaft': ist_geschenkmitgliedschaft,
                 'ist_einmalige_schenkung': ist_einmalige_schenkung,
                 'geschenkunterlagen_an_schenker': geschenkunterlagen_an_schenker,
+                'datum_hv_zahlung': datum_hv_zahlung,
                 'letzte_bearbeitung_von': 'SP'
             })
             
@@ -2293,7 +2311,8 @@ def check_main_keys(kwargs):
         'isKollektiv',
         'isGeschenkmitgliedschaft',
         'isEinmaligeSchenkung',
-        'schenkerHasGeschenkunterlagen'
+        'schenkerHasGeschenkunterlagen',
+        'datumBezahltHaftpflicht'
     ]
     for key in mandatory_keys:
         if key not in kwargs:
@@ -2666,6 +2685,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "isGeschenkmitgliedschaft": True if int(mitgliedschaft.ist_geschenkmitgliedschaft) == 1 else False,
         "isEinmaligeSchenkung": True if int(mitgliedschaft.ist_einmalige_schenkung) == 1 else False,
         "schenkerHasGeschenkunterlagen": True if int(mitgliedschaft.geschenkunterlagen_an_schenker) == 1 else False,
+        "datumBezahltHaftpflicht": str(mitgliedschaft.datum_hv_zahlung).replace(" ", "T") if mitgliedschaft.datum_hv_zahlung else None,
         "adressen": adressen
     }
     
