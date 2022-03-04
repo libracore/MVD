@@ -31,6 +31,10 @@ class Mitgliedschaft(Document):
             # handling von Kontakt(en), Adresse(n) und Kunde(n)
             self.handling_kontakt_adresse_kunde()
             
+            # entferne "Postfach" aus Strasse falls vorhanden
+            if int(self.postfach) == 1 and self.strasse == 'Postfach':
+                self.strasse = ''
+            
             # Briefanrede
             self.briefanrede = get_anredekonvention(self=self)
             
@@ -619,7 +623,6 @@ def update_rg_kontakt(mitgliedschaft):
             last_name = mitgliedschaft.rg_nachname
         else:
             last_name = ''
-    
     contact.first_name = first_name
     contact.last_name = last_name
     contact.salutation = salutation
@@ -2022,6 +2025,21 @@ def mvm_update(mitgliedschaft, kwargs):
             else:
                 ist_kollektiv = '0'
             
+            if kwargs['isGeschenkmitgliedschaft']:
+                ist_geschenkmitgliedschaft = 1
+            else:
+                ist_geschenkmitgliedschaft = '0'
+            
+            if kwargs['isEinmaligeSchenkung']:
+                ist_einmalige_schenkung = 1
+            else:
+                ist_einmalige_schenkung = '0'
+            
+            if kwargs['schenkerHasGeschenkunterlagen']:
+                geschenkunterlagen_an_schenker = 1
+            else:
+                geschenkunterlagen_an_schenker = '0'
+            
             region = ''
             if kwargs['regionCode']:
                 regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
@@ -2052,6 +2070,9 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.validierung_notwendig = 0
             mitgliedschaft.language = get_sprache_abk(language=kwargs['sprache']) if kwargs['sprache'] else 'de'
             mitgliedschaft.ist_kollektiv = ist_kollektiv
+            mitgliedschaft.ist_geschenkmitgliedschaft = ist_geschenkmitgliedschaft
+            mitgliedschaft.ist_einmalige_schenkung = ist_einmalige_schenkung
+            mitgliedschaft.geschenkunterlagen_an_schenker = geschenkunterlagen_an_schenker
             mitgliedschaft.letzte_bearbeitung_von = 'SP'
             
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
@@ -2157,6 +2178,21 @@ def mvm_neuanlage(kwargs):
             else:
                 ist_kollektiv = '0'
             
+            if kwargs['isGeschenkmitgliedschaft']:
+                ist_geschenkmitgliedschaft = 1
+            else:
+                ist_geschenkmitgliedschaft = '0'
+            
+            if kwargs['isEinmaligeSchenkung']:
+                ist_einmalige_schenkung = 1
+            else:
+                ist_einmalige_schenkung = '0'
+            
+            if kwargs['schenkerHasGeschenkunterlagen']:
+                geschenkunterlagen_an_schenker = 1
+            else:
+                geschenkunterlagen_an_schenker = '0'
+            
             region = ''
             if kwargs['regionCode']:
                 regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
@@ -2189,6 +2225,9 @@ def mvm_neuanlage(kwargs):
                 'validierung_notwendig': 0,
                 'language': get_sprache_abk(language=kwargs['sprache']),
                 'ist_kollektiv': ist_kollektiv,
+                'ist_geschenkmitgliedschaft': ist_geschenkmitgliedschaft,
+                'ist_einmalige_schenkung': ist_einmalige_schenkung,
+                'geschenkunterlagen_an_schenker': geschenkunterlagen_an_schenker,
                 'letzte_bearbeitung_von': 'SP'
             })
             
@@ -2251,7 +2290,10 @@ def check_main_keys(kwargs):
         'adressen',
         'sprache',
         'needsValidation',
-        'isKollektiv'
+        'isKollektiv',
+        'isGeschenkmitgliedschaft',
+        'isEinmaligeSchenkung',
+        'schenkerHasGeschenkunterlagen'
     ]
     for key in mandatory_keys:
         if key not in kwargs:
@@ -2326,16 +2368,17 @@ def get_inkl_hv(inkl_hv):
         return 0
 
 def check_email(email=None):
-    import re
-    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-    if email:
-        if(re.fullmatch(regex, email)):
-            return True
-        else:
-            frappe.log_error("Folgende E-Mail musste entfernt werden: {0}".format(email), 'Fehlerhafte E-Mail')
-            return False
-    else:
-        return False
+    # ~ import re
+    # ~ regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    # ~ if email:
+        # ~ if(re.fullmatch(regex, email)):
+            # ~ return True
+        # ~ else:
+            # ~ frappe.log_error("Folgende E-Mail musste entfernt werden: {0}".format(email), 'Fehlerhafte E-Mail')
+            # ~ return False
+    # ~ else:
+        # ~ return False
+    return True
     
 def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
     try:
@@ -2478,7 +2521,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 new_mitgliedschaft.adressen_gesperrt = 1
             for kontaktdaten in rechnung["kontakte"]:
                 if kontaktdaten["istHauptkontakt"]:
-                    if str(kontaktdaten["nachname"]) != new_mitgliedschaft.nachname_1 and str(kontaktdaten["vorname"]) != new_mitgliedschaft.vorname_1:
+                    if (str(kontaktdaten["nachname"]) + str(kontaktdaten["vorname"])) != (new_mitgliedschaft.nachname_1 + new_mitgliedschaft.vorname_1):
                         # unabhängiger debitor
                         new_mitgliedschaft.unabhaengiger_debitor = 1
                         if kontaktdaten["firma"]:
@@ -2489,7 +2532,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                             new_mitgliedschaft.rg_kundentyp = 'Einzelperson'
                         if kontaktdaten["anrede"] != 'Unbekannt':
                             new_mitgliedschaft.rg_anrede = str(kontaktdaten["anrede"]) if kontaktdaten["anrede"] else ''
-                        new_mitgliedschaft.rg_nachname_ = str(kontaktdaten["nachname"]) if kontaktdaten["nachname"] else ''
+                        new_mitgliedschaft.rg_nachname = str(kontaktdaten["nachname"]) if kontaktdaten["nachname"] else ''
                         new_mitgliedschaft.rg_vorname = str(kontaktdaten["vorname"]) if kontaktdaten["vorname"] else ''
                         new_mitgliedschaft.rg_tel_p = str(kontaktdaten["telefon"]) if kontaktdaten["telefon"] else ''
                         if kontaktdaten["mobile"]:
@@ -2570,11 +2613,13 @@ def send_mvm_sektionswechsel(mitgliedschaft):
 
 def prepare_mvm_for_sp(mitgliedschaft):
     adressen = get_adressen_for_sp(mitgliedschaft)
+    
     typ_mapper = {
         'Kollektiv': 'Kollektiv',
         'Privat': 'Privat',
         'Geschäft': 'Geschaeft'
     }
+    
     status_mapper = {
         'Anmeldung': 'Anmeldung',
         'Online-Anmeldung': 'OnlineAnmeldung',
@@ -2588,6 +2633,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         'Inaktiv': 'Inaktiv',
         'Interessent*in': 'InteressentIn'
     }
+    
     prepared_mvm = {
         "mitgliedNummer": str(mitgliedschaft.mitglied_nr),
         "mitgliedId": int(mitgliedschaft.mitglied_id),
@@ -2617,6 +2663,9 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "anzahlZeitungen": int(mitgliedschaft.m_und_w),
         "zeitungAlsPdf": True if mitgliedschaft.m_und_w_pdf else False,
         "isKollektiv": True if int(mitgliedschaft.ist_kollektiv) == 1 else False,
+        "isGeschenkmitgliedschaft": True if int(mitgliedschaft.ist_geschenkmitgliedschaft) == 1 else False,
+        "isEinmaligeSchenkung": True if int(mitgliedschaft.ist_einmalige_schenkung) == 1 else False,
+        "schenkerHasGeschenkunterlagen": True if int(mitgliedschaft.geschenkunterlagen_an_schenker) == 1 else False,
         "adressen": adressen
     }
     

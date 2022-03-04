@@ -30,6 +30,9 @@
   "m_und_w_pdf",
   "kein_email",
   "adressen_gesperrt",
+  "ist_geschenkmitgliedschaft",
+  "ist_einmalige_schenkung",
+  "geschenkunterlagen_an_schenker",
   "reduzierte_mitgliedschaft",
   "grund_abweichender_betrag",
   "reduzierter_betrag",
@@ -1033,10 +1036,30 @@
    "fieldtype": "Check",
    "label": "Ist Kollektiv",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "ist_geschenkmitgliedschaft",
+   "fieldtype": "Check",
+   "label": "Ist Geschenkmitgliedschaft"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.ist_geschenkmitgliedschaft",
+   "fieldname": "ist_einmalige_schenkung",
+   "fieldtype": "Check",
+   "label": "Ist einmalige Schenkung"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.ist_geschenkmitgliedschaft",
+   "fieldname": "geschenkunterlagen_an_schenker",
+   "fieldtype": "Check",
+   "label": "Geschenkunterlagen an Schenker"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-03-03 11:49:04.575183",
+ "modified": "2022-03-04 12:43:13.922500",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

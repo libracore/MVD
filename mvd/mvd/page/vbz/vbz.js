@@ -328,18 +328,17 @@ frappe.vbz = {
         });
     },
     mahnung_massenlauf: function() {
-        frappe.dom.freeze('Erstelle Sammel-PDF...');
+        frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz.vbz.mahnung_massenlauf",
             args:{},
             freeze: true,
-            freeze_message: 'Erstelle Sammel-PDF...',
+            freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
             callback: function(r)
             {
                 frappe.dom.unfreeze();
-                frappe.route_options = {"name": r.message}
-                frappe.set_route("List", "File", "List");
+                frappe.set_route("Form", "Massenlauf", r.message);
             }
         });
     }

@@ -259,34 +259,49 @@ def begruessung_online_massenlauf():
 
 @frappe.whitelist()
 def mahnung_massenlauf():
-    mahnungen = frappe.get_list('Mahnung', filters={'massenlauf': 1}, fields=['name'])
+    mahnungen = frappe.get_list('Mahnung', filters={'massenlauf': 1, 'docstatus': 1}, fields=['name'])
     if len(mahnungen) > 0:
-        output = PdfFileWriter()
-        for mahnung in mahnungen:
-            output = frappe.get_print("Mahnung", mahnung['name'], 'Mahnung', as_pdf = True, output = output, ignore_zugferd=True)
-            
-        file_name = "Mahnungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
-        file_name = file_name.split(".")[0]
-        file_name = file_name.replace(":", "-")
-        file_name = file_name + ".pdf"
-        
-        filedata = get_file_data_from_writer(output)
-        
-        _file = frappe.get_doc({
-            "doctype": "File",
-            "file_name": file_name,
-            "folder": "Home",
-            "is_private": 1,
-            "content": filedata
+        massenlauf = frappe.get_doc({
+            "doctype": "Massenlauf",
+            "sektion_id": frappe.get_value("Mahnung", mahnungen[0]['name'], "sektion_id"),
+            "status": "Offen"
         })
-        
-        _file.save(ignore_permissions=True)
+        massenlauf.insert(ignore_permissions=True)
         
         for mahnung in mahnungen:
             m = frappe.get_doc("Mahnung", mahnung['name'])
             m.massenlauf = '0'
+            m.massenlauf_referenz = massenlauf.name
             m.save(ignore_permissions=True)
         
-        return _file.name
+        return massenlauf.name
+        
+        # ~ output = PdfFileWriter()
+        # ~ for mahnung in mahnungen:
+            # ~ output = frappe.get_print("Mahnung", mahnung['name'], 'Mahnung', as_pdf = True, output = output, ignore_zugferd=True)
+            
+        # ~ file_name = "Mahnungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+        # ~ file_name = file_name.split(".")[0]
+        # ~ file_name = file_name.replace(":", "-")
+        # ~ file_name = file_name + ".pdf"
+        
+        # ~ filedata = get_file_data_from_writer(output)
+        
+        # ~ _file = frappe.get_doc({
+            # ~ "doctype": "File",
+            # ~ "file_name": file_name,
+            # ~ "folder": "Home",
+            # ~ "is_private": 1,
+            # ~ "content": filedata
+        # ~ })
+        
+        # ~ _file.save(ignore_permissions=True)
+        
+        # ~ for mahnung in mahnungen:
+            # ~ m = frappe.get_doc("Mahnung", mahnung['name'])
+            # ~ m.massenlauf = '0'
+            # ~ m.save(ignore_permissions=True)
+        
+        # ~ return _file.name
     else:
-        frappe.throw("Es gibt keine Mahnungen die für einen Massenlauf vorgemerkt sind.")
+        frappe.throw("Es gibt keine Mahnungen die für einen Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")

@@ -12,7 +12,47 @@ frappe.listview_settings['Mahnung'] = {
                 __("Erstelle")
             );
         });  
+        $("[data-label='Submit']").parent().unbind();
+        $("[data-label='Submit']").parent().click(function(){
+            frappe.confirm('Möchten Sie die Markierten Mahnungen buchen?',
+            () => {
+                var selected_mahnungen = cur_list.get_checked_items();
+                submit_mahnungen(selected_mahnungen);
+            }, () => {
+                // No
+            })
+            
+        });
     }
+}
+
+function submit_mahnungen(mahnungen) {
+    frappe.dom.freeze('Bitte warten, buche Mahnungen...');
+    frappe.call({
+        'method': "mvd.mvd.doctype.mahnung.mahnung.bulk_submit",
+        'args': {
+            'mahnungen': mahnungen
+        },
+        'callback': function(r) {
+            var jobname = r.message;
+            let mahnung_refresher = setInterval(mahnung_refresher_handler, 3000, jobname);
+            function mahnung_refresher_handler(jobname) {
+                frappe.call({
+                'method': "mvd.mvd.doctype.mahnung.mahnung.is_buhchungs_job_running",
+                    'args': {
+                        'mahnung': jobname
+                    },
+                    'callback': function(res) {
+                        if (res.message == 'refresh') {
+                            clearInterval(mahnung_refresher);
+                            frappe.dom.unfreeze();
+                            cur_list.refresh();
+                        }
+                    }
+                });
+            }
+        }
+    });
 }
 
 function create_payment_reminders(values) {
