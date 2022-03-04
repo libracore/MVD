@@ -10,6 +10,7 @@
   "section_allgemein",
   "sektion_id",
   "mitgliedtyp_c",
+  "geschenkmitgliedschaft_dok_empfaenger",
   "language",
   "reduzierte_mitgliedschaft",
   "cb1",
@@ -24,6 +25,7 @@
   "section_tipps",
   "tipps",
   "tipps_mahnung",
+  "tipps_geschenkmitgliedschaft",
   "section_inhalt_1",
   "h1",
   "seite_1a",
@@ -74,7 +76,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Dokument",
-   "options": "Anmeldung mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ\nMahnung",
+   "options": "Anmeldung mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ\nMahnung\nGeschenkmitgliedschaft",
    "reqd": 1
   },
   {
@@ -107,7 +109,7 @@
    "label": "Vorderseite"
   },
   {
-   "depends_on": "eval:doc.doppelseitiger_druck",
+   "depends_on": "eval:doc.doppelseitiger_druck&&doc.dokument!='Geschenkmitgliedschaft'",
    "fieldname": "seite_1b",
    "fieldtype": "Text Editor",
    "label": "R\u00fcckseite"
@@ -204,7 +206,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:in_list(['Begr\u00fcssung mit Ausweis', 'Korrespondenz', 'Zuzug ohne EZ'], doc.dokument)",
+   "depends_on": "eval:in_list(['Begr\u00fcssung mit Ausweis', 'Korrespondenz', 'Zuzug ohne EZ', 'Geschenkmitgliedschaft'], doc.dokument)",
    "fieldname": "seite_1_ausweis",
    "fieldtype": "Check",
    "label": "Ausweis auf Blatt 1 andrucken"
@@ -258,7 +260,7 @@
    "label": "Tipps"
   },
   {
-   "depends_on": "eval:doc.dokument!='Mahnung'",
+   "depends_on": "eval:doc.dokument!='Mahnung'&&doc.dokument!='Geschenkmitgliedschaft'",
    "fieldname": "tipps",
    "fieldtype": "HTML",
    "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n</ul>"
@@ -276,7 +278,7 @@
    "label": "Validierungsstring"
   },
   {
-   "depends_on": "eval:doc.dokument!='Korrespondenz'&&doc.dokument!='Mahnung'",
+   "depends_on": "eval:doc.dokument!='Korrespondenz'&&doc.dokument!='Mahnung'&&doc.dokument!='Geschenkmitgliedschaft'",
    "fieldname": "mitgliedtyp_c",
    "fieldtype": "Select",
    "label": "Mitgliedtyp",
@@ -284,7 +286,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.dokument!='Korrespondenz'&&doc.dokument!='Mahnung'",
+   "depends_on": "eval:doc.dokument!='Korrespondenz'&&doc.dokument!='Mahnung'&&doc.dokument!='Geschenkmitgliedschaft'",
    "fieldname": "reduzierte_mitgliedschaft",
    "fieldtype": "Check",
    "label": "Reduzierte Mitgliedschaft"
@@ -367,9 +369,23 @@
    "fieldname": "tipps_mahnung",
    "fieldtype": "HTML",
    "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Gesamtbetrag der gemahnten Rechnung(en) -&gt; <b>%%Gesamtbetrag_gemahnte_Rechnungen%%</b></li>\n<li>Jahr der gemahnten Jahresrechnung auf Seite 1 -&gt; <b>%%Jahresrechnung_Jahr%%</b></li>\n</ul>"
+  },
+  {
+   "depends_on": "eval:doc.dokument=='Geschenkmitgliedschaft'",
+   "fieldname": "tipps_geschenkmitgliedschaft",
+   "fieldtype": "HTML",
+   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede Beschenkte*r -&gt; <b>%%ANREDE BESCHENKTE%%</b></li>\n<li>Briefanrede Schenkende*r -&gt; <b>%%ANREDE SCHENKENDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Vor- Nachname Beschenkte*r -&gt; <b>%%VOR- NACHNAME BESCHENKTE%%</b></li>\n<li>Vor- Nachname Schenkende*r -&gt; <b>%%VOR- NACHNAME SCHENKENDE%%</b></li>\n</ul>"
+  },
+  {
+   "default": "Beschenkte*r",
+   "depends_on": "eval:doc.dokument=='Geschenkmitgliedschaft'",
+   "fieldname": "geschenkmitgliedschaft_dok_empfaenger",
+   "fieldtype": "Select",
+   "label": "Empf\u00e4nger",
+   "options": "Schenkende*r\nBeschenkte*r"
   }
  ],
- "modified": "2022-02-23 10:32:45.142933",
+ "modified": "2022-03-04 21:45:12.711211",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

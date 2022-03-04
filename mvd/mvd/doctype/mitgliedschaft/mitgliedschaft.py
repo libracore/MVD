@@ -2968,7 +2968,9 @@ def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=F
             'seite_3_qrr',
             'seite_3_qrr_spende_hv',
             'blatt_2_info_mahnung',
-            'tipps_mahnung'
+            'tipps_mahnung',
+            'geschenkmitgliedschaft_dok_empfaenger',
+            'tipps_geschenkmitgliedschaft'
         ]
         for key in keys_to_remove:
             try:
@@ -2983,6 +2985,123 @@ def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=F
         new_korrespondenz.insert(ignore_permissions=True)
         frappe.db.commit()
         return new_korrespondenz.name
+
+@frappe.whitelist()
+def create_geschenk_korrespondenz(mitgliedschaft, druckvorlage_inhaber=False, druckvorlage_zahler=False, massenlauf=False):
+    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+    
+    druckvorlage = frappe.get_doc("Druckvorlage", druckvorlage_inhaber)
+    _new_korrespondenz = frappe.copy_doc(druckvorlage)
+    _new_korrespondenz.doctype = 'Korrespondenz'
+    _new_korrespondenz.sektion_id = mitgliedschaft.sektion_id
+    _new_korrespondenz.titel = 'Geschenkmitgliedschaft Beschenkte*r'
+    
+    new_korrespondenz = frappe._dict(_new_korrespondenz.as_dict())
+    
+    keys_to_remove = [
+        'mitgliedtyp_c',
+        'validierungsstring',
+        'language',
+        'reduzierte_mitgliedschaft',
+        'dokument',
+        'default',
+        'deaktiviert',
+        'seite_1_qrr',
+        'seite_1_qrr_spende_hv',
+        'seite_2_qrr',
+        'seite_2_qrr_spende_hv',
+        'seite_3_qrr',
+        'seite_3_qrr_spende_hv',
+        'blatt_2_info_mahnung',
+        'tipps_mahnung',
+        'geschenkmitgliedschaft_dok_empfaenger',
+        'tipps_geschenkmitgliedschaft'
+    ]
+    for key in keys_to_remove:
+        try:
+            new_korrespondenz.pop(key)
+        except:
+            pass
+    
+    new_korrespondenz['mv_mitgliedschaft'] = mitgliedschaft.name
+    new_korrespondenz['massenlauf'] = 1 if massenlauf else 0
+    
+    new_korrespondenz = frappe.get_doc(new_korrespondenz)
+    new_korrespondenz.insert(ignore_permissions=True)
+    frappe.db.commit()
+    
+    inhaber = new_korrespondenz.name
+    zahler = None
+    
+    if druckvorlage_zahler:
+        druckvorlage = frappe.get_doc("Druckvorlage", druckvorlage_zahler)
+        _new_korrespondenz = frappe.copy_doc(druckvorlage)
+        _new_korrespondenz.doctype = 'Korrespondenz'
+        _new_korrespondenz.sektion_id = mitgliedschaft.sektion_id
+        _new_korrespondenz.titel = 'Geschenkmitgliedschaft Schenkende*r'
+        
+        new_korrespondenz = frappe._dict(_new_korrespondenz.as_dict())
+        
+        keys_to_remove = [
+            'mitgliedtyp_c',
+            'validierungsstring',
+            'language',
+            'reduzierte_mitgliedschaft',
+            'dokument',
+            'default',
+            'deaktiviert',
+            'seite_1_qrr',
+            'seite_1_qrr_spende_hv',
+            'seite_2_qrr',
+            'seite_2_qrr_spende_hv',
+            'seite_3_qrr',
+            'seite_3_qrr_spende_hv',
+            'blatt_2_info_mahnung',
+            'tipps_mahnung',
+            'geschenkmitgliedschaft_dok_empfaenger',
+            'tipps_geschenkmitgliedschaft'
+        ]
+        for key in keys_to_remove:
+            try:
+                new_korrespondenz.pop(key)
+            except:
+                pass
+        
+        new_korrespondenz['mv_mitgliedschaft'] = mitgliedschaft.name
+        new_korrespondenz['massenlauf'] = 1 if massenlauf else 0
+        
+        new_korrespondenz = frappe.get_doc(new_korrespondenz)
+        new_korrespondenz.geschenk = 1
+        new_korrespondenz.insert(ignore_permissions=True)
+        frappe.db.commit()
+        
+        zahler = new_korrespondenz.name
+    
+    output = PdfFileWriter()
+    if druckvorlage_zahler:
+        output = frappe.get_print("Korrespondenz", zahler, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+    output = frappe.get_print("Korrespondenz", inhaber, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+    
+    file_name = "Geschenk_Korrespondenz_{datetime}".format(datetime=now().replace(" ", "_"))
+    file_name = file_name.split(".")[0]
+    file_name = file_name.replace(":", "-")
+    file_name = file_name + ".pdf"
+    
+    filedata = get_file_data_from_writer(output)
+    
+    _file = frappe.get_doc({
+        "doctype": "File",
+        "file_name": file_name,
+        "folder": "Home/Attachments",
+        "is_private": 1,
+        "content": filedata,
+        "attached_to_doctype": 'Mitgliedschaft',
+        "attached_to_name": mitgliedschaft.name
+    })
+    
+    _file.save(ignore_permissions=True)
+        
+    return {'inhaber': inhaber, 'zahler': zahler}
 
 @frappe.whitelist()
 def create_korrespondenz_massenlauf(mitgliedschaften, druckvorlage, titel):

@@ -10,6 +10,7 @@
   "sektion_id",
   "mv_mitgliedschaft",
   "massenlauf",
+  "geschenk",
   "section_seitenmanagement",
   "anzahl_seiten",
   "cb_2",
@@ -261,9 +262,17 @@
    "fieldname": "massenlauf",
    "fieldtype": "Check",
    "label": "Massenlauf vormerkung"
+  },
+  {
+   "default": "0",
+   "fieldname": "geschenk",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Geschenk",
+   "read_only": 1
   }
  ],
- "modified": "2022-02-23 10:24:09.741755",
+ "modified": "2022-03-04 21:48:36.968460",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Korrespondenz",
