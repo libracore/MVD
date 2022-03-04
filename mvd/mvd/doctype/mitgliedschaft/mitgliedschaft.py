@@ -31,6 +31,10 @@ class Mitgliedschaft(Document):
             # handling von Kontakt(en), Adresse(n) und Kunde(n)
             self.handling_kontakt_adresse_kunde()
             
+            # entferne "Postfach" aus Strasse falls vorhanden
+            if int(self.postfach) == 1 and self.strasse == 'Postfach':
+                self.strasse = ''
+            
             # Briefanrede
             self.briefanrede = get_anredekonvention(self=self)
             
