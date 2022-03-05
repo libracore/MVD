@@ -63,7 +63,8 @@ hm = {
     'nkategorie_d': 'nkategorie_d',
     'notiz': 'notiz',
     'weitere_kontaktinfos': 'weitere_kontaktinfos',
-    'mkategorie_d': 'mkategorie_d'
+    'mkategorie_d': 'mkategorie_d',
+    'benutzer_name': 'benutzer_name'
 }
 
 def read_csv(site_name, file_name, limit=False):
@@ -637,6 +638,7 @@ def create_comment(row):
         description = str(get_value(row, 'nkategorie_d')) + "<br>"
         description += str(get_value(row, 'datum_von')) + "<br>"
         description += str(get_value(row, 'notiz')) + "<br>"
+        description += str(get_value(row, 'benutzer_name')) + "<br>"
         mitgliedschaft.add_comment('Comment', text=description)
         frappe.db.commit()
     except Exception as err:
@@ -647,6 +649,7 @@ def create_todo(row):
         description = str(get_value(row, 'nkategorie_d')) + "<br>"
         description += str(get_value(row, 'datum_von')) + "<br>"
         description += str(get_value(row, 'notiz')) + "<br>"
+        description += str(get_value(row, 'benutzer_name')) + "<br>"
         
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
         owner = frappe.get_value("Sektion", mitgliedschaft.sektion_id, "virtueller_user")

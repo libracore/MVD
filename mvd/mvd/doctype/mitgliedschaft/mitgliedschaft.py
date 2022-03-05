@@ -231,6 +231,7 @@ class Mitgliedschaft(Document):
             self.status_c = 'Regulär'
             # erstellung Begrüssungsschreiben
             self.begruessung_massendruck = 1
+            self.begruessung_via_zahlung = 1
             druckvorlage = get_druckvorlagen(sektion=self.sektion_id, dokument='Begrüssung mit Ausweis', mitgliedtyp=self.mitgliedtyp_c, language=self.language)['default_druckvorlage']
             self.begruessung_massendruck_dokument = create_korrespondenz(mitgliedschaft=self.name, druckvorlage=druckvorlage, titel='Begrüssung (Autom.)')
             

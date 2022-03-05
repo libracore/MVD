@@ -29,9 +29,13 @@
         </tr>
         <tr>
             <td>Begrüssung (Bezahlte Mitgliedschaft:<br>Anmeldung und Interessent*in)</td>
-            <td>tbd</td>
-            <td><i id="begruessung_qty" class="fa fa-eye"></i></td>
-            <td><i id="begruessung_print" class="fa fa-file"></i></td>
+            {% if begruessung_bezahlt.qty > 99 %}
+                <td>99+</td>
+            {% else %}
+                <td>{{ begruessung_bezahlt.qty }}</td>
+            {% endif %}
+            <td>{% if begruessung_bezahlt.qty > 0 %}<i id="begruessung_qty" class="fa fa-eye"></i>{% endif %}</td>
+            <td>{% if begruessung_bezahlt.qty > 0 %}<i id="begruessung_print" class="fa fa-file"></i>{% endif %}</td>
         </tr>
         <tr>
             <td>Begrüssung (Online-Beitritt)</td>
