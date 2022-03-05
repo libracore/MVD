@@ -154,6 +154,7 @@
   "rg_massendruck_vormerkung",
   "rg_massendruck",
   "begruessung_massendruck",
+  "begruessung_via_zahlung",
   "begruessung_massendruck_dokument",
   "letzte_bearbeitung_von",
   "status_vor_onl_mutation"
@@ -1070,10 +1071,16 @@
    "fieldtype": "Date",
    "label": "Datum Zahlung Mitgliedschaft",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "begruessung_via_zahlung",
+   "fieldtype": "Check",
+   "label": "Begr\u00fcssung via Zahlung"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-03-04 17:47:20.121235",
+ "modified": "2022-03-05 20:30:13.135078",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

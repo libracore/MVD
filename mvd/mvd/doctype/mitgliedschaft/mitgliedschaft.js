@@ -97,9 +97,15 @@ frappe.ui.form.on('Mitgliedschaft', {
             }
             
             if (cur_frm.doc.begruessung_massendruck) {
-                frm.add_custom_button(__("Von Massenlauf (Begrüssung Online-Beitritt) entfernen"),  function() {
-                    begruessung_massendruck_verarbeitet(frm);
-                });
+                if (!cur_frm.doc.begruessung_via_zahlung) {
+                    frm.add_custom_button(__("Von Massenlauf (Begrüssung Online-Beitritt) entfernen"),  function() {
+                        begruessung_massendruck_verarbeitet(frm);
+                    });
+                } else {
+                    frm.add_custom_button(__("Von Massenlauf (Begrüssung Bezahlte Mitgliedschaft) entfernen"),  function() {
+                        begruessung_massendruck_verarbeitet(frm);
+                    });
+                }
             }
             
             frm.add_custom_button(__("Erstelle ToDo"),  function() {
@@ -669,6 +675,7 @@ function begruessung_massendruck_verarbeitet(frm) {
             function(){
                 // on yes
                 cur_frm.set_value("begruessung_massendruck", '0');
+                cur_frm.set_value("begruessung_via_zahlung", '0');
                 cur_frm.set_value("begruessung_massendruck_dokument", '');
                 cur_frm.save();
                 frappe.msgprint("Der Druck des Begrüssungsschreibens wurde aus dem Massenlauf entfernt.");
