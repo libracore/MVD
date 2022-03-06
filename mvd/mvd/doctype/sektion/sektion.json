@@ -18,6 +18,7 @@
   "mitgliedschafts_artikel",
   "mitgliedschafts_artikel_geschaeft",
   "mitgliedschafts_artikel_beitritt",
+  "mitgliedschafts_artikel_beitritt_geschaeft",
   "mitgliedschafts_artikel_reduziert",
   "mitgliedschafts_artikel_gratis",
   "hv_artikel",
@@ -105,7 +106,7 @@
   {
    "fieldname": "mitgliedschafts_artikel",
    "fieldtype": "Link",
-   "label": "Artikel Mitgliedschaft (Normal)",
+   "label": "Artikel Mitgliedschaft (Privat)",
    "options": "Item"
   },
   {
@@ -266,11 +267,17 @@
   {
    "fieldname": "mitgliedschafts_artikel_beitritt",
    "fieldtype": "Link",
-   "label": "Artikel Beitrittsgeb\u00fchr",
+   "label": "Artikel Beitrittsgeb\u00fchr (Privat)",
+   "options": "Item"
+  },
+  {
+   "fieldname": "mitgliedschafts_artikel_beitritt_geschaeft",
+   "fieldtype": "Link",
+   "label": "Artikel Beitrittsgeb\u00fchr (Gesch\u00e4ft)",
    "options": "Item"
   }
  ],
- "modified": "2022-02-28 11:11:48.162015",
+ "modified": "2022-03-06 20:14:57.773465",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

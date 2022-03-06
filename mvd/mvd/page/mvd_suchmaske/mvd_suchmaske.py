@@ -172,7 +172,7 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False):
         "m_und_w": 1,
         "mitgliedtyp_c": anlage_daten["mitgliedtyp"],
         "inkl_hv": 1,
-        "eintritt": now(),
+        "eintrittsdatum": now(),
         "kundentyp": anlage_daten["kundentyp"],
         "firma": firma,
         "zusatz_firma": zusatz_firma,

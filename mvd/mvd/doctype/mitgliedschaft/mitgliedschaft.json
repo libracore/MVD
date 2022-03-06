@@ -219,7 +219,7 @@
    "fieldtype": "Date",
    "hidden": 1,
    "label": "Eintritt (Obsolet)",
-   "permlevel": 1
+   "permlevel": 2
   },
   {
    "fieldname": "wegzug",
@@ -1082,11 +1082,12 @@
    "fieldname": "eintrittsdatum",
    "fieldtype": "Date",
    "label": "Eintritt",
+   "permlevel": 1,
    "reqd": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-03-06 19:25:02.986784",
+ "modified": "2022-03-06 20:05:42.466694",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
