@@ -531,7 +531,8 @@ def create_termin(row):
             "bis": str(get_value(row, 'datum_bis')),
             "erinnerung": str(get_value(row, 'datum_erinnerung')),
             "notitz": str(get_value(row, 'notiz_termin')),
-            "status": termin_status
+            "status": termin_status,
+            "mv_mitgliedschaft": str(get_value(row, 'mitglied_id'))
         })
         new.insert()
         frappe.db.commit()
