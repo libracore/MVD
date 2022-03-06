@@ -1368,7 +1368,7 @@ def get_uebersicht_html(name):
         
         sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
         karenzfrist_in_d = sektion.karenzfrist
-        ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintritt), karenzfrist_in_d)
+        ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintrittsdatum), karenzfrist_in_d)
         if getdate() < ablauf_karenzfrist:
             karenzfrist = False
         else:
@@ -1433,7 +1433,7 @@ def get_uebersicht_html(name):
             'col_qty': int(12 / col_qty),
             'allgemein': {
                 'status': mitgliedschaft.status_c,
-                'eintritt': mitgliedschaft.eintritt,
+                'eintritt': mitgliedschaft.eintrittsdatum,
                 'austritt': mitgliedschaft.austritt,
                 'ampelfarbe': mitgliedschaft.ampel_farbe or 'ampelrot',
                 'ueberfaellige_rechnungen': ueberfaellige_rechnungen,
@@ -1470,7 +1470,7 @@ def get_uebersicht_html(name):
         allgemein = {
             'status': mitgliedschaft.status_c,
             'mitgliedtyp': mitgliedschaft.mitgliedtyp_c,
-            'eintritt': mitgliedschaft.eintritt,
+            'eintritt': mitgliedschaft.eintrittsdatum,
             'kuendigung': mitgliedschaft.kuendigung or False,
             'language': mitgliedschaft.language or 'de'
         }
@@ -2069,7 +2069,7 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.m_und_w = kwargs['anzahlZeitungen']
             mitgliedschaft.m_und_w_pdf = m_und_w_pdf
             mitgliedschaft.wichtig = kwargs['bemerkungen'] if kwargs['bemerkungen'] else ''
-            mitgliedschaft.eintritt = eintritt
+            mitgliedschaft.eintrittsdatum = eintritt
             mitgliedschaft.zuzug = zuzug
             mitgliedschaft.zuzug_von = zuzug_von
             mitgliedschaft.wegzug = wegzug
@@ -2230,7 +2230,7 @@ def mvm_neuanlage(kwargs):
                 'm_und_w': kwargs['anzahlZeitungen'],
                 'm_und_w_pdf': m_und_w_pdf,
                 'wichtig': str(kwargs['bemerkungen']) if kwargs['bemerkungen'] else '',
-                'eintritt': eintritt,
+                'eintrittsdatum': eintritt,
                 'zuzug': zuzug,
                 'zuzug_von': zuzug_von,
                 'wegzug': wegzug,
@@ -2667,7 +2667,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "istTemporaeresMitglied": False, # ???
         "fuerBewirtschaftungGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
         "erfassungsdatum": str(mitgliedschaft.creation).replace(" ", "T"),
-        "eintrittsdatum": str(mitgliedschaft.eintritt).replace(" ", "T") + "T00:00:00" if mitgliedschaft.eintritt else None,
+        "eintrittsdatum": str(mitgliedschaft.eintrittsdatum).replace(" ", "T") + "T00:00:00" if mitgliedschaft.eintrittsdatum else None,
         "austrittsdatum": str(mitgliedschaft.austritt).replace(" ", "T") + "T00:00:00" if mitgliedschaft.austritt else None,
         "alteSektionCode": str(get_sektion_code(mitgliedschaft.zuzug_von)) if mitgliedschaft.zuzug_von else None,
         "zuzugsdatum": str(mitgliedschaft.zuzug).replace(" ", "T") + "T00:00:00" if mitgliedschaft.zuzug else None,
@@ -2892,7 +2892,7 @@ def get_ampelfarbe(mitgliedschaft):
         
         sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
         karenzfrist_in_d = sektion.karenzfrist
-        ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintritt), karenzfrist_in_d)
+        ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintrittsdatum), karenzfrist_in_d)
         
         if getdate() < ablauf_karenzfrist:
             karenzfrist = False

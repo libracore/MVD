@@ -42,6 +42,7 @@
   "wichtig",
   "section_daten",
   "eintritt",
+  "eintrittsdatum",
   "zuzug",
   "wegzug",
   "zahlung_hv",
@@ -214,12 +215,11 @@
    "label": "Daten"
   },
   {
-   "default": "Today",
    "fieldname": "eintritt",
    "fieldtype": "Date",
-   "label": "Eintritt",
-   "permlevel": 1,
-   "reqd": 1
+   "hidden": 1,
+   "label": "Eintritt (Obsolet)",
+   "permlevel": 1
   },
   {
    "fieldname": "wegzug",
@@ -1077,10 +1077,16 @@
    "fieldname": "begruessung_via_zahlung",
    "fieldtype": "Check",
    "label": "Begr\u00fcssung via Zahlung"
+  },
+  {
+   "fieldname": "eintrittsdatum",
+   "fieldtype": "Date",
+   "label": "Eintritt",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-03-05 20:30:13.135078",
+ "modified": "2022-03-06 19:25:02.986784",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
