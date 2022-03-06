@@ -1795,13 +1795,13 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
                     ]
                     jahr = int(getdate(today()).strftime("%Y")) + 1
         # prüfe Beitrittsgebühr
-        if int(mitgliedschaft.zahlung_mitgliedschaft) == 0:
+        if int(mitgliedschaft.zahlung_mitgliedschaft) == 0 and sektion.mitgliedschafts_artikel_beitritt:
             item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt,"qty": 1, "cost_center": company.cost_center})
     
     if mitgliedschaft.mitgliedtyp_c == 'Geschäft':
         item = [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1}]
         # prüfe Beitrittsgebühr
-        if int(mitgliedschaft.zahlung_mitgliedschaft) == 0:
+        if int(mitgliedschaft.zahlung_mitgliedschaft) == 0 and sektion.mitgliedschafts_artikel_beitritt_geschaeft:
             item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt_geschaeft,"qty": 1, "cost_center": company.cost_center})
     
     # ~ if mitgliedschaft.mitgliedtyp_c == 'Kollektiv':
