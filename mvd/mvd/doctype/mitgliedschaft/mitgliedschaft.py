@@ -2666,14 +2666,14 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "regionCode": None, # ???
         "istTemporaeresMitglied": False, # ???
         "fuerBewirtschaftungGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
-        "erfassungsdatum": str(mitgliedschaft.creation).replace(" ", "T") + "00:00:00",
-        "eintrittsdatum": str(mitgliedschaft.eintritt).replace(" ", "T") + "00:00:00" if mitgliedschaft.eintritt else None,
-        "austrittsdatum": str(mitgliedschaft.austritt).replace(" ", "T") + "00:00:00" if mitgliedschaft.austritt else None,
+        "erfassungsdatum": str(mitgliedschaft.creation).replace(" ", "T") + "T00:00:00",
+        "eintrittsdatum": str(mitgliedschaft.eintritt).replace(" ", "T") + "T00:00:00" if mitgliedschaft.eintritt else None,
+        "austrittsdatum": str(mitgliedschaft.austritt).replace(" ", "T") + "T00:00:00" if mitgliedschaft.austritt else None,
         "alteSektionCode": str(get_sektion_code(mitgliedschaft.zuzug_von)) if mitgliedschaft.zuzug_von else None,
-        "zuzugsdatum": str(mitgliedschaft.zuzug).replace(" ", "T") + "00:00:00" if mitgliedschaft.zuzug else None,
+        "zuzugsdatum": str(mitgliedschaft.zuzug).replace(" ", "T") + "T00:00:00" if mitgliedschaft.zuzug else None,
         "neueSektionCode": str(get_sektion_code(mitgliedschaft.wegzug_zu)) if mitgliedschaft.wegzug_zu else None,
-        "wegzugsdatum": str(mitgliedschaft.wegzug).replace(" ", "T") + "00:00:00" if mitgliedschaft.wegzug else None,
-        "kuendigungPer": str(mitgliedschaft.kuendigung).replace(" ", "T") + "00:00:00" if mitgliedschaft.kuendigung else None,
+        "wegzugsdatum": str(mitgliedschaft.wegzug).replace(" ", "T") + "T00:00:00" if mitgliedschaft.wegzug else None,
+        "kuendigungPer": str(mitgliedschaft.kuendigung).replace(" ", "T") + "T00:00:00" if mitgliedschaft.kuendigung else None,
         "jahrBezahltMitgliedschaft": mitgliedschaft.zahlung_mitgliedschaft or 0,
         "betragBezahltMitgliedschaft": None, # ???
         "jahrBezahltHaftpflicht": mitgliedschaft.zahlung_hv, # TBD
@@ -2686,7 +2686,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "isGeschenkmitgliedschaft": True if int(mitgliedschaft.ist_geschenkmitgliedschaft) == 1 else False,
         "isEinmaligeSchenkung": True if int(mitgliedschaft.ist_einmalige_schenkung) == 1 else False,
         "schenkerHasGeschenkunterlagen": True if int(mitgliedschaft.geschenkunterlagen_an_schenker) == 1 else False,
-        "datumBezahltHaftpflicht": str(mitgliedschaft.datum_hv_zahlung).replace(" ", "T") + "00:00:00" if mitgliedschaft.datum_hv_zahlung else None,
+        "datumBezahltHaftpflicht": str(mitgliedschaft.datum_hv_zahlung).replace(" ", "T") + "T00:00:00" if mitgliedschaft.datum_hv_zahlung else None,
         "adressen": adressen
     }
     
