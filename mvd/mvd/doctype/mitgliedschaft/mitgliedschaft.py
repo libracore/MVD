@@ -2666,7 +2666,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "regionCode": None, # ???
         "istTemporaeresMitglied": False, # ???
         "fuerBewirtschaftungGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
-        "erfassungsdatum": str(mitgliedschaft.creation).replace(" ", "T") + "T00:00:00",
+        "erfassungsdatum": str(mitgliedschaft.creation).replace(" ", "T"),
         "eintrittsdatum": str(mitgliedschaft.eintritt).replace(" ", "T") + "T00:00:00" if mitgliedschaft.eintritt else None,
         "austrittsdatum": str(mitgliedschaft.austritt).replace(" ", "T") + "T00:00:00" if mitgliedschaft.austritt else None,
         "alteSektionCode": str(get_sektion_code(mitgliedschaft.zuzug_von)) if mitgliedschaft.zuzug_von else None,
