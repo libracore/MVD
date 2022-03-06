@@ -1794,11 +1794,18 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
                         {"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center}
                     ]
                     jahr = int(getdate(today()).strftime("%Y")) + 1
+        # prüfe Beitrittsgebühr
+        if int(mitgliedschaft.zahlung_mitgliedschaft) == 0:
+            item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt,"qty": 1, "cost_center": company.cost_center})
     
     if mitgliedschaft.mitgliedtyp_c == 'Geschäft':
         item = [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1}]
-    if mitgliedschaft.mitgliedtyp_c == 'Kollektiv':
-        item = [{"item_code": sektion.mitgliedschafts_artikel_kollektiv,"qty": 1}]
+        # prüfe Beitrittsgebühr
+        if int(mitgliedschaft.zahlung_mitgliedschaft) == 0:
+            item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt_geschaeft,"qty": 1, "cost_center": company.cost_center})
+    
+    # ~ if mitgliedschaft.mitgliedtyp_c == 'Kollektiv':
+        # ~ item = [{"item_code": sektion.mitgliedschafts_artikel_kollektiv,"qty": 1}]
     
     if mitgliedschaft.status_c == 'Interessent*in':
         exclude_from_payment_reminder_until = '2099-12-31'
