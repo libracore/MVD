@@ -25,7 +25,7 @@
                     <div class="vbz-indikator"><span>{{ todo.qty }}</span></div>
                 {% endif %}
             {% endif %}}#-->
-            <div class="vbz-indikator"><span>(!)</span></div>
+            <div class="vbz-indikator-grey"><span>*</span></div>
         </center>
     </div>
     <div class="control-card blue-card" id="termin">
@@ -39,7 +39,7 @@
                     <div class="vbz-indikator"><span>{{ termin.qty }}</span></div>
                 {% endif %}
             {% endif %}#}-->
-            <div class="vbz-indikator"><span>(!)</span></div>
+            <div class="vbz-indikator-grey"><span>*</span></div>
         </center>
     </div>
     <div class="control-card blue-card" id="handbuch">
@@ -70,7 +70,7 @@
                     <div class="vbz-indikator"><span>{{ validierung.qty }}</span></div>
                 {% endif %}
             {% endif %}#}-->
-            <div class="vbz-indikator"><span>(!)</span></div>
+            <div class="vbz-indikator-grey"><span>*</span></div>
         </center>
     </div>
     <div class="control-card green-card" id="arbeitsbacklog">
@@ -84,7 +84,7 @@
                     <div class="vbz-indikator"><span>{{ arbeits_backlog.qty }}</span></div>
                 {% endif %}
             {% endif %}#}-->
-            <div class="vbz-indikator"><span>(!)</span></div>
+            <div class="vbz-indikator-grey"><span>*</span></div>
         </center>
     </div>
     <div class="control-card green-card" id="massenlauf">
@@ -98,7 +98,7 @@
                     <div class="vbz-indikator"><span>{{ massenlauf_total }}</span></div>
                 {% endif %}
             {% endif %}#}-->
-            <div class="vbz-indikator"><span>(!)</span></div>
+            <div class="vbz-indikator-grey"><span>*</span></div>
         </center>
     </div>
     <div class="control-card green-card" id="adresspflege">
@@ -135,6 +135,5 @@
 </div>
 <div class="row">
     <h1 class="vbz">Informationen</h1>
-    <div class="vbz-indikator"><span>(!)</span></div>
-    <p>Aktuell reduzierter Betrieb</p>
+    <p>Die Anzahl-Visualisierung (Zahlen in roten Kreisen) ist im Moment deaktiviert und wird mittels grauen Kreisen symbolisch angezeigt.</p>
 </div>
