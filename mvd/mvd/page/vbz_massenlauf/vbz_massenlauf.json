@@ -1,0 +1,35 @@
+{
+ "content": null,
+ "creation": "2022-03-07 13:18:25.474644",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2022-03-07 13:18:25.474644",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "vbz-massenlauf",
+ "owner": "Administrator",
+ "page_name": "vbz-massenlauf",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "MV_RB"
+  },
+  {
+   "role": "MV_MA"
+  },
+  {
+   "role": "MV_RW"
+  },
+  {
+   "role": "MV_GL"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Verarbeitungszentrale"
+}
