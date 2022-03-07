@@ -135,6 +135,7 @@ frappe.vbz = {
         });
         $("#validieren").click(function(){
             //~ frappe.vbz.show_view('validierung');
+            frappe.dom.freeze('Öffne Validierungen...');
             frappe.set_route("vbz-validieren");
         });
         $("#validierung_allgemein").click(function(){
