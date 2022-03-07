@@ -4,27 +4,33 @@
 frappe.ui.form.on('Payment Entry', {
     refresh: function(frm) {
         if (!frm.doc.__islocal) {
-            if (cur_frm.doc.unallocated_amount > 0) {
-                if (!cur_frm.doc.korrespondenz) {
-                    frm.add_custom_button(__("Mitgliedschafts-Korrespondenz erstellen"), function() {
-                        erstelle_korrespondenz(frm);
+            if (cur_frm.doc.mv_mitgliedschaft) {
+                if (cur_frm.doc.unallocated_amount > 0) {
+                    if (!cur_frm.doc.korrespondenz) {
+                        frm.add_custom_button(__("Mitgliedschafts-Korrespondenz erstellen"), function() {
+                            erstelle_korrespondenz(frm);
+                        });
+                    }
+                    if ((cur_frm.doc.paid_amount / cur_frm.doc.unallocated_amount) == 2) {
+                        frm.add_custom_button(__("Mit Folgejahr-Mitgliedschaft ausgleichen"), function() {
+                            mit_folgejahr_ausgleichen(frm);
+                        });
+                    }
+                    frm.add_custom_button(__("Mit Spende ausgleichen"), function() {
+                        mit_spende_ausgleichen(frm);
+                    });
+                    frm.add_custom_button(__("Mit Rückzahlung ausgleichen"), function() {
+                        rueckzahlung(frm);
                     });
                 }
-                if ((cur_frm.doc.paid_amount / cur_frm.doc.unallocated_amount) == 2) {
-                    frm.add_custom_button(__("Mit Folgejahr-Mitgliedschaft ausgleichen"), function() {
-                        mit_folgejahr_ausgleichen(frm);
+                if (check_underpaid(frm)) {
+                    frm.add_custom_button(__("Differenz als Kulanz ausgleichen"), function() {
+                        kulanz_ausgleich(frm);
                     });
                 }
-                frm.add_custom_button(__("Mit Spende ausgleichen"), function() {
-                    mit_spende_ausgleichen(frm);
-                });
-                frm.add_custom_button(__("Mit Rückzahlung ausgleichen"), function() {
-                    rueckzahlung(frm);
-                });
-            }
-            if (check_underpaid(frm)) {
-                frm.add_custom_button(__("Differenz als Kulanz ausgleichen"), function() {
-                    kulanz_ausgleich(frm);
+            } else {
+                frm.add_custom_button(__("Mitgliedschaft zuweisen"), function() {
+                    mitgliedschaft_zuweisen(frm);
                 });
             }
         }
@@ -39,6 +45,35 @@ function check_underpaid(frm) {
        }
     });
     return underpaid
+}
+
+function mitgliedschaft_zuweisen(frm) {
+    frappe.prompt([
+        {'fieldname': 'mitgliedschaft', 'fieldtype': 'Link', 'label': 'Mitgliedschaft', 'reqd': 1, 'options': 'Mitgliedschaft'}
+    ],
+    function(values){
+        
+        if (values.druckvorlage) {
+            var druckvorlage = values.druckvorlage;
+        } else {
+            var druckvorlage = 'keine'
+        }
+        frappe.call({
+            method: "mvd.mvd.doctype.camt_import.camt_import.mitgliedschaft_zuweisen",
+            args:{
+                    'mitgliedschaft': values.mitgliedschaft
+            },
+            callback: function(r)
+            {
+                cur_frm.set_value("mv_mitgliedschaft", values.mitgliedschaft);
+                cur_frm.set_value("party", r.message);
+                cur_frm.save();
+            }
+        });
+    },
+    'Mitgliedschaft zuweisen',
+    'Zuweisen'
+    )
 }
 
 function erstelle_korrespondenz(frm) {
