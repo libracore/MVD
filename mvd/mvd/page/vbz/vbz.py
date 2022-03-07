@@ -11,18 +11,18 @@ from frappe.utils.pdf import get_file_data_from_writer
 @frappe.whitelist()
 def get_open_data():
     
-    kuendigung_qty = len(frappe.get_list('Mitgliedschaft', fields='name', filters={'kuendigung_verarbeiten': 1}, limit=100, distinct=True, ignore_ifnull=True))
-    korrespondenz_qty = len(frappe.get_list('Korrespondenz', fields='name', filters={'massenlauf': 1}, limit=100, distinct=True, ignore_ifnull=True))
-    zuzug_qty = len(frappe.get_list('Mitgliedschaft', fields='name', filters={'zuzug_massendruck': 1}, limit=100, distinct=True, ignore_ifnull=True))
-    rg_massendruck_qty = len(frappe.get_list('Mitgliedschaft', fields='name', filters={'rg_massendruck_vormerkung': 1}, limit=100, distinct=True, ignore_ifnull=True))
-    begruessung_online_qty = len(frappe.get_list('Mitgliedschaft', fields='name', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 0}, limit=100, distinct=True, ignore_ifnull=True))
-    begruessung_bezahlt_qty = len(frappe.get_list('Mitgliedschaft', fields='name', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 1}, limit=100, distinct=True, ignore_ifnull=True))
-    mahnung_qty = len(frappe.get_list('Mahnung', fields='name', filters={'massenlauf': 1, 'docstatus': 1}, limit=100, distinct=True, ignore_ifnull=True))
+    kuendigung_qty = 0 #len(frappe.get_list('Mitgliedschaft', fields='name', filters={'kuendigung_verarbeiten': 1}, limit=100, distinct=True, ignore_ifnull=True))
+    korrespondenz_qty =0 #len(frappe.get_list('Korrespondenz', fields='name', filters={'massenlauf': 1}, limit=100, distinct=True, ignore_ifnull=True))
+    zuzug_qty = 0 #len(frappe.get_list('Mitgliedschaft', fields='name', filters={'zuzug_massendruck': 1}, limit=100, distinct=True, ignore_ifnull=True))
+    rg_massendruck_qty = 0 #len(frappe.get_list('Mitgliedschaft', fields='name', filters={'rg_massendruck_vormerkung': 1}, limit=100, distinct=True, ignore_ifnull=True))
+    begruessung_online_qty = 0 #len(frappe.get_list('Mitgliedschaft', fields='name', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 0}, limit=100, distinct=True, ignore_ifnull=True))
+    begruessung_bezahlt_qty = 0 #len(frappe.get_list('Mitgliedschaft', fields='name', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 1}, limit=100, distinct=True, ignore_ifnull=True))
+    mahnung_qty = 0 #len(frappe.get_list('Mahnung', fields='name', filters={'massenlauf': 1, 'docstatus': 1}, limit=100, distinct=True, ignore_ifnull=True))
     # massenlauf total
     massenlauf_total = kuendigung_qty + korrespondenz_qty + zuzug_qty + rg_massendruck_qty + begruessung_online_qty + begruessung_bezahlt_qty + mahnung_qty
     
     # letzter CAMT Import
-    last_camt_import = frappe.get_list('CAMT Import', fields='creation', filters={'status': ['!=', 'Open']}, order_by='creation DESC', ignore_ifnull=True)
+    last_camt_import = [] #frappe.get_list('CAMT Import', fields='creation', filters={'status': ['!=', 'Open']}, order_by='creation DESC', ignore_ifnull=True)
     if len(last_camt_import) > 0:
         last_camt_import = 'Letzer Import:<br>' + getdate(last_camt_import[0].creation).strftime("%d.%m.%Y")
     else:
@@ -41,24 +41,24 @@ def get_open_data():
         'termin': {
             'qty': len(frappe.get_list('Termin', fields='name', filters={'von': ['>', today()]}, limit=100, distinct=True, ignore_ifnull=True))
         },
-        'validierung': {
-            'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1}, limit=100, distinct=True, ignore_ifnull=True)),
-            'online_beitritt': {
-                'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Online-Beitritt'}, limit=100, distinct=True, ignore_ifnull=True))
-            },
-            'online_anmeldung': {
-                'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Online-Anmeldung'}, limit=100, distinct=True, ignore_ifnull=True))
-            },
-            'online_kuendigung': {
-                'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Online-Kündigung'}, limit=100, distinct=True, ignore_ifnull=True))
-            },
-            'online_mutation': {
-                'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Online-Mutation'}, limit=100, distinct=True, ignore_ifnull=True))
-            },
-            'zuzug': {
-                'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Zuzug'}, limit=100, distinct=True, ignore_ifnull=True))
-            }
-        },
+        # ~ 'validierung': {
+            # ~ 'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1}, limit=100, distinct=True, ignore_ifnull=True)),
+            # ~ 'online_beitritt': {
+                # ~ 'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Online-Beitritt'}, limit=100, distinct=True, ignore_ifnull=True))
+            # ~ },
+            # ~ 'online_anmeldung': {
+                # ~ 'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Online-Anmeldung'}, limit=100, distinct=True, ignore_ifnull=True))
+            # ~ },
+            # ~ 'online_kuendigung': {
+                # ~ 'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Online-Kündigung'}, limit=100, distinct=True, ignore_ifnull=True))
+            # ~ },
+            # ~ 'online_mutation': {
+                # ~ 'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Online-Mutation'}, limit=100, distinct=True, ignore_ifnull=True))
+            # ~ },
+            # ~ 'zuzug': {
+                # ~ 'qty': len(frappe.get_list('Mitgliedschaft', fields='name', filters={'validierung_notwendig': 1, 'status_c': 'Zuzug'}, limit=100, distinct=True, ignore_ifnull=True))
+            # ~ }
+        # ~ },
         'kuendigung_massenlauf': {
             'qty': kuendigung_qty
         },
@@ -316,33 +316,5 @@ def mahnung_massenlauf():
             m.save(ignore_permissions=True)
         
         return massenlauf.name
-        
-        # ~ output = PdfFileWriter()
-        # ~ for mahnung in mahnungen:
-            # ~ output = frappe.get_print("Mahnung", mahnung['name'], 'Mahnung', as_pdf = True, output = output, ignore_zugferd=True)
-            
-        # ~ file_name = "Mahnungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
-        # ~ file_name = file_name.split(".")[0]
-        # ~ file_name = file_name.replace(":", "-")
-        # ~ file_name = file_name + ".pdf"
-        
-        # ~ filedata = get_file_data_from_writer(output)
-        
-        # ~ _file = frappe.get_doc({
-            # ~ "doctype": "File",
-            # ~ "file_name": file_name,
-            # ~ "folder": "Home",
-            # ~ "is_private": 1,
-            # ~ "content": filedata
-        # ~ })
-        
-        # ~ _file.save(ignore_permissions=True)
-        
-        # ~ for mahnung in mahnungen:
-            # ~ m = frappe.get_doc("Mahnung", mahnung['name'])
-            # ~ m.massenlauf = '0'
-            # ~ m.save(ignore_permissions=True)
-        
-        # ~ return _file.name
     else:
         frappe.throw("Es gibt keine Mahnungen die für einen Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")

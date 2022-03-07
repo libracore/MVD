@@ -2847,17 +2847,18 @@ def pe_check_zahlung_mitgliedschaft(pe, event):
                 mitgliedschaft.save(ignore_permissions=True)
 
 def set_inaktiv():
-    mvms = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Kündigung', 'Ausschluss')""", as_dict=True)
-    for mvm in mvms:
-        mv = frappe.get_doc("Mitgliedschaft", mvm.name)
-        if mv.status_c in ('Kündigung', 'Gestorben'):
-            if mv.kuendigung and mv.kuendigung <= getdate(today()):
-                mv.status_c = 'Inaktiv'
-                mv.save(ignore_permissions=True)
-        elif mv.status_c == 'Ausschluss':
-            if mv.austritt and mv.austritt <= getdate(today()):
-                mv.status_c = 'Inaktiv'
-                mv.save(ignore_permissions=True)
+    frappe-log_error("", "Achtung: mitgliedschaft.set_inaktiv ist inaktiviert!")
+    # ~ mvms = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Kündigung', 'Ausschluss')""", as_dict=True)
+    # ~ for mvm in mvms:
+        # ~ mv = frappe.get_doc("Mitgliedschaft", mvm.name)
+        # ~ if mv.status_c in ('Kündigung', 'Gestorben'):
+            # ~ if mv.kuendigung and mv.kuendigung <= getdate(today()):
+                # ~ mv.status_c = 'Inaktiv'
+                # ~ mv.save(ignore_permissions=True)
+        # ~ elif mv.status_c == 'Ausschluss':
+            # ~ if mv.austritt and mv.austritt <= getdate(today()):
+                # ~ mv.status_c = 'Inaktiv'
+                # ~ mv.save(ignore_permissions=True)
 # -----------------------------------------------
 # other helpers
 # -----------------------------------------------

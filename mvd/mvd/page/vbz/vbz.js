@@ -23,7 +23,7 @@ frappe.vbz = {
             {
                 if (r.message) {
                     page.add_view('overview', frappe.render_template("overview", eval(r.message)))
-                    page.add_view('validierung', frappe.render_template("validierung", eval(r.message.validierung)))
+                    //~ page.add_view('validierung', frappe.render_template("validierung", eval(r.message.validierung)))
                     page.add_view('massenlauf', frappe.render_template("massenlauf", {
                         'kuendigung': eval(r.message.kuendigung_massenlauf),
                         'korrespondenz': eval(r.message.korrespondenz_massenlauf),
@@ -134,7 +134,8 @@ frappe.vbz = {
             frappe.set_route("List", "ToDo", "List");
         });
         $("#validieren").click(function(){
-            frappe.vbz.show_view('validierung');
+            //~ frappe.vbz.show_view('validierung');
+            frappe.set_route("vbz-validieren");
         });
         $("#validierung_allgemein").click(function(){
             frappe.route_options = {"validierung_notwendig": 1}
@@ -145,32 +146,32 @@ frappe.vbz = {
         });
         
         // validierungen
-        $("#online_beitritte").click(function(){
-            frappe.route_options = {"status_c": 'Online-Beitritt', "validierung_notwendig": 1}
-            frappe.set_route("List", "Mitgliedschaft", "List");
-        });
-        $("#online_anmeldungen").click(function(){
-            frappe.route_options = {"status_c": 'Online-Anmeldung', "validierung_notwendig": 1}
-            frappe.set_route("List", "Mitgliedschaft", "List");
-        });
-        $("#online_kuendigungen").click(function(){
-            frappe.route_options = {"status_c": 'Online-Kündigung', "validierung_notwendig": 1}
-            frappe.set_route("List", "Mitgliedschaft", "List");
-        });
-        $("#zuzuege").click(function(){
-            frappe.route_options = {"status_c": 'Zuzug', "validierung_notwendig": 1}
-            frappe.set_route("List", "Mitgliedschaft", "List");
-        });
-        $("#online_mutationen").click(function(){
-            frappe.route_options = {"status_c": 'Online-Mutation', "validierung_notwendig": 1}
-            frappe.set_route("List", "Mitgliedschaft", "List");
-        });
-        $("#geschenk_mitgliedschaften").click(function(){
-            frappe.msgprint("Wird noch umgesetzt");
-        });
-        $("#autom_adressaenderungen").click(function(){
-            frappe.msgprint("Wird noch umgesetzt");
-        });
+        //~ $("#online_beitritte").click(function(){
+            //~ frappe.route_options = {"status_c": 'Online-Beitritt', "validierung_notwendig": 1}
+            //~ frappe.set_route("List", "Mitgliedschaft", "List");
+        //~ });
+        //~ $("#online_anmeldungen").click(function(){
+            //~ frappe.route_options = {"status_c": 'Online-Anmeldung', "validierung_notwendig": 1}
+            //~ frappe.set_route("List", "Mitgliedschaft", "List");
+        //~ });
+        //~ $("#online_kuendigungen").click(function(){
+            //~ frappe.route_options = {"status_c": 'Online-Kündigung', "validierung_notwendig": 1}
+            //~ frappe.set_route("List", "Mitgliedschaft", "List");
+        //~ });
+        //~ $("#zuzuege").click(function(){
+            //~ frappe.route_options = {"status_c": 'Zuzug', "validierung_notwendig": 1}
+            //~ frappe.set_route("List", "Mitgliedschaft", "List");
+        //~ });
+        //~ $("#online_mutationen").click(function(){
+            //~ frappe.route_options = {"status_c": 'Online-Mutation', "validierung_notwendig": 1}
+            //~ frappe.set_route("List", "Mitgliedschaft", "List");
+        //~ });
+        //~ $("#geschenk_mitgliedschaften").click(function(){
+            //~ frappe.msgprint("Wird noch umgesetzt");
+        //~ });
+        //~ $("#autom_adressaenderungen").click(function(){
+            //~ frappe.msgprint("Wird noch umgesetzt");
+        //~ });
         
         // massenlauf
         $("#keundigung_qty").click(function(){
