@@ -868,3 +868,11 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False):
         payment_entry_record.save()
     
     payment_entry_record.submit()
+
+@frappe.whitelist()
+def mitgliedschaft_zuweisen(mitgliedschaft):
+    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+    if mitgliedschaft.rg_kunde:
+        return mitgliedschaft.rg_kunde
+    else:
+        return mitgliedschaft.kunde_mitglied
