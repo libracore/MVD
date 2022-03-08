@@ -259,7 +259,7 @@ def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, redu
         
         return alle_druckvorlagen
 
-def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=False):
+def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=False, fr=False):
     try:
         mitgliedschaft.name
     except:
@@ -274,9 +274,13 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
         {'key_word': '%%VOR- NACHNAME SCHENKENDE%%', 'value': " ".join((mitgliedschaft.rg_vorname or '', mitgliedschaft.rg_nachname or ''))}
     ]
     
-    if sinv:
-        sinv = frappe.get_doc("Sales Invoice", sinv)
-        amount = sinv.outstanding_amount
+    if sinv or fr:
+        if sinv:
+            sinv = frappe.get_doc("Sales Invoice", sinv)
+            amount = sinv.outstanding_amount
+        if fr:
+            fr = frappe.get_doc("Fakultative Rechnung", fr)
+            amount = fr.betrag
         key_words.append({
             'key_word': '%%RECHNUNGSBETRAG%%', 'value': "{:,.2f}".format(amount).replace(",", "'")
         })
