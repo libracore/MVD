@@ -63,6 +63,8 @@ function mitgliedschaft_zuweisen(frm) {
             args:{
                     'mitgliedschaft': values.mitgliedschaft
             },
+            freeze: true,
+            freeze_message: 'Weise Mitgliedschaft zu...',
             callback: function(r)
             {
                 cur_frm.set_value("mv_mitgliedschaft", values.mitgliedschaft);
