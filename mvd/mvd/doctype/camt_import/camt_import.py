@@ -822,7 +822,7 @@ def get_filter_for_unassigned():
     return frappe.get_list('Sektion', fields='default_customer', as_list=True)
 
 @frappe.whitelist()
-def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False):
+def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False):
     sinv = frappe.get_doc("Sales Invoice", sinv)
     if hv:
         hv_sinv = create_unpaid_sinv(hv, betrag=12)
@@ -831,6 +831,7 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False):
     mitgliedschaft = sinv.mv_mitgliedschaft
     payment_entry_record = frappe.get_doc({
         'doctype': "Payment Entry",
+        'posting_date': datum or today(),
         'party_type': 'Customer',
         'party': customer,
         'mv_mitgliedschaft': mitgliedschaft,
@@ -850,7 +851,7 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False):
             }
         ],
         'reference_no': 'Barzahlung {0}'.format(sinv.name) if bar else 'EZS-Zahlung {0}'.format(sinv.name),
-        'reference_date': today()
+        'reference_date': datum or today()
     }).insert()
     
     if hv:
