@@ -876,3 +876,29 @@ def mitgliedschaft_zuweisen(mitgliedschaft):
         return mitgliedschaft.rg_kunde
     else:
         return mitgliedschaft.kunde_mitglied
+    
+@frappe.whitelist()
+def als_hv_verbuchen(pe):
+    payment_entry = frappe.get_doc("Payment Entry", pe)
+    mitgliedschaft = payment_entry.mv_mitgliedschaft
+    
+    # erstelle fr
+    from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
+    fr = create_hv_fr(mitgliedschaft)
+    # erstelle sinv aus fr
+    sinv = create_unpaid_sinv(fr)
+    
+    # match sinv mit pe
+    reference_entry = frappe.get_doc({"doctype": "Payment Entry Reference"})
+    reference_entry = payment_entry.append('references', {})
+    reference_entry.reference_doctype = "Sales Invoice"
+    reference_entry.reference_name = sinv
+    reference_entry.total_amount = frappe.get_value("Sales Invoice", sinv, "base_grand_total")
+    reference_entry.outstanding_amount = frappe.get_value("Sales Invoice", sinv, "outstanding_amount")
+    reference_entry.allocated_amount = reference_entry.outstanding_amount
+    #reference_entry.insert();
+    # update unallocated amount
+    payment_entry.unallocated_amount -= reference_entry.allocated_amount
+    payment_entry.save()
+    payment_entry.submit()
+    return
