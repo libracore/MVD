@@ -8,7 +8,6 @@ frappe.ui.form.on('Mitgliedschaft', {
     },
     refresh: function(frm) {
        if (!frm.doc.__islocal) {
-           
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
                 
                 if ((!['Kündigung', 'Gestorben', 'Anmeldung', 'Online-Anmeldung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.mitgliedtyp_c == 'Privat')) {
@@ -124,7 +123,7 @@ frappe.ui.form.on('Mitgliedschaft', {
             $(":button[data-doctype='Payment Entry']").remove();
         }
         
-        if (['Wegzug', 'Ausschluss'].includes(cur_frm.doc.status_c)) {
+        if (['Wegzug', 'Ausschluss', 'Inaktiv'].includes(cur_frm.doc.status_c)) {
             setze_read_only(frm);
             frm.disable_save();
         } else {
