@@ -554,7 +554,7 @@ frappe.mvd_such_client = {
                         sektion_id.refresh();
                     }
                 },
-                read_only: frappe.user.has_role("System Manager") ? 0:1
+                read_only: frappe.user.has_role("MV_MVD") ? 0:1
             },
             only_input: true,
         });
