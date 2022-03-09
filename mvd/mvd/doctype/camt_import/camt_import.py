@@ -169,6 +169,7 @@ def erstelle_zahlung(date, to_account, received_amount, transaction_id, remarks,
         new_payment_entry.reference_no = transaction_id
         new_payment_entry.reference_date = date
         new_payment_entry.remarks = remarks
+        new_payment_entry.remarks_clone = remarks
         new_payment_entry.esr_reference = qrr
         
         inserted_payment_entry = new_payment_entry.insert()
