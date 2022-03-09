@@ -937,3 +937,104 @@ def als_hv_verbuchen(pe):
     payment_entry.save()
     payment_entry.submit()
     return
+
+@frappe.whitelist()
+def fr_bez_ezs(fr, datum):
+    hv_sinv = create_unpaid_sinv(fr)
+    hv_sinv = frappe.get_doc("Sales Invoice", hv_sinv)
+    
+    customer = hv_sinv.customer
+    mitgliedschaft = hv_sinv.mv_mitgliedschaft
+    payment_entry_record = frappe.get_doc({
+        'doctype': "Payment Entry",
+        'posting_date': datum or today(),
+        'party_type': 'Customer',
+        'party': customer,
+        'mv_mitgliedschaft': mitgliedschaft,
+        'company': hv_sinv.company,
+        'sektion_id': hv_sinv.sektion_id,
+        'paid_from': hv_sinv.debit_to,
+        'paid_amount': hv_sinv.outstanding_amount,
+        'paid_to': frappe.get_value("Sektion", hv_sinv.sektion_id, "account"),
+        'received_amount': hv_sinv.outstanding_amount,
+        'references': [
+            {
+                'reference_doctype': "Sales Invoice",
+                'reference_name': hv_sinv.name,
+                'total_amount': hv_sinv.base_grand_total,
+                'outstanding_amount': hv_sinv.outstanding_amount,
+                'allocated_amount': hv_sinv.outstanding_amount
+            }
+        ],
+        'reference_no': 'EZS-Zahlung {0}'.format(hv_sinv.name),
+        'reference_date': datum or today()
+    }).insert()
+    
+    payment_entry_record.submit()
+    
+    return
+
+@frappe.whitelist()
+def fr_bez_bar(fr, datum):
+    fr = frappe.get_doc("Fakultative Rechnung", fr)
+    mitgliedschaft = frappe.get_doc("Mitgliedschaft", fr.mv_mitgliedschaft)
+    sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+    company = frappe.get_doc("Company", sektion.company)
+    
+    if not mitgliedschaft.rg_kunde:
+        customer = mitgliedschaft.kunde_mitglied
+        contact = mitgliedschaft.kontakt_mitglied
+        if not mitgliedschaft.rg_adresse:
+            address = mitgliedschaft.adresse_mitglied
+        else:
+            address = mitgliedschaft.rg_adresse
+    else:
+        customer = mitgliedschaft.rg_kunde_mitglied
+        address = mitgliedschaft.rg_adresse_mitglied
+        contact = mitgliedschaft.rg_kontakt_mitglied
+    
+    item = [{"item_code": sektion.hv_artikel, "qty": 1, "rate": sektion.betrag_hv}]
+    
+    sinv = frappe.get_doc({
+        "doctype": "Sales Invoice",
+        "posting_date": datum or today(),
+        "set_posting_time": 1,
+        "ist_mitgliedschaftsrechnung": 0,
+        "ist_hv_rechnung": 1 if fr.typ == 'HV' else 0,
+        "ist_spenden_rechnung": 0 if fr.typ == 'HV' else 1,
+        "mv_mitgliedschaft": fr.mv_mitgliedschaft,
+        "company": sektion.company,
+        "cost_center": company.cost_center,
+        "customer": customer,
+        "customer_address": address,
+        "contact_person": contact,
+        'mitgliedschafts_jahr': int(getdate(today()).strftime("%Y")),
+        'due_date': add_days(today(), 30),
+        'debit_to': company.default_receivable_account,
+        'sektions_code': str(sektion.sektion_id) or '00',
+        'sektion_id': fr.sektion_id,
+        "items": item,
+        "inkl_hv": 0,
+        "esr_reference": fr.qrr_referenz or get_qrr_reference(fr=fr.name)
+    })
+    sinv.insert(ignore_permissions=True)
+    
+    pos_profile = frappe.get_doc("POS Profile", sektion.pos_barzahlung)
+    sinv.is_pos = 1
+    sinv.pos_profile = pos_profile.name
+    row = sinv.append('payments', {})
+    row.mode_of_payment = pos_profile.payments[0].mode_of_payment
+    row.account = pos_profile.payments[0].account
+    row.type = pos_profile.payments[0].type
+    row.amount = sinv.grand_total
+    sinv.save(ignore_permissions=True)
+    
+    # submit workaround weil submit ignore_permissions=True nicht kennt
+    sinv.docstatus = 1
+    sinv.save(ignore_permissions=True)
+    
+    fr.status = 'Paid'
+    fr.bezahlt_via = sinv.name
+    fr.save(ignore_permissions=True)
+    
+    return
