@@ -52,13 +52,14 @@ function bezahlt_mit_ezs(frm, hv_check) {
     if (frappe.user.has_role("MV_RW")) {
         if (hv_check) {
             frappe.prompt([
-                {'fieldname': 'hv', 'fieldtype': 'Check', 'label': 'Inkl. HV?', 'reqd': 0, 'default': 0}  
+                {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Zahlungsdatum', 'reqd': 1},
+                {'fieldname': 'hv', 'fieldtype': 'Check', 'label': 'Inkl. HV?', 'reqd': 0, 'default': 0}
             ],
             function(values){
                 if (values.hv) {
-                    erstelle_zahlung(hv_check, true);
+                    erstelle_zahlung(hv_check, true, values.datum);
                 } else {
-                    erstelle_zahlung(false, true);
+                    erstelle_zahlung(false, true, values.datum);
                 }
             },
             'Mit oder ohne HV',
@@ -129,41 +130,106 @@ function check_for_hv(frm) {
     });
 }
 
-function erstelle_zahlung(hv, ezs) {
-    var args;
-    if (ezs) {
-        if (hv) {
-            args = {
-                'sinv': cur_frm.doc.name,
-                'hv': hv,
-                'ezs': 1
-            }
-        } else {
-            args = {
-                'sinv': cur_frm.doc.name,
-                'ezs': 1
-            }
-        }
-    } else {
-        if (hv) {
-            args = {
-                'sinv': cur_frm.doc.name,
-                'hv': hv,
-                'bar': 1
-            }
-        } else {
-            args = {
-                'sinv': cur_frm.doc.name,
-                'bar': 1
-            }
-        }
+function erstelle_zahlung(hv, ezs, datum=false) {
+    if (!datum) {
+        datum = ask_for_date(hv, ezs);
     }
-    frappe.call({
-        method:"mvd.mvd.doctype.camt_import.camt_import.sinv_bez_mit_ezs_oder_bar",
-        'args': args,
-        'async': false,
-        'callback': function(r) {
-            cur_frm.reload_doc();
+    if (datum) {
+        var args;
+        if (ezs) {
+            if (hv) {
+                args = {
+                    'sinv': cur_frm.doc.name,
+                    'hv': hv,
+                    'ezs': 1,
+                    'datum': datum
+                }
+            } else {
+                args = {
+                    'sinv': cur_frm.doc.name,
+                    'ezs': 1,
+                    'datum': datum
+                }
+            }
+        } else {
+            if (hv) {
+                args = {
+                    'sinv': cur_frm.doc.name,
+                    'hv': hv,
+                    'bar': 1,
+                    'datum': datum
+                }
+            } else {
+                args = {
+                    'sinv': cur_frm.doc.name,
+                    'bar': 1,
+                    'datum': datum
+                }
+            }
         }
-    });
+        frappe.call({
+            method:"mvd.mvd.doctype.camt_import.camt_import.sinv_bez_mit_ezs_oder_bar",
+            'args': args,
+            'async': true,
+            'freeze': true,
+            'freeze_message': 'Verbuche Zahlung...',
+            'callback': function(r) {
+                cur_frm.reload_doc();
+            }
+        });
+    }
+}
+
+function ask_for_date(hv, ezs) {
+    frappe.prompt([
+        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Zahlungsdatum', 'reqd': 1}  
+    ],
+    function(values){
+        var datum = values.datum;
+        var args;
+        if (ezs) {
+            if (hv) {
+                args = {
+                    'sinv': cur_frm.doc.name,
+                    'hv': hv,
+                    'ezs': 1,
+                    'datum': datum
+                }
+            } else {
+                args = {
+                    'sinv': cur_frm.doc.name,
+                    'ezs': 1,
+                    'datum': datum
+                }
+            }
+        } else {
+            if (hv) {
+                args = {
+                    'sinv': cur_frm.doc.name,
+                    'hv': hv,
+                    'bar': 1,
+                    'datum': datum
+                }
+            } else {
+                args = {
+                    'sinv': cur_frm.doc.name,
+                    'bar': 1,
+                    'datum': datum
+                }
+            }
+        }
+        frappe.call({
+            method:"mvd.mvd.doctype.camt_import.camt_import.sinv_bez_mit_ezs_oder_bar",
+            'args': args,
+            'async': true,
+            'freeze': true,
+            'freeze_message': 'Verbuche Zahlung...',
+            'callback': function(r) {
+                cur_frm.reload_doc();
+            }
+        });
+    },
+    'Zahlungsdatum',
+    'Ausführen'
+    )
 }

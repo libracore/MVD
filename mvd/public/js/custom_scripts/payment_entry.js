@@ -22,6 +22,11 @@ frappe.ui.form.on('Payment Entry', {
                     frm.add_custom_button(__("Mit Rückzahlung ausgleichen"), function() {
                         rueckzahlung(frm);
                     });
+                    if (cur_frm.doc.unallocated_amount == 12) {
+                        frm.add_custom_button(__("Als HV Zahlung verbuchen"), function() {
+                            als_hv_verbuchen(frm);
+                        });
+                    }
                 }
                 if (check_underpaid(frm)) {
                     frm.add_custom_button(__("Differenz als Kulanz ausgleichen"), function() {
@@ -151,6 +156,34 @@ function erstelle_korrespondenz(frm) {
                 }
             }
         });
+    } else {
+        frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
+    }
+}
+
+function als_hv_verbuchen(frm) {
+    if (frappe.user.has_role("MV_RW")) {
+        frappe.confirm(
+            'Wollen Sie die Zahlung als HV-Zahlung verbuchen?',
+            function(){
+                // on yes
+                frappe.call({
+                    method: "mvd.mvd.doctype.camt_import.camt_import.als_hv_verbuchen",
+                    args:{
+                        'pe': cur_frm.doc.name
+                    },
+                    freeze: true,
+                    freeze_message: 'Verbuche als HV-Zahlung...',
+                    callback: function(r)
+                    {
+                        cur_frm.reload_doc();
+                    }
+                });
+            },
+            function(){
+                // on no
+            }
+        )
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
     }

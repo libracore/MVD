@@ -394,8 +394,41 @@ def zahlungen_zuweisen(master_data):
                     master_data['unsubmitted_payments'].append(pe.name)
                     master_data['unassigned_payments'].append(pe.name)
         else:
-            master_data['unsubmitted_payments'].append(pe.name)
-            master_data['unassigned_payments'].append(pe.name)
+            # prüfe allfällige doppelzahlung und weise kunde zu
+            qrr = pe.esr_reference
+            sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `customer`
+                                    FROM `tabSales Invoice`
+                                    WHERE REPLACE(`esr_reference`, ' ', '') = '{qrr}'""".format(qrr=qrr), as_dict=True)
+            
+            if not len(sinv) > 0:
+                # HACK (alte Debitoren)
+                qrr = pe.esr_reference[11:24]
+                
+                sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `customer`
+                                    FROM `tabSales Invoice`
+                                    WHERE `esr_reference` LIKE '%{qrr}%'""".format(qrr=qrr), as_dict=True)
+            
+            if len(sinv) > 0:
+                # Kunde zu Payment Entry zuweisen
+                pe.party = sinv[0].customer
+                pe.mv_mitgliedschaft = sinv[0].mv_mitgliedschaft
+                pe.save()
+                master_data['assigned_payments'].append(pe.name)
+                master_data['unsubmitted_payments'].append(pe.name)
+            else:
+                # HACK 2 (alte Debitoren)
+                qrr = pe.esr_reference[11:21]
+                customers = frappe.db.sql("""SELECT `name`, `kunde_mitglied`, `rg_kunde` FROM `tabMitgliedschaft` WHERE `miveba_buchungen` LIKE '%{qrr}%'""".format(qrr=qrr), as_dict=True)
+                if len(customers) > 0:
+                    # Kunde zu Payment Entry zuweisen
+                    pe.party = customers[0].rg_kunde if customers[0].rg_kunde else customers[0].kunde_mitglied
+                    pe.mv_mitgliedschaft = customers[0].name
+                    pe.save()
+                    master_data['assigned_payments'].append(pe.name)
+                    master_data['unsubmitted_payments'].append(pe.name)
+                else:
+                    master_data['unsubmitted_payments'].append(pe.name)
+                    master_data['unassigned_payments'].append(pe.name)
     
     return master_data
 
@@ -822,7 +855,7 @@ def get_filter_for_unassigned():
     return frappe.get_list('Sektion', fields='default_customer', as_list=True)
 
 @frappe.whitelist()
-def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False):
+def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False):
     sinv = frappe.get_doc("Sales Invoice", sinv)
     if hv:
         hv_sinv = create_unpaid_sinv(hv, betrag=12)
@@ -831,6 +864,7 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False):
     mitgliedschaft = sinv.mv_mitgliedschaft
     payment_entry_record = frappe.get_doc({
         'doctype': "Payment Entry",
+        'posting_date': datum or today(),
         'party_type': 'Customer',
         'party': customer,
         'mv_mitgliedschaft': mitgliedschaft,
@@ -850,7 +884,7 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False):
             }
         ],
         'reference_no': 'Barzahlung {0}'.format(sinv.name) if bar else 'EZS-Zahlung {0}'.format(sinv.name),
-        'reference_date': today()
+        'reference_date': datum or today()
     }).insert()
     
     if hv:
@@ -876,3 +910,29 @@ def mitgliedschaft_zuweisen(mitgliedschaft):
         return mitgliedschaft.rg_kunde
     else:
         return mitgliedschaft.kunde_mitglied
+    
+@frappe.whitelist()
+def als_hv_verbuchen(pe):
+    payment_entry = frappe.get_doc("Payment Entry", pe)
+    mitgliedschaft = payment_entry.mv_mitgliedschaft
+    
+    # erstelle fr
+    from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
+    fr = create_hv_fr(mitgliedschaft)
+    # erstelle sinv aus fr
+    sinv = create_unpaid_sinv(fr)
+    
+    # match sinv mit pe
+    reference_entry = frappe.get_doc({"doctype": "Payment Entry Reference"})
+    reference_entry = payment_entry.append('references', {})
+    reference_entry.reference_doctype = "Sales Invoice"
+    reference_entry.reference_name = sinv
+    reference_entry.total_amount = frappe.get_value("Sales Invoice", sinv, "base_grand_total")
+    reference_entry.outstanding_amount = frappe.get_value("Sales Invoice", sinv, "outstanding_amount")
+    reference_entry.allocated_amount = reference_entry.outstanding_amount
+    #reference_entry.insert();
+    # update unallocated amount
+    payment_entry.unallocated_amount -= reference_entry.allocated_amount
+    payment_entry.save()
+    payment_entry.submit()
+    return
