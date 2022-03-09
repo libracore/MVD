@@ -394,8 +394,41 @@ def zahlungen_zuweisen(master_data):
                     master_data['unsubmitted_payments'].append(pe.name)
                     master_data['unassigned_payments'].append(pe.name)
         else:
-            master_data['unsubmitted_payments'].append(pe.name)
-            master_data['unassigned_payments'].append(pe.name)
+            # prüfe allfällige doppelzahlung und weise kunde zu
+            qrr = pe.esr_reference
+            sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `customer`
+                                    FROM `tabSales Invoice`
+                                    WHERE REPLACE(`esr_reference`, ' ', '') = '{qrr}'""".format(qrr=qrr), as_dict=True)
+            
+            if not len(sinv) > 0:
+                # HACK (alte Debitoren)
+                qrr = pe.esr_reference[11:24]
+                
+                sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `customer`
+                                    FROM `tabSales Invoice`
+                                    WHERE `esr_reference` LIKE '%{qrr}%'""".format(qrr=qrr), as_dict=True)
+            
+            if len(sinv) > 0:
+                # Kunde zu Payment Entry zuweisen
+                pe.party = sinv[0].customer
+                pe.mv_mitgliedschaft = sinv[0].mv_mitgliedschaft
+                pe.save()
+                master_data['assigned_payments'].append(pe.name)
+                master_data['unsubmitted_payments'].append(pe.name)
+            else:
+                # HACK 2 (alte Debitoren)
+                qrr = pe.esr_reference[11:21]
+                customers = frappe.db.sql("""SELECT `name`, `kunde_mitglied`, `rg_kunde` FROM `tabMitgliedschaft` WHERE `miveba_buchungen` LIKE '%{qrr}%'""".format(qrr=qrr), as_dict=True)
+                if len(customers) > 0:
+                    # Kunde zu Payment Entry zuweisen
+                    pe.party = customers[0].rg_kunde if customers[0].rg_kunde else customers[0].kunde_mitglied
+                    pe.mv_mitgliedschaft = customers[0].name
+                    pe.save()
+                    master_data['assigned_payments'].append(pe.name)
+                    master_data['unsubmitted_payments'].append(pe.name)
+                else:
+                    master_data['unsubmitted_payments'].append(pe.name)
+                    master_data['unassigned_payments'].append(pe.name)
     
     return master_data
 
