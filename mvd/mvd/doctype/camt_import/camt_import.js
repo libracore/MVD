@@ -48,13 +48,15 @@ frappe.ui.form.on('CAMT Import', {
     },
     show_overpaid: function(frm) {
         frappe.route_options = {
-            "name": ["in", eval(cur_frm.doc.overpaid)]
+            "camt_import": cur_frm.doc.name,
+            "camt_status": 'Überbezahlt'
         }
         frappe.set_route("List", "Payment Entry");
     },
     show_unassigned: function(frm) {
         frappe.route_options = {
-            "name": ["in", eval(cur_frm.doc.unmatched_payments)],
+            "camt_import": cur_frm.doc.name,
+            "camt_status": 'Nicht zugewiesen',
             "docstatus": 0
         }
         frappe.set_route("List", "Payment Entry");
@@ -76,51 +78,55 @@ frappe.ui.form.on('CAMT Import', {
         aktualisiere_camt_uebersicht(frm);
     },
     show_imported_payments: function(frm) {
-        frappe.route_options = {"name": ["in", eval(cur_frm.doc.importet_payments)]}
+        frappe.route_options = {"camt_import": cur_frm.doc.name}
         frappe.set_route("List", "Payment Entry");
     },
     show_unsubmitted_payments: function(frm) {
         frappe.route_options = {
-            "name": ["in", eval(cur_frm.doc.unsubmitted_payments)],
+            "camt_import": cur_frm.doc.name,
             "docstatus": 0
         }
         frappe.set_route("List", "Payment Entry");
     },
     show_submitted_payments: function(frm) {
         frappe.route_options = {
-            "name": ["in", eval(cur_frm.doc.submitted_payments)],
+            "camt_import": cur_frm.doc.name,
             "docstatus": 1
         }
         frappe.set_route("List", "Payment Entry");
     },
     show_matched_payments: function(frm) {
         frappe.route_options = {
-            "name": ["in", eval(cur_frm.doc.matched_payments)]
+            "camt_import": cur_frm.doc.name,
+            "camt_status": ['!=', 'Nicht zugewiesen']
         }
         frappe.set_route("List", "Payment Entry");
     },
     show_canceled_payments: function(frm) {
         frappe.route_options = {
-            "name": ["in", eval(cur_frm.doc.importet_payments)],
+            "camt_import": cur_frm.doc.name,
             "docstatus": 2
         }
         frappe.set_route("List", "Payment Entry");
     },
     show_doppelte_mitgliedschaft: function(frm) {
         frappe.route_options = {
-            "name": ["in", eval(cur_frm.doc.doppelte_mitgliedschaft)]
+            "camt_import": cur_frm.doc.name,
+            "camt_status": 'Doppelte Mitgliedschafts-Zahlung'
         }
         frappe.set_route("List", "Payment Entry");
     },
     show_wegzuege: function(frm) {
         frappe.route_options = {
-            "name": ["in", eval(cur_frm.doc.gebucht_weggezogen_list)]
+            "camt_import": cur_frm.doc.name,
+            "camt_status": 'Wegzug'
         }
         frappe.set_route("List", "Payment Entry");
     },
     show_underpaid: function(frm) {
         frappe.route_options = {
-            "name": ["in", eval(cur_frm.doc.underpaid)]
+            "camt_import": cur_frm.doc.name,
+            "camt_status": 'Unterbezahlt'
         }
         frappe.set_route("List", "Payment Entry");
     }

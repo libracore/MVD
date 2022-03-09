@@ -567,6 +567,45 @@ def update_camt_import_record(camt_import, master_data, aktualisierung=False):
     camt_import.master_data = str(master_data)
     camt_import.save()
     erstelle_report(camt_import.name)
+    pe_status_update(master_data, camt_import.name)
+    return
+
+def pe_status_update(master_data, camt_import):
+    if len(master_data['imported_payments']) > 0:
+        if len(master_data['imported_payments']) > 1:
+            imported_payments = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_import` = '{camt_import}' WHERE `name` IN {pes}""".format(camt_import=camt_import, pes=tuple(master_data['imported_payments'])), as_list=True)
+        else:
+            imported_payments = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_import` = '{camt_import}' WHERE `name` = '{pes}'""".format(camt_import=camt_import, pes=master_data['imported_payments'][0]), as_list=True)
+        if len(master_data['submitted_payments']) > 0:
+            if len(master_data['submitted_payments']) > 1:
+                submitted_payments = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_status` = 'Verbucht' WHERE `name` IN {pes}""".format(pes=tuple(master_data['submitted_payments'])), as_list=True)
+            else:
+                submitted_payments = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_status` = 'Verbucht' WHERE `name` = '{pes}'""".format(pes=master_data['submitted_payments'][0]), as_list=True)
+        if len(master_data['unassigned_payments']) > 0:
+            if len(master_data['unassigned_payments']) > 1:
+                unassigned_payments = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_status` = 'Nicht zugewiesen' WHERE `name` IN {pes}""".format(pes=tuple(master_data['unassigned_payments'])), as_list=True)
+            else:
+                unassigned_payments = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_status` = 'Nicht zugewiesen' WHERE `name` = '{pes}'""".format(pes=master_data['unassigned_payments'][0]), as_list=True)
+        if len(master_data['underpaid']) > 0:
+            if len(master_data['underpaid']) > 1:
+                underpaid = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_status` = 'Unterbezahlt' WHERE `name` IN {pes}""".format(pes=tuple(master_data['underpaid'])), as_list=True)
+            else:
+                underpaid = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_status` = 'Unterbezahlt' WHERE `name` = '{pes}'""".format(pes=master_data['underpaid'][0]), as_list=True)
+        if len(master_data['overpaid']) > 0:
+            if len(master_data['overpaid']) > 1:
+                overpaid = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_status` = 'Überbezahlt' WHERE `name` IN {pes}""".format(pes=tuple(master_data['overpaid'])), as_list=True)
+            else:
+                overpaid = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_status` = 'Überbezahlt' WHERE `name` = '{pes}'""".format(pes=master_data['overpaid'][0]), as_list=True)
+        if len(master_data['doppelte_mitgliedschaft']) > 0:
+            if len(master_data['doppelte_mitgliedschaft']) > 1:
+                doppelte_mitgliedschaft = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_status` = 'Doppelte Mitgliedschafts-Zahlung' WHERE `name` IN {pes}""".format(pes=tuple(master_data['doppelte_mitgliedschaft'])), as_list=True)
+            else:
+                doppelte_mitgliedschaft = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_status` = 'Doppelte Mitgliedschafts-Zahlung' WHERE `name` = '{pes}'""".format(pes=master_data['doppelte_mitgliedschaft'][0]), as_list=True)
+        if len(master_data['gebucht_weggezogen']) > 0:
+            if len(master_data['gebucht_weggezogen']) > 1:
+                gebucht_weggezogen = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_status` = 'Wegzug' WHERE `name` IN {pes}""".format(pes=tuple(master_data['gebucht_weggezogen'])), as_list=True)
+            else:
+                gebucht_weggezogen = frappe.db.sql("""UPDATE `tabPayment Entry` SET `camt_status` = 'Wegzug' WHERE `name` = '{pes}'""".format(pes=master_data['gebucht_weggezogen'][0]), as_list=True)
     
     return
 
