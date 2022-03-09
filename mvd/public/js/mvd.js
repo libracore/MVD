@@ -32,7 +32,7 @@ $(document).ready(function() {
     setTimeout(function(){
         var navbars = document.getElementsByClassName("navbar");
         if (navbars.length > 0) {
-            if ((window.location.hostname.includes("test-libracore")) || (window.location.hostname.includes("localhost")) || (window.location.hostname.includes("192.168.0.18"))) {
+            if ((window.location.hostname.includes("test-libracore")) || (window.location.hostname.includes("localhost")) || (window.location.hostname.includes("192.168.0.18") || (window.location.hostname.includes("dev-libracore"))) {
                 navbars[0].style.backgroundColor = "#B0473A";
             }
         }
