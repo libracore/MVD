@@ -1077,3 +1077,8 @@ def fr_bez_bar(fr, datum):
     fr.save(ignore_permissions=True)
     
     return
+
+@frappe.whitelist()
+def reopen_payment_as_admin(pe):
+    frappe.db.sql("""UPDATE `tabPayment Entry` SET `docstatus` = 0 WHERE `name` = '{pe}'""".format(pe=pe), as_list=True)
+    return
