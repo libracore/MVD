@@ -20,8 +20,11 @@ class Mitgliedschaft(Document):
             mitglied_nummer_obj = mvm_neue_mitglieder_nummer(self)
             if mitglied_nummer_obj:
                 self.mitglied_id = mitglied_nummer_obj["mitgliedId"]
-                if not self.mitglied_nr:
-                    self.mitglied_nr = mitglied_nummer_obj["mitgliedNummer"]
+                if not self.mitglied_nr or self.mitglied_nr == 'MV':
+                    if mitglied_nummer_obj["mitgliedNummer"]:
+                        self.mitglied_nr = mitglied_nummer_obj["mitgliedNummer"]
+                    else:
+                        self.mitglied_nr = 'MV'
             else:
                 frappe.throw("Die gewünschte Mitgliedschaft konnte nicht erstellt werden.")
         return
@@ -65,6 +68,10 @@ class Mitgliedschaft(Document):
                 close_open_validations(self.name, 'Interessent*Innenbrief mit EZ')
             if not int(self.anmeldung_mit_ez) == 1:
                 close_open_validations(self.name, 'Anmeldung mit EZ')
+            
+            # beziehe mitglied_nr wenn umwandlung von Interessent*in
+            if self.status_c != 'Interessent*in' and self.mitglied_nr == 'MV':
+                self.mitglied_nr = mvm_mitglieder_nummer_update(self.name)
             
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
@@ -2598,7 +2605,15 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
 def mvm_neue_mitglieder_nummer(mitgliedschaft):
     from mvd.mvd.service_plattform.api import neue_mitglieder_nummer
     sektion_code = get_sektion_code(mitgliedschaft.sektion_id)
-    return neue_mitglieder_nummer(sektion_code)
+    needsMitgliedNummer = True
+    if mitgliedschaft.status_c == 'Interessent*in':
+        needsMitgliedNummer = False
+    return neue_mitglieder_nummer(sektion_code, needsMitgliedNummer=needsMitgliedNummer)
+
+# Bezug neuer mitgliedId 
+def mvm_mitglieder_nummer_update(mitgliedId):
+    from mvd.mvd.service_plattform.api import mitglieder_nummer_update
+    return mitglieder_nummer_update(mitgliedId)['mitgliedNummer']
 
 def send_mvm_to_sp(mitgliedschaft, update):
     if str(get_sektion_code(mitgliedschaft.sektion_id)) != 'ZH':
