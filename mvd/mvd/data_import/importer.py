@@ -65,7 +65,11 @@ hm = {
     'weitere_kontaktinfos': 'weitere_kontaktinfos',
     'mkategorie_d': 'mkategorie_d',
     'benutzer_name': 'benutzer_name',
-    'jahr_bez_mitgl': 'jahr_bez_mitgl'
+    'jahr_bez_mitgl': 'jahr_bez_mitgl',
+    'objekt_hausnummer': 'objekt_hausnummer',
+    'nummer_zu': 'nummer_zu',
+    'objekt_nummer_zu': 'objekt_nummer_zu',
+    'rg_nummer_zu': 'rg_nummer_zu'
 }
 
 def read_csv(site_name, file_name, limit=False):
@@ -854,5 +858,58 @@ def import_special(site_name, file_name, limit=False):
                 frappe.log_error("{0}".format(row), 'Mitgliedschaft existiert nicht')
             print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
             count += 1
+        else:
+            break
+
+# --------------------------------------------------------------
+# Adressen Update
+# --------------------------------------------------------------
+def update_adressen(site_name, file_name, limit=False):
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.update_adressen --kwargs "{'site_name': 'site1.local', 'file_name': 'hausnummer_zusatz_gefiltert.csv'}"
+    '''
+    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_sp_queue
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    submit_counter = 1
+    max_loop = limit
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            if frappe.db.exists("Mitgliedschaft", str(get_value(row, 'mitglied_id'))):
+                try:
+                    objekt_hausnummer = str(get_value(row, 'objekt_hausnummer'))
+                    nummer_zu = str(get_value(row, 'nummer_zu'))
+                    objekt_nummer_zu = str(get_value(row, 'objekt_nummer_zu'))
+                    rg_nummer_zu = str(get_value(row, 'rg_nummer_zu'))
+                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
+                    mitgliedschaft.objekt_hausnummer = objekt_hausnummer
+                    mitgliedschaft.nummer_zu = nummer_zu
+                    mitgliedschaft.objekt_nummer_zu = objekt_nummer_zu
+                    mitgliedschaft.rg_nummer_zu = rg_nummer_zu
+                    mitgliedschaft.letzte_bearbeitung_von = 'SP'
+                    mitgliedschaft.save()
+                    create_sp_queue(mitgliedschaft, True)
+                    if submit_counter == 100:
+                        frappe.db.commit()
+                        submit_counter = 1
+                except Exception as err:
+                    frappe.log_error("{0}\n\n{1}".format(err, row), 'Adressen Update konnte nicht durchgeführt werden')
+            else:
+                frappe.log_error("{0}".format(row), 'Mitgliedschaft existiert nicht')
+            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+            count += 1
+            submit_counter += 1
         else:
             break

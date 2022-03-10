@@ -142,7 +142,7 @@ frappe.mvd_such_client = {
                     }
                 }
             } else {
-                if (cur_page.page.search_fields.alle_sektionen.get_value() == 1&&frappe.user.has_role("System Manager")) {
+                if (cur_page.page.search_fields.alle_sektionen.get_value() == 1&&frappe.user.has_role("MV_MVD")) {
                     // suche über alle sektionen ahnand spezial rechte
                     frappe.mvd_such_client.start_suche(page)
                 } else {
