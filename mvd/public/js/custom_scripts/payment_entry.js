@@ -38,9 +38,27 @@ frappe.ui.form.on('Payment Entry', {
                     mitgliedschaft_zuweisen(frm);
                 });
             }
+            if (cur_frm.doc.docstatus == 2&&frappe.user.has_role("Administrator")) {
+                frm.add_custom_button(__("Storno Rollback"), function() {
+                    storno_rollback(frm);
+                });
+            }
         }
     }
 });
+
+function storno_rollback(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.camt_import.camt_import.reopen_payment_as_admin",
+        args:{
+                'pe': cur_frm.doc.name
+        },
+        callback: function(r)
+        {
+            cur_frm.reload_doc();
+        }
+    });
+}
 
 function check_underpaid(frm) {
     var underpaid = false;
