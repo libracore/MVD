@@ -33,12 +33,14 @@ frappe.ui.form.on('Payment Entry', {
                         kulanz_ausgleich(frm);
                     });
                 }
-            } else {
+            }
+            if (cur_frm.doc.docstatus == 0) {
                 frm.add_custom_button(__("Mitgliedschaft zuweisen"), function() {
                     mitgliedschaft_zuweisen(frm);
                 });
             }
-            if (cur_frm.doc.docstatus == 2&&frappe.user.has_role("Administrator")) {
+            
+            if ((cur_frm.doc.docstatus == 2)&&(frappe.user.has_role("Administrator"))) {
                 frm.add_custom_button(__("Storno Rollback"), function() {
                     storno_rollback(frm);
                 });
