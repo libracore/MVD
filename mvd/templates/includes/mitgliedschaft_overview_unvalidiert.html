@@ -4,12 +4,13 @@
     <div class="col-sm-12">
         <div class="address-box" style="background-color: #fafad9;">
             <p>
+                <b>Sektion:</b> {{ allgemein.sektion }}<br>
                 <b>Status:</b> {{ allgemein.status }}<br>
                 <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp }}<br>
                 {% if allgemein.kuendigung %}
                     <b>Kündigung per:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}
                 {% else %}
-                    <b>Erfassung/Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}
+                    <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}
                 {% endif %}
                 <br><b>Sprache:</b> {{ allgemein.language }}<br>
             </p>

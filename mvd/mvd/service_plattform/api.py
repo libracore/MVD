@@ -31,7 +31,7 @@ def whoami(type='light'):
 # ---------------------------------------------------
 # ausgehend
 # ---------------------------------------------------
-def neue_mitglieder_nummer(sektion_code, sprache='Deutsch', typ='Privat'):
+def neue_mitglieder_nummer(sektion_code, sprache='Deutsch', typ='Privat', needsMitgliedNummer=True):
     if not int(frappe.db.get_single_value('Service Plattform API', 'not_get_number_and_id')) == 1:
         if auth_check(SVCPF_SCOPE):
             config = frappe.get_doc("Service Plattform API", "Service Plattform API")
@@ -41,7 +41,8 @@ def neue_mitglieder_nummer(sektion_code, sprache='Deutsch', typ='Privat'):
             json = {
                 "sektionCode": sektion_code,
                 "sprache": sprache,
-                "typ": typ
+                "typ": typ,
+                "needsMitgliedNummer": needsMitgliedNummer
             }
             token = config.get_value(SVCPF_SCOPE, 'api_token')
             headers = {"authorization": "Bearer {token}".format(token=token)}
@@ -63,6 +64,30 @@ def neue_mitglieder_nummer(sektion_code, sprache='Deutsch', typ='Privat'):
             'mitgliedNummer': '13467985',
             'mitgliedId': '97624986'
         }
+
+def mitglieder_nummer_update(mitgliedId):
+    if not int(frappe.db.get_single_value('Service Plattform API', 'not_get_number_and_id')) == 1:
+        if auth_check(SVCPF_SCOPE):
+            config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+            sub_url = config.get_value(SVCPF_SCOPE, "api_url")
+            endpoint = "/mitglieder/{mitgliedId}/neueMitgliederNummer".format(mitgliedId=mitgliedId)
+            url = sub_url + endpoint
+            token = config.get_value(SVCPF_SCOPE, 'api_token')
+            headers = {"authorization": "Bearer {token}".format(token=token)}
+            
+            try:
+                mitglied_nr_obj = requests.post(url, headers = headers)
+                mitglied_nr_obj = mitglied_nr_obj.json()
+                if 'mitgliedNummer' not in mitglied_nr_obj:
+                    frappe.log_error("{0}".format(mitglied_nr_obj), 'neue_mitglieder_nummer failed')
+                    frappe.throw("Zur Zeit können keine Daten von der Serviceplatform bezogen werden.")
+                
+                return mitglied_nr_obj
+            except Exception as err:
+                frappe.log_error("{0}".format(err), 'neue_mitglieder_nummer failed')
+                frappe.db.commit()
+    else:
+        frappe.throw("neue_mitglieder_nummer deaktiviert")
 
 def update_mvm(mvm, update):
     if not int(frappe.db.get_single_value('Service Plattform API', 'no_sp_update')) == 1:

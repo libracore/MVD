@@ -20,8 +20,11 @@ class Mitgliedschaft(Document):
             mitglied_nummer_obj = mvm_neue_mitglieder_nummer(self)
             if mitglied_nummer_obj:
                 self.mitglied_id = mitglied_nummer_obj["mitgliedId"]
-                if not self.mitglied_nr:
-                    self.mitglied_nr = mitglied_nummer_obj["mitgliedNummer"]
+                if not self.mitglied_nr or self.mitglied_nr == 'MV':
+                    if mitglied_nummer_obj["mitgliedNummer"]:
+                        self.mitglied_nr = mitglied_nummer_obj["mitgliedNummer"]
+                    else:
+                        self.mitglied_nr = 'MV'
             else:
                 frappe.throw("Die gewünschte Mitgliedschaft konnte nicht erstellt werden.")
         return
@@ -66,6 +69,11 @@ class Mitgliedschaft(Document):
             if not int(self.anmeldung_mit_ez) == 1:
                 close_open_validations(self.name, 'Anmeldung mit EZ')
             
+            # beziehe mitglied_nr wenn umwandlung von Interessent*in
+            if self.status_c != 'Interessent*in' and self.mitglied_nr == 'MV':
+                self.mitglied_nr = mvm_mitglieder_nummer_update(self.name)
+                self.letzte_bearbeitung_von = 'User'
+            
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
                 if self.creation == self.modified:
@@ -77,9 +85,6 @@ class Mitgliedschaft(Document):
                     # special case sektionswechsel nach ZH
                     if self.wegzug_zu in ('MVZH', 'MVBE', 'MVSO') and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
-        # ~ else:
-            # ~ # erstelle abreits backlog: Zu Validieren
-            # ~ create_abl("Daten Validieren", self)
     
     def handling_kontakt_adresse_kunde(self):
         # Mitglied
@@ -226,6 +231,9 @@ class Mitgliedschaft(Document):
             self.naechstes_jahr_geschuldet = 1
         
         
+        # Zahldatum = Eintrittsdatum
+        if self.status_c == 'Interessent*in' and self.bezahltes_mitgliedschaftsjahr > 0:
+            self.eintrittsdatum = self.datum_zahlung_mitgliedschaft
         
         if self.bezahltes_mitgliedschaftsjahr > 0 and self.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
             self.status_c = 'Regulär'
@@ -1451,7 +1459,8 @@ def get_uebersicht_html(name):
                 'tel_g_1': mitgliedschaft.tel_g_1 or '',
                 'tel_g_2': mitgliedschaft.tel_g_2 or '',
                 'rg_tel_g': mitgliedschaft.rg_tel_g or '',
-                'language': mitgliedschaft.language or 'de'
+                'language': mitgliedschaft.language or 'de',
+                'sektion': mitgliedschaft.sektion_id
             }
         }
         
@@ -1472,7 +1481,8 @@ def get_uebersicht_html(name):
             'mitgliedtyp': mitgliedschaft.mitgliedtyp_c,
             'eintritt': mitgliedschaft.eintrittsdatum,
             'kuendigung': mitgliedschaft.kuendigung or False,
-            'language': mitgliedschaft.language or 'de'
+            'language': mitgliedschaft.language or 'de',
+            'sektion': mitgliedschaft.sektion_id
         }
         
         # Hauptmitglied
@@ -2598,7 +2608,15 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
 def mvm_neue_mitglieder_nummer(mitgliedschaft):
     from mvd.mvd.service_plattform.api import neue_mitglieder_nummer
     sektion_code = get_sektion_code(mitgliedschaft.sektion_id)
-    return neue_mitglieder_nummer(sektion_code)
+    needsMitgliedNummer = True
+    if mitgliedschaft.status_c == 'Interessent*in':
+        needsMitgliedNummer = False
+    return neue_mitglieder_nummer(sektion_code, needsMitgliedNummer=needsMitgliedNummer)
+
+# Bezug neuer mitgliedId 
+def mvm_mitglieder_nummer_update(mitgliedId):
+    from mvd.mvd.service_plattform.api import mitglieder_nummer_update
+    return mitglieder_nummer_update(mitgliedId)['mitgliedNummer']
 
 def send_mvm_to_sp(mitgliedschaft, update):
     if str(get_sektion_code(mitgliedschaft.sektion_id)) != 'ZH':
