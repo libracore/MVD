@@ -1458,7 +1458,8 @@ def get_uebersicht_html(name):
                 'tel_g_1': mitgliedschaft.tel_g_1 or '',
                 'tel_g_2': mitgliedschaft.tel_g_2 or '',
                 'rg_tel_g': mitgliedschaft.rg_tel_g or '',
-                'language': mitgliedschaft.language or 'de'
+                'language': mitgliedschaft.language or 'de',
+                'sektion': mitgliedschaft.sektion_id
             }
         }
         
@@ -1479,7 +1480,8 @@ def get_uebersicht_html(name):
             'mitgliedtyp': mitgliedschaft.mitgliedtyp_c,
             'eintritt': mitgliedschaft.eintrittsdatum,
             'kuendigung': mitgliedschaft.kuendigung or False,
-            'language': mitgliedschaft.language or 'de'
+            'language': mitgliedschaft.language or 'de',
+            'sektion': mitgliedschaft.sektion_id
         }
         
         # Hauptmitglied
