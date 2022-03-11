@@ -1994,20 +1994,10 @@ def mvm_update(mitgliedschaft, kwargs):
             if not mitgliedtyp_c:
                 return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']), daten=kwargs)
             
-            if kwargs['eintrittsdatum']:
+            if kwargs['eintrittsdatum'] and status_c != 'Interessent*in':
                 eintritt = kwargs['eintrittsdatum'].split("T")[0]
             else:
                 eintritt = None
-            if status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in') and not eintritt:
-                if kwargs['erfassungsdatum']:
-                    eintritt = kwargs['erfassungsdatum'].split("T")[0]
-                else:
-                    eintritt = None
-            if not eintritt and status_c == 'Inaktiv':
-                if kwargs['erfassungsdatum']:
-                    eintritt = kwargs['erfassungsdatum'].split("T")[0]
-                else:
-                    eintritt = None
             
             if kwargs['neueSektionCode']:
                 wegzug_zu = get_sektion_id(kwargs['neueSektionCode'])
@@ -2162,21 +2152,10 @@ def mvm_neuanlage(kwargs):
             if not mitgliedtyp_c:
                 return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']), daten=kwargs)
             
-            if kwargs['eintrittsdatum']:
+            if kwargs['eintrittsdatum'] and status_c != 'Interessent*in':
                 eintritt = kwargs['eintrittsdatum'].split("T")[0]
             else:
                 eintritt = None
-            if status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in') and not eintritt:
-                if kwargs['erfassungsdatum']:
-                    eintritt = kwargs['erfassungsdatum'].split("T")[0]
-                else:
-                    eintritt = None
-            
-            if not eintritt and status_c == 'Inaktiv':
-                if kwargs['erfassungsdatum']:
-                    eintritt = kwargs['erfassungsdatum'].split("T")[0]
-                else:
-                    eintritt = None
             
             if kwargs['zuzugsdatum']:
                 zuzug = kwargs['zuzugsdatum'].split("T")[0]

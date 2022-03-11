@@ -163,6 +163,10 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False):
     if 'zusatz_firma' in anlage_daten:
         zusatz_firma = anlage_daten["zusatz_firma"] if anlage_daten["zusatz_firma"] else ''
     
+    eintritt = now()
+    if anlage_daten["status"] == 'Interessent*in':
+        eintritt = None
+    
     # erstelle mitgliedschaft
     mitgliedschaft = frappe.get_doc({
         "doctype": "Mitgliedschaft",
@@ -172,7 +176,7 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False):
         "m_und_w": 1,
         "mitgliedtyp_c": anlage_daten["mitgliedtyp"],
         "inkl_hv": 1,
-        "eintrittsdatum": now(),
+        "eintrittsdatum": eintritt,
         "kundentyp": anlage_daten["kundentyp"],
         "firma": firma,
         "zusatz_firma": zusatz_firma,
