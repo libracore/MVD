@@ -1079,6 +1079,7 @@
    "label": "Begr\u00fcssung via Zahlung"
   },
   {
+   "depends_on": "eval:doc.status_c!='Interessent*in'",
    "fieldname": "eintrittsdatum",
    "fieldtype": "Date",
    "label": "Eintritt",
@@ -1087,7 +1088,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-03-10 16:50:30.627498",
+ "modified": "2022-03-11 09:11:33.699367",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

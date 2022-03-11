@@ -84,9 +84,6 @@ class Mitgliedschaft(Document):
                     # special case sektionswechsel nach ZH
                     if self.wegzug_zu in ('MVZH', 'MVBE', 'MVSO') and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
-        # ~ else:
-            # ~ # erstelle abreits backlog: Zu Validieren
-            # ~ create_abl("Daten Validieren", self)
     
     def handling_kontakt_adresse_kunde(self):
         # Mitglied
@@ -233,6 +230,9 @@ class Mitgliedschaft(Document):
             self.naechstes_jahr_geschuldet = 1
         
         
+        # Zahldatum = Eintrittsdatum
+        if self.status_c == 'Interessent*in' and self.bezahltes_mitgliedschaftsjahr > 0:
+            self.eintrittsdatum = self.datum_zahlung_mitgliedschaft
         
         if self.bezahltes_mitgliedschaftsjahr > 0 and self.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
             self.status_c = 'Regulär'
