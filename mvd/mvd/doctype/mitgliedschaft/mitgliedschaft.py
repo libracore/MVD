@@ -72,6 +72,7 @@ class Mitgliedschaft(Document):
             # beziehe mitglied_nr wenn umwandlung von Interessent*in
             if self.status_c != 'Interessent*in' and self.mitglied_nr == 'MV':
                 self.mitglied_nr = mvm_mitglieder_nummer_update(self.name)
+                self.letzte_bearbeitung_von = 'User'
             
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
