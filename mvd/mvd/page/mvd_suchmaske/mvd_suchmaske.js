@@ -212,11 +212,11 @@ frappe.mvd_such_client = {
                     'goto_list': true
             },
             freeze: true,
-            freeze_message: 'Suche nach Mitgliedschaften...',
+            freeze_message: 'Aufbereitung Mitgliedschafts Liste...',
             callback: function(r)
             {
                 if (r.message) {
-                    frappe.route_options = {"mitglied_nr": ["in", r.message]}
+                    frappe.route_options = {"search_hash": r.message}
                     frappe.set_route("List", "Mitgliedschaft");
                 }
             }

@@ -158,7 +158,8 @@
   "begruessung_via_zahlung",
   "begruessung_massendruck_dokument",
   "letzte_bearbeitung_von",
-  "status_vor_onl_mutation"
+  "status_vor_onl_mutation",
+  "search_hash"
  ],
  "fields": [
   {
@@ -1084,10 +1085,15 @@
    "fieldtype": "Date",
    "label": "Eintritt",
    "permlevel": 1
+  },
+  {
+   "fieldname": "search_hash",
+   "fieldtype": "Data",
+   "label": "Search Hash"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-03-11 11:22:13.399831",
+ "modified": "2022-03-11 15:22:39.641089",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

@@ -108,21 +108,24 @@ def suche(suchparameter, goto_list=False):
     else:
         filters = ''
     
-    mitgliedschaften = frappe.db.sql("""SELECT * FROM `tabMitgliedschaft` {filters} ORDER BY `nachname_1` ASC""".format(filters=filters), as_dict=True)
-    
-    if len(mitgliedschaften) > 0:
-        if not suchparameter["sektions_uebergreifend"]:
-            if not goto_list:
+    if goto_list:
+        search_hash = frappe.generate_hash(length=10)
+        mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` {filters}""".format(filters=filters), as_list=True)
+        if len(mitgliedschaften) > 1:
+            mitgliedschaften = [item for sublist in mitgliedschaften for item in sublist]
+            mitgliedschaften = tuple(mitgliedschaften)
+            set_search_hash = frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `search_hash` = '{search_hash}' WHERE `name` IN {mitgliedschaften}""".format(search_hash=search_hash, mitgliedschaften=mitgliedschaften), as_list=True)
+            return search_hash
+        else:
+            return False
+    else:
+        mitgliedschaften = frappe.db.sql("""SELECT * FROM `tabMitgliedschaft` {filters} ORDER BY `nachname_1` ASC""".format(filters=filters), as_dict=True)
+        
+        if len(mitgliedschaften) > 0:
+            if not suchparameter["sektions_uebergreifend"]:
                 resultate_html = get_resultate_html(mitgliedschaften)
                 return resultate_html
             else:
-                _route_options_list = []
-                for mitgliedschaft in mitgliedschaften:
-                    _route_options_list.append(mitgliedschaft.mitglied_nr)
-                route_options_list = (",").join(_route_options_list)
-                return route_options_list
-        else:
-            if not goto_list:
                 if len(mitgliedschaften) > 1:
                     return 'too many'
                 else:
@@ -131,10 +134,8 @@ def suche(suchparameter, goto_list=False):
                         'mitgliedschaft': mitgliedschaft,
                     }
                     return frappe.render_template('templates/includes/mvd_freizuegigkeitsabfrage.html', data)
-            else:
-                return False
-    else:
-        return False
+        else:
+            return False
 
 def get_resultate_html(mitgliedschaften):
     meine_sektionen = []
