@@ -1083,12 +1083,11 @@
    "fieldname": "eintrittsdatum",
    "fieldtype": "Date",
    "label": "Eintritt",
-   "permlevel": 1,
-   "reqd": 1
+   "permlevel": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-03-11 09:11:33.699367",
+ "modified": "2022-03-11 11:22:13.399831",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
