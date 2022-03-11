@@ -2,9 +2,11 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Service Plattform API', {
-    // refresh: function(frm) {
-
-    // }
+    flush_queue: function(frm) {
+        frappe.call({
+            method: 'mvd.mvd.doctype.service_plattform_api.service_plattform_api.flush_complete_queue'
+        });
+    }
 });
 
 frappe.ui.form.on('Service Plattform API Connection', {
@@ -19,6 +21,5 @@ frappe.ui.form.on('Service Plattform API Connection', {
                cur_frm.reload_doc();
             }
         });
-
     }
 });
