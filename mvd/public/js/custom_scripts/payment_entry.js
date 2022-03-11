@@ -5,12 +5,12 @@ frappe.ui.form.on('Payment Entry', {
     refresh: function(frm) {
         if (!frm.doc.__islocal) {
             if (cur_frm.doc.mv_mitgliedschaft) {
+                if (!cur_frm.doc.korrespondenz) {
+                    frm.add_custom_button(__("Mitgliedschafts-Korrespondenz erstellen"), function() {
+                        erstelle_korrespondenz(frm);
+                    });
+                }
                 if (cur_frm.doc.unallocated_amount > 0) {
-                    if (!cur_frm.doc.korrespondenz) {
-                        frm.add_custom_button(__("Mitgliedschafts-Korrespondenz erstellen"), function() {
-                            erstelle_korrespondenz(frm);
-                        });
-                    }
                     if ((cur_frm.doc.paid_amount / cur_frm.doc.unallocated_amount) == 2) {
                         frm.add_custom_button(__("Mit Folgejahr-Mitgliedschaft ausgleichen"), function() {
                             mit_folgejahr_ausgleichen(frm);
