@@ -5,6 +5,7 @@
         <div class="col-sm-12">
             <div class="address-box">
                 <p>
+                    <b>Sektion:</b> {{ allgemein.sektion }}<br>
                     <b>Status:</b> {{ allgemein.status }}
                 </p>
                 <p>
@@ -23,6 +24,7 @@
         <div class="col-sm-5">
             <div class="address-box">
                 <p>
+                    <b>Sektion:</b> {{ allgemein.sektion }}<br>
                     <b>Status:</b> {{ allgemein.status }}<br>
                     <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
                     {% if allgemein.status not in ['Anmeldung', 'Online-Anmeldung'] %}
@@ -74,6 +76,7 @@
                     <span class="css-ampel {{ allgemein.ampelfarbe }}"><span></span></span>
                 </p>
                 <p>
+                    <b>Sektion:</b> {{ allgemein.sektion }}<br>
                     <b>Status:</b> {{ allgemein.status }}<br>
                     <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
                     {% if allgemein.status not in ['Anmeldung', 'Online-Anmeldung'] %}
