@@ -26,6 +26,15 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
             return false;
         }
     });
+    // trigger für Suchen mit Enter
+    frappe.ui.keys.on('enter', function(e) {
+        var route = frappe.get_route();
+        if(route[0]==='mvd-suchmaske') {
+            me.$user_search_button.click();
+            e.preventDefault();
+            return false;
+        }
+    });
     // trigger für ctrl + l
     frappe.ui.keys.on('ctrl+l', function(e) {
         var route = frappe.get_route();
