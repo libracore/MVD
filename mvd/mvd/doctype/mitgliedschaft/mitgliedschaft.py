@@ -793,7 +793,9 @@ def create_rg_kunde(mitgliedschaft):
         'customer_name': customer_name,
         'customer_addition': customer_addition,
         'customer_type': customer_type,
-        'sektion': mitgliedschaft.sektion_id
+        'sektion': mitgliedschaft.sektion_id,
+        'customer_group': 'All Customer Groups',
+        'territory': 'All Territories'
     })
     new_customer.insert(ignore_permissions=True)
     frappe.db.commit()
@@ -1283,7 +1285,9 @@ def create_kunde_mitglied(mitgliedschaft):
         'customer_name': customer_name,
         'customer_addition': customer_addition,
         'customer_type': customer_type,
-        'sektion': mitgliedschaft.sektion_id
+        'sektion': mitgliedschaft.sektion_id,
+        'customer_group': 'All Customer Groups',
+        'territory': 'All Territories'
     })
     
     new_customer.insert(ignore_permissions=True)
