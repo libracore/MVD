@@ -2502,7 +2502,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 new_mitgliedschaft.abweichende_objektadresse = 1
                 new_mitgliedschaft.objekt_zusatz_adresse = str(objekt["adresszusatz"]) if objekt["adresszusatz"] else ''
                 new_mitgliedschaft.objekt_strasse = str(objekt["strasse"]) if objekt["strasse"] else ''
-                new_mitgliedschaft.objekt_nummer = str(objekt["hausnummer"]) if objekt["hausnummer"] else ''
+                new_mitgliedschaft.objekt_hausnummer = str(objekt["hausnummer"]) if objekt["hausnummer"] else ''
                 new_mitgliedschaft.objekt_nummer_zu = str(objekt["hausnummerZusatz"]) if objekt["hausnummerZusatz"] else ''
                 new_mitgliedschaft.objekt_plz = str(objekt["postleitzahl"]) if objekt["postleitzahl"] else ''
                 new_mitgliedschaft.objekt_ort = str(objekt["ort"]) if objekt["ort"] else ''
@@ -2514,7 +2514,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 new_mitgliedschaft.abweichende_objektadresse = 0
                 new_mitgliedschaft.objekt_zusatz_adresse = None
                 new_mitgliedschaft.objekt_strasse = None
-                new_mitgliedschaft.objekt_nummer = None
+                new_mitgliedschaft.objekt_hausnummer = None
                 new_mitgliedschaft.objekt_plz = None
                 new_mitgliedschaft.objekt_ort = None
         else:
