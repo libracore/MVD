@@ -11,7 +11,7 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
         sinv = frappe.get_doc("Sales Invoice", sales_invoice)
         if sinv.mv_mitgliedschaft:
             mvm = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
-            reference_raw = '00 00'
+            reference_raw = '00 00000 00 '
             reference_raw += mvm.mitglied_nr.replace("MV", "")[:3]
             reference_raw += ' '
             reference_raw += mvm.mitglied_nr.replace("MV", "")[3:8]
@@ -20,25 +20,25 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
             reference_raw += sinv.customer.replace("K-", "")[:1]
             reference_raw += ' '
             reference_raw += sinv.customer.replace("K-", "")[1:6]
-        reference_raw += ' 000'
-        reference_raw += sales_invoice.replace("R-", "")[:2]
+        reference_raw += ' 00'
+        reference_raw += sales_invoice.replace("R-", "")[:3]
         reference_raw += ' '
-        reference_raw += sales_invoice.replace("R-", "")[2:7]
+        reference_raw += sales_invoice.replace("R-", "")[3:7]
     
     if fr:
         fr_sinv = frappe.get_doc("Fakultative Rechnung", fr)
         mvm = frappe.get_doc("Mitgliedschaft", fr_sinv.mv_mitgliedschaft)
         if fr_sinv.typ == 'HV':
-            reference_raw = '11 00'
+            reference_raw = '11 00000 00'
         else:
-            reference_raw = '12 00'
+            reference_raw = '12 00000 00'
         reference_raw += mvm.mitglied_nr.replace("MV", "")[:3]
         reference_raw += ' '
         reference_raw += mvm.mitglied_nr.replace("MV", "")[3:8]
-        reference_raw += ' 000'
-        reference_raw += fr.replace("FR-", "")[:2]
+        reference_raw += ' 00'
+        reference_raw += fr.replace("FR-", "")[:3]
         reference_raw += ' '
-        reference_raw += fr.replace("FR-", "")[2:7]
+        reference_raw += fr.replace("FR-", "")[3:8]
     
     check_digit_matrix = {
         '0': [0, 9, 4, 6, 8, 2, 7, 1, 3, 5, 0],
