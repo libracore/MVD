@@ -10,9 +10,13 @@ frappe.ui.form.on('Mitgliedschaft', {
        if (!frm.doc.__islocal) {
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
                 
-                if ((!['Kündigung', 'Gestorben', 'Anmeldung', 'Online-Anmeldung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.mitgliedtyp_c == 'Privat')) {
+                if ((!['Kündigung', 'Gestorben', 'Anmeldung', 'Online-Anmeldung'].includes(cur_frm.doc.status_c))) {
                     frm.add_custom_button(__("Sektionswechsel"),  function() {
-                        sektionswechsel(frm);
+                        if (cur_frm.doc.mitgliedtyp_c == 'Geschäft') {
+                            frappe.msgprint("Für Geschäftsmitglieder ist kein automatischer Sektionswechsel möglich.");
+                        } else {
+                            sektionswechsel(frm);;
+                        }
                     }, __("Mutation"));
                 }
                 
