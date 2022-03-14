@@ -2522,7 +2522,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
             new_mitgliedschaft.abweichende_objektadresse = 0
             new_mitgliedschaft.objekt_zusatz_adresse = None
             new_mitgliedschaft.objekt_strasse = None
-            new_mitgliedschaft.objekt_nummer = None
+            new_mitgliedschaft.objekt_hausnummer = None
             new_mitgliedschaft.objekt_plz = None
             new_mitgliedschaft.objekt_ort = None
         
