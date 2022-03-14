@@ -206,10 +206,14 @@ def zahlungen_zuweisen(master_data):
         
         # 1.1
         qrr = pe.esr_reference
+        
+        # HACK (zu kurze ERPNext Referenznummern): soll später entfernt werden
+        qrr_short = pe.esr_reference[4:27]
+        
         sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`
                             FROM `tabSales Invoice`
-                            WHERE REPLACE(`esr_reference`, ' ', '') = '{qrr}'
-                            AND `status` != 'Paid'""".format(qrr=qrr), as_dict=True)
+                            WHERE (REPLACE(`esr_reference`, ' ', '') = '{qrr}' OR REPLACE(`esr_reference`, ' ', '') = '{qrr_short}')
+                            AND `status` != 'Paid'""".format(qrr=qrr, qrr_short=qrr_short), as_dict=True)
         
         # 1.2
         if not len(sinv) > 0:
@@ -224,11 +228,15 @@ def zahlungen_zuweisen(master_data):
         # 2.1 / 3.1
         if not len(sinv) > 0 and pe.paid_amount == 12:
             qrr = pe.esr_reference
+            
+            # HACK (zu kurze ERPNext Referenznummern): soll später entfernt werden
+            qrr_short = pe.esr_reference[4:27]
+            
             fr = frappe.db.sql("""SELECT `name`
                                 FROM `tabFakultative Rechnung`
                                 WHERE `docstatus` = 1
                                 AND `status` = 'Unpaid'
-                                AND REPLACE(`qrr_referenz`, ' ', '') = '{qrr}'""".format(qrr=qrr), as_dict=True)
+                                AND (REPLACE(`qrr_referenz`, ' ', '') = '{qrr}' OR REPLACE(`qrr_referenz`, ' ', '') = '{qrr_short})""".format(qrr=qrr, qrr_short=qrr_short), as_dict=True)
             if len(fr) > 0:
                 fr_sinv = create_unpaid_sinv(fr, betrag=12)
                 sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`
@@ -397,9 +405,13 @@ def zahlungen_zuweisen(master_data):
         else:
             # prüfe allfällige doppelzahlung und weise kunde zu
             qrr = pe.esr_reference
+            
+            # HACK (zu kurze ERPNext Referenznummern): soll später entfernt werden
+            qrr_short = pe.esr_reference[4:27]
+            
             sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `customer`
                                     FROM `tabSales Invoice`
-                                    WHERE REPLACE(`esr_reference`, ' ', '') = '{qrr}'""".format(qrr=qrr), as_dict=True)
+                                    WHERE (REPLACE(`esr_reference`, ' ', '') = '{qrr}' OR REPLACE(`esr_reference`, ' ', '') = '{qrr}')""".format(qrr=qrr, qrr_short=qrr_short), as_dict=True)
             
             if not len(sinv) > 0:
                 # HACK (alte Debitoren)
