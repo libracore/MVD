@@ -564,20 +564,23 @@ def check_kategorie(row):
 
 def check_kontakt(row):
     kontakt = str(get_value(row, 'pers_name'))
-    sektion_id = frappe.get_value("Mitgliedschaft", str(get_value(row, 'mitglied_id')), "sektion_id")
-    query = ("""SELECT `name` FROM `tabTermin Kontaktperson` WHERE `kontakt` = '{kontakt}' AND `sektion_id` = '{sektion_id}'""".format(kontakt=kontakt, sektion_id=sektion_id))
-    kat = frappe.db.sql(query, as_list=True)
-    if len(kat) > 0:
-        return kat[0][0]
+    if kontakt and kontakt != '':
+        sektion_id = frappe.get_value("Mitgliedschaft", str(get_value(row, 'mitglied_id')), "sektion_id")
+        query = ("""SELECT `name` FROM `tabTermin Kontaktperson` WHERE `kontakt` = '{kontakt}' AND `sektion_id` = '{sektion_id}'""".format(kontakt=kontakt, sektion_id=sektion_id))
+        kat = frappe.db.sql(query, as_list=True)
+        if len(kat) > 0:
+            return kat[0][0]
+        else:
+            new = frappe.get_doc({
+                "doctype": "Termin Kontaktperson",
+                "kontakt": kontakt,
+                "sektion_id": sektion_id
+            })
+            new.insert()
+            frappe.db.commit()
+            return new.name
     else:
-        new = frappe.get_doc({
-            "doctype": "Termin Kontaktperson",
-            "kontakt": kontakt,
-            "sektion_id": sektion_id
-        })
-        new.insert()
-        frappe.db.commit()
-        return new.name
+        return ''
 
 def check_termin_status(row, value):
     value = row[hm[value]]
