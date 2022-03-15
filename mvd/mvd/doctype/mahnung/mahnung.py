@@ -167,7 +167,7 @@ def get_mahnungs_qrrs(mahnung):
                 if cmp_addr.postfach:
                     if cmp_addr.postfach_nummer:
                         receiver_street = 'Postfach'
-                        receiver_number = cmp_addr['postfach_nummer']
+                        receiver_number = cmp_addr.postfach_nummer
                     else:
                         receiver_street = 'Postfach'
                         receiver_number = ' '
