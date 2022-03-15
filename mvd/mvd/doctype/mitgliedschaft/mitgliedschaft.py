@@ -2113,8 +2113,9 @@ def mvm_update(mitgliedschaft, kwargs):
             else:
                 if kwargs['needsValidation']:
                     mitgliedschaft.validierung_notwendig = 1
-                    mitgliedschaft.status_vor_onl_mutation = status_c
-                    mitgliedschaft.status_c = 'Online-Mutation'
+                    if status_c != 'Zuzug':
+                        mitgliedschaft.status_vor_onl_mutation = status_c
+                        mitgliedschaft.status_c = 'Online-Mutation'
                     
                 
             mitgliedschaft.flags.ignore_links=True
@@ -2264,8 +2265,9 @@ def mvm_neuanlage(kwargs):
             else:
                 if kwargs['needsValidation']:
                     new_mitgliedschaft.validierung_notwendig = 1
-                    new_mitgliedschaft.status_vor_onl_mutation = status_c
-                    new_mitgliedschaft.status_c = 'Online-Mutation'
+                    if status_c != 'Zuzug':
+                        new_mitgliedschaft.status_vor_onl_mutation = status_c
+                        new_mitgliedschaft.status_c = 'Online-Mutation'
             
             new_mitgliedschaft.insert()
             frappe.db.commit()
@@ -2592,7 +2594,7 @@ def mvm_neue_mitglieder_nummer(mitgliedschaft):
     from mvd.mvd.service_plattform.api import neue_mitglieder_nummer
     sektion_code = get_sektion_code(mitgliedschaft.sektion_id)
     needsMitgliedNummer = True
-    if mitgliedschaft.status_c == 'Interessent*in':
+    if mitgliedschaft.status_c in ('Interessent*in', 'Zuzug'):
         needsMitgliedNummer = False
     return neue_mitglieder_nummer(sektion_code, needsMitgliedNummer=needsMitgliedNummer)
 
