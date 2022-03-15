@@ -6,6 +6,11 @@ frappe.ui.form.on('Sales Invoice', {
         if (cur_frm.doc.outstanding_amount > 0) {
             check_for_hv(frm);
         }
+        if ((cur_frm.doc.docstatus == 2)&&(frappe.user.has_role("Administrator"))) {
+            frm.add_custom_button(__("Storno Rollback"), function() {
+                storno_rollback(frm);
+            });
+        }
         // hack to default buttons
         setTimeout(function(){
             $("[data-label='Create']").remove();
@@ -232,4 +237,17 @@ function ask_for_date(hv, ezs) {
     'Zahlungsdatum',
     'Ausführen'
     )
+}
+
+function storno_rollback(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.camt_import.camt_import.reopen_sinv_as_admin",
+        args:{
+                'sinv': cur_frm.doc.name
+        },
+        callback: function(r)
+        {
+            cur_frm.reload_doc();
+        }
+    });
 }
