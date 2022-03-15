@@ -1097,5 +1097,5 @@ def reopen_payment_as_admin(pe):
 
 @frappe.whitelist()
 def reopen_sinv_as_admin(sinv):
-    frappe.db.sql("""UPDATE `tabSales Invoice SET `docstatus` = 0 WHERE `name` = '{sinv}'""".format(sinv=sinv), as_list=True)
+    frappe.db.sql("""UPDATE `tabSales Invoice` SET `docstatus` = 0 WHERE `name` = '{sinv}'""".format(sinv=sinv), as_list=True)
     return

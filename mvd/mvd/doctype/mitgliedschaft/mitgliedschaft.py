@@ -193,6 +193,10 @@ class Mitgliedschaft(Document):
             return
         
     def check_zahlung_mitgliedschaft(self):
+        noch_kein_eintritt = False
+        if not self.datum_zahlung_mitgliedschaft:
+            noch_kein_eintritt = True
+        
         sinvs = frappe.db.sql("""SELECT
                                     `name`,
                                     `is_pos`,
@@ -232,8 +236,9 @@ class Mitgliedschaft(Document):
         
         
         # Zahldatum = Eintrittsdatum
-        if self.status_c == 'Interessent*in' and self.bezahltes_mitgliedschaftsjahr > 0:
-            self.eintrittsdatum = self.datum_zahlung_mitgliedschaft
+        if self.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in') and self.bezahltes_mitgliedschaftsjahr > 0:
+            if noch_kein_eintritt:
+                self.eintrittsdatum = self.datum_zahlung_mitgliedschaft
         
         if self.bezahltes_mitgliedschaftsjahr > 0 and self.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
             self.status_c = 'Regulär'
