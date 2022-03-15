@@ -236,7 +236,7 @@ def zahlungen_zuweisen(master_data):
                                 FROM `tabFakultative Rechnung`
                                 WHERE `docstatus` = 1
                                 AND `status` = 'Unpaid'
-                                AND (REPLACE(`qrr_referenz`, ' ', '') = '{qrr}' OR REPLACE(`qrr_referenz`, ' ', '') = '{qrr_short})""".format(qrr=qrr, qrr_short=qrr_short), as_dict=True)
+                                AND (REPLACE(`qrr_referenz`, ' ', '') = '{qrr}' OR REPLACE(`qrr_referenz`, ' ', '') = '{qrr_short}')""".format(qrr=qrr, qrr_short=qrr_short), as_dict=True)
             if len(fr) > 0:
                 fr_sinv = create_unpaid_sinv(fr, betrag=12)
                 sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`
@@ -411,7 +411,7 @@ def zahlungen_zuweisen(master_data):
             
             sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `customer`
                                     FROM `tabSales Invoice`
-                                    WHERE (REPLACE(`esr_reference`, ' ', '') = '{qrr}' OR REPLACE(`esr_reference`, ' ', '') = '{qrr}')""".format(qrr=qrr, qrr_short=qrr_short), as_dict=True)
+                                    WHERE (REPLACE(`esr_reference`, ' ', '') = '{qrr}' OR REPLACE(`esr_reference`, ' ', '') = '{qrr_short}')""".format(qrr=qrr, qrr_short=qrr_short), as_dict=True)
             
             if not len(sinv) > 0:
                 # HACK (alte Debitoren)
