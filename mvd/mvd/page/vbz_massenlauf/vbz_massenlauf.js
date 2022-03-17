@@ -142,18 +142,17 @@ frappe.vbz_massenlauf = {
         frappe.dom.unfreeze();
     },
     korrespondenz_massenlauf: function() {
-        frappe.dom.freeze('Erstelle Sammel-PDF...');
+        frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.korrespondenz_massenlauf",
             args:{},
             freeze: true,
-            freeze_message: 'Erstelle Sammel-PDF...',
+            freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
             callback: function(r)
             {
                 frappe.dom.unfreeze();
-                frappe.route_options = {"name": r.message}
-                frappe.set_route("List", "File", "List");
+                frappe.set_route("Form", "Massenlauf", r.message);
             }
         });
     },
@@ -167,75 +166,68 @@ frappe.vbz_massenlauf = {
             async: false,
             callback: function(r)
             {
-                //~ frappe.dom.unfreeze();
-                //~ frappe.route_options = {"name": r.message}
-                //~ frappe.set_route("List", "File", "List");
                 frappe.dom.unfreeze();
                 frappe.set_route("Form", "Massenlauf", r.message);
             }
         });
     },
     zuzug_massenlauf: function() {
-        frappe.dom.freeze('Erstelle Sammel-PDF...');
+        frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.zuzug_massenlauf",
             args:{},
             freeze: true,
-            freeze_message: 'Erstelle Sammel-PDF...',
+            freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
             callback: function(r)
             {
                 frappe.dom.unfreeze();
-                frappe.route_options = {"name": r.message}
-                frappe.set_route("List", "File", "List");
+                frappe.set_route("Form", "Massenlauf", r.message);
             }
         });
     },
     rg_massenlauf: function() {
-        frappe.dom.freeze('Erstelle Sammel-PDF...');
+        frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.rg_massenlauf",
             args:{},
             freeze: true,
-            freeze_message: 'Erstelle Sammel-PDF...',
+            freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
             callback: function(r)
             {
                 frappe.dom.unfreeze();
-                frappe.route_options = {"name": r.message}
-                frappe.set_route("List", "File", "List");
+                frappe.set_route("Form", "Massenlauf", r.message);
             }
         });
     },
     begruessung_online_massenlauf: function() {
-        frappe.dom.freeze('Erstelle Sammel-PDF...');
+        frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.begruessung_online_massenlauf",
             args:{},
             freeze: true,
-            freeze_message: 'Erstelle Sammel-PDF...',
+            freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
             callback: function(r)
             {
                 frappe.dom.unfreeze();
-                frappe.route_options = {"name": r.message}
-                frappe.set_route("List", "File", "List");
+                frappe.set_route("Form", "Massenlauf", r.message);
             }
         });
     },
     begruessung_via_zahlung_massenlauf: function() {
-        frappe.dom.freeze('Erstelle Sammel-PDF...');
+        frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.begruessung_via_zahlung_massenlauf",
             args:{},
             freeze: true,
-            freeze_message: 'Erstelle Sammel-PDF...',
+            freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
             callback: function(r)
             {
                 frappe.dom.unfreeze();
-                frappe.route_options = {"name": r.message}
-                frappe.set_route("List", "File", "List");
+                frappe.set_route("Form", "Massenlauf", r.message);
             }
         });
     },
