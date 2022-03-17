@@ -37,7 +37,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Typ",
-   "options": "Mahnung",
+   "options": "Mahnung\nK\u00fcndigung\nZuzug\nBegr\u00fcssung durch Bezahlung\nBegr\u00fcssung Online\nKorrespondenz\nRechnung",
    "read_only": 1,
    "reqd": 1
   },
@@ -62,7 +62,7 @@
    "read_only": 1
   }
  ],
- "modified": "2022-03-03 14:33:35.225604",
+ "modified": "2022-03-17 21:51:29.107179",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Massenlauf",

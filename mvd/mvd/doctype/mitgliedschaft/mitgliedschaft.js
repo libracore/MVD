@@ -7,7 +7,12 @@ frappe.ui.form.on('Mitgliedschaft', {
         override_default_email_dialog(frm);
     },
     refresh: function(frm) {
-       if (!frm.doc.__islocal) {
+       if (!frm.doc.__islocal&&cur_frm.doc.status_c != 'Inaktiv') {
+            if ((cur_frm.doc.status_c != 'Inaktiv')&&(frappe.user.has_role("System Manager"))) {
+                frm.add_custom_button(__("Inaktivieren"), function() {
+                    mitglied_inaktivieren(frm);
+                }).addClass("btn-danger")
+            }
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
                 
                 if ((!['Kündigung', 'Gestorben', 'Anmeldung', 'Online-Anmeldung'].includes(cur_frm.doc.status_c))) {
@@ -1300,5 +1305,34 @@ function erstelle_todo(frm) {
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
     }
+}
+
+function mitglied_inaktivieren(frm) {
+    frappe.confirm(
+        'Haben Sie alle Rechnungen und Fakultativen Rechnungen storniert und möchten das Mitglied wirklich <b>inaktivieren</b>?',
+        function(){
+            // on yes
+            cur_frm.set_value("validierung_notwendig", '0');
+            cur_frm.set_value("kuendigung_verarbeiten", '0');
+            cur_frm.set_value("interessent_innenbrief_mit_ez", '0');
+            cur_frm.set_value("anmeldung_mit_ez", '0');
+            cur_frm.set_value("zuzug_massendruck", '0');
+            cur_frm.set_value("rg_massendruck_vormerkung", '0');
+            cur_frm.set_value("begruessung_massendruck", '0');
+            cur_frm.set_value("begruessung_via_zahlung", '0');
+            cur_frm.set_value("zuzugs_rechnung", '');
+            cur_frm.set_value("zuzug_korrespondenz", '');
+            cur_frm.set_value("kuendigung_druckvorlage", '');
+            cur_frm.set_value("rg_massendruck", '');
+            cur_frm.set_value("begruessung_massendruck_dokument", '');
+            cur_frm.set_value("letzte_bearbeitung_von", 'User');
+            cur_frm.set_value("status_c", 'Inaktiv');
+            cur_frm.save();
+            frappe.msgprint("Das Mitglied wurde inaktiviert.");
+        },
+        function(){
+            // on no
+        }
+    )
 }
 
