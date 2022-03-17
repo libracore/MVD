@@ -66,7 +66,7 @@ frappe.vbz_massenlauf = {
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#kuendigung_print").click(function(){
-            if (!frappe.user.has_role("MV_RB")) {
+            if (!frappe.user.has_role("MV_RB")||frappe.user.has_role("System Manager")) {
                 frappe.vbz_massenlauf.kuendigung_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
@@ -77,7 +77,7 @@ frappe.vbz_massenlauf = {
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#zuzug_print").click(function(){
-            if (!frappe.user.has_role("MV_RB")) {
+            if (!frappe.user.has_role("MV_RB")||frappe.user.has_role("System Manager")) {
                 frappe.vbz_massenlauf.zuzug_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
@@ -88,7 +88,7 @@ frappe.vbz_massenlauf = {
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#begruessung_print").click(function(){
-            if (!frappe.user.has_role("MV_RB")) {
+            if (!frappe.user.has_role("MV_RB")||frappe.user.has_role("System Manager")) {
                 frappe.vbz_massenlauf.begruessung_via_zahlung_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
@@ -99,7 +99,7 @@ frappe.vbz_massenlauf = {
             frappe.set_route("List", "Korrespondenz", "List");
         });
         $("#korrespondenz_print").click(function(){
-            if (!frappe.user.has_role("MV_RB")) {
+            if (!frappe.user.has_role("MV_RB")||frappe.user.has_role("System Manager")) {
                 frappe.vbz_massenlauf.korrespondenz_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
@@ -110,7 +110,7 @@ frappe.vbz_massenlauf = {
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#rechnungen_print").click(function(){
-            if (!frappe.user.has_role("MV_RB")) {
+            if (!frappe.user.has_role("MV_RB")||frappe.user.has_role("System Manager")) {
                 frappe.vbz_massenlauf.rg_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
@@ -121,7 +121,7 @@ frappe.vbz_massenlauf = {
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#begruessung_online_print").click(function(){
-            if (!frappe.user.has_role("MV_RB")) {
+            if (!frappe.user.has_role("MV_RB")||frappe.user.has_role("System Manager")) {
                 frappe.vbz_massenlauf.begruessung_online_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
@@ -132,7 +132,7 @@ frappe.vbz_massenlauf = {
             frappe.set_route("List", "Mahnung", "List");
         });
         $("#mahnungen_print").click(function(){
-            if (!frappe.user.has_role("MV_RB")) {
+            if (!frappe.user.has_role("MV_RB")||frappe.user.has_role("System Manager")) {
                 frappe.vbz_massenlauf.mahnung_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
@@ -158,18 +158,20 @@ frappe.vbz_massenlauf = {
         });
     },
     kuendigung_massenlauf: function() {
-        frappe.dom.freeze('Erstelle Sammel-PDF...');
+        frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.kuendigung_massenlauf",
             args:{},
             freeze: true,
-            freeze_message: 'Erstelle Sammel-PDF...',
+            freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
             callback: function(r)
             {
+                //~ frappe.dom.unfreeze();
+                //~ frappe.route_options = {"name": r.message}
+                //~ frappe.set_route("List", "File", "List");
                 frappe.dom.unfreeze();
-                frappe.route_options = {"name": r.message}
-                frappe.set_route("List", "File", "List");
+                frappe.set_route("Form", "Massenlauf", r.message);
             }
         });
     },

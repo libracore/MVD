@@ -85,37 +85,51 @@ def korrespondenz_massenlauf():
 
 @frappe.whitelist()
 def kuendigung_massenlauf():
+    # ~ mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'kuendigung_verarbeiten': 1}, fields=['name'])
+    # ~ if len(mitgliedschaften) > 0:
+        # ~ output = PdfFileWriter()
+        # ~ for mitgliedschaft in mitgliedschaften:
+            # ~ output = frappe.get_print("Mitgliedschaft", mitgliedschaft['name'], 'Kündigungsbestätigung', as_pdf = True, output = output, ignore_zugferd=True)
+            
+        # ~ file_name = "Kündigungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+        # ~ file_name = file_name.split(".")[0]
+        # ~ file_name = file_name.replace(":", "-")
+        # ~ file_name = file_name + ".pdf"
+        
+        # ~ filedata = get_file_data_from_writer(output)
+        
+        # ~ _file = frappe.get_doc({
+            # ~ "doctype": "File",
+            # ~ "file_name": file_name,
+            # ~ "folder": "Home",
+            # ~ "is_private": 1,
+            # ~ "content": filedata
+        # ~ })
+        
+        # ~ _file.save(ignore_permissions=True)
+        
+        # ~ for mitgliedschaft in mitgliedschaften:
+            # ~ m = frappe.get_doc("Mitgliedschaft", mitgliedschaft['name'])
+            # ~ m.kuendigung_verarbeiten = '0'
+            # ~ m.save(ignore_permissions=True)
+        
+        # ~ return _file.name
+    # ~ else:
+        # ~ frappe.throw("Es gibt keine Mitgliedschaften die für einen Kündigungs-Massenlauf vorgemerkt sind.")
+    
     mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'kuendigung_verarbeiten': 1}, fields=['name'])
     if len(mitgliedschaften) > 0:
-        output = PdfFileWriter()
-        for mitgliedschaft in mitgliedschaften:
-            output = frappe.get_print("Mitgliedschaft", mitgliedschaft['name'], 'Kündigungsbestätigung', as_pdf = True, output = output, ignore_zugferd=True)
-            
-        file_name = "Kündigungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
-        file_name = file_name.split(".")[0]
-        file_name = file_name.replace(":", "-")
-        file_name = file_name + ".pdf"
-        
-        filedata = get_file_data_from_writer(output)
-        
-        _file = frappe.get_doc({
-            "doctype": "File",
-            "file_name": file_name,
-            "folder": "Home",
-            "is_private": 1,
-            "content": filedata
+        massenlauf = frappe.get_doc({
+            "doctype": "Massenlauf",
+            "sektion_id": frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['name'], "sektion_id"),
+            "status": "Offen",
+            "typ": "Kündigung"
         })
+        massenlauf.insert(ignore_permissions=True)
         
-        _file.save(ignore_permissions=True)
-        
-        for mitgliedschaft in mitgliedschaften:
-            m = frappe.get_doc("Mitgliedschaft", mitgliedschaft['name'])
-            m.kuendigung_verarbeiten = '0'
-            m.save(ignore_permissions=True)
-        
-        return _file.name
+        return massenlauf.name
     else:
-        frappe.throw("Es gibt keine Mitgliedschaften die für einen Kündigungs-Massenlauf vorgemerkt sind.")
+        frappe.throw("Es gibt keine Kündigungen die für einen Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
 
 @frappe.whitelist()
 def zuzug_massenlauf():
@@ -270,7 +284,8 @@ def mahnung_massenlauf():
         massenlauf = frappe.get_doc({
             "doctype": "Massenlauf",
             "sektion_id": frappe.get_value("Mahnung", mahnungen[0]['name'], "sektion_id"),
-            "status": "Offen"
+            "status": "Offen",
+            "typ": "Mahnung"
         })
         massenlauf.insert(ignore_permissions=True)
         
