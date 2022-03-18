@@ -284,8 +284,16 @@ def kulanz_ausgleich(mahnung, sinv, amount, outstanding_amount, due_date):
     return
 
 @frappe.whitelist()
-def bulk_submit(mahnungen):
+def bulk_submit(mahnungen, alle):
     mahnungen = json.loads(mahnungen)
+    if len(mahnungen) < 1:
+        if int(alle) == 1:
+            mahnungen = frappe.get_list('Mahnung', filters={'docstatus': 0}, fields=['name'])
+            if len(mahnungen) < 1:
+                return 'keine'
+        else:
+            return 'keine'
+    
     args = {
         'mahnungen': mahnungen
     }

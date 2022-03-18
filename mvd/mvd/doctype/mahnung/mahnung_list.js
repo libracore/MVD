@@ -11,13 +11,27 @@ frappe.listview_settings['Mahnung'] = {
                 __("Erstelle Mahnungen"),
                 __("Erstelle")
             );
-        });  
+        });
+        
+        listview.page.add_menu_item( __("Alle Entwurfs-Mahnungen buchen"), function() {
+            frappe.confirm(
+                'Wollen Sie alle Entwurfs-Mahnungen buchen?',
+                function(){
+                    // on yes
+                    submit_mahnungen([], 1)
+                },
+                function(){
+                    // on no
+                }
+            )
+        });
+        
         $("[data-label='Submit']").parent().unbind();
         $("[data-label='Submit']").parent().click(function(){
             frappe.confirm('Möchten Sie die Markierten Mahnungen buchen?',
             () => {
                 var selected_mahnungen = cur_list.get_checked_items();
-                submit_mahnungen(selected_mahnungen);
+                submit_mahnungen(selected_mahnungen, 0);
             }, () => {
                 // No
             })
@@ -26,30 +40,36 @@ frappe.listview_settings['Mahnung'] = {
     }
 }
 
-function submit_mahnungen(mahnungen) {
+function submit_mahnungen(mahnungen, alle) {
     frappe.dom.freeze('Bitte warten, buche Mahnungen...');
     frappe.call({
         'method': "mvd.mvd.doctype.mahnung.mahnung.bulk_submit",
         'args': {
-            'mahnungen': mahnungen
+            'mahnungen': mahnungen,
+            'alle': alle
         },
         'callback': function(r) {
             var jobname = r.message;
-            let mahnung_refresher = setInterval(mahnung_refresher_handler, 3000, jobname);
-            function mahnung_refresher_handler(jobname) {
-                frappe.call({
-                'method': "mvd.mvd.doctype.mahnung.mahnung.is_buhchungs_job_running",
-                    'args': {
-                        'mahnung': jobname
-                    },
-                    'callback': function(res) {
-                        if (res.message == 'refresh') {
-                            clearInterval(mahnung_refresher);
-                            frappe.dom.unfreeze();
-                            cur_list.refresh();
+            if (jobname != 'keine') {
+                let mahnung_refresher = setInterval(mahnung_refresher_handler, 3000, jobname);
+                function mahnung_refresher_handler(jobname) {
+                    frappe.call({
+                    'method': "mvd.mvd.doctype.mahnung.mahnung.is_buhchungs_job_running",
+                        'args': {
+                            'mahnung': jobname
+                        },
+                        'callback': function(res) {
+                            if (res.message == 'refresh') {
+                                clearInterval(mahnung_refresher);
+                                frappe.dom.unfreeze();
+                                cur_list.refresh();
+                            }
                         }
-                    }
-                });
+                    });
+                }
+            } else {
+                frappe.dom.unfreeze();
+                frappe.msgprint("Es gibt keine Mahnungen zum verbuchen.");
             }
         }
     });
