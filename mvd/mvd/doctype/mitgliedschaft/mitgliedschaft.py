@@ -2109,12 +2109,8 @@ def mvm_update(mitgliedschaft, kwargs):
             if not mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Beim Adressen Update ist etwas schief gelaufen', daten=kwargs)
             
-            if status_c in ('Online-Anmeldung', 'Online-Beitritt'):
+            if status_c in ('Online-Anmeldung', 'Online-Beitritt', 'Online-Kündigung'):
                 mitgliedschaft.validierung_notwendig = 1
-            elif status_c == 'Kündigung':
-                if kwargs['needsValidation']:
-                    mitgliedschaft.validierung_notwendig = 1
-                    mitgliedschaft.status_c = 'Online-Kündigung'
             else:
                 if kwargs['needsValidation']:
                     mitgliedschaft.validierung_notwendig = 1
@@ -2261,12 +2257,8 @@ def mvm_neuanlage(kwargs):
             if not new_mitgliedschaft:
                 return raise_xxx(500, 'Internal Server Error', 'Bei der Adressen Anlage ist etwas schief gelaufen', daten=kwargs)
             
-            if status_c in ('Online-Anmeldung', 'Online-Beitritt'):
+            if status_c in ('Online-Anmeldung', 'Online-Beitritt', 'Online-Kündigung'):
                 new_mitgliedschaft.validierung_notwendig = 1
-            elif status_c == 'Kündigung':
-                if kwargs['needsValidation']:
-                    new_mitgliedschaft.validierung_notwendig = 1
-                    new_mitgliedschaft.status_c = 'Online-Kündigung'
             else:
                 if kwargs['needsValidation']:
                     new_mitgliedschaft.validierung_notwendig = 1
@@ -2276,12 +2268,6 @@ def mvm_neuanlage(kwargs):
             
             new_mitgliedschaft.insert()
             frappe.db.commit()
-            
-            # ~ if status_c in ('Online-Anmeldung', 'Online-Beitritt'):
-                # ~ # erstelle abreits backlog: Zu Validieren
-                # ~ create_abl("Daten Validieren", new_mitgliedschaft)
-                # ~ new_mitgliedschaft.validierung_notwendig = 1
-                # ~ new_mitgliedschaft.save()
             
             return raise_200()
             
@@ -2356,6 +2342,7 @@ def get_status_c(status_c):
         'Anmeldung': 'Anmeldung',
         'OnlineAnmeldung': 'Online-Anmeldung',
         'OnlineBeitritt': 'Online-Beitritt',
+        'OnlineKuendigung': 'Online-Kündigung',
         'Zuzug': 'Zuzug',
         'Regulaer': 'Regulär',
         'Gestorben': 'Gestorben',
@@ -2659,6 +2646,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         'Anmeldung': 'Anmeldung',
         'Online-Anmeldung': 'OnlineAnmeldung',
         'Online-Beitritt': 'OnlineBeitritt',
+        'Online-Kündigung': 'OnlineKuendigung',
         'Zuzug': 'Zuzug',
         'Regulär': 'Regulaer',
         'Gestorben': 'Gestorben',
