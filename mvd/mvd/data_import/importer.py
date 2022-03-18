@@ -916,3 +916,49 @@ def update_adressen(site_name, file_name, limit=False):
             submit_counter += 1
         else:
             break
+
+# --------------------------------------------------------------
+# Ampel Reset
+# --------------------------------------------------------------
+def ampel_reset():
+    '''
+        Example:
+        sudo bench --site [site_name] execute mvd.mvd.data_import.importer.ampel_reset
+    '''
+    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_ampelfarbe
+    
+    # setze rote Ampel
+    rote_mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')""", as_dict=True)
+    total = len(rote_mitgliedschaften)
+    print("Setze Ampel auf Rot bei {0} Mitgliedschaften".format(total))
+    submit_counter = 1
+    count = 1
+    for mitgliedschaft in rote_mitgliedschaften:
+        set_rot = frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `ampel_farbe` = 'ampelrot' WHERE `name` = '{m}'""".format(m=mitgliedschaft.name), as_list=True)
+        print("{0} von {1}".format(count, total))
+        if submit_counter == 100:
+            frappe.db.commit()
+            submit_counter = 1
+        else:
+            submit_counter += 1
+        count += 1
+    frappe.db.commit()
+    
+    # setze alle ampeln
+    mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` NOT IN ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')""", as_dict=True)
+    total = len(mitgliedschaften)
+    print("Setze/Berechne Ampel bei {0} Mitgliedschaften".format(total))
+    submit_counter = 1
+    count = 1
+    for mitgliedschaft in mitgliedschaften:
+        m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+        neue_farbe = get_ampelfarbe(m)
+        if neue_farbe != m.ampel_farbe:
+            set_neue_farbe = frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `ampel_farbe` = '{neue_farbe}' WHERE `name` = '{name}'""".format(neue_farbe=neue_farbe, name=m.name), as_list=True)
+            submit_counter += 1
+        if submit_counter == 100:
+            frappe.db.commit()
+            submit_counter = 1
+        print("{0} von {1}".format(count, total))
+        count += 1
+    frappe.db.commit()
