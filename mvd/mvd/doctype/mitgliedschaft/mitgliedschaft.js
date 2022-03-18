@@ -315,11 +315,7 @@ function kuendigung(frm) {
                             var ks_month = kuendigungs_stichtag.getMonth();
                             var ks_day = kuendigungs_stichtag.getDate();
                             
-                            if (cur_frm.doc.kuendigung) {
-                                var now = frappe.datetime.str_to_obj(cur_frm.doc.kuendigung);
-                            } else {
-                                var now = frappe.datetime.str_to_obj(frappe.datetime.now_date());
-                            }
+                            var now = frappe.datetime.str_to_obj(frappe.datetime.now_date());
                             
                             var now_month = now.getMonth();
                             var now_day = now.getDate();
