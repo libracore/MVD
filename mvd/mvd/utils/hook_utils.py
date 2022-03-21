@@ -24,3 +24,17 @@ def resave_mitgliedschaft(sinv, event):
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
         mitgliedschaft.letzte_bearbeitung_von = 'SP'
         mitgliedschaft.save()
+
+def todo_permissions(todo, event):
+    try:
+        if frappe.db.exists("Sektion", {'virtueller_user': todo.owner}):
+            sektion = frappe.db.get_value("Sektion", {"virtueller_user": todo.owner}, ["name"])
+            users = frappe.get_all('User Permission', fields='user', filters={'for_value': sektion, 'allow': 'Sektion', 'is_default': 1}, limit=100, distinct=True, ignore_ifnull=True)
+            for user in users:
+                frappe.share.add('ToDo', todo.name, user=user.user, read=1, write=1, flags={'ignore_share_permission': True})
+        else:
+            users = frappe.share.get_users('ToDo', todo.name)
+            for user in users:
+                frappe.share.remove("ToDo", todo.name, user.user, flags={'ignore_share_permission': True, 'ignore_permissions': True})
+    except:
+        pass

@@ -35,9 +35,6 @@ class Mahnung(Document):
 # this function will create new payment reminders
 @frappe.whitelist()
 def create_payment_reminders(sektion_id):
-    # check auto submit
-    # ~ auto_submit = frappe.get_value("ERPNextSwiss Settings", "ERPNextSwiss Settings", "payment_reminder_auto_submit")
-    
     # get company
     company = frappe.get_doc("Sektion", sektion_id).company
     # get all customers with open sales invoices
@@ -122,9 +119,6 @@ def create_payment_reminders(sektion_id):
                     'status_c': frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['mv_mitgliedschaft'], "status_c")
                 })
                 reminder_record = new_reminder.insert(ignore_permissions=True)
-                # ~ if int(auto_submit) == 1:
-                    # ~ reminder_record.update_reminder_levels()
-                    # ~ reminder_record.submit()
                 frappe.db.commit()
         return 'Mahnungen wurden erstellt'
     else:
