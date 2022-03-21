@@ -85,9 +85,9 @@ extend_bootinfo = "mvd.mvd.utils.mvd_bootinfo.boot_session"
 # Permissions
 # -----------
 # Permissions evaluated in scripted ways
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+# ~ has_permission = {
+    # ~ "ToDo": "mvd.mvd.utils.hook_utils.todo_permissions"
+# ~ }
 
 # Document Events
 # ---------------
@@ -101,6 +101,9 @@ doc_events = {
     },
     "Payment Entry": {
         "on_submit": ["mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.pe_check_zahlung_mitgliedschaft", "mvd.mvd.utils.hook_utils.check_mitgliedschaft_in_pe"]
+    },
+    "ToDo": {
+        "on_update": "mvd.mvd.utils.hook_utils.todo_permissions"
     }
 }
 
