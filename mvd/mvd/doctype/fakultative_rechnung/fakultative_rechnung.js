@@ -46,17 +46,18 @@ frappe.ui.form.on('Fakultative Rechnung', {
     }
 });
 
-function bezahlt_in_bar(hv, ezs) {
+function bezahlt_in_bar(frm) {
     frappe.prompt([
-        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Zahlungsdatum', 'reqd': 1}  
+        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Zahlungsdatum', 'reqd': 1},
+        {'fieldname': 'betrag', 'fieldtype': 'Currency', 'label': 'Betrag', 'reqd': 1, 'default': cur_frm.doc.typ == 'HV' ? 12:0, 'read_only': cur_frm.doc.typ == 'HV' ? 1:0}
     ],
     function(values){
-        var datum = values.datum;
         frappe.call({
             method:"mvd.mvd.doctype.camt_import.camt_import.fr_bez_bar",
             'args': {
                 'fr': cur_frm.doc.name,
-                'datum': datum
+                'datum': values.datum,
+                'betrag': values.betrag
             },
             'async': true,
             'freeze': true,
@@ -71,17 +72,18 @@ function bezahlt_in_bar(hv, ezs) {
     )
 }
 
-function bezahlt_mit_ezs(hv, ezs) {
+function bezahlt_mit_ezs(frm) {
     frappe.prompt([
-        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Zahlungsdatum', 'reqd': 1}  
+        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Zahlungsdatum', 'reqd': 1},
+        {'fieldname': 'betrag', 'fieldtype': 'Currency', 'label': 'Betrag', 'reqd': 1, 'default': cur_frm.doc.typ == 'HV' ? 12:0, 'read_only': cur_frm.doc.typ == 'HV' ? 1:0}
     ],
     function(values){
-        var datum = values.datum;
         frappe.call({
             method:"mvd.mvd.doctype.camt_import.camt_import.fr_bez_ezs",
             'args': {
                 'fr': cur_frm.doc.name,
-                'datum': datum
+                'datum': values.datum,
+                'betrag': values.betrag
             },
             'async': true,
             'freeze': true,
