@@ -35,6 +35,13 @@ class Mahnung(Document):
 # this function will create new payment reminders
 @frappe.whitelist()
 def create_payment_reminders(sektion_id):
+    args = {
+        'sektion_id': sektion_id
+    }
+    enqueue("mvd.mvd.doctype.mahnung.mahnung.bulk_create_payment_reminders", queue='long', job_name='{0} Mahnlauf'.format(sektion_id), timeout=5000, **args)
+    return
+
+def bulk_create_payment_reminders(sektion_id):
     # get company
     company = frappe.get_doc("Sektion", sektion_id).company
     # get all customers with open sales invoices
@@ -302,12 +309,30 @@ def bulk_submit_bgj(mahnungen):
     return
 
 @frappe.whitelist()
-def is_buhchungs_job_running(mahnung):
+def bulk_delete():
+    mahnungen = frappe.get_list('Mahnung', filters={'docstatus': 0}, fields=['name'])
+    if len(mahnungen) < 1:
+        return 'keine'
+    
+    args = {
+        'mahnungen': mahnungen
+    }
+    enqueue("mvd.mvd.doctype.mahnung.mahnung.bulk_delete_bgj", queue='long', job_name='Lösche Entwurfs-Mahnungen {0}'.format(mahnungen[0]["name"]), timeout=5000, **args)
+    return mahnungen[0]["name"]
+    
+def bulk_delete_bgj(mahnungen):
+    for mahnung in mahnungen:
+        mahnung = frappe.get_doc("Mahnung", mahnung["name"])
+        mahnung.delete()
+    return
+
+@frappe.whitelist()
+def is_mahnungs_job_running(jobname):
     from frappe.utils.background_jobs import get_jobs
-    running = get_info(mahnung)
+    running = get_info(jobname)
     return running
 
-def get_info(mahnung):
+def get_info(jobname):
     from rq import Queue, Worker
     from frappe.utils.background_jobs import get_redis_conn
     from frappe.utils import format_datetime, cint, convert_utc_to_user_timezone
@@ -351,7 +376,7 @@ def get_info(mahnung):
     
     found_job = 'refresh'
     for job in jobs:
-        if job['job_name'] == 'Buche Mahnungen {0}'.format(mahnung):
+        if job['job_name'] == jobname:
             found_job = True
 
     return found_job
