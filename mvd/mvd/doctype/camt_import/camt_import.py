@@ -907,8 +907,11 @@ def get_filter_for_unassigned():
     return frappe.get_list('Sektion', fields='default_customer', as_list=True)
 
 @frappe.whitelist()
-def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False):
+def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False, betrag=False):
     sinv = frappe.get_doc("Sales Invoice", sinv)
+    betrag = float(betrag)
+    if betrag > sinv.outstanding_amount:
+        frappe.throw("Der Bezahlte Betrag darf die ausstehende Summe nicht überschreiten")
     if hv:
         hv_sinv = create_unpaid_sinv(hv, betrag=12)
     
@@ -923,16 +926,16 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False)
         'company': sinv.company,
         'sektion_id': sinv.sektion_id,
         'paid_from': sinv.debit_to,
-        'paid_amount': sinv.outstanding_amount,
+        'paid_amount': betrag,
         'paid_to': frappe.get_value("Sektion", sinv.sektion_id, "account"),
-        'received_amount': sinv.outstanding_amount,
+        'received_amount': betrag,
         'references': [
             {
                 'reference_doctype': "Sales Invoice",
                 'reference_name': sinv.name,
                 'total_amount': sinv.base_grand_total,
                 'outstanding_amount': sinv.outstanding_amount,
-                'allocated_amount': sinv.outstanding_amount
+                'allocated_amount': betrag
             }
         ],
         'reference_no': 'Barzahlung {0}'.format(sinv.name) if bar else 'EZS-Zahlung {0}'.format(sinv.name),
@@ -990,8 +993,9 @@ def als_hv_verbuchen(pe):
     return
 
 @frappe.whitelist()
-def fr_bez_ezs(fr, datum):
-    hv_sinv = create_unpaid_sinv(fr)
+def fr_bez_ezs(fr, datum, betrag):
+    betrag = float(betrag)
+    hv_sinv = create_unpaid_sinv(fr, betrag=betrag)
     hv_sinv = frappe.get_doc("Sales Invoice", hv_sinv)
     
     customer = hv_sinv.customer
