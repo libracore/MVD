@@ -119,7 +119,9 @@ frappe.ui.form.on('Mitgliedschaft', {
             frm.add_custom_button(__("Erstelle ToDo"),  function() {
                 erstelle_todo(frm);
             });
-            
+        }
+        
+        if (!frm.doc.__islocal) {
             // load html overview
             load_html_overview(frm);
             
