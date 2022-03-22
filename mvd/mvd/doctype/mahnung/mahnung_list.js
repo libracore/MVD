@@ -51,12 +51,13 @@ function submit_mahnungen(mahnungen, alle) {
         'callback': function(r) {
             var jobname = r.message;
             if (jobname != 'keine') {
+                jobname = "Buche Mahnungen " + jobname;
                 let mahnung_refresher = setInterval(mahnung_refresher_handler, 3000, jobname);
                 function mahnung_refresher_handler(jobname) {
                     frappe.call({
-                    'method': "mvd.mvd.doctype.mahnung.mahnung.is_buhchungs_job_running",
+                    'method': "mvd.mvd.doctype.mahnung.mahnung.is_mahnungs_job_running",
                         'args': {
-                            'mahnung': jobname
+                            'jobname': jobname
                         },
                         'callback': function(res) {
                             if (res.message == 'refresh') {
@@ -77,16 +78,34 @@ function submit_mahnungen(mahnungen, alle) {
 
 function create_payment_reminders(values) {
     if (frappe.user.has_role("MV_MA")) {
+        frappe.dom.freeze('Bitte warten, erstelle Mahnungen...');
         frappe.call({
             'method': "mvd.mvd.doctype.mahnung.mahnung.create_payment_reminders",
             'args': {
                 'sektion_id': values.sektion_id
             },
             'callback': function(response) {
-                frappe.msgprint(response.message);
-                cur_list.refresh();
+                var jobname = values.sektion_id + " Mahnlauf";
+                let mahnung_refresher = setInterval(mahnung_refresher_handler, 3000, jobname);
+                function mahnung_refresher_handler(jobname) {
+                    frappe.call({
+                    'method': "mvd.mvd.doctype.mahnung.mahnung.is_mahnungs_job_running",
+                        'args': {
+                            'jobname': jobname
+                        },
+                        'callback': function(res) {
+                            if (res.message == 'refresh') {
+                                clearInterval(mahnung_refresher);
+                                frappe.dom.unfreeze();
+                                cur_list.refresh();
+                            }
+                        }
+                    });
+                };
             }
         });
+        
+        
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
     }
