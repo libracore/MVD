@@ -238,7 +238,7 @@ def zahlungen_zuweisen(master_data):
                                 AND `status` = 'Unpaid'
                                 AND (REPLACE(`qrr_referenz`, ' ', '') = '{qrr}' OR REPLACE(`qrr_referenz`, ' ', '') = '{qrr_short}')""".format(qrr=qrr, qrr_short=qrr_short), as_dict=True)
             if len(fr) > 0:
-                fr_sinv = create_unpaid_sinv(fr, betrag=12)
+                fr_sinv = create_unpaid_sinv(fr[0].name, betrag=12)
                 sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`
                                         FROM `tabSales Invoice`
                                         WHERE `name` = '{fr_sinv}'""".format(fr_sinv=fr_sinv), as_dict=True)
@@ -362,19 +362,20 @@ def zahlungen_zuweisen(master_data):
             else:
                 # 5.
                 potenzieller_umzug = False
-                mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
-                if mitgliedschaft.status_c == 'Wegzug':
-                    if mitgliedschaft.wegzug_zu:
-                        umzugs_mitgliedschaft = frappe.db.sql("""SELECT
-                                                                    `name`
-                                                                FROM `tabMitgliedschaft`
-                                                                WHERE `sektion_id` = '{wegzug_zu}'
-                                                                AND `mitglied_nr` = '{mitglied_nr}'""".format(wegzug_zu=mitgliedschaft.wegzug_zu, mitglied_nr=mitgliedschaft.mitglied_nr), as_dict=True)
-                        if len(umzugs_mitgliedschaft) > 0:
-                            umzugs_mitgliedschaft = umzugs_mitgliedschaft[0].name
-                            sinv = frappe.db.sql("""SELECT `name` FROM `tabSales Invoice` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `docstatus` = 1 AND `status` != 'Paid'""".format(mitgliedschaft=umzugs_mitgliedschaft), as_dict=True)
-                            if len(sinv) > 0:
-                                potenzieller_umzug = sinv[0].name
+                if sinv[0].mv_mitgliedschaft:
+                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv[0].mv_mitgliedschaft)
+                    if mitgliedschaft.status_c == 'Wegzug':
+                        if mitgliedschaft.wegzug_zu:
+                            umzugs_mitgliedschaft = frappe.db.sql("""SELECT
+                                                                        `name`
+                                                                    FROM `tabMitgliedschaft`
+                                                                    WHERE `sektion_id` = '{wegzug_zu}'
+                                                                    AND `mitglied_nr` = '{mitglied_nr}'""".format(wegzug_zu=mitgliedschaft.wegzug_zu, mitglied_nr=mitgliedschaft.mitglied_nr), as_dict=True)
+                            if len(umzugs_mitgliedschaft) > 0:
+                                umzugs_mitgliedschaft = umzugs_mitgliedschaft[0].name
+                                sinv = frappe.db.sql("""SELECT `name` FROM `tabSales Invoice` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `docstatus` = 1 AND `status` != 'Paid'""".format(mitgliedschaft=umzugs_mitgliedschaft), as_dict=True)
+                                if len(sinv) > 0:
+                                    potenzieller_umzug = sinv[0].name
                 
                 if potenzieller_umzug:
                     sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`, `company`, `sektion_id`, `debit_to`
