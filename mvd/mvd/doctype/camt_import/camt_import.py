@@ -238,7 +238,7 @@ def zahlungen_zuweisen(master_data):
                                 AND `status` = 'Unpaid'
                                 AND (REPLACE(`qrr_referenz`, ' ', '') = '{qrr}' OR REPLACE(`qrr_referenz`, ' ', '') = '{qrr_short}')""".format(qrr=qrr, qrr_short=qrr_short), as_dict=True)
             if len(fr) > 0:
-                fr_sinv = create_unpaid_sinv(fr, betrag=12)
+                fr_sinv = create_unpaid_sinv(fr[0].name, betrag=12)
                 sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`
                                         FROM `tabSales Invoice`
                                         WHERE `name` = '{fr_sinv}'""".format(fr_sinv=fr_sinv), as_dict=True)
