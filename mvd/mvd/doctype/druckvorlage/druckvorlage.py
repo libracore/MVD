@@ -218,8 +218,6 @@ def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, redu
         additional_filters = ''
         if mitgliedtyp:
             additional_filters += """ AND `mitgliedtyp_c` = '{mitgliedtyp}'""".format(mitgliedtyp=mitgliedtyp)
-        if reduzierte_mitgliedschaft:
-            additional_filters += """ AND `reduzierte_mitgliedschaft` = '{reduzierte_mitgliedschaft}'""".format(reduzierte_mitgliedschaft=reduzierte_mitgliedschaft)
         if language:
             additional_filters += """ AND `language` = '{language}'""".format(language=language)
         
