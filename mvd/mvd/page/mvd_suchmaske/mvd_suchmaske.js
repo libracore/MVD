@@ -391,7 +391,6 @@ frappe.mvd_such_client = {
             parent: page.main.find(".email"),
             df: {
                 fieldtype: "Data",
-                options: 'Email',
                 fieldname: "email",
                 placeholder: "E-Mail"
             },
@@ -709,7 +708,7 @@ frappe.mvd_such_client = {
                             {'fieldname': 'telefon', 'fieldtype': 'Data', 'label': 'Telefon Privat', 'reqd': 0, 'default': cur_page.page.search_fields.tel.get_value()},
                             {'fieldname': 'telefon_g', 'fieldtype': 'Data', 'label': 'Telefon Geschäft', 'reqd': 0},
                             {'fieldname': 'telefon_m', 'fieldtype': 'Data', 'label': 'Telefon Mobile', 'reqd': 0},
-                            {'fieldname': 'email', 'fieldtype': 'Data', 'label': 'E-Mail', 'reqd': 0, 'options': 'Email', 'default': cur_page.page.search_fields.email.get_value()},
+                            {'fieldname': 'email', 'fieldtype': 'Data', 'label': 'E-Mail', 'reqd': 0, 'default': cur_page.page.search_fields.email.get_value()},
                             {'fieldname': 'cb_2', 'fieldtype': 'Column Break'},
                             {'fieldname': 'zusatz_firma', 'fieldtype': 'Data', 'label': 'Zusatz Firma', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_firma.get_value(), 'hidden': cur_page.page.search_fields.mitgliedtyp_c.get_value() == 'Geschäft' ? 0:1},
                             {'fieldname': 'zusatz_adresse', 'fieldtype': 'Data', 'label': 'Zusatz Adresse', 'reqd': 0, 'default': cur_page.page.search_fields.zusatz_adresse.get_value()},
