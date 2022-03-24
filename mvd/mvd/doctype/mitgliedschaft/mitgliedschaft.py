@@ -62,6 +62,12 @@ class Mitgliedschaft(Document):
             # ampelfarbe
             self.ampel_farbe = get_ampelfarbe(self)
             
+            # setze CB "Aktive Mitgliedschaft"
+            if self.status_c not in ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv'):
+                self.aktive_mitgliedschaft = 1
+            else:
+                self.aktive_mitgliedschaft = 0
+            
             # schliesse offene abreits backlogs
             close_open_validations(self.name, 'Daten Validieren')
             if not int(self.interessent_innenbrief_mit_ez) == 1:
