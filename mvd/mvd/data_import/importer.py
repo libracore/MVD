@@ -962,3 +962,19 @@ def ampel_reset():
         print("{0} von {1}".format(count, total))
         count += 1
     frappe.db.commit()
+
+# --------------------------------------------------------------
+# Setze CB "Aktive Mitgliedschaft"
+# --------------------------------------------------------------
+def aktive_mitgliedschaft():
+    '''
+        Example:
+        sudo bench --site [site_name] execute mvd.mvd.data_import.importer.aktive_mitgliedschaft
+    '''
+    
+    print("Aktiviere aktive Mitgliedschaften...")
+    SQL_SAFE_UPDATES_false = frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
+    update_cb = frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `aktive_mitgliedschaft` = 1 WHERE `status_c` NOT IN ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv')""", as_list=True)
+    SQL_SAFE_UPDATES_true = frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)
+    frappe.db.commit()
+    print("Aktive Mitgliedschaften aktiviert")

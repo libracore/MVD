@@ -159,7 +159,8 @@
   "begruessung_massendruck_dokument",
   "letzte_bearbeitung_von",
   "status_vor_onl_mutation",
-  "search_hash"
+  "search_hash",
+  "aktive_mitgliedschaft"
  ],
  "fields": [
   {
@@ -1090,10 +1091,16 @@
    "fieldname": "search_hash",
    "fieldtype": "Data",
    "label": "Search Hash"
+  },
+  {
+   "default": "0",
+   "fieldname": "aktive_mitgliedschaft",
+   "fieldtype": "Check",
+   "label": "Aktive Mitgliedschaft"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-03-11 15:22:39.641089",
+ "modified": "2022-03-24 14:38:41.948728",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
