@@ -1,0 +1,12 @@
+.ql-tooltip-arrow {
+    visibility: hidden !important;
+}
+
+.ql-tooltip {
+    left: 2.667px !important;
+    top: -50px !important;
+}
+
+.reply.timeline-content-show {
+    overflow: visible !important;
+}
