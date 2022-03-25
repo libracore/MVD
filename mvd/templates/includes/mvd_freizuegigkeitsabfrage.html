@@ -49,7 +49,7 @@
                 <td>{{ mitgliedschaft.ort }}</td>
                 <td>{% if mitgliedschaft.eintritt %}{{ frappe.utils.get_datetime(mitgliedschaft.eintritt).strftime('%d.%m.%Y') }}{% else %}-{% endif %}</td>
                 <td>{% if mitgliedschaft.austritt %}{{ frappe.utils.get_datetime(mitgliedschaft.austritt).strftime('%d.%m.%Y') }}{% else %}-{% endif %}</td>
-                <td>-</td>
+                <td>{% if mitgliedschaft.zahlung_mitgliedschaft != '0' %}{{ mitgliedschaft.zahlung_mitgliedschaft }}{% else %}-{% endif %}</td>
             </tr>
         </tbody>
     </table>
