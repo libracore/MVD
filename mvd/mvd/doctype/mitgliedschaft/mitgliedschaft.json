@@ -1100,7 +1100,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-03-24 14:38:41.948728",
+ "modified": "2022-03-25 14:46:03.700679",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
@@ -1182,7 +1182,6 @@
  ],
  "search_fields": "mitglied_nr,mitglied_id",
  "show_name_in_global_search": 1,
- "show_preview_popup": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "title_field": "mitglied_nr",
