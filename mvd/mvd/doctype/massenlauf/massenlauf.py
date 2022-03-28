@@ -68,9 +68,33 @@ def verarbeitung_massenlauf(massenlauf):
 def mahnung(massenlauf):
     try:
         mahnungen = frappe.get_list('Mahnung', filters={'massenlauf_referenz': massenlauf, 'docstatus': 1}, fields=['name'])
+        counter = 1
         output = PdfFileWriter()
         for mahnung in mahnungen:
             output = frappe.get_print("Mahnung", mahnung['name'], 'Mahnung', as_pdf = True, output = output, ignore_zugferd=True)
+            if counter == 500:
+                file_name = "Mahnungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+                file_name = file_name.split(".")[0]
+                file_name = file_name.replace(":", "-")
+                file_name = file_name + ".pdf"
+                
+                filedata = get_file_data_from_writer(output)
+                
+                _file = frappe.get_doc({
+                    "doctype": "File",
+                    "file_name": file_name,
+                    "folder": "Home/Attachments",
+                    "is_private": 1,
+                    "content": filedata,
+                    "attached_to_doctype": 'Massenlauf',
+                    "attached_to_name": massenlauf
+                })
+                
+                _file.save(ignore_permissions=True)
+                output = PdfFileWriter()
+                counter = 1
+            else:
+                counter += 1
             
         file_name = "Mahnungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
         file_name = file_name.split(".")[0]
@@ -105,34 +129,58 @@ def kuendigung(massenlauf):
     try:
         mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'kuendigung_verarbeiten': 1}, fields=['name'])
         if len(mitgliedschaften) > 0:
+            counter = 1
             output = PdfFileWriter()
             for mitgliedschaft in mitgliedschaften:
                 output = frappe.get_print("Mitgliedschaft", mitgliedschaft['name'], 'Kündigungsbestätigung', as_pdf = True, output = output, ignore_zugferd=True)
+                if counter == 500:
+                    file_name = "Kündigungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+                    file_name = file_name.split(".")[0]
+                    file_name = file_name.replace(":", "-")
+                    file_name = file_name + ".pdf"
+                    
+                    filedata = get_file_data_from_writer(output)
+                    
+                    _file = frappe.get_doc({
+                        "doctype": "File",
+                        "file_name": file_name,
+                        "folder": "Home/Attachments",
+                        "is_private": 1,
+                        "content": filedata,
+                        "attached_to_doctype": 'Massenlauf',
+                        "attached_to_name": massenlauf
+                    })
+                    
+                    _file.save(ignore_permissions=True)
+                    output = PdfFileWriter()
+                    counter = 1
+                else:
+                    counter += 1
             
-        file_name = "Kündigungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
-        file_name = file_name.split(".")[0]
-        file_name = file_name.replace(":", "-")
-        file_name = file_name + ".pdf"
-        
-        filedata = get_file_data_from_writer(output)
-        
-        _file = frappe.get_doc({
-            "doctype": "File",
-            "file_name": file_name,
-            "folder": "Home/Attachments",
-            "is_private": 1,
-            "content": filedata,
-            "attached_to_doctype": 'Massenlauf',
-            "attached_to_name": massenlauf
-        })
-        
-        _file.save(ignore_permissions=True)
-        
-        for mitgliedschaft in mitgliedschaften:
-            m = frappe.get_doc("Mitgliedschaft", mitgliedschaft['name'])
-            m.kuendigung_verarbeiten = '0'
-            m.letzte_bearbeitung_von = 'SP'
-            m.save(ignore_permissions=True)
+            file_name = "Kündigungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+            file_name = file_name.split(".")[0]
+            file_name = file_name.replace(":", "-")
+            file_name = file_name + ".pdf"
+            
+            filedata = get_file_data_from_writer(output)
+            
+            _file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": file_name,
+                "folder": "Home/Attachments",
+                "is_private": 1,
+                "content": filedata,
+                "attached_to_doctype": 'Massenlauf',
+                "attached_to_name": massenlauf
+            })
+            
+            _file.save(ignore_permissions=True)
+            
+            for mitgliedschaft in mitgliedschaften:
+                m = frappe.get_doc("Mitgliedschaft", mitgliedschaft['name'])
+                m.kuendigung_verarbeiten = '0'
+                m.letzte_bearbeitung_von = 'SP'
+                m.save(ignore_permissions=True)
         
         massenlauf = frappe.get_doc("Massenlauf", massenlauf)
         massenlauf.status = 'Abgeschlossen'
@@ -149,6 +197,7 @@ def zuzug(massenlauf):
         ungedruckte = ''
         mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'zuzug_massendruck': 1}, fields=['name', 'zuzugs_rechnung', 'zuzug_korrespondenz'])
         if len(mitgliedschaften) > 0:
+            counter = 1
             output = PdfFileWriter()
             for mitgliedschaft in mitgliedschaften:
                 if mitgliedschaft['zuzugs_rechnung']:
@@ -157,25 +206,48 @@ def zuzug(massenlauf):
                     output = frappe.get_print("Korrespondenz", mitgliedschaft['zuzug_korrespondenz'], 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
                 else:
                     ungedruckte += mitgliedschaft['name'] + '\n'
+                if counter == 500:
+                    file_name = "Zuzugs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+                    file_name = file_name.split(".")[0]
+                    file_name = file_name.replace(":", "-")
+                    file_name = file_name + ".pdf"
+                    
+                    filedata = get_file_data_from_writer(output)
+                    
+                    _file = frappe.get_doc({
+                        "doctype": "File",
+                        "file_name": file_name,
+                        "folder": "Home/Attachments",
+                        "is_private": 1,
+                        "content": filedata,
+                        "attached_to_doctype": 'Massenlauf',
+                        "attached_to_name": massenlauf
+                    })
+                    
+                    _file.save(ignore_permissions=True)
+                    output = PdfFileWriter()
+                    counter = 1
+                else:
+                    counter += 1
             
-        file_name = "Zuzugs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
-        file_name = file_name.split(".")[0]
-        file_name = file_name.replace(":", "-")
-        file_name = file_name + ".pdf"
-        
-        filedata = get_file_data_from_writer(output)
-        
-        _file = frappe.get_doc({
-            "doctype": "File",
-            "file_name": file_name,
-            "folder": "Home/Attachments",
-            "is_private": 1,
-            "content": filedata,
-            "attached_to_doctype": 'Massenlauf',
-            "attached_to_name": massenlauf
-        })
-        
-        _file.save(ignore_permissions=True)
+            file_name = "Zuzugs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+            file_name = file_name.split(".")[0]
+            file_name = file_name.replace(":", "-")
+            file_name = file_name + ".pdf"
+            
+            filedata = get_file_data_from_writer(output)
+            
+            _file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": file_name,
+                "folder": "Home/Attachments",
+                "is_private": 1,
+                "content": filedata,
+                "attached_to_doctype": 'Massenlauf',
+                "attached_to_name": massenlauf
+            })
+            
+            _file.save(ignore_permissions=True)
         
         for mitgliedschaft in mitgliedschaften:
             m = frappe.get_doc("Mitgliedschaft", mitgliedschaft['name'])
@@ -199,29 +271,53 @@ def begruessung_bezahlung(massenlauf):
     try:
         mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 1}, fields=['name', 'begruessung_massendruck_dokument'])
         if len(mitgliedschaften) > 0:
+            counter = 1
             output = PdfFileWriter()
             for mitgliedschaft in mitgliedschaften:
                 if mitgliedschaft['begruessung_massendruck_dokument']:
                     output = frappe.get_print("Korrespondenz", mitgliedschaft['begruessung_massendruck_dokument'], 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+                if counter == 500:
+                    file_name = "Begüssungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+                    file_name = file_name.split(".")[0]
+                    file_name = file_name.replace(":", "-")
+                    file_name = file_name + ".pdf"
+                    
+                    filedata = get_file_data_from_writer(output)
+                    
+                    _file = frappe.get_doc({
+                        "doctype": "File",
+                        "file_name": file_name,
+                        "folder": "Home/Attachments",
+                        "is_private": 1,
+                        "content": filedata,
+                        "attached_to_doctype": 'Massenlauf',
+                        "attached_to_name": massenlauf
+                    })
+                    
+                    _file.save(ignore_permissions=True)
+                    output = PdfFileWriter()
+                    counter = 1
+                else:
+                    counter += 1
             
-        file_name = "Begüssungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
-        file_name = file_name.split(".")[0]
-        file_name = file_name.replace(":", "-")
-        file_name = file_name + ".pdf"
-        
-        filedata = get_file_data_from_writer(output)
-        
-        _file = frappe.get_doc({
-            "doctype": "File",
-            "file_name": file_name,
-            "folder": "Home/Attachments",
-            "is_private": 1,
-            "content": filedata,
-            "attached_to_doctype": 'Massenlauf',
-            "attached_to_name": massenlauf
-        })
-        
-        _file.save(ignore_permissions=True)
+            file_name = "Begüssungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+            file_name = file_name.split(".")[0]
+            file_name = file_name.replace(":", "-")
+            file_name = file_name + ".pdf"
+            
+            filedata = get_file_data_from_writer(output)
+            
+            _file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": file_name,
+                "folder": "Home/Attachments",
+                "is_private": 1,
+                "content": filedata,
+                "attached_to_doctype": 'Massenlauf',
+                "attached_to_name": massenlauf
+            })
+            
+            _file.save(ignore_permissions=True)
         
         for mitgliedschaft in mitgliedschaften:
             m = frappe.get_doc("Mitgliedschaft", mitgliedschaft['name'])
@@ -244,29 +340,53 @@ def begruessung_online(massenlauf):
     try:
         mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 0}, fields=['name', 'begruessung_massendruck_dokument'])
         if len(mitgliedschaften) > 0:
+            counter = 1
             output = PdfFileWriter()
             for mitgliedschaft in mitgliedschaften:
                 if mitgliedschaft['begruessung_massendruck_dokument']:
                     output = frappe.get_print("Korrespondenz", mitgliedschaft['begruessung_massendruck_dokument'], 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+                if counter == 500:
+                    file_name = "Begüssungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+                    file_name = file_name.split(".")[0]
+                    file_name = file_name.replace(":", "-")
+                    file_name = file_name + ".pdf"
+                    
+                    filedata = get_file_data_from_writer(output)
+                    
+                    _file = frappe.get_doc({
+                        "doctype": "File",
+                        "file_name": file_name,
+                        "folder": "Home/Attachments",
+                        "is_private": 1,
+                        "content": filedata,
+                        "attached_to_doctype": 'Massenlauf',
+                        "attached_to_name": massenlauf
+                    })
+                    
+                    _file.save(ignore_permissions=True)
+                    output = PdfFileWriter()
+                    counter = 1
+                else:
+                    counter += 1
             
-        file_name = "Begüssungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
-        file_name = file_name.split(".")[0]
-        file_name = file_name.replace(":", "-")
-        file_name = file_name + ".pdf"
-        
-        filedata = get_file_data_from_writer(output)
-        
-        _file = frappe.get_doc({
-            "doctype": "File",
-            "file_name": file_name,
-            "folder": "Home/Attachments",
-            "is_private": 1,
-            "content": filedata,
-            "attached_to_doctype": 'Massenlauf',
-            "attached_to_name": massenlauf
-        })
-        
-        _file.save(ignore_permissions=True)
+            file_name = "Begüssungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+            file_name = file_name.split(".")[0]
+            file_name = file_name.replace(":", "-")
+            file_name = file_name + ".pdf"
+            
+            filedata = get_file_data_from_writer(output)
+            
+            _file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": file_name,
+                "folder": "Home/Attachments",
+                "is_private": 1,
+                "content": filedata,
+                "attached_to_doctype": 'Massenlauf',
+                "attached_to_name": massenlauf
+            })
+            
+            _file.save(ignore_permissions=True)
         
         for mitgliedschaft in mitgliedschaften:
             m = frappe.get_doc("Mitgliedschaft", mitgliedschaft['name'])
@@ -288,28 +408,52 @@ def korrespondenz(massenlauf):
     try:
         korrespondenzen = frappe.get_list('Korrespondenz', filters={'massenlauf': 1}, fields=['name'])
         if len(korrespondenzen) > 0:
+            counter = 1
             output = PdfFileWriter()
             for korrespondenz in korrespondenzen:
                 output = frappe.get_print("Korrespondenz", korrespondenz['name'], 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+                if counter == 500:
+                    file_name = "Korrespondenz_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+                    file_name = file_name.split(".")[0]
+                    file_name = file_name.replace(":", "-")
+                    file_name = file_name + ".pdf"
+                    
+                    filedata = get_file_data_from_writer(output)
+                    
+                    _file = frappe.get_doc({
+                        "doctype": "File",
+                        "file_name": file_name,
+                        "folder": "Home/Attachments",
+                        "is_private": 1,
+                        "content": filedata,
+                        "attached_to_doctype": 'Massenlauf',
+                        "attached_to_name": massenlauf
+                    })
+                    
+                    _file.save(ignore_permissions=True)
+                    output = PdfFileWriter()
+                    counter = 1
+                else:
+                    counter += 1
             
-        file_name = "Korrespondenz_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
-        file_name = file_name.split(".")[0]
-        file_name = file_name.replace(":", "-")
-        file_name = file_name + ".pdf"
-        
-        filedata = get_file_data_from_writer(output)
-        
-        _file = frappe.get_doc({
-            "doctype": "File",
-            "file_name": file_name,
-            "folder": "Home/Attachments",
-            "is_private": 1,
-            "content": filedata,
-            "attached_to_doctype": 'Massenlauf',
-            "attached_to_name": massenlauf
-        })
-        
-        _file.save(ignore_permissions=True)
+            file_name = "Korrespondenz_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+            file_name = file_name.split(".")[0]
+            file_name = file_name.replace(":", "-")
+            file_name = file_name + ".pdf"
+            
+            filedata = get_file_data_from_writer(output)
+            
+            _file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": file_name,
+                "folder": "Home/Attachments",
+                "is_private": 1,
+                "content": filedata,
+                "attached_to_doctype": 'Massenlauf',
+                "attached_to_name": massenlauf
+            })
+            
+            _file.save(ignore_permissions=True)
         
         for korrespondenz in korrespondenzen:
             k = frappe.get_doc("Korrespondenz", korrespondenz['name'])
@@ -330,29 +474,53 @@ def rechnung(massenlauf):
     try:
         mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'rg_massendruck_vormerkung': 1}, fields=['rg_massendruck', 'name'])
         if len(mitgliedschaften) > 0:
+            counter = 1
             output = PdfFileWriter()
             for mitgliedschaft in mitgliedschaften:
                 if mitgliedschaft['rg_massendruck']:
                     output = frappe.get_print("Sales Invoice", mitgliedschaft['rg_massendruck'], 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)
+                if counter == 500:
+                    file_name = "Mitgliedschaftsrechnungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+                    file_name = file_name.split(".")[0]
+                    file_name = file_name.replace(":", "-")
+                    file_name = file_name + ".pdf"
+                    
+                    filedata = get_file_data_from_writer(output)
+                    
+                    _file = frappe.get_doc({
+                        "doctype": "File",
+                        "file_name": file_name,
+                        "folder": "Home/Attachments",
+                        "is_private": 1,
+                        "content": filedata,
+                        "attached_to_doctype": 'Massenlauf',
+                        "attached_to_name": massenlauf
+                    })
+                    
+                    _file.save(ignore_permissions=True)
+                    output = PdfFileWriter()
+                    counter = 1
+                else:
+                    counter += 1
             
-        file_name = "Mitgliedschaftsrechnungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
-        file_name = file_name.split(".")[0]
-        file_name = file_name.replace(":", "-")
-        file_name = file_name + ".pdf"
-        
-        filedata = get_file_data_from_writer(output)
-        
-        _file = frappe.get_doc({
-            "doctype": "File",
-            "file_name": file_name,
-            "folder": "Home/Attachments",
-            "is_private": 1,
-            "content": filedata,
-            "attached_to_doctype": 'Massenlauf',
-            "attached_to_name": massenlauf
-        })
-        
-        _file.save(ignore_permissions=True)
+            file_name = "Mitgliedschaftsrechnungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
+            file_name = file_name.split(".")[0]
+            file_name = file_name.replace(":", "-")
+            file_name = file_name + ".pdf"
+            
+            filedata = get_file_data_from_writer(output)
+            
+            _file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": file_name,
+                "folder": "Home/Attachments",
+                "is_private": 1,
+                "content": filedata,
+                "attached_to_doctype": 'Massenlauf',
+                "attached_to_name": massenlauf
+            })
+            
+            _file.save(ignore_permissions=True)
         
         for m in mitgliedschaften:
             m = frappe.get_doc("Mitgliedschaft", m['name'])
