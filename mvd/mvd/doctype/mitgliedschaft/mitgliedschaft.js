@@ -272,6 +272,33 @@ frappe.ui.form.on('Mitgliedschaft', {
     },
     rg_plz: function(frm) {
         pincode_lookup(cur_frm.doc.rg_plz, 'rg_ort');
+    },
+    tel_p_1: function(frm) {
+        is_valid_phone(cur_frm.doc.tel_p_1);
+    },
+    tel_m_1: function(frm) {
+        is_valid_phone(cur_frm.doc.tel_m_1);
+    },
+    tel_g_1: function(frm) {
+        is_valid_phone(cur_frm.doc.tel_g_1);
+    },
+    tel_p_2: function(frm) {
+        is_valid_phone(cur_frm.doc.tel_p_2);
+    },
+    tel_m_2: function(frm) {
+        is_valid_phone(cur_frm.doc.tel_m_2);
+    },
+    tel_g_2: function(frm) {
+        is_valid_phone(cur_frm.doc.tel_g_2);
+    },
+    rg_tel_p: function(frm) {
+        is_valid_phone(cur_frm.doc.rg_tel_p);
+    },
+    rg_tel_m: function(frm) {
+        is_valid_phone(cur_frm.doc.rg_tel_m);
+    },
+    rg_tel_g: function(frm) {
+        is_valid_phone(cur_frm.doc.rg_tel_g);
     }
 });
 
@@ -1332,5 +1359,16 @@ function mitglied_inaktivieren(frm) {
             // on no
         }
     )
+}
+
+function is_valid_phone(number) {
+    var regex = /[^+0123456789 ]/g
+    if (regex.test(number)) {
+        frappe.msgprint({
+            title: __('Unzulässiges Format'),
+            indicator: 'red',
+            message: __('Die erfasste Telefonnummer ist <b>nicht</b> zulässig.<br>Zulässige Inhalte sind:<ul><li>+</li><li>Leerschlag</li><li>Zahlen von 0-9</li></ul>')
+        });
+    }
 }
 
