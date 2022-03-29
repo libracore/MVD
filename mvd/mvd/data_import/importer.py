@@ -978,3 +978,25 @@ def aktive_mitgliedschaft():
     SQL_SAFE_UPDATES_true = frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)
     frappe.db.commit()
     print("Aktive Mitgliedschaften aktiviert")
+
+# --------------------------------------------------------------
+# Tausche CB "Geschenkunterlagen an Schenker"
+# --------------------------------------------------------------
+def change_geschenk_cb():
+    '''
+        Example:
+        sudo bench --site [site_name] execute mvd.mvd.data_import.importer.change_geschenk_cb
+    '''
+    
+    mitgliedschaften = frappe.db.sql("""SELECT `name`, `geschenkunterlagen_an_schenker` FROM `tabMitgliedschaft` WHERE `ist_geschenkmitgliedschaft` = 1""", as_dict=True)
+    print("Change {0} Mitgliedschaften".format(len(mitgliedschaften)))
+    count = 1
+    for m in mitgliedschaften:
+        if int(m.geschenkunterlagen_an_schenker) == 1:
+            frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `geschenkunterlagen_an_schenker` = 0 WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=m.name), as_list=True)
+        else:
+            frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `geschenkunterlagen_an_schenker` = 1 WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=m.name), as_list=True)
+        print("{0} von {1}".format(count, len(mitgliedschaften)))
+        count += 1
+    frappe.db.commit()
+    
