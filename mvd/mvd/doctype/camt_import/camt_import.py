@@ -19,7 +19,14 @@ from decimal import Decimal, ROUND_HALF_UP
 from frappe.utils.data import add_days, today, getdate, now
 
 class CAMTImport(Document):
-    pass
+    def validate(self):
+        if not self.sektion_id:
+            sektionen = frappe.db.sql("""SELECT `for_value` FROM `tabUser Permission` WHERE `allow` = 'Sektion' AND `is_default` = 1 AND `user` = '{user}'""".format(user=frappe.session.user), as_dict=True)
+            if len(sektionen) > 0:
+                self.sektion_id = sektionen[0].for_value
+                sektion = frappe.get_doc("Sektion", sektionen[0].for_value)
+                self.company = sektion.company
+                self.account = sektion.account
 
 @frappe.whitelist()
 def lese_camt_file(camt_import, file_path):
