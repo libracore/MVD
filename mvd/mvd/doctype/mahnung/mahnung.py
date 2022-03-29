@@ -140,6 +140,7 @@ def get_mahnungs_qrrs(mahnung):
     mahnung = frappe.get_doc("Mahnung", mahnung)
     sektion = frappe.get_doc("Sektion", mahnung.sektion_id)
     bankkonto = frappe.get_doc("Account", sektion.account)
+    druckvorlage = frappe.get_doc("Druckvorlage", mahnung.druckvorlage)
     qrrs = []
     for _sinv in mahnung.sales_invoices:
         sinv = frappe.get_doc("Sales Invoice", _sinv.sales_invoice)
@@ -239,13 +240,14 @@ def get_mahnungs_qrrs(mahnung):
             'receiver_number': receiver_number,
             'receiver_country': receiver_country,
             'receiver_pincode': receiver_pincode,
-            'receiver_town': receiver_town,
+            'receiver_town': _(receiver_town, druckvorlage.language or 'de'),
             'payer_name': payer_name,
             'payer_street': payer_street,
             'payer_number': payer_number,
             'payer_country': payer_country,
             'payer_pincode': payer_pincode,
-            'payer_town': payer_town
+            'payer_town': payer_town,
+            'language': druckvorlage.language or 'de'
         }
         qrrs.append(qrr_dict)
     return qrrs

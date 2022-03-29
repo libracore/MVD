@@ -20,7 +20,8 @@
         'payer_number': '55',
         'payer_country': 'CH',
         'payer_pincode': '8636',
-        'payer_town': 'Wald ZH'
+        'payer_town': 'Wald ZH',
+        'language': 'de'
     } %}
 #}-->
 
@@ -266,18 +267,18 @@
     <div id="qrr">
         <div id="empfangsschein">
             <div id="empfangsschein_titel">
-                <p class="titel-e-z">Empfangsschein</p>
+                <p class="titel-e-z">{{ _("Empfangsschein", qrr.language) }}</p>
             </div>
             <div id="empfangsschein_angaben">
                 <p class="wert-e">
-                    <span class="ueberschrift-e">Konto / Zahlbar an</span><br>
+                    <span class="ueberschrift-e">{{ _("Konto / Zahlbar an", qrr.language) }}</span><br>
                     {{ qrr.iban }}<br>
                     {{ qrr.receiver_name }}<br>
                     {{ qrr.receiver_street | trim }} {{ qrr.receiver_number }}<br>
                     {{ qrr.receiver_country }}-{{ qrr.receiver_pincode }} {{ qrr.receiver_town }}<br><br>
-                    <span class="ueberschrift-e">Referenz</span><br>
+                    <span class="ueberschrift-e">{{ _("Referenz", qrr.language) }}</span><br>
                     {{ qrr.reference }}<br><br>
-                    <span class="ueberschrift-e">Zahlbar durch</span><br>
+                    <span class="ueberschrift-e">{{ _("Zahlbar durch", qrr.language) }}</span><br>
                     {{ qrr.payer_name }}<br>
                     {{ qrr.payer_street | trim }} {{ qrr.payer_number }}<br>
                     {{ qrr.payer_country }}-{{ qrr.payer_pincode }} {{ qrr.payer_town }}
@@ -286,25 +287,25 @@
             <div id="empfangsschein_betrag">
                 <div id="empfangsschein_betrag_1">
                     <p class="betrag-e">
-                        <span class="ueberschrift-e">Währung</span><br>
+                        <span class="ueberschrift-e">{{ _("Währung", qrr.language) }}</span><br>
                         {{ qrr.currency }}
                     </p>
                 </div>
                 <div id="empfangsschein_betrag_2">
                     <p class="betrag-e">
-                        <span class="ueberschrift-e">Betrag</span><br>
+                        <span class="ueberschrift-e">{{ _("Betrag", qrr.language) }}</span><br>
                         {{ qrr.amount }}
                     </p>
                 </div>
             </div>
             <div id="empfangsschein_annahmestelle">
-                Annahmestelle
+                {{ _("Annahmestelle", qrr.language) }}
             </div>
         </div>
         <div id="zahlteil">
             <div id="zahlteil_links">
                 <div id="zahlteil_titel">
-                    <p class="titel-e-z">Zahlteil</p>
+                    <p class="titel-e-z">{{ _("Zahlteil", qrr.language) }}</p>
                 </div>
                 <div id="zahlteil_qr_platzhalter">
                     <div id="qr_code">
@@ -314,13 +315,13 @@
                 <div id="zahlteil_betrag">
                     <div id="zahlteil_betrag_1">
                         <p>
-                            <span class="ueberschrift-z">Währung</span><br>
+                            <span class="ueberschrift-z">{{ _("Währung", qrr.language) }}</span><br>
                             <span class="betrag-z">{{ qrr.currency }}</span>
                         </p>
                     </div>
                     <div id="zahlteil_betrag_2">
                         <p>
-                            <span class="ueberschrift-z">Betrag</span><br>
+                            <span class="ueberschrift-z">{{ _("Betrag", qrr.language) }}</span><br>
                             <span class="betrag-z">{{ qrr.amount }}</span>
                         </p>
                     </div>
@@ -329,16 +330,16 @@
             <div id="zahlteil_rechts">
                 <div id="zahlteil_angaben">
                     <p class="wert-z">
-                        <span class="ueberschrift-z">Konto / Zahlbar an</span><br>
+                        <span class="ueberschrift-z">{{ _("Konto / Zahlbar an", qrr.language) }}</span><br>
                         {{ qrr.iban }}<br>
                         {{ qrr.receiver_name }}<br>
                         {{ qrr.receiver_street | trim }} {{ qrr.receiver_number }}<br>
                         {{ qrr.receiver_country }}-{{ qrr.receiver_pincode }} {{ qrr.receiver_town }}<br><br>
-                        <span class="ueberschrift-z">Referenz</span><br>
+                        <span class="ueberschrift-z">{{ _("Referenz", qrr.language) }}</span><br>
                         {{ qrr.reference }}<br><br>
-                        <span class="ueberschrift-z">Zusätzliche Informationen</span><br>
+                        <span class="ueberschrift-z">{{ _("Zusätzliche Informationen", qrr.language) }}</span><br>
                         {{ qrr.message|replace(" // ", "<br>") }}<br><br>
-                        <span class="ueberschrift-z">Zahlbar durch</span><br>
+                        <span class="ueberschrift-z">{{ _("Zahlbar durch", qrr.language) }}</span><br>
                         {{ qrr.payer_name }}<br>
                         {{ qrr.payer_street | trim }} {{ qrr.payer_number }}<br>
                         {{ qrr.payer_country }}-{{ qrr.payer_pincode }} {{ qrr.payer_town }}
