@@ -263,7 +263,7 @@
    "depends_on": "eval:doc.dokument!='Mahnung'&&doc.dokument!='Geschenkmitgliedschaft'",
    "fieldname": "tipps",
    "fieldtype": "HTML",
-   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n</ul>"
+   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Rechnungsbetrag (Nur wenn mit EZ) -&gt; <b>%%RECHNUNGSBETRAG%%</b></li>\n</ul>"
   },
   {
    "default": "0",
@@ -385,7 +385,7 @@
    "options": "Schenkende*r\nBeschenkte*r"
   }
  ],
- "modified": "2022-03-04 21:45:12.711211",
+ "modified": "2022-03-31 21:31:47.942015",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",
