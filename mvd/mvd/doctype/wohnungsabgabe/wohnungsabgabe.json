@@ -1,0 +1,95 @@
+{
+ "autoname": "format:WA-{sektion_id}-{####}",
+ "creation": "2022-03-31 10:56:44.803311",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sektion_id",
+  "expertin",
+  "section_auftrag",
+  "abgabe"
+ ],
+ "fields": [
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expertin",
+   "fieldtype": "Data",
+   "label": "Expert*in"
+  },
+  {
+   "fieldname": "section_auftrag",
+   "fieldtype": "Section Break",
+   "label": "Auftrag"
+  },
+  {
+   "default": "0",
+   "fieldname": "abgabe",
+   "fieldtype": "Check",
+   "label": "Abgabe"
+  }
+ ],
+ "modified": "2022-03-31 11:08:30.206845",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Wohnungsabgabe",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MV_MVD",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MV_MA",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MV_GL",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
