@@ -62,6 +62,11 @@ class Mitgliedschaft(Document):
             # ampelfarbe
             self.ampel_farbe = get_ampelfarbe(self)
             
+            # sektionswechsel fix von MVZH
+            if self.status_c == 'Zuzug' and int(self.zuzug_massendruck) == 1:
+                if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
+                    self.zuzug_fix()
+            
             # setze CB "Aktive Mitgliedschaft"
             if self.status_c not in ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv'):
                 self.aktive_mitgliedschaft = 1
@@ -91,6 +96,56 @@ class Mitgliedschaft(Document):
                     # special case sektionswechsel nach ZH
                     if self.wegzug_zu in ('MVZH', 'MVBE', 'MVSO') and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
+    
+    def zuzug_fix(self):
+        # erstelle ggf. neue Rechnung
+        mit_rechnung = False
+        if self.zahlung_mitgliedschaft < int(now().split("-")[0]):
+            if self.naechstes_jahr_geschuldet == 1:
+                mit_rechnung = create_mitgliedschaftsrechnung(self.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=self.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=self.mitgliedtyp_c, reduzierte_mitgliedschaft=self.reduzierte_mitgliedschaft, language=self.language)['default_druckvorlage'])
+        
+        
+        if mit_rechnung:
+            self.zuzugs_rechnung = mit_rechnung
+        else:
+            druckvorlage = frappe.get_doc("Druckvorlage", get_druckvorlagen(sektion=self.sektion_id, dokument='Zuzug ohne EZ', mitgliedtyp=self.mitgliedtyp_c, reduzierte_mitgliedschaft=self.reduzierte_mitgliedschaft, language=self.language)['default_druckvorlage'])
+            _new_korrespondenz = frappe.copy_doc(druckvorlage)
+            _new_korrespondenz.doctype = 'Korrespondenz'
+            _new_korrespondenz.sektion_id = self.sektion_id
+            _new_korrespondenz.titel = 'Zuzug ohne EZ'
+            
+            new_korrespondenz = frappe._dict(_new_korrespondenz.as_dict())
+            keys_to_remove = [
+                'mitgliedtyp_c',
+                'validierungsstring',
+                'language',
+                'reduzierte_mitgliedschaft',
+                'dokument',
+                'default',
+                'deaktiviert',
+                'seite_1_qrr',
+                'seite_1_qrr_spende_hv',
+                'seite_2_qrr',
+                'seite_2_qrr_spende_hv',
+                'seite_3_qrr',
+                'seite_3_qrr_spende_hv',
+                'blatt_2_info_mahnung',
+                'tipps_mahnung'
+            ]
+            for key in keys_to_remove:
+                try:
+                    new_korrespondenz.pop(key)
+                except:
+                    pass
+            
+            new_korrespondenz['mv_mitgliedschaft'] = self.name
+            new_korrespondenz['massenlauf'] = 0
+            
+            new_korrespondenz = frappe.get_doc(new_korrespondenz)
+            new_korrespondenz.insert(ignore_permissions=True)
+            frappe.db.commit()
+            
+            self.zuzug_korrespondenz = new_korrespondenz.name
     
     def handling_kontakt_adresse_kunde(self):
         # Mitglied
