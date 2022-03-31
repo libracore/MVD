@@ -267,11 +267,23 @@ class Mitgliedschaft(Document):
             for sinv in sinvs:
                 sinv = frappe.get_doc("Sales Invoice", sinv.name)
                 if sinv.docstatus == 1:
+                    # cancel linked FR
                     linked_fr = frappe.db.sql("""SELECT `name` FROM `tabFakultative Rechnung` WHERE `sales_invoice` = '{sinv}' AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
                     if len(linked_fr) > 0:
                         for _fr in linked_fr:
                             fr = frappe.get_doc("Fakultative Rechnung", _fr.name)
                             fr.cancel()
+                    
+                    # cancel linked mahnungen
+                    if sinv.payment_reminder_level > 0:
+                        linked_mahnungen = frappe.db.sql("""SELECT DISTINCT `parent` FROM `tabMahnung Invoices` WHERE `sales_invoice` = '{sinv}' AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
+                        if len(linked_mahnungen) > 0:
+                            for _mahnung in linked_mahnungen:
+                                mahnung = frappe.get_doc("Mahnung", _mahnung.parent)
+                                mahnung.cancel()
+                    
+                    # reload & cancel sinv
+                    sinv = frappe.get_doc("Sales Invoice", sinv.name)
                     sinv.cancel()
                 else:
                     if sinv.docstatus == 0:
