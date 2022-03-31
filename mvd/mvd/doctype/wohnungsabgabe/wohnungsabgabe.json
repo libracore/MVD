@@ -6,12 +6,14 @@
  "engine": "InnoDB",
  "field_order": [
   "sektion_id",
+  "mv_mitgliedschaft",
   "expertin",
   "section_auftrag",
   "abgabe"
  ],
  "fields": [
   {
+   "fetch_from": "mv_mitgliedschaft.sektion_id",
    "fieldname": "sektion_id",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -34,9 +36,15 @@
    "fieldname": "abgabe",
    "fieldtype": "Check",
    "label": "Abgabe"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Mitgliedschaft",
+   "options": "Mitgliedschaft"
   }
  ],
- "modified": "2022-03-31 11:08:30.206845",
+ "modified": "2022-03-31 11:17:14.693610",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
