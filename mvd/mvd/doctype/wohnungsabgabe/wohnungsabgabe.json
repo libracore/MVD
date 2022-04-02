@@ -6,10 +6,35 @@
  "engine": "InnoDB",
  "field_order": [
   "sektion_id",
-  "mv_mitgliedschaft",
   "expertin",
+  "section_auftraggeberin",
+  "mv_mitgliedschaft",
+  "column_break_5",
+  "adresse_auftraggeberin",
+  "adresse_neu",
   "section_auftrag",
-  "abgabe"
+  "auftrag_abgabe",
+  "auftrag_uebernahme",
+  "auftrag_zustandsbericht",
+  "section_tarife",
+  "tarif_01",
+  "tarif_02",
+  "tarif_03",
+  "tarif_04",
+  "tarif_05",
+  "tarif_06",
+  "tarif_07",
+  "section_wegspesen",
+  "weg_01",
+  "weg_02",
+  "weg_03",
+  "weg_04",
+  "section_nichtmitglieder",
+  "nichtmitgliederzuschlag",
+  "section_total",
+  "total",
+  "section_intern",
+  "dauer_der_abgabe"
  ],
  "fields": [
   {
@@ -32,19 +57,145 @@
    "label": "Auftrag"
   },
   {
-   "default": "0",
-   "fieldname": "abgabe",
-   "fieldtype": "Check",
-   "label": "Abgabe"
-  },
-  {
    "fieldname": "mv_mitgliedschaft",
    "fieldtype": "Link",
    "label": "Mitgliedschaft",
    "options": "Mitgliedschaft"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "adresse_auftraggeberin",
+   "fieldtype": "Text",
+   "label": "Auftragggeber*in Adresse"
+  },
+  {
+   "fieldname": "adresse_neu",
+   "fieldtype": "Data",
+   "label": "Neue Adresse"
+  },
+  {
+   "fieldname": "section_auftraggeberin",
+   "fieldtype": "Section Break",
+   "label": "Auftraggeber*in"
+  },
+  {
+   "default": "0",
+   "fieldname": "auftrag_abgabe",
+   "fieldtype": "Check",
+   "label": "Abgabe"
+  },
+  {
+   "default": "0",
+   "fieldname": "auftrag_uebernahme",
+   "fieldtype": "Check",
+   "label": "\u00dcbernahme / M\u00e4ngel bei Antritt "
+  },
+  {
+   "default": "0",
+   "fieldname": "auftrag_zustandsbericht",
+   "fieldtype": "Check",
+   "label": "Erstellen Zustandsbericht "
+  },
+  {
+   "fieldname": "section_tarife",
+   "fieldtype": "Section Break",
+   "label": "Tarife"
+  },
+  {
+   "fieldname": "tarif_01",
+   "fieldtype": "Currency",
+   "label": "1 - 1 \u00bd Zimmer Wohnung (Fr. 70.-)"
+  },
+  {
+   "fieldname": "tarif_02",
+   "fieldtype": "Currency",
+   "label": "2 - 3 \u00bd Zimmer Wohnung"
+  },
+  {
+   "fieldname": "tarif_03",
+   "fieldtype": "Currency",
+   "label": "4 - 5 \u00bd Zimmer Wohnung"
+  },
+  {
+   "fieldname": "tarif_04",
+   "fieldtype": "Currency",
+   "label": "6 - 6 \u00bd Zimmer Wohnung"
+  },
+  {
+   "fieldname": "tarif_05",
+   "fieldtype": "Currency",
+   "label": "Einfamilienhaus + kleiner Umschwung"
+  },
+  {
+   "fieldname": "tarif_06",
+   "fieldtype": "Currency",
+   "label": "Zusatz: Garage/EHP/Mansarde/Garten"
+  },
+  {
+   "fieldname": "tarif_07",
+   "fieldtype": "Currency",
+   "label": "Gesch\u00e4ftsr\u00e4ume / Loft"
+  },
+  {
+   "fieldname": "section_wegspesen",
+   "fieldtype": "Section Break",
+   "label": "Wegspesen"
+  },
+  {
+   "fieldname": "weg_01",
+   "fieldtype": "Currency",
+   "label": "Bis 25 KM  "
+  },
+  {
+   "fieldname": "weg_02",
+   "fieldtype": "Currency",
+   "label": "26 KM bis 50 KM  "
+  },
+  {
+   "fieldname": "weg_03",
+   "fieldtype": "Currency",
+   "label": "51 KM bis 80 KM "
+  },
+  {
+   "fieldname": "weg_04",
+   "fieldtype": "Currency",
+   "label": "\u00dcber 80 KM"
+  },
+  {
+   "fieldname": "section_nichtmitglieder",
+   "fieldtype": "Section Break",
+   "label": "Nichtmitglieder-Zuschlag"
+  },
+  {
+   "fieldname": "nichtmitgliederzuschlag",
+   "fieldtype": "Currency",
+   "label": "Nichtmitglieder-Zuschlag"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Float",
+   "label": "Total"
+  },
+  {
+   "fieldname": "section_intern",
+   "fieldtype": "Section Break",
+   "label": "Intern"
+  },
+  {
+   "fieldname": "dauer_der_abgabe",
+   "fieldtype": "Time",
+   "label": "Dauer der Abgabe"
+  },
+  {
+   "fieldname": "section_total",
+   "fieldtype": "Section Break",
+   "label": "Total"
   }
  ],
- "modified": "2022-03-31 11:17:14.693610",
+ "modified": "2022-04-02 15:35:43.276219",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
