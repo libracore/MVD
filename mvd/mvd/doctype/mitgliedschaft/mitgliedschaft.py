@@ -2141,6 +2141,41 @@ def mvm_update(mitgliedschaft, kwargs):
             else:
                 datum_hv_zahlung = None
             
+            if kwargs['onlineHaftpflicht']:
+                online_haftpflicht = kwargs['onlineHaftpflicht']
+            else:
+                online_haftpflicht = None
+            
+            if kwargs['onlineGutschrift']:
+                online_gutschrift = kwargs['onlineGutschrift']
+            else:
+                online_gutschrift = None
+            
+            if kwargs['onlineBetrag']:
+                online_betrag = kwargs['onlineBetrag']
+            else:
+                online_betrag = None
+            
+            if kwargs['datumOnlineVerbucht']:
+                datum_online_verbucht = kwargs['datumOnlineVerbucht']
+            else:
+                datum_online_verbucht = None
+            
+            if kwargs['datumOnlineGutschrift']:
+                datum_online_gutschrift = kwargs['datumOnlineGutschrift']
+            else:
+                datum_online_gutschrift = None
+            
+            if kwargs['onlinePaymentMethod']:
+                online_payment_method = kwargs['onlinePaymentMethod']
+            else:
+                online_payment_method = None
+            
+            if kwargs['onlinePaymentId']:
+                online_payment_id = kwargs['onlinePaymentId']
+            else:
+                online_payment_id = None
+            
             region = ''
             if kwargs['regionCode']:
                 regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
@@ -2176,6 +2211,13 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.geschenkunterlagen_an_schenker = geschenkunterlagen_an_schenker
             mitgliedschaft.datum_hv_zahlung = datum_hv_zahlung
             mitgliedschaft.letzte_bearbeitung_von = 'SP'
+            mitgliedschaft.online_haftpflicht = online_haftpflicht
+            mitgliedschaft.online_gutschrift = online_gutschrift
+            mitgliedschaft.online_betrag = online_betrag
+            mitgliedschaft.datum_online_verbucht = datum_online_verbucht
+            mitgliedschaft.datum_online_gutschrift = datum_online_gutschrift
+            mitgliedschaft.online_payment_method = online_payment_method
+            mitgliedschaft.online_payment_id = online_payment_id
             
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
             
@@ -2286,6 +2328,41 @@ def mvm_neuanlage(kwargs):
             else:
                 datum_hv_zahlung = None
             
+            if kwargs['onlineHaftpflicht']:
+                online_haftpflicht = kwargs['onlineHaftpflicht']
+            else:
+                online_haftpflicht = None
+            
+            if kwargs['onlineGutschrift']:
+                online_gutschrift = kwargs['onlineGutschrift']
+            else:
+                online_gutschrift = None
+            
+            if kwargs['onlineBetrag']:
+                online_betrag = kwargs['onlineBetrag']
+            else:
+                online_betrag = None
+            
+            if kwargs['datumOnlineVerbucht']:
+                datum_online_verbucht = kwargs['datumOnlineVerbucht']
+            else:
+                datum_online_verbucht = None
+            
+            if kwargs['datumOnlineGutschrift']:
+                datum_online_gutschrift = kwargs['datumOnlineGutschrift']
+            else:
+                datum_online_gutschrift = None
+            
+            if kwargs['onlinePaymentMethod']:
+                online_payment_method = kwargs['onlinePaymentMethod']
+            else:
+                online_payment_method = None
+            
+            if kwargs['onlinePaymentId']:
+                online_payment_id = kwargs['onlinePaymentId']
+            else:
+                online_payment_id = None
+            
             region = ''
             if kwargs['regionCode']:
                 regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
@@ -2322,7 +2399,14 @@ def mvm_neuanlage(kwargs):
                 'ist_einmalige_schenkung': ist_einmalige_schenkung,
                 'geschenkunterlagen_an_schenker': geschenkunterlagen_an_schenker,
                 'datum_hv_zahlung': datum_hv_zahlung,
-                'letzte_bearbeitung_von': 'SP'
+                'letzte_bearbeitung_von': 'SP',
+                'online_haftpflicht': online_haftpflicht,
+                'online_gutschrift': online_gutschrift,
+                'online_betrag': online_betrag,
+                'datum_online_verbucht': datum_online_verbucht,
+                'datum_online_gutschrift': datum_online_gutschrift,
+                'online_payment_method': online_payment_method,
+                'online_payment_id': online_payment_id
             })
             
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
@@ -2379,7 +2463,14 @@ def check_main_keys(kwargs):
         'isGeschenkmitgliedschaft',
         'isEinmaligeSchenkung',
         'schenkerHasGeschenkunterlagen',
-        'datumBezahltHaftpflicht'
+        'datumBezahltHaftpflicht',
+        'onlineHaftpflicht',
+        'onlineGutschrift',
+        'onlineBetrag',
+        'datumOnlineVerbucht',
+        'datumOnlineGutschrift',
+        'onlinePaymentMethod',
+        'onlinePaymentId'
     ]
     for key in mandatory_keys:
         if key not in kwargs:
@@ -2763,7 +2854,14 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "isEinmaligeSchenkung": True if int(mitgliedschaft.ist_einmalige_schenkung) == 1 else False,
         "schenkerHasGeschenkunterlagen": True if int(mitgliedschaft.geschenkunterlagen_an_schenker) == 1 else False,
         "datumBezahltHaftpflicht": str(mitgliedschaft.datum_hv_zahlung).replace(" ", "T") + "T00:00:00" if mitgliedschaft.datum_hv_zahlung else None,
-        "adressen": adressen
+        "adressen": adressen,
+        "onlineHaftpflicht": mitgliedschaft.online_haftpflicht,
+        "onlineGutschrift": mitgliedschaft.online_gutschrift,
+        "onlineBetrag": mitgliedschaft.online_betrag,
+        "datumOnlineVerbucht": mitgliedschaft.datum_online_verbucht,
+        "datumOnlineGutschrift": mitgliedschaft.datum_online_gutschrift,
+        "onlinePaymentMethod": mitgliedschaft.online_payment_method,
+        "onlinePaymentId": mitgliedschaft.online_payment_id
     }
     
     return prepared_mvm
