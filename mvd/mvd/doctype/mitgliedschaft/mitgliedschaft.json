@@ -143,6 +143,14 @@
   "section_kommunikation",
   "section_miveba_buchungen",
   "miveba_buchungen",
+  "section_datatrans",
+  "online_haftpflicht",
+  "online_gutschrift",
+  "online_betrag",
+  "datum_online_verbucht",
+  "datum_online_gutschrift",
+  "online_payment_method",
+  "online_payment_id",
   "section_workflow_helpers",
   "validierung_notwendig",
   "kuendigung_verarbeiten",
@@ -1097,10 +1105,52 @@
    "fieldname": "aktive_mitgliedschaft",
    "fieldtype": "Check",
    "label": "Aktive Mitgliedschaft"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_datatrans",
+   "fieldtype": "Section Break",
+   "label": "Datatrans",
+   "permlevel": 2
+  },
+  {
+   "fieldname": "online_haftpflicht",
+   "fieldtype": "Data",
+   "label": "onlineHaftpflicht"
+  },
+  {
+   "fieldname": "online_gutschrift",
+   "fieldtype": "Data",
+   "label": "onlineGutschrift"
+  },
+  {
+   "fieldname": "online_betrag",
+   "fieldtype": "Data",
+   "label": "onlineBetrag"
+  },
+  {
+   "fieldname": "datum_online_verbucht",
+   "fieldtype": "Data",
+   "label": "datumOnlineVerbucht"
+  },
+  {
+   "fieldname": "datum_online_gutschrift",
+   "fieldtype": "Data",
+   "label": "datumOnlineGutschrift"
+  },
+  {
+   "fieldname": "online_payment_method",
+   "fieldtype": "Data",
+   "label": "onlinePaymentMethod"
+  },
+  {
+   "fieldname": "online_payment_id",
+   "fieldtype": "Data",
+   "label": "onlinePaymentId"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-03-25 14:46:03.700679",
+ "modified": "2022-04-04 16:11:53.915917",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
