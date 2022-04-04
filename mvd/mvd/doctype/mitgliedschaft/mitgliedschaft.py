@@ -63,7 +63,7 @@ class Mitgliedschaft(Document):
             self.ampel_farbe = get_ampelfarbe(self)
             
             # sektionswechsel fix von MVZH
-            if self.status_c == 'Zuzug' and int(self.zuzug_massendruck) == 1:
+            if int(self.zuzug_massendruck) == 1:
                 if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
                     self.zuzug_fix()
             
