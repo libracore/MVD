@@ -153,6 +153,14 @@ frappe.ui.form.on('Mitgliedschaft', {
             cur_frm.set_df_property('nachname_1', 'reqd', 1);
             cur_frm.set_df_property('firma', 'reqd', 0);
         }
+        
+        cur_frm.fields_dict['region'].get_query = function(doc) {
+            return {
+                filters: {
+                    "disabled": ["!=", 1]
+                }
+            }
+        }
     },
     m_und_w: function(frm) {
         if (![0, 1].includes(cur_frm.doc.m_und_w)) {

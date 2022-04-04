@@ -8,7 +8,8 @@
  "field_order": [
   "title",
   "region_c",
-  "sektion_id"
+  "sektion_id",
+  "disabled"
  ],
  "fields": [
   {
@@ -31,9 +32,15 @@
    "label": "Sektion",
    "options": "Sektion",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Deaktiviert"
   }
  ],
- "modified": "2022-03-02 16:07:58.867581",
+ "modified": "2022-04-04 20:39:02.336227",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Region",
