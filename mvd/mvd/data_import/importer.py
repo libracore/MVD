@@ -759,7 +759,7 @@ def import_miveba_buchungen(site_name, file_name, limit=False):
                     #mitgliedschaft.save()
                     #frappe.db.commit()
                     mitglied_id = str(get_value(row, 'mitglied_id'))
-                    miveba_buchungen = str(get_value(row, 'weitere_kontaktinfos'))
+                    miveba_buchungen = str(get_value(row, 'buchungen'))
                     frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `miveba_buchungen` = '{miveba_buchungen}' WHERE `name` = '{mitglied_id}'""".format(miveba_buchungen=miveba_buchungen, mitglied_id=mitglied_id), as_list=True)
                     if commit_count == 1000:
                         frappe.db.commit()
