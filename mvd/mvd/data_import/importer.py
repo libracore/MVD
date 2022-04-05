@@ -69,7 +69,8 @@ hm = {
     'objekt_hausnummer': 'objekt_hausnummer',
     'nummer_zu': 'nummer_zu',
     'objekt_nummer_zu': 'objekt_nummer_zu',
-    'rg_nummer_zu': 'rg_nummer_zu'
+    'rg_nummer_zu': 'rg_nummer_zu',
+    'buchungen': 'buchungen'
 }
 
 def read_csv(site_name, file_name, limit=False):
@@ -397,11 +398,19 @@ def migliedschaft_existiert(mitglied_id):
 # --------------------------------------------------------------
 # Debitor Importer
 # --------------------------------------------------------------
-def import_debitoren(site_name, file_name, limit=False):
+def import_debitoren(site_name, file_name, limit=False, delete_from=False):
     '''
         Example:
         sudo bench execute mvd.mvd.data_import.importer.import_debitoren --kwargs "{'site_name': 'site1.local', 'file_name': 'offene_rechnungen.csv'}"
     '''
+    
+    if delete_from:
+        SQL_SAFE_UPDATES_false = frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
+        delete_sinvs = frappe.db.sql("""DELETE FROM `tabSales Invoice` WHERE `sektion_id` = '{delete_from}'
+                                    AND `docstatus` = 1
+                                    AND `status` = 'Overdue'""".format(delete_from=delete_from), as_list=True)
+        SQL_SAFE_UPDATES_true = frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)
+        frappe.db.commit()
     
     # display all coloumns for error handling
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
@@ -753,11 +762,6 @@ def import_miveba_buchungen(site_name, file_name, limit=False):
         if count <= max_loop:
             if frappe.db.exists("Mitgliedschaft", str(get_value(row, 'mitglied_id'))):
                 try:
-                    #mitgliedschaft = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id')))
-                    #mitgliedschaft.letzte_bearbeitung_von = 'SP'
-                    #mitgliedschaft.miveba_buchungen = str(get_value(row, 'weitere_kontaktinfos'))
-                    #mitgliedschaft.save()
-                    #frappe.db.commit()
                     mitglied_id = str(get_value(row, 'mitglied_id'))
                     miveba_buchungen = str(get_value(row, 'buchungen'))
                     frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `miveba_buchungen` = '{miveba_buchungen}' WHERE `name` = '{mitglied_id}'""".format(miveba_buchungen=miveba_buchungen, mitglied_id=mitglied_id), as_list=True)
