@@ -1224,7 +1224,7 @@ function erstelle_begruessungs_korrespondenz(frm) {
                 //~ }
             frappe.prompt([
                 {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1, 'default': 'Begrüssung mit Ausweis'},
-                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage',
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                     'get_query': function() {
                         return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
                     }
