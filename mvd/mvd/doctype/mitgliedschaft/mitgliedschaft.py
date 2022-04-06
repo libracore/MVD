@@ -67,6 +67,10 @@ class Mitgliedschaft(Document):
                 if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
                     self.zuzug_fix()
             
+            # eintrittsdatum fix
+            if self.eintritt and not self.eintrittsdatum:
+                self.eintrittsdatum = self.eintritt
+            
             # setze CB "Aktive Mitgliedschaft"
             if self.status_c not in ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv'):
                 self.aktive_mitgliedschaft = 1
