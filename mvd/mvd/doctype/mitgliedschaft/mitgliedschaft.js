@@ -1360,6 +1360,7 @@ function mitglied_inaktivieren(frm) {
             cur_frm.set_value("begruessung_massendruck_dokument", '');
             cur_frm.set_value("letzte_bearbeitung_von", 'User');
             cur_frm.set_value("status_c", 'Inaktiv');
+            cur_frm.set_value("austritt", frappe.datetime.get_today());
             cur_frm.save();
             frappe.msgprint("Das Mitglied wurde inaktiviert.");
         },
