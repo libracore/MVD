@@ -120,7 +120,10 @@ def suche(suchparameter, goto_list=False):
             return False
     else:
         if suchparameter["sektions_uebergreifend"] and not suchparameter["alle_sektionen"]:
-            mitgliedschaften = frappe.db.sql("""SELECT * FROM `tabMitgliedschaft` {filters} ORDER BY `creation` DESC LIMIT 1""".format(filters=filters), as_dict=True)
+            mitgliedschaften = frappe.db.sql("""SELECT * FROM `tabMitgliedschaft` {filters}
+                                                ORDER BY CASE WHEN `status_c` NOT IN ('Inaktiv', 'Wegzug') THEN 1
+                                                ELSE 2 END
+                                                LIMIT 1""".format(filters=filters), as_dict=True)
         else:
             mitgliedschaften = frappe.db.sql("""SELECT * FROM `tabMitgliedschaft` {filters} ORDER BY `nachname_1` ASC""".format(filters=filters), as_dict=True)
         
