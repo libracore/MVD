@@ -1224,7 +1224,7 @@ function erstelle_begruessungs_korrespondenz(frm) {
                 //~ }
             frappe.prompt([
                 {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1, 'default': 'Begrüssung mit Ausweis'},
-                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage',
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                     'get_query': function() {
                         return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
                     }
@@ -1360,6 +1360,7 @@ function mitglied_inaktivieren(frm) {
             cur_frm.set_value("begruessung_massendruck_dokument", '');
             cur_frm.set_value("letzte_bearbeitung_von", 'User');
             cur_frm.set_value("status_c", 'Inaktiv');
+            cur_frm.set_value("austritt", frappe.datetime.get_today());
             cur_frm.save();
             frappe.msgprint("Das Mitglied wurde inaktiviert.");
         },
