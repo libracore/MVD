@@ -70,7 +70,14 @@ hm = {
     'nummer_zu': 'nummer_zu',
     'objekt_nummer_zu': 'objekt_nummer_zu',
     'rg_nummer_zu': 'rg_nummer_zu',
-    'buchungen': 'buchungen'
+    'buchungen': 'buchungen',
+    'online_haftpflicht': 'online_haftpflicht',
+    'online_gutschrift': 'online_gutschrift',
+    'online_betrag': 'online_betrag',
+    'datum_online_verbucht': 'datum_online_verbucht',
+    'datum_online_gutschrift': 'datum_online_gutschrift',
+    'online_payment_method': 'online_payment_method',
+    'online_payment_id': 'online_payment_id'
 }
 
 def read_csv(site_name, file_name, limit=False):
@@ -1040,6 +1047,74 @@ def update_beitritt(site_name, file_name, limit=False):
                         submit_counter += 1
                 except Exception as err:
                     frappe.log_error("{0}\n\n{1}".format(err, row), 'Beitritt Update konnte nicht durchgeführt werden')
+            else:
+                frappe.log_error("{0}".format(row), 'Mitgliedschaft existiert nicht')
+            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+            count += 1
+            submit_counter += 1
+        else:
+            break
+
+# --------------------------------------------------------------
+# OnlinePayment Update
+# --------------------------------------------------------------
+def update_online_payment(site_name, file_name, limit=False):
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.update_online_payment --kwargs "{'site_name': 'site1.local', 'file_name': 'mitglied_nr_paymentId_vor_7_Maerz.csv'}"
+    '''
+    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_sp_queue
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    submit_counter = 1
+    max_loop = limit
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            if frappe.db.exists("Mitgliedschaft", str(get_value(row, 'mitglied_id'))):
+                try:
+                    online_haftpflicht = str(get_value(row, 'online_haftpflicht'))
+                    online_gutschrift = str(get_value(row, 'online_gutschrift'))
+                    online_betrag = str(get_value(row, 'online_betrag'))
+                    datum_online_verbucht = str(get_value(row, 'datum_online_verbucht'))
+                    datum_online_gutschrift = str(get_value(row, 'datum_online_gutschrift'))
+                    online_payment_method = str(get_value(row, 'online_payment_method'))
+                    online_payment_id = str(get_value(row, 'online_payment_id'))
+                    
+                    frappe.db.sql("""UPDATE `tabMitgliedschaft` SET
+                                        `online_haftpflicht` = '{online_haftpflicht}',
+                                        `online_gutschrift` = '{online_gutschrift}',
+                                        `online_betrag` = '{online_betrag}',
+                                        `datum_online_verbucht` = '{datum_online_verbucht}',
+                                        `datum_online_gutschrift` = '{datum_online_gutschrift}',
+                                        `online_payment_method` = '{online_payment_method}',
+                                        `online_payment_id` = '{online_payment_id}'
+                                    WHERE `name` = '{mitglied_id}'""".format(online_haftpflicht=online_haftpflicht, \
+                                    online_gutschrift=online_gutschrift, \
+                                    online_betrag=online_betrag, \
+                                    datum_online_verbucht=datum_online_verbucht, \
+                                    datum_online_gutschrift=datum_online_gutschrift, \
+                                    online_payment_method=online_payment_method, \
+                                    online_payment_id=online_payment_id, \
+                                    mitglied_id=str(get_value(row, 'mitglied_id'))), as_list=True)
+                    
+                    if submit_counter == 100:
+                        frappe.db.commit()
+                        submit_counter = 1
+                    else:
+                        submit_counter += 1
+                except Exception as err:
+                    frappe.log_error("{0}\n\n{1}".format(err, row), 'OnlinePayment Update konnte nicht durchgeführt werden')
             else:
                 frappe.log_error("{0}".format(row), 'Mitgliedschaft existiert nicht')
             print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
