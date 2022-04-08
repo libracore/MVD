@@ -63,9 +63,13 @@ class Mitgliedschaft(Document):
             self.ampel_farbe = get_ampelfarbe(self)
             
             # sektionswechsel fix von MVZH
-            if int(self.zuzug_massendruck) == 1:
+            if int(self.zuzug_massendruck) == 1 or self.status_c == 'Zuzug':
                 if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
                     self.zuzug_fix()
+            
+            # eintrittsdatum fix
+            if self.eintritt and not self.eintrittsdatum:
+                self.eintrittsdatum = self.eintritt
             
             # setze CB "Aktive Mitgliedschaft"
             if self.status_c not in ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv'):

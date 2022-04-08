@@ -892,6 +892,9 @@ def kulanz_ausgleich(pe):
                 sinv.outstanding_amount = outstanding_amount
     if new_payment > 0:
         pe.paid_amount = new_payment
+        pe.difference_amount = 0
+        pe.base_received_amount = new_payment
+        pe.received_amount = new_payment
         pe.insert()
         pe.save()
         pe.submit()
