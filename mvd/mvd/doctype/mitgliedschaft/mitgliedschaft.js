@@ -78,6 +78,11 @@ frappe.ui.form.on('Mitgliedschaft', {
                         daten_validiert(frm);
                     });
                 }
+                
+                // open sections
+                cur_frm.fields_dict.section_allgemein.collapse();
+                cur_frm.fields_dict.section_personen_daten.collapse();
+                cur_frm.fields_dict.section_korrespondenz_adresse.collapse();
             }
             
             if (cur_frm.doc.kuendigung_verarbeiten) {
@@ -1279,7 +1284,7 @@ function erstelle_begruessungs_korrespondenz(frm) {
 }
 
 function erstelle_todo(frm) {
-    if (frappe.user.has_role("MV_MA")) {
+    if (frappe.user.has_role("MV_MA")||frappe.user.has_role("MV_RB")) {
         frappe.call({
             'method': "frappe.client.get",
             'args': {
