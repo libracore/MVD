@@ -58,9 +58,26 @@ $(document).on('click','#navbar-breadcrumbs a, a.navbar-home',function(event){
         }
     }
     if (!!cur_frm) {
-        if (cur_frm.is_dirty()&&frappe._cur_route.includes("Form")) {
-            frappe.confirm('Diese Mitgliedschaft besitzt ungespeicherte Änderungen,<br>möchten Sie die Mitgliedschaft trotzdem verlassen?',
-            () => {
+        if (['Mitgliedschaft', 'Termin'].includes(cur_frm.doctype)) {
+            if (cur_frm.is_dirty()&&frappe._cur_route.includes("Form")) {
+                var confirm_message = 'Diese Mitgliedschaft besitzt ungespeicherte Änderungen,<br>möchten Sie die Mitgliedschaft trotzdem verlassen?';
+                if (cur_frm.doctype == "Termin") {
+                    confirm_message = 'Dieser Termin besitzt ungespeicherte Änderungen,<br>möchten Sie den Termin trotzdem verlassen?';
+                }
+                frappe.confirm(confirm_message,
+                () => {
+                    if(navURL.endsWith("vbz")) {
+                        if (frappe._cur_route != "#vbz") {
+                            frappe.dom.freeze('Lade Verarbeitungszentrale...');
+                        }
+                        window.location.href = navURL;
+                    } else {
+                        window.location.href = navURL;
+                    }
+                }, () => {
+                    // No
+                })
+            } else {
                 if(navURL.endsWith("vbz")) {
                     if (frappe._cur_route != "#vbz") {
                         frappe.dom.freeze('Lade Verarbeitungszentrale...');
@@ -69,10 +86,8 @@ $(document).on('click','#navbar-breadcrumbs a, a.navbar-home',function(event){
                 } else {
                     window.location.href = navURL;
                 }
-            }, () => {
-                // No
-            })
-        } else {
+            }
+        }  else {
             if(navURL.endsWith("vbz")) {
                 if (frappe._cur_route != "#vbz") {
                     frappe.dom.freeze('Lade Verarbeitungszentrale...');
@@ -97,15 +112,19 @@ $(document).on('click','#navbar-breadcrumbs a, a.navbar-home',function(event){
 window.onload = function() {
     window.addEventListener("beforeunload", function (e) {
         if (!!cur_frm) {
-            if (!cur_frm.is_dirty()) {
+            if (['Mitgliedschaft', 'Termin'].includes(cur_frm.doctype)) {
+                if (!cur_frm.is_dirty()) {
+                    return undefined;
+                }
+
+                var confirmationMessage = 'It looks like you have been editing something. '
+                                        + 'If you leave before saving, your changes will be lost.';
+                
+                (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+                return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
+            } else {
                 return undefined;
             }
-
-            var confirmationMessage = 'It looks like you have been editing something. '
-                                    + 'If you leave before saving, your changes will be lost.';
-            
-            (e || window.event).returnValue = confirmationMessage; //Gecko + IE
-            return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
         }
     });
 };
