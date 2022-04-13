@@ -27,9 +27,8 @@
   "expert_in",
   "vermieter_in",
   "section_auftrag",
-  "auftrag_abgabe",
-  "auftrag_uebernahme",
-  "auftrag_zustandsbericht",
+  "auftrag_typ",
+  "auftrag_beschreibung",
   "section_tarife",
   "tarif_01",
   "tarif_02",
@@ -37,6 +36,7 @@
   "tarif_04",
   "tarif_05",
   "tarif_06",
+  "tarif_06_beschreibung",
   "tarif_07",
   "section_wegspesen",
   "weg_01",
@@ -49,7 +49,8 @@
   "total",
   "betrag_erhalten",
   "section_intern",
-  "dauer_der_abgabe"
+  "dauer_der_abgabe",
+  "rechnungsadresse"
  ],
  "fields": [
   {
@@ -86,24 +87,6 @@
    "fieldname": "section_auftrag",
    "fieldtype": "Section Break",
    "label": "Auftrag"
-  },
-  {
-   "default": "0",
-   "fieldname": "auftrag_abgabe",
-   "fieldtype": "Check",
-   "label": "Abgabe"
-  },
-  {
-   "default": "0",
-   "fieldname": "auftrag_uebernahme",
-   "fieldtype": "Check",
-   "label": "\u00dcbernahme / M\u00e4ngel bei Antritt "
-  },
-  {
-   "default": "0",
-   "fieldname": "auftrag_zustandsbericht",
-   "fieldtype": "Check",
-   "label": "Erstellen Zustandsbericht "
   },
   {
    "fieldname": "section_tarife",
@@ -263,8 +246,9 @@
   },
   {
    "fieldname": "expert_in",
-   "fieldtype": "Data",
-   "label": "Expert*in"
+   "fieldtype": "Select",
+   "label": "Expert*in",
+   "options": "- offen -\nBaumeler, Markus\nEgger, Martin\nSuter, Heinz\nHofer, Werner\nWagner, Susanne\nSch\u00e4rer, Kathrin\nKofmel, Urban\nHagi, Martin\nGuldimann, Ursula\nRufer, Lilli"
   },
   {
    "fieldname": "vermieter_in",
@@ -286,9 +270,32 @@
    "fieldname": "betrag_erhalten",
    "fieldtype": "Currency",
    "label": "Betrag erhalten"
+  },
+  {
+   "fieldname": "auftrag_typ",
+   "fieldtype": "Select",
+   "label": "Auftrag Typ",
+   "options": "Abgabe\n\u00dcbernahme/M\u00e4ngel bei Antritt\nErstellen Zustandsbericht"
+  },
+  {
+   "description": "z.B. 2 - 3 \u00bd Zimmer Wohnung, 7. Stock",
+   "fieldname": "auftrag_beschreibung",
+   "fieldtype": "Data",
+   "label": "Auftrag Beschreibung"
+  },
+  {
+   "fieldname": "rechnungsadresse",
+   "fieldtype": "Small Text",
+   "label": "Rechnungsadresse"
+  },
+  {
+   "default": "Garage/EHP/Mansarde/Garten",
+   "fieldname": "tarif_06_beschreibung",
+   "fieldtype": "Data",
+   "label": "Zusatz Beschreibung"
   }
  ],
- "modified": "2022-04-13 02:07:49.500236",
+ "modified": "2022-04-13 18:11:22.536766",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
