@@ -142,10 +142,28 @@ frappe.vbz_massenlauf = {
         frappe.dom.unfreeze();
     },
     korrespondenz_massenlauf: function() {
+        var sektion = frappe.boot.default_sektion;
+        if (frappe.boot.multi_sektion) {
+            frappe.prompt([
+                {'fieldname': 'sektion', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'options': 'Sektion', 'default': sektion}  
+            ],
+            function(values){
+                frappe.vbz_massenlauf.execute_korrespondenz_massenlauf(values.sektion);
+            },
+            'Sektionsauswahl',
+            'Weiter'
+            )
+        } else {
+            frappe.vbz_massenlauf.execute_korrespondenz_massenlauf(sektion);
+        }
+    },
+    execute_korrespondenz_massenlauf: function(sektion) {
         frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.korrespondenz_massenlauf",
-            args:{},
+            args:{
+                'sektion': sektion
+            },
             freeze: true,
             freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
@@ -157,10 +175,28 @@ frappe.vbz_massenlauf = {
         });
     },
     kuendigung_massenlauf: function() {
+        var sektion = frappe.boot.default_sektion;
+        if (frappe.boot.multi_sektion) {
+            frappe.prompt([
+                {'fieldname': 'sektion', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'options': 'Sektion', 'default': sektion}  
+            ],
+            function(values){
+                frappe.vbz_massenlauf.execute_kuendigung_massenlauf(values.sektion);
+            },
+            'Sektionsauswahl',
+            'Weiter'
+            )
+        } else {
+            frappe.vbz_massenlauf.execute_kuendigung_massenlauf(sektion);
+        }
+    },
+    execute_kuendigung_massenlauf: function(sektion) {
         frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.kuendigung_massenlauf",
-            args:{},
+            args:{
+                'sektion': sektion
+            },
             freeze: true,
             freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
@@ -172,10 +208,28 @@ frappe.vbz_massenlauf = {
         });
     },
     zuzug_massenlauf: function() {
+        var sektion = frappe.boot.default_sektion;
+        if (frappe.boot.multi_sektion) {
+            frappe.prompt([
+                {'fieldname': 'sektion', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'options': 'Sektion', 'default': sektion}  
+            ],
+            function(values){
+                frappe.vbz_massenlauf.execute_zuzug_massenlauf(values.sektion);
+            },
+            'Sektionsauswahl',
+            'Weiter'
+            )
+        } else {
+            frappe.vbz_massenlauf.execute_zuzug_massenlauf(sektion);
+        }
+    },
+    execute_zuzug_massenlauf: function(sektion) {
         frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.zuzug_massenlauf",
-            args:{},
+            args:{
+                'sektion': sektion
+            },
             freeze: true,
             freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
@@ -187,10 +241,28 @@ frappe.vbz_massenlauf = {
         });
     },
     rg_massenlauf: function() {
+        var sektion = frappe.boot.default_sektion;
+        if (frappe.boot.multi_sektion) {
+            frappe.prompt([
+                {'fieldname': 'sektion', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'options': 'Sektion', 'default': sektion}  
+            ],
+            function(values){
+                frappe.vbz_massenlauf.execute_rg_massenlauf(values.sektion);
+            },
+            'Sektionsauswahl',
+            'Weiter'
+            )
+        } else {
+            frappe.vbz_massenlauf.execute_rg_massenlauf(sektion);
+        }
+    },
+    execute_rg_massenlauf: function(sektion) {
         frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.rg_massenlauf",
-            args:{},
+            args:{
+                'sektion': sektion
+            },
             freeze: true,
             freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
@@ -202,10 +274,28 @@ frappe.vbz_massenlauf = {
         });
     },
     begruessung_online_massenlauf: function() {
+        var sektion = frappe.boot.default_sektion;
+        if (frappe.boot.multi_sektion) {
+            frappe.prompt([
+                {'fieldname': 'sektion', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'options': 'Sektion', 'default': sektion}  
+            ],
+            function(values){
+                frappe.vbz_massenlauf.execute_begruessung_online_massenlauf(values.sektion);
+            },
+            'Sektionsauswahl',
+            'Weiter'
+            )
+        } else {
+            frappe.vbz_massenlauf.execute_begruessung_online_massenlauf(sektion);
+        }
+    },
+    execute_begruessung_online_massenlauf: function() {
         frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.begruessung_online_massenlauf",
-            args:{},
+            args:{
+                'sektion': sektion
+            },
             freeze: true,
             freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
@@ -217,10 +307,28 @@ frappe.vbz_massenlauf = {
         });
     },
     begruessung_via_zahlung_massenlauf: function() {
+        var sektion = frappe.boot.default_sektion;
+        if (frappe.boot.multi_sektion) {
+            frappe.prompt([
+                {'fieldname': 'sektion', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'options': 'Sektion', 'default': sektion}  
+            ],
+            function(values){
+                frappe.vbz_massenlauf.execute_begruessung_via_zahlung_massenlauf(values.sektion);
+            },
+            'Sektionsauswahl',
+            'Weiter'
+            )
+        } else {
+            frappe.vbz_massenlauf.execute_begruessung_via_zahlung_massenlauf(sektion);
+        }
+    },
+    execute_begruessung_via_zahlung_massenlauf: function(sektion) {
         frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.begruessung_via_zahlung_massenlauf",
-            args:{},
+            args:{
+                'sektion': sektion
+            },
             freeze: true,
             freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
@@ -232,10 +340,28 @@ frappe.vbz_massenlauf = {
         });
     },
     mahnung_massenlauf: function() {
+        var sektion = frappe.boot.default_sektion;
+        if (frappe.boot.multi_sektion) {
+            frappe.prompt([
+                {'fieldname': 'sektion', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'options': 'Sektion', 'default': sektion}  
+            ],
+            function(values){
+                frappe.vbz_massenlauf.execute_mahnung_massenlauf(values.sektion);
+            },
+            'Sektionsauswahl',
+            'Weiter'
+            )
+        } else {
+            frappe.vbz_massenlauf.execute_mahnung_massenlauf(sektion);
+        }
+    },
+    execute_mahnung_massenlauf: function(sektion) {
         frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.mahnung_massenlauf",
-            args:{},
+            args:{
+                'sektion': sektion
+            },
             freeze: true,
             freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
