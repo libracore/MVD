@@ -6,12 +6,26 @@
  "engine": "InnoDB",
  "field_order": [
   "sektion_id",
-  "expertin",
-  "section_auftraggeberin",
   "mv_mitgliedschaft",
-  "column_break_5",
-  "adresse_auftraggeberin",
+  "section_auftraggeberin",
+  "mitglied_nr",
+  "adressblock",
+  "briefanrede",
+  "firma",
+  "anrede_c",
+  "nachname_1",
+  "vorname_1",
+  "tel_p_1",
+  "tel_m_1",
+  "e_mail_1",
+  "strasse_nummer_zusatz",
+  "plz",
+  "ort",
   "adresse_neu",
+  "section_koordinaten",
+  "termin",
+  "expert_in",
+  "vermieter_in",
   "section_auftrag",
   "auftrag_abgabe",
   "auftrag_uebernahme",
@@ -33,6 +47,7 @@
   "nichtmitgliederzuschlag",
   "section_total",
   "total",
+  "betrag_erhalten",
   "section_intern",
   "dauer_der_abgabe"
  ],
@@ -47,39 +62,30 @@
    "reqd": 1
   },
   {
-   "fieldname": "expertin",
-   "fieldtype": "Data",
-   "label": "Expert*in"
-  },
-  {
-   "fieldname": "section_auftrag",
-   "fieldtype": "Section Break",
-   "label": "Auftrag"
-  },
-  {
    "fieldname": "mv_mitgliedschaft",
    "fieldtype": "Link",
    "label": "Mitgliedschaft",
    "options": "Mitgliedschaft"
   },
   {
-   "fieldname": "column_break_5",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "adresse_auftraggeberin",
-   "fieldtype": "Text",
-   "label": "Auftragggeber*in Adresse"
-  },
-  {
-   "fieldname": "adresse_neu",
+   "fieldname": "mitglied_nr",
    "fieldtype": "Data",
-   "label": "Neue Adresse"
+   "label": "Mitgliedernummer"
   },
   {
    "fieldname": "section_auftraggeberin",
    "fieldtype": "Section Break",
    "label": "Auftraggeber*in"
+  },
+  {
+   "fieldname": "adresse_neu",
+   "fieldtype": "Small Text",
+   "label": "Neue Adresse"
+  },
+  {
+   "fieldname": "section_auftrag",
+   "fieldtype": "Section Break",
+   "label": "Auftrag"
   },
   {
    "default": "0",
@@ -112,32 +118,32 @@
   {
    "fieldname": "tarif_02",
    "fieldtype": "Currency",
-   "label": "2 - 3 \u00bd Zimmer Wohnung"
+   "label": "2 - 3 \u00bd Zimmer Wohnung (Fr. 90.-)"
   },
   {
    "fieldname": "tarif_03",
    "fieldtype": "Currency",
-   "label": "4 - 5 \u00bd Zimmer Wohnung"
+   "label": "4 - 5 \u00bd Zimmer Wohnung (Fr. 120.-)"
   },
   {
    "fieldname": "tarif_04",
    "fieldtype": "Currency",
-   "label": "6 - 6 \u00bd Zimmer Wohnung"
+   "label": "6 - 6 \u00bd Zimmer Wohnung (Fr. 160.-)"
   },
   {
    "fieldname": "tarif_05",
    "fieldtype": "Currency",
-   "label": "Einfamilienhaus + kleiner Umschwung"
+   "label": "Einfamilienhaus + kleiner Umschwung (Fr. 200.-)"
   },
   {
    "fieldname": "tarif_06",
    "fieldtype": "Currency",
-   "label": "Zusatz: Garage/EHP/Mansarde/Garten"
+   "label": "Zusatz: Garage/EHP/Mansarde/Garten (Fr. 10.-)"
   },
   {
    "fieldname": "tarif_07",
    "fieldtype": "Currency",
-   "label": "Gesch\u00e4ftsr\u00e4ume / Loft"
+   "label": "Gesch\u00e4ftsr\u00e4ume / Loft (Fr. 95.-)"
   },
   {
    "fieldname": "section_wegspesen",
@@ -147,36 +153,41 @@
   {
    "fieldname": "weg_01",
    "fieldtype": "Currency",
-   "label": "Bis 25 KM  "
+   "label": "Bis 25 KM  (Fr. 30.-)"
   },
   {
    "fieldname": "weg_02",
    "fieldtype": "Currency",
-   "label": "26 KM bis 50 KM  "
+   "label": "26 KM bis 50 KM  (Fr. 50.-)"
   },
   {
    "fieldname": "weg_03",
    "fieldtype": "Currency",
-   "label": "51 KM bis 80 KM "
+   "label": "51 KM bis 80 KM (Fr. 80.-)"
   },
   {
    "fieldname": "weg_04",
    "fieldtype": "Currency",
-   "label": "\u00dcber 80 KM"
+   "label": "\u00dcber 80 KM (Fr. 100.-)"
   },
   {
    "fieldname": "section_nichtmitglieder",
    "fieldtype": "Section Break",
-   "label": "Nichtmitglieder-Zuschlag"
+   "label": "Nichtmitglieder-Zuschlag "
   },
   {
    "fieldname": "nichtmitgliederzuschlag",
    "fieldtype": "Currency",
-   "label": "Nichtmitglieder-Zuschlag"
+   "label": "Nichtmitglieder-Zuschlag (Fr. 70.-)"
+  },
+  {
+   "fieldname": "section_total",
+   "fieldtype": "Section Break",
+   "label": "Total"
   },
   {
    "fieldname": "total",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "label": "Total"
   },
   {
@@ -190,12 +201,94 @@
    "label": "Dauer der Abgabe"
   },
   {
-   "fieldname": "section_total",
+   "fieldname": "firma",
+   "fieldtype": "Data",
+   "label": "Firma"
+  },
+  {
+   "fieldname": "anrede_c",
+   "fieldtype": "Data",
+   "label": "Anrede"
+  },
+  {
+   "fieldname": "nachname_1",
+   "fieldtype": "Data",
+   "label": "Nachname"
+  },
+  {
+   "fieldname": "vorname_1",
+   "fieldtype": "Data",
+   "label": "Vorname"
+  },
+  {
+   "fieldname": "tel_p_1",
+   "fieldtype": "Data",
+   "label": "Tel. Privat"
+  },
+  {
+   "fieldname": "tel_m_1",
+   "fieldtype": "Data",
+   "label": "Tel. Mobil"
+  },
+  {
+   "fieldname": "e_mail_1",
+   "fieldtype": "Data",
+   "label": "E-Mail"
+  },
+  {
+   "fieldname": "strasse_nummer_zusatz",
+   "fieldtype": "Data",
+   "label": "Strasse und Nummer"
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "label": "PLZ"
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "label": "Ort"
+  },
+  {
+   "fieldname": "section_koordinaten",
    "fieldtype": "Section Break",
-   "label": "Total"
+   "label": "Termin"
+  },
+  {
+   "fieldname": "termin",
+   "fieldtype": "Datetime",
+   "label": "Termin",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expert_in",
+   "fieldtype": "Data",
+   "label": "Expert*in"
+  },
+  {
+   "fieldname": "vermieter_in",
+   "fieldtype": "Data",
+   "label": "Vermieter*in"
+  },
+  {
+   "columns": 1,
+   "fieldname": "adressblock",
+   "fieldtype": "Small Text",
+   "label": "Adressblock"
+  },
+  {
+   "fieldname": "briefanrede",
+   "fieldtype": "Data",
+   "label": "Briefanrede"
+  },
+  {
+   "fieldname": "betrag_erhalten",
+   "fieldtype": "Currency",
+   "label": "Betrag erhalten"
   }
  ],
- "modified": "2022-04-02 15:35:43.276219",
+ "modified": "2022-04-13 01:58:12.867645",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
@@ -215,35 +308,13 @@
   },
   {
    "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "MV_MVD",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "MV_MA",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
    "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "MV_GL",
+   "role": "MV_beta",
    "share": 1,
    "write": 1
   }
