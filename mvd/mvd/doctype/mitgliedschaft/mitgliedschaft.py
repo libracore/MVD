@@ -89,6 +89,10 @@ class Mitgliedschaft(Document):
                 self.mitglied_nr = mvm_mitglieder_nummer_update(self.name)
                 self.letzte_bearbeitung_von = 'User'
             
+            # hotfix für onlineHaftpflicht value (null vs 0)
+            if not self.online_haftpflicht:
+                self.online_haftpflicht = '0'
+            
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
                 if self.creation == self.modified:
