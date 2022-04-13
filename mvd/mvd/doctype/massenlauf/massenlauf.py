@@ -18,56 +18,63 @@ def verarbeitung_massenlauf(massenlauf):
     massenlauf = frappe.get_doc("Massenlauf", massenlauf)
     if massenlauf.typ == 'Mahnung':
         args = {
-            'massenlauf': massenlauf.name
+            'massenlauf': massenlauf.name,
+            'sektion': massenlauf.sektion_id
         }
         enqueue("mvd.mvd.doctype.massenlauf.massenlauf.mahnung", queue='long', job_name='Verarbeite Massenlauf {0}'.format(massenlauf.name), timeout=5000, **args)
         return 1
     
     if massenlauf.typ == 'Kündigung':
         args = {
-            'massenlauf': massenlauf.name
+            'massenlauf': massenlauf.name,
+            'sektion': massenlauf.sektion_id
         }
         enqueue("mvd.mvd.doctype.massenlauf.massenlauf.kuendigung", queue='long', job_name='Verarbeite Massenlauf {0}'.format(massenlauf.name), timeout=5000, **args)
         return 1
     
     if massenlauf.typ == 'Zuzug':
         args = {
-            'massenlauf': massenlauf.name
+            'massenlauf': massenlauf.name,
+            'sektion': massenlauf.sektion_id
         }
         enqueue("mvd.mvd.doctype.massenlauf.massenlauf.zuzug", queue='long', job_name='Verarbeite Massenlauf {0}'.format(massenlauf.name), timeout=5000, **args)
         return 1
     
     if massenlauf.typ == 'Begrüssung durch Bezahlung':
         args = {
-            'massenlauf': massenlauf.name
+            'massenlauf': massenlauf.name,
+            'sektion': massenlauf.sektion_id
         }
         enqueue("mvd.mvd.doctype.massenlauf.massenlauf.begruessung_bezahlung", queue='long', job_name='Verarbeite Massenlauf {0}'.format(massenlauf.name), timeout=5000, **args)
         return 1
     
     if massenlauf.typ == 'Begrüssung Online':
         args = {
-            'massenlauf': massenlauf.name
+            'massenlauf': massenlauf.name,
+            'sektion': massenlauf.sektion_id
         }
         enqueue("mvd.mvd.doctype.massenlauf.massenlauf.begruessung_online", queue='long', job_name='Verarbeite Massenlauf {0}'.format(massenlauf.name), timeout=5000, **args)
         return 1
     
     if massenlauf.typ == 'Korrespondenz':
         args = {
-            'massenlauf': massenlauf.name
+            'massenlauf': massenlauf.name,
+            'sektion': massenlauf.sektion_id
         }
         enqueue("mvd.mvd.doctype.massenlauf.massenlauf.korrespondenz", queue='long', job_name='Verarbeite Massenlauf {0}'.format(massenlauf.name), timeout=5000, **args)
         return 1
     
     if massenlauf.typ == 'Rechnung':
         args = {
-            'massenlauf': massenlauf.name
+            'massenlauf': massenlauf.name,
+            'sektion': massenlauf.sektion_id
         }
         enqueue("mvd.mvd.doctype.massenlauf.massenlauf.rechnung", queue='long', job_name='Verarbeite Massenlauf {0}'.format(massenlauf.name), timeout=5000, **args)
         return 1
 
-def mahnung(massenlauf):
+def mahnung(massenlauf, sektion):
     try:
-        mahnungen = frappe.get_list('Mahnung', filters={'massenlauf_referenz': massenlauf, 'docstatus': 1}, fields=['name'])
+        mahnungen = frappe.get_list('Mahnung', filters={'massenlauf_referenz': massenlauf, 'docstatus': 1, 'sektion_id': sektion}, fields=['name'])
         counter = 1
         output = PdfFileWriter()
         for mahnung in mahnungen:
@@ -125,9 +132,9 @@ def mahnung(massenlauf):
         massenlauf.error = str(err)
         massenlauf.save(ignore_permissions=True)
 
-def kuendigung(massenlauf):
+def kuendigung(massenlauf, sektion):
     try:
-        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'kuendigung_verarbeiten': 1}, fields=['name'])
+        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'kuendigung_verarbeiten': 1, 'sektion_id': sektion}, fields=['name'])
         if len(mitgliedschaften) > 0:
             counter = 1
             output = PdfFileWriter()
@@ -192,10 +199,10 @@ def kuendigung(massenlauf):
         massenlauf.error = str(err)
         massenlauf.save(ignore_permissions=True)
 
-def zuzug(massenlauf):
+def zuzug(massenlauf, sektion):
     try:
         ungedruckte = ''
-        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'zuzug_massendruck': 1}, fields=['name', 'zuzugs_rechnung', 'zuzug_korrespondenz'])
+        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'zuzug_massendruck': 1, 'sektion_id': sektion}, fields=['name', 'zuzugs_rechnung', 'zuzug_korrespondenz'])
         if len(mitgliedschaften) > 0:
             counter = 1
             output = PdfFileWriter()
@@ -267,9 +274,9 @@ def zuzug(massenlauf):
         massenlauf.error = str(err)
         massenlauf.save(ignore_permissions=True)
 
-def begruessung_bezahlung(massenlauf):
+def begruessung_bezahlung(massenlauf, sektion):
     try:
-        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 1}, fields=['name', 'begruessung_massendruck_dokument'])
+        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 1, 'sektion_id': sektion}, fields=['name', 'begruessung_massendruck_dokument'])
         if len(mitgliedschaften) > 0:
             counter = 1
             output = PdfFileWriter()
@@ -336,9 +343,9 @@ def begruessung_bezahlung(massenlauf):
         massenlauf.error = str(err)
         massenlauf.save(ignore_permissions=True)
 
-def begruessung_online(massenlauf):
+def begruessung_online(massenlauf, sektion):
     try:
-        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 0}, fields=['name', 'begruessung_massendruck_dokument'])
+        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 0, 'sektion_id': sektion}, fields=['name', 'begruessung_massendruck_dokument'])
         if len(mitgliedschaften) > 0:
             counter = 1
             output = PdfFileWriter()
@@ -404,9 +411,9 @@ def begruessung_online(massenlauf):
         massenlauf.error = str(err)
         massenlauf.save(ignore_permissions=True)
 
-def korrespondenz(massenlauf):
+def korrespondenz(massenlauf, sektion):
     try:
-        korrespondenzen = frappe.get_list('Korrespondenz', filters={'massenlauf': 1}, fields=['name'])
+        korrespondenzen = frappe.get_list('Korrespondenz', filters={'massenlauf': 1, 'sektion_id': sektion}, fields=['name'])
         if len(korrespondenzen) > 0:
             counter = 1
             output = PdfFileWriter()
@@ -470,9 +477,9 @@ def korrespondenz(massenlauf):
         massenlauf.error = str(err)
         massenlauf.save(ignore_permissions=True)
 
-def rechnung(massenlauf):
+def rechnung(massenlauf, sektion):
     try:
-        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'rg_massendruck_vormerkung': 1}, fields=['rg_massendruck', 'name'])
+        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'rg_massendruck_vormerkung': 1, 'sektion_id': sektion}, fields=['rg_massendruck', 'name'])
         if len(mitgliedschaften) > 0:
             counter = 1
             output = PdfFileWriter()

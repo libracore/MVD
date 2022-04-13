@@ -50,119 +50,140 @@ def get_open_data():
     return open_data
 
 @frappe.whitelist()
-def korrespondenz_massenlauf():
-    korrespondenzen = frappe.get_list('Korrespondenz', filters={'massenlauf': 1}, fields=['name'])
-    if len(korrespondenzen) > 0:
-        massenlauf = frappe.get_doc({
-            "doctype": "Massenlauf",
-            "sektion_id": frappe.get_value("Korrespondenz", korrespondenzen[0]['name'], "sektion_id"),
-            "status": "Offen",
-            "typ": "Korrespondenz"
-        })
-        massenlauf.insert(ignore_permissions=True)
-        
-        return massenlauf.name
+def korrespondenz_massenlauf(sektion=False):
+    if sektion:
+        korrespondenzen = frappe.get_list('Korrespondenz', filters={'massenlauf': 1, 'sektion_id': sektion}, fields=['name'])
+        if len(korrespondenzen) > 0:
+            massenlauf = frappe.get_doc({
+                "doctype": "Massenlauf",
+                "sektion_id": frappe.get_value("Korrespondenz", korrespondenzen[0]['name'], "sektion_id"),
+                "status": "Offen",
+                "typ": "Korrespondenz"
+            })
+            massenlauf.insert(ignore_permissions=True)
+            
+            return massenlauf.name
+        else:
+            frappe.throw("Es gibt keine Korrespondenzen die für einen Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
     else:
-        frappe.throw("Es gibt keine Korrespondenzen die für einen Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
+        frappe.throw("Fehlende Sektionsinformationen")
 
 @frappe.whitelist()
-def kuendigung_massenlauf():
-    mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'kuendigung_verarbeiten': 1}, fields=['name'])
-    if len(mitgliedschaften) > 0:
-        massenlauf = frappe.get_doc({
-            "doctype": "Massenlauf",
-            "sektion_id": frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['name'], "sektion_id"),
-            "status": "Offen",
-            "typ": "Kündigung"
-        })
-        massenlauf.insert(ignore_permissions=True)
-        
-        return massenlauf.name
+def kuendigung_massenlauf(sektion=False):
+    if sektion:
+        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'kuendigung_verarbeiten': 1, 'sektion_id': sektion}, fields=['name'])
+        if len(mitgliedschaften) > 0:
+            massenlauf = frappe.get_doc({
+                "doctype": "Massenlauf",
+                "sektion_id": frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['name'], "sektion_id"),
+                "status": "Offen",
+                "typ": "Kündigung"
+            })
+            massenlauf.insert(ignore_permissions=True)
+            
+            return massenlauf.name
+        else:
+            frappe.throw("Es gibt keine Kündigungen die für einen Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
     else:
-        frappe.throw("Es gibt keine Kündigungen die für einen Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
+        frappe.throw("Fehlende Sektionsinformationen")
 
 @frappe.whitelist()
-def zuzug_massenlauf():
-    mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'zuzug_massendruck': 1}, fields=['name'])
-    if len(mitgliedschaften) > 0:
-        massenlauf = frappe.get_doc({
-            "doctype": "Massenlauf",
-            "sektion_id": frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['name'], "sektion_id"),
-            "status": "Offen",
-            "typ": "Zuzug"
-        })
-        massenlauf.insert(ignore_permissions=True)
-        
-        return massenlauf.name
+def zuzug_massenlauf(sektion=False):
+    if sektion:
+        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'zuzug_massendruck': 1, 'sektion_id': sektion}, fields=['name'])
+        if len(mitgliedschaften) > 0:
+            massenlauf = frappe.get_doc({
+                "doctype": "Massenlauf",
+                "sektion_id": frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['name'], "sektion_id"),
+                "status": "Offen",
+                "typ": "Zuzug"
+            })
+            massenlauf.insert(ignore_permissions=True)
+            
+            return massenlauf.name
+        else:
+            frappe.throw("Es gibt keine Zuzüge die für einen Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
     else:
-        frappe.throw("Es gibt keine Zuzüge die für einen Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
+        frappe.throw("Fehlende Sektionsinformationen")
 
 @frappe.whitelist()
-def rg_massenlauf():
-    mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'rg_massendruck_vormerkung': 1}, fields=['name'])
-    if len(mitgliedschaften) > 0:
-        massenlauf = frappe.get_doc({
-            "doctype": "Massenlauf",
-            "sektion_id": frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['name'], "sektion_id"),
-            "status": "Offen",
-            "typ": "Rechnung"
-        })
-        massenlauf.insert(ignore_permissions=True)
-        
-        return massenlauf.name
+def rg_massenlauf(sektion=False):
+    if sektion:
+        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'rg_massendruck_vormerkung': 1, 'sektion_id': sektion}, fields=['name'])
+        if len(mitgliedschaften) > 0:
+            massenlauf = frappe.get_doc({
+                "doctype": "Massenlauf",
+                "sektion_id": frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['name'], "sektion_id"),
+                "status": "Offen",
+                "typ": "Rechnung"
+            })
+            massenlauf.insert(ignore_permissions=True)
+            
+            return massenlauf.name
+        else:
+            frappe.throw("Es gibt keine Mitgliedschaften die für einen Rechnungs-Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
     else:
-        frappe.throw("Es gibt keine Mitgliedschaften die für einen Rechnungs-Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
+        frappe.throw("Fehlende Sektionsinformationen")
 
 @frappe.whitelist()
-def begruessung_online_massenlauf():
-    mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 0}, fields=['name'])
-    if len(mitgliedschaften) > 0:
-        massenlauf = frappe.get_doc({
-            "doctype": "Massenlauf",
-            "sektion_id": frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['name'], "sektion_id"),
-            "status": "Offen",
-            "typ": "Begrüssung Online"
-        })
-        massenlauf.insert(ignore_permissions=True)
-        
-        return massenlauf.name
+def begruessung_online_massenlauf(sektion=False):
+    if sektion:
+        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 0, 'sektion_id': sektion}, fields=['name'])
+        if len(mitgliedschaften) > 0:
+            massenlauf = frappe.get_doc({
+                "doctype": "Massenlauf",
+                "sektion_id": frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['name'], "sektion_id"),
+                "status": "Offen",
+                "typ": "Begrüssung Online"
+            })
+            massenlauf.insert(ignore_permissions=True)
+            
+            return massenlauf.name
+        else:
+            frappe.throw("Es gibt keine Mitgliedschaften die für einen Begrüssungs-Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
     else:
-        frappe.throw("Es gibt keine Mitgliedschaften die für einen Begrüssungs-Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
+        frappe.throw("Fehlende Sektionsinformationen")
 
 @frappe.whitelist()
-def begruessung_via_zahlung_massenlauf():
-    mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 1}, fields=['name'])
-    if len(mitgliedschaften) > 0:
-        massenlauf = frappe.get_doc({
-            "doctype": "Massenlauf",
-            "sektion_id": frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['name'], "sektion_id"),
-            "status": "Offen",
-            "typ": "Begrüssung durch Bezahlung"
-        })
-        massenlauf.insert(ignore_permissions=True)
-        
-        return massenlauf.name
+def begruessung_via_zahlung_massenlauf(sektion=False):
+    if sektion:
+        mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 1, 'sektion_id': sektion}, fields=['name'])
+        if len(mitgliedschaften) > 0:
+            massenlauf = frappe.get_doc({
+                "doctype": "Massenlauf",
+                "sektion_id": frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['name'], "sektion_id"),
+                "status": "Offen",
+                "typ": "Begrüssung durch Bezahlung"
+            })
+            massenlauf.insert(ignore_permissions=True)
+            
+            return massenlauf.name
+        else:
+            frappe.throw("Es gibt keine Mitgliedschaften die für einen Begrüssungs-Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
     else:
-        frappe.throw("Es gibt keine Mitgliedschaften die für einen Begrüssungs-Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
+        frappe.throw("Fehlende Sektionsinformationen")
 
 @frappe.whitelist()
-def mahnung_massenlauf():
-    mahnungen = frappe.get_list('Mahnung', filters={'massenlauf': 1, 'docstatus': 1}, fields=['name'])
-    if len(mahnungen) > 0:
-        massenlauf = frappe.get_doc({
-            "doctype": "Massenlauf",
-            "sektion_id": frappe.get_value("Mahnung", mahnungen[0]['name'], "sektion_id"),
-            "status": "Offen",
-            "typ": "Mahnung"
-        })
-        massenlauf.insert(ignore_permissions=True)
-        
-        for mahnung in mahnungen:
-            m = frappe.get_doc("Mahnung", mahnung['name'])
-            m.massenlauf = '0'
-            m.massenlauf_referenz = massenlauf.name
-            m.save(ignore_permissions=True)
-        
-        return massenlauf.name
+def mahnung_massenlauf(sektion=False):
+    if sektion:
+        mahnungen = frappe.get_list('Mahnung', filters={'massenlauf': 1, 'docstatus': 1, 'sektion_id': sektion}, fields=['name'])
+        if len(mahnungen) > 0:
+            massenlauf = frappe.get_doc({
+                "doctype": "Massenlauf",
+                "sektion_id": frappe.get_value("Mahnung", mahnungen[0]['name'], "sektion_id"),
+                "status": "Offen",
+                "typ": "Mahnung"
+            })
+            massenlauf.insert(ignore_permissions=True)
+            
+            for mahnung in mahnungen:
+                m = frappe.get_doc("Mahnung", mahnung['name'])
+                m.massenlauf = '0'
+                m.massenlauf_referenz = massenlauf.name
+                m.save(ignore_permissions=True)
+            
+            return massenlauf.name
+        else:
+            frappe.throw("Es gibt keine Mahnungen die für einen Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
     else:
-        frappe.throw("Es gibt keine Mahnungen die für einen Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
+        frappe.throw("Fehlende Sektionsinformationen")
