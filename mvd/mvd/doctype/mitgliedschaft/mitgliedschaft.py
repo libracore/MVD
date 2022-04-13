@@ -102,7 +102,7 @@ class Mitgliedschaft(Document):
                     # sende update an SP
                     send_mvm_to_sp(self, True)
                     # special case sektionswechsel nach ZH
-                    if self.wegzug_zu in ('MVZH', 'MVBE', 'MVSO') and self.status_c == 'Wegzug':
+                    if self.wegzug_zu in ('MVZH', 'MVSO') and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
     
     def zuzug_fix(self):
