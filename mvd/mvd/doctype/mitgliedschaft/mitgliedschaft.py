@@ -65,7 +65,7 @@ class Mitgliedschaft(Document):
             # sektionswechsel fix von MVZH
             if int(self.zuzug_massendruck) == 1 or self.status_c == 'Zuzug':
                 if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
-                    self.zuzug_fix()
+                    self.zuzug_korrespondenz = self.zuzug_fix()
             
             # eintrittsdatum fix
             if self.eintritt and not self.eintrittsdatum:
@@ -89,6 +89,10 @@ class Mitgliedschaft(Document):
                 self.mitglied_nr = mvm_mitglieder_nummer_update(self.name)
                 self.letzte_bearbeitung_von = 'User'
             
+            # hotfix für onlineHaftpflicht value (null vs 0)
+            if not self.online_haftpflicht:
+                self.online_haftpflicht = '0'
+            
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
                 if self.creation == self.modified:
@@ -98,7 +102,7 @@ class Mitgliedschaft(Document):
                     # sende update an SP
                     send_mvm_to_sp(self, True)
                     # special case sektionswechsel nach ZH
-                    if self.wegzug_zu in ('MVZH', 'MVBE', 'MVSO') and self.status_c == 'Wegzug':
+                    if self.wegzug_zu in ('MVZH', 'MVSO') and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
     
     def zuzug_fix(self):
@@ -142,14 +146,14 @@ class Mitgliedschaft(Document):
                 except:
                     pass
             
-            new_korrespondenz['mv_mitgliedschaft'] = self.name
+            new_korrespondenz['mv_mitgliedschaft'] = self.mitglied_id
             new_korrespondenz['massenlauf'] = 0
             
             new_korrespondenz = frappe.get_doc(new_korrespondenz)
             new_korrespondenz.insert(ignore_permissions=True)
             frappe.db.commit()
             
-            self.zuzug_korrespondenz = new_korrespondenz.name
+            return new_korrespondenz.name
     
     def handling_kontakt_adresse_kunde(self):
         # Mitglied
