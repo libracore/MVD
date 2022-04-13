@@ -197,8 +197,8 @@
   },
   {
    "fieldname": "dauer_der_abgabe",
-   "fieldtype": "Time",
-   "label": "Dauer der Abgabe"
+   "fieldtype": "Data",
+   "label": "Dauer der Abgabe (min)"
   },
   {
    "fieldname": "firma",
@@ -288,7 +288,7 @@
    "label": "Betrag erhalten"
   }
  ],
- "modified": "2022-04-13 01:58:12.867645",
+ "modified": "2022-04-13 02:07:49.500236",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
