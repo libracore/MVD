@@ -31,6 +31,9 @@ class Mitgliedschaft(Document):
     
     def validate(self):
         if not self.validierung_notwendig or str(self.validierung_notwendig) == '0':
+            # entferne Telefonnummern mit vergessenen Leerschlägen
+            self.remove_unnecessary_blanks()
+            
             # handling von Kontakt(en), Adresse(n) und Kunde(n)
             self.handling_kontakt_adresse_kunde()
             
@@ -104,6 +107,40 @@ class Mitgliedschaft(Document):
                     # special case sektionswechsel nach ZH
                     if self.wegzug_zu in ('MVZH', 'MVSO') and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
+    
+    def remove_unnecessary_blanks(self):
+        # Hauptmitglied
+        if self.tel_p_1:
+            if not len(self.tel_p_1.replace(" ", "")) > 0:
+                self.tel_p_1 = None
+        if self.tel_m_1:
+            if not len(self.tel_m_1.replace(" ", "")) > 0:
+                self.tel_m_1 = None
+        if self.tel_g_1:
+            if not len(self.tel_g_1.replace(" ", "")) > 0:
+                self.tel_g_1 = None
+        
+        # Solidarmitglied
+        if self.tel_p_2:
+            if not len(self.tel_p_2.replace(" ", "")) > 0:
+                self.tel_p_2 = None
+        if self.tel_m_2:
+            if not len(self.tel_m_2.replace(" ", "")) > 0:
+                self.tel_m_2 = None
+        if self.tel_g_2:
+            if not len(self.tel_g_2.replace(" ", "")) > 0:
+                self.tel_g_2 = None
+        
+        # Rechnungskontakt
+        if self.rg_tel_p:
+            if not len(self.rg_tel_p.replace(" ", "")) > 0:
+                self.rg_tel_p = None
+        if self.rg_tel_m:
+            if not len(self.rg_tel_m.replace(" ", "")) > 0:
+                self.rg_tel_m = None
+        if self.rg_tel_g:
+            if not len(self.rg_tel_g.replace(" ", "")) > 0:
+                self.rg_tel_g = None
     
     def zuzug_fix(self):
         # erstelle ggf. neue Rechnung
