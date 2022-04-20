@@ -1831,7 +1831,15 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             new_mitgliedschaft.rg_kunde = ''
             new_mitgliedschaft.rg_kontakt = ''
             new_mitgliedschaft.rg_adresse = ''
+            new_mitgliedschaft.online_haftpflicht = 0
+            new_mitgliedschaft.online_gutschrift = None
+            new_mitgliedschaft.online_betrag = None
+            new_mitgliedschaft.datum_online_verbucht = None
+            new_mitgliedschaft.datum_online_gutschrift = None
+            new_mitgliedschaft.online_payment_method = None
+            new_mitgliedschaft.online_payment_id = None
             new_mitgliedschaft.adress_id_rg = ''
+            
             new_mitgliedschaft.letzte_bearbeitung_von = 'SP'
             new_mitgliedschaft.insert(ignore_permissions=True)
             frappe.db.commit()
