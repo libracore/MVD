@@ -285,20 +285,17 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
     
     if mahnung:
         mahnung = frappe.get_doc("Mahnung", mahnung)
-        jahresrechnung_txt = 'Jahresrechnung '
-        if mitgliedschaft.language == 'fr':
-            jahresrechnung_txt = ''
         key_words.append({
             'key_word': '%%Gesamtbetrag_gemahnte_Rechnungen%%', 'value': "{:,.2f}".format(mahnung.total_with_charge).replace(",", "'")
         })
         if mahnung.sales_invoices[idx].ist_mitgliedschaftsrechnung:
             if mahnung.sales_invoices[idx].amount == mahnung.sales_invoices[idx].outstanding_amount:
                 key_words.append({
-                    'key_word': '%%Jahresrechnung_Jahr%%', 'value': jahresrechnung_txt + str(mahnung.sales_invoices[idx].mitgliedschafts_jahr)
+                    'key_word': '%%Jahresrechnung_Jahr%%', 'value': str(mahnung.sales_invoices[idx].mitgliedschafts_jahr)
                 })
             else:
                 key_words.append({
-                    'key_word': '%%Jahresrechnung_Jahr%%', 'value': jahresrechnung_txt + str(mahnung.sales_invoices[idx].mitgliedschafts_jahr) + ' (Restbetrag)'
+                    'key_word': '%%Jahresrechnung_Jahr%%', 'value': str(mahnung.sales_invoices[idx].mitgliedschafts_jahr) + ' (Restbetrag)'
                 })
         else:
             if mahnung.sales_invoices[idx].amount == mahnung.sales_invoices[idx].outstanding_amount:
