@@ -90,7 +90,7 @@ frappe.vbz = {
             window.open('https://wiki.mieterverband.ch/pages/viewpage.action?pageId=74744863', '_blank').focus();
         });
         $("#mitglieder").click(function(){
-            frappe.route_options = {};
+            frappe.route_options = {"aktive_mitgliedschaft": 1};
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#suchmaske").click(function(){
