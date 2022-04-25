@@ -3068,19 +3068,6 @@ def pe_check_zahlung_mitgliedschaft(pe, event):
                 mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
                 mitgliedschaft.save(ignore_permissions=True)
 
-def set_inaktiv():
-    frappe-log_error("", "Achtung: mitgliedschaft.set_inaktiv ist inaktiviert!")
-    # ~ mvms = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Kündigung', 'Ausschluss')""", as_dict=True)
-    # ~ for mvm in mvms:
-        # ~ mv = frappe.get_doc("Mitgliedschaft", mvm.name)
-        # ~ if mv.status_c in ('Kündigung', 'Gestorben'):
-            # ~ if mv.kuendigung and mv.kuendigung <= getdate(today()):
-                # ~ mv.status_c = 'Inaktiv'
-                # ~ mv.save(ignore_permissions=True)
-        # ~ elif mv.status_c == 'Ausschluss':
-            # ~ if mv.austritt and mv.austritt <= getdate(today()):
-                # ~ mv.status_c = 'Inaktiv'
-                # ~ mv.save(ignore_permissions=True)
 # -----------------------------------------------
 # other helpers
 # -----------------------------------------------
@@ -3153,14 +3140,6 @@ def get_ampelfarbe(mitgliedschaft):
                     ampelfarbe = 'ampelgruen'
     
     return ampelfarbe
-
-def entferne_alte_reduzierungen():
-    alte_preisregeln = frappe.db.sql("""SELECT `name` FROM `tabPricing Rule` WHERE `name` LIKE 'Reduzierung%' AND `disable` = 0 AND `valid_upto` < CURDATE()""", as_dict=True)
-    for alte_preisregel in alte_preisregeln:
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", alte_preisregel.name.replace("Reduzierung ", ""))
-        mitgliedschaft.reduzierte_mitgliedschaft = 0
-        mitgliedschaft.save()
-    return
 
 @frappe.whitelist()
 def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=False):

@@ -111,8 +111,9 @@ doc_events = {
 # ---------------
 scheduler_events = {
     "daily": [
-        "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.set_inaktiv",
-        "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.entferne_alte_reduzierungen"
+        "mvd.mvd.utils.daily_jobs.set_inaktiv",
+        "mvd.mvd.utils.daily_jobs.entferne_alte_reduzierungen",
+        "mvd.mvd.utils.daily_jobs.ampel_neuberechnung"
     ],
     "all": [
         "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue"
