@@ -11,7 +11,6 @@ frappe.listview_settings['Mitgliedschaft'] = {
                     frappe.msgprint("Bitte markieren Sie zuerst die gewünschten Mitgliedschaften");
                 }
         });
-        frappe.route_options = {"aktive_mitgliedschaft": 1};
     }
 };
 
