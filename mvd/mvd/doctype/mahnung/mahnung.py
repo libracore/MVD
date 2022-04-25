@@ -10,6 +10,7 @@ import json
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
 from frappe.utils.data import today
 from frappe.utils.background_jobs import enqueue
+from frappe import _
 
 class Mahnung(Document):
     # this will apply all payment reminder levels in the sales invoices
