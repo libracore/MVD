@@ -938,25 +938,8 @@ def ampel_reset():
     '''
     from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_ampelfarbe
     
-    # setze rote Ampel
-    rote_mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')""", as_dict=True)
-    total = len(rote_mitgliedschaften)
-    print("Setze Ampel auf Rot bei {0} Mitgliedschaften".format(total))
-    submit_counter = 1
-    count = 1
-    for mitgliedschaft in rote_mitgliedschaften:
-        set_rot = frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `ampel_farbe` = 'ampelrot' WHERE `name` = '{m}'""".format(m=mitgliedschaft.name), as_list=True)
-        print("{0} von {1}".format(count, total))
-        if submit_counter == 100:
-            frappe.db.commit()
-            submit_counter = 1
-        else:
-            submit_counter += 1
-        count += 1
-    frappe.db.commit()
-    
-    # setze alle ampeln
-    mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` NOT IN ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')""", as_dict=True)
+    # neuberechnung aller roten ampeln
+    mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `ampel_farbe` = 'ampelrot'""", as_dict=True)
     total = len(mitgliedschaften)
     print("Setze/Berechne Ampel bei {0} Mitgliedschaften".format(total))
     submit_counter = 1
@@ -1122,3 +1105,29 @@ def update_online_payment(site_name, file_name, limit=False):
             submit_counter += 1
         else:
             break
+
+# --------------------------------------------------------------
+# Adressen reset (Postfach \n fix)
+# --------------------------------------------------------------
+def adressen_fix_postfach():
+    '''
+        Example:
+        sudo bench --site [site_name] execute mvd.mvd.data_import.importer.adressen_fix_postfach
+    '''
+    
+    mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `postfach` = 1""", as_dict=True)
+    total = len(mitgliedschaften)
+    print("Setze Adressenl bei {0} Mitgliedschaften".format(total))
+    submit_counter = 0
+    count = 0
+    for mitgliedschaft in mitgliedschaften:
+        m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+        m.save()
+        submit_counter += 1
+        if submit_counter == 100:
+            frappe.db.commit()
+            submit_counter = 1
+        count += 1
+        print("{0} von {1}".format(count, total))
+        
+    frappe.db.commit()
