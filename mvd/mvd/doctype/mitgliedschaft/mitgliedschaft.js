@@ -142,6 +142,9 @@ frappe.ui.form.on('Mitgliedschaft', {
         if (['Wegzug', 'Ausschluss', 'Inaktiv'].includes(cur_frm.doc.status_c)) {
             setze_read_only(frm);
             frm.disable_save();
+            frm.add_custom_button(__("Wieder Beitritt"), function() {
+                wieder_beitritt(frm);
+            }).addClass("btn-danger")
         } else {
             frm.enable_save();
         }
@@ -1368,6 +1371,27 @@ function mitglied_inaktivieren(frm) {
             cur_frm.set_value("austritt", frappe.datetime.get_today());
             cur_frm.save();
             frappe.msgprint("Das Mitglied wurde inaktiviert.");
+        },
+        function(){
+            // on no
+        }
+    )
+}
+
+function wieder_beitritt(frm) {
+    frappe.confirm(
+        'Möchten Sie das inaktivierte Mitglied in eine <b>Neu Anmeldung</b> umwandeln?',
+        function(){
+            // on yes
+            frappe.call({
+                "method": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.wieder_beitritt",
+                "args": {
+                    "mitgliedschaft": cur_frm.doc.name
+                },
+                "callback": function(response) {
+                    frappe.set_route("Form", "Mitgliedschaft", response.message);
+                }
+            });
         },
         function(){
             // on no

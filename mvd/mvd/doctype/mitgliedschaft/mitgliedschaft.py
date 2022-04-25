@@ -3337,3 +3337,34 @@ def erstelle_todo(owner, mitglied, description=False, datum=False, notify=0):
         "mv_mitgliedschaft": mitglied
     }).insert(ignore_permissions=True)
     return
+
+@frappe.whitelist()
+def wieder_beitritt(mitgliedschaft):
+    mitgliedschafts_copy = frappe.copy_doc(frappe.get_doc("Mitgliedschaft", mitgliedschaft))
+    mitgliedschafts_copy.mitglied_nr = None
+    mitgliedschafts_copy.mitglied_id = None
+    mitgliedschafts_copy.status_c = 'Anmeldung'
+    mitgliedschafts_copy.eintrittsdatum = today()
+    mitgliedschafts_copy.zuzug = None
+    mitgliedschafts_copy.zuzug_von = None
+    mitgliedschafts_copy.wegzug = None
+    mitgliedschafts_copy.wegzug_zu = None
+    mitgliedschafts_copy.austritt = None
+    mitgliedschafts_copy.kuendigung = None
+    mitgliedschafts_copy.zahlung_hv = 0
+    mitgliedschafts_copy.zahlung_mitgliedschaft = 0
+    mitgliedschafts_copy.naechstes_jahr_geschuldet = 1
+    mitgliedschafts_copy.validierung_notwendig = 0
+    mitgliedschafts_copy.datum_hv_zahlung = None
+    mitgliedschafts_copy.letzte_bearbeitung_von = 'SP'
+    mitgliedschafts_copy.online_haftpflicht = None
+    mitgliedschafts_copy.online_gutschrift = None
+    mitgliedschafts_copy.online_betrag = None
+    mitgliedschafts_copy.datum_online_verbucht = None
+    mitgliedschafts_copy.datum_online_gutschrift = None
+    mitgliedschafts_copy.online_payment_method = None
+    mitgliedschafts_copy.online_payment_id = None
+    mitgliedschafts_copy.anmeldung_mit_ez = 1
+    mitgliedschafts_copy.insert()
+    return mitgliedschafts_copy.name
+    
