@@ -540,13 +540,15 @@ def get_adressblock(mitgliedschaft):
         adressblock += mitgliedschaft.zusatz_adresse or ''
         adressblock += '\n'
     
-    adressblock += mitgliedschaft.strasse or ''
-    if mitgliedschaft.nummer:
-        adressblock += ' '
-        adressblock += str(mitgliedschaft.nummer) or ''
-        if mitgliedschaft.nummer_zu:
-            adressblock += str(mitgliedschaft.nummer_zu) or ''
-    adressblock += '\n'
+    # ~ adressblock += mitgliedschaft.strasse or ''
+    if mitgliedschaft.strasse and mitgliedschaft.strasse != '':
+        adressblock += mitgliedschaft.strasse
+        if mitgliedschaft.nummer:
+            adressblock += ' '
+            adressblock += str(mitgliedschaft.nummer) or ''
+            if mitgliedschaft.nummer_zu:
+                adressblock += str(mitgliedschaft.nummer_zu) or ''
+        adressblock += '\n'
     
     if int(mitgliedschaft.postfach) == 1:
         adressblock += 'Postfach '
