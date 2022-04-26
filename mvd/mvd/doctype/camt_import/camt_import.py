@@ -317,7 +317,7 @@ def zahlungen_zuweisen(master_data):
                             fr_sinv = create_unpaid_sinv(fr[0].name)
                             sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`
                                                     FROM `tabSales Invoice`
-                                                    WHERE `name` = '{fr_sinv}'""".format(fr_sinv=fr_sinv), as_dict=True)
+                                                    WHERE `name` = '{fr_sinv}'""".format(fr_sinv=fr_sinv), as_dict=True)[0].name
                         else:
                             mitgliedschaft = new_pe.mv_mitgliedschaft
                             
