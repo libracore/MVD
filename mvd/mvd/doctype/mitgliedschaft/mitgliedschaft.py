@@ -1812,7 +1812,7 @@ def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
 
 @frappe.whitelist()
 def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
-    if str(get_sektion_code(neue_sektion)) not in ('ZH', 'BE', 'SO'):
+    if str(get_sektion_code(neue_sektion)) not in ('ZH', 'SO'):
         try:
             # erstelle Mitgliedschaft in Zuzugs-Sektion
             mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
