@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils.data import today
+from frappe.utils.data import today, getdate
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_ampelfarbe
 
 def set_inaktiv():
