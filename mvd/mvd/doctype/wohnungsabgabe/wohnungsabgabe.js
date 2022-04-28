@@ -44,25 +44,32 @@ function mitgliedschaftsdatenUebernehmen(frm) {
               cur_frm.set_value("ort", mitgliedschaft.ort);
             }
             cur_frm.set_value("strasse_nummer_zusatz", strasse_nummer_zusatz);
-
+            if (mitgliedschaft.abweichende_rechnungsadresse ) {
+              cur_frm.set_value("rechnungsadresse", mitgliedschaft.rg_adressblock);
+            }
 	    // hier die nächste Zeile…
         }
     });
 }
 
 function totalRechner(frm) {
-  var tarif_01 = cur_frm.doc.tarif_01;
-  var tarif_02 = cur_frm.doc.tarif_02;
-  var tarif_03 = cur_frm.doc.tarif_03;
-  var tarif_04 = cur_frm.doc.tarif_04;
-  var tarif_05 = cur_frm.doc.tarif_05;
-  var tarif_06 = cur_frm.doc.tarif_06;
-  var tarif_07 = cur_frm.doc.tarif_07;
-	var weg_01 = cur_frm.doc.weg_01;
-	var weg_02 = cur_frm.doc.weg_02;
-  var weg_03 = cur_frm.doc.weg_03;
-  var weg_04 = cur_frm.doc.weg_04;
-  var nichtmitgliederzuschlag = cur_frm.doc.nichtmitgliederzuschlag;
+  var tarif_01 = parseFloat(cur_frm.doc.tarif_01);
+  console.log('tarif_01 '+tarif_01);
+  var tarif_02 = parseFloat(cur_frm.doc.tarif_02);
+  var tarif_03 = parseFloat(cur_frm.doc.tarif_03);
+  var tarif_04 = parseFloat(cur_frm.doc.tarif_04);
+  var tarif_05 = parseFloat(cur_frm.doc.tarif_05);
+  var tarif_06 = parseFloat(cur_frm.doc.tarif_06);
+  var tarif_07 = parseFloat(cur_frm.doc.tarif_07);
+  var weg_01 = parseFloat(cur_frm.doc.weg_01);
+  var weg_02 = parseFloat(cur_frm.doc.weg_02);
+  var weg_03 = parseFloat(cur_frm.doc.weg_03);
+  var weg_04 = parseFloat(cur_frm.doc.weg_04);
+  var nichtmitgliederzuschlag = parseFloat(cur_frm.doc.nichtmitgliederzuschlag);
 	var total = tarif_01 + tarif_02 + tarif_03 + tarif_04 + tarif_05 + tarif_06 + tarif_07 + weg_01 + weg_02 + weg_03 + weg_04 + nichtmitgliederzuschlag;
-	cur_frm.set_value("total", total);
+  console.log('menno: '+tarif_01 + tarif_02 + tarif_03 + tarif_04 + tarif_05 + tarif_06 + tarif_07 + weg_01 + weg_02 + weg_03 + weg_04 + nichtmitgliederzuschlag);
+
+  console.log(total);
+  //total = parseFloat(total).toFixed(2);
+  cur_frm.set_value("total", total);
 };

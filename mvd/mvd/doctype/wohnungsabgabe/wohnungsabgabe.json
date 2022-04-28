@@ -18,10 +18,12 @@
   "tel_p_1",
   "tel_m_1",
   "e_mail_1",
+  "section_ort",
   "strasse_nummer_zusatz",
   "plz",
   "ort",
   "adresse_neu",
+  "rechnungsadresse",
   "section_koordinaten",
   "termin",
   "expert_in",
@@ -49,8 +51,7 @@
   "total",
   "betrag_erhalten",
   "section_intern",
-  "dauer_der_abgabe",
-  "rechnungsadresse"
+  "dauer_der_abgabe"
  ],
  "fields": [
   {
@@ -94,29 +95,35 @@
    "label": "Tarife"
   },
   {
+   "default": "0",
    "fieldname": "tarif_01",
-   "fieldtype": "Currency",
-   "label": "1 - 1 \u00bd Zimmer Wohnung (Fr. 70.-)"
+   "fieldtype": "Select",
+   "label": "1 - 1 \u00bd Zimmer Wohnung (Fr. 70.-)",
+   "options": "0\n70"
   },
   {
    "fieldname": "tarif_02",
-   "fieldtype": "Currency",
-   "label": "2 - 3 \u00bd Zimmer Wohnung (Fr. 90.-)"
+   "fieldtype": "Select",
+   "label": "2 - 3 \u00bd Zimmer Wohnung (Fr. 90.-)",
+   "options": "0\n90"
   },
   {
    "fieldname": "tarif_03",
-   "fieldtype": "Currency",
-   "label": "4 - 5 \u00bd Zimmer Wohnung (Fr. 120.-)"
+   "fieldtype": "Select",
+   "label": "4 - 5 \u00bd Zimmer Wohnung (Fr. 120.-)",
+   "options": "0\n120"
   },
   {
    "fieldname": "tarif_04",
-   "fieldtype": "Currency",
-   "label": "6 - 6 \u00bd Zimmer Wohnung (Fr. 160.-)"
+   "fieldtype": "Select",
+   "label": "6 - 6 \u00bd Zimmer Wohnung (Fr. 160.-)",
+   "options": "0\n160"
   },
   {
    "fieldname": "tarif_05",
-   "fieldtype": "Currency",
-   "label": "Einfamilienhaus + kleiner Umschwung (Fr. 200.-)"
+   "fieldtype": "Select",
+   "label": "Einfamilienhaus + kleiner Umschwung (Fr. 200.-)",
+   "options": "0\n200"
   },
   {
    "fieldname": "tarif_06",
@@ -135,23 +142,27 @@
   },
   {
    "fieldname": "weg_01",
-   "fieldtype": "Currency",
-   "label": "Bis 25 KM  (Fr. 30.-)"
+   "fieldtype": "Select",
+   "label": "Bis 25 KM  (Fr. 30.-)",
+   "options": "0\n30"
   },
   {
    "fieldname": "weg_02",
-   "fieldtype": "Currency",
-   "label": "26 KM bis 50 KM  (Fr. 50.-)"
+   "fieldtype": "Select",
+   "label": "26 KM bis 50 KM  (Fr. 50.-)",
+   "options": "0\n50"
   },
   {
    "fieldname": "weg_03",
-   "fieldtype": "Currency",
-   "label": "51 KM bis 80 KM (Fr. 80.-)"
+   "fieldtype": "Select",
+   "label": "51 KM bis 80 KM (Fr. 80.-)",
+   "options": "0\n80"
   },
   {
    "fieldname": "weg_04",
-   "fieldtype": "Currency",
-   "label": "\u00dcber 80 KM (Fr. 100.-)"
+   "fieldtype": "Select",
+   "label": "\u00dcber 80 KM (Fr. 100.-)",
+   "options": "0\n100"
   },
   {
    "fieldname": "section_nichtmitglieder",
@@ -160,8 +171,9 @@
   },
   {
    "fieldname": "nichtmitgliederzuschlag",
-   "fieldtype": "Currency",
-   "label": "Nichtmitglieder-Zuschlag (Fr. 70.-)"
+   "fieldtype": "Select",
+   "label": "Nichtmitglieder-Zuschlag (Fr. 70.-)",
+   "options": "0\n70"
   },
   {
    "fieldname": "section_total",
@@ -241,14 +253,13 @@
   {
    "fieldname": "termin",
    "fieldtype": "Datetime",
-   "label": "Termin",
-   "reqd": 1
+   "label": "Termin"
   },
   {
    "fieldname": "expert_in",
    "fieldtype": "Select",
    "label": "Expert*in",
-   "options": "- offen -\nBaumeler, Markus\nEgger, Martin\nSuter, Heinz\nHofer, Werner\nWagner, Susanne\nSch\u00e4rer, Kathrin\nKofmel, Urban\nHagi, Martin\nGuldimann, Ursula\nRufer, Lilli"
+   "options": "\nBaumeler, Markus\nEgger, Martin\nSuter, Heinz\nHofer, Werner\nWagner, Susanne\nSch\u00e4rer, Kathrin\nKofmel, Urban\nHagi, Martin\nGuldimann, Ursula\nRufer, Lilli"
   },
   {
    "fieldname": "vermieter_in",
@@ -278,7 +289,7 @@
    "options": "Abgabe\n\u00dcbernahme/M\u00e4ngel bei Antritt\nErstellen Zustandsbericht"
   },
   {
-   "description": "z.B. 2 - 3 \u00bd Zimmer Wohnung, 7. Stock",
+   "description": "z.B. 3\u00bd Zimmer Wohnung, 7. Stock",
    "fieldname": "auftrag_beschreibung",
    "fieldtype": "Data",
    "label": "Auftrag Beschreibung"
@@ -286,16 +297,21 @@
   {
    "fieldname": "rechnungsadresse",
    "fieldtype": "Small Text",
-   "label": "Rechnungsadresse"
+   "label": "Rechnungsadresse (abweichend)"
   },
   {
    "default": "Garage/EHP/Mansarde/Garten",
    "fieldname": "tarif_06_beschreibung",
    "fieldtype": "Data",
    "label": "Zusatz Beschreibung"
+  },
+  {
+   "fieldname": "section_ort",
+   "fieldtype": "Section Break",
+   "label": "Adresse f\u00fcr Abgabe/\u00dcbergabe/Bericht "
   }
  ],
- "modified": "2022-04-13 18:11:22.536766",
+ "modified": "2022-04-28 13:37:46.477749",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
