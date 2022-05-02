@@ -6,8 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "sektion_id",
-  "mitgliederdaten_uebernehmen",
+  "language",
   "mv_mitgliedschaft",
+  "mitgliederdaten_uebernehmen",
   "section_auftraggeberin",
   "mitglied_nr",
   "adressblock",
@@ -317,9 +318,16 @@
    "fieldname": "mitgliederdaten_uebernehmen",
    "fieldtype": "Button",
    "label": "Mitgliederdaten \u00fcbernehmen"
+  },
+  {
+   "default": "de",
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Sprache",
+   "options": "Language"
   }
  ],
- "modified": "2022-05-02 10:49:47.233846",
+ "modified": "2022-05-02 11:19:22.997770",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",

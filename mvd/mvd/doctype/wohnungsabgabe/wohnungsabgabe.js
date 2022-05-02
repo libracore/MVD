@@ -29,6 +29,7 @@ function mitgliedschaftsdatenUebernehmen(frm) {
         'callback': function(response) {
             var mitgliedschaft = response.message;
             cur_frm.set_value("mitglied_nr", mitgliedschaft.mitglied_nr);
+            cur_frm.set_value("language", mitgliedschaft.language);
             cur_frm.set_value("adressblock", mitgliedschaft.adressblock);
             cur_frm.set_value("briefanrede", mitgliedschaft.briefanrede);
             cur_frm.set_value("firma", mitgliedschaft.firma);
