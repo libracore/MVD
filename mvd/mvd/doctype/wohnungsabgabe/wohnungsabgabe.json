@@ -51,8 +51,8 @@
   "nichtmitgliederzuschlag",
   "section_total",
   "total",
-  "betrag_erhalten",
   "section_intern",
+  "betrag_erhalten",
   "dauer_der_abgabe"
  ],
  "fields": [
@@ -192,7 +192,7 @@
   {
    "fieldname": "section_intern",
    "fieldtype": "Section Break",
-   "label": "Intern"
+   "label": "Internes"
   },
   {
    "fieldname": "dauer_der_abgabe",
@@ -299,12 +299,14 @@
    "label": "Auftrag Beschreibung"
   },
   {
+   "description": "Wenn hier etwas eingetragen ist, erscheint auf dem Formular \u00abRechnung an:\u00bb statt \u00abBetrag erhalten\u00bb.",
    "fieldname": "rechnungsadresse",
    "fieldtype": "Small Text",
    "label": "Rechnungsadresse (abweichend)"
   },
   {
    "default": "Garage/EHP/Mansarde/Garten",
+   "description": "frz.: Garage / mansarde / remise / jardin",
    "fieldname": "tarif_06_beschreibung",
    "fieldtype": "Data",
    "label": "Zusatz Beschreibung"
@@ -327,7 +329,7 @@
    "options": "Language"
   }
  ],
- "modified": "2022-05-02 11:19:22.997770",
+ "modified": "2022-05-02 22:32:59.240218",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",

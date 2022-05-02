@@ -75,6 +75,6 @@ function totalRechner(frm) {
   //console.log('menno: '+tarif_01 + tarif_02 + tarif_03 + tarif_04 + tarif_05 + tarif_06 + tarif_07 + weg_01 + weg_02 + weg_03 + weg_04 + nichtmitgliederzuschlag);
 
   console.log(total);
-  //total = parseFloat(total).toFixed(2);
+  total = parseFloat(total).toFixed(2);
   cur_frm.set_value("total", total);
 };
