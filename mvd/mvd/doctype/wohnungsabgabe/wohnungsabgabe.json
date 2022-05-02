@@ -1,0 +1,364 @@
+{
+ "autoname": "format:WA-{sektion_id}-{####}",
+ "creation": "2022-03-31 10:56:44.803311",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sektion_id",
+  "language",
+  "mv_mitgliedschaft",
+  "mitgliederdaten_uebernehmen",
+  "section_auftraggeberin",
+  "mitglied_nr",
+  "adressblock",
+  "briefanrede",
+  "firma",
+  "anrede_c",
+  "nachname_1",
+  "vorname_1",
+  "tel_p_1",
+  "tel_m_1",
+  "e_mail_1",
+  "section_ort",
+  "strasse_nummer_zusatz",
+  "plz",
+  "ort",
+  "adresse_neu",
+  "rechnungsadresse",
+  "section_koordinaten",
+  "termin",
+  "expert_in",
+  "vermieter_in",
+  "section_auftrag",
+  "auftrag_typ",
+  "auftrag_beschreibung",
+  "section_tarife",
+  "tarif_01",
+  "tarif_02",
+  "tarif_03",
+  "tarif_04",
+  "tarif_05",
+  "tarif_06",
+  "tarif_06_beschreibung",
+  "tarif_07",
+  "section_wegspesen",
+  "weg_01",
+  "weg_02",
+  "weg_03",
+  "weg_04",
+  "section_nichtmitglieder",
+  "nichtmitgliederzuschlag",
+  "section_total",
+  "total",
+  "betrag_erhalten",
+  "section_intern",
+  "dauer_der_abgabe"
+ ],
+ "fields": [
+  {
+   "fetch_from": "mv_mitgliedschaft.sektion_id",
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Mitgliedschaft",
+   "options": "Mitgliedschaft"
+  },
+  {
+   "fieldname": "mitglied_nr",
+   "fieldtype": "Data",
+   "label": "Mitgliedernummer"
+  },
+  {
+   "fieldname": "section_auftraggeberin",
+   "fieldtype": "Section Break",
+   "label": "Auftraggeber*in"
+  },
+  {
+   "fieldname": "adresse_neu",
+   "fieldtype": "Small Text",
+   "label": "Neue Adresse"
+  },
+  {
+   "fieldname": "section_auftrag",
+   "fieldtype": "Section Break",
+   "label": "Auftrag"
+  },
+  {
+   "fieldname": "section_tarife",
+   "fieldtype": "Section Break",
+   "label": "Tarife"
+  },
+  {
+   "default": "0",
+   "fieldname": "tarif_01",
+   "fieldtype": "Select",
+   "label": "1 - 1 \u00bd Zimmer Wohnung (Fr. 70.-)",
+   "options": "0\n70"
+  },
+  {
+   "fieldname": "tarif_02",
+   "fieldtype": "Select",
+   "label": "2 - 3 \u00bd Zimmer Wohnung (Fr. 90.-)",
+   "options": "0\n90"
+  },
+  {
+   "fieldname": "tarif_03",
+   "fieldtype": "Select",
+   "label": "4 - 5 \u00bd Zimmer Wohnung (Fr. 120.-)",
+   "options": "0\n120"
+  },
+  {
+   "fieldname": "tarif_04",
+   "fieldtype": "Select",
+   "label": "6 - 6 \u00bd Zimmer Wohnung (Fr. 160.-)",
+   "options": "0\n160"
+  },
+  {
+   "fieldname": "tarif_05",
+   "fieldtype": "Select",
+   "label": "Einfamilienhaus + kleiner Umschwung (Fr. 200.-)",
+   "options": "0\n200"
+  },
+  {
+   "default": "0",
+   "fieldname": "tarif_06",
+   "fieldtype": "Currency",
+   "label": "Zusatz: Garage/EHP/Mansarde/Garten (Fr. 10.-)"
+  },
+  {
+   "default": "0",
+   "fieldname": "tarif_07",
+   "fieldtype": "Currency",
+   "label": "Gesch\u00e4ftsr\u00e4ume / Loft (Fr. 95.-)"
+  },
+  {
+   "fieldname": "section_wegspesen",
+   "fieldtype": "Section Break",
+   "label": "Wegspesen"
+  },
+  {
+   "fieldname": "weg_01",
+   "fieldtype": "Select",
+   "label": "Bis 25 KM  (Fr. 30.-)",
+   "options": "0\n30"
+  },
+  {
+   "fieldname": "weg_02",
+   "fieldtype": "Select",
+   "label": "26 KM bis 50 KM  (Fr. 50.-)",
+   "options": "0\n50"
+  },
+  {
+   "fieldname": "weg_03",
+   "fieldtype": "Select",
+   "label": "51 KM bis 80 KM (Fr. 80.-)",
+   "options": "0\n80"
+  },
+  {
+   "fieldname": "weg_04",
+   "fieldtype": "Select",
+   "label": "\u00dcber 80 KM (Fr. 100.-)",
+   "options": "0\n100"
+  },
+  {
+   "fieldname": "section_nichtmitglieder",
+   "fieldtype": "Section Break",
+   "label": "Nichtmitglieder-Zuschlag "
+  },
+  {
+   "fieldname": "nichtmitgliederzuschlag",
+   "fieldtype": "Select",
+   "label": "Nichtmitglieder-Zuschlag (Fr. 70.-)",
+   "options": "0\n70"
+  },
+  {
+   "fieldname": "section_total",
+   "fieldtype": "Section Break",
+   "label": "Total"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total"
+  },
+  {
+   "fieldname": "section_intern",
+   "fieldtype": "Section Break",
+   "label": "Intern"
+  },
+  {
+   "fieldname": "dauer_der_abgabe",
+   "fieldtype": "Data",
+   "label": "Dauer der Abgabe (min)"
+  },
+  {
+   "fieldname": "firma",
+   "fieldtype": "Data",
+   "label": "Firma"
+  },
+  {
+   "fieldname": "anrede_c",
+   "fieldtype": "Data",
+   "label": "Anrede"
+  },
+  {
+   "fieldname": "nachname_1",
+   "fieldtype": "Data",
+   "label": "Nachname"
+  },
+  {
+   "fieldname": "vorname_1",
+   "fieldtype": "Data",
+   "label": "Vorname"
+  },
+  {
+   "fieldname": "tel_p_1",
+   "fieldtype": "Data",
+   "label": "Tel. Privat"
+  },
+  {
+   "fieldname": "tel_m_1",
+   "fieldtype": "Data",
+   "label": "Tel. Mobil"
+  },
+  {
+   "fieldname": "e_mail_1",
+   "fieldtype": "Data",
+   "label": "E-Mail"
+  },
+  {
+   "fieldname": "strasse_nummer_zusatz",
+   "fieldtype": "Data",
+   "label": "Strasse und Nummer"
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "label": "PLZ"
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "label": "Ort"
+  },
+  {
+   "fieldname": "section_koordinaten",
+   "fieldtype": "Section Break",
+   "label": "Termin"
+  },
+  {
+   "fieldname": "termin",
+   "fieldtype": "Datetime",
+   "label": "Termin"
+  },
+  {
+   "fieldname": "expert_in",
+   "fieldtype": "Select",
+   "label": "Expert*in",
+   "options": "\nBaumeler, Markus\nEgger, Martin\nSuter, Heinz\nHofer, Werner\nWagner, Susanne\nSch\u00e4rer, Kathrin\nKofmel, Urban\nHagi, Martin\nGuldimann, Ursula\nRufer, Lilli"
+  },
+  {
+   "fieldname": "vermieter_in",
+   "fieldtype": "Data",
+   "label": "Vermieter*in"
+  },
+  {
+   "columns": 1,
+   "fieldname": "adressblock",
+   "fieldtype": "Small Text",
+   "label": "Adressblock"
+  },
+  {
+   "fieldname": "briefanrede",
+   "fieldtype": "Data",
+   "label": "Briefanrede"
+  },
+  {
+   "fieldname": "betrag_erhalten",
+   "fieldtype": "Currency",
+   "label": "Betrag erhalten"
+  },
+  {
+   "fieldname": "auftrag_typ",
+   "fieldtype": "Select",
+   "label": "Auftrag Typ",
+   "options": "Abgabe\n\u00dcbernahme/M\u00e4ngel bei Antritt\nErstellen Zustandsbericht"
+  },
+  {
+   "description": "z.B. 3\u00bd Zimmer Wohnung, 7. Stock",
+   "fieldname": "auftrag_beschreibung",
+   "fieldtype": "Data",
+   "label": "Auftrag Beschreibung"
+  },
+  {
+   "fieldname": "rechnungsadresse",
+   "fieldtype": "Small Text",
+   "label": "Rechnungsadresse (abweichend)"
+  },
+  {
+   "default": "Garage/EHP/Mansarde/Garten",
+   "fieldname": "tarif_06_beschreibung",
+   "fieldtype": "Data",
+   "label": "Zusatz Beschreibung"
+  },
+  {
+   "fieldname": "section_ort",
+   "fieldtype": "Section Break",
+   "label": "Adresse f\u00fcr Abgabe/\u00dcbergabe/Bericht "
+  },
+  {
+   "fieldname": "mitgliederdaten_uebernehmen",
+   "fieldtype": "Button",
+   "label": "Mitgliederdaten \u00fcbernehmen"
+  },
+  {
+   "default": "de",
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Sprache",
+   "options": "Language"
+  }
+ ],
+ "modified": "2022-05-02 11:19:22.997770",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Wohnungsabgabe",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MV_beta",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
