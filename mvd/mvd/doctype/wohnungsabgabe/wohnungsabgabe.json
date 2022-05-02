@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "sektion_id",
+  "mitgliederdaten_uebernehmen",
   "mv_mitgliedschaft",
   "section_auftraggeberin",
   "mitglied_nr",
@@ -126,11 +127,13 @@
    "options": "0\n200"
   },
   {
+   "default": "0",
    "fieldname": "tarif_06",
    "fieldtype": "Currency",
    "label": "Zusatz: Garage/EHP/Mansarde/Garten (Fr. 10.-)"
   },
   {
+   "default": "0",
    "fieldname": "tarif_07",
    "fieldtype": "Currency",
    "label": "Gesch\u00e4ftsr\u00e4ume / Loft (Fr. 95.-)"
@@ -309,9 +312,14 @@
    "fieldname": "section_ort",
    "fieldtype": "Section Break",
    "label": "Adresse f\u00fcr Abgabe/\u00dcbergabe/Bericht "
+  },
+  {
+   "fieldname": "mitgliederdaten_uebernehmen",
+   "fieldtype": "Button",
+   "label": "Mitgliederdaten \u00fcbernehmen"
   }
  ],
- "modified": "2022-04-28 13:37:46.477749",
+ "modified": "2022-05-02 10:49:47.233846",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",

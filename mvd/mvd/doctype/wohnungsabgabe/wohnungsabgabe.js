@@ -3,16 +3,20 @@
 
 frappe.ui.form.on('Wohnungsabgabe', {
          refresh: function(frm) {
-         	  	frm.add_custom_button(__("Mitgliedschaftsdaten übernehmen"),  function() {
-         			mitgliedschaftsdatenUebernehmen(frm);
-                		});
+         	  	//frm.add_custom_button(__("Mitgliedschaftsdaten übernehmen"),  function() {
+         			//mitgliedschaftsdatenUebernehmen(frm);
+              //  		});
          },
 	 validate: function(frm) {
 	 		totalRechner(frm);
 	},
-	total: function(frm) {
-	 		totalRechner(frm);
-	},
+	//total: function(frm) {
+	// 		totalRechner(frm);
+	//},
+  mitgliederdaten_uebernehmen: function(frm) {
+    mitgliedschaftsdatenUebernehmen(frm);
+  }
+
 });
 
 function mitgliedschaftsdatenUebernehmen(frm) {
@@ -67,7 +71,7 @@ function totalRechner(frm) {
   var weg_04 = parseFloat(cur_frm.doc.weg_04);
   var nichtmitgliederzuschlag = parseFloat(cur_frm.doc.nichtmitgliederzuschlag);
 	var total = tarif_01 + tarif_02 + tarif_03 + tarif_04 + tarif_05 + tarif_06 + tarif_07 + weg_01 + weg_02 + weg_03 + weg_04 + nichtmitgliederzuschlag;
-  console.log('menno: '+tarif_01 + tarif_02 + tarif_03 + tarif_04 + tarif_05 + tarif_06 + tarif_07 + weg_01 + weg_02 + weg_03 + weg_04 + nichtmitgliederzuschlag);
+  //console.log('menno: '+tarif_01 + tarif_02 + tarif_03 + tarif_04 + tarif_05 + tarif_06 + tarif_07 + weg_01 + weg_02 + weg_03 + weg_04 + nichtmitgliederzuschlag);
 
   console.log(total);
   //total = parseFloat(total).toFixed(2);
