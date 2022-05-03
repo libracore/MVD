@@ -2256,7 +2256,7 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.austritt = austritt
             mitgliedschaft.kuendigung = kuendigung
             mitgliedschaft.zahlung_hv = int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0
-            mitgliedschaft.zahlung_mitgliedschaft = int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0
+            mitgliedschaft.bezahltes_mitgliedschaftsjahr = int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0
             mitgliedschaft.naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
             mitgliedschaft.validierung_notwendig = 0
             mitgliedschaft.language = get_sprache_abk(language=kwargs['sprache']) if kwargs['sprache'] else 'de'
@@ -2400,8 +2400,10 @@ def mvm_neuanlage(kwargs):
             
             if kwargs['datumOnlineVerbucht']:
                 datum_online_verbucht = kwargs['datumOnlineVerbucht']
+                datum_zahlung_mitgliedschaft = datum_online_verbucht.split("T")[0]
             else:
                 datum_online_verbucht = None
+                datum_zahlung_mitgliedschaft = None
             
             if kwargs['datumOnlineGutschrift']:
                 datum_online_gutschrift = kwargs['datumOnlineGutschrift']
@@ -2445,7 +2447,7 @@ def mvm_neuanlage(kwargs):
                 'austritt': austritt,
                 'kuendigung': kuendigung,
                 'zahlung_hv': int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0,
-                'zahlung_mitgliedschaft': int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0,
+                'bezahltes_mitgliedschaftsjahr': int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0,
                 'naechstes_jahr_geschuldet': 1 if kwargs['naechstesJahrGeschuldet'] else '0',
                 'validierung_notwendig': 0,
                 'language': get_sprache_abk(language=kwargs['sprache']),
@@ -2461,7 +2463,8 @@ def mvm_neuanlage(kwargs):
                 'datum_online_verbucht': datum_online_verbucht,
                 'datum_online_gutschrift': datum_online_gutschrift,
                 'online_payment_method': online_payment_method,
-                'online_payment_id': online_payment_id
+                'online_payment_id': online_payment_id,
+                'datum_zahlung_mitgliedschaft': datum_zahlung_mitgliedschaft
             })
             
             new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
@@ -2896,7 +2899,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "neueSektionCode": str(get_sektion_code(mitgliedschaft.wegzug_zu)) if mitgliedschaft.wegzug_zu else None,
         "wegzugsdatum": str(mitgliedschaft.wegzug).replace(" ", "T") + "T00:00:00" if mitgliedschaft.wegzug else None,
         "kuendigungPer": str(mitgliedschaft.kuendigung).replace(" ", "T") + "T00:00:00" if mitgliedschaft.kuendigung else None,
-        "jahrBezahltMitgliedschaft": mitgliedschaft.zahlung_mitgliedschaft or 0,
+        "jahrBezahltMitgliedschaft": mitgliedschaft.bezahltes_mitgliedschaftsjahr or 0,
         "betragBezahltMitgliedschaft": None, # ???
         "jahrBezahltHaftpflicht": mitgliedschaft.zahlung_hv, # TBD
         "betragBezahltHaftpflicht": None, # ???
