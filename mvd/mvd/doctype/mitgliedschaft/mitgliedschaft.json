@@ -845,7 +845,8 @@
    "default": "0",
    "fieldname": "zahlung_mitgliedschaft",
    "fieldtype": "Int",
-   "label": "Zahlung Mitgliedschaft",
+   "hidden": 1,
+   "label": "Zahlung Mitgliedschaft (Obsolet)",
    "read_only": 1
   },
   {
@@ -1150,7 +1151,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-04-04 16:11:53.915917",
+ "modified": "2022-05-03 15:01:50.540797",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

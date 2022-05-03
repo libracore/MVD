@@ -1131,3 +1131,54 @@ def adressen_fix_postfach():
         print("{0} von {1}".format(count, total))
         
     frappe.db.commit()
+
+# --------------------------------------------------------------
+# Fix: Zahlung Mitgliedschaft <> Bezahltes Mitgliedschaftsjahr
+# --------------------------------------------------------------
+def fix_zahlungs_jahr():
+    '''
+        Example:
+        sudo bench --site [site_name] execute mvd.mvd.data_import.importer.fix_zahlungs_jahr
+    '''
+    
+    mitgliedschaften = frappe.db.sql("""SELECT `name`, `zahlung_mitgliedschaft` FROM `tabMitgliedschaft` WHERE `zahlung_mitgliedschaft` > 0""", as_dict=True)
+    total = len(mitgliedschaften)
+    print("Fixe Zahlung Mitgliedschaft <> Bezahltes Mitgliedschaftsjahr bei {0} Mitgliedschaften".format(total))
+    submit_counter = 0
+    count = 0
+    for mitgliedschaft in mitgliedschaften:
+        frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `bezahltes_mitgliedschaftsjahr` = {zahlung_mitgliedschaft} WHERE `name` = '{name}'""".format(zahlung_mitgliedschaft=mitgliedschaft.zahlung_mitgliedschaft, name=mitgliedschaft.name), as_list=True)
+        submit_counter += 1
+        if submit_counter == 100:
+            frappe.db.commit()
+            submit_counter = 1
+        count += 1
+        print("{0} von {1}".format(count, total))
+        
+    frappe.db.commit()
+
+# --------------------------------------------------------------
+# Nachmigration für SP
+# --------------------------------------------------------------
+def nachmigration_fuer_sp():
+    '''
+        Example:
+        sudo bench --site [site_name] execute mvd.mvd.data_import.importer.nachmigration_fuer_sp
+    '''
+    
+    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import send_mvm_to_sp
+    
+    mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `datum_zahlung_mitgliedschaft` BETWEEN CAST('2022-03-01' AS DATE) AND CAST('2022-05-03' AS DATE)""", as_dict=True)
+    submit_counter = 1
+    counter = 1
+    for mitgliedschaft in mitgliedschaften: 
+        m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name) 
+        send_mvm_to_sp(m, True) 
+        print("{0} von {1}".format(counter, len(mitgliedschaften))) 
+        counter += 1
+        if submit_counter == 100:
+            frappe.db.commit()
+            submit_counter = 1
+        else:
+            submit_counter += 1
+    frappe.db.commit()

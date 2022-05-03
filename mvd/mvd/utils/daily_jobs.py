@@ -21,11 +21,11 @@ def set_inaktiv():
                 m.status_c = 'Inaktiv'
                 m.save(ignore_permissions=True)
         if submit_counter == 100:
-            frappe.db.submit()
+            frappe.db.commit()
             submit_counter = 1
         else:
             submit_counter += 1
-    frappe.db.submit()
+    frappe.db.commit()
 
 def entferne_alte_reduzierungen():
     alte_preisregeln = frappe.db.sql("""SELECT `name` FROM `tabPricing Rule` WHERE `name` LIKE 'Reduzierung%' AND `disable` = 0 AND `valid_upto` < CURDATE()""", as_dict=True)
