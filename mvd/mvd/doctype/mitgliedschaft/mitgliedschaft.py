@@ -2888,7 +2888,6 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "typ": str(typ_mapper[mitgliedschaft.mitgliedtyp_c]),
         "status": str(status_mapper[mitgliedschaft.status_c]),
         "sprache": get_sprache(language=mitgliedschaft.language) if mitgliedschaft.language else 'Deutsch',
-        "regionCode": None, # ???
         "istTemporaeresMitglied": False, # ???
         "fuerBewirtschaftungGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
         "erfassungsdatum": str(mitgliedschaft.creation).replace(" ", "T"),

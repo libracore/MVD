@@ -14,7 +14,7 @@ class ServicePlatformQueue(Document):
 
 def flush_queue():
     # ausgehende queues
-    queues = frappe.db.sql("""SELECT `name` FROM `tabService Platform Queue` WHERE `status` = 'Open' AND `eingehend` != 1 ORDER BY `creation` ASC LIMIT 10""", as_dict=True)
+    queues = frappe.db.sql("""SELECT `name` FROM `tabService Platform Queue` WHERE `status` = 'Open' AND `eingehend` != 1 ORDER BY `creation` ASC LIMIT 300""", as_dict=True)
     for _queue in queues:
         queue = frappe.get_doc("Service Platform Queue", _queue.name)
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", queue.mv_mitgliedschaft)
