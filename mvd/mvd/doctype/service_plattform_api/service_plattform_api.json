@@ -14,7 +14,8 @@
   "no_sp_update",
   "json_error_log",
   "queue",
-  "flush_queue"
+  "flush_queue",
+  "flush_limit"
  ],
  "fields": [
   {
@@ -81,10 +82,16 @@
    "fieldname": "flush_queue",
    "fieldtype": "Button",
    "label": "Flush Queue"
+  },
+  {
+   "default": "0",
+   "fieldname": "flush_limit",
+   "fieldtype": "Int",
+   "label": "Flush Limit"
   }
  ],
  "issingle": 1,
- "modified": "2022-03-11 20:41:40.720609",
+ "modified": "2022-05-04 20:39:20.463880",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",
