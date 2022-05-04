@@ -16,6 +16,10 @@ def set_inaktiv():
             if m.kuendigung and m.kuendigung <= getdate(today()):
                 m.status_c = 'Inaktiv'
                 m.save(ignore_permissions=True)
+            else:
+                if m.austritt and m.austritt <= getdate(today()):
+                    m.status_c = 'Inaktiv'
+                    m.save(ignore_permissions=True)
         elif m.status_c == 'Ausschluss':
             if m.austritt and m.austritt <= getdate(today()):
                 m.status_c = 'Inaktiv'
