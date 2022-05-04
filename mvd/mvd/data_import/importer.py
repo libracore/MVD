@@ -1182,3 +1182,48 @@ def nachmigration_fuer_sp():
         else:
             submit_counter += 1
     frappe.db.commit()
+
+# --------------------------------------------------------------
+# regionCode SP Update
+# --------------------------------------------------------------
+def update_region_code(site_name, file_name, limit=False):
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.update_region_code --kwargs "{'site_name': 'site1.local', 'file_name': 'update_region_code.csv'}"
+    '''
+    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import send_mvm_to_sp
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    submit_counter = 1
+    max_loop = limit
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            if frappe.db.exists("Mitgliedschaft", str(get_value(row, 'mitglied_id'))):
+                try:
+                    m = frappe.get_doc("Mitgliedschaft", str(get_value(row, 'mitglied_id'))) 
+                    send_mvm_to_sp(m, True)
+                    if submit_counter == 100:
+                        frappe.db.commit()
+                        submit_counter = 1
+                    else:
+                        submit_counter += 1
+                except Exception as err:
+                    frappe.log_error("{0}\n\n{1}".format(err, row), 'Queue konnte nicht erstellt werden')
+            else:
+                frappe.log_error("{0}".format(row), 'Mitgliedschaft existiert nicht')
+            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+            count += 1
+            submit_counter += 1
+        else:
+            break

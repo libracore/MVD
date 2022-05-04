@@ -12,9 +12,14 @@ from frappe.utils.background_jobs import enqueue
 class ServicePlatformQueue(Document):
     pass
 
-def flush_queue():
+def flush_queue(limit=100):
     # ausgehende queues
-    queues = frappe.db.sql("""SELECT `name` FROM `tabService Platform Queue` WHERE `status` = 'Open' AND `eingehend` != 1 ORDER BY `creation` ASC LIMIT 300""", as_dict=True)
+    limit = int(frappe.db.get_single_value('Service Plattform API', 'flush_limit'))
+    if limit > 0:
+        limit = 'LIMIT {limit}'.format(limit=limit)
+    else:
+        limit = ''
+    queues = frappe.db.sql("""SELECT `name` FROM `tabService Platform Queue` WHERE `status` = 'Open' AND `eingehend` != 1 ORDER BY `creation` ASC {limit}""".format(limit=limit), as_dict=True)
     for _queue in queues:
         queue = frappe.get_doc("Service Platform Queue", _queue.name)
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", queue.mv_mitgliedschaft)
