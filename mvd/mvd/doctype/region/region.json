@@ -9,7 +9,8 @@
   "title",
   "region_c",
   "sektion_id",
-  "disabled"
+  "disabled",
+  "plz_zuordnung"
  ],
  "fields": [
   {
@@ -38,9 +39,15 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Deaktiviert"
+  },
+  {
+   "fieldname": "plz_zuordnung",
+   "fieldtype": "Table",
+   "label": "Postleitzahlen Zuordnung",
+   "options": "Region PLZ"
   }
  ],
- "modified": "2022-04-04 20:39:02.336227",
+ "modified": "2022-05-05 14:12:57.600012",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Region",

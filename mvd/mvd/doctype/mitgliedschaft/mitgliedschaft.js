@@ -169,6 +169,12 @@ frappe.ui.form.on('Mitgliedschaft', {
                 }
             }
         }
+        
+        if (cint(cur_frm.doc.region_manuell)==1) {
+            cur_frm.set_df_property('region', 'read_only', 0);
+        } else {
+            cur_frm.set_df_property('region', 'read_only', 1);
+        }
     },
     m_und_w: function(frm) {
         if (![0, 1].includes(cur_frm.doc.m_und_w)) {
@@ -315,6 +321,13 @@ frappe.ui.form.on('Mitgliedschaft', {
     },
     rg_tel_g: function(frm) {
         is_valid_phone(cur_frm.doc.rg_tel_g);
+    },
+    region_manuell: function(frm) {
+        if (cint(cur_frm.doc.region_manuell)==1) {
+            cur_frm.set_df_property('region', 'read_only', 0);
+        } else {
+            cur_frm.set_df_property('region', 'read_only', 1);
+        }
     }
 });
 

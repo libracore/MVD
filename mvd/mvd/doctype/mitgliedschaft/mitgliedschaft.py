@@ -96,6 +96,10 @@ class Mitgliedschaft(Document):
             if not self.online_haftpflicht:
                 self.online_haftpflicht = '0'
             
+            # Regions-Zuordnung anhand PLZ
+            if not int(self.region_manuell) == 1:
+                self.region = self.get_region()
+            
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
                 if self.creation == self.modified:
@@ -141,6 +145,24 @@ class Mitgliedschaft(Document):
         if self.rg_tel_g:
             if not len(self.rg_tel_g.replace(" ", "")) > 0:
                 self.rg_tel_g = None
+    
+    def get_region(self):
+        plz = self.plz
+        region = frappe.db.sql("""SELECT
+                                    `parent`
+                                FROM `tabRegion PLZ`
+                                WHERE `plz_von` <= {plz}
+                                AND `plz_bis` >= {plz}
+                                AND `parent` IN (
+                                    SELECT
+                                        `name`
+                                    FROM `tabRegion`
+                                    WHERE `sektion_id` = '{sektion}'
+                                ) LIMIT 1""".format(plz=plz, sektion=self.sektion_id), as_dict=True)
+        if len(region) > 0:
+            return region[0].parent
+        else:
+            return None
     
     def zuzug_fix(self):
         # erstelle ggf. neue Rechnung

@@ -1009,7 +1009,8 @@
    "fieldname": "region",
    "fieldtype": "Link",
    "label": "Region",
-   "options": "Region"
+   "options": "Region",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -1151,7 +1152,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-05-03 15:01:50.540797",
+ "modified": "2022-05-05 14:25:00.231847",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
