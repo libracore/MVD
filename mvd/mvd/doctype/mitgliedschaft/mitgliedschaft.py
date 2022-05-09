@@ -3342,7 +3342,9 @@ def erstelle_todo(owner, mitglied, description=False, datum=False, notify=0):
 
 @frappe.whitelist()
 def wieder_beitritt(mitgliedschaft):
-    mitgliedschafts_copy = frappe.copy_doc(frappe.get_doc("Mitgliedschaft", mitgliedschaft))
+    alte_mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+    mitgliedschafts_copy = frappe.copy_doc(alte_mitgliedschaft.as_dict())
+    
     mitgliedschafts_copy.mitglied_nr = None
     mitgliedschafts_copy.mitglied_id = None
     mitgliedschafts_copy.status_c = 'Anmeldung'
@@ -3353,10 +3355,10 @@ def wieder_beitritt(mitgliedschaft):
     mitgliedschafts_copy.wegzug_zu = None
     mitgliedschafts_copy.austritt = None
     mitgliedschafts_copy.kuendigung = None
+    mitgliedschafts_copy.bezahltes_mitgliedschaftsjahr = 0
     mitgliedschafts_copy.zahlung_hv = 0
     mitgliedschafts_copy.zahlung_mitgliedschaft = 0
     mitgliedschafts_copy.naechstes_jahr_geschuldet = 1
-    mitgliedschafts_copy.validierung_notwendig = 0
     mitgliedschafts_copy.datum_hv_zahlung = None
     mitgliedschafts_copy.letzte_bearbeitung_von = 'SP'
     mitgliedschafts_copy.online_haftpflicht = None
@@ -3367,6 +3369,26 @@ def wieder_beitritt(mitgliedschaft):
     mitgliedschafts_copy.online_payment_method = None
     mitgliedschafts_copy.online_payment_id = None
     mitgliedschafts_copy.anmeldung_mit_ez = 1
+    mitgliedschafts_copy.validierung_notwendig = 1
+    mitgliedschafts_copy.kuendigung_verarbeiten = 0
+    mitgliedschafts_copy.interessent_innenbrief_mit_ez = 0
+    mitgliedschafts_copy.zuzug_massendruck = 0
+    mitgliedschafts_copy.zuzugs_rechnung = None
+    mitgliedschafts_copy.zuzug_korrespondenz = None
+    mitgliedschafts_copy.kuendigung_druckvorlage = None
+    mitgliedschafts_copy.rg_massendruck_vormerkung = 0
+    mitgliedschafts_copy.begruessung_massendruck = 0
+    mitgliedschafts_copy.begruessung_via_zahlung = 0
+    mitgliedschafts_copy.begruessung_massendruck_dokument = None
+    
     mitgliedschafts_copy.insert()
+    frappe.db.commit()
+    
+    mitgliedschafts_copy.validierung_notwendig = 0
+    mitgliedschafts_copy.save()
+    
+    alte_mitgliedschaft.add_comment('Comment', text='Mitgliedschaft (als Anmeldung) mittels {0} ({1}) reaktiviert.'.format(mitgliedschafts_copy.mitglied_nr, mitgliedschafts_copy.name))
+    mitgliedschafts_copy.add_comment('Comment', text='Reaktivierte Mitgliedschaft aus {0} ({1})'.format(alte_mitgliedschaft.mitglied_nr, alte_mitgliedschaft.name))
+    
     return mitgliedschafts_copy.name
     

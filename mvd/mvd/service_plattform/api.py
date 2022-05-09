@@ -61,8 +61,8 @@ def neue_mitglieder_nummer(sektion_code, sprache='Deutsch', typ='Privat', needsM
     else:
         frappe.log_error("SektionsCode: {0}".format(sektion_code), 'neue_mitglieder_nummer deaktiviert: manuelle vergabe')
         return {
-            'mitgliedNummer': '13467985',
-            'mitgliedId': '97624986'
+            'mitgliedNummer': '00000000',
+            'mitgliedId': int("9{0}".format(frappe.db.count('Mitgliedschaft'))) + 1
         }
 
 def mitglieder_nummer_update(mitgliedId):
