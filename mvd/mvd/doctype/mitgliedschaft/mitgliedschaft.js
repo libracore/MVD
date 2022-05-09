@@ -254,6 +254,15 @@ frappe.ui.form.on('Mitgliedschaft', {
             cur_frm.set_df_property('rg_nachname', 'reqd', 1);
         }
     },
+    rg_kundentyp: function(frm) {
+        if (cur_frm.doc.rg_kundentyp == 'Unternehmen') {
+            cur_frm.set_df_property('rg_nachname', 'reqd', 0);
+            cur_frm.set_df_property('rg_firma', 'reqd', 1);
+        } else {
+            cur_frm.set_df_property('rg_nachname', 'reqd', 1);
+            cur_frm.set_df_property('rg_firma', 'reqd', 0);
+        }
+    },
     hat_solidarmitglied: function(frm) {
         if (!cur_frm.doc.hat_solidarmitglied) {
             cur_frm.set_df_property('nachname_2', 'reqd', 0);
