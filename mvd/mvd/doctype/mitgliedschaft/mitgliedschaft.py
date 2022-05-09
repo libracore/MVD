@@ -66,9 +66,10 @@ class Mitgliedschaft(Document):
             self.ampel_farbe = get_ampelfarbe(self)
             
             # sektionswechsel fix von MVZH
-            if int(self.zuzug_massendruck) == 1 or self.status_c == 'Zuzug':
+            if self.sektion_id == 'MVZH' and self.status_c == 'Zuzug':
                 if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
-                    self.zuzug_korrespondenz = self.zuzug_fix()
+                    if self.kunde_mitglied:
+                        self.zuzug_korrespondenz = self.zuzug_fix()
             
             # eintrittsdatum fix
             if self.eintritt and not self.eintrittsdatum:
@@ -1841,9 +1842,10 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             new_mitgliedschaft.online_payment_method = None
             new_mitgliedschaft.online_payment_id = None
             new_mitgliedschaft.adress_id_rg = ''
-            
+            new_mitgliedschaft.validierung_notwendig = 0
             new_mitgliedschaft.letzte_bearbeitung_von = 'SP'
             new_mitgliedschaft.insert(ignore_permissions=True)
+            
             frappe.db.commit()
             
             # erstelle ggf. neue Rechnung
@@ -1906,8 +1908,8 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), new_mitgliedschaft.as_dict()), 'Sektionswechsel')
             return 0
     else:
-        # Sektionswechsel nach ZH, BE, SO --> kein neues Mtiglied in ERPNext, Meldung Sektionswechsel erfolgt vie validate Trigger von Mitgliedschaft
-        # Sobald ZH, BE oder SO neues Mitglied verarbeitet erhält ERPNext via SP eine Neuanlage von/für ZH, BE oder SO und ist mittels Freizügigkeitsabfrage wieder verfügbar
+        # Sektionswechsel nach ZH, und SO --> kein neues Mtiglied in ERPNext, Meldung Sektionswechsel erfolgt vie validate Trigger von Mitgliedschaft
+        # Sobald ZH oder SO neues Mitglied verarbeitet erhält ERPNext via SP eine Neuanlage von/für ZH oder SO und ist mittels Freizügigkeitsabfrage wieder verfügbar
         return 1
 
 @frappe.whitelist()
