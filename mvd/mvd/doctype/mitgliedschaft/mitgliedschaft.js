@@ -165,7 +165,8 @@ frappe.ui.form.on('Mitgliedschaft', {
         cur_frm.fields_dict['region'].get_query = function(doc) {
             return {
                 filters: {
-                    "disabled": ["!=", 1]
+                    "disabled": ["!=", 1],
+                    "sektion_id": cur_frm.doc.sektion_id
                 }
             }
         }

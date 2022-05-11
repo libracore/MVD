@@ -18,11 +18,14 @@ def zuordnung(region):
     # Zuteilen Region innerhalb PLZ Range(s)
     for plz in region.plz_zuordnung:
         mitgliedschaften_query = """WHERE `region_manuell` != 1
-                                    AND `plz` >= '{plz_von}'
-                                    AND `plz` <= '{plz_bis}'
-                                    AND `region` != '{region}'
-                                    AND `sektion_id` = '{sektion}'
-                                    AND `status_c` != 'Inaktiv'""".format(plz_von=plz.plz_von, \
+                                    AND `status_c` != 'Inaktiv'
+                                    AND (
+                                        CAST(IFNULL(`plz`, 0) AS INTEGER) BETWEEN {plz_von} AND {plz_bis}
+                                    )
+                                    AND (
+                                        `region` != '{region}' OR `region` IS NULL
+                                    )
+                                    AND `sektion_id` = '{sektion}'""".format(plz_von=plz.plz_von, \
                                                                         plz_bis=plz.plz_bis, \
                                                                         region=region.name, \
                                                                         sektion=region.sektion_id)
@@ -52,7 +55,7 @@ def zuordnung(region):
                                                                     region=region.name, \
                                                                     sektion=region.sektion_id)
     for plz in region.plz_zuordnung:
-        mitgliedschaften_query += """ AND `plz` NOT BETWEEN {plz_von} AND {plz_bis}""".format(plz_von=plz.plz_von, \
+        mitgliedschaften_query += """ AND (CAST(IFNULL(`plz`, 0) AS INTEGER) NOT BETWEEN {plz_von} AND {plz_bis})""".format(plz_von=plz.plz_von, \
                                                                     plz_bis=plz.plz_bis)
     
     mitgliedschaften_queue = frappe.db.sql("""SELECT
@@ -71,7 +74,7 @@ def zuordnung(region):
     }
     enqueue("mvd.mvd.doctype.region.region.create_queues", queue='long', job_name='Entfernung von Falsch-Zuteilungen ({0})'.format(region.name), timeout=5000, **args)
     
-    region.add_comment('Comment', text='Automatische Zuordnung ausgelöst')
+    region.add_comment('Comment', text='Automatische Zuordnung durchgeführt')
     
     return
 

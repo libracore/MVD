@@ -16,7 +16,6 @@
   {
    "fieldname": "title",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Titel",
    "reqd": 1,
    "unique": 1
@@ -30,6 +29,7 @@
   {
    "fieldname": "sektion_id",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Sektion",
    "options": "Sektion",
    "reqd": 1
@@ -47,7 +47,7 @@
    "options": "Region PLZ"
   }
  ],
- "modified": "2022-05-05 14:12:57.600012",
+ "modified": "2022-05-11 08:50:21.779667",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Region",
