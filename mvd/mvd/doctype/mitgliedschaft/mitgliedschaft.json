@@ -91,6 +91,7 @@
   "postfach_nummer",
   "plz",
   "ort",
+  "land",
   "section_objekt_adresse",
   "abweichende_objektadresse",
   "objekt_zusatz_adresse",
@@ -110,6 +111,7 @@
   "rg_postfach_nummer",
   "rg_plz",
   "rg_ort",
+  "rg_land",
   "cb_2",
   "rg_kundentyp",
   "rg_firma",
@@ -1148,10 +1150,25 @@
    "fieldname": "online_payment_id",
    "fieldtype": "Data",
    "label": "onlinePaymentId"
+  },
+  {
+   "default": "Schweiz",
+   "fieldname": "land",
+   "fieldtype": "Link",
+   "label": "Land",
+   "options": "Country"
+  },
+  {
+   "default": "Schweiz",
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_land",
+   "fieldtype": "Link",
+   "label": "Land (Rechnung)",
+   "options": "Country"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-05-09 15:39:37.058547",
+ "modified": "2022-05-11 16:02:00.789288",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
