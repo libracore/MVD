@@ -559,7 +559,11 @@ def get_adressblock(mitgliedschaft):
         adressblock += str(mitgliedschaft.postfach_nummer) or ''
         adressblock += '\n'
     
-    adressblock += str(mitgliedschaft.plz) or ''
+    if mitgliedschaft.land != 'Schweiz':
+        laender_code = frappe.get_value("Country", mitgliedschaft.land, "code").upper() + "-"
+    else:
+        laender_code = ''
+    adressblock += laender_code + str(mitgliedschaft.plz) or ''
     adressblock += ' '
     adressblock += mitgliedschaft.ort or ''
     
@@ -628,7 +632,11 @@ def get_rg_adressblock(mitgliedschaft):
         adressblock += str(mitgliedschaft.rg_postfach_nummer) or ''
         adressblock += '\n'
     
-    adressblock += str(mitgliedschaft.rg_plz) or ''
+    if mitgliedschaft.rg_land != 'Schweiz':
+        laender_code = frappe.get_value("Country", mitgliedschaft.rg_land, "code").upper() + "-"
+    else:
+        laender_code = ''
+    adressblock += laender_code + str(mitgliedschaft.rg_plz) or ''
     adressblock += ' '
     adressblock += mitgliedschaft.rg_ort or ''
     
@@ -651,6 +659,7 @@ def update_rg_adresse(mitgliedschaft):
     plz = mitgliedschaft.rg_plz
     postfach_nummer = mitgliedschaft.rg_postfach_nummer
     city = mitgliedschaft.rg_ort
+    country = mitgliedschaft.rg_land or 'Schweiz'
     
     address.address_title = address_title
     address.address_line1 = address_line1
@@ -662,6 +671,7 @@ def update_rg_adresse(mitgliedschaft):
     address.postfach = postfach
     address.postfach_nummer = postfach_nummer
     address.city = city
+    address.country = country
     address.is_primary_address = is_primary_address
     address.is_shipping_address = is_shipping_address
     address.adress_id = str(mitgliedschaft.mitglied_id) + "-Rechnung"
@@ -701,6 +711,7 @@ def create_rg_adresse(mitgliedschaft):
     plz = mitgliedschaft.rg_plz
     postfach_nummer = mitgliedschaft.rg_postfach_nummer
     city = mitgliedschaft.rg_ort
+    country = mitgliedschaft.rg_land or 'Schweiz'
     
     new_address = frappe.get_doc({
         'doctype': 'Address',
@@ -714,6 +725,7 @@ def create_rg_adresse(mitgliedschaft):
         'postfach': postfach,
         'postfach_nummer': postfach_nummer,
         'city': city,
+        'country': country,
         'is_primary_address': is_primary_address,
         'is_shipping_address': is_shipping_address,
         'adress_id': str(mitgliedschaft.mitglied_id) + "-Rechnung"
@@ -1041,6 +1053,7 @@ def update_adresse_mitglied(mitgliedschaft):
     plz = mitgliedschaft.plz
     postfach_nummer = mitgliedschaft.postfach_nummer
     city = mitgliedschaft.ort
+    country = mitgliedschaft.land or 'Schweiz'
     
     address.address_title = address_title
     address.address_line1 = address_line1
@@ -1052,6 +1065,7 @@ def update_adresse_mitglied(mitgliedschaft):
     address.postfach = postfach
     address.postfach_nummer = postfach_nummer
     address.city = city
+    address.country = country
     address.is_primary_address = is_primary_address
     address.is_shipping_address = is_shipping_address
     address.adress_id = str(mitgliedschaft.mitglied_id) + "-Mitglied"
@@ -1085,6 +1099,7 @@ def create_adresse_mitglied(mitgliedschaft):
     plz = mitgliedschaft.plz
     postfach_nummer = mitgliedschaft.postfach_nummer
     city = mitgliedschaft.ort
+    country = mitgliedschaft.land or 'Schweiz'
     
     new_address = frappe.get_doc({
         'doctype': 'Address',
@@ -1098,6 +1113,7 @@ def create_adresse_mitglied(mitgliedschaft):
         'postfach': postfach,
         'postfach_nummer': postfach_nummer,
         'city': city,
+        'country': country,
         'is_primary_address': is_primary_address,
         'is_shipping_address': is_shipping_address,
         'adress_id': str(mitgliedschaft.mitglied_id) + "-Mitglied"
