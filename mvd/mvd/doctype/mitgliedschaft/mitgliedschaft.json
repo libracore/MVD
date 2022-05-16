@@ -38,6 +38,7 @@
   "reduzierter_betrag",
   "reduzierung_bis",
   "language",
+  "mahnstopp",
   "section_wichtige_infos",
   "wichtig",
   "section_daten",
@@ -1165,10 +1166,15 @@
    "fieldtype": "Link",
    "label": "Land (Rechnung)",
    "options": "Country"
+  },
+  {
+   "fieldname": "mahnstopp",
+   "fieldtype": "Date",
+   "label": "Von Mahnlauf ausschliessen bis"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-05-11 16:02:00.789288",
+ "modified": "2022-05-16 12:46:50.594802",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

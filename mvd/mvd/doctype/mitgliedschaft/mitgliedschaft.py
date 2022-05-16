@@ -100,6 +100,13 @@ class Mitgliedschaft(Document):
             if not self.online_haftpflicht:
                 self.online_haftpflicht = '0'
             
+            # Mahnstopp in Rechnungen setzen
+            if self.status_c in ('Gestorben', 'Ausschluss'):
+                self.mahnstopp = '2099-12-31'
+            
+            if self.mahnstopp:
+                mahnstopp(self.name, self.mahnstopp)
+            
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
                 if self.creation == self.modified:
@@ -513,7 +520,13 @@ class Mitgliedschaft(Document):
         contact.links = []
         contact.save(ignore_permissions=True)
         return ''
-    
+
+def mahnstopp(mitgliedschaft, mahnstopp):
+    SQL_SAFE_UPDATES_false = frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
+    frappe.db.sql("""UPDATE `tabSales Invoice` SET `exclude_from_payment_reminder_until` = '{mahnstopp}' WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'""".format(mitgliedschaft=mitgliedschaft, mahnstopp=mahnstopp), as_list=True)
+    SQL_SAFE_UPDATES_true = frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)
+    frappe.db.commit()
+
 def get_adressblock(mitgliedschaft):
     adressblock = ''
     if mitgliedschaft.kundentyp == 'Unternehmen':
