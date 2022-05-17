@@ -615,6 +615,7 @@ function daten_validiert(frm) {
                     )
                 } else if (cur_frm.doc.status_c == 'Online-Anmeldung') {
                     cur_frm.set_value("validierung_notwendig", '0');
+                    cur_frm.set_value("status_c", 'Regulär');
                     cur_frm.timeline.insert_comment("Validierung durchgeführt.");
                     cur_frm.save();
                     erstelle_rechnung(frm);
@@ -624,7 +625,12 @@ function daten_validiert(frm) {
                     cur_frm.timeline.insert_comment("Validierung durchgeführt.");
                     erstelle_begruessungs_korrespondenz(frm);
                 } else if (cur_frm.doc.status_c == 'Online-Mutation') {
-                    cur_frm.set_value("status_c", cur_frm.doc.status_vor_onl_mutation);
+                    if (cur_frm.doc.status_vor_onl_mutation) {
+                        var alter_status = cur_frm.doc.status_vor_onl_mutation;
+                        cur_frm.set_value("status_c", alter_status);
+                    } else {
+                        cur_frm.set_value("status_c", 'Regulär');
+                    }
                     cur_frm.set_value("status_vor_onl_mutation", '');
                     cur_frm.set_value("validierung_notwendig", '0');
                     cur_frm.save();
