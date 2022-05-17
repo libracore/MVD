@@ -7,6 +7,7 @@
         padding-right: 5px;
         padding-left: 5px;
         max-width: 100px;
+        cursor: pointer;
     }
     td {
         padding-right: 5px;
@@ -89,7 +90,7 @@
                             {% endif %}
                         </td>
                         {% if mitgliedschaft.status_c != 'Inaktiv' %}
-                            <td>Solidarmitglied</td>
+                            <td>{{ mitgliedschaft.status_c }} (S)</td>
                         {% else %}
                             <td>Inaktiv</td>
                         {% endif %}

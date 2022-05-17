@@ -36,7 +36,7 @@ def suche(suchparameter, goto_list=False):
                 filters_list.append("""`status_c` = '{status_c}'""".format(status_c=suchparameter["status_c"]))
         else:
             if not suchparameter["inaktive"]:
-                filters_list.append("""`status_c` != 'Inaktiv'""")
+                filters_list.append("""`aktive_mitgliedschaft` = 1""")
     if suchparameter["mitgliedtyp_c"] and suchparameter["sektion_id"]:
         if suchparameter["mitgliedtyp_c"] != 'Alle':
             filters_list.append("""`mitgliedtyp_c` = '{mitgliedtyp_c}'""".format(mitgliedtyp_c=suchparameter["mitgliedtyp_c"]))
