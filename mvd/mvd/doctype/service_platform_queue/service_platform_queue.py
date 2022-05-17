@@ -30,4 +30,7 @@ def flush_queue(limit=100):
             prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
             update_status = update_mvm(prepared_mvm, update)
             queue.status = 'Closed'
+            queue.objekt = str(prepared_mvm)
             queue.save(ignore_permissions=True)
+        else:
+            frappe.log_error("Mitglied: {0}\nStatus: {1}".format(mitgliedschaft.name, mitgliedschaft.status_c), 'API Queue: Falscher Status')
