@@ -23,10 +23,14 @@ def flush_queue(limit=100):
     for _queue in queues:
         queue = frappe.get_doc("Service Platform Queue", _queue.name)
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", queue.mv_mitgliedschaft)
-        update = False
-        if int(queue.update) == 1:
-            update = True
-        prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
-        update_status = update_mvm(prepared_mvm, update)
-        queue.status = 'Closed'
-        queue.save(ignore_permissions=True)
+        if mitgliedschaft.status_c not in ('Online-Anmeldung', 'Online-Beitritt', 'Online-Mutation'):
+            update = False
+            if int(queue.update) == 1:
+                update = True
+            prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
+            update_status = update_mvm(prepared_mvm, update)
+            queue.status = 'Closed'
+            queue.objekt = str(prepared_mvm)
+            queue.save(ignore_permissions=True)
+        else:
+            frappe.log_error("Mitglied: {0}\nStatus: {1}".format(mitgliedschaft.name, mitgliedschaft.status_c), 'API Queue: Falscher Status')
