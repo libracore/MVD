@@ -34,6 +34,9 @@ def suche(suchparameter, goto_list=False):
                 filters_list.append("""`status_c` IN ('Regulär', 'Online-Mutation')""")
             else:
                 filters_list.append("""`status_c` = '{status_c}'""".format(status_c=suchparameter["status_c"]))
+        else:
+            if not suchparameter["inaktive"]:
+                filters_list.append("""`aktive_mitgliedschaft` = 1""")
     if suchparameter["mitgliedtyp_c"] and suchparameter["sektion_id"]:
         if suchparameter["mitgliedtyp_c"] != 'Alle':
             filters_list.append("""`mitgliedtyp_c` = '{mitgliedtyp_c}'""".format(mitgliedtyp_c=suchparameter["mitgliedtyp_c"]))
@@ -125,7 +128,45 @@ def suche(suchparameter, goto_list=False):
                                                 ELSE 2 END
                                                 LIMIT 1""".format(filters=filters), as_dict=True)
         else:
-            mitgliedschaften = frappe.db.sql("""SELECT * FROM `tabMitgliedschaft` {filters} ORDER BY `nachname_1` ASC""".format(filters=filters), as_dict=True)
+            sortierung = """CASE
+                                WHEN `status_c` = 'Regulär' THEN 1
+                                WHEN `status_c` = 'Kündigung' THEN 2
+                                WHEN `status_c` = 'Online-Beitritt' THEN 3
+                                WHEN `status_c` = 'Zuzug' THEN 4
+                                WHEN `status_c` = 'Online-Anmeldung' THEN 5
+                                WHEN `status_c` = 'Anmeldung' THEN 6
+                                WHEN `status_c` = 'Interessent*in' THEN 7
+                                WHEN `status_c` = 'Gestorben' THEN 8
+                                WHEN `status_c` = 'Wegzug' THEN 9
+                                WHEN `status_c` = 'Ausschluss' THEN 10
+                                WHEN `status_c` = 'Inaktiv' THEN 11
+                            ELSE 12 END"""
+            if suchparameter["sortierung"]:
+                if suchparameter["sortierung"] != 'Status':
+                    if suchparameter["sortierung"] == 'Mitglied':
+                        sortierung = """`mitglied_nr` ASC"""
+                    elif suchparameter["sortierung"] == 'Firma':
+                        sortierung = """`firma` ASC"""
+                    elif suchparameter["sortierung"] == 'Nachname':
+                        sortierung = """`nachname_1` ASC"""
+                    elif suchparameter["sortierung"] == 'Vorname':
+                        sortierung = """`vorname_1` ASC"""
+                    elif suchparameter["sortierung"] == 'Strasse':
+                        sortierung = """`strasse` ASC"""
+                    elif suchparameter["sortierung"] == 'Nr':
+                        sortierung = """`nummer` ASC"""
+                    elif suchparameter["sortierung"] == 'Wohnort':
+                        sortierung = """`plz` ASC"""
+                    elif suchparameter["sortierung"] == 'P':
+                        sortierung = """`tel_p_1` ASC"""
+                    elif suchparameter["sortierung"] == 'M':
+                        sortierung = """`tel_m_1` ASC"""
+                    elif suchparameter["sortierung"] == 'G':
+                        sortierung = """`tel_g_1` ASC"""
+                    elif suchparameter["sortierung"] == 'Mitgliedtyp':
+                        sortierung = """`mitgliedtyp_c` ASC"""
+            
+            mitgliedschaften = frappe.db.sql("""SELECT * FROM `tabMitgliedschaft` {filters} ORDER BY {sortierung}""".format(filters=filters, sortierung=sortierung), as_dict=True)
         
         if len(mitgliedschaften) > 0:
             if not suchparameter["sektions_uebergreifend"]:

@@ -7,6 +7,7 @@
         padding-right: 5px;
         padding-left: 5px;
         max-width: 100px;
+        cursor: pointer;
     }
     td {
         padding-right: 5px;
@@ -14,29 +15,29 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 100px;
+        max-width: 90px;
     }
     tr {
         border-bottom: 1px solid silver;
     }
 </style>
 <div style='width: 100%; height: 50vH; overflow: auto;'>
-    <table style="width: 100%;">
+    <table style="width: 100%;" id="resultate_table">
         <thead>
             <tr>
                 <th style="padding-left: 0px !important;">&nbsp;</th>
-                <th>Mitglied</th>
-                <th>Firma</th>
-                <th>Nachname</th>
-                <th>Vorname</th>
-                <th>Strasse</th>
-                <th>Nr.</th>
-                <th>PLZ</th>
-                <th>Wohnort</th>
-                <th>Tel. P</th>
-                <th>Tel. M</th>
-                <th>Tel. G</th>
-                <th>Mitgliedtyp</th>
+                <th onclick="sortTable('Mitglied')">Mitglied</th>
+                <th onclick="sortTable('Status')">Status</th>
+                <th onclick="sortTable('Firma')">Firma</th>
+                <th onclick="sortTable('Nachname')">Nachname</th>
+                <th onclick="sortTable('Vorname')">Vorname</th>
+                <th onclick="sortTable('Strasse')">Strasse</th>
+                <th onclick="sortTable('Nr')">Nr.</th>
+                <th onclick="sortTable('Wohnort')">Wohnort</th>
+                <th onclick="sortTable('P')">Tel. P</th>
+                <th onclick="sortTable('M')">Tel. M</th>
+                <th onclick="sortTable('G')">Tel. G</th>
+                <th onclick="sortTable('Mitgliedtyp')">Mitgliedtyp</th>
             </tr>
         </thead>
         <tbody>
@@ -58,13 +59,13 @@
                             {{ mitgliedschaft.mitglied_nr }}
                         {% endif %}
                     </td>
+                    <td>{{ mitgliedschaft.status_c }}</td>
                     <td>{{ mitgliedschaft.firma or '' }}</td>
                     <td>{{ mitgliedschaft.nachname_1 or '' }}</td>
                     <td>{{ mitgliedschaft.vorname_1 or '' }}</td>
                     <td>{{ mitgliedschaft.strasse or '' }}</td>
                     <td>{% if mitgliedschaft.postfach %}{{ mitgliedschaft.postfach_nummer or '' }}{% else %}{{ mitgliedschaft.nummer or '' }}{{ mitgliedschaft.nummer_zu or '' }}{% endif %}</td>
-                    <td>{{ mitgliedschaft.plz or '' }}</td>
-                    <td>{{ mitgliedschaft.ort or '' }}</td>
+                    <td>{{ mitgliedschaft.plz or '' }} {{ mitgliedschaft.ort or '' }}</td>
                     <td>{{ mitgliedschaft.tel_p_1 or '' }}</td>
                     <td>{{ mitgliedschaft.tel_m_1 or '' }}</td>
                     <td>{{ mitgliedschaft.tel_g_1 or '' }}</td>
@@ -88,13 +89,17 @@
                                 {{ mitgliedschaft.mitglied_nr }}
                             {% endif %}
                         </td>
+                        {% if mitgliedschaft.status_c != 'Inaktiv' %}
+                            <td>{{ mitgliedschaft.status_c }} (S)</td>
+                        {% else %}
+                            <td>Inaktiv</td>
+                        {% endif %}
                         <td>{{ mitgliedschaft.firma or '' }}</td>
                         <td>{{ mitgliedschaft.nachname_2 or '' }}</td>
                         <td>{{ mitgliedschaft.vorname_2 or '' }}</td>
                         <td>{{ mitgliedschaft.strasse or '' }}</td>
                         <td>{% if mitgliedschaft.postfach %}{{ mitgliedschaft.postfach_nummer or '' }}{% else %}{{ mitgliedschaft.nummer or '' }}{{ mitgliedschaft.nummer_zu or '' }}{% endif %}</td>
-                        <td>{{ mitgliedschaft.plz or '' }}</td>
-                        <td>{{ mitgliedschaft.ort or '' }}</td>
+                        <td>{{ mitgliedschaft.plz or '' }} {{ mitgliedschaft.ort or '' }}</td>
                         <td>{{ mitgliedschaft.tel_p_2 or '' }}</td>
                         <td>{{ mitgliedschaft.tel_m_2 or '' }}</td>
                         <td>{{ mitgliedschaft.tel_g_2 or '' }}</td>

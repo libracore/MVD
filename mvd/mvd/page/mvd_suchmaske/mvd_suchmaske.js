@@ -65,8 +65,11 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.sektions_uebergreifend.refresh();
     
     me.search_fields.status_c = frappe.mvd_such_client.create_status_c_field(page)
-    me.search_fields.status_c.set_value('Regulär');
+    me.search_fields.status_c.set_value('Alle');
     me.search_fields.status_c.refresh();
+    
+    me.search_fields.inaktive = frappe.mvd_such_client.create_inaktive_field(page)
+    me.search_fields.inaktive.refresh();
     
     me.search_fields.language = frappe.mvd_such_client.create_language_field(page)
     me.search_fields.language.refresh();
@@ -123,6 +126,9 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.search_fields.neuanlage = frappe.mvd_such_client.create_neuanlage_btn(page)
     me.search_fields.neuanlage.refresh();
     
+    me.search_fields.sortierung = frappe.mvd_such_client.create_sortierung_field(page)
+    me.search_fields.sortierung.refresh();
+    
     // hotfix weil offenbar manchmal die Werte nicht gesetzt werden
     if (!me.search_fields.sektion_id.get_value()) {
         me.search_fields.sektion_id.set_value(frappe.boot.default_sektion);
@@ -170,6 +176,7 @@ frappe.mvd_such_client = {
                 search_data[key] = false;
             }
         }
+        console.log(search_data);
         frappe.call({
             method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.suche",
             args:{
@@ -302,6 +309,18 @@ frappe.mvd_such_client = {
         });
         return mitglied_nr
     },
+    create_sortierung_field: function(page) {
+        var sortierung = frappe.ui.form.make_control({
+            parent: page.main.find(".sortierung"),
+            df: {
+                fieldtype: "Data",
+                fieldname: "sortierung",
+                hidden: 1
+            },
+            only_input: true,
+        });
+        return sortierung
+    },
     create_sektions_uebergreifend_field: function(page, sektion_id, default_sektion) {
         var sektions_uebergreifend = frappe.ui.form.make_control({
             parent: page.main.find(".sektions_uebergreifend"),
@@ -323,6 +342,17 @@ frappe.mvd_such_client = {
             only_input: true,
         });
         return sektions_uebergreifend
+    },
+    create_inaktive_field: function(page) {
+        var inaktive = frappe.ui.form.make_control({
+            parent: page.main.find(".inaktive"),
+            df: {
+                fieldtype: "Check",
+                fieldname: "inaktive"
+            },
+            only_input: true,
+        });
+        return inaktive
     },
     create_status_c_field: function(page) {
         var status_c = frappe.ui.form.make_control({
@@ -874,4 +904,10 @@ function pincode_lookup(pincode, ort) {
             }
         });
     }
+}
+
+function sortTable(spalte) {
+    cur_page.page.search_fields.sortierung.set_value(spalte).then(function(){
+        cur_page.page.$user_search_button.click();
+    });
 }

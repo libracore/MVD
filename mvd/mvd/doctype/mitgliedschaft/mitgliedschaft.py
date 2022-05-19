@@ -103,6 +103,13 @@ class Mitgliedschaft(Document):
             if not self.online_haftpflicht:
                 self.online_haftpflicht = '0'
             
+            # Mahnstopp in Rechnungen setzen
+            if self.status_c in ('Gestorben', 'Ausschluss'):
+                self.mahnstopp = '2099-12-31'
+            
+            if self.mahnstopp:
+                mahnstopp(self.name, self.mahnstopp)
+            
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
                 if self.creation == self.modified:
@@ -525,7 +532,13 @@ class Mitgliedschaft(Document):
         contact.links = []
         contact.save(ignore_permissions=True)
         return ''
-    
+
+def mahnstopp(mitgliedschaft, mahnstopp):
+    SQL_SAFE_UPDATES_false = frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
+    frappe.db.sql("""UPDATE `tabSales Invoice` SET `exclude_from_payment_reminder_until` = '{mahnstopp}' WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'""".format(mitgliedschaft=mitgliedschaft, mahnstopp=mahnstopp), as_list=True)
+    SQL_SAFE_UPDATES_true = frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)
+    frappe.db.commit()
+
 def get_adressblock(mitgliedschaft):
     adressblock = ''
     if mitgliedschaft.kundentyp == 'Unternehmen':
@@ -1974,6 +1987,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
                         {"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center}
                     ]
                     jahr = int(getdate(today()).strftime("%Y")) + 1
+        
         # prüfe Beitrittsgebühr
         if int(mitgliedschaft.zahlung_mitgliedschaft) == 0 and sektion.mitgliedschafts_artikel_beitritt:
             item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt,"qty": 1, "cost_center": company.cost_center})
@@ -3424,4 +3438,24 @@ def wieder_beitritt(mitgliedschaft):
     mitgliedschafts_copy.add_comment('Comment', text='Reaktivierte Mitgliedschaft aus {0} ({1})'.format(alte_mitgliedschaft.mitglied_nr, alte_mitgliedschaft.name))
     
     return mitgliedschafts_copy.name
-    
+
+@frappe.whitelist()
+def check_erstelle_rechnung(mitgliedschaft, typ, sektion):
+    jahr = int(getdate(today()).strftime("%Y"))
+    if typ == 'Privat':
+        gratis_bis_ende_jahr = frappe.get_value("Sektion", sektion, "gratis_bis_ende_jahr")
+        gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(gratis_bis_ende_jahr).strftime("%d"))
+        if getdate(today()) >= gratis_ab:
+            jahr += 1
+                    
+    vorhandene_rechnungen = frappe.db.sql("""SELECT
+                                                COUNT(`name`) AS `qty`
+                                            FROM `tabSales Invoice`
+                                            WHERE `docstatus` = 1
+                                            AND `ist_mitgliedschaftsrechnung` = 1
+                                            AND `mv_mitgliedschaft` = '{mitgliedschaft}'
+                                            AND `mitgliedschafts_jahr` = '{jahr}'""".format(mitgliedschaft=mitgliedschaft, jahr=jahr), as_dict=True)[0].qty
+    if vorhandene_rechnungen < 1:
+        return 1
+    else:
+        return 0
