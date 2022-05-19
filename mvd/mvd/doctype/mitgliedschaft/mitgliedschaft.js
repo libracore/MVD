@@ -606,7 +606,7 @@ function daten_validiert(frm) {
                         },
                         function(){
                             // on no
-                            cur_frm.set_value("validierung_notwendig", '0');
+                            cur_frm.set_value("validierung_notwendig", 0);
                             cur_frm.set_value("status_c", 'Regulär');
                             cur_frm.save();
                             cur_frm.timeline.insert_comment("Validierung durchgeführt.");
@@ -620,9 +620,10 @@ function daten_validiert(frm) {
                     cur_frm.save();
                     erstelle_rechnung(frm);
                 } else if (cur_frm.doc.status_c == 'Online-Beitritt') {
+                    cur_frm.set_value("validierung_notwendig", '0');
                     cur_frm.set_value("status_c", 'Regulär');
-                    cur_frm.save();
                     cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                    cur_frm.save();
                     erstelle_begruessungs_korrespondenz(frm);
                 } else if (cur_frm.doc.status_c == 'Online-Mutation') {
                     if (cur_frm.doc.status_vor_onl_mutation) {
@@ -1292,12 +1293,14 @@ function erstelle_begruessungs_korrespondenz(frm) {
                                 cur_frm.set_value("begruessung_massendruck", '1');
                                 cur_frm.set_value("begruessung_massendruck_dokument", r.message);
                                 cur_frm.set_value("validierung_notwendig", '0');
+                                cur_frm.set_value("status_c", 'Regulär');
                                 cur_frm.save();
                                 frappe.msgprint("Die Daten wurden als validert bestätigt und der Druck des Begrüssungsdokument für den Massenlauf vorgemerkt.");
                             },
                             function(){
                                 // on no
                                 cur_frm.set_value("validierung_notwendig", '0');
+                                cur_frm.set_value("status_c", 'Regulär');
                                 cur_frm.save();
                                 frappe.msgprint("Die Daten wurden als validert bestätigt, das erstellte Begrüssungsdokument finden Sie unter Korrespondenz.");
                             }
@@ -1312,6 +1315,7 @@ function erstelle_begruessungs_korrespondenz(frm) {
     });
     if (cur_frm.is_dirty()) {
         cur_frm.set_value("validierung_notwendig", '0');
+        cur_frm.set_value("status_c", 'Regulär');
         cur_frm.save();
     }
 }

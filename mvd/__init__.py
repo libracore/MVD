@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-__version__ = '1.68.51'
-
+__version__ = '1.65.52'

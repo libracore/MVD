@@ -31,6 +31,9 @@ class Mitgliedschaft(Document):
     
     def validate(self):
         if not self.validierung_notwendig or str(self.validierung_notwendig) == '0':
+            #status_c permission fix
+            self.statuc_c_permission_fix()
+            
             # entferne Telefonnummern mit vergessenen Leerschlägen
             self.remove_unnecessary_blanks()
             
@@ -118,6 +121,15 @@ class Mitgliedschaft(Document):
                     # special case sektionswechsel nach ZH
                     if self.wegzug_zu in ('MVZH', 'MVSO') and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
+    
+    def statuc_c_permission_fix(self):
+        if self.status_c in ('Online-Anmeldung', 'Online-Beitritt'):
+            self.status_c = 'Regulär'
+        elif self.status_c == 'Online-Mutation':
+            if self.status_vor_onl_mutation:
+                self.status_c = self.status_vor_onl_mutation
+            else:
+                self.status_c = 'Regulär'
     
     def remove_unnecessary_blanks(self):
         # Hauptmitglied
