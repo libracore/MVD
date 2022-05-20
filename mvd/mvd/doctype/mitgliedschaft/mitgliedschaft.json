@@ -212,7 +212,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Regul\u00e4r\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nOnline-K\u00fcndigung\nOnline-Mutation\nZuzug\nGestorben\nK\u00fcndigung\nWegzug\nAusschluss\nInaktiv\nInteressent*in",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "fieldname": "mitgliedtyp_c",
@@ -232,13 +232,14 @@
    "fieldtype": "Date",
    "hidden": 1,
    "label": "Eintritt (Obsolet)",
-   "permlevel": 2
+   "permlevel": 2,
+   "read_only": 1
   },
   {
    "fieldname": "wegzug",
    "fieldtype": "Date",
    "label": "Wegzug",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "fieldname": "cb_1",
@@ -248,13 +249,13 @@
    "fieldname": "austritt",
    "fieldtype": "Date",
    "label": "Austritt/Ausschluss",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "fieldname": "kuendigung",
    "fieldtype": "Date",
    "label": "K\u00fcndigung",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -686,7 +687,7 @@
    "fieldname": "zuzug",
    "fieldtype": "Date",
    "label": "Zuzug",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "fieldname": "section_uebersicht",
@@ -719,20 +720,20 @@
    "fieldname": "zuzug_von",
    "fieldtype": "Data",
    "label": "Zuzug von",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "fieldname": "wegzug_zu",
    "fieldtype": "Data",
    "label": "Wegzug zu",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "zahlung_hv",
    "fieldtype": "Int",
    "label": "Zahlung HV",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "default": "1",
@@ -842,7 +843,7 @@
    "fieldname": "verstorben_am",
    "fieldtype": "Date",
    "label": "Verstorben am",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "default": "0",
@@ -850,6 +851,7 @@
    "fieldtype": "Int",
    "hidden": 1,
    "label": "Zahlung Mitgliedschaft (Obsolet)",
+   "permlevel": 2,
    "read_only": 1
   },
   {
@@ -1025,7 +1027,7 @@
    "fieldname": "bezahltes_mitgliedschaftsjahr",
    "fieldtype": "Int",
    "label": "Bezahltes Mitgliedschaftsjahr",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -1078,13 +1080,13 @@
    "fieldname": "datum_hv_zahlung",
    "fieldtype": "Date",
    "label": "Datum HV Zahlung",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "fieldname": "datum_zahlung_mitgliedschaft",
    "fieldtype": "Date",
    "label": "Datum Zahlung Mitgliedschaft",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "default": "0",
@@ -1097,7 +1099,7 @@
    "fieldname": "eintrittsdatum",
    "fieldtype": "Date",
    "label": "Eintritt",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "fieldname": "search_hash",
@@ -1174,7 +1176,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-05-16 12:46:50.594802",
+ "modified": "2022-05-20 09:54:08.441463",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
