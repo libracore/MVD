@@ -632,7 +632,6 @@ function daten_validiert(frm) {
                     )
                 } else if (cur_frm.doc.status_c == 'Online-Anmeldung') {
                     cur_frm.set_value("validierung_notwendig", '0');
-                    cur_frm.set_value("status_c", 'Regulär');
                     cur_frm.timeline.insert_comment("Validierung durchgeführt.");
                     cur_frm.save();
                     erstelle_rechnung(frm);
