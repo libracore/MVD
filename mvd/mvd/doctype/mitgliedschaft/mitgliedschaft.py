@@ -2509,6 +2509,10 @@ def mvm_neuanlage(kwargs):
             
             if status_c in ('Online-Anmeldung', 'Online-Beitritt', 'Online-Kündigung'):
                 new_mitgliedschaft.validierung_notwendig = 1
+                if statuc_c == 'Online-Beitritt':
+                    if int(online_haftpflicht) == 1:
+                        new_mitgliedschaft.datum_hv_zahlung = eintritt
+                    new_mitgliedschaft.datum_zahlung_mitgliedschaft = eintritt
             else:
                 if kwargs['needsValidation']:
                     new_mitgliedschaft.validierung_notwendig = 1
