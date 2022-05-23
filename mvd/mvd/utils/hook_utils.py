@@ -38,3 +38,19 @@ def todo_permissions(todo, event):
                 frappe.share.remove("ToDo", todo.name, user.user, flags={'ignore_share_permission': True, 'ignore_permissions': True})
     except:
         pass
+
+def unlink_fr(sinv, event):
+    hv_fr = frappe.db.sql("""SELECT `name` FROM `tabFakultative Rechnung` WHERE `docstatus` = 1 AND `sales_invoice` = '{sinv}'""".format(sinv=sinv.name), as_dict=True)
+    if len(hv_fr) > 0:
+        if len(hv_fr) > 1:
+            frappe.throw("Es gibt mehere FR-Rechnungen zu dieser Rechnung. Bitte kontaktieren Sie den Support.")
+        else:
+            update_fr = frappe.db.sql("""UPDATE `tabFakultative Rechnung` SET `sales_invoice` = '' WHERE `name` = '{hv_fr}'""".format(hv_fr=hv_fr[0].name), as_list=True)
+            frappe.db.commit()
+            sinv.zugehoerige_fr = hv_fr=hv_fr[0].name
+
+def relink_fr(sinv, event):
+    if sinv.zugehoerige_fr:
+        update_fr = frappe.db.sql("""UPDATE `tabFakultative Rechnung` SET `sales_invoice` = '{sinv}' WHERE `name` = '{hv_fr}'""".format(sinv=sinv.name, hv_fr=sinv.zugehoerige_fr), as_list=True)
+        frappe.db.commit()
+        sinv.zugehoerige_fr = None

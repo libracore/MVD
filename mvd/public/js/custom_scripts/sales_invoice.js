@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Sales Invoice', {
     refresh: function(frm) {
-        if (cur_frm.doc.outstanding_amount > 0) {
+        if ((cur_frm.doc.outstanding_amount > 0)&&(cur_frm.doc.docstatus==1)) {
             check_for_hv(frm);
         }
         if ((cur_frm.doc.docstatus == 2)&&(frappe.user.has_role("Administrator"))) {
@@ -14,6 +14,8 @@ frappe.ui.form.on('Sales Invoice', {
         // hack to default buttons
         setTimeout(function(){
             $("[data-label='Create']").remove();
+            $("[data-label='Erstellen']").remove();
+            $("[data-label='Holen%20Sie%20Elemente%20aus']").remove();
         }, 500);
     },
     validate: function(frm) {

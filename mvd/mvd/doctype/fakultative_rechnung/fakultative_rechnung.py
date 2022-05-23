@@ -13,6 +13,10 @@ from frappe.utils.pdf import get_file_data_from_writer
 class FakultativeRechnung(Document):
     def before_submit(self):
         self.qrr_referenz = get_qrr_reference(fr=self.name)
+    
+    def before_cancel(self):
+        if self.status == 'Paid':
+            frappe.throw("Bezahlte Fakultative Rechnungen können nicht storniert werden.")
 
 @frappe.whitelist()
 def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False, druckvorlage='', asap_print=False):
