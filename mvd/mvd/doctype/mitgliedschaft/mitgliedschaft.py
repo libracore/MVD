@@ -2316,6 +2316,11 @@ def mvm_update(mitgliedschaft, kwargs):
             
             if status_c in ('Online-Anmeldung', 'Online-Beitritt', 'Online-Kündigung'):
                 mitgliedschaft.validierung_notwendig = 1
+                if status_c == 'Online-Beitritt':
+                    if online_haftpflicht:
+                        if int(online_haftpflicht) == 1:
+                            new_mitgliedschaft.datum_hv_zahlung = eintritt
+                    new_mitgliedschaft.datum_zahlung_mitgliedschaft = eintritt
             else:
                 if kwargs['needsValidation']:
                     mitgliedschaft.validierung_notwendig = 1
