@@ -116,11 +116,6 @@ class Mitgliedschaft(Document):
                     # special case sektionswechsel nach ZH
                     if self.wegzug_zu in ('MVZH', 'MVSO') and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
-        else:
-            # sektionswechsel fix von MVZH
-            if self.zuzug_von == 'MVZH' and self.status_c == 'Zuzug':
-                if not self.zuzug:
-                    self.zuzug = today()
     
     def remove_unnecessary_blanks(self):
         # Hauptmitglied
@@ -2322,8 +2317,8 @@ def mvm_update(mitgliedschaft, kwargs):
                 if status_c == 'Online-Beitritt':
                     if online_haftpflicht:
                         if int(online_haftpflicht) == 1:
-                            new_mitgliedschaft.datum_hv_zahlung = eintritt
-                    new_mitgliedschaft.datum_zahlung_mitgliedschaft = eintritt
+                            mitgliedschaft.datum_hv_zahlung = eintritt
+                    mitgliedschaft.datum_zahlung_mitgliedschaft = eintritt
             else:
                 if kwargs['needsValidation']:
                     mitgliedschaft.validierung_notwendig = 1
@@ -2331,7 +2326,12 @@ def mvm_update(mitgliedschaft, kwargs):
                         mitgliedschaft.status_vor_onl_mutation = status_c
                         mitgliedschaft.status_c = 'Online-Mutation'
                     
-                
+            
+            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
+            if mitgliedschaft.zuzug_von == 'MVZH' and mitgliedschaft.status_c == 'Zuzug':
+                if not mitgliedschaft.zuzug:
+                    mitgliedschaft.zuzug = today()
+            
             mitgliedschaft.flags.ignore_links=True
             mitgliedschaft.save()
             frappe.db.commit()
@@ -2528,6 +2528,11 @@ def mvm_neuanlage(kwargs):
                     if status_c != 'Zuzug':
                         new_mitgliedschaft.status_vor_onl_mutation = status_c
                         new_mitgliedschaft.status_c = 'Online-Mutation'
+            
+            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
+            if new_mitgliedschaft.zuzug_von == 'MVZH' and new_mitgliedschaft.status_c == 'Zuzug':
+                if not new_mitgliedschaft.zuzug:
+                    new_mitgliedschaft.zuzug = today()
             
             new_mitgliedschaft.insert()
             frappe.db.commit()
