@@ -65,13 +65,11 @@ class Mitgliedschaft(Document):
             # ampelfarbe
             self.ampel_farbe = get_ampelfarbe(self)
             
-            # sektionswechsel fix von MVZH
-            if self.zuzug_von == 'MVZH' and self.status_c == 'Zuzug':
+            # Zuzugs-Korrespondenz für Massenlauf
+            if self.zuzug_von and int(self.zuzug_massendruck) == 1:
                 if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
                     if self.kunde_mitglied:
-                        self.zuzug_korrespondenz = self.zuzug_fix()
-                    if not self.zuzug:
-                        self.zuzug = today()
+                        self.zuzug_massenlauf_korrespondenz()
                         
             
             # eintrittsdatum fix
@@ -118,6 +116,11 @@ class Mitgliedschaft(Document):
                     # special case sektionswechsel nach ZH
                     if self.wegzug_zu in ('MVZH', 'MVSO') and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
+        else:
+            # sektionswechsel fix von MVZH
+            if self.zuzug_von == 'MVZH' and self.status_c == 'Zuzug':
+                if not self.zuzug:
+                    self.zuzug = today()
     
     def remove_unnecessary_blanks(self):
         # Hauptmitglied
@@ -153,10 +156,10 @@ class Mitgliedschaft(Document):
             if not len(self.rg_tel_g.replace(" ", "")) > 0:
                 self.rg_tel_g = None
     
-    def zuzug_fix(self):
+    def zuzug_massenlauf_korrespondenz(self):
         # erstelle ggf. neue Rechnung
         mit_rechnung = False
-        if self.zahlung_mitgliedschaft < int(now().split("-")[0]):
+        if self.bezahltes_mitgliedschaftsjahr < int(now().split("-")[0]):
             if self.naechstes_jahr_geschuldet == 1:
                 mit_rechnung = create_mitgliedschaftsrechnung(self.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=self.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=self.mitgliedtyp_c, reduzierte_mitgliedschaft=self.reduzierte_mitgliedschaft, language=self.language)['default_druckvorlage'])
         
@@ -201,7 +204,7 @@ class Mitgliedschaft(Document):
             new_korrespondenz.insert(ignore_permissions=True)
             frappe.db.commit()
             
-            return new_korrespondenz.name
+            self.zuzug_korrespondenz =  new_korrespondenz.name
     
     def handling_kontakt_adresse_kunde(self):
         # Mitglied
