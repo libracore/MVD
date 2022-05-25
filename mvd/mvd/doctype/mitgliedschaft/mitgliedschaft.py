@@ -2443,7 +2443,10 @@ def mvm_neuanlage(kwargs):
             
             if kwargs['datumOnlineVerbucht']:
                 datum_online_verbucht = kwargs['datumOnlineVerbucht']
-                datum_zahlung_mitgliedschaft = datum_online_verbucht.split("T")[0]
+                if zuzug_von not in ('MVZH', 'MVSO'):
+                    datum_zahlung_mitgliedschaft = datum_online_verbucht.split("T")[0]
+                else:
+                    datum_zahlung_mitgliedschaft = None
             else:
                 datum_online_verbucht = None
                 datum_zahlung_mitgliedschaft = None
