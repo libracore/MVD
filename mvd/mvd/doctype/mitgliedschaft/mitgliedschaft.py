@@ -31,9 +31,6 @@ class Mitgliedschaft(Document):
     
     def validate(self):
         if not self.validierung_notwendig or str(self.validierung_notwendig) == '0':
-            #status_c permission fix
-            self.statuc_c_permission_fix()
-            
             # entferne Telefonnummern mit vergessenen Leerschlägen
             self.remove_unnecessary_blanks()
             
@@ -68,13 +65,11 @@ class Mitgliedschaft(Document):
             # ampelfarbe
             self.ampel_farbe = get_ampelfarbe(self)
             
-            # sektionswechsel fix von MVZH
-            if self.zuzug_von == 'MVZH' and self.status_c == 'Zuzug':
+            # Zuzugs-Korrespondenz für Massenlauf
+            if self.zuzug_von and int(self.zuzug_massendruck) == 1:
                 if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
                     if self.kunde_mitglied:
-                        self.zuzug_korrespondenz = self.zuzug_fix()
-                    if not self.zuzug:
-                        self.zuzug = today()
+                        self.zuzug_massenlauf_korrespondenz()
                         
             
             # eintrittsdatum fix
@@ -122,15 +117,6 @@ class Mitgliedschaft(Document):
                     if self.wegzug_zu in ('MVZH', 'MVSO') and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
     
-    def statuc_c_permission_fix(self):
-        if self.status_c in ('Online-Anmeldung', 'Online-Beitritt'):
-            self.status_c = 'Regulär'
-        elif self.status_c == 'Online-Mutation':
-            if self.status_vor_onl_mutation:
-                self.status_c = self.status_vor_onl_mutation
-            else:
-                self.status_c = 'Regulär'
-    
     def remove_unnecessary_blanks(self):
         # Hauptmitglied
         if self.tel_p_1:
@@ -165,10 +151,10 @@ class Mitgliedschaft(Document):
             if not len(self.rg_tel_g.replace(" ", "")) > 0:
                 self.rg_tel_g = None
     
-    def zuzug_fix(self):
+    def zuzug_massenlauf_korrespondenz(self):
         # erstelle ggf. neue Rechnung
         mit_rechnung = False
-        if self.zahlung_mitgliedschaft < int(now().split("-")[0]):
+        if self.bezahltes_mitgliedschaftsjahr < int(now().split("-")[0]):
             if self.naechstes_jahr_geschuldet == 1:
                 mit_rechnung = create_mitgliedschaftsrechnung(self.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=self.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=self.mitgliedtyp_c, reduzierte_mitgliedschaft=self.reduzierte_mitgliedschaft, language=self.language)['default_druckvorlage'])
         
@@ -213,7 +199,7 @@ class Mitgliedschaft(Document):
             new_korrespondenz.insert(ignore_permissions=True)
             frappe.db.commit()
             
-            return new_korrespondenz.name
+            self.zuzug_korrespondenz =  new_korrespondenz.name
     
     def handling_kontakt_adresse_kunde(self):
         # Mitglied
@@ -2328,6 +2314,11 @@ def mvm_update(mitgliedschaft, kwargs):
             
             if status_c in ('Online-Anmeldung', 'Online-Beitritt', 'Online-Kündigung'):
                 mitgliedschaft.validierung_notwendig = 1
+                if status_c == 'Online-Beitritt':
+                    if online_haftpflicht:
+                        if int(online_haftpflicht) == 1:
+                            mitgliedschaft.datum_hv_zahlung = eintritt
+                    mitgliedschaft.datum_zahlung_mitgliedschaft = eintritt
             else:
                 if kwargs['needsValidation']:
                     mitgliedschaft.validierung_notwendig = 1
@@ -2335,7 +2326,12 @@ def mvm_update(mitgliedschaft, kwargs):
                         mitgliedschaft.status_vor_onl_mutation = status_c
                         mitgliedschaft.status_c = 'Online-Mutation'
                     
-                
+            
+            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
+            if mitgliedschaft.zuzug_von == 'MVZH' and mitgliedschaft.status_c == 'Zuzug':
+                if not mitgliedschaft.zuzug:
+                    mitgliedschaft.zuzug = today()
+            
             mitgliedschaft.flags.ignore_links=True
             mitgliedschaft.save()
             frappe.db.commit()
@@ -2447,7 +2443,10 @@ def mvm_neuanlage(kwargs):
             
             if kwargs['datumOnlineVerbucht']:
                 datum_online_verbucht = kwargs['datumOnlineVerbucht']
-                datum_zahlung_mitgliedschaft = datum_online_verbucht.split("T")[0]
+                if zuzug_von not in ('MVZH', 'MVSO'):
+                    datum_zahlung_mitgliedschaft = datum_online_verbucht.split("T")[0]
+                else:
+                    datum_zahlung_mitgliedschaft = None
             else:
                 datum_online_verbucht = None
                 datum_zahlung_mitgliedschaft = None
@@ -2521,12 +2520,22 @@ def mvm_neuanlage(kwargs):
             
             if status_c in ('Online-Anmeldung', 'Online-Beitritt', 'Online-Kündigung'):
                 new_mitgliedschaft.validierung_notwendig = 1
+                if status_c == 'Online-Beitritt':
+                    if online_haftpflicht:
+                        if int(online_haftpflicht) == 1:
+                            new_mitgliedschaft.datum_hv_zahlung = eintritt
+                    new_mitgliedschaft.datum_zahlung_mitgliedschaft = eintritt
             else:
                 if kwargs['needsValidation']:
                     new_mitgliedschaft.validierung_notwendig = 1
                     if status_c != 'Zuzug':
                         new_mitgliedschaft.status_vor_onl_mutation = status_c
                         new_mitgliedschaft.status_c = 'Online-Mutation'
+            
+            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
+            if new_mitgliedschaft.zuzug_von == 'MVZH' and new_mitgliedschaft.status_c == 'Zuzug':
+                if not new_mitgliedschaft.zuzug:
+                    new_mitgliedschaft.zuzug = today()
             
             new_mitgliedschaft.insert()
             frappe.db.commit()
