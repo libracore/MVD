@@ -37,7 +37,7 @@ def flush_complete_queue():
     for _queue in queues:
         queue = frappe.get_doc("Service Platform Queue", _queue.name)
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", queue.mv_mitgliedschaft)
-        if mitgliedschaft.status_c not in ('Online-Anmeldung', 'Online-Beitritt', 'Online-Mutation'):
+        if mitgliedschaft.status_c not in ('Online-Beitritt', 'Online-Mutation'):
             update = False
             if int(queue.update) == 1:
                 update = True
