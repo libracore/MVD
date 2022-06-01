@@ -1,30 +1,34 @@
 {
- "creation": "2022-02-16 23:04:43.746460",
+ "creation": "2022-06-01 14:44:23.738301",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "status",
   "mv_mitgliedschaft",
-  "update",
-  "objekt",
-  "sektion_id"
+  "json",
+  "neuanlage",
+  "update"
  ],
  "fields": [
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Status",
-   "options": "Open\nClosed",
-   "reqd": 1
-  },
   {
    "fieldname": "mv_mitgliedschaft",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Mitgliedschaft",
-   "options": "Mitgliedschaft"
+   "options": "Mitgliedschaft",
+   "reqd": 1
+  },
+  {
+   "fieldname": "json",
+   "fieldtype": "Code",
+   "label": "JSON"
+  },
+  {
+   "default": "0",
+   "fieldname": "neuanlage",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Neuanlage"
   },
   {
    "default": "0",
@@ -32,38 +36,24 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Update"
-  },
-  {
-   "fieldname": "objekt",
-   "fieldtype": "Code",
-   "label": "Objekt"
-  },
-  {
-   "fieldname": "sektion_id",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Sektion"
   }
  ],
- "modified": "2022-06-01 15:13:23.328096",
+ "modified": "2022-06-01 15:12:34.921291",
  "modified_by": "Administrator",
  "module": "MVD",
- "name": "Service Platform Queue",
+ "name": "Service Plattform Log",
  "owner": "Administrator",
  "permissions": [
   {
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "share": 1,
-   "write": 1
+   "share": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "title_field": "mv_mitgliedschaft",
