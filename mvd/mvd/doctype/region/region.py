@@ -15,78 +15,82 @@ class Region(Document):
 def zuordnung(region):
     region = frappe.get_doc("Region", region)
     
-    # Zuteilen Region innerhalb PLZ Range(s)
-    for plz in region.plz_zuordnung:
-        mitgliedschaften_query = """WHERE `region_manuell` != 1
-                                    AND `status_c` != 'Inaktiv'
-                                    AND (
-                                        CAST(IFNULL(`plz`, 0) AS INTEGER) BETWEEN {plz_von} AND {plz_bis}
-                                    )
-                                    AND (
-                                        `region` != '{region}' OR `region` IS NULL
-                                    )
-                                    AND `sektion_id` = '{sektion}'""".format(plz_von=plz.plz_von, \
-                                                                        plz_bis=plz.plz_bis, \
-                                                                        region=region.name, \
-                                                                        sektion=region.sektion_id)
-        
-        mitgliedschaften_queue = frappe.db.sql("""SELECT
-                                                        `name`
-                                                    FROM `tabMitgliedschaft`
-                                                    {mitgliedschaften_query}""".format(mitgliedschaften_query=mitgliedschaften_query), as_dict=True)
-        frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
-        mitgliedschafts_update = frappe.db.sql("""UPDATE `tabMitgliedschaft`
-                                                    SET `region` = '{region}'
-                                                    {mitgliedschaften_query}""".format(region=region.name, mitgliedschaften_query=mitgliedschaften_query), as_list=True)
-        frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)
-        frappe.db.commit()
-    
-    args = {
-        'mitgliedschaften_queue': mitgliedschaften_queue
-    }
-    enqueue("mvd.mvd.doctype.region.region.create_queues", queue='long', job_name='Zuteilung Region {0}'.format(region.name), timeout=5000, **args)
-    
-    # Löschen von Falsch-Zuteilungen (PLZ ausserhalb Range(s))
-    mitgliedschaften_query = """WHERE `region_manuell` != 1
-                                AND `region` = '{region}'
-                                AND `sektion_id` = '{sektion}'
-                                AND `status_c` != 'Inaktiv'""".format(plz_von=plz.plz_von, \
-                                                                    plz_bis=plz.plz_bis, \
-                                                                    region=region.name, \
-                                                                    sektion=region.sektion_id)
-    for plz in region.plz_zuordnung:
-        mitgliedschaften_query += """ AND (CAST(IFNULL(`plz`, 0) AS INTEGER) NOT BETWEEN {plz_von} AND {plz_bis})""".format(plz_von=plz.plz_von, \
-                                                                    plz_bis=plz.plz_bis)
-    
-    mitgliedschaften_queue = frappe.db.sql("""SELECT
-                                                    `name`
-                                                FROM `tabMitgliedschaft`
-                                                {mitgliedschaften_query}""".format(mitgliedschaften_query=mitgliedschaften_query), as_dict=True)
-    frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
-    mitgliedschafts_update = frappe.db.sql("""UPDATE `tabMitgliedschaft`
-                                                SET `region` = ''
-                                                {mitgliedschaften_query}""".format(mitgliedschaften_query=mitgliedschaften_query), as_list=True)
-    frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)
-    frappe.db.commit()
-    
-    args = {
-        'mitgliedschaften_queue': mitgliedschaften_queue
-    }
-    enqueue("mvd.mvd.doctype.region.region.create_queues", queue='long', job_name='Entfernung von Falsch-Zuteilungen ({0})'.format(region.name), timeout=5000, **args)
-    
-    region.add_comment('Comment', text='Automatische Zuordnung durchgeführt')
+    regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `disabled` != 1 AND `sektion_id` = '{sektion}'""".format(sektion=region.sektion_id), as_dict=True)
+    for reg in regionen:
+        r = frappe.get_doc("Region", reg.name)
+        r.auto_zuordnung = 1
+        r.save()
     
     return
 
-def create_queues(mitgliedschaften_queue):
-    commit_counter = 1
-    for mitgliedschaft in mitgliedschaften_queue:
-        m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
-        send_mvm_to_sp(m, True)
-        if commit_counter == 100:
-            frappe.db.commit()
+def _regionen_zuteilung():
+    regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `auto_zuordnung` = 1 AND `disabled` != 1""", as_dict=True)
+    
+    for reg in regionen:
+        # Zuteilen Region innerhalb PLZ Range(s)
+        region = frappe.get_doc("Region", reg.name)
+        
+        for plz in region.plz_zuordnung:
+            mitgliedschaften_query = """WHERE `region_manuell` != 1
+                                        AND `status_c` != 'Inaktiv'
+                                        AND (
+                                            CAST(IFNULL(`plz`, 0) AS INTEGER) BETWEEN {plz_von} AND {plz_bis}
+                                        )
+                                        AND (
+                                            `region` != '{region}' OR `region` IS NULL
+                                        )
+                                        AND `sektion_id` = '{sektion}'""".format(plz_von=plz.plz_von, \
+                                                                            plz_bis=plz.plz_bis, \
+                                                                            region=region.name, \
+                                                                            sektion=region.sektion_id)
+            
+            mitgliedschaften = frappe.db.sql("""SELECT
+                                                            `name`
+                                                        FROM `tabMitgliedschaft`
+                                                        {mitgliedschaften_query}""".format(mitgliedschaften_query=mitgliedschaften_query), as_dict=True)
+            
             commit_counter = 1
-        else:
-            commit_counter += 1
-    frappe.db.commit()
-    return
+            for mitgliedschaft in mitgliedschaften:
+                m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                m.region = region.name
+                m.save()
+                if commit_counter == 100:
+                    frappe.db.commit()
+                    commit_counter = 1
+                else:
+                    commit_counter += 1
+            frappe.db.commit()
+        
+        # Löschen von Falsch-Zuteilungen (PLZ ausserhalb Range(s))
+        mitgliedschaften_query = """WHERE `region_manuell` != 1
+                                    AND `region` = '{region}'
+                                    AND `sektion_id` = '{sektion}'
+                                    AND `status_c` != 'Inaktiv'""".format(plz_von=plz.plz_von, \
+                                                                        plz_bis=plz.plz_bis, \
+                                                                        region=region.name, \
+                                                                        sektion=region.sektion_id)
+        for plz in region.plz_zuordnung:
+            mitgliedschaften_query += """AND (CAST(IFNULL(`plz`, 0) AS INTEGER) NOT BETWEEN {plz_von} AND {plz_bis})""".format(plz_von=plz.plz_von, \
+                                                                                                                            plz_bis=plz.plz_bis)
+        
+        mitgliedschaften = frappe.db.sql("""SELECT
+                                                `name`
+                                            FROM `tabMitgliedschaft`
+                                            {mitgliedschaften_query}""".format(mitgliedschaften_query=mitgliedschaften_query), as_dict=True)
+        
+        commit_counter = 1
+        for mitgliedschaft in mitgliedschaften:
+            m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+            m.region = ''
+            m.save()
+            if commit_counter == 100:
+                frappe.db.commit()
+                commit_counter = 1
+            else:
+                commit_counter += 1
+        frappe.db.commit()
+        
+        region.auto_zuordnung = 0
+        region.save()
+        
+        return

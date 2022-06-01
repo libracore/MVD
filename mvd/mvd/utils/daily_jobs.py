@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils.data import today, getdate
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_ampelfarbe
+from mvd.mvd.doctype.region.region import _regionen_zuteilung
 
 def set_inaktiv():
     mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Kündigung', 'Ausschluss')""", as_dict=True)
@@ -59,3 +60,6 @@ def ampel_neuberechnung():
             else:
                 submit_counter += 1
     frappe.db.commit()
+
+def regionen_zuteilung():
+    _regionen_zuteilung()

@@ -3,9 +3,11 @@
 
 frappe.ui.form.on('Region', {
     refresh: function(frm) {
-        frm.add_custom_button(__("Automatisch Zuordnen"), function() {
-            zuordnung(frm);
-        });
+        if (!cur_frm.doc.disabled&&!cur_frm.doc.auto_zuordnung) {
+            frm.add_custom_button(__("Automatisch Zuordnen"), function() {
+                zuordnung(frm);
+            });
+        }
     }
 });
 
@@ -15,10 +17,9 @@ function zuordnung(frm) {
         args: {
             region: cur_frm.doc.name
         },
-        freeze: true,
-        freeze_message: 'Bitte warten, Zuordnung erfolgt...',
         callback: function(r) {
             cur_frm.reload_doc();
+            frappe.msgprint("Die automatische Zuordnung aller Regionen der Sektion " + cur_frm.doc.sektion_id + " wird über Nacht ausgeführt.");
         }
     });
 }
