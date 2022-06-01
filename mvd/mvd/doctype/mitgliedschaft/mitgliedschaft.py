@@ -2336,7 +2336,7 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.save()
             frappe.db.commit()
             
-            # Wenn sektion = ZH und status_c = wegzug DANN Rechnung stornieren wenn unbezahlt!!!!!!!!
+            create_sp_log(mitgliedschaft.name, False, kwargs)
             
             return raise_200()
             
@@ -2539,6 +2539,8 @@ def mvm_neuanlage(kwargs):
             
             new_mitgliedschaft.insert()
             frappe.db.commit()
+            
+            create_sp_log(new_mitgliedschaft.name, True, kwargs)
             
             return raise_200()
             
@@ -2891,12 +2893,12 @@ def create_sp_queue(mitgliedschaft, update):
         queue = frappe.get_doc({
             "doctype": "Service Platform Queue",
             "status": "Open",
-            "mv_mitgliedschaft": mitgliedschaft.mitglied_id
+            "mv_mitgliedschaft": mitgliedschaft.mitglied_id,
+            "sektion_id": mitgliedschaft.sektion_id,
+            "update": 1 if update else 0
         })
         queue.insert(ignore_permissions=True)
-        if update:
-            queue.update = 1
-            queue.save(ignore_permissions=True)
+        
         return
 
 def send_mvm_sektionswechsel(mitgliedschaft):
@@ -3468,3 +3470,21 @@ def check_erstelle_rechnung(mitgliedschaft, typ, sektion):
         return 1
     else:
         return 0
+
+def create_sp_log(mitgliedschaft, neuanlage, kwargs):
+    if neuanlage:
+        neuanlage = 1
+        update = 0
+    else:
+        neuanlage = 0
+        update = 1
+    
+    sp_log = frappe.get_doc({
+        "doctype":"Service Plattform Log",
+        "mv_mitgliedschaft": mitgliedschaft,
+        "json": str(kwargs),
+        "neuanlage": neuanlage,
+        "update": update
+    }).insert(ignore_permissions=True)
+    
+    return
