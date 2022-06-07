@@ -93,4 +93,4 @@ def _regionen_zuteilung():
         region.auto_zuordnung = 0
         region.save()
         
-        return
+    return
