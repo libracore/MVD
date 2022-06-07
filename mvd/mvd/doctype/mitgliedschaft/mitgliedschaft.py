@@ -65,10 +65,12 @@ class Mitgliedschaft(Document):
             # ampelfarbe
             self.ampel_farbe = get_ampelfarbe(self)
             
-            # sektionswechsel fix von MVZH
-            if int(self.zuzug_massendruck) == 1 or self.status_c == 'Zuzug':
+            # Zuzugs-Korrespondenz für Massenlauf
+            if self.zuzug_von and int(self.zuzug_massendruck) == 1:
                 if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
-                    self.zuzug_korrespondenz = self.zuzug_fix()
+                    if self.kunde_mitglied:
+                        self.zuzug_massenlauf_korrespondenz()
+                        
             
             # eintrittsdatum fix
             if self.eintritt and not self.eintrittsdatum:
@@ -99,6 +101,13 @@ class Mitgliedschaft(Document):
             # Regions-Zuordnung anhand PLZ
             if not int(self.region_manuell) == 1:
                 self.region = self.get_region()
+        
+            # Mahnstopp in Rechnungen setzen
+            if self.status_c in ('Gestorben', 'Ausschluss'):
+                self.mahnstopp = '2099-12-31'
+            
+            if self.mahnstopp:
+                mahnstopp(self.name, self.mahnstopp)
             
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
@@ -163,11 +172,11 @@ class Mitgliedschaft(Document):
             return region[0].parent
         else:
             return None
-    
-    def zuzug_fix(self):
+
+    def zuzug_massenlauf_korrespondenz(self):
         # erstelle ggf. neue Rechnung
         mit_rechnung = False
-        if self.zahlung_mitgliedschaft < int(now().split("-")[0]):
+        if self.bezahltes_mitgliedschaftsjahr < int(now().split("-")[0]):
             if self.naechstes_jahr_geschuldet == 1:
                 mit_rechnung = create_mitgliedschaftsrechnung(self.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=self.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=self.mitgliedtyp_c, reduzierte_mitgliedschaft=self.reduzierte_mitgliedschaft, language=self.language)['default_druckvorlage'])
         
@@ -212,7 +221,7 @@ class Mitgliedschaft(Document):
             new_korrespondenz.insert(ignore_permissions=True)
             frappe.db.commit()
             
-            return new_korrespondenz.name
+            self.zuzug_korrespondenz =  new_korrespondenz.name
     
     def handling_kontakt_adresse_kunde(self):
         # Mitglied
@@ -531,7 +540,13 @@ class Mitgliedschaft(Document):
         contact.links = []
         contact.save(ignore_permissions=True)
         return ''
-    
+
+def mahnstopp(mitgliedschaft, mahnstopp):
+    SQL_SAFE_UPDATES_false = frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
+    frappe.db.sql("""UPDATE `tabSales Invoice` SET `exclude_from_payment_reminder_until` = '{mahnstopp}' WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'""".format(mitgliedschaft=mitgliedschaft, mahnstopp=mahnstopp), as_list=True)
+    SQL_SAFE_UPDATES_true = frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)
+    frappe.db.commit()
+
 def get_adressblock(mitgliedschaft):
     adressblock = ''
     if mitgliedschaft.kundentyp == 'Unternehmen':
@@ -577,7 +592,11 @@ def get_adressblock(mitgliedschaft):
         adressblock += str(mitgliedschaft.postfach_nummer) or ''
         adressblock += '\n'
     
-    adressblock += str(mitgliedschaft.plz) or ''
+    if mitgliedschaft.land != 'Schweiz':
+        laender_code = frappe.get_value("Country", mitgliedschaft.land, "code").upper() + "-"
+    else:
+        laender_code = ''
+    adressblock += laender_code + str(mitgliedschaft.plz) or ''
     adressblock += ' '
     adressblock += mitgliedschaft.ort or ''
     
@@ -646,7 +665,11 @@ def get_rg_adressblock(mitgliedschaft):
         adressblock += str(mitgliedschaft.rg_postfach_nummer) or ''
         adressblock += '\n'
     
-    adressblock += str(mitgliedschaft.rg_plz) or ''
+    if mitgliedschaft.rg_land != 'Schweiz':
+        laender_code = frappe.get_value("Country", mitgliedschaft.rg_land, "code").upper() + "-"
+    else:
+        laender_code = ''
+    adressblock += laender_code + str(mitgliedschaft.rg_plz) or ''
     adressblock += ' '
     adressblock += mitgliedschaft.rg_ort or ''
     
@@ -669,6 +692,7 @@ def update_rg_adresse(mitgliedschaft):
     plz = mitgliedschaft.rg_plz
     postfach_nummer = mitgliedschaft.rg_postfach_nummer
     city = mitgliedschaft.rg_ort
+    country = mitgliedschaft.rg_land or 'Schweiz'
     
     address.address_title = address_title
     address.address_line1 = address_line1
@@ -680,6 +704,7 @@ def update_rg_adresse(mitgliedschaft):
     address.postfach = postfach
     address.postfach_nummer = postfach_nummer
     address.city = city
+    address.country = country
     address.is_primary_address = is_primary_address
     address.is_shipping_address = is_shipping_address
     address.adress_id = str(mitgliedschaft.mitglied_id) + "-Rechnung"
@@ -719,6 +744,7 @@ def create_rg_adresse(mitgliedschaft):
     plz = mitgliedschaft.rg_plz
     postfach_nummer = mitgliedschaft.rg_postfach_nummer
     city = mitgliedschaft.rg_ort
+    country = mitgliedschaft.rg_land or 'Schweiz'
     
     new_address = frappe.get_doc({
         'doctype': 'Address',
@@ -732,6 +758,7 @@ def create_rg_adresse(mitgliedschaft):
         'postfach': postfach,
         'postfach_nummer': postfach_nummer,
         'city': city,
+        'country': country,
         'is_primary_address': is_primary_address,
         'is_shipping_address': is_shipping_address,
         'adress_id': str(mitgliedschaft.mitglied_id) + "-Rechnung"
@@ -1059,6 +1086,7 @@ def update_adresse_mitglied(mitgliedschaft):
     plz = mitgliedschaft.plz
     postfach_nummer = mitgliedschaft.postfach_nummer
     city = mitgliedschaft.ort
+    country = mitgliedschaft.land or 'Schweiz'
     
     address.address_title = address_title
     address.address_line1 = address_line1
@@ -1070,6 +1098,7 @@ def update_adresse_mitglied(mitgliedschaft):
     address.postfach = postfach
     address.postfach_nummer = postfach_nummer
     address.city = city
+    address.country = country
     address.is_primary_address = is_primary_address
     address.is_shipping_address = is_shipping_address
     address.adress_id = str(mitgliedschaft.mitglied_id) + "-Mitglied"
@@ -1103,6 +1132,7 @@ def create_adresse_mitglied(mitgliedschaft):
     plz = mitgliedschaft.plz
     postfach_nummer = mitgliedschaft.postfach_nummer
     city = mitgliedschaft.ort
+    country = mitgliedschaft.land or 'Schweiz'
     
     new_address = frappe.get_doc({
         'doctype': 'Address',
@@ -1116,6 +1146,7 @@ def create_adresse_mitglied(mitgliedschaft):
         'postfach': postfach,
         'postfach_nummer': postfach_nummer,
         'city': city,
+        'country': country,
         'is_primary_address': is_primary_address,
         'is_shipping_address': is_shipping_address,
         'adress_id': str(mitgliedschaft.mitglied_id) + "-Mitglied"
@@ -1863,9 +1894,10 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             new_mitgliedschaft.online_payment_method = None
             new_mitgliedschaft.online_payment_id = None
             new_mitgliedschaft.adress_id_rg = ''
-            
+            new_mitgliedschaft.validierung_notwendig = 0
             new_mitgliedschaft.letzte_bearbeitung_von = 'SP'
             new_mitgliedschaft.insert(ignore_permissions=True)
+            
             frappe.db.commit()
             
             # erstelle ggf. neue Rechnung
@@ -1928,8 +1960,8 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), new_mitgliedschaft.as_dict()), 'Sektionswechsel')
             return 0
     else:
-        # Sektionswechsel nach ZH, BE, SO --> kein neues Mtiglied in ERPNext, Meldung Sektionswechsel erfolgt vie validate Trigger von Mitgliedschaft
-        # Sobald ZH, BE oder SO neues Mitglied verarbeitet erhält ERPNext via SP eine Neuanlage von/für ZH, BE oder SO und ist mittels Freizügigkeitsabfrage wieder verfügbar
+        # Sektionswechsel nach ZH, und SO --> kein neues Mtiglied in ERPNext, Meldung Sektionswechsel erfolgt vie validate Trigger von Mitgliedschaft
+        # Sobald ZH oder SO neues Mitglied verarbeitet erhält ERPNext via SP eine Neuanlage von/für ZH oder SO und ist mittels Freizügigkeitsabfrage wieder verfügbar
         return 1
 
 @frappe.whitelist()
@@ -1963,6 +1995,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
                         {"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center}
                     ]
                     jahr = int(getdate(today()).strftime("%Y")) + 1
+        
         # prüfe Beitrittsgebühr
         if int(mitgliedschaft.zahlung_mitgliedschaft) == 0 and sektion.mitgliedschafts_artikel_beitritt:
             item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt,"qty": 1, "cost_center": company.cost_center})
@@ -2303,6 +2336,11 @@ def mvm_update(mitgliedschaft, kwargs):
             
             if status_c in ('Online-Anmeldung', 'Online-Beitritt', 'Online-Kündigung'):
                 mitgliedschaft.validierung_notwendig = 1
+                if status_c == 'Online-Beitritt':
+                    if online_haftpflicht:
+                        if int(online_haftpflicht) == 1:
+                            mitgliedschaft.datum_hv_zahlung = eintritt
+                    mitgliedschaft.datum_zahlung_mitgliedschaft = eintritt
             else:
                 if kwargs['needsValidation']:
                     mitgliedschaft.validierung_notwendig = 1
@@ -2310,12 +2348,17 @@ def mvm_update(mitgliedschaft, kwargs):
                         mitgliedschaft.status_vor_onl_mutation = status_c
                         mitgliedschaft.status_c = 'Online-Mutation'
                     
-                
+            
+            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
+            if mitgliedschaft.zuzug_von == 'MVZH' and mitgliedschaft.status_c == 'Zuzug':
+                if not mitgliedschaft.zuzug:
+                    mitgliedschaft.zuzug = today()
+            
             mitgliedschaft.flags.ignore_links=True
             mitgliedschaft.save()
             frappe.db.commit()
             
-            # Wenn sektion = ZH und status_c = wegzug DANN Rechnung stornieren wenn unbezahlt!!!!!!!!
+            create_sp_log(mitgliedschaft.name, False, kwargs)
             
             return raise_200()
             
@@ -2422,7 +2465,10 @@ def mvm_neuanlage(kwargs):
             
             if kwargs['datumOnlineVerbucht']:
                 datum_online_verbucht = kwargs['datumOnlineVerbucht']
-                datum_zahlung_mitgliedschaft = datum_online_verbucht.split("T")[0]
+                if zuzug_von not in ('MVZH', 'MVSO'):
+                    datum_zahlung_mitgliedschaft = datum_online_verbucht.split("T")[0]
+                else:
+                    datum_zahlung_mitgliedschaft = None
             else:
                 datum_online_verbucht = None
                 datum_zahlung_mitgliedschaft = None
@@ -2496,6 +2542,11 @@ def mvm_neuanlage(kwargs):
             
             if status_c in ('Online-Anmeldung', 'Online-Beitritt', 'Online-Kündigung'):
                 new_mitgliedschaft.validierung_notwendig = 1
+                if status_c == 'Online-Beitritt':
+                    if online_haftpflicht:
+                        if int(online_haftpflicht) == 1:
+                            new_mitgliedschaft.datum_hv_zahlung = eintritt
+                    new_mitgliedschaft.datum_zahlung_mitgliedschaft = eintritt
             else:
                 if kwargs['needsValidation']:
                     new_mitgliedschaft.validierung_notwendig = 1
@@ -2503,8 +2554,15 @@ def mvm_neuanlage(kwargs):
                         new_mitgliedschaft.status_vor_onl_mutation = status_c
                         new_mitgliedschaft.status_c = 'Online-Mutation'
             
+            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
+            if new_mitgliedschaft.zuzug_von == 'MVZH' and new_mitgliedschaft.status_c == 'Zuzug':
+                if not new_mitgliedschaft.zuzug:
+                    new_mitgliedschaft.zuzug = today()
+            
             new_mitgliedschaft.insert()
             frappe.db.commit()
+            
+            create_sp_log(new_mitgliedschaft.name, True, kwargs)
             
             return raise_200()
             
@@ -2857,12 +2915,12 @@ def create_sp_queue(mitgliedschaft, update):
         queue = frappe.get_doc({
             "doctype": "Service Platform Queue",
             "status": "Open",
-            "mv_mitgliedschaft": mitgliedschaft.mitglied_id
+            "mv_mitgliedschaft": mitgliedschaft.mitglied_id,
+            "sektion_id": mitgliedschaft.sektion_id,
+            "update": 1 if update else 0
         })
         queue.insert(ignore_permissions=True)
-        if update:
-            queue.update = 1
-            queue.save(ignore_permissions=True)
+        
         return
 
 def send_mvm_sektionswechsel(mitgliedschaft):
@@ -3364,7 +3422,9 @@ def erstelle_todo(owner, mitglied, description=False, datum=False, notify=0):
 
 @frappe.whitelist()
 def wieder_beitritt(mitgliedschaft):
-    mitgliedschafts_copy = frappe.copy_doc(frappe.get_doc("Mitgliedschaft", mitgliedschaft))
+    alte_mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+    mitgliedschafts_copy = frappe.copy_doc(alte_mitgliedschaft.as_dict())
+    
     mitgliedschafts_copy.mitglied_nr = None
     mitgliedschafts_copy.mitglied_id = None
     mitgliedschafts_copy.status_c = 'Anmeldung'
@@ -3375,10 +3435,10 @@ def wieder_beitritt(mitgliedschaft):
     mitgliedschafts_copy.wegzug_zu = None
     mitgliedschafts_copy.austritt = None
     mitgliedschafts_copy.kuendigung = None
+    mitgliedschafts_copy.bezahltes_mitgliedschaftsjahr = 0
     mitgliedschafts_copy.zahlung_hv = 0
     mitgliedschafts_copy.zahlung_mitgliedschaft = 0
     mitgliedschafts_copy.naechstes_jahr_geschuldet = 1
-    mitgliedschafts_copy.validierung_notwendig = 0
     mitgliedschafts_copy.datum_hv_zahlung = None
     mitgliedschafts_copy.letzte_bearbeitung_von = 'SP'
     mitgliedschafts_copy.online_haftpflicht = None
@@ -3389,6 +3449,64 @@ def wieder_beitritt(mitgliedschaft):
     mitgliedschafts_copy.online_payment_method = None
     mitgliedschafts_copy.online_payment_id = None
     mitgliedschafts_copy.anmeldung_mit_ez = 1
-    mitgliedschafts_copy.insert()
-    return mitgliedschafts_copy.name
+    mitgliedschafts_copy.validierung_notwendig = 1
+    mitgliedschafts_copy.kuendigung_verarbeiten = 0
+    mitgliedschafts_copy.interessent_innenbrief_mit_ez = 0
+    mitgliedschafts_copy.zuzug_massendruck = 0
+    mitgliedschafts_copy.zuzugs_rechnung = None
+    mitgliedschafts_copy.zuzug_korrespondenz = None
+    mitgliedschafts_copy.kuendigung_druckvorlage = None
+    mitgliedschafts_copy.rg_massendruck_vormerkung = 0
+    mitgliedschafts_copy.begruessung_massendruck = 0
+    mitgliedschafts_copy.begruessung_via_zahlung = 0
+    mitgliedschafts_copy.begruessung_massendruck_dokument = None
     
+    mitgliedschafts_copy.insert()
+    frappe.db.commit()
+    
+    mitgliedschafts_copy.validierung_notwendig = 0
+    mitgliedschafts_copy.save()
+    
+    alte_mitgliedschaft.add_comment('Comment', text='Mitgliedschaft (als Anmeldung) mittels {0} ({1}) reaktiviert.'.format(mitgliedschafts_copy.mitglied_nr, mitgliedschafts_copy.name))
+    mitgliedschafts_copy.add_comment('Comment', text='Reaktivierte Mitgliedschaft aus {0} ({1})'.format(alte_mitgliedschaft.mitglied_nr, alte_mitgliedschaft.name))
+    
+    return mitgliedschafts_copy.name
+
+@frappe.whitelist()
+def check_erstelle_rechnung(mitgliedschaft, typ, sektion):
+    jahr = int(getdate(today()).strftime("%Y"))
+    if typ == 'Privat':
+        gratis_bis_ende_jahr = frappe.get_value("Sektion", sektion, "gratis_bis_ende_jahr")
+        gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(gratis_bis_ende_jahr).strftime("%d"))
+        if getdate(today()) >= gratis_ab:
+            jahr += 1
+                    
+    vorhandene_rechnungen = frappe.db.sql("""SELECT
+                                                COUNT(`name`) AS `qty`
+                                            FROM `tabSales Invoice`
+                                            WHERE `docstatus` = 1
+                                            AND `ist_mitgliedschaftsrechnung` = 1
+                                            AND `mv_mitgliedschaft` = '{mitgliedschaft}'
+                                            AND `mitgliedschafts_jahr` = '{jahr}'""".format(mitgliedschaft=mitgliedschaft, jahr=jahr), as_dict=True)[0].qty
+    if vorhandene_rechnungen < 1:
+        return 1
+    else:
+        return 0
+
+def create_sp_log(mitgliedschaft, neuanlage, kwargs):
+    if neuanlage:
+        neuanlage = 1
+        update = 0
+    else:
+        neuanlage = 0
+        update = 1
+    
+    sp_log = frappe.get_doc({
+        "doctype":"Service Plattform Log",
+        "mv_mitgliedschaft": mitgliedschaft,
+        "json": str(kwargs),
+        "neuanlage": neuanlage,
+        "update": update
+    }).insert(ignore_permissions=True)
+    
+    return

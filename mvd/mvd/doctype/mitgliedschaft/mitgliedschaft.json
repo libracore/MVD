@@ -38,6 +38,7 @@
   "reduzierter_betrag",
   "reduzierung_bis",
   "language",
+  "mahnstopp",
   "section_wichtige_infos",
   "wichtig",
   "section_daten",
@@ -91,6 +92,7 @@
   "postfach_nummer",
   "plz",
   "ort",
+  "land",
   "section_objekt_adresse",
   "abweichende_objektadresse",
   "objekt_zusatz_adresse",
@@ -110,6 +112,7 @@
   "rg_postfach_nummer",
   "rg_plz",
   "rg_ort",
+  "rg_land",
   "cb_2",
   "rg_kundentyp",
   "rg_firma",
@@ -229,7 +232,8 @@
    "fieldtype": "Date",
    "hidden": 1,
    "label": "Eintritt (Obsolet)",
-   "permlevel": 2
+   "permlevel": 2,
+   "read_only": 1
   },
   {
    "fieldname": "wegzug",
@@ -847,6 +851,7 @@
    "fieldtype": "Int",
    "hidden": 1,
    "label": "Zahlung Mitgliedschaft (Obsolet)",
+   "permlevel": 2,
    "read_only": 1
   },
   {
@@ -1095,7 +1100,7 @@
    "fieldname": "eintrittsdatum",
    "fieldtype": "Date",
    "label": "Eintritt",
-   "permlevel": 1
+   "read_only": 1
   },
   {
    "fieldname": "search_hash",
@@ -1149,10 +1154,30 @@
    "fieldname": "online_payment_id",
    "fieldtype": "Data",
    "label": "onlinePaymentId"
+  },
+  {
+   "default": "Schweiz",
+   "fieldname": "land",
+   "fieldtype": "Link",
+   "label": "Land",
+   "options": "Country"
+  },
+  {
+   "default": "Schweiz",
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_land",
+   "fieldtype": "Link",
+   "label": "Land (Rechnung)",
+   "options": "Country"
+  },
+  {
+   "fieldname": "mahnstopp",
+   "fieldtype": "Date",
+   "label": "Von Mahnlauf ausschliessen bis"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-05-05 14:25:00.231847",
+ "modified": "2022-05-20 09:54:08.441463",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

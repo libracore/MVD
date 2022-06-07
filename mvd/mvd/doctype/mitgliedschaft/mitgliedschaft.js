@@ -176,6 +176,22 @@ frappe.ui.form.on('Mitgliedschaft', {
         } else {
             cur_frm.set_df_property('region', 'read_only', 1);
         }
+        // freigabe Felder der Sektion "Daten" sowie Feld "status_c" für entsprechende Rolle
+        if (frappe.user.has_role("System Manager")) {
+            cur_frm.set_df_property('status_c', 'read_only', 0);
+            cur_frm.set_df_property('eintrittsdatum', 'read_only', 0);
+            cur_frm.set_df_property('zuzug', 'read_only', 0);
+            cur_frm.set_df_property('wegzug', 'read_only', 0);
+            cur_frm.set_df_property('zahlung_hv', 'read_only', 0);
+            cur_frm.set_df_property('datum_hv_zahlung', 'read_only', 0);
+            cur_frm.set_df_property('datum_zahlung_mitgliedschaft', 'read_only', 0);
+            cur_frm.set_df_property('bezahltes_mitgliedschaftsjahr', 'read_only', 0);
+            cur_frm.set_df_property('austritt', 'read_only', 0);
+            cur_frm.set_df_property('zuzug_von', 'read_only', 0);
+            cur_frm.set_df_property('wegzug_zu', 'read_only', 0);
+            cur_frm.set_df_property('kuendigung', 'read_only', 0);
+            cur_frm.set_df_property('verstorben_am', 'read_only', 0);
+        }
     },
     m_und_w: function(frm) {
         if (![0, 1].includes(cur_frm.doc.m_und_w)) {
@@ -259,6 +275,15 @@ frappe.ui.form.on('Mitgliedschaft', {
             cur_frm.set_df_property('rg_nachname', 'reqd', 0);
         } else {
             cur_frm.set_df_property('rg_nachname', 'reqd', 1);
+        }
+    },
+    rg_kundentyp: function(frm) {
+        if (cur_frm.doc.rg_kundentyp == 'Unternehmen') {
+            cur_frm.set_df_property('rg_nachname', 'reqd', 0);
+            cur_frm.set_df_property('rg_firma', 'reqd', 1);
+        } else {
+            cur_frm.set_df_property('rg_nachname', 'reqd', 1);
+            cur_frm.set_df_property('rg_firma', 'reqd', 0);
         }
     },
     hat_solidarmitglied: function(frm) {
@@ -611,7 +636,7 @@ function daten_validiert(frm) {
                         },
                         function(){
                             // on no
-                            cur_frm.set_value("validierung_notwendig", '0');
+                            cur_frm.set_value("validierung_notwendig", 0);
                             cur_frm.set_value("status_c", 'Regulär');
                             cur_frm.save();
                             cur_frm.timeline.insert_comment("Validierung durchgeführt.");
@@ -624,12 +649,18 @@ function daten_validiert(frm) {
                     cur_frm.save();
                     erstelle_rechnung(frm);
                 } else if (cur_frm.doc.status_c == 'Online-Beitritt') {
+                    cur_frm.set_value("validierung_notwendig", '0');
                     cur_frm.set_value("status_c", 'Regulär');
-                    cur_frm.save();
                     cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                    cur_frm.save();
                     erstelle_begruessungs_korrespondenz(frm);
                 } else if (cur_frm.doc.status_c == 'Online-Mutation') {
-                    cur_frm.set_value("status_c", cur_frm.doc.status_vor_onl_mutation);
+                    if (cur_frm.doc.status_vor_onl_mutation) {
+                        var alter_status = cur_frm.doc.status_vor_onl_mutation;
+                        cur_frm.set_value("status_c", alter_status);
+                    } else {
+                        cur_frm.set_value("status_c", 'Regulär');
+                    }
                     cur_frm.set_value("status_vor_onl_mutation", '');
                     cur_frm.set_value("validierung_notwendig", '0');
                     cur_frm.save();
@@ -756,89 +787,104 @@ function begruessung_massendruck_verarbeitet(frm) {
 
 function erstelle_rechnung(frm) {
     if (frappe.user.has_role("MV_MA")) {
-        var dokument = 'Anmeldung mit EZ';
-        if (cur_frm.doc.status_c == 'Interessent*in') {
-            dokument = 'Interessent*Innenbrief mit EZ';
-        }
         frappe.call({
-            method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+            method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.check_erstelle_rechnung",
             args:{
-                    'sektion': cur_frm.doc.sektion_id,
-                    'dokument': dokument,
-                    'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
-                    'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
-                    'language': cur_frm.doc.language
+                    'mitgliedschaft': cur_frm.doc.name,
+                    'typ': cur_frm.doc.mitgliedtyp_c,
+                    'sektion': cur_frm.doc.sektion_id
             },
-            async: false,
             callback: function(r)
             {
-                var druckvorlagen = r.message
-                // Default Druckvorlage für den Moment deaktiviert!
-                //~ frappe.prompt([
-                    //~ {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
-                        //~ 'get_query': function() {
-                            //~ return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
-                        //~ }
-                    //~ },
-                    //~ {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1},
-                    //~ {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
-                    //~ {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0}
-                //~ ],
-                frappe.prompt([
-                    {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
-                        'get_query': function() {
-                            return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
-                        }
-                    },
-                    {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1},
-                    {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
-                    {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0}
-                ],
-                function(values){
-                    if (values.bar_bezahlt == 1) {
-                        var bar_bezahlt = true;
-                        if (values.hv_bar_bezahlt == 1) {
-                            var hv_bar_bezahlt = true;
-                        } else {
-                            var hv_bar_bezahlt = null;
-                        }
-                    } else {
-                        var bar_bezahlt = null;
-                        var hv_bar_bezahlt = null;
-                    }
-                    if (values.massendruck == 1) {
-                        var massendruck = true;
-                    } else {
-                        var massendruck = null;
+                if (r.message == 1) {
+                    var dokument = 'Anmeldung mit EZ';
+                    if (cur_frm.doc.status_c == 'Interessent*in') {
+                        dokument = 'Interessent*Innenbrief mit EZ';
                     }
                     frappe.call({
-                        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung",
+                        method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
                         args:{
-                                'mitgliedschaft': cur_frm.doc.name,
-                                'bezahlt': bar_bezahlt,
-                                'attach_as_pdf': true,
-                                'submit': true,
-                                'hv_bar_bezahlt': hv_bar_bezahlt,
-                                'druckvorlage': values.druckvorlage,
-                                'massendruck': massendruck
+                                'sektion': cur_frm.doc.sektion_id,
+                                'dokument': dokument,
+                                'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                                'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                                'language': cur_frm.doc.language
                         },
-                        freeze: true,
-                        freeze_message: 'Erstelle Rechnung...',
+                        async: false,
                         callback: function(r)
                         {
-                            cur_frm.reload_doc();
-                            cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung " + r.message + " erstellt.");
-                            if (massendruck) {
-                                frappe.msgprint("Die Rechnung wurde erstellt und für den Massenlauf vorgemerkt, Sie finden sie in den Anhängen.");
-                            } else {
-                                frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
-                            }
+                            var druckvorlagen = r.message
+                            // Default Druckvorlage für den Moment deaktiviert!
+                            //~ frappe.prompt([
+                                //~ {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
+                                    //~ 'get_query': function() {
+                                        //~ return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                                    //~ }
+                                //~ },
+                                //~ {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1},
+                                //~ {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
+                                //~ {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0}
+                            //~ ],
+                            frappe.prompt([
+                                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
+                                    'get_query': function() {
+                                        return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                                    }
+                                },
+                                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1},
+                                {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
+                                {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0}
+                            ],
+                            function(values){
+                                if (values.bar_bezahlt == 1) {
+                                    var bar_bezahlt = true;
+                                    if (values.hv_bar_bezahlt == 1) {
+                                        var hv_bar_bezahlt = true;
+                                    } else {
+                                        var hv_bar_bezahlt = null;
+                                    }
+                                } else {
+                                    var bar_bezahlt = null;
+                                    var hv_bar_bezahlt = null;
+                                }
+                                if (values.massendruck == 1) {
+                                    var massendruck = true;
+                                } else {
+                                    var massendruck = null;
+                                }
+                                frappe.call({
+                                    method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung",
+                                    args:{
+                                            'mitgliedschaft': cur_frm.doc.name,
+                                            'bezahlt': bar_bezahlt,
+                                            'attach_as_pdf': true,
+                                            'submit': true,
+                                            'hv_bar_bezahlt': hv_bar_bezahlt,
+                                            'druckvorlage': values.druckvorlage,
+                                            'massendruck': massendruck
+                                    },
+                                    freeze: true,
+                                    freeze_message: 'Erstelle Rechnung...',
+                                    callback: function(r)
+                                    {
+                                        cur_frm.reload_doc();
+                                        cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung " + r.message + " erstellt.");
+                                        if (massendruck) {
+                                            frappe.msgprint("Die Rechnung wurde erstellt und für den Massenlauf vorgemerkt, Sie finden sie in den Anhängen.");
+                                        } else {
+                                            frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
+                                        }
+                                    }
+                                });
+                            },
+                            'Rechnungs Erstellung',
+                            'Erstellen'
+                            )
                         }
                     });
-                },
-                'Rechnungs Erstellung',
-                'Erstellen'
-                )
+                } else {
+                    frappe.msgprint("Die Rechnung des entsprechenden Jahres wurde bereits erstellt.<br>Wenn Sie diese neu erstellen möchten, müssen Sie die existierende zuerst stornieren.");
+                }
             }
         });
     } else {
@@ -1276,12 +1322,14 @@ function erstelle_begruessungs_korrespondenz(frm) {
                                 cur_frm.set_value("begruessung_massendruck", '1');
                                 cur_frm.set_value("begruessung_massendruck_dokument", r.message);
                                 cur_frm.set_value("validierung_notwendig", '0');
+                                cur_frm.set_value("status_c", 'Regulär');
                                 cur_frm.save();
                                 frappe.msgprint("Die Daten wurden als validert bestätigt und der Druck des Begrüssungsdokument für den Massenlauf vorgemerkt.");
                             },
                             function(){
                                 // on no
                                 cur_frm.set_value("validierung_notwendig", '0');
+                                cur_frm.set_value("status_c", 'Regulär');
                                 cur_frm.save();
                                 frappe.msgprint("Die Daten wurden als validert bestätigt, das erstellte Begrüssungsdokument finden Sie unter Korrespondenz.");
                             }
@@ -1296,6 +1344,7 @@ function erstelle_begruessungs_korrespondenz(frm) {
     });
     if (cur_frm.is_dirty()) {
         cur_frm.set_value("validierung_notwendig", '0');
+        cur_frm.set_value("status_c", 'Regulär');
         cur_frm.save();
     }
 }

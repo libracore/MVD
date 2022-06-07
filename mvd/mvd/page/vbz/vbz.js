@@ -40,6 +40,7 @@ frappe.vbz = {
         $("#validieren").off("click");
         $("#neuanlage").off("click");
         $("#handbuch").off("click");
+        $("#info_blog").off("click");
         $("#massenlauf").off("click");
         $("#adresspflege").off("click");
         $("#serienbrief").off("click");
@@ -88,6 +89,9 @@ frappe.vbz = {
         });
         $("#handbuch").click(function(){
             window.open('https://wiki.mieterverband.ch/pages/viewpage.action?pageId=74744863', '_blank').focus();
+        });
+        $("#info_blog").click(function(){
+            window.open('https://wiki.mieterverband.ch/pages/viewrecentblogposts.action?key=AMV', '_blank').focus();
         });
         $("#mitglieder").click(function(){
             frappe.route_options = {"aktive_mitgliedschaft": 1};

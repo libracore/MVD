@@ -24,6 +24,10 @@ def get_data():
             {
                 'label': _('Zu erledigen'),
                 'items': ['Arbeits Backlog']
+            },
+            {
+                'label': _('Service Plattform'),
+                'items': ['Service Platform Queue', 'Service Plattform Log']
             }
         ]
     }
