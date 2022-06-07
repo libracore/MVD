@@ -77,7 +77,10 @@ hm = {
     'datum_online_verbucht': 'datum_online_verbucht',
     'datum_online_gutschrift': 'datum_online_gutschrift',
     'online_payment_method': 'online_payment_method',
-    'online_payment_id': 'online_payment_id'
+    'online_payment_id': 'online_payment_id',
+    'region_d': 'region_d',
+    'plz_von': 'plz_von',
+    'plz_bis': 'plz_bis'
 }
 
 def read_csv(site_name, file_name, limit=False):
@@ -1227,3 +1230,64 @@ def update_region_code(site_name, file_name, limit=False):
             submit_counter += 1
         else:
             break
+
+# --------------------------------------------------------------
+# region_plz import
+# --------------------------------------------------------------
+def import_region_plz(site_name, file_name, limit=False):
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.import_region_plz --kwargs "{'site_name': 'site1.local', 'file_name': 'region_plz.csv'}"
+    '''
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    submit_counter = 1
+    max_loop = limit
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    region = None
+    error_logs = False
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            if region and region.name == str(get_value(row, 'region_d')):
+                r_row = region.append('plz_zuordnung', {})
+                r_row.plz_von = int(get_value(row, 'plz_von'))
+                r_row.plz_bis = int(get_value(row, 'plz_bis'))
+                region.save()
+                print("Add range {0}..{1} to {2}".format(get_value(row, 'plz_von'), get_value(row, 'plz_bis'), str(get_value(row, 'region_d'))))
+            else:
+                if frappe.db.exists("Region", str(get_value(row, 'region_d'))):
+                    try:
+                        region = frappe.get_doc("Region", str(get_value(row, 'region_d'))) 
+                        r_row = region.append('plz_zuordnung', {})
+                        r_row.plz_von = int(get_value(row, 'plz_von'))
+                        r_row.plz_bis = int(get_value(row, 'plz_bis'))
+                        region.save()
+                        print("Add range {0}..{1} to {2}".format(get_value(row, 'plz_von'), get_value(row, 'plz_bis'), str(get_value(row, 'region_d'))))
+                    except Exception as err:
+                        frappe.log_error("FAILED: Add range {0}..{1} to {2}".format(get_value(row, 'plz_von'), get_value(row, 'plz_bis'), str(get_value(row, 'region_d'))), 'Region / PLZ')
+                        print("FAILED: Add range {0}..{1} to {2}".format(get_value(row, 'plz_von'), get_value(row, 'plz_bis'), str(get_value(row, 'region_d'))))
+                        error_logs = True
+                else:
+                    frappe.log_error("FAILED: Add range {0}..{1} to {2}".format(get_value(row, 'plz_von'), get_value(row, 'plz_bis'), str(get_value(row, 'region_d'))), 'Region / PLZ')
+                    print("FAILED: Add range {0}..{1} to {2}".format(get_value(row, 'plz_von'), get_value(row, 'plz_bis'), str(get_value(row, 'region_d'))))
+                    error_logs = True
+            if submit_counter == 100:
+                frappe.db.commit()
+                submit_counter = 1
+            else:
+                submit_counter += 1
+        else:
+            break
+    if error_logs:
+        print("Errors detected, see error log")
+    print("Done")

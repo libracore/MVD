@@ -9,13 +9,14 @@
   "title",
   "region_c",
   "sektion_id",
-  "disabled"
+  "disabled",
+  "auto_zuordnung",
+  "plz_zuordnung"
  ],
  "fields": [
   {
    "fieldname": "title",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Titel",
    "reqd": 1,
    "unique": 1
@@ -29,6 +30,7 @@
   {
    "fieldname": "sektion_id",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Sektion",
    "options": "Sektion",
    "reqd": 1
@@ -38,9 +40,22 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Deaktiviert"
+  },
+  {
+   "fieldname": "plz_zuordnung",
+   "fieldtype": "Table",
+   "label": "Postleitzahlen Zuordnung",
+   "options": "Region PLZ"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_zuordnung",
+   "fieldtype": "Check",
+   "label": "Automatische Zuordnung aktiv",
+   "read_only": 1
   }
  ],
- "modified": "2022-04-04 20:39:02.336227",
+ "modified": "2022-06-01 16:50:08.064149",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Region",
