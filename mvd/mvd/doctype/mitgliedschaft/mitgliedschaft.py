@@ -2921,7 +2921,8 @@ def create_sp_queue(mitgliedschaft, update):
             "sektion_id": mitgliedschaft.sektion_id,
             "update": 1 if update else 0
         })
-        queue.insert(ignore_permissions=True)
+        
+        queue.insert(ignore_permissions=True, ignore_links=True)
         
         return
 
