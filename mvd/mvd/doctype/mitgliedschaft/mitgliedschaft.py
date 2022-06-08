@@ -3476,8 +3476,11 @@ def wieder_beitritt(mitgliedschaft):
     return mitgliedschafts_copy.name
 
 @frappe.whitelist()
-def check_erstelle_rechnung(mitgliedschaft, typ, sektion):
-    jahr = int(getdate(today()).strftime("%Y"))
+def check_erstelle_rechnung(mitgliedschaft, typ, sektion, jahr=False):
+    if not jahr:
+        jahr = int(getdate(today()).strftime("%Y"))
+    else:
+        jahr = int(jahr)
     if typ == 'Privat':
         gratis_bis_ende_jahr = frappe.get_value("Sektion", sektion, "gratis_bis_ende_jahr")
         gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(gratis_bis_ende_jahr).strftime("%d"))
@@ -3494,7 +3497,7 @@ def check_erstelle_rechnung(mitgliedschaft, typ, sektion):
     if vorhandene_rechnungen < 1:
         return 1
     else:
-        return 0
+        return jahr + 1
 
 def create_sp_log(mitgliedschaft, neuanlage, kwargs):
     if neuanlage:
