@@ -1014,7 +1014,8 @@
    "fieldname": "region",
    "fieldtype": "Link",
    "label": "Region",
-   "options": "Region"
+   "options": "Region",
+   "read_only": 1
   },
   {
    "default": "0",

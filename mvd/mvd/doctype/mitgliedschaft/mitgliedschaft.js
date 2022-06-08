@@ -165,11 +165,17 @@ frappe.ui.form.on('Mitgliedschaft', {
         cur_frm.fields_dict['region'].get_query = function(doc) {
             return {
                 filters: {
-                    "disabled": ["!=", 1]
+                    "disabled": ["!=", 1],
+                    "sektion_id": cur_frm.doc.sektion_id
                 }
             }
         }
         
+        if (cint(cur_frm.doc.region_manuell)==1) {
+            cur_frm.set_df_property('region', 'read_only', 0);
+        } else {
+            cur_frm.set_df_property('region', 'read_only', 1);
+        }
         // freigabe Felder der Sektion "Daten" sowie Feld "status_c" für entsprechende Rolle
         if (frappe.user.has_role("System Manager")) {
             cur_frm.set_df_property('status_c', 'read_only', 0);
@@ -341,6 +347,13 @@ frappe.ui.form.on('Mitgliedschaft', {
     },
     rg_tel_g: function(frm) {
         is_valid_phone(cur_frm.doc.rg_tel_g);
+    },
+    region_manuell: function(frm) {
+        if (cint(cur_frm.doc.region_manuell)==1) {
+            cur_frm.set_df_property('region', 'read_only', 0);
+        } else {
+            cur_frm.set_df_property('region', 'read_only', 1);
+        }
     }
 });
 
