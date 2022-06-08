@@ -1,0 +1,37 @@
+{
+ "creation": "2022-05-05 14:12:08.155024",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "plz_von",
+  "plz_bis"
+ ],
+ "fields": [
+  {
+   "fieldname": "plz_von",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Von",
+   "reqd": 1
+  },
+  {
+   "fieldname": "plz_bis",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Bis",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-05-05 14:12:08.155024",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Region PLZ",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -102,12 +102,6 @@ def get_data():
                     "name": "Region",
                     "label": _("Regionen"),
                     "description": _("Regions Einstellungen")
-                },
-                {
-                    "type": "doctype",
-                    "name": "PLZ Sektion Zuordnung",
-                    "label": _("Zuordnung PLZ <-> Sektion"),
-                    "description": _("Zuordnung PLZ <-> Sektion")
                 }
             ]
         }
