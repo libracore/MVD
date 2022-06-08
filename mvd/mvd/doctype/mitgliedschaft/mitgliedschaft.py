@@ -1896,6 +1896,8 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             new_mitgliedschaft.adress_id_rg = ''
             new_mitgliedschaft.validierung_notwendig = 0
             new_mitgliedschaft.letzte_bearbeitung_von = 'SP'
+            new_mitgliedschaft.region_manuell = 0
+            new_mitgliedschaft.region = None
             new_mitgliedschaft.insert(ignore_permissions=True)
             
             frappe.db.commit()
