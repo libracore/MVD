@@ -264,7 +264,7 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     
     key_words = [
-        {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede},
+        {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede if not mahnung and not sinv else mitgliedschaft.rg_briefanrede},
         {'key_word': '%%MIETGLIEDERNUMMER%%', 'value': mitgliedschaft.mitglied_nr},
         {'key_word': '%%ANREDE BESCHENKTE%%', 'value': mitgliedschaft.briefanrede},
         {'key_word': '%%ANREDE SCHENKENDE%%', 'value': mitgliedschaft.rg_briefanrede},
