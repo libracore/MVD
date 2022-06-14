@@ -70,11 +70,6 @@ class Mitgliedschaft(Document):
                 if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
                     if self.kunde_mitglied:
                         self.zuzug_massenlauf_korrespondenz()
-                        
-            
-            # eintrittsdatum fix
-            if self.eintritt and not self.eintrittsdatum:
-                self.eintrittsdatum = self.eintritt
             
             # setze CB "Aktive Mitgliedschaft"
             if self.status_c not in ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv'):
@@ -1610,6 +1605,11 @@ def get_uebersicht_html(name):
                                             AND `due_date` >= CURDATE()
                                             AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
         
+        if mitgliedschaft.status_c not in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
+            eintritt = mitgliedschaft.eintrittsdatum
+        else:
+            eintritt = mitgliedschaft.eintritt if mitgliedschaft.eintritt else mitgliedschaft.creation
+        
         data = {
             'kunde_mitglied': kunde_mitglied,
             'kontakt_mitglied': kontakt_mitglied,
@@ -1623,7 +1623,7 @@ def get_uebersicht_html(name):
             'col_qty': int(12 / col_qty),
             'allgemein': {
                 'status': mitgliedschaft.status_c,
-                'eintritt': mitgliedschaft.eintrittsdatum,
+                'eintritt': eintritt,
                 'austritt': mitgliedschaft.austritt,
                 'ampelfarbe': mitgliedschaft.ampel_farbe or 'ampelrot',
                 'ueberfaellige_rechnungen': ueberfaellige_rechnungen,
@@ -1658,10 +1658,15 @@ def get_uebersicht_html(name):
         rechnungsempfaenger = False
         rechnungsadresse = False
         
+        if mitgliedschaft.status_c not in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
+            eintritt = mitgliedschaft.eintrittsdatum
+        else:
+            eintritt = mitgliedschaft.eintritt if mitgliedschaft.eintritt else mitgliedschaft.creation
+        
         allgemein = {
             'status': mitgliedschaft.status_c,
             'mitgliedtyp': mitgliedschaft.mitgliedtyp_c,
-            'eintritt': mitgliedschaft.eintrittsdatum,
+            'eintritt': eintritt,
             'kuendigung': mitgliedschaft.kuendigung or False,
             'language': mitgliedschaft.language or 'de',
             'sektion': mitgliedschaft.sektion_id
