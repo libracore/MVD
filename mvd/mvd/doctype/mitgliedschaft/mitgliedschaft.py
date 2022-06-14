@@ -2188,7 +2188,7 @@ def mvm_update(mitgliedschaft, kwargs):
             if not mitgliedtyp_c:
                 return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']), daten=kwargs)
             
-            if kwargs['eintrittsdatum'] and status_c != 'Interessent*in':
+            if kwargs['eintrittsdatum'] and status_c not in ('Interessent*in', 'Anmeldung', 'Online-Anmeldung'):
                 eintritt = kwargs['eintrittsdatum'].split("T")[0]
             else:
                 eintritt = None
@@ -2395,7 +2395,7 @@ def mvm_neuanlage(kwargs):
             if not mitgliedtyp_c:
                 return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']), daten=kwargs)
             
-            if kwargs['eintrittsdatum'] and status_c != 'Interessent*in':
+            if kwargs['eintrittsdatum'] and status_c not in ('Interessent*in', 'Anmeldung', 'Online-Anmeldung'):
                 eintritt = kwargs['eintrittsdatum'].split("T")[0]
             else:
                 eintritt = None
