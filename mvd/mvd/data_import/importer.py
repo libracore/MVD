@@ -1301,7 +1301,6 @@ def entfernung_fehlerhaften_eintrittsdatum():
         sudo bench --site [site_name] execute mvd.mvd.data_import.importer.entfernung_fehlerhaften_eintrittsdatum
     '''
     
-    # ~ from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import send_mvm_to_sp
     
     mitgliedschaften = frappe.db.sql("""SELECT DISTINCT
                                             `name`
@@ -1312,11 +1311,10 @@ def entfernung_fehlerhaften_eintrittsdatum():
     counter = 1
     for mitgliedschaft in mitgliedschaften: 
         m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name) 
-        m.eintrittsdatum = None
+        m.eintrittsdatum = ''
         m.bezahltes_mitgliedschaftsjahr = 0
         m.save()
-        m.add_comment('Comment', text='Korrektur/Löschung fehlerhafter Beitrittsdaten gemäss: https://wiki.mieterverband.ch/x/DABABQ')
-        # ~ send_mvm_to_sp(m, True) 
+        
         print("{0} von {1}".format(counter, len(mitgliedschaften))) 
         counter += 1
         if submit_counter == 100:

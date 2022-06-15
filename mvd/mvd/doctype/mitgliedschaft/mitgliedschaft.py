@@ -70,11 +70,6 @@ class Mitgliedschaft(Document):
                 if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
                     if self.kunde_mitglied:
                         self.zuzug_massenlauf_korrespondenz()
-                        
-            
-            # eintrittsdatum fix
-            if self.eintritt and not self.eintrittsdatum:
-                self.eintrittsdatum = self.eintritt
             
             # setze CB "Aktive Mitgliedschaft"
             if self.status_c not in ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv'):
@@ -1610,6 +1605,11 @@ def get_uebersicht_html(name):
                                             AND `due_date` >= CURDATE()
                                             AND `docstatus` = 1""".format(rechnungs_kunde=rechnungs_kunde), as_dict=True)[0].open_amount
         
+        if mitgliedschaft.status_c not in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
+            eintritt = mitgliedschaft.eintrittsdatum
+        else:
+            eintritt = mitgliedschaft.eintritt if mitgliedschaft.eintritt else mitgliedschaft.creation
+        
         data = {
             'kunde_mitglied': kunde_mitglied,
             'kontakt_mitglied': kontakt_mitglied,
@@ -1623,7 +1623,7 @@ def get_uebersicht_html(name):
             'col_qty': int(12 / col_qty),
             'allgemein': {
                 'status': mitgliedschaft.status_c,
-                'eintritt': mitgliedschaft.eintrittsdatum,
+                'eintritt': eintritt,
                 'austritt': mitgliedschaft.austritt,
                 'ampelfarbe': mitgliedschaft.ampel_farbe or 'ampelrot',
                 'ueberfaellige_rechnungen': ueberfaellige_rechnungen,
@@ -1658,10 +1658,15 @@ def get_uebersicht_html(name):
         rechnungsempfaenger = False
         rechnungsadresse = False
         
+        if mitgliedschaft.status_c not in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
+            eintritt = mitgliedschaft.eintrittsdatum
+        else:
+            eintritt = mitgliedschaft.eintritt if mitgliedschaft.eintritt else mitgliedschaft.creation
+        
         allgemein = {
             'status': mitgliedschaft.status_c,
             'mitgliedtyp': mitgliedschaft.mitgliedtyp_c,
-            'eintritt': mitgliedschaft.eintrittsdatum,
+            'eintritt': eintritt,
             'kuendigung': mitgliedschaft.kuendigung or False,
             'language': mitgliedschaft.language or 'de',
             'sektion': mitgliedschaft.sektion_id
@@ -2176,6 +2181,7 @@ def mvm_update(mitgliedschaft, kwargs):
     missing_keys = check_main_keys(kwargs)
     if not missing_keys:
         try:
+            # allgemeine Daten
             sektion_id = get_sektion_id(kwargs['sektionCode'])
             if not sektion_id:
                 return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['sektionCode']), daten=kwargs)
@@ -2188,11 +2194,6 @@ def mvm_update(mitgliedschaft, kwargs):
             if not mitgliedtyp_c:
                 return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']), daten=kwargs)
             
-            if kwargs['eintrittsdatum'] and status_c not in ('Interessent*in', 'Anmeldung', 'Online-Anmeldung'):
-                eintritt = kwargs['eintrittsdatum'].split("T")[0]
-            else:
-                eintritt = None
-            
             if kwargs['neueSektionCode']:
                 wegzug_zu = get_sektion_id(kwargs['neueSektionCode'])
             else:
@@ -2203,30 +2204,12 @@ def mvm_update(mitgliedschaft, kwargs):
             else:
                 zuzug_von = ''
             
-            if kwargs['zuzugsdatum']:
-                zuzug = kwargs['zuzugsdatum'].split("T")[0]
-            else:
-                zuzug = ''
-            
-            if kwargs['wegzugsdatum']:
-                wegzug = kwargs['wegzugsdatum'].split("T")[0]
-            else:
-                wegzug = ''
-            
-            if kwargs['austrittsdatum']:
-                austritt = kwargs['austrittsdatum'].split("T")[0]
-            else:
-                austritt = ''
-            
-            if kwargs['kuendigungPer']:
-                kuendigung = kwargs['kuendigungPer'].split("T")[0]
-            else:
-                kuendigung = ''
-            
             if kwargs['zeitungAlsPdf']:
                 m_und_w_pdf = 1
             else:
                 m_und_w_pdf = 0
+            
+            m_und_w = kwargs['anzahlZeitungen']
             
             if kwargs['isKollektiv']:
                 ist_kollektiv = 1
@@ -2248,6 +2231,53 @@ def mvm_update(mitgliedschaft, kwargs):
             else:
                 geschenkunterlagen_an_schenker = '0'
             
+            region = ''
+            if kwargs['regionCode']:
+                regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
+                if len(regionen) > 0:
+                    region = regionen[0].name
+            
+            region_manuell = 1 if kwargs['regionManuell'] else '0'
+            
+            mitglied_nr = kwargs['mitgliedNummer']
+            
+            mitglied_id = kwargs['mitgliedId']
+            
+            inkl_hv = get_inkl_hv(kwargs["jahrBezahltHaftpflicht"])
+            
+            wichtig = kwargs['bemerkungen'] if kwargs['bemerkungen'] else ''
+            
+            language = get_sprache_abk(language=kwargs['sprache']) if kwargs['sprache'] else 'de'
+            # -----------------------------------------------------------------
+            
+            # Datums Angaben
+            if kwargs['eintrittsdatum'] and status_c not in ('Interessent*in', 'Anmeldung', 'Online-Anmeldung'):
+                eintritt = kwargs['eintrittsdatum'].split("T")[0]
+            else:
+                eintritt = None
+            
+            if kwargs['zuzugsdatum']:
+                zuzug = kwargs['zuzugsdatum'].split("T")[0]
+            else:
+                zuzug = ''
+            
+            if kwargs['wegzugsdatum']:
+                wegzug = kwargs['wegzugsdatum'].split("T")[0]
+            else:
+                wegzug = ''
+            
+            if kwargs['austrittsdatum']:
+                austritt = kwargs['austrittsdatum'].split("T")[0]
+            else:
+                austritt = ''
+            
+            if kwargs['kuendigungPer']:
+                kuendigung = kwargs['kuendigungPer'].split("T")[0]
+            else:
+                kuendigung = ''
+            # -----------------------------------------------------------------
+            
+            # Zahlungs-Daten (Mitgliedschaft, HV, Datatrans)
             if kwargs['datumBezahltHaftpflicht']:
                 datum_hv_zahlung = kwargs['datumBezahltHaftpflicht'].split("T")[0]
             else:
@@ -2257,6 +2287,8 @@ def mvm_update(mitgliedschaft, kwargs):
                 online_haftpflicht = kwargs['onlineHaftpflicht']
             else:
                 online_haftpflicht = None
+            
+            zahlung_hv = int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0
             
             if kwargs['onlineGutschrift']:
                 online_gutschrift = kwargs['onlineGutschrift']
@@ -2288,23 +2320,23 @@ def mvm_update(mitgliedschaft, kwargs):
             else:
                 online_payment_id = None
             
-            region = ''
-            if kwargs['regionCode']:
-                regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
-                if len(regionen) > 0:
-                    region = regionen[0].name
+            bezahltes_mitgliedschaftsjahr = int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0
             
-            mitgliedschaft.mitglied_nr = kwargs['mitgliedNummer']
+            naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
+            # -----------------------------------------------------------------
+            
+            
+            mitgliedschaft.mitglied_nr = mitglied_nr
             mitgliedschaft.sektion_id = sektion_id
             mitgliedschaft.region = region
-            mitgliedschaft.region_manuell = 1 if kwargs['regionManuell'] else '0'
+            mitgliedschaft.region_manuell = region_manuell
             mitgliedschaft.status_c = status_c
-            mitgliedschaft.mitglied_id = kwargs['mitgliedId']
+            mitgliedschaft.mitglied_id = mitglied_id
             mitgliedschaft.mitgliedtyp_c = mitgliedtyp_c
-            mitgliedschaft.inkl_hv = get_inkl_hv(kwargs["jahrBezahltHaftpflicht"])
-            mitgliedschaft.m_und_w = kwargs['anzahlZeitungen']
+            mitgliedschaft.inkl_hv = inkl_hv
+            mitgliedschaft.m_und_w = m_und_w
             mitgliedschaft.m_und_w_pdf = m_und_w_pdf
-            mitgliedschaft.wichtig = kwargs['bemerkungen'] if kwargs['bemerkungen'] else ''
+            mitgliedschaft.wichtig = wichtig
             mitgliedschaft.eintrittsdatum = eintritt
             mitgliedschaft.zuzug = zuzug
             mitgliedschaft.zuzug_von = zuzug_von
@@ -2312,11 +2344,11 @@ def mvm_update(mitgliedschaft, kwargs):
             mitgliedschaft.wegzug_zu = wegzug_zu
             mitgliedschaft.austritt = austritt
             mitgliedschaft.kuendigung = kuendigung
-            mitgliedschaft.zahlung_hv = int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0
-            mitgliedschaft.bezahltes_mitgliedschaftsjahr = int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0
-            mitgliedschaft.naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
+            mitgliedschaft.zahlung_hv = zahlung_hv
+            mitgliedschaft.bezahltes_mitgliedschaftsjahr = bezahltes_mitgliedschaftsjahr
+            mitgliedschaft.naechstes_jahr_geschuldet = naechstes_jahr_geschuldet
             mitgliedschaft.validierung_notwendig = 0
-            mitgliedschaft.language = get_sprache_abk(language=kwargs['sprache']) if kwargs['sprache'] else 'de'
+            mitgliedschaft.language = language
             mitgliedschaft.ist_kollektiv = ist_kollektiv
             mitgliedschaft.ist_geschenkmitgliedschaft = ist_geschenkmitgliedschaft
             mitgliedschaft.ist_einmalige_schenkung = ist_einmalige_schenkung
@@ -2373,6 +2405,7 @@ def mvm_neuanlage(kwargs):
     missing_keys = check_main_keys(kwargs)
     if not missing_keys:
         try:
+            # allgemeine Daten
             sektion_id = get_sektion_id(kwargs['sektionCode'])
             if not sektion_id:
                 return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['sektionCode']), daten=kwargs)
@@ -2394,31 +2427,6 @@ def mvm_neuanlage(kwargs):
             mitgliedtyp_c = get_mitgliedtyp_c(kwargs['typ'])
             if not mitgliedtyp_c:
                 return raise_xxx(404, 'Not Found', 'typ ({mitgliedtyp_c}) not found'.format(mitgliedtyp_c=kwargs['Typ']), daten=kwargs)
-            
-            if kwargs['eintrittsdatum'] and status_c not in ('Interessent*in', 'Anmeldung', 'Online-Anmeldung'):
-                eintritt = kwargs['eintrittsdatum'].split("T")[0]
-            else:
-                eintritt = None
-            
-            if kwargs['zuzugsdatum']:
-                zuzug = kwargs['zuzugsdatum'].split("T")[0]
-            else:
-                zuzug = ''
-            
-            if kwargs['wegzugsdatum']:
-                wegzug = kwargs['wegzugsdatum'].split("T")[0]
-            else:
-                wegzug = ''
-            
-            if kwargs['austrittsdatum']:
-                austritt = kwargs['austrittsdatum'].split("T")[0]
-            else:
-                austritt = ''
-            
-            if kwargs['kuendigungPer']:
-                kuendigung = kwargs['kuendigungPer'].split("T")[0]
-            else:
-                kuendigung = ''
             
             if kwargs['zeitungAlsPdf']:
                 m_und_w_pdf = 1
@@ -2444,6 +2452,62 @@ def mvm_neuanlage(kwargs):
                 geschenkunterlagen_an_schenker = 1
             else:
                 geschenkunterlagen_an_schenker = '0'
+            
+            region = ''
+            if kwargs['regionCode']:
+                regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
+                if len(regionen) > 0:
+                    region = regionen[0].name
+            
+            mitglied_nr = str(kwargs['mitgliedNummer'])
+            
+            mitglied_id = str(kwargs['mitgliedId'])
+            
+            region_manuell = 1 if kwargs['regionManuell'] else '0'
+            
+            inkl_hv = get_inkl_hv(kwargs["jahrBezahltHaftpflicht"])
+            
+            m_und_w = kwargs['anzahlZeitungen']
+            
+            wichtig = str(kwargs['bemerkungen']) if kwargs['bemerkungen'] else ''
+            
+            language = get_sprache_abk(language=kwargs['sprache'])
+            # -----------------------------------------------------------------
+            
+            # Datums Angaben
+            if kwargs['eintrittsdatum'] and status_c not in ('Interessent*in', 'Anmeldung', 'Online-Anmeldung'):
+                eintritt = kwargs['eintrittsdatum'].split("T")[0]
+            else:
+                eintritt = None
+            
+            if kwargs['zuzugsdatum']:
+                zuzug = kwargs['zuzugsdatum'].split("T")[0]
+            else:
+                zuzug = ''
+            
+            if kwargs['wegzugsdatum']:
+                wegzug = kwargs['wegzugsdatum'].split("T")[0]
+            else:
+                wegzug = ''
+            
+            if kwargs['austrittsdatum']:
+                austritt = kwargs['austrittsdatum'].split("T")[0]
+            else:
+                austritt = ''
+            
+            if kwargs['kuendigungPer']:
+                kuendigung = kwargs['kuendigungPer'].split("T")[0]
+            else:
+                kuendigung = ''
+            # -----------------------------------------------------------------
+            
+            # Zahlungs-Daten (Mitgliedschaft, HV, Datatrans)
+            
+            zahlung_hv = int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0
+            
+            bezahltes_mitgliedschaftsjahr = int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0
+            
+            naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
             
             if kwargs['datumBezahltHaftpflicht']:
                 datum_hv_zahlung = kwargs['datumBezahltHaftpflicht'].split("T")[0]
@@ -2490,25 +2554,21 @@ def mvm_neuanlage(kwargs):
             else:
                 online_payment_id = None
             
-            region = ''
-            if kwargs['regionCode']:
-                regionen = frappe.db.sql("""SELECT `name` FROM `tabRegion` WHERE `region_c` = '{region}'""".format(region=kwargs['regionCode']), as_dict=True)
-                if len(regionen) > 0:
-                    region = regionen[0].name
+            
             
             new_mitgliedschaft = frappe.get_doc({
                 'doctype': 'Mitgliedschaft',
-                'mitglied_nr': str(kwargs['mitgliedNummer']),
+                'mitglied_nr': mitglied_nr,
                 'sektion_id': sektion_id,
                 'region': region,
-                'region_manuell': 1 if kwargs['regionManuell'] else '0',
+                'region_manuell': region_manuell,
                 'status_c': status_c,
-                'mitglied_id': str(kwargs['mitgliedId']),
+                'mitglied_id': mitglied_id,
                 'mitgliedtyp_c': mitgliedtyp_c,
-                'inkl_hv': get_inkl_hv(kwargs["jahrBezahltHaftpflicht"]),
-                'm_und_w': kwargs['anzahlZeitungen'],
+                'inkl_hv': inkl_hv,
+                'm_und_w': m_und_w,
                 'm_und_w_pdf': m_und_w_pdf,
-                'wichtig': str(kwargs['bemerkungen']) if kwargs['bemerkungen'] else '',
+                'wichtig': wichtig,
                 'eintrittsdatum': eintritt,
                 'zuzug': zuzug,
                 'zuzug_von': zuzug_von,
@@ -2516,11 +2576,11 @@ def mvm_neuanlage(kwargs):
                 'wegzug_zu': wegzug_zu,
                 'austritt': austritt,
                 'kuendigung': kuendigung,
-                'zahlung_hv': int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0,
-                'bezahltes_mitgliedschaftsjahr': int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0,
-                'naechstes_jahr_geschuldet': 1 if kwargs['naechstesJahrGeschuldet'] else '0',
+                'zahlung_hv': zahlung_hv,
+                'bezahltes_mitgliedschaftsjahr': bezahltes_mitgliedschaftsjahr,
+                'naechstes_jahr_geschuldet': naechstes_jahr_geschuldet,
                 'validierung_notwendig': 0,
-                'language': get_sprache_abk(language=kwargs['sprache']),
+                'language': language,
                 'ist_kollektiv': ist_kollektiv,
                 'ist_geschenkmitgliedschaft': ist_geschenkmitgliedschaft,
                 'ist_einmalige_schenkung': ist_einmalige_schenkung,
