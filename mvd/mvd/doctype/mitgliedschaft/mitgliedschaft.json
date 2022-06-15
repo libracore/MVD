@@ -171,7 +171,9 @@
   "letzte_bearbeitung_von",
   "status_vor_onl_mutation",
   "search_hash",
-  "aktive_mitgliedschaft"
+  "aktive_mitgliedschaft",
+  "m_w_retouren_offen",
+  "m_w_retouren_in_bearbeitung"
  ],
  "fields": [
   {
@@ -1014,8 +1016,7 @@
    "fieldname": "region",
    "fieldtype": "Link",
    "label": "Region",
-   "options": "Region",
-   "read_only": 1
+   "options": "Region"
   },
   {
    "default": "0",
@@ -1174,10 +1175,22 @@
    "fieldname": "mahnstopp",
    "fieldtype": "Date",
    "label": "Von Mahnlauf ausschliessen bis"
+  },
+  {
+   "default": "0",
+   "fieldname": "m_w_retouren_offen",
+   "fieldtype": "Check",
+   "label": "M+W Retoure(n) offen"
+  },
+  {
+   "default": "0",
+   "fieldname": "m_w_retouren_in_bearbeitung",
+   "fieldtype": "Check",
+   "label": "M+W Retoure(n) in Bearbeitung"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-05-20 09:54:08.441463",
+ "modified": "2022-06-15 17:55:34.779183",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from mvd.mvd.doctype.retouren_mw.retouren_mw import create_post_retouren
 
 # Post Retouren
 def _post_retouren(data):
@@ -16,7 +17,11 @@ def _post_retouren(data):
                 missing_keys = check_main_keys(data, 'retouren')
                 if not missing_keys:
                     # hier würde ich nun die Meldungen verarbeiten
-                    return raise_200()
+                    job = create_post_retouren(data)
+                    if job == 1:
+                        return raise_200()
+                    else:
+                        return raise_xxx(500, 'Internal Server Error', '{error}'.format(error=job), data)
                 else:
                     return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=missing_keys), data)
         else:
