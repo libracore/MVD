@@ -1291,3 +1291,65 @@ def import_region_plz(site_name, file_name, limit=False):
     if error_logs:
         print("Errors detected, see error log")
     print("Done")
+    
+# --------------------------------------------------------------
+# Entfernung fehlerhaften Eintrittsdatum
+# --------------------------------------------------------------
+def entfernung_fehlerhaften_eintrittsdatum():
+    '''
+        Example:
+        sudo bench --site [site_name] execute mvd.mvd.data_import.importer.entfernung_fehlerhaften_eintrittsdatum
+    '''
+    
+    
+    mitgliedschaften = frappe.db.sql("""SELECT DISTINCT
+                                            `name`
+                                        FROM `tabMitgliedschaft`
+                                        WHERE `eintrittsdatum` IS NOT NULL
+                                        AND `status_c` IN ('Anmeldung', 'Online-Anmeldung', 'Interessent*in')""", as_dict=True)
+    submit_counter = 1
+    counter = 1
+    for mitgliedschaft in mitgliedschaften: 
+        m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name) 
+        m.eintrittsdatum = ''
+        m.bezahltes_mitgliedschaftsjahr = 0
+        m.save()
+        
+        print("{0} von {1}".format(counter, len(mitgliedschaften))) 
+        counter += 1
+        if submit_counter == 100:
+            frappe.db.commit()
+            submit_counter = 1
+        else:
+            submit_counter += 1
+    frappe.db.commit()
+
+# --------------------------------------------------------------
+# Nachsendung Auschluss ohne Eintrittsdatum an SP
+# --------------------------------------------------------------
+def nachsendung_auschluss_ohne_eintrittsdatum_an_sp():
+    '''
+        Example:
+        sudo bench --site [site_name] execute mvd.mvd.data_import.importer.nachsendung_auschluss_ohne_eintrittsdatum_an_sp
+    '''
+    
+    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import send_mvm_to_sp
+    
+    mitgliedschaften = frappe.db.sql("""SELECT DISTINCT
+                                            `name`
+                                        FROM `tabMitgliedschaft`
+                                        WHERE `status_c` = 'Inaktiv'
+                                        AND `eintrittsdatum` IS NULL""", as_dict=True)
+    submit_counter = 1
+    counter = 1
+    for mitgliedschaft in mitgliedschaften: 
+        m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name) 
+        send_mvm_to_sp(m, True) 
+        print("{0} von {1}".format(counter, len(mitgliedschaften))) 
+        counter += 1
+        if submit_counter == 100:
+            frappe.db.commit()
+            submit_counter = 1
+        else:
+            submit_counter += 1
+    frappe.db.commit()
