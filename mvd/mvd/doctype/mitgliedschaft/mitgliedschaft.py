@@ -2383,8 +2383,8 @@ def mvm_update(mitgliedschaft, kwargs):
                         mitgliedschaft.status_c = 'Online-Mutation'
                     
             
-            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
-            if mitgliedschaft.zuzug_von == 'MVZH' and mitgliedschaft.status_c == 'Zuzug':
+            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH und MVSO
+            if mitgliedschaft.zuzug_von in ('MVZH', 'MVSO') and mitgliedschaft.status_c == 'Zuzug':
                 if not mitgliedschaft.zuzug:
                     mitgliedschaft.zuzug = today()
             
@@ -2616,8 +2616,8 @@ def mvm_neuanlage(kwargs):
                         new_mitgliedschaft.status_vor_onl_mutation = status_c
                         new_mitgliedschaft.status_c = 'Online-Mutation'
             
-            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
-            if new_mitgliedschaft.zuzug_von == 'MVZH' and new_mitgliedschaft.status_c == 'Zuzug':
+            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH und MVSO
+            if new_mitgliedschaft.zuzug_von in ('MVZH', 'MVSO') and new_mitgliedschaft.status_c == 'Zuzug':
                 if not new_mitgliedschaft.zuzug:
                     new_mitgliedschaft.zuzug = today()
             
