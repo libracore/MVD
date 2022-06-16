@@ -172,6 +172,8 @@
   "status_vor_onl_mutation",
   "search_hash",
   "aktive_mitgliedschaft",
+  "m_w_retouren_offen",
+  "m_w_retouren_in_bearbeitung",
   "zuzug_durch_sp"
  ],
  "fields": [
@@ -1175,6 +1177,18 @@
    "fieldname": "mahnstopp",
    "fieldtype": "Date",
    "label": "Von Mahnlauf ausschliessen bis"
+  },
+  {
+   "default": "0",
+   "fieldname": "m_w_retouren_offen",
+   "fieldtype": "Check",
+   "label": "M+W Retoure(n) offen"
+  },
+  {
+   "default": "0",
+   "fieldname": "m_w_retouren_in_bearbeitung",
+   "fieldtype": "Check",
+   "label": "M+W Retoure(n) in Bearbeitung"
   },
   {
    "default": "0",
