@@ -171,7 +171,8 @@
   "letzte_bearbeitung_von",
   "status_vor_onl_mutation",
   "search_hash",
-  "aktive_mitgliedschaft"
+  "aktive_mitgliedschaft",
+  "zuzug_durch_sp"
  ],
  "fields": [
   {
@@ -1174,10 +1175,16 @@
    "fieldname": "mahnstopp",
    "fieldtype": "Date",
    "label": "Von Mahnlauf ausschliessen bis"
+  },
+  {
+   "default": "0",
+   "fieldname": "zuzug_durch_sp",
+   "fieldtype": "Check",
+   "label": "Zuzug durch SP"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-05-20 09:54:08.441463",
+ "modified": "2022-06-16 13:14:57.384518",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
