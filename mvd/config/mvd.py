@@ -104,5 +104,23 @@ def get_data():
                     "description": _("Regions Einstellungen")
                 }
             ]
+        },
+        {
+            "label": _("Adresspflege"),
+            "icon": "fa fa-cog",
+            "items": [
+                {
+                    "type": "doctype",
+                    "name": "Retouren MW",
+                    "label": _("Retouren MW"),
+                    "description": _("Retouren MW")
+                },
+                {
+                    "type": "doctype",
+                    "name": "MW",
+                    "label": _("MW"),
+                    "description": _("MW")
+                }
+            ]
         }
     ]

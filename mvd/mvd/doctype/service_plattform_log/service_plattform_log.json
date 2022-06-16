@@ -7,7 +7,9 @@
   "mv_mitgliedschaft",
   "json",
   "neuanlage",
-  "update"
+  "update",
+  "retoure",
+  "response"
  ],
  "fields": [
   {
@@ -36,9 +38,23 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Update"
+  },
+  {
+   "default": "0",
+   "fieldname": "retoure",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Retoure"
+  },
+  {
+   "default": "0",
+   "fieldname": "response",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Response"
   }
  ],
- "modified": "2022-06-01 15:12:34.921291",
+ "modified": "2022-06-07 13:01:45.784222",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform Log",

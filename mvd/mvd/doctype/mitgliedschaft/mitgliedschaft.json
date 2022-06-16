@@ -173,6 +173,8 @@
   "search_hash",
   "aktive_mitgliedschaft",
   "zuzug_durch_sp"
+  "m_w_retouren_offen",
+  "m_w_retouren_in_bearbeitung"
  ],
  "fields": [
   {
@@ -1015,8 +1017,7 @@
    "fieldname": "region",
    "fieldtype": "Link",
    "label": "Region",
-   "options": "Region",
-   "read_only": 1
+   "options": "Region"
   },
   {
    "default": "0",
@@ -1178,9 +1179,21 @@
   },
   {
    "default": "0",
+   "fieldname": "m_w_retouren_in_bearbeitung",
+   "fieldtype": "Check",
+   "label": "M+W Retoure(n) in Bearbeitung"
+  },
+  {
+   "default": "0",
    "fieldname": "zuzug_durch_sp",
    "fieldtype": "Check",
    "label": "Zuzug durch SP"
+  },
+  {
+   "default": "0",
+   "fieldname": "m_w_retouren_offen",
+   "fieldtype": "Check",
+   "label": "M+W Retoure(n) offen"
   }
  ],
  "icon": "fa fa-tag",
