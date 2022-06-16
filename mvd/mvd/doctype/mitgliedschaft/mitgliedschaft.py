@@ -65,11 +65,18 @@ class Mitgliedschaft(Document):
             # ampelfarbe
             self.ampel_farbe = get_ampelfarbe(self)
             
-            # Zuzugs-Korrespondenz für Massenlauf
+            # Hotfix Zuzugs-Korrespondenz
+            # mit Massenlauf-Vormerkung
             if self.zuzug_von and int(self.zuzug_massendruck) == 1:
                 if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
                     if self.kunde_mitglied:
                         self.zuzug_massenlauf_korrespondenz()
+                        self.zuzug_durch_sp = 0
+            # ohne Massenlauf-Vormerkung
+            elif self.zuzug_von and int(self.zuzug_durch_sp) == 1:
+                if self.kunde_mitglied:
+                    self.zuzug_massenlauf_korrespondenz()
+                    self.zuzug_durch_sp = 0
             
             # setze CB "Aktive Mitgliedschaft"
             if self.status_c not in ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv'):
@@ -2620,6 +2627,12 @@ def mvm_neuanlage(kwargs):
             if new_mitgliedschaft.zuzug_von in ('MVZH', 'MVSO') and new_mitgliedschaft.status_c == 'Zuzug':
                 if not new_mitgliedschaft.zuzug:
                     new_mitgliedschaft.zuzug = today()
+            
+            # Hotfix bei (libracore/libracore) Sektionswechsel gehandelt durch die SP
+            if new_mitgliedschaft.status_c == 'Zuzug':
+                if not new_mitgliedschaft.zuzug:
+                    new_mitgliedschaft.zuzug = today()
+                new_mitgliedschaft.zuzug_durch_sp = 1
             
             new_mitgliedschaft.insert()
             frappe.db.commit()
