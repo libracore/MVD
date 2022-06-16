@@ -173,7 +173,8 @@
   "search_hash",
   "aktive_mitgliedschaft",
   "m_w_retouren_offen",
-  "m_w_retouren_in_bearbeitung"
+  "m_w_retouren_in_bearbeitung",
+  "zuzug_durch_sp"
  ],
  "fields": [
   {
@@ -1187,6 +1188,12 @@
    "fieldname": "m_w_retouren_in_bearbeitung",
    "fieldtype": "Check",
    "label": "M+W Retoure(n) in Bearbeitung"
+  },
+  {
+   "default": "0",
+   "fieldname": "zuzug_durch_sp",
+   "fieldtype": "Check",
+   "label": "Zuzug durch SP"
   }
  ],
  "icon": "fa fa-tag",
