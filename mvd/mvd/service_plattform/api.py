@@ -12,6 +12,8 @@ from datetime import datetime
 import random
 import string
 from frappe import _
+from mvd.mvd.utils.post import _post_retouren
+from mvd.mvd.utils.post import _post_responses
 
 AUTH0_SCOPE = "Auth0"
 SVCPF_SCOPE = "ServicePF"
@@ -381,3 +383,14 @@ def assign_roles(user, roles, debug=False):
         if debug:
             print("Error: {0}".format(err))
         frappe.log_error("{0}".format(err), 'assign role to auth0 failed')
+
+#
+# Adressenabgleich
+#
+@frappe.whitelist()
+def post_retouren(**data):
+    return _post_retouren(data)
+
+@frappe.whitelist()
+def post_responses(**data):
+    return _post_responses(data)

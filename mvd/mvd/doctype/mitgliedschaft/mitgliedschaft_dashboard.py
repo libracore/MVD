@@ -28,6 +28,10 @@ def get_data():
             {
                 'label': _('Service Plattform'),
                 'items': ['Service Platform Queue', 'Service Plattform Log']
+            },
+            {
+                'label': _('Adresspflege'),
+                'items': ['Retouren MW']
             }
         ]
     }

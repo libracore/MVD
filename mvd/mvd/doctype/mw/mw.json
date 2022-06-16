@@ -1,0 +1,86 @@
+{
+ "creation": "2022-06-15 18:08:18.243034",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "ausgabe_lang",
+  "ausgabe_kurz",
+  "laufnummer",
+  "datum_input",
+  "datum_inserate_und_wechselseiten",
+  "datum_adressexport",
+  "datum_druck",
+  "datum_verteilung",
+  "url_online"
+ ],
+ "fields": [
+  {
+   "fieldname": "ausgabe_lang",
+   "fieldtype": "Data",
+   "label": "Ausgabe lang"
+  },
+  {
+   "fieldname": "ausgabe_kurz",
+   "fieldtype": "Data",
+   "label": "Ausgabe kurz"
+  },
+  {
+   "fieldname": "laufnummer",
+   "fieldtype": "Int",
+   "label": "Laufnummer"
+  },
+  {
+   "fieldname": "datum_input",
+   "fieldtype": "Date",
+   "label": "Datum Input"
+  },
+  {
+   "fieldname": "datum_inserate_und_wechselseiten",
+   "fieldtype": "Date",
+   "label": "Datum Inserate und Wechselseiten"
+  },
+  {
+   "fieldname": "datum_adressexport",
+   "fieldtype": "Date",
+   "label": "Datum Adressexport"
+  },
+  {
+   "fieldname": "datum_druck",
+   "fieldtype": "Date",
+   "label": "Datum Druck"
+  },
+  {
+   "fieldname": "datum_verteilung",
+   "fieldtype": "Date",
+   "label": "Datum Vereilung"
+  },
+  {
+   "fieldname": "url_online",
+   "fieldtype": "Data",
+   "label": "URL Online"
+  }
+ ],
+ "modified": "2022-06-15 18:08:18.243034",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "MW",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
