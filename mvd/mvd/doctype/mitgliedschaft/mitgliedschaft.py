@@ -3583,3 +3583,12 @@ def create_sp_log(mitgliedschaft, neuanlage, kwargs):
     }).insert(ignore_permissions=True)
     
     return
+
+@frappe.whitelist()
+def get_returen_dashboard(mitgliedschaft):
+    anz_offen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabRetouren MW` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Offen'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)[0].qty
+    anz_in_bearbeitung = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabRetouren MW` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'In Bearbeitung'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)[0].qty
+    return {
+        'anz_offen': anz_offen,
+        'anz_in_bearbeitung': anz_in_bearbeitung
+    }

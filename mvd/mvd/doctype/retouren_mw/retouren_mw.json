@@ -1,0 +1,139 @@
+{
+ "allow_copy": 1,
+ "autoname": "format:Ret-MW-{ausgabe}-{###}",
+ "creation": "2022-06-15 16:14:34.776701",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_allgemein",
+  "status",
+  "ausgabe",
+  "section_verknuepfung",
+  "mv_mitgliedschaft",
+  "sektion_id",
+  "section_api_daten",
+  "legacy_kategorie_code",
+  "legacy_notiz",
+  "grund_code",
+  "grund_bezeichnung",
+  "sendungsnummer",
+  "retoure_mw_sequence_number",
+  "retoure_dmc",
+  "retoure_sendungsbild",
+  "datum_erfasst_post"
+ ],
+ "fields": [
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Offen\nIn Bearbeitung\nAbgeschlossen",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ausgabe",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Ausgabe",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "section_verknuepfung",
+   "fieldtype": "Section Break",
+   "label": "Verkn\u00fcpfungen"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Mitgliedschaft",
+   "options": "Mitgliedschaft",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_api_daten",
+   "fieldtype": "Section Break",
+   "label": "API Daten"
+  },
+  {
+   "fieldname": "legacy_kategorie_code",
+   "fieldtype": "Data",
+   "label": "legacyKategorieCode"
+  },
+  {
+   "fieldname": "legacy_notiz",
+   "fieldtype": "Data",
+   "label": "legacyNotiz"
+  },
+  {
+   "fieldname": "grund_code",
+   "fieldtype": "Data",
+   "label": "grundCode"
+  },
+  {
+   "fieldname": "grund_bezeichnung",
+   "fieldtype": "Data",
+   "label": "grundBezeichnung"
+  },
+  {
+   "fieldname": "sendungsnummer",
+   "fieldtype": "Data",
+   "label": "sendungsnummer"
+  },
+  {
+   "fieldname": "retoure_mw_sequence_number",
+   "fieldtype": "Data",
+   "label": "retoureMuWSequenceNumber"
+  },
+  {
+   "fieldname": "retoure_dmc",
+   "fieldtype": "Data",
+   "label": "retoureDMC"
+  },
+  {
+   "fieldname": "retoure_sendungsbild",
+   "fieldtype": "Data",
+   "label": "retoureSendungsbild"
+  },
+  {
+   "fieldname": "datum_erfasst_post",
+   "fieldtype": "Date",
+   "label": "datumErfasstPost"
+  }
+ ],
+ "modified": "2022-06-15 18:04:41.136603",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Retouren MW",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
