@@ -579,7 +579,6 @@ def get_adressblock(mitgliedschaft):
         adressblock += mitgliedschaft.zusatz_adresse or ''
         adressblock += '\n'
     
-    # ~ adressblock += mitgliedschaft.strasse or ''
     if mitgliedschaft.strasse and mitgliedschaft.strasse != '':
         adressblock += mitgliedschaft.strasse
         if mitgliedschaft.nummer:
@@ -1587,8 +1586,6 @@ def get_uebersicht_html(name):
         
         if mitgliedschaft.mitgliedtyp_c == 'Privat':
             if mitgliedschaft.zahlung_hv:
-                # im moment umgeschrieben von Datum auf Jahreszahl, muss nach dem Update der API wieder angepasst werden!
-                # hv_status = 'HV bezahlt am {0}'.format(frappe.utils.get_datetime(mitgliedschaft.zahlung_hv).strftime('%d.%m.%Y'))
                 hv_status = 'HV bezahlt im {0}'.format(mitgliedschaft.zahlung_hv)
                 if mitgliedschaft.datum_hv_zahlung:
                     hv_status = 'HV bezahlt am {0}'.format(frappe.utils.get_datetime(mitgliedschaft.datum_hv_zahlung).strftime('%d.%m.%Y'))
@@ -2019,9 +2016,6 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, sub
         # prüfe Beitrittsgebühr
         if int(mitgliedschaft.zahlung_mitgliedschaft) == 0 and sektion.mitgliedschafts_artikel_beitritt_geschaeft:
             item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt_geschaeft,"qty": 1, "cost_center": company.cost_center})
-    
-    # ~ if mitgliedschaft.mitgliedtyp_c == 'Kollektiv':
-        # ~ item = [{"item_code": sektion.mitgliedschafts_artikel_kollektiv,"qty": 1}]
     
     if mitgliedschaft.status_c == 'Interessent*in':
         exclude_from_payment_reminder_until = '2099-12-31'
