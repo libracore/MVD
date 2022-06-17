@@ -6,7 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "sektion_id",
-  "kategorie"
+  "kategorie",
+  "disabled"
  ],
  "fields": [
   {
@@ -23,9 +24,15 @@
    "in_list_view": 1,
    "label": "Kategorie",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Deaktiviert"
   }
  ],
- "modified": "2022-02-23 10:26:25.031991",
+ "modified": "2022-06-17 11:40:21.632580",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Terminkategorie",
