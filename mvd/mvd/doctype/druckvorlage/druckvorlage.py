@@ -258,16 +258,20 @@ def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, redu
         return alle_druckvorlagen
 
 def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=False, fr=False):
+    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_anredekonvention
     try:
         mitgliedschaft.name
     except:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     
     key_words = [
-        {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede if not mahnung and not sinv else mitgliedschaft.rg_briefanrede},
+        {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft) if not mahnung and not sinv else mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)},
+        # ~ {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede if not mahnung and not sinv else mitgliedschaft.rg_briefanrede},
         {'key_word': '%%MIETGLIEDERNUMMER%%', 'value': mitgliedschaft.mitglied_nr},
-        {'key_word': '%%ANREDE BESCHENKTE%%', 'value': mitgliedschaft.briefanrede},
-        {'key_word': '%%ANREDE SCHENKENDE%%', 'value': mitgliedschaft.rg_briefanrede},
+        {'key_word': '%%ANREDE BESCHENKTE%%', 'value': mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft)},
+        # ~ {'key_word': '%%ANREDE BESCHENKTE%%', 'value': mitgliedschaft.briefanrede},
+        {'key_word': '%%ANREDE SCHENKENDE%%', 'value': mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)},
+        # ~ {'key_word': '%%ANREDE SCHENKENDE%%', 'value': mitgliedschaft.rg_briefanrede},
         {'key_word': '%%VOR- NACHNAME BESCHENKTE%%', 'value': " ".join((mitgliedschaft.vorname_1 or '', mitgliedschaft.nachname_1 or ''))},
         {'key_word': '%%VOR- NACHNAME SCHENKENDE%%', 'value': " ".join((mitgliedschaft.rg_vorname or '', mitgliedschaft.rg_nachname or ''))}
     ]

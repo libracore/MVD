@@ -180,7 +180,7 @@ class Mitgliedschaft(Document):
         mit_rechnung = False
         if self.bezahltes_mitgliedschaftsjahr < int(now().split("-")[0]):
             if self.naechstes_jahr_geschuldet == 1:
-                mit_rechnung = create_mitgliedschaftsrechnung(self.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=self.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=self.mitgliedtyp_c, reduzierte_mitgliedschaft=self.reduzierte_mitgliedschaft, language=self.language)['default_druckvorlage'])
+                mit_rechnung = create_mitgliedschaftsrechnung(self.name, mitgliedschaft_obj=self, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=self.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=self.mitgliedtyp_c, reduzierte_mitgliedschaft=self.reduzierte_mitgliedschaft, language=self.language)['default_druckvorlage'])
         
         
         if mit_rechnung:
@@ -1976,8 +1976,11 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         return 1
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False):
-    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False):
+    if not mitgliedschaft_obj:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+    else:
+        mitgliedschaft = mitgliedschaft_obj
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
     company = frappe.get_doc("Company", sektion.company)
     if not mitgliedschaft.rg_kunde:
