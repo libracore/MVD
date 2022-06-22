@@ -9,6 +9,7 @@
   "section_allgemein",
   "status",
   "ausgabe",
+  "adresse_geaendert",
   "section_verknuepfung",
   "mv_mitgliedschaft",
   "sektion_id",
@@ -113,9 +114,15 @@
    "fieldname": "datum_erfasst_post",
    "fieldtype": "Datetime",
    "label": "datumErfasstPost"
+  },
+  {
+   "default": "0",
+   "fieldname": "adresse_geaendert",
+   "fieldtype": "Check",
+   "label": "Adresse seit Export ge\u00e4ndert?"
   }
  ],
- "modified": "2022-06-22 15:05:18.355527",
+ "modified": "2022-06-22 15:38:47.608896",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren MW",
@@ -134,7 +141,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "ausgabe",
  "sort_order": "DESC",
  "track_changes": 1
 }

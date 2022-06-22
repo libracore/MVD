@@ -312,8 +312,28 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frappe.validated=false;
             }
         }
-        //cur_frm.set_value("sp_no_update", 0);
+        
         cur_frm.set_value("letzte_bearbeitung_von", 'User');
+        
+        // Abfrage ob M+W Retouren geschlossen werden sollen
+        if (cur_frm.doc.m_w_retouren_offen || cur_frm.doc.m_w_retouren_in_bearbeitung) {
+            frappe.confirm(
+                'Dieses Mitglied besitzt offene M+W Retouren. Möchten Sie diese als Abgeschlossen markieren?',
+                function(){
+                    // on yes
+                    frappe.call({
+                        method: "mvd.mvd.doctype.retouren_mw.retouren_mw.close_open_retouren",
+                        args:{
+                                'mitgliedschaft': cur_frm.doc.name
+                        },
+                        callback: function(r){}
+                    });
+                },
+                function(){
+                    // on no
+                }
+            )
+        }
     },
     plz: function(frm) {
         pincode_lookup(cur_frm.doc.plz, 'ort');
