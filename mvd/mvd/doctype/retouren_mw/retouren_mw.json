@@ -25,6 +25,7 @@
  ],
  "fields": [
   {
+   "default": "Offen",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -75,7 +76,7 @@
   },
   {
    "fieldname": "legacy_notiz",
-   "fieldtype": "Data",
+   "fieldtype": "Code",
    "label": "legacyNotiz"
   },
   {
@@ -105,7 +106,7 @@
   },
   {
    "fieldname": "retoure_sendungsbild",
-   "fieldtype": "Data",
+   "fieldtype": "Code",
    "label": "retoureSendungsbild"
   },
   {
@@ -114,7 +115,7 @@
    "label": "datumErfasstPost"
   }
  ],
- "modified": "2022-06-15 18:04:41.136603",
+ "modified": "2022-06-22 14:24:39.964716",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren MW",
