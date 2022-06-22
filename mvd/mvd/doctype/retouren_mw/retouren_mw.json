@@ -126,10 +126,11 @@
    "default": "0",
    "fieldname": "onload_frei",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "onload_frei"
   }
  ],
- "modified": "2022-06-22 16:50:44.648056",
+ "modified": "2022-06-22 16:56:36.527949",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren MW",
