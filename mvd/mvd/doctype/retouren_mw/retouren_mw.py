@@ -36,12 +36,13 @@ class RetourenMW(Document):
                 mitgliedschaft.m_w_retouren_in_bearbeitung = 0
                 mitgliedschaft.save()
     def onload(self):
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
-        adresse = frappe.get_doc("Address", mitgliedschaft.adresse_mitglied)
-        datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=self.retoure_mw_sequence_number), as_dict=True)[0].datum_adressexport
-        if getdate(adresse.creation) > getdate(datum_adressexport):
-            self.adresse_geaendert = 1
-        else: self.adresse_geaendert = 0
+        if int(self.onload_frei) == 1:
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
+            adresse = frappe.get_doc("Address", mitgliedschaft.adresse_mitglied)
+            datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=self.retoure_mw_sequence_number), as_dict=True)[0].datum_adressexport
+            if getdate(adresse.creation) > getdate(datum_adressexport):
+                self.adresse_geaendert = 1
+            else: self.adresse_geaendert = 0
 
 def create_post_retouren(data):
     try:
@@ -60,7 +61,8 @@ def create_post_retouren(data):
             'retoure_mw_sequence_number': data['retoureMuWSequenceNumber'],
             'retoure_dmc': data['retoureDMC'],
             'retoureSendungsbild': data['retoureSendungsbild'],
-            'datum_erfasst_post': data['datumErfasstPost']
+            'datum_erfasst_post': data['datumErfasstPost'],
+            'onload_frei': 1
         })
         
         post_retoure.insert(ignore_permissions=True)

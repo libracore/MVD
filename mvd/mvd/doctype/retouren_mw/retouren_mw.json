@@ -22,7 +22,8 @@
   "retoure_mw_sequence_number",
   "retoure_dmc",
   "retoure_sendungsbild",
-  "datum_erfasst_post"
+  "datum_erfasst_post",
+  "onload_frei"
  ],
  "fields": [
   {
@@ -120,9 +121,15 @@
    "fieldname": "adresse_geaendert",
    "fieldtype": "Check",
    "label": "Adresse seit Export ge\u00e4ndert?"
+  },
+  {
+   "default": "0",
+   "fieldname": "onload_frei",
+   "fieldtype": "Check",
+   "label": "onload_frei"
   }
  ],
- "modified": "2022-06-22 15:38:47.608896",
+ "modified": "2022-06-22 16:50:44.648056",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren MW",
