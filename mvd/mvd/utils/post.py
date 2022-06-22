@@ -72,7 +72,6 @@ def check_main_keys(data, typ):
     if typ == 'retouren':
         mandatory_keys = [
             'mitgliedId',
-            'sektionCode',
             'legacyKategorieCode',
             'legacyNotiz',
             'grundCode',
@@ -90,8 +89,8 @@ def check_main_keys(data, typ):
             'legacyResponseId',
             'legacyKategorieCode',
             'legacyNotiz',
-            'gültigVon',
-            'gültigBis',
+            'gueltigVon',
+            'gueltigBis',
             'erhalten',
             'qStat',
             'qStatBezeichnung',

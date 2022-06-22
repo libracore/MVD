@@ -111,11 +111,11 @@
   },
   {
    "fieldname": "datum_erfasst_post",
-   "fieldtype": "Date",
+   "fieldtype": "Datetime",
    "label": "datumErfasstPost"
   }
  ],
- "modified": "2022-06-22 14:24:39.964716",
+ "modified": "2022-06-22 15:05:18.355527",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren MW",
