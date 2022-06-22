@@ -8,9 +8,9 @@ from mvd.mvd.doctype.retouren_mw.retouren_mw import create_post_retouren
 
 # Post Retouren
 def _post_retouren(data):
-    create_sp_log(mitgliedschaft, True, data)
     if 'mitgliedId' in data:
         if data["mitgliedId"] > 0:
+            create_sp_log(data["mitgliedId"], True, data)
             if not frappe.db.exists("Mitgliedschaft", data["mitgliedId"]):
                 return raise_xxx(400, 'Bad Request', 'Unknown mitgliedId', data)
             else:
@@ -31,9 +31,9 @@ def _post_retouren(data):
 
 # Post Rückmeldungen
 def _post_responses(data):
-    create_sp_log(mitgliedschaft, False, data)
     if 'mitgliedId' in data:
         if data["mitgliedId"] > 0:
+            create_sp_log(data["mitgliedId"], False, data)
             if not frappe.db.exists("Mitgliedschaft", data["mitgliedId"]):
                 return raise_xxx(400, 'Bad Request', 'Unknown mitgliedId', data)
             else:

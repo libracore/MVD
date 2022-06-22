@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_sektion_id
 
 class RetourenMW(Document):
     def validate(self):
@@ -39,10 +38,11 @@ class RetourenMW(Document):
 def create_post_retouren(data):
     try:
         laufnummer = frappe.db.sql("""SELECT `ausgabe_kurz` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=data['retoureMuWSequenceNumber']), as_dict=True)[0]
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", data['mitgliedId'])
         post_retoure = frappe.get_doc({
             'doctype': 'Retouren MW',
             'mv_mitgliedschaft': data['mitgliedId'],
-            'sektion_id': get_sektion_id(data['sektionCode']),
+            'sektion_id': mitgliedschaft.sektion_id,
             'ausgabe': ausgabe_kurz,
             'legacy_kategorie_code': data['legacyKategorieCode'],
             'legacy_notiz': data['legacyNotiz'],
