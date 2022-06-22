@@ -57,7 +57,6 @@ def create_post_retouren(data):
             'legacy_notiz': data['legacyNotiz'],
             'grund_code': data['grundCode'],
             'grund_bezeichnung': data['grundBezeichnung'],
-            'sendungsnummer': data['sendungsnummer'],
             'retoure_mw_sequence_number': data['retoureMuWSequenceNumber'],
             'retoure_dmc': data['retoureDMC'],
             'retoureSendungsbild': data['retoureSendungsbild'],

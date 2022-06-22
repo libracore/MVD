@@ -76,7 +76,6 @@ def check_main_keys(data, typ):
             'legacyNotiz',
             'grundCode',
             'grundBezeichnung',
-            'sendungsnummer',
             'retoureMuWSequenceNumber',
             'retoureDMC',
             'retoureSendungsbild',

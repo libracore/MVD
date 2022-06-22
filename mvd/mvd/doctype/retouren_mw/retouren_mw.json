@@ -8,21 +8,23 @@
  "field_order": [
   "section_allgemein",
   "status",
-  "ausgabe",
   "adresse_geaendert",
+  "cb_1",
+  "ausgabe",
   "section_verknuepfung",
   "mv_mitgliedschaft",
+  "cb_2",
   "sektion_id",
   "section_api_daten",
   "legacy_kategorie_code",
-  "legacy_notiz",
   "grund_code",
   "grund_bezeichnung",
-  "sendungsnummer",
+  "legacy_notiz",
+  "cb_3",
+  "datum_erfasst_post",
   "retoure_mw_sequence_number",
   "retoure_dmc",
   "retoure_sendungsbild",
-  "datum_erfasst_post",
   "onload_frei"
  ],
  "fields": [
@@ -92,11 +94,6 @@
    "label": "grundBezeichnung"
   },
   {
-   "fieldname": "sendungsnummer",
-   "fieldtype": "Data",
-   "label": "sendungsnummer"
-  },
-  {
    "fieldname": "retoure_mw_sequence_number",
    "fieldtype": "Data",
    "label": "retoureMuWSequenceNumber"
@@ -128,9 +125,21 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "onload_frei"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-06-22 16:56:36.527949",
+ "modified": "2022-06-22 17:02:11.544610",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren MW",
