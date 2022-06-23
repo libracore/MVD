@@ -80,7 +80,18 @@ hm = {
     'online_payment_id': 'online_payment_id',
     'region_d': 'region_d',
     'plz_von': 'plz_von',
-    'plz_bis': 'plz_bis'
+    'plz_bis': 'plz_bis',
+    'status': 'status',
+    'mv_mitgliedschaft': 'mv_mitgliedschaft',
+    'ausgabe': 'ausgabe',
+    'legacy_kategorie_code': 'legacy_kategorie_code',
+    'legacy_notiz': 'legacy_notiz',
+    'grund_code': 'grund_code',
+    'grund_bezeichnung': 'grund_bezeichnung',
+    'retoure_mw_sequence_number': 'retoure_mw_sequence_number',
+    'retoure_dmc': 'retoure_dmc',
+    'retoure_sendungsbild': 'retoure_sendungsbild',
+    'datum_erfasst_post': 'datum_erfasst_post'
 }
 
 def read_csv(site_name, file_name, limit=False):
@@ -1352,4 +1363,62 @@ def nachsendung_auschluss_ohne_eintrittsdatum_an_sp():
             submit_counter = 1
         else:
             submit_counter += 1
+    frappe.db.commit()
+
+# --------------------------------------------------------------
+# import Retouren MW
+# --------------------------------------------------------------
+def import_retouren_mw(site_name, file_name, limit=False):
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.import_retouren_mw --kwargs "{'site_name': 'site1.local', 'file_name': 'import_retouren_mw.csv'}"
+    '''
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    submit_counter = 1
+    max_loop = limit
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            try:
+                post_retoure = frappe.get_doc({
+                    'doctype': 'Retouren MW',
+                    'status': get_value(row, 'status'),
+                    'mv_mitgliedschaft': get_value(row, 'mv_mitgliedschaft'),
+                    'sektion_id': get_value(row, 'sektion_id'),
+                    'ausgabe': get_value(row, 'ausgabe'),
+                    'legacy_kategorie_code': get_value(row, 'legacy_kategorie_code'),
+                    'legacy_notiz': get_value(row, 'legacy_notiz'),
+                    'grund_code': get_value(row, 'grund_code'),
+                    'grund_bezeichnung': get_value(row, 'grund_bezeichnung'),
+                    'retoure_mw_sequence_number': get_value(row, 'retoure_mw_sequence_number'),
+                    'retoure_dmc': get_value(row, 'retoure_dmc'),
+                    'retoure_sendungsbild': get_value(row, 'retoure_sendungsbild'),
+                    'datum_erfasst_post': str(get_value(row, 'datum_erfasst_post')).split(".")[2] + '-' + str(get_value(row, 'datum_erfasst_post')).split(".")[1] + '-' + str(get_value(row, 'datum_erfasst_post')).split(".")[0] + "T00:00:00",
+                    'adresse_geaendert': 0
+                })
+                
+                post_retoure.insert(ignore_permissions=True)
+                if submit_counter == 100:
+                    frappe.db.commit()
+                    submit_counter = 1
+                else:
+                    submit_counter += 1
+            
+            except Exception as err:
+                frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, row, frappe.utils.get_traceback()), 'post_retoure konnte nicht erstellt werden')
+            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+            count += 1
+        else:
+            break
     frappe.db.commit()
