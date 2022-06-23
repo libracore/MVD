@@ -24,7 +24,8 @@
   "datum_erfasst_post",
   "retoure_mw_sequence_number",
   "retoure_dmc",
-  "retoure_sendungsbild"
+  "retoure_sendungsbild",
+  "ignore_validation"
  ],
  "fields": [
   {
@@ -141,9 +142,16 @@
   {
    "fieldname": "cb_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_validation",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "ignore_validation"
   }
  ],
- "modified": "2022-06-23 09:37:46.624214",
+ "modified": "2022-06-23 16:22:46.411242",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren MW",

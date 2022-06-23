@@ -1405,7 +1405,8 @@ def import_retouren_mw(site_name, file_name, limit=False):
                     'retoure_dmc': get_value(row, 'retoure_dmc'),
                     'retoure_sendungsbild': get_value(row, 'retoure_sendungsbild'),
                     'datum_erfasst_post': str(get_value(row, 'datum_erfasst_post')).split(".")[2] + '-' + str(get_value(row, 'datum_erfasst_post')).split(".")[1] + '-' + str(get_value(row, 'datum_erfasst_post')).split(".")[0] + "T00:00:00",
-                    'adresse_geaendert': 0
+                    'adresse_geaendert': 0,
+                    'ignore_validation': 1
                 })
                 
                 post_retoure.insert(ignore_permissions=True)
@@ -1421,4 +1422,25 @@ def import_retouren_mw(site_name, file_name, limit=False):
             count += 1
         else:
             break
+    frappe.db.commit()
+
+# --------------------------------------------------------------
+# update mitgliedschaften anhand import Retouren MW
+# --------------------------------------------------------------
+def update_mitgliedschaften_anhand_import_retouren_mw():
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.update_mitgliedschaften_anhand_import_retouren_mw
+    '''
+    
+    counter = 1
+    update_offen = frappe.db.sql("""SELECT DISTINCT 
+                                        `mv_mitgliedschaft`
+                                    FROM `tabRetouren MW`
+                                    WHERE `status` = 'Offen'""", as_dict=True)
+    for u_o in update_offen:
+        update = frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `m_w_retouren_offen` = 1 WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=u_o.mv_mitgliedschaft), as_list=True)
+        print("Update {0} of {1}".format(counter, len(update_offen)))
+        counter += 1
+    
     frappe.db.commit()

@@ -9,38 +9,39 @@ from frappe.utils.data import getdate
 
 class RetourenMW(Document):
     def validate(self):
-        if self.status == 'Offen':
-            mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
-            mitgliedschaft.m_w_retouren_offen = 1
-            mitgliedschaft.save()
-        elif self.status == 'In Bearbeitung':
-            mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
-            mitgliedschaft.m_w_retouren_in_bearbeitung = 1
-            mitgliedschaft.save()
-        else:
-            anz_offen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabRetouren MW` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Offen'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)[0].qty
-            anz_in_bearbeitung = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabRetouren MW` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'In Bearbeitung'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)[0].qty
-            mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
-            if anz_offen > 0 or anz_in_bearbeitung > 0:
-                if anz_offen > 0:
-                    mitgliedschaft.m_w_retouren_offen = 1
-                else:
-                    mitgliedschaft.m_w_retouren_offen = 0
-                if anz_in_bearbeitung > 0:
-                    mitgliedschaft.m_w_retouren_in_bearbeitung = 1
-                else:
-                    mitgliedschaft.m_w_retouren_in_bearbeitung = 0
+        if int(self.ignore_validation) != 1:
+            if self.status == 'Offen':
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
+                mitgliedschaft.m_w_retouren_offen = 1
+                mitgliedschaft.save()
+            elif self.status == 'In Bearbeitung':
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
+                mitgliedschaft.m_w_retouren_in_bearbeitung = 1
                 mitgliedschaft.save()
             else:
-                mitgliedschaft.m_w_retouren_offen = 0
-                mitgliedschaft.m_w_retouren_in_bearbeitung = 0
-                mitgliedschaft.save()
-        
-        adresse = frappe.db.sql("""SELECT `adresse_mitglied` FROM `tabMitgliedschaft` WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)[0].adresse_mitglied
-        adresse = frappe.get_doc("Address", adresse)
-        datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=self.retoure_mw_sequence_number), as_dict=True)[0].datum_adressexport
-        if getdate(adresse.modified) > getdate(datum_adressexport):
-            self.adresse_geaendert = 1
+                anz_offen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabRetouren MW` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Offen'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)[0].qty
+                anz_in_bearbeitung = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabRetouren MW` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'In Bearbeitung'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)[0].qty
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
+                if anz_offen > 0 or anz_in_bearbeitung > 0:
+                    if anz_offen > 0:
+                        mitgliedschaft.m_w_retouren_offen = 1
+                    else:
+                        mitgliedschaft.m_w_retouren_offen = 0
+                    if anz_in_bearbeitung > 0:
+                        mitgliedschaft.m_w_retouren_in_bearbeitung = 1
+                    else:
+                        mitgliedschaft.m_w_retouren_in_bearbeitung = 0
+                    mitgliedschaft.save()
+                else:
+                    mitgliedschaft.m_w_retouren_offen = 0
+                    mitgliedschaft.m_w_retouren_in_bearbeitung = 0
+                    mitgliedschaft.save()
+            
+            adresse = frappe.db.sql("""SELECT `adresse_mitglied` FROM `tabMitgliedschaft` WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)[0].adresse_mitglied
+            adresse = frappe.get_doc("Address", adresse)
+            datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=self.retoure_mw_sequence_number), as_dict=True)[0].datum_adressexport
+            if getdate(adresse.modified) > getdate(datum_adressexport):
+                self.adresse_geaendert = 1
 
 def create_post_retouren(data):
     try:
