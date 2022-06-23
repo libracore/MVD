@@ -172,6 +172,8 @@
   "status_vor_onl_mutation",
   "search_hash",
   "aktive_mitgliedschaft",
+  "m_w_retouren_offen",
+  "m_w_retouren_in_bearbeitung",
   "zuzug_durch_sp"
  ],
  "fields": [
@@ -1178,13 +1180,25 @@
   },
   {
    "default": "0",
+   "fieldname": "m_w_retouren_offen",
+   "fieldtype": "Check",
+   "label": "M+W Retoure(n) offen"
+  },
+  {
+   "default": "0",
+   "fieldname": "m_w_retouren_in_bearbeitung",
+   "fieldtype": "Check",
+   "label": "M+W Retoure(n) in Bearbeitung"
+  },
+  {
+   "default": "0",
    "fieldname": "zuzug_durch_sp",
    "fieldtype": "Check",
    "label": "Zuzug durch SP"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-06-16 14:11:28.445157",
+ "modified": "2022-06-21 14:11:28.445157",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

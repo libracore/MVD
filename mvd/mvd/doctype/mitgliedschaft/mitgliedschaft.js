@@ -130,6 +130,9 @@ frappe.ui.form.on('Mitgliedschaft', {
             // load html overview
             load_html_overview(frm);
             
+            // load retouren overview
+            load_retouren_overview(frm)
+            
             // assign hack
             $(".add-assignment.text-muted").remove();
             
@@ -309,8 +312,28 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frappe.validated=false;
             }
         }
-        //cur_frm.set_value("sp_no_update", 0);
+        
         cur_frm.set_value("letzte_bearbeitung_von", 'User');
+        
+        // Abfrage ob M+W Retouren geschlossen werden sollen
+        if (cur_frm.doc.m_w_retouren_offen || cur_frm.doc.m_w_retouren_in_bearbeitung) {
+            frappe.confirm(
+                'Dieses Mitglied besitzt offene M+W Retouren. Möchten Sie diese als Abgeschlossen markieren?',
+                function(){
+                    // on yes
+                    frappe.call({
+                        method: "mvd.mvd.doctype.retouren_mw.retouren_mw.close_open_retouren",
+                        args:{
+                                'mitgliedschaft': cur_frm.doc.name
+                        },
+                        callback: function(r){}
+                    });
+                },
+                function(){
+                    // on no
+                }
+            )
+        }
     },
     plz: function(frm) {
         pincode_lookup(cur_frm.doc.plz, 'ort');
@@ -366,6 +389,41 @@ function load_html_overview(frm) {
         callback: function(r)
         {
             cur_frm.set_df_property('uebersicht_html','options', r.message);
+        }
+    });
+}
+
+function load_retouren_overview(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_returen_dashboard",
+        args:{
+                'mitgliedschaft': cur_frm.doc.name
+        },
+        callback: function(r)
+        {
+            var retouren = r.message;
+            var info = '';
+            var color = 'green';
+            var show = false;
+            if (retouren.anz_offen > 0) {
+                info += retouren.anz_offen + " Offene ";
+                color = 'red';
+                show = true;
+            }
+            if (retouren.anz_in_bearbeitung > 0) {
+                if (!show) {
+                    info += retouren.anz_in_bearbeitung + " M+W Retoure(n) in Bearbeitung";
+                    color = 'orange';
+                    show = true;
+                } else {
+                    info += 'M+W Retoure(n) und ' + retouren.anz_in_bearbeitung + " in Bearbeitung";
+                }
+            } else {
+                info += 'M+W Retoure(n)';
+            }
+            if (show) {
+                cur_frm.dashboard.add_indicator(info, color);
+            }
         }
     });
 }

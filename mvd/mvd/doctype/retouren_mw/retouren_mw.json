@@ -1,0 +1,168 @@
+{
+ "allow_copy": 1,
+ "autoname": "format:Ret-MW-{ausgabe}-{###}",
+ "creation": "2022-06-15 16:14:34.776701",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_allgemein",
+  "status",
+  "adresse_geaendert",
+  "cb_1",
+  "ausgabe",
+  "section_verknuepfung",
+  "mv_mitgliedschaft",
+  "cb_2",
+  "sektion_id",
+  "section_api_daten",
+  "legacy_kategorie_code",
+  "grund_code",
+  "grund_bezeichnung",
+  "legacy_notiz",
+  "cb_3",
+  "datum_erfasst_post",
+  "retoure_mw_sequence_number",
+  "retoure_dmc",
+  "retoure_sendungsbild"
+ ],
+ "fields": [
+  {
+   "default": "Offen",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Offen\nIn Bearbeitung\nAbgeschlossen",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ausgabe",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Ausgabe",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "section_verknuepfung",
+   "fieldtype": "Section Break",
+   "label": "Verkn\u00fcpfungen"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Mitgliedschaft",
+   "options": "Mitgliedschaft",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_api_daten",
+   "fieldtype": "Section Break",
+   "label": "API Daten"
+  },
+  {
+   "fieldname": "legacy_kategorie_code",
+   "fieldtype": "Data",
+   "label": "legacyKategorieCode",
+   "read_only": 1
+  },
+  {
+   "fieldname": "legacy_notiz",
+   "fieldtype": "Code",
+   "label": "legacyNotiz",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grund_code",
+   "fieldtype": "Data",
+   "label": "grundCode",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grund_bezeichnung",
+   "fieldtype": "Data",
+   "label": "grundBezeichnung",
+   "read_only": 1
+  },
+  {
+   "fieldname": "retoure_mw_sequence_number",
+   "fieldtype": "Data",
+   "label": "retoureMuWSequenceNumber",
+   "read_only": 1
+  },
+  {
+   "fieldname": "retoure_dmc",
+   "fieldtype": "Data",
+   "label": "retoureDMC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "retoure_sendungsbild",
+   "fieldtype": "Code",
+   "label": "retoureSendungsbild",
+   "read_only": 1
+  },
+  {
+   "fieldname": "datum_erfasst_post",
+   "fieldtype": "Datetime",
+   "label": "datumErfasstPost",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "adresse_geaendert",
+   "fieldtype": "Check",
+   "label": "Adresse seit Export ge\u00e4ndert?",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "modified": "2022-06-23 09:37:46.624214",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Retouren MW",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "ausgabe",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

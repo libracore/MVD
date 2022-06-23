@@ -107,6 +107,9 @@ doc_events = {
     },
     "ToDo": {
         "on_update": "mvd.mvd.utils.hook_utils.todo_permissions"
+    },
+    "Address": {
+        "on_update": "mvd.mvd.doctype.retouren_mw.retouren_mw.check_dates"
     }
 }
 
