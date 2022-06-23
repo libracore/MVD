@@ -24,8 +24,7 @@
   "datum_erfasst_post",
   "retoure_mw_sequence_number",
   "retoure_dmc",
-  "retoure_sendungsbild",
-  "onload_frei"
+  "retoure_sendungsbild"
  ],
  "fields": [
   {
@@ -42,6 +41,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Ausgabe",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -59,6 +59,7 @@
    "fieldtype": "Link",
    "label": "Mitgliedschaft",
    "options": "Mitgliedschaft",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -66,6 +67,7 @@
    "fieldtype": "Link",
    "label": "Sektion",
    "options": "Sektion",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -76,55 +78,57 @@
   {
    "fieldname": "legacy_kategorie_code",
    "fieldtype": "Data",
-   "label": "legacyKategorieCode"
+   "label": "legacyKategorieCode",
+   "read_only": 1
   },
   {
    "fieldname": "legacy_notiz",
    "fieldtype": "Code",
-   "label": "legacyNotiz"
+   "label": "legacyNotiz",
+   "read_only": 1
   },
   {
    "fieldname": "grund_code",
    "fieldtype": "Data",
-   "label": "grundCode"
+   "label": "grundCode",
+   "read_only": 1
   },
   {
    "fieldname": "grund_bezeichnung",
    "fieldtype": "Data",
-   "label": "grundBezeichnung"
+   "label": "grundBezeichnung",
+   "read_only": 1
   },
   {
    "fieldname": "retoure_mw_sequence_number",
    "fieldtype": "Data",
-   "label": "retoureMuWSequenceNumber"
+   "label": "retoureMuWSequenceNumber",
+   "read_only": 1
   },
   {
    "fieldname": "retoure_dmc",
    "fieldtype": "Data",
-   "label": "retoureDMC"
+   "label": "retoureDMC",
+   "read_only": 1
   },
   {
    "fieldname": "retoure_sendungsbild",
    "fieldtype": "Code",
-   "label": "retoureSendungsbild"
+   "label": "retoureSendungsbild",
+   "read_only": 1
   },
   {
    "fieldname": "datum_erfasst_post",
    "fieldtype": "Datetime",
-   "label": "datumErfasstPost"
+   "label": "datumErfasstPost",
+   "read_only": 1
   },
   {
    "default": "0",
    "fieldname": "adresse_geaendert",
    "fieldtype": "Check",
-   "label": "Adresse seit Export ge\u00e4ndert?"
-  },
-  {
-   "default": "0",
-   "fieldname": "onload_frei",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "onload_frei"
+   "label": "Adresse seit Export ge\u00e4ndert?",
+   "read_only": 1
   },
   {
    "fieldname": "cb_1",
@@ -139,7 +143,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-06-22 17:02:11.544610",
+ "modified": "2022-06-23 09:37:46.624214",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren MW",
