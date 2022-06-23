@@ -2011,13 +2011,13 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
                     jahr = int(getdate(today()).strftime("%Y")) + 1
         
         # prüfe Beitrittsgebühr
-        if int(mitgliedschaft.zahlung_mitgliedschaft) == 0 and sektion.mitgliedschafts_artikel_beitritt:
+        if int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) == 0 and sektion.mitgliedschafts_artikel_beitritt:
             item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt,"qty": 1, "cost_center": company.cost_center})
     
     if mitgliedschaft.mitgliedtyp_c == 'Geschäft':
         item = [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1}]
         # prüfe Beitrittsgebühr
-        if int(mitgliedschaft.zahlung_mitgliedschaft) == 0 and sektion.mitgliedschafts_artikel_beitritt_geschaeft:
+        if int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) == 0 and sektion.mitgliedschafts_artikel_beitritt_geschaeft:
             item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt_geschaeft,"qty": 1, "cost_center": company.cost_center})
     
     if mitgliedschaft.status_c == 'Interessent*in':
