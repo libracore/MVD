@@ -1,9 +1,9 @@
 frappe.pages['vbz-massenlauf'].on_page_load = function(wrapper) {
-	var page = frappe.ui.make_app_page({
-		parent: wrapper,
-		title: 'Verarbeitungszentrale',
-		single_column: true
-	});
+    var page = frappe.ui.make_app_page({
+        parent: wrapper,
+        title: 'Verarbeitungszentrale',
+        single_column: true
+    });
 }
 frappe.pages['vbz-massenlauf'].on_page_load = function(wrapper) {
     var page = frappe.ui.make_app_page({
@@ -289,7 +289,7 @@ frappe.vbz_massenlauf = {
             frappe.vbz_massenlauf.execute_begruessung_online_massenlauf(sektion);
         }
     },
-    execute_begruessung_online_massenlauf: function() {
+    execute_begruessung_online_massenlauf: function(sektion) {
         frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.begruessung_online_massenlauf",
