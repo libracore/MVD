@@ -3,15 +3,15 @@
 
 frappe.ui.form.on('Druckvorlage', {
     refresh: function(frm) {
-            if (cur_frm.doc.dokument == 'Geschenkmitgliedschaft') {
-                cur_frm.set_df_property('seite_1_ausweis','read_only',1);
-                cur_frm.set_df_property('doppelseitiger_druck','read_only',1);
-                if (cur_frm.doc.geschenkmitgliedschaft_dok_empfaenger == 'Schenkende*r') {
-                    cur_frm.set_df_property('seite_1_referenzblock_ausblenden','read_only',0);
-                }
+        if (cur_frm.doc.dokument == 'Geschenkmitgliedschaft') {
+            cur_frm.set_df_property('seite_1_ausweis','read_only',1);
+            cur_frm.set_df_property('doppelseitiger_druck','read_only',1);
+            if (cur_frm.doc.geschenkmitgliedschaft_dok_empfaenger == 'Schenkende*r') {
+                cur_frm.set_df_property('seite_1_referenzblock_ausblenden','read_only',0);
             }
-        },
-        dokument: function(frm) {
+        }
+    },
+    dokument: function(frm) {
         if (cur_frm.doc.dokument == 'Mahnung') {
             cur_frm.set_value('anzahl_seiten', '2');
         }
