@@ -200,6 +200,7 @@ def kuendigung(massenlauf, sektion):
         massenlauf.save(ignore_permissions=True)
 
 def zuzug(massenlauf, sektion):
+    err_mitgl = ''
     try:
         ungedruckte = ''
         mitgliedschaften = frappe.get_list('Mitgliedschaft', filters={'zuzug_massendruck': 1, 'sektion_id': sektion}, fields=['name', 'zuzugs_rechnung', 'zuzug_korrespondenz'])
@@ -207,6 +208,7 @@ def zuzug(massenlauf, sektion):
             counter = 1
             output = PdfFileWriter()
             for mitgliedschaft in mitgliedschaften:
+                err_mitgl = mitgliedschaft['name']
                 if mitgliedschaft['zuzugs_rechnung']:
                     output = frappe.get_print("Sales Invoice", mitgliedschaft['zuzugs_rechnung'], 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)
                 elif mitgliedschaft['zuzug_korrespondenz']:
@@ -271,7 +273,7 @@ def zuzug(massenlauf, sektion):
     except Exception as err:
         massenlauf = frappe.get_doc("Massenlauf", massenlauf)
         massenlauf.status = 'Fehlgeschlagen'
-        massenlauf.error = str(err)
+        massenlauf.error += "------------\n{0}: {1}\n\n{2}\n------------".format(str(err), err_mitgl, frappe.utils.get_traceback())
         massenlauf.save(ignore_permissions=True)
 
 def begruessung_bezahlung(massenlauf, sektion):
