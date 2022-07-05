@@ -49,6 +49,8 @@ frappe.vbz = {
         $("#todo").off("click");
         $("#termin").off("click");
         $("#mahnung").off("click");
+        $("#zweimal_unzustellbar").off("click");
+        $("#einmal_unzustellbar").off("click");
     },
     add_click_handlers: function(open_datas) {
         frappe.vbz.remove_click_handlers();
@@ -120,6 +122,14 @@ frappe.vbz = {
         });
         $("#neuanlage").click(function(){
             frappe.set_route("mvd-suchmaske");
+        });
+        $("#zweimal_unzustellbar").click(function(){
+            frappe.route_options = {"m_w_anzahl": ['>', 1]};
+            frappe.set_route("List", "Mitgliedschaft", "List");
+        });
+        $("#einmal_unzustellbar").click(function(){
+            frappe.route_options = {"m_w_anzahl": 1};
+            frappe.set_route("List", "Mitgliedschaft", "List");
         });
         
         frappe.dom.unfreeze();
