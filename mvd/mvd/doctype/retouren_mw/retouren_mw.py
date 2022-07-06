@@ -139,28 +139,41 @@ def close_open_retouren(mitgliedschaft):
             r.save()
 
 def check_dates(adresse, event):
-    mitgliedschaften = frappe.db.sql("""SELECT
-                                            `name`
-                                        FROM `tabMitgliedschaft`
-                                        WHERE `adresse_mitglied` = '{adresse}' LIMIT 1""".format(adresse=adresse.name), as_dict=True)
-    if len(mitgliedschaften) > 0:
-        mitgliedschaft = mitgliedschaften[0].name
-        retouren = frappe.db.sql("""SELECT
-                                        `name`
-                                    FROM `tabRetouren MW`
-                                    WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
-                                    AND `status` != 'Abgeschlossen'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
-        for retoure in retouren:
-            retoure = frappe.get_doc("Retouren MW", retoure.name)
-            datum_adressexport = frappe.db.sql("""SELECT
-                                                        `datum_adressexport`
-                                                    FROM `tabMW`
-                                                    WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=retoure.retoure_mw_sequence_number), as_dict=True)
-            if len(datum_adressexport) > 0:
-                datum_adressexport = datum_adressexport[0].datum_adressexport
-                if getdate(adresse.modified) > getdate(datum_adressexport) and retoure.adresse_geaendert != 1:
-                    retoure.adresse_geaendert = 1
-                    retoure.save(ignore_permissions=True)
+    adresse_alt = frappe.db.sql("""SELECT * FROM `tabAddress` WHERE `name` = '{adr}'""".format(adr=adresse.name), as_dict=True)
+    if len(adresse_alt) > 0:
+        adresse_alt = adresse_alt[0]
+        changed = False
+        if adresse_alt.zusatz != adresse.zusatz or \
+        adresse_alt.strasse != adresse.strasse or \
+        adresse_alt.postfach != adresse.postfach or \
+        adresse_alt.postfach_nummer != adresse.postfach_nummer or \
+        adresse_alt.plz != adresse.plz or \
+        adresse_alt.city != adresse.city:
+            changed = True
+        
+        if changed:
+            mitgliedschaften = frappe.db.sql("""SELECT
+                                                    `name`
+                                                FROM `tabMitgliedschaft`
+                                                WHERE `adresse_mitglied` = '{adresse}' LIMIT 1""".format(adresse=adresse.name), as_dict=True)
+            if len(mitgliedschaften) > 0:
+                mitgliedschaft = mitgliedschaften[0].name
+                retouren = frappe.db.sql("""SELECT
+                                                `name`
+                                            FROM `tabRetouren MW`
+                                            WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
+                                            AND `status` != 'Abgeschlossen'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
+                for retoure in retouren:
+                    retoure = frappe.get_doc("Retouren MW", retoure.name)
+                    datum_adressexport = frappe.db.sql("""SELECT
+                                                                `datum_adressexport`
+                                                            FROM `tabMW`
+                                                            WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=retoure.retoure_mw_sequence_number), as_dict=True)
+                    if len(datum_adressexport) > 0:
+                        datum_adressexport = datum_adressexport[0].datum_adressexport
+                        if getdate(adresse.modified) > getdate(datum_adressexport) and retoure.adresse_geaendert != 1:
+                            retoure.adresse_geaendert = 1
+                            retoure.save(ignore_permissions=True)
 
 @frappe.whitelist()
 def get_mail_data(mitgliedschaft, retoure, grund_bezeichnung):
