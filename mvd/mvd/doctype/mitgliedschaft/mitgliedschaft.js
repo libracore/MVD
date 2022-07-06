@@ -327,11 +327,16 @@ frappe.ui.form.on('Mitgliedschaft', {
                                 'mitgliedschaft': cur_frm.doc.name
                         },
                         callback: function(r){
-                            cur_frm.reload_doc();
-                            cur_frm.set_value("m_w_retouren_offen", 0);
-                            cur_frm.set_value("m_w_retouren_in_bearbeitung", 0);
-                            cur_frm.set_value("m_w_anzahl", 0);
-                            cur_frm.save();
+                            var resolve_reload = new Promise(function(resolve) {
+                                cur_frm.reload_doc();
+                                resolve(true);
+                            });
+                            resolve_reload.then(function(resolve_reload) {
+                                cur_frm.set_value("m_w_retouren_offen", 0);
+                                cur_frm.set_value("m_w_retouren_in_bearbeitung", 0);
+                                cur_frm.set_value("m_w_anzahl", 0);
+                                cur_frm.save();
+                            });
                         }
                     });
                 },
