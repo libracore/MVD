@@ -326,7 +326,13 @@ frappe.ui.form.on('Mitgliedschaft', {
                         args:{
                                 'mitgliedschaft': cur_frm.doc.name
                         },
-                        callback: function(r){}
+                        callback: function(r){
+                            cur_frm.reload_doc();
+                            cur_frm.set_value("m_w_retouren_offen", 0);
+                            cur_frm.set_value("m_w_retouren_in_bearbeitung", 0);
+                            cur_frm.set_value("m_w_anzahl", 0);
+                            cur_frm.save();
+                        }
                     });
                 },
                 function(){
