@@ -19,6 +19,7 @@ class RetourenMW(Document):
                     mitgliedschaft.m_w_retouren_in_bearbeitung = 0
                 
                 mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
+                mitgliedschaft.letzte_bearbeitung_von = 'SP'
                 mitgliedschaft.save()
                 
             elif self.status == 'In Bearbeitung':
@@ -30,6 +31,7 @@ class RetourenMW(Document):
                     mitgliedschaft.m_w_retouren_offen = 0
                 
                 mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
+                mitgliedschaft.letzte_bearbeitung_von = 'SP'
                 mitgliedschaft.save()
                 
             else:
@@ -46,11 +48,13 @@ class RetourenMW(Document):
                     else:
                         mitgliedschaft.m_w_retouren_in_bearbeitung = 0
                     mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
+                    mitgliedschaft.letzte_bearbeitung_von = 'SP'
                     mitgliedschaft.save()
                 else:
                     mitgliedschaft.m_w_retouren_offen = 0
                     mitgliedschaft.m_w_retouren_in_bearbeitung = 0
                     mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
+                    mitgliedschaft.letzte_bearbeitung_von = 'SP'
                     mitgliedschaft.save()
             
             adresse = frappe.db.sql("""SELECT `adresse_mitglied` FROM `tabMitgliedschaft` WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)
