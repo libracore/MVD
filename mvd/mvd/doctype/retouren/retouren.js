@@ -1,7 +1,7 @@
 // Copyright (c) 2022, libracore and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Retouren MW', {
+frappe.ui.form.on('Retouren', {
     refresh: function(frm) {
         cur_frm.page.add_action_icon(__("fa fa-envelope-o"), function() {
             send_mail(frm);
@@ -11,7 +11,7 @@ frappe.ui.form.on('Retouren MW', {
 
 function send_mail(frm) {
     frappe.call({
-        method: "mvd.mvd.doctype.retouren_mw.retouren_mw.get_mail_data",
+        method: "mvd.mvd.doctype.retouren.retouren.get_mail_data",
         args:{
                 'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft,
                 'retoure': cur_frm.doc.name,

@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from mvd.mvd.doctype.retouren_mw.retouren_mw import create_post_retouren
+from mvd.mvd.doctype.retouren.retouren import create_post_retouren
 
 # Post Retouren
 def _post_retouren(data):

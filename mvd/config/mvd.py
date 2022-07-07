@@ -111,9 +111,9 @@ def get_data():
             "items": [
                 {
                     "type": "doctype",
-                    "name": "Retouren MW",
-                    "label": _("Retouren MW"),
-                    "description": _("Retouren MW")
+                    "name": "Retouren",
+                    "label": _("Retouren"),
+                    "description": _("Retouren")
                 },
                 {
                     "type": "doctype",

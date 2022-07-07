@@ -76,16 +76,16 @@ class RetourenMW(Document):
 def get_retouren_qty(mitgliedschaft, self):
     anz_offen = frappe.db.sql("""SELECT
                                     COUNT(`name`) AS `qty`
-                                FROM `tabRetouren MW`
+                                FROM `tabRetouren`
                                 WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
                                 AND `status` = 'Offen'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)[0].qty
     anz_in_bearbeitung = frappe.db.sql("""SELECT
                                             COUNT(`name`) AS `qty`
-                                        FROM `tabRetouren MW`
+                                        FROM `tabRetouren`
                                         WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
                                         AND `status` = 'In Bearbeitung'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)[0].qty
     
-    old_status = frappe.db.sql("""SELECT `status` FROM `tabRetouren MW` WHERE `name` = '{retoure}'""".format(retoure=self.name), as_dict=True)
+    old_status = frappe.db.sql("""SELECT `status` FROM `tabRetouren` WHERE `name` = '{retoure}'""".format(retoure=self.name), as_dict=True)
     if len(old_status) > 0:
         if old_status[0].status != self.status:
             if old_status[0].status == 'Offen':
@@ -119,7 +119,7 @@ def create_post_retouren(data):
         else:
             adresse_geaendert = 0
         post_retoure = frappe.get_doc({
-            'doctype': 'Retouren MW',
+            'doctype': 'Retouren',
             'mv_mitgliedschaft': data['mitgliedId'],
             'sektion_id': mitgliedschaft.sektion_id,
             'adressblock': mitgliedschaft.adressblock,
@@ -145,12 +145,12 @@ def create_post_retouren(data):
 def close_open_retouren(mitgliedschaft):
     retouren = frappe.db.sql("""SELECT
                                     `name`
-                                FROM `tabRetouren MW`
+                                FROM `tabRetouren`
                                 WHERE `status` != 'Abgeschlossen'
                                 AND `mv_mitgliedschaft` = '{mitgliedschaft}'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
     if len(retouren) > 0:
         for retoure in retouren:
-            r = frappe.get_doc("Retouren MW", retoure.name)
+            r = frappe.get_doc("Retouren", retoure.name)
             r.status = 'Abgeschlossen'
             r.save()
 
@@ -176,7 +176,7 @@ def check_dates(adresse, event):
                 mitgliedschaft = mitgliedschaften[0].name
                 retouren = frappe.db.sql("""SELECT
                                                 `name`
-                                            FROM `tabRetouren MW`
+                                            FROM `tabRetouren`
                                             WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
                                             AND `status` != 'Abgeschlossen'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
                 for retoure in retouren:
@@ -197,7 +197,7 @@ def get_mail_data(mitgliedschaft, retoure, grund_bezeichnung):
     if mitgliedschaft.e_mail_1:
         return {
             'email': mitgliedschaft.e_mail_1,
-            'cc': 'mv+Mitgliedschaft+{0}@libracore.io,mv+Retouren%20MW+{1}@libracore.io'.format(mitgliedschaft.name, retoure),
+            'cc': 'mv+Mitgliedschaft+{0}@libracore.io,mv+Retouren+{1}@libracore.io'.format(mitgliedschaft.name, retoure),
             'subject': 'Ihre Mitgliedschaft: Neue Adresse?',
             'email_body': '{0}%0d%0a%0d%0aDie Post konnte Ihnen unsere Verbandszeitschrift M+W nicht zustellen. Sie wurde retourniert mit dem Vermerk «{1}».%0d%0aBitte teilen Sie uns Ihre aktuelle Wohnadresse mit, damit wir Ihnen auch weiterhin unsere Post zustellen können.%0d%0a%0d%0aSie sind in unserer Mitgliederdatei unter nachfolgender Adresse geführt:%0d%0a{2}%0d%0a%0d%0aFreundliche Grüsse'.format(mitgliedschaft.briefanrede, grund_bezeichnung, mitgliedschaft.adressblock.replace("\n", "%0d%0a"))
         }

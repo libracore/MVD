@@ -31,7 +31,7 @@ def get_data():
             },
             {
                 'label': _('Adresspflege'),
-                'items': ['Retouren MW']
+                'items': ['Retouren']
             }
         ]
     }

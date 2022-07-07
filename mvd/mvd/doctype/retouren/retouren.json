@@ -1,7 +1,7 @@
 {
  "allow_copy": 1,
  "autoname": "format:Ret-MW-{ausgabe}-{###}",
- "creation": "2022-06-15 16:14:34.776701",
+ "creation": "2022-07-07 15:25:54.265610",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -30,6 +30,11 @@
  ],
  "fields": [
   {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
    "default": "Offen",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -39,17 +44,23 @@
    "reqd": 1
   },
   {
+   "default": "0",
+   "fieldname": "adresse_geaendert",
+   "fieldtype": "Check",
+   "label": "Adresse seit Export ge\u00e4ndert?",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "ausgabe",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Ausgabe",
    "read_only": 1,
    "reqd": 1
-  },
-  {
-   "fieldname": "section_allgemein",
-   "fieldtype": "Section Break",
-   "label": "Allgemein"
   },
   {
    "fieldname": "section_verknuepfung",
@@ -63,6 +74,17 @@
    "options": "Mitgliedschaft",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fetch_from": "mitgliedschaft.adressblock",
+   "fieldname": "adressblock",
+   "fieldtype": "Code",
+   "label": "Adressblock",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "sektion_id",
@@ -84,12 +106,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "legacy_notiz",
-   "fieldtype": "Code",
-   "label": "legacyNotiz",
-   "read_only": 1
-  },
-  {
    "fieldname": "grund_code",
    "fieldtype": "Data",
    "label": "grundCode",
@@ -99,6 +115,22 @@
    "fieldname": "grund_bezeichnung",
    "fieldtype": "Data",
    "label": "grundBezeichnung",
+   "read_only": 1
+  },
+  {
+   "fieldname": "legacy_notiz",
+   "fieldtype": "Code",
+   "label": "legacyNotiz",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "datum_erfasst_post",
+   "fieldtype": "Datetime",
+   "label": "datumErfasstPost",
    "read_only": 1
   },
   {
@@ -120,49 +152,17 @@
    "read_only": 1
   },
   {
-   "fieldname": "datum_erfasst_post",
-   "fieldtype": "Datetime",
-   "label": "datumErfasstPost",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "adresse_geaendert",
-   "fieldtype": "Check",
-   "label": "Adresse seit Export ge\u00e4ndert?",
-   "read_only": 1
-  },
-  {
-   "fieldname": "cb_1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "cb_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "cb_3",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "fieldname": "ignore_validation",
    "fieldtype": "Check",
    "hidden": 1,
    "label": "ignore_validation"
-  },
-  {
-   "fetch_from": "mitgliedschaft.adressblock",
-   "fieldname": "adressblock",
-   "fieldtype": "Code",
-   "label": "Adressblock",
-   "read_only": 1
   }
  ],
- "modified": "2022-07-07 15:09:12.414308",
+ "modified": "2022-07-07 15:25:54.265610",
  "modified_by": "Administrator",
  "module": "MVD",
- "name": "Retouren MW",
+ "name": "Retouren",
  "owner": "Administrator",
  "permissions": [
   {

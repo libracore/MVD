@@ -109,7 +109,7 @@ doc_events = {
         "on_update": "mvd.mvd.utils.hook_utils.todo_permissions"
     },
     "Address": {
-        "validate": "mvd.mvd.doctype.retouren_mw.retouren_mw.check_dates"
+        "validate": "mvd.mvd.doctype.retouren.retouren.check_dates"
     }
 }
 
