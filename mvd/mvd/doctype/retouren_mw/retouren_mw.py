@@ -98,7 +98,7 @@ def create_post_retouren(data):
         ausgabe_kurz = frappe.db.sql("""SELECT `ausgabe_kurz` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=data['retoureMuWSequenceNumber']), as_dict=True)[0].ausgabe_kurz
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", data['mitgliedId'])
         adresse = frappe.get_doc("Address", mitgliedschaft.adresse_mitglied)
-        datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=self.retoure_mw_sequence_number), as_dict=True)[0].datum_adressexport
+        datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=data['retoureMuWSequenceNumber']), as_dict=True)[0].datum_adressexport
         if getdate(adresse.modified) > getdate(datum_adressexport):
             adresse_geaendert = 1
         else:
