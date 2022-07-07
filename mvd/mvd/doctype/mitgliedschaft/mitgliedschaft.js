@@ -322,7 +322,7 @@ frappe.ui.form.on('Mitgliedschaft', {
                 function(){
                     // on yes
                     frappe.call({
-                        method: "mvd.mvd.doctype.retouren_mw.retouren_mw.close_open_retouren",
+                        method: "mvd.mvd.doctype.retouren.retouren.close_open_retouren",
                         args:{
                                 'mitgliedschaft': cur_frm.doc.name
                         },
