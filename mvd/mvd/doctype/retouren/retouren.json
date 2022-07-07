@@ -1,5 +1,6 @@
 {
  "allow_copy": 1,
+ "allow_import": 1,
  "autoname": "format:Ret-MW-{ausgabe}-{###}",
  "creation": "2022-07-07 15:25:54.265610",
  "doctype": "DocType",
@@ -159,7 +160,7 @@
    "label": "ignore_validation"
   }
  ],
- "modified": "2022-07-07 15:25:54.265610",
+ "modified": "2022-07-07 16:00:10.969091",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren",
