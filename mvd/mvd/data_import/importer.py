@@ -1423,21 +1423,23 @@ def import_retouren(site_name, file_name, limit=False):
     frappe.db.commit()
 
 # --------------------------------------------------------------
-# update mitgliedschaften anhand import Retouren MW
+# update mitgliedschaften anhand import Retouren
 # --------------------------------------------------------------
-def update_mitgliedschaften_anhand_import_retouren_mw():
+def update_mitgliedschaften_anhand_import_retouren():
     '''
         Example:
-        sudo bench execute mvd.mvd.data_import.importer.update_mitgliedschaften_anhand_import_retouren_mw
+        sudo bench execute mvd.mvd.data_import.importer.update_mitgliedschaften_anhand_import_retouren
     '''
     
     counter = 1
-    update_offen = frappe.db.sql("""SELECT DISTINCT 
-                                        `mv_mitgliedschaft`
-                                    FROM `tabRetouren MW`
-                                    WHERE `status` = 'Offen'""", as_dict=True)
+    update_offen = frappe.db.sql("""SELECT 
+                                    `mv_mitgliedschaft`,
+                                    COUNT(`name`) AS `qty`
+                                    FROM `tabRetouren`
+                                    WHERE `status` IN ('Offen', 'In Bearbeitung')
+                                    GROUP BY `mv_mitgliedschaft`""", as_dict=True)
     for u_o in update_offen:
-        update = frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `m_w_retouren_offen` = 1 WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=u_o.mv_mitgliedschaft), as_list=True)
+        update = frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `m_w_anzahl` = {qty} WHERE `name` = '{mitgliedschaft}'""".format(qty=u_o.qty, mitgliedschaft=u_o.mv_mitgliedschaft), as_list=True)
         print("Update {0} of {1}".format(counter, len(update_offen)))
         counter += 1
     
