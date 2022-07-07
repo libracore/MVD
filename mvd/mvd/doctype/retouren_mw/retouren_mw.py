@@ -54,12 +54,15 @@ class RetourenMW(Document):
                     mitgliedschaft.save()
             
             adresse = frappe.db.sql("""SELECT `adresse_mitglied` FROM `tabMitgliedschaft` WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)[0].adresse_mitglied
-            adresse = frappe.get_doc("Address", adresse)
-            datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=self.retoure_mw_sequence_number), as_dict=True)
-            if len(datum_adressexport) > 0:
-                datum_adressexport = datum_adressexport[0].datum_adressexport
-                if getdate(adresse.modified) > getdate(datum_adressexport):
-                    self.adresse_geaendert = 1
+            try:
+                adresse = frappe.get_doc("Address", adresse)
+                datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=self.retoure_mw_sequence_number), as_dict=True)
+                if len(datum_adressexport) > 0:
+                    datum_adressexport = datum_adressexport[0].datum_adressexport
+                    if getdate(adresse.modified) > getdate(datum_adressexport):
+                        self.adresse_geaendert = 1
+            except:
+                pass
 
 def get_retouren_qty(mitgliedschaft, self):
     anz_offen = frappe.db.sql("""SELECT
