@@ -53,16 +53,15 @@ class RetourenMW(Document):
                     mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
                     mitgliedschaft.save()
             
-            adresse = frappe.db.sql("""SELECT `adresse_mitglied` FROM `tabMitgliedschaft` WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)[0].adresse_mitglied
-            try:
+            adresse = frappe.db.sql("""SELECT `adresse_mitglied` FROM `tabMitgliedschaft` WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)
+            if len(adresse) > 0:
+                adresse = adresse[0].adresse_mitglied
                 adresse = frappe.get_doc("Address", adresse)
                 datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=self.retoure_mw_sequence_number), as_dict=True)
                 if len(datum_adressexport) > 0:
                     datum_adressexport = datum_adressexport[0].datum_adressexport
                     if getdate(adresse.modified) > getdate(datum_adressexport):
                         self.adresse_geaendert = 1
-            except:
-                pass
 
 def get_retouren_qty(mitgliedschaft, self):
     anz_offen = frappe.db.sql("""SELECT
@@ -100,10 +99,13 @@ def create_post_retouren(data):
     try:
         ausgabe_kurz = frappe.db.sql("""SELECT `ausgabe_kurz` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=data['retoureMuWSequenceNumber']), as_dict=True)[0].ausgabe_kurz
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", data['mitgliedId'])
-        adresse = frappe.get_doc("Address", mitgliedschaft.adresse_mitglied)
-        datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=data['retoureMuWSequenceNumber']), as_dict=True)[0].datum_adressexport
-        if getdate(adresse.modified) > getdate(datum_adressexport):
-            adresse_geaendert = 1
+        if mitgliedschaft.adresse_mitglied:
+            adresse = frappe.get_doc("Address", mitgliedschaft.adresse_mitglied)
+            datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=data['retoureMuWSequenceNumber']), as_dict=True)[0].datum_adressexport
+            if getdate(adresse.modified) > getdate(datum_adressexport):
+                adresse_geaendert = 1
+            else:
+                adresse_geaendert = 0
         else:
             adresse_geaendert = 0
         post_retoure = frappe.get_doc({
