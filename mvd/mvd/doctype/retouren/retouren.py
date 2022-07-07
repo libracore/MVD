@@ -180,7 +180,7 @@ def check_dates(adresse, event):
                                             WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
                                             AND `status` != 'Abgeschlossen'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
                 for retoure in retouren:
-                    retoure = frappe.get_doc("Retouren MW", retoure.name)
+                    retoure = frappe.get_doc("Retouren", retoure.name)
                     datum_adressexport = frappe.db.sql("""SELECT
                                                                 `datum_adressexport`
                                                             FROM `tabMW`
