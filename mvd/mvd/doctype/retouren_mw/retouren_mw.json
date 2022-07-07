@@ -13,6 +13,7 @@
   "ausgabe",
   "section_verknuepfung",
   "mv_mitgliedschaft",
+  "adressblock",
   "cb_2",
   "sektion_id",
   "section_api_daten",
@@ -149,9 +150,16 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "ignore_validation"
+  },
+  {
+   "fetch_from": "mitgliedschaft.adressblock",
+   "fieldname": "adressblock",
+   "fieldtype": "Code",
+   "label": "Adressblock",
+   "read_only": 1
   }
  ],
- "modified": "2022-06-23 16:22:46.411242",
+ "modified": "2022-07-07 15:09:12.414308",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren MW",
@@ -168,9 +176,18 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MV_MA",
+   "share": 1,
+   "write": 1
   }
  ],
- "sort_field": "ausgabe",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "track_changes": 1
 }

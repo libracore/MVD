@@ -14,11 +14,23 @@
         </tr>
         <tr id="zweimal_unzustellbar">
             <td>zweimal unzustellbare M+W (Zustellung gestoppt)</td>
-            <td>4</td>
+            <td>
+                {% if retouren.qty > 99 %}
+                    99+
+                {% else %}
+                    {{ termin.qty }}
+                {% endif %}
+            </td>
         </tr>
         <tr id="einmal_unzustellbar">
             <td>einmal unzustellbare M+W</td>
-            <td>40</td>
+            <td>
+                {% if retouren.qty > 99 %}
+                    99+
+                {% else %}
+                    {{ termin.qty }}
+                {% endif %}
+            </td>
         </tr>
     </table>
     <h2 class="place-holder-left">Adresspflege Web-Service (prio 2)</h2>

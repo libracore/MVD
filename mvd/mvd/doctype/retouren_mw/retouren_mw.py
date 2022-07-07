@@ -8,6 +8,11 @@ from frappe.model.document import Document
 from frappe.utils.data import getdate
 
 class RetourenMW(Document):
+    def onload(self):
+        if self.mv_mitgliedschaft:
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
+            self.adressblock = mitgliedschaft.adressblock
+    
     def validate(self):
         if int(self.ignore_validation) != 1:
             if self.status == 'Offen':
@@ -117,6 +122,7 @@ def create_post_retouren(data):
             'doctype': 'Retouren MW',
             'mv_mitgliedschaft': data['mitgliedId'],
             'sektion_id': mitgliedschaft.sektion_id,
+            'adressblock': mitgliedschaft.adressblock,
             'ausgabe': ausgabe_kurz,
             'legacy_kategorie_code': data['legacyKategorieCode'],
             'legacy_notiz': data['legacyNotiz'],

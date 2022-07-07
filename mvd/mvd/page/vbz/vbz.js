@@ -23,7 +23,7 @@ frappe.vbz = {
             {
                 if (r.message) {
                     page.add_view('overview', frappe.render_template("overview", eval(r.message)))
-                    page.add_view('adresspflege', frappe.render_template("adresspflege", {}))
+                    page.add_view('adresspflege', frappe.render_template("adresspflege", eval(r.message)))
                     frappe.vbz.add_click_handlers(eval(r.message));
                 }
             }
