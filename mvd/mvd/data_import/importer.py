@@ -1366,12 +1366,12 @@ def nachsendung_auschluss_ohne_eintrittsdatum_an_sp():
     frappe.db.commit()
 
 # --------------------------------------------------------------
-# import Retouren MW
+# import Retouren
 # --------------------------------------------------------------
-def import_retouren_mw(site_name, file_name, limit=False):
+def import_retouren(site_name, file_name, limit=False):
     '''
         Example:
-        sudo bench execute mvd.mvd.data_import.importer.import_retouren_mw --kwargs "{'site_name': 'site1.local', 'file_name': 'import_retouren_mw.csv'}"
+        sudo bench execute mvd.mvd.data_import.importer.import_retouren --kwargs "{'site_name': 'site1.local', 'file_name': 'retouren.csv'}"
     '''
     # display all coloumns for error handling
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
@@ -1392,7 +1392,7 @@ def import_retouren_mw(site_name, file_name, limit=False):
         if count <= max_loop:
             try:
                 post_retoure = frappe.get_doc({
-                    'doctype': 'Retouren MW',
+                    'doctype': 'Retouren',
                     'status': get_value(row, 'status'),
                     'mv_mitgliedschaft': get_value(row, 'mv_mitgliedschaft'),
                     'sektion_id': get_value(row, 'sektion_id'),
@@ -1404,9 +1404,7 @@ def import_retouren_mw(site_name, file_name, limit=False):
                     'retoure_mw_sequence_number': get_value(row, 'retoure_mw_sequence_number'),
                     'retoure_dmc': get_value(row, 'retoure_dmc'),
                     'retoure_sendungsbild': get_value(row, 'retoure_sendungsbild'),
-                    'datum_erfasst_post': str(get_value(row, 'datum_erfasst_post')).split(".")[2] + '-' + str(get_value(row, 'datum_erfasst_post')).split(".")[1] + '-' + str(get_value(row, 'datum_erfasst_post')).split(".")[0] + "T00:00:00",
-                    'adresse_geaendert': 0,
-                    'ignore_validation': 1
+                    'datum_erfasst_post': str(get_value(row, 'datum_erfasst_post'))
                 })
                 
                 post_retoure.insert(ignore_permissions=True)

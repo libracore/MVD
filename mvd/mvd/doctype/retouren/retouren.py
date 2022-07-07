@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.data import getdate
 
-class RetourenMW(Document):
+class Retouren(Document):
     def onload(self):
         if self.mv_mitgliedschaft:
             mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
