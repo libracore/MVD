@@ -1,0 +1,56 @@
+{
+ "creation": "2022-07-08 09:05:30.144261",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "datum",
+  "status_alt",
+  "status_neu",
+  "grund"
+ ],
+ "fields": [
+  {
+   "fieldname": "datum",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Datum",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "status_alt",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Status alt",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "status_neu",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Status neu",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "grund",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Grund",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-07-08 09:21:38.601132",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Status Change",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

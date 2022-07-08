@@ -26,7 +26,7 @@
             <div class="address-box">
                 <p>
                     <b>Sektion:</b> {{ allgemein.sektion }}<br>
-                    <b>Status:</b> {{ allgemein.status }}<br>
+                    <b>Status:</b> {{ allgemein.status }}{% if allgemein.kuendigung and allgemein.status == 'Regulär' %} &dagger;{% endif %}<br>
                     <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
                     {% if allgemein.status not in ['Anmeldung', 'Online-Anmeldung'] %}
                         <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
@@ -78,7 +78,7 @@
                 </p>
                 <p>
                     <b>Sektion:</b> {{ allgemein.sektion }}<br>
-                    <b>Status:</b> {{ allgemein.status }}<br>
+                    <b>Status:</b> {{ allgemein.status }}{% if allgemein.kuendigung and allgemein.status == 'Regulär' %} &dagger;{% endif %}<br>
                     <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
                     {% if allgemein.status not in ['Anmeldung', 'Online-Anmeldung'] %}
                         <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>

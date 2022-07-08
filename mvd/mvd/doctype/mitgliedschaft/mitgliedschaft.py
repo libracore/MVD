@@ -380,7 +380,14 @@ class Mitgliedschaft(Document):
                 self.eintrittsdatum = self.datum_zahlung_mitgliedschaft
         
         if self.bezahltes_mitgliedschaftsjahr > 0 and self.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
+            # erstelle status change log und Status-Änderung
+            change_log_row = self.append('status_change', {})
+            change_log_row.datum = now()
+            change_log_row.status_alt = self.status_c
+            change_log_row.status_neu = 'Regulär'
+            change_log_row.grund = 'Zahlungseingang'
             self.status_c = 'Regulär'
+            
             # erstellung Begrüssungsschreiben
             self.begruessung_massendruck = 1
             self.begruessung_via_zahlung = 1
@@ -2101,11 +2108,17 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
     return sinv.name
 
 @frappe.whitelist()
-def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druckvorlage):
+def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druckvorlage, grund='Ohne Begründung'):
     # erfassung Kündigung
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     mitgliedschaft.kuendigung = datum_kuendigung
-    mitgliedschaft.status_c = 'Kündigung'
+    # erstelle status change log und Status-Änderung
+    change_log_row = mitgliedschaft.append('status_change', {})
+    change_log_row.datum = now()
+    change_log_row.status_alt = mitgliedschaft.status_c
+    change_log_row.status_neu = 'Regulär &dagger;'
+    change_log_row.grund = grund
+    
     mitgliedschaft.validierung_notwendig = 0
     mitgliedschaft.kuendigung_druckvorlage = druckvorlage
     if massenlauf == '1':
@@ -2329,6 +2342,13 @@ def mvm_update(mitgliedschaft, kwargs):
             naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
             # -----------------------------------------------------------------
             
+            # erstelle ggf. status change log und Status-Änderung
+            if status_c != mitgliedschaft.status_c:
+                change_log_row = mitgliedschaft.append('status_change', {})
+                change_log_row.datum = now()
+                change_log_row.status_alt = mitgliedschaft.status_c
+                change_log_row.status_neu = status_c
+                change_log_row.grund = 'SP Update'
             
             mitgliedschaft.mitglied_nr = mitglied_nr
             mitgliedschaft.sektion_id = sektion_id

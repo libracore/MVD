@@ -498,6 +498,7 @@ function kuendigung(frm) {
                                 //~ ];
                                 var field_list = [
                                     {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': cur_frm.doc.kuendigung ? cur_frm.doc.kuendigung:frappe.datetime.year_end()},
+                                    {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe'},
                                     {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                                         'get_query': function() {
                                             return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
@@ -531,6 +532,7 @@ function kuendigung(frm) {
                                 var field_list = [
                                     {'fieldname': 'html_info', 'fieldtype': 'HTML', 'options': '<p style="color: red;">Achtung: Kündigungsfrist verpasst!</p>'},
                                     {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.add_months(frappe.datetime.year_end(), 12), 'read_only': 1},
+                                    {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe'},
                                     {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                                         'get_query': function() {
                                             return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
@@ -559,7 +561,8 @@ function kuendigung(frm) {
                                             'mitgliedschaft': cur_frm.doc.name,
                                             'datum_kuendigung': values.datum,
                                             'massenlauf': values.massenlauf,
-                                            'druckvorlage': values.druckvorlage
+                                            'druckvorlage': values.druckvorlage,
+                                            'grund': values.grund ? values.grund:'Ohne Begründung'
                                     },
                                     freeze: true,
                                     freeze_message: 'Erstelle Kündigung inkl. Bestätigung...',
@@ -589,12 +592,18 @@ function todesfall(frm) {
     if (frappe.user.has_role("MV_MA")) {
         frappe.prompt([
             {'fieldname': 'verstorben_am', 'fieldtype': 'Date', 'label': 'Verstorben am', 'reqd': 0, 'default': frappe.datetime.get_today()},
-            {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Todesfall bedingte Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.year_end()},
+            {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Todesfallbedingte inaktivierung erfolgt per', 'reqd': 1, 'default': frappe.datetime.year_end()},
             {'fieldname': 'todesfall_uebernahme', 'fieldtype': 'Data', 'label': 'Übernommen durch'}
         ],
         function(values){
             cur_frm.set_value("kuendigung", values.datum);
             cur_frm.set_value("verstorben_am", values.verstorben_am);
+            var status_change_log = cur_frm.add_child('status_change');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Gestorben');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Gestorben");
+            cur_frm.refresh_field('status_change');
             cur_frm.set_value("status_c", 'Gestorben');
             if (values.todesfall_uebernahme) {
                 cur_frm.set_value("todesfall_uebernahme", values.todesfall_uebernahme);
@@ -619,6 +628,12 @@ function ausschluss(frm) {
         ],
         function(values){
             cur_frm.set_value("austritt", values.datum);
+            var status_change_log = cur_frm.add_child('status_change');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Ausschluss');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Ausschluss: " + values.grund);
+            cur_frm.refresh_field('status_change');
             cur_frm.set_value("status_c", 'Ausschluss');
             if (values.grund) {
                 var alte_infos = cur_frm.doc.wichtig;
@@ -665,6 +680,12 @@ function sektionswechsel(frm) {
                             if (r.message == 1) {
                                 cur_frm.set_value("wegzug", frappe.datetime.get_today());
                                 cur_frm.set_value("wegzug_zu", values.sektion_neu);
+                                var status_change_log = cur_frm.add_child('status_change');
+                                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+                                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Wegzug');
+                                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Sektionswechsel zu " + values.sektion_neu);
+                                cur_frm.refresh_field('status_change');
                                 cur_frm.set_value("status_c", 'Wegzug');
                                 cur_frm.save();
                                 cur_frm.timeline.insert_comment("Sektionswechsel zu " + values.sektion_neu + " vollzogen.");
@@ -1616,6 +1637,12 @@ function mitglied_inaktivieren(frm) {
             cur_frm.set_value("rg_massendruck", '');
             cur_frm.set_value("begruessung_massendruck_dokument", '');
             cur_frm.set_value("letzte_bearbeitung_von", 'User');
+            var status_change_log = cur_frm.add_child('status_change');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Inaktiv');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', 'Manuelle Inaktivierung');
+            cur_frm.refresh_field('status_change');
             cur_frm.set_value("status_c", 'Inaktiv');
             cur_frm.set_value("austritt", frappe.datetime.get_today());
             cur_frm.save();

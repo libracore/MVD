@@ -4,27 +4,50 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils.data import today, getdate
+from frappe.utils.data import today, getdate, now
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_ampelfarbe
 from mvd.mvd.doctype.region.region import _regionen_zuteilung
 
 def set_inaktiv():
-    mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Kündigung', 'Ausschluss')""", as_dict=True)
+    mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Ausschluss', 'Wegzug') OR (`status_c` = 'Regulär' AND `kuendigung` IS NOT NULL)""", as_dict=True)
     submit_counter = 1
     for mitgliedschaft in mitgliedschaften:
         m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
-        if m.status_c in ('Kündigung', 'Gestorben'):
+        if m.status_c in ('Regulär', 'Gestorben'):
             if m.kuendigung and m.kuendigung <= getdate(today()):
+                change_log_row = m.append('status_change', {})
+                change_log_row.datum = now()
+                change_log_row.status_alt = m.status_c + ' &dagger;' if m.status_c == 'Regulär' else m.status_c
+                change_log_row.status_neu = 'Inaktiv'
+                change_log_row.grund = 'Autom. Inaktivierung'
                 m.status_c = 'Inaktiv'
                 m.save(ignore_permissions=True)
             else:
                 if m.austritt and m.austritt <= getdate(today()):
+                    change_log_row = m.append('status_change', {})
+                    change_log_row.datum = now()
+                    change_log_row.status_alt = m.status_c
+                    change_log_row.status_neu = 'Inaktiv'
+                    change_log_row.grund = 'Autom. Inaktivierung'
                     m.status_c = 'Inaktiv'
                     m.save(ignore_permissions=True)
         elif m.status_c == 'Ausschluss':
             if m.austritt and m.austritt <= getdate(today()):
+                change_log_row = m.append('status_change', {})
+                change_log_row.datum = now()
+                change_log_row.status_alt = m.status_c
+                change_log_row.status_neu = 'Inaktiv'
+                change_log_row.grund = 'Autom. Inaktivierung'
                 m.status_c = 'Inaktiv'
                 m.save(ignore_permissions=True)
+        elif m.status_c == 'Wegzug':
+            change_log_row = m.append('status_change', {})
+            change_log_row.datum = now()
+            change_log_row.status_alt = m.status_c
+            change_log_row.status_neu = 'Inaktiv'
+            change_log_row.grund = 'Wegzug zu Sektion {0}'.format(m.wegzug_zu)
+            m.status_c = 'Inaktiv'
+            m.save(ignore_permissions=True)
         if submit_counter == 100:
             frappe.db.commit()
             submit_counter = 1
