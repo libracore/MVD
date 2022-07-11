@@ -15,7 +15,7 @@ frappe.ui.form.on('Mitgliedschaft', {
             }
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
                 
-                if ((!['Kündigung', 'Gestorben', 'Anmeldung', 'Online-Anmeldung'].includes(cur_frm.doc.status_c))) {
+                if ((!['Gestorben', 'Anmeldung', 'Online-Anmeldung'].includes(cur_frm.doc.status_c))&&(!cur_frm.doc.kuendigung)) {
                     frm.add_custom_button(__("Sektionswechsel"),  function() {
                         if (cur_frm.doc.mitgliedtyp_c == 'Geschäft') {
                             frappe.msgprint("Für Geschäftsmitglieder ist kein automatischer Sektionswechsel möglich.");
@@ -25,10 +25,16 @@ frappe.ui.form.on('Mitgliedschaft', {
                     }, __("Mutation"));
                 }
                 
-                if (!['Kündigung', 'Gestorben'].includes(cur_frm.doc.status_c)) {
+                if (!['Gestorben'].includes(cur_frm.doc.status_c)&&(!cur_frm.doc.kuendigung)) {
                     frm.add_custom_button(__("Kündigung"),  function() {
                         kuendigung(frm);
                     }, __("Mutation"));
+                } else {
+                    if (!['Gestorben'].includes(cur_frm.doc.status_c)&&(cur_frm.doc.kuendigung)) {
+                        frm.add_custom_button(__("Kündigung zurückziehen"),  function() {
+                            kuendigung_rueckzug(frm);
+                        }, __("Mutation"));
+                    }
                 }
                 
                 frm.add_custom_button(__("Ausschluss"),  function() {
@@ -41,7 +47,7 @@ frappe.ui.form.on('Mitgliedschaft', {
                     }, __("Mutation"));
                 }
                 
-                if (!['Gestorben', 'Kündigung'].includes(cur_frm.doc.status_c)) {
+                if (!['Gestorben'].includes(cur_frm.doc.status_c)&&(!cur_frm.doc.kuendigung)) {
                     frm.add_custom_button(__("Mitgliedschafts-Rechnung"),  function() {
                         erstelle_rechnung(frm);
                     }, __("Erstelle"));
@@ -569,7 +575,7 @@ function kuendigung(frm) {
                                     callback: function(r)
                                     {
                                         cur_frm.reload_doc();
-                                        cur_frm.timeline.insert_comment("Kündigung erfasst.");
+                                        cur_frm.timeline.insert_comment("Kündigung");
                                         frappe.msgprint("Die Kündigung wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.<br>Die Kündigungsbestätigung finden Sie in den Anhängen.");
                                     }
                                 });
@@ -586,6 +592,27 @@ function kuendigung(frm) {
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
     }
+}
+
+function kuendigung_rueckzug(frm) {
+    frappe.confirm(
+        'Wollen Sie die Kündigung zurückziehen?',
+        function(){
+            cur_frm.set_value("kuendigung", '');
+            var status_change_log = cur_frm.add_child('status_change');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', 'Regulär &dagger;');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Kündigungs Rückzug");
+            cur_frm.refresh_field('status_change');
+            cur_frm.save();
+            frappe.msgprint("Die Kündigung wurde zurückgezogen.");
+        },
+        function(){
+            // on no
+        }
+    )
+    
 }
 
 function todesfall(frm) {
