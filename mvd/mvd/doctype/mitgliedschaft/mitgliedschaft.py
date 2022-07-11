@@ -2416,6 +2416,11 @@ def mvm_update(mitgliedschaft, kwargs):
                     mitgliedschaft.validierung_notwendig = 1
                     if status_c != 'Zuzug':
                         mitgliedschaft.status_vor_onl_mutation = status_c
+                        change_log_row = mitgliedschaft.append('status_change', {})
+                        change_log_row.datum = now()
+                        change_log_row.status_alt = mitgliedschaft.status_c
+                        change_log_row.status_neu = 'Online-Mutation'
+                        change_log_row.grund = 'SP Update'
                         mitgliedschaft.status_c = 'Online-Mutation'
                     
             
