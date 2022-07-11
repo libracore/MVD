@@ -2128,6 +2128,7 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druck
     mitgliedschaft.kuendigung_druckvorlage = druckvorlage
     if massenlauf == '1':
         mitgliedschaft.kuendigung_verarbeiten = 1
+    mitgliedschaft.letzte_bearbeitung_von = 'User'
     mitgliedschaft.save(ignore_permissions=True)
     
     # erstellung Kündigungs PDF
