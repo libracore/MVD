@@ -45,6 +45,12 @@ def get_data():
                 },
                 {
                     "type": "doctype",
+                    "name": "Massenlauf Inaktivierung",
+                    "label": _("Massenlauf Inaktivierung"),
+                    "description": _("Massenlauf Inaktivierung")
+                },
+                {
+                    "type": "doctype",
                     "name": "CAMT Import",
                     "label": _("CAMT Importer"),
                     "description": _("CAMT Importer")

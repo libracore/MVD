@@ -1,0 +1,132 @@
+{
+ "creation": "2022-07-11 13:46:13.744880",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_allgemein",
+  "ausschluss",
+  "sektion_id",
+  "cb_1",
+  "grund",
+  "section_hinweis",
+  "hinweis",
+  "section_selektion",
+  "offene_jahresrechnung",
+  "section_mitgliedschaften",
+  "mitgliedschaften",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "ausschluss",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Ausschluss per",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grund",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Ausschluss Grund",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_selektion",
+   "fieldtype": "Section Break",
+   "label": "Selektion"
+  },
+  {
+   "default": "1",
+   "fieldname": "offene_jahresrechnung",
+   "fieldtype": "Check",
+   "label": "Offene Jahresrechnung"
+  },
+  {
+   "fieldname": "section_mitgliedschaften",
+   "fieldtype": "Section Break",
+   "label": "Mitgliedschaften"
+  },
+  {
+   "fieldname": "mitgliedschaften",
+   "fieldtype": "Table",
+   "label": "Mitgliedschaften",
+   "options": "Massenlauf Inaktivierung Mitgliedschaften"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Massenlauf Inaktivierung",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_hinweis",
+   "fieldtype": "Section Break",
+   "label": "Hinweis"
+  },
+  {
+   "fieldname": "hinweis",
+   "fieldtype": "HTML",
+   "options": "<ol><li>Kriterien w\u00e4hlen</li><li>Speichern dr\u00fccken</li><li>--&gt; Resultat wird angezeigt</li><li>Liste bereinigen</li><li>Buchen dr\u00fccken, Ausschliessungen werden in der Nacht ausgef\u00fchrt</li></ol>"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-07-11 17:01:56.757334",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Massenlauf Inaktivierung",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MV_MA",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "ausschluss",
+ "track_changes": 1
+}

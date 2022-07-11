@@ -498,6 +498,21 @@ function kuendigung(frm) {
                                 }
                             }
                             
+                            var default_grund = '';
+                            var abw_grund = '';
+                            
+                            cur_frm.doc.status_change.forEach(function(entry) {
+                                if (entry.grund.includes("Andere Gründe")&&entry.idx == cur_frm.doc.status_change.length) {
+                                    default_grund = 'Andere Gründe';
+                                    if (entry.grund.split("Andere Gründe: ").length > 1) {
+                                        abw_grund = entry.grund.split("Andere Gründe")[1];
+                                    }
+                                } else if (entry.idx == cur_frm.doc.status_change.length) {
+                                    default_grund = entry.grund;
+                                }
+                            });
+                            
+                            
                             if (fristgerecht) {
                                 // Default Druckvorlage für den Moment deaktiviert!
                                 //~ var field_list = [
@@ -511,7 +526,17 @@ function kuendigung(frm) {
                                 //~ ];
                                 var field_list = [
                                     {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': cur_frm.doc.kuendigung ? cur_frm.doc.kuendigung:frappe.datetime.year_end()},
-                                    {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe'},
+                                    {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe', 'default': default_grund, 'change': function() {
+                                            if (cur_dialog.fields_dict.grund.get_value() == 'Andere Gründe') {
+                                                cur_dialog.fields_dict.abw_grund.df.hidden = 0;
+                                                cur_dialog.fields_dict.abw_grund.refresh();
+                                            } else {
+                                                cur_dialog.fields_dict.abw_grund.df.hidden = 1;
+                                                cur_dialog.fields_dict.abw_grund.refresh();
+                                            }
+                                        }
+                                    },
+                                    {'fieldname': 'abw_grund', 'fieldtype': 'Data', 'label': 'Andere Gründe', 'hidden': default_grund.includes("Andere Gründe") ? 0:1, 'default': abw_grund},
                                     {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                                         'get_query': function() {
                                             return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
@@ -545,7 +570,17 @@ function kuendigung(frm) {
                                 var field_list = [
                                     {'fieldname': 'html_info', 'fieldtype': 'HTML', 'options': '<p style="color: red;">Achtung: Kündigungsfrist verpasst!</p>'},
                                     {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.add_months(frappe.datetime.year_end(), 12), 'read_only': 1},
-                                    {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe'},
+                                    {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe', 'default': default_grund, 'change': function() {
+                                            if (cur_dialog.fields_dict.grund.get_value() == 'Andere Gründe') {
+                                                cur_dialog.fields_dict.abw_grund.df.hidden = 0;
+                                                cur_dialog.fields_dict.abw_grund.refresh();
+                                            } else {
+                                                cur_dialog.fields_dict.abw_grund.df.hidden = 1;
+                                                cur_dialog.fields_dict.abw_grund.refresh();
+                                            }
+                                        }
+                                    },
+                                    {'fieldname': 'abw_grund', 'fieldtype': 'Data', 'label': 'Andere Gründe', 'hidden': default_grund.includes("Andere Gründe") ? 0:1, 'default': abw_grund},
                                     {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                                         'get_query': function() {
                                             return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
@@ -568,6 +603,10 @@ function kuendigung(frm) {
                             
                             frappe.prompt(field_list,
                             function(values){
+                                var _grund = values.grund ? values.grund:'Ohne Begründung'
+                                if (values.grund == 'Andere Gründe') {
+                                    _grund = values.grund + ": " + values.abw_grund;
+                                }
                                 frappe.call({
                                     method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.make_kuendigungs_prozess",
                                     args:{
@@ -575,7 +614,7 @@ function kuendigung(frm) {
                                             'datum_kuendigung': values.datum,
                                             'massenlauf': values.massenlauf,
                                             'druckvorlage': values.druckvorlage,
-                                            'grund': values.grund ? values.grund:'Ohne Begründung'
+                                            'grund': _grund
                                     },
                                     freeze: true,
                                     freeze_message: 'Erstelle Kündigung inkl. Bestätigung...',
@@ -625,12 +664,12 @@ function kuendigung_rueckzug(frm) {
 function todesfall(frm) {
     if (frappe.user.has_role("MV_MA")) {
         frappe.prompt([
-            {'fieldname': 'verstorben_am', 'fieldtype': 'Date', 'label': 'Verstorben am', 'reqd': 0, 'default': frappe.datetime.get_today()},
-            {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Todesfallbedingte inaktivierung erfolgt per', 'reqd': 1, 'default': frappe.datetime.year_end()},
+            {'fieldname': 'verstorben_am', 'fieldtype': 'Date', 'label': 'Verstorben am (oder Meldung)', 'reqd': 1, 'default': frappe.datetime.get_today()},
+            {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Todesfallbedingte inaktivierung erfolgt per', 'reqd': 1, 'default': frappe.datetime.get_today()},
             {'fieldname': 'todesfall_uebernahme', 'fieldtype': 'Data', 'label': 'Übernommen durch'}
         ],
         function(values){
-            cur_frm.set_value("kuendigung", values.datum);
+            cur_frm.set_value("austritt", values.datum);
             cur_frm.set_value("verstorben_am", values.verstorben_am);
             var status_change_log = cur_frm.add_child('status_change');
             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
@@ -644,7 +683,7 @@ function todesfall(frm) {
             }
             cur_frm.save();
             cur_frm.timeline.insert_comment("Todesfall erfasst.");
-            frappe.msgprint("Der Todesfall sowie die damit verbundene Kündigung wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
+            frappe.msgprint("Der Todesfall sowie der damit verbundene Austritt wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
         },
         'Todesfall',
         'Erfassen'

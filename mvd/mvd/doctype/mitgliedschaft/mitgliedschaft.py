@@ -2353,7 +2353,13 @@ def mvm_update(mitgliedschaft, kwargs):
                 change_log_row.datum = now()
                 change_log_row.status_alt = mitgliedschaft.status_c
                 change_log_row.status_neu = status_c
-                change_log_row.grund = 'SP Update'
+                if status_c == 'Online-Kündigung':
+                    if kwargs['kuendigungsgrund'] == 'Andere Gründe':
+                        change_log_row.grund = kwargs['kuendigungsgrund'] + ": " + kwargs['kuendigungsgrundBemerkung']
+                    else:
+                        change_log_row.grund = kwargs['kuendigungsgrund']
+                else:
+                    change_log_row.grund = 'SP Update'
             
             mitgliedschaft.mitglied_nr = mitglied_nr
             mitgliedschaft.sektion_id = sektion_id
@@ -2705,7 +2711,8 @@ def check_main_keys(kwargs):
         'datumOnlineVerbucht',
         'datumOnlineGutschrift',
         'onlinePaymentMethod',
-        'onlinePaymentId'
+        'onlinePaymentId',
+        'kuendigungsgrund'
     ]
     for key in mandatory_keys:
         if key not in kwargs:
@@ -3057,6 +3064,18 @@ def prepare_mvm_for_sp(mitgliedschaft):
         'Interessent*in': 'InteressentIn'
     }
     
+    if mitgliedschaft.kuendigung:
+        kuendigungsgrund = frappe.db.sql("""SELECT
+                                                `grund`
+                                            FROM `tabStatus Change`
+                                            WHERE `status_neu` = 'Regulär &dagger;'
+                                            AND `parent` = '{mitgliedschaft}'
+                                            ORDER BY `idx` DESC""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)
+        if len(kuendigungsgrund) > 0:
+            kuendigungsgrund = kuendigungsgrund[0].grund
+    else:
+        kuendigungsgrund = None
+    
     prepared_mvm = {
         "mitgliedNummer": str(mitgliedschaft.mitglied_nr),
         "mitgliedId": int(mitgliedschaft.mitglied_id),
@@ -3096,7 +3115,8 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "datumOnlineVerbucht": mitgliedschaft.datum_online_verbucht if mitgliedschaft.datum_online_verbucht and mitgliedschaft.datum_online_verbucht != '' else None,
         "datumOnlineGutschrift": mitgliedschaft.datum_online_gutschrift if mitgliedschaft.datum_online_gutschrift and mitgliedschaft.datum_online_gutschrift != '' else None,
         "onlinePaymentMethod": mitgliedschaft.online_payment_method if mitgliedschaft.online_payment_method and mitgliedschaft.online_payment_method != '' else None,
-        "onlinePaymentId": mitgliedschaft.online_payment_id if mitgliedschaft.online_payment_id and mitgliedschaft.online_payment_id != '' else None
+        "onlinePaymentId": mitgliedschaft.online_payment_id if mitgliedschaft.online_payment_id and mitgliedschaft.online_payment_id != '' else None,
+        "kuendigungsgrund": kuendigungsgrund
     }
     
     return prepared_mvm

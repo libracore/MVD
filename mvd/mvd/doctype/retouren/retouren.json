@@ -1,7 +1,7 @@
 {
  "allow_copy": 1,
  "allow_import": 1,
- "autoname": "format:Ret-MW-{ausgabe}-{###}",
+ "autoname": "format:Ret-{#####}",
  "creation": "2022-07-07 15:25:54.265610",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -71,6 +71,7 @@
   {
    "fieldname": "mv_mitgliedschaft",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Mitgliedschaft",
    "options": "Mitgliedschaft",
    "read_only": 1,
@@ -160,7 +161,7 @@
    "label": "ignore_validation"
   }
  ],
- "modified": "2022-07-07 16:00:10.969091",
+ "modified": "2022-07-11 15:23:59.816903",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren",
@@ -190,5 +191,6 @@
  ],
  "sort_field": "creation",
  "sort_order": "DESC",
+ "title_field": "grund_bezeichnung",
  "track_changes": 1
 }
