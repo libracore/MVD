@@ -3076,6 +3076,8 @@ def prepare_mvm_for_sp(mitgliedschaft):
         'Interessent*in': 'InteressentIn'
     }
     
+    kuendigungsgrund = None
+    
     if mitgliedschaft.kuendigung:
         kuendigungsgrund = frappe.db.sql("""SELECT
                                                 `grund`
@@ -3084,9 +3086,8 @@ def prepare_mvm_for_sp(mitgliedschaft):
                                             AND `parent` = '{mitgliedschaft}'
                                             ORDER BY `idx` DESC""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)
         if len(kuendigungsgrund) > 0:
-            kuendigungsgrund = kuendigungsgrund[0].grund
-    else:
-        kuendigungsgrund = None
+            kuendigungsgrund = kuendigungsgrund[0].grund or None
+        
     
     prepared_mvm = {
         "mitgliedNummer": str(mitgliedschaft.mitglied_nr),
