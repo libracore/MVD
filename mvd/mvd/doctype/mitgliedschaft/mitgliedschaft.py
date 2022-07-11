@@ -380,7 +380,14 @@ class Mitgliedschaft(Document):
                 self.eintrittsdatum = self.datum_zahlung_mitgliedschaft
         
         if self.bezahltes_mitgliedschaftsjahr > 0 and self.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
+            # erstelle status change log und Status-Änderung
+            change_log_row = self.append('status_change', {})
+            change_log_row.datum = now()
+            change_log_row.status_alt = self.status_c
+            change_log_row.status_neu = 'Regulär'
+            change_log_row.grund = 'Zahlungseingang'
             self.status_c = 'Regulär'
+            
             # erstellung Begrüssungsschreiben
             self.begruessung_massendruck = 1
             self.begruessung_via_zahlung = 1
@@ -1646,7 +1653,8 @@ def get_uebersicht_html(name):
                 'tel_g_2': mitgliedschaft.tel_g_2 or '',
                 'rg_tel_g': mitgliedschaft.rg_tel_g or '',
                 'language': mitgliedschaft.language or 'de',
-                'sektion': mitgliedschaft.sektion_id
+                'sektion': mitgliedschaft.sektion_id,
+                'region': '({0})'.format(mitgliedschaft.region) if mitgliedschaft.region else ''
             }
         }
         
@@ -1673,7 +1681,8 @@ def get_uebersicht_html(name):
             'eintritt': eintritt,
             'kuendigung': mitgliedschaft.kuendigung or False,
             'language': mitgliedschaft.language or 'de',
-            'sektion': mitgliedschaft.sektion_id
+            'sektion': mitgliedschaft.sektion_id,
+            'region': '({0})'.format(mitgliedschaft.region) if mitgliedschaft.region else ''
         }
         
         # Hauptmitglied
@@ -2101,15 +2110,25 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
     return sinv.name
 
 @frappe.whitelist()
-def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druckvorlage):
+def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druckvorlage, grund='Ohne Begründung'):
     # erfassung Kündigung
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     mitgliedschaft.kuendigung = datum_kuendigung
-    mitgliedschaft.status_c = 'Kündigung'
+    # erstelle status change log und Status-Änderung
+    change_log_row = mitgliedschaft.append('status_change', {})
+    change_log_row.datum = now()
+    change_log_row.status_alt = mitgliedschaft.status_c
+    change_log_row.status_neu = 'Regulär &dagger;'
+    change_log_row.grund = grund
+    
+    if mitgliedschaft.status_c == 'Online-Kündigung':
+        mitgliedschaft.status_c = 'Regulär'
+    
     mitgliedschaft.validierung_notwendig = 0
     mitgliedschaft.kuendigung_druckvorlage = druckvorlage
     if massenlauf == '1':
         mitgliedschaft.kuendigung_verarbeiten = 1
+    mitgliedschaft.letzte_bearbeitung_von = 'User'
     mitgliedschaft.save(ignore_permissions=True)
     
     # erstellung Kündigungs PDF
@@ -2276,7 +2295,13 @@ def mvm_update(mitgliedschaft, kwargs):
                 austritt = ''
             
             if kwargs['kuendigungPer']:
-                kuendigung = kwargs['kuendigungPer'].split("T")[0]
+                if kwargs['needsValidation'] and status_c not in ('Online-Anmeldung', 'Online-Beitritt', 'Online-Kündigung', 'Zuzug'):
+                    kuendigung = kwargs['kuendigungPer'].split("T")[0]
+                else:
+                    if sektion_id in ('MVZH', 'MVSO'):
+                        kuendigung = kwargs['kuendigungPer'].split("T")[0]
+                    else:
+                        kuendigung = mitgliedschaft.kuendigung
             else:
                 kuendigung = ''
             # -----------------------------------------------------------------
@@ -2329,6 +2354,19 @@ def mvm_update(mitgliedschaft, kwargs):
             naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
             # -----------------------------------------------------------------
             
+            # erstelle ggf. status change log und Status-Änderung
+            if status_c != mitgliedschaft.status_c:
+                change_log_row = mitgliedschaft.append('status_change', {})
+                change_log_row.datum = now()
+                change_log_row.status_alt = mitgliedschaft.status_c
+                change_log_row.status_neu = status_c
+                if status_c == 'Online-Kündigung':
+                    if kwargs['kuendigungsgrund'] == 'Andere Gründe':
+                        change_log_row.grund = kwargs['kuendigungsgrund'] + ": " + kwargs['kuendigungsgrundBemerkung']
+                    else:
+                        change_log_row.grund = kwargs['kuendigungsgrund']
+                else:
+                    change_log_row.grund = 'SP Update'
             
             mitgliedschaft.mitglied_nr = mitglied_nr
             mitgliedschaft.sektion_id = sektion_id
@@ -2384,6 +2422,11 @@ def mvm_update(mitgliedschaft, kwargs):
                     mitgliedschaft.validierung_notwendig = 1
                     if status_c != 'Zuzug':
                         mitgliedschaft.status_vor_onl_mutation = status_c
+                        change_log_row = mitgliedschaft.append('status_change', {})
+                        change_log_row.datum = now()
+                        change_log_row.status_alt = mitgliedschaft.status_c
+                        change_log_row.status_neu = 'Online-Mutation'
+                        change_log_row.grund = 'SP Update'
                         mitgliedschaft.status_c = 'Online-Mutation'
                     
             
@@ -2680,7 +2723,8 @@ def check_main_keys(kwargs):
         'datumOnlineVerbucht',
         'datumOnlineGutschrift',
         'onlinePaymentMethod',
-        'onlinePaymentId'
+        'onlinePaymentId',
+        'kuendigungsgrund'
     ]
     for key in mandatory_keys:
         if key not in kwargs:
@@ -3032,6 +3076,19 @@ def prepare_mvm_for_sp(mitgliedschaft):
         'Interessent*in': 'InteressentIn'
     }
     
+    kuendigungsgrund = None
+    
+    if mitgliedschaft.kuendigung:
+        kuendigungsgrund = frappe.db.sql("""SELECT
+                                                `grund`
+                                            FROM `tabStatus Change`
+                                            WHERE `status_neu` = 'Regulär &dagger;'
+                                            AND `parent` = '{mitgliedschaft}'
+                                            ORDER BY `idx` DESC""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)
+        if len(kuendigungsgrund) > 0:
+            kuendigungsgrund = kuendigungsgrund[0].grund or None
+        
+    
     prepared_mvm = {
         "mitgliedNummer": str(mitgliedschaft.mitglied_nr),
         "mitgliedId": int(mitgliedschaft.mitglied_id),
@@ -3071,7 +3128,8 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "datumOnlineVerbucht": mitgliedschaft.datum_online_verbucht if mitgliedschaft.datum_online_verbucht and mitgliedschaft.datum_online_verbucht != '' else None,
         "datumOnlineGutschrift": mitgliedschaft.datum_online_gutschrift if mitgliedschaft.datum_online_gutschrift and mitgliedschaft.datum_online_gutschrift != '' else None,
         "onlinePaymentMethod": mitgliedschaft.online_payment_method if mitgliedschaft.online_payment_method and mitgliedschaft.online_payment_method != '' else None,
-        "onlinePaymentId": mitgliedschaft.online_payment_id if mitgliedschaft.online_payment_id and mitgliedschaft.online_payment_id != '' else None
+        "onlinePaymentId": mitgliedschaft.online_payment_id if mitgliedschaft.online_payment_id and mitgliedschaft.online_payment_id != '' else None,
+        "kuendigungsgrund": kuendigungsgrund
     }
     
     return prepared_mvm
@@ -3582,3 +3640,12 @@ def create_sp_log(mitgliedschaft, neuanlage, kwargs):
     }).insert(ignore_permissions=True)
     
     return
+
+@frappe.whitelist()
+def get_returen_dashboard(mitgliedschaft):
+    anz_offen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabRetouren` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Offen'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)[0].qty
+    anz_in_bearbeitung = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabRetouren` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'In Bearbeitung'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)[0].qty
+    return {
+        'anz_offen': anz_offen,
+        'anz_in_bearbeitung': anz_in_bearbeitung
+    }

@@ -1,0 +1,196 @@
+{
+ "allow_copy": 1,
+ "allow_import": 1,
+ "autoname": "format:Ret-{#####}",
+ "creation": "2022-07-07 15:25:54.265610",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_allgemein",
+  "status",
+  "adresse_geaendert",
+  "cb_1",
+  "ausgabe",
+  "section_verknuepfung",
+  "mv_mitgliedschaft",
+  "adressblock",
+  "cb_2",
+  "sektion_id",
+  "section_api_daten",
+  "legacy_kategorie_code",
+  "grund_code",
+  "grund_bezeichnung",
+  "legacy_notiz",
+  "cb_3",
+  "datum_erfasst_post",
+  "retoure_mw_sequence_number",
+  "retoure_dmc",
+  "retoure_sendungsbild",
+  "ignore_validation"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "default": "Offen",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Offen\nIn Bearbeitung\nAbgeschlossen",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "adresse_geaendert",
+   "fieldtype": "Check",
+   "label": "Adresse seit Export ge\u00e4ndert?",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ausgabe",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Ausgabe",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_verknuepfung",
+   "fieldtype": "Section Break",
+   "label": "Verkn\u00fcpfungen"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mitgliedschaft",
+   "options": "Mitgliedschaft",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "mitgliedschaft.adressblock",
+   "fieldname": "adressblock",
+   "fieldtype": "Code",
+   "label": "Adressblock",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_api_daten",
+   "fieldtype": "Section Break",
+   "label": "API Daten"
+  },
+  {
+   "fieldname": "legacy_kategorie_code",
+   "fieldtype": "Data",
+   "label": "legacyKategorieCode",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grund_code",
+   "fieldtype": "Data",
+   "label": "grundCode",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grund_bezeichnung",
+   "fieldtype": "Data",
+   "label": "grundBezeichnung",
+   "read_only": 1
+  },
+  {
+   "fieldname": "legacy_notiz",
+   "fieldtype": "Code",
+   "label": "legacyNotiz",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "datum_erfasst_post",
+   "fieldtype": "Datetime",
+   "label": "datumErfasstPost",
+   "read_only": 1
+  },
+  {
+   "fieldname": "retoure_mw_sequence_number",
+   "fieldtype": "Data",
+   "label": "retoureMuWSequenceNumber",
+   "read_only": 1
+  },
+  {
+   "fieldname": "retoure_dmc",
+   "fieldtype": "Data",
+   "label": "retoureDMC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "retoure_sendungsbild",
+   "fieldtype": "Code",
+   "label": "retoureSendungsbild",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_validation",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "ignore_validation"
+  }
+ ],
+ "modified": "2022-07-11 15:23:59.816903",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Retouren",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MV_MA",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "title_field": "grund_bezeichnung",
+ "track_changes": 1
+}

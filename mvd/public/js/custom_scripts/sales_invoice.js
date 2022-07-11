@@ -6,7 +6,7 @@ frappe.ui.form.on('Sales Invoice', {
         if ((cur_frm.doc.outstanding_amount > 0)&&(cur_frm.doc.docstatus==1)) {
             check_for_hv(frm);
         }
-        if ((cur_frm.doc.docstatus == 2)&&(frappe.user.has_role("Administrator"))) {
+        if ((cur_frm.doc.docstatus == 2)&&(frappe.user.has_role("System Manager"))) {
             frm.add_custom_button(__("Storno Rollback"), function() {
                 storno_rollback(frm);
             });

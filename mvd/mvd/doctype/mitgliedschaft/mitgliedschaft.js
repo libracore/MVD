@@ -8,14 +8,14 @@ frappe.ui.form.on('Mitgliedschaft', {
     },
     refresh: function(frm) {
        if (!frm.doc.__islocal&&cur_frm.doc.status_c != 'Inaktiv') {
-            if ((cur_frm.doc.status_c != 'Inaktiv')&&(frappe.user.has_role("System Manager"))) {
+            if (((cur_frm.doc.status_c != 'Inaktiv')&&(frappe.user.has_role("System Manager")))||(['Online-Anmeldung', 'Anmeldung', 'Interessent*in'].includes(cur_frm.doc.status_c))) {
                 frm.add_custom_button(__("Inaktivieren"), function() {
                     mitglied_inaktivieren(frm);
                 }).addClass("btn-danger")
             }
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
                 
-                if ((!['Kündigung', 'Gestorben', 'Anmeldung', 'Online-Anmeldung'].includes(cur_frm.doc.status_c))) {
+                if ((!['Gestorben', 'Anmeldung', 'Online-Anmeldung'].includes(cur_frm.doc.status_c))&&(!cur_frm.doc.kuendigung)) {
                     frm.add_custom_button(__("Sektionswechsel"),  function() {
                         if (cur_frm.doc.mitgliedtyp_c == 'Geschäft') {
                             frappe.msgprint("Für Geschäftsmitglieder ist kein automatischer Sektionswechsel möglich.");
@@ -25,10 +25,16 @@ frappe.ui.form.on('Mitgliedschaft', {
                     }, __("Mutation"));
                 }
                 
-                if (!['Kündigung', 'Gestorben'].includes(cur_frm.doc.status_c)) {
+                if (!['Gestorben'].includes(cur_frm.doc.status_c)&&(!cur_frm.doc.kuendigung)) {
                     frm.add_custom_button(__("Kündigung"),  function() {
                         kuendigung(frm);
                     }, __("Mutation"));
+                } else {
+                    if (!['Gestorben'].includes(cur_frm.doc.status_c)&&(cur_frm.doc.kuendigung)) {
+                        frm.add_custom_button(__("Kündigung zurückziehen"),  function() {
+                            kuendigung_rueckzug(frm);
+                        }, __("Mutation"));
+                    }
                 }
                 
                 frm.add_custom_button(__("Ausschluss"),  function() {
@@ -41,7 +47,7 @@ frappe.ui.form.on('Mitgliedschaft', {
                     }, __("Mutation"));
                 }
                 
-                if (!['Gestorben', 'Kündigung'].includes(cur_frm.doc.status_c)) {
+                if (!['Gestorben'].includes(cur_frm.doc.status_c)&&(!cur_frm.doc.kuendigung)) {
                     frm.add_custom_button(__("Mitgliedschafts-Rechnung"),  function() {
                         erstelle_rechnung(frm);
                     }, __("Erstelle"));
@@ -129,6 +135,12 @@ frappe.ui.form.on('Mitgliedschaft', {
         if (!frm.doc.__islocal) {
             // load html overview
             load_html_overview(frm);
+            
+            // Aktuell Deaktiviert bis zum Deployment
+            // *****************************************************
+            // load retouren overview
+            //~ load_retouren_overview(frm)
+            // *****************************************************
             
             // assign hack
             $(".add-assignment.text-muted").remove();
@@ -309,8 +321,43 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frappe.validated=false;
             }
         }
-        //cur_frm.set_value("sp_no_update", 0);
+        
         cur_frm.set_value("letzte_bearbeitung_von", 'User');
+        
+        // *****************************************************
+        // Aktuell Deaktiviert bis zum Deployment
+        // *****************************************************
+        // Abfrage ob M+W Retouren geschlossen werden sollen
+        //~ if (cur_frm.doc.m_w_retouren_offen || cur_frm.doc.m_w_retouren_in_bearbeitung) {
+            //~ frappe.confirm(
+                //~ 'Dieses Mitglied besitzt offene M+W Retouren. Möchten Sie diese als Abgeschlossen markieren?',
+                //~ function(){
+                    //~ // on yes
+                    //~ frappe.call({
+                        //~ method: "mvd.mvd.doctype.retouren.retouren.close_open_retouren",
+                        //~ args:{
+                                //~ 'mitgliedschaft': cur_frm.doc.name
+                        //~ },
+                        //~ callback: function(r){
+                            //~ var resolve_reload = new Promise(function(resolve) {
+                                //~ cur_frm.reload_doc();
+                                //~ resolve(true);
+                            //~ });
+                            //~ resolve_reload.then(function(resolve_reload) {
+                                //~ cur_frm.set_value("m_w_retouren_offen", 0);
+                                //~ cur_frm.set_value("m_w_retouren_in_bearbeitung", 0);
+                                //~ cur_frm.set_value("m_w_anzahl", 0);
+                                //~ cur_frm.save();
+                            //~ });
+                        //~ }
+                    //~ });
+                //~ },
+                //~ function(){
+                    //~ // on no
+                //~ }
+            //~ )
+        //~ }
+        // *****************************************************
     },
     plz: function(frm) {
         pincode_lookup(cur_frm.doc.plz, 'ort');
@@ -370,6 +417,41 @@ function load_html_overview(frm) {
     });
 }
 
+function load_retouren_overview(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_returen_dashboard",
+        args:{
+                'mitgliedschaft': cur_frm.doc.name
+        },
+        callback: function(r)
+        {
+            var retouren = r.message;
+            var info = '';
+            var color = 'green';
+            var show = false;
+            if (retouren.anz_offen > 0) {
+                info += retouren.anz_offen + " Offene ";
+                color = 'red';
+                show = true;
+            }
+            if (retouren.anz_in_bearbeitung > 0) {
+                if (!show) {
+                    info += retouren.anz_in_bearbeitung + " M+W Retoure(n) in Bearbeitung";
+                    color = 'orange';
+                    show = true;
+                } else {
+                    info += 'M+W Retoure(n) und ' + retouren.anz_in_bearbeitung + " in Bearbeitung";
+                }
+            } else {
+                info += 'M+W Retoure(n)';
+            }
+            if (show) {
+                cur_frm.dashboard.add_indicator(info, color);
+            }
+        }
+    });
+}
+
 function kuendigung(frm) {
     if (frappe.user.has_role("MV_MA")) {
         frappe.call({
@@ -416,6 +498,21 @@ function kuendigung(frm) {
                                 }
                             }
                             
+                            var default_grund = '';
+                            var abw_grund = '';
+                            
+                            cur_frm.doc.status_change.forEach(function(entry) {
+                                if (entry.grund.includes("Andere Gründe")&&entry.idx == cur_frm.doc.status_change.length) {
+                                    default_grund = 'Andere Gründe';
+                                    if (entry.grund.split("Andere Gründe: ").length > 1) {
+                                        abw_grund = entry.grund.split("Andere Gründe: ")[1];
+                                    }
+                                } else if (entry.idx == cur_frm.doc.status_change.length) {
+                                    default_grund = entry.grund;
+                                }
+                            });
+                            
+                            
                             if (fristgerecht) {
                                 // Default Druckvorlage für den Moment deaktiviert!
                                 //~ var field_list = [
@@ -429,6 +526,17 @@ function kuendigung(frm) {
                                 //~ ];
                                 var field_list = [
                                     {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': cur_frm.doc.kuendigung ? cur_frm.doc.kuendigung:frappe.datetime.year_end()},
+                                    {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe', 'default': default_grund, 'change': function() {
+                                            if (cur_dialog.fields_dict.grund.get_value() == 'Andere Gründe') {
+                                                cur_dialog.fields_dict.abw_grund.df.hidden = 0;
+                                                cur_dialog.fields_dict.abw_grund.refresh();
+                                            } else {
+                                                cur_dialog.fields_dict.abw_grund.df.hidden = 1;
+                                                cur_dialog.fields_dict.abw_grund.refresh();
+                                            }
+                                        }
+                                    },
+                                    {'fieldname': 'abw_grund', 'fieldtype': 'Data', 'label': 'Andere Gründe', 'hidden': default_grund.includes("Andere Gründe") ? 0:1, 'default': abw_grund},
                                     {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                                         'get_query': function() {
                                             return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
@@ -462,6 +570,17 @@ function kuendigung(frm) {
                                 var field_list = [
                                     {'fieldname': 'html_info', 'fieldtype': 'HTML', 'options': '<p style="color: red;">Achtung: Kündigungsfrist verpasst!</p>'},
                                     {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.add_months(frappe.datetime.year_end(), 12), 'read_only': 1},
+                                    {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe', 'default': default_grund, 'change': function() {
+                                            if (cur_dialog.fields_dict.grund.get_value() == 'Andere Gründe') {
+                                                cur_dialog.fields_dict.abw_grund.df.hidden = 0;
+                                                cur_dialog.fields_dict.abw_grund.refresh();
+                                            } else {
+                                                cur_dialog.fields_dict.abw_grund.df.hidden = 1;
+                                                cur_dialog.fields_dict.abw_grund.refresh();
+                                            }
+                                        }
+                                    },
+                                    {'fieldname': 'abw_grund', 'fieldtype': 'Data', 'label': 'Andere Gründe', 'hidden': default_grund.includes("Andere Gründe") ? 0:1, 'default': abw_grund},
                                     {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                                         'get_query': function() {
                                             return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
@@ -484,20 +603,25 @@ function kuendigung(frm) {
                             
                             frappe.prompt(field_list,
                             function(values){
+                                var _grund = values.grund ? values.grund:'Ohne Begründung'
+                                if (values.grund == 'Andere Gründe') {
+                                    _grund = values.grund + ": " + values.abw_grund;
+                                }
                                 frappe.call({
                                     method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.make_kuendigungs_prozess",
                                     args:{
                                             'mitgliedschaft': cur_frm.doc.name,
                                             'datum_kuendigung': values.datum,
                                             'massenlauf': values.massenlauf,
-                                            'druckvorlage': values.druckvorlage
+                                            'druckvorlage': values.druckvorlage,
+                                            'grund': _grund
                                     },
                                     freeze: true,
                                     freeze_message: 'Erstelle Kündigung inkl. Bestätigung...',
                                     callback: function(r)
                                     {
                                         cur_frm.reload_doc();
-                                        cur_frm.timeline.insert_comment("Kündigung erfasst.");
+                                        cur_frm.timeline.insert_comment("Kündigung");
                                         frappe.msgprint("Die Kündigung wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.<br>Die Kündigungsbestätigung finden Sie in den Anhängen.");
                                     }
                                 });
@@ -516,23 +640,50 @@ function kuendigung(frm) {
     }
 }
 
+function kuendigung_rueckzug(frm) {
+    frappe.confirm(
+        'Wollen Sie die Kündigung zurückziehen?',
+        function(){
+            cur_frm.set_value("kuendigung", '');
+            var status_change_log = cur_frm.add_child('status_change');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', 'Regulär &dagger;');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Kündigungs Rückzug");
+            cur_frm.refresh_field('status_change');
+            cur_frm.save();
+            frappe.msgprint("Die Kündigung wurde zurückgezogen.");
+        },
+        function(){
+            // on no
+        }
+    )
+    
+}
+
 function todesfall(frm) {
     if (frappe.user.has_role("MV_MA")) {
         frappe.prompt([
-            {'fieldname': 'verstorben_am', 'fieldtype': 'Date', 'label': 'Verstorben am', 'reqd': 0, 'default': frappe.datetime.get_today()},
-            {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Todesfall bedingte Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.year_end()},
+            {'fieldname': 'verstorben_am', 'fieldtype': 'Date', 'label': 'Verstorben am (oder Meldung)', 'reqd': 1, 'default': frappe.datetime.get_today()},
+            {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Todesfallbedingte inaktivierung erfolgt per', 'reqd': 1, 'default': frappe.datetime.get_today()},
             {'fieldname': 'todesfall_uebernahme', 'fieldtype': 'Data', 'label': 'Übernommen durch'}
         ],
         function(values){
-            cur_frm.set_value("kuendigung", values.datum);
+            cur_frm.set_value("austritt", values.datum);
             cur_frm.set_value("verstorben_am", values.verstorben_am);
+            var status_change_log = cur_frm.add_child('status_change');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Gestorben');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Gestorben");
+            cur_frm.refresh_field('status_change');
             cur_frm.set_value("status_c", 'Gestorben');
             if (values.todesfall_uebernahme) {
                 cur_frm.set_value("todesfall_uebernahme", values.todesfall_uebernahme);
             }
             cur_frm.save();
             cur_frm.timeline.insert_comment("Todesfall erfasst.");
-            frappe.msgprint("Der Todesfall sowie die damit verbundene Kündigung wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
+            frappe.msgprint("Der Todesfall sowie der damit verbundene Austritt wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
         },
         'Todesfall',
         'Erfassen'
@@ -550,6 +701,12 @@ function ausschluss(frm) {
         ],
         function(values){
             cur_frm.set_value("austritt", values.datum);
+            var status_change_log = cur_frm.add_child('status_change');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Ausschluss');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Ausschluss: " + values.grund);
+            cur_frm.refresh_field('status_change');
             cur_frm.set_value("status_c", 'Ausschluss');
             if (values.grund) {
                 var alte_infos = cur_frm.doc.wichtig;
@@ -596,6 +753,12 @@ function sektionswechsel(frm) {
                             if (r.message == 1) {
                                 cur_frm.set_value("wegzug", frappe.datetime.get_today());
                                 cur_frm.set_value("wegzug_zu", values.sektion_neu);
+                                var status_change_log = cur_frm.add_child('status_change');
+                                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+                                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Wegzug');
+                                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Sektionswechsel zu " + values.sektion_neu);
+                                cur_frm.refresh_field('status_change');
                                 cur_frm.set_value("status_c", 'Wegzug');
                                 cur_frm.save();
                                 cur_frm.timeline.insert_comment("Sektionswechsel zu " + values.sektion_neu + " vollzogen.");
@@ -629,6 +792,12 @@ function daten_validiert(frm) {
                             // on yes
                             cur_frm.set_value("zuzug_massendruck", '1');
                             cur_frm.set_value("validierung_notwendig", '0');
+                            var status_change_log = cur_frm.add_child('status_change');
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär');
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Zuzugsvalidierung");
+                            cur_frm.refresh_field('status_change');
                             cur_frm.set_value("status_c", 'Regulär');
                             cur_frm.save();
                             cur_frm.timeline.insert_comment("Validierung durchgeführt.");
@@ -637,6 +806,12 @@ function daten_validiert(frm) {
                         function(){
                             // on no
                             cur_frm.set_value("validierung_notwendig", 0);
+                            var status_change_log = cur_frm.add_child('status_change');
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär');
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Zuzugsvalidierung");
+                            cur_frm.refresh_field('status_change');
                             cur_frm.set_value("status_c", 'Regulär');
                             cur_frm.save();
                             cur_frm.timeline.insert_comment("Validierung durchgeführt.");
@@ -650,6 +825,12 @@ function daten_validiert(frm) {
                     erstelle_rechnung(frm);
                 } else if (cur_frm.doc.status_c == 'Online-Beitritt') {
                     cur_frm.set_value("validierung_notwendig", '0');
+                    var status_change_log = cur_frm.add_child('status_change');
+                    frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                    frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+                    frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär');
+                    frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Validierung Online-Beitritt");
+                    cur_frm.refresh_field('status_change');
                     cur_frm.set_value("status_c", 'Regulär');
                     cur_frm.timeline.insert_comment("Validierung durchgeführt.");
                     cur_frm.save();
@@ -660,6 +841,21 @@ function daten_validiert(frm) {
                         cur_frm.set_value("status_c", alter_status);
                     } else {
                         cur_frm.set_value("status_c", 'Regulär');
+                    }
+                    if ((alter_status == 'Regulär')&&(cur_frm.doc.kuendigung)) {
+                        var status_change_log = cur_frm.add_child('status_change');
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', 'Online-Mutation');
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär &dagger;');
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Validierung Online-Mutation");
+                        cur_frm.refresh_field('status_change');
+                    } else {
+                        var status_change_log = cur_frm.add_child('status_change');
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', 'Online-Mutation');
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', alter_status);
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Validierung Online-Mutation");
+                        cur_frm.refresh_field('status_change');
                     }
                     cur_frm.set_value("status_vor_onl_mutation", '');
                     cur_frm.set_value("validierung_notwendig", '0');
@@ -1547,8 +1743,15 @@ function mitglied_inaktivieren(frm) {
             cur_frm.set_value("rg_massendruck", '');
             cur_frm.set_value("begruessung_massendruck_dokument", '');
             cur_frm.set_value("letzte_bearbeitung_von", 'User');
+            var status_change_log = cur_frm.add_child('status_change');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Inaktiv');
+            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', 'Manuelle Inaktivierung');
+            cur_frm.refresh_field('status_change');
             cur_frm.set_value("status_c", 'Inaktiv');
-            cur_frm.set_value("austritt", frappe.datetime.get_today());
+            // Auskommentiert da diese nie beigetretten sind, ergo kein Austrittsdatum
+            //~ cur_frm.set_value("austritt", frappe.datetime.get_today());
             cur_frm.save();
             frappe.msgprint("Das Mitglied wurde inaktiviert.");
         },

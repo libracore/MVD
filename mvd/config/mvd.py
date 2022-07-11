@@ -45,6 +45,12 @@ def get_data():
                 },
                 {
                     "type": "doctype",
+                    "name": "Massenlauf Inaktivierung",
+                    "label": _("Massenlauf Inaktivierung"),
+                    "description": _("Massenlauf Inaktivierung")
+                },
+                {
+                    "type": "doctype",
                     "name": "CAMT Import",
                     "label": _("CAMT Importer"),
                     "description": _("CAMT Importer")
@@ -102,6 +108,24 @@ def get_data():
                     "name": "Region",
                     "label": _("Regionen"),
                     "description": _("Regions Einstellungen")
+                }
+            ]
+        },
+        {
+            "label": _("Adresspflege"),
+            "icon": "fa fa-cog",
+            "items": [
+                {
+                    "type": "doctype",
+                    "name": "Retouren",
+                    "label": _("Retouren"),
+                    "description": _("Retouren")
+                },
+                {
+                    "type": "doctype",
+                    "name": "MW",
+                    "label": _("MW"),
+                    "description": _("MW")
                 }
             ]
         }

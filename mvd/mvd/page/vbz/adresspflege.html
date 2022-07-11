@@ -1,21 +1,39 @@
 <h1 class="vbz"><span class="back-to-overview"><i class="fa fa-home pull-left"></i><i class="fa fa-chevron-left pull-left"></i></span> Adressrecherche und Adresspflege</h1>
 <div class="row">
     <h2 class="place-holder-left">Adressrecherche M+W</h2>
+    <p class="place-holder-left">Grundlage für die Adressrecherche und Adresspflege sind:<br>
+    1. Retouren M+W (sehr zuverlässig)<br>
+    2. Meldungen der Post über den Dienst Adresspflege (niedrige Zuverlässigkeit)<br><br>
+    Die Zustellung des M+W wird nach zwei Retouren eingestellt bis die Adresse korrigiert ist<br>
+    und ihr die Anzahl M+W wieder von 0 auf 1 setzt.</p>
+    <h2 class="place-holder-left">Retouren M+W</h2>
     <table id="table_adressrecherche_uebersicht">
         <tr>
             <th><b>Verarbeitung von</b></th>
             <th><b>Anzahl</b></th>
         </tr>
+        <tr id="zweimal_unzustellbar">
+            <td>zweimal unzustellbare M+W (Zustellung gestoppt)</td>
+            <td>
+                {% if retouren.qty > 99 %}
+                    99+
+                {% else %}
+                    {{ termin.qty }}
+                {% endif %}
+            </td>
+        </tr>
         <tr id="einmal_unzustellbar">
             <td>einmal unzustellbare M+W</td>
-            <td>40</td>
-        </tr>
-        <tr id="zweimal_unzustellbar">
-            <td>zweimal unzustellbare M+W</td>
-            <td>4</td>
+            <td>
+                {% if retouren.qty > 99 %}
+                    99+
+                {% else %}
+                    {{ termin.qty }}
+                {% endif %}
+            </td>
         </tr>
     </table>
-    <h2 class="place-holder-left">Adresspflege mit Meldungen des Webservice der Post M+W</h2>
+    <h2 class="place-holder-left">Adresspflege Web-Service (prio 2)</h2>
     <table id="table_adresspflege_uebersicht">
         <tr>
             <th><b>Verarbeitung von</b></th>
