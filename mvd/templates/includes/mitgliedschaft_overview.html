@@ -1,3 +1,4 @@
+<!-- Server Funktion "get_uebersicht_html" in mitgliedschaft.py, aufgerufen via mitgliedschaft.js -->
 <div class="clearfix"></div>
 {% if allgemein.status == 'Interessent*in' %}
     <div class="row">
@@ -5,7 +6,7 @@
         <div class="col-sm-12">
             <div class="address-box">
                 <p>
-                    <b>Sektion:</b> {{ allgemein.sektion }}<br>
+                    <b>Sektion:</b> {{ allgemein.sektion }} {{ allgemein.region }}<br>
                     <b>Status:</b> {{ allgemein.status }}<br>
                     <b>Erfassung:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}
                 </p>
@@ -25,14 +26,11 @@
         <div class="col-sm-5">
             <div class="address-box">
                 <p>
-                    <b>Sektion:</b> {{ allgemein.sektion }}<br>
-                    <b>Status:</b> {{ allgemein.status }}{% if allgemein.kuendigung and allgemein.status == 'Regulär' %} &dagger;{% endif %}<br>
+                    <b>Sektion:</b> {{ allgemein.sektion }} {{ allgemein.region }}<br>
+                    <b>Status:</b> {{ allgemein.status }}{% if allgemein.kuendigung and allgemein.status == 'Regulär' %} &dagger; (<b>Gekündigt per {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}</b>){% endif %}<br>
                     <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
                     {% if allgemein.status not in ['Anmeldung', 'Online-Anmeldung'] %}
                         <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
-                        {% if allgemein.kuendigung %}
-                            <b>Kündigung:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}<br>
-                        {% endif %}
                         {% if allgemein.austritt %}
                             <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
                         {% endif %}
@@ -77,14 +75,11 @@
                     <span class="css-ampel {{ allgemein.ampelfarbe }}"><span></span></span>
                 </p>
                 <p>
-                    <b>Sektion:</b> {{ allgemein.sektion }}<br>
-                    <b>Status:</b> {{ allgemein.status }}{% if allgemein.kuendigung and allgemein.status == 'Regulär' %} &dagger;{% endif %}<br>
+                    <b>Sektion:</b> {{ allgemein.sektion }} {{ allgemein.region }}<br>
+                    <b>Status:</b> {{ allgemein.status }}{% if allgemein.kuendigung and allgemein.status == 'Regulär' %} &dagger; (<b>Gekündigt per {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}</b>){% endif %}<br>
                     <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
                     {% if allgemein.status not in ['Anmeldung', 'Online-Anmeldung'] %}
                         <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
-                        {% if allgemein.kuendigung %}
-                            <b>Kündigung:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}<br>
-                        {% endif %}
                         {% if allgemein.austritt %}
                             <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
                         {% endif %}
