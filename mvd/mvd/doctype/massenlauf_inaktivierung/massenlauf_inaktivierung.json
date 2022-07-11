@@ -88,11 +88,11 @@
   {
    "fieldname": "hinweis",
    "fieldtype": "HTML",
-   "options": "<ol><li>Kriterien w\u00e4hlen</li><li>Speichern dr\u00fccken</li><li>--&gt; Resultat wird angezeigt</li><li>Liste bereinigen</li><li>Buchen dr\u00fccken, Ausschliessungen werden in der Nacht ausgef\u00fchrt</li></ol>"
+   "options": "<h1>Hinweis f\u00fcr Massenlauf Inaktivierung:\nDer Massenlauf Inaktivierung wird f\u00fcr den Jahresversand entwickelt: Die Massen-Inaktivierung kann noch nicht ausgel\u00f6st werden.</h1>\n<ol><li>Kriterien w\u00e4hlen</li><li>Speichern dr\u00fccken</li><li>--&gt; Resultat wird angezeigt</li><li>Liste bereinigen</li><li>Buchen dr\u00fccken, Ausschliessungen werden in der Nacht ausgef\u00fchrt</li></ol>\n<p>Tipp: Um neu zu beginnen, k\u00f6nnen alle Zeilen gel\u00f6scht werden und dann mit Speichern neu geladen werden.</p>"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-07-11 17:01:56.757334",
+ "modified": "2022-07-11 22:03:11.175996",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Massenlauf Inaktivierung",
