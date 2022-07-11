@@ -2121,6 +2121,9 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druck
     change_log_row.status_neu = 'Regulär &dagger;'
     change_log_row.grund = grund
     
+    if mitgliedschaft.status_c == 'Online-Kündigung':
+        mitgliedschaft.status_c = 'Regulär'
+    
     mitgliedschaft.validierung_notwendig = 0
     mitgliedschaft.kuendigung_druckvorlage = druckvorlage
     if massenlauf == '1':
