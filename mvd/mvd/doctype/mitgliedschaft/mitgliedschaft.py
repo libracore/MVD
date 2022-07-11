@@ -2295,7 +2295,13 @@ def mvm_update(mitgliedschaft, kwargs):
                 austritt = ''
             
             if kwargs['kuendigungPer']:
-                kuendigung = kwargs['kuendigungPer'].split("T")[0]
+                if kwargs['needsValidation'] and status_c not in ('Online-Anmeldung', 'Online-Beitritt', 'Online-Kündigung', 'Zuzug'):
+                    kuendigung = kwargs['kuendigungPer'].split("T")[0]
+                else:
+                    if sektion_id in ('MVZH', 'MVSO'):
+                        kuendigung = kwargs['kuendigungPer'].split("T")[0]
+                    else:
+                        kuendigung = mitgliedschaft.kuendigung
             else:
                 kuendigung = ''
             # -----------------------------------------------------------------

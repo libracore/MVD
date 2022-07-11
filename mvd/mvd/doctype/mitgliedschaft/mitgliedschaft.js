@@ -792,6 +792,12 @@ function daten_validiert(frm) {
                             // on yes
                             cur_frm.set_value("zuzug_massendruck", '1');
                             cur_frm.set_value("validierung_notwendig", '0');
+                            var status_change_log = cur_frm.add_child('status_change');
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär');
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Zuzugsvalidierung");
+                            cur_frm.refresh_field('status_change');
                             cur_frm.set_value("status_c", 'Regulär');
                             cur_frm.save();
                             cur_frm.timeline.insert_comment("Validierung durchgeführt.");
@@ -800,6 +806,12 @@ function daten_validiert(frm) {
                         function(){
                             // on no
                             cur_frm.set_value("validierung_notwendig", 0);
+                            var status_change_log = cur_frm.add_child('status_change');
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär');
+                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Zuzugsvalidierung");
+                            cur_frm.refresh_field('status_change');
                             cur_frm.set_value("status_c", 'Regulär');
                             cur_frm.save();
                             cur_frm.timeline.insert_comment("Validierung durchgeführt.");
@@ -813,6 +825,12 @@ function daten_validiert(frm) {
                     erstelle_rechnung(frm);
                 } else if (cur_frm.doc.status_c == 'Online-Beitritt') {
                     cur_frm.set_value("validierung_notwendig", '0');
+                    var status_change_log = cur_frm.add_child('status_change');
+                    frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                    frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+                    frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär');
+                    frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Validierung Online-Beitritt");
+                    cur_frm.refresh_field('status_change');
                     cur_frm.set_value("status_c", 'Regulär');
                     cur_frm.timeline.insert_comment("Validierung durchgeführt.");
                     cur_frm.save();
@@ -823,6 +841,21 @@ function daten_validiert(frm) {
                         cur_frm.set_value("status_c", alter_status);
                     } else {
                         cur_frm.set_value("status_c", 'Regulär');
+                    }
+                    if ((alter_status == 'Regulär')&&(cur_frm.doc.kuendigung)) {
+                        var status_change_log = cur_frm.add_child('status_change');
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', 'Online-Mutation');
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär &dagger;');
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Validierung Online-Mutation");
+                        cur_frm.refresh_field('status_change');
+                    } else {
+                        var status_change_log = cur_frm.add_child('status_change');
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', 'Online-Mutation');
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', alter_status);
+                        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Validierung Online-Mutation");
+                        cur_frm.refresh_field('status_change');
                     }
                     cur_frm.set_value("status_vor_onl_mutation", '');
                     cur_frm.set_value("validierung_notwendig", '0');
