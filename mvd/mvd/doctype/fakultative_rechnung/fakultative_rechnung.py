@@ -152,9 +152,9 @@ def create_unpaid_sinv(fr, betrag=False):
         else:
             address = mitgliedschaft.rg_adresse
     else:
-        customer = mitgliedschaft.rg_kunde_mitglied
-        address = mitgliedschaft.rg_adresse_mitglied
-        contact = mitgliedschaft.rg_kontakt_mitglied
+        customer = mitgliedschaft.rg_kunde
+        address = mitgliedschaft.rg_adresse
+        contact = mitgliedschaft.rg_kontakt
     
     if fr.typ == 'HV':
         betrag = sektion.betrag_hv
