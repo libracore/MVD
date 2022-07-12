@@ -1884,6 +1884,10 @@ def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
 @frappe.whitelist()
 def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
     if str(get_sektion_code(neue_sektion)) not in ('ZH', 'SO'):
+        # Pseudo Sektion handling
+        if int(frappe.db.get_value("Sektion", neue_sektion, "pseudo_sektion")) == 1:
+            return 1
+        
         try:
             # erstelle Mitgliedschaft in Zuzugs-Sektion
             mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
@@ -3302,6 +3306,29 @@ def get_sektionen_zur_auswahl():
     for sektion in sektionen:
         sektionen_zur_auswahl += "\n" + sektion.name
     return sektionen_zur_auswahl
+
+@frappe.whitelist()
+def get_pseudo_sektionen_zur_auswahl():
+    sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` WHERE `pseudo_sektion` = 1 ORDER BY `name` ASC""", as_dict=True)
+    sektionen_zur_auswahl = ''
+    for sektion in sektionen:
+        sektionen_zur_auswahl += "\n" + sektion.name
+    return sektionen_zur_auswahl
+
+@frappe.whitelist()
+def sektionswechsel_pseudo_sektion(mitgliedschaft, eintrittsdatum, bezahltes_mitgliedschaftsjahr, zuzug_von, sektion_id, zuzug):
+    try:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+        mitgliedschaft.eintrittsdatum = eintrittsdatum
+        mitgliedschaft.bezahltes_mitgliedschaftsjahr = int(bezahltes_mitgliedschaftsjahr)
+        mitgliedschaft.zuzug_von = mitgliedschaft.sektion_id
+        mitgliedschaft.sektion_id = sektion_id
+        mitgliedschaft.zuzug = zuzug
+        mitgliedschaft.save(ignore_permissions=True)
+        return 1
+    except Exception as err:
+        frappe.log_error("{0}\n---\n{1}".format(err, mitgliedschaft.as_json()), 'sektionswechsel_pseudo_sektion')
+        return err
 
 def get_ampelfarbe(mitgliedschaft):
     ''' mögliche Ampelfarben:

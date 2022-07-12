@@ -14,6 +14,7 @@
   "cb_1",
   "sektion_id",
   "default_ort",
+  "pseudo_sektion",
   "section_sektionseinstellungen",
   "mitgliedschafts_artikel",
   "mitgliedschafts_artikel_geschaeft",
@@ -275,9 +276,15 @@
    "fieldtype": "Link",
    "label": "Artikel Beitrittsgeb\u00fchr (Gesch\u00e4ft)",
    "options": "Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "pseudo_sektion",
+   "fieldtype": "Check",
+   "label": "Pseudo Sektion"
   }
  ],
- "modified": "2022-03-06 20:14:57.773465",
+ "modified": "2022-07-12 11:06:02.620040",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
