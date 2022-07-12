@@ -3092,6 +3092,8 @@ def prepare_mvm_for_sp(mitgliedschaft):
                                             ORDER BY `idx` DESC""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)
         if len(kuendigungsgrund) > 0:
             kuendigungsgrund = kuendigungsgrund[0].grund or None
+        else:
+            kuendigungsgrund = None
         
     
     prepared_mvm = {

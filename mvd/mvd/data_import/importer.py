@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 import pandas as pd
-from frappe.utils.data import add_days, getdate, get_datetime, now_datetime
+from frappe.utils.data import add_days, getdate, get_datetime, now_datetime, now
 
 
 # Header mapping (ERPNext <> MVD)
@@ -1441,6 +1441,55 @@ def update_mitgliedschaften_anhand_import_retouren():
     for u_o in update_offen:
         update = frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `m_w_anzahl` = {qty} WHERE `name` = '{mitgliedschaft}'""".format(qty=u_o.qty, mitgliedschaft=u_o.mv_mitgliedschaft), as_list=True)
         print("Update {0} of {1}".format(counter, len(update_offen)))
+        counter += 1
+    
+    frappe.db.commit()
+
+# --------------------------------------------------------------
+# update mitgliedschaften: korrektur Kündigung/Regulär/Inaktiv
+# --------------------------------------------------------------
+def update_mitgliedschaften_korr_k_r_i():
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.update_mitgliedschaften_korr_k_r_i
+    '''
+    
+    counter = 1
+    inaktive_ms = frappe.db.sql("""SELECT 
+                                    `name`
+                                    FROM `tabMitgliedschaft`
+                                    WHERE `status_c` = 'Kündigung'
+                                    AND `kuendigung` <= CURDATE()""", as_dict=True)
+    for i_ms in inaktive_ms:
+        m = frappe.get_doc("Mitgliedschaft", i_ms.name)
+        m.status_c = 'Inaktiv'
+        change_log_row = m.append('status_change', {})
+        change_log_row.datum = now()
+        change_log_row.status_alt = 'Kündigung'
+        change_log_row.status_neu = 'Inaktiv'
+        change_log_row.grund = 'Autom. Bereinigung'
+        m.save()
+        
+        print("Update {0} of {1}".format(counter, len(inaktive_ms)))
+        counter += 1
+    
+    counter = 1
+    regul_ms = frappe.db.sql("""SELECT 
+                                    `name`
+                                    FROM `tabMitgliedschaft`
+                                    WHERE `status_c` = 'Kündigung'
+                                    AND `kuendigung` > CURDATE()""", as_dict=True)
+    for i_ms in regul_ms:
+        m = frappe.get_doc("Mitgliedschaft", i_ms.name)
+        m.status_c = 'Regulär'
+        change_log_row = m.append('status_change', {})
+        change_log_row.datum = now()
+        change_log_row.status_alt = 'Kündigung'
+        change_log_row.status_neu = 'Regulär &dagger;'
+        change_log_row.grund = 'Autom. Bereinigung'
+        m.save()
+        
+        print("Update {0} of {1}".format(counter, len(regul_ms)))
         counter += 1
     
     frappe.db.commit()
