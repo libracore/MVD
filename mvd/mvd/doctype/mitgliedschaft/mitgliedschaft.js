@@ -20,9 +20,17 @@ frappe.ui.form.on('Mitgliedschaft', {
                         if (cur_frm.doc.mitgliedtyp_c == 'Geschäft') {
                             frappe.msgprint("Für Geschäftsmitglieder ist kein automatischer Sektionswechsel möglich.");
                         } else {
-                            sektionswechsel(frm);;
+                            sektionswechsel(frm);
                         }
                     }, __("Mutation"));
+                }
+                
+                if (cur_frm.doc.status_c == 'Anmeldung') {
+                    if (((frappe.datetime.get_day_diff(frappe.datetime.now(), cur_frm.doc.creation)) <= 7)||(frappe.user.has_role("System Manager"))) {
+                        frm.add_custom_button(__("Zuzug aus virtueller Sektion"),  function() {
+                            sektionswechsel_pseudo_sektion(frm);
+                        }, __("Mutation"));
+                    }
                 }
                 
                 if (!['Gestorben'].includes(cur_frm.doc.status_c)&&(!cur_frm.doc.kuendigung)) {
@@ -722,6 +730,58 @@ function ausschluss(frm) {
         'Ausschluss',
         'Erfassen'
         )
+    } else {
+        frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
+    }
+}
+
+function sektionswechsel_pseudo_sektion(frm) {
+    if (frappe.user.has_role("MV_MA")) {
+        frappe.call({
+            method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_pseudo_sektionen_zur_auswahl",
+            args:{},
+            callback: function(r)
+            {
+                var sektionen_zur_auswahl = r.message;
+                frappe.prompt([
+                    {'fieldname': 'sektion_neu', 'fieldtype': 'Select', 'label': 'Zuzug von', 'reqd': 1, 'options': sektionen_zur_auswahl},
+                    {'fieldname': 'eintrittsdatum', 'fieldtype': 'Date', 'label': 'Eintrittsdatum', 'reqd': 1, 'default': frappe.datetime.get_today()},
+                    {'fieldname': 'mitgliedschaft_bezahlt', 'fieldtype': 'Int', 'label': 'Mitgliedschaft bezahlt', 'reqd': 1, 'default': '0', 'description': 'Jahr für das die Mitgliedschaft bezahlt wurde, oder 0 falls Rechnung offen'},
+                    {'fieldname': 'zuzug_datum', 'fieldtype': 'Date', 'label': 'Zuzug Datum', 'reqd': 1, 'default': frappe.datetime.get_today()}
+                ],
+                function(values){
+                    frappe.call({
+                        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.sektionswechsel_pseudo_sektion",
+                        args:{
+                                'mitgliedschaft': cur_frm.doc.name,
+                                'eintrittsdatum': values.eintrittsdatum,
+                                'bezahltes_mitgliedschaftsjahr': values.mitgliedschaft_bezahlt,
+                                'zuzug_von': cur_frm.doc.sektion_id,
+                                'sektion_id': values.sektion_neu,
+                                'zuzug': values.zuzug_datum
+                        },
+                        freeze: true,
+                        freeze_message: 'Führe Sektionswechsel durch...',
+                        callback: function(r)
+                        {
+                            if (r.message == 1) {
+                                if (values.mitgliedschaft_bezahlt != String(frappe.datetime.get_today()).split("-")[0]) {
+                                    frappe.msgprint("Die Rechnung wurde erstellt, bitte ausdrucken und zustellen.");
+                                } else {
+                                    frappe.msgprint("Die Begrüssungs Korrespondenz wurde erstellt, bitte ausdrucken und zustellen.");
+                                }
+                            } else {
+                                frappe.msgprint("oops, da ist etwas schiefgelaufen!");
+                            }
+                            cur_frm.reload_doc();
+                        }
+                    });
+                },
+                'Zuzug aus virtueller Sektion',
+                'Übertragen'
+                )
+            }
+        });
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
     }
