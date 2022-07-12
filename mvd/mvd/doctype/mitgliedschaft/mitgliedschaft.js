@@ -23,8 +23,11 @@ frappe.ui.form.on('Mitgliedschaft', {
                             sektionswechsel(frm);
                         }
                     }, __("Mutation"));
+                }
+                
+                if (cur_frm.doc.status_c == 'Anmeldung') {
                     if (((frappe.datetime.get_day_diff(frappe.datetime.now(), cur_frm.doc.creation)) <= 7)||(frappe.user.has_role("System Manager"))) {
-                        frm.add_custom_button(__("Zuzug in Pseudosektion"),  function() {
+                        frm.add_custom_button(__("Zuzug aus virtueller Sektion"),  function() {
                             sektionswechsel_pseudo_sektion(frm);
                         }, __("Mutation"));
                     }
@@ -741,9 +744,9 @@ function sektionswechsel_pseudo_sektion(frm) {
             {
                 var sektionen_zur_auswahl = r.message;
                 frappe.prompt([
-                    {'fieldname': 'sektion_neu', 'fieldtype': 'Select', 'label': 'Pseudosektion', 'reqd': 1, 'options': sektionen_zur_auswahl},
+                    {'fieldname': 'sektion_neu', 'fieldtype': 'Select', 'label': 'Zuzug von', 'reqd': 1, 'options': sektionen_zur_auswahl},
                     {'fieldname': 'eintrittsdatum', 'fieldtype': 'Date', 'label': 'Eintrittsdatum', 'reqd': 1, 'default': frappe.datetime.get_today()},
-                    {'fieldname': 'mitgliedschaft_bezahlt', 'fieldtype': 'Int', 'label': 'Mitgliedschaft bezahlt', 'reqd': 1, 'default': '0'},
+                    {'fieldname': 'mitgliedschaft_bezahlt', 'fieldtype': 'Int', 'label': 'Mitgliedschaft bezahlt', 'reqd': 1, 'default': '0', 'description': 'Jahr für das die Mitgliedschaft bezahlt wurde, oder 0 falls Rechnung offen'},
                     {'fieldname': 'zuzug_datum', 'fieldtype': 'Date', 'label': 'Zuzug Datum', 'reqd': 1, 'default': frappe.datetime.get_today()}
                 ],
                 function(values){
@@ -762,15 +765,19 @@ function sektionswechsel_pseudo_sektion(frm) {
                         callback: function(r)
                         {
                             if (r.message == 1) {
-                                frappe.set_route("List", "Mitgliedschaft", "List");
-                                frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
+                                if (values.mitgliedschaft_bezahlt != String(frappe.datetime.get_today()).split("-")[0]) {
+                                    frappe.msgprint("Die Rechnung wurde erstellt, bitte ausdrucken und zustellen.");
+                                } else {
+                                    frappe.msgprint("Die Begrüssungs Korrespondenz wurde erstellt, bitte ausdrucken und zustellen.");
+                                }
                             } else {
                                 frappe.msgprint("oops, da ist etwas schiefgelaufen!");
                             }
+                            cur_frm.reload_doc();
                         }
                     });
                 },
-                'Zuzug in Pseudosektion',
+                'Zuzug aus virtueller Sektion',
                 'Übertragen'
                 )
             }

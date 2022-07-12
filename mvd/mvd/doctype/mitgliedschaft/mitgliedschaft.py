@@ -3321,10 +3321,67 @@ def sektionswechsel_pseudo_sektion(mitgliedschaft, eintrittsdatum, bezahltes_mit
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
         mitgliedschaft.eintrittsdatum = eintrittsdatum
         mitgliedschaft.bezahltes_mitgliedschaftsjahr = int(bezahltes_mitgliedschaftsjahr)
-        mitgliedschaft.zuzug_von = mitgliedschaft.sektion_id
-        mitgliedschaft.sektion_id = sektion_id
+        mitgliedschaft.zuzug_von = sektion_id
         mitgliedschaft.zuzug = zuzug
+        mitgliedschaft.status_c = 'Regulär'
+        
+        
+        # erstelle ggf. neue Rechnung
+        mit_rechnung = False
+        if mitgliedschaft.bezahltes_mitgliedschaftsjahr < int(now().split("-")[0]):
+            if mitgliedschaft.naechstes_jahr_geschuldet == 1:
+                mit_rechnung = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=mitgliedschaft.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=mitgliedschaft.reduzierte_mitgliedschaft, language=mitgliedschaft.language)['default_druckvorlage'])
+        
+        if mit_rechnung:
+            mitgliedschaft.zuzugs_rechnung = mit_rechnung
+        else:
+            druckvorlage = frappe.get_doc("Druckvorlage", get_druckvorlagen(sektion=mitgliedschaft.sektion_id, dokument='Zuzug ohne EZ', mitgliedtyp=mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=mitgliedschaft.reduzierte_mitgliedschaft, language=mitgliedschaft.language)['default_druckvorlage'])
+            _new_korrespondenz = frappe.copy_doc(druckvorlage)
+            _new_korrespondenz.doctype = 'Korrespondenz'
+            _new_korrespondenz.sektion_id = mitgliedschaft.sektion_id
+            _new_korrespondenz.titel = 'Zuzug ohne EZ'
+            
+            new_korrespondenz = frappe._dict(_new_korrespondenz.as_dict())
+            keys_to_remove = [
+                'mitgliedtyp_c',
+                'validierungsstring',
+                'language',
+                'reduzierte_mitgliedschaft',
+                'dokument',
+                'default',
+                'deaktiviert',
+                'seite_1_qrr',
+                'seite_1_qrr_spende_hv',
+                'seite_2_qrr',
+                'seite_2_qrr_spende_hv',
+                'seite_3_qrr',
+                'seite_3_qrr_spende_hv',
+                'blatt_2_info_mahnung',
+                'tipps_mahnung'
+            ]
+            for key in keys_to_remove:
+                try:
+                    new_korrespondenz.pop(key)
+                except:
+                    pass
+            
+            new_korrespondenz['mv_mitgliedschaft'] = mitgliedschaft.name
+            new_korrespondenz['massenlauf'] = 0
+            
+            new_korrespondenz = frappe.get_doc(new_korrespondenz)
+            new_korrespondenz.insert(ignore_permissions=True)
+            frappe.db.commit()
+            
+            mitgliedschaft.zuzug_korrespondenz = new_korrespondenz.name
+        
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+        mitgliedschaft.eintrittsdatum = eintrittsdatum
+        mitgliedschaft.bezahltes_mitgliedschaftsjahr = int(bezahltes_mitgliedschaftsjahr)
+        mitgliedschaft.zuzug_von = sektion_id
+        mitgliedschaft.zuzug = zuzug
+        mitgliedschaft.status_c = 'Regulär'
         mitgliedschaft.save(ignore_permissions=True)
+                
         return 1
     except Exception as err:
         frappe.log_error("{0}\n---\n{1}".format(err, mitgliedschaft.as_json()), 'sektionswechsel_pseudo_sektion')
