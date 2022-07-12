@@ -1454,6 +1454,7 @@ def update_mitgliedschaften_korr_k_r_i():
         sudo bench execute mvd.mvd.data_import.importer.update_mitgliedschaften_korr_k_r_i
     '''
     
+    s_c = 1
     counter = 1
     inaktive_ms = frappe.db.sql("""SELECT 
                                     `name`
@@ -1461,18 +1462,27 @@ def update_mitgliedschaften_korr_k_r_i():
                                     WHERE `status_c` = 'Kündigung'
                                     AND `kuendigung` <= CURDATE()""", as_dict=True)
     for i_ms in inaktive_ms:
-        m = frappe.get_doc("Mitgliedschaft", i_ms.name)
-        m.status_c = 'Inaktiv'
-        change_log_row = m.append('status_change', {})
-        change_log_row.datum = now()
-        change_log_row.status_alt = 'Kündigung'
-        change_log_row.status_neu = 'Inaktiv'
-        change_log_row.grund = 'Autom. Bereinigung'
-        m.save()
-        
+        try:
+            m = frappe.get_doc("Mitgliedschaft", i_ms.name)
+            m.status_c = 'Inaktiv'
+            change_log_row = m.append('status_change', {})
+            change_log_row.datum = now()
+            change_log_row.status_alt = 'Kündigung'
+            change_log_row.status_neu = 'Inaktiv'
+            change_log_row.grund = 'Autom. Bereinigung'
+            m.letzte_bearbeitung_von = 'User'
+            m.save()
+        except Exception as err:
+            frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), i_ms.name), 'update_mitgliedschaften_korr_k_r_i')
+            
         print("Update {0} of {1}".format(counter, len(inaktive_ms)))
         counter += 1
+        s_c += 1
+        if s_c == 100:
+            frappe.db.commit()
+            s_c = 1
     
+    s_c = 1
     counter = 1
     regul_ms = frappe.db.sql("""SELECT 
                                     `name`
@@ -1480,16 +1490,24 @@ def update_mitgliedschaften_korr_k_r_i():
                                     WHERE `status_c` = 'Kündigung'
                                     AND `kuendigung` > CURDATE()""", as_dict=True)
     for i_ms in regul_ms:
-        m = frappe.get_doc("Mitgliedschaft", i_ms.name)
-        m.status_c = 'Regulär'
-        change_log_row = m.append('status_change', {})
-        change_log_row.datum = now()
-        change_log_row.status_alt = 'Kündigung'
-        change_log_row.status_neu = 'Regulär &dagger;'
-        change_log_row.grund = 'Autom. Bereinigung'
-        m.save()
+        try:
+            m = frappe.get_doc("Mitgliedschaft", i_ms.name)
+            m.status_c = 'Regulär'
+            change_log_row = m.append('status_change', {})
+            change_log_row.datum = now()
+            change_log_row.status_alt = 'Kündigung'
+            change_log_row.status_neu = 'Regulär &dagger;'
+            change_log_row.grund = 'Autom. Bereinigung'
+            m.letzte_bearbeitung_von = 'User'
+            m.save()
+        except Exception as err:
+            frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), i_ms.name), 'update_mitgliedschaften_korr_k_r_i')
         
         print("Update {0} of {1}".format(counter, len(regul_ms)))
         counter += 1
+        s_c += 1
+        if s_c == 100:
+            frappe.db.commit()
+            s_c = 1
     
     frappe.db.commit()
