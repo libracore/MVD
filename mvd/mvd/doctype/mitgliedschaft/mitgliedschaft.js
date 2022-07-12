@@ -679,6 +679,10 @@ function todesfall(frm) {
         function(values){
             cur_frm.set_value("austritt", values.datum);
             cur_frm.set_value("verstorben_am", values.verstorben_am);
+            
+            cur_frm.set_value("m_und_w", 0);
+            cur_frm.set_value("adressen_gesperrt", 1);
+            
             var status_change_log = cur_frm.add_child('status_change');
             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
