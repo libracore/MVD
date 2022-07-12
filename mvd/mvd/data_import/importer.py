@@ -1470,6 +1470,7 @@ def update_mitgliedschaften_korr_k_r_i():
             change_log_row.status_alt = 'Kündigung'
             change_log_row.status_neu = 'Inaktiv'
             change_log_row.grund = 'Autom. Bereinigung'
+            m.letzte_bearbeitung_von = 'User'
             m.save()
         except Exception as err:
             frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), i_ms.name), 'update_mitgliedschaften_korr_k_r_i')
@@ -1497,6 +1498,7 @@ def update_mitgliedschaften_korr_k_r_i():
             change_log_row.status_alt = 'Kündigung'
             change_log_row.status_neu = 'Regulär &dagger;'
             change_log_row.grund = 'Autom. Bereinigung'
+            m.letzte_bearbeitung_von = 'User'
             m.save()
         except Exception as err:
             frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), i_ms.name), 'update_mitgliedschaften_korr_k_r_i')
