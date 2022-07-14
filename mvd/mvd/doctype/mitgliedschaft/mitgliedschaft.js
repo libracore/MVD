@@ -510,10 +510,12 @@ function kuendigung(frm) {
                             var abw_grund = '';
                             
                             cur_frm.doc.status_change.forEach(function(entry) {
-                                if (entry.grund.includes("Andere Gründe")&&entry.idx == cur_frm.doc.status_change.length) {
-                                    default_grund = 'Andere Gründe';
-                                    if (entry.grund.split("Andere Gründe: ").length > 1) {
-                                        abw_grund = entry.grund.split("Andere Gründe: ")[1];
+                                if (entry.grund){
+                                    if (entry.grund.includes("Andere Gründe")&&entry.idx == cur_frm.doc.status_change.length) {
+                                        default_grund = 'Andere Gründe';
+                                        if (entry.grund.split("Andere Gründe: ").length > 1) {
+                                            abw_grund = entry.grund.split("Andere Gründe: ")[1];
+                                        }
                                     }
                                 } else if (entry.idx == cur_frm.doc.status_change.length) {
                                     if (entry.grund) {
