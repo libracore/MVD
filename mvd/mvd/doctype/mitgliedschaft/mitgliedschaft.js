@@ -516,7 +516,11 @@ function kuendigung(frm) {
                                         abw_grund = entry.grund.split("Andere Gründe: ")[1];
                                     }
                                 } else if (entry.idx == cur_frm.doc.status_change.length) {
-                                    default_grund = entry.grund;
+                                    if (entry.grund) {
+                                        default_grund = entry.grund;
+                                    } else {
+                                        default_grund = 'Keine Angabe';
+                                    }
                                 }
                             });
                             
@@ -534,7 +538,7 @@ function kuendigung(frm) {
                                 //~ ];
                                 var field_list = [
                                     {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': cur_frm.doc.kuendigung ? cur_frm.doc.kuendigung:frappe.datetime.year_end()},
-                                    {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe', 'default': default_grund, 'change': function() {
+                                    {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe\nKeine Angabe', 'default': default_grund, 'change': function() {
                                             if (cur_dialog.fields_dict.grund.get_value() == 'Andere Gründe') {
                                                 cur_dialog.fields_dict.abw_grund.df.hidden = 0;
                                                 cur_dialog.fields_dict.abw_grund.refresh();
