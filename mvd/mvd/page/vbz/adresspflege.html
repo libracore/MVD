@@ -15,11 +15,7 @@
         <tr id="zweimal_unzustellbar">
             <td>zweimal unzustellbare M+W (Zustellung gestoppt)</td>
             <td>
-                {% if retouren.qty > 99 %}
-                    99+
-                {% else %}
-                    {{ termin.qty }}
-                {% endif %}
+                n/a
             </td>
         </tr>
         <tr id="einmal_unzustellbar">
@@ -28,7 +24,7 @@
                 {% if retouren.qty > 99 %}
                     99+
                 {% else %}
-                    {{ termin.qty }}
+                    {{ retouren.qty }}
                 {% endif %}
             </td>
         </tr>
