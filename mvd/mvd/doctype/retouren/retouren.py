@@ -14,64 +14,62 @@ class Retouren(Document):
             self.adressblock = mitgliedschaft.adressblock
     
     def validate(self):
-        if int(self.ignore_validation) != 1:
-            if self.status == 'Offen':
-                mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
-                mitgliedschaft.m_w_retouren_offen = 1
-                anz_offen, anz_in_bearbeitung = get_retouren_qty(self.mv_mitgliedschaft, self)
-                
-                if anz_in_bearbeitung < 1:
-                    mitgliedschaft.m_w_retouren_in_bearbeitung = 0
-                
-                mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
-                mitgliedschaft.letzte_bearbeitung_von = 'SP'
-                mitgliedschaft.save()
-                
-            elif self.status == 'In Bearbeitung':
-                mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
-                mitgliedschaft.m_w_retouren_in_bearbeitung = 1
-                anz_offen, anz_in_bearbeitung = get_retouren_qty(self.mv_mitgliedschaft, self)
-                
-                if anz_offen < 1:
-                    mitgliedschaft.m_w_retouren_offen = 0
-                
-                mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
-                mitgliedschaft.letzte_bearbeitung_von = 'SP'
-                mitgliedschaft.save()
-                
-            else:
-                anz_offen, anz_in_bearbeitung = get_retouren_qty(self.mv_mitgliedschaft, self)
-                mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
-                
-                if anz_offen > 0 or anz_in_bearbeitung > 0:
-                    if anz_offen > 0:
-                        mitgliedschaft.m_w_retouren_offen = 1
-                    else:
-                        mitgliedschaft.m_w_retouren_offen = 0
-                    if anz_in_bearbeitung > 0:
-                        mitgliedschaft.m_w_retouren_in_bearbeitung = 1
-                    else:
-                        mitgliedschaft.m_w_retouren_in_bearbeitung = 0
-                    mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
-                    mitgliedschaft.letzte_bearbeitung_von = 'SP'
-                    mitgliedschaft.save()
+        if self.status == 'Offen':
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
+            mitgliedschaft.m_w_retouren_offen = 1
+            anz_offen, anz_in_bearbeitung = get_retouren_qty(self.mv_mitgliedschaft, self)
+            
+            if anz_in_bearbeitung < 1:
+                mitgliedschaft.m_w_retouren_in_bearbeitung = 0
+            
+            mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
+            mitgliedschaft.letzte_bearbeitung_von = 'SP'
+            mitgliedschaft.save()
+            
+        elif self.status == 'In Bearbeitung':
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
+            mitgliedschaft.m_w_retouren_in_bearbeitung = 1
+            anz_offen, anz_in_bearbeitung = get_retouren_qty(self.mv_mitgliedschaft, self)
+            
+            if anz_offen < 1:
+                mitgliedschaft.m_w_retouren_offen = 0
+            
+            mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
+            mitgliedschaft.letzte_bearbeitung_von = 'SP'
+            mitgliedschaft.save()
+            
+        else:
+            anz_offen, anz_in_bearbeitung = get_retouren_qty(self.mv_mitgliedschaft, self)
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
+            
+            if anz_offen > 0 or anz_in_bearbeitung > 0:
+                if anz_offen > 0:
+                    mitgliedschaft.m_w_retouren_offen = 1
                 else:
                     mitgliedschaft.m_w_retouren_offen = 0
+                if anz_in_bearbeitung > 0:
+                    mitgliedschaft.m_w_retouren_in_bearbeitung = 1
+                else:
                     mitgliedschaft.m_w_retouren_in_bearbeitung = 0
-                    mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
-                    mitgliedschaft.letzte_bearbeitung_von = 'SP'
-                    mitgliedschaft.save()
-            
-            adresse = frappe.db.sql("""SELECT `adresse_mitglied` FROM `tabMitgliedschaft` WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)
-            if len(adresse) > 0:
-                if adresse[0].adresse_mitglied and adresse[0].adresse_mitglied != 'None':
-                    adresse = adresse[0].adresse_mitglied
-                    adresse = frappe.get_doc("Address", adresse)
-                    datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=self.retoure_mw_sequence_number), as_dict=True)
-                    if len(datum_adressexport) > 0:
-                        datum_adressexport = datum_adressexport[0].datum_adressexport
-                        if getdate(adresse.modified) > getdate(datum_adressexport):
-                            self.adresse_geaendert = 1
+                mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
+                mitgliedschaft.letzte_bearbeitung_von = 'SP'
+                mitgliedschaft.save()
+            else:
+                mitgliedschaft.m_w_retouren_offen = 0
+                mitgliedschaft.m_w_retouren_in_bearbeitung = 0
+                mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
+                mitgliedschaft.letzte_bearbeitung_von = 'SP'
+                mitgliedschaft.save()
+        
+        adresse = frappe.db.sql("""SELECT `adresse_mitglied` FROM `tabMitgliedschaft` WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)
+        if len(adresse) > 0:
+            if adresse[0].adresse_mitglied and adresse[0].adresse_mitglied != 'None':
+                adresse = adresse[0].adresse_mitglied
+                
+                datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=self.retoure_mw_sequence_number), as_dict=True)
+                if len(datum_adressexport) > 0:
+                    datum_adressexport = datum_adressexport[0].datum_adressexport
+                    self.adresse_geaendert = adresse_geaendert_check(adr=adresse, datum_adressexport=datum_adressexport)
 
 def get_retouren_qty(mitgliedschaft, self):
     anz_offen = frappe.db.sql("""SELECT
@@ -109,15 +107,13 @@ def create_post_retouren(data):
     try:
         ausgabe_kurz = frappe.db.sql("""SELECT `ausgabe_kurz` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=data['retoureMuWSequenceNumber']), as_dict=True)[0].ausgabe_kurz
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", data['mitgliedId'])
+        
         if mitgliedschaft.adresse_mitglied and mitgliedschaft.adresse_mitglied != 'None':
-            adresse = frappe.get_doc("Address", mitgliedschaft.adresse_mitglied)
             datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=data['retoureMuWSequenceNumber']), as_dict=True)[0].datum_adressexport
-            if getdate(adresse.modified) > getdate(datum_adressexport):
-                adresse_geaendert = 1
-            else:
-                adresse_geaendert = 0
+            adresse_geaendert = adresse_geaendert_check(adr=mitgliedschaft.adresse_mitglied, datum_adressexport=datum_adressexport)
         else:
             adresse_geaendert = 0
+        
         post_retoure = frappe.get_doc({
             'doctype': 'Retouren',
             'mv_mitgliedschaft': data['mitgliedId'],
@@ -137,7 +133,9 @@ def create_post_retouren(data):
         
         post_retoure.insert(ignore_permissions=True)
         frappe.db.commit()
+        
         return 1
+        
     except Exception as err:
         return err
 
@@ -155,41 +153,30 @@ def close_open_retouren(mitgliedschaft):
             r.save()
 
 def check_dates(adresse, event):
-    adresse_alt = frappe.db.sql("""SELECT * FROM `tabAddress` WHERE `name` = '{adr}'""".format(adr=adresse.name), as_dict=True)
-    if len(adresse_alt) > 0:
-        adresse_alt = adresse_alt[0]
-        changed = False
-        if adresse_alt.zusatz != adresse.zusatz or \
-        adresse_alt.strasse != adresse.strasse or \
-        adresse_alt.postfach != adresse.postfach or \
-        adresse_alt.postfach_nummer != adresse.postfach_nummer or \
-        adresse_alt.plz != adresse.plz or \
-        adresse_alt.city != adresse.city:
-            changed = True
-        
-        if changed:
-            mitgliedschaften = frappe.db.sql("""SELECT
-                                                    `name`
-                                                FROM `tabMitgliedschaft`
-                                                WHERE `adresse_mitglied` = '{adresse}' LIMIT 1""".format(adresse=adresse.name), as_dict=True)
-            if len(mitgliedschaften) > 0:
-                mitgliedschaft = mitgliedschaften[0].name
-                retouren = frappe.db.sql("""SELECT
+    changed = adresse_geaendert_check(adr=adresse.name)
+    if changed == 1:
+        mitgliedschaften = frappe.db.sql("""SELECT
                                                 `name`
-                                            FROM `tabRetouren`
-                                            WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
-                                            AND `status` != 'Abgeschlossen'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
-                for retoure in retouren:
-                    retoure = frappe.get_doc("Retouren", retoure.name)
-                    datum_adressexport = frappe.db.sql("""SELECT
-                                                                `datum_adressexport`
-                                                            FROM `tabMW`
-                                                            WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=retoure.retoure_mw_sequence_number), as_dict=True)
-                    if len(datum_adressexport) > 0:
-                        datum_adressexport = datum_adressexport[0].datum_adressexport
-                        if getdate(adresse.modified) > getdate(datum_adressexport) and retoure.adresse_geaendert != 1:
-                            retoure.adresse_geaendert = 1
-                            retoure.save(ignore_permissions=True)
+                                            FROM `tabMitgliedschaft`
+                                            WHERE `adresse_mitglied` = '{adresse}' LIMIT 1""".format(adresse=adresse.name), as_dict=True)
+        if len(mitgliedschaften) > 0:
+            mitgliedschaft = mitgliedschaften[0].name
+            retouren = frappe.db.sql("""SELECT
+                                            `name`
+                                        FROM `tabRetouren`
+                                        WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
+                                        AND `status` != 'Abgeschlossen'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
+            for retoure in retouren:
+                retoure = frappe.get_doc("Retouren", retoure.name)
+                datum_adressexport = frappe.db.sql("""SELECT
+                                                            `datum_adressexport`
+                                                        FROM `tabMW`
+                                                        WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=retoure.retoure_mw_sequence_number), as_dict=True)
+                if len(datum_adressexport) > 0:
+                    datum_adressexport = datum_adressexport[0].datum_adressexport
+                    if retoure.adresse_geaendert != 1:
+                        adresse_geaendert = adresse_geaendert_check(adr=adresse.name, datum_adressexport=datum_adressexport)
+                        frappe.db.sql("""UPDATE `tabRetouren` SET `adresse_geaendert` = {adresse_geaendert} WHERE `name` = '{name}'""".format(adresse_geaendert=adresse_geaendert, name=retoure.name), as_list=True)
 
 @frappe.whitelist()
 def get_mail_data(mitgliedschaft, retoure, grund_bezeichnung):
@@ -203,3 +190,36 @@ def get_mail_data(mitgliedschaft, retoure, grund_bezeichnung):
         }
     else:
         return None
+
+def adresse_geaendert_check(adr=None, datum_adressexport=None):
+    if adr:
+        adresse_geaendert = frappe.db.sql("""SELECT 
+                                                    `creation`
+                                                FROM `tabVersion`
+                                                WHERE `docname` = '{adr}'
+                                                AND `ref_doctype` = 'Address'
+                                                AND (
+                                                    `data` LIKE '%zusatz%'
+                                                    or `data` LIKE '%strasse%'
+                                                    or `data` LIKE '%postfach%'
+                                                    or `data` LIKE '%postfach_nummer%'
+                                                    or `data` LIKE '%plz%'
+                                                    or `data` LIKE '%city%'
+                                                    or `data` LIKE '%address_line2%'
+                                                )
+                                                ORDER BY `creation` DESC
+                                                LIMIT 1""".format(adr=adr), as_dict=True)
+        if len(adresse_geaendert) > 0:
+            if datum_adressexport:
+                adresse_geaendert = getdate(adresse_geaendert[0].creation)
+                datum_adressexport = getdate(datum_adressexport)
+                if adresse_geaendert >= datum_adressexport:
+                    return 1
+                else:
+                    return 0
+            else:
+                return 1
+        else:
+            return 0
+    else:
+        return 0
