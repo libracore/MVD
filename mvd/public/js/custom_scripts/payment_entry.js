@@ -40,7 +40,7 @@ frappe.ui.form.on('Payment Entry', {
                 });
             }
             
-            if ((cur_frm.doc.docstatus == 2)&&(frappe.user.has_role("Administrator"))) {
+            if ((cur_frm.doc.docstatus == 2)&&(frappe.user.has_role("System Manager"))) {
                 frm.add_custom_button(__("Storno Rollback"), function() {
                     storno_rollback(frm);
                 });
