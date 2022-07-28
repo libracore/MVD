@@ -24,6 +24,9 @@ class Retouren(Document):
             
             mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
             mitgliedschaft.letzte_bearbeitung_von = 'SP'
+            
+            mitgliedschaft.retoure_in_folge = self.retoure_in_folge
+            
             mitgliedschaft.save()
             
         elif self.status == 'In Bearbeitung':
@@ -36,6 +39,9 @@ class Retouren(Document):
             
             mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
             mitgliedschaft.letzte_bearbeitung_von = 'SP'
+            
+            mitgliedschaft.retoure_in_folge = self.retoure_in_folge
+            
             mitgliedschaft.save()
             
         else:
@@ -53,12 +59,18 @@ class Retouren(Document):
                     mitgliedschaft.m_w_retouren_in_bearbeitung = 0
                 mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
                 mitgliedschaft.letzte_bearbeitung_von = 'SP'
+                
+                mitgliedschaft.retoure_in_folge = self.retoure_in_folge
+                
                 mitgliedschaft.save()
             else:
                 mitgliedschaft.m_w_retouren_offen = 0
                 mitgliedschaft.m_w_retouren_in_bearbeitung = 0
                 mitgliedschaft.m_w_anzahl = anz_offen + anz_in_bearbeitung
                 mitgliedschaft.letzte_bearbeitung_von = 'SP'
+                
+                mitgliedschaft.retoure_in_folge = self.retoure_in_folge
+                
                 mitgliedschaft.save()
         
         adresse = frappe.db.sql("""SELECT `adresse_mitglied` FROM `tabMitgliedschaft` WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)
@@ -128,7 +140,8 @@ def create_post_retouren(data):
             'retoure_dmc': data['retoureDMC'],
             'retoureSendungsbild': data['retoureSendungsbild'],
             'datum_erfasst_post': data['datumErfasstPost'],
-            'adresse_geaendert': adresse_geaendert
+            'adresse_geaendert': adresse_geaendert,
+            'retoure_in_folge': check_retoure_in_folge(data['retoureMuWSequenceNumber'], data['mitgliedId'])
         })
         
         post_retoure.insert(ignore_permissions=True)
@@ -221,5 +234,13 @@ def adresse_geaendert_check(adr=None, datum_adressexport=None):
                 return 1
         else:
             return 0
+    else:
+        return 0
+
+def check_retoure_in_folge(retoure_mw_sequence_number, mv_mitgliedschaft):
+    retoure_mw_sequence_number = int(retoure_mw_sequence_number) - 1
+    qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabRetouren` WHERE `retoure_mw_sequence_number` = '{retoure_mw_sequence_number}' AND `mv_mitgliedschaft` = '{mv_mitgliedschaft}'""".format(retoure_mw_sequence_number=retoure_mw_sequence_number, mv_mitgliedschaft=mv_mitgliedschaft), as_dict=True)[0].qty
+    if qty > 0:
+        return 1
     else:
         return 0

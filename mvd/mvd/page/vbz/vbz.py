@@ -20,7 +20,8 @@ def get_open_data():
     mahnung_qty = 0 #len(frappe.get_list('Mahnung', fields='name', filters={'massenlauf': 1, 'docstatus': 1}, limit=100, distinct=True, ignore_ifnull=True))
     # massenlauf total
     massenlauf_total = kuendigung_qty + korrespondenz_qty + zuzug_qty + rg_massendruck_qty + begruessung_online_qty + begruessung_bezahlt_qty + mahnung_qty
-    retouren_qty = len(frappe.get_list('Retouren', fields='name', filters={'status': ['!=','Abgeschlossen']}, limit=100, distinct=True, ignore_ifnull=True))
+    retouren_einmal_qty = len(frappe.get_list('Retouren', fields='name', filters={'status': ['!=','Abgeschlossen'], 'retoure_in_folge': 0}, limit=100, distinct=True, ignore_ifnull=True))
+    retouren_zweimal_qty = len(frappe.get_list('Retouren', fields='name', filters={'status': ['!=','Abgeschlossen'], 'retoure_in_folge': 1}, limit=100, distinct=True, ignore_ifnull=True))
     
     # letzter CAMT Import
     last_camt_import = [] #frappe.get_list('CAMT Import', fields='creation', filters={'status': ['!=', 'Open']}, order_by='creation DESC', ignore_ifnull=True)
@@ -64,7 +65,8 @@ def get_open_data():
             'qty': mahnung_qty
         },
         'retouren': {
-            'qty': retouren_qty
+            'retouren_einmal_qty': retouren_einmal_qty,
+            'retouren_zweimal_qty': retouren_zweimal_qty
         }
     }
     
