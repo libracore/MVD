@@ -1520,6 +1520,7 @@ def korrektur_retouren():
         Example:
         sudo bench execute mvd.mvd.data_import.importer.korrektur_retouren
     '''
+    from mvd.mvd.doctype.retouren.retouren import check_retoure_in_folge
     
     print("Reset Mitgliedschaften...")
     SQL_SAFE_UPDATES_false = frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
@@ -1534,21 +1535,16 @@ def korrektur_retouren():
     print("Starte korrektur_retouren")
     
     counter = 1
-    commit_counter = 1
     retouren = frappe.db.sql("""SELECT `name` FROM `tabRetouren` ORDER BY `retoure_mw_sequence_number` ASC""", as_dict=True)
     for retoure in retouren:
         retoure = frappe.get_doc("Retouren", retoure.name)
-        retoure.adresse_geandert = 0
-        retoure.retoure_in_folge = 0
+        retoure.adresse_geaendert = 0
+        retoure.retoure_in_folge = check_retoure_in_folge(retoure.retoure_mw_sequence_number, retoure.mv_mitgliedschaft)
         retoure.save()
+        frappe.db.commit()
         
         print("Update {0} of {1} Retouren".format(counter, len(retouren)))
         counter += 1
-        if commit_counter == 100:
-            frappe.db.commit()
-            commit_counter = 1
-        else:
-            commit_counter += 1
     
     frappe.db.commit()
     print("Done")
