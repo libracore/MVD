@@ -73,15 +73,16 @@ class Retouren(Document):
                 
                 mitgliedschaft.save()
         
-        adresse = frappe.db.sql("""SELECT `adresse_mitglied` FROM `tabMitgliedschaft` WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)
-        if len(adresse) > 0:
-            if adresse[0].adresse_mitglied and adresse[0].adresse_mitglied != 'None':
-                adresse = adresse[0].adresse_mitglied
-                
-                datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=self.retoure_mw_sequence_number), as_dict=True)
-                if len(datum_adressexport) > 0:
-                    datum_adressexport = datum_adressexport[0].datum_adressexport
-                    self.adresse_geaendert = adresse_geaendert_check(adr=adresse, datum_adressexport=datum_adressexport)
+        if self.adresse_geaendert != 1:
+            adresse = frappe.db.sql("""SELECT `adresse_mitglied` FROM `tabMitgliedschaft` WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=self.mv_mitgliedschaft), as_dict=True)
+            if len(adresse) > 0:
+                if adresse[0].adresse_mitglied and adresse[0].adresse_mitglied != 'None':
+                    adresse = adresse[0].adresse_mitglied
+                    
+                    datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=self.retoure_mw_sequence_number), as_dict=True)
+                    if len(datum_adressexport) > 0:
+                        datum_adressexport = datum_adressexport[0].datum_adressexport
+                        self.adresse_geaendert = adresse_geaendert_check(adr=adresse, datum_adressexport=datum_adressexport)
 
 def get_retouren_qty(mitgliedschaft, self):
     anz_offen = frappe.db.sql("""SELECT
@@ -177,17 +178,16 @@ def check_dates(adresse, event):
             retouren = frappe.db.sql("""SELECT
                                             `name`
                                         FROM `tabRetouren`
-                                        WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
-                                        AND `status` != 'Abgeschlossen'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
+                                        WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
             for retoure in retouren:
                 retoure = frappe.get_doc("Retouren", retoure.name)
-                datum_adressexport = frappe.db.sql("""SELECT
-                                                            `datum_adressexport`
-                                                        FROM `tabMW`
-                                                        WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=retoure.retoure_mw_sequence_number), as_dict=True)
-                if len(datum_adressexport) > 0:
-                    datum_adressexport = datum_adressexport[0].datum_adressexport
-                    if retoure.adresse_geaendert != 1:
+                if retoure.adresse_geaendert != 1:
+                    datum_adressexport = frappe.db.sql("""SELECT
+                                                                `datum_adressexport`
+                                                            FROM `tabMW`
+                                                            WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=retoure.retoure_mw_sequence_number), as_dict=True)
+                    if len(datum_adressexport) > 0:
+                        datum_adressexport = datum_adressexport[0].datum_adressexport
                         adresse_geaendert = adresse_geaendert_check(adr=adresse.name, datum_adressexport=datum_adressexport)
                         frappe.db.sql("""UPDATE `tabRetouren` SET `adresse_geaendert` = {adresse_geaendert} WHERE `name` = '{name}'""".format(adresse_geaendert=adresse_geaendert, name=retoure.name), as_list=True)
 
