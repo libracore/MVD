@@ -7,6 +7,9 @@ frappe.ui.form.on('Mitgliedschaft', {
         override_default_email_dialog(frm);
     },
     refresh: function(frm) {
+       // Datensatz-Titel ergänzen
+       mitglied_name_anzeigen(frm);
+       
        if (!frm.doc.__islocal&&cur_frm.doc.status_c != 'Inaktiv') {
             if (((cur_frm.doc.status_c != 'Inaktiv')&&(frappe.user.has_role("System Manager")))||(['Online-Anmeldung', 'Anmeldung', 'Interessent*in'].includes(cur_frm.doc.status_c))) {
                 frm.add_custom_button(__("Inaktivieren"), function() {
@@ -1881,5 +1884,15 @@ function is_valid_phone(number) {
             message: __('Die erfasste Telefonnummer ist <b>nicht</b> zulässig.<br>Zulässige Inhalte sind:<ul><li>+</li><li>Leerschlag</li><li>Zahlen von 0-9</li></ul>')
         });
     }
+}
+
+function mitglied_name_anzeigen(frm) {
+    var data = cur_frm.doc.mitglied_nr + "&nbsp;&nbsp;&nbsp;";
+    if (cur_frm.doc.firma) {
+        data += cur_frm.doc.firma + ', ';
+    }
+    data += cur_frm.doc.vorname_1 + " " + cur_frm.doc.nachname_1;
+    $(".ellipsis.title-text").html(data);
+    console.log($(".ellipsis.title-text"));
 }
 
