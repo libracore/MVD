@@ -2667,6 +2667,7 @@ def mvm_neuanlage(kwargs):
                     if online_haftpflicht:
                         if int(online_haftpflicht) == 1:
                             new_mitgliedschaft.datum_hv_zahlung = eintritt
+                            new_mitgliedschaft.zahlung_hv = int(getdate(eintritt).strftime("%Y"))
                     new_mitgliedschaft.datum_zahlung_mitgliedschaft = eintritt
             else:
                 if kwargs['needsValidation']:
