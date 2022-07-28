@@ -51,6 +51,8 @@ frappe.vbz = {
         $("#mahnung").off("click");
         $("#zweimal_unzustellbar").off("click");
         $("#einmal_unzustellbar").off("click");
+        $("#offene_retouren").off("click");
+        $("#retouren_in_bearbeitung").off("click");
     },
     add_click_handlers: function(open_datas) {
         frappe.vbz.remove_click_handlers();
@@ -130,6 +132,14 @@ frappe.vbz = {
         $("#einmal_unzustellbar").click(function(){
             frappe.route_options = {"m_w_anzahl": 1, "retoure_in_folge": 0};
             frappe.set_route("List", "Mitgliedschaft", "List");
+        });
+        $("#offene_retouren").click(function(){
+            frappe.route_options = {"status": "Offen"};
+            frappe.set_route("List", "Retouren", "List");
+        });
+        $("#retouren_in_bearbeitung").click(function(){
+            frappe.route_options = {"status": "In Bearbeitung"};
+            frappe.set_route("List", "Retouren", "List");
         });
         
         frappe.dom.unfreeze();
