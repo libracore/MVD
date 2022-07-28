@@ -1511,3 +1511,38 @@ def update_mitgliedschaften_korr_k_r_i():
             s_c = 1
     
     frappe.db.commit()
+
+# --------------------------------------------------------------
+# Korrektur Retouren
+# --------------------------------------------------------------
+def korrektur_retouren():
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.korrektur_retouren
+    '''
+    
+    print("Reset Mitgliedschaften...")
+    SQL_SAFE_UPDATES_false = frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
+    update_cb = frappe.db.sql("""UPDATE `tabMitgliedschaft` SET
+                                    `m_w_retouren_offen` = 0,
+                                    `m_w_retouren_in_bearbeitung` = 0,
+                                    `m_w_anzahl` = 0,
+                                    `retoure_in_folge` = 0""", as_list=True)
+    SQL_SAFE_UPDATES_true = frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)
+    frappe.db.commit()
+    
+    print("Starte korrektur_retouren")
+    
+    counter = 1
+    retouren = frappe.db.sql("""SELECT `name` FROM `tabRetouren` ORDER BY `retoure_mw_sequence_number` ASC""", as_dict=True)
+    for retoure in retouren:
+        retoure = frappe.get_doc("Retouren", retoure.name)
+        retoure.adresse_geandert = 0
+        retoure.retoure_in_folge = 0
+        retoure.save()
+        
+        print("Update {0} of {1} Retouren".format(counter, len(retouren)))
+        counter += 1
+    
+    frappe.db.commit()
+    print("Done")
