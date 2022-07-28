@@ -124,11 +124,11 @@ frappe.vbz = {
             frappe.set_route("mvd-suchmaske");
         });
         $("#zweimal_unzustellbar").click(function(){
-            frappe.route_options = {"m_w_anzahl": ['>', 1]};
+            frappe.route_options = {"m_w_anzahl": ['>=', 1], "retoure_in_folge": 1};
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#einmal_unzustellbar").click(function(){
-            frappe.route_options = {"m_w_anzahl": 1};
+            frappe.route_options = {"m_w_anzahl": 1, "retoure_in_folge": 0};
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         

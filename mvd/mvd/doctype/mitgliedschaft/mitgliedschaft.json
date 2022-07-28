@@ -177,6 +177,7 @@
   "m_w_retouren_offen",
   "m_w_retouren_in_bearbeitung",
   "m_w_anzahl",
+  "retoure_in_folge",
   "zuzug_durch_sp"
  ],
  "fields": [
@@ -1216,10 +1217,16 @@
    "label": "\u00dcbersicht",
    "options": "Status Change",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "retoure_in_folge",
+   "fieldtype": "Check",
+   "label": "Zwei Retouren in Folge"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-07-08 09:09:06.581704",
+ "modified": "2022-07-28 10:32:32.005792",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
