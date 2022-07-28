@@ -14,7 +14,12 @@ class MassenlaufInaktivierung(Document):
                                             FROM `tabSales Invoice`
                                             WHERE `outstanding_amount` > 0
                                             AND `docstatus` = 1
-                                            AND `sektion_id` = '{sektion}'""".format(sektion=self.sektion_id), as_dict=True)
+                                            AND `sektion_id` = '{sektion}'
+                                            AND `ist_mitgliedschaftsrechnung` = 1
+                                            AND `status` = 'Overdue'
+                                            AND `mv_mitgliedschaft` IN (
+                                                SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` = 'Regulär'
+                                            )""".format(sektion=self.sektion_id), as_dict=True)
             for mitgliedschaft in open_invoices:
                 ms = frappe.db.sql("""SELECT
                                         `vorname_1`,
