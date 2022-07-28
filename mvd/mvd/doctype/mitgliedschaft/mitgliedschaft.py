@@ -429,6 +429,8 @@ class Mitgliedschaft(Document):
                     if sinv.docstatus == 0:
                         sinv.delete()
         
+        self.letzte_bearbeitung_von = 'User'
+        
         return
     
     def check_zahlung_hv(self):
@@ -456,6 +458,8 @@ class Mitgliedschaft(Document):
                     sinv_year = getdate(pe.reference_date).strftime("%Y")
                     self.datum_hv_zahlung = pe.reference_date
             self.zahlung_hv = sinv_year
+            self.letzte_bearbeitung_von = 'User'
+        
         return
         
     def validate_rg_kunde(self):
@@ -2663,6 +2667,7 @@ def mvm_neuanlage(kwargs):
                     if online_haftpflicht:
                         if int(online_haftpflicht) == 1:
                             new_mitgliedschaft.datum_hv_zahlung = eintritt
+                            new_mitgliedschaft.zahlung_hv = int(getdate(eintritt).strftime("%Y"))
                     new_mitgliedschaft.datum_zahlung_mitgliedschaft = eintritt
             else:
                 if kwargs['needsValidation']:
