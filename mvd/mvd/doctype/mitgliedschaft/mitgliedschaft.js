@@ -145,7 +145,21 @@ frappe.ui.form.on('Mitgliedschaft', {
             load_html_overview(frm);
             
             // load retouren overview
-            load_retouren_overview(frm);
+            frappe.call({
+                'method': "frappe.client.get",
+                'args': {
+                    'doctype': "MVD Settings",
+                    'name': "MVD Settings"
+                },
+                'callback': function(response) {
+                    var settings = response.message;
+
+                    if (settings.retouren_management) {
+                        load_retouren_overview(frm);
+                    }
+                }
+            });
+            
             
             // assign hack
             $(".add-assignment.text-muted").remove();
@@ -330,35 +344,48 @@ frappe.ui.form.on('Mitgliedschaft', {
         cur_frm.set_value("letzte_bearbeitung_von", 'User');
         
         // Abfrage ob M+W Retouren geschlossen werden sollen
-        if (cur_frm.doc.m_w_retouren_offen || cur_frm.doc.m_w_retouren_in_bearbeitung) {
-            frappe.confirm(
-                'Dieses Mitglied besitzt offene M+W Retouren. Möchten Sie diese als Abgeschlossen markieren?',
-                function(){
-                    // on yes
-                    frappe.call({
-                        method: "mvd.mvd.doctype.retouren.retouren.close_open_retouren",
-                        args:{
-                                'mitgliedschaft': cur_frm.doc.name
-                        },
-                        callback: function(r){
-                            var resolve_reload = new Promise(function(resolve) {
-                                cur_frm.reload_doc();
-                                resolve(true);
-                            });
-                            resolve_reload.then(function(resolve_reload) {
-                                cur_frm.set_value("m_w_retouren_offen", 0);
-                                cur_frm.set_value("m_w_retouren_in_bearbeitung", 0);
-                                cur_frm.set_value("m_w_anzahl", 0);
-                                cur_frm.save();
-                            });
-                        }
-                    });
-                },
-                function(){
-                    // on no
+        frappe.call({
+            'method': "frappe.client.get",
+            'args': {
+                'doctype': "MVD Settings",
+                'name': "MVD Settings"
+            },
+            'callback': function(response) {
+                var settings = response.message;
+
+                if (settings.retouren_management) {
+                    if (cur_frm.doc.m_w_retouren_offen || cur_frm.doc.m_w_retouren_in_bearbeitung) {
+                        frappe.confirm(
+                            'Dieses Mitglied besitzt offene M+W Retouren. Möchten Sie diese als Abgeschlossen markieren?',
+                            function(){
+                                // on yes
+                                frappe.call({
+                                    method: "mvd.mvd.doctype.retouren.retouren.close_open_retouren",
+                                    args:{
+                                            'mitgliedschaft': cur_frm.doc.name
+                                    },
+                                    callback: function(r){
+                                        var resolve_reload = new Promise(function(resolve) {
+                                            cur_frm.reload_doc();
+                                            resolve(true);
+                                        });
+                                        resolve_reload.then(function(resolve_reload) {
+                                            cur_frm.set_value("m_w_retouren_offen", 0);
+                                            cur_frm.set_value("m_w_retouren_in_bearbeitung", 0);
+                                            cur_frm.set_value("m_w_anzahl", 0);
+                                            cur_frm.save();
+                                        });
+                                    }
+                                });
+                            },
+                            function(){
+                                // on no
+                            }
+                        )
+                    }
                 }
-            )
-        }
+            }
+        });
     },
     plz: function(frm) {
         pincode_lookup(cur_frm.doc.plz, 'ort');
