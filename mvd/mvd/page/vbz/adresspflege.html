@@ -32,6 +32,26 @@
                 {% endif %}
             </td>
         </tr>
+        <tr id="offene_retouren">
+            <td>Offene Retourne</td>
+            <td>
+                {% if retouren.offene_retouren_qty > 99 %}
+                    99+
+                {% else %}
+                    {{ retouren.offene_retouren_qty }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr id="retouren_in_bearbeitung">
+            <td>Retournen in Bearbeitung</td>
+            <td>
+                {% if retouren.retouren_in_bearbeitung_qty > 99 %}
+                    99+
+                {% else %}
+                    {{ retouren.retouren_in_bearbeitung_qty }}
+                {% endif %}
+            </td>
+        </tr>
     </table>
     <h2 class="place-holder-left">Adresspflege Web-Service (prio 2)</h2>
     <table id="table_adresspflege_uebersicht">
