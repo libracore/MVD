@@ -57,6 +57,7 @@ frappe.vbz_massenlauf = {
         $("#begruessung_online_print").off("click");
         $("#mahnungen_qty").off("click");
         $("#mahnungen_print").off("click");
+        $("#alle_massenlaeufe").off("click");
     },
     add_click_handlers: function(open_datas) {
         frappe.vbz_massenlauf.remove_click_handlers();
@@ -137,6 +138,10 @@ frappe.vbz_massenlauf = {
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
             }
+        });
+        $("#alle_massenlaeufe").click(function(){
+            frappe.route_options = {};
+            frappe.set_route("List", "Massenlauf", "List");
         });
         
         frappe.dom.unfreeze();
