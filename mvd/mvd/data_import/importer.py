@@ -1534,6 +1534,7 @@ def korrektur_retouren():
     print("Starte korrektur_retouren")
     
     counter = 1
+    commit_counter = 1
     retouren = frappe.db.sql("""SELECT `name` FROM `tabRetouren` ORDER BY `retoure_mw_sequence_number` ASC""", as_dict=True)
     for retoure in retouren:
         retoure = frappe.get_doc("Retouren", retoure.name)
@@ -1543,6 +1544,11 @@ def korrektur_retouren():
         
         print("Update {0} of {1} Retouren".format(counter, len(retouren)))
         counter += 1
+        if commit_counter == 100:
+            frappe.db.commit()
+            commit_counter = 1
+        else:
+            commit_counter += 1
     
     frappe.db.commit()
     print("Done")
