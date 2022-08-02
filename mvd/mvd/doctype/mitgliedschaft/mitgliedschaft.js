@@ -10,6 +10,9 @@ frappe.ui.form.on('Mitgliedschaft', {
        // Datensatz-Titel ergänzen
        mitglied_name_anzeigen(frm);
        
+       // orange Navbar wenn form dirty
+       dirty_observer(frm);
+       
        if (!frm.doc.__islocal&&cur_frm.doc.status_c != 'Inaktiv') {
             if (((cur_frm.doc.status_c != 'Inaktiv')&&(frappe.user.has_role("System Manager")))||(['Online-Anmeldung', 'Anmeldung', 'Interessent*in'].includes(cur_frm.doc.status_c))) {
                 frm.add_custom_button(__("Inaktivieren"), function() {
@@ -1900,7 +1903,6 @@ function mitglied_name_anzeigen(frm) {
     }
     data += cur_frm.doc.vorname_1 + " " + cur_frm.doc.nachname_1;
     $(".ellipsis.title-text").html(data);
-    console.log($(".ellipsis.title-text"));
 }
 
 function status_historie_ergaenzen(frm) {
@@ -1925,3 +1927,14 @@ function status_historie_ergaenzen(frm) {
     )
 }
 
+function dirty_observer(frm) {
+    $(cur_frm.wrapper).on("dirty", function() {
+       if (cur_frm.is_dirty()) {
+           $(".page-head.flex.align-center").css("background-color", "orange");
+       }
+   });
+   if (!cur_frm.is_dirty()) {
+       $(".page-head.flex.align-center").css("background-color", '#fff');
+       console.log("ok");
+   }
+}
