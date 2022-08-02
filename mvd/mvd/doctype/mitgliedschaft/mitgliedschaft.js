@@ -16,6 +16,13 @@ frappe.ui.form.on('Mitgliedschaft', {
                     mitglied_inaktivieren(frm);
                 }).addClass("btn-danger")
             }
+            
+            if (frappe.user.has_role("System Manager")) {
+                frm.add_custom_button(__("Status Historie ergänzen"), function() {
+                    status_historie_ergaenzen(frm);
+                }).addClass("btn-warning")
+            }
+            
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
                 
                 if ((!['Gestorben', 'Anmeldung', 'Online-Anmeldung'].includes(cur_frm.doc.status_c))&&(!cur_frm.doc.kuendigung)) {
@@ -1894,5 +1901,27 @@ function mitglied_name_anzeigen(frm) {
     data += cur_frm.doc.vorname_1 + " " + cur_frm.doc.nachname_1;
     $(".ellipsis.title-text").html(data);
     console.log($(".ellipsis.title-text"));
+}
+
+function status_historie_ergaenzen(frm) {
+    frappe.prompt([
+        {'fieldname': 'status_alt', 'fieldtype': 'Select', 'label': 'Status alt', 'reqd': 1, 'options': 'Regulär\nRegulär &dagger;\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nOnline-Kündigung\nOnline-Mutation\nZuzug\nGestorben\nKündigung\nWegzug\nAusschluss\nInaktiv\nInteressent*in'},
+        {'fieldname': 'status_neu', 'fieldtype': 'Select', 'label': 'Status neu', 'reqd': 1, 'options': 'Regulär\nRegulär &dagger;\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nOnline-Kündigung\nOnline-Mutation\nZuzug\nGestorben\nKündigung\nWegzug\nAusschluss\nInaktiv\nInteressent*in'},
+        {'fieldname': 'grund', 'fieldtype': 'Data', 'label': 'Grund', 'reqd': 1},
+        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Datum', 'reqd': 1, 'default': frappe.datetime.get_today()}
+    ],
+    function(values){
+        show_alert(values, 5);
+        var status_change_log = cur_frm.add_child('status_change');
+        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', values.datum);
+        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', values.status_alt);
+        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', values.status_neu);
+        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', values.grund);
+        cur_frm.refresh_field('status_change');
+        cur_frm.save();
+    },
+    'Status Historie Ergänzung',
+    'Hinzufügen'
+    )
 }
 
