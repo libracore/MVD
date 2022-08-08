@@ -13,6 +13,12 @@ frappe.ui.form.on('Mitgliedschaft', {
        // orange Navbar wenn form dirty
        dirty_observer(frm);
        
+       if (!frm.doc.__islocal&&cur_frm.doc.status_c == 'Inaktiv'&&!cur_frm.doc.wegzug_zu) {
+           frm.add_custom_button(__("Reaktivieren"), function() {
+                    mitglied_reaktivieren(frm);
+                }).addClass("btn-danger")
+       }
+       
        if (!frm.doc.__islocal&&cur_frm.doc.status_c != 'Inaktiv') {
             if (((cur_frm.doc.status_c != 'Inaktiv')&&(frappe.user.has_role("System Manager")))||(['Online-Anmeldung', 'Anmeldung', 'Interessent*in'].includes(cur_frm.doc.status_c))) {
                 frm.add_custom_button(__("Inaktivieren"), function() {
@@ -1935,6 +1941,41 @@ function dirty_observer(frm) {
    });
    if (!cur_frm.is_dirty()) {
        $(".page-head.flex.align-center").css("background-color", '#fff');
-       console.log("ok");
    }
+}
+
+function mitglied_reaktivieren(frm) {
+    frappe.confirm(
+        'Mitglieder sollten nur reaktiviert werden, wenn die Beiträge lückenlos bezahlt wurden. Bei Bedarf müssen fehlende Rechnungen revisioniert und nach der Reaktivierung nochmals gestellt bzw. gebucht werden.',
+        function(){
+            // on yes
+            frappe.prompt([
+                {'fieldname': 'grund', 'fieldtype': 'Data', 'label': 'Reaktivierungs Grund', 'reqd': 1}  
+            ],
+            function(values){
+                cur_frm.set_value("austritt", '');
+                cur_frm.set_value("kuendigung", '');
+                
+                var status_change_log = cur_frm.add_child('status_change');
+                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', 'Inaktiv');
+                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär');
+                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', values.grund);
+                cur_frm.refresh_field('status_change');
+                
+                cur_frm.set_value("status_c", 'Regulär');
+                cur_frm.set_value("letzte_bearbeitung_von", 'User');
+                
+                cur_frm.save();
+            },
+            'Manuelle Reaktivierung',
+            'Reaktivieren'
+            )
+
+        },
+        function(){
+            // on no
+        },
+        'hallo'
+    )
 }
