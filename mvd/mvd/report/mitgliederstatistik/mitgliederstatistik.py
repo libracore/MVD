@@ -59,7 +59,7 @@ def get_stand(filters, data):
     data.append(
         {
             'mitglieder': 'Stand',
-            'berechnung': 'Total - Zuzüger - Neumitglieder {from_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y')),
+            'berechnung': '{from_date} (Total - Zuzüger - Neumitglieder)'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y')),
             'anzahl': '',
             'total': alle - neumitglieder - zuzueger
         })
@@ -82,6 +82,9 @@ def get_stand(filters, data):
     return data
 
 def get_personen_in_db(filters, data):
+    # ---
+    # Achtung: Online-Beitritte sind hier mit dabei (bei Miveba nicht)
+    # ---
     alle = frappe.db.sql("""SELECT
                                     COUNT(`name`) AS `qty`
                                 FROM `tabMitgliedschaft`
@@ -263,18 +266,19 @@ def get_ohne_mitgliednummer(filters, data):
     return data
 
 def get_nicht_bezahlt(filters, data):
+    year = int(frappe.utils.get_datetime(filters.to_date).strftime('%Y'))
     nicht_bezahlt = frappe.db.sql("""SELECT
                                     COUNT(`name`) AS `qty`
                                 FROM `tabMitgliedschaft`
                                 WHERE `sektion_id` = '{sektion_id}'
-                                AND `bezahltes_mitgliedschaftsjahr` = 0
+                                AND `bezahltes_mitgliedschaftsjahr` < {year}
                                 AND `wegzug` IS NULL
                                 AND `austritt` IS NULL
-                                AND `kuendigung` IS NULL""".format(sektion_id=filters.sektion_id), as_dict=True)[0].qty
+                                AND `kuendigung` IS NULL""".format(sektion_id=filters.sektion_id, year=year), as_dict=True)[0].qty
     data.append(
         {
-            'mitglieder': 'nicht bezahlt',
-            'berechnung': 'nicht bezahlt und weder Datum Wegzug noch Datum Austritt noch vorgemerkte Kündigung',
+            'mitglieder': 'nicht bezahlt ({year})'.format(year=year),
+            'berechnung': 'nicht bezahlt und weder Datum Wegzug noch Datum Austritt noch vorgemerkte Kündigung (?)',
             'anzahl': nicht_bezahlt,
             'total': ''
         })
