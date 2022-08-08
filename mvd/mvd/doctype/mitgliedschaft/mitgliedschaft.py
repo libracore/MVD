@@ -1931,7 +1931,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             
             # erstelle ggf. neue Rechnung
             mit_rechnung = False
-            if new_mitgliedschaft.zahlung_mitgliedschaft < int(now().split("-")[0]):
+            if new_mitgliedschaft.bezahltes_mitgliedschaftsjahr < int(now().split("-")[0]):
                 if new_mitgliedschaft.naechstes_jahr_geschuldet == 1:
                     mit_rechnung = create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug mit EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
             
