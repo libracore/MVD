@@ -1132,7 +1132,53 @@ function erstelle_rechnung(frm) {
                                 },
                                 {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1},
                                 {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
-                                {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0}
+                                {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0},
+                                {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 0},
+                                {
+                                    label: "Rechnungs Artikel",
+                                    fieldname: "rechnungs_artikel", 
+                                    fieldtype: "Table", 
+                                    cannot_add_rows: false,
+                                    in_place_edit: false,
+                                    depends_on: 'eval:doc.eigene_items',
+                                    data: [],
+                                    get_data: () => {
+                                        return [];
+                                    },
+                                    fields: [
+                                    {
+                                        fieldtype:'Link',
+                                        fieldname:"item_code",
+                                        options: 'Item',
+                                        in_list_view: 1,
+                                        read_only: 0,
+                                        reqd: 1,
+                                        label: __('Item Code'),
+                                        change: function() {
+                                            if (this.get_value()) {
+                                                var rate_field = this.grid_row.on_grid_fields[1]
+                                                frappe.call({
+                                                    method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
+                                                    args:{
+                                                            'item': this.get_value()
+                                                    },
+                                                    callback: function(r)
+                                                    {
+                                                        rate_field.set_value(r.message);
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    },
+                                    {
+                                        fieldtype:'Currency',
+                                        fieldname:"rate",
+                                        in_list_view: 1,
+                                        read_only: 0,
+                                        label: __('Rate'),
+                                        reqd: 1
+                                    }]
+                                }
                             ],
                             function(values){
                                 if (values.bar_bezahlt == 1) {
@@ -1160,7 +1206,9 @@ function erstelle_rechnung(frm) {
                                             'submit': true,
                                             'hv_bar_bezahlt': hv_bar_bezahlt,
                                             'druckvorlage': values.druckvorlage,
-                                            'massendruck': massendruck
+                                            'massendruck': massendruck,
+                                            'eigene_items': values.eigene_items,
+                                            'rechnungs_artikel': values.rechnungs_artikel
                                     },
                                     freeze: true,
                                     freeze_message: 'Erstelle Rechnung...',
@@ -1255,7 +1303,53 @@ function erstelle_folgejahr_rechnung(frm, jahr) {
                 },
                 {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1},
                 {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
-                {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0}
+                {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0},
+                {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 0},
+                {
+                    label: "Rechnungs Artikel",
+                    fieldname: "rechnungs_artikel", 
+                    fieldtype: "Table", 
+                    cannot_add_rows: false,
+                    in_place_edit: false,
+                    depends_on: 'eval:doc.eigene_items',
+                    data: [],
+                    get_data: () => {
+                        return [];
+                    },
+                    fields: [
+                    {
+                        fieldtype:'Link',
+                        fieldname:"item_code",
+                        options: 'Item',
+                        in_list_view: 1,
+                        read_only: 0,
+                        reqd: 1,
+                        label: __('Item Code'),
+                        change: function() {
+                            if (this.get_value()) {
+                                var rate_field = this.grid_row.on_grid_fields[1]
+                                frappe.call({
+                                    method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
+                                    args:{
+                                            'item': this.get_value()
+                                    },
+                                    callback: function(r)
+                                    {
+                                        rate_field.set_value(r.message);
+                                    }
+                                });
+                            }
+                        }
+                    },
+                    {
+                        fieldtype:'Currency',
+                        fieldname:"rate",
+                        in_list_view: 1,
+                        read_only: 0,
+                        label: __('Rate'),
+                        reqd: 1
+                    }]
+                }
             ],
             function(values){
                 if (values.bar_bezahlt == 1) {
@@ -1285,7 +1379,9 @@ function erstelle_folgejahr_rechnung(frm, jahr) {
                             'druckvorlage': values.druckvorlage,
                             'massendruck': massendruck,
                             'ignore_stichtage': true,
-                            'jahr': jahr
+                            'jahr': jahr,
+                            'eigene_items': values.eigene_items,
+                            'rechnungs_artikel': values.rechnungs_artikel
                     },
                     freeze: true,
                     freeze_message: 'Erstelle Rechnung...',
@@ -1935,6 +2031,5 @@ function dirty_observer(frm) {
    });
    if (!cur_frm.is_dirty()) {
        $(".page-head.flex.align-center").css("background-color", '#fff');
-       console.log("ok");
    }
 }
