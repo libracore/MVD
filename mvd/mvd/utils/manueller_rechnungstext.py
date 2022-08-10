@@ -7,11 +7,11 @@ import frappe
 from mvd.mvd.doctype.druckvorlage.druckvorlage import replace_mv_keywords
 
 @frappe.whitelist()
-def get_textdaten(sinv):
+def get_textdaten(sinv, druckvorlage):
     sinv = frappe.get_doc("Sales Invoice", sinv)
     sinv.manueller_rechnungstext = 1
     
-    druckvorlage = frappe.get_doc("Druckvorlage", sinv.druckvorlage)
+    druckvorlage = frappe.get_doc("Druckvorlage", druckvorlage)
     
     sinv.doppelseitiger_druck = druckvorlage.doppelseitiger_druck
     sinv.anzahl_seiten = druckvorlage.anzahl_seiten

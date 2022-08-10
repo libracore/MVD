@@ -287,16 +287,25 @@ function manueller_rechnungstext(frm) {
     } else if (frm.doc.__islocal||cur_frm.dirty()) {
        frappe.msgprint("Bitte speichern Sie die Rechnung.");
     } else {
-        frappe.call({
-            method: "mvd.mvd.utils.manueller_rechnungstext.get_textdaten",
-            args:{
-                    'sinv': cur_frm.doc.name
-            },
-            callback: function(r)
-            {
-                frappe.msgprint("Die Textdaten der Druckvorlage <b>" + r.message + "</b> wurden erfolgreich geladen.<br>Sie können diese nun im Abschnitt 'Rechnungstext' bearbeiten.");
-                cur_frm.reload_doc();
-            }
-        });
+        frappe.prompt([
+            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'default': cur_frm.doc.druckvorlage, 'options': 'Druckvorlage'}  
+        ],
+        function(values){
+            frappe.call({
+                method: "mvd.mvd.utils.manueller_rechnungstext.get_textdaten",
+                args:{
+                        'sinv': cur_frm.doc.name,
+                        'druckvorlage': values.druckvorlage
+                },
+                callback: function(r)
+                {
+                    frappe.msgprint("Die Textdaten der Druckvorlage <b>" + r.message + "</b> wurden erfolgreich geladen.<br>Sie können diese nun im Abschnitt 'Rechnungstext' bearbeiten.");
+                    cur_frm.reload_doc();
+                }
+            });
+        },
+        'Auswahl Druckvorlage',
+        'Texte laden'
+        )
     }
 }
