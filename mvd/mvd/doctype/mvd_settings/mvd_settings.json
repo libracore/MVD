@@ -4,7 +4,11 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "retouren_management"
+  "section_feature",
+  "retouren_management",
+  "reaktivierung_von_inaktiven",
+  "manuelle_artikelauswahl",
+  "rechnungstext_anpassungen"
  ],
  "fields": [
   {
@@ -12,10 +16,33 @@
    "fieldname": "retouren_management",
    "fieldtype": "Check",
    "label": "Retouren Handling in Mitgliedschaft"
+  },
+  {
+   "default": "0",
+   "fieldname": "reaktivierung_von_inaktiven",
+   "fieldtype": "Check",
+   "label": "Reaktivierung von inaktiven Mitgliedschaften"
+  },
+  {
+   "default": "0",
+   "fieldname": "manuelle_artikelauswahl",
+   "fieldtype": "Check",
+   "label": "Manuelle Rechnungsartikel auswahl"
+  },
+  {
+   "default": "0",
+   "fieldname": "rechnungstext_anpassungen",
+   "fieldtype": "Check",
+   "label": "Rechnungstext anpassungen"
+  },
+  {
+   "fieldname": "section_feature",
+   "fieldtype": "Section Break",
+   "label": "Feature Aktivierung / Deaktivierung"
   }
  ],
  "issingle": 1,
- "modified": "2022-07-28 14:23:14.547389",
+ "modified": "2022-08-11 13:13:34.665518",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Settings",
