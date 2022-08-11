@@ -1994,7 +1994,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         return 1
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False):
+def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None):
     if not mitgliedschaft_obj:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     else:
@@ -2013,30 +2013,39 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         address = mitgliedschaft.rg_adresse
         contact = mitgliedschaft.rg_kontakt
     
-    # finde passenden Artikel
-    if mitgliedschaft.mitgliedtyp_c == 'Privat':
-        item = [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center}]
-        if not ignore_stichtage:
-            reduziert_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.reduzierter_mitgliederbeitrag).strftime("%m") + "-" + getdate(sektion.reduzierter_mitgliederbeitrag).strftime("%d"))
-            gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%d"))
-            if getdate(today()) >= reduziert_ab:
-                item = [{"item_code": sektion.mitgliedschafts_artikel_reduziert,"qty": 1, "cost_center": company.cost_center}]
-                if getdate(today()) >= gratis_ab:
-                    item = [
-                        {"item_code": sektion.mitgliedschafts_artikel_gratis,"qty": 1, "cost_center": company.cost_center},
-                        {"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center}
-                    ]
-                    jahr = int(getdate(today()).strftime("%Y")) + 1
+    if not eigene_items or int(eigene_items) == 0:
+        # finde passenden Artikel
+        if mitgliedschaft.mitgliedtyp_c == 'Privat':
+            item = [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center}]
+            if not ignore_stichtage:
+                reduziert_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.reduzierter_mitgliederbeitrag).strftime("%m") + "-" + getdate(sektion.reduzierter_mitgliederbeitrag).strftime("%d"))
+                gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%d"))
+                if getdate(today()) >= reduziert_ab:
+                    item = [{"item_code": sektion.mitgliedschafts_artikel_reduziert,"qty": 1, "cost_center": company.cost_center}]
+                    if getdate(today()) >= gratis_ab:
+                        item = [
+                            {"item_code": sektion.mitgliedschafts_artikel_gratis,"qty": 1, "cost_center": company.cost_center},
+                            {"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center}
+                        ]
+                        jahr = int(getdate(today()).strftime("%Y")) + 1
+            
+            # prüfe Beitrittsgebühr
+            if int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) == 0 and sektion.mitgliedschafts_artikel_beitritt:
+                item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt,"qty": 1, "cost_center": company.cost_center})
         
-        # prüfe Beitrittsgebühr
-        if int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) == 0 and sektion.mitgliedschafts_artikel_beitritt:
-            item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt,"qty": 1, "cost_center": company.cost_center})
-    
-    if mitgliedschaft.mitgliedtyp_c == 'Geschäft':
-        item = [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1}]
-        # prüfe Beitrittsgebühr
-        if int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) == 0 and sektion.mitgliedschafts_artikel_beitritt_geschaeft:
-            item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt_geschaeft,"qty": 1, "cost_center": company.cost_center})
+        if mitgliedschaft.mitgliedtyp_c == 'Geschäft':
+            item = [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1}]
+            # prüfe Beitrittsgebühr
+            if int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) == 0 and sektion.mitgliedschafts_artikel_beitritt_geschaeft:
+                item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt_geschaeft,"qty": 1, "cost_center": company.cost_center})
+    else:
+        rechnungs_artikel = json.loads(rechnungs_artikel)
+        for item in rechnungs_artikel:
+            del item['__islocal']
+            item['qty'] = 1
+            item['cost_center'] = company.cost_center
+        item = rechnungs_artikel
+        # ~ frappe.throw(rechnungs_artikel)
     
     if mitgliedschaft.status_c == 'Interessent*in':
         exclude_from_payment_reminder_until = '2099-12-31'

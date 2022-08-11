@@ -13,6 +13,12 @@ frappe.ui.form.on('Mitgliedschaft', {
        // orange Navbar wenn form dirty
        dirty_observer(frm);
        
+       if (!frm.doc.__islocal&&cur_frm.doc.status_c == 'Inaktiv'&&!cur_frm.doc.wegzug_zu) {
+           frm.add_custom_button(__("Reaktivieren"), function() {
+                    mitglied_reaktivieren(frm);
+                }).addClass("btn-danger")
+       }
+       
        if (!frm.doc.__islocal&&cur_frm.doc.status_c != 'Inaktiv') {
             if (((cur_frm.doc.status_c != 'Inaktiv')&&(frappe.user.has_role("System Manager")))||(['Online-Anmeldung', 'Anmeldung', 'Interessent*in'].includes(cur_frm.doc.status_c))) {
                 frm.add_custom_button(__("Inaktivieren"), function() {
@@ -1132,7 +1138,53 @@ function erstelle_rechnung(frm) {
                                 },
                                 {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1},
                                 {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
-                                {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0}
+                                {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0},
+                                {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 0},
+                                {
+                                    label: "Rechnungs Artikel",
+                                    fieldname: "rechnungs_artikel", 
+                                    fieldtype: "Table", 
+                                    cannot_add_rows: false,
+                                    in_place_edit: false,
+                                    depends_on: 'eval:doc.eigene_items',
+                                    data: [],
+                                    get_data: () => {
+                                        return [];
+                                    },
+                                    fields: [
+                                    {
+                                        fieldtype:'Link',
+                                        fieldname:"item_code",
+                                        options: 'Item',
+                                        in_list_view: 1,
+                                        read_only: 0,
+                                        reqd: 1,
+                                        label: __('Item Code'),
+                                        change: function() {
+                                            if (this.get_value()) {
+                                                var rate_field = this.grid_row.on_grid_fields[1]
+                                                frappe.call({
+                                                    method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
+                                                    args:{
+                                                            'item': this.get_value()
+                                                    },
+                                                    callback: function(r)
+                                                    {
+                                                        rate_field.set_value(r.message);
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    },
+                                    {
+                                        fieldtype:'Currency',
+                                        fieldname:"rate",
+                                        in_list_view: 1,
+                                        read_only: 0,
+                                        label: __('Rate'),
+                                        reqd: 1
+                                    }]
+                                }
                             ],
                             function(values){
                                 if (values.bar_bezahlt == 1) {
@@ -1160,7 +1212,9 @@ function erstelle_rechnung(frm) {
                                             'submit': true,
                                             'hv_bar_bezahlt': hv_bar_bezahlt,
                                             'druckvorlage': values.druckvorlage,
-                                            'massendruck': massendruck
+                                            'massendruck': massendruck,
+                                            'eigene_items': values.eigene_items,
+                                            'rechnungs_artikel': values.rechnungs_artikel
                                     },
                                     freeze: true,
                                     freeze_message: 'Erstelle Rechnung...',
@@ -1255,7 +1309,53 @@ function erstelle_folgejahr_rechnung(frm, jahr) {
                 },
                 {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1},
                 {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
-                {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0}
+                {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0},
+                {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 0},
+                {
+                    label: "Rechnungs Artikel",
+                    fieldname: "rechnungs_artikel", 
+                    fieldtype: "Table", 
+                    cannot_add_rows: false,
+                    in_place_edit: false,
+                    depends_on: 'eval:doc.eigene_items',
+                    data: [],
+                    get_data: () => {
+                        return [];
+                    },
+                    fields: [
+                    {
+                        fieldtype:'Link',
+                        fieldname:"item_code",
+                        options: 'Item',
+                        in_list_view: 1,
+                        read_only: 0,
+                        reqd: 1,
+                        label: __('Item Code'),
+                        change: function() {
+                            if (this.get_value()) {
+                                var rate_field = this.grid_row.on_grid_fields[1]
+                                frappe.call({
+                                    method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
+                                    args:{
+                                            'item': this.get_value()
+                                    },
+                                    callback: function(r)
+                                    {
+                                        rate_field.set_value(r.message);
+                                    }
+                                });
+                            }
+                        }
+                    },
+                    {
+                        fieldtype:'Currency',
+                        fieldname:"rate",
+                        in_list_view: 1,
+                        read_only: 0,
+                        label: __('Rate'),
+                        reqd: 1
+                    }]
+                }
             ],
             function(values){
                 if (values.bar_bezahlt == 1) {
@@ -1285,7 +1385,9 @@ function erstelle_folgejahr_rechnung(frm, jahr) {
                             'druckvorlage': values.druckvorlage,
                             'massendruck': massendruck,
                             'ignore_stichtage': true,
-                            'jahr': jahr
+                            'jahr': jahr,
+                            'eigene_items': values.eigene_items,
+                            'rechnungs_artikel': values.rechnungs_artikel
                     },
                     freeze: true,
                     freeze_message: 'Erstelle Rechnung...',
@@ -1935,6 +2037,41 @@ function dirty_observer(frm) {
    });
    if (!cur_frm.is_dirty()) {
        $(".page-head.flex.align-center").css("background-color", '#fff');
-       console.log("ok");
    }
+}
+
+function mitglied_reaktivieren(frm) {
+    frappe.confirm(
+        'Mitglieder sollten nur reaktiviert werden, wenn die Beiträge lückenlos bezahlt wurden. Bei Bedarf müssen fehlende Rechnungen revisioniert und nach der Reaktivierung nochmals gestellt bzw. gebucht werden.',
+        function(){
+            // on yes
+            frappe.prompt([
+                {'fieldname': 'grund', 'fieldtype': 'Data', 'label': 'Reaktivierungs Grund', 'reqd': 1}  
+            ],
+            function(values){
+                cur_frm.set_value("austritt", '');
+                cur_frm.set_value("kuendigung", '');
+                
+                var status_change_log = cur_frm.add_child('status_change');
+                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', 'Inaktiv');
+                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär');
+                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', values.grund);
+                cur_frm.refresh_field('status_change');
+                
+                cur_frm.set_value("status_c", 'Regulär');
+                cur_frm.set_value("letzte_bearbeitung_von", 'User');
+                
+                cur_frm.save();
+            },
+            'Manuelle Reaktivierung',
+            'Reaktivieren'
+            )
+
+        },
+        function(){
+            // on no
+        },
+        'hallo'
+    )
 }

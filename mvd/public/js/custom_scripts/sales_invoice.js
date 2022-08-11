@@ -6,6 +6,11 @@ frappe.ui.form.on('Sales Invoice', {
         if ((cur_frm.doc.outstanding_amount > 0)&&(cur_frm.doc.docstatus==1)) {
             check_for_hv(frm);
         }
+        
+        frm.add_custom_button(__("Rechnungstext manuell bearbeiten"), function() {
+            manueller_rechnungstext(frm);
+        });
+        
         if ((cur_frm.doc.docstatus == 2)&&(frappe.user.has_role("System Manager"))) {
             frm.add_custom_button(__("Storno Rollback"), function() {
                 storno_rollback(frm);
@@ -272,4 +277,35 @@ function storno_rollback(frm) {
             cur_frm.reload_doc();
         }
     });
+}
+
+function manueller_rechnungstext(frm) {
+    if (cur_frm.doc.docstatus == 1) {
+        frappe.msgprint("Bitte stornieren Sie die Rechnung.");
+    } else if (cur_frm.doc.docstatus == 2) {
+        frappe.msgprint("Bitte klicken Sie auf Abändern.");
+    } else if (frm.doc.__islocal||cur_frm.dirty()) {
+       frappe.msgprint("Bitte speichern Sie die Rechnung.");
+    } else {
+        frappe.prompt([
+            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'default': cur_frm.doc.druckvorlage, 'options': 'Druckvorlage'}  
+        ],
+        function(values){
+            frappe.call({
+                method: "mvd.mvd.utils.manueller_rechnungstext.get_textdaten",
+                args:{
+                        'sinv': cur_frm.doc.name,
+                        'druckvorlage': values.druckvorlage
+                },
+                callback: function(r)
+                {
+                    frappe.msgprint("Die Textdaten der Druckvorlage <b>" + r.message + "</b> wurden erfolgreich geladen.<br>Sie können diese nun im Abschnitt 'Rechnungstext' bearbeiten.");
+                    cur_frm.reload_doc();
+                }
+            });
+        },
+        'Auswahl Druckvorlage',
+        'Texte laden'
+        )
+    }
 }
