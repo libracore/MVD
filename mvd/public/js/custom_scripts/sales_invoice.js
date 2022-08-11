@@ -7,8 +7,20 @@ frappe.ui.form.on('Sales Invoice', {
             check_for_hv(frm);
         }
         
-        frm.add_custom_button(__("Rechnungstext manuell bearbeiten"), function() {
-            manueller_rechnungstext(frm);
+        frappe.call({
+            'method': "frappe.client.get",
+            'args': {
+                'doctype': "MVD Settings",
+                'name': "MVD Settings"
+            },
+            'callback': function(settings_response) {
+                var settings = settings_response.message;
+                if (settings.rechnungstext_anpassungen) {
+                    frm.add_custom_button(__("Rechnungstext manuell bearbeiten"), function() {
+                        manueller_rechnungstext(frm);
+                    });
+                }
+            }
         });
         
         if ((cur_frm.doc.docstatus == 2)&&(frappe.user.has_role("System Manager"))) {
