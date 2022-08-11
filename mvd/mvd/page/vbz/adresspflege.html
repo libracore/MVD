@@ -7,14 +7,14 @@
     Die Zustellung des M+W wird nach zwei Retouren eingestellt bis die Adresse korrigiert ist<br>
     und ihr die Anzahl M+W wieder von 0 auf 1 setzt.</p>
     <h2 class="place-holder-left">Retouren M+W</h2>
-    <p class="place-holder-left"><a href="https://wiki.mieterverband.ch/x/kwBqBQ" target="_blank">Anleitung</a></p>
+    <p class="place-holder-left"><a href="https://wiki.mieterverband.ch/x/kwBqBQ" target="_blank">&rarr; Anleitung</a></p>
     <table id="table_adressrecherche_uebersicht">
         <tr>
-            <th><b>Verarbeitung von</b></th>
+            <th><b>Verarbeitung</b></th>
             <th><b>Anzahl</b></th>
         </tr>
         <tr id="zweimal_unzustellbar">
-            <td>zweimal unzustellbare M+W (Zustellung gestoppt)</td>
+            <td>Mitglieder mit zweimal unzustellbarem M+W (Zustellung gestoppt)</td>
             <td>
                 {% if retouren.retouren_zweimal_qty > 99 %}
                     99+
@@ -24,7 +24,7 @@
             </td>
         </tr>
         <tr id="einmal_unzustellbar">
-            <td>einmal unzustellbare M+W</td>
+            <td>Mitglieder mit einmal unzustellbarem M+W</td>
             <td>
                 {% if retouren.retouren_einmal_qty > 99 %}
                     99+
@@ -34,7 +34,7 @@
             </td>
         </tr>
         <tr id="offene_retouren">
-            <td>Offene Retourne</td>
+            <td>Offene Retouren</td>
             <td>
                 {% if retouren.offene_retouren_qty > 99 %}
                     99+
@@ -44,7 +44,7 @@
             </td>
         </tr>
         <tr id="retouren_in_bearbeitung">
-            <td>Retournen in Bearbeitung</td>
+            <td>Retouren in Bearbeitung</td>
             <td>
                 {% if retouren.retouren_in_bearbeitung_qty > 99 %}
                     99+
