@@ -44,7 +44,9 @@
   "cb_3",
   "fz_rechts",
   "section_mitgliederausweis",
-  "ausweis_rueckseite"
+  "ausweis_rueckseite",
+  "section_todo",
+  "todo_gruppen"
  ],
  "fields": [
   {
@@ -282,9 +284,21 @@
    "fieldname": "pseudo_sektion",
    "fieldtype": "Check",
    "label": "Pseudo Sektion"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_todo",
+   "fieldtype": "Section Break",
+   "label": "Gruppen ToDo"
+  },
+  {
+   "fieldname": "todo_gruppen",
+   "fieldtype": "Table",
+   "label": "ToDo Gruppen",
+   "options": "ToDo Gruppen"
   }
  ],
- "modified": "2022-07-12 11:06:02.620040",
+ "modified": "2022-08-17 20:40:54.005241",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
