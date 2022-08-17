@@ -2383,7 +2383,7 @@ def mvm_update(mitgliedschaft, kwargs):
                 change_log_row.status_neu = status_c
                 if status_c == 'Online-Kündigung':
                     if kwargs['kuendigungsgrund'] == 'Andere Gründe':
-                        change_log_row.grund = kwargs['kuendigungsgrund'] + ": " + kwargs['kuendigungsgrundBemerkung']
+                        change_log_row.grund = kwargs['kuendigungsgrund'] + ": " + kwargs['kuendigungsgrundBemerkung'] if kwargs['kuendigungsgrundBemerkung'] else '---'
                     else:
                         change_log_row.grund = kwargs['kuendigungsgrund']
                 else:
