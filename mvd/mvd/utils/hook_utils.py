@@ -33,9 +33,14 @@ def todo_permissions(todo, event):
             for user in users:
                 frappe.share.add('ToDo', todo.name, user=user.user, read=1, write=1, flags={'ignore_share_permission': True})
         else:
-            users = frappe.share.get_users('ToDo', todo.name)
-            for user in users:
-                frappe.share.remove("ToDo", todo.name, user.user, flags={'ignore_share_permission': True, 'ignore_permissions': True})
+            virt_users = frappe.db.sql("""SELECT `user` FROM `tabToDo Gruppen` WHERE `virt_user` = '{owner}'""".format(owner=todo.owner), as_dict=True)
+            if len(virt_users) > 0:
+                for user in virt_users:
+                    frappe.share.add('ToDo', todo.name, user=user.user, read=1, write=1, flags={'ignore_share_permission': True})
+            else:
+                users = frappe.share.get_users('ToDo', todo.name)
+                for user in users:
+                    frappe.share.remove("ToDo", todo.name, user.user, flags={'ignore_share_permission': True, 'ignore_permissions': True})
     except:
         pass
 
