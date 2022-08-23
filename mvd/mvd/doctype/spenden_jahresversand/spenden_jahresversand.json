@@ -1,0 +1,152 @@
+{
+ "creation": "2022-08-22 12:13:59.263980",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_allgemein",
+  "sektionsspezifisch",
+  "sektion_id",
+  "cb_1",
+  "sprachspezifisch",
+  "sprache",
+  "cb_2",
+  "mitgliedtypspezifisch",
+  "mitgliedtyp",
+  "amended_from",
+  "section_bg_job",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "default": "1",
+   "fieldname": "sektionsspezifisch",
+   "fieldtype": "Check",
+   "label": "Sektionsspezifisch",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.sektionsspezifisch",
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "sprachspezifisch",
+   "fieldtype": "Check",
+   "label": "Sprach spezifisch"
+  },
+  {
+   "default": "de",
+   "depends_on": "eval:doc.sprachspezifisch",
+   "fieldname": "sprache",
+   "fieldtype": "Link",
+   "label": "Sprache",
+   "options": "Language"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Spenden Jahresversand",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "mitgliedtypspezifisch",
+   "fieldtype": "Check",
+   "label": "Mitgliedtyp spezifisch"
+  },
+  {
+   "depends_on": "eval:doc.mitgliedtypspezifisch",
+   "fieldname": "mitgliedtyp",
+   "fieldtype": "Select",
+   "label": "Mitgliedtyp",
+   "options": "Privat\nGesch\u00e4ft"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_bg_job",
+   "fieldtype": "Section Break",
+   "label": "Background-Job"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Neu\nVorgemerkt\nIn Arbeit\nAbgeschlossen\nFehlgeschlagen",
+   "permlevel": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-08-23 11:09:32.966701",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Spenden Jahresversand",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MV_MA",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "MV_MA"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

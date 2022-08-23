@@ -40,8 +40,14 @@ def get_data():
                 {
                     "type": "doctype",
                     "name": "MV Jahresversand",
-                    "label": _("Jahresversand"),
+                    "label": _("Rechnungs Jahresversand"),
                     "description": _("MV Jahresversand")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Spenden Jahresversand",
+                    "label": _("Spenden Jahresversand"),
+                    "description": _("Spenden Jahresversand")
                 },
                 {
                     "type": "doctype",

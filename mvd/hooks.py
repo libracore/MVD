@@ -120,7 +120,8 @@ scheduler_events = {
         "mvd.mvd.utils.daily_jobs.set_inaktiv",
         "mvd.mvd.utils.daily_jobs.entferne_alte_reduzierungen",
         "mvd.mvd.utils.daily_jobs.ampel_neuberechnung",
-        "mvd.mvd.utils.daily_jobs.regionen_zuteilung"
+        "mvd.mvd.utils.daily_jobs.regionen_zuteilung",
+        "mvd.mvd.utils.daily_jobs.spenden_jahresversand"
     ],
     "all": [
         "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue"
