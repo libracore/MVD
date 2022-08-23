@@ -54,7 +54,8 @@ def spenden_jahresversand(doc):
                 'betrag': 0.00,
                 'posting_date': today(),
                 'company': sektion.company,
-                'druckvorlage': ''
+                'druckvorlage': '',
+                'spenden_jahresversand': doc.name
             })
             fr.insert(ignore_permissions=True)
             
