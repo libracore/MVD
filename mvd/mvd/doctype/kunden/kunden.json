@@ -1,0 +1,432 @@
+{
+ "allow_copy": 1,
+ "allow_events_in_timeline": 1,
+ "allow_import": 1,
+ "autoname": "MV-K.######",
+ "creation": "2022-08-24 13:19:29.451736",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_kunde",
+  "kundentyp",
+  "firma",
+  "nachname",
+  "tel_p",
+  "tel_g",
+  "cb_1",
+  "anrede",
+  "zusatz_firma",
+  "vorname",
+  "tel_m",
+  "e_mail",
+  "section_korrespondenz_adresse",
+  "strasse",
+  "nummer",
+  "plz",
+  "postfach_nummer",
+  "postfach",
+  "cb_2",
+  "zusatz_adresse",
+  "nummer_zu",
+  "ort",
+  "land",
+  "section_rechnungs_adresse",
+  "abweichende_rechnungsadresse",
+  "unabhaengiger_debitor",
+  "rg_zusatz_adresse",
+  "rg_strasse",
+  "rg_nummer",
+  "rg_nummer_zu",
+  "rg_postfach",
+  "rg_postfach_nummer",
+  "rg_plz",
+  "rg_ort",
+  "rg_land",
+  "cb_3",
+  "rg_kundentyp",
+  "rg_firma",
+  "rg_zusatz_firma",
+  "rg_anrede",
+  "rg_nachname",
+  "rg_vorname",
+  "rg_tel_p",
+  "rg_tel_m",
+  "rg_tel_g",
+  "rg_e_mail",
+  "section_links",
+  "sektion_id",
+  "title_1",
+  "kunde_kunde",
+  "kontakt_kunde",
+  "adresse_kunde",
+  "title_4",
+  "rg_kunde",
+  "rg_kontakt",
+  "rg_adresse"
+ ],
+ "fields": [
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "kundentyp",
+   "fieldtype": "Select",
+   "label": "Kontakttyp",
+   "options": "Einzelperson\nUnternehmen",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.kundentyp=='Unternehmen'",
+   "fieldname": "firma",
+   "fieldtype": "Data",
+   "label": "Firma"
+  },
+  {
+   "depends_on": "eval:doc.kundentyp=='Unternehmen'",
+   "fieldname": "zusatz_firma",
+   "fieldtype": "Data",
+   "label": "Zusatz Firma"
+  },
+  {
+   "fieldname": "anrede",
+   "fieldtype": "Link",
+   "label": "Anrede",
+   "options": "Salutation"
+  },
+  {
+   "fieldname": "nachname",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nachname"
+  },
+  {
+   "fieldname": "vorname",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Vorname"
+  },
+  {
+   "fieldname": "tel_p",
+   "fieldtype": "Data",
+   "label": "Tel. Privat"
+  },
+  {
+   "fieldname": "tel_m",
+   "fieldtype": "Data",
+   "label": "Tel. Mobil"
+  },
+  {
+   "fieldname": "tel_g",
+   "fieldtype": "Data",
+   "label": "Tel. Gesch\u00e4ftlich"
+  },
+  {
+   "fieldname": "e_mail",
+   "fieldtype": "Data",
+   "label": "E-Mail"
+  },
+  {
+   "fieldname": "section_korrespondenz_adresse",
+   "fieldtype": "Section Break",
+   "label": "Korrespondenzadresse"
+  },
+  {
+   "fieldname": "zusatz_adresse",
+   "fieldtype": "Data",
+   "label": "Zusatzadresse"
+  },
+  {
+   "fieldname": "strasse",
+   "fieldtype": "Data",
+   "label": "Strasse"
+  },
+  {
+   "fieldname": "nummer",
+   "fieldtype": "Data",
+   "label": "Hausnummer"
+  },
+  {
+   "fieldname": "nummer_zu",
+   "fieldtype": "Data",
+   "label": "Nr. Zusatz"
+  },
+  {
+   "default": "0",
+   "fieldname": "postfach",
+   "fieldtype": "Check",
+   "label": "Postfach"
+  },
+  {
+   "depends_on": "eval:doc.postfach=='1'",
+   "fieldname": "postfach_nummer",
+   "fieldtype": "Data",
+   "label": "Postfach Nr."
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "label": "PLZ",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "label": "Wohnort",
+   "reqd": 1
+  },
+  {
+   "default": "Schweiz",
+   "fieldname": "land",
+   "fieldtype": "Link",
+   "label": "Land",
+   "options": "Country"
+  },
+  {
+   "fieldname": "section_rechnungs_adresse",
+   "fieldtype": "Section Break",
+   "label": "Rechnungsadresse"
+  },
+  {
+   "default": "0",
+   "fieldname": "abweichende_rechnungsadresse",
+   "fieldtype": "Check",
+   "label": "Abweichende Rechnungsadresse"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "unabhaengiger_debitor",
+   "fieldtype": "Check",
+   "label": "Unabh\u00e4ngiger Debitor"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_zusatz_adresse",
+   "fieldtype": "Data",
+   "label": "Zusatzadresse (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_strasse",
+   "fieldtype": "Data",
+   "label": "Strasse (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_nummer",
+   "fieldtype": "Data",
+   "label": "Hausnummer (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_nummer_zu",
+   "fieldtype": "Data",
+   "label": "Nr. Zusatz (Rechnung)"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_postfach",
+   "fieldtype": "Check",
+   "label": "Postfach (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.rg_postfach=='1'",
+   "fieldname": "rg_postfach_nummer",
+   "fieldtype": "Data",
+   "label": "Postfach Nummer (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_plz",
+   "fieldtype": "Data",
+   "label": "PLZ (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_ort",
+   "fieldtype": "Data",
+   "label": "Ort (Rechnung)"
+  },
+  {
+   "default": "Schweiz",
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rg_land",
+   "fieldtype": "Link",
+   "label": "Land (Rechnung)",
+   "options": "Country"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_kundentyp",
+   "fieldtype": "Select",
+   "label": "Kontakttyp (Rechnung)",
+   "options": "Einzelperson\nUnternehmen"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'&&doc.rg_kundentyp=='Unternehmen'",
+   "fieldname": "rg_firma",
+   "fieldtype": "Data",
+   "label": "Firma (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'&&doc.rg_kundentyp=='Unternehmen'",
+   "fieldname": "rg_zusatz_firma",
+   "fieldtype": "Data",
+   "label": "Zusatz Firma (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_anrede",
+   "fieldtype": "Link",
+   "label": "Anrede (Rechnung)",
+   "options": "Salutation"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_nachname",
+   "fieldtype": "Data",
+   "label": "Nachname (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_vorname",
+   "fieldtype": "Data",
+   "label": "Vorname (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_tel_p",
+   "fieldtype": "Data",
+   "label": "Tel. Privat (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_tel_m",
+   "fieldtype": "Data",
+   "label": "Tel. Mobil (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_tel_g",
+   "fieldtype": "Data",
+   "label": "Tel. Gesch\u00e4ftlich (Rechnung)"
+  },
+  {
+   "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'&&doc.unabhaengiger_debitor=='1'",
+   "fieldname": "rg_e_mail",
+   "fieldtype": "Data",
+   "label": "E-Mail (Rechnung)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_links",
+   "fieldtype": "Section Break",
+   "label": "Verkn\u00fcpfungen"
+  },
+  {
+   "fieldname": "title_1",
+   "fieldtype": "Heading",
+   "label": "Kunde"
+  },
+  {
+   "fieldname": "kunde_kunde",
+   "fieldtype": "Link",
+   "label": "Kunde",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kontakt_kunde",
+   "fieldtype": "Link",
+   "label": "Kontakt",
+   "options": "Contact",
+   "read_only": 1
+  },
+  {
+   "fieldname": "adresse_kunde",
+   "fieldtype": "Link",
+   "label": "Adresse",
+   "options": "Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "title_4",
+   "fieldtype": "Heading",
+   "label": "Rechnungsempf\u00e4nger"
+  },
+  {
+   "fieldname": "rg_kunde",
+   "fieldtype": "Link",
+   "label": "Kunde",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rg_kontakt",
+   "fieldtype": "Link",
+   "label": "Kontakt",
+   "options": "Contact",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rg_adresse",
+   "fieldtype": "Link",
+   "label": "Adresse",
+   "options": "Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_kunde",
+   "fieldtype": "Section Break",
+   "label": "Kunde"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "icon": "fa fa-tag",
+ "modified": "2022-08-24 14:54:48.217506",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Kunden",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "MV_MA",
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
