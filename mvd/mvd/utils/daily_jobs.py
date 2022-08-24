@@ -88,14 +88,14 @@ def ampel_neuberechnung():
 def regionen_zuteilung():
     _regionen_zuteilung()
 
-def spenden_jahresversand():
-        spenden_jahresversand = frappe.db.sql("""SELECT `name` FROM `tabSpenden Jahresversand` WHERE `status` = 'Vorgemerkt' AND `docstatus` = 1""", as_dict=True)
+def spenden_versand():
+        spenden_jahresversand = frappe.db.sql("""SELECT `name` FROM `tabSpendenversand` WHERE `status` = 'Vorgemerkt' AND `docstatus` = 1""", as_dict=True)
         if len(spenden_jahresversand) > 0:
             for lauf in spenden_jahresversand:
-                lauf = frappe.get_doc("Spenden Jahresversand", lauf.name)
+                lauf = frappe.get_doc("Spendenversand", lauf.name)
                 lauf.status = 'In Arbeit'
                 lauf.save()
                 args = {
                     'doc': lauf
                 }
-                enqueue("mvd.mvd.doctype.spenden_jahresversand.spenden_jahresversand.spenden_jahresversand", queue='long', job_name='Spenden Jahresversand {0}'.format(lauf.name), timeout=5000, **args)
+                enqueue("mvd.mvd.doctype.spendenversand.spendenversand.spenden_versand", queue='long', job_name='Spendenversand {0}'.format(lauf.name), timeout=5000, **args)

@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe.utils.data import add_days, today, now
 from frappe.utils.csvutils import to_csv as make_csv
 
-class SpendenJahresversand(Document):
+class Spendenversand(Document):
     def validate(self):
         if int(self.sektionsspezifisch) == 1 and not self.sektion_id:
             frappe.throw("Bitte wählen Sie eine Sektion aus.")
@@ -20,9 +20,8 @@ class SpendenJahresversand(Document):
     def before_submit(self):
         if self.status == 'Neu':
             self.status = 'Vorgemerkt'
-            # ~ self.save()
 
-def spenden_jahresversand(doc):
+def spenden_versand(doc):
     fr_list = []
     try:
         sektion = ''
@@ -50,12 +49,12 @@ def spenden_jahresversand(doc):
                 'sektion_id': str(sektion.name),
                 'sektions_code': str(sektion.sektion_id) or '00',
                 'sales_invoice': '',
-                'typ': 'Spende (Jahresversand)',
+                'typ': 'Spende (Spendenversand)',
                 'betrag': 0.00,
                 'posting_date': today(),
                 'company': sektion.company,
                 'druckvorlage': '',
-                'spenden_jahresversand': doc.name
+                'spenden_versand': doc.name
             })
             fr.insert(ignore_permissions=True)
             
@@ -74,21 +73,22 @@ def spenden_jahresversand(doc):
         if len(fr_list) > 0:
             for fr_doc in fr_list:
                 fr = frappe.get_doc("Fakultative Rechnung", fr_doc)
+                fr.cancel()
                 fr.delete()
 
-def create_sammel_csv(fr_list, spenden_jahresversand):
+def create_sammel_csv(fr_list, spenden_versand):
     csv_data = get_csv_data(fr_list)
 
     csv_file = make_csv(csv_data)
 
     _file = frappe.get_doc({
         "doctype": "File",
-        "file_name": "spenden_jahresversand_{datetime}.csv".format(datetime=now().replace(" ", "_")),
+        "file_name": "spendenversand_{datetime}.csv".format(datetime=now().replace(" ", "_")),
         "folder": "Home/Attachments",
         "is_private": 1,
         "content": csv_file,
-        "attached_to_doctype": 'Spenden Jahresversand',
-        "attached_to_name": spenden_jahresversand.name
+        "attached_to_doctype": 'Spendenversand',
+        "attached_to_name": spenden_versand.name
     })
     _file.save()
 

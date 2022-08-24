@@ -45,9 +45,9 @@ def get_data():
                 },
                 {
                     "type": "doctype",
-                    "name": "Spenden Jahresversand",
-                    "label": _("Spenden Jahresversand"),
-                    "description": _("Spenden Jahresversand")
+                    "name": "Spendenversand",
+                    "label": _("Spendenversand"),
+                    "description": _("Spendenversand")
                 },
                 {
                     "type": "doctype",

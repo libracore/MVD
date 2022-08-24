@@ -11,7 +11,7 @@
   "sektion_id",
   "sektions_code",
   "druckvorlage",
-  "spenden_jahresversand",
+  "spenden_versand",
   "cb_1",
   "company",
   "sales_invoice",
@@ -41,7 +41,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Typ",
-   "options": "HV\nSpende\nSpende (Jahresversand)",
+   "options": "HV\nSpende\nSpende (Spendenversand)",
    "reqd": 1
   },
   {
@@ -160,16 +160,16 @@
    "options": "Druckvorlage"
   },
   {
-   "depends_on": "eval:doc.typ=='Spende (Jahresversand)'",
-   "fieldname": "spenden_jahresversand",
+   "depends_on": "eval:doc.typ=='Spende (Spendenversand)'",
+   "fieldname": "spenden_versand",
    "fieldtype": "Link",
-   "label": "Aus Spenden Jahresversand",
-   "options": "Spenden Jahresversand",
+   "label": "Aus Spendenversand",
+   "options": "Spendenversand",
    "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-08-23 20:14:53.371913",
+ "modified": "2022-08-24 10:27:30.846436",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Fakultative Rechnung",

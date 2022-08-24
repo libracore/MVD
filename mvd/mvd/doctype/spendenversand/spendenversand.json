@@ -1,5 +1,5 @@
 {
- "creation": "2022-08-22 12:13:59.263980",
+ "creation": "2022-08-24 10:08:37.763773",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -15,7 +15,8 @@
   "mitgliedtyp",
   "amended_from",
   "section_bg_job",
-  "status"
+  "status",
+  "amended_from"
  ],
  "fields": [
   {
@@ -40,6 +41,10 @@
    "reqd": 1
   },
   {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "0",
    "fieldname": "sprachspezifisch",
    "fieldtype": "Check",
@@ -54,13 +59,8 @@
    "options": "Language"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Spenden Jahresversand",
-   "print_hide": 1,
-   "read_only": 1
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -76,12 +76,13 @@
    "options": "Privat\nGesch\u00e4ft"
   },
   {
-   "fieldname": "cb_1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "cb_2",
-   "fieldtype": "Column Break"
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Spenden Jahresversand",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "section_bg_job",
@@ -95,13 +96,22 @@
    "label": "Status",
    "options": "Neu\nVorgemerkt\nIn Arbeit\nAbgeschlossen\nFehlgeschlagen",
    "permlevel": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Spendenversand",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-08-23 11:09:32.966701",
+ "modified": "2022-08-24 10:08:37.763773",
  "modified_by": "Administrator",
  "module": "MVD",
- "name": "Spenden Jahresversand",
+ "name": "Spendenversand",
  "owner": "Administrator",
  "permissions": [
   {
