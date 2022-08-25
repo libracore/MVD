@@ -131,7 +131,9 @@
                     {% if kontakt_mitglied.salutation %}
                         {{ kontakt_mitglied.salutation }}<br>
                     {% endif %}
-                    {{ kontakt_mitglied.first_name or '' }} {{ kontakt_mitglied.last_name or '' }}
+                    {% if kontakt_mitglied.first_name != kunde_mitglied.customer_name %}
+                        {{ kontakt_mitglied.first_name or '' }} {{ kontakt_mitglied.last_name or '' }}
+                    {% endif %}
                 </p>
             {% endif %}
             <!-- Adresse (nicht zwingend Objekt) -->
