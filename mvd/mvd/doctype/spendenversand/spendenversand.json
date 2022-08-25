@@ -7,13 +7,17 @@
   "section_allgemein",
   "sektionsspezifisch",
   "sektion_id",
+  "inkl_gesperrt",
+  "keine_kuendigungen",
   "cb_1",
   "sprachspezifisch",
   "sprache",
   "cb_2",
   "mitgliedtypspezifisch",
   "mitgliedtyp",
-  "amended_from",
+  "cb_3",
+  "regionsspezifisch",
+  "region",
   "section_bg_job",
   "status",
   "amended_from"
@@ -28,7 +32,7 @@
    "default": "1",
    "fieldname": "sektionsspezifisch",
    "fieldtype": "Check",
-   "label": "Sektionsspezifisch",
+   "label": "Sektions spezifisch",
    "read_only": 1
   },
   {
@@ -76,15 +80,6 @@
    "options": "Privat\nGesch\u00e4ft"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Spenden Jahresversand",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "section_bg_job",
    "fieldtype": "Section Break",
    "label": "Background-Job"
@@ -105,10 +100,39 @@
    "options": "Spendenversand",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "regionsspezifisch",
+   "fieldtype": "Check",
+   "label": "Regions spezifisch"
+  },
+  {
+   "depends_on": "eval:doc.regionsspezifisch",
+   "fieldname": "region",
+   "fieldtype": "Link",
+   "label": "Region",
+   "options": "Region"
+  },
+  {
+   "default": "0",
+   "fieldname": "inkl_gesperrt",
+   "fieldtype": "Check",
+   "label": "Gesperrte Adressen ber\u00fccksichtigen"
+  },
+  {
+   "default": "0",
+   "fieldname": "keine_kuendigungen",
+   "fieldtype": "Check",
+   "label": "K\u00fcndigungen nicht ber\u00fccksichtigen"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-08-24 10:08:37.763773",
+ "modified": "2022-08-25 11:45:25.612662",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Spendenversand",

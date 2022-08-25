@@ -16,6 +16,8 @@ class Spendenversand(Document):
             frappe.throw("Bitte wählen Sie eine Sprache aus.")
         if int(self.mitgliedtypspezifisch) == 1 and not self.mitgliedtyp:
             frappe.throw("Bitte wählen Sie einen Mitgliedtyp aus.")
+        if int(self.regionsspezifisch) == 1 and not self.region:
+            frappe.throw("Bitte wählen Sie eine Region aus.")
     
     def before_submit(self):
         if self.status == 'Neu':
@@ -27,17 +29,32 @@ def spenden_versand(doc):
         sektion = ''
         sprache = ''
         mitgliedtyp = ''
+        region = ''
+        keine_gesperrten_adressen = ''
+        keine_kuendigungen = ''
         if int(doc.sektionsspezifisch) == 1:
             sektion = """ AND `sektion_id` = '{sektion_id}'""".format(sektion_id=doc.sektion_id)
         if int(doc.sprachspezifisch) == 1:
             sprache = """ AND `language` = '{sprache}'""".format(sprache=doc.sprache)
         if int(doc.mitgliedtypspezifisch) == 1:
             mitgliedtyp = """ AND `mitgliedtyp_c` = '{mitgliedtyp}'""".format(mitgliedtyp=doc.mitgliedtyp)
+        if int(doc.regionsspezifisch) == 1:
+            region = """ AND `region` = '{region}'""".format(region=doc.region)
+        if int(doc.inkl_gesperrt) == 1:
+            keine_gesperrten_adressen = """ AND `adressen_gesperrt` != 1"""
+        if int(doc.keine_kuendigungen) == 1:
+            keine_kuendigungen = """ AND (`kuendigung` < '2000-01-01' OR `kuendigung` IS NULL)"""
         
         mitgliedschaften = frappe.db.sql("""SELECT
                                                 `name`
                                             FROM `tabMitgliedschaft`
-                                            WHERE `status_c` = 'Regulär'{sektion}{sprache}{mitgliedtyp}""".format(sektion=sektion, sprache=sprache, mitgliedtyp=mitgliedtyp), as_dict=True)
+                                            WHERE `status_c` = 'Regulär'
+                                            {sektion}{sprache}{mitgliedtyp}{region}{keine_gesperrten_adressen}{keine_kuendigungen}""".format(sektion=sektion, \
+                                                                                                                                            sprache=sprache, \
+                                                                                                                                            mitgliedtyp=mitgliedtyp, \
+                                                                                                                                            region=region, \
+                                                                                                                                            keine_gesperrten_adressen=keine_gesperrten_adressen, \
+                                                                                                                                            keine_kuendigungen=keine_kuendigungen), as_dict=True)
         
         for mitgliedschaft_name in mitgliedschaften:
             mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft_name.name)
