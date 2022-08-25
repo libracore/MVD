@@ -195,11 +195,15 @@ def check_dates(adresse, event):
 def get_mail_data(mitgliedschaft, retoure, grund_bezeichnung):
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     if mitgliedschaft.e_mail_1:
+        email_body = '{0}%0d%0a%0d%0aDie Post konnte Ihnen unsere Verbandszeitschrift M+W nicht zustellen. Sie wurde retourniert mit dem Vermerk «{1}».%0d%0aBitte teilen Sie uns Ihre aktuelle Wohnadresse mit, damit wir Ihnen auch weiterhin unsere Post zustellen können.%0d%0a%0d%0aSie sind in unserer Mitgliederdatei unter nachfolgender Adresse geführt:%0d%0a{2}%0d%0a%0d%0a%0d%0a%0d%0a'.format(mitgliedschaft.briefanrede, grund_bezeichnung.split(" (")[0], mitgliedschaft.adressblock.replace("\n", "%0d%0a"))
+        if mitgliedschaft.language == 'fr':
+            email_body = "Cher Monsieur / Chère Madame,%0d%0a%0d%0aLa poste n'a pas pu vous livrer notre journal de l’Asloca M+W à l’adresse indiquée. Il a été retourné avec la remarque «{0}».%0d%0aVeuillez nous communiquer votre adresse résidentielle actuelle afin que nous puissions continuer à vous livrer notre courrier.%0d%0a%0d%0aDans notre fichier votre adresse est enregistrée comme suit :%0d%0a{1}%0d%0a%0d%0a%0d%0a%0d%0a".format(grund_bezeichnung.split(" (")[0], mitgliedschaft.adressblock.replace("\n", "%0d%0a"))
+        
         return {
             'email': mitgliedschaft.e_mail_1,
             'cc': 'mv+Mitgliedschaft+{0}@libracore.io;mv+Retouren+{1}@libracore.io'.format(mitgliedschaft.name, retoure),
             'subject': 'Ihre Mitgliedschaft ({0}): Neue Adresse?'.format(mitgliedschaft.mitglied_nr),
-            'email_body': '{0}%0d%0a%0d%0aDie Post konnte Ihnen unsere Verbandszeitschrift M+W nicht zustellen. Sie wurde retourniert mit dem Vermerk «{1}».%0d%0aBitte teilen Sie uns Ihre aktuelle Wohnadresse mit, damit wir Ihnen auch weiterhin unsere Post zustellen können.%0d%0a%0d%0aSie sind in unserer Mitgliederdatei unter nachfolgender Adresse geführt:%0d%0a{2}%0d%0a%0d%0a%0d%0a%0d%0a'.format(mitgliedschaft.briefanrede, grund_bezeichnung.split(" (")[0], mitgliedschaft.adressblock.replace("\n", "%0d%0a"))
+            'email_body': email_body
         }
     else:
         return None
