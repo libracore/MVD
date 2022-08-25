@@ -8,13 +8,17 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_allgemein",
+  "sektion_id",
+  "cb_1",
+  "language",
   "section_kunde",
   "kundentyp",
   "firma",
   "nachname",
   "tel_p",
   "tel_g",
-  "cb_1",
+  "cb_2",
   "anrede",
   "zusatz_firma",
   "vorname",
@@ -26,7 +30,7 @@
   "plz",
   "postfach_nummer",
   "postfach",
-  "cb_2",
+  "cb_3",
   "zusatz_adresse",
   "nummer_zu",
   "ort",
@@ -43,7 +47,7 @@
   "rg_plz",
   "rg_ort",
   "rg_land",
-  "cb_3",
+  "cb_4",
   "rg_kundentyp",
   "rg_firma",
   "rg_zusatz_firma",
@@ -55,11 +59,11 @@
   "rg_tel_g",
   "rg_e_mail",
   "section_links",
-  "sektion_id",
   "title_1",
   "kunde_kunde",
   "kontakt_kunde",
   "adresse_kunde",
+  "cb_5",
   "title_4",
   "rg_kunde",
   "rg_kontakt",
@@ -71,7 +75,6 @@
    "fieldtype": "Link",
    "label": "Sektion",
    "options": "Sektion",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -399,10 +402,29 @@
   {
    "fieldname": "cb_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Sprache",
+   "options": "Language"
+  },
+  {
+   "fieldname": "cb_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_5",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-08-24 15:00:43.137909",
+ "modified": "2022-08-25 09:01:32.892368",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kunden",
