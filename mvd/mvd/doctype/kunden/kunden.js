@@ -49,6 +49,12 @@ frappe.ui.form.on('Kunden', {
     rg_kundentyp: function(frm) {
         // set firma mandatory (Eigener Rechnungsempfänger)
         firmenrechnungsempfaenger_mandatory(frm);
+    },
+    plz: function(frm) {
+        pincode_lookup(cur_frm.doc.plz, 'ort');
+    },
+    rg_plz: function(frm) {
+        pincode_lookup(cur_frm.doc.rg_plz, 'rg_ort');
     }
 });
 
@@ -218,4 +224,59 @@ function set_party_dashboard_indicators(frm) {
             [format_currency(company_wise_info[0].total_unpaid, company_wise_info[0].currency)]),
         company_wise_info[0].total_unpaid ? 'orange' : 'green');
     }
+}
+
+function pincode_lookup(pincode, field) {
+    var filters = [['pincode','=', pincode]];
+    // find cities
+    if (pincode) {
+        frappe.call({
+            method: 'frappe.client.get_list',
+            args: {
+                doctype: 'Pincode',
+                filters: filters,
+                fields: ['name', 'pincode', 'city', 'canton_code']
+            },
+            async: false,
+            callback: function(response) {
+                if (response.message) {
+                    if (response.message.length == 1) {
+                        // got exactly one city
+                        var city = response.message[0].city;
+                        cur_frm.set_value(field, city);
+                    } else {
+                        // multiple cities found, show selection
+                        var cities = "";
+                        response.message.forEach(function (record) {
+                            cities += (record.city + "\n");
+                        });
+                        cities = cities.substring(0, cities.length - 1);
+                        frappe.prompt([
+                                {'fieldname': 'city', 
+                                 'fieldtype': 'Select', 
+                                 'label': 'City', 
+                                 'reqd': 1,
+                                 'options': cities,
+                                 'default': response.message[0].city
+                                }  
+                            ],
+                            function(values){
+                                var city = values.city;
+                                cur_frm.set_value(field, city);
+                            },
+                            __('City'),
+                            __('Set')
+                        );
+                    }
+                } else {
+                    // got no match
+                    cur_frm.set_value(field, city);
+                }
+            }
+        });
+    }
+}
+
+function umwandlung_interessent(frm) {
+    
 }
