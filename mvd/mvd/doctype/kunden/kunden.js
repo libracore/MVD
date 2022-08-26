@@ -21,6 +21,11 @@ frappe.ui.form.on('Kunden', {
                 frm.add_custom_button(__("Mitglied (Regulär)"), function() {
                     umwandlung(frm, 'Regulär');
                 }, __("Umwandlung"));
+            } else {
+                // ganzes formular read only
+                cur_frm.fields.forEach(function(l){ cur_frm.set_df_property(l.df.fieldname, "read_only", 1); });
+                cur_frm.dashboard.set_headline("Da dieser Kunde in ein Mitglied umgewandelt wurde, müssen alle Stammdaten-Änderungen über das Mitglied erfolgen.");
+                cur_frm.disable_save();
             }
         }
         

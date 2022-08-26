@@ -832,6 +832,7 @@ def anlage_prozess(anlage_daten, status):
         mitgliedschaft.save()
     
     verknuepfe_kunde_mitglied(anlage_daten['name'], mitgliedschaft.name)
+    add_comment_to_kunde(anlage_daten['name'], mitgliedschaft)
     
     return mitgliedschaft.name
 
@@ -840,3 +841,7 @@ def verknuepfe_kunde_mitglied(kunde, mitgliedschaft):
     sales_invoice = frappe.db.sql("""UPDATE `tabSales Invoice` SET `mv_mitgliedschaft` = '{mitgliedschaft}' WHERE `mv_kunde` = '{kunde}'""".format(mitgliedschaft=mitgliedschaft, kunde=kunde), as_list=True)
     payment_entry = frappe.db.sql("""UPDATE `tabPayment Entry` SET `mv_mitgliedschaft` = '{mitgliedschaft}' WHERE `mv_kunde` = '{kunde}'""".format(mitgliedschaft=mitgliedschaft, kunde=kunde), as_list=True)
     safe_mode_on = frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)
+
+def add_comment_to_kunde(kunde, mitgliedschaft):
+    kunde = frappe.get_doc("Kunden", kunde)
+    kunde.add_comment('Comment', text='Umgewandelt in Mitgliedschaft {0} ({1})'.format(mitgliedschaft.mitglied_nr, mitgliedschaft.name))
