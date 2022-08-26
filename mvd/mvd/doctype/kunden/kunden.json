@@ -107,13 +107,15 @@
    "fieldname": "nachname",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Nachname"
+   "label": "Nachname",
+   "reqd": 1
   },
   {
    "fieldname": "vorname",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Vorname"
+   "label": "Vorname",
+   "reqd": 1
   },
   {
    "fieldname": "tel_p",
@@ -148,7 +150,8 @@
   {
    "fieldname": "strasse",
    "fieldtype": "Data",
-   "label": "Strasse"
+   "label": "Strasse",
+   "reqd": 1
   },
   {
    "fieldname": "nummer",
@@ -424,7 +427,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-08-25 09:01:32.892368",
+ "modified": "2022-08-26 08:40:20.979791",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kunden",
