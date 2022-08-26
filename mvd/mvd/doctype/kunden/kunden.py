@@ -844,4 +844,4 @@ def verknuepfe_kunde_mitglied(kunde, mitgliedschaft):
 
 def add_comment_to_kunde(kunde, mitgliedschaft):
     kunde = frappe.get_doc("Kunden", kunde)
-    kunde.add_comment('Comment', text='Umgewandelt in Mitgliedschaft {0} ({1})'.format(mitgliedschaft.mitglied_nr, mitgliedschaft.name))
+    kunde.add_comment('Comment', text="Umgewandelt in Mitgliedschaft <a href='/desk#Form/Mitgliedschaft/{mitgliedschaft}'>{mitglied_nr} ({mitgliedschaft})</a>".format(mitglied_nr=mitgliedschaft.mitglied_nr, mitgliedschaft=mitgliedschaft.name))
