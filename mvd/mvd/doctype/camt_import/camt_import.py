@@ -928,12 +928,14 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False,
     
     customer = sinv.customer
     mitgliedschaft = sinv.mv_mitgliedschaft
+    mv_kunde = sinv.mv_kunde
     payment_entry_record = frappe.get_doc({
         'doctype': "Payment Entry",
         'posting_date': datum or today(),
         'party_type': 'Customer',
         'party': customer,
         'mv_mitgliedschaft': mitgliedschaft,
+        'mv_kunde': mv_kunde,
         'company': sinv.company,
         'sektion_id': sinv.sektion_id,
         'paid_from': sinv.debit_to,

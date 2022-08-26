@@ -76,7 +76,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Dokument",
-   "options": "Anmeldung mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ\nMahnung\nGeschenkmitgliedschaft",
+   "options": "Anmeldung mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ\nMahnung\nGeschenkmitgliedschaft\nRechnung (Sonstiges)",
    "reqd": 1
   },
   {
@@ -385,7 +385,7 @@
    "options": "Schenkende*r\nBeschenkte*r"
   }
  ],
- "modified": "2022-03-31 21:31:47.942015",
+ "modified": "2022-08-26 09:27:03.537091",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

@@ -4,9 +4,21 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _, msgprint, scrub
 from frappe.model.document import Document
+from erpnext.accounts.utils import get_fiscal_year
+from frappe.utils import nowdate, flt
 
 class Kunden(Document):
+    def onload(self):
+        if self.rg_kunde or self.kunde_kunde:
+            self.load_dashboard_info()
+
+    def load_dashboard_info(self):
+        party = self.rg_kunde if self.rg_kunde else self.kunde_kunde
+        info = get_dashboard_info(party)
+        self.set_onload('dashboard_info', info)
+    
     def validate(self):
         if self.kunde_kunde:
             self.update_kunde()
@@ -607,3 +619,115 @@ class Kunden(Document):
         else:
             link.link_name = self.kunde_kunde
         address.save(ignore_permissions=True)
+
+def get_dashboard_info(party):
+    current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
+    party_type = "Customer"
+    doctype = "Sales Invoice"
+
+    companies = frappe.get_all(doctype, filters={
+        'docstatus': 1,
+        party_type.lower(): party
+    }, distinct=1, fields=['company'])
+
+    company_wise_info = []
+
+    company_wise_grand_total = frappe.get_all(doctype,
+        filters={
+            'docstatus': 1,
+            party_type.lower(): party,
+            'posting_date': ('between', [current_fiscal_year.year_start_date, current_fiscal_year.year_end_date])
+            },
+            group_by="company",
+            fields=["company", "sum(grand_total) as grand_total", "sum(base_grand_total) as base_grand_total"]
+        )
+
+    company_wise_billing_this_year = frappe._dict()
+
+    for d in company_wise_grand_total:
+        company_wise_billing_this_year.setdefault(
+            d.company,{
+                "grand_total": d.grand_total,
+                "base_grand_total": d.base_grand_total
+            })
+
+
+    company_wise_total_unpaid = frappe._dict(frappe.db.sql("""
+        select company, sum(debit_in_account_currency) - sum(credit_in_account_currency)
+        from `tabGL Entry`
+        where party_type = %s and party=%s
+        group by company""", (party_type, party)))
+
+    for d in companies:
+        company_default_currency = frappe.db.get_value("Company", d.company, 'default_currency')
+        party_account_currency = get_party_account_currency(party_type, party, d.company)
+
+        if party_account_currency==company_default_currency:
+            billing_this_year = flt(company_wise_billing_this_year.get(d.company,{}).get("base_grand_total"))
+        else:
+            billing_this_year = flt(company_wise_billing_this_year.get(d.company,{}).get("grand_total"))
+
+        total_unpaid = flt(company_wise_total_unpaid.get(d.company))
+
+        info = {}
+        info["billing_this_year"] = flt(billing_this_year) if billing_this_year else 0
+        info["currency"] = party_account_currency
+        info["total_unpaid"] = flt(total_unpaid) if total_unpaid else 0
+        info["company"] = d.company
+
+        company_wise_info.append(info)
+
+    return company_wise_info
+
+def get_party_account_currency(party_type, party, company):
+    def generator():
+        party_account = get_party_account(party_type, party, company)
+        return frappe.db.get_value("Account", party_account, "account_currency", cache=True)
+
+    return frappe.local_cache("party_account_currency", (party_type, party, company), generator)
+
+@frappe.whitelist()
+def get_party_account(party_type, party, company):
+    """Returns the account for the given `party`.
+        Will first search in party (Customer / Supplier) record, if not found,
+        will search in group (Customer Group / Supplier Group),
+        finally will return default."""
+    if not company:
+        frappe.throw(_("Please select a Company"))
+
+    if not party:
+        return
+
+    account = frappe.db.get_value("Party Account",
+        {"parenttype": party_type, "parent": party, "company": company}, "account")
+
+    if not account and party_type in ['Customer', 'Supplier']:
+        party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Group"
+        group = frappe.get_cached_value(party_type, party, scrub(party_group_doctype))
+        account = frappe.db.get_value("Party Account",
+            {"parenttype": party_group_doctype, "parent": group, "company": company}, "account")
+
+    if not account and party_type in ['Customer', 'Supplier']:
+        default_account_name = "default_receivable_account" \
+            if party_type=="Customer" else "default_payable_account"
+        account = frappe.get_cached_value('Company',  company,  default_account_name)
+
+    existing_gle_currency = get_party_gle_currency(party_type, party, company)
+    if existing_gle_currency:
+        if account:
+            account_currency = frappe.db.get_value("Account", account, "account_currency", cache=True)
+        if (account and account_currency != existing_gle_currency) or not account:
+                account = get_party_gle_account(party_type, party, company)
+
+    return account
+
+def get_party_gle_currency(party_type, party, company):
+    def generator():
+        existing_gle_currency = frappe.db.sql("""select account_currency from `tabGL Entry`
+            where docstatus=1 and company=%(company)s and party_type=%(party_type)s and party=%(party)s
+            limit 1""", { "company": company, "party_type": party_type, "party": party })
+
+        return existing_gle_currency[0][0] if existing_gle_currency else None
+
+    return frappe.local_cache("party_gle_currency", (party_type, party, company), generator,
+        regenerate_if_none=True)
