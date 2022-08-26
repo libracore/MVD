@@ -10,6 +10,7 @@
  "field_order": [
   "section_allgemein",
   "sektion_id",
+  "mv_mitgliedschaft",
   "cb_1",
   "language",
   "section_kunde",
@@ -424,10 +425,17 @@
   {
    "fieldname": "cb_5",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Mitgliedschaft",
+   "options": "Mitgliedschaft",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-08-26 08:40:20.979791",
+ "modified": "2022-08-26 14:39:52.832167",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kunden",

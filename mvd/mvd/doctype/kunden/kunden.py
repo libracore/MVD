@@ -7,7 +7,9 @@ import frappe
 from frappe import _, msgprint, scrub
 from frappe.model.document import Document
 from erpnext.accounts.utils import get_fiscal_year
-from frappe.utils import nowdate, flt
+from frappe.utils import nowdate, flt, now
+import json
+from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung, create_abl
 
 class Kunden(Document):
     def onload(self):
@@ -731,3 +733,110 @@ def get_party_gle_currency(party_type, party, company):
 
     return frappe.local_cache("party_gle_currency", (party_type, party, company), generator,
         regenerate_if_none=True)
+
+@frappe.whitelist()
+def anlage_prozess(anlage_daten, status):
+    if isinstance(anlage_daten, str):
+        anlage_daten = json.loads(anlage_daten)
+    
+    # ~ frappe.throw(str(anlage_daten))
+    
+    firma = ''
+    if 'firma' in anlage_daten:
+        firma = anlage_daten["firma"] if anlage_daten["firma"] else ''
+    zusatz_firma = ''
+    if 'zusatz_firma' in anlage_daten:
+        zusatz_firma = anlage_daten["zusatz_firma"] if anlage_daten["zusatz_firma"] else ''
+    
+    eintritt = None
+    if status == 'Regulär':
+        eintritt = now()
+    
+    # erstelle mitgliedschaft
+    mitgliedschaft = frappe.get_doc({
+        "doctype": "Mitgliedschaft",
+        "sektion_id": anlage_daten["sektion_id"],
+        "status_c": status,
+        "language": anlage_daten["language"],
+        "m_und_w": 1,
+        "mitgliedtyp_c": 'Privat',
+        "inkl_hv": 1,
+        "eintrittsdatum": eintritt,
+        "kundentyp": anlage_daten["kundentyp"],
+        "firma": firma,
+        "zusatz_firma": zusatz_firma,
+        "anrede_c": anlage_daten["anrede"] if 'anrede' in anlage_daten else '',
+        "nachname_1": anlage_daten["nachname"],
+        "vorname_1": anlage_daten["vorname"],
+        "tel_p_1": anlage_daten["tel_p"] if 'tel_p' in anlage_daten else '',
+        "tel_m_1": anlage_daten["tel_m"] if 'tel_m' in anlage_daten else '',
+        "tel_g_1": anlage_daten["tel_g"] if 'tel_g' in anlage_daten else '',
+        "e_mail_1": anlage_daten["e_mail"] if 'e_mail' in anlage_daten else '',
+        "zusatz_adresse": anlage_daten["zusatz_adresse"] if 'zusatz_adresse' in anlage_daten else '',
+        "strasse": anlage_daten["strasse"] if 'strasse' in anlage_daten else '',
+        "nummer": anlage_daten["nummer"] if 'nummer' in anlage_daten else '',
+        "nummer_zu": anlage_daten["nummer_zu"] if 'nummer_zu' in anlage_daten else '',
+        "postfach": anlage_daten["postfach"],
+        "postfach_nummer": anlage_daten["postfach_nummer"] if 'postfach_nummer' in anlage_daten else '',
+        "plz": anlage_daten["plz"],
+        "ort": anlage_daten["ort"],
+        "objekt_strasse": anlage_daten["strasse"] if int(anlage_daten["postfach"]) == 1 else '',
+        "objekt_plz": anlage_daten["plz"] if int(anlage_daten["postfach"]) == 1 else '',
+        "objekt_ort": anlage_daten["ort"] if int(anlage_daten["postfach"]) == 1 else '',
+        "abweichende_objektadresse": 1 if int(anlage_daten["postfach"]) == 1 else '0',
+        "kunde_mitglied": anlage_daten["kunde_kunde"],
+        "kontakt_mitglied": anlage_daten["kontakt_kunde"],
+        "adresse_mitglied": anlage_daten["adresse_kunde"],
+        "rg_kunde": anlage_daten["rg_kunde"],
+        "rg_kontakt": anlage_daten["rg_kontakt"],
+        "rg_adresse": anlage_daten["rg_adresse"],
+        "abweichende_rechnungsadresse": anlage_daten["abweichende_rechnungsadresse"],
+        "unabhaengiger_debitor": anlage_daten["unabhaengiger_debitor"],
+        "rg_zusatz_adresse": anlage_daten["rg_zusatz_adresse"],
+        "rg_strasse": anlage_daten["rg_strasse"],
+        "rg_nummer": anlage_daten["rg_nummer"],
+        "rg_nummer_zu": anlage_daten["rg_nummer_zu"],
+        "rg_postfach": anlage_daten["rg_postfach"],
+        "rg_postfach_nummer": anlage_daten["rg_postfach_nummer"],
+        "rg_plz": anlage_daten["rg_plz"],
+        "rg_ort": anlage_daten["rg_ort"],
+        "rg_land": anlage_daten["rg_land"],
+        "rg_kundentyp": anlage_daten["rg_kundentyp"],
+        "rg_firma": anlage_daten["rg_firma"],
+        "rg_zusatz_firma": anlage_daten["rg_zusatz_firma"],
+        "rg_anrede": anlage_daten["rg_anrede"],
+        "rg_nachname": anlage_daten["rg_nachname"],
+        "rg_vorname": anlage_daten["rg_vorname"],
+        "rg_tel_p": anlage_daten["rg_tel_p"],
+        "rg_tel_m": anlage_daten["rg_tel_m"],
+        "rg_tel_g": anlage_daten["rg_tel_g"],
+        "rg_e_mail": anlage_daten["rg_e_mail"]
+    })
+    mitgliedschaft.insert(ignore_permissions=True)
+    
+    if status == 'Regulär':
+        bezahlt = True
+        hv_bar_bezahlt = False
+        sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage='', massendruck=False)
+    elif status == 'Interessent*in':
+        # erstelle ABL für Interessent*Innenbrief mit EZ
+        create_abl("Interessent*Innenbrief mit EZ", mitgliedschaft)
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+        mitgliedschaft.interessent_innenbrief_mit_ez = 1
+        mitgliedschaft.save()
+    elif status == 'Anmeldung':
+        # erstelle ABL für Anmeldung mit EZ
+        create_abl("Anmeldung mit EZ", mitgliedschaft)
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+        mitgliedschaft.anmeldung_mit_ez = 1
+        mitgliedschaft.save()
+    
+    verknuepfe_kunde_mitglied(anlage_daten['name'], mitgliedschaft.name)
+    
+    return mitgliedschaft.name
+
+def verknuepfe_kunde_mitglied(kunde, mitgliedschaft):
+    safe_mode_off = frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
+    sales_invoice = frappe.db.sql("""UPDATE `tabSales Invoice` SET `mv_mitgliedschaft` = '{mitgliedschaft}' WHERE `mv_kunde` = '{kunde}'""".format(mitgliedschaft=mitgliedschaft, kunde=kunde), as_list=True)
+    payment_entry = frappe.db.sql("""UPDATE `tabPayment Entry` SET `mv_mitgliedschaft` = '{mitgliedschaft}' WHERE `mv_kunde` = '{kunde}'""".format(mitgliedschaft=mitgliedschaft, kunde=kunde), as_list=True)
+    safe_mode_on = frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)

@@ -11,7 +11,7 @@ from PyPDF2 import PdfFileWriter
 from frappe.utils.pdf import get_file_data_from_writer
 
 @frappe.whitelist()
-def create_reachnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, kunde=False, druckvorlage=False, bezahlt=False, submit=False, attach_as_pdf=False):
+def create_rechnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, kunde=False, druckvorlage=False, bezahlt=False, submit=False, attach_as_pdf=False, mv_mitgliedschaft=None):
     sektion = frappe.get_doc("Sektion", sektion)
     company = frappe.get_doc("Company", sektion.company)
     
@@ -34,7 +34,7 @@ def create_reachnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False,
         kunde = frappe.get_doc("Kunden", kunde)
         if not kunde.rg_kunde:
             customer = kunde.kunde_kunde
-            contact = mitgliedschaft.kontakt_kunde
+            contact = kunde.kontakt_kunde
             if not kunde.rg_adresse:
                 address = kunde.adresse_kunde
             else:
@@ -56,7 +56,7 @@ def create_reachnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False,
     sinv = frappe.get_doc({
         "doctype": "Sales Invoice",
         "ist_sonstige_rechnung": 1,
-        "mv_mitgliedschaft": mitgliedschaft.name if mitgliedschaft else None,
+        "mv_mitgliedschaft": mitgliedschaft.name if mitgliedschaft else mv_mitgliedschaft if mv_mitgliedschaft else None,
         "mv_kunde": kunde.name if kunde else None,
         "company": sektion.company,
         "cost_center": company.cost_center,

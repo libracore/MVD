@@ -5,21 +5,23 @@ frappe.ui.form.on('Kunden', {
     refresh: function(frm) {
         // buttons
         if (!frm.doc.__islocal) {
-            frm.add_custom_button(__("Rechnung"),  function() {
+            frm.add_custom_button(__("Rechnung"), function() {
                 erstelle_rechnung_sonstiges(frm);
             }, __("Erstelle"));
             
-            frm.add_custom_button(__("Interessent*in"),  function() {
-                umwandlung_interessent(frm);
-            }, __("Umwandlung"));
-            
-            frm.add_custom_button(__("Anmeldung"),  function() {
-                umwandlung_anmeldung(frm);
-            }, __("Umwandlung"));
-            
-            frm.add_custom_button(__("Mitglied (Regulär)"),  function() {
-                umwandlung_mitglied(frm);
-            }, __("Umwandlung"));
+            if (!cur_frm.doc.mv_mitgliedschaft) {
+                frm.add_custom_button(__("Interessent*in"), function() {
+                    umwandlung(frm, 'Interessent*in');
+                }, __("Umwandlung"));
+                
+                frm.add_custom_button(__("Anmeldung"), function() {
+                    umwandlung(frm, 'Anmeldung');
+                }, __("Umwandlung"));
+                
+                frm.add_custom_button(__("Mitglied (Regulär)"), function() {
+                    umwandlung(frm, 'Regulär');
+                }, __("Umwandlung"));
+            }
         }
         
         // set strasse, plz und ort mandatory (Rechnungsempfänger)
@@ -113,101 +115,92 @@ function erstelle_rechnung_sonstiges(frm) {
             callback: function(r)
             {
                 var druckvorlagen = r.message
-                frappe.call({
-                    'method': "frappe.client.get",
-                    'args': {
-                        'doctype': "MVD Settings",
-                        'name': "MVD Settings"
+                frappe.prompt([
+                    {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
+                        'get_query': function() {
+                            return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                        }
                     },
-                    'callback': function(settings_response) {
-                        var settings = settings_response.message;
-                        frappe.prompt([
-                            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
-                                'get_query': function() {
-                                    return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
-                                }
-                            },
-                            {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0},
-                            {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 1, 'read_only': 1},
-                            {
-                                label: "Rechnungs Artikel",
-                                fieldname: "rechnungs_artikel", 
-                                fieldtype: "Table", 
-                                cannot_add_rows: false,
-                                in_place_edit: false,
-                                reqd: 1,
-                                data: [],
-                                get_data: () => {
-                                    return [];
-                                },
-                                fields: [
-                                {
-                                    fieldtype:'Link',
-                                    fieldname:"item_code",
-                                    options: 'Item',
-                                    in_list_view: 1,
-                                    read_only: 0,
-                                    reqd: 1,
-                                    label: __('Item Code'),
-                                    change: function() {
-                                        if (this.get_value()) {
-                                            var rate_field = this.grid_row.on_grid_fields[1]
-                                            frappe.call({
-                                                method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
-                                                args:{
-                                                        'item': this.get_value()
-                                                },
-                                                callback: function(r)
-                                                {
-                                                    rate_field.set_value(r.message);
-                                                }
-                                            });
-                                        }
-                                    }
-                                },
-                                {
-                                    fieldtype:'Currency',
-                                    fieldname:"rate",
-                                    in_list_view: 1,
-                                    read_only: 0,
-                                    label: __('Rate'),
-                                    reqd: 1
-                                }]
-                            }
-                        ],
-                        function(values){
-                            if (values.bar_bezahlt == 1) {
-                                var bar_bezahlt = true;
-                            } else {
-                                var bar_bezahlt = null;
-                            }
-                            frappe.call({
-                                method: "mvd.mvd.utils.sonstige_rechnungen.create_reachnung_sonstiges",
-                                args:{
-                                        'sektion': cur_frm.doc.sektion_id,
-                                        'kunde': cur_frm.doc.name,
-                                        'bezahlt': bar_bezahlt,
-                                        'attach_as_pdf': true,
-                                        'submit': true,
-                                        'druckvorlage': values.druckvorlage,
-                                        'rechnungs_artikel': values.rechnungs_artikel
-                                },
-                                freeze: true,
-                                freeze_message: 'Erstelle Rechnung...',
-                                callback: function(r)
-                                {
-                                    cur_frm.reload_doc();
-                                    cur_frm.timeline.insert_comment("Rechnung " + r.message + " erstellt.");
-                                    frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
-                                    cur_frm.reload_doc();
-                                }
-                            });
+                    {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0},
+                    {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 1, 'read_only': 1},
+                    {
+                        label: "Rechnungs Artikel",
+                        fieldname: "rechnungs_artikel", 
+                        fieldtype: "Table", 
+                        cannot_add_rows: false,
+                        in_place_edit: false,
+                        reqd: 1,
+                        data: [],
+                        get_data: () => {
+                            return [];
                         },
-                        'Rechnungs Erstellung',
-                        'Erstellen'
-                        )
+                        fields: [
+                        {
+                            fieldtype:'Link',
+                            fieldname:"item_code",
+                            options: 'Item',
+                            in_list_view: 1,
+                            read_only: 0,
+                            reqd: 1,
+                            label: __('Item Code'),
+                            change: function() {
+                                if (this.get_value()) {
+                                    var rate_field = this.grid_row.on_grid_fields[1]
+                                    frappe.call({
+                                        method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
+                                        args:{
+                                                'item': this.get_value()
+                                        },
+                                        callback: function(r)
+                                        {
+                                            rate_field.set_value(r.message);
+                                        }
+                                    });
+                                }
+                            }
+                        },
+                        {
+                            fieldtype:'Currency',
+                            fieldname:"rate",
+                            in_list_view: 1,
+                            read_only: 0,
+                            label: __('Rate'),
+                            reqd: 1
+                        }]
                     }
-                });
+                ],
+                function(values){
+                    if (values.bar_bezahlt == 1) {
+                        var bar_bezahlt = true;
+                    } else {
+                        var bar_bezahlt = null;
+                    }
+                    frappe.call({
+                        method: "mvd.mvd.utils.sonstige_rechnungen.create_rechnung_sonstiges",
+                        args:{
+                                'sektion': cur_frm.doc.sektion_id,
+                                'kunde': cur_frm.doc.name,
+                                'bezahlt': bar_bezahlt,
+                                'attach_as_pdf': true,
+                                'submit': true,
+                                'druckvorlage': values.druckvorlage,
+                                'rechnungs_artikel': values.rechnungs_artikel,
+                                'mv_mitgliedschaft': cur_frm.doc.mv_mitgliedschaft
+                        },
+                        freeze: true,
+                        freeze_message: 'Erstelle Rechnung...',
+                        callback: function(r)
+                        {
+                            cur_frm.reload_doc();
+                            cur_frm.timeline.insert_comment("Rechnung " + r.message + " erstellt.");
+                            frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
+                            cur_frm.reload_doc();
+                        }
+                    });
+                },
+                'Rechnungs Erstellung',
+                'Erstellen'
+                )
             }
         });
     } else {
@@ -277,6 +270,22 @@ function pincode_lookup(pincode, field) {
     }
 }
 
-function umwandlung_interessent(frm) {
-    
+function umwandlung(frm, status) {
+    frappe.call({
+        'method': "mvd.mvd.doctype.kunden.kunden.anlage_prozess",
+        'args':{
+                'anlage_daten': frm.doc,
+                'status': status
+        },
+        'freeze': true,
+        'freeze_message': 'Wandle um zu ' + status + '...',
+        'callback': function(r)
+        {
+            if (r.message) {
+                cur_frm.set_value("mv_mitgliedschaft", r.message);
+                cur_frm.save();
+                frappe.set_route("Form", "Mitgliedschaft", r.message);
+            }
+        }
+    });
 }
