@@ -11,6 +11,7 @@
   "sektion_id",
   "sektions_code",
   "druckvorlage",
+  "spenden_versand",
   "cb_1",
   "company",
   "sales_invoice",
@@ -40,7 +41,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Typ",
-   "options": "HV\nSpende",
+   "options": "HV\nSpende\nSpende (Spendenversand)",
    "reqd": 1
   },
   {
@@ -157,10 +158,18 @@
    "fieldtype": "Link",
    "label": "Druckvorlage",
    "options": "Druckvorlage"
+  },
+  {
+   "depends_on": "eval:doc.typ=='Spende (Spendenversand)'",
+   "fieldname": "spenden_versand",
+   "fieldtype": "Link",
+   "label": "Aus Spendenversand",
+   "options": "Spendenversand",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-02-23 10:35:31.072176",
+ "modified": "2022-08-24 10:27:30.846436",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Fakultative Rechnung",
