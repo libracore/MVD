@@ -7,6 +7,7 @@ import frappe
 from frappe.utils.data import today, getdate, now
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_ampelfarbe
 from mvd.mvd.doctype.region.region import _regionen_zuteilung
+from frappe.utils.background_jobs import enqueue
 
 def set_inaktiv():
     mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Ausschluss', 'Wegzug') OR (`status_c` = 'Regulär' AND `kuendigung` IS NOT NULL)""", as_dict=True)
@@ -86,3 +87,15 @@ def ampel_neuberechnung():
 
 def regionen_zuteilung():
     _regionen_zuteilung()
+
+def spenden_versand():
+        spenden_jahresversand = frappe.db.sql("""SELECT `name` FROM `tabSpendenversand` WHERE `status` = 'Vorgemerkt' AND `docstatus` = 1""", as_dict=True)
+        if len(spenden_jahresversand) > 0:
+            for lauf in spenden_jahresversand:
+                lauf = frappe.get_doc("Spendenversand", lauf.name)
+                lauf.status = 'In Arbeit'
+                lauf.save()
+                args = {
+                    'doc': lauf
+                }
+                enqueue("mvd.mvd.doctype.spendenversand.spendenversand.spenden_versand", queue='long', job_name='Spendenversand {0}'.format(lauf.name), timeout=5000, **args)
