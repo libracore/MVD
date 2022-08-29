@@ -74,12 +74,6 @@ def get_data():
             "icon": "fa fa-cog",
             "items": [
                 {
-                   "type": "page",
-                   "name": "mvd-suchmaske",
-                   "label": _("Kundensuche"),
-                   "description": _("Kundensuche")
-                },
-                {
                     "type": "doctype",
                     "name": "Kunden",
                     "label": _("Kunden"),
