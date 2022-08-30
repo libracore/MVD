@@ -265,6 +265,8 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False):
             hv_bar_bezahlt = False
             if int(massendruck) == 1:
                 massendruck = True
+            else:
+                massendruck = False
             sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck)
         else:
             if anlage_daten["status"] == 'Interessent*in':
