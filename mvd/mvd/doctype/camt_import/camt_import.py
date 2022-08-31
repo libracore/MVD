@@ -1074,7 +1074,7 @@ def fr_bez_bar(fr, datum):
         "customer": customer,
         "customer_address": address,
         "contact_person": contact,
-        'mitgliedschafts_jahr': int(getdate(today()).strftime("%Y")),
+        'mitgliedschafts_jahr': fr.bezugsjahr if fr.bezugsjahr and fr.bezugsjahr > 0 else int(getdate(today()).strftime("%Y")),
         'due_date': add_days(today(), 30),
         'debit_to': company.default_receivable_account,
         'sektions_code': str(sektion.sektion_id) or '00',

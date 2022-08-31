@@ -19,7 +19,7 @@ class FakultativeRechnung(Document):
             frappe.throw("Bezahlte Fakultative Rechnungen können nicht storniert werden.")
 
 @frappe.whitelist()
-def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False, druckvorlage='', asap_print=False):
+def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False, druckvorlage='', asap_print=False, bezugsjahr=0):
     if not betrag_spende:
         cancel_old_hv_fr(mitgliedschaft)
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
@@ -35,7 +35,8 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spend
         'betrag': betrag_spende or sektion.betrag_hv,
         'posting_date': today(),
         'company': sektion.company,
-        'druckvorlage': druckvorlage
+        'druckvorlage': druckvorlage,
+        'bezugsjahr': bezugsjahr
     })
     fr.insert(ignore_permissions=True)
     
@@ -112,7 +113,7 @@ def create_paid_sinv(fr, mitgliedschaft, sektion):
         "customer": customer,
         "customer_address": address,
         "contact_person": contact,
-        'mitgliedschafts_jahr': int(getdate(today()).strftime("%Y")),
+        'mitgliedschafts_jahr': fr.bezugsjahr if fr.bezugsjahr and fr.bezugsjahr > 0 else int(getdate(today()).strftime("%Y")),
         'due_date': add_days(today(), 30),
         'debit_to': company.default_receivable_account,
         'sektions_code': str(sektion.sektion_id) or '00',
@@ -175,7 +176,7 @@ def create_unpaid_sinv(fr, betrag=False):
         "customer": customer,
         "customer_address": address,
         "contact_person": contact,
-        'mitgliedschafts_jahr': int(getdate(today()).strftime("%Y")),
+        'mitgliedschafts_jahr': fr.bezugsjahr if fr.bezugsjahr and fr.bezugsjahr > 0 else int(getdate(today()).strftime("%Y")),
         'due_date': add_days(today(), 30),
         'debit_to': company.default_receivable_account,
         'sektions_code': str(sektion.sektion_id) or '00',
