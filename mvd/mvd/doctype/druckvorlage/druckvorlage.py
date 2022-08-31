@@ -259,32 +259,46 @@ def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, redu
 
 def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=False, fr=False):
     from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_anredekonvention
+    nur_kunde = False
     try:
         mitgliedschaft.name
     except:
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+        try:
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+        except:
+            nur_kunde = True
+            kunde = frappe.get_doc("Kunden", mitgliedschaft)
     
-    key_words = [
-        {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft) if not mahnung and not sinv else mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)},
-        # ~ {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede if not mahnung and not sinv else mitgliedschaft.rg_briefanrede},
-        {'key_word': '%%MIETGLIEDERNUMMER%%', 'value': mitgliedschaft.mitglied_nr},
-        {'key_word': '%%ANREDE BESCHENKTE%%', 'value': mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft)},
-        # ~ {'key_word': '%%ANREDE BESCHENKTE%%', 'value': mitgliedschaft.briefanrede},
-        {'key_word': '%%ANREDE SCHENKENDE%%', 'value': mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)},
-        # ~ {'key_word': '%%ANREDE SCHENKENDE%%', 'value': mitgliedschaft.rg_briefanrede},
-        {'key_word': '%%VOR- NACHNAME BESCHENKTE%%', 'value': " ".join((mitgliedschaft.vorname_1 or '', mitgliedschaft.nachname_1 or ''))},
-        {'key_word': '%%VOR- NACHNAME SCHENKENDE%%', 'value': " ".join((mitgliedschaft.rg_vorname or '', mitgliedschaft.rg_nachname or ''))}
-    ]
+    if not nur_kunde:
+        key_words = [
+            {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft) if not mahnung and not sinv else mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)},
+            # ~ {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede if not mahnung and not sinv else mitgliedschaft.rg_briefanrede},
+            {'key_word': '%%MIETGLIEDERNUMMER%%', 'value': mitgliedschaft.mitglied_nr},
+            {'key_word': '%%ANREDE BESCHENKTE%%', 'value': mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft)},
+            # ~ {'key_word': '%%ANREDE BESCHENKTE%%', 'value': mitgliedschaft.briefanrede},
+            {'key_word': '%%ANREDE SCHENKENDE%%', 'value': mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)},
+            # ~ {'key_word': '%%ANREDE SCHENKENDE%%', 'value': mitgliedschaft.rg_briefanrede},
+            {'key_word': '%%VOR- NACHNAME BESCHENKTE%%', 'value': " ".join((mitgliedschaft.vorname_1 or '', mitgliedschaft.nachname_1 or ''))},
+            {'key_word': '%%VOR- NACHNAME SCHENKENDE%%', 'value': " ".join((mitgliedschaft.rg_vorname or '', mitgliedschaft.rg_nachname or ''))}
+        ]
     
     if sinv or fr:
         if sinv:
             sinv = frappe.get_doc("Sales Invoice", sinv)
             amount = sinv.outstanding_amount
+            rechnungsnummer = sinv.name
+            key_words.append({
+                'key_word': '%%ARTIKELTABELLE%%', 'value': get_item_table(sinv)
+            })
         if fr:
             fr = frappe.get_doc("Fakultative Rechnung", fr)
             amount = fr.betrag
+            rechnungsnummer = fr.name
         key_words.append({
             'key_word': '%%RECHNUNGSBETRAG%%', 'value': "{:,.2f}".format(amount).replace(",", "'")
+        })
+        key_words.append({
+            'key_word': '%%RECHNUNGSNUMMER%%', 'value': rechnungsnummer
         })
     
     if mahnung:
@@ -314,3 +328,60 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
         txt = txt.replace(key_word['key_word'], key_word['value'])
     
     return txt
+
+def get_item_table(sinv):
+    table = """
+                <table style="width: 100%;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid black;">
+                            <th style="text-align: left;">Anz.</th>
+                            <th style="text-align: left;">Bezeichnung</th>
+                            <th style="text-align: right;">Einzelpreis</th>
+                            <th style="text-align: right;">Total</th>
+                            <th style="text-align: right;">MWST</th>
+                        </tr>
+                    </thead>
+                    <tbody>"""
+    for item in sinv.items:
+        table += """
+                    <tr>
+                        <td style="text-align: left;">{qty}</td>
+                        <td style="text-align: left;">{bez}</td>
+                        <td style="text-align: right;">{einzp}</td>
+                        <td style="text-align: right;">{total}</td>
+                        <td style="text-align: right;">{mwst}</td>
+                    </tr>""".format(qty=int(item.qty), \
+                                    bez=item.item_name, \
+                                    einzp="{:,.2f}".format(item.rate).replace(",", "'"), \
+                                    total="{:,.2f}".format(item.amount).replace(",", "'"), \
+                                    mwst=item.item_tax_template)
+    
+    table += """
+                <tr style="border-bottom: 1px solid black; border-top: 1px solid black;">
+                    <td colspan="2" style="text-align: left;"><b>Total</b> (inkl. MWSt.)</td>
+                    <td style="text-align: right;">Fr.</td>
+                    <td style="text-align: right;">{grand_total}</td>
+                    <td></td>
+                </tr>""".format(grand_total="{:,.2f}".format(sinv.grand_total).replace(",", "'"))
+    
+    table += """
+                <tr>
+                    <td colspan="2" style="text-align: left;">Unsere MWST-Nr: CHE-100.822.971 MWST</td>
+                    <td colspan="3" style="text-align: right;"><table style="width: 100%;">"""
+    for tax in sinv.taxes:
+        table += """<tr>
+                        <td style="padding-top: 0px !important; text-align: right;">Satz:</td>
+                        <td style="padding-top: 0px !important; text-align: right;">{satz}</td>
+                        <td style="padding-top: 0px !important; text-align: right;">Betrag:</td>
+                        <td style="padding-top: 0px !important; text-align: right;">{betrag}</td>
+                        <td style="padding-top: 0px !important; text-align: right;">Steuer:</td>
+                        <td style="padding-top: 0px !important; text-align: right;">{steuer}</td>
+                    </tr>""".format(satz=tax.description, \
+                                    betrag="{:,.2f}".format(tax.total).replace(",", "'"), \
+                                    steuer="{:,.2f}".format(tax.tax_amount).replace(",", "'"))
+    table += """</table></td>"""
+    
+    table += """
+                    </tbody>
+                </table>"""
+    return table

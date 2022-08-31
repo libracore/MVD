@@ -9,6 +9,7 @@ from mvd.mvd.utils.qrr_reference import get_qrr_reference
 from frappe.utils.data import add_days, getdate, now, today
 from PyPDF2 import PdfFileWriter
 from frappe.utils.pdf import get_file_data_from_writer
+from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 
 @frappe.whitelist()
 def create_rechnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, kunde=False, druckvorlage=False, bezahlt=False, submit=False, attach_as_pdf=False, mv_mitgliedschaft=None):
@@ -72,6 +73,11 @@ def create_rechnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, 
     })
     sinv.insert(ignore_permissions=True)
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
+    sales_taxes_and_charges = get_sales_taxes_and_charges_template(sektion.company)
+    sinv.taxes_and_charges = sales_taxes_and_charges['taxes_and_charges']
+    for tax in sales_taxes_and_charges['taxes']:
+        row = sinv.append('taxes', tax)
+    
     sinv.save(ignore_permissions=True)
     
     if bezahlt:
@@ -118,3 +124,7 @@ def create_rechnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, 
         _file.save(ignore_permissions=True)
     
     return sinv.name
+
+def get_sales_taxes_and_charges_template(company):
+    sales_taxes_and_charges = get_default_taxes_and_charges(master_doctype='Sales Taxes and Charges Template', company=company)
+    return sales_taxes_and_charges
