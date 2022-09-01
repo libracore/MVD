@@ -1,0 +1,87 @@
+{
+ "autoname": "format:Jahresversand-{sektion_id}-{jahr}",
+ "creation": "2022-09-01 12:56:55.516866",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sektion_id",
+  "jahr",
+  "cb_1",
+  "status",
+  "download_draft",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jahr",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Jahresversand f\u00fcr Jahr",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==0",
+   "fieldname": "download_draft",
+   "fieldtype": "Button",
+   "label": "Download Entwurfsdaten"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rechnungs Jahresversand",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Vorgemerkt\nIn Arbeit\nAbgeschlossen\nFehlgeschlagen"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-09-01 13:09:19.109569",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Rechnungs Jahresversand",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "MV_MA",
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
