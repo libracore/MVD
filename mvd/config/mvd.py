@@ -39,9 +39,9 @@ def get_data():
                 },
                 {
                     "type": "doctype",
-                    "name": "MV Jahresversand",
+                    "name": "Rechnungs Jahresversand",
                     "label": _("Rechnungs Jahresversand"),
-                    "description": _("MV Jahresversand")
+                    "description": _("Rechnungs Jahresversand")
                 },
                 {
                     "type": "doctype",
