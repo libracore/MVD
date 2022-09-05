@@ -29,7 +29,8 @@
   "total_before_charge",
   "total_with_charge",
   "section_hidden_linking",
-  "hidden_linking"
+  "hidden_linking",
+  "mv_kunde"
  ],
  "fields": [
   {
@@ -201,10 +202,16 @@
    "label": "Massenlauf Referenz",
    "options": "Massenlauf",
    "read_only": 1
+  },
+  {
+   "fieldname": "mv_kunde",
+   "fieldtype": "Link",
+   "label": "Kunde",
+   "options": "Kunden"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-03-03 14:02:00.861561",
+ "modified": "2022-08-26 10:39:32.887593",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnung",

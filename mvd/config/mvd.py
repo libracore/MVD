@@ -76,26 +76,14 @@ def get_data():
             ]
         },
         {
-            "label": _("Stammdaten"),
+            "label": _("Faktura Kunden"),
             "icon": "fa fa-cog",
             "items": [
-               {
+                {
                     "type": "doctype",
-                    "name": "Customer",
+                    "name": "Kunden",
                     "label": _("Kunden"),
-                    "description": _("Customers")
-                },
-                {
-                    "type": "doctype",
-                    "name": "Address",
-                    "label": _("Adressen"),
-                    "description": _("Adressen")
-                },
-                {
-                    "type": "doctype",
-                    "name": "Contact",
-                    "label": _("Contact"),
-                    "description": _("Kontaktpersonen")
+                    "description": _("Kunden")
                 }
             ]
         },
