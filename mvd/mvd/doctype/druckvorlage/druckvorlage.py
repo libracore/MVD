@@ -262,12 +262,14 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
     nur_kunde = False
     try:
         mitgliedschaft.name
+        if mitgliedschaft.doctype == 'Kunden':
+            nur_kunde = True
     except:
         try:
             mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
         except:
             nur_kunde = True
-            kunde = frappe.get_doc("Kunden", mitgliedschaft)
+            mitgliedschaft = frappe.get_doc("Kunden", mitgliedschaft)
     
     if not nur_kunde:
         key_words = [
@@ -280,6 +282,11 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
             # ~ {'key_word': '%%ANREDE SCHENKENDE%%', 'value': mitgliedschaft.rg_briefanrede},
             {'key_word': '%%VOR- NACHNAME BESCHENKTE%%', 'value': " ".join((mitgliedschaft.vorname_1 or '', mitgliedschaft.nachname_1 or ''))},
             {'key_word': '%%VOR- NACHNAME SCHENKENDE%%', 'value': " ".join((mitgliedschaft.rg_vorname or '', mitgliedschaft.rg_nachname or ''))}
+        ]
+    else:
+        key_words = [
+            {'key_word': '%%MIETGLIEDERNUMMER%%', 'value': '---'},
+            {'key_word': '%%ANREDE%%', 'value': get_anredekonvention(self=mitgliedschaft)}
         ]
     
     if sinv or fr:
