@@ -2194,7 +2194,7 @@ function erstelle_rechnung_sonstiges(frm) {
                                 var bar_bezahlt = null;
                             }
                             frappe.call({
-                                method: "mvd.mvd.utils.sonstige_rechnungen.create_reachnung_sonstiges",
+                                method: "mvd.mvd.utils.sonstige_rechnungen.create_rechnung_sonstiges",
                                 args:{
                                         'sektion': cur_frm.doc.sektion_id,
                                         'mitgliedschaft': cur_frm.doc.name,
