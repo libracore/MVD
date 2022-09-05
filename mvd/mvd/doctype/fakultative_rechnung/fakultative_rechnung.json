@@ -12,6 +12,8 @@
   "sektions_code",
   "druckvorlage",
   "spenden_versand",
+  "rechnungs_jahresversand",
+  "bezugsjahr",
   "cb_1",
   "company",
   "sales_invoice",
@@ -166,10 +168,23 @@
    "label": "Aus Spendenversand",
    "options": "Spendenversand",
    "read_only": 1
+  },
+  {
+   "fieldname": "bezugsjahr",
+   "fieldtype": "Int",
+   "label": "Bezugsjahr",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rechnungs_jahresversand",
+   "fieldtype": "Link",
+   "label": "Aus Rechnungs Jahresversand",
+   "options": "Rechnungs Jahresversand",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-08-24 10:27:30.846436",
+ "modified": "2022-09-02 11:24:20.840019",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Fakultative Rechnung",

@@ -99,3 +99,15 @@ def spenden_versand():
                     'doc': lauf
                 }
                 enqueue("mvd.mvd.doctype.spendenversand.spendenversand.spenden_versand", queue='long', job_name='Spendenversand {0}'.format(lauf.name), timeout=5000, **args)
+
+def rechnungs_jahresversand():
+        rechnungs_jahresversand = frappe.db.sql("""SELECT `name` FROM `tabRechnungs Jahresversand` WHERE `status` = 'Vorgemerkt' AND `docstatus` = 1""", as_dict=True)
+        if len(rechnungs_jahresversand) > 0:
+            for lauf in rechnungs_jahresversand:
+                jahresversand = frappe.get_doc("Rechnungs Jahresversand", lauf.name)
+                jahresversand.status = 'In Arbeit'
+                jahresversand.save()
+                args = {
+                    'jahresversand': lauf.name
+                }
+                enqueue("mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.create_invoices", queue='long', job_name='Rechnungs Jahresversand {0}'.format(lauf.name), timeout=5000, **args)

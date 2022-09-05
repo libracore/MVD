@@ -9,6 +9,7 @@
   "sektion_id",
   "cb_1",
   "grund",
+  "status",
   "section_hinweis",
   "hinweis",
   "section_selektion",
@@ -89,10 +90,18 @@
    "fieldname": "hinweis",
    "fieldtype": "HTML",
    "options": "<h1>Hinweis f\u00fcr Massenlauf Inaktivierung:\nDer Massenlauf Inaktivierung wird f\u00fcr den Jahresversand entwickelt: Die Massen-Inaktivierung kann noch nicht ausgel\u00f6st werden.</h1>\n<ol><li>Kriterien w\u00e4hlen</li><li>Speichern dr\u00fccken</li><li>--&gt; Resultat wird angezeigt</li><li>Liste bereinigen</li><li>Buchen dr\u00fccken, Ausschliessungen werden in der Nacht ausgef\u00fchrt</li></ol>\n<p>Tipp: Um neu zu beginnen, k\u00f6nnen alle Zeilen gel\u00f6scht werden und dann mit Speichern neu geladen werden.</p>"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Vorgemerkt\nAbgeschlossen\nFehlgeschlagen",
+   "permlevel": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-07-11 22:03:11.175996",
+ "modified": "2022-09-01 12:05:40.589043",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Massenlauf Inaktivierung",
@@ -103,6 +112,18 @@
    "delete": 1,
    "email": 1,
    "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
    "print": 1,
    "read": 1,
    "report": 1,
@@ -123,6 +144,12 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "export": 1,
+   "permlevel": 1,
+   "read": 1,
+   "role": "MV_MA"
   }
  ],
  "sort_field": "modified",

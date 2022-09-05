@@ -437,7 +437,8 @@ class Mitgliedschaft(Document):
         sinvs = frappe.db.sql("""SELECT
                                     `name`,
                                     `is_pos`,
-                                    `posting_date`
+                                    `posting_date`,
+                                    `mitgliedschafts_jahr`
                                 FROM `tabSales Invoice`
                                 WHERE `docstatus` = 1
                                 AND `ist_hv_rechnung` = 1
@@ -447,7 +448,7 @@ class Mitgliedschaft(Document):
         if len(sinvs) > 0:
             sinv = sinvs[0]
             if sinv.is_pos == 1:
-                sinv_year = getdate(sinv.posting_date).strftime("%Y")
+                sinv_year = sinv.mitgliedschafts_jahr if sinv.mitgliedschafts_jahr and sinv.mitgliedschafts_jahr > 0 else getdate(sinv.posting_date).strftime("%Y")
                 self.datum_hv_zahlung = sinv.posting_date
             else:
                 pes = frappe.db.sql("""SELECT `parent` FROM `tabPayment Entry Reference`
@@ -455,7 +456,7 @@ class Mitgliedschaft(Document):
                                         AND `reference_name` = '{sinv}' ORDER BY `creation` DESC""".format(sinv=sinv.name), as_dict=True)
                 if len(pes) > 0:
                     pe = frappe.get_doc("Payment Entry", pes[0].parent)
-                    sinv_year = getdate(pe.reference_date).strftime("%Y")
+                    sinv_year = sinv.mitgliedschafts_jahr if sinv.mitgliedschafts_jahr and sinv.mitgliedschafts_jahr > 0 else getdate(pe.reference_date).strftime("%Y")
                     self.datum_hv_zahlung = pe.reference_date
             self.zahlung_hv = sinv_year
             self.letzte_bearbeitung_von = 'User'
@@ -1994,7 +1995,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         return 1
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None):
+def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None):
     if not mitgliedschaft_obj:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     else:
@@ -2034,7 +2035,15 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
                 item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt,"qty": 1, "cost_center": company.cost_center})
         
         if mitgliedschaft.mitgliedtyp_c == 'Geschäft':
-            item = [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1}]
+            item = [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center}]
+            # prüfe gratis ab stichtag
+            gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%d"))
+            if getdate(today()) >= gratis_ab:
+                item = [
+                    {"item_code": sektion.mitgliedschafts_artikel_gratis,"qty": 1, "cost_center": company.cost_center},
+                    {"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center}
+                ]
+                jahr = int(getdate(today()).strftime("%Y")) + 1
             # prüfe Beitrittsgebühr
             if int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) == 0 and sektion.mitgliedschafts_artikel_beitritt_geschaeft:
                 item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt_geschaeft,"qty": 1, "cost_center": company.cost_center})
@@ -2068,7 +2077,8 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         'sektion_id': mitgliedschaft.sektion_id,
         "items": item,
         "druckvorlage": druckvorlage if druckvorlage else '',
-        "exclude_from_payment_reminder_until": exclude_from_payment_reminder_until
+        "exclude_from_payment_reminder_until": exclude_from_payment_reminder_until,
+        "rechnungs_jahresversand": rechnungs_jahresversand
     })
     sinv.insert(ignore_permissions=True)
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
@@ -2096,7 +2106,8 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         sinv.save(ignore_permissions=True)
     
     if inkl_hv and mitgliedschaft.mitgliedtyp_c != 'Geschäft':
-        fr_rechnung = create_hv_fr(mitgliedschaft=mitgliedschaft.name, sales_invoice=sinv.name, bezahlt=hv_bar_bezahlt)
+        bezugsjahr = jahr or int(getdate(today()).strftime("%Y"))
+        fr_rechnung = create_hv_fr(mitgliedschaft=mitgliedschaft.name, sales_invoice=sinv.name, bezahlt=hv_bar_bezahlt, bezugsjahr=bezugsjahr)
     
     if attach_as_pdf:
         # add doc signature to allow print
