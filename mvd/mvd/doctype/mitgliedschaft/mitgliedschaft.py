@@ -1995,7 +1995,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         return 1
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None):
+def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None):
     if not mitgliedschaft_obj:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     else:
@@ -2077,7 +2077,8 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         'sektion_id': mitgliedschaft.sektion_id,
         "items": item,
         "druckvorlage": druckvorlage if druckvorlage else '',
-        "exclude_from_payment_reminder_until": exclude_from_payment_reminder_until
+        "exclude_from_payment_reminder_until": exclude_from_payment_reminder_until,
+        "rechnungs_jahresversand": rechnungs_jahresversand
     })
     sinv.insert(ignore_permissions=True)
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
