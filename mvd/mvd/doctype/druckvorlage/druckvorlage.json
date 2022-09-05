@@ -76,7 +76,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Dokument",
-   "options": "Anmeldung mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ\nMahnung\nGeschenkmitgliedschaft",
+   "options": "Anmeldung mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ\nMahnung\nGeschenkmitgliedschaft\nRechnung (Sonstiges)",
    "reqd": 1
   },
   {
@@ -263,7 +263,7 @@
    "depends_on": "eval:doc.dokument!='Mahnung'&&doc.dokument!='Geschenkmitgliedschaft'",
    "fieldname": "tipps",
    "fieldtype": "HTML",
-   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Rechnungsbetrag (Nur wenn mit EZ) -&gt; <b>%%RECHNUNGSBETRAG%%</b></li>\n</ul>"
+   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Rechnungsbetrag (Nur wenn mit EZ) -&gt; <b>%%RECHNUNGSBETRAG%%</b></li>\n<li>Rechnungsnummer -&gt; <b>%%RECHNUNGSNUMMER%%</b></li>\n</ul>"
   },
   {
    "default": "0",
@@ -385,7 +385,7 @@
    "options": "Schenkende*r\nBeschenkte*r"
   }
  ],
- "modified": "2022-03-31 21:31:47.942015",
+ "modified": "2022-08-30 10:32:08.540894",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",
