@@ -3457,7 +3457,7 @@ def get_sektions_code(company):
 
 @frappe.whitelist()
 def get_sektionen_zur_auswahl():
-    sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` ORDER BY `name` ASC""", as_dict=True)
+    sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` WHERE `keine_mitgliedschaftssektion` != 1 ORDER BY `name` ASC""", as_dict=True)
     sektionen_zur_auswahl = ''
     for sektion in sektionen:
         sektionen_zur_auswahl += "\n" + sektion.name
@@ -3465,7 +3465,7 @@ def get_sektionen_zur_auswahl():
 
 @frappe.whitelist()
 def get_pseudo_sektionen_zur_auswahl():
-    sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` WHERE `pseudo_sektion` = 1 ORDER BY `name` ASC""", as_dict=True)
+    sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` WHERE `pseudo_sektion` = 1 AND `keine_mitgliedschaftssektion` != 1 ORDER BY `name` ASC""", as_dict=True)
     sektionen_zur_auswahl = ''
     for sektion in sektionen:
         sektionen_zur_auswahl += "\n" + sektion.name
