@@ -162,6 +162,9 @@ function erstelle_rechnung_sonstiges(frm) {
                                         }
                                     });
                                 }
+                            },
+                            get_query: function() {
+                                return { 'filters': { 'mitgliedschaftsspezifischer_artikel': 0 } };
                             }
                         },
                         {
