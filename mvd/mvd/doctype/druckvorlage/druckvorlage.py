@@ -214,6 +214,12 @@ class Druckvorlage(Document):
 
 @frappe.whitelist()
 def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, reduzierte_mitgliedschaft=False, language=False, serienbrief=False):
+    user = frappe.session.user
+    if "System Manager" in frappe.get_roles(user):
+        sektionen_filter = """`sektion_id` IN ('{0}', '{1}')""".format(sektion, 'MVD')
+    else:
+        sektionen_filter = """`sektion_id` = '{0}'""".format(sektion)
+    
     if not serienbrief:
         additional_filters = ''
         if mitgliedtyp:
@@ -225,10 +231,10 @@ def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, redu
                                                 `name`,
                                                 `default`
                                             FROM `tabDruckvorlage`
-                                            WHERE `sektion_id` = '{sektion}'
+                                            WHERE {sektionen_filter}
                                             AND `deaktiviert` != 1
                                             AND `dokument` = '{dokument}'
-                                            {additional_filters}""".format(sektion=sektion, dokument=dokument, additional_filters=additional_filters), as_dict=True)
+                                            {additional_filters}""".format(sektionen_filter=sektionen_filter, dokument=dokument, additional_filters=additional_filters), as_dict=True)
         
         alle_druckvorlagen = []
         default_druckvorlage = ''
@@ -337,6 +343,10 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
     return txt
 
 def get_item_table(sinv):
+    taxes = {}
+    for tax in sinv.taxes:
+        taxes[tax.description] = 0
+    
     table = """
                 <table style="width: 100%;">
                     <thead>
@@ -362,6 +372,8 @@ def get_item_table(sinv):
                                     einzp="{:,.2f}".format(item.rate).replace(",", "'"), \
                                     total="{:,.2f}".format(item.amount).replace(",", "'"), \
                                     mwst=item.item_tax_template)
+        if item.item_tax_template and item.item_tax_template in taxes:
+            taxes[item.item_tax_template] += item.amount
     
     table += """
                 <tr style="border-bottom: 1px solid black; border-top: 1px solid black;">
@@ -372,19 +384,19 @@ def get_item_table(sinv):
                 </tr>""".format(grand_total="{:,.2f}".format(sinv.grand_total).replace(",", "'"))
     
     table += """
-                <tr>
-                    <td colspan="2" style="text-align: left;">Unsere MWST-Nr: CHE-100.822.971 MWST</td>
+                <tr style="line-height: 1;">
+                    <td colspan="2" style="text-align: left; font-size: 8px;">Unsere MWST-Nr: CHE-100.822.971 MWST</td>
                     <td colspan="3" style="text-align: right;"><table style="width: 100%;">"""
     for tax in sinv.taxes:
-        table += """<tr>
-                        <td style="padding-top: 0px !important; text-align: right;">Satz:</td>
-                        <td style="padding-top: 0px !important; text-align: right;">{satz}</td>
-                        <td style="padding-top: 0px !important; text-align: right;">Betrag:</td>
-                        <td style="padding-top: 0px !important; text-align: right;">{betrag}</td>
-                        <td style="padding-top: 0px !important; text-align: right;">Steuer:</td>
-                        <td style="padding-top: 0px !important; text-align: right;">{steuer}</td>
+        table += """<tr style="line-height: 1;">
+                        <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Satz:</td>
+                        <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{satz}</td>
+                        <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Betrag:</td>
+                        <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{betrag}</td>
+                        <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Steuer:</td>
+                        <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{steuer}</td>
                     </tr>""".format(satz=tax.description, \
-                                    betrag="{:,.2f}".format(tax.total).replace(",", "'"), \
+                                    betrag="{:,.2f}".format(taxes[tax.description]).replace(",", "'"), \
                                     steuer="{:,.2f}".format(tax.tax_amount).replace(",", "'"))
     table += """</table></td>"""
     

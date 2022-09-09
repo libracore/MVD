@@ -44,17 +44,19 @@ frappe.ui.form.on('Kunden', {
     abweichende_rechnungsadresse: function(frm) {
         // set strasse, plz und ort mandatory (Rechnungsempfänger)
         rechnungsadresse_mandatory(frm);
+        // set nachname und vorname mandatory (Rechnungsempfänger)
+        rechnungsempfaenger_mandatory(frm);
     },
     kundentyp: function(frm) {
         // set firma mandatory (Kunde)
         firmenkunde_mandatory(frm);
     },
     unabhaengiger_debitor: function(frm) {
-        // set nachname und vorname mandatory (Eigener Rechnungsempfänger)
+        // set nachname und vorname mandatory (Rechnungsempfänger)
         rechnungsempfaenger_mandatory(frm);
     },
     rg_kundentyp: function(frm) {
-        // set firma mandatory (Eigener Rechnungsempfänger)
+        // set firma mandatory (Rechnungsempfänger)
         firmenrechnungsempfaenger_mandatory(frm);
     },
     plz: function(frm) {
