@@ -1,0 +1,31 @@
+{
+ "custom_fields": [],
+ "custom_perms": [],
+ "doctype": "Massenlauf Inaktivierung",
+ "property_setters": [
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2022-09-07 11:12:56.443471",
+   "default_value": null,
+   "doc_type": "Massenlauf Inaktivierung",
+   "docstatus": 0,
+   "doctype_or_field": "DocType",
+   "field_name": null,
+   "idx": 0,
+   "modified": "2022-09-07 11:12:56.443471",
+   "modified_by": "Administrator",
+   "name": "Massenlauf Inaktivierung-default_print_format",
+   "owner": "Administrator",
+   "parent": null,
+   "parentfield": null,
+   "parenttype": null,
+   "property": "default_print_format",
+   "property_type": "Data",
+   "value": "Massenlauf Inaktivierung"
+  }
+ ],
+ "sync_on_migrate": 1
+}

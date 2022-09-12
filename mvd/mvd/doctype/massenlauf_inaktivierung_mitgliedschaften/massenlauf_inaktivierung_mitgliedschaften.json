@@ -4,11 +4,22 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_allgemein",
   "mv_mitgliedschaft",
   "mitglied_nr",
+  "eintritt",
+  "section_mitglied",
   "vorname",
   "nachname",
-  "firma"
+  "firma",
+  "section_solidarmitglied",
+  "vorname_2",
+  "nachname_2",
+  "section_adresse",
+  "strasse",
+  "nummer",
+  "plz",
+  "ort"
  ],
  "fields": [
   {
@@ -47,10 +58,72 @@
    "in_list_view": 1,
    "label": "Firma",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "eintritt",
+   "fieldtype": "Date",
+   "label": "Eintritt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_mitglied",
+   "fieldtype": "Section Break",
+   "label": "Hauptmitglied"
+  },
+  {
+   "fieldname": "section_solidarmitglied",
+   "fieldtype": "Section Break",
+   "label": "Solidarmitglied"
+  },
+  {
+   "fieldname": "vorname_2",
+   "fieldtype": "Data",
+   "label": "Vorname",
+   "read_only": 1
+  },
+  {
+   "fieldname": "nachname_2",
+   "fieldtype": "Data",
+   "label": "Nachname",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_adresse",
+   "fieldtype": "Section Break",
+   "label": "Korrespondenzadresse"
+  },
+  {
+   "fieldname": "strasse",
+   "fieldtype": "Data",
+   "label": "Strasse",
+   "read_only": 1
+  },
+  {
+   "fieldname": "nummer",
+   "fieldtype": "Data",
+   "label": "Nummer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "label": "PLZ",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "label": "Ort",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2022-07-11 22:12:13.345046",
+ "modified": "2022-09-07 10:42:58.268549",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Massenlauf Inaktivierung Mitgliedschaften",
