@@ -217,6 +217,8 @@ def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, redu
     user = frappe.session.user
     if "System Manager" in frappe.get_roles(user):
         sektionen_filter = """`sektion_id` IN ('{0}', '{1}')""".format(sektion, 'MVD')
+    elif "MV_MVD" in frappe.get_roles(user):
+        sektionen_filter = """`sektion_id` IN ('{0}', '{1}')""".format(sektion, 'MVD')
     else:
         sektionen_filter = """`sektion_id` = '{0}'""".format(sektion)
     
