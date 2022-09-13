@@ -13,6 +13,8 @@ from erpnext.controllers.accounts_controller import get_default_taxes_and_charge
 
 @frappe.whitelist()
 def create_rechnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, kunde=False, druckvorlage=False, bezahlt=False, submit=False, attach_as_pdf=False, mv_mitgliedschaft=None):
+    if druckvorlage:
+        sektion = frappe.get_doc("Druckvorlage", druckvorlage).sektion_id
     sektion = frappe.get_doc("Sektion", sektion)
     company = frappe.get_doc("Company", sektion.company)
     
