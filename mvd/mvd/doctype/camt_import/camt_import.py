@@ -196,14 +196,14 @@ def zahlungen_zuweisen(master_data):
             1.1 Anhand QRR/ESR
             1.2 Hack Anhand stellen 11-24 von QRR/ESR
         2. Prüfe HV Zahlung
-            2.1 Betrag = 12? -> Suche nach HV FAK Rechnung -> Bei Erfolg: 4., sonst 3.
+            2.1 Betrag = 10? -> Suche nach HV FAK Rechnung -> Bei Erfolg: 4., sonst 3.
         3. Prüfe Spenden Zahlung
             3.1 suche nach Spenden FAK Rechnung anhand QRR/ESR -> Bei Erfolg: 4., sonst 5.
         4. Verbuchen / Splitten
             (4.0) Hack
             4.1 Verbuchen Zahlung mit Rechnung
             4.2 Wenn überzahlt --> Überzahlung in eigene Zahlung umwandeln
-            4.3 Wenn Überzahlung = CHF 12 und keine HV FAK vorhanden --> HV Fak erstellen, umwandeln und zuweisen
+            4.3 Wenn Überzahlung = CHF 10 und keine HV FAK vorhanden --> HV Fak erstellen, umwandeln und zuweisen
         5. Umzugshandling
     '''
     
@@ -233,7 +233,7 @@ def zahlungen_zuweisen(master_data):
                                 AND `status` != 'Paid'""".format(qrr=qrr), as_dict=True)
         
         # 2.1 / 3.1
-        if not len(sinv) > 0 and pe.paid_amount == 12:
+        if not len(sinv) > 0 and pe.paid_amount == 10:
             qrr = pe.esr_reference
             
             # HACK (zu kurze ERPNext Referenznummern): soll später entfernt werden
@@ -245,7 +245,7 @@ def zahlungen_zuweisen(master_data):
                                 AND `status` = 'Unpaid'
                                 AND (REPLACE(`qrr_referenz`, ' ', '') = '{qrr}' OR REPLACE(`qrr_referenz`, ' ', '') = '{qrr_short}')""".format(qrr=qrr, qrr_short=qrr_short), as_dict=True)
             if len(fr) > 0:
-                fr_sinv = create_unpaid_sinv(fr[0].name, betrag=12)
+                fr_sinv = create_unpaid_sinv(fr[0].name, betrag=10)
                 sinv = frappe.db.sql("""SELECT `name`, `mv_mitgliedschaft`, `docstatus`, `due_date`, `base_grand_total`, `outstanding_amount`, `customer`
                                         FROM `tabSales Invoice`
                                         WHERE `name` = '{fr_sinv}'""".format(fr_sinv=fr_sinv), as_dict=True)
@@ -257,7 +257,7 @@ def zahlungen_zuweisen(master_data):
                 pe.mv_mitgliedschaft = sinv[0].mv_mitgliedschaft
                 
                 # HACK 2
-                if pe.paid_amount < sinv[0].outstanding_amount and pe.paid_amount == 12:
+                if pe.paid_amount < sinv[0].outstanding_amount and pe.paid_amount == 10:
                     if pe.esr_reference[11:14] != '000':
                         # erstelle fr
                         from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
@@ -306,7 +306,7 @@ def zahlungen_zuweisen(master_data):
                     new_pe.insert()
                     
                     # 4.3
-                    if new_pe.unallocated_amount == 12:
+                    if new_pe.unallocated_amount == 10:
                         fr = frappe.db.sql("""SELECT `name`
                                                 FROM `tabFakultative Rechnung`
                                                 WHERE `docstatus` = 1
@@ -924,7 +924,7 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False,
     if betrag > sinv.outstanding_amount:
         frappe.throw("Der Bezahlte Betrag darf die ausstehende Summe nicht überschreiten")
     if hv:
-        hv_sinv = create_unpaid_sinv(hv, betrag=12)
+        hv_sinv = create_unpaid_sinv(hv, betrag=10)
     
     customer = sinv.customer
     mitgliedschaft = sinv.mv_mitgliedschaft
