@@ -49,7 +49,7 @@ frappe.ui.form.on('Fakultative Rechnung', {
 function bezahlt_in_bar(frm) {
     frappe.prompt([
         {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Zahlungsdatum', 'reqd': 1},
-        {'fieldname': 'betrag', 'fieldtype': 'Currency', 'label': 'Betrag', 'reqd': 1, 'default': cur_frm.doc.typ == 'HV' ? 12:0, 'read_only': cur_frm.doc.typ == 'HV' ? 1:0}
+        {'fieldname': 'betrag', 'fieldtype': 'Currency', 'label': 'Betrag', 'reqd': 1, 'default': cur_frm.doc.typ == 'HV' ? 10:0, 'read_only': cur_frm.doc.typ == 'HV' ? 1:0}
     ],
     function(values){
         frappe.call({
@@ -75,7 +75,7 @@ function bezahlt_in_bar(frm) {
 function bezahlt_mit_ezs(frm) {
     frappe.prompt([
         {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Zahlungsdatum', 'reqd': 1},
-        {'fieldname': 'betrag', 'fieldtype': 'Currency', 'label': 'Betrag', 'reqd': 1, 'default': cur_frm.doc.typ == 'HV' ? 12:0, 'read_only': cur_frm.doc.typ == 'HV' ? 1:0}
+        {'fieldname': 'betrag', 'fieldtype': 'Currency', 'label': 'Betrag', 'reqd': 1, 'default': cur_frm.doc.typ == 'HV' ? 10:0, 'read_only': cur_frm.doc.typ == 'HV' ? 1:0}
     ],
     function(values){
         frappe.call({

@@ -22,7 +22,7 @@ frappe.ui.form.on('Payment Entry', {
                     frm.add_custom_button(__("Mit Rückzahlung ausgleichen"), function() {
                         rueckzahlung(frm);
                     });
-                    if (cur_frm.doc.unallocated_amount == 12) {
+                    if (cur_frm.doc.unallocated_amount == 10) {
                         frm.add_custom_button(__("Als HV Zahlung verbuchen"), function() {
                             als_hv_verbuchen(frm);
                         });
