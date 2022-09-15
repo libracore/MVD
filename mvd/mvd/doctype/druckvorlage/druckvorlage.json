@@ -30,6 +30,7 @@
   "h1",
   "seite_1a",
   "seite_1b",
+  "qrr_ez_folgeseite_mahnung",
   "seite_1_qrr",
   "seite_1_qrr_spende_hv",
   "seite_1_ausweis",
@@ -383,9 +384,16 @@
    "fieldtype": "Select",
    "label": "Empf\u00e4nger",
    "options": "Schenkende*r\nBeschenkte*r"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.dokument=='Mahnung'",
+   "fieldname": "qrr_ez_folgeseite_mahnung",
+   "fieldtype": "Check",
+   "label": "QRR EZ auf Folgeseite verschieben"
   }
  ],
- "modified": "2022-08-30 10:32:08.540894",
+ "modified": "2022-09-15 09:12:09.430498",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",
