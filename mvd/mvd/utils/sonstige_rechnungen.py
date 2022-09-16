@@ -52,7 +52,7 @@ def create_rechnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, 
     rechnungs_artikel = json.loads(rechnungs_artikel)
     for item in rechnungs_artikel:
         del item['__islocal']
-        item['qty'] = 1
+        #item['qty'] = 1
         item['cost_center'] = company.cost_center
     item = rechnungs_artikel
     
