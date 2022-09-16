@@ -2176,7 +2176,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         rechnungs_artikel = json.loads(rechnungs_artikel)
         for item in rechnungs_artikel:
             del item['__islocal']
-            item['qty'] = 1
+            # ~ item['qty'] = 1
             item['cost_center'] = company.cost_center
         item = rechnungs_artikel
         # ~ frappe.throw(rechnungs_artikel)

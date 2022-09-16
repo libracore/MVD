@@ -152,7 +152,8 @@ function erstelle_rechnung_sonstiges(frm) {
                             label: __('Item Code'),
                             change: function() {
                                 if (this.get_value()) {
-                                    var rate_field = this.grid_row.on_grid_fields[1]
+                                    var rate_field = this.grid_row.on_grid_fields[2];
+                                    var qty_field = this.grid_row.on_grid_fields[1];
                                     frappe.call({
                                         method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
                                         args:{
@@ -161,6 +162,7 @@ function erstelle_rechnung_sonstiges(frm) {
                                         callback: function(r)
                                         {
                                             rate_field.set_value(r.message);
+                                            qty_field.set_value(1);
                                         }
                                     });
                                 }
@@ -168,6 +170,14 @@ function erstelle_rechnung_sonstiges(frm) {
                             get_query: function() {
                                 return { 'filters': { 'mitgliedschaftsspezifischer_artikel': 0 } };
                             }
+                        },
+                        {
+                            fieldtype:'Int',
+                            fieldname:"qty",
+                            in_list_view: 1,
+                            read_only: 0,
+                            label: __('Qty'),
+                            reqd: 1
                         },
                         {
                             fieldtype:'Currency',
