@@ -91,7 +91,8 @@ hm = {
     'retoure_mw_sequence_number': 'retoure_mw_sequence_number',
     'retoure_dmc': 'retoure_dmc',
     'retoure_sendungsbild': 'retoure_sendungsbild',
-    'datum_erfasst_post': 'datum_erfasst_post'
+    'datum_erfasst_post': 'datum_erfasst_post',
+    'jahr': 'jahr'
 }
 
 def read_csv(site_name, file_name, limit=False):
@@ -1548,3 +1549,63 @@ def korrektur_retouren():
     
     frappe.db.commit()
     print("Done")
+
+# --------------------------------------------------------------
+# Korrektur HV Jahre
+# --------------------------------------------------------------
+def korrektur_hv_years(site_name, file_name, limit=False):
+    '''
+        Example:
+        sudo bench execute mvd.mvd.data_import.importer.korrektur_hv_years --kwargs "{'site_name': 'site1.local', 'file_name': 'faktura_202209160956.csv'}"
+    '''
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    submit_counter = 1
+    max_loop = limit
+    corrections = 'Korrekturen:'
+    not_founds = 'Mitgliedschaften nicht vorhanden:'
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            try:
+                ms = frappe.get_doc("Mitgliedschaft", get_value(row, 'mitglied_id'))
+                if not ms.zahlung_hv or int(ms.zahlung_hv) < int(get_value(row, 'jahr')):
+                    corrections += '\n{mitglied_id}, {alt}, {neu}'.format(mitglied_id=ms.name, alt=ms.zahlung_hv, neu=int(get_value(row, 'jahr')))
+                    ms.zahlung_hv = int(get_value(row, 'jahr'))
+                    ms.save()
+                    if ms.wegzug:
+                        ms2 = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `mitglied_nr` = '{mitglied_nr}' AND `sektion_id` = '{sektion_id}' LIMIT 1""".format(mitglied_nr=ms.mitglied_nr, sektion_id=ms.sektion_id), as_dict=True)
+                        if len(ms2) > 0:
+                            ms2 = frappe.get_doc("Mitgliedschaft", ms2[0].name)
+                            if not ms2.zahlung_hv or int(ms2.zahlung_hv) < int(get_value(row, 'jahr')):
+                                corrections += '\n{mitglied_id}, {alt}, {neu}'.format(mitglied_id=ms2.name, alt=ms2.zahlung_hv, neu=int(get_value(row, 'jahr')))
+                                ms2.zahlung_hv = int(get_value(row, 'jahr'))
+                                ms2.save()
+                if submit_counter == 100:
+                    frappe.db.commit()
+                    submit_counter = 1
+                else:
+                    submit_counter += 1
+            
+            except Exception as err:
+                if frappe.DoesNotExistError:
+                    not_founds += '\n{0}'.format(get_value(row, 'mitglied_id'))
+                else:
+                    frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, row, frappe.utils.get_traceback()), 'korrektur_hv_years konnte nicht durchgeführt werden')
+            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+            count += 1
+        else:
+            break
+    frappe.log_error("{0}".format(corrections), 'Korrekturen')
+    frappe.log_error("{0}".format(not_founds), 'not_founds')
+    frappe.db.commit()
