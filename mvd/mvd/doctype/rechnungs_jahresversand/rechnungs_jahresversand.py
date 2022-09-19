@@ -6,13 +6,15 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils.csvutils import to_csv as make_csv
-from frappe.utils.data import now
+from frappe.utils.data import now, getdate
 from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung
 from frappe.utils.background_jobs import enqueue
 
 class RechnungsJahresversand(Document):
-    pass
+    def before_save(self):
+        if not self.jahr:
+            self.jahr = int(getdate(now()).strftime("%Y")) + 1
 
 @frappe.whitelist()
 def get_draft_csv(jahresversand=None):

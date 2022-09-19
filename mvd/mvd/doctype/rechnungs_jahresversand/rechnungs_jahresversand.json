@@ -28,7 +28,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Jahresversand f\u00fcr Jahr",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "cb_1",
@@ -54,7 +54,8 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Vorgemerkt\nIn Arbeit\nAbgeschlossen\nFehlgeschlagen\nStorniert"
+   "options": "Vorgemerkt\nIn Arbeit\nAbgeschlossen\nFehlgeschlagen\nStorniert",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.status=='Abgeschlossen'",
@@ -64,7 +65,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-09-02 14:44:21.078189",
+ "modified": "2022-09-19 16:01:34.923900",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Rechnungs Jahresversand",
