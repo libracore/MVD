@@ -1,4 +1,5 @@
 {
+ "autoname": "format:Inaktivierung-{#####}",
  "creation": "2022-07-11 13:46:13.744880",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -54,7 +55,7 @@
   {
    "fieldname": "section_selektion",
    "fieldtype": "Section Break",
-   "label": "Selektion"
+   "label": "Selektionskriterien"
   },
   {
    "default": "1",
@@ -90,7 +91,7 @@
   {
    "fieldname": "hinweis",
    "fieldtype": "HTML",
-   "options": "<p>Hinweis f\u00fcr Massenlauf Inaktivierung:</p>\n<ol><li>Kriterien w\u00e4hlen</li><li>Speichern dr\u00fccken</li><li>--&gt; Resultat wird angezeigt</li><li>Liste bereinigen</li><li>Buchen dr\u00fccken, Ausschliessungen werden durch das Buchen ausgef\u00fchrt</li></ol>\n<p>Tipp: Um neu zu beginnen, k\u00f6nnen alle Zeilen gel\u00f6scht werden und dann mit Speichern neu geladen werden.</p>"
+   "options": "<p>Hinweis f\u00fcr Massenlauf Inaktivierung:</p>\n<ol><li>Kriterien w\u00e4hlen</li><li>Speichern dr\u00fccken</li><li>--&gt; Resultat wird angezeigt</li><li>Liste bereinigen</li><li>Buchen dr\u00fccken, Ausschl\u00fcsse werden durch das Buchen ausgef\u00fchrt</li></ol>\n<p>Tipp: Um neu zu beginnen, k\u00f6nnen alle Zeilen gel\u00f6scht werden und dann mit Speichern neu geladen werden.</p>"
   },
   {
    "allow_on_submit": 1,
@@ -104,11 +105,11 @@
    "default": "1",
    "fieldname": "rg_storno",
    "fieldtype": "Check",
-   "label": "Austehende Jahresrechnung des akutellen Kalenderjahres stornieren"
+   "label": "Ausstehende Jahresrechnung des aktuellen Kalenderjahres stornieren"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-09-08 12:33:57.460440",
+ "modified": "2022-09-19 15:32:14.342133",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Massenlauf Inaktivierung",
