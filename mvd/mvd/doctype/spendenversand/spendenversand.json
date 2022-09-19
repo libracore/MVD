@@ -32,7 +32,7 @@
    "default": "1",
    "fieldname": "sektionsspezifisch",
    "fieldtype": "Check",
-   "label": "Sektions spezifisch",
+   "label": "Sektion",
    "read_only": 1
   },
   {
@@ -52,7 +52,7 @@
    "default": "0",
    "fieldname": "sprachspezifisch",
    "fieldtype": "Check",
-   "label": "Sprach spezifisch"
+   "label": "Sprache"
   },
   {
    "default": "de",
@@ -70,7 +70,7 @@
    "default": "0",
    "fieldname": "mitgliedtypspezifisch",
    "fieldtype": "Check",
-   "label": "Mitgliedtyp spezifisch"
+   "label": "Mitgliedtyp"
   },
   {
    "depends_on": "eval:doc.mitgliedtypspezifisch",
@@ -109,7 +109,7 @@
    "default": "0",
    "fieldname": "regionsspezifisch",
    "fieldtype": "Check",
-   "label": "Regions spezifisch"
+   "label": "Region"
   },
   {
    "depends_on": "eval:doc.regionsspezifisch",
@@ -132,7 +132,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-08-25 11:45:25.612662",
+ "modified": "2022-09-19 15:33:57.174380",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Spendenversand",
