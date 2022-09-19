@@ -429,7 +429,8 @@ class Mitgliedschaft(Document):
                     if sinv.docstatus == 0:
                         sinv.delete()
         
-        self.letzte_bearbeitung_von = 'User'
+        # hotfix aufgrund endlessloop zwischen ERPNext und SP
+        # ~ self.letzte_bearbeitung_von = 'User'
         
         return
     
@@ -459,7 +460,9 @@ class Mitgliedschaft(Document):
                     sinv_year = sinv.mitgliedschafts_jahr if sinv.mitgliedschafts_jahr and sinv.mitgliedschafts_jahr > 0 else getdate(pe.reference_date).strftime("%Y")
                     self.datum_hv_zahlung = pe.reference_date
             self.zahlung_hv = sinv_year
-            self.letzte_bearbeitung_von = 'User'
+            
+            # hotfix aufgrund endlessloop zwischen ERPNext und SP
+            # ~ self.letzte_bearbeitung_von = 'User'
         
         return
         
