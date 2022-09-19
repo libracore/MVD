@@ -54,10 +54,14 @@ class Mitgliedschaft(Document):
             self.rg_adressblock = get_rg_adressblock(self)
             
             # update Zahlung Mitgliedschaft
-            self.check_zahlung_mitgliedschaft()
+            # hotfix aufgrund endlessloop zwischen ERPNext und SP
+            if self.letzte_bearbeitung_von == 'User':
+                self.check_zahlung_mitgliedschaft()
             
             # update Zahlung HV
-            self.check_zahlung_hv()
+            # hotfix aufgrund endlessloop zwischen ERPNext und SP
+            if self.letzte_bearbeitung_von == 'User':
+                self.check_zahlung_hv()
             
             # preisregel
             self.check_preisregel()
@@ -429,8 +433,7 @@ class Mitgliedschaft(Document):
                     if sinv.docstatus == 0:
                         sinv.delete()
         
-        # hotfix aufgrund endlessloop zwischen ERPNext und SP
-        # ~ self.letzte_bearbeitung_von = 'User'
+        self.letzte_bearbeitung_von = 'User'
         
         return
     
@@ -461,8 +464,7 @@ class Mitgliedschaft(Document):
                     self.datum_hv_zahlung = pe.reference_date
             self.zahlung_hv = sinv_year
             
-            # hotfix aufgrund endlessloop zwischen ERPNext und SP
-            # ~ self.letzte_bearbeitung_von = 'User'
+            self.letzte_bearbeitung_von = 'User'
         
         return
         
