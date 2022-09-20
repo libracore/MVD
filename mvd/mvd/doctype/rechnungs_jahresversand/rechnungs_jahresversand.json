@@ -1,18 +1,25 @@
 {
- "allow_rename": 1,
- "autoname": "format:Jahresversand-{sektion_id}-{jahr}",
+ "allow_copy": 1,
+ "autoname": "format:Jahresversand-{#####}",
  "creation": "2022-09-01 12:56:55.516866",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "title",
   "sektion_id",
   "jahr",
   "cb_1",
   "status",
   "download_draft",
   "rechnungen_stornieren",
-  "amended_from"
+  "amended_from",
+  "section_selektionskriterien",
+  "sprach_spezifisch",
+  "language",
+  "cb_2",
+  "mitgliedtyp_spezifisch",
+  "mitgliedtyp"
  ],
  "fields": [
   {
@@ -62,10 +69,51 @@
    "fieldname": "rechnungen_stornieren",
    "fieldtype": "Button",
    "label": "Rechnungen stonieren"
+  },
+  {
+   "fieldname": "section_selektionskriterien",
+   "fieldtype": "Section Break",
+   "label": "Selektionskriterien"
+  },
+  {
+   "default": "0",
+   "fieldname": "sprach_spezifisch",
+   "fieldtype": "Check",
+   "label": "Sprache"
+  },
+  {
+   "depends_on": "eval:doc.sprach_spezifisch",
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Sprache",
+   "options": "Language"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "mitgliedtyp_spezifisch",
+   "fieldtype": "Check",
+   "label": "Mitgliedtyp"
+  },
+  {
+   "depends_on": "eval:doc.mitgliedtyp_spezifisch",
+   "fieldname": "mitgliedtyp",
+   "fieldtype": "Select",
+   "label": "Mitgliedtyp",
+   "options": "Privat\nGesch\u00e4ft"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-09-19 16:01:34.923900",
+ "modified": "2022-09-20 14:35:29.547471",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Rechnungs Jahresversand",
@@ -86,5 +134,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "title",
  "track_changes": 1
 }
