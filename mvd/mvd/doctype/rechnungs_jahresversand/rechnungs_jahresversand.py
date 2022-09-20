@@ -87,189 +87,99 @@ def get_draft_csv(jahresversand=None):
     
     for _mitgliedschaft in mitgliedschaften:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", _mitgliedschaft.name)
-        row_data = []
-        pseudo_zeile = False
         
-        if mitgliedschaft.unabhaengiger_debitor and mitgliedschaft.abweichende_rechnungsadresse:
-            # fremdzahler
-            if mitgliedschaft.rg_kundentyp == 'Unternehmen':
-                row_data.append(mitgliedschaft.rg_firma or '')
-                row_data.append(mitgliedschaft.rg_zusatz_firma or '')
-            else:
-                row_data.append("")
-                row_data.append("")
-            row_data.append(mitgliedschaft.rg_anrede or '')
-            row_data.append(mitgliedschaft.rg_vorname or '')
-            row_data.append(mitgliedschaft.rg_nachname or '')
-            row_data.append("")
-            row_data.append("")
-        else:
-            # selbstzahler
-            if mitgliedschaft.kundentyp == 'Unternehmen':
-                row_data.append(mitgliedschaft.firma or '')
-                row_data.append(mitgliedschaft.zusatz_firma or '')
-            else:
-                row_data.append("")
-                row_data.append("")
-            row_data.append(mitgliedschaft.anrede_c or '')
-            row_data.append(mitgliedschaft.vorname_1 or '')
-            row_data.append(mitgliedschaft.nachname_1 or '')
-            if mitgliedschaft.hat_solidarmitglied:
-                row_data.append(mitgliedschaft.vorname_2 or '')
-                row_data.append(mitgliedschaft.nachname_2 or '')
-            else:
-                row_data.append("")
-                row_data.append("")
+        # ------------------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------------
+        '''
+            Geschenkmitgliedschaften sowie Gratis Mitgliedschaften werden NICHT berücksichtigt
+        '''
+        # ------------------------------------------------------------------------------------
+        skip = False
+        if mitgliedschaft.ist_geschenkmitgliedschaft:
+            skip = True
+        if mitgliedschaft.reduzierte_mitgliedschaft and not mitgliedschaft.reduzierter_betrag > 0:
+            skip = True
+        # ------------------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------------
         
-        if mitgliedschaft.abweichende_rechnungsadresse:
-            row_data.append(mitgliedschaft.rg_zusatz_adresse or '')
-            strasse = ''
-            strasse += mitgliedschaft.rg_strasse or ''
-            strasse += " " + str(mitgliedschaft.rg_nummer or '')
-            strasse += mitgliedschaft.rg_nummer_zu or ''
-            row_data.append(strasse)
-            if mitgliedschaft.rg_postfach:
-                row_data.append(mitgliedschaft.rg_postfach_nummer or '')
-                row_data.append("")
-                row_data.append("")
-            else:
-                row_data.append("")
-                row_data.append("")
-                row_data.append("")
-            row_data.append(mitgliedschaft.rg_plz or '')
-            row_data.append(mitgliedschaft.rg_ort or '')
-        else:
-            row_data.append(mitgliedschaft.zusatz_adresse or '')
-            strasse = ''
-            strasse += mitgliedschaft.strasse or ''
-            strasse += " " + str(mitgliedschaft.nummer or '')
-            strasse += mitgliedschaft.nummer_zu or ''
-            row_data.append(strasse)
-            if mitgliedschaft.postfach:
-                row_data.append(mitgliedschaft.postfach_nummer or '')
-                row_data.append("")
-                row_data.append("")
-            else:
-                row_data.append("")
-                row_data.append("")
-                row_data.append("")
-            row_data.append(mitgliedschaft.plz or '')
-            row_data.append(mitgliedschaft.ort or '')
-        
-        row_data.append(get_invcoice_amount(mitgliedschaft, sektion))
-        row_data.append('Entwurfsdaten')
-        row_data.append('')
-        row_data.append(get_hv_rate(mitgliedschaft, sektion))
-        row_data.append('Entwurfsdaten')
-        row_data.append('')
-        row_data.append('Entwurfsdaten')
-        
-        row_data.append(mitgliedschaft.mitglied_nr or '')
-        row_data.append(jahresversand.jahr or '')
-        row_data.append(mitgliedschaft.mitgliedtyp_c or '')
-        row_data.append(mitgliedschaft.sektion_id or '')
-        row_data.append('')
-        row_data.append('')
-        row_data.append(mitgliedschaft.e_mail_1 or '')
-        row_data.append(mitgliedschaft.e_mail_2 or '')
-        row_data.append('')
-        row_data.append(mitgliedschaft.vorname_1 or '')
-        row_data.append(mitgliedschaft.nachname_1 or '')
-        
-        if mitgliedschaft.hat_solidarmitglied:
-            row_data.append(mitgliedschaft.vorname_2 or '')
-            row_data.append(mitgliedschaft.nachname_2 or '')
-        else:
-            row_data.append("")
-            row_data.append("")
-        
-        if mitgliedschaft.unabhaengiger_debitor:
-            pseudo_zeile = True
-            if mitgliedschaft.kundentyp == 'Unternehmen':
-                # bezahlt_fuer_firma
-                bezahlt_fuer_firma = mitgliedschaft.firma or ''
-                bezahlt_fuer_firma += ' ' if mitgliedschaft.firma else ''
-                bezahlt_fuer_firma += mitgliedschaft.zusatz_firma or ''
-                row_data.append(bezahlt_fuer_firma)
-                # bezahlt_fuer_name
-                bezahlt_fuer_name = mitgliedschaft.anrede_c or ''
-                bezahlt_fuer_name += ' ' if mitgliedschaft.anrede_c else ''
-                bezahlt_fuer_name += mitgliedschaft.vorname_1 or ''
-                bezahlt_fuer_name += ' ' if mitgliedschaft.vorname_1 else ''
-                bezahlt_fuer_name += mitgliedschaft.nachname_1 or ''
-                row_data.append(bezahlt_fuer_name)
-            else:
-                # bezahlt_fuer_name
-                row_data.append('')
-                bezahlt_fuer_name = mitgliedschaft.anrede_c or ''
-                bezahlt_fuer_name += ' ' if mitgliedschaft.anrede_c else ''
-                bezahlt_fuer_name += mitgliedschaft.vorname_1 or ''
-                bezahlt_fuer_name += ' ' if mitgliedschaft.vorname_1 else ''
-                bezahlt_fuer_name += mitgliedschaft.nachname_1 or ''
-                row_data.append(bezahlt_fuer_name)
-        else:
-            # bezahlt_fuer_firma
-            row_data.append('')
-            # bezahlt_fuer_name
-            row_data.append('')
-        
-        # bezahlt_von_firma
-        row_data.append('')
-        # bezahlt_von_name
-        row_data.append('')
-        
-        if pseudo_zeile:
-            if mitgliedschaft.ist_geschenkmitgliedschaft:
-                row_data.append('Geschenkmitgliedschaft')
-            else:
-                row_data.append('Unabhängiger Debitor')
-        else:
-            row_data.append('')
-        
-        data.append(row_data)
-        
-        if pseudo_zeile:
+        if not skip:
             row_data = []
-            if mitgliedschaft.kundentyp == 'Unternehmen':
-                row_data.append(mitgliedschaft.firma or '')
-                row_data.append(mitgliedschaft.zusatz_firma or '')
-            else:
-                row_data.append("")
-                row_data.append("")
-            row_data.append(mitgliedschaft.anrede_c or '')
-            row_data.append(mitgliedschaft.vorname_1 or '')
-            row_data.append(mitgliedschaft.nachname_1 or '')
-            if mitgliedschaft.hat_solidarmitglied:
-                row_data.append(mitgliedschaft.vorname_2 or '')
-                row_data.append(mitgliedschaft.nachname_2 or '')
-            else:
-                row_data.append("")
-                row_data.append("")
-        
-            row_data.append(mitgliedschaft.zusatz_adresse or '')
-            strasse = ''
-            strasse += mitgliedschaft.strasse or ''
-            strasse += " " + str(mitgliedschaft.nummer or '')
-            strasse += mitgliedschaft.nummer_zu or ''
-            row_data.append(strasse)
-            if mitgliedschaft.postfach:
-                row_data.append(mitgliedschaft.postfach_nummer or '')
-                row_data.append("")
-                row_data.append("")
-            else:
-                row_data.append("")
-                row_data.append("")
-                row_data.append("")
-            row_data.append(mitgliedschaft.plz or '')
-            row_data.append(mitgliedschaft.ort or '')
+            pseudo_zeile = False
             
-            row_data.append('--')
-            row_data.append('--')
-            row_data.append('--')
-            row_data.append('--')
-            row_data.append('--')
-            row_data.append('--')
-            row_data.append('--')
+            if mitgliedschaft.unabhaengiger_debitor and mitgliedschaft.abweichende_rechnungsadresse:
+                # fremdzahler
+                if mitgliedschaft.rg_kundentyp == 'Unternehmen':
+                    row_data.append(mitgliedschaft.rg_firma or '')
+                    row_data.append(mitgliedschaft.rg_zusatz_firma or '')
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                row_data.append(mitgliedschaft.rg_anrede or '')
+                row_data.append(mitgliedschaft.rg_vorname or '')
+                row_data.append(mitgliedschaft.rg_nachname or '')
+                row_data.append("")
+                row_data.append("")
+            else:
+                # selbstzahler
+                if mitgliedschaft.kundentyp == 'Unternehmen':
+                    row_data.append(mitgliedschaft.firma or '')
+                    row_data.append(mitgliedschaft.zusatz_firma or '')
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                row_data.append(mitgliedschaft.anrede_c or '')
+                row_data.append(mitgliedschaft.vorname_1 or '')
+                row_data.append(mitgliedschaft.nachname_1 or '')
+                if mitgliedschaft.hat_solidarmitglied:
+                    row_data.append(mitgliedschaft.vorname_2 or '')
+                    row_data.append(mitgliedschaft.nachname_2 or '')
+                else:
+                    row_data.append("")
+                    row_data.append("")
+            
+            if mitgliedschaft.abweichende_rechnungsadresse:
+                row_data.append(mitgliedschaft.rg_zusatz_adresse or '')
+                strasse = ''
+                strasse += mitgliedschaft.rg_strasse or ''
+                strasse += " " + str(mitgliedschaft.rg_nummer or '')
+                strasse += mitgliedschaft.rg_nummer_zu or ''
+                row_data.append(strasse)
+                if mitgliedschaft.rg_postfach:
+                    row_data.append(mitgliedschaft.rg_postfach_nummer or '')
+                    row_data.append("")
+                    row_data.append("")
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                    row_data.append("")
+                row_data.append(mitgliedschaft.rg_plz or '')
+                row_data.append(mitgliedschaft.rg_ort or '')
+            else:
+                row_data.append(mitgliedschaft.zusatz_adresse or '')
+                strasse = ''
+                strasse += mitgliedschaft.strasse or ''
+                strasse += " " + str(mitgliedschaft.nummer or '')
+                strasse += mitgliedschaft.nummer_zu or ''
+                row_data.append(strasse)
+                if mitgliedschaft.postfach:
+                    row_data.append(mitgliedschaft.postfach_nummer or '')
+                    row_data.append("")
+                    row_data.append("")
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                    row_data.append("")
+                row_data.append(mitgliedschaft.plz or '')
+                row_data.append(mitgliedschaft.ort or '')
+            
+            row_data.append(get_invcoice_amount(mitgliedschaft, sektion))
+            row_data.append('Entwurfsdaten')
+            row_data.append('')
+            row_data.append(get_hv_rate(mitgliedschaft, sektion))
+            row_data.append('Entwurfsdaten')
+            row_data.append('')
+            row_data.append('Entwurfsdaten')
+            
             row_data.append(mitgliedschaft.mitglied_nr or '')
             row_data.append(jahresversand.jahr or '')
             row_data.append(mitgliedschaft.mitgliedtyp_c or '')
@@ -281,6 +191,7 @@ def get_draft_csv(jahresversand=None):
             row_data.append('')
             row_data.append(mitgliedschaft.vorname_1 or '')
             row_data.append(mitgliedschaft.nachname_1 or '')
+            
             if mitgliedschaft.hat_solidarmitglied:
                 row_data.append(mitgliedschaft.vorname_2 or '')
                 row_data.append(mitgliedschaft.nachname_2 or '')
@@ -288,40 +199,151 @@ def get_draft_csv(jahresversand=None):
                 row_data.append("")
                 row_data.append("")
             
-            # bezahlt_fuer_firma
-            row_data.append('')
-            # bezahlt_fuer_name
-            row_data.append('')
-            
-            if mitgliedschaft.rg_kundentyp == 'Unternehmen':
-                # bezahlt_von_firma
-                bezahlt_von_firma = mitgliedschaft.rg_firma or ''
-                bezahlt_von_firma += ' ' if mitgliedschaft.rg_firma else ''
-                bezahlt_von_firma += mitgliedschaft.rg_zusatz_firma or ''
-                row_data.append(bezahlt_von_firma)
-                # bezahlt_von_name
-                bezahlt_von_name = mitgliedschaft.rg_anrede or ''
-                bezahlt_von_name += ' ' if mitgliedschaft.rg_anrede else ''
-                bezahlt_von_name += mitgliedschaft.rg_vorname or ''
-                bezahlt_von_name += ' ' if mitgliedschaft.rg_vorname else ''
-                bezahlt_von_name += mitgliedschaft.rg_nachname or ''
-                row_data.append(bezahlt_von_name)
+            if mitgliedschaft.unabhaengiger_debitor:
+                pseudo_zeile = True
+                if mitgliedschaft.kundentyp == 'Unternehmen':
+                    # bezahlt_fuer_firma
+                    bezahlt_fuer_firma = mitgliedschaft.firma or ''
+                    bezahlt_fuer_firma += ' ' if mitgliedschaft.firma else ''
+                    bezahlt_fuer_firma += mitgliedschaft.zusatz_firma or ''
+                    row_data.append(bezahlt_fuer_firma)
+                    # bezahlt_fuer_name
+                    bezahlt_fuer_name = mitgliedschaft.anrede_c or ''
+                    bezahlt_fuer_name += ' ' if mitgliedschaft.anrede_c else ''
+                    bezahlt_fuer_name += mitgliedschaft.vorname_1 or ''
+                    bezahlt_fuer_name += ' ' if mitgliedschaft.vorname_1 else ''
+                    bezahlt_fuer_name += mitgliedschaft.nachname_1 or ''
+                    row_data.append(bezahlt_fuer_name)
+                else:
+                    # bezahlt_fuer_name
+                    row_data.append('')
+                    bezahlt_fuer_name = mitgliedschaft.anrede_c or ''
+                    bezahlt_fuer_name += ' ' if mitgliedschaft.anrede_c else ''
+                    bezahlt_fuer_name += mitgliedschaft.vorname_1 or ''
+                    bezahlt_fuer_name += ' ' if mitgliedschaft.vorname_1 else ''
+                    bezahlt_fuer_name += mitgliedschaft.nachname_1 or ''
+                    row_data.append(bezahlt_fuer_name)
             else:
-                # bezahlt_von_name
+                # bezahlt_fuer_firma
                 row_data.append('')
-                bezahlt_von_name = mitgliedschaft.rg_anrede or ''
-                bezahlt_von_name += ' ' if mitgliedschaft.rg_anrede else ''
-                bezahlt_von_name += mitgliedschaft.rg_vorname or ''
-                bezahlt_von_name += ' ' if mitgliedschaft.rg_vorname else ''
-                bezahlt_von_name += mitgliedschaft.rg_nachname or ''
-                row_data.append(bezahlt_von_name)
+                # bezahlt_fuer_name
+                row_data.append('')
             
-            if mitgliedschaft.ist_geschenkmitgliedschaft:
-                row_data.append('Geschenkmitgliedschaft')
+            # bezahlt_von_firma
+            row_data.append('')
+            # bezahlt_von_name
+            row_data.append('')
+            
+            if pseudo_zeile:
+                if mitgliedschaft.ist_geschenkmitgliedschaft:
+                    row_data.append('Geschenkmitgliedschaft')
+                else:
+                    row_data.append('Unabhängiger Debitor')
             else:
-                row_data.append('Unabhängiger Debitor')
+                if mitgliedschaft.reduzierte_mitgliedschaft:
+                    row_data.append('Reduzierte Mitgliedschaft')
+                else:
+                    row_data.append('')
             
             data.append(row_data)
+            
+            if pseudo_zeile:
+                row_data = []
+                if mitgliedschaft.kundentyp == 'Unternehmen':
+                    row_data.append(mitgliedschaft.firma or '')
+                    row_data.append(mitgliedschaft.zusatz_firma or '')
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                row_data.append(mitgliedschaft.anrede_c or '')
+                row_data.append(mitgliedschaft.vorname_1 or '')
+                row_data.append(mitgliedschaft.nachname_1 or '')
+                if mitgliedschaft.hat_solidarmitglied:
+                    row_data.append(mitgliedschaft.vorname_2 or '')
+                    row_data.append(mitgliedschaft.nachname_2 or '')
+                else:
+                    row_data.append("")
+                    row_data.append("")
+            
+                row_data.append(mitgliedschaft.zusatz_adresse or '')
+                strasse = ''
+                strasse += mitgliedschaft.strasse or ''
+                strasse += " " + str(mitgliedschaft.nummer or '')
+                strasse += mitgliedschaft.nummer_zu or ''
+                row_data.append(strasse)
+                if mitgliedschaft.postfach:
+                    row_data.append(mitgliedschaft.postfach_nummer or '')
+                    row_data.append("")
+                    row_data.append("")
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                    row_data.append("")
+                row_data.append(mitgliedschaft.plz or '')
+                row_data.append(mitgliedschaft.ort or '')
+                
+                row_data.append('--')
+                row_data.append('--')
+                row_data.append('--')
+                row_data.append('--')
+                row_data.append('--')
+                row_data.append('--')
+                row_data.append('--')
+                row_data.append(mitgliedschaft.mitglied_nr or '')
+                row_data.append(jahresversand.jahr or '')
+                row_data.append(mitgliedschaft.mitgliedtyp_c or '')
+                row_data.append(mitgliedschaft.sektion_id or '')
+                row_data.append('')
+                row_data.append('')
+                row_data.append(mitgliedschaft.e_mail_1 or '')
+                row_data.append(mitgliedschaft.e_mail_2 or '')
+                row_data.append('')
+                row_data.append(mitgliedschaft.vorname_1 or '')
+                row_data.append(mitgliedschaft.nachname_1 or '')
+                if mitgliedschaft.hat_solidarmitglied:
+                    row_data.append(mitgliedschaft.vorname_2 or '')
+                    row_data.append(mitgliedschaft.nachname_2 or '')
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                
+                # bezahlt_fuer_firma
+                row_data.append('')
+                # bezahlt_fuer_name
+                row_data.append('')
+                
+                if mitgliedschaft.rg_kundentyp == 'Unternehmen':
+                    # bezahlt_von_firma
+                    bezahlt_von_firma = mitgliedschaft.rg_firma or ''
+                    bezahlt_von_firma += ' ' if mitgliedschaft.rg_firma else ''
+                    bezahlt_von_firma += mitgliedschaft.rg_zusatz_firma or ''
+                    row_data.append(bezahlt_von_firma)
+                    # bezahlt_von_name
+                    bezahlt_von_name = mitgliedschaft.rg_anrede or ''
+                    bezahlt_von_name += ' ' if mitgliedschaft.rg_anrede else ''
+                    bezahlt_von_name += mitgliedschaft.rg_vorname or ''
+                    bezahlt_von_name += ' ' if mitgliedschaft.rg_vorname else ''
+                    bezahlt_von_name += mitgliedschaft.rg_nachname or ''
+                    row_data.append(bezahlt_von_name)
+                else:
+                    # bezahlt_von_name
+                    row_data.append('')
+                    bezahlt_von_name = mitgliedschaft.rg_anrede or ''
+                    bezahlt_von_name += ' ' if mitgliedschaft.rg_anrede else ''
+                    bezahlt_von_name += mitgliedschaft.rg_vorname or ''
+                    bezahlt_von_name += ' ' if mitgliedschaft.rg_vorname else ''
+                    bezahlt_von_name += mitgliedschaft.rg_nachname or ''
+                    row_data.append(bezahlt_von_name)
+                
+                if mitgliedschaft.ist_geschenkmitgliedschaft:
+                    row_data.append('Geschenkmitgliedschaft')
+                else:
+                    if mitgliedschaft.reduzierte_mitgliedschaft:
+                        row_data.append('Reduzierte Mitgliedschaft / Unabhängiger Debitor')
+                    else:
+                        row_data.append('Unabhängiger Debitor')
+                
+                data.append(row_data)
     
     csv_file = make_csv(data)
     file_name = "DRAFT_{titel}_{datetime}.csv".format(titel='Jahresversand-{sektion_id}-{jahr}'.format(sektion_id=jahresversand.sektion_id, jahr=jahresversand.jahr), datetime=now().replace(" ", "_"))
@@ -367,7 +389,10 @@ def create_invoices(jahresversand):
         filters += """ AND `mitgliedtyp_c` = '{mitgliedtyp}'""".format(mitgliedtyp=jahresversand.mitgliedtyp)
     
     mitgliedschaften = frappe.db.sql("""SELECT
-                                            `name`
+                                            `name`,
+                                            `ist_geschenkmitgliedschaft`,
+                                            `reduzierte_mitgliedschaft`,
+                                            `reduzierter_betrag`
                                         FROM `tabMitgliedschaft`
                                         WHERE `sektion_id` = '{sektion_id}'
                                         AND `status_c` = 'Regulär'
@@ -382,7 +407,22 @@ def create_invoices(jahresversand):
     
     try:
         for mitgliedschaft in mitgliedschaften:
-            sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=jahresversand.jahr, submit=True, ignore_stichtage=True, rechnungs_jahresversand=jahresversand.name)
+            # ------------------------------------------------------------------------------------
+            # ------------------------------------------------------------------------------------
+            '''
+                Geschenkmitgliedschaften sowie Gratis Mitgliedschaften werden NICHT berücksichtigt
+            '''
+            # ------------------------------------------------------------------------------------
+            skip = False
+            if int(mitgliedschaft.ist_geschenkmitgliedschaft) == 1:
+                skip = True
+            if int(mitgliedschaft.reduzierte_mitgliedschaft) == 1 and not mitgliedschaft.reduzierter_betrag > 0:
+                skip = True
+            # ------------------------------------------------------------------------------------
+            # ------------------------------------------------------------------------------------
+            
+            if not skip:
+                sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=jahresversand.jahr, submit=True, ignore_stichtage=True, rechnungs_jahresversand=jahresversand.name)
         
         frappe.db.commit()
         get_csv(jahresversand.name)
@@ -448,199 +488,109 @@ def get_csv(jahresversand):
     
     for rechnung in rechnungen:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", rechnung.mv_mitgliedschaft)
-        row_data = []
-        pseudo_zeile = False
         
-        if mitgliedschaft.unabhaengiger_debitor and mitgliedschaft.abweichende_rechnungsadresse:
-            # fremdzahler
-            if mitgliedschaft.rg_kundentyp == 'Unternehmen':
-                row_data.append(mitgliedschaft.rg_firma or '')
-                row_data.append(mitgliedschaft.rg_zusatz_firma or '')
-            else:
-                row_data.append("")
-                row_data.append("")
-            row_data.append(mitgliedschaft.rg_anrede or '')
-            row_data.append(mitgliedschaft.rg_vorname or '')
-            row_data.append(mitgliedschaft.rg_nachname or '')
-            row_data.append("")
-            row_data.append("")
-        else:
-            # selbstzahler
-            if mitgliedschaft.kundentyp == 'Unternehmen':
-                row_data.append(mitgliedschaft.firma or '')
-                row_data.append(mitgliedschaft.zusatz_firma or '')
-            else:
-                row_data.append("")
-                row_data.append("")
-            row_data.append(mitgliedschaft.anrede_c or '')
-            row_data.append(mitgliedschaft.vorname_1 or '')
-            row_data.append(mitgliedschaft.nachname_1 or '')
-            if mitgliedschaft.hat_solidarmitglied:
-                row_data.append(mitgliedschaft.vorname_2 or '')
-                row_data.append(mitgliedschaft.nachname_2 or '')
-            else:
-                row_data.append("")
-                row_data.append("")
+        # ------------------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------------
+        '''
+            Geschenkmitgliedschaften sowie Gratis Mitgliedschaften werden NICHT berücksichtigt
+        '''
+        # ------------------------------------------------------------------------------------
+        skip = False
+        if mitgliedschaft.ist_geschenkmitgliedschaft:
+            skip = True
+        if mitgliedschaft.reduzierte_mitgliedschaft and not mitgliedschaft.reduzierter_betrag > 0:
+            skip = True
+        # ------------------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------------
         
-        if mitgliedschaft.abweichende_rechnungsadresse:
-            row_data.append(mitgliedschaft.rg_zusatz_adresse or '')
-            strasse = ''
-            strasse += mitgliedschaft.rg_strasse or ''
-            strasse += " " + str(mitgliedschaft.rg_nummer or '')
-            strasse += mitgliedschaft.rg_nummer_zu or ''
-            row_data.append(strasse)
-            if mitgliedschaft.rg_postfach:
-                row_data.append(mitgliedschaft.rg_postfach_nummer or '')
-                row_data.append("")
-                row_data.append("")
-            else:
-                row_data.append("")
-                row_data.append("")
-                row_data.append("")
-            row_data.append(mitgliedschaft.rg_plz or '')
-            row_data.append(mitgliedschaft.rg_ort or '')
-        else:
-            row_data.append(mitgliedschaft.zusatz_adresse or '')
-            strasse = ''
-            strasse += mitgliedschaft.strasse or ''
-            strasse += " " + str(mitgliedschaft.nummer or '')
-            strasse += mitgliedschaft.nummer_zu or ''
-            row_data.append(strasse)
-            if mitgliedschaft.postfach:
-                row_data.append(mitgliedschaft.postfach_nummer or '')
-                row_data.append("")
-                row_data.append("")
-            else:
-                row_data.append("")
-                row_data.append("")
-                row_data.append("")
-            row_data.append(mitgliedschaft.plz or '')
-            row_data.append(mitgliedschaft.ort or '')
-        
-        sinv = frappe.get_doc("Sales Invoice", rechnung.name)
-        hv_rechnungen = frappe.db.sql("""SELECT
-                                            `name`
-                                        FROM `tabFakultative Rechnung`
-                                        WHERE `sales_invoice` = '{sinv}'
-                                        AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
-        hv = False
-        if len(hv_rechnungen) > 0:
-            hv = frappe.get_doc("Fakultative Rechnung", hv_rechnungen[0].name)
-        
-        row_data.append(sinv.grand_total or '')
-        row_data.append(sinv.esr_reference or '')
-        row_data.append('')
-        row_data.append(hv.betrag if hv else '')
-        row_data.append(hv.qrr_referenz if hv else '')
-        row_data.append('')
-        row_data.append(sinv.name or '')
-        
-        row_data.append(mitgliedschaft.mitglied_nr or '')
-        row_data.append(jahresversand.jahr or '')
-        row_data.append(mitgliedschaft.mitgliedtyp_c or '')
-        row_data.append(mitgliedschaft.sektion_id or '')
-        row_data.append('')
-        row_data.append('')
-        row_data.append(mitgliedschaft.e_mail_1 or '')
-        row_data.append(mitgliedschaft.e_mail_2 or '')
-        row_data.append('')
-        row_data.append(mitgliedschaft.vorname_1 or '')
-        row_data.append(mitgliedschaft.nachname_1 or '')
-        
-        if mitgliedschaft.hat_solidarmitglied:
-            row_data.append(mitgliedschaft.vorname_2 or '')
-            row_data.append(mitgliedschaft.nachname_2 or '')
-        else:
-            row_data.append("")
-            row_data.append("")
-        
-        if mitgliedschaft.unabhaengiger_debitor:
-            pseudo_zeile = True
-            if mitgliedschaft.kundentyp == 'Unternehmen':
-                # bezahlt_fuer_firma
-                bezahlt_fuer_firma = mitgliedschaft.firma or ''
-                bezahlt_fuer_firma += ' ' if mitgliedschaft.firma else ''
-                bezahlt_fuer_firma += mitgliedschaft.zusatz_firma or ''
-                row_data.append(bezahlt_fuer_firma)
-                # bezahlt_fuer_name
-                bezahlt_fuer_name = mitgliedschaft.anrede_c or ''
-                bezahlt_fuer_name += ' ' if mitgliedschaft.anrede_c else ''
-                bezahlt_fuer_name += mitgliedschaft.vorname_1 or ''
-                bezahlt_fuer_name += ' ' if mitgliedschaft.vorname_1 else ''
-                bezahlt_fuer_name += mitgliedschaft.nachname_1 or ''
-                row_data.append(bezahlt_fuer_name)
-            else:
-                # bezahlt_fuer_name
-                row_data.append('')
-                bezahlt_fuer_name = mitgliedschaft.anrede_c or ''
-                bezahlt_fuer_name += ' ' if mitgliedschaft.anrede_c else ''
-                bezahlt_fuer_name += mitgliedschaft.vorname_1 or ''
-                bezahlt_fuer_name += ' ' if mitgliedschaft.vorname_1 else ''
-                bezahlt_fuer_name += mitgliedschaft.nachname_1 or ''
-                row_data.append(bezahlt_fuer_name)
-        else:
-            # bezahlt_fuer_firma
-            row_data.append('')
-            # bezahlt_fuer_name
-            row_data.append('')
-        
-        # bezahlt_von_firma
-        row_data.append('')
-        # bezahlt_von_name
-        row_data.append('')
-        
-        if pseudo_zeile:
-            if mitgliedschaft.ist_geschenkmitgliedschaft:
-                row_data.append('Geschenkmitgliedschaft')
-            else:
-                row_data.append('Unabhängiger Debitor')
-        else:
-            row_data.append('')
-        
-        data.append(row_data)
-        
-        if pseudo_zeile:
+        if not skip:
             row_data = []
-            if mitgliedschaft.kundentyp == 'Unternehmen':
-                row_data.append(mitgliedschaft.firma or '')
-                row_data.append(mitgliedschaft.zusatz_firma or '')
-            else:
-                row_data.append("")
-                row_data.append("")
-            row_data.append(mitgliedschaft.anrede_c or '')
-            row_data.append(mitgliedschaft.vorname_1 or '')
-            row_data.append(mitgliedschaft.nachname_1 or '')
-            if mitgliedschaft.hat_solidarmitglied:
-                row_data.append(mitgliedschaft.vorname_2 or '')
-                row_data.append(mitgliedschaft.nachname_2 or '')
-            else:
-                row_data.append("")
-                row_data.append("")
-        
-            row_data.append(mitgliedschaft.zusatz_adresse or '')
-            strasse = ''
-            strasse += mitgliedschaft.strasse or ''
-            strasse += " " + str(mitgliedschaft.nummer or '')
-            strasse += mitgliedschaft.nummer_zu or ''
-            row_data.append(strasse)
-            if mitgliedschaft.postfach:
-                row_data.append(mitgliedschaft.postfach_nummer or '')
-                row_data.append("")
-                row_data.append("")
-            else:
-                row_data.append("")
-                row_data.append("")
-                row_data.append("")
-            row_data.append(mitgliedschaft.plz or '')
-            row_data.append(mitgliedschaft.ort or '')
+            pseudo_zeile = False
             
-            row_data.append('--')
-            row_data.append('--')
-            row_data.append('--')
-            row_data.append('--')
-            row_data.append('--')
-            row_data.append('--')
-            row_data.append('--')
+            if mitgliedschaft.unabhaengiger_debitor and mitgliedschaft.abweichende_rechnungsadresse:
+                # fremdzahler
+                if mitgliedschaft.rg_kundentyp == 'Unternehmen':
+                    row_data.append(mitgliedschaft.rg_firma or '')
+                    row_data.append(mitgliedschaft.rg_zusatz_firma or '')
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                row_data.append(mitgliedschaft.rg_anrede or '')
+                row_data.append(mitgliedschaft.rg_vorname or '')
+                row_data.append(mitgliedschaft.rg_nachname or '')
+                row_data.append("")
+                row_data.append("")
+            else:
+                # selbstzahler
+                if mitgliedschaft.kundentyp == 'Unternehmen':
+                    row_data.append(mitgliedschaft.firma or '')
+                    row_data.append(mitgliedschaft.zusatz_firma or '')
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                row_data.append(mitgliedschaft.anrede_c or '')
+                row_data.append(mitgliedschaft.vorname_1 or '')
+                row_data.append(mitgliedschaft.nachname_1 or '')
+                if mitgliedschaft.hat_solidarmitglied:
+                    row_data.append(mitgliedschaft.vorname_2 or '')
+                    row_data.append(mitgliedschaft.nachname_2 or '')
+                else:
+                    row_data.append("")
+                    row_data.append("")
+            
+            if mitgliedschaft.abweichende_rechnungsadresse:
+                row_data.append(mitgliedschaft.rg_zusatz_adresse or '')
+                strasse = ''
+                strasse += mitgliedschaft.rg_strasse or ''
+                strasse += " " + str(mitgliedschaft.rg_nummer or '')
+                strasse += mitgliedschaft.rg_nummer_zu or ''
+                row_data.append(strasse)
+                if mitgliedschaft.rg_postfach:
+                    row_data.append(mitgliedschaft.rg_postfach_nummer or '')
+                    row_data.append("")
+                    row_data.append("")
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                    row_data.append("")
+                row_data.append(mitgliedschaft.rg_plz or '')
+                row_data.append(mitgliedschaft.rg_ort or '')
+            else:
+                row_data.append(mitgliedschaft.zusatz_adresse or '')
+                strasse = ''
+                strasse += mitgliedschaft.strasse or ''
+                strasse += " " + str(mitgliedschaft.nummer or '')
+                strasse += mitgliedschaft.nummer_zu or ''
+                row_data.append(strasse)
+                if mitgliedschaft.postfach:
+                    row_data.append(mitgliedschaft.postfach_nummer or '')
+                    row_data.append("")
+                    row_data.append("")
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                    row_data.append("")
+                row_data.append(mitgliedschaft.plz or '')
+                row_data.append(mitgliedschaft.ort or '')
+            
+            sinv = frappe.get_doc("Sales Invoice", rechnung.name)
+            hv_rechnungen = frappe.db.sql("""SELECT
+                                                `name`
+                                            FROM `tabFakultative Rechnung`
+                                            WHERE `sales_invoice` = '{sinv}'
+                                            AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
+            hv = False
+            if len(hv_rechnungen) > 0:
+                hv = frappe.get_doc("Fakultative Rechnung", hv_rechnungen[0].name)
+            
+            row_data.append(sinv.grand_total or '')
+            row_data.append(sinv.esr_reference or '')
+            row_data.append('')
+            row_data.append(hv.betrag if hv else '')
+            row_data.append(hv.qrr_referenz if hv else '')
+            row_data.append('')
+            row_data.append(sinv.name or '')
+            
             row_data.append(mitgliedschaft.mitglied_nr or '')
             row_data.append(jahresversand.jahr or '')
             row_data.append(mitgliedschaft.mitgliedtyp_c or '')
@@ -652,6 +602,7 @@ def get_csv(jahresversand):
             row_data.append('')
             row_data.append(mitgliedschaft.vorname_1 or '')
             row_data.append(mitgliedschaft.nachname_1 or '')
+            
             if mitgliedschaft.hat_solidarmitglied:
                 row_data.append(mitgliedschaft.vorname_2 or '')
                 row_data.append(mitgliedschaft.nachname_2 or '')
@@ -659,40 +610,151 @@ def get_csv(jahresversand):
                 row_data.append("")
                 row_data.append("")
             
-            # bezahlt_fuer_firma
-            row_data.append('')
-            # bezahlt_fuer_name
-            row_data.append('')
-            
-            if mitgliedschaft.rg_kundentyp == 'Unternehmen':
-                # bezahlt_von_firma
-                bezahlt_von_firma = mitgliedschaft.rg_firma or ''
-                bezahlt_von_firma += ' ' if mitgliedschaft.rg_firma else ''
-                bezahlt_von_firma += mitgliedschaft.rg_zusatz_firma or ''
-                row_data.append(bezahlt_von_firma)
-                # bezahlt_von_name
-                bezahlt_von_name = mitgliedschaft.rg_anrede or ''
-                bezahlt_von_name += ' ' if mitgliedschaft.rg_anrede else ''
-                bezahlt_von_name += mitgliedschaft.rg_vorname or ''
-                bezahlt_von_name += ' ' if mitgliedschaft.rg_vorname else ''
-                bezahlt_von_name += mitgliedschaft.rg_nachname or ''
-                row_data.append(bezahlt_von_name)
+            if mitgliedschaft.unabhaengiger_debitor:
+                pseudo_zeile = True
+                if mitgliedschaft.kundentyp == 'Unternehmen':
+                    # bezahlt_fuer_firma
+                    bezahlt_fuer_firma = mitgliedschaft.firma or ''
+                    bezahlt_fuer_firma += ' ' if mitgliedschaft.firma else ''
+                    bezahlt_fuer_firma += mitgliedschaft.zusatz_firma or ''
+                    row_data.append(bezahlt_fuer_firma)
+                    # bezahlt_fuer_name
+                    bezahlt_fuer_name = mitgliedschaft.anrede_c or ''
+                    bezahlt_fuer_name += ' ' if mitgliedschaft.anrede_c else ''
+                    bezahlt_fuer_name += mitgliedschaft.vorname_1 or ''
+                    bezahlt_fuer_name += ' ' if mitgliedschaft.vorname_1 else ''
+                    bezahlt_fuer_name += mitgliedschaft.nachname_1 or ''
+                    row_data.append(bezahlt_fuer_name)
+                else:
+                    # bezahlt_fuer_name
+                    row_data.append('')
+                    bezahlt_fuer_name = mitgliedschaft.anrede_c or ''
+                    bezahlt_fuer_name += ' ' if mitgliedschaft.anrede_c else ''
+                    bezahlt_fuer_name += mitgliedschaft.vorname_1 or ''
+                    bezahlt_fuer_name += ' ' if mitgliedschaft.vorname_1 else ''
+                    bezahlt_fuer_name += mitgliedschaft.nachname_1 or ''
+                    row_data.append(bezahlt_fuer_name)
             else:
-                # bezahlt_von_name
+                # bezahlt_fuer_firma
                 row_data.append('')
-                bezahlt_von_name = mitgliedschaft.rg_anrede or ''
-                bezahlt_von_name += ' ' if mitgliedschaft.rg_anrede else ''
-                bezahlt_von_name += mitgliedschaft.rg_vorname or ''
-                bezahlt_von_name += ' ' if mitgliedschaft.rg_vorname else ''
-                bezahlt_von_name += mitgliedschaft.rg_nachname or ''
-                row_data.append(bezahlt_von_name)
+                # bezahlt_fuer_name
+                row_data.append('')
             
-            if mitgliedschaft.ist_geschenkmitgliedschaft:
-                row_data.append('Geschenkmitgliedschaft')
+            # bezahlt_von_firma
+            row_data.append('')
+            # bezahlt_von_name
+            row_data.append('')
+            
+            if pseudo_zeile:
+                if mitgliedschaft.ist_geschenkmitgliedschaft:
+                    row_data.append('Geschenkmitgliedschaft')
+                else:
+                    row_data.append('Unabhängiger Debitor')
             else:
-                row_data.append('Unabhängiger Debitor')
+                if mitgliedschaft.reduzierte_mitgliedschaft:
+                    row_data.append('Reduzierte Mitgliedschaft')
+                else:
+                    row_data.append('')
             
             data.append(row_data)
+            
+            if pseudo_zeile:
+                row_data = []
+                if mitgliedschaft.kundentyp == 'Unternehmen':
+                    row_data.append(mitgliedschaft.firma or '')
+                    row_data.append(mitgliedschaft.zusatz_firma or '')
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                row_data.append(mitgliedschaft.anrede_c or '')
+                row_data.append(mitgliedschaft.vorname_1 or '')
+                row_data.append(mitgliedschaft.nachname_1 or '')
+                if mitgliedschaft.hat_solidarmitglied:
+                    row_data.append(mitgliedschaft.vorname_2 or '')
+                    row_data.append(mitgliedschaft.nachname_2 or '')
+                else:
+                    row_data.append("")
+                    row_data.append("")
+            
+                row_data.append(mitgliedschaft.zusatz_adresse or '')
+                strasse = ''
+                strasse += mitgliedschaft.strasse or ''
+                strasse += " " + str(mitgliedschaft.nummer or '')
+                strasse += mitgliedschaft.nummer_zu or ''
+                row_data.append(strasse)
+                if mitgliedschaft.postfach:
+                    row_data.append(mitgliedschaft.postfach_nummer or '')
+                    row_data.append("")
+                    row_data.append("")
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                    row_data.append("")
+                row_data.append(mitgliedschaft.plz or '')
+                row_data.append(mitgliedschaft.ort or '')
+                
+                row_data.append('--')
+                row_data.append('--')
+                row_data.append('--')
+                row_data.append('--')
+                row_data.append('--')
+                row_data.append('--')
+                row_data.append('--')
+                row_data.append(mitgliedschaft.mitglied_nr or '')
+                row_data.append(jahresversand.jahr or '')
+                row_data.append(mitgliedschaft.mitgliedtyp_c or '')
+                row_data.append(mitgliedschaft.sektion_id or '')
+                row_data.append('')
+                row_data.append('')
+                row_data.append(mitgliedschaft.e_mail_1 or '')
+                row_data.append(mitgliedschaft.e_mail_2 or '')
+                row_data.append('')
+                row_data.append(mitgliedschaft.vorname_1 or '')
+                row_data.append(mitgliedschaft.nachname_1 or '')
+                if mitgliedschaft.hat_solidarmitglied:
+                    row_data.append(mitgliedschaft.vorname_2 or '')
+                    row_data.append(mitgliedschaft.nachname_2 or '')
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                
+                # bezahlt_fuer_firma
+                row_data.append('')
+                # bezahlt_fuer_name
+                row_data.append('')
+                
+                if mitgliedschaft.rg_kundentyp == 'Unternehmen':
+                    # bezahlt_von_firma
+                    bezahlt_von_firma = mitgliedschaft.rg_firma or ''
+                    bezahlt_von_firma += ' ' if mitgliedschaft.rg_firma else ''
+                    bezahlt_von_firma += mitgliedschaft.rg_zusatz_firma or ''
+                    row_data.append(bezahlt_von_firma)
+                    # bezahlt_von_name
+                    bezahlt_von_name = mitgliedschaft.rg_anrede or ''
+                    bezahlt_von_name += ' ' if mitgliedschaft.rg_anrede else ''
+                    bezahlt_von_name += mitgliedschaft.rg_vorname or ''
+                    bezahlt_von_name += ' ' if mitgliedschaft.rg_vorname else ''
+                    bezahlt_von_name += mitgliedschaft.rg_nachname or ''
+                    row_data.append(bezahlt_von_name)
+                else:
+                    # bezahlt_von_name
+                    row_data.append('')
+                    bezahlt_von_name = mitgliedschaft.rg_anrede or ''
+                    bezahlt_von_name += ' ' if mitgliedschaft.rg_anrede else ''
+                    bezahlt_von_name += mitgliedschaft.rg_vorname or ''
+                    bezahlt_von_name += ' ' if mitgliedschaft.rg_vorname else ''
+                    bezahlt_von_name += mitgliedschaft.rg_nachname or ''
+                    row_data.append(bezahlt_von_name)
+                
+                if mitgliedschaft.ist_geschenkmitgliedschaft:
+                    row_data.append('Geschenkmitgliedschaft')
+                else:
+                    if mitgliedschaft.reduzierte_mitgliedschaft:
+                        row_data.append('Reduzierte Mitgliedschaft / Unabhängiger Debitor')
+                    else:
+                        row_data.append('Unabhängiger Debitor')
+                
+                data.append(row_data)
     
     csv_file = make_csv(data)
     file_name = "{titel}_{datetime}.csv".format(titel='Jahresversand-{sektion_id}-{jahr}'.format(sektion_id=jahresversand.sektion_id, jahr=jahresversand.jahr), datetime=now().replace(" ", "_"))
