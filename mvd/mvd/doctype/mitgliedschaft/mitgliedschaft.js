@@ -1118,6 +1118,7 @@ function erstelle_rechnung(frm) {
             },
             callback: function(r)
             {
+                console.log(r.message);
                 if (r.message == 1) {
                     var dokument = 'Anmeldung mit EZ';
                     if (cur_frm.doc.status_c == 'Interessent*in') {

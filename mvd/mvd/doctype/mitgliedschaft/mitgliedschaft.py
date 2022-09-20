@@ -3846,6 +3846,7 @@ def wieder_beitritt(mitgliedschaft):
 
 @frappe.whitelist()
 def check_erstelle_rechnung(mitgliedschaft, typ, sektion, jahr=False):
+    gratis_case = False
     if not jahr:
         jahr = int(getdate(today()).strftime("%Y"))
     else:
@@ -3854,15 +3855,19 @@ def check_erstelle_rechnung(mitgliedschaft, typ, sektion, jahr=False):
         gratis_bis_ende_jahr = frappe.get_value("Sektion", sektion, "gratis_bis_ende_jahr")
         gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(gratis_bis_ende_jahr).strftime("%d"))
         if getdate(today()) >= gratis_ab:
-            jahr += 1
-                    
-    vorhandene_rechnungen = frappe.db.sql("""SELECT
-                                                COUNT(`name`) AS `qty`
-                                            FROM `tabSales Invoice`
-                                            WHERE `docstatus` = 1
-                                            AND `ist_mitgliedschaftsrechnung` = 1
-                                            AND `mv_mitgliedschaft` = '{mitgliedschaft}'
-                                            AND `mitgliedschafts_jahr` = '{jahr}'""".format(mitgliedschaft=mitgliedschaft, jahr=jahr), as_dict=True)[0].qty
+            gratis_case = True
+    
+    if not gratis_case:
+        vorhandene_rechnungen = frappe.db.sql("""SELECT
+                                                    COUNT(`name`) AS `qty`
+                                                FROM `tabSales Invoice`
+                                                WHERE `docstatus` = 1
+                                                AND `ist_mitgliedschaftsrechnung` = 1
+                                                AND `mv_mitgliedschaft` = '{mitgliedschaft}'
+                                                AND `mitgliedschafts_jahr` = '{jahr}'""".format(mitgliedschaft=mitgliedschaft, jahr=jahr), as_dict=True)[0].qty
+    else:
+        vorhandene_rechnungen = 0
+    
     if vorhandene_rechnungen < 1:
         return 1
     else:
