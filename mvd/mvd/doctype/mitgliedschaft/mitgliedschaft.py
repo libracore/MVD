@@ -3850,11 +3850,6 @@ def check_erstelle_rechnung(mitgliedschaft, typ, sektion, jahr=False):
         jahr = int(getdate(today()).strftime("%Y"))
     else:
         jahr = int(jahr)
-    if typ == 'Privat':
-        gratis_bis_ende_jahr = frappe.get_value("Sektion", sektion, "gratis_bis_ende_jahr")
-        gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(gratis_bis_ende_jahr).strftime("%d"))
-        if getdate(today()) >= gratis_ab:
-            jahr += 1
                     
     vorhandene_rechnungen = frappe.db.sql("""SELECT
                                                 COUNT(`name`) AS `qty`
