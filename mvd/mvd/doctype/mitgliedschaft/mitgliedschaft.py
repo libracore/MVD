@@ -2208,7 +2208,8 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         "items": item,
         "druckvorlage": druckvorlage if druckvorlage else '',
         "exclude_from_payment_reminder_until": exclude_from_payment_reminder_until,
-        "rechnungs_jahresversand": rechnungs_jahresversand
+        "rechnungs_jahresversand": rechnungs_jahresversand,
+        "allocate_advances_automatically": 1 if rechnungs_jahresversand else 0
     })
     sinv.insert(ignore_permissions=True)
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
