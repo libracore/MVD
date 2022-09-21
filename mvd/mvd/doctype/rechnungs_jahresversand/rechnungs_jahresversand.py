@@ -583,7 +583,7 @@ def get_csv(jahresversand):
             if len(hv_rechnungen) > 0:
                 hv = frappe.get_doc("Fakultative Rechnung", hv_rechnungen[0].name)
             
-            row_data.append(sinv.grand_total or '')
+            row_data.append(sinv.outstanding_amount or 0.00)
             row_data.append(sinv.esr_reference or '')
             row_data.append('')
             row_data.append(hv.betrag if hv else '')

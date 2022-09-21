@@ -572,6 +572,12 @@ function kuendigung(frm) {
                                         if (entry.grund.split("Andere Gründe: ").length > 1) {
                                             abw_grund = entry.grund.split("Andere Gründe: ")[1];
                                         }
+                                    } else if (entry.idx == cur_frm.doc.status_change.length) {
+                                        if (entry.grund) {
+                                            default_grund = entry.grund;
+                                        } else {
+                                            default_grund = 'Keine Angabe';
+                                        }
                                     }
                                 } else if (entry.idx == cur_frm.doc.status_change.length) {
                                     if (entry.grund) {
