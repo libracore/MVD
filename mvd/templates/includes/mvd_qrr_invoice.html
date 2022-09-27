@@ -253,7 +253,6 @@
 {% if not qrr.payer_pincode %}{% set warning = 'payer_pincode Missing!' %}{% endif %}
 {% if not qrr.payer_town %}{% set warning = 'payer_town Missing!' %}{% endif %}
 {% if not qrr.currency %}{% set warning = 'currency Missing!' %}{% endif %}
-{% if not qrr.amount %}{% set warning = 'amount Missing!' %}{% endif %}
 {% if not qrr.message %}{% set warning = 'message Missing!' %}{% endif %}
 {% if not qrr.additional_information %}{% set warning = 'additional_information Missing!' %}{% endif %}
 
@@ -287,15 +286,19 @@
             <div id="empfangsschein_betrag">
                 <div id="empfangsschein_betrag_1">
                     <p class="betrag-e">
-                        <span class="ueberschrift-e">{{ _("Währung", qrr.language) }}</span><br>
+                        <span class="ueberschrift-e">{{ _("Währung", qrr.language) }}{% if not qrr.amount %}&nbsp;&nbsp;&nbsp;{{ _("Betrag", qrr.language) }}{% endif %}</span><br>
                         {{ qrr.currency }}
                     </p>
                 </div>
                 <div id="empfangsschein_betrag_2">
-                    <p class="betrag-e">
-                        <span class="ueberschrift-e">{{ _("Betrag", qrr.language) }}</span><br>
-                        {{ qrr.amount }}
-                    </p>
+                    {% if qrr.amount %}
+                        <p class="betrag-e">
+                            <span class="ueberschrift-e">{{ _("Betrag", qrr.language) }}</span><br>
+                            {{ qrr.amount }}
+                        </p>
+                    {% else %}
+                        <img src="/assets/mvd/img/Feld_Betrag_40x15mm.png"/>
+                    {% endif %}
                 </div>
             </div>
             <div id="empfangsschein_annahmestelle">
@@ -309,21 +312,26 @@
                 </div>
                 <div id="zahlteil_qr_platzhalter">
                     <div id="qr_code">
-                        <img src="https://data.libracore.ch/phpqrcode/api/iso20022.php?iban={{ qrr.iban | trim }}&receiver_name={{ _(qrr.receiver_name, qrr.language) }}&receiver_street={{ qrr.receiver_street | trim }}&receiver_number={{ qrr.receiver_number }}&receiver_pincode={{ qrr.receiver_pincode }}&receiver_town={{ qrr.receiver_town }}&receiver_country={{ qrr.receiver_country }}&amount={{ qrr.amount }}&currency={{ qrr.currency }}&payer_name={{ qrr.payer_name }}&payer_street={{ qrr.payer_street | trim }}&payer_number={{ qrr.payer_number }}&payer_pincode={{ qrr.payer_pincode }}&payer_town={{ qrr.payer_town }}&payer_country={{ qrr.payer_country }}&reference_type={{ qrr.reference_type }}&reference={{ qrr.reference | replace(" ", "") }}&message={{ qrr.message }}" style="width: 46mm !important; height: 46mm !important;" />
+                        <img src="https://data.libracore.ch/phpqrcode/api/iso20022.php?iban={{ qrr.iban | trim }}&receiver_name={{ _(qrr.receiver_name, qrr.language) }}&receiver_street={{ qrr.receiver_street | trim }}&receiver_number={{ qrr.receiver_number }}&receiver_pincode={{ qrr.receiver_pincode }}&receiver_town={{ qrr.receiver_town }}&receiver_country={{ qrr.receiver_country }}&amount={% if qrr.amount %}{{ qrr.amount }}{% else %}0{% endif %}&currency={{ qrr.currency }}&payer_name={{ qrr.payer_name }}&payer_street={{ qrr.payer_street | trim }}&payer_number={{ qrr.payer_number }}&payer_pincode={{ qrr.payer_pincode }}&payer_town={{ qrr.payer_town }}&payer_country={{ qrr.payer_country }}&reference_type={{ qrr.reference_type }}&reference={{ qrr.reference | replace(" ", "") }}&message={{ qrr.message }}" style="width: 46mm !important; height: 46mm !important;" />
                     </div>
                 </div>
                 <div id="zahlteil_betrag">
                     <div id="zahlteil_betrag_1">
                         <p>
-                            <span class="ueberschrift-z">{{ _("Währung", qrr.language) }}</span><br>
+                            <span class="ueberschrift-z">{{ _("Währung", qrr.language) }}{% if not qrr.amount %}&nbsp;&nbsp;&nbsp;{{ _("Betrag", qrr.language) }}{% endif %}</span><br>
                             <span class="betrag-z">{{ qrr.currency }}</span>
                         </p>
+                        {% if not qrr.amount %}
+                            <img style="margin-top: -20px; margin-left: 30px; max-width: 160% !important;" src="/assets/mvd/img/Feld_Betrag_40x15mm.png"/>
+                        {% endif %}
                     </div>
                     <div id="zahlteil_betrag_2">
-                        <p>
-                            <span class="ueberschrift-z">{{ _("Betrag", qrr.language) }}</span><br>
-                            <span class="betrag-z">{{ qrr.amount }}</span>
-                        </p>
+                        {% if qrr.amount %}
+                            <p>
+                                <span class="ueberschrift-z">{{ _("Betrag", qrr.language) }}</span><br>
+                                <span class="betrag-z">{{ qrr.amount }}</span>
+                            </p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
