@@ -381,7 +381,10 @@ def get_hv_rate(mitgliedschaft, sektion):
 
 def create_invoices(jahresversand):
     jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+    
     jahresversand_doc.add_comment('Comment', text='Beginne mit Rechnungserstellung...')
+    frappe.db.commit()
+    
     sektion = frappe.get_doc("Sektion", jahresversand_doc.sektion_id)
     filters = ''
     if int(jahresversand_doc.sprach_spezifisch) == 1:
@@ -426,11 +429,16 @@ def create_invoices(jahresversand):
                 sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=jahresversand_doc.jahr, submit=True, ignore_stichtage=True, rechnungs_jahresversand=jahresversand_doc.name)
         
         frappe.db.commit()
+        
         jahresversand_doc.add_comment('Comment', text='Rechnungen erstellt. Beginne mit CSV...')
+        frappe.db.commit()
+        
         get_csv(jahresversand)
+        
         jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
         jahresversand_doc.status = 'Abgeschlossen'
         jahresversand_doc.save()
+        
     except Exception as err:
         jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
         jahresversand_doc.status = 'Fehlgeschlagen'
@@ -776,6 +784,7 @@ def get_csv(jahresversand):
     _file.save()
     
     jahresversand.add_comment('Comment', text='CSV erstellt.')
+    frappe.db.commit()
     
     return 'done'
 
