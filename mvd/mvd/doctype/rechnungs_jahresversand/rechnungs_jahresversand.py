@@ -430,7 +430,7 @@ def create_invoices(jahresversand):
             loop = batch + 1
             args = {
                 'jahresversand': jahresversand,
-                'limit': 10,
+                'limit': 1000,
                 'loop': loop,
                 'last': False if loop < qty else True
             }
