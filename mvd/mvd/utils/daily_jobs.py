@@ -110,4 +110,4 @@ def rechnungs_jahresversand():
                 args = {
                     'jahresversand': lauf.name
                 }
-                enqueue("mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.create_invoices", queue='long', job_name='Rechnungs Jahresversand {0}'.format(lauf.name), timeout=5000, **args)
+                enqueue("mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.create_invoices", queue='long', job_name='Rechnungs Jahresversand {0}'.format(lauf.name), timeout=6000, **args)
