@@ -409,41 +409,107 @@ def create_invoices(jahresversand):
                                             AND `docstatus` = 1)
                                         {filters}""".format(sektion_id=jahresversand_doc.sektion_id, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters), as_dict=True)
     
-    try:
-        for mitgliedschaft in mitgliedschaften:
-            # ------------------------------------------------------------------------------------
-            # ------------------------------------------------------------------------------------
-            '''
-                Geschenkmitgliedschaften sowie Gratis Mitgliedschaften werden NICHT berücksichtigt
-            '''
-            # ------------------------------------------------------------------------------------
-            skip = False
-            if int(mitgliedschaft.ist_geschenkmitgliedschaft) == 1:
-                skip = True
-            if int(mitgliedschaft.reduzierte_mitgliedschaft) == 1 and not mitgliedschaft.reduzierter_betrag > 0:
-                skip = True
-            # ------------------------------------------------------------------------------------
-            # ------------------------------------------------------------------------------------
+    if len(mitgliedschaften) <= 1000:
+        jahresversand_doc.add_comment('Comment', text='Rechnungserstellung erfolgt in einem Batch (Menge <= 1000)...')
+        frappe.db.commit()
+        args = {
+            'jahresversand': jahresversand,
+            'limit': False,
+            'loop': False,
+            'last': True
+        }
+        enqueue("mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.create_invoices_one_batch", queue='long', job_name='Rechnungs Jahresversand {0}'.format(jahresversand), timeout=6000, **args)
+    else:
+        # calc 1000er batches
+        qty = int(len(mitgliedschaften)/1000) + 1
+        jahresversand_doc.add_comment('Comment', text='Rechnungserstellung erfolgt Batchweise ({0}) (Menge > 1000)...'.format(qty))
+        frappe.db.commit()
+        
+        batches = range(qty)
+        for batch in batches:
+            loop = batch + 1
+            args = {
+                'jahresversand': jahresversand,
+                'limit': 10,
+                'loop': loop,
+                'last': False if loop < qty else True
+            }
+            enqueue("mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.create_invoices_one_batch", queue='long', job_name='Rechnungs Jahresversand {0} Batch {1}'.format(jahresversand, loop), timeout=6000, **args)
+        
+    return
+
+def create_invoices_one_batch(jahresversand, limit=False, loop=False, last=False):
+    jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+    if jahresversand_doc.status != 'Fehlgeschlagen':
+        if not limit:
+            jahresversand_doc.add_comment('Comment', text='Beginne mit Gesamtbatch...')
+            frappe.db.commit()
+            limit = ''
+        else:
+            jahresversand_doc.add_comment('Comment', text='Beginne mit Batch {loop}...'.format(loop=loop))
+            frappe.db.commit()
+            limit = ' LIMIT {0}'.format(limit)
+        
+        sektion = frappe.get_doc("Sektion", jahresversand_doc.sektion_id)
+        filters = ''
+        if int(jahresversand_doc.sprach_spezifisch) == 1:
+            filters += """ AND `language` = '{language}'""".format(language=jahresversand_doc.language)
+        if int(jahresversand_doc.mitgliedtyp_spezifisch) == 1:
+            filters += """ AND `mitgliedtyp_c` = '{mitgliedtyp}'""".format(mitgliedtyp=jahresversand_doc.mitgliedtyp)
+        
+        mitgliedschaften = frappe.db.sql("""SELECT
+                                                `name`,
+                                                `ist_geschenkmitgliedschaft`,
+                                                `reduzierte_mitgliedschaft`,
+                                                `reduzierter_betrag`
+                                            FROM `tabMitgliedschaft`
+                                            WHERE `sektion_id` = '{sektion_id}'
+                                            AND `status_c` = 'Regulär'
+                                            AND `name` NOT IN (
+                                                SELECT
+                                                    `mv_mitgliedschaft`
+                                                FROM `tabSales Invoice`
+                                                WHERE `mitgliedschafts_jahr` = '{mitgliedschafts_jahr}'
+                                                AND `ist_mitgliedschaftsrechnung` = 1
+                                                AND `docstatus` = 1)
+                                            {filters}{limit}""".format(sektion_id=jahresversand_doc.sektion_id, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters, limit=limit), as_dict=True)
+        
+        try:
+            for mitgliedschaft in mitgliedschaften:
+                # ------------------------------------------------------------------------------------
+                # ------------------------------------------------------------------------------------
+                '''
+                    Geschenkmitgliedschaften sowie Gratis Mitgliedschaften werden NICHT berücksichtigt
+                '''
+                # ------------------------------------------------------------------------------------
+                skip = False
+                if int(mitgliedschaft.ist_geschenkmitgliedschaft) == 1:
+                    skip = True
+                if int(mitgliedschaft.reduzierte_mitgliedschaft) == 1 and not mitgliedschaft.reduzierter_betrag > 0:
+                    skip = True
+                # ------------------------------------------------------------------------------------
+                # ------------------------------------------------------------------------------------
+                
+                if not skip:
+                    sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=jahresversand_doc.jahr, submit=True, ignore_stichtage=True, rechnungs_jahresversand=jahresversand_doc.name)
             
-            if not skip:
-                sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=jahresversand_doc.jahr, submit=True, ignore_stichtage=True, rechnungs_jahresversand=jahresversand_doc.name)
-        
-        frappe.db.commit()
-        
-        jahresversand_doc.add_comment('Comment', text='Rechnungen erstellt. Beginne mit CSV...')
-        frappe.db.commit()
-        
-        get_csv(jahresversand)
-        
-        jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
-        jahresversand_doc.status = 'Abgeschlossen'
-        jahresversand_doc.save()
-        
-    except Exception as err:
-        jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
-        jahresversand_doc.status = 'Fehlgeschlagen'
-        jahresversand_doc.save()
-        jahresversand_doc.add_comment('Comment', text='{0}'.format(str(err)))
+            frappe.db.commit()
+            
+            if last:
+                jahresversand_doc.add_comment('Comment', text='Rechnungen erstellt. Beginne mit CSV...')
+                frappe.db.commit()
+            
+                get_csv(jahresversand)
+            
+                jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+                jahresversand_doc.status = 'Abgeschlossen'
+                jahresversand_doc.save()
+            
+        except Exception as err:
+            jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+            jahresversand_doc.status = 'Fehlgeschlagen'
+            jahresversand_doc.save()
+            jahresversand_doc.add_comment('Comment', text='{0}'.format(str(err)))
 
 def get_csv(jahresversand):
     jahresversand = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
