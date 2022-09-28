@@ -380,13 +380,14 @@ def get_hv_rate(mitgliedschaft, sektion):
         return ''
 
 def create_invoices(jahresversand):
-    jahresversand = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
-    sektion = frappe.get_doc("Sektion", jahresversand.sektion_id)
+    jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+    jahresversand_doc.add_comment('Comment', text='Beginne mit Rechnungserstellung...')
+    sektion = frappe.get_doc("Sektion", jahresversand_doc.sektion_id)
     filters = ''
-    if int(jahresversand.sprach_spezifisch) == 1:
-        filters += """ AND `language` = '{language}'""".format(language=jahresversand.language)
-    if int(jahresversand.mitgliedtyp_spezifisch) == 1:
-        filters += """ AND `mitgliedtyp_c` = '{mitgliedtyp}'""".format(mitgliedtyp=jahresversand.mitgliedtyp)
+    if int(jahresversand_doc.sprach_spezifisch) == 1:
+        filters += """ AND `language` = '{language}'""".format(language=jahresversand_doc.language)
+    if int(jahresversand_doc.mitgliedtyp_spezifisch) == 1:
+        filters += """ AND `mitgliedtyp_c` = '{mitgliedtyp}'""".format(mitgliedtyp=jahresversand_doc.mitgliedtyp)
     
     mitgliedschaften = frappe.db.sql("""SELECT
                                             `name`,
@@ -403,7 +404,7 @@ def create_invoices(jahresversand):
                                             WHERE `mitgliedschafts_jahr` = '{mitgliedschafts_jahr}'
                                             AND `ist_mitgliedschaftsrechnung` = 1
                                             AND `docstatus` = 1)
-                                        {filters}""".format(sektion_id=jahresversand.sektion_id, mitgliedschafts_jahr=jahresversand.jahr, filters=filters), as_dict=True)
+                                        {filters}""".format(sektion_id=jahresversand_doc.sektion_id, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters), as_dict=True)
     
     try:
         for mitgliedschaft in mitgliedschaften:
@@ -422,16 +423,19 @@ def create_invoices(jahresversand):
             # ------------------------------------------------------------------------------------
             
             if not skip:
-                sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=jahresversand.jahr, submit=True, ignore_stichtage=True, rechnungs_jahresversand=jahresversand.name)
+                sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=jahresversand_doc.jahr, submit=True, ignore_stichtage=True, rechnungs_jahresversand=jahresversand_doc.name)
         
         frappe.db.commit()
-        get_csv(jahresversand.name)
-        jahresversand.status = 'Abgeschlossen'
-        jahresversand.save()
+        jahresversand_doc.add_comment('Comment', text='Rechnungen erstellt. Beginne mit CSV...')
+        get_csv(jahresversand)
+        jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+        jahresversand_doc.status = 'Abgeschlossen'
+        jahresversand_doc.save()
     except Exception as err:
-        jahresversand.status = 'Fehlgeschlagen'
-        jahresversand.save()
-        jahresversand.add_comment('Comment', text='{0}'.format(str(err)))
+        jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+        jahresversand_doc.status = 'Fehlgeschlagen'
+        jahresversand_doc.save()
+        jahresversand_doc.add_comment('Comment', text='{0}'.format(str(err)))
 
 def get_csv(jahresversand):
     jahresversand = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
@@ -770,6 +774,8 @@ def get_csv(jahresversand):
     })
     
     _file.save()
+    
+    jahresversand.add_comment('Comment', text='CSV erstellt.')
     
     return 'done'
 
