@@ -89,8 +89,12 @@ function firmenkunde_mandatory(frm) {
     // set firma mandatory (Kunde)
     if (cur_frm.doc.kundentyp == 'Unternehmen') {
         cur_frm.set_df_property('firma', 'reqd', 1);
+        cur_frm.set_df_property('nachname', 'reqd', 0);
+        cur_frm.set_df_property('vorname', 'reqd', 0);
     } else {
         cur_frm.set_df_property('firma', 'reqd', 0);
+        cur_frm.set_df_property('nachname', 'reqd', 1);
+        cur_frm.set_df_property('vorname', 'reqd', 1);
     }
 }
 

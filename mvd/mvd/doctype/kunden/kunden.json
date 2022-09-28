@@ -108,15 +108,13 @@
    "fieldname": "nachname",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Nachname",
-   "reqd": 1
+   "label": "Nachname"
   },
   {
    "fieldname": "vorname",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Vorname",
-   "reqd": 1
+   "label": "Vorname"
   },
   {
    "fieldname": "tel_p",
@@ -435,7 +433,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-08-26 14:39:52.832167",
+ "modified": "2022-09-28 16:38:56.343338",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kunden",
