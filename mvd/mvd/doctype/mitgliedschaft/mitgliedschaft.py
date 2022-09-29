@@ -3420,21 +3420,29 @@ def get_sprache(language='de'):
 # Hooks functions
 # -----------------------------------------------
 def sinv_check_zahlung_mitgliedschaft(sinv, event):
-    # mitgliedschaft speichern um SP Update zu triggern und höchste Mahnstufe zu setzen
-    if sinv.mv_mitgliedschaft:
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
-        try:
-            sql_query = ("""SELECT MAX(`payment_reminder_level`) AS `max` FROM `tabSales Invoice` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Overdue'""".format(mitgliedschaft=mitgliedschaft.name))
-            max_level = frappe.db.sql(sql_query, as_dict=True)[0]['max']
-            if not max_level:
+    skip = False
+    if sinv.rechnungs_jahresversand:
+        from frappe.utils.data import add_to_date
+        ref_date = add_to_date(date=sinv.creation, hours=1)
+        if sinv.modified < ref_date:
+            skip = True
+    
+    if not skip:
+        # mitgliedschaft speichern um SP Update zu triggern und höchste Mahnstufe zu setzen
+        if sinv.mv_mitgliedschaft:
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
+            try:
+                sql_query = ("""SELECT MAX(`payment_reminder_level`) AS `max` FROM `tabSales Invoice` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Overdue'""".format(mitgliedschaft=mitgliedschaft.name))
+                max_level = frappe.db.sql(sql_query, as_dict=True)[0]['max']
+                if not max_level:
+                    max_level = 0
+            except:
                 max_level = 0
-        except:
-            max_level = 0
-        sinv_max_level = int(sinv.payment_reminder_level or 0)
-        if max_level < sinv_max_level:
-            max_level = sinv_max_level
-        mitgliedschaft.max_reminder_level = max_level
-        mitgliedschaft.save(ignore_permissions=True)
+            sinv_max_level = int(sinv.payment_reminder_level or 0)
+            if max_level < sinv_max_level:
+                max_level = sinv_max_level
+            mitgliedschaft.max_reminder_level = max_level
+            mitgliedschaft.save(ignore_permissions=True)
 
 def pe_check_zahlung_mitgliedschaft(pe, event):
     for ref in pe.references:

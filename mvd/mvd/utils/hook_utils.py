@@ -55,7 +55,14 @@ def unlink_fr(sinv, event):
             sinv.zugehoerige_fr = hv_fr=hv_fr[0].name
 
 def relink_fr(sinv, event):
-    if sinv.zugehoerige_fr:
-        update_fr = frappe.db.sql("""UPDATE `tabFakultative Rechnung` SET `sales_invoice` = '{sinv}' WHERE `name` = '{hv_fr}'""".format(sinv=sinv.name, hv_fr=sinv.zugehoerige_fr), as_list=True)
-        frappe.db.commit()
-        sinv.zugehoerige_fr = None
+    skip = False
+    if sinv.rechnungs_jahresversand:
+        from frappe.utils.data import add_to_date
+        ref_date = add_to_date(date=sinv.creation, hours=1)
+        if sinv.modified < ref_date:
+            skip = True
+    if not skip:
+        if sinv.zugehoerige_fr:
+            update_fr = frappe.db.sql("""UPDATE `tabFakultative Rechnung` SET `sales_invoice` = '{sinv}' WHERE `name` = '{hv_fr}'""".format(sinv=sinv.name, hv_fr=sinv.zugehoerige_fr), as_list=True)
+            frappe.db.commit()
+            sinv.zugehoerige_fr = None
