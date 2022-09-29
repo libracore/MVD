@@ -30,7 +30,7 @@ def spenden_versand(doc):
         sprache = ''
         mitgliedtyp = ''
         region = ''
-        keine_gesperrten_adressen = ''
+        keine_gesperrten_adressen = """ AND `adressen_gesperrt` != 1"""
         keine_kuendigungen = ''
         if int(doc.sektionsspezifisch) == 1:
             sektion = """ AND `sektion_id` = '{sektion_id}'""".format(sektion_id=doc.sektion_id)
@@ -41,7 +41,7 @@ def spenden_versand(doc):
         if int(doc.regionsspezifisch) == 1:
             region = """ AND `region` = '{region}'""".format(region=doc.region)
         if int(doc.inkl_gesperrt) == 1:
-            keine_gesperrten_adressen = """ AND `adressen_gesperrt` != 1"""
+            keine_gesperrten_adressen = """ AND `adressen_gesperrt` = 1"""
         if int(doc.keine_kuendigungen) == 1:
             keine_kuendigungen = """ AND (`kuendigung` < '2000-01-01' OR `kuendigung` IS NULL)"""
         
