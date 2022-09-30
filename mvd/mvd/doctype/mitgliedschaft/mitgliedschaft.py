@@ -2271,6 +2271,11 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druck
     # erfassung Kündigung
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     mitgliedschaft.kuendigung = datum_kuendigung
+    new_line = ''
+    if mitgliedschaft.wichtig:
+        new_line = '\n'
+    mitgliedschaft.wichtig += '{0}Kündigungsgrund: {1}'.format(new_line, grund)
+    
     # erstelle status change log und Status-Änderung
     change_log_row = mitgliedschaft.append('status_change', {})
     change_log_row.datum = now()
