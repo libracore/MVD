@@ -120,7 +120,7 @@ class Mitgliedschaft(Document):
                     # sende update an SP
                     send_mvm_to_sp(self, True)
                     # special case sektionswechsel nach ZH
-                    if self.wegzug_zu in ('MVZH', 'MVSO') and self.status_c == 'Wegzug':
+                    if self.wegzug_zu == 'MVZH' and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
     
     def remove_unnecessary_blanks(self):
@@ -2463,7 +2463,7 @@ def mvm_update(mitgliedschaft, kwargs):
                     else:
                         kuendigung = mitgliedschaft.kuendigung
                 else:
-                    if sektion_id in ('MVZH', 'MVSO'):
+                    if sektion_id == 'MVZH':
                         kuendigung = kwargs['kuendigungPer'].split("T")[0]
                     else:
                         kuendigung = mitgliedschaft.kuendigung
@@ -2595,8 +2595,8 @@ def mvm_update(mitgliedschaft, kwargs):
                         mitgliedschaft.status_c = 'Online-Mutation'
                     
             
-            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH und MVSO
-            if mitgliedschaft.zuzug_von in ('MVZH', 'MVSO') and mitgliedschaft.status_c == 'Zuzug':
+            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
+            if mitgliedschaft.zuzug_von == 'MVZH' and mitgliedschaft.status_c == 'Zuzug':
                 if not mitgliedschaft.zuzug:
                     mitgliedschaft.zuzug = today()
             
@@ -2743,7 +2743,7 @@ def mvm_neuanlage(kwargs):
             
             if kwargs['datumOnlineVerbucht']:
                 datum_online_verbucht = kwargs['datumOnlineVerbucht']
-                if zuzug_von not in ('MVZH', 'MVSO'):
+                if zuzug_von != 'MVZH':
                     datum_zahlung_mitgliedschaft = datum_online_verbucht.split("T")[0]
                 else:
                     datum_zahlung_mitgliedschaft = None
@@ -2829,8 +2829,8 @@ def mvm_neuanlage(kwargs):
                         new_mitgliedschaft.status_vor_onl_mutation = status_c
                         new_mitgliedschaft.status_c = 'Online-Mutation'
             
-            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH und MVSO
-            if new_mitgliedschaft.zuzug_von in ('MVZH', 'MVSO') and new_mitgliedschaft.status_c == 'Zuzug':
+            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
+            if new_mitgliedschaft.zuzug_von == 'MVZH' and new_mitgliedschaft.status_c == 'Zuzug':
                 if not new_mitgliedschaft.zuzug:
                     new_mitgliedschaft.zuzug = today()
             
@@ -3212,10 +3212,6 @@ def send_mvm_sektionswechsel(mitgliedschaft):
     neue_sektion = ''
     if mitgliedschaft.wegzug_zu == 'MVZH':
         neue_sektion = 'ZH'
-    elif mitgliedschaft.wegzug_zu == 'MVSO':
-        neue_sektion = 'SO'
-    elif mitgliedschaft.wegzug_zu == 'MVBE':
-        neue_sektion = 'BE'
     sektionswechsel(prepared_mvm, neue_sektion)
 
 def prepare_mvm_for_sp(mitgliedschaft):
