@@ -3455,6 +3455,7 @@ def pe_check_zahlung_mitgliedschaft(pe, event):
             sinv = frappe.get_doc("Sales Invoice", ref.reference_name)
             if sinv.mv_mitgliedschaft:
                 mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
+                mitgliedschaft.letzte_bearbeitung_von = 'User'
                 mitgliedschaft.save(ignore_permissions=True)
 
 # -----------------------------------------------
