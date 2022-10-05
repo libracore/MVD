@@ -111,6 +111,10 @@ class Mitgliedschaft(Document):
             if self.mahnstopp:
                 mahnstopp(self.name, self.mahnstopp)
             
+            # Anzahl M+W Update anhand Retouren in Folge
+            if self.retoure_in_folge and self.m_und_w > 0:
+                self.m_und_w = 0
+            
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
                 if self.creation == self.modified:
