@@ -142,18 +142,18 @@ function import_payments(frm) {
                 'camt_import': cur_frm.doc.name
             },
             callback: function(r) {
-                frappe.dom.freeze('Bitte warten, die Zahlungen werden importiert...');
-                let import_refresher = setInterval(import_refresh_handler, 3000);
-                function import_refresh_handler() {
-                    if (cur_frm.doc.status == 'In Verarbeitung') {
-                        cur_frm.reload_doc();
-                    } else {
-                        clearInterval(import_refresher);
-                        frappe.dom.unfreeze();
-                        aktualisiere_camt_uebersicht(frm);
-                    }
-                }
-                
+                //~ frappe.dom.freeze('Bitte warten, die Zahlungen werden importiert...');
+                //~ let import_refresher = setInterval(import_refresh_handler, 3000);
+                //~ function import_refresh_handler() {
+                    //~ if (cur_frm.doc.status == 'In Verarbeitung') {
+                        //~ cur_frm.reload_doc();
+                    //~ } else {
+                        //~ clearInterval(import_refresher);
+                        //~ frappe.dom.unfreeze();
+                        //~ aktualisiere_camt_uebersicht(frm);
+                    //~ }
+                //~ }
+                frappe.msgprint("Der CAMT-Import wurde gestartet.<br>Sie können den Fortschritt <a href='/desk#background_jobs'>hier</a> verfolgen.");
             }
         });
     });
