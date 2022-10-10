@@ -3845,11 +3845,11 @@ def wieder_beitritt(mitgliedschaft):
     mitgliedschafts_copy.begruessung_via_zahlung = 0
     mitgliedschafts_copy.begruessung_massendruck_dokument = None
     
-    mitgliedschafts_copy.insert()
+    mitgliedschafts_copy.insert(ignore_permissions=True)
     frappe.db.commit()
     
     mitgliedschafts_copy.validierung_notwendig = 0
-    mitgliedschafts_copy.save()
+    mitgliedschafts_copy.save(ignore_permissions=True)
     
     alte_mitgliedschaft.add_comment('Comment', text='Mitgliedschaft (als Anmeldung) mittels {0} ({1}) reaktiviert.'.format(mitgliedschafts_copy.mitglied_nr, mitgliedschafts_copy.name))
     mitgliedschafts_copy.add_comment('Comment', text='Reaktivierte Mitgliedschaft aus {0} ({1})'.format(alte_mitgliedschaft.mitglied_nr, alte_mitgliedschaft.name))
