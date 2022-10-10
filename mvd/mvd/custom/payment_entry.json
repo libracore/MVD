@@ -710,7 +710,7 @@
    "modified_by": "Administrator",
    "name": "Payment Entry-camt_status",
    "no_copy": 0,
-   "options": "Nicht zugewiesen\nRechnungs Match\nUnterbezahlt\n\u00dcberbezahlt\nDoppelte Mitgliedschafts-Zahlung\nWegzug\nVerbucht",
+   "options": "Nicht zugewiesen\nZugewiesen\nRechnungs Match\nUnterbezahlt\n\u00dcberbezahlt\nDoppelte Mitgliedschafts-Zahlung\nWegzug\nVerbucht",
    "owner": "Administrator",
    "parent": null,
    "parentfield": null,

@@ -48,6 +48,9 @@ def verarbeite_camt_file(camt_file, camt_import):
     
     # Zahlungen von CAMT-File einlesen
     zahlungen_einlesen(camt_file, camt_import)
+    
+    # Verbuche Matches
+    verbuche_matches(camt_import)
 
 def zahlungen_einlesen(camt_file, camt_import):
     """
@@ -149,7 +152,6 @@ def zahlungen_einlesen(camt_file, camt_import):
     
     camt_status_update(camt_import.name, 'Zahlungen eingelesen - verbuche Matches')
     frappe.db.commit()
-    verbuche_matches(camt_import.name)
     return
 
 def sinv_lookup(qrr_ref, betrag):
@@ -173,7 +175,8 @@ def sinv_lookup(qrr_ref, betrag):
     sinvs = frappe.db.sql("""SELECT *
                             FROM `tabSales Invoice`
                             WHERE `docstatus` = 1
-                            AND REPLACE(`esr_reference`, ' ', '') = '{qrr_ref}'""".format(qrr_ref=qrr_ref), as_dict=True)
+                            AND REPLACE(`esr_reference`, ' ', '') = '{qrr_ref}'
+                            AND `outstanding_amount` > 0""".format(qrr_ref=qrr_ref), as_dict=True)
     
     if len(sinvs) > 0:
         # Sinv gefunden
@@ -202,7 +205,8 @@ def fak_lookup(qrr_ref, betrag):
     faks = frappe.db.sql("""SELECT *
                             FROM `tabFakultative Rechnung`
                             WHERE `docstatus` = 1
-                            AND REPLACE(`qrr_referenz`, ' ', '') = '{qrr_ref}'""".format(qrr_ref=qrr_ref), as_dict=True)
+                            AND REPLACE(`qrr_referenz`, ' ', '') = '{qrr_ref}'
+                            AND `status` = 'Unpaid'""".format(qrr_ref=qrr_ref), as_dict=True)
     
     if len(faks) > 0:
         # FK gefunden
@@ -365,7 +369,8 @@ def verbuche_matches(camt_import):
                                     `name`
                                 FROM `tabSales Invoice`
                                 WHERE `docstatus` = 1
-                                AND REPLACE(`esr_reference`, ' ', '') = '{qrr}'""".format(qrr=pe_doc.esr_reference), as_dict=True)
+                                AND REPLACE(`esr_reference`, ' ', '') = '{qrr}'
+                                AND `outstanding_amount` > 0""".format(qrr=pe_doc.esr_reference), as_dict=True)
         if len(sinv) > 0:
             sinv_doc = frappe.get_doc("Sales Invoice", sinv[0].name)
             
@@ -396,13 +401,19 @@ def verbuche_matches(camt_import):
             else:
                 # Überzahlung (Splitten)
                 ueberzahlung = frappe.copy_doc(pe_doc)
-                ueberzahlung.paid_amount = (pe_doc.paid_amount - sinv_doc.outstanding_amount) * -1
+                ueberzahlung.paid_amount = (pe_doc.paid_amount - sinv_doc.outstanding_amount)
+                ueberzahlung.received_amount = ueberzahlung.paid_amount
+                ueberzahlung.base_received_amount = ueberzahlung.paid_amount
                 ueberzahlung.camt_status = 'Überbezahlt'
                 ueberzahlung.insert()
+                
+                verabreite_ueberzahlung(camt_import, ueberzahlung, sinv_doc)
                 
                 camt_ueberzahlung_update(camt_import)
                 
                 pe_doc.paid_amount = sinv_doc.outstanding_amount
+                pe_doc.received_amount = sinv_doc.outstanding_amount
+                pe_doc.base_received_amount = sinv_doc.outstanding_amount
                 row = pe_doc.append('references', {})
                 row.reference_doctype = "Sales Invoice"
                 row.reference_name = sinv_doc.name
@@ -412,12 +423,123 @@ def verbuche_matches(camt_import):
                 row.allocated_amount = pe_doc.paid_amount
                 pe_doc.total_allocated_amount = pe_doc.paid_amount
                 pe_doc.unallocated_amount = 0
+                pe_doc.difference_amount = 0
                 pe_doc.camt_status = 'Verbucht'
                 pe_doc.save()
                 pe_doc.submit()
                 camt_gebuchte_zahlung_update(camt_import)
     
     camt_status_update(camt_import, 'Verarbeitet')
+
+def verabreite_ueberzahlung(camt_import, ueberzahlung, sinv_doc):
+    from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price
+    hv_item = frappe.db.get_value('Sektion', ueberzahlung.sektion_id, 'hv_artikel')
+    mitgliedschaft_item = frappe.db.get_value('Sektion', ueberzahlung.sektion_id, 'mitgliedschafts_artikel')
+    hv_item_price = get_item_price(hv_item)
+    mitgliedschaft_item_price = get_item_price(mitgliedschaft_item)
+    
+    if int(sinv_doc.ist_sonstige_rechnung) == 1:
+        if ueberzahlung.paid_amount == mitgliedschaft_item_price:
+            # TBD !!!
+            return
+        else:
+            camt_zugewiesen_nicht_verbucht_update(camt_import)
+            return
+    elif int(sinv_doc.ist_mitgliedschaftsrechnung) == 1:
+        if ueberzahlung.paid_amount == hv_item_price:
+            mitgliedschaftsjahr = int(frappe.db.get_value('Mitgliedschaft', sinv_doc.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr'))
+            if mitgliedschaftsjahr < int(sinv_doc.mitgliedschafts_jahr):
+                mitgliedschaftsjahr = int(sinv_doc.mitgliedschafts_jahr)
+            if int(frappe.db.get_value('Mitgliedschaft', sinv_doc.mv_mitgliedschaft, 'zahlung_hv')) < mitgliedschaftsjahr:
+                # create new HV RG
+                sektion = frappe.get_doc("Sektion", sinv_doc.sektion_id)
+                fr = frappe.get_doc({
+                    "doctype": "Fakultative Rechnung",
+                    "mv_mitgliedschaft": sinv_doc.mv_mitgliedschaft,
+                    'due_date': add_days(today(), 30),
+                    'sektion_id': str(sektion.name),
+                    'sektions_code': str(sektion.sektion_id) or '00',
+                    'sales_invoice': None,
+                    'typ': 'HV',
+                    'betrag': sektion.betrag_hv,
+                    'posting_date': today(),
+                    'company': sektion.company,
+                    'druckvorlage': '',
+                    'bezugsjahr': mitgliedschaftsjahr
+                })
+                fr.insert(ignore_permissions=True)
+                fr.submit()
+                unpaid_sinv = create_unpaid_sinv(fr.name, sektion.betrag_hv)['sinv']
+                
+                row = ueberzahlung.append('references', {})
+                row.reference_doctype = "Sales Invoice"
+                row.reference_name = unpaid_sinv
+                row.due_date = add_days(today(), 30)
+                row.total_amount = sektion.betrag_hv
+                row.outstanding_amount = sektion.betrag_hv
+                row.allocated_amount = sektion.betrag_hv
+                ueberzahlung.total_allocated_amount = sektion.betrag_hv
+                ueberzahlung.unallocated_amount = 0
+                ueberzahlung.difference_amount = 0
+                # ~ ueberzahlung.camt_status = 'Verbucht'
+                ueberzahlung.save()
+                ueberzahlung.submit()
+                camt_gebuchte_zahlung_update(camt_import)
+                camt_hv_update(camt_import)
+            else:
+                camt_zugewiesen_nicht_verbucht_update(camt_import)
+                return
+        else:
+            camt_zugewiesen_nicht_verbucht_update(camt_import)
+            return
+    elif int(sinv_doc.ist_hv_rechnung) == 1:
+        if ueberzahlung.paid_amount == hv_item_price:
+            mitgliedschaftsjahr = int(frappe.db.get_value('Mitgliedschaft', sinv_doc.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr'))
+            if int(sinv_doc.mitgliedschafts_jahr) < mitgliedschaftsjahr:
+                # create new HV RG
+                sektion = frappe.get_doc("Sektion", sinv_doc.sektion_id)
+                fr = frappe.get_doc({
+                    "doctype": "Fakultative Rechnung",
+                    "mv_mitgliedschaft": sinv_doc.mv_mitgliedschaft,
+                    'due_date': add_days(today(), 30),
+                    'sektion_id': str(sektion.name),
+                    'sektions_code': str(sektion.sektion_id) or '00',
+                    'sales_invoice': None,
+                    'typ': 'HV',
+                    'betrag': sektion.betrag_hv,
+                    'posting_date': today(),
+                    'company': sektion.company,
+                    'druckvorlage': '',
+                    'bezugsjahr': mitgliedschaftsjahr
+                })
+                fr.insert(ignore_permissions=True)
+                fr.submit()
+                unpaid_sinv = create_unpaid_sinv(fr.name, sektion.betrag_hv)['sinv']
+                
+                row = ueberzahlung.append('references', {})
+                row.reference_doctype = "Sales Invoice"
+                row.reference_name = unpaid_sinv
+                row.due_date = add_days(today(), 30)
+                row.total_amount = sektion.betrag_hv
+                row.outstanding_amount = sektion.betrag_hv
+                row.allocated_amount = sektion.betrag_hv
+                ueberzahlung.total_allocated_amount = sektion.betrag_hv
+                ueberzahlung.unallocated_amount = 0
+                ueberzahlung.difference_amount = 0
+                # ~ ueberzahlung.camt_status = 'Verbucht'
+                ueberzahlung.save()
+                ueberzahlung.submit()
+                camt_gebuchte_zahlung_update(camt_import)
+                camt_hv_update(camt_import)
+            else:
+                camt_zugewiesen_nicht_verbucht_update(camt_import)
+                return
+        else:
+            camt_zugewiesen_nicht_verbucht_update(camt_import)
+            return
+    else:
+        camt_zugewiesen_nicht_verbucht_update(camt_import)
+        return
 
 # --------------------------------------
 # Hilfs-Funktionen
@@ -462,6 +584,9 @@ def erfasse_eingelesene_zahlungen(transaction_reference, unique_reference, date,
     if sinv_match:
         match_qty = frappe.db.get_value('CAMT Import', camt_import, 'rg_match_qty') + 1
         frappe.db.set_value('CAMT Import', camt_import, 'rg_match_qty', match_qty)
+    else:
+        no_match_qty = frappe.db.get_value('CAMT Import', camt_import, 'anz_unmatched_payments') + 1
+        frappe.db.set_value('CAMT Import', camt_import, 'anz_unmatched_payments', no_match_qty)
 
 def erfasse_nicht_eingelesene_zahlungen(transaction_reference, unique_reference, date, received_amount, camt_import):
     nicht_eingelesene_zahlungen = frappe.db.get_value('CAMT Import', camt_import, 'nicht_eingelesene_zahlungen')
@@ -509,3 +634,152 @@ def camt_spenden_update(camt_import):
 def camt_produkte_update(camt_import):
     qty = frappe.db.get_value('CAMT Import', camt_import, 'produkte_qty') + 1
     frappe.db.set_value('CAMT Import', camt_import, 'produkte_qty', qty)
+
+def camt_zugewiesen_nicht_verbucht_update(camt_import):
+    qty = frappe.db.get_value('CAMT Import', camt_import, 'zugewiesen_unverbucht_qty') + 1
+    frappe.db.set_value('CAMT Import', camt_import, 'zugewiesen_unverbucht_qty', qty)
+
+@frappe.whitelist()
+def suche_mitgliedschaft_aus_pe(payment_entry):
+    data = []
+    pe = frappe.get_doc("Payment Entry", payment_entry)
+    try:
+        # suche alte Zahlungen anhand IBAN
+        remarks = pe.remarks_clone.split("IBAN: ")[1]
+    
+        other_pes = frappe.db.sql("""SELECT
+                                        `mv_mitgliedschaft` AS `mitgliedschaft`
+                                    FROM `tabPayment Entry`
+                                    WHERE `remarks_clone` LIKE '%{remarks}%'
+                                    AND `name` != '{pe}'
+                                    AND `mv_mitgliedschaft` IS NOT NULL""".format(remarks=remarks, pe=pe.name), as_dict=True)
+        if len(other_pes) > 0:
+            for entry in other_pes:
+                unabhaengiger_debitor = frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'unabhaengiger_debitor')
+                if int(unabhaengiger_debitor) == 1:
+                    data.append({
+                        'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_vorname') or '',
+                        'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_nachname') or '',
+                        'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_firma') or '',
+                        'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
+                        'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
+                        'mitgliedschaft': entry.mitgliedschaft,
+                        'quelle': 'IBAN'
+                    })
+                else:
+                    data.append({
+                        'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'vorname_1') or '',
+                        'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'nachname_1') or '',
+                        'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'firma') or '',
+                        'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
+                        'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
+                        'mitgliedschaft': entry.mitgliedschaft,
+                        'quelle': 'IBAN'
+                    })
+    except:
+        pass
+    
+    # suche alte Rechnungen anhand QRR-Referenz
+    alte_rechnungen = frappe.db.sql("""SELECT
+                                        `mv_mitgliedschaft` AS `mitgliedschaft`
+                                    FROM `tabSales Invoice`
+                                    WHERE REPLACE(`esr_reference`, ' ', '') LIKE '%{qrr}%'
+                                    AND `mv_mitgliedschaft` IS NOT NULL""".format(qrr=pe.esr_reference), as_dict=True)
+    if len(alte_rechnungen) > 0:
+        for entry in alte_rechnungen:
+            unabhaengiger_debitor = frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'unabhaengiger_debitor')
+            if int(unabhaengiger_debitor) == 1:
+                data.append({
+                    'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_vorname') or '',
+                    'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_nachname') or '',
+                    'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_firma') or '',
+                    'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
+                    'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
+                    'mitgliedschaft': entry.mitgliedschaft,
+                        'quelle': 'Rechnung'
+                })
+            else:
+                data.append({
+                    'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'vorname_1') or '',
+                    'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'nachname_1') or '',
+                    'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'firma') or '',
+                    'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
+                    'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
+                    'mitgliedschaft': entry.mitgliedschaft,
+                        'quelle': 'Rechnung'
+                })
+    
+    return data
+
+@frappe.whitelist()
+def mitgliedschaft_zuweisen(mitgliedschaft):
+    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+    if mitgliedschaft.rg_kunde:
+        return {
+            'mitgliedschaft': mitgliedschaft.name,
+            'customer': mitgliedschaft.rg_kunde
+        }
+    else:
+        return {
+            'mitgliedschaft': mitgliedschaft.name,
+            'customer': mitgliedschaft.kunde_mitglied
+        }
+
+@frappe.whitelist()
+def aktualisiere_camt_uebersicht(camt_import):
+    camt_import_doc = frappe.get_doc("CAMT Import", camt_import)
+    
+    # verbuchte Zahlungen
+    verbuchte_zahlungen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty`
+                                            FROM `tabPayment Entry`
+                                            WHERE `camt_import` = '{camt_import}'
+                                            AND `docstatus` = 1""".format(camt_import=camt_import), as_dict=True)[0].qty
+    frappe.db.set_value('CAMT Import', camt_import, 'verbuchte_zahlung_qty', verbuchte_zahlungen)
+    
+    # nicht zugewiesene Zahlungen
+    nicht_zugewiesene_zahlungen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty`
+                                            FROM `tabPayment Entry`
+                                            WHERE `camt_import` = '{camt_import}'
+                                            AND `docstatus` = 0
+                                            AND `camt_status` = 'Nicht zugewiesen'""".format(camt_import=camt_import), as_dict=True)[0].qty
+    frappe.db.set_value('CAMT Import', camt_import, 'anz_unmatched_payments', nicht_zugewiesene_zahlungen)
+    
+    # zugewiesene aber unverbuchte Zahlungen
+    zugewiesen_unverbucht_qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty`
+                                            FROM `tabPayment Entry`
+                                            WHERE `camt_import` = '{camt_import}'
+                                            AND `docstatus` = 0
+                                            AND `mv_mitgliedschaft` IS NOT NULL""".format(camt_import=camt_import), as_dict=True)[0].qty
+    frappe.db.set_value('CAMT Import', camt_import, 'zugewiesen_unverbucht_qty', zugewiesen_unverbucht_qty)
+    
+    # Verbuchte Zahlungen welche ein Guthaben auslösen
+    guthaben_qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty`
+                                            FROM `tabPayment Entry`
+                                            WHERE `camt_import` = '{camt_import}'
+                                            AND `docstatus` = 1
+                                            AND `unallocated_amount` > 0""".format(camt_import=camt_import), as_dict=True)[0].qty
+    frappe.db.set_value('CAMT Import', camt_import, 'guthaben_qty', guthaben_qty)
+    
+    # HV, Mitgliedschaften, Produkte und Spenden
+    gebuchte_pes = frappe.db.sql("""SELECT `name`
+                                    FROM `tabPayment Entry`
+                                    WHERE `camt_import` = '{camt_import}'
+                                    AND `docstatus` = 1""".format(camt_import=camt_import), as_dict=True)
+    # reset old values
+    frappe.db.set_value('CAMT Import', camt_import, 'mitgliedschaften_qty', 0)
+    frappe.db.set_value('CAMT Import', camt_import, 'hv_qty', 0)
+    frappe.db.set_value('CAMT Import', camt_import, 'spenden_qty', 0)
+    frappe.db.set_value('CAMT Import', camt_import, 'produkte_qty', 0)
+    
+    # set new values
+    for pe in gebuchte_pes:
+        pe_doc = frappe.get_doc("Payment Entry", pe.name)
+        if len(pe_doc.references) > 0:
+            if int(frappe.db.get_value('Sales Invoice', pe_doc.references[0].reference_name, 'ist_mitgliedschaftsrechnung')) == 1:
+                camt_mitgliedschaften_update(camt_import)
+            elif int(frappe.db.get_value('Sales Invoice', pe_doc.references[0].reference_name, 'ist_hv_rechnung')) == 1:
+                camt_hv_update(camt_import)
+            elif int(frappe.db.get_value('Sales Invoice', pe_doc.references[0].reference_name, 'ist_spenden_rechnung')) == 1:
+                camt_spenden_update(camt_import)
+            elif int(frappe.db.get_value('Sales Invoice', pe_doc.references[0].reference_name, 'ist_sonstige_rechnung')) == 1:
+                camt_produkte_update(camt_import)

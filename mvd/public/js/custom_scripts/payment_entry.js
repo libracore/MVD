@@ -73,34 +73,51 @@ function check_underpaid(frm) {
 }
 
 function mitgliedschaft_zuweisen(frm) {
-    frappe.prompt([
-        {'fieldname': 'mitgliedschaft', 'fieldtype': 'Link', 'label': 'Mitgliedschaft', 'reqd': 1, 'options': 'Mitgliedschaft'}
-    ],
-    function(values){
-        
-        if (values.druckvorlage) {
-            var druckvorlage = values.druckvorlage;
-        } else {
-            var druckvorlage = 'keine'
-        }
-        frappe.call({
-            method: "mvd.mvd.doctype.camt_import.camt_import.mitgliedschaft_zuweisen",
-            args:{
-                    'mitgliedschaft': values.mitgliedschaft
+    frappe.call({
+        method: "mvd.mvd.doctype.camt_import.camt_import.suche_mitgliedschaft_aus_pe",
+        args:{
+                'payment_entry': cur_frm.doc.name
+        },
+        freeze: true,
+        freeze_message: 'Suche nach möglichen Mitgliedschaften...',
+        callback: function(r)
+        {
+            console.log(r.message);
+            var field_list = [
+                {'fieldname': 'mitgliedschaft', 'fieldtype': 'Link', 'label': 'Mitgliedschaft', 'reqd': 1, 'options': 'Mitgliedschaft'},
+                {'fieldname': 'section_vorschlaege', 'fieldtype': 'Section Break', 'label': 'Vorschläge'}
+            ];
+            r.message.forEach(function(entry) {
+                field_list.push({
+                    'fieldname': 'html_' + entry.mitgliedschaft,
+                    'fieldtype': 'HTML',
+                    'options': '<p>' + entry.vorname + " " + entry.nachname + " / " + entry.mitgliedschaft + " (" + entry.sektion + ": " + entry.status + "), Quelle: " + entry.quelle
+                })
+            });
+            
+            frappe.prompt(field_list,
+            function(values){
+                frappe.call({
+                    method: "mvd.mvd.doctype.camt_import.camt_import.mitgliedschaft_zuweisen",
+                    args:{
+                            'mitgliedschaft': values.mitgliedschaft
+                    },
+                    freeze: true,
+                    freeze_message: 'Weise Mitgliedschaft zu...',
+                    callback: function(r)
+                    {
+                        cur_frm.set_value("mv_mitgliedschaft", r.message.mitgliedschaft);
+                        cur_frm.set_value("party", r.message.customer);
+                        cur_frm.set_value("camt_status", 'Zugewiesen');
+                        cur_frm.save();
+                    }
+                });
             },
-            freeze: true,
-            freeze_message: 'Weise Mitgliedschaft zu...',
-            callback: function(r)
-            {
-                cur_frm.set_value("mv_mitgliedschaft", values.mitgliedschaft);
-                cur_frm.set_value("party", r.message);
-                cur_frm.save();
-            }
-        });
-    },
-    'Mitgliedschaft zuweisen',
-    'Zuweisen'
-    )
+            'Mitgliedschaft zuweisen',
+            'Zuweisen'
+            )
+        }
+    });
 }
 
 function erstelle_korrespondenz(frm) {

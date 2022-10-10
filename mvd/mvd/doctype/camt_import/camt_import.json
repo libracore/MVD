@@ -14,20 +14,27 @@
   "status",
   "section_steuerung",
   "import",
+  "show_imported_payments",
+  "show_unassigned",
+  "show_overpaid",
+  "show_zugewiesen_unverbucht",
   "aktualisiere_camt_uebersicht",
   "overview",
   "ausgelesene_zahlungen_qty",
   "eingelesene_zahlungen_qty",
   "rg_match_qty",
-  "ueberzahlung_qty",
+  "verbuchte_zahlung_qty",
   "hv_qty",
   "produkte_qty",
+  "ueberzahlung_qty",
   "cb_4",
   "fehlgeschlagenes_auslesen_qty",
   "nicht_eingelesene_zahlungen_qty",
-  "verbuchte_zahlung_qty",
+  "anz_unmatched_payments",
+  "zugewiesen_unverbucht_qty",
   "mitgliedschaften_qty",
   "spenden_qty",
+  "guthaben_qty",
   "section_verarbeitungs_daten",
   "ausgelesene_zahlungen",
   "eingelesene_zahlungen",
@@ -38,7 +45,6 @@
   "report",
   "section_redesign",
   "anz_importet_payments",
-  "show_imported_payments",
   "anz_matched_payments",
   "show_matched_payments",
   "anz_submitted_payments",
@@ -46,8 +52,6 @@
   "cb_2",
   "anz_deleted_payments",
   "show_canceled_payments",
-  "anz_unmatched_payments",
-  "show_unassigned",
   "anz_unsubmitted_payments",
   "show_unsubmitted_payments",
   "section_ungebucht",
@@ -57,7 +61,6 @@
   "show_wegzuege",
   "cb_3",
   "anz_overpaid",
-  "show_overpaid",
   "anz_doppelte_mitgliedschaft",
   "show_doppelte_mitgliedschaft",
   "section_import",
@@ -152,11 +155,13 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.ueberzahlung_qty > 0",
    "fieldname": "show_overpaid",
    "fieldtype": "Button",
    "label": "Zeige \u00dcberbezahlte"
   },
   {
+   "depends_on": "eval:doc.anz_unmatched_payments > 0",
    "fieldname": "show_unassigned",
    "fieldtype": "Button",
    "label": "Zeige unzugewiesene Zahlungen"
@@ -211,6 +216,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.eingelesene_zahlungen_qty > 0",
    "fieldname": "show_imported_payments",
    "fieldtype": "Button",
    "label": "Zeige importierte Zahlungen"
@@ -258,7 +264,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.unsubmitted_payments",
+   "depends_on": "eval:doc.status=='Verarbeitet'",
    "fieldname": "aktualisiere_camt_uebersicht",
    "fieldtype": "Button",
    "label": "Aktualisiere CAMT \u00dcbersicht"
@@ -392,25 +398,25 @@
   {
    "fieldname": "ausgelesene_zahlungen_qty",
    "fieldtype": "Int",
-   "label": "Ausgelesene Zahlungen",
+   "label": "Ausgelesene Zahlungen (CAMT File)",
    "read_only": 1
   },
   {
    "fieldname": "eingelesene_zahlungen_qty",
    "fieldtype": "Int",
-   "label": "Eingelesene Zahlungen",
+   "label": "Eingelesene Zahlungen (ERPNext)",
    "read_only": 1
   },
   {
    "fieldname": "nicht_eingelesene_zahlungen_qty",
    "fieldtype": "Int",
-   "label": "Nicht eingelesene Zahlungen",
+   "label": "Nicht eingelesene Zahlungen (ERPNext)",
    "read_only": 1
   },
   {
    "fieldname": "rg_match_qty",
    "fieldtype": "Int",
-   "label": "Rechnungs Match",
+   "label": "Rechnungs Match (nach Import)",
    "read_only": 1
   },
   {
@@ -428,7 +434,7 @@
   {
    "fieldname": "fehlgeschlagenes_auslesen_qty",
    "fieldtype": "Int",
-   "label": "Fehlgeschlagenes Auslesen",
+   "label": "Fehlgeschlagenes Auslesen (CAMT File)",
    "read_only": 1
   },
   {
@@ -470,9 +476,27 @@
    "fieldtype": "Int",
    "label": "Spenden",
    "read_only": 1
+  },
+  {
+   "fieldname": "zugewiesen_unverbucht_qty",
+   "fieldtype": "Int",
+   "label": "Zugewiesen aber nicht verbuchte Zahlungen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "guthaben_qty",
+   "fieldtype": "Int",
+   "label": "Guthaben",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.zugewiesen_unverbucht_qty > 0",
+   "fieldname": "show_zugewiesen_unverbucht",
+   "fieldtype": "Button",
+   "label": "Zeige zugewiesene aber unverbuchte"
   }
  ],
- "modified": "2022-10-07 15:42:40.022999",
+ "modified": "2022-10-10 17:02:27.837774",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",
