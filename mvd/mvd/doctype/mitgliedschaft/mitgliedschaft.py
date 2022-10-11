@@ -2825,6 +2825,14 @@ def mvm_neuanlage(kwargs):
                         if int(online_haftpflicht) == 1:
                             new_mitgliedschaft.datum_hv_zahlung = eintritt
                             new_mitgliedschaft.zahlung_hv = int(getdate(eintritt).strftime("%Y"))
+                            
+                            # Trello 909: Bei Online-Beitritten zwischen 15.09.xx und 31.12.xx muss die HV für das Folgejahr gelten.
+                            u_limit = getdate(getdate(eintritt).strftime("%Y") + "-09-15")
+                            o_limit = getdate(getdate(eintritt).strftime("%Y") + "-12-31")
+                            if getdate(eintritt) >= u_limit:
+                                if getdate(eintritt) <= o_limit:
+                                    new_mitgliedschaft.zahlung_hv += 1
+                            # ------------------------------------------------------------------------------------------------------
                     new_mitgliedschaft.datum_zahlung_mitgliedschaft = eintritt
             else:
                 if kwargs['needsValidation']:
