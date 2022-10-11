@@ -22,8 +22,20 @@ class FakultativeRechnung(Document):
 def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False, druckvorlage='', asap_print=False, bezugsjahr=0):
     if not betrag_spende:
         cancel_old_hv_fr(mitgliedschaft)
+        """
+        Trello 909: 
+        Manuelle Erstellung der fakultativen Rechnung für die HV sollte für das aktuellste Mitgliedschaftsjahr erfolgen.
+        Wenn man schon eine Mitgliedschaft für das Folgejahr bezahlt hat, für das Folgejahr sonst für das aktuelle.
+        """
+        if bezugsjahr == 0:
+            if int(getdate(today()).strftime("%Y")) < frappe.get_value("Mitgliedschaft", mitgliedschaft, "bezahltes_mitgliedschaftsjahr"):
+                bezugsjahr = frappe.get_value("Mitgliedschaft", mitgliedschaft, "bezahltes_mitgliedschaftsjahr")
+            else:
+                bezugsjahr = int(getdate(today()).strftime("%Y"))
+        # -------------------------------------------------------------------------------------------------------------
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+    
     fr = frappe.get_doc({
         "doctype": "Fakultative Rechnung",
         "mv_mitgliedschaft": mitgliedschaft.name,
