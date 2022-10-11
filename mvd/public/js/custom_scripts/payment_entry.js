@@ -11,27 +11,24 @@ frappe.ui.form.on('Payment Entry', {
                     });
                 }
                 if (cur_frm.doc.unallocated_amount > 0) {
-                    if ((cur_frm.doc.paid_amount / cur_frm.doc.unallocated_amount) == 2) {
-                        frm.add_custom_button(__("Mit Folgejahr-Mitgliedschaft ausgleichen"), function() {
-                            mit_folgejahr_ausgleichen(frm);
-                        });
-                    }
-                    frm.add_custom_button(__("Mit Spende ausgleichen"), function() {
-                        mit_spende_ausgleichen(frm);
-                    });
-                    frm.add_custom_button(__("Mit Rückzahlung ausgleichen"), function() {
-                        rueckzahlung(frm);
-                    });
-                    if (cur_frm.doc.unallocated_amount == 10) {
-                        frm.add_custom_button(__("Als HV Zahlung verbuchen"), function() {
+                    frm.add_custom_button(__("Mitgliedschaft"), function() {
+                        mit_folgejahr_ausgleichen(frm);
+                    }, __("Verbuchen als ..."));
+                    
+                    if (cur_frm.doc.unallocated_amount >= 10) {
+                        frm.add_custom_button(__("HV Zahlung"), function() {
                             als_hv_verbuchen(frm);
-                        });
+                        }, __("Verbuchen als ..."));
                     }
-                }
-                if (check_underpaid(frm)) {
-                    frm.add_custom_button(__("Differenz als Kulanz ausgleichen"), function() {
-                        kulanz_ausgleich(frm);
-                    });
+                    
+                    frm.add_custom_button(__("Spende"), function() {
+                        mit_spende_ausgleichen(frm);
+                    }, __("Verbuchen als ..."));
+                    
+                    frm.add_custom_button(__("Rückzahlung"), function() {
+                        rueckzahlung(frm);
+                    }, __("Ausgleichen mit ..."));
+                    
                 }
             }
             if (cur_frm.doc.docstatus == 0) {
@@ -60,16 +57,6 @@ function storno_rollback(frm) {
             cur_frm.reload_doc();
         }
     });
-}
-
-function check_underpaid(frm) {
-    var underpaid = false;
-    cur_frm.doc.references.forEach(function(entry) {
-       if (entry.allocated_amount < entry.outstanding_amount) {
-           underpaid = true;
-       }
-    });
-    return underpaid
 }
 
 function mitgliedschaft_zuweisen(frm) {

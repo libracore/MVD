@@ -14,7 +14,6 @@ import operator
 import re
 import six
 from frappe.utils.background_jobs import enqueue
-from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_unpaid_sinv
 from decimal import Decimal, ROUND_HALF_UP
 from frappe.utils.data import add_days, today, getdate, now
 
@@ -775,11 +774,293 @@ def aktualisiere_camt_uebersicht(camt_import):
     for pe in gebuchte_pes:
         pe_doc = frappe.get_doc("Payment Entry", pe.name)
         if len(pe_doc.references) > 0:
-            if int(frappe.db.get_value('Sales Invoice', pe_doc.references[0].reference_name, 'ist_mitgliedschaftsrechnung')) == 1:
-                camt_mitgliedschaften_update(camt_import)
-            elif int(frappe.db.get_value('Sales Invoice', pe_doc.references[0].reference_name, 'ist_hv_rechnung')) == 1:
-                camt_hv_update(camt_import)
-            elif int(frappe.db.get_value('Sales Invoice', pe_doc.references[0].reference_name, 'ist_spenden_rechnung')) == 1:
-                camt_spenden_update(camt_import)
-            elif int(frappe.db.get_value('Sales Invoice', pe_doc.references[0].reference_name, 'ist_sonstige_rechnung')) == 1:
-                camt_produkte_update(camt_import)
+            for reference in pe_doc.references:
+                if int(frappe.db.get_value('Sales Invoice', reference.reference_name, 'ist_mitgliedschaftsrechnung')) == 1:
+                    camt_mitgliedschaften_update(camt_import)
+                elif int(frappe.db.get_value('Sales Invoice', reference.reference_name, 'ist_hv_rechnung')) == 1:
+                    camt_hv_update(camt_import)
+                elif int(frappe.db.get_value('Sales Invoice', reference.reference_name, 'ist_spenden_rechnung')) == 1:
+                    camt_spenden_update(camt_import)
+                elif int(frappe.db.get_value('Sales Invoice', reference.reference_name, 'ist_sonstige_rechnung')) == 1:
+                    camt_produkte_update(camt_import)
+
+@frappe.whitelist()
+def mit_spende_ausgleichen(pe):
+    payment_entry = frappe.get_doc("Payment Entry", pe)
+    mitgliedschaft = payment_entry.mv_mitgliedschaft
+    
+    # erstelle fr
+    from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
+    fr = create_hv_fr(mitgliedschaft, betrag_spende=payment_entry.unallocated_amount)
+    
+    # erstelle sinv aus fr
+    sinv = create_unpaid_sinv(fr, betrag=payment_entry.unallocated_amount)['sinv']
+    
+    # match sinv mit pe
+    row = payment_entry.append('references', {})
+    row.reference_doctype = "Sales Invoice"
+    row.reference_name = sinv
+    row.due_date = add_days(today(), 30)
+    row.total_amount = frappe.get_value("Sales Invoice", sinv, "base_grand_total")
+    row.outstanding_amount = frappe.get_value("Sales Invoice", sinv, "outstanding_amount")
+    row.allocated_amount = frappe.get_value("Sales Invoice", sinv, "outstanding_amount")
+    
+    # update unallocated amount
+    payment_entry.unallocated_amount -= frappe.get_value("Sales Invoice", sinv, "outstanding_amount")
+    payment_entry.camt_status = 'Verbucht'
+    payment_entry.save()
+    payment_entry.submit()
+    
+    camt_gebuchte_zahlung_update(payment_entry.camt_import)
+    camt_spenden_update(payment_entry.camt_import)
+    
+    return
+
+@frappe.whitelist()
+def rueckzahlung(pe):
+    payment_entry = frappe.get_doc("Payment Entry", pe)
+    row = payment_entry.append('deductions', {})
+    row.amount = payment_entry.unallocated_amount * -1
+    row.account = frappe.get_value("Sektion", payment_entry.sektion_id, "zwischen_konto")
+    row.cost_center = frappe.get_value("Company", payment_entry.company, "cost_center")
+    payment_entry.unallocated_amount = 0
+    payment_entry.camt_status = 'Verbucht'
+    camt_gebuchte_zahlung_update(payment_entry.camt_import)
+    payment_entry.save()
+    payment_entry.submit()
+    return
+
+@frappe.whitelist()
+def als_hv_verbuchen(pe):
+    payment_entry = frappe.get_doc("Payment Entry", pe)
+    mitgliedschaft = payment_entry.mv_mitgliedschaft
+    
+    # erstelle fr
+    from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
+    fr = create_hv_fr(mitgliedschaft)
+    
+    # erstelle sinv aus fr
+    sinv = create_unpaid_sinv(fr, 10)['sinv']
+    
+    # match sinv mit pe
+    row = payment_entry.append('references', {})
+    row.reference_doctype = "Sales Invoice"
+    row.reference_name = sinv
+    row.due_date = add_days(today(), 30)
+    row.total_amount = frappe.get_value("Sales Invoice", sinv, "base_grand_total")
+    row.outstanding_amount = frappe.get_value("Sales Invoice", sinv, "outstanding_amount")
+    row.allocated_amount = frappe.get_value("Sales Invoice", sinv, "outstanding_amount")
+    
+    # update unallocated amount
+    payment_entry.unallocated_amount -= frappe.get_value("Sales Invoice", sinv, "outstanding_amount")
+    if payment_entry.unallocated_amount == 0:
+        payment_entry.camt_status = 'Verbucht'
+        camt_gebuchte_zahlung_update(payment_entry.camt_import)
+    camt_hv_update(payment_entry.camt_import)
+    payment_entry.save()
+    if payment_entry.unallocated_amount == 0:
+        payment_entry.submit()
+    return
+
+@frappe.whitelist()
+def fr_bez_ezs(fr, datum, betrag):
+    betrag = float(betrag)
+    hv_sinv = create_unpaid_sinv(fr, betrag=betrag)['sinv']
+    hv_sinv = frappe.get_doc("Sales Invoice", hv_sinv)
+    
+    customer = hv_sinv.customer
+    mitgliedschaft = hv_sinv.mv_mitgliedschaft
+    payment_entry_record = frappe.get_doc({
+        'doctype': "Payment Entry",
+        'posting_date': datum or today(),
+        'party_type': 'Customer',
+        'party': customer,
+        'mv_mitgliedschaft': mitgliedschaft,
+        'company': hv_sinv.company,
+        'sektion_id': hv_sinv.sektion_id,
+        'paid_from': hv_sinv.debit_to,
+        'paid_amount': hv_sinv.outstanding_amount,
+        'paid_to': frappe.get_value("Sektion", hv_sinv.sektion_id, "account"),
+        'received_amount': hv_sinv.outstanding_amount,
+        'references': [
+            {
+                'reference_doctype': "Sales Invoice",
+                'reference_name': hv_sinv.name,
+                'total_amount': hv_sinv.base_grand_total,
+                'outstanding_amount': hv_sinv.outstanding_amount,
+                'allocated_amount': hv_sinv.outstanding_amount
+            }
+        ],
+        'reference_no': 'EZS-Zahlung {0}'.format(hv_sinv.name),
+        'reference_date': datum or today()
+    }).insert()
+    
+    payment_entry_record.submit()
+    
+    return
+
+@frappe.whitelist()
+def fr_bez_bar(fr, datum):
+    fr = frappe.get_doc("Fakultative Rechnung", fr)
+    mitgliedschaft = frappe.get_doc("Mitgliedschaft", fr.mv_mitgliedschaft)
+    sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+    company = frappe.get_doc("Company", sektion.company)
+    
+    if not mitgliedschaft.rg_kunde:
+        customer = mitgliedschaft.kunde_mitglied
+        contact = mitgliedschaft.kontakt_mitglied
+        if not mitgliedschaft.rg_adresse:
+            address = mitgliedschaft.adresse_mitglied
+        else:
+            address = mitgliedschaft.rg_adresse
+    else:
+        customer = mitgliedschaft.rg_kunde_mitglied
+        address = mitgliedschaft.rg_adresse_mitglied
+        contact = mitgliedschaft.rg_kontakt_mitglied
+    
+    item = [{"item_code": sektion.hv_artikel, "qty": 1, "rate": sektion.betrag_hv}]
+    
+    sinv = frappe.get_doc({
+        "doctype": "Sales Invoice",
+        "posting_date": datum or today(),
+        "set_posting_time": 1,
+        "ist_mitgliedschaftsrechnung": 0,
+        "ist_hv_rechnung": 1 if fr.typ == 'HV' else 0,
+        "ist_spenden_rechnung": 0 if fr.typ == 'HV' else 1,
+        "mv_mitgliedschaft": fr.mv_mitgliedschaft,
+        "company": sektion.company,
+        "cost_center": company.cost_center,
+        "customer": customer,
+        "customer_address": address,
+        "contact_person": contact,
+        'mitgliedschafts_jahr': fr.bezugsjahr if fr.bezugsjahr and fr.bezugsjahr > 0 else int(getdate(today()).strftime("%Y")),
+        'due_date': add_days(today(), 30),
+        'debit_to': company.default_receivable_account,
+        'sektions_code': str(sektion.sektion_id) or '00',
+        'sektion_id': fr.sektion_id,
+        "items": item,
+        "inkl_hv": 0,
+        "esr_reference": fr.qrr_referenz or get_qrr_reference(fr=fr.name)
+    })
+    sinv.insert(ignore_permissions=True)
+    
+    pos_profile = frappe.get_doc("POS Profile", sektion.pos_barzahlung)
+    sinv.is_pos = 1
+    sinv.pos_profile = pos_profile.name
+    row = sinv.append('payments', {})
+    row.mode_of_payment = pos_profile.payments[0].mode_of_payment
+    row.account = pos_profile.payments[0].account
+    row.type = pos_profile.payments[0].type
+    row.amount = sinv.grand_total
+    sinv.save(ignore_permissions=True)
+    
+    # submit workaround weil submit ignore_permissions=True nicht kennt
+    sinv.docstatus = 1
+    sinv.save(ignore_permissions=True)
+    
+    fr.status = 'Paid'
+    fr.bezahlt_via = sinv.name
+    fr.save(ignore_permissions=True)
+    
+    return
+
+@frappe.whitelist()
+def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False, betrag=False):
+    sinv = frappe.get_doc("Sales Invoice", sinv)
+    betrag = float(betrag)
+    if betrag > sinv.outstanding_amount:
+        frappe.throw("Der Bezahlte Betrag darf die ausstehende Summe nicht überschreiten")
+    if hv:
+        hv_sinv = create_unpaid_sinv(hv, betrag=10)['sinv']
+    
+    customer = sinv.customer
+    mitgliedschaft = sinv.mv_mitgliedschaft
+    mv_kunde = sinv.mv_kunde
+    payment_entry_record = frappe.get_doc({
+        'doctype': "Payment Entry",
+        'posting_date': datum or today(),
+        'party_type': 'Customer',
+        'party': customer,
+        'mv_mitgliedschaft': mitgliedschaft,
+        'mv_kunde': mv_kunde,
+        'company': sinv.company,
+        'sektion_id': sinv.sektion_id,
+        'paid_from': sinv.debit_to,
+        'paid_amount': betrag,
+        'paid_to': frappe.get_value("Sektion", sinv.sektion_id, "account"),
+        'received_amount': betrag,
+        'references': [
+            {
+                'reference_doctype': "Sales Invoice",
+                'reference_name': sinv.name,
+                'total_amount': sinv.base_grand_total,
+                'outstanding_amount': sinv.outstanding_amount,
+                'allocated_amount': betrag
+            }
+        ],
+        'reference_no': 'Barzahlung {0}'.format(sinv.name) if bar else 'EZS-Zahlung {0}'.format(sinv.name),
+        'reference_date': datum or today()
+    }).insert()
+    
+    if hv:
+        hv_sinv = frappe.get_doc("Sales Invoice", hv_sinv)
+        hv_row = payment_entry_record.append('references', {})
+        hv_row.reference_doctype = "Sales Invoice"
+        hv_row.reference_name = hv_sinv.name
+        hv_row.total_amount = hv_sinv.base_grand_total
+        hv_row.outstanding_amount = hv_sinv.outstanding_amount
+        hv_row.allocated_amount = hv_sinv.outstanding_amount
+        payment_entry_record.paid_amount += hv_sinv.outstanding_amount
+        payment_entry_record.received_amount += hv_sinv.outstanding_amount
+        payment_entry_record.total_allocated_amount = payment_entry_record.paid_amount
+        payment_entry_record.reference_no = payment_entry_record.reference_no + " & {0}".format(hv_sinv.name)
+        payment_entry_record.save()
+    
+    payment_entry_record.submit()
+
+@frappe.whitelist()
+def mit_folgejahr_ausgleichen(pe):
+    payment_entry = frappe.get_doc("Payment Entry", pe)
+    try:
+        sinv_to_copy_name = frappe.db.sql("""SELECT `name`
+                                        FROM `tabSales Invoice`
+                                        WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
+                                        AND `ist_mitgliedschaftsrechnung` = 1
+                                        AND `docstatus` = 1
+                                        ORDER BY `mitgliedschafts_jahr` DESC""".format(mitgliedschaft=payment_entry.mv_mitgliedschaft), as_dict=True)[0].name
+        sinv_to_copy = frappe.get_doc("Sales Invoice", sinv_to_copy_name)
+        sinv = frappe.copy_doc(sinv_to_copy)
+        # ~ sinv.insert()
+        sinv.mitgliedschafts_jahr = sinv_to_copy.mitgliedschafts_jahr + 1
+        sinv.due_date = add_days(today(), 30)
+        sinv.set_posting_time = 1
+        sinv.posting_date = today()
+        sinv.payment_schedule = []
+        sinv.insert()
+        
+        sinv.submit()
+        
+        # match sinv mit pe
+        allocated_amount = payment_entry.unallocated_amount if payment_entry.unallocated_amount <= sinv.outstanding_amount else sinv.outstanding_amount
+        row = payment_entry.append('references', {})
+        row.reference_doctype = "Sales Invoice"
+        row.reference_name = sinv.name
+        row.due_date = add_days(today(), 30)
+        row.total_amount = sinv.base_grand_total
+        row.outstanding_amount = sinv.outstanding_amount
+        row.allocated_amount = allocated_amount
+        
+        # update unallocated amount
+        payment_entry.unallocated_amount -= allocated_amount
+        if payment_entry.unallocated_amount == 0:
+            payment_entry.camt_status = 'Verbucht'
+            camt_gebuchte_zahlung_update(payment_entry.camt_import)
+        
+        payment_entry.save()
+        
+        if payment_entry.unallocated_amount == 0:
+            payment_entry.submit()
+    except:
+        frappe.throw("Dieses Mitglied besitzt noch keine Rechnung.<br>Bitte erstellen Sie manuell eine Initial-Rechnung")
+    
+    return
