@@ -174,8 +174,12 @@ def sinv_lookup(qrr_ref, betrag):
     sinvs = frappe.db.sql("""SELECT *
                             FROM `tabSales Invoice`
                             WHERE `docstatus` = 1
-                            AND REPLACE(`esr_reference`, ' ', '') = '{qrr_ref}'
-                            AND `outstanding_amount` > 0""".format(qrr_ref=qrr_ref), as_dict=True)
+                            AND (
+                                REPLACE(`esr_reference`, ' ', '') = '{qrr_ref}'
+                                OR
+                                REPLACE(`esr_reference`, ' ', '') = '{qrr_ref_short}'
+                            )
+                            AND `outstanding_amount` > 0""".format(qrr_ref=qrr_ref, qrr_ref_short=qrr_ref[8:27]), as_dict=True)
     
     if len(sinvs) > 0:
         # Sinv gefunden
@@ -368,13 +372,22 @@ def verbuche_matches(camt_import):
                                     `name`
                                 FROM `tabSales Invoice`
                                 WHERE `docstatus` = 1
-                                AND REPLACE(`esr_reference`, ' ', '') = '{qrr}'
-                                AND `outstanding_amount` > 0""".format(qrr=pe_doc.esr_reference), as_dict=True)
+                                AND (
+                                    REPLACE(`esr_reference`, ' ', '') = '{qrr}'
+                                    OR
+                                    REPLACE(`esr_reference`, ' ', '') = '{qrr_ref_short}'
+                                )
+                                AND `outstanding_amount` > 0""".format(qrr=pe_doc.esr_reference, qrr_ref_short=pe_doc.esr_reference[8:27]), as_dict=True)
         if len(sinv) > 0:
             sinv_doc = frappe.get_doc("Sales Invoice", sinv[0].name)
             
             if sinv_doc.ist_mitgliedschaftsrechnung:
                 camt_mitgliedschaften_update(camt_import)
+                # Trello 909: Wenn Zahlungseingang zwischen 15.09.xx und 31.12.xx muss die Mitgliedschaft für das Folgejahr zählen
+                folgejahr = check_folgejahr_date(pe_doc.posting_date)
+                if folgejahr:
+                    frappe.db.set_value('Sales Invoice', sinv[0].name, 'mitgliedschafts_jahr', folgejahr)
+                # ----------------------------------------------------------------------------------------------------------------
             elif sinv_doc.ist_hv_rechnung:
                 camt_hv_update(camt_import)
             elif sinv_doc.ist_spenden_rechnung:
@@ -449,6 +462,11 @@ def verabreite_ueberzahlung(camt_import, ueberzahlung, sinv_doc):
             mitgliedschaftsjahr = int(frappe.db.get_value('Mitgliedschaft', sinv_doc.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr'))
             if mitgliedschaftsjahr < int(sinv_doc.mitgliedschafts_jahr):
                 mitgliedschaftsjahr = int(sinv_doc.mitgliedschafts_jahr)
+            # Trello 909: Wenn Zahlungseingang zwischen 15.09.xx und 31.12.xx muss die Mitgliedschaft für das Folgejahr zählen
+            folgejahr = check_folgejahr_date(ueberzahlung.posting_date)
+            if folgejahr:
+                mitgliedschaftsjahr = folgejahr
+            # ----------------------------------------------------------------------------------------------------------------
             if int(frappe.db.get_value('Mitgliedschaft', sinv_doc.mv_mitgliedschaft, 'zahlung_hv')) < mitgliedschaftsjahr:
                 # create new HV RG
                 sektion = frappe.get_doc("Sektion", sinv_doc.sektion_id)
@@ -1030,7 +1048,6 @@ def mit_folgejahr_ausgleichen(pe):
                                         ORDER BY `mitgliedschafts_jahr` DESC""".format(mitgliedschaft=payment_entry.mv_mitgliedschaft), as_dict=True)[0].name
         sinv_to_copy = frappe.get_doc("Sales Invoice", sinv_to_copy_name)
         sinv = frappe.copy_doc(sinv_to_copy)
-        # ~ sinv.insert()
         sinv.mitgliedschafts_jahr = sinv_to_copy.mitgliedschafts_jahr + 1
         sinv.due_date = add_days(today(), 30)
         sinv.set_posting_time = 1
@@ -1064,3 +1081,12 @@ def mit_folgejahr_ausgleichen(pe):
         frappe.throw("Dieses Mitglied besitzt noch keine Rechnung.<br>Bitte erstellen Sie manuell eine Initial-Rechnung")
     
     return
+
+def check_folgejahr_date(date):
+    check = False
+    u_limit = getdate(getdate(today()).strftime("%Y") + "-09-15")
+    o_limit = getdate(getdate(today()).strftime("%Y") + "-12-31")
+    if getdate(date) >= u_limit:
+        if getdate(date) <= o_limit:
+            check = int(getdate(today()).strftime("%Y")) + 1
+    return check
