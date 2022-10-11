@@ -572,6 +572,12 @@ function kuendigung(frm) {
                                         if (entry.grund.split("Andere Gründe: ").length > 1) {
                                             abw_grund = entry.grund.split("Andere Gründe: ")[1];
                                         }
+                                    } else if (entry.idx == cur_frm.doc.status_change.length) {
+                                        if (entry.grund) {
+                                            default_grund = entry.grund;
+                                        } else {
+                                            default_grund = 'Keine Angabe';
+                                        }
                                     }
                                 } else if (entry.idx == cur_frm.doc.status_change.length) {
                                     if (entry.grund) {
@@ -1118,6 +1124,7 @@ function erstelle_rechnung(frm) {
             },
             callback: function(r)
             {
+                console.log(r.message);
                 if (r.message == 1) {
                     var dokument = 'Anmeldung mit EZ';
                     if (cur_frm.doc.status_c == 'Interessent*in') {
@@ -2153,6 +2160,7 @@ function erstelle_rechnung_sonstiges(frm) {
                                 }
                             },
                             {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0},
+                            {'fieldname': 'ohne_betrag', 'fieldtype': 'Check', 'label': 'Betrag ausblenden', 'reqd': 0, 'default': 0, 'hidden': 0},
                             {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 1, 'read_only': 1},
                             {
                                 label: "Rechnungs Artikel",
@@ -2219,6 +2227,12 @@ function erstelle_rechnung_sonstiges(frm) {
                             } else {
                                 var bar_bezahlt = null;
                             }
+                            
+                            if (values.ohne_betrag == 1) {
+                                var ohne_betrag = true;
+                            } else {
+                                var ohne_betrag = null;
+                            }
                             frappe.call({
                                 method: "mvd.mvd.utils.sonstige_rechnungen.create_rechnung_sonstiges",
                                 args:{
@@ -2228,7 +2242,8 @@ function erstelle_rechnung_sonstiges(frm) {
                                         'attach_as_pdf': true,
                                         'submit': true,
                                         'druckvorlage': values.druckvorlage,
-                                        'rechnungs_artikel': values.rechnungs_artikel
+                                        'rechnungs_artikel': values.rechnungs_artikel,
+                                        'ohne_betrag': ohne_betrag
                                 },
                                 freeze: true,
                                 freeze_message: 'Erstelle Rechnung (Sonstiges)...',

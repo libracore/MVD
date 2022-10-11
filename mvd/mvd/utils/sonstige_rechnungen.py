@@ -12,7 +12,7 @@ from frappe.utils.pdf import get_file_data_from_writer
 from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 
 @frappe.whitelist()
-def create_rechnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, kunde=False, druckvorlage=False, bezahlt=False, submit=False, attach_as_pdf=False, mv_mitgliedschaft=None):
+def create_rechnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, kunde=False, druckvorlage=False, bezahlt=False, submit=False, attach_as_pdf=False, mv_mitgliedschaft=None, ohne_betrag=False):
     if druckvorlage:
         sektion = frappe.get_doc("Druckvorlage", druckvorlage).sektion_id
     sektion = frappe.get_doc("Sektion", sektion)
@@ -71,7 +71,8 @@ def create_rechnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, 
         'sektions_code': str(sektion.sektion_id) or '00',
         'sektion_id': sektion.name,
         "items": item,
-        "druckvorlage": druckvorlage if druckvorlage else ''
+        "druckvorlage": druckvorlage if druckvorlage else '',
+        "ohne_betrag": 1 if ohne_betrag else 0
     })
     sinv.insert(ignore_permissions=True)
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)

@@ -111,6 +111,10 @@ class Mitgliedschaft(Document):
             if self.mahnstopp:
                 mahnstopp(self.name, self.mahnstopp)
             
+            # Anzahl M+W Update anhand Retouren in Folge
+            if self.retoure_in_folge and self.m_und_w > 0:
+                self.m_und_w = 0
+            
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
                 if self.creation == self.modified:
@@ -120,7 +124,7 @@ class Mitgliedschaft(Document):
                     # sende update an SP
                     send_mvm_to_sp(self, True)
                     # special case sektionswechsel nach ZH
-                    if self.wegzug_zu in ('MVZH', 'MVSO') and self.status_c == 'Wegzug':
+                    if self.wegzug_zu == 'MVZH' and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
     
     def remove_unnecessary_blanks(self):
@@ -428,8 +432,8 @@ class Mitgliedschaft(Document):
                 else:
                     if sinv.docstatus == 0:
                         sinv.delete()
-        
-        self.letzte_bearbeitung_von = 'User'
+        # hotfix aufgrund endlessloop zwischen ERPNext und SP
+        # ~ self.letzte_bearbeitung_von = 'User'
         
         return
     
@@ -459,7 +463,9 @@ class Mitgliedschaft(Document):
                     sinv_year = sinv.mitgliedschafts_jahr if sinv.mitgliedschafts_jahr and sinv.mitgliedschafts_jahr > 0 else getdate(pe.reference_date).strftime("%Y")
                     self.datum_hv_zahlung = pe.reference_date
             self.zahlung_hv = sinv_year
-            self.letzte_bearbeitung_von = 'User'
+            
+            # hotfix aufgrund endlessloop zwischen ERPNext und SP
+            # ~ self.letzte_bearbeitung_von = 'User'
         
         return
         
@@ -2203,7 +2209,8 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         "items": item,
         "druckvorlage": druckvorlage if druckvorlage else '',
         "exclude_from_payment_reminder_until": exclude_from_payment_reminder_until,
-        "rechnungs_jahresversand": rechnungs_jahresversand
+        "rechnungs_jahresversand": rechnungs_jahresversand,
+        "allocate_advances_automatically": 1 if rechnungs_jahresversand else 0
     })
     sinv.insert(ignore_permissions=True)
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
@@ -2268,6 +2275,11 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druck
     # erfassung Kündigung
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     mitgliedschaft.kuendigung = datum_kuendigung
+    new_line = ''
+    if mitgliedschaft.wichtig:
+        new_line = '\n'
+    mitgliedschaft.wichtig += '{0}Kündigungsgrund: {1}'.format(new_line, grund)
+    
     # erstelle status change log und Status-Änderung
     change_log_row = mitgliedschaft.append('status_change', {})
     change_log_row.datum = now()
@@ -2455,7 +2467,7 @@ def mvm_update(mitgliedschaft, kwargs):
                     else:
                         kuendigung = mitgliedschaft.kuendigung
                 else:
-                    if sektion_id in ('MVZH', 'MVSO'):
+                    if sektion_id == 'MVZH':
                         kuendigung = kwargs['kuendigungPer'].split("T")[0]
                     else:
                         kuendigung = mitgliedschaft.kuendigung
@@ -2587,8 +2599,8 @@ def mvm_update(mitgliedschaft, kwargs):
                         mitgliedschaft.status_c = 'Online-Mutation'
                     
             
-            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH und MVSO
-            if mitgliedschaft.zuzug_von in ('MVZH', 'MVSO') and mitgliedschaft.status_c == 'Zuzug':
+            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
+            if mitgliedschaft.zuzug_von == 'MVZH' and mitgliedschaft.status_c == 'Zuzug':
                 if not mitgliedschaft.zuzug:
                     mitgliedschaft.zuzug = today()
             
@@ -2735,7 +2747,7 @@ def mvm_neuanlage(kwargs):
             
             if kwargs['datumOnlineVerbucht']:
                 datum_online_verbucht = kwargs['datumOnlineVerbucht']
-                if zuzug_von not in ('MVZH', 'MVSO'):
+                if zuzug_von != 'MVZH':
                     datum_zahlung_mitgliedschaft = datum_online_verbucht.split("T")[0]
                 else:
                     datum_zahlung_mitgliedschaft = None
@@ -2813,6 +2825,14 @@ def mvm_neuanlage(kwargs):
                         if int(online_haftpflicht) == 1:
                             new_mitgliedschaft.datum_hv_zahlung = eintritt
                             new_mitgliedschaft.zahlung_hv = int(getdate(eintritt).strftime("%Y"))
+                            
+                            # Trello 909: Bei Online-Beitritten zwischen 15.09.xx und 31.12.xx muss die HV für das Folgejahr gelten.
+                            u_limit = getdate(getdate(eintritt).strftime("%Y") + "-09-15")
+                            o_limit = getdate(getdate(eintritt).strftime("%Y") + "-12-31")
+                            if getdate(eintritt) >= u_limit:
+                                if getdate(eintritt) <= o_limit:
+                                    new_mitgliedschaft.zahlung_hv += 1
+                            # ------------------------------------------------------------------------------------------------------
                     new_mitgliedschaft.datum_zahlung_mitgliedschaft = eintritt
             else:
                 if kwargs['needsValidation']:
@@ -2821,8 +2841,8 @@ def mvm_neuanlage(kwargs):
                         new_mitgliedschaft.status_vor_onl_mutation = status_c
                         new_mitgliedschaft.status_c = 'Online-Mutation'
             
-            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH und MVSO
-            if new_mitgliedschaft.zuzug_von in ('MVZH', 'MVSO') and new_mitgliedschaft.status_c == 'Zuzug':
+            # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
+            if new_mitgliedschaft.zuzug_von == 'MVZH' and new_mitgliedschaft.status_c == 'Zuzug':
                 if not new_mitgliedschaft.zuzug:
                     new_mitgliedschaft.zuzug = today()
             
@@ -3204,10 +3224,6 @@ def send_mvm_sektionswechsel(mitgliedschaft):
     neue_sektion = ''
     if mitgliedschaft.wegzug_zu == 'MVZH':
         neue_sektion = 'ZH'
-    elif mitgliedschaft.wegzug_zu == 'MVSO':
-        neue_sektion = 'SO'
-    elif mitgliedschaft.wegzug_zu == 'MVBE':
-        neue_sektion = 'BE'
     sektionswechsel(prepared_mvm, neue_sektion)
 
 def prepare_mvm_for_sp(mitgliedschaft):
@@ -3417,21 +3433,29 @@ def get_sprache(language='de'):
 # Hooks functions
 # -----------------------------------------------
 def sinv_check_zahlung_mitgliedschaft(sinv, event):
-    # mitgliedschaft speichern um SP Update zu triggern und höchste Mahnstufe zu setzen
-    if sinv.mv_mitgliedschaft:
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
-        try:
-            sql_query = ("""SELECT MAX(`payment_reminder_level`) AS `max` FROM `tabSales Invoice` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Overdue'""".format(mitgliedschaft=mitgliedschaft.name))
-            max_level = frappe.db.sql(sql_query, as_dict=True)[0]['max']
-            if not max_level:
+    skip = False
+    if sinv.rechnungs_jahresversand:
+        from frappe.utils.data import add_to_date
+        ref_date = add_to_date(date=sinv.creation, hours=1)
+        if sinv.modified < ref_date:
+            skip = True
+    
+    if not skip:
+        # mitgliedschaft speichern um SP Update zu triggern und höchste Mahnstufe zu setzen
+        if sinv.mv_mitgliedschaft:
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
+            try:
+                sql_query = ("""SELECT MAX(`payment_reminder_level`) AS `max` FROM `tabSales Invoice` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Overdue'""".format(mitgliedschaft=mitgliedschaft.name))
+                max_level = frappe.db.sql(sql_query, as_dict=True)[0]['max']
+                if not max_level:
+                    max_level = 0
+            except:
                 max_level = 0
-        except:
-            max_level = 0
-        sinv_max_level = int(sinv.payment_reminder_level or 0)
-        if max_level < sinv_max_level:
-            max_level = sinv_max_level
-        mitgliedschaft.max_reminder_level = max_level
-        mitgliedschaft.save(ignore_permissions=True)
+            sinv_max_level = int(sinv.payment_reminder_level or 0)
+            if max_level < sinv_max_level:
+                max_level = sinv_max_level
+            mitgliedschaft.max_reminder_level = max_level
+            mitgliedschaft.save(ignore_permissions=True)
 
 def pe_check_zahlung_mitgliedschaft(pe, event):
     for ref in pe.references:
@@ -3439,6 +3463,7 @@ def pe_check_zahlung_mitgliedschaft(pe, event):
             sinv = frappe.get_doc("Sales Invoice", ref.reference_name)
             if sinv.mv_mitgliedschaft:
                 mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
+                mitgliedschaft.letzte_bearbeitung_von = 'User'
                 mitgliedschaft.save(ignore_permissions=True)
 
 # -----------------------------------------------
@@ -3828,11 +3853,11 @@ def wieder_beitritt(mitgliedschaft):
     mitgliedschafts_copy.begruessung_via_zahlung = 0
     mitgliedschafts_copy.begruessung_massendruck_dokument = None
     
-    mitgliedschafts_copy.insert()
+    mitgliedschafts_copy.insert(ignore_permissions=True)
     frappe.db.commit()
     
     mitgliedschafts_copy.validierung_notwendig = 0
-    mitgliedschafts_copy.save()
+    mitgliedschafts_copy.save(ignore_permissions=True)
     
     alte_mitgliedschaft.add_comment('Comment', text='Mitgliedschaft (als Anmeldung) mittels {0} ({1}) reaktiviert.'.format(mitgliedschafts_copy.mitglied_nr, mitgliedschafts_copy.name))
     mitgliedschafts_copy.add_comment('Comment', text='Reaktivierte Mitgliedschaft aus {0} ({1})'.format(alte_mitgliedschaft.mitglied_nr, alte_mitgliedschaft.name))
@@ -3841,6 +3866,7 @@ def wieder_beitritt(mitgliedschaft):
 
 @frappe.whitelist()
 def check_erstelle_rechnung(mitgliedschaft, typ, sektion, jahr=False):
+    gratis_case = False
     if not jahr:
         jahr = int(getdate(today()).strftime("%Y"))
     else:
@@ -3849,15 +3875,19 @@ def check_erstelle_rechnung(mitgliedschaft, typ, sektion, jahr=False):
         gratis_bis_ende_jahr = frappe.get_value("Sektion", sektion, "gratis_bis_ende_jahr")
         gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(gratis_bis_ende_jahr).strftime("%d"))
         if getdate(today()) >= gratis_ab:
-            jahr += 1
-                    
-    vorhandene_rechnungen = frappe.db.sql("""SELECT
-                                                COUNT(`name`) AS `qty`
-                                            FROM `tabSales Invoice`
-                                            WHERE `docstatus` = 1
-                                            AND `ist_mitgliedschaftsrechnung` = 1
-                                            AND `mv_mitgliedschaft` = '{mitgliedschaft}'
-                                            AND `mitgliedschafts_jahr` = '{jahr}'""".format(mitgliedschaft=mitgliedschaft, jahr=jahr), as_dict=True)[0].qty
+            gratis_case = True
+    
+    if not gratis_case:
+        vorhandene_rechnungen = frappe.db.sql("""SELECT
+                                                    COUNT(`name`) AS `qty`
+                                                FROM `tabSales Invoice`
+                                                WHERE `docstatus` = 1
+                                                AND `ist_mitgliedschaftsrechnung` = 1
+                                                AND `mv_mitgliedschaft` = '{mitgliedschaft}'
+                                                AND `mitgliedschafts_jahr` = '{jahr}'""".format(mitgliedschaft=mitgliedschaft, jahr=jahr), as_dict=True)[0].qty
+    else:
+        vorhandene_rechnungen = 0
+    
     if vorhandene_rechnungen < 1:
         return 1
     else:
