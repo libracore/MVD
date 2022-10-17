@@ -13,6 +13,7 @@ from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
 from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
 from frappe.utils.pdf import get_file_data_from_writer
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
+from frappe import _
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
@@ -1932,18 +1933,18 @@ def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
         if int(mitgliedschaft.unabhaengiger_debitor) == 1:
             # Rechnungs Anrede
             if mitgliedschaft.rg_anrede == 'Herr':
-                return 'Sehr geehrter Herr {nachname}'.format(nachname=mitgliedschaft.rg_nachname)
+                return _('Sehr geehrter Herr {nachname}', mitgliedschaft.language or 'de').format(nachname=mitgliedschaft.rg_nachname)
             elif mitgliedschaft.rg_anrede == 'Frau':
-                return 'Sehr geehrte Frau {nachname}'.format(nachname=mitgliedschaft.rg_nachname)
+                return _('Sehr geehrte Frau {nachname}', mitgliedschaft.language or 'de').format(nachname=mitgliedschaft.rg_nachname)
             else:
-                return 'Guten Tag {vorname} {nachname}'.format(vorname=mitgliedschaft.rg_vorname or '', nachname=mitgliedschaft.rg_nachname)
+                return _('Guten Tag {vorname} {nachname}', mitgliedschaft.language or 'de').format(vorname=mitgliedschaft.rg_vorname or '', nachname=mitgliedschaft.rg_nachname)
         else:
             if mitgliedschaft.anrede == 'Herr':
-                return 'Sehr geehrter Herr {nachname}'.format(nachname=mitgliedschaft.nachname)
+                return _('Sehr geehrter Herr {nachname}', mitgliedschaft.language or 'de').format(nachname=mitgliedschaft.nachname)
             elif mitgliedschaft.anrede == 'Frau':
-                return 'Sehr geehrte Frau {nachname}'.format(nachname=mitgliedschaft.nachname)
+                return _('Sehr geehrte Frau {nachname}', mitgliedschaft.language or 'de').format(nachname=mitgliedschaft.nachname)
             else:
-                return 'Guten Tag {vorname} {nachname}'.format(vorname=mitgliedschaft.vorname or '', nachname=mitgliedschaft.nachname)
+                return _('Guten Tag {vorname} {nachname}', mitgliedschaft.language or 'de').format(vorname=mitgliedschaft.vorname or '', nachname=mitgliedschaft.nachname)
     
     if mitgliedschaft.hat_solidarmitglied and not rg:
         # mit Solidarmitglied
@@ -1951,69 +1952,69 @@ def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
             # enthält neutrale Anrede
             if mitgliedschaft.nachname_1 == mitgliedschaft.nachname_2 and mitgliedschaft.vorname_1 == mitgliedschaft.vorname_2:
                 # gleiche Namen Fallback
-                return 'Guten Tag'
+                return _('Guten Tag', mitgliedschaft.language or 'de')
             else:
-                return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                return _('Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}', mitgliedschaft.language or 'de').format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
         else:
             if mitgliedschaft.anrede_c == mitgliedschaft.anrede_2:
                 # selbes Geschlecht
                 if mitgliedschaft.nachname_1 == mitgliedschaft.nachname_2:
                     # gleiche Nachnamen
                     if mitgliedschaft.anrede_c == 'Herr':
-                        return 'Sehr geehrter Herr {vorname_1} {nachname_1}, sehr geehrter Herr {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                        return _('Sehr geehrter Herr {vorname_1} {nachname_1}, sehr geehrter Herr {vorname_2} {nachname_2}', mitgliedschaft.language or 'de').format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
                     elif mitgliedschaft.anrede_c == 'Frau':
-                        return 'Sehr geehrte Frau {vorname_1} {nachname_1}, sehr geehrte Frau {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                        return _('Sehr geehrte Frau {vorname_1} {nachname_1}, sehr geehrte Frau {vorname_2} {nachname_2}', mitgliedschaft.language or 'de').format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
                     else:
                         # Fallback
-                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                        return _('Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}', mitgliedschaft.language or 'de').format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
                 else:
                     # unterschiedliche Nachnamen
                     if mitgliedschaft.anrede_c == 'Herr':
-                        return 'Sehr geehrter Herr {nachname_1}, sehr geehrter Herr {nachname_2}'.format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
+                        return _('Sehr geehrter Herr {nachname_1}, sehr geehrter Herr {nachname_2}', mitgliedschaft.language or 'de').format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
                     elif mitgliedschaft.anrede_c == 'Frau':
-                        return 'Sehr geehrte Frau {nachname_1}, sehr geehrte Frau {nachname_2}'.format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
+                        return _('Sehr geehrte Frau {nachname_1}, sehr geehrte Frau {nachname_2}', mitgliedschaft.language or 'de').format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
                     else:
                         # Fallback
-                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                        return _('Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}', mitgliedschaft.language or 'de').format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
             else:
                 # unterschiedliches Geschlecht
                 if mitgliedschaft.nachname_1 == mitgliedschaft.nachname_2:
                     # gleiche Nachnamen
                     if mitgliedschaft.anrede_c == 'Herr':
-                        return 'Sehr geehrte Herr und Frau {nachname_1}'.format(nachname_1=mitgliedschaft.nachname_1)
+                        return _('Sehr geehrte Herr und Frau {nachname_1}', mitgliedschaft.language or 'de').format(nachname_1=mitgliedschaft.nachname_1)
                     elif mitgliedschaft.anrede_c == 'Frau':
-                        return 'Sehr geehrte Frau und Herr {nachname_1}'.format(nachname_1=mitgliedschaft.nachname_1)
+                        return _('Sehr geehrte Frau und Herr {nachname_1}', mitgliedschaft.language or 'de').format(nachname_1=mitgliedschaft.nachname_1)
                     else:
                         # Fallback
-                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                        return _('Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}', mitgliedschaft.language or 'de').format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
                 else:
                     # unterschiedliche Nachnamen
                     if mitgliedschaft.anrede_c == 'Herr':
-                        return 'Sehr geehrter Herr {nachname_1}, sehr geehrte Frau {nachname_2}'.format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
+                        return _('Sehr geehrter Herr {nachname_1}, sehr geehrte Frau {nachname_2}', mitgliedschaft.language or 'de').format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
                     elif mitgliedschaft.anrede_c == 'Frau':
-                        return 'Sehr geehrte Frau {nachname_1}, sehr geehrter Herr {nachname_2}'.format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
+                        return _('Sehr geehrte Frau {nachname_1}, sehr geehrter Herr {nachname_2}', mitgliedschaft.language or 'de').format(nachname_1=mitgliedschaft.nachname_1, nachname_2=mitgliedschaft.nachname_2)
                     else:
                         # Fallback
-                        return 'Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}'.format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
+                        return _('Guten Tag {vorname_1} {nachname_1} und {vorname_2} {nachname_2}', mitgliedschaft.language or 'de').format(vorname_1=mitgliedschaft.vorname_1 or '', nachname_1=mitgliedschaft.nachname_1, vorname_2=mitgliedschaft.vorname_2, nachname_2=mitgliedschaft.nachname_2)
         
     else:
         if not rg:
             # ohne Solidarmitglied
             if mitgliedschaft.anrede_c == 'Herr':
-                return 'Sehr geehrter Herr {nachname}'.format(nachname=mitgliedschaft.nachname_1)
+                return _('Sehr geehrter Herr {nachname}', mitgliedschaft.language or 'de').format(nachname=mitgliedschaft.nachname_1)
             elif mitgliedschaft.anrede_c == 'Frau':
-                return 'Sehr geehrte Frau {nachname}'.format(nachname=mitgliedschaft.nachname_1)
+                return _('Sehr geehrte Frau {nachname}', mitgliedschaft.language or 'de').format(nachname=mitgliedschaft.nachname_1)
             else:
-                return 'Guten Tag {vorname} {nachname}'.format(vorname=mitgliedschaft.vorname_1 or '', nachname=mitgliedschaft.nachname_1)
+                return _('Guten Tag {vorname} {nachname}', mitgliedschaft.language or 'de').format(vorname=mitgliedschaft.vorname_1 or '', nachname=mitgliedschaft.nachname_1)
         else:
             if int(mitgliedschaft.unabhaengiger_debitor) == 1:
                 # Rechnungs Anrede
                 if mitgliedschaft.rg_anrede == 'Herr':
-                    return 'Sehr geehrter Herr {nachname}'.format(nachname=mitgliedschaft.rg_nachname)
+                    return _('Sehr geehrter Herr {nachname}', mitgliedschaft.language or 'de').format(nachname=mitgliedschaft.rg_nachname)
                 elif mitgliedschaft.rg_anrede == 'Frau':
-                    return 'Sehr geehrte Frau {nachname}'.format(nachname=mitgliedschaft.rg_nachname)
+                    return _('Sehr geehrte Frau {nachname}', mitgliedschaft.language or 'de').format(nachname=mitgliedschaft.rg_nachname)
                 else:
-                    return 'Guten Tag {vorname} {nachname}'.format(vorname=mitgliedschaft.rg_vorname or '', nachname=mitgliedschaft.rg_nachname)
+                    return _('Guten Tag {vorname} {nachname}', mitgliedschaft.language or 'de').format(vorname=mitgliedschaft.rg_vorname or '', nachname=mitgliedschaft.rg_nachname)
             else:
                 return get_anredekonvention(self=mitgliedschaft)
 
