@@ -26,6 +26,7 @@ def get_draft_csv(jahresversand=None):
         'firma',
         'zusatz_firma',
         'anrede',
+        'briefanrede',
         'vorname_1',
         'nachname_1',
         'vorname_2',
@@ -116,6 +117,7 @@ def get_draft_csv(jahresversand=None):
                     row_data.append("")
                     row_data.append("")
                 row_data.append(mitgliedschaft.rg_anrede or '')
+                row_data.append(mitgliedschaft.rg_briefanrede or '')
                 row_data.append(mitgliedschaft.rg_vorname or '')
                 row_data.append(mitgliedschaft.rg_nachname or '')
                 row_data.append("")
@@ -129,6 +131,7 @@ def get_draft_csv(jahresversand=None):
                     row_data.append("")
                     row_data.append("")
                 row_data.append(mitgliedschaft.anrede_c or '')
+                row_data.append(mitgliedschaft.rg_briefanrede or '')
                 row_data.append(mitgliedschaft.vorname_1 or '')
                 row_data.append(mitgliedschaft.nachname_1 or '')
                 if mitgliedschaft.hat_solidarmitglied:
@@ -257,6 +260,7 @@ def get_draft_csv(jahresversand=None):
                     row_data.append("")
                     row_data.append("")
                 row_data.append(mitgliedschaft.anrede_c or '')
+                row_data.append(mitgliedschaft.rg_briefanrede or '')
                 row_data.append(mitgliedschaft.vorname_1 or '')
                 row_data.append(mitgliedschaft.nachname_1 or '')
                 if mitgliedschaft.hat_solidarmitglied:
@@ -521,6 +525,7 @@ def get_csv(jahresversand):
         'firma',
         'zusatz_firma',
         'anrede',
+        'briefanrede',
         'vorname_1',
         'nachname_1',
         'vorname_2',
@@ -597,6 +602,7 @@ def get_csv(jahresversand):
                     row_data.append("")
                     row_data.append("")
                 row_data.append(mitgliedschaft.rg_anrede or '')
+                row_data.append(mitgliedschaft.rg_briefanrede or '')
                 row_data.append(mitgliedschaft.rg_vorname or '')
                 row_data.append(mitgliedschaft.rg_nachname or '')
                 row_data.append("")
@@ -610,6 +616,7 @@ def get_csv(jahresversand):
                     row_data.append("")
                     row_data.append("")
                 row_data.append(mitgliedschaft.anrede_c or '')
+                row_data.append(mitgliedschaft.rg_briefanrede or '')
                 row_data.append(mitgliedschaft.vorname_1 or '')
                 row_data.append(mitgliedschaft.nachname_1 or '')
                 if mitgliedschaft.hat_solidarmitglied:
