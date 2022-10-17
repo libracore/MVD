@@ -2278,7 +2278,9 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druck
     new_line = ''
     if mitgliedschaft.wichtig:
         new_line = '\n'
-    mitgliedschaft.wichtig += '{0}Kündigungsgrund: {1}'.format(new_line, grund)
+        mitgliedschaft.wichtig += '\nKündigungsgrund: {0}'.format(grund)
+    else:
+        mitgliedschaft.wichtig = 'Kündigungsgrund: {0}'.format(grund)
     
     # erstelle status change log und Status-Änderung
     change_log_row = mitgliedschaft.append('status_change', {})
