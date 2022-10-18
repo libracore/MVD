@@ -37,24 +37,24 @@ def get_data():
                     "label": _("Arbeits-Backlog"),
                     "description": _("Zu erledigende Aufgaben")
                 },
-                # ~ {
-                    # ~ "type": "doctype",
-                    # ~ "name": "Rechnungs Jahresversand",
-                    # ~ "label": _("Rechnungs Jahresversand"),
-                    # ~ "description": _("Rechnungs Jahresversand")
-                # ~ },
+                {
+                    "type": "doctype",
+                    "name": "Rechnungs Jahresversand",
+                    "label": _("Rechnungs Jahresversand"),
+                    "description": _("Rechnungs Jahresversand")
+                },
                 {
                     "type": "doctype",
                     "name": "Spendenversand",
                     "label": _("Spendenversand"),
                     "description": _("Spendenversand")
                 },
-                # ~ {
-                    # ~ "type": "doctype",
-                    # ~ "name": "Massenlauf Inaktivierung",
-                    # ~ "label": _("Massenlauf Inaktivierung"),
-                    # ~ "description": _("Massenlauf Inaktivierung")
-                # ~ },
+                {
+                    "type": "doctype",
+                    "name": "Massenlauf Inaktivierung",
+                    "label": _("Massenlauf Inaktivierung"),
+                    "description": _("Massenlauf Inaktivierung")
+                },
                 {
                     "type": "doctype",
                     "name": "CAMT Import",
