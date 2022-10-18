@@ -32,6 +32,7 @@
   "gratis_bis_ende_jahr",
   "pos_barzahlung",
   "betrag_hv",
+  "folgejahr_regelung",
   "section_camt_import",
   "default_customer",
   "cb_5",
@@ -303,9 +304,16 @@
    "fieldname": "keine_mitgliedschaftssektion",
    "fieldtype": "Check",
    "label": "Keine Mitgliedschaftssektion"
+  },
+  {
+   "default": "0",
+   "description": "Diese Checkbox bewirkt, dass das Datum des Zahlungseingangs f\u00fcr das Mitgliedschafts- respektive HV-Jahr ber\u00fccksichtigt wird.",
+   "fieldname": "folgejahr_regelung",
+   "fieldtype": "Check",
+   "label": "Folgejahr Regelung aktiviert"
   }
  ],
- "modified": "2022-09-07 09:35:10.954777",
+ "modified": "2022-10-18 11:16:08.230343",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
