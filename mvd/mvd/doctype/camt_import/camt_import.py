@@ -843,6 +843,100 @@ def aktualisiere_camt_uebersicht(camt_import):
                     camt_spenden_update(camt_import)
                 elif int(frappe.db.get_value('Sales Invoice', reference.reference_name, 'ist_sonstige_rechnung')) == 1:
                     camt_produkte_update(camt_import)
+    
+    # update report data
+    verbuchte_zahlungen_gegen_rechnung = frappe.db.sql("""SELECT
+                                                            SUM(`amount`) AS `amount`,
+                                                            `item_code`
+                                                        FROM `tabSales Invoice Item` WHERE `parent` IN (
+                                                            SELECT DISTINCT
+                                                                `reference_name`
+                                                            FROM `tabPayment Entry Reference`
+                                                            WHERE `parent` IN (
+                                                                SELECT
+                                                                    `name`
+                                                                FROM `tabPayment Entry`
+                                                                WHERE `camt_import` = '{camt_import}'
+                                                                AND `docstatus` = 1
+                                                            )
+                                                        )
+                                                        GROUP BY `item_code`""".format(camt_import=camt_import), as_dict=True)
+    
+    verbuchte_guthaben = frappe.db.sql("""SELECT
+                                                SUM(`unallocated_amount`) AS `amount`,
+                                                `mv_mitgliedschaft` AS `mitgliedschaft`
+                                            FROM `tabPayment Entry`
+                                            WHERE `camt_import` = '{camt_import}'
+                                            AND `mv_mitgliedschaft` IS NOT NULL
+                                            AND `docstatus` = 1
+                                            AND `unallocated_amount` > 0
+                                            GROUP BY `mv_mitgliedschaft`""".format(camt_import=camt_import), as_dict=True)
+    
+    falsch_verbuchte_guthaben = frappe.db.sql("""SELECT
+                                                        `unallocated_amount` AS `amount`,
+                                                        `name`
+                                                    FROM `tabPayment Entry`
+                                                    WHERE `camt_import` = '{camt_import}'
+                                                    AND `mv_mitgliedschaft` IS NULL
+                                                    AND `docstatus` = 1""".format(camt_import=camt_import), as_dict=True)
+    
+    report_data = ''
+    if len(verbuchte_zahlungen_gegen_rechnung) > 0:
+        report_data += """<h2>Artikel Aufschlüsselung</h2>
+                        <table style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Artikel</th>
+                                    <th>Betrag</th>
+                                </tr>
+                            </thead>
+                            <tbody>"""
+        for entry in verbuchte_zahlungen_gegen_rechnung:
+            report_data += """
+                            <tr>
+                                <td>{0}</td>
+                                <td>{1}</td>
+                            </tr>""".format(frappe.get_value("Item", entry.item_code, "item_name"), entry.amount)
+        report_data += """</tbody></table>"""
+    
+    if len(verbuchte_guthaben) > 0:
+        report_data += """<h2>Verbuchte Guthaben</h2>
+                        <table style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Mitglied</th>
+                                    <th>Betrag</th>
+                                </tr>
+                            </thead>
+                            <tbody>"""
+        for entry in verbuchte_guthaben:
+            report_data += """
+                            <tr>
+                                <td>{0}</td>
+                                <td>{1}</td>
+                            </tr>""".format("""<a href="/desk#Form/Mitgliedschaft/{0}">""".format(entry.mitgliedschaft) + str(frappe.get_value("Mitgliedschaft", entry.mitgliedschaft, "mitglied_nr")) + """</a>""", entry.amount)
+        report_data += """</tbody></table>"""
+    
+    if len(falsch_verbuchte_guthaben) > 0:
+        report_data += """<h2>Falsch verbuchte Guthaben</h2>
+                        <table style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Zahlung</th>
+                                    <th>Betrag</th>
+                                </tr>
+                            </thead>
+                            <tbody>"""
+        for entry in verbuchte_guthaben:
+            report_data += """
+                            <tr>
+                                <td>{0}</td>
+                                <td>{1}</td>
+                            </tr>""".format("""<a href="/desk#Form/Payment Entry/{pe}">{pe}</a>""".format(pe=entry.name), entry.amount)
+        report_data += """</tbody></table>"""
+    
+    
+    frappe.db.set_value('CAMT Import', camt_import, 'report', report_data)
 
 @frappe.whitelist()
 def mit_spende_ausgleichen(pe):

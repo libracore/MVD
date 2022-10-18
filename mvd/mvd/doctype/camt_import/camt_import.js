@@ -180,16 +180,20 @@ function import_payments(frm) {
 function aktualisiere_camt_uebersicht(frm) {
     //~ cur_frm.set_value("status", "In Verarbeitung");
     //~ cur_frm.save().then(function(){
-    frappe.call({
-        method: 'mvd.mvd.doctype.camt_import.camt_import.aktualisiere_camt_uebersicht',
-        args: {
-            'camt_import': cur_frm.doc.name
-        },
-        freeze: true,
-        freeze_message: 'Analysiere Daten...',
-        callback: function(r) {
-            cur_frm.reload_doc();
-        }
-    });
+    if (!cur_frm.doc.version_1) {
+        frappe.call({
+            method: 'mvd.mvd.doctype.camt_import.camt_import.aktualisiere_camt_uebersicht',
+            args: {
+                'camt_import': cur_frm.doc.name
+            },
+            freeze: true,
+            freeze_message: 'Analysiere Daten...',
+            callback: function(r) {
+                cur_frm.reload_doc();
+            }
+        });
+    } else {
+        frappe.msgprint("Dieser Datensatz wurde mit einer vorgänger Version des CAMT Importers erzeugt.", "Diese Funktion steht leider nicht zur Verfügung");
+    }
     //~ });
 }
