@@ -60,6 +60,10 @@ class Mitgliedschaft(Document):
             # update Zahlung HV
             self.check_zahlung_hv()
             
+            # Prüfe Jahr Bezahlt (Mitgliedschaft & HV) bezgl. Folgejahr Regelung
+            if self.status_c != 'Inaktiv':
+                self.check_folgejahr_regelung()
+            
             # preisregel
             self.check_preisregel()
             
@@ -354,8 +358,11 @@ class Mitgliedschaft(Document):
                                 ORDER BY `mitgliedschafts_jahr` DESC""".format(mvm=self.name), as_dict=True)
         if len(sinvs) > 0:
             sinv = sinvs[0]
+            sinv_year = int(sinv.mitgliedschafts_jahr)
             if sinv.is_pos == 1:
-                sinv_year = getdate(sinv.posting_date).strftime("%Y")
+                # Fallback wenn sinv.mitgliedschafts_jahr == 0
+                if sinv_year < 1:
+                    sinv_year = getdate(sinv.posting_date).strftime("%Y")
                 self.datum_zahlung_mitgliedschaft = sinv.posting_date
             else:
                 pes = frappe.db.sql("""SELECT `parent` FROM `tabPayment Entry Reference`
@@ -363,14 +370,13 @@ class Mitgliedschaft(Document):
                                         AND `reference_name` = '{sinv}' ORDER BY `creation` DESC""".format(sinv=sinv.name), as_dict=True)
                 if len(pes) > 0:
                     pe = frappe.get_doc("Payment Entry", pes[0].parent)
-                    sinv_year = getdate(pe.reference_date).strftime("%Y")
+                    # Fallback wenn sinv.mitgliedschafts_jahr == 0
+                    if sinv_year < 1:
+                        sinv_year = getdate(pe.reference_date).strftime("%Y")
                     self.datum_zahlung_mitgliedschaft = pe.reference_date
-                else:
-                    sinv_year = 0
-            self.zahlung_mitgliedschaft = sinv_year
             
-            if self.bezahltes_mitgliedschaftsjahr < sinv.mitgliedschafts_jahr:
-                self.bezahltes_mitgliedschaftsjahr = sinv.mitgliedschafts_jahr
+            if self.bezahltes_mitgliedschaftsjahr < sinv_year:
+                self.bezahltes_mitgliedschaftsjahr = sinv_year
         
         current_year = int(now().split("-")[0])
         if int(self.zahlung_mitgliedschaft) > current_year:
@@ -433,8 +439,6 @@ class Mitgliedschaft(Document):
                 else:
                     if sinv.docstatus == 0:
                         sinv.delete()
-        # hotfix aufgrund endlessloop zwischen ERPNext und SP
-        # ~ self.letzte_bearbeitung_von = 'User'
         
         return
     
@@ -464,9 +468,31 @@ class Mitgliedschaft(Document):
                     sinv_year = sinv.mitgliedschafts_jahr if sinv.mitgliedschafts_jahr and sinv.mitgliedschafts_jahr > 0 else getdate(pe.reference_date).strftime("%Y")
                     self.datum_hv_zahlung = pe.reference_date
             self.zahlung_hv = sinv_year
+        
+        return
+    
+    def check_folgejahr_regelung(self):
+        # prüfe ob Folgejahr Regelung der Sektion aktiviert ist:
+        if int(frappe.get_value("Sektion", self.sektion_id, "folgejahr_regelung")) == 1:
+            # prüfe Mitgliedschaftsjahr
+            datum_zahlung_mitgliedschaft = getdate(self.datum_zahlung_mitgliedschaft)
+            jahr_datum_zahlung_mitgliedschaft = int(datum_zahlung_mitgliedschaft.strftime("%Y"))
+            bezahltes_mitgliedschaftsjahr = int(self.bezahltes_mitgliedschaftsjahr)
             
-            # hotfix aufgrund endlessloop zwischen ERPNext und SP
-            # ~ self.letzte_bearbeitung_von = 'User'
+            if bezahltes_mitgliedschaftsjahr == jahr_datum_zahlung_mitgliedschaft:
+                current_year = str(now().split("-")[0])
+                if datum_zahlung_mitgliedschaft >= getdate(current_year + '-09-15') and datum_zahlung_mitgliedschaft <= getdate(current_year + '-12-31'):
+                    self.bezahltes_mitgliedschaftsjahr += 1
+            
+            # prüfe HV-Jahr
+            datum_hv_zahlung = getdate(self.datum_hv_zahlung)
+            jahr_datum_hv_zahlung = int(datum_hv_zahlung.strftime("%Y"))
+            zahlung_hv = int(self.zahlung_hv)
+            
+            if zahlung_hv == jahr_datum_hv_zahlung:
+                current_year = str(now().split("-")[0])
+                if datum_hv_zahlung >= getdate(current_year + '-09-15') and datum_hv_zahlung <= getdate(current_year + '-12-31'):
+                    self.zahlung_hv += 1
         
         return
         
