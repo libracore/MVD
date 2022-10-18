@@ -882,56 +882,50 @@ def aktualisiere_camt_uebersicht(camt_import):
     
     report_data = ''
     if len(verbuchte_zahlungen_gegen_rechnung) > 0:
-        report_data += """<h2>Artikel Aufschlüsselung</h2>
+        report_data += """<h3>Artikel Aufschlüsselung</h3>
                         <table style="width: 100%;">
-                            <thead>
+                            <tbody>
                                 <tr>
-                                    <th>Artikel</th>
-                                    <th>Betrag</th>
-                                </tr>
-                            </thead>
-                            <tbody>"""
+                                    <td style="text-align: left;">Artikel</td>
+                                    <td style="text-align: right;">Betrag</td>
+                                </tr>"""
         for entry in verbuchte_zahlungen_gegen_rechnung:
             report_data += """
                             <tr>
-                                <td>{0}</td>
-                                <td>{1}</td>
+                                <td style="text-align: left;">{0}</td>
+                                <td style="text-align: right;">{1}</td>
                             </tr>""".format(frappe.get_value("Item", entry.item_code, "item_name"), entry.amount)
         report_data += """</tbody></table>"""
     
     if len(verbuchte_guthaben) > 0:
-        report_data += """<h2>Verbuchte Guthaben</h2>
+        report_data += """<h3>Verbuchte Guthaben</h3>
                         <table style="width: 100%;">
-                            <thead>
+                            <tbody>
                                 <tr>
-                                    <th>Mitglied</th>
-                                    <th>Betrag</th>
-                                </tr>
-                            </thead>
-                            <tbody>"""
+                                    <td style="text-align: left;">Mitglied</td>
+                                    <td style="text-align: right;">Betrag</td>
+                                </tr>"""
         for entry in verbuchte_guthaben:
             report_data += """
                             <tr>
-                                <td>{0}</td>
-                                <td>{1}</td>
+                                <td style="text-align: left;">{0}</td>
+                                <td style="text-align: right;">{1}</td>
                             </tr>""".format("""<a href="/desk#Form/Mitgliedschaft/{0}">""".format(entry.mitgliedschaft) + str(frappe.get_value("Mitgliedschaft", entry.mitgliedschaft, "mitglied_nr")) + """</a>""", entry.amount)
         report_data += """</tbody></table>"""
     
     if len(falsch_verbuchte_guthaben) > 0:
         report_data += """<h2>Falsch verbuchte Guthaben</h2>
                         <table style="width: 100%;">
-                            <thead>
+                            <tbody>
                                 <tr>
-                                    <th>Zahlung</th>
-                                    <th>Betrag</th>
-                                </tr>
-                            </thead>
-                            <tbody>"""
+                                    <td style="text-align: left;">Zahlung</td>
+                                    <td style="text-align: right;">Betrag</td>
+                                </tr>"""
         for entry in verbuchte_guthaben:
             report_data += """
                             <tr>
-                                <td>{0}</td>
-                                <td>{1}</td>
+                                <td style="text-align: left;">{0}</td>
+                                <td style="text-align: right;">{1}</td>
                             </tr>""".format("""<a href="/desk#Form/Payment Entry/{pe}">{pe}</a>""".format(pe=entry.name), entry.amount)
         report_data += """</tbody></table>"""
     
