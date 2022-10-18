@@ -887,8 +887,8 @@ def aktualisiere_camt_uebersicht(camt_import):
                         <table style="width: 100%;">
                             <tbody>
                                 <tr>
-                                    <td style="text-align: left;">Artikel</td>
-                                    <td style="text-align: right;">Betrag</td>
+                                    <td style="text-align: left;"><b>Artikel</b></td>
+                                    <td style="text-align: right;"><b>Betrag</b></td>
                                 </tr>"""
         for entry in verbuchte_zahlungen_gegen_rechnung:
             report_data += """
@@ -903,8 +903,8 @@ def aktualisiere_camt_uebersicht(camt_import):
                         <table style="width: 100%;">
                             <tbody>
                                 <tr>
-                                    <td style="text-align: left;">Mitglied</td>
-                                    <td style="text-align: right;">Betrag</td>
+                                    <td style="text-align: left;"><b>Mitglied</b></td>
+                                    <td style="text-align: right;"><b>Betrag</b></td>
                                 </tr>"""
         for entry in verbuchte_guthaben:
             report_data += """
@@ -919,8 +919,8 @@ def aktualisiere_camt_uebersicht(camt_import):
                         <table style="width: 100%;">
                             <tbody>
                                 <tr>
-                                    <td style="text-align: left;">Zahlung</td>
-                                    <td style="text-align: right;">Betrag</td>
+                                    <td style="text-align: left;"><b>Zahlung</b></td>
+                                    <td style="text-align: right;"><b>Betrag</b></td>
                                 </tr>"""
         for entry in falsch_verbuchte_guthaben:
             report_data += """

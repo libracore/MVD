@@ -38,14 +38,14 @@
   "mitgliedschaften_qty",
   "spenden_qty",
   "guthaben_qty",
+  "section_report",
+  "report",
+  "html_report",
   "section_verarbeitungs_daten",
   "ausgelesene_zahlungen",
   "eingelesene_zahlungen",
   "nicht_eingelesene_zahlungen",
   "fehlgeschlagenes_auslesen",
-  "report",
-  "section_report",
-  "html_report",
   "section_redesign",
   "anz_importet_payments",
   "anz_matched_payments",
@@ -343,7 +343,9 @@
   },
   {
    "fieldname": "report",
-   "fieldtype": "Code"
+   "fieldtype": "Code",
+   "hidden": 1,
+   "read_only": 1
   },
   {
    "fieldname": "html_report",
@@ -522,7 +524,7 @@
    "read_only": 1
   }
  ],
- "modified": "2022-10-18 14:25:57.083223",
+ "modified": "2022-10-18 15:47:08.564460",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",
