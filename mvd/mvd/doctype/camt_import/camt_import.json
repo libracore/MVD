@@ -7,6 +7,9 @@
  "engine": "InnoDB",
  "field_order": [
   "camt_file",
+  "camt_file_datum",
+  "camt_taxen",
+  "camt_amount",
   "cb_1",
   "sektion_id",
   "company",
@@ -76,7 +79,8 @@
   "gebucht_weggezogen_list",
   "deleted_payments",
   "errors",
-  "master_data"
+  "master_data",
+  "version_1"
  ],
  "fields": [
   {
@@ -494,9 +498,33 @@
    "fieldname": "show_zugewiesen_unverbucht",
    "fieldtype": "Button",
    "label": "Zeige zugewiesene aber unverbuchte"
+  },
+  {
+   "default": "0",
+   "fieldname": "version_1",
+   "fieldtype": "Check",
+   "label": "Version 1"
+  },
+  {
+   "fieldname": "camt_file_datum",
+   "fieldtype": "Date",
+   "label": "CAMT File Datum",
+   "read_only": 1
+  },
+  {
+   "fieldname": "camt_taxen",
+   "fieldtype": "Currency",
+   "label": "CAMT Taxen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "camt_amount",
+   "fieldtype": "Currency",
+   "label": "CAMT Totalbetrag",
+   "read_only": 1
   }
  ],
- "modified": "2022-10-10 17:02:27.837774",
+ "modified": "2022-10-18 13:39:23.266015",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",

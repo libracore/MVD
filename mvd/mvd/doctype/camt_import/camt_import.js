@@ -3,6 +3,16 @@
 
 frappe.ui.form.on('CAMT Import', {
     refresh: function(frm) {
+        // hidding Version 1 of CAMT Importer
+        if (cur_frm.doc.version_1) {
+            cur_frm.set_df_property('section_steuerung','hidden', 1);
+            cur_frm.set_df_property('overview','hidden', 1);
+            cur_frm.set_df_property('section_verarbeitungs_daten','hidden', 1);
+            cur_frm.set_df_property('section_redesign','hidden', 1);
+            cur_frm.set_df_property('section_ungebucht','hidden', 1);
+            cur_frm.set_df_property('section_import','hidden', 1);
+        }
+        
         // auto save
         if (frm.doc.__islocal) {
            if (frappe.boot.default_sektion) {
