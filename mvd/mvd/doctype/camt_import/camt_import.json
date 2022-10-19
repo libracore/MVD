@@ -27,14 +27,17 @@
   "eingelesene_zahlungen_qty",
   "rg_match_qty",
   "verbuchte_zahlung_qty",
-  "hv_qty",
-  "produkte_qty",
-  "ueberzahlung_qty",
+  "stornierte_zahlungen_qty",
   "cb_4",
   "fehlgeschlagenes_auslesen_qty",
   "nicht_eingelesene_zahlungen_qty",
   "anz_unmatched_payments",
   "zugewiesen_unverbucht_qty",
+  "section_overview_2",
+  "hv_qty",
+  "produkte_qty",
+  "ueberzahlung_qty",
+  "cb_5",
   "mitgliedschaften_qty",
   "spenden_qty",
   "guthaben_qty",
@@ -522,9 +525,23 @@
    "fieldtype": "Currency",
    "label": "CAMT Totalbetrag",
    "read_only": 1
+  },
+  {
+   "fieldname": "stornierte_zahlungen_qty",
+   "fieldtype": "Int",
+   "label": "Stornierte Zahlungen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_overview_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cb_5",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-10-18 15:47:08.564460",
+ "modified": "2022-10-19 09:35:20.372455",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",

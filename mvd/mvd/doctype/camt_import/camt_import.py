@@ -410,7 +410,7 @@ def verbuche_matches(camt_import):
             elif sinv_doc.ist_sonstige_rechnung:
                 camt_produkte_update(camt_import)
             
-            if pe_doc.paid_amount <= sinv_doc.outstanding_amount:
+            if pe_doc.paid_amount <= sinv_doc.outstanding_amount or sinv_doc.ist_spenden_rechnung:
                 # Teilzahlung oder vollständige Bezahlung
                 row = pe_doc.append('references', {})
                 row.reference_doctype = "Sales Invoice"
@@ -419,6 +419,23 @@ def verbuche_matches(camt_import):
                 row.total_amount = sinv_doc.base_grand_total
                 row.outstanding_amount = sinv_doc.outstanding_amount
                 row.allocated_amount = pe_doc.paid_amount
+                
+                # bei Spendenrechnungen muss der gesammte (gerundete!) Betrag ausgeglichen werden
+                # Hierzu muss ggf. eine Rundungsdifferenz abgeschrieben werden
+                if sinv_doc.ist_spenden_rechnung:
+                    if sinv_doc.outstanding_amount > sinv_doc.base_grand_total:
+                        row.allocated_amount = sinv_doc.outstanding_amount
+                        deductions_row = pe_doc.append('deductions', {})
+                        deductions_row.account = frappe.db.get_value('Company', sinv_doc.company, 'write_off_account')
+                        deductions_row.cost_center = frappe.db.get_value('Company', sinv_doc.company, 'cost_center')
+                        deductions_row.amount = sinv_doc.rounding_adjustment
+                    else:
+                        row.allocated_amount = sinv_doc.outstanding_amount
+                        deductions_row = pe_doc.append('deductions', {})
+                        deductions_row.account = frappe.db.get_value('Company', sinv_doc.company, 'write_off_account')
+                        deductions_row.cost_center = frappe.db.get_value('Company', sinv_doc.company, 'cost_center')
+                        deductions_row.amount = sinv_doc.rounding_adjustment
+                
                 pe_doc.total_allocated_amount = pe_doc.paid_amount
                 pe_doc.unallocated_amount = 0
                 pe_doc.camt_status = 'Verbucht'
@@ -820,6 +837,13 @@ def aktualisiere_camt_uebersicht(camt_import):
                                             AND `unallocated_amount` > 0""".format(camt_import=camt_import), as_dict=True)[0].qty
     frappe.db.set_value('CAMT Import', camt_import, 'guthaben_qty', guthaben_qty)
     
+    # Stornierte Zahlungen
+    storno_qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty`
+                                            FROM `tabPayment Entry`
+                                            WHERE `camt_import` = '{camt_import}'
+                                            AND `docstatus` = 2""".format(camt_import=camt_import), as_dict=True)[0].qty
+    frappe.db.set_value('CAMT Import', camt_import, 'stornierte_zahlungen_qty', storno_qty)
+    
     # HV, Mitgliedschaften, Produkte und Spenden
     gebuchte_pes = frappe.db.sql("""SELECT `name`
                                     FROM `tabPayment Entry`
@@ -881,8 +905,18 @@ def aktualisiere_camt_uebersicht(camt_import):
                                                     AND `mv_mitgliedschaft` IS NULL
                                                     AND `docstatus` = 1""".format(camt_import=camt_import), as_dict=True)
     
+    nicht_gebuchte_pes = frappe.db.sql("""SELECT `name`
+                                    FROM `tabPayment Entry`
+                                    WHERE `camt_import` = '{camt_import}'
+                                    AND `docstatus` != 1""".format(camt_import=camt_import), as_dict=True)
+    
     report_data = ''
+    # nicht eingelesene Zahlungen
+    if int(frappe.db.get_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen_qty')) > 0:
+        report_data += """<p style="color: red;"><br>Achtung; {0} Zahlung(en) konnte(n) <u>nicht</u> eingelesen werden!</p>""".format(frappe.db.get_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen_qty'))
+    # Artikel Aufschlüsselung
     if len(verbuchte_zahlungen_gegen_rechnung) > 0:
+        totalbetrag = 0
         report_data += """<h3>Artikel Aufschlüsselung</h3>
                         <table style="width: 100%;">
                             <tbody>
@@ -893,11 +927,19 @@ def aktualisiere_camt_uebersicht(camt_import):
         for entry in verbuchte_zahlungen_gegen_rechnung:
             report_data += """
                             <tr>
-                                <td style="text-align: left;">{0}</td>
-                                <td style="text-align: right;">{1}</td>
-                            </tr>""".format(frappe.get_value("Item", entry.item_code, "item_name"), "{:,.2f}".format(entry.amount).replace(",", "'"))
+                                <td style="text-align: left;">{0} ({1})</td>
+                                <td style="text-align: right;">{2}</td>
+                            </tr>""".format(frappe.get_value("Item", entry.item_code, "item_name"), frappe.get_value("Item", entry.item_code, "sektion_id"), "{:,.2f}".format(entry.amount).replace(",", "'"))
+            totalbetrag += entry.amount
+        report_data += """
+                        <tr>
+                            <td style="text-align: left;"><b>Total</b></td>
+                            <td style="text-align: right;"><b>{0}</b></td>
+                        </tr>""".format("{:,.2f}".format(totalbetrag).replace(",", "'"))
+        
         report_data += """</tbody></table>"""
     
+    # Verbuchte Guthaben
     if len(verbuchte_guthaben) > 0:
         report_data += """<h3>Verbuchte Guthaben</h3>
                         <table style="width: 100%;">
@@ -911,9 +953,11 @@ def aktualisiere_camt_uebersicht(camt_import):
                             <tr>
                                 <td style="text-align: left;">{0}</td>
                                 <td style="text-align: right;">{1}</td>
-                            </tr>""".format("""<a href="/desk#Form/Mitgliedschaft/{0}">""".format(entry.mitgliedschaft) + str(frappe.get_value("Mitgliedschaft", entry.mitgliedschaft, "mitglied_nr")) + """</a>""", "{:,.2f}".format(entry.amount).replace(",", "'"))
+                            </tr>""".format("""<a href="/desk#Form/Mitgliedschaft/{0}">""".format(entry.mitgliedschaft) + str(frappe.get_value("Mitgliedschaft", entry.mitgliedschaft, "mitglied_nr")) + """</a>""", \
+                            "{:,.2f}".format(entry.amount).replace(",", "'"))
         report_data += """</tbody></table>"""
     
+    # Falsch verbuchte Guthaben
     if len(falsch_verbuchte_guthaben) > 0:
         report_data += """<h3>Falsch verbuchte Guthaben</h3>
                         <table style="width: 100%;">
@@ -928,6 +972,57 @@ def aktualisiere_camt_uebersicht(camt_import):
                                 <td style="text-align: left;">{0}</td>
                                 <td style="text-align: right;">{1}</td>
                             </tr>""".format("""<a href="/desk#Form/Payment Entry/{pe}">{pe}</a>""".format(pe=entry.name), "{:,.2f}".format(entry.amount).replace(",", "'"))
+        report_data += """</tbody></table>"""
+    
+    # Zahlungsliste (Verbucht)
+    if len(gebuchte_pes) > 0:
+        report_data += """<h3>Zahlungsliste (Verbucht)</h3>
+                        <table style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: left;"><b>Mitgliedschaft</b></td>
+                                    <td style="text-align: left;"><b>Details</b></td>
+                                    <td style="text-align: right;"><b>Betrag</b></td>
+                                </tr>"""
+        for pe in gebuchte_pes:
+            pe_doc = frappe.get_doc("Payment Entry", pe.name)
+            report_data += """
+                            <tr>
+                                <td style="text-align: left;">{0}</td>
+                                <td style="text-align: left;">{1}</td>
+                                <td style="text-align: right;">{2}</td>
+                            </tr>""".format("""<a href="/desk#Form/Mitgliedschaft/{0}">""".format(pe_doc.mv_mitgliedschaft) + str(frappe.get_value("Mitgliedschaft", pe_doc.mv_mitgliedschaft, "mitglied_nr")) + """</a>""", \
+                            pe_doc.remarks, \
+                            "{:,.2f}".format(pe_doc.paid_amount).replace(",", "'"))
+        report_data += """</tbody></table>"""
+    
+    # Zahlungsliste (Unverbucht)
+    if len(nicht_gebuchte_pes) > 0:
+        report_data += """<h3>Zahlungsliste (Unverbucht)</h3>
+                        <table style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: left;"><b>Mitgliedschaft</b></td>
+                                    <td style="text-align: left;"><b>Details</b></td>
+                                    <td style="text-align: right;"><b>Betrag</b></td>
+                                    <td style="text-align: right;"><b>Status</b></td>
+                                </tr>"""
+        for pe in nicht_gebuchte_pes:
+            pe_doc = frappe.get_doc("Payment Entry", pe.name)
+            if pe_doc.mv_mitgliedschaft:
+                mitgliedschafts_link_string = """<a href="/desk#Form/Mitgliedschaft/{0}">""".format(pe_doc.mv_mitgliedschaft) + str(frappe.get_value("Mitgliedschaft", pe_doc.mv_mitgliedschaft, "mitglied_nr")) + """</a>"""
+            else:
+                mitgliedschafts_link_string = '---'
+            report_data += """
+                            <tr>
+                                <td style="text-align: left;">{0}</td>
+                                <td style="text-align: left;">{1}</td>
+                                <td style="text-align: right;">{2}</td>
+                                <td style="text-align: right;">{3}</td>
+                            </tr>""".format(mitgliedschafts_link_string, \
+                            pe_doc.remarks, \
+                            "{:,.2f}".format(pe_doc.paid_amount).replace(",", "'"), \
+                            'Entwurf' if pe_doc.docstatus == 0 else 'Storniert')
         report_data += """</tbody></table>"""
     
     
@@ -1221,3 +1316,13 @@ def check_folgejahr_date(date):
         if getdate(date) <= o_limit:
             check = int(getdate(today()).strftime("%Y")) + 1
     return check
+
+@frappe.whitelist()
+def reopen_payment_as_admin(pe):
+    frappe.db.sql("""UPDATE `tabPayment Entry` SET `docstatus` = 0 WHERE `name` = '{pe}'""".format(pe=pe), as_list=True)
+    return
+
+@frappe.whitelist()
+def reopen_sinv_as_admin(sinv):
+    frappe.db.sql("""UPDATE `tabSales Invoice` SET `docstatus` = 0 WHERE `name` = '{sinv}'""".format(sinv=sinv), as_list=True)
+    return
