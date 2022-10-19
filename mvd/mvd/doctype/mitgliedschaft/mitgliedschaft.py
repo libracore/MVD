@@ -3468,6 +3468,24 @@ def sinv_check_zahlung_mitgliedschaft(sinv, event):
         ref_date = add_to_date(date=sinv.creation, hours=1)
         if sinv.modified < ref_date:
             skip = True
+            # gewährleistung dass trotz skip das Mitgliedschaftsjahr und bezahldatum korrekt geschrieben wird.
+            if int(frappe.db.get_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr')) < int(sinv.mitgliedschafts_jahr):
+                if sinv.is_pos == 1:
+                    frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'datum_zahlung_mitgliedschaft', sinv.posting_date)
+                    frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr', sinv.mitgliedschafts_jahr)
+                else:
+                    pes = frappe.db.sql("""SELECT `parent` FROM `tabPayment Entry Reference`
+                                            WHERE `reference_doctype` = 'Sales Invoice'
+                                            AND `reference_name` = '{sinv}' ORDER BY `creation` DESC""".format(sinv=sinv.name), as_dict=True)
+                    if len(pes) > 0:
+                        pe = frappe.get_doc("Payment Entry", pes[0].parent)
+                        frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'datum_zahlung_mitgliedschaft', pe.reference_date)
+                        frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr', sinv.mitgliedschafts_jahr)
+                    else:
+                        if len(sinv.advances) > 0:
+                            pe = frappe.get_doc("Payment Entry", sinv.advances[0].reference_name)
+                            frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'datum_zahlung_mitgliedschaft', pe.reference_date)
+                            frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr', sinv.mitgliedschafts_jahr)
     
     if not skip:
         # mitgliedschaft speichern um SP Update zu triggern und höchste Mahnstufe zu setzen
