@@ -11,12 +11,18 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
         sinv = frappe.get_doc("Sales Invoice", sales_invoice)
         if sinv.mv_mitgliedschaft:
             mvm = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
-            reference_raw = '00 00000 00 '
-            reference_raw += mvm.mitglied_nr.replace("MV", "")[:3]
-            reference_raw += ' '
-            reference_raw += mvm.mitglied_nr.replace("MV", "")[3:8]
+            if mvm.status_c != 'Interessent*in':
+                reference_raw = '00 00000 00 '
+                reference_raw += mvm.mitglied_nr.replace("MV", "")[:3]
+                reference_raw += ' '
+                reference_raw += mvm.mitglied_nr.replace("MV", "")[3:8]
+            else:
+                reference_raw = '00 00000 0000'
+                reference_raw += sinv.customer.replace("K-", "")[:1]
+                reference_raw += ' '
+                reference_raw += sinv.customer.replace("K-", "")[1:6]
         else:
-            reference_raw = '00 0000'
+            reference_raw = '00 00000 0000'
             reference_raw += sinv.customer.replace("K-", "")[:1]
             reference_raw += ' '
             reference_raw += sinv.customer.replace("K-", "")[1:6]
@@ -34,10 +40,20 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
             reference_raw = '12 00000 00'
         else:
             reference_raw = '13 00000 00'
-        reference_raw += mvm.mitglied_nr.replace("MV", "")[:3]
-        reference_raw += ' '
-        reference_raw += mvm.mitglied_nr.replace("MV", "")[3:8]
-        reference_raw += ' 00'
+        if mvm.status_c != 'Interessent*in':
+            reference_raw += mvm.mitglied_nr.replace("MV", "")[:3]
+            reference_raw += ' '
+            reference_raw += mvm.mitglied_nr.replace("MV", "")[3:8]
+            reference_raw += ' 00'
+        else:
+            reference_raw += '000 0'
+            if int(mvm.abweichende_rechnungsadresse) == 1 and int(mvm.unabhaengiger_debitor) == 1:
+                customer = mvm.rg_kunde
+            else:
+                customer = mvm.kunde_mitglied
+            reference_raw += customer.replace("K-", "")[:4]
+            reference_raw += ' '
+            reference_raw += customer.replace("K-", "")[4:6]
         reference_raw += fr.replace("FR-", "")[:3]
         reference_raw += ' '
         reference_raw += fr.replace("FR-", "")[3:8]
