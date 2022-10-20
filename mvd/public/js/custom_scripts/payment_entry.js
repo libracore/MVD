@@ -11,27 +11,24 @@ frappe.ui.form.on('Payment Entry', {
                     });
                 }
                 if (cur_frm.doc.unallocated_amount > 0) {
-                    if ((cur_frm.doc.paid_amount / cur_frm.doc.unallocated_amount) == 2) {
-                        frm.add_custom_button(__("Mit Folgejahr-Mitgliedschaft ausgleichen"), function() {
-                            mit_folgejahr_ausgleichen(frm);
-                        });
-                    }
-                    frm.add_custom_button(__("Mit Spende ausgleichen"), function() {
-                        mit_spende_ausgleichen(frm);
-                    });
-                    frm.add_custom_button(__("Mit Rückzahlung ausgleichen"), function() {
-                        rueckzahlung(frm);
-                    });
-                    if (cur_frm.doc.unallocated_amount == 10) {
-                        frm.add_custom_button(__("Als HV Zahlung verbuchen"), function() {
+                    frm.add_custom_button(__("Mitgliedschaft"), function() {
+                        mit_folgejahr_ausgleichen(frm);
+                    }, __("Verbuchen als ..."));
+                    
+                    if (cur_frm.doc.unallocated_amount >= 10) {
+                        frm.add_custom_button(__("HV Zahlung"), function() {
                             als_hv_verbuchen(frm);
-                        });
+                        }, __("Verbuchen als ..."));
                     }
-                }
-                if (check_underpaid(frm)) {
-                    frm.add_custom_button(__("Differenz als Kulanz ausgleichen"), function() {
-                        kulanz_ausgleich(frm);
-                    });
+                    
+                    frm.add_custom_button(__("Spende"), function() {
+                        mit_spende_ausgleichen(frm);
+                    }, __("Verbuchen als ..."));
+                    
+                    frm.add_custom_button(__("Rückzahlung"), function() {
+                        rueckzahlung(frm);
+                    }, __("Ausgleichen mit ..."));
+                    
                 }
             }
             if (cur_frm.doc.docstatus == 0) {
@@ -62,45 +59,52 @@ function storno_rollback(frm) {
     });
 }
 
-function check_underpaid(frm) {
-    var underpaid = false;
-    cur_frm.doc.references.forEach(function(entry) {
-       if (entry.allocated_amount < entry.outstanding_amount) {
-           underpaid = true;
-       }
-    });
-    return underpaid
-}
-
 function mitgliedschaft_zuweisen(frm) {
-    frappe.prompt([
-        {'fieldname': 'mitgliedschaft', 'fieldtype': 'Link', 'label': 'Mitgliedschaft', 'reqd': 1, 'options': 'Mitgliedschaft'}
-    ],
-    function(values){
-        
-        if (values.druckvorlage) {
-            var druckvorlage = values.druckvorlage;
-        } else {
-            var druckvorlage = 'keine'
-        }
-        frappe.call({
-            method: "mvd.mvd.doctype.camt_import.camt_import.mitgliedschaft_zuweisen",
-            args:{
-                    'mitgliedschaft': values.mitgliedschaft
+    frappe.call({
+        method: "mvd.mvd.doctype.camt_import.camt_import.suche_mitgliedschaft_aus_pe",
+        args:{
+                'payment_entry': cur_frm.doc.name
+        },
+        freeze: true,
+        freeze_message: 'Suche nach möglichen Mitgliedschaften...',
+        callback: function(r)
+        {
+            console.log(r.message);
+            var field_list = [
+                {'fieldname': 'mitgliedschaft', 'fieldtype': 'Link', 'label': 'Mitgliedschaft', 'reqd': 1, 'options': 'Mitgliedschaft'},
+                {'fieldname': 'section_vorschlaege', 'fieldtype': 'Section Break', 'label': 'Vorschläge'}
+            ];
+            r.message.forEach(function(entry) {
+                field_list.push({
+                    'fieldname': 'html_' + entry.mitgliedschaft,
+                    'fieldtype': 'HTML',
+                    'options': '<p>' + entry.vorname + " " + entry.nachname + " / " + entry.mitgliedschaft + " (" + entry.sektion + ": " + entry.status + "), Quelle: " + entry.quelle
+                })
+            });
+            
+            frappe.prompt(field_list,
+            function(values){
+                frappe.call({
+                    method: "mvd.mvd.doctype.camt_import.camt_import.mitgliedschaft_zuweisen",
+                    args:{
+                            'mitgliedschaft': values.mitgliedschaft
+                    },
+                    freeze: true,
+                    freeze_message: 'Weise Mitgliedschaft zu...',
+                    callback: function(r)
+                    {
+                        cur_frm.set_value("mv_mitgliedschaft", r.message.mitgliedschaft);
+                        cur_frm.set_value("party", r.message.customer);
+                        cur_frm.set_value("camt_status", 'Zugewiesen');
+                        cur_frm.save();
+                    }
+                });
             },
-            freeze: true,
-            freeze_message: 'Weise Mitgliedschaft zu...',
-            callback: function(r)
-            {
-                cur_frm.set_value("mv_mitgliedschaft", values.mitgliedschaft);
-                cur_frm.set_value("party", r.message);
-                cur_frm.save();
-            }
-        });
-    },
-    'Mitgliedschaft zuweisen',
-    'Zuweisen'
-    )
+            'Mitgliedschaft zuweisen',
+            'Zuweisen'
+            )
+        }
+    });
 }
 
 function erstelle_korrespondenz(frm) {
