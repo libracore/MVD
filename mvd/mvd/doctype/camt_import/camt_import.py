@@ -398,11 +398,6 @@ def verbuche_matches(camt_import):
             
             if sinv_doc.ist_mitgliedschaftsrechnung:
                 camt_mitgliedschaften_update(camt_import)
-                # Trello 909: Wenn Zahlungseingang zwischen 15.09.xx und 31.12.xx muss die Mitgliedschaft für das Folgejahr zählen
-                folgejahr = check_folgejahr_date(pe_doc.posting_date)
-                if folgejahr:
-                    frappe.db.set_value('Sales Invoice', sinv[0].name, 'mitgliedschafts_jahr', folgejahr)
-                # ----------------------------------------------------------------------------------------------------------------
             elif sinv_doc.ist_hv_rechnung:
                 camt_hv_update(camt_import)
             elif sinv_doc.ist_spenden_rechnung:
@@ -494,11 +489,6 @@ def verabreite_ueberzahlung(camt_import, ueberzahlung, sinv_doc):
             mitgliedschaftsjahr = int(frappe.db.get_value('Mitgliedschaft', sinv_doc.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr'))
             if mitgliedschaftsjahr < int(sinv_doc.mitgliedschafts_jahr):
                 mitgliedschaftsjahr = int(sinv_doc.mitgliedschafts_jahr)
-            # Trello 909: Wenn Zahlungseingang zwischen 15.09.xx und 31.12.xx muss die Mitgliedschaft für das Folgejahr zählen
-            folgejahr = check_folgejahr_date(ueberzahlung.posting_date)
-            if folgejahr:
-                mitgliedschaftsjahr = folgejahr
-            # ----------------------------------------------------------------------------------------------------------------
             if int(frappe.db.get_value('Mitgliedschaft', sinv_doc.mv_mitgliedschaft, 'zahlung_hv')) < mitgliedschaftsjahr:
                 # create new HV RG
                 sektion = frappe.get_doc("Sektion", sinv_doc.sektion_id)
@@ -1027,6 +1017,12 @@ def aktualisiere_camt_uebersicht(camt_import):
     
     
     frappe.db.set_value('CAMT Import', camt_import, 'report', report_data)
+    
+    # setzen Status = Closed wenn verbucht = eingelesen
+    if frappe.db.get_value('CAMT Import', camt_import, 'verbuchte_zahlung_qty') == frappe.db.get_value('CAMT Import', camt_import, 'eingelesene_zahlungen_qty'):
+        frappe.db.set_value('CAMT Import', camt_import, 'status', 'Closed')
+    else:
+        frappe.db.set_value('CAMT Import', camt_import, 'status', 'Verarbeitet')
 
 @frappe.whitelist()
 def mit_spende_ausgleichen(pe):
@@ -1307,15 +1303,6 @@ def mit_folgejahr_ausgleichen(pe):
         frappe.throw("Dieses Mitglied besitzt noch keine Rechnung.<br>Bitte erstellen Sie manuell eine Initial-Rechnung")
     
     return
-
-def check_folgejahr_date(date):
-    check = False
-    u_limit = getdate(getdate(today()).strftime("%Y") + "-09-15")
-    o_limit = getdate(getdate(today()).strftime("%Y") + "-12-31")
-    if getdate(date) >= u_limit:
-        if getdate(date) <= o_limit:
-            check = int(getdate(today()).strftime("%Y")) + 1
-    return check
 
 @frappe.whitelist()
 def reopen_payment_as_admin(pe):
