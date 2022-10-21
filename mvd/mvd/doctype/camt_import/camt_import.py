@@ -49,7 +49,11 @@ def verarbeite_camt_file(camt_file, camt_import):
     zahlungen_einlesen(camt_file, camt_import)
     
     # Verbuche Matches
-    verbuche_matches(camt_import)
+    try:
+        verbuche_matches(camt_import)
+    except Exception as err:
+        camt_status_update(camt_import, 'Failed')
+        frappe.log_error("{0}".format(err), 'CAMT-Import {0} failed'.format(camt_import))
     
     # Aktualisiere CAMT Übersicht
     aktualisiere_camt_uebersicht(camt_import)
@@ -500,7 +504,7 @@ def verabreite_ueberzahlung(camt_import, ueberzahlung, sinv_doc):
                     'sektions_code': str(sektion.sektion_id) or '00',
                     'sales_invoice': None,
                     'typ': 'HV',
-                    'betrag': sektion.betrag_hv,
+                    'betrag': hv_item_price,
                     'posting_date': today(),
                     'company': sektion.company,
                     'druckvorlage': '',
@@ -508,19 +512,18 @@ def verabreite_ueberzahlung(camt_import, ueberzahlung, sinv_doc):
                 })
                 fr.insert(ignore_permissions=True)
                 fr.submit()
-                unpaid_sinv = create_unpaid_sinv(fr.name, sektion.betrag_hv)['sinv']
+                unpaid_sinv = create_unpaid_sinv(fr.name, hv_item_price)['sinv']
                 
                 row = ueberzahlung.append('references', {})
                 row.reference_doctype = "Sales Invoice"
                 row.reference_name = unpaid_sinv
                 row.due_date = add_days(today(), 30)
-                row.total_amount = sektion.betrag_hv
-                row.outstanding_amount = sektion.betrag_hv
-                row.allocated_amount = sektion.betrag_hv
-                ueberzahlung.total_allocated_amount = sektion.betrag_hv
+                row.total_amount = hv_item_price
+                row.outstanding_amount = hv_item_price
+                row.allocated_amount = hv_item_price
+                ueberzahlung.total_allocated_amount = hv_item_price
                 ueberzahlung.unallocated_amount = 0
                 ueberzahlung.difference_amount = 0
-                # ~ ueberzahlung.camt_status = 'Verbucht'
                 ueberzahlung.save()
                 ueberzahlung.submit()
                 camt_gebuchte_zahlung_update(camt_import)
@@ -545,7 +548,7 @@ def verabreite_ueberzahlung(camt_import, ueberzahlung, sinv_doc):
                     'sektions_code': str(sektion.sektion_id) or '00',
                     'sales_invoice': None,
                     'typ': 'HV',
-                    'betrag': sektion.betrag_hv,
+                    'betrag': hv_item_price,
                     'posting_date': today(),
                     'company': sektion.company,
                     'druckvorlage': '',
@@ -553,19 +556,18 @@ def verabreite_ueberzahlung(camt_import, ueberzahlung, sinv_doc):
                 })
                 fr.insert(ignore_permissions=True)
                 fr.submit()
-                unpaid_sinv = create_unpaid_sinv(fr.name, sektion.betrag_hv)['sinv']
+                unpaid_sinv = create_unpaid_sinv(fr.name, hv_item_price)['sinv']
                 
                 row = ueberzahlung.append('references', {})
                 row.reference_doctype = "Sales Invoice"
                 row.reference_name = unpaid_sinv
                 row.due_date = add_days(today(), 30)
-                row.total_amount = sektion.betrag_hv
-                row.outstanding_amount = sektion.betrag_hv
-                row.allocated_amount = sektion.betrag_hv
-                ueberzahlung.total_allocated_amount = sektion.betrag_hv
+                row.total_amount = hv_item_price
+                row.outstanding_amount = hv_item_price
+                row.allocated_amount = hv_item_price
+                ueberzahlung.total_allocated_amount = hv_item_price
                 ueberzahlung.unallocated_amount = 0
                 ueberzahlung.difference_amount = 0
-                # ~ ueberzahlung.camt_status = 'Verbucht'
                 ueberzahlung.save()
                 ueberzahlung.submit()
                 camt_gebuchte_zahlung_update(camt_import)
@@ -1019,10 +1021,11 @@ def aktualisiere_camt_uebersicht(camt_import):
     frappe.db.set_value('CAMT Import', camt_import, 'report', report_data)
     
     # setzen Status = Closed wenn verbucht = eingelesen
-    if frappe.db.get_value('CAMT Import', camt_import, 'verbuchte_zahlung_qty') == frappe.db.get_value('CAMT Import', camt_import, 'eingelesene_zahlungen_qty'):
-        frappe.db.set_value('CAMT Import', camt_import, 'status', 'Closed')
-    else:
-        frappe.db.set_value('CAMT Import', camt_import, 'status', 'Verarbeitet')
+    if frappe.db.get_value('CAMT Import', camt_import, 'status') != 'Failed':
+        if (frappe.db.get_value('CAMT Import', camt_import, 'verbuchte_zahlung_qty') - frappe.db.get_value('CAMT Import', camt_import, 'ueberzahlung_qty')) == frappe.db.get_value('CAMT Import', camt_import, 'eingelesene_zahlungen_qty'):
+            frappe.db.set_value('CAMT Import', camt_import, 'status', 'Closed')
+        else:
+            frappe.db.set_value('CAMT Import', camt_import, 'status', 'Verarbeitet')
 
 @frappe.whitelist()
 def mit_spende_ausgleichen(pe):

@@ -81,7 +81,7 @@ def start_massenlauf_inaktivierung(doc):
             ms.status_c = 'Ausschluss'
             alte_infos = ms.wichtig
             neue_infos = "Ausschluss:\n" + doc.grund + "\n\n"
-            neue_infos = neue_infos + alte_infos
+            neue_infos = neue_infos + alte_infos or ''
             ms.wichtig = neue_infos
             ms.adressen_gesperrt = 1
             ms.save()
