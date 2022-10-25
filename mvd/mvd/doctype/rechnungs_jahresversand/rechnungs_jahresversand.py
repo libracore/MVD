@@ -85,7 +85,7 @@ def get_draft_csv(jahresversand=None):
                                             AND `ist_mitgliedschaftsrechnung` = 1
                                             AND `docstatus` = 1)
                                         AND (`kuendigung` IS NULL or `kuendigung` > '{mitgliedschafts_jahr}-12-31')
-                                        AND `datum_zahlung_mitgliedschaft` < {mitgliedschafts_jahr}
+                                        AND `bezahltes_mitgliedschaftsjahr` < {mitgliedschafts_jahr}
                                         {filters}""".format(sektion_id=jahresversand.sektion_id, mitgliedschafts_jahr=jahresversand.jahr, filters=filters), as_dict=True)
     
     for _mitgliedschaft in mitgliedschaften:
@@ -414,7 +414,7 @@ def create_invoices(jahresversand):
                                             AND `ist_mitgliedschaftsrechnung` = 1
                                             AND `docstatus` = 1)
                                         AND (`kuendigung` IS NULL or `kuendigung` > '{mitgliedschafts_jahr}-12-31')
-                                        AND `datum_zahlung_mitgliedschaft` < {mitgliedschafts_jahr}
+                                        AND `bezahltes_mitgliedschaftsjahr` < {mitgliedschafts_jahr}
                                         {filters}""".format(sektion_id=jahresversand_doc.sektion_id, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters), as_dict=True)
     
     if len(mitgliedschaften) <= 1000:
@@ -481,6 +481,7 @@ def create_invoices_one_batch(jahresversand, limit=False, loop=False, last=False
                                                 AND `ist_mitgliedschaftsrechnung` = 1
                                                 AND `docstatus` = 1)
                                             AND (`kuendigung` IS NULL or `kuendigung` > '{mitgliedschafts_jahr}-12-31')
+                                            AND `bezahltes_mitgliedschaftsjahr` < {mitgliedschafts_jahr}
                                             {filters}{limit}""".format(sektion_id=jahresversand_doc.sektion_id, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters, limit=limit), as_dict=True)
         
         try:
