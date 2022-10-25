@@ -204,6 +204,14 @@ frappe.ui.form.on('Mitgliedschaft', {
             frm.add_custom_button(__("Rechnung (Sonstiges)"),  function() {
                 erstelle_rechnung_sonstiges(frm);
             }, __("Erstelle"));
+            
+            // button für Aufhebung M+W Sperre
+            if (cur_frm.doc.retoure_in_folge && cur_frm.doc.m_und_w == 0) {
+                cur_frm.set_df_property('m_und_w', 'read_only', 1);
+                frm.add_custom_button(__("M+W Sperre aufheben"),  function() {
+                    m_und_w_sperre_aufheben(frm);
+                });
+            }
         }
         
         if (['Wegzug', 'Ausschluss', 'Inaktiv'].includes(cur_frm.doc.status_c)) {
@@ -2264,5 +2272,17 @@ function erstelle_rechnung_sonstiges(frm) {
         });
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
+    }
+}
+
+function m_und_w_sperre_aufheben(frm) {
+    if (cur_frm.is_dirty()) {
+        frappe.msgprint("Bitte speichern Sie die Mitgliedschaft zuerst.");
+    } else {
+        cur_frm.set_value("retoure_in_folge", "0");
+        cur_frm.set_df_property('m_und_w', 'read_only', 0);
+        cur_frm.save().then(function(){
+            frappe.msgprint("Sie können die Anzahl M+W nun manuell setzen.");
+        });
     }
 }
