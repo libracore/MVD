@@ -112,10 +112,9 @@ def get_stand(filters, data):
                                             COUNT(`name`) AS `qty`
                                         FROM `tabMitgliedschaft`
                                         WHERE `sektion_id` = '{sektion_id}'
-                                        AND (`eintrittsdatum` < '{from_date}' AND `eintrittsdatum` IS NOT NULL)
-                                        AND (`zuzug` < '{from_date}' or `zuzug` IS NULL)
-                                        AND (`austritt` > '{from_date}' or `austritt` IS NULL)
-                                        AND (`kuendigung` > '{from_date}' or `kuendigung` IS NULL)""".format(from_date=filters.from_date, \
+                                        AND (`eintrittsdatum` <= '{from_date}' AND `eintrittsdatum` IS NOT NULL)
+                                        AND (`zuzug` <= '{from_date}' or `zuzug` IS NULL)
+                                        AND (`austritt` > '{from_date}' or `austritt` IS NULL)""".format(from_date=filters.from_date, \
                                         to_date=filters.to_date, sektion_id=filters.sektion_id), as_dict=True)[0].qty
     data.append(
         {
