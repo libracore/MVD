@@ -864,7 +864,8 @@ def aktualisiere_camt_uebersicht(camt_import):
     # update report data
     verbuchte_zahlungen_gegen_rechnung = frappe.db.sql("""SELECT
                                                             SUM(`amount`) AS `amount`,
-                                                            `item_code`
+                                                            `item_code`,
+                                                            `income_account`
                                                         FROM `tabSales Invoice Item` WHERE `parent` IN (
                                                             SELECT DISTINCT
                                                                 `reference_name`
@@ -894,7 +895,11 @@ def aktualisiere_camt_uebersicht(camt_import):
                                                         `name`
                                                     FROM `tabPayment Entry`
                                                     WHERE `camt_import` = '{camt_import}'
-                                                    AND `mv_mitgliedschaft` IS NULL
+                                                    AND (
+                                                        `mv_mitgliedschaft` IS NULL
+                                                        AND
+                                                        `mv_kunde` IS NULL
+                                                    )
                                                     AND `docstatus` = 1""".format(camt_import=camt_import), as_dict=True)
     
     nicht_gebuchte_pes = frappe.db.sql("""SELECT `name`
@@ -906,10 +911,12 @@ def aktualisiere_camt_uebersicht(camt_import):
     # nicht eingelesene Zahlungen
     if int(frappe.db.get_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen_qty')) > 0:
         report_data += """<p style="color: red;"><br>Achtung; {0} Zahlung(en) konnte(n) <u>nicht</u> eingelesen werden!</p>""".format(frappe.db.get_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen_qty'))
-    # Artikel Aufschlüsselung
+    # Artikel und Ertragskonten Aufschlüsselung
+    ertragskonten = {}
     if len(verbuchte_zahlungen_gegen_rechnung) > 0:
+        # Artikel Aufschlüsselung
         totalbetrag = 0
-        report_data += """<h3>Artikel Aufschlüsselung</h3>
+        report_data += """<h3>Aufschlüsselung nach Artikel</h3>
                         <table style="width: 100%;">
                             <tbody>
                                 <tr>
@@ -917,12 +924,40 @@ def aktualisiere_camt_uebersicht(camt_import):
                                     <td style="text-align: right;"><b>Betrag</b></td>
                                 </tr>"""
         for entry in verbuchte_zahlungen_gegen_rechnung:
+            if entry.income_account in ertragskonten:
+                ertragskonten[entry.income_account] += entry.amount
+            else:
+                ertragskonten[entry.income_account] = entry.amount
             report_data += """
                             <tr>
                                 <td style="text-align: left;">{0} ({1})</td>
                                 <td style="text-align: right;">{2}</td>
                             </tr>""".format(frappe.get_value("Item", entry.item_code, "item_name"), frappe.get_value("Item", entry.item_code, "sektion_id"), "{:,.2f}".format(entry.amount).replace(",", "'"))
             totalbetrag += entry.amount
+        report_data += """
+                        <tr>
+                            <td style="text-align: left;"><b>Total</b></td>
+                            <td style="text-align: right;"><b>{0}</b></td>
+                        </tr>""".format("{:,.2f}".format(totalbetrag).replace(",", "'"))
+        
+        report_data += """</tbody></table>"""
+        
+        # Ertragskonten Aufschlüsselung
+        totalbetrag = 0
+        report_data += """<h3>Aufschlüsselung nach Ertragskonten</h3>
+                        <table style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: left;"><b>Ertragskonto</b></td>
+                                    <td style="text-align: right;"><b>Betrag</b></td>
+                                </tr>"""
+        for key, value in ertragskonten.items():
+            report_data += """
+                            <tr>
+                                <td style="text-align: left;">{0}</td>
+                                <td style="text-align: right;">{1}</td>
+                            </tr>""".format(key, "{:,.2f}".format(value).replace(",", "'"))
+            totalbetrag += value
         report_data += """
                         <tr>
                             <td style="text-align: left;"><b>Total</b></td>
@@ -978,12 +1013,19 @@ def aktualisiere_camt_uebersicht(camt_import):
                                 </tr>"""
         for pe in gebuchte_pes:
             pe_doc = frappe.get_doc("Payment Entry", pe.name)
+            if pe_doc.mv_mitgliedschaft:
+                hyperlink = """<a href="/desk#Form/Mitgliedschaft/{0}">""".format(pe_doc.mv_mitgliedschaft) + str(frappe.get_value("Mitgliedschaft", pe_doc.mv_mitgliedschaft, "mitglied_nr")) + """</a>"""
+            elif pe_doc.mv_kunde:
+                hyperlink = """<a href="/desk#Form/Kunden/{0}">""".format(pe_doc.mv_kunde) + str(pe_doc.mv_kunde) + """</a>"""
+            else:
+                hyperlink = """---"""
+            
             report_data += """
                             <tr>
                                 <td style="text-align: left;">{0}</td>
                                 <td style="text-align: left;">{1}</td>
                                 <td style="text-align: right;">{2}</td>
-                            </tr>""".format("""<a href="/desk#Form/Mitgliedschaft/{0}">""".format(pe_doc.mv_mitgliedschaft) + str(frappe.get_value("Mitgliedschaft", pe_doc.mv_mitgliedschaft, "mitglied_nr")) + """</a>""", \
+                            </tr>""".format(hyperlink, \
                             pe_doc.remarks, \
                             "{:,.2f}".format(pe_doc.paid_amount).replace(",", "'"))
         report_data += """</tbody></table>"""
