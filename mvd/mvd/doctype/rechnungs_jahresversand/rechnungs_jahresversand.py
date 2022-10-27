@@ -150,7 +150,7 @@ def get_draft_csv(jahresversand=None):
                 strasse += mitgliedschaft.rg_nummer_zu or ''
                 row_data.append(strasse)
                 if mitgliedschaft.rg_postfach:
-                    row_data.append(mitgliedschaft.rg_postfach_nummer or '')
+                    row_data.append("Postfach {0}".format(mitgliedschaft.rg_postfach_nummer or ''))
                     row_data.append("")
                     row_data.append("")
                 else:
@@ -167,7 +167,7 @@ def get_draft_csv(jahresversand=None):
                 strasse += mitgliedschaft.nummer_zu or ''
                 row_data.append(strasse)
                 if mitgliedschaft.postfach:
-                    row_data.append(mitgliedschaft.postfach_nummer or '')
+                    row_data.append("Postfach {0}".format(mitgliedschaft.postfach_nummer or ''))
                     row_data.append("")
                     row_data.append("")
                 else:
@@ -278,7 +278,7 @@ def get_draft_csv(jahresversand=None):
                 strasse += mitgliedschaft.nummer_zu or ''
                 row_data.append(strasse)
                 if mitgliedschaft.postfach:
-                    row_data.append(mitgliedschaft.postfach_nummer or '')
+                    row_data.append("Postfach {0}".format(mitgliedschaft.postfach_nummer or ''))
                     row_data.append("")
                     row_data.append("")
                 else:
@@ -637,7 +637,7 @@ def get_csv(jahresversand):
                 strasse += mitgliedschaft.rg_nummer_zu or ''
                 row_data.append(strasse)
                 if mitgliedschaft.rg_postfach:
-                    row_data.append(mitgliedschaft.rg_postfach_nummer or '')
+                    row_data.append("Postfach {0}".format(mitgliedschaft.rg_postfach_nummer or ''))
                     row_data.append("")
                     row_data.append("")
                 else:
@@ -654,7 +654,7 @@ def get_csv(jahresversand):
                 strasse += mitgliedschaft.nummer_zu or ''
                 row_data.append(strasse)
                 if mitgliedschaft.postfach:
-                    row_data.append(mitgliedschaft.postfach_nummer or '')
+                    row_data.append("Postfach {0}".format(mitgliedschaft.postfach_nummer or ''))
                     row_data.append("")
                     row_data.append("")
                 else:
@@ -774,7 +774,7 @@ def get_csv(jahresversand):
                 strasse += mitgliedschaft.nummer_zu or ''
                 row_data.append(strasse)
                 if mitgliedschaft.postfach:
-                    row_data.append(mitgliedschaft.postfach_nummer or '')
+                    row_data.append("Postfach {0}".format(mitgliedschaft.postfach_nummer or ''))
                     row_data.append("")
                     row_data.append("")
                 else:
