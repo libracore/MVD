@@ -71,42 +71,9 @@ def get_stand(filters, data):
     zuzueger = frappe.db.sql("""SELECT
                                     COUNT(`name`) AS `qty`
                                 FROM `tabMitgliedschaft`
-                                WHERE `zuzug` BETWEEN '{from_date}1' AND '{to_date}'
+                                WHERE `zuzug` BETWEEN '{from_date}' AND '{to_date}'
                                 AND `sektion_id` = '{sektion_id}'""".format(from_date=filters.from_date, \
                                 to_date=filters.to_date, sektion_id=filters.sektion_id), as_dict=True)[0].qty
-    
-    # ~ '''
-        # ~ alle_per_from_date = 1 + 2
-        # ~ 1: Alle Mitgliedschaften mit Status Regulär mit Eintritt oder Zuzug < from_date
-        # ~ 2: Alle Mitgliedschaften ohne Status Regulär mit Eintritt oder Zuzug < from_date und Status Change von Regulär zu xxx >= from_date
-    # ~ '''
-    # ~ alle_per_from_date = frappe.db.sql("""SELECT
-                                            # ~ COUNT(`mitgliedschaften`) AS `qty`
-                                        # ~ FROM (
-                                            # ~ SELECT DISTINCT
-                                                # ~ `name` AS `mitgliedschaften`
-                                            # ~ FROM `tabMitgliedschaft`
-                                            # ~ WHERE `sektion_id` = '{sektion_id}'
-                                            # ~ AND `status_c` = 'Regulär'
-                                            # ~ AND `eintrittsdatum` < '{from_date}'
-                                            # ~ AND (`zuzug` < '{from_date}' or `zuzug` IS NULL)
-                                            # ~ UNION
-                                            # ~ SELECT DISTINCT
-                                                # ~ `parent` AS `mitgliedschaften`
-                                            # ~ FROM `tabStatus Change`
-                                            # ~ WHERE `datum` >= '{from_date}'
-                                            # ~ AND (`status_alt` LIKE 'Regulär%' AND `status_neu` NOT LIKE 'Regulär%')
-                                            # ~ AND `parent` IN (
-                                                # ~ SELECT DISTINCT
-                                                    # ~ `name` AS `mitgliedschaften`
-                                                # ~ FROM `tabMitgliedschaft`
-                                                # ~ WHERE `sektion_id` = '{sektion_id}'
-                                                # ~ AND `status_c` != 'Regulär'
-                                                # ~ AND `eintrittsdatum` < '{from_date}'
-                                                # ~ AND (`zuzug` < '{from_date}' or `zuzug` IS NULL)
-                                            # ~ )
-                                        # ~ ) AS `datatbl`""".format(from_date=filters.from_date, \
-                                        # ~ to_date=filters.to_date, sektion_id=filters.sektion_id), as_dict=True)[0].qty
     
     alle_per_from_date = frappe.db.sql("""SELECT
                                             COUNT(`name`) AS `qty`
@@ -194,7 +161,7 @@ def get_kuendigungen(filters, data):
     data.append(
         {
             'mitglieder': 'Kündigungen',
-            'berechnung': 'Kündigungen {from_date} bis {to_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
+            'berechnung': 'Kündigungen per {from_date} bis {to_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
             to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': kuendigungen,
             'total': ''
