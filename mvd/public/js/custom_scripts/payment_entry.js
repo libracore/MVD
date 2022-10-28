@@ -215,26 +215,31 @@ function als_hv_verbuchen(frm) {
 
 function mit_spende_ausgleichen(frm) {
     if (frappe.user.has_role("MV_RW")) {
-        frappe.confirm(
-            'Wollen Sie die Zahlung mit einer Spende ausgleichen?',
-            function(){
-                // on yes
-                frappe.call({
-                    method: "mvd.mvd.doctype.camt_import.camt_import.mit_spende_ausgleichen",
-                    args:{
-                        'pe': cur_frm.doc.name
-                    },
-                    freeze: true,
-                    freeze_message: 'Gleiche Zahlung mit Spende aus...',
-                    callback: function(r)
-                    {
-                        cur_frm.reload_doc();
-                    }
-                });
-            },
-            function(){
-                // on no
+        frappe.prompt([
+            {'fieldname': 'spendenlauf_referenz', 'fieldtype': 'Link', 'label': 'Zuweisung zu Spendenversand', 'reqd': 0, 'options': 'Spendenversand', 'description': 'Sie können hier optional eine Referenz auf einen Spendenversand vornehmen'}
+        ],
+        function(values){
+            if (values.spendenlauf_referenz) {
+                var spendenlauf_referenz = values.spendenlauf_referenz;
+            } else {
+                var spendenlauf_referenz = null
             }
+            frappe.call({
+                method: "mvd.mvd.doctype.camt_import.camt_import.mit_spende_ausgleichen",
+                args:{
+                    'pe': cur_frm.doc.name,
+                    'spendenlauf_referenz': spendenlauf_referenz
+                },
+                freeze: true,
+                freeze_message: 'Gleiche Zahlung mit Spende aus...',
+                callback: function(r)
+                {
+                    cur_frm.reload_doc();
+                }
+            });
+        },
+        'Wollen Sie die Zahlung mit einer Spende ausgleichen?',
+        'Mit Spende ausgleichen'
         )
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
