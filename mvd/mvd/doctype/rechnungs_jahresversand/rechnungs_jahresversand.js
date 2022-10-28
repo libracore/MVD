@@ -35,16 +35,12 @@ frappe.ui.form.on('Rechnungs Jahresversand', {
         frappe.call({
             'method': "mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.get_csv",
             'args': {
-                'jahresversand': cur_frm.doc.name
+                'jahresversand': cur_frm.doc.name,
+                'bg_job': true
             },
-            'freeze': true,
-            'freeze_message': 'Erstelle neues CSV...',
             'callback': function(response) {
-                var csv = response.message;
-
-                if (csv == 'done') {
-                    cur_frm.reload_doc();
-                }
+                frappe.msgprint("Der Prozess wurde gestartet. Sie können den Fortschritt <a href='/desk#background_jobs'>hier</a> einsehen.");
+                cur_frm.reload_doc();
             }
         });
     }
