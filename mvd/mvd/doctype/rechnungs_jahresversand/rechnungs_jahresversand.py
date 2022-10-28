@@ -521,6 +521,7 @@ def create_invoices_one_batch(jahresversand, limit=False, loop=False, last=False
             jahresversand_doc.save()
             jahresversand_doc.add_comment('Comment', text='{0}'.format(str(err)))
 
+@frappe.whitelist()
 def get_csv(jahresversand):
     jahresversand = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
     data = []
@@ -758,6 +759,7 @@ def get_csv(jahresversand):
                     row_data.append("")
                     row_data.append("")
                 row_data.append(mitgliedschaft.anrede_c or '')
+                row_data.append(mitgliedschaft.rg_briefanrede or '')
                 row_data.append(mitgliedschaft.vorname_1 or '')
                 row_data.append(mitgliedschaft.nachname_1 or '')
                 if mitgliedschaft.hat_solidarmitglied:
