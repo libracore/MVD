@@ -553,23 +553,7 @@ function kuendigung(frm) {
                             var ks_month = kuendigungs_stichtag.getMonth();
                             var ks_day = kuendigungs_stichtag.getDate();
                             
-                            var now = frappe.datetime.str_to_obj(frappe.datetime.now_date());
-                            
-                            var now_month = now.getMonth();
-                            var now_day = now.getDate();
-                            
-                            var fristgerecht = true;
-                            
-                            if (now_month > ks_month) {
-                                fristgerecht = false;
-                            } else {
-                                if (now_month == ks_month) {
-                                    if (now_day == ks_day) {
-                                        fristgerecht = false;
-                                    }
-                                }
-                            }
-                            
+                            var kuendigungs_referenzdatum = frappe.datetime.str_to_obj(frappe.datetime.now_date());
                             var default_grund = '';
                             var abw_grund = '';
                             
@@ -580,34 +564,46 @@ function kuendigung(frm) {
                                         if (entry.grund.split("Andere Gründe: ").length > 1) {
                                             abw_grund = entry.grund.split("Andere Gründe: ")[1];
                                         }
+                                        kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
                                     } else if (entry.idx == cur_frm.doc.status_change.length) {
                                         if (entry.grund) {
                                             default_grund = entry.grund;
+                                            kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
                                         } else {
                                             default_grund = 'Keine Angabe';
+                                            kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
                                         }
                                     }
                                 } else if (entry.idx == cur_frm.doc.status_change.length) {
                                     if (entry.grund) {
                                         default_grund = entry.grund;
+                                        kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
                                     } else {
                                         default_grund = 'Keine Angabe';
+                                        kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
                                     }
                                 }
                             });
                             
+                            var kuendigungs_referenzdatum_month = kuendigungs_referenzdatum.getMonth();
+                            var kuendigungs_referenzdatum_day = kuendigungs_referenzdatum.getDate();
+                            
+                            var fristgerecht = true;
+                            
+                            if (kuendigungs_referenzdatum_month > ks_month) {
+                                fristgerecht = false;
+                            } else {
+                                if (kuendigungs_referenzdatum_month == ks_month) {
+                                    if (kuendigungs_referenzdatum_day == ks_day) {
+                                        fristgerecht = false;
+                                    }
+                                }
+                            }
+                            
+                            
+                            
                             
                             if (fristgerecht) {
-                                // Default Druckvorlage für den Moment deaktiviert!
-                                //~ var field_list = [
-                                    //~ {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': cur_frm.doc.kuendigung ? cur_frm.doc.kuendigung:frappe.datetime.year_end()},
-                                    //~ {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
-                                        //~ 'get_query': function() {
-                                            //~ return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
-                                        //~ }
-                                    //~ },
-                                    //~ {'fieldname': 'massenlauf', 'fieldtype': 'Check', 'label': 'Für Massenlauf vormerken', 'default': 1}
-                                //~ ];
                                 var field_list = [
                                     {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': cur_frm.doc.kuendigung ? cur_frm.doc.kuendigung:frappe.datetime.year_end()},
                                     {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe\nKeine Angabe', 'default': default_grund, 'change': function() {
@@ -629,28 +625,6 @@ function kuendigung(frm) {
                                     {'fieldname': 'massenlauf', 'fieldtype': 'Check', 'label': 'Für Massenlauf vormerken', 'default': 1}
                                 ];
                             } else {
-                                // Default Druckvorlage für den Moment deaktiviert!
-                                //~ var field_list = [
-                                    //~ {'fieldname': 'html_info', 'fieldtype': 'HTML', 'options': '<p style="color: red;">Achtung: Kündigungsfrist verpasst!</p>'},
-                                    //~ {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.add_months(frappe.datetime.year_end(), 12), 'read_only': 1},
-                                    //~ {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
-                                        //~ 'get_query': function() {
-                                            //~ return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
-                                        //~ }
-                                    //~ },
-                                    //~ {'fieldname': 'kulanz', 'fieldtype': 'Check', 'label': 'Kulanz anwenden', 'default': 0, 'change': function() {
-                                            //~ if (cur_dialog.fields_dict.kulanz.get_value() == 1) {
-                                                //~ cur_dialog.fields_dict.datum.df.read_only = 0;
-                                                //~ cur_dialog.fields_dict.datum.refresh();
-                                            //~ } else {
-                                                //~ cur_dialog.fields_dict.datum.set_value(frappe.datetime.add_months(frappe.datetime.year_end(), 12));
-                                                //~ cur_dialog.fields_dict.datum.df.read_only = 1;
-                                                //~ cur_dialog.fields_dict.datum.refresh();
-                                            //~ }
-                                        //~ }
-                                    //~ },
-                                    //~ {'fieldname': 'massenlauf', 'fieldtype': 'Check', 'label': 'Für Massenlauf vormerken', 'default': 1}
-                                //~ ];
                                 var field_list = [
                                     {'fieldname': 'html_info', 'fieldtype': 'HTML', 'options': '<p style="color: red;">Achtung: Kündigungsfrist verpasst!</p>'},
                                     {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.add_months(frappe.datetime.year_end(), 12), 'read_only': 1},
