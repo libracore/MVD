@@ -19,7 +19,7 @@ class FakultativeRechnung(Document):
             frappe.throw("Bezahlte Fakultative Rechnungen können nicht storniert werden.")
 
 @frappe.whitelist()
-def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False, druckvorlage='', asap_print=False, bezugsjahr=0):
+def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False, druckvorlage='', asap_print=False, bezugsjahr=0, spendenlauf_referenz=None):
     if not betrag_spende:
         cancel_old_hv_fr(mitgliedschaft)
         """
@@ -43,12 +43,13 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spend
         'sektion_id': str(sektion.name),
         'sektions_code': str(sektion.sektion_id) or '00',
         'sales_invoice': sales_invoice,
-        'typ': 'HV' if not betrag_spende else 'Spende',
+        'typ': 'HV' if not betrag_spende else 'Spende' if not spendenlauf_referenz else 'Spende (Spendenversand)',
         'betrag': betrag_spende or sektion.betrag_hv,
         'posting_date': today(),
         'company': sektion.company,
         'druckvorlage': druckvorlage,
-        'bezugsjahr': bezugsjahr
+        'bezugsjahr': bezugsjahr,
+        'spenden_versand': spendenlauf_referenz
     })
     fr.insert(ignore_permissions=True)
     
