@@ -1070,13 +1070,13 @@ def aktualisiere_camt_uebersicht(camt_import):
             frappe.db.set_value('CAMT Import', camt_import, 'status', 'Verarbeitet')
 
 @frappe.whitelist()
-def mit_spende_ausgleichen(pe):
+def mit_spende_ausgleichen(pe, spendenlauf_referenz=None):
     payment_entry = frappe.get_doc("Payment Entry", pe)
     mitgliedschaft = payment_entry.mv_mitgliedschaft
     
     # erstelle fr
     from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
-    fr = create_hv_fr(mitgliedschaft, betrag_spende=payment_entry.unallocated_amount)
+    fr = create_hv_fr(mitgliedschaft, betrag_spende=payment_entry.unallocated_amount, spendenlauf_referenz=spendenlauf_referenz)
     
     # erstelle sinv aus fr
     sinv = create_unpaid_sinv(fr, betrag=payment_entry.unallocated_amount)['sinv']
