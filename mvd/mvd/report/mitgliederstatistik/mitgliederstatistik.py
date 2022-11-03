@@ -35,17 +35,18 @@ def get_columns():
 
 def get_data(filters):
     data = []
-    data = get_stand(filters, data)
+    data, stand_1, neumitglieder, zuzueger = get_stand(filters, data)
     # ~ data, personen_qty = get_personen_in_db(filters, data)
     data, wegzueger_qty = get_wegzueger(filters, data)
     data, kuendigungen_qty = get_kuendigungen(filters, data)
     # ~ data, vorgem_kuendigungen_qty = get_vorgem_kuendigungen(filters, data)
     data, ausschluesse_qty = get_ausschluesse(filters, data)
     data, gestorbene_qty = get_gestorbene(filters, data)
-    data = get_stand_2(filters, data)
+    data = get_stand_2(filters, data, stand_1, neumitglieder, zuzueger, wegzueger_qty, kuendigungen_qty, ausschluesse_qty, gestorbene_qty)
     data = get_spaetere_eintritte(filters, data)
     data = get_vorgem_kuendigungen_2(filters, data)
     data = get_ueberschrift_1(filters, data)
+    data = get_erben(filters, data)
     data = get_ohne_mitgliednummer(filters, data)
     data = get_nicht_bezahlt(filters, data)
     data = get_ueberschrift_2(filters, data)
@@ -80,8 +81,9 @@ def get_stand(filters, data):
                                         FROM `tabMitgliedschaft`
                                         WHERE `sektion_id` = '{sektion_id}'
                                         AND (`eintrittsdatum` <= '{from_date}' AND `eintrittsdatum` IS NOT NULL)
-                                        AND (`zuzug` <= '{from_date}' or `zuzug` IS NULL)
-                                        AND (`austritt` > '{from_date}' or `austritt` IS NULL)""".format(from_date=filters.from_date, \
+                                        AND (`zuzug` <= '{from_date}' OR `zuzug` IS NULL)
+                                        AND (`austritt` > '{from_date}' OR `austritt` IS NULL)
+                                        AND (`kuendigung` > '{from_date}' OR `kuendigung` IS NULL)""".format(from_date=filters.from_date, \
                                         to_date=filters.to_date, sektion_id=filters.sektion_id), as_dict=True)[0].qty
     data.append(
         {
@@ -113,7 +115,7 @@ def get_stand(filters, data):
             'anzahl': '',
             'total': alle_per_from_date + neumitglieder + zuzueger
         })
-    return data
+    return data, alle_per_from_date, neumitglieder, zuzueger
 
 # ~ def get_personen_in_db(filters, data):
     # ~ # ---
@@ -156,7 +158,8 @@ def get_kuendigungen(filters, data):
                                     COUNT(`name`) AS `qty`
                                 FROM `tabMitgliedschaft`
                                 WHERE `sektion_id` = '{sektion_id}'
-                                AND `kuendigung` BETWEEN '{from_date}' AND '{to_date}'""".format(sektion_id=filters.sektion_id, \
+                                AND `kuendigung` BETWEEN '{from_date}' AND '{to_date}'
+                                AND `austritt` IS NULL""".format(sektion_id=filters.sektion_id, \
                                 from_date=filters.from_date, to_date=filters.to_date), as_dict=True)[0].qty
     data.append(
         {
@@ -207,14 +210,13 @@ def get_ausschluesse(filters, data):
                                     FROM `tabMitgliedschaft`
                                     WHERE `sektion_id` = '{sektion_id}'
                                     AND `austritt` BETWEEN '{from_date}' AND '{to_date}'
-                                    AND (`kuendigung` > '{to_date}' or `kuendigung` IS NULL)
-                                    AND (`wegzug` > '{to_date}' or `wegzug` IS NULL)""".format(sektion_id=filters.sektion_id, \
+                                    AND `verstorben_am` IS NULL""".format(sektion_id=filters.sektion_id, \
                                 from_date=filters.from_date, to_date=filters.to_date), as_dict=True)[0].qty
     
     data.append(
         {
             'mitglieder': 'Ausschlüsse',
-            'berechnung': 'Austrittsdatum {from_date} bis {to_date} und Status Ausschluss'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
+            'berechnung': 'Ausschlussdatum {from_date} bis {to_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
             to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': ausschluesse,
             'total': ''
@@ -222,47 +224,86 @@ def get_ausschluesse(filters, data):
     return data, ausschluesse
 
 def get_gestorbene(filters, data):
-    gestorbene = frappe.db.sql("""SELECT DISTINCT
-                                    COUNT(`name`) AS `qty`
-                                FROM `tabStatus Change`
-                                WHERE `parent` IN (
-                                    SELECT
-                                        `name`
+    # ~ gestorbene = frappe.db.sql("""SELECT DISTINCT
+                                    # ~ COUNT(`name`) AS `qty`
+                                # ~ FROM `tabStatus Change`
+                                # ~ WHERE `parent` IN (
+                                    # ~ SELECT
+                                        # ~ `name`
+                                    # ~ FROM `tabMitgliedschaft`
+                                    # ~ WHERE `sektion_id` = '{sektion_id}'
+                                    # ~ AND `status_c` IN ('Gestorben', 'Inaktiv')
+                                    # ~ AND `austritt` BETWEEN '{from_date}' AND '{to_date}'
+                                # ~ )
+                                # ~ AND `status_alt` = 'Gestorben'
+                                # ~ AND `status_neu` = 'Inaktiv'""".format(sektion_id=filters.sektion_id, \
+                                # ~ from_date=filters.from_date, to_date=filters.to_date), as_dict=True)[0].qty
+    
+    gestorbene = frappe.db.sql("""SELECT
+                                        COUNT(`name`) AS `qty`
                                     FROM `tabMitgliedschaft`
                                     WHERE `sektion_id` = '{sektion_id}'
-                                    AND `status_c` IN ('Gestorben', 'Inaktiv')
                                     AND `austritt` BETWEEN '{from_date}' AND '{to_date}'
-                                )
-                                AND `status_alt` = 'Gestorben'
-                                AND `status_neu` = 'Inaktiv'""".format(sektion_id=filters.sektion_id, \
+                                    AND `verstorben_am` IS NOT NULL""".format(sektion_id=filters.sektion_id, \
                                 from_date=filters.from_date, to_date=filters.to_date), as_dict=True)[0].qty
+    
     data.append(
         {
             'mitglieder': 'Gestorbene',
-            'berechnung': 'Austrittsdatum {from_date} bis {to_date} und Status Gestorben'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
+            'berechnung': 'Todesfall/Meldung mit Mitgliedschaftsende {from_date} bis {to_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
             to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': gestorbene,
             'total': ''
         })
     return data, gestorbene
 
-def get_stand_2(filters, data):
-    # ~ qty = personen_qty - wegzueger_qty - kuendigungen_qty - ausschluesse_qty - gestorbene_qty
+def get_erben(filters, data):
+    
+    erben = frappe.db.sql("""SELECT
+                                        COUNT(`name`) AS `qty`
+                                    FROM `tabMitgliedschaft`
+                                    WHERE `sektion_id` = '{sektion_id}'
+                                    AND `austritt` > '{to_date}'
+                                    AND `verstorben_am` BETWEEN '{from_date}' AND '{to_date}""".format(sektion_id=filters.sektion_id, \
+                                from_date=filters.from_date, to_date=filters.to_date), as_dict=True)[0].qty
+    
+    data.append(
+        {
+            'mitglieder': 'Erben',
+            'berechnung': 'Todesfall/Meldung {from_date} bis {to_date} Mitgliedschaft weitergeführt'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
+            to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
+            'anzahl': erben,
+            'total': ''
+        })
+    return data
+
+def get_stand_2(filters, data, stand_1, neumitglieder, zuzueger, wegzueger_qty, kuendigungen_qty, ausschluesse_qty, gestorbene_qty):
+    qty = (stand_1 + neumitglieder + zuzueger) - wegzueger_qty - kuendigungen_qty - ausschluesse_qty - gestorbene_qty
+    
     alle_per_to_date = frappe.db.sql("""SELECT
                                             COUNT(`name`) AS `qty`
                                         FROM `tabMitgliedschaft`
                                         WHERE `sektion_id` = '{sektion_id}'
-                                        AND `status_c` = 'Regulär'
-                                        AND `eintrittsdatum` <= '{to_date}'
-                                        AND (`zuzug` <= '{to_date}' or `zuzug` IS NULL)""".format(from_date=filters.from_date, \
+                                        `eintrittsdatum` <= '{to_date}'
+                                        AND (`austritt` > '{to_date}' OR `austritt` IS NULL)
+                                        AND (`kuendigung` > '{to_date}' OR `kuendigung` IS NULL)""".format(from_date=filters.from_date, \
                                         to_date=filters.to_date, sektion_id=filters.sektion_id), as_dict=True)[0].qty
     data.append(
         {
-            'mitglieder': 'Stand',
+            'mitglieder': 'Stand Query',
             'berechnung': '{to_date} (Total aktive Mitgliedschaften ohne Wegzüge, Kündigungen, Ausschlüsse, Gestorbene)'.format(to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': '',
             'total': alle_per_to_date
         })
+    
+    data.append(
+        {
+            'mitglieder': 'Stand berechnet',
+            'berechnung': '{to_date} (Total aktive Mitgliedschaften ohne Wegzüge, Kündigungen, Ausschlüsse, Gestorbene)'.format(to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
+            'anzahl': '',
+            'total': qty
+        })
+    
     return data
 
 def get_spaetere_eintritte(filters, data):
