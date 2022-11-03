@@ -65,7 +65,8 @@ def get_stand(filters, data):
                                         AND (`eintrittsdatum` < '{from_date}' AND `eintrittsdatum` IS NOT NULL)
                                         AND (`zuzug` < '{from_date}' OR `zuzug` IS NULL)
                                         AND (`austritt` >= '{from_date}' OR `austritt` IS NULL)
-                                        AND (`kuendigung` >= '{from_date}' OR `kuendigung` IS NULL)""".format(from_date=filters.from_date, \
+                                        AND (`kuendigung` >= '{from_date}' OR `kuendigung` IS NULL)
+                                        AND (`wegzug` >= '{from_date}' OR `wegzug` IS NULL)""".format(from_date=filters.from_date, \
                                         to_date=filters.to_date, sektion_id=filters.sektion_id), as_dict=True)[0].qty
     data.append(
         {
@@ -140,7 +141,8 @@ def get_ausschluesse(filters, data):
                                     FROM `tabMitgliedschaft`
                                     WHERE `sektion_id` = '{sektion_id}'
                                     AND `austritt` BETWEEN '{from_date}' AND '{to_date}'
-                                    AND `verstorben_am` IS NULL""".format(sektion_id=filters.sektion_id, \
+                                    AND `verstorben_am` IS NULL
+                                    AND `eintrittsdatum` IS NOT NULL""".format(sektion_id=filters.sektion_id, \
                                 from_date=filters.from_date, to_date=filters.to_date), as_dict=True)[0].qty
     
     data.append(
@@ -202,7 +204,8 @@ def get_stand_2(filters, data, stand_1, neumitglieder, zuzueger, wegzueger_qty, 
                                         AND `eintrittsdatum` <= '{to_date}'
                                         AND (`zuzug` <= '{to_date}' OR `zuzug` IS NULL)
                                         AND (`austritt` > '{to_date}' OR `austritt` IS NULL)
-                                        AND (`kuendigung` > '{to_date}' OR `kuendigung` IS NULL)""".format(from_date=filters.from_date, \
+                                        AND (`kuendigung` > '{to_date}' OR `kuendigung` IS NULL)
+                                        AND (`wegzug` > '{to_date}' OR `wegzug` IS NULL)""".format(from_date=filters.from_date, \
                                         to_date=filters.to_date, sektion_id=filters.sektion_id), as_dict=True)[0].qty
     data.append(
         {
