@@ -783,18 +783,48 @@ def suche_mitgliedschaft_aus_pe(payment_entry):
     return data
 
 @frappe.whitelist()
-def mitgliedschaft_zuweisen(mitgliedschaft):
-    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
-    if mitgliedschaft.rg_kunde:
-        return {
-            'mitgliedschaft': mitgliedschaft.name,
-            'customer': mitgliedschaft.rg_kunde
-        }
+def mitgliedschaft_zuweisen(mitgliedschaft, faktura=False):
+    if not faktura:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+        if mitgliedschaft.rg_kunde:
+            return {
+                'mitgliedschaft': mitgliedschaft.name,
+                'customer': mitgliedschaft.rg_kunde
+            }
+        else:
+            return {
+                'mitgliedschaft': mitgliedschaft.name,
+                'customer': mitgliedschaft.kunde_mitglied
+            }
     else:
-        return {
-            'mitgliedschaft': mitgliedschaft.name,
-            'customer': mitgliedschaft.kunde_mitglied
-        }
+        faktura = frappe.get_doc("Kunden", mitgliedschaft)
+        if faktura.mv_mitgliedschaft:
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", faktura.mv_mitgliedschaft)
+            if mitgliedschaft.rg_kunde:
+                return {
+                    'mitgliedschaft': mitgliedschaft.name,
+                    'customer': mitgliedschaft.rg_kunde,
+                    'faktura': faktura.name
+                }
+            else:
+                return {
+                    'mitgliedschaft': mitgliedschaft.name,
+                    'customer': mitgliedschaft.kunde_mitglied,
+                    'faktura': faktura.name
+                }
+        else:
+            if faktura.rg_kunde:
+                return {
+                    'mitgliedschaft': '',
+                    'customer': faktura.rg_kunde,
+                    'faktura': faktura.name
+                }
+            else:
+                return {
+                    'mitgliedschaft': '',
+                    'customer': faktura.kunde_kunde,
+                    'faktura': faktura.name
+                }
 
 @frappe.whitelist()
 def aktualisiere_camt_uebersicht(camt_import):
