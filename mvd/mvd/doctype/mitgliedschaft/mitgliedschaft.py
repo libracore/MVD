@@ -3642,6 +3642,7 @@ def get_ampelfarbe(mitgliedschaft):
         ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
                                                     FROM `tabSales Invoice` 
                                                     WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
+                                                    AND `ist_mitgliedschaftsrechnung` = 1
                                                     AND `due_date` < CURDATE()
                                                     AND `docstatus` = 1""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)[0].open_amount
         
@@ -3651,6 +3652,7 @@ def get_ampelfarbe(mitgliedschaft):
             offene_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
                                                 FROM `tabSales Invoice` 
                                                 WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
+                                                AND `ist_mitgliedschaftsrechnung` = 1
                                                 AND `due_date` >= CURDATE()
                                                 AND `docstatus` = 1""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)[0].open_amount
             
