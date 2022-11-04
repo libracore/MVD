@@ -209,7 +209,7 @@ def get_stand_2(filters, data, stand_1, neumitglieder, zuzueger, wegzueger_qty, 
                                         to_date=filters.to_date, sektion_id=filters.sektion_id), as_dict=True)[0].qty
     data.append(
         {
-            'mitglieder': 'Stand Query',
+            'mitglieder': 'Stand',
             'berechnung': '{to_date} (Total aktive Mitgliedschaften ohne Wegzüge, Kündigungen, Ausschlüsse, Gestorbene)'.format(to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': '',
             'total': alle_per_to_date
