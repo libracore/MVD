@@ -32,9 +32,12 @@ frappe.ui.form.on('Payment Entry', {
                 }
             }
             if (cur_frm.doc.docstatus == 0) {
-                frm.add_custom_button(__("Mitgliedschaft zuweisen"), function() {
+                frm.add_custom_button(__("Mitgliedschaft"), function() {
                     mitgliedschaft_zuweisen(frm);
-                });
+                }, __("Zuweisung von ..."));
+                frm.add_custom_button(__("Faktura Kunde"), function() {
+                    faktura_kunde_zuweisen(frm);
+                }, __("Zuweisung von ..."));
             }
             
             if ((cur_frm.doc.docstatus == 2)&&(frappe.user.has_role("System Manager"))) {
@@ -69,7 +72,6 @@ function mitgliedschaft_zuweisen(frm) {
         freeze_message: 'Suche nach möglichen Mitgliedschaften...',
         callback: function(r)
         {
-            console.log(r.message);
             var field_list = [
                 {'fieldname': 'mitgliedschaft', 'fieldtype': 'Link', 'label': 'Mitgliedschaft', 'reqd': 1, 'options': 'Mitgliedschaft'},
                 {'fieldname': 'section_vorschlaege', 'fieldtype': 'Section Break', 'label': 'Vorschläge'}
@@ -96,6 +98,7 @@ function mitgliedschaft_zuweisen(frm) {
                         cur_frm.set_value("mv_mitgliedschaft", r.message.mitgliedschaft);
                         cur_frm.set_value("party", r.message.customer);
                         cur_frm.set_value("camt_status", 'Zugewiesen');
+                        cur_frm.set_value("mv_kunde", '');
                         cur_frm.save();
                     }
                 });
@@ -105,6 +108,37 @@ function mitgliedschaft_zuweisen(frm) {
             )
         }
     });
+}
+
+function faktura_kunde_zuweisen(frm) {
+    var field_list = [
+        {'fieldname': 'faktura_kunde', 'fieldtype': 'Link', 'label': 'Faktura Kunde', 'reqd': 1, 'options': 'Kunden'}
+    ];
+    
+    frappe.prompt(field_list,
+    function(values){
+        frappe.call({
+            method: "mvd.mvd.doctype.camt_import.camt_import.mitgliedschaft_zuweisen",
+            args:{
+                    'mitgliedschaft': values.faktura_kunde,
+                    'faktura': 1
+            },
+            freeze: true,
+            freeze_message: 'Weise Faktura Kunde zu...',
+            callback: function(r)
+            {
+                cur_frm.set_value("mv_mitgliedschaft", r.message.mitgliedschaft);
+                cur_frm.set_value("party", r.message.customer);
+                cur_frm.set_value("camt_status", 'Zugewiesen');
+                cur_frm.set_value("mv_kunde", r.message.faktura);
+                
+                cur_frm.save();
+            }
+        });
+    },
+    'Faktura Kunde zuweisen',
+    'Zuweisen'
+    )
 }
 
 function erstelle_korrespondenz(frm) {
