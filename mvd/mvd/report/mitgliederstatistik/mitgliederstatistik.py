@@ -12,7 +12,7 @@ def execute(filters=None):
 
 def get_columns():
     return[
-        {"label": _("Mitglieder"), "fieldname": "mitglieder", "fieldtype": "Data", "width": 150},
+        {"label": _("Mitglieder"), "fieldname": "mitglieder", "fieldtype": "Data", "width": 200},
         {"label": _("Berechnung"), "fieldname": "berechnung", "fieldtype": "Data", "width": 580},
         {"label": _("Anzahl"), "fieldname": "anzahl", "fieldtype": "Data"},
         {"label": _("Total"), "fieldname": "total", "fieldtype": "Data"}
@@ -71,7 +71,7 @@ def get_stand(filters, data):
     data.append(
         {
             'mitglieder': 'Stand',
-            'berechnung': '{from_date} (Total)'.format(from_date=frappe.utils.add_to_date(frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y')), days=-1),
+            'berechnung': '{from_date} (Total)'.format(from_date=frappe.utils.add_to_date(frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), days=-1)),
             'anzahl': '',
             'total': alle_per_from_date
         })
@@ -230,8 +230,7 @@ def get_spaetere_eintritte(filters, data):
                                     COUNT(`name`) AS `qty`
                                 FROM `tabMitgliedschaft`
                                 WHERE `sektion_id` = '{sektion_id}'
-                                AND `eintrittsdatum` > '{to_date}'
-                                AND `status_c` = 'Regulär'""".format(sektion_id=filters.sektion_id, \
+                                AND `eintrittsdatum` > '{to_date}'""".format(sektion_id=filters.sektion_id, \
                                 to_date=filters.to_date), as_dict=True)[0].qty
     data.append(
         {
@@ -248,12 +247,12 @@ def get_vorgem_kuendigungen_2(filters, data):
                                 FROM `tabMitgliedschaft`
                                 WHERE `sektion_id` = '{sektion_id}'
                                 AND `kuendigung` > '{to_date}'
-                                AND `status_c` NOT IN ('Ausschluss', 'Gestorben', 'Wegzug')""".format(sektion_id=filters.sektion_id, \
+                                AND `eintrittsdatum` IS NOT NULL""".format(sektion_id=filters.sektion_id, \
                                 to_date=filters.to_date), as_dict=True)[0].qty
     data.append(
         {
             'mitglieder': 'vorgem. Kündigungen',
-            'berechnung': 'Kündigungsdatum > {to_date} und Status nicht Ausschluss, Gestorben oder Wegzug'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
+            'berechnung': 'Kündigungsdatum > {to_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
             to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': kuendigungen,
             'total': ''
@@ -360,3 +359,153 @@ def get_ueberschrift_2(filters, data):
             'total': ''
         })
     return data
+
+# --------------------------------------------
+# FRAGEN DIE NOCH GEKLÄRT WERDEN MÜSSEN
+# --------------------------------------------
+'''
+[ ] Zeile 5 und 6 können doppelte beinhalten!
+[ ] Kontroll-Query-Differenzen klären und bereinigen!
+'''
+
+'''
+KONTROLL QUERIES
+
+alle `name` bis und mit Zeile 3 (=Zwischentotal, Zeile 4)
+------------------------------------------------------------------------------------
+SELECT
+    `name`
+FROM (
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `sektion_id` = 'MVAG'
+    AND (`eintrittsdatum` < '2022-01-01' AND `eintrittsdatum` IS NOT NULL)
+    AND (`zuzug` < '2022-01-01' OR `zuzug` IS NULL)
+    AND (`austritt` >= '2022-01-01' OR `austritt` IS NULL)
+    AND (`kuendigung` >= '2022-01-01' OR `kuendigung` IS NULL)
+    AND (`wegzug` >= '2022-01-01' OR `wegzug` IS NULL)
+    UNION 
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `zuzug` BETWEEN '2022-01-01' AND '2022-12-31'
+    AND `sektion_id` = 'MVAG'
+    UNION 
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `eintrittsdatum` BETWEEN '2022-01-01' AND '2022-12-31'
+    AND `zuzug` IS NULL
+    AND `sektion_id` = 'MVAG'
+) AS `tbl`
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+Alle `name` Der Zeilen 5 bis und mit 8
+-----------------------------------------------------------------------------------
+SELECT 
+    `name`
+FROM (
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `sektion_id` = 'MVAG'
+    AND `wegzug` BETWEEN '2022-01-01' AND '2022-12-31'
+    UNION 
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `sektion_id` = 'MVAG'
+    AND `kuendigung` BETWEEN '2022-01-01' AND '2022-12-31'
+    AND `austritt` IS NULL
+    UNION
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `sektion_id` = 'MVAG'
+    AND `austritt` BETWEEN '2022-01-01' AND '2022-12-31'
+    AND `verstorben_am` IS NULL
+    AND `eintrittsdatum` IS NOT NULL
+    UNION 
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `sektion_id` = 'MVAG'
+    AND `austritt` BETWEEN '2022-01-01' AND '2022-12-31'
+    AND `verstorben_am` IS NOT NULL
+) AS `tbl`
+------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
+Mit folgendem Kontroll-Query können Differenzen von Zeile 9 und Zeile 10 gefunden werden
+---------------------------------------------------------------------------------------
+SELECT 
+    `name`
+FROM (
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `sektion_id` = 'MVAG'
+    AND (`eintrittsdatum` < '2022-01-01' AND `eintrittsdatum` IS NOT NULL)
+    AND (`zuzug` < '2022-01-01' OR `zuzug` IS NULL)
+    AND (`austritt` >= '2022-01-01' OR `austritt` IS NULL)
+    AND (`kuendigung` >= '2022-01-01' OR `kuendigung` IS NULL)
+    AND (`wegzug` >= '2022-01-01' OR `wegzug` IS NULL)
+    UNION 
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `zuzug` BETWEEN '2022-01-01' AND '2022-12-31'
+    AND `sektion_id` = 'MVAG'
+    UNION 
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `eintrittsdatum` BETWEEN '2022-01-01' AND '2022-12-31'
+    AND `zuzug` IS NULL
+    AND `sektion_id` = 'MVAG'
+) AS `tbl`
+WHERE `name` NOT IN (
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `sektion_id` = 'MVAG'
+    AND `eintrittsdatum` <= '2022-12-31'
+    AND (`zuzug` <= '2022-12-31' OR `zuzug` IS NULL)
+    AND (`austritt` > '2022-12-31' OR `austritt` IS NULL)
+    AND (`kuendigung` > '2022-12-31' OR `kuendigung` IS NULL)
+    AND (`wegzug` > '2022-12-31' OR `wegzug` IS NULL)
+)
+AND `name` NOT IN (
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `sektion_id` = 'MVAG'
+    AND `wegzug` BETWEEN '2022-01-01' AND '2022-12-31'
+)
+AND `name` NOT IN (
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `sektion_id` = 'MVAG'
+    AND `kuendigung` BETWEEN '2022-01-01' AND '2022-12-31'
+    AND `austritt` IS NULL
+)
+AND `name` NOT IN (
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `sektion_id` = 'MVAG'
+    AND `austritt` BETWEEN '2022-01-01' AND '2022-12-31'
+    AND `verstorben_am` IS NULL
+    AND `eintrittsdatum` IS NOT NULL
+)
+AND `name` NOT IN (
+    SELECT
+        `name`
+    FROM `tabMitgliedschaft`
+    WHERE `sektion_id` = 'MVAG'
+    AND `austritt` BETWEEN '2022-01-01' AND '2022-12-31'
+    AND `verstorben_am` IS NOT NULL
+)
+----------------------------------------------------------------------------
+'''
