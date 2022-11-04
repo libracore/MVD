@@ -739,8 +739,6 @@ def anlage_prozess(anlage_daten, status):
     if isinstance(anlage_daten, str):
         anlage_daten = json.loads(anlage_daten)
     
-    # ~ frappe.throw(str(anlage_daten))
-    
     firma = ''
     if 'firma' in anlage_daten:
         firma = anlage_daten["firma"] if anlage_daten["firma"] else ''
@@ -787,30 +785,30 @@ def anlage_prozess(anlage_daten, status):
         "kunde_mitglied": anlage_daten["kunde_kunde"],
         "kontakt_mitglied": anlage_daten["kontakt_kunde"],
         "adresse_mitglied": anlage_daten["adresse_kunde"],
-        "rg_kunde": anlage_daten["rg_kunde"],
-        "rg_kontakt": anlage_daten["rg_kontakt"],
-        "rg_adresse": anlage_daten["rg_adresse"],
+        "rg_kunde": anlage_daten["rg_kunde"] if "rg_kunde" in anlage_daten else None,
+        "rg_kontakt": anlage_daten["rg_kontakt"] if "rg_kontakt" in anlage_daten else None,
+        "rg_adresse": anlage_daten["rg_adresse"] if "rg_adresse" in anlage_daten else None,
         "abweichende_rechnungsadresse": anlage_daten["abweichende_rechnungsadresse"],
         "unabhaengiger_debitor": anlage_daten["unabhaengiger_debitor"],
-        "rg_zusatz_adresse": anlage_daten["rg_zusatz_adresse"],
-        "rg_strasse": anlage_daten["rg_strasse"],
-        "rg_nummer": anlage_daten["rg_nummer"],
-        "rg_nummer_zu": anlage_daten["rg_nummer_zu"],
-        "rg_postfach": anlage_daten["rg_postfach"],
-        "rg_postfach_nummer": anlage_daten["rg_postfach_nummer"],
-        "rg_plz": anlage_daten["rg_plz"],
-        "rg_ort": anlage_daten["rg_ort"],
-        "rg_land": anlage_daten["rg_land"],
-        "rg_kundentyp": anlage_daten["rg_kundentyp"],
-        "rg_firma": anlage_daten["rg_firma"],
-        "rg_zusatz_firma": anlage_daten["rg_zusatz_firma"],
-        "rg_anrede": anlage_daten["rg_anrede"],
-        "rg_nachname": anlage_daten["rg_nachname"],
-        "rg_vorname": anlage_daten["rg_vorname"],
-        "rg_tel_p": anlage_daten["rg_tel_p"],
-        "rg_tel_m": anlage_daten["rg_tel_m"],
-        "rg_tel_g": anlage_daten["rg_tel_g"],
-        "rg_e_mail": anlage_daten["rg_e_mail"]
+        "rg_zusatz_adresse": anlage_daten["rg_zusatz_adresse"] if "rg_zusatz_adresse" in anlage_daten else None,
+        "rg_strasse": anlage_daten["rg_strasse"] if "rg_strasse" in anlage_daten else None,
+        "rg_nummer": anlage_daten["rg_nummer"] if "rg_nummer" in anlage_daten else None,
+        "rg_nummer_zu": anlage_daten["rg_nummer_zu"] if "rg_nummer_zu" in anlage_daten else None,
+        "rg_postfach": anlage_daten["rg_postfach"] if "rg_postfach" in anlage_daten else None,
+        "rg_postfach_nummer": anlage_daten["rg_postfach_nummer"] if "rg_postfach_nummer" in anlage_daten else None,
+        "rg_plz": anlage_daten["rg_plz"] if "rg_plz" in anlage_daten else None,
+        "rg_ort": anlage_daten["rg_ort"] if "rg_ort" in anlage_daten else None,
+        "rg_land": anlage_daten["rg_land"] if "rg_land" in anlage_daten else None,
+        "rg_kundentyp": anlage_daten["rg_kundentyp"] if "rg_kundentyp" in anlage_daten else None,
+        "rg_firma": anlage_daten["rg_firma"] if "rg_firma" in anlage_daten else None,
+        "rg_zusatz_firma": anlage_daten["rg_zusatz_firma"] if "rg_zusatz_firma" in anlage_daten else None,
+        "rg_anrede": anlage_daten["rg_anrede"] if "rg_anrede" in anlage_daten else None,
+        "rg_nachname": anlage_daten["rg_nachname"] if "rg_nachname" in anlage_daten else None,
+        "rg_vorname": anlage_daten["rg_vorname"] if "rg_vorname" in anlage_daten else None,
+        "rg_tel_p": anlage_daten["rg_tel_p"] if "rg_tel_p" in anlage_daten else None,
+        "rg_tel_m": anlage_daten["rg_tel_m"] if "rg_tel_m" in anlage_daten else None,
+        "rg_tel_g": anlage_daten["rg_tel_g"] if "rg_tel_g" in anlage_daten else None,
+        "rg_e_mail": anlage_daten["rg_e_mail"] if "rg_e_mail" in anlage_daten else None
     })
     mitgliedschaft.insert(ignore_permissions=True)
     
