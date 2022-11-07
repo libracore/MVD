@@ -261,7 +261,7 @@ def get_draft_csv(jahresversand=None):
                     row_data.append("")
                     row_data.append("")
                 row_data.append(mitgliedschaft.anrede_c or '')
-                row_data.append(mitgliedschaft.rg_briefanrede or '')
+                row_data.append(mitgliedschaft.briefanrede or '')
                 row_data.append(mitgliedschaft.vorname_1 or '')
                 row_data.append(mitgliedschaft.nachname_1 or '')
                 if mitgliedschaft.hat_solidarmitglied:
@@ -769,7 +769,7 @@ def get_csv(jahresversand, bg_job=False):
                         row_data.append("")
                         row_data.append("")
                     row_data.append(mitgliedschaft.anrede_c or '')
-                    row_data.append(mitgliedschaft.rg_briefanrede or '')
+                    row_data.append(mitgliedschaft.briefanrede or '')
                     row_data.append(mitgliedschaft.vorname_1 or '')
                     row_data.append(mitgliedschaft.nachname_1 or '')
                     if mitgliedschaft.hat_solidarmitglied:
