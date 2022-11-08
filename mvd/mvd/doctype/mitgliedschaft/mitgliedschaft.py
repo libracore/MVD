@@ -2048,7 +2048,7 @@ def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
 
 @frappe.whitelist()
 def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
-    if str(get_sektion_code(neue_sektion)) not in ('ZH', 'SO'):
+    if str(get_sektion_code(neue_sektion)) not in ('ZH'):
         # Pseudo Sektion handling
         if int(frappe.db.get_value("Sektion", neue_sektion, "pseudo_sektion")) == 1:
             return 1
