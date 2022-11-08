@@ -12,13 +12,14 @@ def execute(filters=None):
 
 def get_columns():
     return[
-        {"label": _("Mitglied"), "fieldname": "mitglied", "fieldtype": "Link", "options": "Mitgliedschaft"},
+        {"label": _("Mitglied"), "fieldname": "mitglied_id", "fieldtype": "Link", "options": "Mitgliedschaft"},
         {"label": _("Mitglied Nr"), "fieldname": "mitglied_nr", "fieldtype": "Data"},
         {"label": _("Mitglied Status"), "fieldname": "mitglied_status", "fieldtype": "Data"},
         {"label": _("Rechnung"), "fieldname": "rechnung", "fieldtype": "Link", "options": "Sales Invoice"},
-        {"label": _("Betrag"), "fieldname": "betrag", "fieldtype": "Currency"},
+        #{"label": _("Rechnung Status"), "fieldname": "rechnung_status", "fieldtype": "Data"},
+        #{"label": _("Betrag"), "fieldname": "betrag", "fieldtype": "Currency"},
         {"label": _("Ausstehender Betrag"), "fieldname": "ausstehender_betrag", "fieldtype": "Currency"},
-        {"label": _("Datum"), "fieldname": "datum", "fieldtype": "Date"},
+        {"label": _("R-Datum"), "fieldname": "datum", "fieldtype": "Date"},
         {"label": _("Mitgliedschaftsjahr"), "fieldname": "mitgliedschaftsjahr", "fieldtype": "Int"}
     ]
 
@@ -35,12 +36,14 @@ def get_nicht_bezahlt(filters, data):
                                                 `sinv`.`outstanding_amount` AS `ausstehender_betrag`,
                                                 `sinv`.`posting_date` AS `datum`,
                                                 `sinv`.`mitgliedschafts_jahr` AS `mitgliedschaftsjahr`,
+                                                `sinv`.`status` AS `rechnung_status`,
                                                 `mvm`.`mitglied_nr` AS `mitglied_nr`,
+                                                `mvm`.`mitglied_id` AS `mitglied_id`,
                                                 `mvm`.`status_c` AS `mitglied_status`
                                             FROM `tabSales Invoice` AS `sinv`
                                             LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `sinv`.`mv_mitgliedschaft` = `mvm`.`name`
-                                            WHERE `sinv`.`sektion_id` = 'MVAG'
-                                            AND `sinv`.`status` != 'Paid'
+                                            WHERE `sinv`.`sektion_id` = '{sektion_id}'
+					    AND `sinv`.`status` != 'Paid'
                                             AND `sinv`.`docstatus` = 1
                                             AND `sinv`.`ist_mitgliedschaftsrechnung` = 1""".format(sektion_id=filters.sektion_id), as_dict=True)
     for record in nicht_bezahlt_per_se:
