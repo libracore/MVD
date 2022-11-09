@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["OP Liste"] = {
+frappe.query_reports["Mitgliederbeitraege"] = {
     "filters": [
         {
             'fieldname': "sektion_id",
