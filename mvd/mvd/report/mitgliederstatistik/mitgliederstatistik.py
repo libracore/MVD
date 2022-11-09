@@ -73,7 +73,7 @@ def get_stand(filters, data):
     data.append(
         {
             'mitglieder': 'Stand',
-            'berechnung': '{from_date} (Total)'.format(from_date=frappe.utils.add_to_date(frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), days=-1)),
+	    'berechnung': '{from_date} (Total)'.format(from_date=frappe.utils.add_to_date(frappe.utils.get_datetime(filters.from_date), days=-1).strftime('%d.%m.%Y')),
             'anzahl': '',
             'total': alle_per_from_date
         })
@@ -87,7 +87,7 @@ def get_stand(filters, data):
         })
     data.append(
         {
-            'mitglieder': 'Zuzüger',
+            'mitglieder': 'Zuzüger*innen',
             'berechnung': 'Zuzugsdatum {from_date} bis {to_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
             to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': zuzueger,
@@ -96,7 +96,7 @@ def get_stand(filters, data):
     data.append(
         {
             'mitglieder': 'Zwischentotal',
-            'berechnung': 'Stand + Neumitglieder + Zuzüger',
+            'berechnung': 'Stand + Neumitglieder + Zuzüger*innen',
             'anzahl': '',
             'total': alle_per_from_date + neumitglieder + zuzueger
         })
@@ -149,7 +149,7 @@ def get_korrektur_wegzug_kuendigung(filters, data):
     data.append(
         {
             'mitglieder': 'Korrektur weggezogene Kündigungen',
-            'berechnung': 'Anzahl der Mitglieder die gekündet sowie auch weggezogen sind. (Korrektur der doppelt gezählten)',
+            'berechnung': 'Mitglieder mit Wegzug vor Kündigungsdatum. (Korrektur)',
             'anzahl': "-{korrektur}".format(korrektur=str(korrektur)),
             'total': ''
         })
@@ -315,7 +315,7 @@ def get_nicht_bezahlt(filters, data):
     
     data.append(
         {
-            'mitglieder': 'nicht bezahlt Mitglieder ({year})'.format(year=year),
+            'mitglieder': 'offene Mitgliederbeiträge ({year})'.format(year=year),
             'berechnung': 'nicht bezahlt per {0}'.format(frappe.utils.get_datetime().strftime('%d.%m.%Y')),
             'anzahl': nicht_bezahlt_per_se,
             'total': ''
@@ -349,8 +349,8 @@ def get_nicht_bezahlt(filters, data):
                                                 )""".format(sektion_id=filters.sektion_id, year=year, to_date=filters.to_date), as_dict=True)[0].qty
     data.append(
         {
-            'mitglieder': 'nach Stichtag beglichene Mitglieder ({year})'.format(year=year),
-            'berechnung': 'bezahlung nach {to_date}'.format(to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
+            'mitglieder': 'nach Berichtsende beglichene Mitgliederbeiträge ({year})'.format(year=year),
+            'berechnung': 'Bezahlung nach {to_date}'.format(to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': nicht_bezahlt_bis_to_date,
             'total': ''
         })
@@ -372,7 +372,7 @@ def get_nicht_bezahlt(filters, data):
     
     data.append(
         {
-            'mitglieder': 'nicht bezahlt Anmeldung ({year})'.format(year=year),
+            'mitglieder': 'offene Anmeldungen ({year})'.format(year=year),
             'berechnung': 'nicht bezahlt per {0}'.format(frappe.utils.get_datetime().strftime('%d.%m.%Y')),
             'anzahl': nicht_bezahlt_per_se,
             'total': ''
@@ -406,8 +406,8 @@ def get_nicht_bezahlt(filters, data):
                                                 )""".format(sektion_id=filters.sektion_id, year=year, to_date=filters.to_date), as_dict=True)[0].qty
     data.append(
         {
-            'mitglieder': 'nach Stichtag beglichene Anmeldungen ({year})'.format(year=year),
-            'berechnung': 'bezahlung nach {to_date}'.format(to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
+            'mitglieder': 'nach Berichtsende beglichene Anmeldungen ({year})'.format(year=year),
+            'berechnung': 'Bezahlung nach {to_date}'.format(to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': nicht_bezahlt_bis_to_date,
             'total': ''
         })
@@ -437,7 +437,7 @@ def get_angemeldet(filters, data):
                                 AND `status_c` IN ('Anmeldung', 'Online-Anmeldung')""".format(sektion_id=filters.sektion_id), as_dict=True)[0].qty
     data.append(
         {
-            'mitglieder': 'angemeldet',
+            'mitglieder': 'Anmeldungen',
             'berechnung': 'per {0}'.format(frappe.utils.get_datetime().strftime('%d.%m.%Y')),
             'anzahl': angemeldet,
             'total': ''
