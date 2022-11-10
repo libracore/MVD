@@ -1,0 +1,116 @@
+{% extends "templates/web.html" %}
+
+{% block title %} Online Beratung {% endblock %}
+
+{% block page_content %}
+
+<h1>E-Mail Beratung</h1><br>
+
+<h2><u>Mitgliedschaftsdaten</u></h2>
+
+<table style="width: 100%">
+    <tr>
+        <td>Mitgliedernummer</td>
+        <td>01234567</td>
+    </tr>
+    <tr>
+        <td>Mitgliedschafts Typ</td>
+        <td>Wohnungsmiete</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top;">Anrede</td>
+        <td>
+            <form>
+                <input type="radio" id="herr" name="anrede" value="Herr">
+                <label for="herr">Herr</label><br>
+                <input type="radio" id="frau" name="anrede" value="Frau">
+                <label for="frau">Frau</label><br>
+            </form>
+        </td>
+    </tr>
+    <tr>
+        <td>Vorname</td>
+        <td>Max</td>
+    </tr>
+    <tr>
+        <td>Nachname</td>
+        <td>Muster</td>
+    </tr>
+    <tr>
+        <td>Telefon privat / mobil *</td>
+        <td>
+            <input type="tel" id="tel" name="tel" value="012 345 67 89" required>
+        </td>
+    </tr>
+    <tr>
+        <td>E-Mail Adresse *</td>
+        <td>
+            <input type="email" id="email" name="email" value="test@mail.ch" required>
+        </td>
+    </tr>
+</table>
+
+<br>
+<h2><u>Mietobjekt</u></h2>
+
+<table style="width: 100%">
+    <tr>
+        <td>Strasse</td>
+        <td>Musterstrasse</td>
+    </tr>
+    <tr>
+        <td>Nummer</td>
+        <td>36</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top;">Postleitzahl</td>
+        <td>8000</td>
+    </tr>
+    <tr>
+        <td>Ort</td>
+        <td>Zürich</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top;">Anderes Mietobjekt</td>
+        <td>
+            <textarea name="anderes_mietobjekt" rows="7" cols="30"></textarea><br>
+            Bitte Adresse und weitere Angaben<br>(Ferienwohnung, Geschäftsraum, <br>
+            Mietwohnung einer Bekannten ...) eingeben,<br>falls sich ihre Frage nicht auf 
+            das versicherte<br>Objekt ihrer MV-Mitgliedschaft bezieht.<br>Rechtshilfe ist in 
+            diesen Fällen nicht gewährleistet.
+        </td>
+    </tr>
+</table>
+
+<br>
+<h2><u>Beratungsanfrage</u></h2>
+
+<table style="width: 100%">
+    <tr>
+        <td style="vertical-align: top;">Frage *</td>
+        <td>
+            <textarea name="frage" rows="7" cols="30" required></textarea>
+        </td>
+    </tr>
+</table>
+
+<br>
+<h2><u>Dokumente Hochladen</u></h2>
+<label for="file_1">1. Datei</label><br>
+<input type="file" id="file_1" name="file_1"><br><br>
+<label for="file_2">2. Datei</label><br>
+<input type="file" id="file_2" name="file_2"><br><br>
+<label for="file_3">3. Datei</label><br>
+<input type="file" id="file_3" name="file_3">
+
+<br><br>
+<input type="button" id="beratungsanfrage_senden" value="Beratunganfrage senden">
+
+{% endblock %}
+
+{% block style %}
+<style>
+    td:nth-child(1) {width: 30%;}
+    td:nth-child(2) {width: 70%;}
+</style>
+{% endblock %}

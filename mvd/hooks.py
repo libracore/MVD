@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from . import __version__ as app_version
+from frappe import _
 
 app_name = "mvd"
 app_title = "MVD"
@@ -50,6 +51,10 @@ jenv = {
 }
 # Home Pages
 # ----------
+standard_portal_menu_items = [
+    {"title": _("Meine Beratungen"), "route": "/meine_beratungen"},
+    {"title": _("Neue Beratung"), "route": "/onlineberatung"}
+]
 
 # application home page (will override Website Settings)
 # home_page = "login"
