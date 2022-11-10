@@ -10,6 +10,13 @@ frappe.query_reports["Mitgliederbeitraege"] = {
             'fieldtype': "Link",
             'options': 'Sektion',
             'reqd': 1
+        },
+        {
+            'fieldname': "zahlstatus",
+            'label': __("Zahlungsstatus"),
+            'fieldtype': "Select",
+            'options': 'Offen\nBeglichen\nAlle',
+            'default': 'Alle'
         }
     ]
 };
