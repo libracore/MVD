@@ -24,6 +24,13 @@ frappe.query_reports["Mitgliederstatistik"] = {
             'fieldtype': "Date",
             'default': frappe.datetime.add_months(frappe.datetime.month_end(), -1),
             'reqd': 1
+        },
+        {
+            'fieldname': "mitgliedschafts_typ",
+            'label': __("Mitgliedtyp"),
+            'fieldtype': "Select",
+            'options': 'Privat und Geschäft\nPrivat\nGeschäft',
+            'default': 'Privat und Geschäft'
         }
     ],
     "formatter":function (value, row, column, data, default_formatter) {
