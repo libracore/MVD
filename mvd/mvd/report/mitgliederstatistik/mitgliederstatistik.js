@@ -27,7 +27,7 @@ frappe.query_reports["Mitgliederstatistik"] = {
         }
     ],
     "formatter":function (value, row, column, data, default_formatter) {
-        if (['Stand', 'Total'].includes(data["mitglieder"])||['in obiger Aufstellung bereits enthalten:', 'in obiger Aufstellung nicht enthalten:'].includes(data["berechnung"])) {
+        if (['Stand', 'Total', 'Zwischentotal'].includes(data["mitglieder"])||['in obiger Aufstellung bereits enthalten:', 'in obiger Aufstellung nicht enthalten:'].includes(data["berechnung"])) {
             value = $(`<span>${value}</span>`);
             var $value = $(value).css("font-weight", "bold", "important");
             value = $value.wrap("<p></p>").parent().html();
