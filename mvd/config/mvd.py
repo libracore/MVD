@@ -24,6 +24,14 @@ def get_data():
                     "name": "MW Abo",
                     "label": _("M+W Abo"),
                     "description": _("M+W Abo")
+                },
+                {
+                    "type": "report",
+                    "name": "Mitgliederstatistik",
+                    "label": _("Mitgliederstatistik"),
+                    "description": _("Mitgliederstatistik"),
+                    "doctype": "Mitgliedschaft",
+                    "is_query_report": True
                 }
             ]
         },
@@ -57,9 +65,39 @@ def get_data():
                 },
                 {
                     "type": "doctype",
+                    "name": "MV Help Links",
+                    "label": _("Hilfe Verknüpfungen"),
+                    "description": _("Hilfe Verknüpfungen direkt zur MVD Wiki")
+                }
+            ]
+        },
+        {
+            "label": _("Finanzen"),
+            "icon": "fa fa-cog",
+            "items": [
+                {
+                    "type": "doctype",
                     "name": "CAMT Import",
                     "label": _("CAMT Importer"),
                     "description": _("CAMT Importer")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Fakultative Rechnung",
+                    "label": _("Fakultative Rechnungen"),
+                    "description": _("Fakultative Rechnungen")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Sales Invoice",
+                    "label": _("Rechnungen"),
+                    "description": _("Rechnungen")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Payment Entry",
+                    "label": _("Zahlungen"),
+                    "description": _("Zahlungen")
                 },
                 {
                     "type": "doctype",
@@ -68,10 +106,20 @@ def get_data():
                     "description": _("Mahnungen")
                 },
                 {
-                    "type": "doctype",
-                    "name": "MV Help Links",
-                    "label": _("Hilfe Verknüpfungen"),
-                    "description": _("Hilfe Verknüpfungen direkt zur MVD Wiki")
+                    "type": "report",
+                    "name": "Mitgliederbeitraege",
+                    "label": _("Mitgliederbeitraege"),
+                    "description": _("Mitgliederbeitraege"),
+                    "doctype": "Mitgliedschaft",
+                    "is_query_report": True
+                },
+                {
+                    "type": "report",
+                    "name": "Spendenuebersicht",
+                    "label": _("Spendenuebersicht"),
+                    "description": _("Spendenuebersicht"),
+                    "doctype": "Fakultative Rechnung",
+                    "is_query_report": True
                 }
             ]
         },
