@@ -15,6 +15,10 @@ def get_columns():
         {"label": _("Mitglied"), "fieldname": "mitglied_id", "fieldtype": "Link", "options": "Mitgliedschaft"},
         {"label": _("Mitglied Nr"), "fieldname": "mitglied_nr", "fieldtype": "Data"},
         {"label": _("Sektion"), "fieldname": "sektion_id", "fieldtype": "Data"},
+        {"label": _("Anrede"), "fieldname": "anrede", "fieldtype": "Data"},
+        {"label": _("Vorname"), "fieldname": "vorname", "fieldtype": "Data"},
+        {"label": _("Nachname"), "fieldname": "nachname", "fieldtype": "Data"},
+        {"label": _("Adressblock"), "fieldname": "adressblock", "fieldtype": "Code"},
         {"label": _("Spendenversand"), "fieldname": "spendenversand", "fieldtype": "Link", "options": "Spendenversand"},
         {"label": _("Fakultative Rechnung"), "fieldname": "fakultative_rechnung", "fieldtype": "Link", "options": "Fakultative Rechnung"},
         {"label": _("Rechnung"), "fieldname": "sales_invoice", "fieldtype": "Link", "options": "Sales Invoice"},
@@ -38,7 +42,11 @@ def get_data(filters):
                                     `fak`.`name` AS `fakultative_rechnung`,
                                     `fak`.`bezahlt_via` AS `sales_invoice`,
                                     `sinv`.`grand_total` AS `amount`,
-                                    `fak`.`spenden_versand` AS `spendenversand`
+                                    `fak`.`spenden_versand` AS `spendenversand`,
+                                    `mvm`.`anrede_c` AS `anrede`,
+                                    `mvm`.`vorname_1` AS `vorname`,
+                                    `mvm`.`nachname_1` AS `nachname`,
+                                    `mvm`.`rg_adressblock` AS `adressblock`
                                 FROM `tabFakultative Rechnung` AS `fak`
                                 LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `fak`.`mv_mitgliedschaft` = `mvm`.`name`
                                 LEFT JOIN `tabSales Invoice` AS `sinv` ON `fak`.`bezahlt_via` = `sinv`.`name`
@@ -54,7 +62,11 @@ def get_data(filters):
                                     `fak`.`name` AS `fakultative_rechnung`,
                                     `fak`.`bezahlt_via` AS `sales_invoice`,
                                     `sinv`.`grand_total` AS `amount`,
-                                    `fak`.`spenden_versand` AS `spendenversand`
+                                    `fak`.`spenden_versand` AS `spendenversand`,
+                                    `mvm`.`anrede_c` AS `anrede`,
+                                    `mvm`.`vorname_1` AS `vorname`,
+                                    `mvm`.`nachname_1` AS `nachname`,
+                                    `mvm`.`rg_adressblock` AS `adressblock`
                                 FROM `tabFakultative Rechnung` AS `fak`
                                 LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `fak`.`mv_mitgliedschaft` = `mvm`.`name`
                                 LEFT JOIN `tabSales Invoice` AS `sinv` ON `fak`.`bezahlt_via` = `sinv`.`name`
@@ -71,7 +83,11 @@ def get_data(filters):
                                     `fak`.`name` AS `fakultative_rechnung`,
                                     `fak`.`bezahlt_via` AS `sales_invoice`,
                                     `sinv`.`grand_total` AS `amount`,
-                                    `fak`.`spenden_versand` AS `spendenversand`
+                                    `fak`.`spenden_versand` AS `spendenversand`,
+                                    `mvm`.`anrede_c` AS `anrede`,
+                                    `mvm`.`vorname_1` AS `vorname`,
+                                    `mvm`.`nachname_1` AS `nachname`,
+                                    `mvm`.`rg_adressblock` AS `adressblock`
                                 FROM `tabFakultative Rechnung` AS `fak`
                                 LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `fak`.`mv_mitgliedschaft` = `mvm`.`name`
                                 LEFT JOIN `tabSales Invoice` AS `sinv` ON `fak`.`bezahlt_via` = `sinv`.`name`
