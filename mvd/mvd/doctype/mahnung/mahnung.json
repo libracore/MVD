@@ -13,6 +13,7 @@
   "druckvorlage",
   "massenlauf",
   "massenlauf_referenz",
+  "mahnlauf",
   "column_general",
   "sektion_id",
   "company",
@@ -208,10 +209,17 @@
    "fieldtype": "Link",
    "label": "Kunde",
    "options": "Kunden"
+  },
+  {
+   "fieldname": "mahnlauf",
+   "fieldtype": "Link",
+   "label": "Mahnlauf Referenz",
+   "options": "Mahnlauf",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-08-26 10:39:32.887593",
+ "modified": "2022-11-15 10:54:29.525970",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnung",
