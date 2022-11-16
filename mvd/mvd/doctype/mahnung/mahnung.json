@@ -10,6 +10,8 @@
   "customer",
   "customer_name",
   "mitgliedschaften",
+  "mv_mitgliedschaft",
+  "mv_kunde",
   "druckvorlage",
   "massenlauf",
   "massenlauf_referenz",
@@ -30,8 +32,7 @@
   "total_before_charge",
   "total_with_charge",
   "section_hidden_linking",
-  "hidden_linking",
-  "mv_kunde"
+  "hidden_linking"
  ],
  "fields": [
   {
@@ -165,14 +166,18 @@
   {
    "fieldname": "hidden_linking",
    "fieldtype": "Table",
-   "label": "Hidden Linking",
-   "options": "mahnung mitgliedschaft linking"
+   "hidden": 1,
+   "label": "Obsolet: Hidden Linking",
+   "options": "mahnung mitgliedschaft linking",
+   "read_only": 1
   },
   {
    "fieldname": "mitgliedschaften",
    "fieldtype": "Table MultiSelect",
-   "label": "Mitgliedschaft(en)",
-   "options": "Mitgliedschaft MultiSelect"
+   "hidden": 1,
+   "label": "Obsolet: Mitgliedschaft(en)",
+   "options": "Mitgliedschaft MultiSelect",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -216,10 +221,16 @@
    "label": "Mahnlauf Referenz",
    "options": "Mahnlauf",
    "read_only": 1
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Mitgliedschaft",
+   "options": "Mitgliedschaft"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-11-15 10:54:29.525970",
+ "modified": "2022-11-16 08:42:47.268571",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnung",

@@ -9,6 +9,11 @@ from frappe.utils.data import add_to_date, nowdate
 from datetime import datetime
 
 class Mahnlauf(Document):
+    def onload(self):
+        self.entwurfs_mahnungen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 0""".format(mahnlauf=self.name), as_dict=True)[0].qty or 0
+        self.gebuchte_mahnungen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 1""".format(mahnlauf=self.name), as_dict=True)[0].qty or 0
+        self.stornierte_mahnungen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 2""".format(mahnlauf=self.name), as_dict=True)[0].qty or 0
+    
     def validate(self):
        # berechne relevantes Fälligkeitsdatum
         mahnstufen_frist = frappe.db.get_value('Sektion', self.sektion_id, 'mahnstufe_{0}'.format(self.mahnstufe)) * -1
@@ -67,7 +72,8 @@ class Mahnlauf(Document):
                                     `currency`,
                                     `mv_mitgliedschaft`,
                                     `customer`,
-                                    `company`
+                                    `company`,
+                                    `mv_kunde`
                                 FROM `tabSales Invoice`
                                 WHERE `sektion_id` = '{sektion_id}'
                                 AND `docstatus` = 1
@@ -102,12 +108,12 @@ class Mahnlauf(Document):
                 total_before_charges += invoice.outstanding_amount
                 invoices.append(new_invoice)
                 currency = invoice.currency
-                mv_mitgliedschaft = None
-                if invoice.mv_mitgliedschaft:
-                    mitgliedschaften.append({
-                        'mv_mitgliedschaft': invoice.mv_mitgliedschaft
-                    })
-                    mv_mitgliedschaft = invoice.mv_mitgliedschaft
+                # ~ mv_mitgliedschaft = None
+                # ~ if invoice.mv_mitgliedschaft:
+                    # ~ mitgliedschaften.append({
+                        # ~ 'mv_mitgliedschaft': invoice.mv_mitgliedschaft
+                    # ~ })
+                    # ~ mv_mitgliedschaft = invoice.mv_mitgliedschaft
                 # find reminder charge
                 charge_matches = frappe.get_all("ERPNextSwiss Settings Payment Reminder Charge", 
                     filters={ 'reminder_level': highest_level },
@@ -121,8 +127,10 @@ class Mahnlauf(Document):
                     "sektion_id": self.sektion_id,
                     "customer": invoice.customer,
                     "mahnlauf": self.name,
-                    "mitgliedschaften": mitgliedschaften,
-                    "hidden_linking": mitgliedschaften,
+                    "mv_mitgliedschaft": invoice.mv_mitgliedschaft,
+                    "mv_kunde": invoice.mv_kunde,
+                    # ~ "mitgliedschaften": mitgliedschaften,
+                    # ~ "hidden_linking": mitgliedschaften,
                     "date": "{year:04d}-{month:02d}-{day:02d}".format(
                         year=now.year, month=now.month, day=now.day),
                     "title": "{customer} {year:04d}-{month:02d}-{day:02d}".format(
@@ -135,7 +143,25 @@ class Mahnlauf(Document):
                     'company': invoice.company,
                     'currency': currency,
                     'druckvorlage': druckvorlage,
-                    'status_c': frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['mv_mitgliedschaft'], "status_c") if mv_mitgliedschaft else None
+                    'status_c': frappe.get_value("Mitgliedschaft", invoice.mv_mitgliedschaft, "status_c") if invoice.mv_mitgliedschaft else None
                 })
                 reminder_record = new_reminder.insert(ignore_permissions=True)
                 frappe.db.commit()
+
+@frappe.whitelist()
+def bulk_submit(mahnlauf):
+    mahnungen = frappe.db.sql("""SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 0""".format(mahnlauf=mahnlauf), as_dict=True)
+    for mahnung in mahnungen:
+        mahnung = frappe.get_doc("Mahnung", mahnung.name)
+        mahnung.update_reminder_levels()
+        mahnung.submit()
+    return
+
+@frappe.whitelist()
+def bulk_cancel(mahnlauf):
+    mahnungen = frappe.db.sql("""SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 1""".format(mahnlauf=mahnlauf), as_dict=True)
+    for mahnung in mahnungen:
+        mahnung = frappe.get_doc("Mahnung", mahnung.name)
+        mahnung.reset_reminder_levels()
+        mahnung.cancel()
+    return
