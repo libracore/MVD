@@ -193,12 +193,8 @@ def sinv_lookup(qrr_ref, betrag):
     sinvs = frappe.db.sql("""SELECT *
                             FROM `tabSales Invoice`
                             WHERE `docstatus` = 1
-                            AND (
-                                REPLACE(`esr_reference`, ' ', '') = '{qrr_ref}'
-                                OR
-                                REPLACE(`esr_reference`, ' ', '') = '{qrr_ref_short}'
-                            )
-                            AND `outstanding_amount` > 0""".format(qrr_ref=qrr_ref, qrr_ref_short=qrr_ref[8:27]), as_dict=True)
+                            AND REPLACE(`esr_reference`, ' ', '') = '{qrr_ref}'
+                            AND `outstanding_amount` > 0""".format(qrr_ref=qrr_ref), as_dict=True)
     
     if len(sinvs) > 0:
         # Sinv gefunden
