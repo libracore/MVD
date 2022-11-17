@@ -52,11 +52,7 @@
   "section_mahnungen",
   "mahnstufe_1",
   "mahnstufe_2",
-  "mahnstufe_3",
-  "cb_6",
-  "mahnstufe_1_mail",
-  "mahnstufe_2_mail",
-  "mahnstufe_3_mail"
+  "mahnstufe_3"
  ],
  "fields": [
   {
@@ -343,31 +339,9 @@
    "fieldtype": "Int",
    "label": "Mahnung 3 nach ... Tagen",
    "reqd": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "mahnstufe_1_mail",
-   "fieldtype": "Check",
-   "label": "Mahnung 1 per E-Mail (wenn vorh.)"
-  },
-  {
-   "default": "0",
-   "fieldname": "mahnstufe_2_mail",
-   "fieldtype": "Check",
-   "label": "Mahnung 2 per E-Mail (wenn vorh.)"
-  },
-  {
-   "default": "0",
-   "fieldname": "mahnstufe_3_mail",
-   "fieldtype": "Check",
-   "label": "Mahnung 3 per E-Mail (wenn vorh.)"
-  },
-  {
-   "fieldname": "cb_6",
-   "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-11-15 09:51:20.179874",
+ "modified": "2022-11-17 13:31:45.996028",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

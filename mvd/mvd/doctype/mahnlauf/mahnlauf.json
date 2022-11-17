@@ -6,23 +6,26 @@
  "field_order": [
   "section_allgemein",
   "sektion_id",
-  "anzahl_pdf",
-  "erstelle_pdf",
+  "massenlauf",
   "cb_1",
   "typ",
-  "anzahl_mail",
-  "versende_e_mail",
+  "mahnungen_per_mail",
   "cb_2",
   "mahnstufe",
   "amended_from",
   "ueberfaellig_seit",
   "section_steuerung",
+  "anzahl_pdf",
   "entwurfs_mahnungen",
   "mahnungen_buchen",
   "cb_3",
+  "anzahl_mail",
   "gebuchte_mahnungen",
   "mahnungen_stornieren",
+  "erstelle_pdf",
+  "versende_e_mail",
   "cb_4",
+  "mahnungen_total",
   "stornierte_mahnungen"
  ],
  "fields": [
@@ -93,19 +96,18 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.docstatus==1",
    "fieldname": "section_steuerung",
    "fieldtype": "Section Break",
-   "label": "Steuerung"
+   "label": "\u00dcbersicht / Steuerung"
   },
   {
-   "depends_on": "eval:doc.docstatus==1",
+   "depends_on": "eval:doc.docstatus==1&&doc.entwurfs_mahnungen > 0",
    "fieldname": "mahnungen_buchen",
    "fieldtype": "Button",
    "label": "Mahnungen Buchen"
   },
   {
-   "depends_on": "eval:doc.docstatus==1",
+   "depends_on": "eval:doc.docstatus==1&&doc.gebuchte_mahnungen > 0",
    "fieldname": "mahnungen_stornieren",
    "fieldtype": "Button",
    "label": "Mahnungen Stornieren"
@@ -139,20 +141,40 @@
    "label": "Stornierte Mahnungen"
   },
   {
-   "depends_on": "eval:doc.gebuchte_mahnungen > 0",
+   "depends_on": "eval:doc.gebuchte_mahnungen > 0 && !doc.massenlauf",
    "fieldname": "erstelle_pdf",
    "fieldtype": "Button",
    "label": "Erstelle PDF"
   },
   {
-   "depends_on": "eval:doc.gebuchte_mahnungen > 0",
+   "depends_on": "eval:doc.gebuchte_mahnungen > 0 && doc.mahnungen_per_mail=='Ja'",
    "fieldname": "versende_e_mail",
    "fieldtype": "Button",
    "label": "Versende E-Mail"
+  },
+  {
+   "fieldname": "mahnungen_total",
+   "fieldtype": "Int",
+   "label": "Mahnungen Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mahnungen_per_mail",
+   "fieldtype": "Select",
+   "label": "Mahnungen per E-Mail",
+   "options": "Nein\nJa"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "massenlauf",
+   "fieldtype": "Link",
+   "label": "Massenlauf",
+   "options": "Massenlauf",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-11-16 09:32:27.738234",
+ "modified": "2022-11-17 15:55:10.516718",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnlauf",

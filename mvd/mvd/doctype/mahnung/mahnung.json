@@ -16,6 +16,7 @@
   "massenlauf",
   "massenlauf_referenz",
   "mahnlauf",
+  "per_mail",
   "column_general",
   "sektion_id",
   "company",
@@ -227,10 +228,17 @@
    "fieldtype": "Link",
    "label": "Mitgliedschaft",
    "options": "Mitgliedschaft"
+  },
+  {
+   "default": "0",
+   "fieldname": "per_mail",
+   "fieldtype": "Check",
+   "label": "Per Mail",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-11-16 08:42:47.268571",
+ "modified": "2022-11-17 16:00:44.869575",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnung",

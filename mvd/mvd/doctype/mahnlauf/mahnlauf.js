@@ -27,5 +27,18 @@ frappe.ui.form.on('Mahnlauf', {
                 cur_frm.reload_doc();
             }
         })
+    },
+    erstelle_pdf: function(frm) {
+        frappe.call({
+            'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.mahnung_massenlauf",
+            'args': {
+                'mahnlauf': cur_frm.doc.name
+            },
+            "freeze": true,
+            "freeze_message": "Bereite Massenlauf vor...",
+            'callback': function(r) {
+                frappe.set_route("Form", "Massenlauf", r.message);
+            }
+        })
     }
 });
