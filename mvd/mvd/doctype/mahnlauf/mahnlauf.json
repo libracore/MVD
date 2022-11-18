@@ -17,6 +17,7 @@
   "section_steuerung",
   "anzahl_pdf",
   "entwurfs_mahnungen",
+  "entwuerfe_loeschen",
   "mahnungen_buchen",
   "cb_3",
   "anzahl_mail",
@@ -46,7 +47,6 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.typ=='Produkte / Dienstleistungen'",
    "fieldname": "mahnstufe",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -141,13 +141,13 @@
    "label": "Stornierte Mahnungen"
   },
   {
-   "depends_on": "eval:doc.gebuchte_mahnungen > 0 && !doc.massenlauf",
+   "depends_on": "eval:(doc.gebuchte_mahnungen > 0 && !doc.massenlauf) && (doc.mahnungen_per_mail == 'Nein'||(doc.mahnungen_per_mail == 'Ja' && doc.anzahl_pdf > 0))",
    "fieldname": "erstelle_pdf",
    "fieldtype": "Button",
    "label": "Erstelle PDF"
   },
   {
-   "depends_on": "eval:doc.gebuchte_mahnungen > 0 && doc.mahnungen_per_mail=='Ja'",
+   "depends_on": "eval:doc.gebuchte_mahnungen > 0 && doc.mahnungen_per_mail=='Ja' && doc.anzahl_mail > 0",
    "fieldname": "versende_e_mail",
    "fieldtype": "Button",
    "label": "Versende E-Mail"
@@ -171,10 +171,16 @@
    "label": "Massenlauf",
    "options": "Massenlauf",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1&&doc.entwurfs_mahnungen > 0",
+   "fieldname": "entwuerfe_loeschen",
+   "fieldtype": "Button",
+   "label": "Entw\u00fcrfe l\u00f6schen"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-11-17 15:55:10.516718",
+ "modified": "2022-11-18 16:33:02.302662",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnlauf",
