@@ -6,6 +6,7 @@
  "field_order": [
   "section_allgemein",
   "sektion_id",
+  "druckvorlage",
   "massenlauf",
   "cb_1",
   "typ",
@@ -77,7 +78,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.typ=='Produkte / Dienstleistungen'",
    "fieldname": "ueberfaellig_seit",
    "fieldtype": "Date",
    "label": "Ber\u00fccksichtigtes F\u00e4lligkeitsdatum",
@@ -177,10 +177,17 @@
    "fieldname": "entwuerfe_loeschen",
    "fieldtype": "Button",
    "label": "Entw\u00fcrfe l\u00f6schen"
+  },
+  {
+   "depends_on": "eval:doc.sektion_id",
+   "fieldname": "druckvorlage",
+   "fieldtype": "Link",
+   "label": "Druckvorlage",
+   "options": "Druckvorlage"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-11-18 16:33:02.302662",
+ "modified": "2022-11-21 13:23:52.672286",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnlauf",

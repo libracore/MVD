@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.data import add_to_date, nowdate
 from datetime import datetime
+from frappe.utils.background_jobs import enqueue
 
 class Mahnlauf(Document):
     def onload(self):
@@ -20,9 +21,28 @@ class Mahnlauf(Document):
         mahnstufen_frist = frappe.db.get_value('Sektion', self.sektion_id, 'mahnstufe_{0}'.format(self.mahnstufe)) * -1
         ueberfaellig_seit = add_to_date(nowdate(), days=mahnstufen_frist)
         self.ueberfaellig_seit = ueberfaellig_seit
+        self.druckvorlage = self.get_druckvorlage()
     
     def on_submit(self):
-        self.get_invoices()
+        if self.druckvorlage:
+            self.get_invoices()
+        else:
+            frappe.throw("Bitte wählen Sie eine Druckvorlage aus.")
+    
+    def get_druckvorlage(self):
+        druckvorlagen = frappe.db.sql("""SELECT
+                                            `name`
+                                        FROM `tabDruckvorlage`
+                                        WHERE `sektion_id` = '{sektion_id}'
+                                        AND `language` = 'de'
+                                        AND `dokument` = 'Mahnung'
+                                        AND `mahnstufe` = '{mahnstufe}'
+                                        AND `default` = 1
+                                        AND `mahntyp` = '{typ}'""".format(sektion_id=self.sektion_id, mahnstufe=self.mahnstufe, typ=self.typ), as_dict=True)
+        if len(druckvorlagen) > 0:
+            return druckvorlagen[0].name
+        else:
+            return None
     
     def get_anzahl(self):
         if self.typ == 'Produkte / Dienstleistungen':
@@ -172,7 +192,6 @@ class Mahnlauf(Document):
                 reminder_charge = 0
                 if charge_matches:
                     reminder_charge = charge_matches[0]['reminder_charge']
-                druckvorlage = 'MVD 1. Mahnung-MVD' #get_default_druckvorlage(sektion_id, frappe.get_value("Mitgliedschaft", mitgliedschaften[0]['mv_mitgliedschaft'], "language"))
                 if self.mahnungen_per_mail:
                     mahnungen_per_mail = frappe.db.sql("""SELECT
                                                 SUM(CASE
@@ -207,7 +226,7 @@ class Mahnlauf(Document):
                     'total_with_charge': (total_before_charges + reminder_charge),
                     'company': invoice.company,
                     'currency': currency,
-                    'druckvorlage': druckvorlage,
+                    'druckvorlage': self.druckvorlage,
                     'status_c': frappe.get_value("Mitgliedschaft", invoice.mv_mitgliedschaft, "status_c") if invoice.mv_mitgliedschaft else None
                 })
                 reminder_record = new_reminder.insert(ignore_permissions=True)
@@ -215,6 +234,13 @@ class Mahnlauf(Document):
 
 @frappe.whitelist()
 def bulk_submit(mahnlauf):
+    args = {
+        'mahnlauf': mahnlauf
+    }
+    enqueue("mvd.mvd.doctype.mahnlauf.mahnlauf.bg_bulk_submit", queue='long', job_name='Mahnlauf {0} (Submit)'.format(mahnlauf), timeout=5000, **args)
+    return
+
+def bg_bulk_submit(mahnlauf):
     mahnungen = frappe.db.sql("""SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 0""".format(mahnlauf=mahnlauf), as_dict=True)
     for mahnung in mahnungen:
         mahnung = frappe.get_doc("Mahnung", mahnung.name)
@@ -224,6 +250,14 @@ def bulk_submit(mahnlauf):
 
 @frappe.whitelist()
 def bulk_cancel(mahnlauf):
+    args = {
+        'mahnlauf': mahnlauf
+    }
+    enqueue("mvd.mvd.doctype.mahnlauf.mahnlauf.bg_bulk_cancel", queue='long', job_name='Mahnlauf {0} (Cancel)'.format(mahnlauf), timeout=5000, **args)
+    return
+
+@frappe.whitelist()
+def bg_bulk_cancel(mahnlauf):
     mahnungen = frappe.db.sql("""SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 1""".format(mahnlauf=mahnlauf), as_dict=True)
     for mahnung in mahnungen:
         mahnung = frappe.get_doc("Mahnung", mahnung.name)
@@ -233,6 +267,13 @@ def bulk_cancel(mahnlauf):
 
 @frappe.whitelist()
 def bulk_delete(mahnlauf):
+    args = {
+        'mahnlauf': mahnlauf
+    }
+    enqueue("mvd.mvd.doctype.mahnlauf.mahnlauf.bg_bulk_delete", queue='long', job_name='Mahnlauf {0} (Delete)'.format(mahnlauf), timeout=5000, **args)
+    return
+
+def bg_bulk_delete(mahnlauf):
     mahnungen = frappe.db.sql("""SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 0""".format(mahnlauf=mahnlauf), as_dict=True)
     for mahnung in mahnungen:
         mahnung = frappe.get_doc("Mahnung", mahnung.name)
@@ -241,6 +282,13 @@ def bulk_delete(mahnlauf):
 
 @frappe.whitelist()
 def mahnung_massenlauf(mahnlauf):
+    args = {
+        'mahnlauf': mahnlauf
+    }
+    enqueue("mvd.mvd.doctype.mahnlauf.mahnlauf.bg_mahnung_massenlauf", queue='long', job_name='Mahnlauf {0} (Vorber. Massenlauf)'.format(mahnlauf), timeout=5000, **args)
+    return
+
+def bg_mahnung_massenlauf(mahnlauf):
     mahnungen = frappe.get_list('Mahnung', filters={'massenlauf': 1, 'docstatus': 1, 'mahnlauf': mahnlauf, 'per_mail': ['!=',1] }, fields=['name'])
     if len(mahnungen) > 0:
         massenlauf = frappe.get_doc({
@@ -261,3 +309,58 @@ def mahnung_massenlauf(mahnlauf):
         return massenlauf.name
     else:
         frappe.throw("Es gibt keine Mahnungen die für einen Massenlauf vorgemerkt sind.")
+
+@frappe.whitelist()
+def is_mahnungs_job_running(jobname):
+    from frappe.utils.background_jobs import get_jobs
+    running = get_info(jobname)
+    return running
+
+def get_info(jobname):
+    from rq import Queue, Worker
+    from frappe.utils.background_jobs import get_redis_conn
+    from frappe.utils import format_datetime, cint, convert_utc_to_user_timezone
+    colors = {
+        'queued': 'orange',
+        'failed': 'red',
+        'started': 'blue',
+        'finished': 'green'
+    }
+    conn = get_redis_conn()
+    queues = Queue.all(conn)
+    workers = Worker.all(conn)
+    jobs = []
+    show_failed=False
+
+    def add_job(j, name):
+        if j.kwargs.get('site')==frappe.local.site:
+            jobs.append({
+                'job_name': j.kwargs.get('kwargs', {}).get('playbook_method') \
+                    or str(j.kwargs.get('job_name')),
+                'status': j.status, 'queue': name,
+                'creation': format_datetime(convert_utc_to_user_timezone(j.created_at)),
+                'color': colors[j.status]
+            })
+            if j.exc_info:
+                jobs[-1]['exc_info'] = j.exc_info
+
+    for w in workers:
+        j = w.get_current_job()
+        if j:
+            add_job(j, w.name)
+
+    for q in queues:
+        if q.name != 'failed':
+            for j in q.get_jobs(): add_job(j, q.name)
+
+    if cint(show_failed):
+        for q in queues:
+            if q.name == 'failed':
+                for j in q.get_jobs()[:10]: add_job(j, q.name)
+    
+    found_job = 'refresh'
+    for job in jobs:
+        if job['job_name'] == jobname:
+            found_job = True
+
+    return found_job

@@ -325,23 +325,23 @@
   {
    "fieldname": "mahnstufe_1",
    "fieldtype": "Int",
-   "label": "Mahnung 1 nach ... Tagen",
+   "label": "Mahnung 1 nach ... Tagen (ab F\u00e4lligkeitsdatum)",
    "reqd": 1
   },
   {
    "fieldname": "mahnstufe_2",
    "fieldtype": "Int",
-   "label": "Mahnung 2 nach ... Tagen",
+   "label": "Mahnung 2 nach ... Tagen (ab F\u00e4lligkeitsdatum)",
    "reqd": 1
   },
   {
    "fieldname": "mahnstufe_3",
    "fieldtype": "Int",
-   "label": "Mahnung 3 nach ... Tagen",
+   "label": "Mahnung 3 nach ... Tagen (ab F\u00e4lligkeitsdatum)",
    "reqd": 1
   }
  ],
- "modified": "2022-11-17 13:31:45.996028",
+ "modified": "2022-11-21 13:43:12.264000",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
