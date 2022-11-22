@@ -71,6 +71,7 @@ def get_data(filters):
                                 LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `fak`.`mv_mitgliedschaft` = `mvm`.`name`
                                 LEFT JOIN `tabSales Invoice` AS `sinv` ON `fak`.`bezahlt_via` = `sinv`.`name`
                                 WHERE `fak`.`status` = 'Paid'
+				AND `fak`.`typ` IN ('Spende','Spende (Spendenversand)')
                                 AND `fak`.`sektion_id` = '{sektion_id}'""".format(sektion_id=filters.sektion_id), as_dict=True)
         return data
     
@@ -91,6 +92,7 @@ def get_data(filters):
                                 FROM `tabFakultative Rechnung` AS `fak`
                                 LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `fak`.`mv_mitgliedschaft` = `mvm`.`name`
                                 LEFT JOIN `tabSales Invoice` AS `sinv` ON `fak`.`bezahlt_via` = `sinv`.`name`
-                                WHERE `fak`.`status` = 'Paid'""", as_dict=True)
+                                WHERE `fak`.`status` = 'Paid'
+				AND `fak`.`typ` IN ('Spende','Spende (Spendenversand)')""", as_dict=True)
         return data
         

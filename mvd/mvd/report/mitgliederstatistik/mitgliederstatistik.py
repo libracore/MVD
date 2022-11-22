@@ -15,7 +15,8 @@ def get_columns():
         {"label": _("Mitglieder"), "fieldname": "mitglieder", "fieldtype": "Data", "width": 270},
         {"label": _("Berechnung"), "fieldname": "berechnung", "fieldtype": "Data", "width": 580},
         {"label": _("Anzahl"), "fieldname": "anzahl", "fieldtype": "Data"},
-        {"label": _("Total"), "fieldname": "total", "fieldtype": "Data"}
+        {"label": _("Total"), "fieldname": "total", "fieldtype": "Data"},
+        {"label": _("Sektion"), "fieldname": "sektion_id", "fieldtype": "Link", "options": "Sektion", "width": 0}
     ]
 
 def get_data(filters):
@@ -79,7 +80,8 @@ def get_stand(filters, data,typ_filter):
             'mitglieder': 'Stand',
             'berechnung': '{from_date} (Total)'.format(from_date=frappe.utils.add_to_date(frappe.utils.get_datetime(filters.from_date), days=-1).strftime('%d.%m.%Y')),
             'anzahl': '',
-            'total': alle_per_from_date
+            'total': alle_per_from_date,
+            'sektion_id': filters.sektion_id
         })
     data.append(
         {
@@ -87,7 +89,8 @@ def get_stand(filters, data,typ_filter):
             'berechnung': 'Eintrittsdatum {from_date} bis {to_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
             to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': neumitglieder,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     data.append(
         {
@@ -95,14 +98,16 @@ def get_stand(filters, data,typ_filter):
             'berechnung': 'Zuzugsdatum {from_date} bis {to_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
             to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': zuzueger,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     data.append(
         {
             'mitglieder': 'Zwischentotal',
             'berechnung': 'Stand + Neumitglieder + Zuzüger*innen',
             'anzahl': '',
-            'total': alle_per_from_date + neumitglieder + zuzueger
+            'total': alle_per_from_date + neumitglieder + zuzueger,
+            'sektion_id': filters.sektion_id
         })
     return data, alle_per_from_date, neumitglieder, zuzueger
 
@@ -120,7 +125,8 @@ def get_wegzueger(filters, data, typ_filter):
             'berechnung': 'Wegzugsdatum {from_date} bis {to_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
             to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': wegzueger,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     return data, wegzueger
 
@@ -139,7 +145,8 @@ def get_kuendigungen(filters, data, typ_filter):
             'berechnung': 'Kündigungen per {from_date} bis {to_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
             to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': kuendigungen,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     return data, kuendigungen
 
@@ -158,7 +165,8 @@ def get_korrektur_wegzug_kuendigung(filters, data, typ_filter):
             'mitglieder': 'Korrektur weggezogene Kündigungen',
             'berechnung': 'Mitglieder mit Wegzug vor Kündigungsdatum. (Korrektur)',
             'anzahl': "-{korrektur}".format(korrektur=str(korrektur)),
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     return data, korrektur
 
@@ -179,7 +187,8 @@ def get_ausschluesse(filters, data, typ_filter):
             'berechnung': 'Ausschlussdatum {from_date} bis {to_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
             to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': ausschluesse,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     return data, ausschluesse
 
@@ -199,7 +208,8 @@ def get_gestorbene(filters, data, typ_filter):
             'berechnung': 'Todesfall/Meldung mit Mitgliedschaftsende {from_date} bis {to_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
             to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': gestorbene,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     return data, gestorbene
 
@@ -220,12 +230,13 @@ def get_erben(filters, data, typ_filter):
             'berechnung': 'Todesfall/Meldung {from_date} bis {to_date} Mitgliedschaft weitergeführt'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
             to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': erben,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     return data
 
 def get_stand_2(filters, data, stand_1, neumitglieder, zuzueger, wegzueger_qty, kuendigungen_qty, ausschluesse_qty, gestorbene_qty, korrektur, typ_filter):
-    qty = (stand_1 + neumitglieder + zuzueger) - wegzueger_qty - kuendigungen_qty - ausschluesse_qty - gestorbene_qty - korrektur
+    qty = (stand_1 + neumitglieder + zuzueger) - wegzueger_qty - kuendigungen_qty - ausschluesse_qty - gestorbene_qty + korrektur
     
     alle_per_to_date = frappe.db.sql("""SELECT
                                             COUNT(`name`) AS `qty`
@@ -243,7 +254,8 @@ def get_stand_2(filters, data, stand_1, neumitglieder, zuzueger, wegzueger_qty, 
             'mitglieder': 'Stand',
             'berechnung': '{to_date} (Total aktive Mitgliedschaften ohne Wegzüge, Kündigungen, Ausschlüsse, Gestorbene)'.format(to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': '',
-            'total': alle_per_to_date
+            'total': alle_per_to_date,
+            'sektion_id': filters.sektion_id
         })
     
     data.append(
@@ -251,7 +263,8 @@ def get_stand_2(filters, data, stand_1, neumitglieder, zuzueger, wegzueger_qty, 
             'mitglieder': 'Stand (Kontrolle)',
             'berechnung': 'Kontrollzeile für Stand'.format(to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': '',
-            'total': qty
+            'total': qty,
+            'sektion_id': filters.sektion_id
         })
     
     return data
@@ -269,7 +282,8 @@ def get_spaetere_eintritte(filters, data, typ_filter):
             'mitglieder': 'spätere Eintritte',
             'berechnung': 'Aktive Mitgliedschaften mit Eintrittsdatum > {to_date}'.format(to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': spaetere_eintritte,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     return data
 
@@ -289,7 +303,8 @@ def get_vorgem_kuendigungen_2(filters, data,typ_filter):
             'berechnung': 'Kündigungsdatum > {to_date}'.format(from_date=frappe.utils.get_datetime(filters.from_date).strftime('%d.%m.%Y'), \
             to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': kuendigungen,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     return data
 
@@ -306,7 +321,8 @@ def get_ohne_mitgliednummer(filters, data, typ_filter):
             'mitglieder': 'ohne Mitgliednummer',
             'berechnung': 'Neumitglieder ohne Nummer',
             'anzahl': ohne_mitgliednummer,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     return data
 
@@ -333,7 +349,8 @@ def get_nicht_bezahlt(filters, data, typ_filter):
             'mitglieder': 'offene Mitgliederbeiträge ({year})'.format(year=year),
             'berechnung': 'nicht bezahlt per {0}'.format(frappe.utils.get_datetime().strftime('%d.%m.%Y')),
             'anzahl': nicht_bezahlt_per_se,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     
     nicht_bezahlt_bis_to_date = frappe.db.sql("""SELECT
@@ -368,7 +385,8 @@ def get_nicht_bezahlt(filters, data, typ_filter):
             'mitglieder': 'nach Berichtsende beglichene Mitgliederbeiträge ({year})'.format(year=year),
             'berechnung': 'Bezahlung nach {to_date}'.format(to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': nicht_bezahlt_bis_to_date,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     
     
@@ -392,7 +410,8 @@ def get_nicht_bezahlt(filters, data, typ_filter):
             'mitglieder': 'offene Anmeldungen ({year})'.format(year=year),
             'berechnung': 'nicht bezahlt per {0}'.format(frappe.utils.get_datetime().strftime('%d.%m.%Y')),
             'anzahl': nicht_bezahlt_per_se,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     
     nicht_bezahlt_bis_to_date = frappe.db.sql("""SELECT
@@ -427,7 +446,8 @@ def get_nicht_bezahlt(filters, data, typ_filter):
             'mitglieder': 'nach Berichtsende beglichene Anmeldungen ({year})'.format(year=year),
             'berechnung': 'Bezahlung nach {to_date}'.format(to_date=frappe.utils.get_datetime(filters.to_date).strftime('%d.%m.%Y')),
             'anzahl': nicht_bezahlt_bis_to_date,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     
     return data
@@ -444,7 +464,8 @@ def get_interessiert(filters, data, typ_filter):
             'mitglieder': 'Interessent*innen',
             'berechnung': 'per {0}'.format(frappe.utils.get_datetime().strftime('%d.%m.%Y')),
             'anzahl': interessiert,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     return data
 
@@ -460,7 +481,8 @@ def get_angemeldet(filters, data, typ_filter):
             'mitglieder': 'Anmeldungen',
             'berechnung': 'per {0}'.format(frappe.utils.get_datetime().strftime('%d.%m.%Y')),
             'anzahl': angemeldet,
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     return data
 
@@ -470,7 +492,8 @@ def get_ueberschrift_1(filters, data):
             'mitglieder': '',
             'berechnung': 'in obiger Aufstellung bereits enthalten:',
             'anzahl': '',
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     return data
 
@@ -480,7 +503,8 @@ def get_ueberschrift_2(filters, data):
             'mitglieder': '',
             'berechnung': 'in obiger Aufstellung nicht enthalten:',
             'anzahl': '',
-            'total': ''
+            'total': '',
+            'sektion_id': filters.sektion_id
         })
     return data
 
