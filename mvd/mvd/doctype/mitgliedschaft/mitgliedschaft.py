@@ -1104,6 +1104,7 @@ def update_rg_kunde(mitgliedschaft):
         customer.customer_addition = ''
         customer.customer_type = 'Individual'
     customer.sektion = mitgliedschaft.sektion_id
+    customer.customer_group = 'Mitglied'
     customer.save(ignore_permissions=True)
     return
 
@@ -1123,7 +1124,7 @@ def create_rg_kunde(mitgliedschaft):
         'customer_addition': customer_addition,
         'customer_type': customer_type,
         'sektion': mitgliedschaft.sektion_id,
-        'customer_group': 'All Customer Groups',
+        'customer_group': 'Mitglied',
         'territory': 'All Territories'
     })
     new_customer.insert(ignore_permissions=True)
@@ -1582,6 +1583,7 @@ def update_kunde_mitglied(mitgliedschaft):
         customer.customer_addition = ''
         customer.customer_type = 'Individual'
     customer.sektion = mitgliedschaft.sektion_id
+    customer.customer_group = 'Mitglied'
     
     # fallback wrong import data
     if customer.customer_name == ' ' and mitgliedschaft.firma:
@@ -1619,7 +1621,7 @@ def create_kunde_mitglied(mitgliedschaft):
         'customer_addition': customer_addition,
         'customer_type': customer_type,
         'sektion': mitgliedschaft.sektion_id,
-        'customer_group': 'All Customer Groups',
+        'customer_group': 'Mitglied',
         'territory': 'All Territories'
     })
     
