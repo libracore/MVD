@@ -192,7 +192,7 @@ class Mahnlauf(Document):
                 reminder_charge = 0
                 if charge_matches:
                     reminder_charge = charge_matches[0]['reminder_charge']
-                if self.mahnungen_per_mail:
+                if self.mahnungen_per_mail == 'Ja':
                     mahnungen_per_mail = frappe.db.sql("""SELECT
                                                 SUM(CASE
                                                     WHEN `mvm`.`unabhaengiger_debitor` = 1 AND `mvm`.`rg_e_mail` LIKE '%@%' THEN 1
@@ -306,7 +306,7 @@ def bg_mahnung_massenlauf(mahnlauf):
             m.save(ignore_permissions=True)
         
         frappe.set_value("Mahnlauf", mahnlauf, "massenlauf", massenlauf.name)
-        return massenlauf.name
+        return
     else:
         frappe.throw("Es gibt keine Mahnungen die für einen Massenlauf vorgemerkt sind.")
 

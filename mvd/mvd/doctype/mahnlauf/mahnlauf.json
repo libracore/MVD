@@ -1,4 +1,5 @@
 {
+ "autoname": "format:{sektion_id}-{typ_code}-{DD}{MM}{YY}-{###}",
  "creation": "2022-11-15 09:42:39.964743",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -10,24 +11,31 @@
   "massenlauf",
   "cb_1",
   "typ",
+  "typ_code",
   "mahnungen_per_mail",
   "cb_2",
   "mahnstufe",
   "amended_from",
   "ueberfaellig_seit",
-  "section_steuerung",
+  "section_uebersicht",
   "anzahl_pdf",
+  "cb_3",
+  "anzahl_mail",
+  "cb_4",
+  "mahnungen_total",
+  "section_steuerung",
+  "steuerung_1",
   "entwurfs_mahnungen",
   "entwuerfe_loeschen",
   "mahnungen_buchen",
-  "cb_3",
-  "anzahl_mail",
+  "cb_5",
+  "steuerung_2",
   "gebuchte_mahnungen",
   "mahnungen_stornieren",
   "erstelle_pdf",
   "versende_e_mail",
-  "cb_4",
-  "mahnungen_total",
+  "cb_6",
+  "steuerung_3",
   "stornierte_mahnungen"
  ],
  "fields": [
@@ -96,15 +104,16 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.docstatus==1",
    "fieldname": "section_steuerung",
    "fieldtype": "Section Break",
-   "label": "\u00dcbersicht / Steuerung"
+   "label": "Steuerung"
   },
   {
    "depends_on": "eval:doc.docstatus==1&&doc.entwurfs_mahnungen > 0",
    "fieldname": "mahnungen_buchen",
    "fieldtype": "Button",
-   "label": "Mahnungen Buchen"
+   "label": "Weiter"
   },
   {
    "depends_on": "eval:doc.docstatus==1&&doc.gebuchte_mahnungen > 0",
@@ -144,7 +153,7 @@
    "depends_on": "eval:(doc.gebuchte_mahnungen > 0 && !doc.massenlauf) && (doc.mahnungen_per_mail == 'Nein'||(doc.mahnungen_per_mail == 'Ja' && doc.anzahl_pdf > 0))",
    "fieldname": "erstelle_pdf",
    "fieldtype": "Button",
-   "label": "Erstelle PDF"
+   "label": "Drucken"
   },
   {
    "depends_on": "eval:doc.gebuchte_mahnungen > 0 && doc.mahnungen_per_mail=='Ja' && doc.anzahl_mail > 0",
@@ -176,7 +185,7 @@
    "depends_on": "eval:doc.docstatus==1&&doc.entwurfs_mahnungen > 0",
    "fieldname": "entwuerfe_loeschen",
    "fieldtype": "Button",
-   "label": "Entw\u00fcrfe l\u00f6schen"
+   "label": "Abbrechen"
   },
   {
    "depends_on": "eval:doc.sektion_id",
@@ -184,10 +193,45 @@
    "fieldtype": "Link",
    "label": "Druckvorlage",
    "options": "Druckvorlage"
+  },
+  {
+   "fieldname": "section_uebersicht",
+   "fieldtype": "Section Break",
+   "label": "\u00dcbersicht"
+  },
+  {
+   "fieldname": "cb_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "steuerung_1",
+   "fieldtype": "HTML",
+   "options": "<p>Schritt 1</p>"
+  },
+  {
+   "fieldname": "steuerung_2",
+   "fieldtype": "HTML",
+   "options": "<p>Schritt 2</p>"
+  },
+  {
+   "fieldname": "steuerung_3",
+   "fieldtype": "HTML",
+   "options": "<p>&nbsp;</p>"
+  },
+  {
+   "fieldname": "typ_code",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "typ_code",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-11-21 13:23:52.672286",
+ "modified": "2022-11-22 20:32:08.666569",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnlauf",

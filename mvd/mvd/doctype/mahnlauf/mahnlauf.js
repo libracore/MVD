@@ -76,44 +76,27 @@ frappe.ui.form.on('Mahnlauf', {
         });
     },
     erstelle_pdf: function(frm) {
-        frappe.call({
-            'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.mahnung_massenlauf",
-            'args': {
-                'mahnlauf': cur_frm.doc.name
-            },
-            "freeze": true,
-            "freeze_message": "Bereite Massenlauf vor...",
-            'callback': function(r) {
-                frappe.set_route("Form", "Massenlauf", r.message);
-            }
-        })
-        
-        frappe.dom.freeze('Bitte warten, bereite Massenlauf vor...');
-        frappe.call({
-            'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.mahnung_massenlauf",
-            'args': {
-                'mahnlauf': cur_frm.doc.name
-            },
-            'callback': function(r) {
-                var jobname = 'Mahnlauf ' + cur_frm.doc.name + ' (Vorber. Massenlauf)';
-                let mahnung_refresher = setInterval(mahnung_refresher_handler, 3000, jobname);
-                function mahnung_refresher_handler(jobname) {
-                    frappe.call({
-                    'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.is_mahnungs_job_running",
-                        'args': {
-                            'jobname': jobname
-                        },
-                        'callback': function(res) {
-                            if (res.message == 'refresh') {
-                                clearInterval(mahnung_refresher);
-                                frappe.dom.unfreeze();
-                                cur_frm.reload_doc();
-                            }
-                        }
-                    });
+        var d = new frappe.ui.Dialog({
+            'fields': [
+                {'fieldname': 'ht', 'fieldtype': 'HTML'},
+                {'fieldname': 'pdf', 'fieldtype': 'Button', 'label': 'PDF erstellen', 'click': function() {
+                        d.hide();
+                        print_pdf(frm);
+                    }
+                },
+                {'fieldname': 'csv', 'fieldtype': 'Button', 'label': 'CSV erstellen', 'click': function() {
+                        d.hide();
+                        frappe.msgprint("Hier folgt ein csv...");
+                    }
                 }
-            }
+            ],
+            primary_action: function(){
+                d.hide();
+            },
+            primary_action_label: __('Abbrechen')
         });
+        d.fields_dict.ht.$wrapper.html('Wie wollen Sie verfahren?');
+        d.show();
     },
     entwuerfe_loeschen: function(frm) {
         frappe.dom.freeze('Bitte warten, lösche Entwurfs Mahnungen...');
@@ -142,8 +125,53 @@ frappe.ui.form.on('Mahnlauf', {
                 }
             }
         });
+    },
+    typ: function(frm) {
+        if (cur_frm.doc.typ == 'Produkte / Dienstleistungen') {
+            cur_frm.set_value("typ_code", "P");
+        }
+        if (cur_frm.doc.typ == 'Mitgliedschaft (Jahresrechnung)') {
+            cur_frm.set_value("typ_code", "M");
+        }
+        if (cur_frm.doc.typ == 'Anmeldungen') {
+            cur_frm.set_value("typ_code", "A");
+        }
     }
 });
+
+function print_pdf(frm) {
+    frappe.dom.freeze('Bitte warten, bereite Massenlauf vor...');
+    frappe.call({
+        'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.mahnung_massenlauf",
+        'args': {
+            'mahnlauf': cur_frm.doc.name
+        },
+        'callback': function(r) {
+            var jobname = 'Mahnlauf ' + cur_frm.doc.name + ' (Vorber. Massenlauf)';
+            let mahnung_refresher = setInterval(mahnung_refresher_handler, 3000, jobname);
+            function mahnung_refresher_handler(jobname) {
+                frappe.call({
+                'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.is_mahnungs_job_running",
+                    'args': {
+                        'jobname': jobname
+                    },
+                    'callback': function(res) {
+                        if (res.message == 'refresh') {
+                            clearInterval(mahnung_refresher);
+                            frappe.dom.unfreeze();
+                            cur_frm.reload_doc()
+                            if (cur_frm.get_field("massenlauf").value ) {
+                                frappe.set_route("Form", "Massenlauf", cur_frm.get_field("massenlauf").value );
+                            } else {
+                                frappe.msgprint("Keine Mahnungen zum PDF Druck vorhanden.");
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    });
+}
 
 function get_default_sektion() {
     var default_sektion = '';
