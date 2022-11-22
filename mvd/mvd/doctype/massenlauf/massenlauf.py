@@ -273,7 +273,10 @@ def zuzug(massenlauf, sektion):
     except Exception as err:
         massenlauf = frappe.get_doc("Massenlauf", massenlauf)
         massenlauf.status = 'Fehlgeschlagen'
-        massenlauf.error += "------------\n{0}: {1}\n\n{2}\n------------".format(str(err), err_mitgl, frappe.utils.get_traceback())
+        if massenlauf.error:
+            massenlauf.error += "------------\n{0}: {1}\n\n{2}\n------------".format(str(err), str(err_mitgl), str(frappe.utils.get_traceback()))
+        else:
+            massenlauf.error = "------------\n{0}: {1}\n\n{2}\n------------".format(str(err), str(err_mitgl), str(frappe.utils.get_traceback()))
         massenlauf.save(ignore_permissions=True)
 
 def begruessung_bezahlung(massenlauf, sektion):
