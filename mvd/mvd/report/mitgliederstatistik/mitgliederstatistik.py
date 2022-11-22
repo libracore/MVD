@@ -236,7 +236,7 @@ def get_erben(filters, data, typ_filter):
     return data
 
 def get_stand_2(filters, data, stand_1, neumitglieder, zuzueger, wegzueger_qty, kuendigungen_qty, ausschluesse_qty, gestorbene_qty, korrektur, typ_filter):
-    qty = (stand_1 + neumitglieder + zuzueger) - wegzueger_qty - kuendigungen_qty - ausschluesse_qty - gestorbene_qty - korrektur
+    qty = (stand_1 + neumitglieder + zuzueger) - wegzueger_qty - kuendigungen_qty - ausschluesse_qty - gestorbene_qty + korrektur
     
     alle_per_to_date = frappe.db.sql("""SELECT
                                             COUNT(`name`) AS `qty`

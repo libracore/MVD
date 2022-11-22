@@ -14,6 +14,7 @@ def get_columns():
     return[
         {"label": _("Mitglied"), "fieldname": "mitglied_id", "fieldtype": "Link", "options": "Mitgliedschaft"},
         {"label": _("Mitglied Nr"), "fieldname": "mitglied_nr", "fieldtype": "Data"},
+        {"label": _("Mitglied Name"), "fieldname": "mitglied_name", "fieldtype": "Data"},
         {"label": _("Mitglied Status"), "fieldname": "mitglied_status", "fieldtype": "Data"},
         {"label": _("Mitgliedtyp"), "fieldname": "mitgliedtyp_c", "fieldtype": "Data"},
         {"label": _("Rechnung"), "fieldname": "rechnung", "fieldtype": "Link", "options": "Sales Invoice"},
@@ -39,6 +40,7 @@ def get_nicht_bezahlt(filters, data):
                                                 `sinv`.`posting_date` AS `datum`,
                                                 `sinv`.`mitgliedschafts_jahr` AS `mitgliedschaftsjahr`,
                                                 `sinv`.`status` AS `rechnung_status`,
+                                                `sinv`.`title` AS `mitglied_name`,
                                                 `mvm`.`mitglied_nr` AS `mitglied_nr`,
                                                 `mvm`.`mitglied_id` AS `mitglied_id`,
                                                 `mvm`.`status_c` AS `mitglied_status`,
