@@ -4,3 +4,4 @@ mvd.patches.v4_3_3.create_fr_translations
 mvd.patches.v4_5_3.folgejahr_regelung
 mvd.patches.camt_redesign.camt_redesign
 mvd.patches.translation_spendenuebersicht.translation_spendenuebersicht
+mvd.patches.v5_15_9.anlage_customer_group
