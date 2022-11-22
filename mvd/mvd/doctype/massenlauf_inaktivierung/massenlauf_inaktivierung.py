@@ -84,6 +84,20 @@ def start_massenlauf_inaktivierung(doc):
             neue_infos = neue_infos + alte_infos or ''
             ms.wichtig = neue_infos
             ms.adressen_gesperrt = 1
+            ms.validierung_notwendig = None
+            ms.kuendigung_verarbeiten = None
+            ms.interessent_innenbrief_mit_ez = None
+            ms.anmeldung_mit_ez = None
+            ms.zuzug_massendruck = None
+            ms.rg_massendruck_vormerkung = None
+            ms.begruessung_massendruck = None
+            ms.begruessung_via_zahlung = None
+            ms.zuzugs_rechnung = None
+            ms.zuzug_korrespondenz = None
+            ms.kuendigung_druckvorlage = None
+            ms.rg_massendruck = None
+            ms.begruessung_massendruck_dokument = None
+            
             ms.save()
             ms.add_comment('Comment', text='Ausschluss vollzogen ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
             
