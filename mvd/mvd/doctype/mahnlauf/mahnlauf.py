@@ -418,6 +418,7 @@ def send_reminder_mails(mahnlauf, betreff, message):
             send_email=True,
             sender_full_name=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name")
         )
+    frappe.set_value("Mahnlauf", mahnlauf, "e_mails_versendet", 1)
     return
 
 def get_recipients(mahnung):

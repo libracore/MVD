@@ -10,6 +10,7 @@
   "druckvorlage",
   "e_mail_vorlage",
   "massenlauf",
+  "e_mails_versendet",
   "cb_1",
   "typ",
   "typ_code",
@@ -157,7 +158,7 @@
    "label": "Drucken"
   },
   {
-   "depends_on": "eval:doc.gebuchte_mahnungen > 0 && doc.mahnungen_per_mail=='Ja' && doc.anzahl_mail > 0",
+   "depends_on": "eval:doc.gebuchte_mahnungen > 0 && doc.mahnungen_per_mail=='Ja' && doc.anzahl_mail > 0 && !doc.e_mails_versendet",
    "fieldname": "versende_e_mail",
    "fieldtype": "Button",
    "label": "Versende E-Mail"
@@ -236,10 +237,19 @@
    "fieldtype": "Link",
    "label": "E-Mail Vorlage",
    "options": "Druckvorlage"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "depends_on": "eval:doc.gebuchte_mahnungen > 0 && doc.mahnungen_per_mail=='Ja' && doc.anzahl_mail > 0",
+   "fieldname": "e_mails_versendet",
+   "fieldtype": "Check",
+   "label": "E-Mails versendet",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-11-23 11:30:19.684620",
+ "modified": "2022-11-23 15:59:54.934145",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnlauf",

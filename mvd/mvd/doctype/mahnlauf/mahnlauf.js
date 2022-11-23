@@ -156,6 +156,7 @@ frappe.ui.form.on('Mahnlauf', {
                                 'message': d.get_values().message
                             },
                             'callback': function(res) {
+                                cur_frm.reload_doc();
                                 frappe.msgprint("Die E-Mails wurden versendet.");
                             }
                         });
@@ -191,11 +192,7 @@ function print_pdf(frm) {
                             clearInterval(mahnung_refresher);
                             frappe.dom.unfreeze();
                             cur_frm.reload_doc()
-                            if (cur_frm.get_field("massenlauf").value ) {
-                                frappe.set_route("Form", "Massenlauf", cur_frm.get_field("massenlauf").value );
-                            } else {
-                                frappe.msgprint("Keine Mahnungen zum PDF Druck vorhanden.");
-                            }
+                            frappe.msgprint("Das Massenlauf Dokument wurde vorbereitet.");
                         }
                     }
                 });
