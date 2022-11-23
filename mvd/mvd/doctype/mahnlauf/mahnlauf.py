@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from frappe.utils.data import add_to_date, nowdate
 from datetime import datetime
 from frappe.utils.background_jobs import enqueue
+from frappe.core.doctype.communication.email import make
 
 class Mahnlauf(Document):
     def onload(self):
@@ -392,11 +393,43 @@ def get_e_mail_field_list(e_mail_vorlage=None):
         druckvorlage = frappe.get_doc("Druckvorlage", e_mail_vorlage)
         fields_list = [
             {'fieldname': 'betreff', 'fieldtype': 'Data', 'reqd': 1, 'default': druckvorlage.e_mail_betreff},
-            {'fieldname': 'nachricht', 'fieldtype': 'Text Editor', 'reqd': 1, 'default': druckvorlage.e_mail_text}
+            {'fieldname': 'message', 'fieldtype': 'Text Editor', 'reqd': 1, 'default': druckvorlage.e_mail_text}
         ]
     else:
         fields_list = [
             {'fieldname': 'betreff', 'fieldtype': 'Data', 'reqd': 1},
-            {'fieldname': 'nachricht', 'fieldtype': 'Text Editor', 'reqd': 1}
+            {'fieldname': 'message', 'fieldtype': 'Text Editor', 'reqd': 1}
         ]
     return fields_list
+
+@frappe.whitelist()
+def send_reminder_mails(mahnlauf, betreff, message):
+    mahnungen = frappe.db.sql("""SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 1 AND `per_mail` = 1""".format(mahnlauf=mahnlauf), as_dict=True)
+    for mahnung in mahnungen:
+        mahnung = frappe.get_doc("Mahnung", mahnung.name)
+        make(
+            recipients=get_recipients(mahnung),
+            sender=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
+            subject=betreff,
+            content=message,
+            doctype='Mahnung',
+            name=mahnung.name,
+            attachments=None,
+            send_email=True,
+            sender_full_name=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name")
+        )
+    return
+
+def get_recipients(mahnung):
+    if mahnung.mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mahnung.mv_mitgliedschaft)
+        if mitgliedschaft.abweichende_rechnungsadresse and mitgliedschaft.unabhaengiger_debitor and mitgliedschaft.rg_e_mail:
+            return [mitgliedschaft.rg_e_mail]
+        else:
+            return [mitgliedschaft.e_mail_1]
+    else:
+        kunde = frappe.get_doc("Kunde", mahnung.mv_kunde)
+        if kunde.abweichende_rechnungsadresse and kunde.unabhaengiger_debitor and kunde.rg_e_mail:
+            return [kunde.rg_e_mail]
+        else:
+            return [kunde.e_mail]

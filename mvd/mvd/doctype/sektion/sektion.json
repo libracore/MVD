@@ -52,7 +52,9 @@
   "section_mahnungen",
   "mahnstufe_1",
   "mahnstufe_2",
-  "mahnstufe_3"
+  "mahnstufe_3",
+  "mahnung_absender_adresse",
+  "mahnung_absender_name"
  ],
  "fields": [
   {
@@ -339,9 +341,21 @@
    "fieldtype": "Int",
    "label": "Mahnung 3 nach ... Tagen (ab F\u00e4lligkeitsdatum)",
    "reqd": 1
+  },
+  {
+   "fieldname": "mahnung_absender_adresse",
+   "fieldtype": "Data",
+   "label": "E-Mail Absender Adresse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mahnung_absender_name",
+   "fieldtype": "Data",
+   "label": "E-Mail Absender Name",
+   "reqd": 1
   }
  ],
- "modified": "2022-11-21 13:43:12.264000",
+ "modified": "2022-11-23 14:46:29.622699",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

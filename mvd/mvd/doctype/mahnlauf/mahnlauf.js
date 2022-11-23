@@ -148,7 +148,17 @@ frappe.ui.form.on('Mahnlauf', {
                     fields: r.message,
                     primary_action: function(){
                         d.hide();
-                        show_alert(d.get_values());
+                        frappe.call({
+                            'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.send_reminder_mails",
+                            'args': {
+                                'mahnlauf': cur_frm.doc.name,
+                                'betreff': d.get_values().betreff,
+                                'message': d.get_values().message
+                            },
+                            'callback': function(res) {
+                                frappe.msgprint("Die E-Mails wurden versendet.");
+                            }
+                        });
                     },
                     primary_action_label: __('Versenden'),
                     title: 'Mahnungs E-Mail Versand'
