@@ -6,3 +6,4 @@ mvd.patches.camt_redesign.camt_redesign
 mvd.patches.translation_spendenuebersicht.translation_spendenuebersicht
 mvd.patches.v5_15_9.anlage_customer_group
 mvd.patches.v5_15_10.korrektur_massenlauf
+mvd.patches.v5_15_11.korrektur_ampelfarbe
