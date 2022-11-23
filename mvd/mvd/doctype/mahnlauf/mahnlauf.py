@@ -38,7 +38,8 @@ class Mahnlauf(Document):
                                         AND `dokument` = 'Mahnung'
                                         AND `mahnstufe` = '{mahnstufe}'
                                         AND `default` = 1
-                                        AND `mahntyp` = '{typ}'""".format(sektion_id=self.sektion_id, mahnstufe=self.mahnstufe, typ=self.typ), as_dict=True)
+                                        AND `mahntyp` = '{typ}'
+                                        AND `e_mail_vorlage` != 1""".format(sektion_id=self.sektion_id, mahnstufe=self.mahnstufe, typ=self.typ), as_dict=True)
         if len(druckvorlagen) > 0:
             return druckvorlagen[0].name
         else:
