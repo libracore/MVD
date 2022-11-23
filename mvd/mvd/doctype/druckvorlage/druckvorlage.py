@@ -186,12 +186,24 @@ class Druckvorlage(Document):
     
     def set_validierungsstring(self):
         if self.dokument != 'Geschenkmitgliedschaft':
-            validierungsstring = ''
-            validierungsstring += self.sektion_id + "-"
-            validierungsstring += self.language + "-"
-            validierungsstring += self.dokument + "-"
-            validierungsstring += self.mitgliedtyp_c + "-"
-            validierungsstring += str(self.reduzierte_mitgliedschaft)
+            if self.dokument != 'Mahnung':
+                validierungsstring = ''
+                validierungsstring += self.sektion_id + "-"
+                validierungsstring += self.language + "-"
+                validierungsstring += self.dokument + "-"
+                validierungsstring += self.mitgliedtyp_c + "-"
+                validierungsstring += str(self.reduzierte_mitgliedschaft)
+            else:
+                validierungsstring = ''
+                validierungsstring += self.sektion_id + "-"
+                validierungsstring += self.language + "-"
+                validierungsstring += self.dokument + "-"
+                validierungsstring += self.mitgliedtyp_c + "-"
+                validierungsstring += self.mahntyp + "-"
+                validierungsstring += self.mahnstufe + "-"
+                validierungsstring += str(self.e_mail_vorlage) if self.e_mail_vorlage else '0'
+                validierungsstring += '-'
+                validierungsstring += str(self.reduzierte_mitgliedschaft)
         else:
             validierungsstring = ''
             validierungsstring += self.sektion_id + "-"

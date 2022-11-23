@@ -22,6 +22,7 @@ class Mahnlauf(Document):
         ueberfaellig_seit = add_to_date(nowdate(), days=mahnstufen_frist)
         self.ueberfaellig_seit = ueberfaellig_seit
         self.druckvorlage = self.get_druckvorlage()
+        self.e_mail_vorlage = self.get_e_mail_vorlage()
     
     def on_submit(self):
         if self.druckvorlage:
@@ -42,6 +43,25 @@ class Mahnlauf(Document):
                                         AND `e_mail_vorlage` != 1""".format(sektion_id=self.sektion_id, mahnstufe=self.mahnstufe, typ=self.typ), as_dict=True)
         if len(druckvorlagen) > 0:
             return druckvorlagen[0].name
+        else:
+            return None
+        
+    def get_e_mail_vorlage(self):
+        if self.mahnungen_per_mail == 'Ja':
+            druckvorlagen = frappe.db.sql("""SELECT
+                                                `name`
+                                            FROM `tabDruckvorlage`
+                                            WHERE `sektion_id` = '{sektion_id}'
+                                            AND `language` = 'de'
+                                            AND `dokument` = 'Mahnung'
+                                            AND `mahnstufe` = '{mahnstufe}'
+                                            AND `default` = 1
+                                            AND `mahntyp` = '{typ}'
+                                            AND `e_mail_vorlage` = 1""".format(sektion_id=self.sektion_id, mahnstufe=self.mahnstufe, typ=self.typ), as_dict=True)
+            if len(druckvorlagen) > 0:
+                return druckvorlagen[0].name
+            else:
+                return None
         else:
             return None
     
@@ -365,3 +385,18 @@ def get_info(jobname):
             found_job = True
 
     return found_job
+
+@frappe.whitelist()
+def get_e_mail_field_list(e_mail_vorlage=None):
+    if e_mail_vorlage:
+        druckvorlage = frappe.get_doc("Druckvorlage", e_mail_vorlage)
+        fields_list = [
+            {'fieldname': 'betreff', 'fieldtype': 'Data', 'reqd': 1, 'default': druckvorlage.e_mail_betreff},
+            {'fieldname': 'nachricht', 'fieldtype': 'Text Editor', 'reqd': 1, 'default': druckvorlage.e_mail_text}
+        ]
+    else:
+        fields_list = [
+            {'fieldname': 'betreff', 'fieldtype': 'Data', 'reqd': 1},
+            {'fieldname': 'nachricht', 'fieldtype': 'Text Editor', 'reqd': 1}
+        ]
+    return fields_list

@@ -8,6 +8,7 @@
   "section_allgemein",
   "sektion_id",
   "druckvorlage",
+  "e_mail_vorlage",
   "massenlauf",
   "cb_1",
   "typ",
@@ -228,10 +229,17 @@
    "hidden": 1,
    "label": "typ_code",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.sektion_id",
+   "fieldname": "e_mail_vorlage",
+   "fieldtype": "Link",
+   "label": "E-Mail Vorlage",
+   "options": "Druckvorlage"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-11-22 20:32:08.666569",
+ "modified": "2022-11-23 11:30:19.684620",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnlauf",

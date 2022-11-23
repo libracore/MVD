@@ -136,6 +136,27 @@ frappe.ui.form.on('Mahnlauf', {
         if (cur_frm.doc.typ == 'Anmeldungen') {
             cur_frm.set_value("typ_code", "A");
         }
+    },
+    versende_e_mail: function(frm) {
+        frappe.call({
+        'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.get_e_mail_field_list",
+            'args': {
+                'e_mail_vorlage': cur_frm.doc.e_mail_vorlage
+            },
+            'callback': function(r) {
+                var d = new frappe.ui.Dialog({
+                    fields: r.message,
+                    primary_action: function(){
+                        d.hide();
+                        show_alert(d.get_values());
+                    },
+                    primary_action_label: __('Versenden'),
+                    title: 'Mahnungs E-Mail Versand'
+                });
+                d.show();
+            }
+        });
+        
     }
 });
 
