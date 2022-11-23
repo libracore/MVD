@@ -3490,6 +3490,11 @@ def sinv_check_zahlung_mitgliedschaft(sinv, event):
                             pe = frappe.get_doc("Payment Entry", sinv.advances[0].reference_name)
                             frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'datum_zahlung_mitgliedschaft', pe.reference_date)
                             frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr', sinv.mitgliedschafts_jahr)
+            # gewährleistung dass trotz skip die Mitgliedschafts Ampel aktualisiert wird
+            if sinv.mv_mitgliedschaft:
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
+                ampelfarbe = get_ampelfarbe(mitgliedschaft)
+                frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'ampel_farbe', ampelfarbe)
     
     if not skip:
         # mitgliedschaft speichern um SP Update zu triggern und höchste Mahnstufe zu setzen
