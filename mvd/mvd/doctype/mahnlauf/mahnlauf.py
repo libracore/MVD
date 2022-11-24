@@ -9,7 +9,7 @@ from frappe.utils.data import add_to_date, nowdate
 from datetime import datetime
 from frappe.utils.background_jobs import enqueue
 from frappe.core.doctype.communication.email import make
-from frappe import sendmail
+from frappe import sendmail, get_print
 
 class Mahnlauf(Document):
     def onload(self):
@@ -408,6 +408,7 @@ def send_reminder_mails(mahnlauf, betreff, message):
     mahnungen = frappe.db.sql("""SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 1 AND `per_mail` = 1""".format(mahnlauf=mahnlauf), as_dict=True)
     for mahnung in mahnungen:
         mahnung = frappe.get_doc("Mahnung", mahnung.name)
+        attachments = [frappe.attach_print("Mahnung", mahnung.name, file_name=mahnung.name, print_format='Mahnung')]
         comm = make(
             recipients=get_recipients(mahnung),
             sender=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
@@ -415,7 +416,7 @@ def send_reminder_mails(mahnlauf, betreff, message):
             content=message,
             doctype='Mahnung',
             name=mahnung.name,
-            attachments=None,
+            attachments=attachments,
             send_email=False,
             sender_full_name=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name")
         )["name"]
@@ -432,7 +433,7 @@ def send_reminder_mails(mahnlauf, betreff, message):
             unsubscribe_method=None,
             unsubscribe_params=None,
             unsubscribe_message=None,
-            attachments=None,
+            attachments=attachments,
             content=None,
             doctype='Mahnung',
             name=mahnung.name,
