@@ -9,6 +9,7 @@ from frappe.utils.data import add_to_date, nowdate
 from datetime import datetime
 from frappe.utils.background_jobs import enqueue
 from frappe.core.doctype.communication.email import make
+from frappe import sendmail
 
 class Mahnlauf(Document):
     def onload(self):
@@ -407,7 +408,7 @@ def send_reminder_mails(mahnlauf, betreff, message):
     mahnungen = frappe.db.sql("""SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 1 AND `per_mail` = 1""".format(mahnlauf=mahnlauf), as_dict=True)
     for mahnung in mahnungen:
         mahnung = frappe.get_doc("Mahnung", mahnung.name)
-        make(
+        comm = make(
             recipients=get_recipients(mahnung),
             sender=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
             subject=betreff,
@@ -415,9 +416,49 @@ def send_reminder_mails(mahnlauf, betreff, message):
             doctype='Mahnung',
             name=mahnung.name,
             attachments=None,
-            send_email=True,
+            send_email=False,
             sender_full_name=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name")
+        )["name"]
+        
+        sendmail(
+            recipients=get_recipients(mahnung),
+            sender="{0} <{1}>".format(frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name"), frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse")),
+            subject=betreff,
+            message=message,
+            as_markdown=False,
+            delayed=True,
+            reference_doctype='Mahnung',
+            reference_name=mahnung.name,
+            unsubscribe_method=None,
+            unsubscribe_params=None,
+            unsubscribe_message=None,
+            attachments=None,
+            content=None,
+            doctype='Mahnung',
+            name=mahnung.name,
+            reply_to=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
+            cc=[],
+            bcc=[],
+            message_id=frappe.get_value("Communication", comm, "message_id"),
+            in_reply_to=None,
+            send_after=None,
+            expose_recipients=None,
+            send_priority=1,
+            communication=comm,
+            retry=1,
+            now=None,
+            read_receipt=None,
+            is_notification=False,
+            inline_images=None,
+            template='mahnung',
+            args={
+                "message": message,
+                "footer": frappe.get_value("Sektion", mahnung.sektion_id, "footer")
+            },
+            header=None,
+            print_letterhead=False
         )
+        
     frappe.set_value("Mahnlauf", mahnlauf, "e_mails_versendet", 1)
     return
 
