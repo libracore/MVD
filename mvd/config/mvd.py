@@ -20,12 +20,6 @@ def get_data():
                     "description": _("Mitgliedschaft")
                 },
                 {
-                    "type": "doctype",
-                    "name": "MW Abo",
-                    "label": _("M+W Abo"),
-                    "description": _("M+W Abo")
-                },
-                {
                     "type": "report",
                     "name": "Mitgliederstatistik",
                     "label": _("Mitgliederstatistik"),
@@ -136,20 +130,20 @@ def get_data():
             ]
         },
         {
-            "label": _("Verbands-Stammdaten"),
+            "label": _("M + W"),
             "icon": "fa fa-cog",
             "items": [
                 {
                     "type": "doctype",
-                    "name": "Sektion",
-                    "label": _("Sektionen"),
-                    "description": _("Sektions Einstellungen")
+                    "name": "MW Abo",
+                    "label": _("M+W Abo"),
+                    "description": _("M+W Abo")
                 },
                 {
                     "type": "doctype",
-                    "name": "Region",
-                    "label": _("Regionen"),
-                    "description": _("Regions Einstellungen")
+                    "name": "MW Export",
+                    "label": _("M+W Export"),
+                    "description": _("M+W Export")
                 }
             ]
         },
@@ -168,6 +162,24 @@ def get_data():
                     "name": "MW",
                     "label": _("MW"),
                     "description": _("MW")
+                }
+            ]
+        },
+        {
+            "label": _("Verbands-Stammdaten"),
+            "icon": "fa fa-cog",
+            "items": [
+                {
+                    "type": "doctype",
+                    "name": "Sektion",
+                    "label": _("Sektionen"),
+                    "description": _("Sektions Einstellungen")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Region",
+                    "label": _("Regionen"),
+                    "description": _("Regions Einstellungen")
                 }
             ]
         }
