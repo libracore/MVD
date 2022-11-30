@@ -1463,8 +1463,8 @@ def check_pes_against_camt(camt_file):
                         if len(pe) > 1:
                             print("Zahlung {0} mehrfach erfasst".format(unique_reference))
                         else:
-                            if pe[0].total_allocated_amount > amount:
-                                print("Zahlung {0} zu hoch erfasst".format(unique_reference))
+                            if pe[0].total_allocated_amount != amount:
+                                print("Betrag der Zahlung {0} passt nicht".format(unique_reference))
                     else:
                         print("Zahlung {0} nicht gefunden".format(unique_reference))
             except Exception as e:
