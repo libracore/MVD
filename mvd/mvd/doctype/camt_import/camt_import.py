@@ -1389,6 +1389,14 @@ def reopen_sinv_as_admin(sinv):
 # ----------------------------
 """
 sudo bench execute mvd.mvd.doctype.camt_import.camt_import.check_pes_against_camt --kwargs "{'camt_file': '/private/files/xxxxxxxx.xml'}"
+
+Das ist eine Konreoll Funktion für verarbeitete CAMT Imports.
+Diese Funktion vergleicht alle Zahlungen des CAMT Files mit den importierten Zahlungen.
+Es zeigt Zahlungen an:
+- die nicht eingelesen wurden
+- die mehfach eingelesen wurden
+- deren eingelesener Betrag vom Betrag im CAMT File abweicht
+Sowie die Summe der eingelesenen Zahlungen und die Summe der Zahlungen im CAMT File
 """
 def check_pes_against_camt(camt_file):
     # lese und prüfe camt file
