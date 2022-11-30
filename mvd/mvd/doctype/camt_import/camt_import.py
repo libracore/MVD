@@ -1465,6 +1465,12 @@ def check_pes_against_camt(camt_file):
                     if len(pe) > 0:
                         if len(pe) > 1:
                             print("Zahlung {0} mehrfach erfasst".format(unique_reference))
+                            zwischentotal = 0
+                            for p in pe:
+                                zwischentotal += p.total_allocated_amount
+                            if zwischentotal != amount:
+                                print("Beträge der mehrfach erfassten Zahlung {0} passt nicht".format(unique_reference))
+                            totalbetrag_pe += zwischentotal
                         else:
                             if pe[0].total_allocated_amount != amount:
                                 print("Betrag der Zahlung {0} passt nicht".format(unique_reference))
