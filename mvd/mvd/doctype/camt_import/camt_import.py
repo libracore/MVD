@@ -1387,18 +1387,18 @@ def reopen_sinv_as_admin(sinv):
 
 # HILFS-/KONTROLL-FUNKTION
 # ----------------------------
-"""
-sudo bench execute mvd.mvd.doctype.camt_import.camt_import.check_pes_against_camt --kwargs "{'camt_file': '/private/files/xxxxxxxx.xml'}"
-
-Das ist eine Konreoll Funktion für verarbeitete CAMT Imports.
-Diese Funktion vergleicht alle Zahlungen des CAMT Files mit den importierten Zahlungen.
-Es zeigt Zahlungen an:
-- die nicht eingelesen wurden
-- die mehfach eingelesen wurden
-- deren eingelesener Betrag vom Betrag im CAMT File abweicht
-Sowie die Summe der eingelesenen Zahlungen und die Summe der Zahlungen im CAMT File
-"""
 def check_pes_against_camt(camt_file):
+    """
+    sudo bench execute mvd.mvd.doctype.camt_import.camt_import.check_pes_against_camt --kwargs "{'camt_file': '/private/files/xxxxxxxx.xml'}"
+
+    Das ist eine Kontroll Funktion für verarbeitete CAMT Imports.
+    Diese Funktion vergleicht alle Zahlungen des CAMT Files mit den importierten Zahlungen.
+    Es zeigt Zahlungen an:
+    - die nicht eingelesen wurden
+    - die mehfach eingelesen wurden
+    - deren eingelesener Betrag vom Betrag im CAMT File abweicht
+    Sowie die Summe der eingelesenen Zahlungen und die Summe der Zahlungen im CAMT File
+    """
     # lese und prüfe camt file
     camt_file = get_camt_file(camt_file)
     totalbetrag_camt = 0
@@ -1491,3 +1491,22 @@ def check_pes_against_camt(camt_file):
                 pass
     print("Finish")
     print("Total in CAMT: {0} \nTotal in PEs: {1}".format(totalbetrag_camt, totalbetrag_pe))
+
+def restart_verbuche_matches(camt_import):
+    """
+    sudo bench execute mvd.mvd.doctype.camt_import.camt_import.restart_verbuche_matches --kwargs "{'camt_import': 'xyz'}"
+
+    Diese Funktion startet "verbuche_matches" neu falls er fehlgeschlagen ist.
+    """
+    args = {
+        'camt_import': camt_import
+    }
+    enqueue("mvd.mvd.doctype.camt_import.camt_import.bg_restart_verbuche_matches", queue='long', job_name='Verarbeite CAMT Import {0}'.format(camt_import), timeout=5000, **args)
+
+def bg_restart_verbuche_matches(camt_import):
+    # Verbuche Matches
+    try:
+        verbuche_matches(camt_import)
+    except Exception as err:
+        camt_status_update(camt_import, 'Failed')
+        frappe.log_error("{0}".format(err), 'CAMT-Import {0} failed'.format(camt_import))
