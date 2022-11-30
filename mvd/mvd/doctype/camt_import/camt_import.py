@@ -1384,3 +1384,91 @@ def reopen_payment_as_admin(pe):
 def reopen_sinv_as_admin(sinv):
     frappe.db.sql("""UPDATE `tabSales Invoice` SET `docstatus` = 0 WHERE `name` = '{sinv}'""".format(sinv=sinv), as_list=True)
     return
+
+# HILFS-/KONTROLL-FUNKTION
+# ----------------------------
+"""
+sudo bench execute mvd.mvd.doctype.camt_import.camt_import.check_pes_against_camt --kwargs "{'camt_file': '/private/files/xxxxxxxx.xml'}"
+"""
+def check_pes_against_camt(camt_file):
+    # lese und prüfe camt file
+    camt_file = get_camt_file(camt_file)
+    transaction_entries = camt_file.find_all('ntry')
+    for entry in transaction_entries:
+        entry_soup = BeautifulSoup(six.text_type(entry), 'lxml')
+        date = entry_soup.bookgdt.dt.get_text()
+        transactions = entry_soup.find_all('txdtls')
+        entry_amount = float(entry_soup.amt.get_text())
+        entry_currency = entry_soup.amt['ccy']
+        for transaction in transactions:
+            transaction_soup = BeautifulSoup(six.text_type(transaction), 'lxml')
+            try:
+                unique_reference = transaction_soup.refs.acctsvcrref.get_text()
+                amount = float(transaction_soup.amt.get_text())
+                currency = transaction_soup.amt['ccy']
+                try:
+                    party_soup = BeautifulSoup(six.text_type(transaction_soup.dbtr), 'lxml')
+                    customer_name = party_soup.nm.get_text()
+                    try:
+                        street = party_soup.strtnm.get_text()
+                        try:
+                            street_number = party_soup.bldgnb.get_text()
+                            address_line = "{0} {1}".format(street, street_number)
+                        except:
+                            address_line = street
+                    except:
+                        address_line = ""
+                    try:
+                        plz = party_soup.pstcd.get_text()
+                    except:
+                        plz = ""
+                    try:
+                        town = party_soup.twnnm.get_text()
+                    except:
+                        town = ""
+                    try:
+                        country = party_soup.ctry.get_text()
+                    except:
+                        party_iban = ""
+                    customer_address = "{0}, {1}, {2}".format(address_line, plz, town)
+                    try:
+                        customer_iban = "{0}".format(transaction_soup.dbtracct.id.iban.get_text())
+                    except:
+                        customer_iban = ""
+                except:
+                    try:
+                        customer_iban = transaction_soup.dbtracct.id.iban.get_text()
+                    except Exception as e:
+                        customer_iban = ""
+                        customer_name = "Postschalter"
+                        customer_address = ""
+                try:
+                    charges = float(transaction_soup.chrgs.ttlchrgsandtaxamt.get_text())
+                except:
+                    charges = 0.0
+                credit_debit = transaction_soup.cdtdbtind.get_text()
+                try:
+                    transaction_reference = transaction_soup.rmtinf.strd.cdtrrefinf.ref.get_text()
+                except:
+                    try:
+                        transaction_reference = transaction_soup.rmtinf.ustrd.get_text()
+                    except:
+                        try:
+                            transaction_reference = transaction_soup.refs.endtoendid.get_text()
+                        except:
+                            transaction_reference = unique_reference
+                if credit_debit == "CRDT":
+                    pe = frappe.db.sql("""SELECT * FROM `tabPayment Entry` WHERE `reference_no` = '{0}' AND `docstatus` = 1""".format(unique_reference), as_dict=True)
+                    if len(pe) > 0:
+                        if len(pe) > 1:
+                            print("Zahlung {0} mehrfach erfasst".format(unique_reference))
+                        else:
+                            if pe[0].total_allocated_amount > amount:
+                                print("Zahlung {0} zu hoch erfasst".format(unique_reference))
+                    else:
+                        print("Zahlung {0} nicht gefunden".format(unique_reference))
+            except Exception as e:
+                # Zahlung konnte nicht ausgelesen werden, entsprechender Errorlog im CAMT-File wird erzeugt
+                print("ERROR\n:{0}\n---------\n{1}\n--------\n{2}".format(six.text_type(transaction), e, camt_import.name))
+                pass
+    print("Finish")
