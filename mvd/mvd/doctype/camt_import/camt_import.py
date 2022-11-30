@@ -1393,6 +1393,8 @@ sudo bench execute mvd.mvd.doctype.camt_import.camt_import.check_pes_against_cam
 def check_pes_against_camt(camt_file):
     # lese und prüfe camt file
     camt_file = get_camt_file(camt_file)
+    totalbetrag_camt = 0
+    totalbetrag_pe = 0
     transaction_entries = camt_file.find_all('ntry')
     for entry in transaction_entries:
         entry_soup = BeautifulSoup(six.text_type(entry), 'lxml')
@@ -1458,6 +1460,7 @@ def check_pes_against_camt(camt_file):
                         except:
                             transaction_reference = unique_reference
                 if credit_debit == "CRDT":
+                    totalbetrag_camt += amount
                     pe = frappe.db.sql("""SELECT * FROM `tabPayment Entry` WHERE `reference_no` = '{0}' AND `docstatus` = 1""".format(unique_reference), as_dict=True)
                     if len(pe) > 0:
                         if len(pe) > 1:
@@ -1465,6 +1468,7 @@ def check_pes_against_camt(camt_file):
                         else:
                             if pe[0].total_allocated_amount != amount:
                                 print("Betrag der Zahlung {0} passt nicht".format(unique_reference))
+                            totalbetrag_pe += pe[0].total_allocated_amount
                     else:
                         print("Zahlung {0} nicht gefunden".format(unique_reference))
             except Exception as e:
@@ -1472,3 +1476,4 @@ def check_pes_against_camt(camt_file):
                 print("ERROR\n:{0}\n---------\n{1}\n--------\n{2}".format(six.text_type(transaction), e, camt_import.name))
                 pass
     print("Finish")
+    print("Total in CAMT: {0} \nTotal in PEs: {1}".format(totalbetrag_camt, totalbetrag_pe))
