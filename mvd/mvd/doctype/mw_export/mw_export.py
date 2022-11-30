@@ -16,7 +16,7 @@ class MWExport(Document):
             SUM(CASE WHEN COALESCE(`m_und_w`, 0) > 5 THEN COALESCE(`m_und_w`, 0) ELSE 0 END) AS `anzahl_5`,
             SUM(COALESCE(`m_und_w`, 0)) AS `anzahl`
         FROM `tabMitgliedschaft`
-        WHERE `status_c` NOT IN ('Inaktiv', 'Interessent*in')
+        WHERE `status_c` NOT IN ('Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')
         GROUP BY `sektion_id`, COALESCE(`region`, '')"""
         if self.zeitungsauflage_query != zeitungsauflage_query.replace("        ", ""):
             if not self.zeitungsauflage_query or self.zeitungsauflage_query == '':
@@ -77,7 +77,7 @@ class MWExport(Document):
                     query_list.append("""`plz` = {0}""".format(self.plz_von))
             
             # Zusammenführen der Queryliste zu einem Query
-            query = """/* {0} */\nWHERE `status_c` NOT IN ('Inaktiv', 'Interessent*in')\nAND `m_und_w_export` != '{1}'\nAND {2}\n/*----------*/""".format(self.query_titel or 'QUERY', self.name, "\nAND".join(query_list))
+            query = """/* {0} */\nWHERE `status_c` NOT IN ('Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')\nAND `m_und_w_export` != '{1}'\nAND {2}\n/*----------*/""".format(self.query_titel or 'QUERY', self.name, "\nAND".join(query_list))
             
             # Hinzufügen des Queries zum Datensatz
             if self.einzel_queries:
