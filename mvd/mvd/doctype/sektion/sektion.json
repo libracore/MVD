@@ -41,10 +41,6 @@
   "kulanz_konto",
   "section_fusszeile",
   "fz_links",
-  "cb_2",
-  "fz_mitte",
-  "cb_3",
-  "fz_rechts",
   "section_mitgliederausweis",
   "ausweis_rueckseite",
   "section_todo",
@@ -118,36 +114,14 @@
    "collapsible": 1,
    "fieldname": "section_fusszeile",
    "fieldtype": "Section Break",
-   "label": "Fusszeile"
+   "label": "Fusszeile / Referenzblock"
   },
   {
    "default": "Mieterinnen- und Mieterverband<br>\n[Sektionenname]",
    "fieldname": "fz_links",
    "fieldtype": "Code",
-   "label": "Links",
+   "label": "Fusszeile / Referenzblock",
    "reqd": 1
-  },
-  {
-   "default": "[Strasse]<br>\n[Postfach]<br>\n[PLZ Ort]",
-   "fieldname": "fz_mitte",
-   "fieldtype": "Code",
-   "label": "Mitte",
-   "reqd": 1
-  },
-  {
-   "default": "T [Telefonnummer]<br>\n[E-Mailadresse]<br>\nwww.mieterverband.ch",
-   "fieldname": "fz_rechts",
-   "fieldtype": "Code",
-   "label": "Rechts",
-   "reqd": 1
-  },
-  {
-   "fieldname": "cb_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "cb_3",
-   "fieldtype": "Column Break"
   },
   {
    "collapsible": 1,
@@ -313,7 +287,7 @@
    "label": "Folgejahr Regelung aktiviert"
   }
  ],
- "modified": "2022-10-18 11:16:08.230343",
+ "modified": "2022-12-01 13:14:29.397219",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
