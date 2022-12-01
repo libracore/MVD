@@ -1,0 +1,33 @@
+{
+ "creation": "2022-12-01 08:36:46.252738",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "titel",
+  "query"
+ ],
+ "fields": [
+  {
+   "fieldname": "titel",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Titel"
+  },
+  {
+   "fieldname": "query",
+   "fieldtype": "Code",
+   "label": "Qeruy"
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-12-01 08:41:29.704224",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "MW Einzelqueries",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

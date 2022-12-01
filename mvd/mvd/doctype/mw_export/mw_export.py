@@ -5,6 +5,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils.data import add_days, today, now
+from frappe.utils.csvutils import to_csv as make_csv
 
 class MWExport(Document):
     def validate(self):
@@ -56,6 +58,10 @@ class MWExport(Document):
             """
             self.zeitungsauflage_data = zeitungsauflage
     def query_hinzufuegen(self):
+        # Prüfe ob Titel (aka Filename) vorhanden
+        if not self.query_titel:
+            frappe.throw("Bitte mindestens ein Query Titel angeben")
+        
         # Prüfe ob Daten für Query vorhanden
         if self.query_sektion_id \
         or self.query_region \
@@ -77,13 +83,12 @@ class MWExport(Document):
                     query_list.append("""`plz` = {0}""".format(self.plz_von))
             
             # Zusammenführen der Queryliste zu einem Query
-            query = """/* {0} */\nWHERE `status_c` NOT IN ('Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')\nAND `m_und_w_export` != '{1}'\nAND {2}\n/*----------*/""".format(self.query_titel or 'QUERY', self.name, "\nAND".join(query_list))
+            query = """{0}""".format("\n".join(query_list))
             
             # Hinzufügen des Queries zum Datensatz
-            if self.einzel_queries:
-                self.einzel_queries += """\n\n""" + query
-            else:
-                self.einzel_queries = query
+            row = self.append('einzelqueries', {})
+            row.titel = self.query_titel
+            row.query = query
             
             # Zurücksetzen des Query Generators
             self.query_titel = None
@@ -93,3 +98,99 @@ class MWExport(Document):
             self.plz_bis = 0
             
             self.save()
+    
+    def export_queries(self):
+        try:
+            for query in self.einzelqueries:
+                csv_data = get_csv_data(self.name, query.query)
+
+                csv_file = make_csv(csv_data)
+
+                _file = frappe.get_doc({
+                    "doctype": "File",
+                    "file_name": "{titel}_{datetime}.csv".format(titel=query.titel, datetime=now().replace(" ", "_")),
+                    "folder": "Home/Attachments",
+                    "is_private": 1,
+                    "content": csv_file,
+                    "attached_to_doctype": 'MW Export',
+                    "attached_to_name": self.name
+                })
+                _file.save()
+            self.status = 'Abgeschlossen'
+            self.save()
+        except Exception as err:
+            self.add_comment('Comment', text=str(err))
+            self.status = 'Fehlgeschlagen'
+            self.save()
+
+def get_csv_data(mw_export, query):
+    data = []
+    titel = [
+        'mitglied_nr',
+        'anrede',
+        'name_1',
+        'name_2',
+        'name_3',
+        'strasse_pf',
+        'plz_6',
+        'ort',
+        'anzahl',
+        'sektion_c',
+        'region_c'
+    ]
+    data.append(titel)
+    
+    query_data = frappe.db.sql("""SELECT
+                                    `mitglied_nr`,
+                                    `anrede_c`,
+                                    `vorname_1`,
+                                    `nachname_1`,
+                                    `vorname_2`,
+                                    `nachname_2`,
+                                    `rg_vorname`,
+                                    `rg_nachname`,
+                                    `strasse`,
+                                    `nummer`,
+                                    `nummer_zu`,
+                                    `postfach`,
+                                    `postfach_nummer`,
+                                    `plz`,
+                                    `ort`,
+                                    `m_und_w`,
+                                    `sektion_id`,
+                                    `region`
+                                FROM `tabMitgliedschaft`
+                                WHERE `status_c` NOT IN ('Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')
+                                /*AND `m_und_w_export` != '{mw_export}'*/
+                                AND `m_und_w` > 0
+                                AND {query}""".format(mw_export=mw_export, query=query.replace("\n", " AND")), as_dict=True)
+    if len(query_data) > 0:
+        for entry in query_data:
+            mitglied_nr = entry.mitglied_nr
+            anrede = entry.anrede_c
+            name_1 = " ".join([entry.vorname_1 or '', entry.nachname_1 or ''])
+            name_2 = " ".join([entry.vorname_2 or '', entry.nachname_2 or ''])
+            name_3 = " ".join([entry.rg_vorname or '', entry.rg_nachname or ''])
+            strasse_pf = " ".join([entry.strasse if not int(entry.postfach) == 1 else 'Postfach', entry.nummer + entry.nummer_zu or '' if not int(entry.postfach) == 1 else entry.postfach_nummer or ''])
+            plz_6 = entry.plz
+            ort = entry.ort
+            anzahl = entry.m_und_w
+            sektion_c = entry.sektion_id
+            region_c = entry.region or ''
+            
+            _data = [
+                mitglied_nr,
+                anrede,
+                name_1,
+                name_2,
+                name_3,
+                strasse_pf,
+                plz_6,
+                ort,
+                anzahl,
+                sektion_c,
+                region_c
+            ]
+            data.append(_data)
+
+    return data
