@@ -594,7 +594,7 @@ function kuendigung(frm) {
                                 fristgerecht = false;
                             } else {
                                 if (kuendigungs_referenzdatum_month == ks_month) {
-                                    if (kuendigungs_referenzdatum_day == ks_day) {
+                                    if (kuendigungs_referenzdatum_day > ks_day) {
                                         fristgerecht = false;
                                     }
                                 }
