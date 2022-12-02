@@ -2408,6 +2408,7 @@ def mvm_update(mitgliedschaft, kwargs):
             if not sektion_id:
                 return raise_xxx(404, 'Not Found', 'Sektion ({sektion_id}) not found'.format(sektion_id=kwargs['sektionCode']), daten=kwargs)
                 
+            status_vor_onl_mutation = mitgliedschaft.status_c
             status_c = get_status_c(kwargs['status'])
             if not status_c:
                 return raise_xxx(404, 'Not Found', 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['status']), daten=kwargs)
@@ -2623,7 +2624,7 @@ def mvm_update(mitgliedschaft, kwargs):
                 if kwargs['needsValidation']:
                     mitgliedschaft.validierung_notwendig = 1
                     if status_c != 'Zuzug':
-                        mitgliedschaft.status_vor_onl_mutation = status_c
+                        mitgliedschaft.status_vor_onl_mutation = status_vor_onl_mutation
                         change_log_row = mitgliedschaft.append('status_change', {})
                         change_log_row.datum = now()
                         change_log_row.status_alt = mitgliedschaft.status_c
