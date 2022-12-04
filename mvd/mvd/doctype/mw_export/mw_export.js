@@ -38,6 +38,7 @@ frappe.ui.form.on('MW Export', {
                 doc: frm.doc,
                 callback: function(response) {
                    cur_frm.reload_doc();
+                   frappe.msg_print('Der Export wurde gestartet. Sie können den Fortschritt <a href="/desk#background_jobs">hier</a> einsehen.');
                 }
             });
         });

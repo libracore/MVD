@@ -178,7 +178,8 @@
   "m_w_retouren_in_bearbeitung",
   "m_w_anzahl",
   "retoure_in_folge",
-  "zuzug_durch_sp"
+  "zuzug_durch_sp",
+  "m_und_w_export"
  ],
  "fields": [
   {
@@ -1223,10 +1224,15 @@
    "fieldname": "retoure_in_folge",
    "fieldtype": "Check",
    "label": "Zwei Retouren in Folge"
+  },
+  {
+   "fieldname": "m_und_w_export",
+   "fieldtype": "Data",
+   "label": "M+W Export"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-07-28 10:32:32.005792",
+ "modified": "2022-12-02 10:43:02.935789",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.data import add_days, today, now
 from frappe.utils.csvutils import to_csv as make_csv
+from frappe.utils.background_jobs import enqueue
 
 class MWExport(Document):
     def validate(self):
@@ -41,7 +42,33 @@ class MWExport(Document):
                     <tbody>
             """
             zeitungsauflagen = frappe.db.sql(zeitungsauflage_query, as_dict=True)
+            zwischentotal = 0
+            sektion = None
+            add_zwischentotal = False
             for za in zeitungsauflagen:
+                if sektion:
+                    if sektion == za.sektion:
+                        zwischentotal += za.anzahl
+                        add_zwischentotal = False
+                    else:
+                        add_zwischentotal = True
+                else:
+                    sektion = za.sektion
+                    zwischentotal = za.anzahl
+                if add_zwischentotal:
+                    zeitungsauflage += """
+                        <tr>
+                            <td><b>{0}</b></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><b>{1}</b></td>
+                        </tr>
+                    """.format(sektion, int(zwischentotal))
+                    zwischentotal = za.anzahl
+                    sektion = za.sektion
+                
                 zeitungsauflage += """
                     <tr>
                         <td>{0}</td>
@@ -52,6 +79,16 @@ class MWExport(Document):
                         <td>{5}</td>
                     </tr>
                 """.format(za.sektion, za.region, int(za.aktiv), int(za.inaktiv), int(za.anzahl_5), int(za.anzahl))
+            zeitungsauflage += """
+                    <tr>
+                        <td><b>{0}</b></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td><b>{1}</b></td>
+                    </tr>
+                """.format(sektion, int(zwischentotal))
             zeitungsauflage += """
                 </tbody>
                 </table>
@@ -100,30 +137,52 @@ class MWExport(Document):
             self.save()
     
     def export_queries(self):
-        try:
-            for query in self.einzelqueries:
-                csv_data = get_csv_data(self.name, query.query)
+        args = {
+            'self': self
+        }
+        enqueue("mvd.mvd.doctype.mw_export.mw_export.bg_export_queries", queue='long', job_name='Export Queries {0}'.format(self.name), timeout=5000, **args)
 
-                csv_file = make_csv(csv_data)
+def bg_export_queries(self):
+    try:
+        # Einzelqueries
+        for query in self.einzelqueries:
+            csv_data = get_csv_data(self.name, query.query)
 
-                _file = frappe.get_doc({
-                    "doctype": "File",
-                    "file_name": "{titel}_{datetime}.csv".format(titel=query.titel, datetime=now().replace(" ", "_")),
-                    "folder": "Home/Attachments",
-                    "is_private": 1,
-                    "content": csv_file,
-                    "attached_to_doctype": 'MW Export',
-                    "attached_to_name": self.name
-                })
-                _file.save()
-            self.status = 'Abgeschlossen'
-            self.save()
-        except Exception as err:
-            self.add_comment('Comment', text=str(err))
-            self.status = 'Fehlgeschlagen'
-            self.save()
+            csv_file = make_csv(csv_data)
 
-def get_csv_data(mw_export, query):
+            _file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": "{titel}_{datetime}.csv".format(titel=query.titel, datetime=now().replace(" ", "_")),
+                "folder": "Home/Attachments",
+                "is_private": 1,
+                "content": csv_file,
+                "attached_to_doctype": 'MW Export',
+                "attached_to_name": self.name
+            })
+            _file.save()
+        
+        # Rest
+        csv_data = get_csv_data(self.name)
+
+        csv_file = make_csv(csv_data)
+
+        _file = frappe.get_doc({
+            "doctype": "File",
+            "file_name": "Rest_{datetime}.csv".format(datetime=now().replace(" ", "_")),
+            "folder": "Home/Attachments",
+            "is_private": 1,
+            "content": csv_file,
+            "attached_to_doctype": 'MW Export',
+            "attached_to_name": self.name
+        })
+        _file.save()
+        
+        self.db_set('status', 'Abgeschlossen', commit=True)
+    except Exception as err:
+        self.add_comment('Comment', text=str(err))
+        self.db_set('status', 'Fehlgeschlagen', commit=True)
+
+def get_csv_data(mw_export, query=False):
     data = []
     titel = [
         'mitglied_nr',
@@ -140,7 +199,11 @@ def get_csv_data(mw_export, query):
     ]
     data.append(titel)
     
+    query_filter = ''
+    if query:
+        query_filter = "AND " + query.replace("\n", " AND")
     query_data = frappe.db.sql("""SELECT
+                                    `name`,
                                     `mitglied_nr`,
                                     `anrede_c`,
                                     `vorname_1`,
@@ -161,9 +224,9 @@ def get_csv_data(mw_export, query):
                                     `region`
                                 FROM `tabMitgliedschaft`
                                 WHERE `status_c` NOT IN ('Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')
-                                /*AND `m_und_w_export` != '{mw_export}'*/
+                                AND `m_und_w_export` != '{mw_export}'
                                 AND `m_und_w` > 0
-                                AND {query}""".format(mw_export=mw_export, query=query.replace("\n", " AND")), as_dict=True)
+                                {query}""".format(mw_export=mw_export, query=query_filter), as_dict=True, debug=True)
     if len(query_data) > 0:
         for entry in query_data:
             mitglied_nr = entry.mitglied_nr
@@ -192,5 +255,7 @@ def get_csv_data(mw_export, query):
                 region_c
             ]
             data.append(_data)
+            
+            frappe.db.set_value("Mitgliedschaft", entry.name, "m_und_w_export", mw_export)
 
     return data
