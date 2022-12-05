@@ -267,6 +267,13 @@ frappe.ui.form.on('Mitgliedschaft', {
             cur_frm.set_df_property('kuendigung', 'read_only', 0);
             cur_frm.set_df_property('verstorben_am', 'read_only', 0);
         }
+        
+        // Kündigungs-Mail-Button für MVBE
+        if (cur_frm.doc.kuendigung && cur_frm.doc.status_c != 'Inaktiv' && cur_frm.doc.e_mail_1 && ['MVBE', 'MVOS'].includes(cur_frm.doc.sektion_id)) {
+            frm.add_custom_button(__("K-Best. E-Mail"),  function() {
+                sende_k_best_email(frm);
+            });
+        }
     },
     m_und_w: function(frm) {
         if (![0, 1].includes(cur_frm.doc.m_und_w)) {
@@ -2259,4 +2266,26 @@ function m_und_w_sperre_aufheben(frm) {
             frappe.msgprint("Sie können die Anzahl M+W nun manuell setzen.");
         });
     }
+}
+
+function sende_k_best_email(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_kuendigungsmail_txt",
+        args:{
+                'mitgliedschaft': cur_frm.doc.name,
+                'sektion_id': cur_frm.doc.sektion_id,
+                'language': cur_frm.doc.language
+        },
+        callback: function(r)
+        {
+            if (r.message) {
+                var mail_data = r.message;
+                var email = cur_frm.doc.e_mail_1;
+                var cc = mail_data.cc;
+                var subject = mail_data.subject;
+                var email_body = mail_data.email_body;
+                document.location = "mailto:"+email+"?cc="+cc+"&subject="+subject+"&body="+email_body;
+            }
+        }
+    });
 }
