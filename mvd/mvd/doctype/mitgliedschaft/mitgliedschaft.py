@@ -12,7 +12,7 @@ from PyPDF2 import PdfFileWriter
 from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
 from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
 from frappe.utils.pdf import get_file_data_from_writer
-from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
+from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen, replace_mv_keywords
 from frappe import _
 
 class Mitgliedschaft(Document):
@@ -3977,4 +3977,25 @@ def get_returen_dashboard(mitgliedschaft):
     return {
         'anz_offen': anz_offen,
         'anz_in_bearbeitung': anz_in_bearbeitung
+    }
+
+@frappe.whitelist()
+def get_kuendigungsmail_txt(mitgliedschaft, sektion_id, language):
+    if language == 'fr':
+        txt_field = 'kuendigungs_bestaetigung_fr'
+        subject = 'Résiliation de votre affiliation'
+    else:
+        txt_field = 'kuendigungs_bestaetigung_de'
+        subject = 'Kündigung Ihrer Mitgliedschaft'
+    
+    txt_raw = frappe.db.get_value("Sektion", sektion_id, txt_field)
+    if txt_raw:
+        txt = replace_mv_keywords(txt_raw, mitgliedschaft)
+    else:
+        txt = ''
+    email_body = '{0}'.format(txt.replace("\n", "%0d%0a"))
+    return {
+        'cc': 'mv+Mitgliedschaft+{0}@libracore.io'.format(mitgliedschaft),
+        'subject': subject,
+        'email_body': email_body
     }

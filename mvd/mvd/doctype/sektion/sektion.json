@@ -48,7 +48,10 @@
   "section_mitgliederausweis",
   "ausweis_rueckseite",
   "section_todo",
-  "todo_gruppen"
+  "todo_gruppen",
+  "section_e_mail",
+  "kuendigungs_bestaetigung_de",
+  "kuendigungs_bestaetigung_fr"
  ],
  "fields": [
   {
@@ -311,9 +314,25 @@
    "fieldname": "folgejahr_regelung",
    "fieldtype": "Check",
    "label": "Folgejahr Regelung aktiviert"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_e_mail",
+   "fieldtype": "Section Break",
+   "label": "E-Mail"
+  },
+  {
+   "fieldname": "kuendigungs_bestaetigung_de",
+   "fieldtype": "Text",
+   "label": "K\u00fcndigungsbest\u00e4tigung (DE)"
+  },
+  {
+   "fieldname": "kuendigungs_bestaetigung_fr",
+   "fieldtype": "Text",
+   "label": "K\u00fcndigungsbest\u00e4tigung (FR)"
   }
  ],
- "modified": "2022-10-18 11:16:08.230343",
+ "modified": "2022-12-05 11:21:58.275675",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
