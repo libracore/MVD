@@ -55,7 +55,10 @@
   "mahnstufe_3",
   "mahnung_absender_adresse",
   "mahnung_absender_name",
-  "footer"
+  "footer",
+  "section_e_mail",
+  "kuendigungs_bestaetigung_de",
+  "kuendigungs_bestaetigung_fr"
  ],
  "fields": [
   {
@@ -359,9 +362,25 @@
    "fieldname": "footer",
    "fieldtype": "HTML Editor",
    "label": "E-Mail Footer"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_e_mail",
+   "fieldtype": "Section Break",
+   "label": "E-Mail"
+  },
+  {
+   "fieldname": "kuendigungs_bestaetigung_de",
+   "fieldtype": "Text",
+   "label": "K\u00fcndigungsbest\u00e4tigung (DE)"
+  },
+  {
+   "fieldname": "kuendigungs_bestaetigung_fr",
+   "fieldtype": "Text",
+   "label": "K\u00fcndigungsbest\u00e4tigung (FR)"
   }
  ],
- "modified": "2022-11-24 11:04:15.702947",
+ "modified": "2022-12-05 13:21:58.275675",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
