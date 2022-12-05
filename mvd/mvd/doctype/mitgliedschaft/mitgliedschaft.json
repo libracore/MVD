@@ -23,6 +23,7 @@
   "cb_0",
   "mitglied_id",
   "status_c",
+  "interessent_typ",
   "mitgliedtyp_c",
   "todesfall_uebernahme",
   "inkl_hv",
@@ -1229,10 +1230,17 @@
    "fieldname": "m_und_w_export",
    "fieldtype": "Data",
    "label": "M+W Export"
+  },
+  {
+   "depends_on": "eval:doc.status_c=='Interessent*in'",
+   "fieldname": "interessent_typ",
+   "fieldtype": "Link",
+   "label": "Interessent*in Typ",
+   "options": "InteressentIn Typ"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-12-02 10:43:02.935789",
+ "modified": "2022-12-05 14:01:10.259071",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

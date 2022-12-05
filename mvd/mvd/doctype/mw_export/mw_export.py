@@ -19,7 +19,12 @@ class MWExport(Document):
             SUM(CASE WHEN COALESCE(`m_und_w`, 0) > 5 THEN COALESCE(`m_und_w`, 0) ELSE 0 END) AS `anzahl_5`,
             SUM(COALESCE(`m_und_w`, 0)) AS `anzahl`
         FROM `tabMitgliedschaft`
-        WHERE `status_c` NOT IN ('Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')
+        WHERE 
+            (
+                `status_c` NOT IN ('Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')
+                OR
+                `status_c` = 'Interessent*in' AND `interessent_typ` = 'M+W'
+            )
         GROUP BY `sektion_id`, COALESCE(`region`, '')"""
         if self.zeitungsauflage_query != zeitungsauflage_query.replace("        ", ""):
             if not self.zeitungsauflage_query or self.zeitungsauflage_query == '':
@@ -223,7 +228,11 @@ def get_csv_data(mw_export, query=False):
                                     `sektion_id`,
                                     `region`
                                 FROM `tabMitgliedschaft`
-                                WHERE `status_c` NOT IN ('Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')
+                                WHERE (
+                                    `status_c` NOT IN ('Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')
+                                    OR
+                                    `status_c` = 'Interessent*in' AND `interessent_typ` = 'M+W'
+                                )
                                 AND `m_und_w_export` != '{mw_export}'
                                 AND `m_und_w` > 0
                                 {query}""".format(mw_export=mw_export, query=query_filter), as_dict=True, debug=True)

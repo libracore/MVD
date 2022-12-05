@@ -180,6 +180,12 @@ def get_data():
                     "name": "Region",
                     "label": _("Regionen"),
                     "description": _("Regions Einstellungen")
+                },
+                {
+                    "type": "doctype",
+                    "name": "InteressentIn Typ",
+                    "label": _("Interessent*in Typ"),
+                    "description": _("Interessent*in Typ")
                 }
             ]
         }
