@@ -101,50 +101,51 @@ def start_massenlauf_inaktivierung(doc):
             ms.save()
             ms.add_comment('Comment', text='Ausschluss vollzogen ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
             
-            if int(doc.rg_storno) == 1:
-                curr_year = getdate(now()).strftime("%Y")
-                
-                # Sales Invoice Storno
-                sinvs = frappe.db.sql("""SELECT
-                                            `name`
-                                        FROM `tabSales Invoice`
-                                        WHERE `ist_mitgliedschaftsrechnung` = 1
-                                        AND `mitgliedschafts_jahr` = '{curr_year}'
-                                        AND `docstatus` = 1
-                                        AND `mv_mitgliedschaft` = '{mv_mitgliedschaft}'
-                                        AND `status` != 'Paid'""".format(curr_year=curr_year, mv_mitgliedschaft=ms.name), as_dict=True)
-                if len(sinvs) > 0:
-                    for sinv in sinvs:
-                        # check linked mahnung
-                        linked_mahnung = frappe.db.sql("""SELECT
-                                                                `parent`
-                                                            FROM `tabMahnung Invoices`
-                                                            WHERE `sales_invoice` = '{sinv}'
-                                                            AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
-                        
-                        if len(linked_mahnung) > 0:
-                            for mahnung in linked_mahnung:
-                                mahnung_doc = frappe.get_doc("Mahnung", mahnung.parent)
-                                mahnung_doc.cancel()
-                                mahnung_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
-                        
-                        sinv_doc = frappe.get_doc("Sales Invoice", sinv.name)
-                        sinv_doc.cancel()
-                        sinv_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
-                
-                # Fakultative Rechnung Storno
-                frs = frappe.db.sql("""SELECT
-                                            `name`
-                                        FROM `tabFakultative Rechnung`
-                                        WHERE `bezugsjahr` = '{curr_year}'
-                                        AND `docstatus` = 1
-                                        AND `mv_mitgliedschaft` = '{mv_mitgliedschaft}'
-                                        AND `status` != 'Paid'""".format(curr_year=curr_year, mv_mitgliedschaft=ms.name), as_dict=True)
-                if len(frs) > 0:
-                    for fr in frs:
-                        fr_doc = frappe.get_doc("Fakultative Rechnung", fr.name)
-                        fr_doc.cancel()
-                        fr_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
+            if doc.rg_storno:
+                if int(doc.rg_storno) == 1:
+                    curr_year = getdate(now()).strftime("%Y")
+                    
+                    # Sales Invoice Storno
+                    sinvs = frappe.db.sql("""SELECT
+                                                `name`
+                                            FROM `tabSales Invoice`
+                                            WHERE `ist_mitgliedschaftsrechnung` = 1
+                                            AND `mitgliedschafts_jahr` = '{curr_year}'
+                                            AND `docstatus` = 1
+                                            AND `mv_mitgliedschaft` = '{mv_mitgliedschaft}'
+                                            AND `status` != 'Paid'""".format(curr_year=curr_year, mv_mitgliedschaft=ms.name), as_dict=True)
+                    if len(sinvs) > 0:
+                        for sinv in sinvs:
+                            # check linked mahnung
+                            linked_mahnung = frappe.db.sql("""SELECT
+                                                                    `parent`
+                                                                FROM `tabMahnung Invoices`
+                                                                WHERE `sales_invoice` = '{sinv}'
+                                                                AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
+                            
+                            if len(linked_mahnung) > 0:
+                                for mahnung in linked_mahnung:
+                                    mahnung_doc = frappe.get_doc("Mahnung", mahnung.parent)
+                                    mahnung_doc.cancel()
+                                    mahnung_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
+                            
+                            sinv_doc = frappe.get_doc("Sales Invoice", sinv.name)
+                            sinv_doc.cancel()
+                            sinv_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
+                    
+                    # Fakultative Rechnung Storno
+                    frs = frappe.db.sql("""SELECT
+                                                `name`
+                                            FROM `tabFakultative Rechnung`
+                                            WHERE `bezugsjahr` = '{curr_year}'
+                                            AND `docstatus` = 1
+                                            AND `mv_mitgliedschaft` = '{mv_mitgliedschaft}'
+                                            AND `status` != 'Paid'""".format(curr_year=curr_year, mv_mitgliedschaft=ms.name), as_dict=True)
+                    if len(frs) > 0:
+                        for fr in frs:
+                            fr_doc = frappe.get_doc("Fakultative Rechnung", fr.name)
+                            fr_doc.cancel()
+                            fr_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
         
         doc.reload()
         doc.db_set('status', 'Abgeschlossen', commit=True)
