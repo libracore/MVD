@@ -4,7 +4,8 @@
 frappe.ui.form.on('MW Export', {
     refresh: function(frm) {
         if (frm.doc.__islocal) {
-           cur_frm.save();
+           frappe.dom.freeze('Zähle Abonnent*innen...');
+           cur_frm.save().then(function(){frappe.dom.unfreeze();});
         }
         
         if (cur_frm.doc.zeitungsauflage_data) {
@@ -38,7 +39,7 @@ frappe.ui.form.on('MW Export', {
                 doc: frm.doc,
                 callback: function(response) {
                    cur_frm.reload_doc();
-                   frappe.msg_print('Der Export wurde gestartet. Sie können den Fortschritt <a href="/desk#background_jobs">hier</a> einsehen.');
+                   frappe.msgprint('Der Export wurde gestartet. Sie können den Fortschritt <a href="/desk#background_jobs">hier</a> einsehen.');
                 }
             });
         });
