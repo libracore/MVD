@@ -1,4 +1,6 @@
 {
+ "allow_rename": 1,
+ "autoname": "format:MW-{ausgabe_jahr}-{ausgabe_nummer}",
  "creation": "2022-06-16 13:08:18.243034",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -12,7 +14,9 @@
   "datum_adressexport",
   "datum_druck",
   "datum_verteilung",
-  "url_online"
+  "url_online",
+  "ausgabe_nummer",
+  "ausgabe_jahr"
  ],
  "fields": [
   {
@@ -59,9 +63,19 @@
    "fieldname": "url_online",
    "fieldtype": "Data",
    "label": "URL Online"
+  },
+  {
+   "fieldname": "ausgabe_nummer",
+   "fieldtype": "Data",
+   "label": "Ausgabe Nummer"
+  },
+  {
+   "fieldname": "ausgabe_jahr",
+   "fieldtype": "Data",
+   "label": "Ausgabe Jahr"
   }
  ],
- "modified": "2022-06-22 15:36:30.249147",
+ "modified": "2022-12-06 16:28:04.952612",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MW",
