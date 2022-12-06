@@ -59,7 +59,15 @@
                             {{ mitgliedschaft.mitglied_nr }}
                         {% endif %}
                     </td>
-                    <td>{{ mitgliedschaft.status_c }}</td>
+                    {% if mitgliedschaft.status_c == 'Interessent*in' %}
+                        {% if mitgliedschaft.interessent_typ %}
+                            <td>{{ mitgliedschaft.interessent_typ }}</td>
+                        {% else %}
+                            <td>{{ mitgliedschaft.status_c }}</td>
+                        {% endif %}
+                    {% else %}
+                        <td>{{ mitgliedschaft.status_c }}</td>
+                    {% endif %}
                     <td>{{ mitgliedschaft.firma or '' }}</td>
                     <td>{{ mitgliedschaft.nachname_1 or '' }}</td>
                     <td>{{ mitgliedschaft.vorname_1 or '' }}</td>
