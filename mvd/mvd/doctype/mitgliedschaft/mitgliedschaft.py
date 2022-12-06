@@ -1104,7 +1104,11 @@ def update_rg_kunde(mitgliedschaft):
         customer.customer_addition = ''
         customer.customer_type = 'Individual'
     customer.sektion = mitgliedschaft.sektion_id
-    customer.customer_group = 'Mitglied'
+    if mitgliedschaft.status_c == 'Interessent*in':
+        customer.customer_group = 'Interessent*in'
+    else:
+        customer.customer_group = 'Mitglied'
+    
     customer.save(ignore_permissions=True)
     return
 
@@ -1118,13 +1122,18 @@ def create_rg_kunde(mitgliedschaft):
         customer_addition = ''
         customer_type = 'Individual'
     
+    if mitgliedschaft.status_c == 'Interessent*in':
+        customer_group = 'Interessent*in'
+    else:
+        customer_group = 'Mitglied'
+    
     new_customer = frappe.get_doc({
         'doctype': 'Customer',
         'customer_name': customer_name,
         'customer_addition': customer_addition,
         'customer_type': customer_type,
         'sektion': mitgliedschaft.sektion_id,
-        'customer_group': 'Mitglied',
+        'customer_group': customer_group,
         'territory': 'All Territories'
     })
     new_customer.insert(ignore_permissions=True)
@@ -1583,7 +1592,10 @@ def update_kunde_mitglied(mitgliedschaft):
         customer.customer_addition = ''
         customer.customer_type = 'Individual'
     customer.sektion = mitgliedschaft.sektion_id
-    customer.customer_group = 'Mitglied'
+    if mitgliedschaft.status_c == 'Interessent*in':
+        customer.customer_group = 'Interessent*in'
+    else:
+        customer.customer_group = 'Mitglied'
     
     # fallback wrong import data
     if customer.customer_name == ' ' and mitgliedschaft.firma:
@@ -1607,7 +1619,10 @@ def create_kunde_mitglied(mitgliedschaft):
             customer_name = mitgliedschaft.nachname_1
         customer_addition = ''
         customer_type = 'Individual'
-        
+    if mitgliedschaft.status_c == 'Interessent*in':
+        customer_group = 'Interessent*in'
+    else:
+        customer_group = 'Mitglied'
     # fallback wrong import data
     if customer_name == ' ' and mitgliedschaft.firma:
         customer_name = mitgliedschaft.firma
@@ -1621,7 +1636,7 @@ def create_kunde_mitglied(mitgliedschaft):
         'customer_addition': customer_addition,
         'customer_type': customer_type,
         'sektion': mitgliedschaft.sektion_id,
-        'customer_group': 'Mitglied',
+        'customer_group': customer_group,
         'territory': 'All Territories'
     })
     

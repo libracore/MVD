@@ -1,10 +1,12 @@
 {
- "autoname": "format:MWE-{DD}{MM}{YY}-{###}",
+ "autoname": "format:MWE-{YY}-{MM}-{DD}",
  "creation": "2022-11-28 12:12:30.777426",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_allgemein",
+  "mw_ausgabe",
   "section_uebersicht",
   "zeitungsauflage",
   "zeitungsauflage_query",
@@ -123,9 +125,21 @@
    "fieldname": "export_queries",
    "fieldtype": "Button",
    "label": "Export Queries"
+  },
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "mw_ausgabe",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "M+W Ausgabe",
+   "options": "MW"
   }
  ],
- "modified": "2022-12-01 10:02:46.295575",
+ "modified": "2022-12-06 16:25:03.610404",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MW Export",

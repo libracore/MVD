@@ -46,6 +46,10 @@ class MWExport(Document):
                     </thead>
                     <tbody>
             """
+            not_allow_key_words = ['drop', 'update', 'alter', 'delete', 'insert', 'create']
+            for not_allowed in not_allow_key_words:
+                if not_allowed.upper() in zeitungsauflage_query.upper():
+                    frappe.throw("Unerlaubtes Query!")
             zeitungsauflagen = frappe.db.sql(zeitungsauflage_query, as_dict=True)
             zwischentotal = 0
             sektion = None
