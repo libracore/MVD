@@ -23,6 +23,7 @@
   "cb_0",
   "mitglied_id",
   "status_c",
+  "interessent_typ",
   "mitgliedtyp_c",
   "todesfall_uebernahme",
   "inkl_hv",
@@ -178,7 +179,8 @@
   "m_w_retouren_in_bearbeitung",
   "m_w_anzahl",
   "retoure_in_folge",
-  "zuzug_durch_sp"
+  "zuzug_durch_sp",
+  "m_und_w_export"
  ],
  "fields": [
   {
@@ -1223,10 +1225,22 @@
    "fieldname": "retoure_in_folge",
    "fieldtype": "Check",
    "label": "Zwei Retouren in Folge"
+  },
+  {
+   "fieldname": "m_und_w_export",
+   "fieldtype": "Data",
+   "label": "M+W Export"
+  },
+  {
+   "depends_on": "eval:doc.status_c=='Interessent*in'",
+   "fieldname": "interessent_typ",
+   "fieldtype": "Link",
+   "label": "Interessent*in Typ",
+   "options": "InteressentIn Typ"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-07-28 10:32:32.005792",
+ "modified": "2022-12-05 14:01:10.259071",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

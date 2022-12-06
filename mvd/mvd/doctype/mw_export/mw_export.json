@@ -1,0 +1,170 @@
+{
+ "autoname": "format:MWE-{YY}-{MM}-{DD}",
+ "creation": "2022-11-28 12:12:30.777426",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_allgemein",
+  "mw_ausgabe",
+  "section_uebersicht",
+  "zeitungsauflage",
+  "zeitungsauflage_query",
+  "zeitungsauflage_data",
+  "amended_from",
+  "section_query_generator",
+  "query_titel",
+  "query_sektion_id",
+  "query_region",
+  "query_hinzufuegen",
+  "cb_1",
+  "plz_von",
+  "plz_bis",
+  "section_queries",
+  "einzelqueries",
+  "export_queries",
+  "status"
+ ],
+ "fields": [
+  {
+   "collapsible": 1,
+   "fieldname": "section_uebersicht",
+   "fieldtype": "Section Break",
+   "label": "\u00dcbersicht"
+  },
+  {
+   "fieldname": "zeitungsauflage",
+   "fieldtype": "HTML",
+   "label": "Zeitungsauflage"
+  },
+  {
+   "fieldname": "zeitungsauflage_query",
+   "fieldtype": "Code",
+   "label": "Query",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "MW Export",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "zeitungsauflage_data",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "zeitungsauflage_data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_query_generator",
+   "fieldtype": "Section Break",
+   "label": "Query Generator"
+  },
+  {
+   "fieldname": "query_titel",
+   "fieldtype": "Data",
+   "label": "Titel"
+  },
+  {
+   "fieldname": "query_sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
+  },
+  {
+   "fieldname": "query_region",
+   "fieldtype": "Link",
+   "label": "Region",
+   "options": "Region"
+  },
+  {
+   "fieldname": "query_hinzufuegen",
+   "fieldtype": "Button",
+   "label": "Query hinzuf\u00fcgen"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "plz_von",
+   "fieldtype": "Int",
+   "label": "PLZ von"
+  },
+  {
+   "default": "0",
+   "fieldname": "plz_bis",
+   "fieldtype": "Int",
+   "label": "PLZ bis"
+  },
+  {
+   "fieldname": "section_queries",
+   "fieldtype": "Section Break",
+   "label": "Queries"
+  },
+  {
+   "fieldname": "einzelqueries",
+   "fieldtype": "Table",
+   "label": "Einzelqueries",
+   "options": "MW Einzelqueries"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "Neu\nCSV Erstellung\nAbgeschlossen\nFehlgeschlagen"
+  },
+  {
+   "depends_on": "eval:doc.status=='Neu'",
+   "fieldname": "export_queries",
+   "fieldtype": "Button",
+   "label": "Export Queries"
+  },
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "mw_ausgabe",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "M+W Ausgabe",
+   "options": "MW"
+  }
+ ],
+ "modified": "2022-12-06 16:25:03.610404",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "MW Export",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
