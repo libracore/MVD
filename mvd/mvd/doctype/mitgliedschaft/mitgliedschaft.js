@@ -87,9 +87,15 @@ frappe.ui.form.on('Mitgliedschaft', {
                 }
                 
                 if (!['Gestorben'].includes(cur_frm.doc.status_c)&&(!cur_frm.doc.kuendigung)) {
-                    frm.add_custom_button(__("Mitgliedschafts-Rechnung"),  function() {
-                        erstelle_rechnung(frm);
-                    }, __("Erstelle"));
+                    if (!cur_frm.doc.ist_geschenkmitgliedschaft) {
+                        frm.add_custom_button(__("Mitgliedschafts-Rechnung"),  function() {
+                            erstelle_rechnung(frm);
+                        }, __("Erstelle"));
+                    } else {
+                        frm.add_custom_button(__("Mitgliedschafts-Rechnung (Geschenk)"),  function() {
+                            erstelle_rechnung(frm);
+                        }, __("Erstelle"));
+                    }
                     
                     frm.add_custom_button(__("Spenden-Rechnung"),  function() {
                         erstelle_spenden_rechnung(frm);
