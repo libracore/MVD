@@ -1027,35 +1027,6 @@ def aktualisiere_camt_uebersicht(camt_import):
                             </tr>""".format("""<a href="/desk#Form/Payment Entry/{pe}">{pe}</a>""".format(pe=entry.name), "{:,.2f}".format(entry.amount).replace(",", "'"))
         report_data += """</tbody></table>"""
     
-    # Zahlungsliste (Verbucht)
-    if len(gebuchte_pes) > 0:
-        report_data += """<h3>Zahlungsliste (Verbucht)</h3>
-                        <table style="width: 100%;">
-                            <tbody>
-                                <tr>
-                                    <td style="text-align: left;"><b>Mitgliedschaft</b></td>
-                                    <td style="text-align: left;"><b>Details</b></td>
-                                    <td style="text-align: right;"><b>Betrag</b></td>
-                                </tr>"""
-        for pe in gebuchte_pes:
-            pe_doc = frappe.get_doc("Payment Entry", pe.name)
-            if pe_doc.mv_mitgliedschaft:
-                hyperlink = """<a href="/desk#Form/Mitgliedschaft/{0}">""".format(pe_doc.mv_mitgliedschaft) + str(frappe.get_value("Mitgliedschaft", pe_doc.mv_mitgliedschaft, "mitglied_nr")) + """</a>"""
-            elif pe_doc.mv_kunde:
-                hyperlink = """<a href="/desk#Form/Kunden/{0}">""".format(pe_doc.mv_kunde) + str(pe_doc.mv_kunde) + """</a>"""
-            else:
-                hyperlink = """---"""
-            
-            report_data += """
-                            <tr>
-                                <td style="text-align: left;">{0}</td>
-                                <td style="text-align: left;">{1}</td>
-                                <td style="text-align: right;">{2}</td>
-                            </tr>""".format(hyperlink, \
-                            pe_doc.remarks, \
-                            "{:,.2f}".format(pe_doc.paid_amount).replace(",", "'"))
-        report_data += """</tbody></table>"""
-    
     # Zahlungsliste (Unverbucht)
     if len(nicht_gebuchte_pes) > 0:
         report_data += """<h3>Zahlungsliste (Unverbucht)</h3>
@@ -1083,6 +1054,35 @@ def aktualisiere_camt_uebersicht(camt_import):
                             pe_doc.remarks, \
                             "{:,.2f}".format(pe_doc.paid_amount).replace(",", "'"), \
                             'Entwurf' if pe_doc.docstatus == 0 else 'Storniert')
+        report_data += """</tbody></table>"""
+    
+    # Zahlungsliste (Verbucht)
+    if len(gebuchte_pes) > 0:
+        report_data += """<h3>Zahlungsliste (Verbucht)</h3>
+                        <table style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: left;"><b>Mitgliedschaft</b></td>
+                                    <td style="text-align: left;"><b>Details</b></td>
+                                    <td style="text-align: right;"><b>Betrag</b></td>
+                                </tr>"""
+        for pe in gebuchte_pes:
+            pe_doc = frappe.get_doc("Payment Entry", pe.name)
+            if pe_doc.mv_mitgliedschaft:
+                hyperlink = """<a href="/desk#Form/Mitgliedschaft/{0}">""".format(pe_doc.mv_mitgliedschaft) + str(frappe.get_value("Mitgliedschaft", pe_doc.mv_mitgliedschaft, "mitglied_nr")) + """</a>"""
+            elif pe_doc.mv_kunde:
+                hyperlink = """<a href="/desk#Form/Kunden/{0}">""".format(pe_doc.mv_kunde) + str(pe_doc.mv_kunde) + """</a>"""
+            else:
+                hyperlink = """---"""
+            
+            report_data += """
+                            <tr>
+                                <td style="text-align: left;">{0}</td>
+                                <td style="text-align: left;">{1}</td>
+                                <td style="text-align: right;">{2}</td>
+                            </tr>""".format(hyperlink, \
+                            pe_doc.remarks, \
+                            "{:,.2f}".format(pe_doc.paid_amount).replace(",", "'"))
         report_data += """</tbody></table>"""
     
     
