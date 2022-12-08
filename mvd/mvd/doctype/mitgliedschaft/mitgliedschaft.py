@@ -71,17 +71,20 @@ class Mitgliedschaft(Document):
             self.ampel_farbe = get_ampelfarbe(self)
             
             # Hotfix Zuzugs-Korrespondenz
-            # mit Massenlauf-Vormerkung
-            if self.zuzug_von and int(self.zuzug_massendruck) == 1:
-                if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
-                    if self.kunde_mitglied:
-                        self.zuzug_massenlauf_korrespondenz()
-                        self.zuzug_durch_sp = 0
-            # ohne Massenlauf-Vormerkung
-            elif self.zuzug_von and int(self.zuzug_durch_sp) == 1:
-                if self.kunde_mitglied:
-                    self.zuzug_massenlauf_korrespondenz()
-                    self.zuzug_durch_sp = 0
+            if self.zuzug_von:
+                # mit Massenlauf-Vormerkung
+                if self.zuzug_massendruck:
+                    if int(self.zuzug_massendruck) == 1:
+                        if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
+                            if self.kunde_mitglied:
+                                self.zuzug_massenlauf_korrespondenz()
+                                self.zuzug_durch_sp = 0
+                # ohne Massenlauf-Vormerkung
+                elif self.zuzug_durch_sp:
+                    if int(self.zuzug_durch_sp) == 1:
+                        if self.kunde_mitglied:
+                            self.zuzug_massenlauf_korrespondenz()
+                            self.zuzug_durch_sp = 0
             
             # setze CB "Aktive Mitgliedschaft"
             if self.status_c not in ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv'):
@@ -91,10 +94,12 @@ class Mitgliedschaft(Document):
             
             # schliesse offene abreits backlogs
             close_open_validations(self.name, 'Daten Validieren')
-            if not int(self.interessent_innenbrief_mit_ez) == 1:
-                close_open_validations(self.name, 'Interessent*Innenbrief mit EZ')
-            if not int(self.anmeldung_mit_ez) == 1:
-                close_open_validations(self.name, 'Anmeldung mit EZ')
+            if self.interessent_innenbrief_mit_ez:
+                if not int(self.interessent_innenbrief_mit_ez) == 1:
+                    close_open_validations(self.name, 'Interessent*Innenbrief mit EZ')
+            if self.anmeldung_mit_ez:
+                if not int(self.anmeldung_mit_ez) == 1:
+                    close_open_validations(self.name, 'Anmeldung mit EZ')
             
             # beziehe mitglied_nr wenn umwandlung von Interessent*in
             if self.status_c != 'Interessent*in' and self.mitglied_nr == 'MV':
@@ -1593,9 +1598,9 @@ def update_kunde_mitglied(mitgliedschaft):
         customer.customer_type = 'Individual'
     customer.sektion = mitgliedschaft.sektion_id
     if mitgliedschaft.status_c == 'Interessent*in':
-        customer.customer_group = 'Interessent*in'
+        customer_group = 'Interessent*in'
     else:
-        customer.customer_group = 'Mitglied'
+        customer_group = 'Mitglied'
     
     # fallback wrong import data
     if customer.customer_name == ' ' and mitgliedschaft.firma:
@@ -1605,6 +1610,7 @@ def update_kunde_mitglied(mitgliedschaft):
         frappe.log_error("{0}\n---\n{1}".format('fallback: customer_name was " "', mitgliedschaft.as_json()), 'update_kunde_mitglied')
     
     customer.save(ignore_permissions=True)
+    frappe.db.set_value("Customer", customer.name, "customer_group", customer_group)
     return
     
 def create_kunde_mitglied(mitgliedschaft):

@@ -237,8 +237,8 @@ def get_csv_data(mw_export, query=False):
                                     OR
                                     `status_c` = 'Interessent*in' AND `interessent_typ` = 'M+W'
                                 )
-                                AND `m_und_w_export` != '{mw_export}'
-                                AND `m_und_w` > 0
+                                AND IFNULL(`m_und_w_export`, '') != '{mw_export}'
+                                AND IFNULL(`m_und_w`, 0) > 0
                                 {query}""".format(mw_export=mw_export, query=query_filter), as_dict=True, debug=True)
     if len(query_data) > 0:
         for entry in query_data:
