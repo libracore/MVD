@@ -18,6 +18,10 @@ def get_columns():
         {"label": _("Anrede"), "fieldname": "anrede", "fieldtype": "Data"},
         {"label": _("Vorname"), "fieldname": "vorname", "fieldtype": "Data"},
         {"label": _("Nachname"), "fieldname": "nachname", "fieldtype": "Data"},
+        {"label": _("Briefanrede"), "fieldname": "briefanrede", "fieldtype": "Data"},
+        {"label": _("Anrede Solidar MG"), "fieldname": "anrede_2", "fieldtype": "Data"},
+        {"label": _("Vorname Solidar MG"), "fieldname": "vorname_2", "fieldtype": "Data"},
+        {"label": _("Nachname Solidar MG"), "fieldname": "nachname_2", "fieldtype": "Data"},
         {"label": _("Adressblock"), "fieldname": "adressblock", "fieldtype": "Code"},
         {"label": _("Spendenversand"), "fieldname": "spendenversand", "fieldtype": "Link", "options": "Spendenversand"},
         {"label": _("Fakultative Rechnung"), "fieldname": "fakultative_rechnung", "fieldtype": "Link", "options": "Fakultative Rechnung"},
@@ -46,7 +50,11 @@ def get_data(filters):
                                     `mvm`.`anrede_c` AS `anrede`,
                                     `mvm`.`vorname_1` AS `vorname`,
                                     `mvm`.`nachname_1` AS `nachname`,
-                                    `mvm`.`rg_adressblock` AS `adressblock`
+                                    `mvm`.`rg_adressblock` AS `adressblock`,
+                                    `mvm`.`briefanrede` AS `briefanrede`,
+                                    IFNULL(`mvm`.`anrede_2`, '') AS `anrede_2`,
+                                    IFNULL(`mvm`.`vorname_2`, '') AS `vorname_2`,
+                                    IFNULL(`mvm`.`vorname_2`, '') AS `nachname_2`
                                 FROM `tabFakultative Rechnung` AS `fak`
                                 LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `fak`.`mv_mitgliedschaft` = `mvm`.`name`
                                 LEFT JOIN `tabSales Invoice` AS `sinv` ON `fak`.`bezahlt_via` = `sinv`.`name`
@@ -66,12 +74,16 @@ def get_data(filters):
                                     `mvm`.`anrede_c` AS `anrede`,
                                     `mvm`.`vorname_1` AS `vorname`,
                                     `mvm`.`nachname_1` AS `nachname`,
-                                    `mvm`.`rg_adressblock` AS `adressblock`
+                                    `mvm`.`rg_adressblock` AS `adressblock`,
+                                    `mvm`.`briefanrede` AS `briefanrede`,
+                                    IFNULL(`mvm`.`anrede_2`, '') AS `anrede_2`,
+                                    IFNULL(`mvm`.`vorname_2`, '') AS `vorname_2`,
+                                    IFNULL(`mvm`.`vorname_2`, '') AS `nachname_2`
                                 FROM `tabFakultative Rechnung` AS `fak`
                                 LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `fak`.`mv_mitgliedschaft` = `mvm`.`name`
                                 LEFT JOIN `tabSales Invoice` AS `sinv` ON `fak`.`bezahlt_via` = `sinv`.`name`
                                 WHERE `fak`.`status` = 'Paid'
-				AND `fak`.`typ` IN ('Spende','Spende (Spendenversand)')
+                                AND `fak`.`typ` IN ('Spende','Spende (Spendenversand)')
                                 AND `fak`.`sektion_id` = '{sektion_id}'""".format(sektion_id=filters.sektion_id), as_dict=True)
         return data
     
@@ -88,11 +100,15 @@ def get_data(filters):
                                     `mvm`.`anrede_c` AS `anrede`,
                                     `mvm`.`vorname_1` AS `vorname`,
                                     `mvm`.`nachname_1` AS `nachname`,
-                                    `mvm`.`rg_adressblock` AS `adressblock`
+                                    `mvm`.`rg_adressblock` AS `adressblock`,
+                                    `mvm`.`briefanrede` AS `briefanrede`,
+                                    IFNULL(`mvm`.`anrede_2`, '') AS `anrede_2`,
+                                    IFNULL(`mvm`.`vorname_2`, '') AS `vorname_2`,
+                                    IFNULL(`mvm`.`vorname_2`, '') AS `nachname_2`
                                 FROM `tabFakultative Rechnung` AS `fak`
                                 LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `fak`.`mv_mitgliedschaft` = `mvm`.`name`
                                 LEFT JOIN `tabSales Invoice` AS `sinv` ON `fak`.`bezahlt_via` = `sinv`.`name`
                                 WHERE `fak`.`status` = 'Paid'
-				AND `fak`.`typ` IN ('Spende','Spende (Spendenversand)')""", as_dict=True)
+                                AND `fak`.`typ` IN ('Spende','Spende (Spendenversand)')""", as_dict=True)
         return data
         
