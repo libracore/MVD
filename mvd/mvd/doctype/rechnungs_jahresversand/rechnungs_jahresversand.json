@@ -20,7 +20,10 @@
   "language",
   "cb_2",
   "mitgliedtyp_spezifisch",
-  "mitgliedtyp"
+  "mitgliedtyp",
+  "cb_3",
+  "region_spezifisch",
+  "region"
  ],
  "fields": [
   {
@@ -117,10 +120,27 @@
    "fieldname": "download_new_csv",
    "fieldtype": "Button",
    "label": "CSV neu generieren"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "region_spezifisch",
+   "fieldtype": "Check",
+   "label": "Region"
+  },
+  {
+   "depends_on": "eval:doc.region_spezifisch",
+   "fieldname": "region",
+   "fieldtype": "Link",
+   "label": "Region",
+   "options": "Region"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-10-28 09:25:47.443857",
+ "modified": "2022-12-13 09:24:54.069827",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Rechnungs Jahresversand",
