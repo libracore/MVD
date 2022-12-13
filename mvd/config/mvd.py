@@ -114,6 +114,14 @@ def get_data():
                     "description": _("Spendenuebersicht"),
                     "doctype": "Fakultative Rechnung",
                     "is_query_report": True
+                },
+                {
+                    "type": "report",
+                    "name": "Guthaben",
+                    "label": _("Guthabenübersicht"),
+                    "description": _("Guthabenübersicht"),
+                    "doctype": "Customer",
+                    "is_query_report": True
                 }
             ]
         },
