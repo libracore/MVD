@@ -71,6 +71,8 @@ def get_draft_csv(jahresversand=None):
         filters += """ AND `language` = '{language}'""".format(language=jahresversand.language)
     if int(jahresversand.mitgliedtyp_spezifisch) == 1:
         filters += """ AND `mitgliedtyp_c` = '{mitgliedtyp}'""".format(mitgliedtyp=jahresversand.mitgliedtyp)
+    if int(jahresversand.region_spezifisch) == 1:
+        filters += """ AND `region` = '{region}'""".format(region=jahresversand.region)
     
     mitgliedschaften = frappe.db.sql("""SELECT
                                             `name`
@@ -397,6 +399,8 @@ def create_invoices(jahresversand):
         filters += """ AND `language` = '{language}'""".format(language=jahresversand_doc.language)
     if int(jahresversand_doc.mitgliedtyp_spezifisch) == 1:
         filters += """ AND `mitgliedtyp_c` = '{mitgliedtyp}'""".format(mitgliedtyp=jahresversand_doc.mitgliedtyp)
+    if int(jahresversand_doc.region_spezifisch) == 1:
+        filters += """ AND `region` = '{region}'""".format(region=jahresversand_doc.region)
     
     mitgliedschaften = frappe.db.sql("""SELECT
                                             `name`,
@@ -464,6 +468,8 @@ def create_invoices_one_batch(jahresversand, limit=False, loop=False, last=False
             filters += """ AND `language` = '{language}'""".format(language=jahresversand_doc.language)
         if int(jahresversand_doc.mitgliedtyp_spezifisch) == 1:
             filters += """ AND `mitgliedtyp_c` = '{mitgliedtyp}'""".format(mitgliedtyp=jahresversand_doc.mitgliedtyp)
+        if int(jahresversand_doc.region_spezifisch) == 1:
+            filters += """ AND `region` = '{region}'""".format(region=jahresversand_doc.region)
         
         mitgliedschaften = frappe.db.sql("""SELECT
                                                 `name`,
