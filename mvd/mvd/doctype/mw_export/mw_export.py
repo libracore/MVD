@@ -278,6 +278,6 @@ def get_csv_data(mw_export, query=False):
             ]
             data.append(_data)
             
-            frappe.db.set_value("Mitgliedschaft", entry.name, "m_und_w_export", mw_export)
+            frappe.db.set_value("Mitgliedschaft", entry.name, "m_und_w_export", mw_export, update_modified=False)
 
     return data
