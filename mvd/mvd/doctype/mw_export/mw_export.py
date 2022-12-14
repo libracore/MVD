@@ -11,6 +11,10 @@ from frappe.utils.background_jobs import enqueue
 
 class MWExport(Document):
     def validate(self):
+        if not self.sprach_reset:
+            self.language = ''
+            self.sprach_reset = 1
+        
         zeitungsauflage_query = """SELECT
             `sektion_id` AS `sektion`,
             COALESCE(`region`, '') AS `region`,
@@ -112,7 +116,8 @@ class MWExport(Document):
         if self.query_sektion_id \
         or self.query_region \
         or self.plz_von \
-        or self.plz_bis:
+        or self.plz_bis \
+        or self.language:
             # Erstelle Query Liste
             query_list = []
             
@@ -121,6 +126,9 @@ class MWExport(Document):
             
             if self.query_region:
                 query_list.append("""`region` = '{0}'""".format(self.query_region))
+            
+            if self.language:
+                query_list.append("""`language` = '{0}'""".format(self.language))
             
             if self.plz_von and self.plz_von > 0:
                 if self.plz_bis and self.plz_bis > 0:
@@ -142,6 +150,7 @@ class MWExport(Document):
             self.query_region = None
             self.plz_von = 0
             self.plz_bis = 0
+            self.language = None
             
             self.save()
     
