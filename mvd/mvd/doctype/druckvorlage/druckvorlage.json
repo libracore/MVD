@@ -82,7 +82,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Dokument",
-   "options": "Anmeldung mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ\nMahnung\nGeschenkmitgliedschaft\nRechnung (Sonstiges)",
+   "options": "Anmeldung mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ\nMahnung\nGeschenkmitgliedschaft\nRechnung (Sonstiges)\nJahresrechnung",
    "reqd": 1
   },
   {
@@ -123,7 +123,7 @@
    "label": "R\u00fcckseite"
   },
   {
-   "depends_on": "eval:doc.anzahl_seiten!='3'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ'], doc.dokument)",
+   "depends_on": "eval:doc.anzahl_seiten!='3'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ', 'Jahresrechnung'], doc.dokument)",
    "fieldname": "seite_1_qrr",
    "fieldtype": "Select",
    "label": "QRR EZ",
@@ -148,7 +148,7 @@
    "label": "R\u00fcckseite"
   },
   {
-   "depends_on": "eval:doc.anzahl_seiten!='1'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ'], doc.dokument)",
+   "depends_on": "eval:doc.anzahl_seiten!='1'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ', 'Jahresrechnung'], doc.dokument)",
    "fieldname": "seite_2_qrr",
    "fieldtype": "Select",
    "label": "QRR EZ",
@@ -173,7 +173,7 @@
    "label": "R\u00fcckseite"
   },
   {
-   "depends_on": "eval:doc.anzahl_seiten=='3'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ'], doc.dokument)",
+   "depends_on": "eval:doc.anzahl_seiten=='3'&&in_list(['Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ', 'Jahresrechnung'], doc.dokument)",
    "fieldname": "seite_3_qrr",
    "fieldtype": "Select",
    "label": "QRR EZ",
@@ -274,7 +274,7 @@
    "depends_on": "eval:doc.dokument!='Mahnung'&&doc.dokument!='Geschenkmitgliedschaft'",
    "fieldname": "tipps",
    "fieldtype": "HTML",
-   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Rechnungsbetrag (Nur wenn mit EZ) -&gt; <b>%%RECHNUNGSBETRAG%%</b></li>\n<li>Rechnungsnummer -&gt; <b>%%RECHNUNGSNUMMER%%</b></li>\n</ul>"
+   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Rechnungsbetrag (Nur wenn mit EZ) -&gt; <b>%%RECHNUNGSBETRAG%%</b></li>\n<li>Rechnungsnummer -&gt; <b>%%RECHNUNGSNUMMER%%</b></li>\n<li>Briefanrede Beschenkte*r -&gt; <b>%%ANREDE BESCHENKTE%%</b></li>\n<li>Briefanrede Schenkende*r -&gt; <b>%%ANREDE SCHENKENDE%%</b></li>\n<li>Vor- Nachname Beschenkte*r -&gt; <b>%%VOR- NACHNAME BESCHENKTE%%</b></li>\n<li>Vor- Nachname Schenkende*r -&gt; <b>%%VOR- NACHNAME SCHENKENDE%%</b></li>\n</ul>"
   },
   {
    "default": "0",
@@ -435,7 +435,7 @@
    "label": "Text"
   }
  ],
- "modified": "2022-11-23 10:49:49.754394",
+ "modified": "2022-12-15 17:27:33.102776",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

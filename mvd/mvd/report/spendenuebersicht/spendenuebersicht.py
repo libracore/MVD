@@ -54,7 +54,7 @@ def get_data(filters):
                                     `mvm`.`briefanrede` AS `briefanrede`,
                                     IFNULL(`mvm`.`anrede_2`, '') AS `anrede_2`,
                                     IFNULL(`mvm`.`vorname_2`, '') AS `vorname_2`,
-                                    IFNULL(`mvm`.`vorname_2`, '') AS `nachname_2`
+                                    IFNULL(`mvm`.`nachname_2`, '') AS `nachname_2`
                                 FROM `tabFakultative Rechnung` AS `fak`
                                 LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `fak`.`mv_mitgliedschaft` = `mvm`.`name`
                                 LEFT JOIN `tabSales Invoice` AS `sinv` ON `fak`.`bezahlt_via` = `sinv`.`name`
@@ -78,7 +78,7 @@ def get_data(filters):
                                     `mvm`.`briefanrede` AS `briefanrede`,
                                     IFNULL(`mvm`.`anrede_2`, '') AS `anrede_2`,
                                     IFNULL(`mvm`.`vorname_2`, '') AS `vorname_2`,
-                                    IFNULL(`mvm`.`vorname_2`, '') AS `nachname_2`
+                                    IFNULL(`mvm`.`nachname_2`, '') AS `nachname_2`
                                 FROM `tabFakultative Rechnung` AS `fak`
                                 LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `fak`.`mv_mitgliedschaft` = `mvm`.`name`
                                 LEFT JOIN `tabSales Invoice` AS `sinv` ON `fak`.`bezahlt_via` = `sinv`.`name`
@@ -104,7 +104,7 @@ def get_data(filters):
                                     `mvm`.`briefanrede` AS `briefanrede`,
                                     IFNULL(`mvm`.`anrede_2`, '') AS `anrede_2`,
                                     IFNULL(`mvm`.`vorname_2`, '') AS `vorname_2`,
-                                    IFNULL(`mvm`.`vorname_2`, '') AS `nachname_2`
+                                    IFNULL(`mvm`.`nachname_2`, '') AS `nachname_2`
                                 FROM `tabFakultative Rechnung` AS `fak`
                                 LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `fak`.`mv_mitgliedschaft` = `mvm`.`name`
                                 LEFT JOIN `tabSales Invoice` AS `sinv` ON `fak`.`bezahlt_via` = `sinv`.`name`
