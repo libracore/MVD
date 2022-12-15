@@ -1118,15 +1118,138 @@ function erstelle_rechnung(frm) {
             // prüfung bezgl. "einmalige Schenkung"
             if (cur_frm.doc.ist_einmalige_schenkung && cur_frm.doc.unabhaengiger_debitor) {
                 // Warnhinweis
-                frappe.msgprint("Es handelt sich hierbei um eine <b>einmalige Schenkung</b>.<br>Bitte entfernen Sie den unabhängigen Debitor <b>vor</b> der Rechnungserstellung insofern notwendig", "Achtung: einmalige Schenkung");
-                erstelle_normale_rechnung(frm);
+                frappe.msgprint("Es handelt sich hierbei um eine <b>einmalige Schenkung</b>.<br>Bitte entfernen Sie zuerst den unabhängigen Debitor und die zugehörige abweichende Rechnungsadresse.", "Achtung: einmalige Schenkung");
             } else {
-                
+                erstelle_geschenk_rechnung(frm);
             }
         }
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
     }
+}
+
+function erstelle_geschenk_rechnung(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.check_erstelle_rechnung",
+        args:{
+                'mitgliedschaft': cur_frm.doc.name,
+                'typ': cur_frm.doc.mitgliedtyp_c,
+                'sektion': cur_frm.doc.sektion_id
+        },
+        callback: function(r)
+        {
+            // Prüfung ob Rechnung für aktuelles Jahr
+            if (r.message == 1) {
+                var dokument = 'Geschenk-Weiterführung';
+                frappe.call({
+                    method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+                    args:{
+                            'sektion': cur_frm.doc.sektion_id,
+                            'dokument': dokument,
+                            'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                            'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                            'language': cur_frm.doc.language
+                    },
+                    async: false,
+                    callback: function(r)
+                    {
+                        var druckvorlagen = r.message
+                        frappe.prompt([
+                            {'fieldname': 'rg_druckvorlage', 'fieldtype': 'Link', 'label': 'Rechnungs Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
+                                'get_query': function() {
+                                    return { 'filters': {
+                                        'dokument': 'Jahresrechnung',
+                                        'sektion_id': cur_frm.doc.sektion_id,
+                                        'deaktiviert': ['!=', 1]
+                                    } };
+                                }
+                            },
+                            {'fieldname': 'korrespondenz_druckvorlage', 'fieldtype': 'Link', 'label': 'Korrespondenz Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
+                                'get_query': function() {
+                                    return { 'filters': {
+                                        'dokument': 'Korrespondenz',
+                                        'sektion_id': cur_frm.doc.sektion_id,
+                                        'deaktiviert': ['!=', 1]
+                                    } };
+                                }
+                            }
+                        ],
+                        function(values){
+                            frappe.call({
+                                method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung",
+                                args:{
+                                        'mitgliedschaft': cur_frm.doc.name,
+                                        'attach_as_pdf': true,
+                                        'submit': true,
+                                        'druckvorlage': values.rg_druckvorlage
+                                },
+                                freeze: true,
+                                freeze_message: 'Erstelle Rechnung und Korrespondenz...',
+                                callback: function(r)
+                                {
+                                    //~ cur_frm.reload_doc();
+                                    cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung " + r.message + " erstellt.");
+                                    
+                                    
+                                    frappe.call({
+                                        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_korrespondenz",
+                                        args:{
+                                                'mitgliedschaft': cur_frm.doc.name,
+                                                'druckvorlage': values.korrespondenz_druckvorlage,
+                                                'titel': "Begleitschreiben zu " + r.message,
+                                                'attach_as_pdf': true,
+                                                'sinv_mitgliedschaftsjahr': r.message
+                                        },
+                                        freeze: true,
+                                        freeze_message: 'Erstelle Korrespondenz...',
+                                        callback: function(res)
+                                        {
+                                            cur_frm.reload_doc();
+                                            cur_frm.timeline.insert_comment("Korrespondenz " + res.message + " erstellt.");
+                                            frappe.msgprint("Die Rechnung und Korrespondenz wurde erstellt, Sie finden sie in den Anhängen.");
+                                        }
+                                    });
+                                }
+                            });
+                        },
+                        'Rechnungs/Korrespondenz Erstellung',
+                        'Erstellen'
+                        )
+                    }
+                });
+            } else {
+                // Rechnung für aktuelles Jahr bereits gestellt, prüfung für Folgejahrrechnung
+                //~ frappe.call({
+                    //~ method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.check_erstelle_rechnung",
+                    //~ args:{
+                            //~ 'mitgliedschaft': cur_frm.doc.name,
+                            //~ 'typ': cur_frm.doc.mitgliedtyp_c,
+                            //~ 'sektion': cur_frm.doc.sektion_id,
+                            //~ 'jahr': r.message
+                    //~ },
+                    //~ callback: function(response)
+                    //~ {
+                        //~ if (response.message == 1) {
+                            //~ var txt = 'Die Rechnung des entsprechenden Jahres wurde bereits erstellt.<br>Wenn Sie diese neu erstellen möchten, müssen Sie die existierende zuerst stornieren.<br><br>';
+                            //~ txt += 'Alternativ können Sie eine Rechnung für das Jahr ' + r.message + ' erstellen.</p>'
+                            
+                            //~ frappe.prompt([
+                                //~ {'fieldname': 'txt', 'fieldtype': 'HTML', 'options': txt}  
+                            //~ ],
+                            //~ function(values){
+                                //~ erstelle_folgejahr_rechnung(frm, r.message)
+                            //~ },
+                            //~ 'Rechnungserstellung',
+                            //~ 'Erstelle Rechnung für ' + r.message
+                            //~ )
+                        //~ } else {
+                            //~ frappe.msgprint("Es wurde bereits für das aktuelle Jahr sowie das Folgejahr eine Rechnung erstellt.");
+                        //~ }
+                    //~ }
+                //~ });
+            }
+        }
+    });
 }
 
 function erstelle_normale_rechnung(frm) {

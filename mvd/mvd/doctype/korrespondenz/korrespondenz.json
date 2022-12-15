@@ -10,6 +10,8 @@
   "sektion_id",
   "mv_mitgliedschaft",
   "massenlauf",
+  "mitgliedschafts_jahr_manuell",
+  "mitgliedschafts_jahr",
   "geschenk",
   "section_seitenmanagement",
   "anzahl_seiten",
@@ -270,9 +272,21 @@
    "hidden": 1,
    "label": "Geschenk",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "mitgliedschafts_jahr_manuell",
+   "fieldtype": "Check",
+   "label": "Mitgliedschaftsjahr manuell festlegen"
+  },
+  {
+   "depends_on": "eval:doc.mitgliedschafts_jahr_manuell",
+   "fieldname": "mitgliedschafts_jahr",
+   "fieldtype": "Data",
+   "label": "Mitgliedschaftsjahr"
   }
  ],
- "modified": "2022-03-04 21:48:36.968460",
+ "modified": "2022-12-15 17:16:05.582495",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Korrespondenz",
