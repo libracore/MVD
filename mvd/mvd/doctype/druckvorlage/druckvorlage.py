@@ -16,7 +16,7 @@ class Druckvorlage(Document):
             self.default = '0'
     
     def validiere_inhalt(self):
-        if self.dokument in ('Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ'):
+        if self.dokument in ('Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ', 'Jahresrechnung'):
             if self.mitgliedtyp_c == 'Privat':
                 if self.anzahl_seiten == '1':
                     frappe.throw("Es müssen mindestens 2 Seiten aktiviert werden (Mitgliedschaftsrechnung & HV Rechnung)")
