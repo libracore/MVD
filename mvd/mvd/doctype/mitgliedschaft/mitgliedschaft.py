@@ -3272,15 +3272,16 @@ def create_sp_queue(mitgliedschaft, update):
     if existing_queue > 0 and update:
         return
     else:
-        queue = frappe.get_doc({
-            "doctype": "Service Platform Queue",
-            "status": "Open",
-            "mv_mitgliedschaft": mitgliedschaft.mitglied_id,
-            "sektion_id": mitgliedschaft.sektion_id,
-            "update": 1 if update else 0
-        })
-        
-        queue.insert(ignore_permissions=True, ignore_links=True)
+        if mitgliedschaft.status_c not in ('Online-Beitritt', 'Online-Mutation'):
+            queue = frappe.get_doc({
+                "doctype": "Service Platform Queue",
+                "status": "Open",
+                "mv_mitgliedschaft": mitgliedschaft.mitglied_id,
+                "sektion_id": mitgliedschaft.sektion_id,
+                "update": 1 if update else 0
+            })
+            
+            queue.insert(ignore_permissions=True, ignore_links=True)
         
         return
 

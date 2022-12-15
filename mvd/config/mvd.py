@@ -120,7 +120,7 @@ def get_data():
                     "name": "Guthaben",
                     "label": _("Guthabenübersicht"),
                     "description": _("Guthabenübersicht"),
-                    "doctype": "Customer",
+                    "doctype": "Mitgliedschaft",
                     "is_query_report": True
                 }
             ]

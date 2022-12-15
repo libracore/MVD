@@ -12,12 +12,14 @@
   "zeitungsauflage_query",
   "zeitungsauflage_data",
   "amended_from",
+  "sprach_reset",
   "section_query_generator",
   "query_titel",
   "query_sektion_id",
   "query_region",
   "query_hinzufuegen",
   "cb_1",
+  "language",
   "plz_von",
   "plz_bis",
   "section_queries",
@@ -137,9 +139,23 @@
    "in_list_view": 1,
    "label": "M+W Ausgabe",
    "options": "MW"
+  },
+  {
+   "default": "de",
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Sprache",
+   "options": "Language"
+  },
+  {
+   "default": "0",
+   "fieldname": "sprach_reset",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Sprach reset"
   }
  ],
- "modified": "2022-12-08 12:55:33.853627",
+ "modified": "2022-12-14 10:03:03.521750",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MW Export",
