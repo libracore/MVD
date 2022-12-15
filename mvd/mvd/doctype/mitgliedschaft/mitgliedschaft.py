@@ -410,6 +410,16 @@ class Mitgliedschaft(Document):
             druckvorlage = get_druckvorlagen(sektion=self.sektion_id, dokument='Begrüssung mit Ausweis', mitgliedtyp=self.mitgliedtyp_c, language=self.language)['default_druckvorlage']
             self.begruessung_massendruck_dokument = create_korrespondenz(mitgliedschaft=self.name, druckvorlage=druckvorlage, titel='Begrüssung (Autom.)')
             
+        if self.ist_geschenkmitgliedschaft:
+            # erstelle status change log und Status-Änderung
+            change_log_row = self.append('status_change', {})
+            change_log_row.datum = now()
+            change_log_row.status_alt = self.status_c + " (Geschenk)"
+            change_log_row.status_neu = self.status_c
+            change_log_row.grund = 'Zahlungseingang Geschenkmitgliedschaft'
+            self.ist_geschenkmitgliedschaft = None
+            self.ist_einmalige_schenkung = None
+            self.geschenkunterlagen_an_schenker = None
         
         # prüfe offene Rechnungen bei sektionswechsel
         if self.status_c == 'Wegzug':
@@ -3706,7 +3716,7 @@ def get_ampelfarbe(mitgliedschaft):
     return ampelfarbe
 
 @frappe.whitelist()
-def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=False):
+def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=False, attach_as_pdf=False, sinv_mitgliedschaftsjahr=False):
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     if druckvorlage == 'keine':
         new_korrespondenz = frappe.get_doc({
@@ -3756,8 +3766,39 @@ def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=F
         new_korrespondenz['massenlauf'] = 1 if massenlauf else 0
         
         new_korrespondenz = frappe.get_doc(new_korrespondenz)
+        if sinv_mitgliedschaftsjahr:
+            bezugsjahr = frappe.db.get_value("Sales Invoice", sinv_mitgliedschaftsjahr, 'mitgliedschafts_jahr')
+            new_korrespondenz.mitgliedschafts_jahr_manuell = 1
+            new_korrespondenz.mitgliedschafts_jahr = bezugsjahr
         new_korrespondenz.insert(ignore_permissions=True)
         frappe.db.commit()
+        
+        if attach_as_pdf:
+            # add doc signature to allow print
+            frappe.form_dict.key = new_korrespondenz.get_signature()
+            
+            # erstellung Rechnungs PDF
+            output = PdfFileWriter()
+            output = frappe.get_print("Korrespondenz", new_korrespondenz.name, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+            
+            file_name = "{new_korrespondenz}_{datetime}".format(new_korrespondenz=new_korrespondenz.name, datetime=now().replace(" ", "_"))
+            file_name = file_name.split(".")[0]
+            file_name = file_name.replace(":", "-")
+            file_name = file_name + ".pdf"
+            
+            filedata = get_file_data_from_writer(output)
+            
+            _file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": file_name,
+                "folder": "Home/Attachments",
+                "is_private": 1,
+                "content": filedata,
+                "attached_to_doctype": 'Mitgliedschaft',
+                "attached_to_name": mitgliedschaft.name
+            })
+            
+            _file.save(ignore_permissions=True)
         return new_korrespondenz.name
 
 @frappe.whitelist()
