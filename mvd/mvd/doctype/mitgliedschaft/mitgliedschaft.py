@@ -409,17 +409,6 @@ class Mitgliedschaft(Document):
             self.begruessung_via_zahlung = 1
             druckvorlage = get_druckvorlagen(sektion=self.sektion_id, dokument='Begrüssung mit Ausweis', mitgliedtyp=self.mitgliedtyp_c, language=self.language)['default_druckvorlage']
             self.begruessung_massendruck_dokument = create_korrespondenz(mitgliedschaft=self.name, druckvorlage=druckvorlage, titel='Begrüssung (Autom.)')
-            
-        if self.ist_geschenkmitgliedschaft:
-            # erstelle status change log und Status-Änderung
-            change_log_row = self.append('status_change', {})
-            change_log_row.datum = now()
-            change_log_row.status_alt = self.status_c + " (Geschenk)"
-            change_log_row.status_neu = self.status_c
-            change_log_row.grund = 'Zahlungseingang Geschenkmitgliedschaft'
-            self.ist_geschenkmitgliedschaft = None
-            self.ist_einmalige_schenkung = None
-            self.geschenkunterlagen_an_schenker = None
         
         # prüfe offene Rechnungen bei sektionswechsel
         if self.status_c == 'Wegzug':
