@@ -984,8 +984,11 @@ function daten_validiert(frm) {
                         frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Validierung Online-Mutation");
                         cur_frm.refresh_field('status_change');
                     }
+                    if (cur_frm.doc.status_vor_onl_mutation && cur_frm.doc.status_vor_onl_mutation != 'Online-Kündigung') {
+                        // Nur wenn nicht Special Case: Regulär > Online-Kündigung > Online-Mutation
+                        cur_frm.set_value("validierung_notwendig", '0');
+                    }
                     cur_frm.set_value("status_vor_onl_mutation", '');
-                    cur_frm.set_value("validierung_notwendig", '0');
                     cur_frm.save();
                     cur_frm.timeline.insert_comment("Validierung durchgeführt.");
                 } else {
