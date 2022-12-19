@@ -180,7 +180,8 @@
   "m_w_anzahl",
   "retoure_in_folge",
   "zuzug_durch_sp",
-  "m_und_w_export"
+  "m_und_w_export",
+  "geschenk_reset_rechnung"
  ],
  "fields": [
   {
@@ -1237,10 +1238,15 @@
    "fieldtype": "Link",
    "label": "Interessent*in Typ",
    "options": "InteressentIn Typ"
+  },
+  {
+   "fieldname": "geschenk_reset_rechnung",
+   "fieldtype": "Data",
+   "label": "Geschenk-Reset Rechnung"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-12-05 14:01:10.259071",
+ "modified": "2022-12-18 11:08:58.365240",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
