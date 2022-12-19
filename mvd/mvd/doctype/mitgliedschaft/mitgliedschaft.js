@@ -1184,7 +1184,8 @@ function erstelle_geschenk_rechnung(frm) {
                                         'mitgliedschaft': cur_frm.doc.name,
                                         'attach_as_pdf': true,
                                         'submit': true,
-                                        'druckvorlage': values.rg_druckvorlage
+                                        'druckvorlage': values.rg_druckvorlage,
+                                        'geschenk_reset': true
                                 },
                                 freeze: true,
                                 freeze_message: 'Erstelle Rechnung und Korrespondenz...',
