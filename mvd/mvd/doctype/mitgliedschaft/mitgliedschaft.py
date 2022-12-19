@@ -2177,7 +2177,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         return 1
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None):
+def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None, geschenk_reset=False):
     if not mitgliedschaft_obj:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     else:
@@ -2318,6 +2318,9 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         })
         
         _file.save(ignore_permissions=True)
+    
+    if geschenk_reset:
+        frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'geschenk_reset_rechnung', sinv.name)
     
     return sinv.name
 

@@ -111,3 +111,31 @@ def rechnungs_jahresversand():
                     'jahresversand': lauf.name
                 }
                 enqueue("mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.create_invoices", queue='long', job_name='Rechnungs Jahresversand {0}'.format(lauf.name), timeout=6000, **args)
+
+def reset_geschenk_mitgliedschaften():
+    mitgliedschaften = frappe.db.sql("""
+            SELECT
+                `mv_mitgliedschaft`
+            FROM `tabSales Invoice`
+            WHERE `name` IN (
+                SELECT
+                    `geschenk_reset_rechnung`
+                FROM `tabMitgliedschaft`
+                WHERE `geschenk_reset_rechnung` LIKE 'R%'
+            )
+            AND `status` = 'Paid'
+        """, as_dict=True)
+    for mitgliedschaft in mitgliedschaften:
+        ms = frappe.get_doc("Mitgliedschaft", mitgliedschaft.mv_mitgliedschaft)
+        if not ms.validierung_notwendig:
+            # erstelle status change log und entferne Mitgliedschafts CBs
+            change_log_row = ms.append('status_change', {})
+            change_log_row.datum = today()
+            change_log_row.status_alt = ms.status_c + " (Geschenk)"
+            change_log_row.status_neu = ms.status_c
+            change_log_row.grund = 'Weiterführung Mitgliedschaft'
+            ms.ist_geschenkmitgliedschaft = None
+            ms.ist_einmalige_schenkung = None
+            ms.geschenkunterlagen_an_schenker = None
+            ms.geschenk_reset_rechnung = None
+            ms.save()
