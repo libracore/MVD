@@ -26,11 +26,6 @@ frappe.ui.form.on('Kunden', {
                 frm.add_custom_button(__("Mitglied (Regulär)"), function() {
                     umwandlung(frm, 'Regulär');
                 }, __("Umwandlung"));
-            } else {
-                // ganzes formular read only
-                cur_frm.fields.forEach(function(l){ cur_frm.set_df_property(l.df.fieldname, "read_only", 1); });
-                cur_frm.dashboard.set_headline("Da dieser Kunde in ein <a href='/desk#Form/Mitgliedschaft/" + cur_frm.doc.mv_mitgliedschaft + "'>Mitglied</a> umgewandelt wurde, müssen alle Stammdaten-Änderungen über das <a href='/desk#Form/Mitgliedschaft/" + cur_frm.doc.mv_mitgliedschaft + "'>Mitglied</a> erfolgen.");
-                cur_frm.disable_save();
             }
         }
         
@@ -139,10 +134,12 @@ function erstelle_rechnung_sonstiges(frm) {
                     },
                     {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0},
                     {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 1, 'read_only': 1},
+                    {'fieldname': 'ignore_pricing_rule', 'fieldtype': 'Check', 'label': 'Preisregeln ignorieren', 'reqd': 0, 'default': 0, 'read_only': 0},
                     {
                         label: "Rechnungs Artikel",
                         fieldname: "rechnungs_artikel", 
                         fieldtype: "Table", 
+                        description: 'Die Preise der untenstehenden Tabelle werden nur im Zusammenhang mit "Preisregel ignorieren" verwendet.',
                         cannot_add_rows: false,
                         in_place_edit: false,
                         reqd: 1,
@@ -204,6 +201,11 @@ function erstelle_rechnung_sonstiges(frm) {
                     } else {
                         var bar_bezahlt = null;
                     }
+                    if (values.ignore_pricing_rule == 1) {
+                        var ignore_pricing_rule = true;
+                    } else {
+                        var ignore_pricing_rule = null;
+                    }
                     frappe.call({
                         method: "mvd.mvd.utils.sonstige_rechnungen.create_rechnung_sonstiges",
                         args:{
@@ -214,7 +216,8 @@ function erstelle_rechnung_sonstiges(frm) {
                                 'submit': true,
                                 'druckvorlage': values.druckvorlage,
                                 'rechnungs_artikel': values.rechnungs_artikel,
-                                'mv_mitgliedschaft': cur_frm.doc.mv_mitgliedschaft
+                                'mv_mitgliedschaft': cur_frm.doc.mv_mitgliedschaft,
+                                'ignore_pricing_rule': ignore_pricing_rule
                         },
                         freeze: true,
                         freeze_message: 'Erstelle Rechnung...',
