@@ -359,6 +359,10 @@ def get_item_table(sinv):
                     </thead>
                     <tbody>"""
     for item in sinv.items:
+        if item.description.replace("<div>", "").replace("</div>", "") == item.item_code:
+            bezeichnung = item.item_name
+        else:
+            bezeichnung = item.description
         table += """
                     <tr>
                         <td style="text-align: left;">{qty}</td>
@@ -367,7 +371,7 @@ def get_item_table(sinv):
                         <td style="text-align: right;">{total}</td>
                         <td style="text-align: right;">{mwst}</td>
                     </tr>""".format(qty=int(item.qty), \
-                                    bez=item.item_name, \
+                                    bez=bezeichnung, \
                                     einzp="{:,.2f}".format(item.rate).replace(",", "'"), \
                                     total="{:,.2f}".format(item.amount).replace(",", "'"), \
                                     mwst=item.item_tax_template)
