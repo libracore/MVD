@@ -428,12 +428,11 @@
    "fieldname": "mv_mitgliedschaft",
    "fieldtype": "Link",
    "label": "Mitgliedschaft",
-   "options": "Mitgliedschaft",
-   "read_only": 1
+   "options": "Mitgliedschaft"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-09-28 16:38:56.343338",
+ "modified": "2022-12-20 11:31:04.197565",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kunden",

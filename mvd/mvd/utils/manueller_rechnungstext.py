@@ -29,23 +29,24 @@ def get_textdaten(sinv, druckvorlage):
     sinv.seite_3_adressblock_ausblenden = druckvorlage.seite_3_adressblock_ausblenden
     sinv.seite_3_datum_ausblenden = druckvorlage.seite_3_datum_ausblenden
     
+    mitglied_ref = sinv.mv_mitgliedschaft or sinv.mv_kunde
     if druckvorlage.seite_1a:
-        sinv.seite_1a = replace_mv_keywords(druckvorlage.seite_1a, sinv.mv_mitgliedschaft, sinv=sinv.name)
+        sinv.seite_1a = replace_mv_keywords(druckvorlage.seite_1a, mitglied_ref, sinv=sinv.name)
     
     if druckvorlage.seite_1b:
-        sinv.seite_1b = replace_mv_keywords(druckvorlage.seite_1b, sinv.mv_mitgliedschaft, sinv=sinv.name)
+        sinv.seite_1b = replace_mv_keywords(druckvorlage.seite_1b, mitglied_ref, sinv=sinv.name)
     
     if druckvorlage.seite_2a:
-        sinv.seite_2a = replace_mv_keywords(druckvorlage.seite_2a, sinv.mv_mitgliedschaft, sinv=sinv.name)
+        sinv.seite_2a = replace_mv_keywords(druckvorlage.seite_2a, mitglied_ref, sinv=sinv.name)
     
     if druckvorlage.seite_2b:
-        sinv.seite_2b = replace_mv_keywords(druckvorlage.seite_2b, sinv.mv_mitgliedschaft, sinv=sinv.name)
+        sinv.seite_2b = replace_mv_keywords(druckvorlage.seite_2b, mitglied_ref, sinv=sinv.name)
     
     if druckvorlage.seite_3a:
-        sinv.seite_3a = replace_mv_keywords(druckvorlage.seite_3a, sinv.mv_mitgliedschaft, sinv=sinv.name)
+        sinv.seite_3a = replace_mv_keywords(druckvorlage.seite_3a, mitglied_ref, sinv=sinv.name)
     
     if druckvorlage.seite_3b:
-        sinv.seite_3b = replace_mv_keywords(druckvorlage.seite_3b, sinv.mv_mitgliedschaft, sinv=sinv.name)
+        sinv.seite_3b = replace_mv_keywords(druckvorlage.seite_3b, mitglied_ref, sinv=sinv.name)
     
     sinv.save()
     return druckvorlage.name
