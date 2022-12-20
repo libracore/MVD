@@ -273,21 +273,18 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
         if mitgliedschaft.doctype == 'Kunden':
             nur_kunde = True
     except:
-        try:
-            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
-        except:
+        if 'MV-K' in mitgliedschaft:
             nur_kunde = True
             mitgliedschaft = frappe.get_doc("Kunden", mitgliedschaft)
+        else:
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     
     if not nur_kunde:
         key_words = [
             {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft) if not mahnung and not sinv else mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)},
-            # ~ {'key_word': '%%ANREDE%%', 'value': mitgliedschaft.briefanrede if not mahnung and not sinv else mitgliedschaft.rg_briefanrede},
             {'key_word': '%%MIETGLIEDERNUMMER%%', 'value': mitgliedschaft.mitglied_nr},
             {'key_word': '%%ANREDE BESCHENKTE%%', 'value': mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft)},
-            # ~ {'key_word': '%%ANREDE BESCHENKTE%%', 'value': mitgliedschaft.briefanrede},
             {'key_word': '%%ANREDE SCHENKENDE%%', 'value': mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)},
-            # ~ {'key_word': '%%ANREDE SCHENKENDE%%', 'value': mitgliedschaft.rg_briefanrede},
             {'key_word': '%%VOR- NACHNAME BESCHENKTE%%', 'value': " ".join((mitgliedschaft.vorname_1 or '', mitgliedschaft.nachname_1 or ''))},
             {'key_word': '%%VOR- NACHNAME SCHENKENDE%%', 'value': " ".join((mitgliedschaft.rg_vorname or '', mitgliedschaft.rg_nachname or ''))}
         ]
