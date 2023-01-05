@@ -147,26 +147,26 @@
   {
    "fieldname": "weg_01",
    "fieldtype": "Select",
-   "label": "Bis 25 KM  (Fr. 30.-)",
-   "options": "0\n30"
+   "label": "Bis 25 KM  (Fr. 35.-)",
+   "options": "0\n30\n35"
   },
   {
    "fieldname": "weg_02",
    "fieldtype": "Select",
-   "label": "26 KM bis 50 KM  (Fr. 50.-)",
-   "options": "0\n50"
+   "label": "26 KM bis 50 KM  (Fr. 60.-)",
+   "options": "0\n50\n60"
   },
   {
    "fieldname": "weg_03",
    "fieldtype": "Select",
-   "label": "51 KM bis 80 KM (Fr. 80.-)",
-   "options": "0\n80"
+   "label": "51 KM bis 80 KM (Fr. 90.-)",
+   "options": "0\n80\n90"
   },
   {
    "fieldname": "weg_04",
    "fieldtype": "Select",
-   "label": "\u00dcber 80 KM (Fr. 100.-)",
-   "options": "0\n100"
+   "label": "\u00dcber 80 KM (Fr. 115.-)",
+   "options": "0\n100\n115"
   },
   {
    "fieldname": "section_nichtmitglieder",
@@ -329,7 +329,7 @@
    "options": "Language"
   }
  ],
- "modified": "2022-05-02 22:32:59.240218",
+ "modified": "2023-01-03 14:17:16.048511",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
