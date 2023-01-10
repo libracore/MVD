@@ -1263,55 +1263,55 @@ table {
 }
 @font-face {
  font-family:'MetaWebBold';
- src:url('../fonts/MetaWebBold.eot');
- src:url('../fonts/MetaWebBold.eot?#iefix') format('embedded-opentype'),
- url('../fonts/MetaWebBold.woff2') format('woff2'),
- url('../fonts/MetaWebBold.woff') format('woff'),
- url('../fonts/MetaWebBold.ttf') format('truetype'),
- url('../fonts/MetaWebBold.svg#MetaWebBold') format('svg');
+ src:url('/assets/mvd/font/MetaWebBold.eot');
+ src:url('/assets/mvd/font/MetaWebBold.eot?#iefix') format('embedded-opentype'),
+ url('/assets/mvd/font/MetaWebBold.woff2') format('woff2'),
+ url('/assets/mvd/font/MetaWebBold.woff') format('woff'),
+ url('/assets/mvd/font/MetaWebBold.ttf') format('truetype'),
+ url('/assets/mvd/font/MetaWebBold.svg#MetaWebBold') format('svg');
  font-style:normal;
  font-weight:400
 }
 @font-face {
  font-family:'MetaWebMedium';
- src:url('../fonts/MetaWebMedium.eot');
- src:url('../fonts/MetaWebMedium.eot?#iefix') format('embedded-opentype'),
- url('../fonts/MetaWebMedium.woff2') format('woff2'),
- url('../fonts/MetaWebMedium.woff') format('woff'),
- url('../fonts/MetaWebMedium.ttf') format('truetype'),
- url('../fonts/MetaWebMedium.svg#MetaWebMedium') format('svg');
+ src:url('/assets/mvd/font/MetaWebMedium.eot');
+ src:url('/assets/mvd/font/MetaWebMedium.eot?#iefix') format('embedded-opentype'),
+ url('/assets/mvd/font/MetaWebMedium.woff2') format('woff2'),
+ url('/assets/mvd/font/MetaWebMedium.woff') format('woff'),
+ url('/assets/mvd/font/MetaWebMedium.ttf') format('truetype'),
+ url('/assets/mvd/font/MetaWebMedium.svg#MetaWebMedium') format('svg');
  font-style:normal;
  font-weight:400
 }
 @font-face {
  font-family:'MetaWebNormal';
- src:url('../fonts/MetaWebNormal.eot');
- src:url('../fonts/MetaWebNormal.eot?#iefix') format('embedded-opentype'),
- url('../fonts/MetaWebNormal.woff2') format('woff2'),
- url('../fonts/MetaWebNormal.woff') format('woff'),
- url('../fonts/MetaWebNormal.ttf') format('truetype'),
- url('../fonts/MetaWebNormal.svg#MetaWebNormal') format('svg');
+ src:url('/assets/mvd/font/MetaWebNormal.eot');
+ src:url('/assets/mvd/font/MetaWebNormal.eot?#iefix') format('embedded-opentype'),
+ url('/assets/mvd/font/MetaWebNormal.woff2') format('woff2'),
+ url('/assets/mvd/font/MetaWebNormal.woff') format('woff'),
+ url('/assets/mvd/font/MetaWebNormal.ttf') format('truetype'),
+ url('/assets/mvd/font/MetaWebNormal.svg#MetaWebNormal') format('svg');
  font-style:normal;
  font-weight:400
 }
 @font-face {
  font-family:'MetaWebLight';
- src:url('../fonts/MetaWebLight.eot');
- src:url('../fonts/MetaWebLight.eot?#iefix') format('embedded-opentype'),
- url('../fonts/MetaWebLight.woff2') format('woff2'),
- url('../fonts/MetaWebLight.woff') format('woff'),
- url('../fonts/MetaWebLight.ttf') format('truetype'),
- url('../fonts/MetaWebLight.svg#MetaWebLight') format('svg');
+ src:url('/assets/mvd/font/MetaWebLight.eot');
+ src:url('/assets/mvd/font/MetaWebLight.eot?#iefix') format('embedded-opentype'),
+ url('/assets/mvd/font/MetaWebLight.woff2') format('woff2'),
+ url('/assets/mvd/font/MetaWebLight.woff') format('woff'),
+ url('/assets/mvd/font/MetaWebLight.ttf') format('truetype'),
+ url('/assets/mvd/font/MetaWebLight.svg#MetaWebLight') format('svg');
  font-style:normal;
  font-weight:400
 }
 @font-face {
  font-family:'mv-icons';
- src:url('../fonts/mv-icons.eot?#iefix');
- src:url('../fonts/mv-icons.eot?#iefix') format('embedded-opentype'),
- url('../fonts/mv-icons.woff') format('woff'),
- url('../fonts/mv-icons.ttf') format('truetype'),
- url('../fonts/mv-icons.svg#mv-icons') format('svg');
+ src:url('/assets/mvd/font/mv-icons.eot?#iefix');
+ src:url('/assets/mvd/font/mv-icons.eot?#iefix') format('embedded-opentype'),
+ url('/assets/mvd/font/mv-icons.woff') format('woff'),
+ url('/assets/mvd/font/mv-icons.ttf') format('truetype'),
+ url('/assets/mvd/font/mv-icons.svg#mv-icons') format('svg');
  font-weight:normal;
  font-style:normal
 }
