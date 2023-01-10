@@ -5395,3 +5395,10 @@ body {
 }
 .octicon-search:before { content: '\f02e'} /*  */
 .octicon-mail:before { content: '\f03b'} /*  */
+
+h5.modal-title {
+    display: none;
+}
+div.modal-footer.hidden {
+    display: none;
+}

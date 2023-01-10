@@ -1,0 +1,146 @@
+{
+ "creation": "2023-01-10 08:31:35.392459",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_mitgliedschaftsdaten",
+  "mv_mitgliedschaft",
+  "sektion_id",
+  "mitgliedschafts_typ",
+  "anrede",
+  "vorname",
+  "nachname",
+  "telefon",
+  "e_mail",
+  "section_mietobjekt",
+  "strasse",
+  "nummer",
+  "postleitzahl",
+  "ort",
+  "anderes_mietobjekt",
+  "section_beratungsanfrage",
+  "frage",
+  "section_dokumente"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_mitgliedschaftsdaten",
+   "fieldtype": "Section Break",
+   "label": "Mitgliedschaftsdaten"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mitgliedschaft",
+   "options": "Mitgliedschaft",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.sektion_id",
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
+  },
+  {
+   "fieldname": "mitgliedschafts_typ",
+   "fieldtype": "Data",
+   "label": "Mitgliedschafts Typ"
+  },
+  {
+   "fieldname": "anrede",
+   "fieldtype": "Data",
+   "label": "Anrede"
+  },
+  {
+   "fieldname": "vorname",
+   "fieldtype": "Data",
+   "label": "Vorname"
+  },
+  {
+   "fieldname": "nachname",
+   "fieldtype": "Data",
+   "label": "Nachname"
+  },
+  {
+   "fieldname": "telefon",
+   "fieldtype": "Data",
+   "label": "Telefon privat / mobil"
+  },
+  {
+   "fieldname": "e_mail",
+   "fieldtype": "Data",
+   "label": " E-Mail Adresse"
+  },
+  {
+   "fieldname": "section_mietobjekt",
+   "fieldtype": "Section Break",
+   "label": "Mietobjekt"
+  },
+  {
+   "fieldname": "strasse",
+   "fieldtype": "Data",
+   "label": "Strasse"
+  },
+  {
+   "fieldname": "nummer",
+   "fieldtype": "Data",
+   "label": "Nummer"
+  },
+  {
+   "fieldname": "postleitzahl",
+   "fieldtype": "Data",
+   "label": "Postleitzahl"
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "label": "Ort"
+  },
+  {
+   "fieldname": "anderes_mietobjekt",
+   "fieldtype": "Text",
+   "label": "Anderes Mietobjekt"
+  },
+  {
+   "fieldname": "section_beratungsanfrage",
+   "fieldtype": "Section Break",
+   "label": "Beratungsanfrage"
+  },
+  {
+   "fieldname": "frage",
+   "fieldtype": "Text",
+   "label": "Frage"
+  },
+  {
+   "fieldname": "section_dokumente",
+   "fieldtype": "Section Break",
+   "label": "Dokumente"
+  }
+ ],
+ "modified": "2023-01-10 08:31:35.392459",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Onlineberatung",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

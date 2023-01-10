@@ -30,6 +30,30 @@ def get_data():
             ]
         },
         {
+            "label": _("Beratung"),
+            "icon": "fa fa-cog",
+            "items": [
+                {
+                    "type": "doctype",
+                    "name": "Termin",
+                    "label": _("Termin"),
+                    "description": _("Termin")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Wohnungsabgabe",
+                    "label": _("Wohnungsabgabe"),
+                    "description": _("Wohnungsabgabe")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Onlineberatung",
+                    "label": _("Onlineberatung"),
+                    "description": _("Onlineberatung")
+                }
+            ]
+        },
+        {
             "label": _("Werkzeuge"),
             "icon": "fa fa-cog",
             "items": [
@@ -62,6 +86,54 @@ def get_data():
                     "name": "MV Help Links",
                     "label": _("Hilfe Verknüpfungen"),
                     "description": _("Hilfe Verknüpfungen direkt zur MVD Wiki")
+                }
+            ]
+        },
+        {
+            "label": _("Faktura Kunden"),
+            "icon": "fa fa-cog",
+            "items": [
+                {
+                    "type": "doctype",
+                    "name": "Kunden",
+                    "label": _("Kunden"),
+                    "description": _("Kunden")
+                }
+            ]
+        },
+        {
+            "label": _("M + W"),
+            "icon": "fa fa-cog",
+            "items": [
+                {
+                    "type": "doctype",
+                    "name": "MW Abo",
+                    "label": _("M+W Abo"),
+                    "description": _("M+W Abo")
+                },
+                {
+                    "type": "doctype",
+                    "name": "MW Export",
+                    "label": _("M+W Export"),
+                    "description": _("M+W Export")
+                }
+            ]
+        },
+        {
+            "label": _("Adresspflege"),
+            "icon": "fa fa-cog",
+            "items": [
+                {
+                    "type": "doctype",
+                    "name": "Retouren",
+                    "label": _("Retouren"),
+                    "description": _("Retouren")
+                },
+                {
+                    "type": "doctype",
+                    "name": "MW",
+                    "label": _("MW"),
+                    "description": _("MW")
                 }
             ]
         },
@@ -122,54 +194,6 @@ def get_data():
                     "description": _("Guthabenübersicht"),
                     "doctype": "Mitgliedschaft",
                     "is_query_report": True
-                }
-            ]
-        },
-        {
-            "label": _("Faktura Kunden"),
-            "icon": "fa fa-cog",
-            "items": [
-                {
-                    "type": "doctype",
-                    "name": "Kunden",
-                    "label": _("Kunden"),
-                    "description": _("Kunden")
-                }
-            ]
-        },
-        {
-            "label": _("M + W"),
-            "icon": "fa fa-cog",
-            "items": [
-                {
-                    "type": "doctype",
-                    "name": "MW Abo",
-                    "label": _("M+W Abo"),
-                    "description": _("M+W Abo")
-                },
-                {
-                    "type": "doctype",
-                    "name": "MW Export",
-                    "label": _("M+W Export"),
-                    "description": _("M+W Export")
-                }
-            ]
-        },
-        {
-            "label": _("Adresspflege"),
-            "icon": "fa fa-cog",
-            "items": [
-                {
-                    "type": "doctype",
-                    "name": "Retouren",
-                    "label": _("Retouren"),
-                    "description": _("Retouren")
-                },
-                {
-                    "type": "doctype",
-                    "name": "MW",
-                    "label": _("MW"),
-                    "description": _("MW")
                 }
             ]
         },
