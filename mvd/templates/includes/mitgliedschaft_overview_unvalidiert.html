@@ -1,3 +1,4 @@
+<!-- Achtung; siehe auch frappe-bench/apps/mvd/mvd/templates/includes/mitgliedschaft_overview.html -->
 <div class="clearfix"></div>
 <div class="row">
     <!-- Card Allgemein -->
@@ -6,7 +7,7 @@
             <p>
                 <b>Sektion:</b> {{ allgemein.sektion }}<br>
                 <b>Status:</b> {{ allgemein.status }}<br>
-                <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp }}<br>
+                <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp }} {% if allgemein.ist_geschenkmitgliedschaft %}🎁{% endif %}<br>
                 {% if allgemein.kuendigung %}
                     <b>Kündigung per:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}
                 {% else %}

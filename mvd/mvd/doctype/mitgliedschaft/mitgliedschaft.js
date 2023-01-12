@@ -991,12 +991,19 @@ function daten_validiert(frm) {
                     cur_frm.set_value("status_vor_onl_mutation", '');
                     cur_frm.save();
                     cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                    if (cur_frm.doc.ist_geschenkmitgliedschaft) {
+                        frappe.msgprint("Die Daten wurden als validert bestätigt.<br><b>Achtung:</b> es handelt sich um eine Geschenkmitgliedschaft.");
+                    }
                 } else {
                     cur_frm.set_value("validierung_notwendig", '0');
                     cur_frm.set_value("status_c", 'Regulär');
                     cur_frm.save();
                     cur_frm.timeline.insert_comment("Validierung durchgeführt.");
-                    frappe.msgprint("Die Daten wurden als validert bestätigt.");
+                    if (cur_frm.doc.ist_geschenkmitgliedschaft) {
+                        frappe.msgprint("Die Daten wurden als validert bestätigt.<br><b>Achtung:</b> es handelt sich um eine Geschenkmitgliedschaft.");
+                    } else {
+                        frappe.msgprint("Die Daten wurden als validert bestätigt.");
+                    }
                 }
             },
             function(){
