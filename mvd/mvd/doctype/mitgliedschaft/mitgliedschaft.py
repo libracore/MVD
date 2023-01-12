@@ -1821,6 +1821,7 @@ def get_uebersicht_html(name):
                 'tel_g_1': mitgliedschaft.tel_g_1 or '',
                 'tel_g_2': mitgliedschaft.tel_g_2 or '',
                 'rg_tel_g': mitgliedschaft.rg_tel_g or '',
+                'ist_geschenkmitgliedschaft': mitgliedschaft.ist_geschenkmitgliedschaft,
                 'language': mitgliedschaft.language or 'de',
                 'sektion': mitgliedschaft.sektion_id,
                 'region': '({0})'.format(mitgliedschaft.region) if mitgliedschaft.region else ''
@@ -1849,6 +1850,7 @@ def get_uebersicht_html(name):
             'mitgliedtyp': mitgliedschaft.mitgliedtyp_c,
             'eintritt': eintritt,
             'kuendigung': mitgliedschaft.kuendigung or False,
+            'ist_geschenkmitgliedschaft': mitgliedschaft.ist_geschenkmitgliedschaft,
             'language': mitgliedschaft.language or 'de',
             'sektion': mitgliedschaft.sektion_id,
             'region': '({0})'.format(mitgliedschaft.region) if mitgliedschaft.region else ''
