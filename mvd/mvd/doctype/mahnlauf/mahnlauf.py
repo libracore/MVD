@@ -23,8 +23,10 @@ class Mahnlauf(Document):
         mahnstufen_frist = frappe.db.get_value('Sektion', self.sektion_id, 'mahnstufe_{0}'.format(self.mahnstufe)) * -1
         ueberfaellig_seit = add_to_date(nowdate(), days=mahnstufen_frist)
         self.ueberfaellig_seit = ueberfaellig_seit
-        self.druckvorlage = self.get_druckvorlage()
-        self.e_mail_vorlage = self.get_e_mail_vorlage()
+        if not self.druckvorlage:
+            self.druckvorlage = self.get_druckvorlage()
+        if not self.e_mail_vorlage:
+            self.e_mail_vorlage = self.get_e_mail_vorlage()
     
     def on_submit(self):
         if self.druckvorlage:
@@ -393,13 +395,13 @@ def get_e_mail_field_list(e_mail_vorlage=None):
     if e_mail_vorlage:
         druckvorlage = frappe.get_doc("Druckvorlage", e_mail_vorlage)
         fields_list = [
-            {'fieldname': 'betreff', 'fieldtype': 'Data', 'reqd': 1, 'default': druckvorlage.e_mail_betreff},
-            {'fieldname': 'message', 'fieldtype': 'Text Editor', 'reqd': 1, 'default': druckvorlage.e_mail_text}
+            {'fieldname': 'betreff', 'label': 'Betreff', 'fieldtype': 'Data', 'reqd': 1, 'default': druckvorlage.e_mail_betreff},
+            {'fieldname': 'message', 'label': 'Nachricht', 'fieldtype': 'Text Editor', 'reqd': 1, 'default': druckvorlage.e_mail_text}
         ]
     else:
         fields_list = [
-            {'fieldname': 'betreff', 'fieldtype': 'Data', 'reqd': 1},
-            {'fieldname': 'message', 'fieldtype': 'Text Editor', 'reqd': 1}
+            {'fieldname': 'betreff', 'label': 'Betreff', 'fieldtype': 'Data', 'reqd': 1},
+            {'fieldname': 'message', 'label': 'Nachricht', 'fieldtype': 'Text Editor', 'reqd': 1}
         ]
     return fields_list
 
@@ -471,7 +473,7 @@ def get_recipients(mahnung):
         else:
             return [mitgliedschaft.e_mail_1]
     else:
-        kunde = frappe.get_doc("Kunde", mahnung.mv_kunde)
+        kunde = frappe.get_doc("Kunden", mahnung.mv_kunde)
         if kunde.abweichende_rechnungsadresse and kunde.unabhaengiger_debitor and kunde.rg_e_mail:
             return [kunde.rg_e_mail]
         else:
