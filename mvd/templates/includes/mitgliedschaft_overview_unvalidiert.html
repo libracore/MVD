@@ -6,7 +6,7 @@
             <p>
                 <b>Sektion:</b> {{ allgemein.sektion }}<br>
                 <b>Status:</b> {{ allgemein.status }}<br>
-                <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp }}<br>
+                <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp }} {% if allgemein.ist_geschenkmitgliedschaft %}🎁{% endif %}<br>
                 {% if allgemein.kuendigung %}
                     <b>Kündigung per:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}
                 {% else %}

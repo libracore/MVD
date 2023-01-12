@@ -28,7 +28,7 @@
                 <p>
                     <b>Sektion:</b> {{ allgemein.sektion }} {{ allgemein.region }}<br>
                     <b>Status:</b> {{ allgemein.status }}{% if allgemein.kuendigung and allgemein.status == 'Regulär' %} &dagger; (<b>Gekündigt per {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}</b>){% endif %}<br>
-                    <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
+                    <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }} {% if allgemein.ist_geschenkmitgliedschaft %}🎁{% endif %}<br>
                     {% if allgemein.status not in ['Anmeldung', 'Online-Anmeldung'] %}
                         <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
                         {% if allgemein.austritt %}
@@ -77,7 +77,7 @@
                 <p>
                     <b>Sektion:</b> {{ allgemein.sektion }} {{ allgemein.region }}<br>
                     <b>Status:</b> {{ allgemein.status }}{% if allgemein.kuendigung and allgemein.status == 'Regulär' %} &dagger; (<b>Gekündigt per {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}</b>){% endif %}<br>
-                    <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }}<br>
+                    <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }} {% if allgemein.ist_geschenkmitgliedschaft %}🎁{% endif %}<br>
                     {% if allgemein.status not in ['Anmeldung', 'Online-Anmeldung'] %}
                         <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
                         {% if allgemein.austritt %}
