@@ -153,7 +153,8 @@ frappe.ui.form.on('Mahnlauf', {
                             'args': {
                                 'mahnlauf': cur_frm.doc.name,
                                 'betreff': d.get_values().betreff,
-                                'message': d.get_values().message
+                                'message': d.get_values().message,
+                                'email_vorlage': cur_frm.doc.e_mail_vorlage
                             },
                             'callback': function(res) {
                                 cur_frm.reload_doc();

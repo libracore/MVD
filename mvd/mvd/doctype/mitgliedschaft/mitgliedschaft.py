@@ -125,6 +125,9 @@ class Mitgliedschaft(Document):
             if self.retoure_in_folge and self.m_und_w > 0:
                 self.m_und_w = 0
             
+            # halte ggf. Faktura Kunde synchron
+            self.check_faktura_kunde()
+            
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
                 if self.creation == self.modified:
@@ -593,6 +596,12 @@ class Mitgliedschaft(Document):
         contact.links = []
         contact.save(ignore_permissions=True)
         return ''
+    
+    def check_faktura_kunde(self):
+        from mvd.mvd.doctype.kunden.kunden import update_faktura_kunde
+        faktura = frappe.db.sql("""SELECT `name` FROM `tabKunden` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `daten_aus_mitgliedschaft` = 1""".format(mitgliedschaft=self.name), as_dict=True)
+        if len(faktura) > 0:
+            update_faktura_kunde(mitgliedschaft=self, kunde=faktura[0].name)
 
 def mahnstopp(mitgliedschaft, mahnstopp):
     SQL_SAFE_UPDATES_false = frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
@@ -4065,3 +4074,48 @@ def get_kuendigungsmail_txt(mitgliedschaft, sektion_id, language):
         'subject': subject,
         'email_body': email_body
     }
+
+@frappe.whitelist()
+def erstellung_faktura_kunde(mitgliedschaft):
+    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+    
+    # check ob kunde bereits existiert
+    existing = frappe.db.sql("""SELECT `name` FROM `tabKunden` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)
+    if len(existing) > 0:
+        return existing[0].name
+    
+    kunde = frappe.get_doc({
+        "doctype":"Kunden",
+        "mv_mitgliedschaft": mitgliedschaft.name,
+        "sektion_id": "MVD",
+        'language': mitgliedschaft.language,
+        'kundentyp': mitgliedschaft.kundentyp,
+        'anrede': mitgliedschaft.anrede_c,
+        'vorname': mitgliedschaft.vorname_1,
+        'nachname': mitgliedschaft.nachname_1,
+        'tel_p': mitgliedschaft.tel_p_1,
+        'tel_m': mitgliedschaft.tel_m_1,
+        'tel_g': mitgliedschaft.tel_g_1,
+        'e_mail': mitgliedschaft.e_mail_1,
+        'strasse': mitgliedschaft.strasse,
+        'zusatz_adresse': mitgliedschaft.zusatz_adresse,
+        'nummer': mitgliedschaft.nummer,
+        'nummer_zu': mitgliedschaft.nummer_zu,
+        'plz': mitgliedschaft.plz,
+        'ort': mitgliedschaft.ort,
+        'postfach': mitgliedschaft.postfach,
+        'land': mitgliedschaft.land,
+        'postfach_nummer': mitgliedschaft.postfach_nummer,
+        'abweichende_rechnungsadresse': mitgliedschaft.abweichende_rechnungsadresse,
+        'rg_zusatz_adresse': mitgliedschaft.rg_zusatz_adresse,
+        'rg_strasse': mitgliedschaft.rg_strasse,
+        'rg_nummer': mitgliedschaft.rg_nummer,
+        'rg_nummer_zu': mitgliedschaft.rg_nummer_zu,
+        'rg_postfach': mitgliedschaft.rg_postfach,
+        'rg_postfach_nummer': mitgliedschaft.rg_postfach_nummer,
+        'rg_plz': mitgliedschaft.rg_plz,
+        'rg_ort': mitgliedschaft.rg_ort,
+        'rg_land': mitgliedschaft.rg_land
+    }).insert(ignore_permissions=True)
+    
+    return kunde.name
