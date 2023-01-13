@@ -15,7 +15,10 @@
   "reduzierte_mitgliedschaft",
   "cb1",
   "dokument",
+  "mahntyp",
+  "mahnstufe",
   "default",
+  "e_mail_vorlage",
   "deaktiviert",
   "section_seitenmanagement",
   "anzahl_seiten",
@@ -37,7 +40,6 @@
   "seite_1_fusszeile_ausblenden",
   "seite_1_referenzblock_ausblenden",
   "h2",
-  "blatt_2_info_mahnung",
   "seite_2a",
   "seite_2b",
   "seite_2_qrr",
@@ -56,7 +58,10 @@
   "seite_3_fusszeile_ausblenden",
   "seite_3_referenzblock_ausblenden",
   "seite_3_adressblock_ausblenden",
-  "seite_3_datum_ausblenden"
+  "seite_3_datum_ausblenden",
+  "section_email",
+  "e_mail_betreff",
+  "e_mail_text"
  ],
  "fields": [
   {
@@ -81,11 +86,13 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:!doc.e_mail_vorlage",
    "fieldname": "section_seitenmanagement",
    "fieldtype": "Section Break",
    "label": "Seitenmanagement"
   },
   {
+   "depends_on": "eval:doc.dokument!='Mahnung'",
    "fieldname": "anzahl_seiten",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -193,6 +200,7 @@
    "label": "Fusszeile Blatt 3 ausblenden"
   },
   {
+   "depends_on": "eval:!doc.e_mail_vorlage",
    "fieldname": "section_inhalt_1",
    "fieldtype": "Section Break",
    "label": "Inhalt"
@@ -202,6 +210,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.dokument!='Mahnung'",
    "fieldname": "cb_2",
    "fieldtype": "Column Break"
   },
@@ -361,15 +370,9 @@
   },
   {
    "depends_on": "eval:doc.dokument=='Mahnung'",
-   "fieldname": "blatt_2_info_mahnung",
-   "fieldtype": "HTML",
-   "options": "<p>Falls mehr als 1 Rechnung gemahnt werden muss, wird automatisch ein weiteres Blatt gem\u00e4ss der nachfolgenden Definition erzeugt. Muss nur eine Rechnung gemahnt werden, wird die Definition von \"Blatt 2\" ignoriert.</p>"
-  },
-  {
-   "depends_on": "eval:doc.dokument=='Mahnung'",
    "fieldname": "tipps_mahnung",
    "fieldtype": "HTML",
-   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Gesamtbetrag der gemahnten Rechnung(en) -&gt; <b>%%Gesamtbetrag_gemahnte_Rechnungen%%</b></li>\n<li>Jahr der gemahnten Jahresrechnung auf Seite 1 -&gt; <b>%%Jahresrechnung_Jahr%%</b></li>\n</ul>"
+   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Gesamtbetrag der gemahnten Rechnung(en) -&gt; <b>%%Gesamtbetrag_gemahnte_Rechnungen%%</b></li>\n<li>Jahr der gemahnten Jahresrechnung auf Seite 1 -&gt; <b>%%Jahresrechnung_Jahr%%</b></li>\n<li>Rechnungsdatum der gemahnten Rechnung -&gt; <b>%%RECHNUNGSDATUM%%</b></li>\n<li>Artikeltabelle der gemahnten Rechnung -&gt; <b>%%ARTIKELTABELLE%%</b></li>\n</ul>"
   },
   {
    "depends_on": "eval:doc.dokument=='Geschenkmitgliedschaft'",
@@ -391,9 +394,51 @@
    "fieldname": "qrr_ez_folgeseite_mahnung",
    "fieldtype": "Check",
    "label": "QRR EZ auf Folgeseite verschieben"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.dokument=='Mahnung'",
+   "fieldname": "mahnstufe",
+   "fieldtype": "Select",
+   "label": "Mahnstufe",
+   "options": "1\n2\n3"
+  },
+  {
+   "default": "Produkte / Dienstleistungen",
+   "depends_on": "eval:doc.dokument=='Mahnung'",
+   "fieldname": "mahntyp",
+   "fieldtype": "Select",
+   "label": "Mahntyp",
+   "options": "Produkte / Dienstleistungen\nMitgliedschaft (Jahresrechnung)\nAnmeldungen"
+  },
+  {
+   "default": "0",
+   "fieldname": "e_mail_vorlage",
+   "fieldtype": "Check",
+   "label": "E-Mail Vorlage"
+  },
+  {
+   "depends_on": "eval:doc.e_mail_vorlage",
+   "fieldname": "section_email",
+   "fieldtype": "Section Break",
+   "label": "E-Mail"
+  },
+  {
+   "fieldname": "e_mail_betreff",
+   "fieldtype": "Data",
+   "label": "Betreff"
+  },
+  {
+   "fieldname": "e_mail_text",
+   "fieldtype": "Text Editor",
+   "label": "Text"
   }
  ],
- "modified": "2022-12-15 17:27:33.102776",
+<<<<<<< HEAD
+ "modified": "2023-01-13 09:33:51.748679",
+=======
+ "modified": "2023-01-12 13:27:33.102776",
+>>>>>>> 07a603677f13d2676dad97722aae0c16bda8ddff
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

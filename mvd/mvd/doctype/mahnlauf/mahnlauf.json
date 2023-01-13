@@ -1,0 +1,303 @@
+{
+ "autoname": "format:{sektion_id}-{typ_code}-{DD}{MM}{YY}-{###}",
+ "creation": "2022-11-15 09:42:39.964743",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_allgemein",
+  "sektion_id",
+  "druckvorlage",
+  "e_mail_vorlage",
+  "massenlauf",
+  "e_mails_versendet",
+  "cb_1",
+  "typ",
+  "typ_code",
+  "mahnungen_per_mail",
+  "cb_2",
+  "mahnstufe",
+  "amended_from",
+  "ueberfaellig_seit",
+  "section_uebersicht",
+  "anzahl_pdf",
+  "cb_3",
+  "anzahl_mail",
+  "cb_4",
+  "mahnungen_total",
+  "section_steuerung",
+  "steuerung_1",
+  "entwurfs_mahnungen",
+  "entwuerfe_loeschen",
+  "mahnungen_buchen",
+  "cb_5",
+  "steuerung_2",
+  "gebuchte_mahnungen",
+  "mahnungen_stornieren",
+  "erstelle_pdf",
+  "versende_e_mail",
+  "cb_6",
+  "steuerung_3",
+  "stornierte_mahnungen"
+ ],
+ "fields": [
+  {
+   "fieldname": "typ",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Typ",
+   "options": "\nProdukte / Dienstleistungen\nMitgliedschaft (Jahresrechnung)\nAnmeldungen",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mahnstufe",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Mahnstufe",
+   "options": "1\n2\n3",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Mahnlauf",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ueberfaellig_seit",
+   "fieldtype": "Date",
+   "label": "Ber\u00fccksichtigtes F\u00e4lligkeitsdatum",
+   "read_only": 1
+  },
+  {
+   "fieldname": "anzahl_pdf",
+   "fieldtype": "Int",
+   "label": "Anzahl Mahnungen (PDF)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "anzahl_mail",
+   "fieldtype": "Int",
+   "label": "Anzahl Mahnungen (Mail)",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "section_steuerung",
+   "fieldtype": "Section Break",
+   "label": "Steuerung"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1&&doc.entwurfs_mahnungen > 0",
+   "fieldname": "mahnungen_buchen",
+   "fieldtype": "Button",
+   "label": "Weiter"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1&&doc.gebuchte_mahnungen > 0",
+   "fieldname": "mahnungen_stornieren",
+   "fieldtype": "Button",
+   "label": "Mahnungen Stornieren"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "entwurfs_mahnungen",
+   "fieldtype": "Int",
+   "label": "Entwurfs Mahnungen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "gebuchte_mahnungen",
+   "fieldtype": "Int",
+   "label": "Gebuchte Mahnungen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "stornierte_mahnungen",
+   "fieldtype": "Int",
+   "label": "Stornierte Mahnungen"
+  },
+  {
+   "depends_on": "eval:(doc.gebuchte_mahnungen > 0 && !doc.massenlauf) && (doc.mahnungen_per_mail == 'Nein'||(doc.mahnungen_per_mail == 'Ja' && doc.anzahl_pdf > 0))",
+   "fieldname": "erstelle_pdf",
+   "fieldtype": "Button",
+   "label": "Drucken"
+  },
+  {
+   "depends_on": "eval:doc.gebuchte_mahnungen > 0 && doc.mahnungen_per_mail=='Ja' && doc.anzahl_mail > 0 && !doc.e_mails_versendet",
+   "fieldname": "versende_e_mail",
+   "fieldtype": "Button",
+   "label": "Versende E-Mail"
+  },
+  {
+   "fieldname": "mahnungen_total",
+   "fieldtype": "Int",
+   "label": "Mahnungen Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mahnungen_per_mail",
+   "fieldtype": "Select",
+   "label": "Mahnungen per E-Mail",
+   "options": "Nein\nJa"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "massenlauf",
+   "fieldtype": "Link",
+   "label": "Massenlauf",
+   "options": "Massenlauf",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1&&doc.entwurfs_mahnungen > 0",
+   "fieldname": "entwuerfe_loeschen",
+   "fieldtype": "Button",
+   "label": "Abbrechen"
+  },
+  {
+   "depends_on": "eval:doc.sektion_id",
+   "fieldname": "druckvorlage",
+   "fieldtype": "Link",
+   "label": "Druckvorlage",
+   "options": "Druckvorlage"
+  },
+  {
+   "fieldname": "section_uebersicht",
+   "fieldtype": "Section Break",
+   "label": "\u00dcbersicht"
+  },
+  {
+   "fieldname": "cb_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "steuerung_1",
+   "fieldtype": "HTML",
+   "options": "<p>Schritt 1</p>"
+  },
+  {
+   "fieldname": "steuerung_2",
+   "fieldtype": "HTML",
+   "options": "<p>Schritt 2</p>"
+  },
+  {
+   "fieldname": "steuerung_3",
+   "fieldtype": "HTML",
+   "options": "<p>&nbsp;</p>"
+  },
+  {
+   "fieldname": "typ_code",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "typ_code",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.sektion_id",
+   "fieldname": "e_mail_vorlage",
+   "fieldtype": "Link",
+   "label": "E-Mail Vorlage",
+   "options": "Druckvorlage"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "depends_on": "eval:doc.gebuchte_mahnungen > 0 && doc.mahnungen_per_mail=='Ja' && doc.anzahl_mail > 0",
+   "fieldname": "e_mails_versendet",
+   "fieldtype": "Check",
+   "label": "E-Mails versendet",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-11-23 15:59:54.934145",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Mahnlauf",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MV_MA",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MVD Sektionsmitarbeiter*in",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

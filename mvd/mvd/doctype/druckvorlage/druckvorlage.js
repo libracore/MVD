@@ -13,7 +13,8 @@ frappe.ui.form.on('Druckvorlage', {
     },
     dokument: function(frm) {
         if (cur_frm.doc.dokument == 'Mahnung') {
-            cur_frm.set_value('anzahl_seiten', '2');
+            cur_frm.set_value('anzahl_seiten', '1');
+            cur_frm.set_value('qrr_ez_folgeseite_mahnung', null);
         }
         if (cur_frm.doc.dokument == 'Geschenkmitgliedschaft') {
             cur_frm.set_value('anzahl_seiten', '1');
@@ -39,17 +40,24 @@ frappe.ui.form.on('Druckvorlage', {
         }
     },
     anzahl_seiten: function(frm) {
-        if (cur_frm.doc.dokument == 'Mahnung') {
-            if (cur_frm.doc.anzahl_seiten != '2') {
-                cur_frm.set_value('anzahl_seiten', '2');
-                frappe.msgprint("Die Anzahl Blätter wurde auf 2 zurückgesetzt weil es sich um eine Mahnungs Druckvorlage handelt.");
-            }
-        }
+        //~ if (cur_frm.doc.dokument == 'Mahnung') {
+            //~ if (cur_frm.doc.anzahl_seiten == '3') {
+                //~ cur_frm.set_value('anzahl_seiten', '2');
+                //~ frappe.msgprint("Die Anzahl Blätter wurde auf 2 zurückgesetzt weil es sich um eine Mahnungs Druckvorlage handelt.");
+            //~ }
+        //~ }
         if (cur_frm.doc.dokument == 'Geschenkmitgliedschaft') {
             if (cur_frm.doc.anzahl_seiten != '1') {
                 cur_frm.set_value('anzahl_seiten', '1');
                 frappe.msgprint("Die Anzahl Blätter wurde auf 1 zurückgesetzt weil es sich um eine Geschenkmitgliedschafts Druckvorlage handelt.");
             }
+        }
+    },
+    qrr_ez_folgeseite_mahnung: function(frm) {
+        if (cur_frm.doc.qrr_ez_folgeseite_mahnung) {
+            cur_frm.set_value('anzahl_seiten', '2');
+        } else {
+            cur_frm.set_value('anzahl_seiten', '1');
         }
     }
 });
