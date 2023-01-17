@@ -127,6 +127,30 @@ def create_post_retouren(data):
         else:
             adresse_geaendert = 0
         
+        if data['neueAddresse']:
+            neue_adresse_json = data['neueAddresse']
+            neue_adresse = """Gültig ab {0}""".format(neue_adresse_json['validFrom'])
+            if neue_adresse_json['validTo']:
+                neue_adresse += """\nGültig bis {0}""".format(neue_adresse_json['validTo'])
+            if neue_adresse_json['adresszusatz']:
+                neue_adresse += """\n{0}""".format(neue_adresse_json['adresszusatz'])
+            if neue_adresse_json['postfach']:
+                neue_adresse += """\n{0}""".format(neue_adresse_json['postfach'])
+                if neue_adresse_json['postfachNummer']:
+                    neue_adresse += """ {0}""".format(neue_adresse_json['postfachNummer'])
+            if neue_adresse_json['strasse']:
+                neue_adresse += """\n{0}""".format(neue_adresse_json['strasse'])
+                if neue_adresse_json['hausnummer']:
+                    neue_adresse += """ {0}""".format(neue_adresse_json['hausnummer'])
+                if neue_adresse_json['hausnummerZusatz']:
+                    neue_adresse += """{0}""".format(neue_adresse_json['hausnummerZusatz'])
+            if neue_adresse_json['postleitzahl']:
+                neue_adresse += """\n{0} {1}""".format(neue_adresse_json['postleitzahl'], neue_adresse_json['ort'])
+            
+        else:
+            neue_adresse_json = None
+            neue_adresse = None
+        
         post_retoure = frappe.get_doc({
             'doctype': 'Retouren',
             'mv_mitgliedschaft': data['mitgliedId'],
@@ -142,7 +166,9 @@ def create_post_retouren(data):
             'retoureSendungsbild': data['retoureSendungsbild'],
             'datum_erfasst_post': data['datumErfasstPost'],
             'adresse_geaendert': adresse_geaendert,
-            'retoure_in_folge': check_retoure_in_folge(data['retoureMuWSequenceNumber'], data['mitgliedId'])
+            'retoure_in_folge': check_retoure_in_folge(data['retoureMuWSequenceNumber'], data['mitgliedId']),
+            'neue_adresse_json': str(neue_adresse_json),
+            'neue_adresse': neue_adresse
         })
         
         post_retoure.insert(ignore_permissions=True)
