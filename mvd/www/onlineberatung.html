@@ -145,7 +145,7 @@
                             <div class="col-sm-12 col-md-12 col-lg-12">
                                 <div class="logo-section">
                                     <a class="section-title" href="https://mieterverband.ch/mv-zh.html" title="Startseite">
-                                       MV Zürich
+                                       MV Sektion
                                     </a>
                                 </div>
                             </div>
@@ -364,6 +364,20 @@
                                                     </div>
                                                 </div>
                                             </fieldset>
+<!-- kat-anfang -->
+<nav class="nav-tab nav-tab-emailberatung">
+					<ul class="h-cf">
+
+								<li class="nav-item selected">
+									<a class="nav-link" href="#/" onclick="document.getElementById('mz').style.display = 'none'"><span>Allgemeine Anfrage</span></a>
+								</li>
+
+								<li class="nav-item">
+									<a class="nav-link" href="#/"" onclick="document.getElementById('mz').style.display = 'inline' "><span>Mietzinserhöhung</span></a>
+								</li>
+					</ul>
+			</nav>
+<!-- kat-ende -->
                                             <fieldset class="fieldset">
                                                 <span class="e-copy-small required-hint position-right"><span>*</span> Pflichtfeld</span>
                                                 <h2 class="e-h3 fieldset-title">Beratungsanfrage</h2>
@@ -379,6 +393,57 @@
                                                         </div>
                                                     </div>
                                                 </div>
+						<!-- Mietzinsfelder -->
+                                                <div class="mz" id="mz" style="display:none;">
+						<div class="form-row">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="mz_alt" class="label mietzins required">
+                                                                Mietzins alt&nbsp;*
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <input type="text" name="mz_alt" id="mz_alt" value="" maxlength="128">
+                                                        </div>
+                                                    </div>
+                                                </div>
+						<div class="form-row">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="mz_alt_datum" class="label mietzins required">
+                                                                Mietzins alt Datum&nbsp;*
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <input type="text" name="mz_alt_datum" id="mz_alt_datum" value="01.01.2020" maxlength="128">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="mz_neu" class="label mietzins required">
+                                                                Mietzins neu&nbsp;*
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <input type="text" name="mz_neu" id="mz_neu" value="" maxlength="128">
+                                                        </div>
+                                                    </div>
+                                                </div>
+						<div class="form-row">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="mz_neu_datum" class="label mietzins required">
+                                                                Mietzins neu Datum&nbsp;*
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <input type="text" name="mz_neu_datum" id="mz_neu_datum" value="01.03.2023" maxlength="128">
+                                                        </div>
+                                                    </div>
+                                                </div>
+						</div>
                                             </fieldset>
                                             <fieldset class="fieldset">
                                                 <span class="e-copy-small required-hint position-right" style="display: none;"><span>*</span> Pflichtfeld</span>

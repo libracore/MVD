@@ -4186,11 +4186,13 @@ body {
  }
 }
 .nav-tab .nav-link {
- color:#535f29;
+ /* color:#535f29;*/
+ color: #333;
  text-decoration:none;
  padding:8px 21px 5px 21px;
  display:block;
- background:#e5eec4;
+ /* background:#e5eec4;*/
+ background:#CAEAEE;
  border:solid #b7bda3;
  border-width:1px 1px 0 0
 }
@@ -4207,7 +4209,7 @@ body {
 .nav-tab .nav-link:hover {
  background:none
 }
-.nav-tab-rent-law {
+.nav-tab-rent-law, .nav-tab-emailberatung {
  margin-bottom:42px
 }
 @media screen and (max-width: 40em) {
