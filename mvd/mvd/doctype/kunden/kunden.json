@@ -432,14 +432,14 @@
    "options": "Mitgliedschaft"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "daten_aus_mitgliedschaft",
    "fieldtype": "Check",
    "label": "Daten aus Mitgliedschaft beziehen"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2023-01-13 10:05:55.683533",
+ "modified": "2023-01-17 11:36:26.903670",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kunden",

@@ -73,7 +73,7 @@ class Kunden(Document):
             'customer_addition': customer_addition,
             'customer_type': customer_type,
             'sektion': self.sektion_id,
-            'customer_group': 'All Customer Groups',
+            'customer_group': 'All Customer Groups' if not self.mv_mitgliedschaft else 'Mitglied',
             'territory': 'All Territories'
         })
         
@@ -95,6 +95,11 @@ class Kunden(Document):
             customer.customer_addition = ''
             customer.customer_type = 'Individual'
         customer.sektion = self.sektion_id
+        
+        if self.mv_mitgliedschaft:
+            customer.customer_group = 'Mitglied'
+        else:
+            customer.customer_group = 'All Customer Groups'
         
         customer.save(ignore_permissions=True)
     
