@@ -5,14 +5,15 @@
  "engine": "InnoDB",
  "field_order": [
   "kategorie",
+  "beratungskategorie",
   "von",
   "kontakt",
   "cb_1",
   "mv_mitgliedschaft",
   "sektion_id",
+  "status",
   "bis",
   "erinnerung",
-  "status",
   "section_notitz",
   "notitz",
   "amended_from"
@@ -93,9 +94,15 @@
    "label": "Status",
    "options": "Open\nClosed",
    "reqd": 1
+  },
+  {
+   "fieldname": "beratungskategorie",
+   "fieldtype": "Link",
+   "label": "Beratungskategorie",
+   "options": "Beratungskategorie"
   }
  ],
- "modified": "2022-03-02 16:54:43.961809",
+ "modified": "2023-01-20 11:51:26.210554",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin",
