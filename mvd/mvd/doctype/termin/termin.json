@@ -14,6 +14,9 @@
   "status",
   "bis",
   "erinnerung",
+  "status",
+  "section_documents",
+  "documents",
   "section_notitz",
   "notitz",
   "amended_from"
@@ -100,10 +103,21 @@
    "fieldtype": "Link",
    "label": "Beratungskategorie",
    "options": "Beratungskategorie"
+  },
+   "collapsible": 1,
+   "fieldname": "section_documents",
+   "fieldtype": "Section Break",
+   "label": "Dokumente"
+  },
+  {
+   "fieldname": "documents",
+   "fieldtype": "Table",
+   "label": "Dokumente",
+   "options": "Beratungsdateien"
   }
  ],
- "modified": "2023-01-20 11:51:26.210554",
  "modified_by": "Administrator",
+ "modified": "2023-01-20 11:51:26.210554",
  "module": "MVD",
  "name": "Termin",
  "owner": "Administrator",
