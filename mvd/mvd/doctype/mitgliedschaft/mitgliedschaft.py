@@ -3986,6 +3986,7 @@ def wieder_beitritt(mitgliedschaft):
     mitgliedschafts_copy.begruessung_massendruck = 0
     mitgliedschafts_copy.begruessung_via_zahlung = 0
     mitgliedschafts_copy.begruessung_massendruck_dokument = None
+    mitgliedschafts_copy.status_change = []
     
     mitgliedschafts_copy.insert(ignore_permissions=True)
     frappe.db.commit()
