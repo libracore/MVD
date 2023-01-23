@@ -8,3 +8,4 @@ mvd.patches.v5_15_9.anlage_customer_group
 mvd.patches.v5_15_10.korrektur_massenlauf
 mvd.patches.v5_15_11.korrektur_ampelfarbe
 mvd.patches.anlage_customer_group_interessentin.anlage_customer_group_interessentin
+mvd.patches.v5_30_23.anlage_beratungskategorie
