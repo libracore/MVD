@@ -5,11 +5,13 @@
  "engine": "InnoDB",
  "field_order": [
   "kategorie",
+  "beratungskategorie",
   "von",
   "kontakt",
   "cb_1",
   "mv_mitgliedschaft",
   "sektion_id",
+  "status",
   "bis",
   "erinnerung",
   "status",
@@ -97,6 +99,11 @@
    "reqd": 1
   },
   {
+   "fieldname": "beratungskategorie",
+   "fieldtype": "Link",
+   "label": "Beratungskategorie",
+   "options": "Beratungskategorie"
+  },
    "collapsible": 1,
    "fieldname": "section_documents",
    "fieldtype": "Section Break",
@@ -109,8 +116,8 @@
    "options": "Beratungsdateien"
   }
  ],
- "modified": "2022-12-12 10:15:44.115458",
  "modified_by": "Administrator",
+ "modified": "2023-01-20 11:51:26.210554",
  "module": "MVD",
  "name": "Termin",
  "owner": "Administrator",
