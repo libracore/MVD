@@ -104,6 +104,7 @@
    "label": "Beratungskategorie",
    "options": "Beratungskategorie"
   },
+  {
    "collapsible": 1,
    "fieldname": "section_documents",
    "fieldtype": "Section Break",
