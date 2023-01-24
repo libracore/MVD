@@ -27,6 +27,12 @@ frappe.ui.form.on('Kunden', {
                     umwandlung(frm, 'Regulär');
                 }, __("Umwandlung"));
             }
+            
+            if (!cur_frm.dirty()) {
+                frm.add_custom_button(__("Daten aus Mitgliedschaft beziehen"), function() {
+                    daten_aus_mitgl_bez(frm);
+                });
+            }
         }
         
         // set strasse, plz und ort mandatory (Rechnungsempfänger)
@@ -95,7 +101,7 @@ function firmenkunde_mandatory(frm) {
 
 function rechnungsempfaenger_mandatory(frm) {
     // set nachname und vorname mandatory (Eigener Rechnungsempfänger)
-    if (cur_frm.doc.abweichende_rechnungsadresse) {
+    if (cur_frm.doc.unabhaengiger_debitor) {
         cur_frm.set_df_property('rg_nachname', 'reqd', 1);
         cur_frm.set_df_property('rg_vorname', 'reqd', 1);
     } else {
@@ -318,6 +324,21 @@ function umwandlung(frm, status) {
                 cur_frm.save();
                 frappe.set_route("Form", "Mitgliedschaft", r.message);
             }
+        }
+    });
+}
+
+function daten_aus_mitgl_bez(frm, status) {
+    frappe.call({
+        'method': "mvd.mvd.doctype.kunden.kunden.update_faktura_kunde",
+        'args':{
+                'kunde': cur_frm.doc.name
+        },
+        'freeze': true,
+        'freeze_message': 'Beziehe Daten aus Mitgliedschaft',
+        'callback': function(r)
+        {
+            cur_frm.reload_doc();
         }
     });
 }

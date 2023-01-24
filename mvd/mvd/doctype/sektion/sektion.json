@@ -49,6 +49,13 @@
   "ausweis_rueckseite",
   "section_todo",
   "todo_gruppen",
+  "section_mahnungen",
+  "mahnstufe_1",
+  "mahnstufe_2",
+  "mahnstufe_3",
+  "mahnung_absender_adresse",
+  "mahnung_absender_name",
+  "footer",
   "section_e_mail",
   "kuendigungs_bestaetigung_de",
   "kuendigungs_bestaetigung_fr"
@@ -317,6 +324,47 @@
   },
   {
    "collapsible": 1,
+   "fieldname": "section_mahnungen",
+   "fieldtype": "Section Break",
+   "label": "Mahnungen"
+  },
+  {
+   "fieldname": "mahnstufe_1",
+   "fieldtype": "Int",
+   "label": "Mahnung 1 nach ... Tagen (ab F\u00e4lligkeitsdatum)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mahnstufe_2",
+   "fieldtype": "Int",
+   "label": "Mahnung 2 nach ... Tagen (ab F\u00e4lligkeitsdatum)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mahnstufe_3",
+   "fieldtype": "Int",
+   "label": "Mahnung 3 nach ... Tagen (ab F\u00e4lligkeitsdatum)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mahnung_absender_adresse",
+   "fieldtype": "Data",
+   "label": "E-Mail Absender Adresse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mahnung_absender_name",
+   "fieldtype": "Data",
+   "label": "E-Mail Absender Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "footer",
+   "fieldtype": "HTML Editor",
+   "label": "E-Mail Footer"
+  },
+  {
+   "collapsible": 1,
    "fieldname": "section_e_mail",
    "fieldtype": "Section Break",
    "label": "E-Mail"
@@ -332,7 +380,7 @@
    "label": "K\u00fcndigungsbest\u00e4tigung (FR)"
   }
  ],
- "modified": "2022-12-05 11:21:58.275675",
+ "modified": "2022-12-05 13:21:58.275675",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

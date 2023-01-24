@@ -532,7 +532,7 @@
    "columns": 0,
    "creation": "2021-12-06 11:04:29.832014",
    "default": null,
-   "depends_on": "eval:doc.ist_mitgliedschaftsrechnung||doc.ist_hv_rechnung",
+   "depends_on": "",
    "description": null,
    "docstatus": 0,
    "dt": "Sales Invoice",
