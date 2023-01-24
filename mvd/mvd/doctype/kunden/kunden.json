@@ -13,6 +13,7 @@
   "mv_mitgliedschaft",
   "cb_1",
   "language",
+  "daten_aus_mitgliedschaft",
   "section_kunde",
   "kundentyp",
   "firma",
@@ -429,10 +430,16 @@
    "fieldtype": "Link",
    "label": "Mitgliedschaft",
    "options": "Mitgliedschaft"
+  },
+  {
+   "default": "1",
+   "fieldname": "daten_aus_mitgliedschaft",
+   "fieldtype": "Check",
+   "label": "Daten aus Mitgliedschaft beziehen"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-12-20 11:31:04.197565",
+ "modified": "2023-01-17 11:36:26.903670",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kunden",

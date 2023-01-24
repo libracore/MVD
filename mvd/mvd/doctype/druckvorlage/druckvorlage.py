@@ -186,12 +186,24 @@ class Druckvorlage(Document):
     
     def set_validierungsstring(self):
         if self.dokument != 'Geschenkmitgliedschaft':
-            validierungsstring = ''
-            validierungsstring += self.sektion_id + "-"
-            validierungsstring += self.language + "-"
-            validierungsstring += self.dokument + "-"
-            validierungsstring += self.mitgliedtyp_c + "-"
-            validierungsstring += str(self.reduzierte_mitgliedschaft)
+            if self.dokument != 'Mahnung':
+                validierungsstring = ''
+                validierungsstring += self.sektion_id + "-"
+                validierungsstring += self.language + "-"
+                validierungsstring += self.dokument + "-"
+                validierungsstring += self.mitgliedtyp_c + "-"
+                validierungsstring += str(self.reduzierte_mitgliedschaft)
+            else:
+                validierungsstring = ''
+                validierungsstring += self.sektion_id + "-"
+                validierungsstring += self.language + "-"
+                validierungsstring += self.dokument + "-"
+                validierungsstring += self.mitgliedtyp_c + "-"
+                validierungsstring += self.mahntyp + "-"
+                validierungsstring += self.mahnstufe + "-"
+                validierungsstring += str(self.e_mail_vorlage) if self.e_mail_vorlage else '0'
+                validierungsstring += '-'
+                validierungsstring += str(self.reduzierte_mitgliedschaft)
         else:
             validierungsstring = ''
             validierungsstring += self.sektion_id + "-"
@@ -318,6 +330,9 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
         key_words.append({
             'key_word': '%%Gesamtbetrag_gemahnte_Rechnungen%%', 'value': "{:,.2f}".format(mahnung.total_with_charge).replace(",", "'")
         })
+        key_words.append({
+            'key_word': '%%RECHNUNGSDATUM%%', 'value': frappe.utils.get_datetime(mahnung.sales_invoices[idx].posting_date).strftime('%d.%m.%Y')
+        })
         if mahnung.sales_invoices[idx].ist_mitgliedschaftsrechnung:
             if mahnung.sales_invoices[idx].amount == mahnung.sales_invoices[idx].outstanding_amount:
                 key_words.append({
@@ -338,7 +353,6 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
                 })
     for key_word in key_words:
         txt = txt.replace(key_word['key_word'], key_word['value'])
-    
     return txt
 
 def get_item_table(sinv):
@@ -406,4 +420,5 @@ def get_item_table(sinv):
     table += """
                     </tbody>
                 </table>"""
+    
     return table

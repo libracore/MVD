@@ -31,6 +31,12 @@ frappe.ui.form.on('Mitgliedschaft', {
             });
        }
        
+       if (frappe.user.has_role("MV_MVD")) {
+            frm.add_custom_button(__("Erstellung Faktura Kunde"), function() {
+                erstellung_faktura_kunde(frm);
+            }).addClass("btn-warning")
+        }
+        
        if (!frm.doc.__islocal&&cur_frm.doc.status_c != 'Inaktiv') {
             if (((cur_frm.doc.status_c != 'Inaktiv')&&(frappe.user.has_role("System Manager")))||(['Online-Anmeldung', 'Anmeldung', 'Interessent*in'].includes(cur_frm.doc.status_c))) {
                 frm.add_custom_button(__("Inaktivieren"), function() {
@@ -2452,6 +2458,23 @@ function sende_k_best_email(frm) {
                 var subject = mail_data.subject;
                 var email_body = mail_data.email_body;
                 document.location = "mailto:"+email+"?cc="+cc+"&subject="+subject+"&body="+email_body;
+            }
+        }
+    });
+}
+
+function erstellung_faktura_kunde(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.erstellung_faktura_kunde",
+        args:{
+                'mitgliedschaft': cur_frm.doc.name
+        },
+        freeze: true,
+        freeze_message: 'Erstelle Faktura Kunde...',
+        callback: function(r)
+        {
+            if (r.message) {
+                frappe.set_route("Form", "Kunden", r.message);
             }
         }
     });

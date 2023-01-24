@@ -73,7 +73,7 @@ class Kunden(Document):
             'customer_addition': customer_addition,
             'customer_type': customer_type,
             'sektion': self.sektion_id,
-            'customer_group': 'All Customer Groups',
+            'customer_group': 'All Customer Groups' if not self.mv_mitgliedschaft else 'Mitglied',
             'territory': 'All Territories'
         })
         
@@ -95,6 +95,11 @@ class Kunden(Document):
             customer.customer_addition = ''
             customer.customer_type = 'Individual'
         customer.sektion = self.sektion_id
+        
+        if self.mv_mitgliedschaft:
+            customer.customer_group = 'Mitglied'
+        else:
+            customer.customer_group = 'All Customer Groups'
         
         customer.save(ignore_permissions=True)
     
@@ -843,3 +848,38 @@ def verknuepfe_kunde_mitglied(kunde, mitgliedschaft):
 def add_comment_to_kunde(kunde, mitgliedschaft):
     kunde = frappe.get_doc("Kunden", kunde)
     kunde.add_comment('Comment', text="Umgewandelt in Mitgliedschaft <a href='/desk#Form/Mitgliedschaft/{mitgliedschaft}'>{mitglied_nr} ({mitgliedschaft})</a>".format(mitglied_nr=mitgliedschaft.mitglied_nr, mitgliedschaft=mitgliedschaft.name))
+
+@frappe.whitelist()
+def update_faktura_kunde(mitgliedschaft=None, kunde=None):
+    faktura_kunde = frappe.get_doc('Kunden', kunde)
+    if not mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", faktura_kunde.mv_mitgliedschaft)
+    faktura_kunde.language = mitgliedschaft.language
+    faktura_kunde.kundentyp = mitgliedschaft.kundentyp
+    faktura_kunde.anrede = mitgliedschaft.anrede_c
+    faktura_kunde.vorname = mitgliedschaft.vorname_1
+    faktura_kunde.nachname = mitgliedschaft.nachname_1
+    faktura_kunde.tel_p = mitgliedschaft.tel_p_1
+    faktura_kunde.tel_m = mitgliedschaft.tel_m_1
+    faktura_kunde.tel_g = mitgliedschaft.tel_g_1
+    faktura_kunde.e_mail = mitgliedschaft.e_mail_1
+    faktura_kunde.strasse = mitgliedschaft.strasse
+    faktura_kunde.zusatz_adresse = mitgliedschaft.zusatz_adresse
+    faktura_kunde.nummer = mitgliedschaft.nummer
+    faktura_kunde.nummer_zu = mitgliedschaft.nummer_zu
+    faktura_kunde.plz = mitgliedschaft.plz
+    faktura_kunde.ort = mitgliedschaft.ort
+    faktura_kunde.postfach = mitgliedschaft.postfach
+    faktura_kunde.land = mitgliedschaft.land
+    faktura_kunde.postfach_nummer = mitgliedschaft.postfach_nummer
+    faktura_kunde.abweichende_rechnungsadresse = mitgliedschaft.abweichende_rechnungsadresse
+    faktura_kunde.rg_zusatz_adresse = mitgliedschaft.rg_zusatz_adresse
+    faktura_kunde.rg_strasse = mitgliedschaft.rg_strasse
+    faktura_kunde.rg_nummer = mitgliedschaft.rg_nummer
+    faktura_kunde.rg_nummer_zu = mitgliedschaft.rg_nummer_zu
+    faktura_kunde.rg_postfach = mitgliedschaft.rg_postfach
+    faktura_kunde.rg_postfach_nummer = mitgliedschaft.rg_postfach_nummer
+    faktura_kunde.rg_plz = mitgliedschaft.rg_plz
+    faktura_kunde.rg_ort = mitgliedschaft.rg_ort
+    faktura_kunde.rg_land = mitgliedschaft.rg_land
+    faktura_kunde.save()
