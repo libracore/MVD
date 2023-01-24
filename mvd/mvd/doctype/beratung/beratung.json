@@ -1,0 +1,54 @@
+{
+ "creation": "2023-01-24 21:06:52.762827",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "subject",
+  "status",
+  "beratungskategorie"
+ ],
+ "fields": [
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nClosed",
+   "reqd": 1
+  },
+  {
+   "fieldname": "beratungskategorie",
+   "fieldtype": "Link",
+   "label": "Beratungskategorie",
+   "options": "Beratungskategorie"
+  }
+ ],
+ "modified": "2023-01-24 21:06:52.762827",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Beratung",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

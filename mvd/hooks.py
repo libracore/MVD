@@ -48,6 +48,10 @@ jenv = {
         "get_rg_adressblock:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_rg_adressblock"
     ]
 }
+
+# allow to link incoing mails to Beratung
+email_append_to = ["Beratung"]
+
 # Home Pages
 # ----------
 
