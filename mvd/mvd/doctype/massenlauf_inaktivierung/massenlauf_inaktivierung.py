@@ -11,6 +11,17 @@ from frappe.utils.background_jobs import enqueue
 class MassenlaufInaktivierung(Document):
     def before_save(self):
         if not self.mitgliedschaften:
+            additional_filters = """"""
+            if int(self.relevantes_mitgliedschaftsjahr) > 0:
+                additional_filters += """AND `mitgliedschafts_jahr` = '{0}'""".format(self.relevantes_mitgliedschaftsjahr)
+                if int(self.ausnahme_folgejahr) == 1:
+                    if int(self.ausnahme_jahr) > 0:
+                        additional_filters += """AND `mv_mitgliedschaft` NOT IN (
+                                                    SELECT
+                                                        `name`
+                                                    FROM `tabMitgliedschaft`
+                                                    WHERE `bezahltes_mitgliedschaftsjahr` = '{0}'
+                                                )""".format(self.ausnahme_jahr)
             open_invoices = frappe.db.sql("""SELECT
                                                 `mv_mitgliedschaft`
                                             FROM `tabSales Invoice`
@@ -25,7 +36,8 @@ class MassenlaufInaktivierung(Document):
                                                 FROM `tabMitgliedschaft`
                                                 WHERE `status_c` = 'Regulär'
                                                 AND `kuendigung` IS NULL
-                                            )""".format(sektion=self.sektion_id), as_dict=True)
+                                            )
+                                            {additional_filters}""".format(sektion=self.sektion_id, additional_filters=additional_filters), as_dict=True)
             for mitgliedschaft in open_invoices:
                 ms = frappe.db.sql("""SELECT
                                         `vorname_1` AS `vorname`,
