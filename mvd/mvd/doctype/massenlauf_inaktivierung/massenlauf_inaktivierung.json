@@ -16,6 +16,9 @@
   "hinweis",
   "section_selektion",
   "offene_jahresrechnung",
+  "relevantes_mitgliedschaftsjahr",
+  "ausnahme_folgejahr",
+  "ausnahme_jahr",
   "section_mitgliedschaften",
   "mitgliedschaften",
   "amended_from"
@@ -107,10 +110,33 @@
    "fieldname": "rg_storno",
    "fieldtype": "Check",
    "label": "Ausstehende Jahresrechnung des aktuellen Kalenderjahres stornieren"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.offene_jahresrechnung",
+   "description": "Wird hier ein Mitgliedschaftsjahr eingegeben, so wird explizit nach \u00fcberf\u00e4lligen Rechnungen dessen gesucht.",
+   "fieldname": "relevantes_mitgliedschaftsjahr",
+   "fieldtype": "Int",
+   "label": "Zu ber\u00fccksichtigendes Mitgliedschaftsjahr"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.offene_jahresrechnung && doc.relevantes_mitgliedschaftsjahr > 0",
+   "fieldname": "ausnahme_folgejahr",
+   "fieldtype": "Check",
+   "label": "Ausnahme f\u00fcr Folgejahr Bezahlungen"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.offene_jahresrechnung && doc.relevantes_mitgliedschaftsjahr > 0 && doc.ausnahme_folgejahr",
+   "description": "Alle Mitglieder welche zwar das zu ber\u00fccksichtigende Mitgliedschaftsjahr nicht bezahlt haben, daf\u00fcr aber das hier hinterlegte Folgejahr, werden vom Inaktivierungslauf ignoriert.",
+   "fieldname": "ausnahme_jahr",
+   "fieldtype": "Int",
+   "label": "Ausnahmejahr"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-09-19 15:39:27.809104",
+ "modified": "2023-01-25 08:41:43.862797",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Massenlauf Inaktivierung",
