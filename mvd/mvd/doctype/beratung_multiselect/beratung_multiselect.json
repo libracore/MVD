@@ -1,0 +1,28 @@
+{
+ "creation": "2023-01-25 14:23:31.777540",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "beratung"
+ ],
+ "fields": [
+  {
+   "fieldname": "beratung",
+   "fieldtype": "Link",
+   "label": "Beratung",
+   "options": "Beratung"
+  }
+ ],
+ "istable": 1,
+ "modified": "2023-01-25 14:23:31.777540",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Beratung Multiselect",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

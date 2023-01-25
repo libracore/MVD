@@ -126,6 +126,18 @@ def get_data():
             ]
         },
         {
+            "label": _("Beratungen / Termine"),
+            "icon": "fa fa-cog",
+            "items": [
+                {
+                    "type": "doctype",
+                    "name": "Beratung",
+                    "label": _("Beratung"),
+                    "description": _("Beratung")
+                }
+            ]
+        },
+        {
             "label": _("Faktura Kunden"),
             "icon": "fa fa-cog",
             "items": [

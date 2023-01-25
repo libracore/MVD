@@ -4,15 +4,34 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_allgemein",
+  "beratungskategorie",
+  "kontaktperson",
+  "start_date",
   "subject",
+  "cb_1",
+  "mv_mitgliedschaft",
   "status",
-  "beratungskategorie"
+  "beratung_prio",
+  "verknuepfungen",
+  "section_uebersicht",
+  "uebersicht_html",
+  "section_tremin",
+  "termin",
+  "section_verknuepfungen",
+  "verknuepfungen_html",
+  "section_anfrage",
+  "notitz",
+  "antwort",
+  "section_dokumente",
+  "dokumente"
  ],
  "fields": [
   {
    "fieldname": "subject",
    "fieldtype": "Data",
-   "label": "Subject"
+   "hidden": 1,
+   "label": "Thema"
   },
   {
    "fieldname": "status",
@@ -27,9 +46,103 @@
    "fieldtype": "Link",
    "label": "Beratungskategorie",
    "options": "Beratungskategorie"
+  },
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "kontaktperson",
+   "fieldtype": "Link",
+   "label": "Kontaktperson",
+   "options": "Termin Kontaktperson"
+  },
+  {
+   "default": "Today",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Eingang/Er\u00f6ffnung Fall"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Mitgliedschaft",
+   "options": "Mitgliedschaft"
+  },
+  {
+   "fieldname": "beratung_prio",
+   "fieldtype": "Link",
+   "label": "Priorit\u00e4t (Beratungsfall)",
+   "options": "Beratung Prio"
+  },
+  {
+   "depends_on": "eval:doc.mv_mitgliedschaft",
+   "fieldname": "section_uebersicht",
+   "fieldtype": "Section Break",
+   "label": "\u00dcbersicht"
+  },
+  {
+   "fieldname": "uebersicht_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_tremin",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "termin",
+   "fieldtype": "Table",
+   "label": "Termin",
+   "options": "Beratung Termin"
+  },
+  {
+   "fieldname": "section_verknuepfungen",
+   "fieldtype": "Section Break",
+   "label": "Verkn\u00fcpfungen (Fall)"
+  },
+  {
+   "fieldname": "verknuepfungen_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_anfrage",
+   "fieldtype": "Section Break",
+   "label": "Problemstellung/Anfrage"
+  },
+  {
+   "fieldname": "notitz",
+   "fieldtype": "Text Editor",
+   "label": "Notitz"
+  },
+  {
+   "fieldname": "antwort",
+   "fieldtype": "Text Editor",
+   "label": "Antwort/Protokoll"
+  },
+  {
+   "fieldname": "section_dokumente",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "dokumente",
+   "fieldtype": "Table",
+   "label": "Dokumente",
+   "options": "Beratungsdateien"
+  },
+  {
+   "fieldname": "verknuepfungen",
+   "fieldtype": "Table MultiSelect",
+   "hidden": 1,
+   "label": "Verkn\u00fcpfungen",
+   "options": "Beratung Multiselect"
   }
  ],
- "modified": "2023-01-24 21:06:52.762827",
+ "modified": "2023-01-25 23:33:54.998246",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
