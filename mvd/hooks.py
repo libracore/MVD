@@ -52,6 +52,11 @@ jenv = {
 # allow to link incoing mails to Beratung
 email_append_to = ["Beratung"]
 
+website_redirects = [
+    # absolute location
+    {"source": "/nologin", "target": "https://www.mieterverband.ch/mv/prozesse/login.html"}
+]
+
 # Home Pages
 # ----------
 

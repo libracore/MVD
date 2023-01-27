@@ -6,6 +6,13 @@ no_cache = 1
 
 def get_context(context):
     context.show_sidebar = True
+    authorization_header = frappe.get_request_header("Authorization", None).split(" ") if frappe.get_request_header("Authorization") else None
+    if authorization_header:
+        # check tbd
+        pass
+    else:
+        frappe.local.flags.redirect_location = "/nologin"
+        raise frappe.Redirect
 
 @frappe.whitelist(allow_guest=True)
 def new_onlineberatung(**kwargs):
