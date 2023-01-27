@@ -361,7 +361,7 @@ def get_item_table(sinv):
         taxes[tax.description] = 0
     
     table = """
-                <table style="width: 100%;">
+                <table id="item_table" style="width: 100%;">
                     <thead>
                         <tr style="border-bottom: 1px solid black;">
                             <th style="text-align: left;">Anz.</th>
