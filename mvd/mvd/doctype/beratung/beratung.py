@@ -21,23 +21,47 @@ def verknuepfen(beratung, verknuepfung):
 
 @frappe.whitelist()
 def verknuepfung_entfernen(beratung, verknuepfung):
-    multiselects = frappe.db.sql("""SELECT
+    multiselects_1 = frappe.db.sql("""SELECT
                                         `name`
                                     FROM `tabBeratung Multiselect`
                                     WHERE `parentfield` = 'verknuepfungen'
                                     AND `parenttype` = 'Beratung'
                                     AND `parent` = '{beratung}'
                                     AND `beratung` = '{verknuepfung}'""".format(beratung=beratung, verknuepfung=verknuepfung), as_dict=True)
-    for multiselect in multiselects:
+    for multiselect in multiselects_1:
+        m = frappe.get_doc("Beratung Multiselect", multiselect.name)
+        m.delete()
+    
+    multiselects_2 = frappe.db.sql("""SELECT
+                                        `name`
+                                    FROM `tabBeratung Multiselect`
+                                    WHERE `parentfield` = 'verknuepfungen'
+                                    AND `parenttype` = 'Beratung'
+                                    AND `parent` = '{verknuepfung}'
+                                    AND `beratung` = '{beratung}'""".format(beratung=beratung, verknuepfung=verknuepfung), as_dict=True)
+    for multiselect in multiselects_2:
         m = frappe.get_doc("Beratung Multiselect", multiselect.name)
         m.delete()
 
 @frappe.whitelist()
 def get_verknuepfungsuebersicht(beratung):
-    verknuepfungen = frappe.db.sql("""SELECT
+    verknuepfungen_zu = frappe.db.sql("""SELECT
                                             *
                                         FROM `tabBeratung`
                                         WHERE `name` IN (
+                                            SELECT `beratung`
+                                            FROM `tabBeratung Multiselect`
+                                            WHERE `parent` = '{beratung}'
+                                        )""".format(beratung=beratung), as_dict=True)
+    verknuepfungen_von = frappe.db.sql("""SELECT
+                                            *
+                                        FROM `tabBeratung`
+                                        WHERE `name` IN (
+                                            SELECT `parent`
+                                            FROM `tabBeratung Multiselect`
+                                            WHERE `beratung` = '{beratung}'
+                                        )
+                                        AND `name` NOT IN (
                                             SELECT `beratung`
                                             FROM `tabBeratung Multiselect`
                                             WHERE `parent` = '{beratung}'
@@ -50,21 +74,34 @@ def get_verknuepfungsuebersicht(beratung):
                             <th>Status</th>
                             <th>Kontaktperson</th>
                             <th>Beratungskategorie</th>
-                            <th></th>
+                            <th>Verkn. öffnen</th>
+                            <th>Verkn. aufheben</th>
                         </tr>
                     </thead>
                     <tbody>"""
     
-    for verknuepfung in verknuepfungen:
+    for verknuepfung in verknuepfungen_zu:
         table += """<tr>
                         <td>{0}</td>
                         <td>{1}</td>
                         <td>{2}</td>
                         <td>{3}</td>
                         <td>{4}</td>
-                        <td><i class="fa fa-trash"></i></td>
+                        <td style="text-align: center;"><i class="fa fa-external-link verknuepfung_jump" data-jump="{5}" style="cursor: pointer;"></i></td>
+                        <td style="text-align: center;"><i class="fa fa-trash verknuepfung_trash" data-remove="{5}" style="cursor: pointer;"></i></td>
                     </tr>""".format(frappe.utils.get_datetime(verknuepfung.start_date).strftime('%d.%m.%Y'), \
-                                    verknuepfung.beratung_prio or '-', verknuepfung.status, verknuepfung.kontaktperson or '-', verknuepfung.beratungskategorie or '-')
+                                    verknuepfung.beratung_prio or '-', verknuepfung.status, verknuepfung.kontaktperson or '-', verknuepfung.beratungskategorie or '-', verknuepfung.name)
+    for verknuepfung in verknuepfungen_von:
+        table += """<tr>
+                        <td>{0}</td>
+                        <td>{1}</td>
+                        <td>{2}</td>
+                        <td>{3}</td>
+                        <td>{4}</td>
+                        <td style="text-align: center;"><i class="fa fa-external-link verknuepfung_jump" data-jump="{5}" style="cursor: pointer;"></i></td>
+                        <td style="text-align: center;"><i class="fa fa-trash verknuepfung_trash" data-remove="{5}" style="cursor: pointer;"></i></td>
+                    </tr>""".format(frappe.utils.get_datetime(verknuepfung.start_date).strftime('%d.%m.%Y'), \
+                                    verknuepfung.beratung_prio or '-', verknuepfung.status, verknuepfung.kontaktperson or '-', verknuepfung.beratungskategorie or '-', verknuepfung.name)
     
     table += """</tbody>
                 </table>"""

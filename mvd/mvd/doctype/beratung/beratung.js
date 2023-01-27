@@ -15,7 +15,15 @@ frappe.ui.form.on('Beratung', {
         
         if (!frm.doc.__islocal) {
             frm.add_custom_button(__("Verknüpfen"),  function() {
-                verknuepfen(cur_frm.doc.name, '9c572a3e99', false);
+                frappe.prompt([
+                    {'fieldname': 'beratung', 'fieldtype': 'Link', 'options': 'Beratung', 'label': 'Beratung', 'reqd': 1}  
+                ],
+                function(values){
+                    verknuepfen(cur_frm.doc.name, values.beratung, false);
+                },
+                'Beratungs Verknüpfung',
+                'Verknüpfen'
+                );
             });
         }
     },
@@ -49,6 +57,8 @@ function load_html_verknuepfungen(frm) {
         callback: function(r)
         {
             cur_frm.set_df_property('verknuepfungen_html','options', r.message);
+            add_jump_icons_event_handler(frm);
+            add_trash_icons_event_handler(frm);
         }
     });
 }
@@ -77,4 +87,23 @@ function verknuepfen(beratung_parent, beratung, remove) {
             }
         });
     }
+}
+
+function add_trash_icons_event_handler(frm) {
+    // event handler für trash icons (verknüpfungen)
+    $(".verknuepfung_trash").each(function() {
+        $(this).bind( "click", function() {
+            $(this).parent().parent().css({"background-color": "red"});
+            verknuepfen(cur_frm.doc.name, $(this).attr("data-remove"), true);
+        });
+    });
+}
+
+function add_jump_icons_event_handler(frm) {
+    // event handler für kump icons (verknüpfungen)
+    $(".verknuepfung_jump").each(function() {
+        $(this).bind( "click", function() {
+            frappe.set_route("Form", "Beratung", $(this).attr("data-jump"));
+        });
+    });
 }
