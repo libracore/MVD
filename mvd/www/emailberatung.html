@@ -96,7 +96,7 @@
                                         <div id="nav-meta">
                                             <ul>
                                                 <li class="item-login js-smv-login logged-in">
-                                                    <a href="#" id="smv-login-head" class="link-login js-link-login">Max Muster<i class="fa fa-chevron-down"></i></a>
+                                                    <a href="#" id="smv-login-head" class="link-login js-link-login">{{ vorname }} {{ nachname }}<i class="fa fa-chevron-down"></i></a>
                                                     <ul id="smv-login-dropdown" class="my-account-dropdown js-my-account-dropdown">
                                                         <li>
                                                             <a href="https://mieterverband.ch/mv/prozesse/protected/update-password.html" id="smv-change-password">
@@ -193,8 +193,8 @@
                                                             </label>
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <p class="value-read-only">01234567</p>
-                                                            <input type="text" class="h-hide" aria-hidden="true" name="mitgliedschaft_nr" id="mitgliedschaft_nr" value="01234567" maxlength="50">
+                                                            <p class="value-read-only">{{ mitglied_nr }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="mitgliedschaft_nr" id="mitgliedschaft_nr" value="{{ mitglied_nr }}" maxlength="50">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -221,12 +221,12 @@
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
                                                             <fieldset>
                                                                 <div class="form-item">
-                                                                    <input type="radio" id="anrede_0" name="anrede" value="Frau" disabled="disabled">
+                                                                    <input type="radio" id="anrede_0" name="anrede" value="Frau" {% if anrede == 'Frau' %}checked="checked"{% else %}disabled="disabled"{% endif %}>
                                                                     <label for="anrede_0">Frau</label>
                                                                 </div>
                                                                 <!-- end form-item -->
                                                                 <div class="form-item">
-                                                                    <input type="radio" id="anrede_1" name="anrede" value="Herr" checked="checked">
+                                                                    <input type="radio" id="anrede_1" name="anrede" value="Herr" {% if anrede == 'Herr' %}checked="checked"{% else %}disabled="disabled"{% endif %}>
                                                                     <label for="anrede_1">Herr</label>
                                                                 </div>
                                                                 <!-- end form-item -->
@@ -247,8 +247,8 @@
                                                             </label>
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <p class="value-read-only">Max</p>
-                                                            <input type="text" class="h-hide" aria-hidden="true" name="vorname" id="vorname" value="Max" maxlength="50">
+                                                            <p class="value-read-only">{{ vorname }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="vorname" id="vorname" value="{{ vorname }}" maxlength="50">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -261,8 +261,8 @@
                                                             </label>
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <p class="value-read-only">Muster</p>
-                                                            <input type="text" class="h-hide" aria-hidden="true" name="nachname" id="nachname" value="Muster" maxlength="50">
+                                                            <p class="value-read-only">{{ nachname }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="nachname" id="nachname" value="{{ nachname }}" maxlength="50">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -274,7 +274,7 @@
                                                             </label>
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <input type="text" name="telefon" id="telefon" value="012 345 67 89" maxlength="128">
+                                                            <input type="text" name="telefon" id="telefon" value="{{ telefon }}" maxlength="128">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -286,7 +286,7 @@
                                                             </label>
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <input type="text" name="email" id="email" value="max@muster.ch" maxlength="50">
+                                                            <input type="text" name="email" id="email" value="{{ email }}" maxlength="50">
                                                             <span class="hint">Bitte ändern, wenn die Antwort auf Ihre Frage an eine andere E-Mail Adresse geschickt werden soll.</span>
                                                         </div>
                                                     </div>
@@ -306,8 +306,8 @@
                                                             </label>
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <p class="value-read-only">Musterstrasse</p>
-                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_strasse" id="mo_strasse" value="Musterstrasse" maxlength="50">
+                                                            <p class="value-read-only">{{ strasse }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_strasse" id="mo_strasse" value="{{ strasse }}" maxlength="50">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -319,8 +319,8 @@
                                                             </label>
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <p class="value-read-only">99</p>
-                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_strassen_nr" id="mo_strassen_nr" value="99" maxlength="50">
+                                                            <p class="value-read-only">{{ nummer }}{{ nummer_zu }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_strassen_nr" id="mo_strassen_nr" value="{{ nummer }}{{ nummer_zu }}" maxlength="50">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -332,8 +332,8 @@
                                                             </label>
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <p class="value-read-only">8000</p>
-                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_plz" id="mo_plz" value="8000" maxlength="50">
+                                                            <p class="value-read-only">{{ plz }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_plz" id="mo_plz" value="{{ plz }}" maxlength="50">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -345,8 +345,8 @@
                                                             </label>
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <p class="value-read-only">Zürich</p>
-                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_ort" id="mo_ort" value="Zürich" maxlength="50">
+                                                            <p class="value-read-only">{{ ort }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_ort" id="mo_ort" value="{{ ort }}" maxlength="50">
                                                         </div>
                                                     </div>
                                                 </div>

@@ -36,6 +36,26 @@ def raise_redirect():
     raise frappe.Redirect
 
 def context_erweiterung(context, mitgliedschaft):
+    context.mitglied_nr = mitgliedschaft.mitglied_nr
+    context.anrede = mitgliedschaft.anrede_c
+    context.vorname = mitgliedschaft.vorname_1
+    context.nachname = mitgliedschaft.nachname_1
+    context.telefon = mitgliedschaft.tel_m_1 if mitgliedschaft.tel_m_1 else mitgliedschaft.tel_p_1 if mitgliedschaft.tel_p_1 else mitgliedschaft.tel_g_1 if mitgliedschaft.tel_g_1 else ''
+    context.email = mitgliedschaft.e_mail_1 if mitgliedschaft.e_mail_1 else ''
+    
+    if mitgliedschaft.abweichende_objektadresse:
+        context.strasse = mitgliedschaft.objekt_strasse
+        context.nummer = mitgliedschaft.objekt_hausnummer
+        context.nummer_zu = mitgliedschaft.objekt_nummer_zu
+        context.plz = mitgliedschaft.objekt_plz
+        context.ort = mitgliedschaft.objekt_ort
+    else:
+        context.strasse = mitgliedschaft.strasse
+        context.nummer = mitgliedschaft.nummer
+        context.nummer_zu = mitgliedschaft.nummer_zu
+        context.plz = mitgliedschaft.plz
+        context.ort = mitgliedschaft.ort
+    
     return context
 
 @frappe.whitelist(allow_guest=True)
