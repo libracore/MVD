@@ -3261,7 +3261,7 @@ def mvm_mitglieder_nummer_update(mitgliedId):
     return mitglieder_nummer_update(mitgliedId)['mitgliedNummer']
 
 def send_mvm_to_sp(mitgliedschaft, update):
-    if str(get_sektion_code(mitgliedschaft.sektion_id)) != 'ZH':
+    if str(get_sektion_code(mitgliedschaft.sektion_id)) not in ('ZH', 'M+W-Abo'):
         if not int(frappe.db.get_single_value('Service Plattform API', 'queue')) == 1:
             from mvd.mvd.service_plattform.api import update_mvm
             prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
