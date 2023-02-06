@@ -19,6 +19,7 @@
   "cb_2",
   "sektion_id",
   "neue_adresse",
+  "neue_adresse_gueltig_ab",
   "neue_adresse_json",
   "section_api_daten",
   "legacy_kategorie_code",
@@ -179,11 +180,18 @@
   {
    "fieldname": "neue_adresse_json",
    "fieldtype": "Code",
-   "hidden": 1,
+   "label": "Neue Adresse (JSON)",
+   "permlevel": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "neue_adresse_gueltig_ab",
+   "fieldtype": "Date",
+   "label": "Neue Adresse g\u00fcltig ab",
    "read_only": 1
   }
  ],
- "modified": "2023-01-17 09:07:04.320250",
+ "modified": "2023-02-06 16:23:04.133251",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren",
@@ -194,6 +202,18 @@
    "delete": 1,
    "email": 1,
    "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
    "print": 1,
    "read": 1,
    "report": 1,
