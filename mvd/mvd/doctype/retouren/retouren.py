@@ -129,7 +129,11 @@ def create_post_retouren(data):
         
         if data['neueAddresse']:
             neue_adresse_json = data['neueAddresse']
-            neue_adresse = """Gültig ab {0}""".format(neue_adresse_json['validFrom'])
+            neue_adresse = """"""
+            try:
+                gueltig_ab = neue_adresse_json['validFrom'].split(" ")[0].split("/")[2] + "-" + neue_adresse_json['validFrom'].split(" ")[0].split("/")[0] + "-" + neue_adresse_json['validFrom'].split(" ")[0].split("/")[1]
+            except:
+                gueltig_ab = None
             if neue_adresse_json['validTo']:
                 neue_adresse += """\nGültig bis {0}""".format(neue_adresse_json['validTo'])
             if neue_adresse_json['adresszusatz']:
@@ -150,6 +154,7 @@ def create_post_retouren(data):
         else:
             neue_adresse_json = None
             neue_adresse = None
+            gueltig_ab = None
         
         post_retoure = frappe.get_doc({
             'doctype': 'Retouren',
@@ -168,7 +173,8 @@ def create_post_retouren(data):
             'adresse_geaendert': adresse_geaendert,
             'retoure_in_folge': check_retoure_in_folge(data['retoureMuWSequenceNumber'], data['mitgliedId']),
             'neue_adresse_json': str(neue_adresse_json),
-            'neue_adresse': neue_adresse
+            'neue_adresse': neue_adresse,
+            'neue_adresse_gueltig_ab': gueltig_ab
         })
         
         post_retoure.insert(ignore_permissions=True)
