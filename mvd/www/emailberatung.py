@@ -14,6 +14,8 @@ def get_context(context):
         for cookie in authorization_header.split(";"):
             if cookie.startswith(" jwt_auth="):
                 jwt_token = cookie.split(" jwt_auth=")[1]
+            elif cookie.startswith("jwt_auth="):
+                jwt_token = cookie.split("jwt_auth=")[1]
     
     if jwt_token:
         public_key = frappe.db.get_single_value('JWT', 'public_key')
