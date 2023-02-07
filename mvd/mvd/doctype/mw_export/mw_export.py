@@ -209,10 +209,10 @@ def get_csv_data(mw_export, query=False):
         'name_2',
         'name_3',
         'strasse_pf',
-        'plz_6',
+        'plz_4',
         'ort',
         'anzahl',
-        'sektion_c',
+        'sektion',
         'region_c'
     ]
     data.append(titel)
@@ -239,7 +239,10 @@ def get_csv_data(mw_export, query=False):
                                     `ort`,
                                     `m_und_w`,
                                     `sektion_id`,
-                                    `region`
+                                    `region`,
+                                    `kundentyp`,
+                                    `firma`,
+                                    `zusatz_adresse`
                                 FROM `tabMitgliedschaft`
                                 WHERE (
                                     `status_c` NOT IN ('Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')
@@ -252,16 +255,32 @@ def get_csv_data(mw_export, query=False):
     if len(query_data) > 0:
         for entry in query_data:
             mitglied_nr = entry.mitglied_nr
-            anrede = entry.anrede_c
-            name_1 = " ".join([entry.vorname_1 or '', entry.nachname_1 or ''])
-            name_2 = " ".join([entry.vorname_2 or '', entry.nachname_2 or ''])
+            
+            anrede = ''
+            if not entry.nachname_2:
+                anrede = entry.anrede_c
+            
+            if entry.kundentyp == 'Unternehmen':
+                name_1 = entry.firma or ''
+                name_2 = " ".join([entry.vorname_1 or '', entry.nachname_1 or ''])
+            else:
+                name_1 = " ".join([entry.vorname_1 or '', entry.nachname_1 or ''])
+                name_2 = " ".join([entry.vorname_2 or '', entry.nachname_2 or ''])
+            if entry.zusatz_adresse:
+                name_2 = entry.zusatz_adresse
+            
             name_3 = " ".join([entry.rg_vorname or '', entry.rg_nachname or ''])
+            
             strasse_pf = " ".join([entry.strasse if not int(entry.postfach) == 1 else 'Postfach', entry.nummer + entry.nummer_zu or '' if not int(entry.postfach) == 1 else entry.postfach_nummer or ''])
             plz_6 = entry.plz
             ort = entry.ort
             anzahl = entry.m_und_w
             sektion_c = entry.sektion_id
-            region_c = entry.region or ''
+            
+            if entry.region:
+                region_c = frappe.db.get_value("Region", entry.region, 'region_c')
+            else:
+                region_c = ''
             
             _data = [
                 mitglied_nr,
