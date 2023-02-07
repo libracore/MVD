@@ -17,6 +17,8 @@
   "status",
   "section_steuerung",
   "import",
+  "nur_zahlungen_einlesen",
+  "zahlungen_verbuchen",
   "show_imported_payments",
   "show_unassigned",
   "show_overpaid",
@@ -104,7 +106,7 @@
    "hidden": 1,
    "in_list_view": 1,
    "label": "Status",
-   "options": "Open\nIn Verarbeitung\nZahlungen eingelesen - verbuche Matches\nVerarbeitet\nFailed\nAktualisierung notwendig\nClosed"
+   "options": "Open\nIn Verarbeitung\nZahlungen eingelesen\nZahlungen eingelesen - verbuche Matches\nVerarbeitet\nFailed\nAktualisierung notwendig\nClosed"
   },
   {
    "collapsible": 1,
@@ -539,9 +541,21 @@
   {
    "fieldname": "cb_5",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.camt_file&&doc.status=='Open'&&doc.sektion_id",
+   "fieldname": "nur_zahlungen_einlesen",
+   "fieldtype": "Button",
+   "label": "Nur Zahlungen einlesen"
+  },
+  {
+   "depends_on": "eval:doc.camt_file&&doc.status=='Zahlungen eingelesen'&&doc.sektion_id",
+   "fieldname": "zahlungen_verbuchen",
+   "fieldtype": "Button",
+   "label": "Zahlungen verbuchen"
   }
  ],
- "modified": "2022-10-20 17:00:41.736227",
+ "modified": "2023-02-07 22:59:53.178896",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",

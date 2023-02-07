@@ -28,7 +28,7 @@ class CAMTImport(Document):
                 self.account = sektion.account
 
 @frappe.whitelist()
-def lese_camt_file(camt_import, file_path):
+def lese_camt_file(camt_import, file_path, einlesen, verbuchen):
     # lese und prüfe camt file
     camt_file = get_camt_file(file_path, test=True)
     if not camt_file:
@@ -37,26 +37,32 @@ def lese_camt_file(camt_import, file_path):
     
     args = {
         'camt_file': file_path,
-        'camt_import': camt_import
+        'camt_import': camt_import,
+        'einlesen': einlesen,
+        'verbuchen': verbuchen
     }
     enqueue("mvd.mvd.doctype.camt_import.camt_import.verarbeite_camt_file", queue='long', job_name='Verarbeite CAMT Import {0}'.format(camt_import), timeout=5000, **args)
 
-def verarbeite_camt_file(camt_file, camt_import):
+def verarbeite_camt_file(camt_file, camt_import, einlesen, verbuchen):
     # lese und prüfe camt file
     camt_file = get_camt_file(camt_file)
     
-    # Zahlungen von CAMT-File einlesen
-    zahlungen_einlesen(camt_file, camt_import)
+    if int(einlesen) == 1:
+        # Zahlungen von CAMT-File einlesen
+        zahlungen_einlesen(camt_file, camt_import)
     
-    # Verbuche Matches
-    try:
-        verbuche_matches(camt_import)
-    except Exception as err:
-        camt_status_update(camt_import, 'Failed')
-        frappe.log_error("{0}".format(err), 'CAMT-Import {0} failed'.format(camt_import))
-    
-    # Aktualisiere CAMT Übersicht
-    aktualisiere_camt_uebersicht(camt_import)
+    if int(verbuchen) == 1:
+        # Verbuche Matches
+        try:
+            verbuche_matches(camt_import)
+        except Exception as err:
+            camt_status_update(camt_import, 'Failed')
+            frappe.log_error("{0}".format(err), 'CAMT-Import {0} failed'.format(camt_import))
+        
+        # Aktualisiere CAMT Übersicht
+        aktualisiere_camt_uebersicht(camt_import)
+    else:
+        camt_status_update(camt_import, 'Zahlungen eingelesen')
 
 def zahlungen_einlesen(camt_file, camt_import):
     """
