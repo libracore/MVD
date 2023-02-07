@@ -271,7 +271,7 @@ def get_csv_data(mw_export, query=False):
             
             name_3 = " ".join([entry.rg_vorname or '', entry.rg_nachname or ''])
             
-            strasse_pf = " ".join([entry.strasse if not int(entry.postfach) == 1 else 'Postfach', entry.nummer + entry.nummer_zu or '' if not int(entry.postfach) == 1 else entry.postfach_nummer or ''])
+            strasse_pf = " ".join([entry.strasse or '' if not int(entry.postfach) == 1 else 'Postfach', entry.nummer or '' + entry.nummer_zu or '' if not int(entry.postfach) == 1 else entry.postfach_nummer or ''])
             plz_6 = entry.plz
             ort = entry.ort
             anzahl = entry.m_und_w
