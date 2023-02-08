@@ -48,9 +48,9 @@ frappe.ui.form.on('CAMT Import', {
         if (cur_frm.doc.account) {
             if (cur_frm.is_dirty()) {
                 cur_frm.save();
-                import_payments(frm, 1, 1);
+                import_payments(frm, 1, 1, 1);
             } else {
-                import_payments(frm, 1, 1);
+                import_payments(frm, 1, 1, 1);
             }
         } else {
             frappe.msgprint("Bitte zuerst eine Sektion / ein Account auswählen");
@@ -60,9 +60,21 @@ frappe.ui.form.on('CAMT Import', {
         if (cur_frm.doc.account) {
             if (cur_frm.is_dirty()) {
                 cur_frm.save();
-                import_payments(frm, 1, 0);
+                import_payments(frm, 1, 0, 0);
             } else {
-                import_payments(frm, 1, 0);
+                import_payments(frm, 1, 0, 0);
+            }
+        } else {
+            frappe.msgprint("Bitte zuerst eine Sektion / ein Account auswählen");
+        }
+    },
+    zahlungen_matchen: function(frm) {
+        if (cur_frm.doc.account) {
+            if (cur_frm.is_dirty()) {
+                cur_frm.save();
+                import_payments(frm, 0, 1, 0);
+            } else {
+                import_payments(frm, 0, 1, 0);
             }
         } else {
             frappe.msgprint("Bitte zuerst eine Sektion / ein Account auswählen");
@@ -72,9 +84,9 @@ frappe.ui.form.on('CAMT Import', {
         if (cur_frm.doc.account) {
             if (cur_frm.is_dirty()) {
                 cur_frm.save();
-                import_payments(frm, 0, 1);
+                import_payments(frm, 0, 0, 1);
             } else {
-                import_payments(frm, 0, 1);
+                import_payments(frm, 0, 0, 1);
             }
         } else {
             frappe.msgprint("Bitte zuerst eine Sektion / ein Account auswählen");
@@ -174,7 +186,7 @@ frappe.ui.form.on('CAMT Import', {
     }
 });
 
-function import_payments(frm, einlesen, verbuchen) {
+function import_payments(frm, einlesen, matchen, verbuchen) {
     cur_frm.set_value("status", "In Verarbeitung");
     cur_frm.save().then(function(){
         frappe.call({
@@ -183,6 +195,7 @@ function import_payments(frm, einlesen, verbuchen) {
                 'file_path': cur_frm.doc.camt_file,
                 'camt_import': cur_frm.doc.name,
                 'einlesen': einlesen,
+                'matchen': matchen,
                 'verbuchen': verbuchen
             },
             callback: function(r) {
