@@ -98,6 +98,7 @@
   },
   {
    "depends_on": "eval:doc.camt_file&&doc.status=='Open'&&doc.sektion_id",
+   "description": "oder bei grossen Zahlungsfiles (&gt;2MB)<br>Verarbeitung in drei Schritten:",
    "fieldname": "import",
    "fieldtype": "Button",
    "label": "Verarbeite CAMT File"
@@ -548,26 +549,26 @@
    "depends_on": "eval:doc.camt_file&&doc.status=='Open'&&doc.sektion_id",
    "fieldname": "nur_zahlungen_einlesen",
    "fieldtype": "Button",
-   "label": "Nur Zahlungen einlesen"
+   "label": "Schritt 1 von 3: Nur Zahlungen einlesen"
   },
   {
    "depends_on": "eval:doc.camt_file&&doc.status=='Zahlungen zugeordnet'&&doc.sektion_id",
    "fieldname": "zahlungen_verbuchen",
    "fieldtype": "Button",
-   "label": "Zahlungen verbuchen"
+   "label": "Schritt 3 von 3: Zahlungen verbuchen"
   },
   {
    "depends_on": "eval:doc.camt_file&&doc.status=='Zahlungen eingelesen'&&doc.sektion_id",
    "fieldname": "zahlungen_matchen",
    "fieldtype": "Button",
-   "label": "Zahlungen Matchen"
+   "label": "Schritt 2 von 3: Zahlungen Matchen"
   },
   {
    "fieldname": "cb_6",
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2023-02-09 08:28:47.624183",
+ "modified": "2023-02-09 09:44:53.708362",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",
