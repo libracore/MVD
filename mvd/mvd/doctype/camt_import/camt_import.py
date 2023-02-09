@@ -93,6 +93,8 @@ def zahlungen_einlesen(camt_file, camt_import, nur_einlesen):
     sektion = camt_import.sektion_id
     company = camt_import.company
     
+    commit_counter = 1
+    
     transaction_entries = camt_file.find_all('ntry')
     
     frappe.db.set_value('CAMT Import', camt_import.name, 'camt_file_datum', frappe.utils.get_datetime(camt_file.document.bktocstmrdbtcdtntfctn.grphdr.credttm.get_text().split("T")[0]).strftime('%Y-%m-%d'))
@@ -199,6 +201,12 @@ def zahlungen_einlesen(camt_file, camt_import, nur_einlesen):
                         transaction_id=unique_reference, remarks="QRR: {0}, {1}, {2}, IBAN: {3}".format(
                         transaction_reference, customer_name, customer_address, customer_iban), company=company, sektion=sektion, qrr=transaction_reference, camt_import=camt_import.name)
                     
+                    if commit_counter == 100:
+                        frappe.db.commit()
+                        commit_counter = 1
+                    else:
+                        commit_counter += 1
+                    
             except Exception as e:
                 # Zahlung konnte nicht ausgelesen werden, entsprechender Errorlog im CAMT-File wird erzeugt
                 erfasse_fehlgeschlagenes_auslesen(six.text_type(transaction), e, camt_import.name)
@@ -210,6 +218,7 @@ def zahlungen_einlesen(camt_file, camt_import, nur_einlesen):
 
 def just_match(camt_import):
     payment_entries = frappe.db.sql("""SELECT `name`, `remarks`, `received_amount` FROM `tabPayment Entry` WHERE `camt_import` = '{camt_import}' AND `docstatus` = 0""".format(camt_import=camt_import), as_dict=True)
+    commit_counter = 1
     for payment_entry in payment_entries:
         transaction_reference = payment_entry.remarks.split(", ")[0].replace("QRR: ", "")
         received_amount = payment_entry.received_amount
@@ -225,6 +234,11 @@ def just_match(camt_import):
                 frappe.db.set_value("Payment Entry", payment_entry.name, 'mv_kunde', mv_kunde)
                 payment_match_status = 'Rechnungs Match'
                 frappe.db.set_value("Payment Entry", payment_entry.name, 'camt_status', payment_match_status)
+        if commit_counter == 100:
+            frappe.db.commit()
+            commit_counter = 1
+        else:
+            commit_counter += 1
     return
 
 def sinv_lookup(qrr_ref, betrag):
@@ -435,7 +449,7 @@ def verbuche_matches(camt_import):
                             FROM `tabPayment Entry`
                             WHERE `docstatus` = 0
                             AND `camt_import` = '{camt_import}'""".format(camt_import=camt_import), as_dict=True)
-    
+    commit_counter = 1
     for pe in pes:
         pe_doc = frappe.get_doc("Payment Entry", pe.name)
         sinv = frappe.db.sql("""SELECT
@@ -522,6 +536,12 @@ def verbuche_matches(camt_import):
                 pe_doc.save()
                 pe_doc.submit()
                 camt_gebuchte_zahlung_update(camt_import)
+        
+        if commit_counter == 100:
+            frappe.db.commit()
+            commit_counter = 1
+        else:
+            commit_counter += 1
     
     camt_status_update(camt_import, 'Verarbeitet')
 

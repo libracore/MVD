@@ -20,11 +20,12 @@
   "nur_zahlungen_einlesen",
   "zahlungen_matchen",
   "zahlungen_verbuchen",
+  "aktualisiere_camt_uebersicht",
+  "cb_6",
   "show_imported_payments",
   "show_unassigned",
   "show_overpaid",
   "show_zugewiesen_unverbucht",
-  "aktualisiere_camt_uebersicht",
   "overview",
   "ausgelesene_zahlungen_qty",
   "eingelesene_zahlungen_qty",
@@ -560,9 +561,13 @@
    "fieldname": "zahlungen_matchen",
    "fieldtype": "Button",
    "label": "Zahlungen Matchen"
+  },
+  {
+   "fieldname": "cb_6",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2023-02-08 10:58:20.093472",
+ "modified": "2023-02-09 08:28:47.624183",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",
