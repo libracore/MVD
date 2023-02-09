@@ -15,16 +15,18 @@ from frappe import _
 class Mahnung(Document):
     # this will apply all payment reminder levels in the sales invoices
     def update_reminder_levels(self):
-        for invoice in self.sales_invoices:
-            sales_invoice = frappe.get_doc("Sales Invoice", invoice.sales_invoice)
-            sales_invoice.payment_reminder_level = invoice.reminder_level
-            sales_invoice.save(ignore_permissions=True)
+        if not int(self.zahlungserinnerung) == 1:
+            for invoice in self.sales_invoices:
+                sales_invoice = frappe.get_doc("Sales Invoice", invoice.sales_invoice)
+                sales_invoice.payment_reminder_level = invoice.reminder_level
+                sales_invoice.save(ignore_permissions=True)
         return
     def reset_reminder_levels(self):
-        for invoice in self.sales_invoices:
-            sales_invoice = frappe.get_doc("Sales Invoice", invoice.sales_invoice)
-            sales_invoice.payment_reminder_level = int(invoice.reminder_level) - 1
-            sales_invoice.save(ignore_permissions=True)
+        if not int(self.zahlungserinnerung) == 1:
+            for invoice in self.sales_invoices:
+                sales_invoice = frappe.get_doc("Sales Invoice", invoice.sales_invoice)
+                sales_invoice.payment_reminder_level = int(invoice.reminder_level) - 1
+                sales_invoice.save(ignore_permissions=True)
         return
     # apply payment reminder levels on submit (server based)
     def on_submit(self):

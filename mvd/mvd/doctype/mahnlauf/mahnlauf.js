@@ -169,6 +169,20 @@ frappe.ui.form.on('Mahnlauf', {
             }
         });
         
+    },
+    zahlungserinnerungen: function(frm) {
+        if (cur_frm.doc.zahlungserinnerungen == 1) {
+            cur_frm.set_value("typ", "Mitgliedschaft (Jahresrechnung)");
+            cur_frm.set_df_property('typ', 'read_only', 1);
+            cur_frm.set_value("mahnstufe", "1");
+            cur_frm.set_df_property('mahnstufe', 'read_only', 1);
+            cur_frm.set_value("mahnungen_per_mail", "Ja");
+            cur_frm.set_df_property('mahnungen_per_mail', 'read_only', 1);
+        } else {
+            cur_frm.set_df_property('typ', 'read_only', 0);
+            cur_frm.set_df_property('mahnstufe', 'read_only', 0);
+            cur_frm.set_df_property('mahnungen_per_mail', 'read_only', 0);
+        }
     }
 });
 
