@@ -40,6 +40,12 @@ frappe.ui.form.on('CAMT Import', {
             }
             cur_frm.set_df_property('html_report','options', cur_frm.doc.report);
         }
+        
+        if (frappe.user.has_role("System Manager")) {
+            frm.add_custom_button(__("Manuelle Status Änderung"), function() {
+                change_state_manual(frm);
+            }).addClass("btn-warning")
+        }
     },
     account: function(frm) {
         cur_frm.save();
@@ -235,4 +241,17 @@ function aktualisiere_camt_uebersicht(frm) {
         frappe.msgprint("Dieser Datensatz wurde mit einer vorgänger Version des CAMT Importers erzeugt.", "Diese Funktion steht leider nicht zur Verfügung");
     }
     //~ });
+}
+
+function change_state_manual(frm) {
+    frappe.prompt([
+        {'fieldname': 'new_state', 'fieldtype': 'Select', 'label': 'Neuer Astatus', 'options': "Open\nZahlungen eingelesen\nZahlungen zugeordnet\nClosed", 'reqd': 1}  
+    ],
+    function(values){
+        cur_frm.set_value("status", values.new_state);
+        cur_frm.save()
+    },
+    'Manuelle Status Änderung',
+    'Ändern'
+    )
 }
