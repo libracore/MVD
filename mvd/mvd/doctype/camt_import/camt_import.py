@@ -28,7 +28,7 @@ class CAMTImport(Document):
                 self.account = sektion.account
 
 @frappe.whitelist()
-def lese_camt_file(camt_import, file_path):
+def lese_camt_file(camt_import, file_path, einlesen, matchen, verbuchen):
     # lese und prüfe camt file
     camt_file = get_camt_file(file_path, test=True)
     if not camt_file:
@@ -37,28 +37,54 @@ def lese_camt_file(camt_import, file_path):
     
     args = {
         'camt_file': file_path,
-        'camt_import': camt_import
+        'camt_import': camt_import,
+        'einlesen': einlesen,
+        'matchen': matchen,
+        'verbuchen': verbuchen
     }
     enqueue("mvd.mvd.doctype.camt_import.camt_import.verarbeite_camt_file", queue='long', job_name='Verarbeite CAMT Import {0}'.format(camt_import), timeout=5000, **args)
 
-def verarbeite_camt_file(camt_file, camt_import):
+def verarbeite_camt_file(camt_file, camt_import, einlesen, matchen, verbuchen):
     # lese und prüfe camt file
     camt_file = get_camt_file(camt_file)
     
-    # Zahlungen von CAMT-File einlesen
-    zahlungen_einlesen(camt_file, camt_import)
+    if int(einlesen) == 1:
+        # Zahlungen von CAMT-File einlesen
+        nur_einlesen = 1
+        if int(matchen) == 1:
+            nur_einlesen = 0
+        try:
+            zahlungen_einlesen(camt_file, camt_import, nur_einlesen)
+            # Aktualisiere CAMT Übersicht
+            aktualisiere_camt_uebersicht(camt_import)
+            camt_status_update(camt_import, 'Zahlungen eingelesen')
+        except Exception as err:
+            camt_status_update(camt_import, 'Failed')
+            frappe.log_error("{0}".format(err), 'CAMT-Import {0} failed in einlesen'.format(camt_import))
     
-    # Verbuche Matches
-    try:
-        verbuche_matches(camt_import)
-    except Exception as err:
-        camt_status_update(camt_import, 'Failed')
-        frappe.log_error("{0}".format(err), 'CAMT-Import {0} failed'.format(camt_import))
+    if int(einlesen) == 0 and int(matchen) == 1:
+        # Matchen von Zahlungen
+        try:
+            just_match(camt_import)
+            # Aktualisiere CAMT Übersicht
+            aktualisiere_camt_uebersicht(camt_import)
+            camt_status_update(camt_import, 'Zahlungen zugeordnet')
+        except Exception as err:
+            camt_status_update(camt_import, 'Failed')
+            frappe.log_error("{0}".format(err), 'CAMT-Import {0} failed in just_match'.format(camt_import))
     
-    # Aktualisiere CAMT Übersicht
-    aktualisiere_camt_uebersicht(camt_import)
+    if  int(verbuchen) == 1:
+        # Verbuche Matches
+        try:
+            verbuche_matches(camt_import)
+        except Exception as err:
+            camt_status_update(camt_import, 'Failed')
+            frappe.log_error("{0}".format(err), 'CAMT-Import {0} failed in verbuchen'.format(camt_import))
+        
+        # Aktualisiere CAMT Übersicht
+        aktualisiere_camt_uebersicht(camt_import)
 
-def zahlungen_einlesen(camt_file, camt_import):
+def zahlungen_einlesen(camt_file, camt_import, nur_einlesen):
     """
     Diese Funktion list das CAMT-File aus und erzeugt für alle darin enthaltenen Eingangszahlungen einen Payment Entry
     """
@@ -66,6 +92,8 @@ def zahlungen_einlesen(camt_file, camt_import):
     account = camt_import.account
     sektion = camt_import.sektion_id
     company = camt_import.company
+    
+    commit_counter = 1
     
     transaction_entries = camt_file.find_all('ntry')
     
@@ -156,13 +184,29 @@ def zahlungen_einlesen(camt_file, camt_import):
                     # erfasse ausgelesene Zahlung in CAMT-Import
                     erfasse_ausgelesene_zahlungen(transaction_reference, unique_reference, date, amount, camt_import.name)
                     
-                    # suche nach Sales Invoice oder Fakultative Rechnung anhand QRR-Referenz
-                    sinv_lookup_data = sinv_lookup(transaction_reference, amount)
-                    
+                    if int(nur_einlesen) == 0:
+                        # Einlesen und matchen
+                        # suche nach Sales Invoice oder Fakultative Rechnung anhand QRR-Referenz
+                        sinv_lookup_data = sinv_lookup(transaction_reference, amount)
+                    else:
+                        # nur Einlesen
+                        sinv_lookup_data = {
+                                                'check': False,
+                                                'info': 'No Sinv',
+                                                'sinv': ''
+                                            }
+                        
                     # erfasse Payment Entry
                     erstelle_zahlung(sinv_lookup=sinv_lookup_data, date=date, to_account=account, received_amount=amount, 
                         transaction_id=unique_reference, remarks="QRR: {0}, {1}, {2}, IBAN: {3}".format(
                         transaction_reference, customer_name, customer_address, customer_iban), company=company, sektion=sektion, qrr=transaction_reference, camt_import=camt_import.name)
+                    
+                    if commit_counter == 100:
+                        frappe.db.commit()
+                        commit_counter = 1
+                    else:
+                        commit_counter += 1
+                    
             except Exception as e:
                 # Zahlung konnte nicht ausgelesen werden, entsprechender Errorlog im CAMT-File wird erzeugt
                 erfasse_fehlgeschlagenes_auslesen(six.text_type(transaction), e, camt_import.name)
@@ -170,6 +214,31 @@ def zahlungen_einlesen(camt_file, camt_import):
     
     camt_status_update(camt_import.name, 'Zahlungen eingelesen - verbuche Matches')
     frappe.db.commit()
+    return
+
+def just_match(camt_import):
+    payment_entries = frappe.db.sql("""SELECT `name`, `remarks`, `received_amount` FROM `tabPayment Entry` WHERE `camt_import` = '{camt_import}' AND `docstatus` = 0""".format(camt_import=camt_import), as_dict=True)
+    commit_counter = 1
+    for payment_entry in payment_entries:
+        transaction_reference = payment_entry.remarks.split(", ")[0].replace("QRR: ", "")
+        received_amount = payment_entry.received_amount
+        if len(transaction_reference) > 26:
+            sinv_lookup_data = sinv_lookup(transaction_reference, received_amount)
+            if sinv_lookup_data['check']:
+                sinv = frappe.get_doc("Sales Invoice", sinv_lookup_data['sinv'])
+                customer = sinv.customer
+                frappe.db.set_value("Payment Entry", payment_entry.name, 'party', customer)
+                mitgliedschaft = sinv.mv_mitgliedschaft
+                frappe.db.set_value("Payment Entry", payment_entry.name, 'mv_mitgliedschaft', mitgliedschaft)
+                mv_kunde = sinv.mv_kunde
+                frappe.db.set_value("Payment Entry", payment_entry.name, 'mv_kunde', mv_kunde)
+                payment_match_status = 'Rechnungs Match'
+                frappe.db.set_value("Payment Entry", payment_entry.name, 'camt_status', payment_match_status)
+        if commit_counter == 100:
+            frappe.db.commit()
+            commit_counter = 1
+        else:
+            commit_counter += 1
     return
 
 def sinv_lookup(qrr_ref, betrag):
@@ -380,7 +449,7 @@ def verbuche_matches(camt_import):
                             FROM `tabPayment Entry`
                             WHERE `docstatus` = 0
                             AND `camt_import` = '{camt_import}'""".format(camt_import=camt_import), as_dict=True)
-    
+    commit_counter = 1
     for pe in pes:
         pe_doc = frappe.get_doc("Payment Entry", pe.name)
         sinv = frappe.db.sql("""SELECT
@@ -467,6 +536,12 @@ def verbuche_matches(camt_import):
                 pe_doc.save()
                 pe_doc.submit()
                 camt_gebuchte_zahlung_update(camt_import)
+        
+        if commit_counter == 100:
+            frappe.db.commit()
+            commit_counter = 1
+        else:
+            commit_counter += 1
     
     camt_status_update(camt_import, 'Verarbeitet')
 
@@ -1089,11 +1164,13 @@ def aktualisiere_camt_uebersicht(camt_import):
     frappe.db.set_value('CAMT Import', camt_import, 'report', report_data)
     
     # setzen Status = Closed wenn verbucht = eingelesen
-    if frappe.db.get_value('CAMT Import', camt_import, 'status') != 'Failed':
-        if (frappe.db.get_value('CAMT Import', camt_import, 'verbuchte_zahlung_qty') - frappe.db.get_value('CAMT Import', camt_import, 'ueberzahlung_qty')) == frappe.db.get_value('CAMT Import', camt_import, 'eingelesene_zahlungen_qty'):
-            frappe.db.set_value('CAMT Import', camt_import, 'status', 'Closed')
-        else:
-            frappe.db.set_value('CAMT Import', camt_import, 'status', 'Verarbeitet')
+    alter_status = frappe.db.get_value('CAMT Import', camt_import, 'status')
+    if alter_status != 'Failed':
+        if alter_status != 'Zahlungen eingelesen':
+            if (frappe.db.get_value('CAMT Import', camt_import, 'verbuchte_zahlung_qty') - frappe.db.get_value('CAMT Import', camt_import, 'ueberzahlung_qty')) == frappe.db.get_value('CAMT Import', camt_import, 'eingelesene_zahlungen_qty'):
+                frappe.db.set_value('CAMT Import', camt_import, 'status', 'Closed')
+            else:
+                frappe.db.set_value('CAMT Import', camt_import, 'status', 'Verarbeitet')
 
 @frappe.whitelist()
 def mit_spende_ausgleichen(pe, spendenlauf_referenz=None):

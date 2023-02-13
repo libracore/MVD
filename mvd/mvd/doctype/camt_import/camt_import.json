@@ -17,11 +17,15 @@
   "status",
   "section_steuerung",
   "import",
+  "nur_zahlungen_einlesen",
+  "zahlungen_matchen",
+  "zahlungen_verbuchen",
+  "aktualisiere_camt_uebersicht",
+  "cb_6",
   "show_imported_payments",
   "show_unassigned",
   "show_overpaid",
   "show_zugewiesen_unverbucht",
-  "aktualisiere_camt_uebersicht",
   "overview",
   "ausgelesene_zahlungen_qty",
   "eingelesene_zahlungen_qty",
@@ -94,6 +98,7 @@
   },
   {
    "depends_on": "eval:doc.camt_file&&doc.status=='Open'&&doc.sektion_id",
+   "description": "oder bei grossen Zahlungsfiles (&gt;2MB)<br>Verarbeitung in drei Schritten:",
    "fieldname": "import",
    "fieldtype": "Button",
    "label": "Verarbeite CAMT File"
@@ -104,7 +109,7 @@
    "hidden": 1,
    "in_list_view": 1,
    "label": "Status",
-   "options": "Open\nIn Verarbeitung\nZahlungen eingelesen - verbuche Matches\nVerarbeitet\nFailed\nAktualisierung notwendig\nClosed"
+   "options": "Open\nIn Verarbeitung\nZahlungen eingelesen\nZahlungen zugeordnet\nZahlungen eingelesen - verbuche Matches\nVerarbeitet\nFailed\nAktualisierung notwendig\nClosed"
   },
   {
    "collapsible": 1,
@@ -539,9 +544,31 @@
   {
    "fieldname": "cb_5",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.camt_file&&doc.status=='Open'&&doc.sektion_id",
+   "fieldname": "nur_zahlungen_einlesen",
+   "fieldtype": "Button",
+   "label": "Schritt 1 von 3: Nur Zahlungen einlesen"
+  },
+  {
+   "depends_on": "eval:doc.camt_file&&doc.status=='Zahlungen zugeordnet'&&doc.sektion_id",
+   "fieldname": "zahlungen_verbuchen",
+   "fieldtype": "Button",
+   "label": "Schritt 3 von 3: Zahlungen verbuchen"
+  },
+  {
+   "depends_on": "eval:doc.camt_file&&doc.status=='Zahlungen eingelesen'&&doc.sektion_id",
+   "fieldname": "zahlungen_matchen",
+   "fieldtype": "Button",
+   "label": "Schritt 2 von 3: Zahlungen Matchen"
+  },
+  {
+   "fieldname": "cb_6",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-10-20 17:00:41.736227",
+ "modified": "2023-02-09 09:44:53.708362",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",

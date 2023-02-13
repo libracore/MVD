@@ -40,6 +40,12 @@ frappe.ui.form.on('CAMT Import', {
             }
             cur_frm.set_df_property('html_report','options', cur_frm.doc.report);
         }
+        
+        if (frappe.user.has_role("System Manager")) {
+            frm.add_custom_button(__("Manuelle Status Änderung"), function() {
+                change_state_manual(frm);
+            }).addClass("btn-warning")
+        }
     },
     account: function(frm) {
         cur_frm.save();
@@ -48,9 +54,45 @@ frappe.ui.form.on('CAMT Import', {
         if (cur_frm.doc.account) {
             if (cur_frm.is_dirty()) {
                 cur_frm.save();
-                import_payments(frm);
+                import_payments(frm, 1, 1, 1);
             } else {
-                import_payments(frm);
+                import_payments(frm, 1, 1, 1);
+            }
+        } else {
+            frappe.msgprint("Bitte zuerst eine Sektion / ein Account auswählen");
+        }
+    },
+    nur_zahlungen_einlesen: function(frm) {
+        if (cur_frm.doc.account) {
+            if (cur_frm.is_dirty()) {
+                cur_frm.save();
+                import_payments(frm, 1, 0, 0);
+            } else {
+                import_payments(frm, 1, 0, 0);
+            }
+        } else {
+            frappe.msgprint("Bitte zuerst eine Sektion / ein Account auswählen");
+        }
+    },
+    zahlungen_matchen: function(frm) {
+        if (cur_frm.doc.account) {
+            if (cur_frm.is_dirty()) {
+                cur_frm.save();
+                import_payments(frm, 0, 1, 0);
+            } else {
+                import_payments(frm, 0, 1, 0);
+            }
+        } else {
+            frappe.msgprint("Bitte zuerst eine Sektion / ein Account auswählen");
+        }
+    },
+    zahlungen_verbuchen: function(frm) {
+        if (cur_frm.doc.account) {
+            if (cur_frm.is_dirty()) {
+                cur_frm.save();
+                import_payments(frm, 0, 0, 1);
+            } else {
+                import_payments(frm, 0, 0, 1);
             }
         } else {
             frappe.msgprint("Bitte zuerst eine Sektion / ein Account auswählen");
@@ -150,14 +192,17 @@ frappe.ui.form.on('CAMT Import', {
     }
 });
 
-function import_payments(frm) {
+function import_payments(frm, einlesen, matchen, verbuchen) {
     cur_frm.set_value("status", "In Verarbeitung");
     cur_frm.save().then(function(){
         frappe.call({
             method: 'mvd.mvd.doctype.camt_import.camt_import.lese_camt_file',
             args: {
                 'file_path': cur_frm.doc.camt_file,
-                'camt_import': cur_frm.doc.name
+                'camt_import': cur_frm.doc.name,
+                'einlesen': einlesen,
+                'matchen': matchen,
+                'verbuchen': verbuchen
             },
             callback: function(r) {
                 //~ frappe.dom.freeze('Bitte warten, die Zahlungen werden importiert...');
@@ -196,4 +241,17 @@ function aktualisiere_camt_uebersicht(frm) {
         frappe.msgprint("Dieser Datensatz wurde mit einer vorgänger Version des CAMT Importers erzeugt.", "Diese Funktion steht leider nicht zur Verfügung");
     }
     //~ });
+}
+
+function change_state_manual(frm) {
+    frappe.prompt([
+        {'fieldname': 'new_state', 'fieldtype': 'Select', 'label': 'Neuer Astatus', 'options': "Open\nZahlungen eingelesen\nZahlungen zugeordnet\nClosed", 'reqd': 1}  
+    ],
+    function(values){
+        cur_frm.set_value("status", values.new_state);
+        cur_frm.save()
+    },
+    'Manuelle Status Änderung',
+    'Ändern'
+    )
 }
