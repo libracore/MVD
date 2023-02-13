@@ -87,64 +87,105 @@ class Mahnlauf(Document):
             frappe.throw("Unbekannter Mahnlauf Typ")
         
         if self.is_new() or (self.entwurfs_mahnungen + self.gebuchte_mahnungen + self.stornierte_mahnungen) == 0:
-            e_mails = frappe.db.sql("""SELECT
-                                        SUM(CASE
-                                            WHEN `mvm`.`unabhaengiger_debitor` = 1 AND `mvm`.`rg_e_mail` LIKE '%@%' THEN 1
-                                            WHEN `mvm`.`unabhaengiger_debitor` != 1 AND `mvm`.`e_mail_1` LIKE '%@%' THEN 1
-                                            WHEN `cus`.`unabhaengiger_debitor` = 1 AND `cus`.`rg_e_mail` LIKE '%@%' THEN 1
-                                            WHEN `cus`.`unabhaengiger_debitor` != 1 AND `cus`.`e_mail` LIKE '%@%' THEN 1
-                                            ELSE 0
-                                        END) AS `e_mail`
-                                    FROM `tabSales Invoice` AS `sinv`
-                                    LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `sinv`.`mv_mitgliedschaft` = `mvm`.`name`
-                                    LEFT JOIN `tabKunden` AS `cus` ON `sinv`.`mv_kunde` = `cus`.`name`
-                                    WHERE `sinv`.`sektion_id` = '{sektion_id}'
-                                    AND `sinv`.`docstatus` = 1
-                                    AND `sinv`.`status` != 'Paid'
-                                    AND `sinv`.`due_date` <= '{ueberfaellig_seit}'
-                                    {rg_typ_filter}
-                                    AND `sinv`.`payment_reminder_level` = {mahnstufe}
-                                    AND ((`sinv`.`exclude_from_payment_reminder_until` IS NULL) OR (`sinv`.`exclude_from_payment_reminder_until` < CURDATE()))""".format(sektion_id=self.sektion_id, \
-                                    ueberfaellig_seit=self.ueberfaellig_seit, mahnstufe=int(self.mahnstufe) - 1, rg_typ_filter=rg_typ_filter), as_dict=True)[0].e_mail or 0
-            alle = frappe.db.sql("""SELECT
-                                        COUNT(`sinv`.`name`) AS `qty`
-                                    FROM `tabSales Invoice` AS `sinv`
-                                    LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `sinv`.`mv_mitgliedschaft` = `mvm`.`name`
-                                    WHERE `sinv`.`sektion_id` = '{sektion_id}'
-                                    AND `sinv`.`docstatus` = 1
-                                    AND `sinv`.`status` != 'Paid'
-                                    AND `sinv`.`due_date` <= '{ueberfaellig_seit}'
-                                    {rg_typ_filter}
-                                    AND `sinv`.`payment_reminder_level` = {mahnstufe}
-                                    AND ((`sinv`.`exclude_from_payment_reminder_until` IS NULL) OR (`sinv`.`exclude_from_payment_reminder_until` < CURDATE()))""".format(sektion_id=self.sektion_id, \
-                                    ueberfaellig_seit=self.ueberfaellig_seit, mahnstufe=int(self.mahnstufe) - 1, rg_typ_filter=rg_typ_filter), as_dict=True)[0].qty or 0
-            return alle - e_mails, e_mails, alle
+            if int(self.zahlungserinnerungen) != 1:
+                e_mails = frappe.db.sql("""SELECT
+                                            SUM(CASE
+                                                WHEN `mvm`.`unabhaengiger_debitor` = 1 AND `mvm`.`rg_e_mail` LIKE '%@%' THEN 1
+                                                WHEN `mvm`.`unabhaengiger_debitor` != 1 AND `mvm`.`e_mail_1` LIKE '%@%' THEN 1
+                                                WHEN `cus`.`unabhaengiger_debitor` = 1 AND `cus`.`rg_e_mail` LIKE '%@%' THEN 1
+                                                WHEN `cus`.`unabhaengiger_debitor` != 1 AND `cus`.`e_mail` LIKE '%@%' THEN 1
+                                                ELSE 0
+                                            END) AS `e_mail`
+                                        FROM `tabSales Invoice` AS `sinv`
+                                        LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `sinv`.`mv_mitgliedschaft` = `mvm`.`name`
+                                        LEFT JOIN `tabKunden` AS `cus` ON `sinv`.`mv_kunde` = `cus`.`name`
+                                        WHERE `sinv`.`sektion_id` = '{sektion_id}'
+                                        AND `sinv`.`docstatus` = 1
+                                        AND `sinv`.`status` != 'Paid'
+                                        AND `sinv`.`due_date` <= '{ueberfaellig_seit}'
+                                        {rg_typ_filter}
+                                        AND `sinv`.`payment_reminder_level` = {mahnstufe}
+                                        AND ((`sinv`.`exclude_from_payment_reminder_until` IS NULL) OR (`sinv`.`exclude_from_payment_reminder_until` < CURDATE()))""".format(sektion_id=self.sektion_id, \
+                                        ueberfaellig_seit=self.ueberfaellig_seit, mahnstufe=int(self.mahnstufe) - 1, rg_typ_filter=rg_typ_filter), as_dict=True)[0].e_mail or 0
+                alle = frappe.db.sql("""SELECT
+                                            COUNT(`sinv`.`name`) AS `qty`
+                                        FROM `tabSales Invoice` AS `sinv`
+                                        LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `sinv`.`mv_mitgliedschaft` = `mvm`.`name`
+                                        WHERE `sinv`.`sektion_id` = '{sektion_id}'
+                                        AND `sinv`.`docstatus` = 1
+                                        AND `sinv`.`status` != 'Paid'
+                                        AND `sinv`.`due_date` <= '{ueberfaellig_seit}'
+                                        {rg_typ_filter}
+                                        AND `sinv`.`payment_reminder_level` = {mahnstufe}
+                                        AND ((`sinv`.`exclude_from_payment_reminder_until` IS NULL) OR (`sinv`.`exclude_from_payment_reminder_until` < CURDATE()))""".format(sektion_id=self.sektion_id, \
+                                        ueberfaellig_seit=self.ueberfaellig_seit, mahnstufe=int(self.mahnstufe) - 1, rg_typ_filter=rg_typ_filter), as_dict=True)[0].qty or 0
+                return alle - e_mails, e_mails, alle
+            else:
+                e_mails = frappe.db.sql("""SELECT
+                                            SUM(CASE
+                                                WHEN `mvm`.`unabhaengiger_debitor` = 1 AND `mvm`.`rg_e_mail` LIKE '%@%' THEN 1
+                                                WHEN `mvm`.`unabhaengiger_debitor` != 1 AND `mvm`.`e_mail_1` LIKE '%@%' THEN 1
+                                                WHEN `cus`.`unabhaengiger_debitor` = 1 AND `cus`.`rg_e_mail` LIKE '%@%' THEN 1
+                                                WHEN `cus`.`unabhaengiger_debitor` != 1 AND `cus`.`e_mail` LIKE '%@%' THEN 1
+                                                ELSE 0
+                                            END) AS `e_mail`
+                                        FROM `tabSales Invoice` AS `sinv`
+                                        LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `sinv`.`mv_mitgliedschaft` = `mvm`.`name`
+                                        LEFT JOIN `tabKunden` AS `cus` ON `sinv`.`mv_kunde` = `cus`.`name`
+                                        WHERE `sinv`.`sektion_id` = '{sektion_id}'
+                                        AND `sinv`.`docstatus` = 1
+                                        AND `sinv`.`status` != 'Paid'
+                                        AND `sinv`.`due_date` <= '{ueberfaellig_seit}'
+                                        {rg_typ_filter}
+                                        AND `sinv`.`payment_reminder_level` = {mahnstufe}
+                                        AND ((`sinv`.`exclude_from_payment_reminder_until` IS NULL) OR (`sinv`.`exclude_from_payment_reminder_until` < CURDATE()))""".format(sektion_id=self.sektion_id, \
+                                        ueberfaellig_seit=self.ueberfaellig_seit, mahnstufe=int(self.mahnstufe) - 1, rg_typ_filter=rg_typ_filter), as_dict=True)[0].e_mail or 0
+                return 0, e_mails, e_mails
         else:
-            e_mails = frappe.db.sql("""SELECT
-                                        SUM(CASE
-                                            WHEN `mvm`.`unabhaengiger_debitor` = 1 AND `mvm`.`rg_e_mail` LIKE '%@%' THEN 1
-                                            WHEN `mvm`.`unabhaengiger_debitor` != 1 AND `mvm`.`e_mail_1` LIKE '%@%' THEN 1
-                                            WHEN `cus`.`unabhaengiger_debitor` = 1 AND `cus`.`rg_e_mail` LIKE '%@%' THEN 1
-                                            WHEN `cus`.`unabhaengiger_debitor` != 1 AND `cus`.`e_mail` LIKE '%@%' THEN 1
-                                            ELSE 0
-                                        END) AS `e_mail`
-                                    FROM `tabSales Invoice` AS `sinv`
-                                    LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `sinv`.`mv_mitgliedschaft` = `mvm`.`name`
-                                    LEFT JOIN `tabKunden` AS `cus` ON `sinv`.`mv_kunde` = `cus`.`name`
-                                    WHERE `sinv`.`name` IN (
-                                        SELECT `sales_invoice` AS `name` FROM `tabMahnung Invoices` WHERE `docstatus` != 2 AND `parent` IN (
-                                            SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}'
-                                        )
-                                    )""".format(mahnlauf=self.name), as_dict=True)[0].e_mail or 0
-            alle = frappe.db.sql("""SELECT
-                                        COUNT(`name`) AS `qty`
-                                    FROM `tabSales Invoice`
-                                    WHERE `name` IN (
-                                        SELECT `sales_invoice` AS `name` FROM `tabMahnung Invoices` WHERE `docstatus` != 2 AND `parent` IN (
-                                            SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}'
-                                        )
-                                    )""".format(mahnlauf=self.name), as_dict=True)[0].qty or 0
-            return alle - e_mails, e_mails, alle
+            if int(self.zahlungserinnerungen) != 1:
+                e_mails = frappe.db.sql("""SELECT
+                                            SUM(CASE
+                                                WHEN `mvm`.`unabhaengiger_debitor` = 1 AND `mvm`.`rg_e_mail` LIKE '%@%' THEN 1
+                                                WHEN `mvm`.`unabhaengiger_debitor` != 1 AND `mvm`.`e_mail_1` LIKE '%@%' THEN 1
+                                                WHEN `cus`.`unabhaengiger_debitor` = 1 AND `cus`.`rg_e_mail` LIKE '%@%' THEN 1
+                                                WHEN `cus`.`unabhaengiger_debitor` != 1 AND `cus`.`e_mail` LIKE '%@%' THEN 1
+                                                ELSE 0
+                                            END) AS `e_mail`
+                                        FROM `tabSales Invoice` AS `sinv`
+                                        LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `sinv`.`mv_mitgliedschaft` = `mvm`.`name`
+                                        LEFT JOIN `tabKunden` AS `cus` ON `sinv`.`mv_kunde` = `cus`.`name`
+                                        WHERE `sinv`.`name` IN (
+                                            SELECT `sales_invoice` AS `name` FROM `tabMahnung Invoices` WHERE `docstatus` != 2 AND `parent` IN (
+                                                SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}'
+                                            )
+                                        )""".format(mahnlauf=self.name), as_dict=True)[0].e_mail or 0
+                alle = frappe.db.sql("""SELECT
+                                            COUNT(`name`) AS `qty`
+                                        FROM `tabSales Invoice`
+                                        WHERE `name` IN (
+                                            SELECT `sales_invoice` AS `name` FROM `tabMahnung Invoices` WHERE `docstatus` != 2 AND `parent` IN (
+                                                SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}'
+                                            )
+                                        )""".format(mahnlauf=self.name), as_dict=True)[0].qty or 0
+                return alle - e_mails, e_mails, alle
+            else:
+                e_mails = frappe.db.sql("""SELECT
+                                            SUM(CASE
+                                                WHEN `mvm`.`unabhaengiger_debitor` = 1 AND `mvm`.`rg_e_mail` LIKE '%@%' THEN 1
+                                                WHEN `mvm`.`unabhaengiger_debitor` != 1 AND `mvm`.`e_mail_1` LIKE '%@%' THEN 1
+                                                WHEN `cus`.`unabhaengiger_debitor` = 1 AND `cus`.`rg_e_mail` LIKE '%@%' THEN 1
+                                                WHEN `cus`.`unabhaengiger_debitor` != 1 AND `cus`.`e_mail` LIKE '%@%' THEN 1
+                                                ELSE 0
+                                            END) AS `e_mail`
+                                        FROM `tabSales Invoice` AS `sinv`
+                                        LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `sinv`.`mv_mitgliedschaft` = `mvm`.`name`
+                                        LEFT JOIN `tabKunden` AS `cus` ON `sinv`.`mv_kunde` = `cus`.`name`
+                                        WHERE `sinv`.`name` IN (
+                                            SELECT `sales_invoice` AS `name` FROM `tabMahnung Invoices` WHERE `docstatus` != 2 AND `parent` IN (
+                                                SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}'
+                                            )
+                                        )""".format(mahnlauf=self.name), as_dict=True)[0].e_mail or 0
+                return 0, e_mails, e_mails
     
     def get_invoices(self):
         if self.typ == 'Produkte / Dienstleistungen':
@@ -195,7 +236,10 @@ class Mahnlauf(Document):
                 highest_level = 0
                 total_before_charges = 0
                 currency = None
-                level = invoice.payment_reminder_level + 1
+                if not int(self.zahlungserinnerungen) == 1:
+                    level = invoice.payment_reminder_level + 1
+                else:
+                    level = 0
                 new_invoice = { 
                     'sales_invoice': invoice.name,
                     'amount': invoice.grand_total,
@@ -233,30 +277,38 @@ class Mahnlauf(Document):
                                             WHERE `sinv`.`name` = '{0}'""".format(invoice.name), as_dict=True)[0].e_mail or 0
                 else:
                     mahnungen_per_mail = 0
-                new_reminder = frappe.get_doc({
-                    "doctype": "Mahnung",
-                    "sektion_id": self.sektion_id,
-                    "customer": invoice.customer,
-                    "mahnlauf": self.name,
-                    "per_mail": mahnungen_per_mail,
-                    "mv_mitgliedschaft": invoice.mv_mitgliedschaft,
-                    "mv_kunde": invoice.mv_kunde,
-                    "date": "{year:04d}-{month:02d}-{day:02d}".format(
-                        year=now.year, month=now.month, day=now.day),
-                    "title": "{customer} {year:04d}-{month:02d}-{day:02d}".format(
-                        customer=invoice.customer, year=now.year, month=now.month, day=now.day),
-                    "sales_invoices": invoices,
-                    'highest_level': highest_level,
-                    'total_before_charge': total_before_charges,
-                    'reminder_charge': reminder_charge,
-                    'total_with_charge': (total_before_charges + reminder_charge),
-                    'company': invoice.company,
-                    'currency': currency,
-                    'druckvorlage': self.druckvorlage,
-                    'status_c': frappe.get_value("Mitgliedschaft", invoice.mv_mitgliedschaft, "status_c") if invoice.mv_mitgliedschaft else None
-                })
-                reminder_record = new_reminder.insert(ignore_permissions=True)
-                frappe.db.commit()
+                
+                create_reminder_record_check = True
+                
+                if int(self.zahlungserinnerungen) == 1 and mahnungen_per_mail == 0:
+                    create_reminder_record_check = False
+                
+                if create_reminder_record_check:
+                    new_reminder = frappe.get_doc({
+                        "doctype": "Mahnung",
+                        "sektion_id": self.sektion_id,
+                        "customer": invoice.customer,
+                        "mahnlauf": self.name,
+                        "per_mail": mahnungen_per_mail,
+                        "zahlungserinnerung": self.zahlungserinnerungen,
+                        "mv_mitgliedschaft": invoice.mv_mitgliedschaft,
+                        "mv_kunde": invoice.mv_kunde,
+                        "date": "{year:04d}-{month:02d}-{day:02d}".format(
+                            year=now.year, month=now.month, day=now.day),
+                        "title": "{customer} {year:04d}-{month:02d}-{day:02d}".format(
+                            customer=invoice.customer, year=now.year, month=now.month, day=now.day),
+                        "sales_invoices": invoices,
+                        'highest_level': highest_level,
+                        'total_before_charge': total_before_charges,
+                        'reminder_charge': reminder_charge,
+                        'total_with_charge': (total_before_charges + reminder_charge),
+                        'company': invoice.company,
+                        'currency': currency,
+                        'druckvorlage': self.druckvorlage,
+                        'status_c': frappe.get_value("Mitgliedschaft", invoice.mv_mitgliedschaft, "status_c") if invoice.mv_mitgliedschaft else None
+                    })
+                    reminder_record = new_reminder.insert(ignore_permissions=True)
+                    frappe.db.commit()
 
 @frappe.whitelist()
 def bulk_submit(mahnlauf):
@@ -409,67 +461,85 @@ def get_e_mail_field_list(e_mail_vorlage=None):
 @frappe.whitelist()
 def send_reminder_mails(mahnlauf=None, betreff=None, message=None, email_vorlage=None):
     mahnungen = frappe.db.sql("""SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 1 AND `per_mail` = 1""".format(mahnlauf=mahnlauf), as_dict=True)
+    mahnungen_tbl = []
     for mahnung in mahnungen:
-        mahnung = frappe.get_doc("Mahnung", mahnung.name)
-        if email_vorlage:
-            if mahnung.mv_mitgliedschaft:
-                mitgliedschaft = mahnung.mv_mitgliedschaft
-            else:
-                mitgliedschaft = mahnung.mv_kunde
-            email_vorlage = frappe.get_doc("Druckvorlage", email_vorlage)
-            betreff = replace_mv_keywords(email_vorlage.e_mail_betreff, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
-            message = replace_mv_keywords(email_vorlage.e_mail_text, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
-        attachments = [frappe.attach_print("Mahnung", mahnung.name, file_name=mahnung.name, print_format='Mahnung')]
-        comm = make(
-            recipients=get_recipients(mahnung),
-            sender=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
-            subject=betreff,
-            content=message,
-            doctype='Mahnung',
-            name=mahnung.name,
-            attachments=attachments,
-            send_email=False,
-            sender_full_name=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name")
-        )["name"]
+        if not int(frappe.get_value('MVD Settings', 'MVD Settings', 'email_queue')) == 1:
+            mahnung = frappe.get_doc("Mahnung", mahnung.name)
+            if email_vorlage:
+                if mahnung.mv_mitgliedschaft:
+                    mitgliedschaft = mahnung.mv_mitgliedschaft
+                else:
+                    mitgliedschaft = mahnung.mv_kunde
+                email_vorlage = frappe.get_doc("Druckvorlage", email_vorlage)
+                betreff = replace_mv_keywords(email_vorlage.e_mail_betreff, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
+                message = replace_mv_keywords(email_vorlage.e_mail_text, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
+            attachments = [frappe.attach_print("Mahnung", mahnung.name, file_name=mahnung.name, print_format='Mahnung')]
+            comm = make(
+                recipients=get_recipients(mahnung),
+                sender=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
+                subject=betreff,
+                content=message,
+                doctype='Mahnung',
+                name=mahnung.name,
+                attachments=attachments,
+                send_email=False,
+                sender_full_name=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name")
+            )["name"]
+            
+            sendmail(
+                recipients=get_recipients(mahnung),
+                sender="{0} <{1}>".format(frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name"), frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse")),
+                subject=betreff,
+                message=message,
+                as_markdown=False,
+                delayed=True,
+                reference_doctype='Mahnung',
+                reference_name=mahnung.name,
+                unsubscribe_method=None,
+                unsubscribe_params=None,
+                unsubscribe_message=None,
+                attachments=attachments,
+                content=None,
+                doctype='Mahnung',
+                name=mahnung.name,
+                reply_to=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
+                cc=[],
+                bcc=[],
+                message_id=frappe.get_value("Communication", comm, "message_id"),
+                in_reply_to=None,
+                send_after=None,
+                expose_recipients=None,
+                send_priority=1,
+                communication=comm,
+                retry=1,
+                now=None,
+                read_receipt=None,
+                is_notification=False,
+                inline_images=None,
+                template='mahnung',
+                args={
+                    "message": message,
+                    "footer": frappe.get_value("Sektion", mahnung.sektion_id, "footer")
+                },
+                header=None,
+                print_letterhead=False
+            )
+        else:
+            mahnungen_tbl.append({
+                'mahnung': mahnung.name,
+                'status': 'Not send'
+            })
         
-        sendmail(
-            recipients=get_recipients(mahnung),
-            sender="{0} <{1}>".format(frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name"), frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse")),
-            subject=betreff,
-            message=message,
-            as_markdown=False,
-            delayed=True,
-            reference_doctype='Mahnung',
-            reference_name=mahnung.name,
-            unsubscribe_method=None,
-            unsubscribe_params=None,
-            unsubscribe_message=None,
-            attachments=attachments,
-            content=None,
-            doctype='Mahnung',
-            name=mahnung.name,
-            reply_to=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
-            cc=[],
-            bcc=[],
-            message_id=frappe.get_value("Communication", comm, "message_id"),
-            in_reply_to=None,
-            send_after=None,
-            expose_recipients=None,
-            send_priority=1,
-            communication=comm,
-            retry=1,
-            now=None,
-            read_receipt=None,
-            is_notification=False,
-            inline_images=None,
-            template='mahnung',
-            args={
-                "message": message,
-                "footer": frappe.get_value("Sektion", mahnung.sektion_id, "footer")
-            },
-            header=None,
-            print_letterhead=False
-        )
+    if int(frappe.get_value('MVD Settings', 'MVD Settings', 'email_queue')) == 1:
+        new_queue = frappe.get_doc({
+            'doctype': 'MVD Email Queue',
+            'status': 'Not send',
+            'mahnlauf': mahnlauf,
+            'betreff': betreff,
+            'email_vorlage': email_vorlage,
+            'message': message,
+            'mahnungen': mahnungen_tbl
+        }).insert()
         
     frappe.set_value("Mahnlauf", mahnlauf, "e_mails_versendet", 1)
     return

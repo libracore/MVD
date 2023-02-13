@@ -17,6 +17,7 @@
   "massenlauf_referenz",
   "mahnlauf",
   "per_mail",
+  "zahlungserinnerung",
   "column_general",
   "sektion_id",
   "company",
@@ -235,10 +236,17 @@
    "fieldtype": "Check",
    "label": "Per Mail",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "zahlungserinnerung",
+   "fieldtype": "Check",
+   "label": "Ist Zahlungserinnerung",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-11-17 16:00:44.869575",
+ "modified": "2023-02-09 12:28:52.619212",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnung",

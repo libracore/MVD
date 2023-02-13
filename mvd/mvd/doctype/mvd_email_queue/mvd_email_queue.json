@@ -1,0 +1,71 @@
+{
+ "creation": "2023-02-09 10:27:03.923764",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "status",
+  "mahnlauf",
+  "betreff",
+  "email_vorlage",
+  "message",
+  "mahnungen"
+ ],
+ "fields": [
+  {
+   "fieldname": "mahnlauf",
+   "fieldtype": "Data",
+   "label": "mahnlauf"
+  },
+  {
+   "fieldname": "betreff",
+   "fieldtype": "Data",
+   "label": "betreff"
+  },
+  {
+   "fieldname": "email_vorlage",
+   "fieldtype": "Data",
+   "label": "email_vorlage"
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Code",
+   "label": "message"
+  },
+  {
+   "fieldname": "mahnungen",
+   "fieldtype": "Table",
+   "label": "Mahnungen",
+   "options": "MVD Email Queue Mail"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Not send\nPartially send\nSend"
+  }
+ ],
+ "modified": "2023-02-09 11:39:10.466131",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "MVD Email Queue",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
