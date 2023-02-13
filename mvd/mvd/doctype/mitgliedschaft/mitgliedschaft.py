@@ -3507,7 +3507,7 @@ def sinv_check_zahlung_mitgliedschaft(sinv, event):
     if sinv.rechnungs_jahresversand:
         from frappe.utils.data import add_to_date
         ref_date = add_to_date(date=sinv.creation, hours=1)
-        if sinv.modified < ref_date:
+        if getdate(sinv.modified) < getdate(ref_date):
             skip = True
             # gewährleistung dass trotz skip das Mitgliedschaftsjahr und bezahldatum korrekt geschrieben wird.
             if int(frappe.db.get_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr')) < int(sinv.mitgliedschafts_jahr):

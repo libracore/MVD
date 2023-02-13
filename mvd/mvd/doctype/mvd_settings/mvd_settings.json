@@ -8,7 +8,9 @@
   "retouren_management",
   "reaktivierung_von_inaktiven",
   "manuelle_artikelauswahl",
-  "rechnungstext_anpassungen"
+  "rechnungstext_anpassungen",
+  "email_queue",
+  "emails_per_flush"
  ],
  "fields": [
   {
@@ -39,10 +41,22 @@
    "fieldname": "section_feature",
    "fieldtype": "Section Break",
    "label": "Feature Aktivierung / Deaktivierung"
+  },
+  {
+   "default": "0",
+   "fieldname": "email_queue",
+   "fieldtype": "Check",
+   "label": "Email Queue"
+  },
+  {
+   "depends_on": "eval:doc.email_queue",
+   "fieldname": "emails_per_flush",
+   "fieldtype": "Int",
+   "label": "Anzahl Emails pro Flush"
   }
  ],
  "issingle": 1,
- "modified": "2022-08-11 13:13:34.665518",
+ "modified": "2023-02-09 10:29:42.569675",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Settings",

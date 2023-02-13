@@ -126,7 +126,8 @@ scheduler_events = {
         "mvd.mvd.utils.daily_jobs.rechnungs_jahresversand"
     ],
     "all": [
-        "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue"
+        "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue",
+        "mvd.mvd.doctype.mvd_email_queue.mvd_email_queue.mvd_mail_flush"
     ]
 }
 # scheduler_events = {
