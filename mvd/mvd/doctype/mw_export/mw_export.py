@@ -242,7 +242,8 @@ def get_csv_data(mw_export, query=False):
                                     `region`,
                                     `kundentyp`,
                                     `firma`,
-                                    `zusatz_adresse`
+                                    `zusatz_adresse`,
+                                    `zusatz_firma`
                                 FROM `tabMitgliedschaft`
                                 WHERE (
                                     `status_c` NOT IN ('Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')
@@ -262,14 +263,22 @@ def get_csv_data(mw_export, query=False):
             
             if entry.kundentyp == 'Unternehmen':
                 name_1 = entry.firma or ''
-                name_2 = " ".join([entry.vorname_1 or '', entry.nachname_1 or ''])
+                name_2 = entry.zusatz_firma or ''
+                name_3 = " ".join([entry.vorname_1 or '', entry.nachname_1 or ''])
+                if name_3 == ' ':
+                    name_3 = ''
             else:
                 name_1 = " ".join([entry.vorname_1 or '', entry.nachname_1 or ''])
+                if name_1 == ' ':
+                    name_1 = ''
                 name_2 = " ".join([entry.vorname_2 or '', entry.nachname_2 or ''])
-            if entry.zusatz_adresse:
-                name_2 = entry.zusatz_adresse
+                if name_2 == ' ':
+                    name_2 = ''
             
-            name_3 = " ".join([entry.rg_vorname or '', entry.rg_nachname or ''])
+                if entry.zusatz_adresse:
+                    name_3 = entry.zusatz_adresse
+                else:
+                    name_3 = ''
             
             strasse_pf = " ".join([entry.strasse or '' if not int(entry.postfach) == 1 else 'Postfach', entry.nummer or '' + entry.nummer_zu or '' if not int(entry.postfach) == 1 else entry.postfach_nummer or ''])
             plz_6 = entry.plz
