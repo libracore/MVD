@@ -7,9 +7,16 @@ function new_onlineberatung() {
         'frage': document.getElementById("frage").value
     }
     frappe.call({
-        method: 'mvd.www.emailberatung.new_beratung',
-        args: {
+        'method': 'mvd.www.emailberatung.new_beratung',
+        'args': {
             kwargs
+        },
+        'async': true,
+        'callback': function(res) {
+            var beratung = res.message;
+            if (beratung) {
+                get_upload_keys(beratung);
+            }
         }
     });
 }
@@ -17,7 +24,6 @@ function new_onlineberatung() {
 $(':file').on('change',function(){
     var myFile = $(this).val();
     var upld = myFile.split('.').pop();
-    console.log(upld)
     if(!["pdf", "jpg", "jpeg", "zip"].includes(upld)){
         alert("Nur Dateien vom Typ PDF und JPEG/JPG sind erlaubt.");
         $(this).val("");
@@ -42,3 +48,38 @@ function add_new_file_row() {
     }
 }
 
+function get_upload_keys(beratung) {
+    if (beratung) {
+        frappe.call({
+            method: 'mvd.www.emailberatung.get_upload_keys',
+            callback: function(res) {
+                upload_files(beratung, res.message.key, res.message.secret, loop=1);
+            }
+        });
+    }
+}
+function upload_files(beratung, key, secret, loop=1) {
+    if (loop <= $(':file').length) {
+        var file_name = '';
+        if ($("#upload_files_dateupload_files_date_" + String(loop)).val()) {
+            file_name += $("#upload_files_dateupload_files_date_" + String(loop)).val().replace("-", "_").replace("-", "_") + "_";
+        }
+        if ($("#upload_files_auswahl_" + String(loop)).val()) {
+            file_name += $("#upload_files_auswahl_" + String(loop)).val() + "_";
+        }
+        file_name += document.getElementById("mitgliedschaft_nr").value + "_" + String(loop) + "." + $(':file')[loop - 1].value.split('.').pop();
+        
+        let upload_file = new FormData();
+        upload_file.append('file', $("#upload_files_" + String(loop))[0].files[0], file_name);
+        upload_file.append('is_private', 1);
+        upload_file.append('doctype', 'Beratung');
+        upload_file.append('docname', beratung);
+        fetch('/api/method/upload_file', {
+            headers: {
+                'Authorization': 'token ' + key + ':' + secret
+            },
+            method: 'POST',
+            body: upload_file
+        }).then(upload_files(beratung, key, secret, loop + 1))
+    }
+}

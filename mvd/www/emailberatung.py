@@ -78,5 +78,13 @@ def new_beratung(**kwargs):
         new_ber.insert(ignore_permissions=True)
         frappe.db.commit()
         frappe.msgprint("Vielen Dank, die Anfrage wurde gespeichert.")
+        return new_ber.name
     else:
-        frappe.throw("Die Mitgliedschaft {0} konnte nicht abgerufen werden".format(args['mv_mitgliedschaft']))
+        return 'error'
+
+@frappe.whitelist(allow_guest=True)
+def get_upload_keys():
+    return {
+        'key': frappe.db.get_value("MVD Settings", "MVD Settings", "upload_key"),
+        'secret': frappe.db.get_value("MVD Settings", "MVD Settings", "upload_secret")
+    }
