@@ -39,6 +39,7 @@ def raise_redirect():
 
 def context_erweiterung(context, mitgliedschaft):
     context.mitglied_nr = mitgliedschaft.mitglied_nr
+    context.mitglied_id = mitgliedschaft.name
     context.anrede = mitgliedschaft.anrede_c
     context.vorname = mitgliedschaft.vorname_1
     context.nachname = mitgliedschaft.nachname_1
@@ -61,12 +62,21 @@ def context_erweiterung(context, mitgliedschaft):
     return context
 
 @frappe.whitelist(allow_guest=True)
-def new_onlineberatung(**kwargs):
+def new_beratung(**kwargs):
     args = json.loads(kwargs['kwargs'])
     if frappe.db.exists("Mitgliedschaft", args['mv_mitgliedschaft']):
-        args['doctype'] = "Onlineberatung"
-        new_ob = frappe.get_doc(args)
-        new_ob.insert(ignore_permissions=True)
+        notiz = """<b>Telefon:</b> {0}<br>
+                    <b>E-Mail:</b> {1}<br>
+                    <b>Anderes Mietobjekt:</b><br>{2}<br><br>
+                    <b>Frage:</b><br>{3}""".format(args['telefon'] or '-', args['email'] or '-', args['anderes_mietobjekt'].replace("\n", "<br>") or '-', args['frage'].replace("\n", "<br>") or '-')
+        
+        new_ber = frappe.get_doc({
+            'doctype': 'Beratung',
+            'status': 'Open',
+            'mv_mitgliedschaft': args['mv_mitgliedschaft'],
+            'notiz': notiz
+        })
+        new_ber.insert(ignore_permissions=True)
         frappe.db.commit()
         frappe.msgprint("Vielen Dank, die Anfrage wurde gespeichert.")
     else:

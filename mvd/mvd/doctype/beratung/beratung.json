@@ -21,7 +21,7 @@
   "section_verknuepfungen",
   "verknuepfungen_html",
   "section_anfrage",
-  "notitz",
+  "notiz",
   "antwort",
   "section_dokumente",
   "dokumente"
@@ -115,11 +115,6 @@
    "label": "Problemstellung/Anfrage"
   },
   {
-   "fieldname": "notitz",
-   "fieldtype": "Text Editor",
-   "label": "Notitz"
-  },
-  {
    "fieldname": "antwort",
    "fieldtype": "Text Editor",
    "label": "Antwort/Protokoll"
@@ -140,9 +135,14 @@
    "hidden": 1,
    "label": "Verkn\u00fcpfungen",
    "options": "Beratung Multiselect"
+  },
+  {
+   "fieldname": "notiz",
+   "fieldtype": "Text Editor",
+   "label": "Notiz"
   }
  ],
- "modified": "2023-01-25 23:33:54.998246",
+ "modified": "2023-02-13 12:41:38.309489",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

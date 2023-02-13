@@ -66,44 +66,47 @@ def get_verknuepfungsuebersicht(beratung):
                                             FROM `tabBeratung Multiselect`
                                             WHERE `parent` = '{beratung}'
                                         )""".format(beratung=beratung), as_dict=True)
-    table = """<table style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>Datum</th>
-                            <th>Priorität</th>
-                            <th>Status</th>
-                            <th>Kontaktperson</th>
-                            <th>Beratungskategorie</th>
-                            <th>Verkn. öffnen</th>
-                            <th>Verkn. aufheben</th>
-                        </tr>
-                    </thead>
-                    <tbody>"""
-    
-    for verknuepfung in verknuepfungen_zu:
-        table += """<tr>
-                        <td>{0}</td>
-                        <td>{1}</td>
-                        <td>{2}</td>
-                        <td>{3}</td>
-                        <td>{4}</td>
-                        <td style="text-align: center;"><i class="fa fa-external-link verknuepfung_jump" data-jump="{5}" style="cursor: pointer;"></i></td>
-                        <td style="text-align: center;"><i class="fa fa-trash verknuepfung_trash" data-remove="{5}" style="cursor: pointer;"></i></td>
-                    </tr>""".format(frappe.utils.get_datetime(verknuepfung.start_date).strftime('%d.%m.%Y'), \
-                                    verknuepfung.beratung_prio or '-', verknuepfung.status, verknuepfung.kontaktperson or '-', verknuepfung.beratungskategorie or '-', verknuepfung.name)
-    for verknuepfung in verknuepfungen_von:
-        table += """<tr>
-                        <td>{0}</td>
-                        <td>{1}</td>
-                        <td>{2}</td>
-                        <td>{3}</td>
-                        <td>{4}</td>
-                        <td style="text-align: center;"><i class="fa fa-external-link verknuepfung_jump" data-jump="{5}" style="cursor: pointer;"></i></td>
-                        <td style="text-align: center;"><i class="fa fa-trash verknuepfung_trash" data-remove="{5}" style="cursor: pointer;"></i></td>
-                    </tr>""".format(frappe.utils.get_datetime(verknuepfung.start_date).strftime('%d.%m.%Y'), \
-                                    verknuepfung.beratung_prio or '-', verknuepfung.status, verknuepfung.kontaktperson or '-', verknuepfung.beratungskategorie or '-', verknuepfung.name)
-    
-    table += """</tbody>
-                </table>"""
+    if len(verknuepfungen_zu) > 0:
+        table = """<table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Priorität</th>
+                                <th>Status</th>
+                                <th>Kontaktperson</th>
+                                <th>Beratungskategorie</th>
+                                <th>Verkn. öffnen</th>
+                                <th>Verkn. aufheben</th>
+                            </tr>
+                        </thead>
+                        <tbody>"""
+        
+        for verknuepfung in verknuepfungen_zu:
+            table += """<tr>
+                            <td>{0}</td>
+                            <td>{1}</td>
+                            <td>{2}</td>
+                            <td>{3}</td>
+                            <td>{4}</td>
+                            <td style="text-align: center;"><i class="fa fa-external-link verknuepfung_jump" data-jump="{5}" style="cursor: pointer;"></i></td>
+                            <td style="text-align: center;"><i class="fa fa-trash verknuepfung_trash" data-remove="{5}" style="cursor: pointer;"></i></td>
+                        </tr>""".format(frappe.utils.get_datetime(verknuepfung.start_date).strftime('%d.%m.%Y'), \
+                                        verknuepfung.beratung_prio or '-', verknuepfung.status, verknuepfung.kontaktperson or '-', verknuepfung.beratungskategorie or '-', verknuepfung.name)
+        for verknuepfung in verknuepfungen_von:
+            table += """<tr>
+                            <td>{0}</td>
+                            <td>{1}</td>
+                            <td>{2}</td>
+                            <td>{3}</td>
+                            <td>{4}</td>
+                            <td style="text-align: center;"><i class="fa fa-external-link verknuepfung_jump" data-jump="{5}" style="cursor: pointer;"></i></td>
+                            <td style="text-align: center;"><i class="fa fa-trash verknuepfung_trash" data-remove="{5}" style="cursor: pointer;"></i></td>
+                        </tr>""".format(frappe.utils.get_datetime(verknuepfung.start_date).strftime('%d.%m.%Y'), \
+                                        verknuepfung.beratung_prio or '-', verknuepfung.status, verknuepfung.kontaktperson or '-', verknuepfung.beratungskategorie or '-', verknuepfung.name)
+        
+        table += """</tbody>
+                    </table>"""
+    else:
+        table = """<p>Keine Verknüpfungen vorhanden</p>"""
     
     return table
