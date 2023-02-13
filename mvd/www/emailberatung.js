@@ -6,7 +6,6 @@ function new_onlineberatung() {
         'anderes_mietobjekt': document.getElementById("anderes_mietobjekt").value,
         'frage': document.getElementById("frage").value
     }
-    //~ console.log(kwargs);
     frappe.call({
         method: 'mvd.www.emailberatung.new_beratung',
         args: {
@@ -18,10 +17,15 @@ function new_onlineberatung() {
 $(':file').on('change',function(){
     var myFile = $(this).val();
     var upld = myFile.split('.').pop();
-    if(![".pdf", ".jpg", ".jpeg"].includes(upld)){
+    console.log(upld)
+    if(!["pdf", "jpg", "jpeg", "zip"].includes(upld)){
         alert("Nur Dateien vom Typ PDF und JPEG/JPG sind erlaubt.");
         $(this).val("");
     }
+    if(this.files[0].size > 10485760){
+       alert("Die Maximale Filegrösse beträgt 10MB.");
+       $(this).val("");
+    };
 })
 
 function add_new_file_row() {
