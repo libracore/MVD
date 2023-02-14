@@ -60,26 +60,37 @@ function get_upload_keys(beratung) {
 }
 function upload_files(beratung, key, secret, loop=1) {
     if (loop <= $(':file').length) {
-        var file_name = '';
-        if ($("#upload_files_dateupload_files_date_" + String(loop)).val()) {
-            file_name += $("#upload_files_dateupload_files_date_" + String(loop)).val().replace("-", "_").replace("-", "_") + "_";
+        if ($("#upload_files_" + String(loop))[0].files[0]) {
+            var file_name = '';
+            if ($("#upload_files_dateupload_files_date_" + String(loop)).val()) {
+                file_name += $("#upload_files_dateupload_files_date_" + String(loop)).val().replace("-", "_").replace("-", "_") + "_";
+            }
+            if ($("#upload_files_auswahl_" + String(loop)).val()) {
+                file_name += $("#upload_files_auswahl_" + String(loop)).val() + "_";
+            }
+            file_name += document.getElementById("mitgliedschaft_nr").value + "_" + String(loop) + "." + $(':file')[loop - 1].value.split('.').pop();
+            
+            let upload_file = new FormData();
+            upload_file.append('file', $("#upload_files_" + String(loop))[0].files[0], file_name);
+            upload_file.append('is_private', 1);
+            upload_file.append('doctype', 'Beratung');
+            upload_file.append('docname', beratung);
+            fetch('/api/method/upload_file', {
+                headers: {
+                    'Authorization': 'token ' + key + ':' + secret
+                },
+                method: 'POST',
+                body: upload_file
+            }).then(upload_files(beratung, key, secret, loop + 1))
+        } else {
+            upload_files(beratung, key, secret, loop + 1);
         }
-        if ($("#upload_files_auswahl_" + String(loop)).val()) {
-            file_name += $("#upload_files_auswahl_" + String(loop)).val() + "_";
-        }
-        file_name += document.getElementById("mitgliedschaft_nr").value + "_" + String(loop) + "." + $(':file')[loop - 1].value.split('.').pop();
-        
-        let upload_file = new FormData();
-        upload_file.append('file', $("#upload_files_" + String(loop))[0].files[0], file_name);
-        upload_file.append('is_private', 1);
-        upload_file.append('doctype', 'Beratung');
-        upload_file.append('docname', beratung);
-        fetch('/api/method/upload_file', {
-            headers: {
-                'Authorization': 'token ' + key + ':' + secret
-            },
-            method: 'POST',
-            body: upload_file
-        }).then(upload_files(beratung, key, secret, loop + 1))
+    } else {
+        frappe.call({
+            method: 'mvd.www.emailberatung.raise_redirect',
+            args: {
+                'typ': "200"
+            }
+        });
     }
 }

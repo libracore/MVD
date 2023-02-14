@@ -55,7 +55,8 @@ email_append_to = ["Beratung"]
 website_redirects = [
     # absolute location
     {"source": "/nologin", "target": "https://www.mieterverband.ch/mv/prozesse/login.html"},
-    {"source": "/mvd-500", "target": "https://www.mieterverband.ch/mv/500"}
+    {"source": "/mvd-500", "target": "https://www.mieterverband.ch/mv/500"},
+    {"source": "/mvd-erfolg", "target": "https://www.mieterverband.ch/mv/emailberatung-erfolg"}
 ]
 
 # Home Pages
