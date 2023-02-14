@@ -35,7 +35,6 @@ def get_context(context):
         # KEIN JWT Token
         raise_redirect()
 
-@frappe.whitelist(allow_guest=True)
 def raise_redirect(typ=None):
     if not typ:
         frappe.local.flags.redirect_location = "/nologin"
@@ -43,9 +42,6 @@ def raise_redirect(typ=None):
     else:
         if typ == '500':
             frappe.local.flags.redirect_location = "/mvd-500"
-            raise frappe.Redirect
-        if typ == '200':
-            frappe.local.flags.redirect_location = "/mvd-erfolg"
             raise frappe.Redirect
 
 def context_erweiterung(context, mitgliedschaft):

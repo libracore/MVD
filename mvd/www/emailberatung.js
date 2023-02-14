@@ -86,11 +86,6 @@ function upload_files(beratung, key, secret, loop=1) {
             upload_files(beratung, key, secret, loop + 1);
         }
     } else {
-        frappe.call({
-            method: 'mvd.www.emailberatung.raise_redirect',
-            args: {
-                'typ': "200"
-            }
-        });
+        location.replace('https://www.mieterverband.ch/mv/emailberatung-erfolg');
     }
 }
