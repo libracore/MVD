@@ -85,7 +85,6 @@ def new_beratung(**kwargs):
         })
         new_ber.insert(ignore_permissions=True)
         frappe.db.commit()
-        frappe.msgprint("Vielen Dank, die Anfrage wurde gespeichert.")
         return new_ber.name
     else:
         return 'error'

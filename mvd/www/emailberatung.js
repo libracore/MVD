@@ -14,7 +14,7 @@ function new_onlineberatung() {
         'async': true,
         'callback': function(res) {
             var beratung = res.message;
-            if (beratung) {
+            if (beratung != 'error') {
                 get_upload_keys(beratung);
             }
         }
