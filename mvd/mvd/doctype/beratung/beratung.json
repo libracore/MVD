@@ -14,10 +14,12 @@
   "status",
   "beratung_prio",
   "verknuepfungen",
+  "zuweisung",
   "section_uebersicht",
   "uebersicht_html",
   "section_tremin",
   "termin",
+  "hat_termine",
   "section_verknuepfungen",
   "verknuepfungen_html",
   "section_anfrage",
@@ -38,7 +40,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Open\nClosed",
+   "options": "Eingang\nOpen\nR\u00fcckfragen\nClosed",
    "reqd": 1
   },
   {
@@ -140,9 +142,23 @@
    "fieldname": "notiz",
    "fieldtype": "Text Editor",
    "label": "Notiz"
+  },
+  {
+   "default": "0",
+   "fieldname": "zuweisung",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Zuweisung"
+  },
+  {
+   "default": "0",
+   "fieldname": "hat_termine",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Hat Termine"
   }
  ],
- "modified": "2023-02-13 12:41:38.309489",
+ "modified": "2023-02-14 14:01:35.599842",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

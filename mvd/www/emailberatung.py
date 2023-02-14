@@ -79,7 +79,7 @@ def new_beratung(**kwargs):
         
         new_ber = frappe.get_doc({
             'doctype': 'Beratung',
-            'status': 'Open',
+            'status': 'Eingang',
             'mv_mitgliedschaft': args['mv_mitgliedschaft'],
             'notiz': notiz
         })

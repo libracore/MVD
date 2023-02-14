@@ -7,7 +7,15 @@ import frappe
 from frappe.model.document import Document
 
 class Beratung(Document):
-    pass
+    def validate(self):
+        if len(self.termin) > 0:
+            self.hat_termine = 1
+        else:
+            self.hat_termine = 0
+        if len(self.get_assigned_users()) > 0:
+            self.zuweisung = 1
+        else:
+            self.zuweisung = 0
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):

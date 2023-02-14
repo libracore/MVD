@@ -43,6 +43,17 @@ def todo_permissions(todo, event):
                     frappe.share.remove("ToDo", todo.name, user.user, flags={'ignore_share_permission': True, 'ignore_permissions': True})
     except:
         pass
+    
+    if todo.status == 'Open':
+        if todo.reference_type == 'Beratung':
+            frappe.db.set_value("Beratung", todo.reference_name, "zuweisung", 1)
+    else:
+        if todo.reference_type == 'Beratung':
+            beratung = frappe.get_doc("Beratung", todo.reference_name)
+            if len(beratung.get_assigned_users()) > 0:
+                frappe.db.set_value("Beratung", todo.reference_name, "zuweisung", 1)
+            else:
+                frappe.db.set_value("Beratung", todo.reference_name, "zuweisung", 0)
 
 def unlink_fr(sinv, event):
     hv_fr = frappe.db.sql("""SELECT `name` FROM `tabFakultative Rechnung` WHERE `docstatus` = 1 AND `sales_invoice` = '{sinv}'""".format(sinv=sinv.name), as_dict=True)
