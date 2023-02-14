@@ -13,7 +13,7 @@ def get_open_data():
     open_data = {
         'beratung': {
             'eingang': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang'}, limit=100, distinct=True, ignore_ifnull=True)),
-            'eingang_ohne_zuordnung': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': None}, limit=100, distinct=True, ignore_ifnull=True)),
+            'eingang_ohne_zuordnung': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set']}, limit=100, distinct=True, ignore_ifnull=True)),
             'offen': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open'}, limit=100, distinct=True, ignore_ifnull=True)),
             'offen_dringend': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': 'Hoch'}, limit=100, distinct=True, ignore_ifnull=True)),
             'offen_zuweisung_ja': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'zuweisung': 1}, limit=100, distinct=True, ignore_ifnull=True)),
