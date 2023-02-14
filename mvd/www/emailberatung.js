@@ -63,10 +63,12 @@ function upload_files(beratung, key, secret, loop=1) {
         if ($("#upload_files_" + String(loop))[0].files[0]) {
             var file_name = '';
             if ($("#upload_files_dateupload_files_date_" + String(loop)).val()) {
-                file_name += $("#upload_files_dateupload_files_date_" + String(loop)).val().replace("-", "_").replace("-", "_") + "_";
+                document_date = $("#upload_files_dateupload_files_date_" + String(loop)).val().replace("-", "_").replace("-", "_")
+                file_name += document_date + "_";
             }
             if ($("#upload_files_auswahl_" + String(loop)).val()) {
-                file_name += $("#upload_files_auswahl_" + String(loop)).val() + "_";
+                var document_type = $("#upload_files_auswahl_" + String(loop)).val()
+                file_name += document_type + "_";
             }
             file_name += document.getElementById("mitgliedschaft_nr").value + "_" + String(loop) + "." + $(':file')[loop - 1].value.split('.').pop();
             
@@ -81,7 +83,22 @@ function upload_files(beratung, key, secret, loop=1) {
                 },
                 method: 'POST',
                 body: upload_file
-            }).then(upload_files(beratung, key, secret, loop + 1))
+            }).then(function(res){
+                var kwargs = {
+                    'beratung': beratung,
+                    'idx': loop,
+                    'document_type': document_type,
+                    'filename': file_name,
+                    'document_date': document_date
+                }
+                frappe.call({
+                    'method': 'mvd.www.emailberatung.new_file_to_beratung',
+                    'args': {
+                        kwargs
+                    }
+                });
+                upload_files(beratung, key, secret, loop + 1)
+            })
         } else {
             upload_files(beratung, key, secret, loop + 1);
         }
