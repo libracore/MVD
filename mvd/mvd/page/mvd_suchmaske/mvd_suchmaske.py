@@ -215,11 +215,16 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False):
     if anlage_daten["status"] == 'Regulär':
         eintritt = now()
     
+    if anlage_daten["sektion_id"] == "M+W-Abo":
+        anlage_daten_status = 'Regulär'
+    else:
+        anlage_daten_status = anlage_daten["status"]
+    
     # erstelle mitgliedschaft
     mitgliedschaft = frappe.get_doc({
         "doctype": "Mitgliedschaft",
         "sektion_id": anlage_daten["sektion_id"],
-        "status_c": anlage_daten["status"],
+        "status_c": anlage_daten_status,
         "language": anlage_daten["language"],
         "m_und_w": 1,
         "mitgliedtyp_c": anlage_daten["mitgliedtyp"],
@@ -275,7 +280,7 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False):
                 mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
                 mitgliedschaft.interessent_innenbrief_mit_ez = 1
                 mitgliedschaft.save()
-            if anlage_daten["status"] == 'Anmeldung':
+            if anlage_daten["status"] == 'Anmeldung' and anlage_daten["sektion_id"] != "M+W-Abo":
                 # erstelle ABL für Anmeldung mit EZ
                 create_abl("Anmeldung mit EZ", mitgliedschaft)
                 mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
