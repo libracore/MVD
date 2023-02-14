@@ -26,15 +26,23 @@ def get_context(context):
                 mitgliedschaft = frappe.get_doc("Mitgliedschaft", decoded_jwt_token["mitglied_id"])
                 context = context_erweiterung(context, mitgliedschaft)
             else:
-                raise_redirect()
+                # Mitglied-ID in ERPNext unbekannt
+                raise_redirect(typ='500')
         else:
+            # ungültiger JWT Token
             raise_redirect()
     else:
+        # KEIN JWT Token
         raise_redirect()
 
-def raise_redirect():
-    frappe.local.flags.redirect_location = "/nologin"
-    raise frappe.Redirect
+def raise_redirect(typ=None):
+    if not typ:
+        frappe.local.flags.redirect_location = "/nologin"
+        raise frappe.Redirect
+    else:
+        if typ == '500':
+            frappe.local.flags.redirect_location = "/mvd-500"
+            raise frappe.Redirect
 
 def context_erweiterung(context, mitgliedschaft):
     context.mitglied_nr = mitgliedschaft.mitglied_nr
