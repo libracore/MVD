@@ -4,7 +4,8 @@ function new_onlineberatung() {
         'telefon': document.getElementById("telefon").value,
         'email': document.getElementById("email").value,
         'anderes_mietobjekt': document.getElementById("anderes_mietobjekt").value,
-        'frage': document.getElementById("frage").value
+        'frage': document.getElementById("frage").value,
+        'datum_mietzinsanzeige': document.getElementById("datum_mietzinsanzeige").value
     }
     frappe.call({
         'method': 'mvd.www.emailberatung.new_beratung',

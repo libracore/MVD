@@ -72,10 +72,28 @@ def context_erweiterung(context, mitgliedschaft):
 def new_beratung(**kwargs):
     args = json.loads(kwargs['kwargs'])
     if frappe.db.exists("Mitgliedschaft", args['mv_mitgliedschaft']):
-        notiz = """<b>Telefon:</b> {0}<br>
-                    <b>E-Mail:</b> {1}<br>
-                    <b>Anderes Mietobjekt:</b><br>{2}<br><br>
-                    <b>Frage:</b><br>{3}""".format(args['telefon'] or '-', args['email'] or '-', args['anderes_mietobjekt'].replace("\n", "<br>") or '-', args['frage'].replace("\n", "<br>") or '-')
+        if args['telefon']:
+            telefon = """<b>Telefon:</b> {0}<br>""".format(args['telefon'])
+        else:
+            telefon = ''
+        if args['email']:
+            email = """<b>E-Mail:</b> {0}<br>""".format(args['email'])
+        else:
+            email = ''
+        if args['anderes_mietobjekt']:
+            anderes_mietobjekt = """<b>Anderes Mietobjekt:</b><br>{0}<br><br>""".format(args['anderes_mietobjekt'].replace("\n", "<br>"))
+        else:
+            anderes_mietobjekt = ''
+        if args['frage']:
+            frage = """<b>Frage:</b><br>{0}<br><br>""".format(args['frage'].replace("\n", "<br>"))
+        else:
+            frage = ''
+        if args['datum_mietzinsanzeige']:
+            datum_mietzinsanzeige = """<b>Briefdatum der Mietzinserhöhungsanzeige:</b> {0}""".format(args['datum_mietzinsanzeige'])
+        else:
+            datum_mietzinsanzeige = ''
+        
+        notiz = """{0}{1}{2}{3}{4}""".format(telefon, email, anderes_mietobjekt, frage, datum_mietzinsanzeige)
         
         new_ber = frappe.get_doc({
             'doctype': 'Beratung',
