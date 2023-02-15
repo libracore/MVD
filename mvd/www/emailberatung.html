@@ -369,12 +369,12 @@
                                             <nav class="nav-tab nav-tab-emailberatung">
                                                                 <ul class="h-cf">
 
-                                                                            <li class="nav-item selected">
-                                                                                <a class="nav-link" href="#/" onclick="document.getElementById('mz').style.display = 'none'"><span>Allgemeine Anfrage</span></a>
+                                                                            <li id="allgmein_item" class="nav-item selected">
+                                                                                <a class="nav-link" href="#/" onclick="hide_mz();"><span>Allgemeine Anfrage</span></a>
                                                                             </li>
 
-                                                                            <li class="nav-item">
-                                                                                <a class="nav-link" href="#/"" onclick="document.getElementById('mz').style.display = 'inline' "><span>Mietzinserhöhung</span></a>
+                                                                            <li id="mz_item" class="nav-item">
+                                                                                <a class="nav-link" href="#/" onclick="show_mz();"><span>Mietzinserhöhung</span></a>
                                                                             </li>
                                                                 </ul>
                                                         </nav>
@@ -472,14 +472,7 @@
                                                         </td>
                                                         <td>
                                                             <label for="upload_files_auswahl">Typ:</label>
-                                                            <input type="text" list="upload_files_auswahl_1" value="" />
-                                                            <datalist id="upload_files_auswahl_1">
-                                                                <option value="Typ 1">
-                                                                <option value="Typ 2">
-                                                                <option value="Typ 3">
-                                                                <option value="Typ 4">
-                                                                <option value="Typ 5">
-                                                            </datalist>
+                                                            <input id="upload_files_auswahl_1" name="upload_files_auswahl" type="text" class="awesomplete" data-list="Mietvertrag, Mietzinserhöhung, Mietzinsherabsetzung, Vergleich/Urteil, Vereinbarung, sonstige Vertragsänderung" />
                                                         </td>
                                                     </tr>
                                                     <tr>
