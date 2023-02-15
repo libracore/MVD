@@ -381,7 +381,7 @@
                                             <!-- kat-ende -->
                                             <fieldset class="fieldset">
                                                 <span class="e-copy-small required-hint position-right"><span>*</span> Pflichtfeld</span>
-                                                <h2 class="e-h3 fieldset-title">Beratungsanfrage</h2>
+                                                <h2 class="e-h3 fieldset-title" id="tab_title">Beratungsanfrage</h2>
                                                 <div class="form-row">
                                                     <div class="row">
                                                         <div class="col-sm-12 col-md-4 col-lg-4">
@@ -399,52 +399,16 @@
                                                     <div class="form-row">
                                                         <div class="row">
                                                             <div class="col-sm-12 col-md-4 col-lg-4">
-                                                                <label for="mz_alt" class="label mietzins required">
-                                                                    Mietzins alt&nbsp;*
+                                                                <label for="datum_mietzinsanzeige" class="label mietzins required">
+                                                                    Briefdatum der Mietzinserhöhungsanzeige&nbsp;*
                                                                 </label>
                                                             </div>
-                                                            <div class="col-sm-12 col-md-8 col-lg-8">
-                                                                <input type="text" name="mz_alt" id="mz_alt" value="" maxlength="128">
+                                                            <div class="col-sm-12 col-md-8 col-lg-8" style="padding-top: 10px;">
+                                                                <input type="date" id="datum_mietzinsanzeige" name="datum_mietzinsanzeige">
                                                             </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-row">
-                                                        <div class="row">
-                                                            <div class="col-sm-12 col-md-4 col-lg-4">
-                                                                <label for="mz_alt_datum" class="label mietzins required">
-                                                                    Mietzins alt Datum&nbsp;*
-                                                                </label>
-                                                            </div>
-                                                            <div class="col-sm-12 col-md-8 col-lg-8">
-                                                                <input type="text" name="mz_alt_datum" id="mz_alt_datum" value="01.01.2020" maxlength="128">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                <div class="form-row">
-                                                    <div class="row">
-                                                        <div class="col-sm-12 col-md-4 col-lg-4">
-                                                            <label for="mz_neu" class="label mietzins required">
-                                                                Mietzins neu&nbsp;*
-                                                            </label>
-                                                        </div>
-                                                        <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <input type="text" name="mz_neu" id="mz_neu" value="" maxlength="128">
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="form-row">
-                                                    <div class="row">
-                                                        <div class="col-sm-12 col-md-4 col-lg-4">
-                                                            <label for="mz_neu_datum" class="label mietzins required">
-                                                                Mietzins neu Datum&nbsp;*
-                                                            </label>
-                                                        </div>
-                                                        <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <input type="text" name="mz_neu_datum" id="mz_neu_datum" value="01.03.2023" maxlength="128">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
                                             </fieldset>
                                             <fieldset class="fieldset">
                                                 <span class="e-copy-small required-hint position-right" style="display: none;"><span>*</span> Pflichtfeld</span>
@@ -455,7 +419,7 @@
                                                     </div>
                                                 </div>
                                                 <table style="width: 100%;">
-                                                    <tr id="default_file_row">
+                                                    <tr id="default_file_row" class="file-upload-row">
                                                         <td>
                                                             <div class="form-row">
                                                                 <label for="upload_files">

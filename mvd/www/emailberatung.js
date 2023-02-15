@@ -38,6 +38,7 @@ function add_new_file_row() {
     var new_id = $(':file').length + 1;
     var klon = $("#default_file_row").clone(true);
     klon[0].id = "file_row_" + String(new_id);
+    $(klon[0].children[0].children[0].children[0]).text('Zusätzliche Datei');
     klon[0].children[0].children[0].children[1].id = "upload_files_" + String(new_id);
     klon[0].children[1].children[0].children[1].id = "upload_files_dateupload_files_date_" + String(new_id);
     klon[0].children[2].children[1].children[0].id = "upload_files_auswahl_" + String(new_id);
@@ -111,15 +112,60 @@ function upload_files(beratung, key, secret, loop=1) {
 }
 
 function show_mz() {
-    document.getElementById('mz').style.display = 'inline';
+    $("#tab_title").text("Mietzinserhöhung");
+    $(".mz").css("display", 'inline');
     $("#mz_item").addClass("selected");
     $("#allgmein_item").removeClass("selected");
+    
+    // remove upload rows
+    $(".file-upload-row").each(function(){
+        if ($(this).attr('id') != 'default_file_row') {
+            $(this).remove();
+        }
+    });
+    
+    // clear first upload file
+    $("#upload_files_1").val('');
+    
+    // set first 3 upload rows
+    add_new_file_row();
+    add_new_file_row();
+    $("#upload_files_auswahl_1").val('Mietvertrag');
+    $("#upload_files_auswahl_2").val('Mietzinserhöhung');
+    $("#upload_files_auswahl_3").val('Mietzinsherabsetzung');
+    $("#upload_files_auswahl_1").attr('readonly', true);
+    $("#upload_files_auswahl_2").attr('readonly', true);
+    $("#upload_files_auswahl_3").attr('readonly', true);
+    $("label[for='upload_files']").each(function(index,element){
+        if (index == 0) {
+            $(this).text("1. Mietvertrag");
+        } else if (index == 1) {
+            $(this).text("2. Mietzinserhöhung");
+        } else if (index == 2) {
+            $(this).text("3. Mietzinsherabsetzung");
+        }
+    });
+    
 }
 
 function hide_mz() {
+    $("#tab_title").text("Beratungsanfrage");
+    $(".mz").css("display", 'none');
     $("#allgmein_item").addClass("selected");
     $("#mz_item").removeClass("selected");
-    document.getElementById('mz').style.display = 'none'
+    
+    // remove upload rows
+    $(".file-upload-row").each(function(){
+        if ($(this).attr('id') != 'default_file_row') {
+            $(this).remove();
+        }
+    });
+    
+    // clear first upload file
+    $("#upload_files_1").val('');
+    $("label[for='upload_files']").each(function(){
+        $(this).text("Datei");
+    });
 }
 
 // AWESOMPLETE
