@@ -86,6 +86,11 @@ class Mahnlauf(Document):
         else:
             frappe.throw("Unbekannter Mahnlauf Typ")
         
+        if int(self.sprach_filter) == 1:
+            rg_typ_filter += """
+                                AND `mvm`.`language` = '{0}'
+                            """.format(self.language)
+        
         if self.is_new() or (self.entwurfs_mahnungen + self.gebuchte_mahnungen + self.stornierte_mahnungen) == 0:
             if int(self.zahlungserinnerungen) != 1:
                 e_mails = frappe.db.sql("""SELECT
@@ -202,6 +207,11 @@ class Mahnlauf(Document):
                             """
         else:
             frappe.throw("Unbekannter Mahnlauf Typ")
+        
+        if int(self.sprach_filter) == 1:
+            rg_typ_filter += """
+                                AND `mvm`.`language` = '{0}'
+                            """.format(self.language)
         
         sinvs = frappe.db.sql("""SELECT
                                     `sinv`.`name`,
