@@ -14,12 +14,14 @@
   "cb_1",
   "typ",
   "typ_code",
-  "mahnungen_per_mail",
-  "zahlungserinnerungen",
+  "language",
+  "sprach_filter",
   "cb_2",
   "mahnstufe",
-  "amended_from",
+  "mahnungen_per_mail",
+  "zahlungserinnerungen",
   "ueberfaellig_seit",
+  "amended_from",
   "section_uebersicht",
   "anzahl_pdf",
   "cb_3",
@@ -253,10 +255,23 @@
    "fieldname": "zahlungserinnerungen",
    "fieldtype": "Check",
    "label": "Nur Zahlungserinnerungen"
+  },
+  {
+   "depends_on": "eval:doc.sprach_filter",
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Sprache",
+   "options": "Language"
+  },
+  {
+   "default": "0",
+   "fieldname": "sprach_filter",
+   "fieldtype": "Check",
+   "label": "Auf Basis der Mitgliedsprache filtern"
   }
  ],
  "is_submittable": 1,
- "modified": "2023-02-09 10:33:17.588165",
+ "modified": "2023-02-16 09:52:11.100643",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnlauf",
