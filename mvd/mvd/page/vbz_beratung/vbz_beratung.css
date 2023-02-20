@@ -119,6 +119,11 @@ Validierung
 #offen_dringend:hover,
 #offen_zuweisung:hover,
 #rueckfragen:hover,
+#zugewiesene_beratungen:hover,
+#zugewiesene_termine:hover,
+#rechtsberaterinnen:hover,
+#beratungskategorien:hover,
+#statistik:hover,
 #termine:hover {
     background-color: #91bf1f;
     cursor: pointer;

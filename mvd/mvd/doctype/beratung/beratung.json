@@ -6,6 +6,8 @@
  "field_order": [
   "section_allgemein",
   "beratungskategorie",
+  "beratungskategorie_2",
+  "beratungskategorie_3",
   "kontaktperson",
   "start_date",
   "subject",
@@ -156,9 +158,23 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Hat Termine"
+  },
+  {
+   "depends_on": "eval:doc.beratungskategorie",
+   "fieldname": "beratungskategorie_2",
+   "fieldtype": "Link",
+   "label": "(2) Beratungskategorie",
+   "options": "Beratungskategorie"
+  },
+  {
+   "depends_on": "eval:doc.beratungskategorie_2",
+   "fieldname": "beratungskategorie_3",
+   "fieldtype": "Link",
+   "label": "(3) Beratungskategorie",
+   "options": "Beratungskategorie"
   }
  ],
- "modified": "2023-02-14 14:01:35.599842",
+ "modified": "2023-02-20 08:18:49.619104",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

@@ -16,6 +16,11 @@ class Beratung(Document):
             self.zuweisung = 1
         else:
             self.zuweisung = 0
+        
+        if not self.beratungskategorie_2:
+            self.beratungskategorie_3 = None
+        if not self.beratungskategorie:
+            self.beratungskategorie_2 = None
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):

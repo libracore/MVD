@@ -65,6 +65,23 @@ frappe.vbz_beratung = {
             frappe.route_options = {"hat_termine": 1}
             frappe.set_route("List", "Beratung", "List");
         });
+        $("#zugewiesene_beratungen").click(function(){
+            frappe.route_options = {"_assign": ['like', '%' + frappe.session.user + '%']}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#zugewiesene_termine").click(function(){
+            frappe.route_options = {"_assign": ['like', '%' + frappe.session.user + '%'], "hat_termine": 1}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#rechtsberaterinnen").click(function(){
+            frappe.set_route("List", "Termin Kontaktperson", "List");
+        });
+        $("#beratungskategorien").click(function(){
+            frappe.set_route("List", "Beratungskategorie", "List");
+        });
+        $("#statistik").click(function(){
+            frappe.msgprint("TBD");
+        });
         
         frappe.dom.unfreeze();
     }
