@@ -3,6 +3,7 @@ import frappe
 import json
 import jwt
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
+from frappe.core.doctype.communication.email import make
 
 no_cache = 1
 
@@ -114,6 +115,9 @@ def new_beratung(**kwargs):
         })
         new_ber.insert(ignore_permissions=True)
         frappe.db.commit()
+        if args['email']:
+            send_confirmation_mail(args['mv_mitgliedschaft'], new_ber.name, raised_by=args['email'])
+        send_confirmation_mail(args['mv_mitgliedschaft'], new_ber.name, legacy_mail=True)
         return new_ber.name
     else:
         return 'error'
@@ -143,3 +147,27 @@ def get_upload_keys():
         'key': frappe.db.get_value("MVD Settings", "MVD Settings", "upload_key"),
         'secret': frappe.db.get_value("MVD Settings", "MVD Settings", "upload_secret")
     }
+
+def send_confirmation_mail(mitgliedschaft, beratung, raised_by=None, legacy_mail=False):
+    if not legacy_mail:
+        message = """Guten Tag"""
+        if frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1"):
+            message += " {0}".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1"))
+        if frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"):
+            message += " {0}".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"))
+        message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
+                    <br><br>Mitgliedernummer: {0}<br>{1}""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+        message += """Freundliche Grüsse<br>
+                    Ihr Mieterinnen- und Mieterverband"""
+        
+        make(doctype='Beratung', 
+            name=beratung, 
+            content=message, 
+            subject='Vielen Dank für Ihre Anfrage', 
+            sender='mv-test@libracore.io', 
+            send_email=True, 
+            recipients=[raised_by])
+    else:
+        # hier folgt das legacy Mail....
+        return
+    return
