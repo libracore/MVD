@@ -27,7 +27,7 @@ def get_context(context):
                 context = context_erweiterung(context, mitgliedschaft)
             else:
                 # Mitglied-ID in ERPNext unbekannt
-                frappe.log_error("{0}".format(str(authorization_header)), 'E-Mail Beratung (500)')
+                frappe.log_error("{0}\n\n{1}".format(str(decoded_jwt_token["mitglied_id"]), str(authorization_header)), 'E-Mail Beratung (500)')
                 raise_redirect(typ='500')
         else:
             # ungültiger JWT Token
