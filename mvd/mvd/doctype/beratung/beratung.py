@@ -30,6 +30,10 @@ class Beratung(Document):
             self.beratungskategorie_3 = None
         if not self.beratungskategorie:
             self.beratungskategorie_2 = None
+        
+        if self.kontaktperson:
+            if not frappe.db.get_value("Beratung", self.name, "kontaktperson"):
+                self.create_todo = 1
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
@@ -132,3 +136,18 @@ def get_verknuepfungsuebersicht(beratung):
         table = """<p>Keine Verknüpfungen vorhanden</p>"""
     
     return table
+
+@frappe.whitelist()
+def new_todo(beratung, kontaktperson):
+    kp = frappe.get_doc("Termin Kontaktperson", kontaktperson)
+    for user in kp.user:
+        frappe.get_doc({
+            'doctype': 'ToDo',
+            'description': 'Zuweisung für Beratung {0}'.format(beratung),
+            'reference_type': 'Beratung',
+            'reference_name': beratung,
+            'assigned_by': frappe.session.user or 'Administrator',
+            'owner': user.user
+        }).insert(ignore_permissions=True)
+    frappe.db.set_value("Beratung", beratung, 'create_todo', 0, update_modified=False)
+    frappe.db.commit()

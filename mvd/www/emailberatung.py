@@ -102,7 +102,8 @@ def new_beratung(**kwargs):
             'doctype': 'Beratung',
             'status': 'Eingang',
             'mv_mitgliedschaft': args['mv_mitgliedschaft'],
-            'notiz': notiz
+            'notiz': notiz,
+            'raised_by': args['email'] if args['email'] else None
         })
         new_ber.insert(ignore_permissions=True)
         frappe.db.commit()

@@ -26,6 +26,21 @@ frappe.ui.form.on('Beratung', {
                 );
             });
         }
+        
+        if (cur_frm.doc.kontaktperson&&cur_frm.doc.create_todo) {
+            frappe.call({
+                method: "mvd.mvd.doctype.beratung.beratung.new_todo",
+                args:{
+                        'beratung': cur_frm.doc.name,
+                        'kontaktperson': cur_frm.doc.kontaktperson
+                },
+                callback: function(r)
+                {
+                    cur_frm.reload_doc();
+                    frappe.msgprint("ToDo erstellt");
+                }
+            });
+        }
     },
     mv_mitgliedschaft: function(frm) {
         if ((!frm.doc.__islocal)&&(cur_frm.doc.mv_mitgliedschaft)) {

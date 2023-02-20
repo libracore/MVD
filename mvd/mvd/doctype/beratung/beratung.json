@@ -6,6 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "titel",
+  "raised_by",
+  "create_todo",
   "section_allgemein",
   "beratungskategorie",
   "beratungskategorie_code",
@@ -197,9 +199,22 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Titel"
+  },
+  {
+   "fieldname": "raised_by",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "raised_by"
+  },
+  {
+   "default": "0",
+   "fieldname": "create_todo",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "create_todo"
   }
  ],
- "modified": "2023-02-20 10:46:43.195159",
+ "modified": "2023-02-20 15:45:59.412635",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
