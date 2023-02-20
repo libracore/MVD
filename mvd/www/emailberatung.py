@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import jwt
+from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
 
 no_cache = 1
 
@@ -21,13 +22,19 @@ def get_context(context):
         algorythmus = frappe.db.get_single_value('JWT', 'algorythmus')
         decoded_jwt_token = jwt.decode(jwt_token, public_key, algorithms=[algorythmus])
         context.jwt_token = decoded_jwt_token
-        if 'mitglied_id' in decoded_jwt_token:
-            if frappe.db.exists("Mitgliedschaft", decoded_jwt_token["mitglied_id"]):
-                mitgliedschaft = frappe.get_doc("Mitgliedschaft", decoded_jwt_token["mitglied_id"])
-                context = context_erweiterung(context, mitgliedschaft)
+        if 'mitglied_nr' in decoded_jwt_token:
+            mitglied_id = get_mitglied_id_from_nr(decoded_jwt_token["mitglied_nr"])
+            if mitglied_id:
+                if frappe.db.exists("Mitgliedschaft", mitglied_id):
+                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
+                    context = context_erweiterung(context, mitgliedschaft)
+                else:
+                    # Mitglied-ID in ERPNext unbekannt
+                    frappe.log_error("{0}\n\n{1}".format(str(mitglied_id), str(authorization_header)), 'E-Mail Beratung (500)')
+                    raise_redirect(typ='500')
             else:
                 # Mitglied-ID in ERPNext unbekannt
-                frappe.log_error("{0}\n\n{1}".format(str(decoded_jwt_token["mitglied_id"]), str(authorization_header)), 'E-Mail Beratung (500)')
+                frappe.log_error("{0}\n\n{1}".format(str(decoded_jwt_token["mitglied_nr"]), str(authorization_header)), 'E-Mail Beratung (500)')
                 raise_redirect(typ='500')
         else:
             # ungültiger JWT Token
