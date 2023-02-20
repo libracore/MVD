@@ -15,7 +15,8 @@
    "fieldname": "code",
    "fieldtype": "Data",
    "label": "Code",
-   "set_only_once": 1
+   "set_only_once": 1,
+   "unique": 1
   },
   {
    "fieldname": "titel",
@@ -33,7 +34,7 @@
    "set_only_once": 1
   }
  ],
- "modified": "2023-01-20 14:58:58.492816",
+ "modified": "2023-02-20 10:52:49.350532",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratungskategorie",

@@ -7,6 +7,15 @@ import frappe
 from frappe.model.document import Document
 
 class Beratung(Document):
+    def set_new_name(self):
+        titel = '{0}'.format(self.start_date)
+        if self.mv_mitgliedschaft:
+            titel += ' {0} {1}'.format(frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1"), frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "nachname_1"))
+        if self.beratungskategorie:
+            titel += ' {0}'.format(self.beratungskategorie)
+        self.titel = titel
+        return
+    
     def validate(self):
         if len(self.termin) > 0:
             self.hat_termine = 1

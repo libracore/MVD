@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "kontakt",
+  "user",
   "sektion_id",
   "disabled"
  ],
@@ -31,9 +32,15 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Deaktiviert"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Table MultiSelect",
+   "label": "libracore User",
+   "options": "Termin Kontaktperson Multi User"
   }
  ],
- "modified": "2022-04-28 15:58:40.261044",
+ "modified": "2023-02-20 10:51:51.009482",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin Kontaktperson",
