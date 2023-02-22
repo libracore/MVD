@@ -4,6 +4,8 @@ import json
 import jwt
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
 from frappe.core.doctype.communication.email import make
+from frappe.desk.form.load import get_attachments
+from frappe.utils import get_url
 
 no_cache = 1
 
@@ -77,6 +79,12 @@ def context_erweiterung(context, mitgliedschaft):
         context.plz = mitgliedschaft.plz
         context.ort = mitgliedschaft.ort
     
+    # legacy mode check
+    if frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'legacy_mode') == '2':
+        context.legacy_mode = True
+    else:
+        context.legacy_mode = False
+    
     return context
 
 @frappe.whitelist(allow_guest=True)
@@ -116,8 +124,8 @@ def new_beratung(**kwargs):
         new_ber.insert(ignore_permissions=True)
         frappe.db.commit()
         if args['email']:
-            send_confirmation_mail(args['mv_mitgliedschaft'], new_ber.name, raised_by=args['email'])
-        send_confirmation_mail(args['mv_mitgliedschaft'], new_ber.name, legacy_mail=True)
+            send_confirmation_mail(args['mv_mitgliedschaft'], new_ber.name, notiz, raised_by=args['email'])
+        
         return new_ber.name
     else:
         return 'error'
@@ -148,7 +156,7 @@ def get_upload_keys():
         'secret': frappe.db.get_value("MVD Settings", "MVD Settings", "upload_secret")
     }
 
-def send_confirmation_mail(mitgliedschaft, beratung, raised_by=None, legacy_mail=False):
+def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, legacy_mail=False, sektion=None):
     if not legacy_mail:
         message = """Guten Tag"""
         if frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1"):
@@ -156,7 +164,7 @@ def send_confirmation_mail(mitgliedschaft, beratung, raised_by=None, legacy_mail
         if frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"):
             message += " {0}".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"))
         message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
-                    <br><br>Mitgliedernummer: {0}<br>{1}""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+                    <br><br><b>Mitgliedernummer</b>: {0}<br>{1}""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
         message += """Freundliche Grüsse<br>
                     Ihr Mieterinnen- und Mieterverband"""
         
@@ -168,6 +176,61 @@ def send_confirmation_mail(mitgliedschaft, beratung, raised_by=None, legacy_mail
             send_email=True, 
             recipients=[raised_by])
     else:
-        # hier folgt das legacy Mail....
+        message = False
+        attachments = None
+        if legacy_mail == '1':
+            # legacy mail mit links
+            message = """Guten Tag {0}""".format(sektion)
+            message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
+                    <br><br><b>Mitgliedernummer</b>: {0}<br>{1}<br><br>Anhänge:<br>""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+            for file_data in get_attachments('Beratung', beratung):
+                message += """<a href="{0}">{1}</a><br>""".format(get_url(file_data.file_url), file_data.file_name)
+            
+            message += """<br>Freundliche Grüsse<br>
+                        libracore"""
+        
+        elif legacy_mail == '2':
+            # legacy mail mit anhängen
+            message = """Guten Tag {0}""".format(sektion)
+            message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
+                    <br><br><b>Mitgliedernummer</b>: {0}<br>{1}""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+            message += """<br>Freundliche Grüsse<br>
+                        libracore"""
+            attachments = []
+            for f in get_attachments('Beratung', beratung):
+                attachments.append(f.name)
+        
+        if message:
+            recipient = frappe.db.get_value("Sektion", sektion, 'legacy_email')
+            make(doctype='Beratung', 
+                name=beratung, 
+                content=message, 
+                subject='Neue E-Mail Beratung', 
+                sender='mv-test@libracore.io', 
+                send_email=True, 
+                recipients=[recipient],
+                attachments=attachments)
         return
     return
+
+@frappe.whitelist(allow_guest=True)
+def check_legacy_mode(**kwargs):
+    args = json.loads(kwargs['kwargs'])
+    mitgliedschaft_id = args['mv_mitgliedschaft']
+    sektion = frappe.db.get_value("Mitgliedschaft", mitgliedschaft_id, 'sektion_id')
+    if frappe.db.get_value("Sektion", sektion, 'legacy_mode') == '2':
+        return True
+    else:
+        return False
+
+@frappe.whitelist(allow_guest=True)
+def send_legacy_mail(**kwargs):
+    # legacy mail
+    args = json.loads(kwargs['kwargs'])
+    beratung = args['beratung']
+    
+    mitgliedschaft_id = frappe.db.get_value("Beratung", beratung, 'mv_mitgliedschaft')
+    sektion = frappe.db.get_value("Mitgliedschaft", mitgliedschaft_id, 'sektion_id')
+    notiz = frappe.db.get_value("Beratung", beratung, 'notiz')
+    if frappe.db.get_value("Sektion", sektion, 'legacy_mode') != '0':
+        send_confirmation_mail(mitgliedschaft_id, beratung, notiz, legacy_mail=frappe.db.get_value("Sektion", sektion, 'legacy_mode'), sektion=sektion)

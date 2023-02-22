@@ -25,14 +25,37 @@ function new_onlineberatung() {
 $(':file').on('change',function(){
     var myFile = $(this).val();
     var upld = myFile.split('.').pop();
+    var file_element = this;
     if(!["pdf", "jpg", "jpeg", "zip"].includes(upld)){
         alert("Nur Dateien vom Typ PDF und JPEG/JPG sind erlaubt.");
-        $(this).val("");
+        $(file_element).val("");
+    } else {
+        // get legacy mode
+        var kwargs = {
+            'mv_mitgliedschaft': document.getElementById("mitgliedschaft_id").value
+        }
+        frappe.call({
+            'method': 'mvd.www.emailberatung.check_legacy_mode',
+            'args': {
+                kwargs
+            },
+            'async': true,
+            'callback': function(res) {
+                var legacy_mode = res.message;
+                if (legacy_mode) {
+                    if(file_element.files[0].size > 3145728){
+                       alert("Die Maximale Filegrösse beträgt 3MB.");
+                       $(file_element).val("");
+                    };
+                } else {
+                    if(file_element.files[0].size > 10485760){
+                       alert("Die Maximale Filegrösse beträgt 10MB.");
+                       $(file_element).val("");
+                    };
+                }
+            }
+        });
     }
-    if(this.files[0].size > 10485760){
-       alert("Die Maximale Filegrösse beträgt 10MB.");
-       $(this).val("");
-    };
 })
 
 function add_new_file_row() {
@@ -108,7 +131,16 @@ function upload_files(beratung, key, secret, loop=1) {
             upload_files(beratung, key, secret, loop + 1);
         }
     } else {
-        location.replace('https://www.mieterverband.ch/mv/emailberatung-erfolg');
+        var kwargs = {
+            'beratung': beratung
+        }
+        frappe.call({
+            'method': 'mvd.www.emailberatung.send_legacy_mail',
+            'args': {
+                kwargs
+            }
+        });
+        //~ location.replace('https://www.mieterverband.ch/mv/emailberatung-erfolg');
     }
 }
 

@@ -415,7 +415,7 @@
                                                 <h2 class="e-h3 fieldset-title">Dokumente hochladen</h2>
                                                 <div class="text-image text-image-mv rich-text no-img">
                                                     <div class="text-wrapper">
-                                                        <p>Wichtig: Bitte laden Sie nur Dateien vom Typ PDF und JPEG/JPG hoch. Maximale Grösse: 10 MB</p>
+                                                        <p>Wichtig: Bitte laden Sie nur Dateien vom Typ PDF und JPEG/JPG hoch. Maximale Grösse: {% if not legacy_mode %}10{% else %}3{% endif %} MB</p>
                                                     </div>
                                                 </div>
                                                 <table style="width: 100%;">

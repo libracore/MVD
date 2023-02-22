@@ -58,7 +58,10 @@
   "footer",
   "section_e_mail",
   "kuendigungs_bestaetigung_de",
-  "kuendigungs_bestaetigung_fr"
+  "kuendigungs_bestaetigung_fr",
+  "section_emailberatung",
+  "legacy_mode",
+  "legacy_email"
  ],
  "fields": [
   {
@@ -378,9 +381,29 @@
    "fieldname": "kuendigungs_bestaetigung_fr",
    "fieldtype": "Text",
    "label": "K\u00fcndigungsbest\u00e4tigung (FR)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_emailberatung",
+   "fieldtype": "Section Break",
+   "label": "E-Mail Beratung"
+  },
+  {
+   "default": "0",
+   "description": "0: Deaktiviert<br>\n1: Eingangsmail an Sektion, Anh\u00e4nge als Links<br>\n2: Wie 1, aber Anh\u00e4nge Limitiert auf 3MB und nicht als Links",
+   "fieldname": "legacy_mode",
+   "fieldtype": "Select",
+   "label": "Legacy Mode",
+   "options": "0\n1\n2"
+  },
+  {
+   "depends_on": "eval:doc.legacy_mode != '0'",
+   "fieldname": "legacy_email",
+   "fieldtype": "Data",
+   "label": "E-Mail Empfangsadresse"
   }
  ],
- "modified": "2022-12-05 13:21:58.275675",
+ "modified": "2023-02-22 08:41:49.666173",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
