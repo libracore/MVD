@@ -60,19 +60,40 @@ $(':file').on('change',function(){
 
 function add_new_file_row() {
     var new_id = $(':file').length + 1;
-    var klon = $("#default_file_row").clone(true);
-    klon[0].id = "file_row_" + String(new_id);
-    $(klon[0].children[0].children[0].children[0]).text('Zusätzliche Datei');
-    klon[0].children[0].children[0].children[1].id = "upload_files_" + String(new_id);
-    klon[0].children[1].children[0].children[1].id = "upload_files_dateupload_files_date_" + String(new_id);
-    klon[0].children[2].children[1].children[0].id = "upload_files_auswahl_" + String(new_id);
-    if ($(':file').length != 1) {
-        $("#" + "file_row_" + String($(':file').length)).after(klon);
+    if (new_id <= 15) {
+        var klon = $("#default_file_row").clone(true);
+        klon[0].id = "file_row_" + String(new_id);
+        $(klon[0].children[0].children[0].children[0]).text('Zusätzliche Datei');
+        klon[0].children[0].children[0].children[1].id = "upload_files_" + String(new_id);
+        klon[0].children[1].children[0].children[1].id = "upload_files_dateupload_files_date_" + String(new_id);
+        klon[0].children[2].children[1].children[0].id = "upload_files_auswahl_" + String(new_id);
+        
+        
+        if ($(':file').length != 1) {
+            $("#" + "file_row_" + String($(':file').length)).after(klon);
+        } else {
+            $("#default_file_row").after(klon);
+        }
+        init_awesomplete("upload_files_auswahl_" + String(new_id));
+        $("#upload_files_auswahl_" + String(new_id)).attr('readonly', false);
+        setTimeout(function(){
+            $(".awesomplete-delete").each(function(){
+                $(this).off('click');
+                $(this).empty();
+                if (!$(this).prev().prev().prev().attr('readonly')&&$(this).prev().prev().prev().children('input').length < 1) {
+                    $(this).html('<i class="fa fa-xmark"></i>');
+                    $(this).click(function(){
+                        $(this).prev().prev().prev().val('');
+                    });
+                } else if (!$(this).prev().prev().prev().children('input').attr('readonly')&&$(this).prev().prev().prev().children('input').length > 0) {
+                    $(this).prev().prev().prev().children('input').val('');
+                }
+            });
+        }, 1000);
+        $("#upload_files_auswahl_" + String(new_id)).val('');
     } else {
-        $("#default_file_row").after(klon);
+        alert("Die Maximale Anzahl Files beträgt 15.");
     }
-    init_awesomplete("upload_files_auswahl_" + String(new_id));
-    $("#upload_files_auswahl_" + String(new_id)).val('');
 }
 
 function get_upload_keys(beratung) {
@@ -132,7 +153,8 @@ function upload_files(beratung, key, secret, loop=1) {
         }
     } else {
         var kwargs = {
-            'beratung': beratung
+            'beratung': beratung,
+            'raised_by': document.getElementById("email").value
         }
         frappe.call({
             'method': 'mvd.www.emailberatung.send_legacy_mail',
@@ -140,7 +162,7 @@ function upload_files(beratung, key, secret, loop=1) {
                 kwargs
             }
         });
-        //~ location.replace('https://www.mieterverband.ch/mv/emailberatung-erfolg');
+        location.replace('https://www.mieterverband.ch/mv/emailberatung-erfolg');
     }
 }
 
@@ -165,17 +187,15 @@ function show_mz() {
     add_new_file_row();
     $("#upload_files_auswahl_1").val('Mietvertrag');
     $("#upload_files_auswahl_2").val('Mietzinserhöhung');
-    $("#upload_files_auswahl_3").val('Mietzinsherabsetzung');
     $("#upload_files_auswahl_1").attr('readonly', true);
     $("#upload_files_auswahl_2").attr('readonly', true);
-    $("#upload_files_auswahl_3").attr('readonly', true);
     $("label[for='upload_files']").each(function(index,element){
         if (index == 0) {
             $(this).text("1. Mietvertrag");
         } else if (index == 1) {
             $(this).text("2. Mietzinserhöhung");
         } else if (index == 2) {
-            $(this).text("3. Mietzinsherabsetzung");
+            $(this).text("Falls vorhanden: weitere Vertragsänderung (Mietzinsherabsetzungen, Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
         }
     });
     
@@ -195,9 +215,24 @@ function hide_mz() {
     });
     
     // clear first upload file
+    $("#upload_files_auswahl_1").val('');
+    $("#upload_files_auswahl_1").attr('readonly', false);
     $("#upload_files_1").val('');
     $("label[for='upload_files']").each(function(){
         $(this).text("Datei");
+    });
+    
+    $(".awesomplete-delete").each(function(){
+        $(this).off('click');
+        $(this).empty();
+        if (!$(this).prev().prev().prev().attr('readonly')&&$(this).prev().prev().prev().children('input').length < 1) {
+            $(this).html('<i class="fa fa-xmark"></i>');
+            $(this).click(function(){
+                $(this).prev().prev().prev().val('');
+            });
+        } else if (!$(this).prev().prev().prev().children('input').attr('readonly')&&$(this).prev().prev().prev().children('input').length > 0) {
+            $(this).prev().prev().prev().children('input').val('');
+        }
     });
 }
 
@@ -246,6 +281,11 @@ function init_awesomplete(input_id) {
             role: "status",
             "aria-live": "assertive",
             "aria-relevant": "additions",
+            inside: this.container
+        });
+        
+        this.closing = $.create("span", {
+            className: "awesomplete-delete",
             inside: this.container
         });
 
@@ -616,5 +656,15 @@ function init_awesomplete(input_id) {
 }
 
 init_awesomplete('upload_files_auswahl_1');
+setTimeout(function(){ 
+    $(".awesomplete-delete").each(function(){
+        $(this).html('<i class="fa fa-xmark"></i>');
+        $(this).off('click');
+        $(this).click(function(){
+            $(this).prev().prev().prev().val('');
+        });
+    });
+}, 1000);
+
 // AWESOMPLETE END
 // ----------------------------------------------------------------------------------------------------

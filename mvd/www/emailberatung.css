@@ -5361,6 +5361,9 @@ body {
 .fa-chevron-up:before {
   content: "\f077";
 }
+.fa-xmark:before {
+  content: "\f00d";
+}
 .fa-home:before {
   content: "\f015";
   font-size: 14px !important;
@@ -5513,3 +5516,12 @@ div.modal-footer.hidden {
     color: inherit;
 }
 /*# sourceMappingURL=awesomplete.css.map */
+
+.awesomplete-delete {
+position: absolute;
+top: 6px;
+right: 4px;
+border-radius: 2px;
+padding: 3px;
+z-index: 3;
+}

@@ -61,7 +61,9 @@
   "kuendigungs_bestaetigung_fr",
   "section_emailberatung",
   "legacy_mode",
-  "legacy_email"
+  "legacy_email",
+  "legacy_mail_absender_mail",
+  "legacy_mail_absende_name"
  ],
  "fields": [
   {
@@ -401,9 +403,19 @@
    "fieldname": "legacy_email",
    "fieldtype": "Data",
    "label": "E-Mail Empfangsadresse"
+  },
+  {
+   "fieldname": "legacy_mail_absender_mail",
+   "fieldtype": "Data",
+   "label": "E-Mail Absender Adresse"
+  },
+  {
+   "fieldname": "legacy_mail_absende_name",
+   "fieldtype": "Data",
+   "label": "E-Mail Absender Name"
   }
  ],
- "modified": "2023-02-22 08:41:49.666173",
+ "modified": "2023-02-23 10:12:28.400406",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

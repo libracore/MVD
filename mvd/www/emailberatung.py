@@ -5,7 +5,8 @@ import jwt
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
 from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
-from frappe.utils import get_url
+from frappe.utils import get_url, sanitize_html
+from frappe import sendmail
 
 no_cache = 1
 
@@ -26,11 +27,8 @@ def get_context(context):
         decoded_jwt_token = jwt.decode(jwt_token, public_key, algorithms=[algorythmus])
         context.jwt_token = decoded_jwt_token
         if 'mitglied_nr' in decoded_jwt_token:
-            frappe.log_error("{0}".format(decoded_jwt_token["mitglied_nr"]), "mitglied_nr")
             mitglied_id = get_mitglied_id_from_nr(decoded_jwt_token["mitglied_nr"])
-            frappe.log_error("{0}".format(mitglied_id), "mitglied_id")
             if mitglied_id:
-                frappe.log_error("{0}".format(frappe.db.exists("Mitgliedschaft", mitglied_id)), "db.exist")
                 if frappe.db.exists("Mitgliedschaft", mitglied_id):
                     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
                     context = context_erweiterung(context, mitgliedschaft)
@@ -61,7 +59,6 @@ def raise_redirect(typ=None):
             raise frappe.Redirect
 
 def context_erweiterung(context, mitgliedschaft):
-    frappe.log_error("{0}".format(str(mitgliedschaft)), "context_erweiterung")
     context.mitglied_nr = mitgliedschaft.mitglied_nr
     context.mitglied_id = mitgliedschaft.name
     context.anrede = mitgliedschaft.anrede_c
@@ -69,6 +66,7 @@ def context_erweiterung(context, mitgliedschaft):
     context.nachname = mitgliedschaft.nachname_1
     context.telefon = mitgliedschaft.tel_m_1 if mitgliedschaft.tel_m_1 else mitgliedschaft.tel_p_1 if mitgliedschaft.tel_p_1 else mitgliedschaft.tel_g_1 if mitgliedschaft.tel_g_1 else ''
     context.email = mitgliedschaft.e_mail_1 if mitgliedschaft.e_mail_1 else ''
+    context.sektion = mitgliedschaft.sektion_id
     
     if mitgliedschaft.abweichende_objektadresse:
         context.strasse = mitgliedschaft.objekt_strasse
@@ -89,7 +87,6 @@ def context_erweiterung(context, mitgliedschaft):
     else:
         context.legacy_mode = False
     
-    frappe.log_error("{0}".format(str(context)), "return context")
     return context
 
 @frappe.whitelist(allow_guest=True)
@@ -105,11 +102,11 @@ def new_beratung(**kwargs):
         else:
             email = ''
         if args['anderes_mietobjekt']:
-            anderes_mietobjekt = """<b>Anderes Mietobjekt:</b><br>{0}<br><br>""".format(args['anderes_mietobjekt'].replace("\n", "<br>"))
+            anderes_mietobjekt = """<b>Anderes Mietobjekt:</b><br>{0}<br><br>""".format(sanitize_html(args['anderes_mietobjekt']).replace("\n", "<br>"))
         else:
             anderes_mietobjekt = ''
         if args['frage']:
-            frage = """<b>Frage:</b><br>{0}<br><br>""".format(args['frage'].replace("\n", "<br>"))
+            frage = """<b>Frage:</b><br>{0}<br><br>""".format(sanitize_html(args['frage']).replace("\n", "<br>"))
         else:
             frage = ''
         if args['datum_mietzinsanzeige']:
@@ -129,7 +126,8 @@ def new_beratung(**kwargs):
         new_ber.insert(ignore_permissions=True)
         frappe.db.commit()
         if args['email']:
-            send_confirmation_mail(args['mv_mitgliedschaft'], new_ber.name, notiz, raised_by=args['email'])
+            sektion = frappe.db.get_value("Mitgliedschaft", args['mv_mitgliedschaft'], "sektion_id")
+            send_confirmation_mail(args['mv_mitgliedschaft'], new_ber.name, notiz, raised_by=args['email'], sektion=sektion)
         
         return new_ber.name
     else:
@@ -170,16 +168,53 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
             message += " {0}".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"))
         message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
                     <br><br><b>Mitgliedernummer</b>: {0}<br>{1}""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
-        message += """Freundliche Grüsse<br>
+        message += """<br><br>Freundliche Grüsse<br>
                     Ihr Mieterinnen- und Mieterverband"""
         
-        make(doctype='Beratung', 
-            name=beratung, 
-            content=message, 
+        comm = make(
+            recipients=[raised_by],
+            sender=frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail"),
             subject='Vielen Dank für Ihre Anfrage', 
-            sender='mv-test@libracore.io', 
-            send_email=True, 
-            recipients=[raised_by])
+            content=message,
+            doctype='Beratung',
+            name=beratung,
+            send_email=False,
+            sender_full_name=frappe.get_value("Sektion", sektion, "legacy_mail_absende_name")
+        )["name"]
+        
+        sendmail(
+            recipients=[raised_by],
+            sender="{0} <{1}>".format(frappe.get_value("Sektion", sektion, "legacy_mail_absende_name"), frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail")),
+            subject='Vielen Dank für Ihre Anfrage', 
+            message=message,
+            as_markdown=False,
+            delayed=True,
+            reference_doctype='Beratung',
+            reference_name=beratung,
+            unsubscribe_method=None,
+            unsubscribe_params=None,
+            unsubscribe_message=None,
+            attachments=[],
+            content=None,
+            doctype='Beratung',
+            name=beratung,
+            reply_to=frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail"),
+            cc=[],
+            bcc=[],
+            message_id=frappe.get_value("Communication", comm, "message_id"),
+            in_reply_to=None,
+            send_after=None,
+            expose_recipients=None,
+            send_priority=1,
+            communication=comm,
+            retry=1,
+            now=None,
+            read_receipt=None,
+            is_notification=False,
+            inline_images=None,
+            header=None,
+            print_letterhead=False
+        )
     else:
         message = False
         attachments = None
@@ -188,8 +223,8 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
             message = """Guten Tag {0}""".format(sektion)
             message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
                     <br><br><b>Mitgliedernummer</b>: {0}<br>{1}<br><br>Anhänge:<br>""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
-            for file_data in get_attachments('Beratung', beratung):
-                message += """<a href="{0}">{1}</a><br>""".format(get_url(file_data.file_url), file_data.file_name)
+            for file_data in frappe.get_doc("Beratung", beratung).dokumente:
+                message += """<a href="{0}">{1}</a><br>""".format(get_url(file_data.file), file_data.filename)
             
             message += """<br>Freundliche Grüsse<br>
                         libracore"""
@@ -203,19 +238,57 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                         libracore"""
             attachments = []
             for f in get_attachments('Beratung', beratung):
-                attachments.append(f.name)
+                attachments.append({'fid': f.name})
         
         if message:
             recipient = frappe.db.get_value("Sektion", sektion, 'legacy_email')
-            make(doctype='Beratung', 
-                name=beratung, 
-                content=message, 
-                subject='Neue E-Mail Beratung', 
-                sender='mv-test@libracore.io', 
-                send_email=True, 
+            
+            comm = make(
                 recipients=[recipient],
-                attachments=attachments)
-        return
+                sender=frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail"),
+                subject='Neue E-Mail Beratung', 
+                content=message,
+                doctype='Beratung',
+                name=beratung,
+                send_email=False,
+                sender_full_name=frappe.get_value("Sektion", sektion, "legacy_mail_absende_name"),
+                attachments=attachments
+            )["name"]
+            
+            sendmail(
+                recipients=[recipient],
+                sender="{0} <{1}>".format(frappe.get_value("Sektion", sektion, "legacy_mail_absende_name"), frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail")),
+                subject='Neue E-Mail Beratung', 
+                message=message,
+                as_markdown=False,
+                delayed=True,
+                reference_doctype='Beratung',
+                reference_name=beratung,
+                unsubscribe_method=None,
+                unsubscribe_params=None,
+                unsubscribe_message=None,
+                attachments=attachments,
+                content=None,
+                doctype='Beratung',
+                name=beratung,
+                reply_to=raised_by,
+                cc=[],
+                bcc=[],
+                message_id=frappe.get_value("Communication", comm, "message_id"),
+                in_reply_to=None,
+                send_after=None,
+                expose_recipients=None,
+                send_priority=1,
+                communication=comm,
+                retry=1,
+                now=None,
+                read_receipt=None,
+                is_notification=False,
+                inline_images=None,
+                header=None,
+                print_letterhead=False
+            )
+        
     return
 
 @frappe.whitelist(allow_guest=True)
@@ -233,9 +306,10 @@ def send_legacy_mail(**kwargs):
     # legacy mail
     args = json.loads(kwargs['kwargs'])
     beratung = args['beratung']
+    raised_by = args['raised_by']
     
     mitgliedschaft_id = frappe.db.get_value("Beratung", beratung, 'mv_mitgliedschaft')
     sektion = frappe.db.get_value("Mitgliedschaft", mitgliedschaft_id, 'sektion_id')
     notiz = frappe.db.get_value("Beratung", beratung, 'notiz')
     if frappe.db.get_value("Sektion", sektion, 'legacy_mode') != '0':
-        send_confirmation_mail(mitgliedschaft_id, beratung, notiz, legacy_mail=frappe.db.get_value("Sektion", sektion, 'legacy_mode'), sektion=sektion)
+        send_confirmation_mail(mitgliedschaft_id, beratung, notiz, legacy_mail=frappe.db.get_value("Sektion", sektion, 'legacy_mode'), sektion=sektion, raised_by=raised_by)
