@@ -137,20 +137,25 @@ def new_beratung(**kwargs):
 def new_file_to_beratung(**kwargs):
     args = json.loads(kwargs['kwargs'])
     if frappe.db.exists("Beratung", args['beratung']):
-        file_path = '/private/files/{0}'.format(args['filename'])
-        new_file = frappe.get_doc({
-            'doctype': 'Beratungsdateien',
-            'parentfield': 'dokumente',
-            'parenttype': 'Beratung',
-            'parent': args['beratung'],
-            'idx': args['idx'],
-            'document_type': args['document_type'] if 'document_type' in args else 'Sonstiges',
-            'filename': args['filename'].replace(".pdf", "").replace(".jpg", "").replace(".jpeg", ""),
-            'document_date': args['document_date'] if 'document_date' in args else None,
-            'file': file_path
-        })
-        new_file.insert(ignore_permissions=True)
-        frappe.db.commit()
+        try:
+            file_path = '/private/files/{0}'.format(args['filename'])
+            new_file = frappe.get_doc({
+                'doctype': 'Beratungsdateien',
+                'parentfield': 'dokumente',
+                'parenttype': 'Beratung',
+                'parent': args['beratung'],
+                'idx': args['idx'],
+                'document_type': args['document_type'] if 'document_type' in args else 'Sonstiges',
+                'filename': args['filename'].replace(".pdf", "").replace(".jpg", "").replace(".jpeg", ""),
+                'document_date': args['document_date'] if 'document_date' in args else None,
+                'file': file_path
+            })
+            new_file.insert(ignore_permissions=True)
+            frappe.db.commit()
+        except Exception as e:
+            frappe.log_error("{0}".format(str(e)), "File Upload fehlerhaft")
+    else:
+        frappe.log_error("{0}".format(args['beratung']), "File Upload unvollständig")
 
 @frappe.whitelist(allow_guest=True)
 def get_upload_keys():
