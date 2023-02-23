@@ -112,12 +112,16 @@ function upload_files(beratung, key, secret, loop=1) {
         if ($("#upload_files_" + String(loop))[0].files[0]) {
             var file_name = '';
             if ($("#upload_files_dateupload_files_date_" + String(loop)).val()) {
-                document_date = $("#upload_files_dateupload_files_date_" + String(loop)).val().replace("-", "_").replace("-", "_")
+                var document_date = $("#upload_files_dateupload_files_date_" + String(loop)).val().replace("-", "_").replace("-", "_")
                 file_name += document_date + "_";
+            } else {
+                var document_date = '';
             }
             if ($("#upload_files_auswahl_" + String(loop)).val()) {
-                var document_type = $("#upload_files_auswahl_" + String(loop)).val()
+                var document_type = $("#upload_files_auswahl_" + String(loop)).val().replace("/", "_").replace(" ", "_")
                 file_name += document_type + "_";
+            } else {
+                var document_type = '';
             }
             file_name += document.getElementById("mitgliedschaft_nr").value + "_" + String(loop) + "." + $(':file')[loop - 1].value.split('.').pop();
             
