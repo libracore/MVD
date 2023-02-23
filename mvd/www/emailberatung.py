@@ -221,78 +221,81 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
             print_letterhead=False
         )
     else:
-        message = False
-        attachments = None
-        if legacy_mail == '1':
-            # legacy mail mit links
-            message = """Guten Tag {0}""".format(sektion)
-            message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
-                    <br><br><b>Mitgliedernummer</b>: {0}<br>{1}<br><br>Anhänge:<br>""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
-            for file_data in frappe.get_doc("Beratung", beratung).dokumente:
-                message += """<a href="{0}">{1}</a><br>""".format(get_url(file_data.file), file_data.filename)
+        try:
+            message = False
+            attachments = None
+            if legacy_mail == '1':
+                # legacy mail mit links
+                message = """Guten Tag {0}""".format(sektion)
+                message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
+                        <br><br><b>Mitgliedernummer</b>: {0}<br>{1}<br><br>Anhänge:<br>""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+                for file_data in frappe.get_doc("Beratung", beratung).dokumente:
+                    message += """<a href="{0}">{1}</a><br>""".format(get_url(file_data.file), file_data.filename)
+                
+                message += """<br>Freundliche Grüsse<br>
+                            libracore"""
             
-            message += """<br>Freundliche Grüsse<br>
-                        libracore"""
-        
-        elif legacy_mail == '2':
-            # legacy mail mit anhängen
-            message = """Guten Tag {0}""".format(sektion)
-            message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
-                    <br><br><b>Mitgliedernummer</b>: {0}<br>{1}""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
-            message += """<br>Freundliche Grüsse<br>
-                        libracore"""
-            attachments = []
-            for f in get_attachments('Beratung', beratung):
-                attachments.append({'fid': f.name})
-        
-        if message:
-            recipient = frappe.db.get_value("Sektion", sektion, 'legacy_email')
+            elif legacy_mail == '2':
+                # legacy mail mit anhängen
+                message = """Guten Tag {0}""".format(sektion)
+                message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
+                        <br><br><b>Mitgliedernummer</b>: {0}<br>{1}""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+                message += """<br>Freundliche Grüsse<br>
+                            libracore"""
+                attachments = []
+                for f in get_attachments('Beratung', beratung):
+                    attachments.append({'fid': f.name})
             
-            comm = make(
-                recipients=[recipient],
-                sender=frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail"),
-                subject='Neue E-Mail Beratung', 
-                content=message,
-                doctype='Beratung',
-                name=beratung,
-                send_email=False,
-                sender_full_name=frappe.get_value("Sektion", sektion, "legacy_mail_absende_name"),
-                attachments=attachments
-            )["name"]
-            
-            sendmail(
-                recipients=[recipient],
-                sender="{0} <{1}>".format(frappe.get_value("Sektion", sektion, "legacy_mail_absende_name"), frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail")),
-                subject='Neue E-Mail Beratung', 
-                message=message,
-                as_markdown=False,
-                delayed=True,
-                reference_doctype='Beratung',
-                reference_name=beratung,
-                unsubscribe_method=None,
-                unsubscribe_params=None,
-                unsubscribe_message=None,
-                attachments=attachments,
-                content=None,
-                doctype='Beratung',
-                name=beratung,
-                reply_to=raised_by,
-                cc=[],
-                bcc=[],
-                message_id=frappe.get_value("Communication", comm, "message_id"),
-                in_reply_to=None,
-                send_after=None,
-                expose_recipients=None,
-                send_priority=1,
-                communication=comm,
-                retry=1,
-                now=None,
-                read_receipt=None,
-                is_notification=False,
-                inline_images=None,
-                header=None,
-                print_letterhead=False
-            )
+            if message:
+                recipient = frappe.db.get_value("Sektion", sektion, 'legacy_email')
+                
+                comm = make(
+                    recipients=[recipient],
+                    sender=frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail"),
+                    subject='Neue E-Mail Beratung', 
+                    content=message,
+                    doctype='Beratung',
+                    name=beratung,
+                    send_email=False,
+                    sender_full_name=frappe.get_value("Sektion", sektion, "legacy_mail_absende_name"),
+                    attachments=attachments
+                )["name"]
+                
+                sendmail(
+                    recipients=[recipient],
+                    sender="{0} <{1}>".format(frappe.get_value("Sektion", sektion, "legacy_mail_absende_name"), frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail")),
+                    subject='Neue E-Mail Beratung', 
+                    message=message,
+                    as_markdown=False,
+                    delayed=True,
+                    reference_doctype='Beratung',
+                    reference_name=beratung,
+                    unsubscribe_method=None,
+                    unsubscribe_params=None,
+                    unsubscribe_message=None,
+                    attachments=attachments,
+                    content=None,
+                    doctype='Beratung',
+                    name=beratung,
+                    reply_to=raised_by,
+                    cc=[],
+                    bcc=[],
+                    message_id=frappe.get_value("Communication", comm, "message_id"),
+                    in_reply_to=None,
+                    send_after=None,
+                    expose_recipients=None,
+                    send_priority=1,
+                    communication=comm,
+                    retry=1,
+                    now=None,
+                    read_receipt=None,
+                    is_notification=False,
+                    inline_images=None,
+                    header=None,
+                    print_letterhead=False
+                )
+        except Exception as e:
+            frappe.log_error("{0}".format(str(e)), "Legacy Mail failed")
         
     return
 
@@ -316,5 +319,6 @@ def send_legacy_mail(**kwargs):
     mitgliedschaft_id = frappe.db.get_value("Beratung", beratung, 'mv_mitgliedschaft')
     sektion = frappe.db.get_value("Mitgliedschaft", mitgliedschaft_id, 'sektion_id')
     notiz = frappe.db.get_value("Beratung", beratung, 'notiz')
+    frappe.log_error("{0},\n{1},\n{2},\n{3},\n{4}".format(beratung, raised_by, mitgliedschaft_id, sektion, notiz), "Trigger Legacy Mail (OK)")
     if frappe.db.get_value("Sektion", sektion, 'legacy_mode') != '0':
         send_confirmation_mail(mitgliedschaft_id, beratung, notiz, legacy_mail=frappe.db.get_value("Sektion", sektion, 'legacy_mode'), sektion=sektion, raised_by=raised_by)
