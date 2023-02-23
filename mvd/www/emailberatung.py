@@ -243,7 +243,7 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                 message += """<br>Freundliche Grüsse<br>
                             libracore"""
                 attachments = []
-                all_attachments = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Beratung` AND `attached_to_name` = '{0}'""".format(beratung), as_dict=True)
+                all_attachments = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{0}'""".format(beratung), as_dict=True)
                 for f in all_attachments:
                     attachments.append({'fid': f.name})
             
