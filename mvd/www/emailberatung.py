@@ -322,3 +322,4 @@ def send_legacy_mail(**kwargs):
     frappe.log_error("{0},\n{1},\n{2},\n{3},\n{4}".format(beratung, raised_by, mitgliedschaft_id, sektion, notiz), "Trigger Legacy Mail (OK)")
     if frappe.db.get_value("Sektion", sektion, 'legacy_mode') != '0':
         send_confirmation_mail(mitgliedschaft_id, beratung, notiz, legacy_mail=frappe.db.get_value("Sektion", sektion, 'legacy_mode'), sektion=sektion, raised_by=raised_by)
+        return

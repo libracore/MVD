@@ -164,9 +164,13 @@ function upload_files(beratung, key, secret, loop=1) {
             'method': 'mvd.www.emailberatung.send_legacy_mail',
             'args': {
                 kwargs
+            },
+            'async': true,
+            'callback': function(res) {
+                location.replace('https://www.mieterverband.ch/mv/emailberatung-erfolg');
             }
         });
-        location.replace('https://www.mieterverband.ch/mv/emailberatung-erfolg');
+        
     }
 }
 
