@@ -26,8 +26,11 @@ def get_context(context):
         decoded_jwt_token = jwt.decode(jwt_token, public_key, algorithms=[algorythmus])
         context.jwt_token = decoded_jwt_token
         if 'mitglied_nr' in decoded_jwt_token:
+            frappe.log_error("{0}".format(decoded_jwt_token["mitglied_nr"]), "mitglied_nr")
             mitglied_id = get_mitglied_id_from_nr(decoded_jwt_token["mitglied_nr"])
+            frappe.log_error("{0}".format(mitglied_id), "mitglied_id")
             if mitglied_id:
+                frappe.log_error("{0}".format(frappe.db.exists("Mitgliedschaft", mitglied_id)), "db.exist")
                 if frappe.db.exists("Mitgliedschaft", mitglied_id):
                     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
                     context = context_erweiterung(context, mitgliedschaft)
