@@ -80,7 +80,7 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratungskategorie", "List");
         });
         $("#statistik").click(function(){
-            frappe.msgprint("TBD");
+            frappe.set_route(["query-report", "Beratungsstatistik"]);
         });
         
         frappe.dom.unfreeze();

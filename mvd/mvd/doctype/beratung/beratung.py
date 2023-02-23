@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils.data import today
 
 class Beratung(Document):
     def set_new_name(self):
@@ -17,6 +18,7 @@ class Beratung(Document):
         return
     
     def validate(self):
+        # Termin Filter handling
         if len(self.termin) > 0:
             self.hat_termine = 1
         else:
@@ -26,14 +28,24 @@ class Beratung(Document):
         else:
             self.zuweisung = 0
         
+        # Beratungskategorien handling
         if not self.beratungskategorie_2:
             self.beratungskategorie_3 = None
         if not self.beratungskategorie:
             self.beratungskategorie_2 = None
         
+        # Auto ToDo handling
         if self.kontaktperson:
             if not frappe.db.get_value("Beratung", self.name, "kontaktperson"):
                 self.create_todo = 1
+        
+        # Statistik handling -> closed date tracker
+        if self.status == 'Closed':
+            if not self.geschlossen_am:
+                self.geschlossen_am = today()
+        else:
+            if self.geschlossen_am:
+                self.geschlossen_am = None
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):

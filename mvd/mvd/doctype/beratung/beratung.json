@@ -8,6 +8,7 @@
   "titel",
   "raised_by",
   "create_todo",
+  "geschlossen_am",
   "section_allgemein",
   "beratungskategorie",
   "beratungskategorie_code",
@@ -212,9 +213,15 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "create_todo"
+  },
+  {
+   "fieldname": "geschlossen_am",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "geschlossen_am"
   }
  ],
- "modified": "2023-02-22 15:48:30.949920",
+ "modified": "2023-02-23 08:31:00.690477",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

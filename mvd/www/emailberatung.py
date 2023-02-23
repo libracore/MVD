@@ -58,6 +58,7 @@ def raise_redirect(typ=None):
             raise frappe.Redirect
 
 def context_erweiterung(context, mitgliedschaft):
+    frappe.log_error("{0}".format(str(mitgliedschaft)), "context_erweiterung")
     context.mitglied_nr = mitgliedschaft.mitglied_nr
     context.mitglied_id = mitgliedschaft.name
     context.anrede = mitgliedschaft.anrede_c
@@ -85,6 +86,7 @@ def context_erweiterung(context, mitgliedschaft):
     else:
         context.legacy_mode = False
     
+    frappe.log_error("{0}".format(str(context)), "return context")
     return context
 
 @frappe.whitelist(allow_guest=True)
