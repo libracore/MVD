@@ -4122,14 +4122,16 @@ def erstellung_faktura_kunde(mitgliedschaft):
     return kunde.name
 
 def get_mitglied_id_from_nr(mitglied_nr=None):
+    frappe.log_error("{0}".format(mitglied_nr), "get_mitglied_id_from_nr")
     if mitglied_nr:
         mitgliedschaften = frappe.db.sql("""SELECT
                                                 `name`
                                             FROM `tabMitgliedschaft`
-                                            WHERE `mitglied_nr` = '{0}'
+                                            WHERE `mitglied_nr` LIKE '%{0}'
                                             AND `status` != 'Inaktiv'
                                             ORDER BY `creation` DESC LIMIT 1""".format(mitglied_nr), as_dict=True)
         if len(mitgliedschaften) > 0:
+            frappe.log_error("{0}".format(mitgliedschaften[0].name), "if len(mitgliedschaften) > 0")
             return mitgliedschaften[0].name
         else:
             return None
