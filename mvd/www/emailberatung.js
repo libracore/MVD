@@ -1,25 +1,30 @@
 function new_onlineberatung() {
-    var kwargs = {
-        'mv_mitgliedschaft': document.getElementById("mitgliedschaft_id").value,
-        'telefon': document.getElementById("telefon").value,
-        'email': document.getElementById("email").value,
-        'anderes_mietobjekt': document.getElementById("anderes_mietobjekt").value,
-        'frage': document.getElementById("frage").value,
-        'datum_mietzinsanzeige': document.getElementById("datum_mietzinsanzeige").value
-    }
-    frappe.call({
-        'method': 'mvd.www.emailberatung.new_beratung',
-        'args': {
-            kwargs
-        },
-        'async': true,
-        'callback': function(res) {
-            var beratung = res.message;
-            if (beratung != 'error') {
-                get_upload_keys(beratung);
-            }
+    if (localStorage.getItem('anfage_gesendet') == '0') {
+        localStorage.setItem('anfage_gesendet', '1');
+        var kwargs = {
+            'mv_mitgliedschaft': document.getElementById("mitgliedschaft_id").value,
+            'telefon': document.getElementById("telefon").value,
+            'email': document.getElementById("email").value,
+            'anderes_mietobjekt': document.getElementById("anderes_mietobjekt").value,
+            'frage': document.getElementById("frage").value,
+            'datum_mietzinsanzeige': document.getElementById("datum_mietzinsanzeige").value
         }
-    });
+        frappe.call({
+            'method': 'mvd.www.emailberatung.new_beratung',
+            'args': {
+                kwargs
+            },
+            'async': true,
+            'callback': function(res) {
+                var beratung = res.message;
+                if (beratung != 'error') {
+                    get_upload_keys(beratung);
+                }
+            }
+        });
+    } else {
+        alert("Bitte warten, Ihre Anfrage wird bereits verarbeitet.");
+    }
 }
 
 $(':file').on('change',function(){
@@ -673,6 +678,7 @@ setTimeout(function(){
         });
     });
 }, 1000);
+localStorage.setItem('anfage_gesendet', '0');
 
 // AWESOMPLETE END
 // ----------------------------------------------------------------------------------------------------
