@@ -145,9 +145,9 @@ def new_file_to_beratung(**kwargs):
                 'parenttype': 'Beratung',
                 'parent': args['beratung'],
                 'idx': args['idx'],
-                'document_type': args['document_type'] if 'document_type' in args else 'Sonstiges',
+                'document_type': args['document_type'] if args['document_type'] != '' else 'Sonstiges',
                 'filename': args['filename'].replace(".pdf", "").replace(".jpg", "").replace(".jpeg", ""),
-                'document_date': args['document_date'] if 'document_date' in args else None,
+                'document_date': args['document_date'] if args['document_date'] else None,
                 'file': file_path
             })
             new_file.insert(ignore_permissions=True)
