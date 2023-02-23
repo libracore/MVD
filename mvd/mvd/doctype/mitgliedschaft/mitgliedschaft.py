@@ -4128,7 +4128,7 @@ def get_mitglied_id_from_nr(mitglied_nr=None):
                                                 `name`
                                             FROM `tabMitgliedschaft`
                                             WHERE `mitglied_nr` LIKE '%{0}'
-                                            AND `status` != 'Inaktiv'
+                                            AND `status_c` != 'Inaktiv'
                                             ORDER BY `creation` DESC LIMIT 1""".format(mitglied_nr), as_dict=True)
         if len(mitgliedschaften) > 0:
             frappe.log_error("{0}".format(mitgliedschaften[0].name), "if len(mitgliedschaften) > 0")
