@@ -163,3 +163,31 @@ def new_todo(beratung, kontaktperson):
         }).insert(ignore_permissions=True)
     frappe.db.set_value("Beratung", beratung, 'create_todo', 0, update_modified=False)
     frappe.db.commit()
+
+# SP API Endpunkt: Abfrage Dokumente
+def _get_beratungs_dokument(beratungs_dokument):
+    if 'beratungs_dokument_id' in beratungs_dokument:
+        if frappe.db.exists("File", beratungs_dokument["beratungs_dokument_id"]):
+            # File zurück senden
+            file_doc = frappe.get_doc("File", beratungs_dokument["beratungs_dokument_id"])
+            filecontent = file_doc.get_content()
+            return {
+                'filecontent': filecontent
+            }
+            
+        else:
+            return raise_xxx(400, 'Bad Request', 'file not found')
+    else:
+        return raise_xxx(400, 'Bad Request', 'beratungs_dokument missing')
+
+# Status Returns
+def raise_xxx(code, title, message):
+    frappe.log_error("{0}\n{1}\n{2}\n\n{3}".format(code, title, message, frappe.utils.get_traceback()), 'SP API Error!')
+    frappe.local.response.http_status_code = code
+    frappe.local.response.message = message
+    return ['{code} {title}'.format(code=code, title=title), {
+        "error": {
+            "code": code,
+            "message": "{message}".format(message=message)
+        }
+    }]

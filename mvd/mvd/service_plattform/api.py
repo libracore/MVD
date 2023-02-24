@@ -14,6 +14,7 @@ import string
 from frappe import _
 from mvd.mvd.utils.post import _post_retouren
 from mvd.mvd.utils.post import _post_responses
+from mvd.mvd.doctype.beratung.beratung import _get_beratungs_dokument
 
 AUTH0_SCOPE = "Auth0"
 SVCPF_SCOPE = "ServicePF"
@@ -198,6 +199,11 @@ def get_token(scope=SVCPF_SCOPE):
 @frappe.whitelist()
 def mitglieder(**mitgliedschaft):
     return mvm_mitglieder(mitgliedschaft)
+
+# abfrage Attachment zu Beratung
+@frappe.whitelist()
+def get_beratungs_dokument(**beratungs_dokument):
+    return _get_beratungs_dokument(beratungs_dokument)
 
 def sektionswechsel(mvm, sektion_code):
     if not int(frappe.db.get_single_value('Service Plattform API', 'no_sp_update')) == 1:
