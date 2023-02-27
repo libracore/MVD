@@ -123,8 +123,12 @@ function upload_files(beratung, key, secret, loop=1) {
                 var document_date = '';
             }
             if ($("#upload_files_auswahl_" + String(loop)).val()) {
-                var document_type = $("#upload_files_auswahl_" + String(loop)).val().replace("/", "_").replace(" ", "_")
-                file_name += document_type + "_";
+                var document_type = $("#upload_files_auswahl_" + String(loop)).val()
+                if (['Mietvertrag', 'Mietzinserhöhung', 'Mietzinsherabsetzung', 'Vergleich/Urteil', 'Vereinbarung', 'sonstige Vertragsänderung'].includes(document_type)) {
+                    file_name += document_type.replace("/", "_").replace(" ", "_") + "_";
+                } else {
+                    file_name += 'Sonstiges_';
+                }
             } else {
                 var document_type = '';
             }

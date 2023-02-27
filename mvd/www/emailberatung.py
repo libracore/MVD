@@ -2,11 +2,12 @@ from __future__ import unicode_literals
 import frappe
 import json
 import jwt
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
+from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr, prepare_mvm_for_sp
 from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.utils import get_url, sanitize_html
 from frappe import sendmail
+from mvd.mvd.service_plattform.api import send_beratung
 
 no_cache = 1
 
@@ -121,7 +122,10 @@ def new_beratung(**kwargs):
             'status': 'Eingang',
             'mv_mitgliedschaft': args['mv_mitgliedschaft'],
             'notiz': notiz,
-            'raised_by': args['email'] if args['email'] else None
+            'raised_by': args['email'] if args['email'] else None,
+            'telefon_privat_mobil': args['telefon'] if args['telefon'] else None,
+            'anderes_mietobjekt': args['anderes_mietobjekt'] if args['anderes_mietobjekt'] else None,
+            'frage': args['frage'] if args['frage'] else None
         })
         new_ber.insert(ignore_permissions=True)
         frappe.db.commit()
@@ -137,6 +141,20 @@ def new_beratung(**kwargs):
 def new_file_to_beratung(**kwargs):
     args = json.loads(kwargs['kwargs'])
     if frappe.db.exists("Beratung", args['beratung']):
+        document_type = 'Sonstiges'
+        man_document_type = None
+        if args['document_type']:
+            if args['document_type'] in [
+                        'Mietvertrag',
+                        'Mietzinserhöhung',
+                        'Mietzinsherabsetzung',
+                        'Vergleich/Urteil',
+                        'Vereinbarung',
+                        'sonstige Vertragsänderung'
+                    ]:
+                document_type = args['document_type']
+            else:
+                man_document_type = args['document_type']
         try:
             file_path = '/private/files/{0}'.format(args['filename'])
             new_file = frappe.get_doc({
@@ -145,7 +163,8 @@ def new_file_to_beratung(**kwargs):
                 'parenttype': 'Beratung',
                 'parent': args['beratung'],
                 'idx': args['idx'],
-                'document_type': args['document_type'] if args['document_type'] != '' else 'Sonstiges',
+                'document_type': document_type,
+                'man_document_type': man_document_type,
                 'filename': args['filename'].replace(".pdf", "").replace(".jpg", "").replace(".jpeg", ""),
                 'document_date': args['document_date'] if args['document_date'] else None,
                 'file': file_path
@@ -317,6 +336,9 @@ def send_legacy_mail(**kwargs):
     beratung = args['beratung']
     raised_by = args['raised_by']
     
+    # mark for SP API
+    frappe.db.set_value("Beratung", beratung, 'trigger_api', 1, update_modified=False)
+    
     mitgliedschaft_id = frappe.db.get_value("Beratung", beratung, 'mv_mitgliedschaft')
     sektion = frappe.db.get_value("Mitgliedschaft", mitgliedschaft_id, 'sektion_id')
     notiz = frappe.db.get_value("Beratung", beratung, 'notiz')
@@ -324,3 +346,39 @@ def send_legacy_mail(**kwargs):
     if frappe.db.get_value("Sektion", sektion, 'legacy_mode') != '0':
         send_confirmation_mail(mitgliedschaft_id, beratung, notiz, legacy_mail=frappe.db.get_value("Sektion", sektion, 'legacy_mode'), sektion=sektion, raised_by=raised_by)
         return
+
+def send_to_sp():
+    beratungen = frappe.db.sql("""SELECT `name` FROM `tabBeratung` WHERE `trigger_api` = 1""", as_dict=True)
+    for ber in beratungen:
+        beratung = frappe.get_doc("Beratung", ber.name)
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", beratung.mv_mitgliedschaft)
+        prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
+        dokumente = []
+        files = frappe.db.sql("""SELECT `name`, `file_name` FROM `tabFile` WHERE `attached_to_name` = '{0}'""".format(beratung.name), as_dict=True)
+        for dok in files:
+            dok_data = {
+                "beratungDokumentId": dok.name,
+                "name": dok.file_name,
+                "datum": beratung.start_date,
+                "typ": str(dok.file_name.split(".")[len(dok.file_name.split(".")) - 1])
+            }
+            dokumente.append(dok_data)
+            
+        json_to_send = {
+            "beratungId": beratung.name,
+            "mitglied": prepared_mvm,
+            "datumEingang": beratung.start_date,
+            "beratungskategorie": beratung.beratungskategorie,
+            "telefonPrivatMobil": beratung.telefon_privat_mobil,
+            "email": beratung.raised_by,
+            "anderesMietobjekt": beratung.anderes_mietobjekt,
+            "frage": beratung.frage,
+            "datumBeginnFrist": beratung.start_date,
+            "dokumente": dokumente
+        }
+        
+        frappe.log_error("{0}".format(str(json_to_send)), "Beratung an SP gesendet (OK)")
+        send_beratung(json_to_send)
+        
+        # remove mark for SP API
+        frappe.db.set_value("Beratung", beratung.name, 'trigger_api', 0, update_modified=False)

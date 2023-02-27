@@ -9,6 +9,10 @@
   "raised_by",
   "create_todo",
   "geschlossen_am",
+  "trigger_api",
+  "telefon_privat_mobil",
+  "anderes_mietobjekt",
+  "frage",
   "section_allgemein",
   "beratungskategorie",
   "beratungskategorie_code",
@@ -219,9 +223,34 @@
    "fieldtype": "Date",
    "hidden": 1,
    "label": "geschlossen_am"
+  },
+  {
+   "default": "0",
+   "fieldname": "trigger_api",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "trigger_api"
+  },
+  {
+   "fieldname": "telefon_privat_mobil",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "telefonPrivatMobil"
+  },
+  {
+   "fieldname": "anderes_mietobjekt",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "anderesMietobjekt"
+  },
+  {
+   "fieldname": "frage",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Frage"
   }
  ],
- "modified": "2023-02-23 08:31:00.690477",
+ "modified": "2023-02-25 15:51:25.074285",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
