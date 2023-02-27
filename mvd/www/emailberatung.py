@@ -361,7 +361,7 @@ def send_to_sp():
             dok_data = {
                 "beratungDokumentId": dok.name,
                 "name": dok.file_name,
-                "datum": get_datetime_str(beratung.start_date),
+                "datum": get_datetime_str(beratung.start_date).replace(" ", "T"),
                 "typ": str(dok.file_name.split(".")[len(dok.file_name.split(".")) - 1])
             }
             dokumente.append(dok_data)
