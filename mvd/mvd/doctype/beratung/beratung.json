@@ -13,6 +13,7 @@
   "telefon_privat_mobil",
   "anderes_mietobjekt",
   "frage",
+  "datum_mietzinsanzeige",
   "section_allgemein",
   "beratungskategorie",
   "beratungskategorie_code",
@@ -248,9 +249,15 @@
    "fieldtype": "Code",
    "hidden": 1,
    "label": "Frage"
+  },
+  {
+   "fieldname": "datum_mietzinsanzeige",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "datum_mietzinsanzeige"
   }
  ],
- "modified": "2023-02-25 15:51:25.074285",
+ "modified": "2023-02-27 11:59:20.969344",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

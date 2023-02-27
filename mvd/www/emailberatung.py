@@ -125,7 +125,8 @@ def new_beratung(**kwargs):
             'raised_by': args['email'] if args['email'] else None,
             'telefon_privat_mobil': args['telefon'] if args['telefon'] else None,
             'anderes_mietobjekt': args['anderes_mietobjekt'] if args['anderes_mietobjekt'] else None,
-            'frage': args['frage'] if args['frage'] else None
+            'frage': args['frage'] if args['frage'] else None,
+            'datum_mietzinsanzeige': args['datum_mietzinsanzeige'] if args['datum_mietzinsanzeige'] else None
         })
         new_ber.insert(ignore_permissions=True)
         frappe.db.commit()
@@ -368,7 +369,8 @@ def send_to_sp():
             "beratungId": beratung.name,
             "mitglied": prepared_mvm,
             "datumEingang": beratung.start_date,
-            "beratungskategorie": beratung.beratungskategorie,
+            # ~ "beratungskategorie": beratung.beratungskategorie,
+            "beratungskategorie": 'Mietzinserhöhung' if beratung.datum_mietzinsanzeige else 'Allgemeine Anfrage',
             "telefonPrivatMobil": beratung.telefon_privat_mobil,
             "email": beratung.raised_by,
             "anderesMietobjekt": beratung.anderes_mietobjekt,
