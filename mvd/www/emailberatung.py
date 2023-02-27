@@ -8,6 +8,7 @@ from frappe.desk.form.load import get_attachments
 from frappe.utils import get_url, sanitize_html
 from frappe import sendmail
 from mvd.mvd.service_plattform.api import send_beratung
+from frappe.utils.data import get_datetime_str
 
 no_cache = 1
 
@@ -360,7 +361,7 @@ def send_to_sp():
             dok_data = {
                 "beratungDokumentId": dok.name,
                 "name": dok.file_name,
-                "datum": beratung.start_date,
+                "datum": get_datetime_str(beratung.start_date),
                 "typ": str(dok.file_name.split(".")[len(dok.file_name.split(".")) - 1])
             }
             dokumente.append(dok_data)
@@ -368,14 +369,14 @@ def send_to_sp():
         json_to_send = {
             "beratungId": beratung.name,
             "mitglied": prepared_mvm,
-            "datumEingang": beratung.start_date,
+            "datumEingang": get_datetime_str(beratung.start_date),
             # ~ "beratungskategorie": beratung.beratungskategorie,
             "beratungskategorie": 'Mietzinserhöhung' if beratung.datum_mietzinsanzeige else 'Allgemeine Anfrage',
             "telefonPrivatMobil": beratung.telefon_privat_mobil,
             "email": beratung.raised_by,
             "anderesMietobjekt": beratung.anderes_mietobjekt,
             "frage": beratung.frage,
-            "datumBeginnFrist": beratung.start_date,
+            "datumBeginnFrist": get_datetime_str(beratung.start_date),
             "dokumente": dokumente
         }
         

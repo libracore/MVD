@@ -171,8 +171,11 @@ def _get_beratungs_dokument(beratungs_dokument):
             # File zurück senden
             file_doc = frappe.get_doc("File", beratungs_dokument["beratungs_dokument_id"])
             filecontent = file_doc.get_content()
+            file_name = frappe.db.get_value("File", beratungs_dokument["beratungs_dokument_id"], 'file_name')
             return {
-                'filecontent': filecontent
+                'filecontent': filecontent,
+                'type': str(file_name.split(".")[len(file_name.split(".")) - 1]),
+                'name': file_name
             }
             
         else:
