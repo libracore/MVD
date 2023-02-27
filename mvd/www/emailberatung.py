@@ -369,14 +369,14 @@ def send_to_sp():
         json_to_send = {
             "beratungId": beratung.name,
             "mitglied": prepared_mvm,
-            "datumEingang": get_datetime_str(beratung.start_date),
+            "datumEingang": get_datetime_str(beratung.start_date).replace(" ", "T"),
             # ~ "beratungskategorie": beratung.beratungskategorie,
             "beratungskategorie": 'Mietzinserhöhung' if beratung.datum_mietzinsanzeige else 'Allgemeine Anfrage',
             "telefonPrivatMobil": beratung.telefon_privat_mobil,
             "email": beratung.raised_by,
             "anderesMietobjekt": beratung.anderes_mietobjekt,
             "frage": beratung.frage,
-            "datumBeginnFrist": get_datetime_str(beratung.start_date),
+            "datumBeginnFrist": get_datetime_str(beratung.start_date).replace(" ", "T"),
             "dokumente": dokumente
         }
         
