@@ -1,30 +1,60 @@
 function new_onlineberatung() {
     if (localStorage.getItem('anfage_gesendet') == '0') {
-        localStorage.setItem('anfage_gesendet', '1');
-        var kwargs = {
-            'mv_mitgliedschaft': document.getElementById("mitgliedschaft_id").value,
-            'telefon': document.getElementById("telefon").value,
-            'email': document.getElementById("email").value,
-            'anderes_mietobjekt': document.getElementById("anderes_mietobjekt").value,
-            'frage': document.getElementById("frage").value,
-            'datum_mietzinsanzeige': document.getElementById("datum_mietzinsanzeige").value
-        }
-        frappe.call({
-            'method': 'mvd.www.emailberatung.new_beratung',
-            'args': {
-                kwargs
-            },
-            'async': true,
-            'callback': function(res) {
-                var beratung = res.message;
-                if (beratung != 'error') {
-                    get_upload_keys(beratung);
-                }
+        var failed_validations = check_mandatory();
+        if (failed_validations.length < 1) {
+            localStorage.setItem('anfage_gesendet', '1');
+            var kwargs = {
+                'mv_mitgliedschaft': document.getElementById("mitgliedschaft_id").value,
+                'telefon': document.getElementById("telefon").value,
+                'email': document.getElementById("email").value,
+                'anderes_mietobjekt': document.getElementById("anderes_mietobjekt").value,
+                'frage': document.getElementById("frage").value,
+                'datum_mietzinsanzeige': document.getElementById("datum_mietzinsanzeige").value
             }
-        });
+            frappe.call({
+                'method': 'mvd.www.emailberatung.new_beratung',
+                'args': {
+                    kwargs
+                },
+                'async': true,
+                'callback': function(res) {
+                    var beratung = res.message;
+                    if (beratung != 'error') {
+                        get_upload_keys(beratung);
+                    }
+                }
+            });
+        } else {
+            alert("Bitte füllen Sie alle Pflichtfelder aus.");
+        }
     } else {
         alert("Bitte warten, Ihre Anfrage wird bereits verarbeitet.");
     }
+}
+
+function check_mandatory() {
+    mandatory_fields = [
+        'telefon',
+        'email',
+        'frage'
+    ]
+    
+    if (localStorage.getItem('mz_anfrage') == '1') {
+        mandatory_fields.push('datum_mietzinsanzeige');
+    }
+    
+    failed_validations = []
+    
+    for (var i=0; i < mandatory_fields.length; i++) {
+        if (!$("#" + mandatory_fields[i]).val()) {
+            failed_validations.push(mandatory_fields[i]);
+            $("#" + mandatory_fields[i]).css("border", "1px solid red");
+        } else {
+            $("#" + mandatory_fields[i]).css("border", "1px solid #ccc");
+        }
+    }
+    
+    return failed_validations
 }
 
 $(':file').on('change',function(){
@@ -184,6 +214,7 @@ function upload_files(beratung, key, secret, loop=1) {
 }
 
 function show_mz() {
+    localStorage.setItem('mz_anfrage', '1');
     $("#tab_title").text("Mietzinserhöhung");
     $(".mz").css("display", 'inline');
     $("#mz_item").addClass("selected");
@@ -219,6 +250,8 @@ function show_mz() {
 }
 
 function hide_mz() {
+    localStorage.setItem('mz_anfrage', '0');
+    $("#datum_mietzinsanzeige").val('');
     $("#tab_title").text("Beratungsanfrage");
     $(".mz").css("display", 'none');
     $("#allgmein_item").addClass("selected");
@@ -683,6 +716,7 @@ setTimeout(function(){
     });
 }, 1000);
 localStorage.setItem('anfage_gesendet', '0');
+localStorage.setItem('mz_anfrage', '0');
 
 // AWESOMPLETE END
 // ----------------------------------------------------------------------------------------------------
