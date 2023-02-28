@@ -56,14 +56,14 @@ website_redirects = [
     # absolute location
     {"source": "/nologin", "target": "https://www.mieterverband.ch/mv/prozesse/login.html"},
     {"source": "/mvd-500", "target": "https://www.mieterverband.ch/mv/500"},
-    {"source": "/(^((?!emailberatung).)*$)", "target": "https://www.mieterverband.ch/"}
+    {"source": "/(^((?!emailberatung)|(?!login).)*$)", "target": "https://www.mieterverband.ch/"}
 ]
 
 # Home Pages
 # ----------
 
 # application home page (will override Website Settings)
-# home_page = "login"
+home_page = "redirect"
 
 # website user home page (by Role)
 # role_home_page = {
