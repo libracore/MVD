@@ -14,6 +14,7 @@ import string
 from frappe import _
 from mvd.mvd.utils.post import _post_retouren
 from mvd.mvd.utils.post import _post_responses
+from mvd.mvd.doctype.beratung.beratung import _get_beratungs_dokument
 
 AUTH0_SCOPE = "Auth0"
 SVCPF_SCOPE = "ServicePF"
@@ -124,6 +125,32 @@ def update_mvm(mvm, update):
         frappe.log_error("{0}".format(mvm), 'update_mvm deaktiviert')
         return
 
+def send_beratung(beratungs_data):
+    if auth_check(SVCPF_SCOPE):
+        config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+        sub_url = str(config.get_value(SVCPF_SCOPE, "api_url"))
+        endpoint = str(config.get('beratung'))
+        url = sub_url + endpoint
+        token = config.get_value(SVCPF_SCOPE, 'api_token')
+        headers = {"authorization": "Bearer {token}".format(token=token)}
+        
+        if int(frappe.db.get_single_value('Service Plattform API', 'json_error_log')) == 1:
+            frappe.log_error("{0}".format(json.dumps(beratungs_data)), 'json for ChLa')
+        
+        sp_connection = requests.post(url, json = beratungs_data, headers = headers)
+        
+        try:
+            if sp_connection.status_code != 204:
+                frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, beratungs_data), 'send beratung failed')
+                frappe.db.commit()
+                return
+            else:
+                return
+        except Exception as err:
+            frappe.log_error("{0}\n\n{1}".format(err, beratungs_data), 'send beratung failed')
+            frappe.db.commit()
+            
+
 def auth_check(scope=SVCPF_SCOPE):
     config = frappe.get_doc("Service Plattform API", "Service Plattform API")
     sub_url = str(config.get_value(scope, "api_url"))
@@ -198,6 +225,11 @@ def get_token(scope=SVCPF_SCOPE):
 @frappe.whitelist()
 def mitglieder(**mitgliedschaft):
     return mvm_mitglieder(mitgliedschaft)
+
+# abfrage Attachment zu Beratung
+@frappe.whitelist()
+def get_beratungs_dokument(**beratungs_dokument):
+    return _get_beratungs_dokument(beratungs_dokument)
 
 def sektionswechsel(mvm, sektion_code):
     if not int(frappe.db.get_single_value('Service Plattform API', 'no_sp_update')) == 1:

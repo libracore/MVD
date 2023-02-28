@@ -1,0 +1,44 @@
+{
+ "creation": "2023-01-25 13:36:04.938931",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "von",
+  "bis",
+  "ort"
+ ],
+ "fields": [
+  {
+   "fieldname": "von",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Datum von",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bis",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Datum bis",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Ort"
+  }
+ ],
+ "istable": 1,
+ "modified": "2023-01-25 13:36:04.938931",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Beratung Termin",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

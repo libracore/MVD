@@ -48,11 +48,23 @@ jenv = {
         "get_rg_adressblock:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_rg_adressblock"
     ]
 }
+
+# allow to link incoming mails to Beratung
+email_append_to = ["Beratung"]
+
+website_redirects = [
+    # absolute location
+    {"source": "/nologin", "target": "https://www.mieterverband.ch/mv/prozesse/login.html"},
+    {"source": "/mvd-500", "target": "https://www.mieterverband.ch/mv/500"},
+    # ~ {"source": "/(^(?!.*login)(?!.*emailberatung)(?!.*desk).*$)", "target": "https://www.mieterverband.ch/"}
+    {"source": "/", "target": "https://www.mieterverband.ch/"}
+]
+
 # Home Pages
 # ----------
 
 # application home page (will override Website Settings)
-# home_page = "login"
+home_page = "redirect"
 
 # website user home page (by Role)
 # role_home_page = {
@@ -127,7 +139,8 @@ scheduler_events = {
     ],
     "all": [
         "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue",
-        "mvd.mvd.doctype.mvd_email_queue.mvd_email_queue.mvd_mail_flush"
+        "mvd.mvd.doctype.mvd_email_queue.mvd_email_queue.mvd_mail_flush",
+        "mvd.www.emailberatung.send_to_sp"
     ]
 }
 # scheduler_events = {
