@@ -3342,7 +3342,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "regionCode": frappe.get_value("Region", mitgliedschaft.region, "region_c") if mitgliedschaft.region else None,
         "regionManuell": True if mitgliedschaft.region_manuell else False,
         "typ": str(typ_mapper[mitgliedschaft.mitgliedtyp_c]),
-        "status": str(status_mapper[mitgliedschaft.status_c]),
+        "status": str(status_mapper[mitgliedschaft.status_c]) if mitgliedschaft.status_c != 'Online-Mutation' else str(status_mapper[mitgliedschaft.status_vor_onl_mutation]),
         "sprache": get_sprache(language=mitgliedschaft.language) if mitgliedschaft.language else 'Deutsch',
         "istTemporaeresMitglied": False, # ???
         "fuerBewirtschaftungGesperrt": True if mitgliedschaft.adressen_gesperrt else False,

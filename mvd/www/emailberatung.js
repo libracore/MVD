@@ -100,8 +100,10 @@ function add_new_file_row() {
         klon[0].id = "file_row_" + String(new_id);
         $(klon[0].children[0].children[0].children[0]).text('Zusätzliche Datei');
         klon[0].children[0].children[0].children[1].id = "upload_files_" + String(new_id);
+        $(klon[0].children[0].children[0].children[1]).val('');
         klon[0].children[1].children[0].children[1].id = "upload_files_dateupload_files_date_" + String(new_id);
         klon[0].children[2].children[1].children[0].id = "upload_files_auswahl_" + String(new_id);
+        $(klon[0].children[2].children[1].children[0]).val('');
         
         
         if ($(':file').length != 1) {
@@ -109,8 +111,10 @@ function add_new_file_row() {
         } else {
             $("#default_file_row").after(klon);
         }
+        
         init_awesomplete("upload_files_auswahl_" + String(new_id));
         $("#upload_files_auswahl_" + String(new_id)).attr('readonly', false);
+        
         setTimeout(function(){
             $(".awesomplete-delete").each(function(){
                 $(this).off('click');
@@ -125,7 +129,6 @@ function add_new_file_row() {
                 }
             });
         }, 1000);
-        $("#upload_files_auswahl_" + String(new_id)).val('');
     } else {
         alert("Die Maximale Anzahl Files beträgt 15.");
     }
