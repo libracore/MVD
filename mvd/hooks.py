@@ -49,13 +49,14 @@ jenv = {
     ]
 }
 
-# allow to link incoing mails to Beratung
+# allow to link incoming mails to Beratung
 email_append_to = ["Beratung"]
 
 website_redirects = [
     # absolute location
     {"source": "/nologin", "target": "https://www.mieterverband.ch/mv/prozesse/login.html"},
-    {"source": "/mvd-500", "target": "https://www.mieterverband.ch/mv/500"}
+    {"source": "/mvd-500", "target": "https://www.mieterverband.ch/mv/500"},
+    {"source": "https://service-test.mieterverband.ch/(^((?!emailberatung).)*$)", "target": "https://www.mieterverband.ch/"}
 ]
 
 # Home Pages

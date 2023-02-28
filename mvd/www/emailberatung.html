@@ -320,8 +320,8 @@
                                                             </label>
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <p class="value-read-only">{{ nummer }}{{ nummer_zu }}</p>
-                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_strassen_nr" id="mo_strassen_nr" value="{{ nummer }}{{ nummer_zu }}" maxlength="50">
+                                                            <p class="value-read-only">{{ nummer or '' }}{{ nummer_zu or '' }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_strassen_nr" id="mo_strassen_nr" value="{{ nummer or '' }}{{ nummer_zu or '' }}" maxlength="50">
                                                         </div>
                                                     </div>
                                                 </div>
