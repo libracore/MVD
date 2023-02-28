@@ -5,7 +5,7 @@
 frappe.query_reports["Beratungsstatistik"] = {
     "filters": [
         {
-            'fieldname': "from",
+            'fieldname': "from_date",
             'label': __("Von"),
             'fieldtype': "Date",
             'reqd': 1,
