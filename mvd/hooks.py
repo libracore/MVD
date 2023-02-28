@@ -56,7 +56,7 @@ website_redirects = [
     # absolute location
     {"source": "/nologin", "target": "https://www.mieterverband.ch/mv/prozesse/login.html"},
     {"source": "/mvd-500", "target": "https://www.mieterverband.ch/mv/500"},
-    {"source": "https://service-test.mieterverband.ch/(^((?!emailberatung).)*$)", "target": "https://www.mieterverband.ch/"}
+    {"source": "/(^((?!emailberatung).)*$)", "target": "https://www.mieterverband.ch/"}
 ]
 
 # Home Pages
