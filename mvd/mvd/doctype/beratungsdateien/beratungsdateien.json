@@ -1,0 +1,59 @@
+{
+ "creation": "2022-12-12 10:10:23.786364",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "filename",
+  "document_type",
+  "man_document_type",
+  "document_date",
+  "file"
+ ],
+ "fields": [
+  {
+   "fieldname": "filename",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dateiname",
+   "reqd": 1
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Dokumenttyp",
+   "options": "Mietvertrag\nMietzinserh\u00f6hung\nMietzinsherabsetzung\nVergleich/Urteil\nVereinbarung\nsonstige Vertrags\u00e4nderung\nSonstiges",
+   "reqd": 1
+  },
+  {
+   "fieldname": "document_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Dokumentdatum"
+  },
+  {
+   "fieldname": "file",
+   "fieldtype": "Attach",
+   "label": "Datei",
+   "reqd": 1
+  },
+  {
+   "fieldname": "man_document_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Manueller Dokumententyp"
+  }
+ ],
+ "istable": 1,
+ "modified": "2023-02-27 10:26:20.071675",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Beratungsdateien",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

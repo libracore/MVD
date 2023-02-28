@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="generator" content="frappe">
+
+        {% block meta_block %}
+            {% include "templates/includes/meta_block.html" %}
+        {% endblock %}
+
+        <title>{% block title %} {{ title | striptags }} {% endblock %}</title>
+
+        {% block favicon %}
+        <link
+            rel="shortcut icon"
+            href="{{ (favicon or "/assets/frappe/images/favicon.png") | abs_url }}"
+            type="image/x-icon"
+        >
+        {% endblock %}
+        <script>
+            window.frappe = {};
+            frappe.ready_events = [];
+            frappe.ready = function(fn) {
+                frappe.ready_events.push(fn);
+            }
+            window.dev_server = {{ dev_server }};
+            window.socketio_port = {{ frappe.socketio_port }};
+        </script>
+    </head>
+    <body frappe-session-status="{{ 'logged-in' if frappe.session.user != 'Guest' else 'logged-out'}}" data-path="{{ path | e }}" id="home" class="smvForm smvEmailBeratungForm isCookieRequired process-page">
+        <div class="content-wrapper" id="content">
+            <header class="header" role="heading">
+                <div class="branding">
+                    <div class="container-inner" role="banner">
+                        <ul class="skip">
+                            <li><a href="/mv.html" accesskey="0" title="[ALT + 0]">Startseite</a></li>
+                            <li><a href="#nav-global" accesskey="1" title="[ALT + 1]">Hauptmenü</a></li>
+                            <li><a href="#main" accesskey="2" title="[ALT + 2]">Hauptinhalt</a></li>
+                            <li><a href="/mv/mitgliedschaft-verband/kontakt.html" accesskey="3" title="[ALT + 3]">Kontakt</a></li>
+                            <li><a href="#section" accesskey="3" title="[ALT + 4]">Sektionswahl</a></li>
+                            <li><a href="/mv/searchresults.html#newsearch" accesskey="5" title="[ALT + 5]">Suche</a></li>
+                            <li><a href="#extras" accesskey="6" title="[ALT + 6]">Extrainhalte</a></li>
+                            <li><a href="#nav" accesskey="7" title="[ALT + 7]">Untermenü</a></li>
+                            <li><a href="#site-info-box" accesskey="8" title="[ALT + 8]">Fusszeile</a></li>
+                        </ul>
+                        <div class="row">
+                            <div class="col-sm-9 col-md-4 col-lg-3">
+                                <div class="logo">
+                                    <a class="link-home" href="https://mieterverband.ch/mv.html" title="Startseite">
+                                        <img class="h-flex" src="/assets/mvd/img/MV_Logo_Byline.png" alt="SMV">
+                                        <strong class="h-vh">SMV</strong>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 col-md-8 col-lg-6">
+                                <nav class="nav-main " role="navigation">
+                                    <h6 class="h-vh">Navigation</h6>
+                                    <a href="#" class="nav-handle" aria-hidden="true" title="Navigation Anzeigen"><span></span></a>
+                                    <ul class="nav-list h-cf">
+                                        <li class="nav-item " data-url="https://mieterverband.ch/mv/mietrecht-beratung.html">
+                                            <a class="nav-link" href="https://mieterverband.ch/mv/mietrecht-beratung.html">
+                                                <span>Mietrecht &amp;<br>Beratung</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item " data-url="https://mieterverband.ch/mv/mitgliedschaft-verband.html">
+                                            <a class="nav-link" href="https://mieterverband.ch/mv/mitgliedschaft-verband.html">
+                                                <span>Mitgliedschaft &amp;<br>Verband</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item " data-url="https://mieterverband.ch/mv/politik-positionen.html">
+                                            <a class="nav-link" href="https://mieterverband.ch/mv/politik-positionen.html">
+                                                <span>Politik &amp;<br>Positionen</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                            <div class="col-sm-12 col-md-8 col-lg-3">
+                                <nav class="nav-meta h-cf">
+                                    <div class="top-row h-cf">
+                                        <a href="https://mieterverband.ch/mv.html" class="link-home" title="Home">
+                                            <i class="fa fa-home"></i><span class="h-th">Home</span>
+                                        </a>
+                                        <a href="https://mieterverband.ch/mv/mitgliedschaft-verband/kontakt.html" class="link-contact">Kontakt</a>
+                                        <form id="smv-search-form" class="search-form js-search-form" action="https://mieterverband.ch/mv/searchresults.html">
+                                            <input required="required" id="searchbar" class="search-field" name="queryStr" placeholder="Suche im Ratgeber Mietrecht" type="text" value="">
+                                            <span id="smv-search-span" class="fa fa-search"></span>
+                                        </form>
+                                        <span class="selected-language">
+                                            DE 
+                                        </span>
+                                    </div>
+                                    <div class="bottom-row">
+                                        <div id="nav-meta">
+                                            <ul>
+                                                <li class="item-login js-smv-login logged-in">
+                                                    <a href="#" id="smv-login-head" class="link-login js-link-login">{{ vorname }} {{ nachname }}<i class="fa fa-chevron-down"></i></a>
+                                                    <ul id="smv-login-dropdown" class="my-account-dropdown js-my-account-dropdown">
+                                                        <li>
+                                                            <a href="https://mieterverband.ch/mv/prozesse/protected/update-password.html" id="smv-change-password">
+                                                            Passwort ändern
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="https://mieterverband.ch/mv/prozesse/protected/datenAendern.html" id="smv-update-user">
+                                                                Adressen ändern
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="https://mieterverband.ch/mv/prozesse/protected/changeSection.html" id="smv-change-section">
+                                                                Sektion wechseln
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="https://mieterverband.ch/mv/prozesse/protected/emailConsultation.html" id="smv-email-consultation">
+                                                                E-Mail Beratung
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="https://mieterverband.ch/mv/prozesse/protected/cancelMembership.html" id="smv-cancel-membership">
+                                                                Mitgliedschaft kündigen
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="https://mieterverband.ch/mv.html?mgnlLogout" id="smv-logout-link" onclick="$.removeCookie('smv_membership', { path: '/' })">
+                                                                Abmelden
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <!-- end nav-meta -->
+                                    </div>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="branding-2">
+                    <div class="container-inner">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12 col-lg-12">
+                                <div class="logo-section">
+                                    <a class="section-title" href="https://mieterverband.ch/{{ sektion }}.html" title="Startseite">
+                                       {{ sektion }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div class="print-header" aria-hidden="true">
+                <div class="row">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+                        <div class="logo">
+                            <img class="h-flex" src="/assets/mvd/img/MV_Logo_Byline.png" alt="SMV">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="background-wrapper section">
+                <div class="container-inner">
+                    <div class="breadcrumb"></div>
+                </div>
+                <section class="stage"></section>
+                <div class="content container-inner">
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12 col-lg-8">
+                            <main role="main" class="">
+                                <div class="form js-form">
+                                    <div class="form-intro">
+                                        <h1 class="e-h1 form-title">E-Mail Beratung</h1>
+                                    </div>
+                                    <div class="form-wrapper">
+                                        <form id="form0" method="post" action="" onsubmit=";" enctype="multipart/form-data">
+                                            <div class="form-item-hidden">
+                                                <input type="hidden" name="mgnlModelExecutionUUID" value="55f8e624-9028-4d87-8d49-a574cd136409">
+                                                <input type="hidden" name="field" value="">
+                                                <input type="hidden" name="mgnlFormToken" value="CL7DyBuSQ4XVZm4CW5gYQ9raZ97K7lZu">
+                                            </div>
+                                            <fieldset class="fieldset">
+                                                <span class="e-copy-small required-hint position-right"><span>*</span> Pflichtfeld</span>
+                                                <h2 class="e-h3 fieldset-title">Mitgliedschaftsdaten</h2>
+                                                <div class="form-row">
+                                                    <div class="row readonly">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="mitgliedschaft_nr" class="label mitgliedschaft_nr">
+                                                                Mitgliedernummer
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <p class="value-read-only">{{ mitglied_nr }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="mitgliedschaft_nr" id="mitgliedschaft_nr" value="{{ mitglied_nr }}" maxlength="50">
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="mitgliedschaft_id" id="mitgliedschaft_id" value="{{ mitglied_id }}" maxlength="50">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="row readonly">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="mitgliedschaft_typ" class="label mitgliedschaft_typ">
+                                                                Mitgliedschafts Typ
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <p class="value-read-only">Wohnungsmiete</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="mitgliedschaft_typ" id="mitgliedschaft_typ" value="Wohnungsmiete" maxlength="50">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="anrede" class="label radio">
+                                                                Anrede
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <fieldset>
+                                                                <div class="form-item">
+                                                                    <input type="radio" id="anrede_0" name="anrede" value="Frau" {% if anrede == 'Frau' %}checked="checked"{% else %}disabled="disabled"{% endif %}>
+                                                                    <label for="anrede_0">Frau</label>
+                                                                </div>
+                                                                <!-- end form-item -->
+                                                                <div class="form-item">
+                                                                    <input type="radio" id="anrede_1" name="anrede" value="Herr" {% if anrede == 'Herr' %}checked="checked"{% else %}disabled="disabled"{% endif %}>
+                                                                    <label for="anrede_1">Herr</label>
+                                                                </div>
+                                                                <!-- end form-item -->
+                                                                <div id="checkbox-error" class="text error" style="display:none">
+                                                                    <ul>
+                                                                        <li>Bitte wählen Sie mindestens eine Checkbox aus.</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="row readonly">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="vorname" class="label vorname">
+                                                                Vorname
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <p class="value-read-only">{{ vorname }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="vorname" id="vorname" value="{{ vorname }}" maxlength="50">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="row readonly">
+
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="nachname" class="label nachname">
+                                                                Nachname
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <p class="value-read-only">{{ nachname }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="nachname" id="nachname" value="{{ nachname }}" maxlength="50">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="telefon" class="label telefon required">
+                                                                Telefon privat / mobil&nbsp;*
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <input type="text" name="telefon" id="telefon" value="{{ telefon }}" maxlength="128">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="email" class="label email required">
+                                                                E-Mail Adresse&nbsp;*
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <input type="text" name="email" id="email" value="{{ email }}" maxlength="50">
+                                                            <span class="hint">Bitte ändern, wenn die Antwort auf Ihre Frage an eine andere E-Mail Adresse geschickt werden soll.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" name="commonError" id="commonError" value="">
+                                                <input type="hidden" name="beratungskanal" id="beratungskanal" value="mail">
+                                                <input type="hidden" name="bemerkungen" id="bemerkungen" value="">
+                                            </fieldset>
+                                            <fieldset class="fieldset">
+                                                <span class="e-copy-small required-hint position-right" style="display: none;"><span>*</span> Pflichtfeld</span>
+                                                <h2 class="e-h3 fieldset-title">Mietobjekt</h2>
+                                                <div class="form-row">
+                                                    <div class="row readonly">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="mo_strasse" class="label mo_strasse">
+                                                                Strasse
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <p class="value-read-only">{{ strasse }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_strasse" id="mo_strasse" value="{{ strasse }}" maxlength="50">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="row readonly">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="mo_strassen_nr" class="label mo_strassen_nr">
+                                                                Nummer
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <p class="value-read-only">{{ nummer or '' }}{{ nummer_zu or '' }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_strassen_nr" id="mo_strassen_nr" value="{{ nummer or '' }}{{ nummer_zu or '' }}" maxlength="50">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="row readonly">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="mo_plz" class="label mo_plz">
+                                                                Postleitzahl
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <p class="value-read-only">{{ plz }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_plz" id="mo_plz" value="{{ plz }}" maxlength="50">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="row readonly">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="mo_ort" class="label mo_ort">
+                                                                Ort
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <p class="value-read-only">{{ ort }}</p>
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="mo_ort" id="mo_ort" value="{{ ort }}" maxlength="50">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="anderes_mietobjekt" class="label anderes_mietobjekt">
+                                                                Anderes Mietobjekt
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <textarea id="anderes_mietobjekt" name="anderes_mietobjekt" rows="10"></textarea>
+                                                            <span class="hint">Bitte Adresse und weitere Angaben (Ferienwohnung, Geschäftsraum, Mietwohnung einer Bekannten …) eingeben, falls sich ihre Frage nicht auf das versicherte Objekt ihrer MV-Mitgliedschaft bezieht. Rechtshilfe ist in diesen Fällen nicht gewährleistet.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                            <!-- kat-anfang -->
+                                            <nav class="nav-tab nav-tab-emailberatung">
+                                                                <ul class="h-cf">
+
+                                                                            <li id="allgmein_item" class="nav-item selected">
+                                                                                <a class="nav-link" href="#/" onclick="hide_mz();"><span>Allgemeine Anfrage</span></a>
+                                                                            </li>
+
+                                                                            <li id="mz_item" class="nav-item">
+                                                                                <a class="nav-link" href="#/" onclick="show_mz();"><span>Mietzinserhöhung</span></a>
+                                                                            </li>
+                                                                </ul>
+                                                        </nav>
+                                            <!-- kat-ende -->
+                                            <fieldset class="fieldset">
+                                                <span class="e-copy-small required-hint position-right"><span>*</span> Pflichtfeld</span>
+                                                <h2 class="e-h3 fieldset-title" id="tab_title">Beratungsanfrage</h2>
+                                                <div class="form-row">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="frage" class="label frage required">
+                                                                Frage&nbsp;*
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <textarea id="frage" name="frage" rows="10"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Mietzinsfelder -->
+                                                <div class="mz" id="mz" style="display:none;">
+                                                    <div class="form-row">
+                                                        <div class="row">
+                                                            <div class="col-sm-12 col-md-4 col-lg-4">
+                                                                <label for="datum_mietzinsanzeige" class="label mietzins required">
+                                                                    Briefdatum der Mietzinserhöhungsanzeige&nbsp;*
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-sm-12 col-md-8 col-lg-8" style="padding-top: 10px;">
+                                                                <input type="date" id="datum_mietzinsanzeige" name="datum_mietzinsanzeige">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                            <fieldset class="fieldset">
+                                                <span class="e-copy-small required-hint position-right" style="display: none;"><span>*</span> Pflichtfeld</span>
+                                                <h2 class="e-h3 fieldset-title">Dokumente hochladen</h2>
+                                                <div class="text-image text-image-mv rich-text no-img">
+                                                    <div class="text-wrapper">
+                                                        <p>Wichtig: Bitte laden Sie nur Dateien vom Typ PDF und JPEG/JPG hoch. Maximale Grösse: {% if not legacy_mode %}10{% else %}3{% endif %} MB</p>
+                                                    </div>
+                                                </div>
+                                                <table style="width: 100%;">
+                                                    <tr id="default_file_row" class="file-upload-row">
+                                                        <td>
+                                                            <div class="form-row">
+                                                                <label for="upload_files">
+                                                                    <span>Datei</span>
+                                                                </label>
+                                                                <input type="file" name="upload_files" id="upload_files_1" value="" accept=".pdf, .jpg, .jpeg, .zip">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="form-row">
+                                                                <label for="upload_files_date">Datum</label>
+                                                                <input type="date" id="upload_files_dateupload_files_date_1" name="upload_files_date">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <label for="upload_files_auswahl">Typ:</label>
+                                                            <input id="upload_files_auswahl_1" name="upload_files_auswahl" type="text" class="awesomplete" data-list="Mietvertrag, Mietzinserhöhung, Mietzinsherabsetzung, Vergleich/Urteil, Vereinbarung, sonstige Vertragsänderung" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="3" style="cursor: pointer;" onclick="add_new_file_row();">
+                                                            <i class="fa fa-plus"></i> Zusätzliche Datei hinzufügen
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <div class="button-wrapper">
+                                                    <script type="text/javascript">
+                                                        function mgnlFormHandleBackButton(el) {
+                                                            var back = document.createElement('input')
+                                                            back.setAttribute('type','hidden')
+                                                            back.setAttribute('name', 'mgnlFormBackButtonPressed')
+                                                            //get the enclosing form. This is widely supported, even by IE4!
+                                                            el.form.appendChild(back)
+                                                            //and disable html5 form validation
+                                                            el.form.setAttribute('novalidate', 'novalidate')
+                                                            el.form.submit()
+                                                        }
+                                                    </script>
+                                                    <input type="submit" onclick="return mgnlFormHandleBackButton(this)" value="Abbrechen">
+                                                    <input type="button" value="Beratungsanfrage senden" onclick="new_onlineberatung();">
+                                                </div>
+                                                <!-- end navigation-button-wrapper -->
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="content-info e-copy-small" role="contentinfo">
+                                    <a class="link-top e-link-default" href="#content" title="Zum Seitenanfang">
+                                        <i id="SeitenanfangChevron" class="fa fa-chevron-up"></i>Zum Seitenanfang
+                                    </a>
+                                    <a class="fa fa-print fa-pull-right" href="#" onclick="javascript:window.print();event.preventDefault();"></a>
+                                </div>
+                            </main>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="footer" role="footer">
+                <section class="footer-top">
+                    <div class="container-inner">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6 col-lg-4 box-facebook">
+                                <h3 class="channel-title">
+                                    <a href="https://www.facebook.com/Mieterverband/" target="_blank">
+                                        <i class="fa fa-facebook-official"></i><span>Facebook</span>
+                                    </a>
+                                </h3>
+                                <h3 class="channel-title">
+                                    <a href="https://twitter.com/Mieterverband" target="_blank">
+                                        <i class="fa fa-twitter"></i><span>Twitter</span>
+                                    </a>
+                                </h3>
+                            </div>
+                            <div class="col-sm-12 col-md-6 col-lg-8 box-newsletter">
+                                <h3 class="channel-title">
+                                    <i class="fa fa-envelope-o"></i><span>Newsletter</span>
+                                </h3>
+                                <p class="newsletter-description">Abonnieren Sie unseren Newsletter und erfahren Sie immer das Neuste zu Mietrecht und Wohnpolitik in Ihrer Region sowie hilfreiche Tipps zu Mieten und Wohnen aus erster Hand.</p>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12 col-lg-6">
+                                        <a href="https://mieterverband.ch/mv/prozesse/newsletter.html" class="newsletter-link">Newsletter abonnieren</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="footer-bottom">
+                    <div class="container-inner">
+                        <span class="copyright">© 2014  Mieterinnen- und Mieterverband</span>
+                        <ul>
+                            <li>
+                                <a href="https://mieterverband.ch/mv/mitgliedschaft-verband/impressum.html">Impressum</a>
+                            </li>
+                            <li>
+                                <a href="https://mieterverband.ch/mv/mitgliedschaft-verband/datenschutz.html">Datenschutz</a>
+                            </li>
+                            <li>
+                                <a href="https://mieterverband.ch/mv/politik-positionen/medien.html">Medien</a>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+            </footer>
+        </div>
+        {% block base_scripts %}
+        <!-- js should be loaded in body! -->
+        <script type="text/javascript" src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
+        <script type="text/javascript" src="/assets/js/frappe-web.min.js"></script>
+        <script type="text/javascript" src="/assets/js/bootstrap-4-web.min.js"></script>
+        {% endblock %}
+        <!-- csrf_token -->
+    </body>
+</html>

@@ -1,0 +1,299 @@
+{
+ "autoname": "format:{YY}-{MM}-{DD}-{beratungskategorie_code}-{###}",
+ "creation": "2023-01-24 21:06:52.762827",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "titel",
+  "raised_by",
+  "create_todo",
+  "geschlossen_am",
+  "trigger_api",
+  "telefon_privat_mobil",
+  "anderes_mietobjekt",
+  "frage",
+  "datum_mietzinsanzeige",
+  "section_allgemein",
+  "beratungskategorie",
+  "beratungskategorie_code",
+  "beratungskategorie_2",
+  "beratungskategorie_3",
+  "kontaktperson",
+  "start_date",
+  "subject",
+  "cb_1",
+  "mv_mitgliedschaft",
+  "sektion_id",
+  "status",
+  "beratung_prio",
+  "verknuepfungen",
+  "zuweisung",
+  "section_uebersicht",
+  "uebersicht_html",
+  "section_tremin",
+  "termin",
+  "hat_termine",
+  "section_verknuepfungen",
+  "verknuepfungen_html",
+  "section_anfrage",
+  "notiz",
+  "antwort",
+  "section_dokumente",
+  "dokumente"
+ ],
+ "fields": [
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Thema"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Eingang\nOpen\nR\u00fcckfragen\nin Arbeit\nNicht-Mitglied-Abgewiesen\nClosed",
+   "reqd": 1
+  },
+  {
+   "fieldname": "beratungskategorie",
+   "fieldtype": "Link",
+   "label": "Beratungskategorie",
+   "options": "Beratungskategorie"
+  },
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "kontaktperson",
+   "fieldtype": "Link",
+   "label": "Kontaktperson",
+   "options": "Termin Kontaktperson"
+  },
+  {
+   "default": "Today",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Eingang/Er\u00f6ffnung Fall"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Mitgliedschaft",
+   "options": "Mitgliedschaft"
+  },
+  {
+   "fieldname": "beratung_prio",
+   "fieldtype": "Link",
+   "label": "Priorit\u00e4t (Beratungsfall)",
+   "options": "Beratung Prio"
+  },
+  {
+   "depends_on": "eval:doc.mv_mitgliedschaft",
+   "fieldname": "section_uebersicht",
+   "fieldtype": "Section Break",
+   "label": "\u00dcbersicht"
+  },
+  {
+   "fieldname": "uebersicht_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_tremin",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "termin",
+   "fieldtype": "Table",
+   "label": "Termin",
+   "options": "Beratung Termin"
+  },
+  {
+   "fieldname": "section_verknuepfungen",
+   "fieldtype": "Section Break",
+   "label": "Verkn\u00fcpfungen (Fall)"
+  },
+  {
+   "fieldname": "verknuepfungen_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_anfrage",
+   "fieldtype": "Section Break",
+   "label": "Problemstellung/Anfrage"
+  },
+  {
+   "fieldname": "antwort",
+   "fieldtype": "Text Editor",
+   "label": "Antwort/Protokoll"
+  },
+  {
+   "fieldname": "section_dokumente",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "dokumente",
+   "fieldtype": "Table",
+   "label": "Dokumente",
+   "options": "Beratungsdateien"
+  },
+  {
+   "fieldname": "verknuepfungen",
+   "fieldtype": "Table MultiSelect",
+   "hidden": 1,
+   "label": "Verkn\u00fcpfungen",
+   "options": "Beratung Multiselect"
+  },
+  {
+   "fieldname": "notiz",
+   "fieldtype": "Text Editor",
+   "label": "Notiz"
+  },
+  {
+   "default": "0",
+   "fieldname": "zuweisung",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Zuweisung"
+  },
+  {
+   "default": "0",
+   "fieldname": "hat_termine",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Hat Termine"
+  },
+  {
+   "depends_on": "eval:doc.beratungskategorie",
+   "fieldname": "beratungskategorie_2",
+   "fieldtype": "Link",
+   "label": "(2) Beratungskategorie",
+   "options": "Beratungskategorie"
+  },
+  {
+   "depends_on": "eval:doc.beratungskategorie_2",
+   "fieldname": "beratungskategorie_3",
+   "fieldtype": "Link",
+   "label": "(3) Beratungskategorie",
+   "options": "Beratungskategorie"
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.sektion_id",
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Sektion",
+   "options": "Sektion"
+  },
+  {
+   "fetch_from": "beratungskategorie.code",
+   "fieldname": "beratungskategorie_code",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Beratungskategorie-Code"
+  },
+  {
+   "fieldname": "titel",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Titel"
+  },
+  {
+   "fieldname": "raised_by",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "raised_by"
+  },
+  {
+   "default": "0",
+   "fieldname": "create_todo",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "create_todo"
+  },
+  {
+   "fieldname": "geschlossen_am",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "geschlossen_am"
+  },
+  {
+   "default": "0",
+   "fieldname": "trigger_api",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "trigger_api"
+  },
+  {
+   "fieldname": "telefon_privat_mobil",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "telefonPrivatMobil"
+  },
+  {
+   "fieldname": "anderes_mietobjekt",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "anderesMietobjekt"
+  },
+  {
+   "fieldname": "frage",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Frage"
+  },
+  {
+   "fieldname": "datum_mietzinsanzeige",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "datum_mietzinsanzeige"
+  }
+ ],
+ "modified": "2023-02-28 20:28:59.323799",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Beratung",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "read": 1,
+   "role": "Guest"
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "write": 1
+  }
+ ],
+ "search_fields": "titel",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "titel",
+ "track_changes": 1
+}

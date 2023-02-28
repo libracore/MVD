@@ -1,0 +1,98 @@
+<h1 class="vbz">Rechtsberatung und Disposition</h1>
+<div class="row">
+    <!--<p class="place-holder-left">Alle Änderungen, die nicht von der Sektion von Hand vorgenommen werden, müssen validiert werden.</p>-->
+    <table id="table_beratungs_uebersicht">
+        <tr>
+            <th></th>
+            <th style="text-align: right;"><b>Anzahl</b></th>
+        </tr>
+        <tr id="eingang">
+            <td><b>Unbearbeitete Beratungsanfragen</b> (Status Eingang)</td>
+            {% if eingang > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ eingang }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="eingang_ohne_zuordnung">
+            <td>davon nicht Mitgliedern zugeordnet</td>
+            {% if eingang_ohne_zuordnung > 99 %}
+                <td style="text-align: right;">99+</td>
+            {% else %}
+                <td style="text-align: right;">{{ eingang_ohne_zuordnung }}</td>
+            {% endif %}
+        </tr>
+        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr id="offen">
+            <td><b>Warteschlangen</b> (Status Offen)</td>
+            {% if offen > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ offen }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="offen_dringend">
+            <td>Dringend</td>
+            {% if offen_dringend > 99 %}
+                <td style="text-align: right;">99+</td>
+            {% else %}
+                <td style="text-align: right;">{{ offen_dringend }}</td>
+            {% endif %}
+        </tr>
+        <tr id="offen_zuweisung">
+            <td>Zugewiesen/Nicht-Zugewiesen zu Person/Pool</td>
+            <td style="text-align: right;">{% if offen_zuweisung_ja > 99 %}99+{% else %}{{ offen_zuweisung_ja }}{% endif %}/{% if offen_zuweisung_nein > 99 %}99+{% else %}{{ offen_zuweisung_nein }}{% endif %}</td>
+        </tr>
+        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr id="rueckfragen">
+            <td><b>Rückfragen</b></td>
+            {% if rueckfragen > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ rueckfragen }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="termine">
+            <td><b>Termine</b></td>
+            {% if termine > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ termine }}</b></td>
+            {% endif %}
+        </tr>
+        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr id="fullname">
+            <td><b>{{ frappe.session.user_fullname}}</b></td>
+            <td style="text-align: right;"><b>&nbsp;</b></td>
+        </tr>
+        <tr id="zugewiesene_beratungen">
+            <td>zugewiesene Beratungen</td>
+            {% if zugewiesene_beratungen > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ zugewiesene_beratungen }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="zugewiesene_termine">
+            <td>zugewiesene Termine</td>
+            {% if zugewiesene_termine > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ zugewiesene_termine }}</b></td>
+            {% endif %}
+        </tr>
+        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr id="rechtsberaterinnen">
+            <td>Liste der Rechtsberater*innen</td>
+            <td style="text-align: right;"><b>&nbsp;</b></td>
+        </tr>
+        <tr id="beratungskategorien">
+            <td>Liste der Beratungskategorien</td>
+            <td style="text-align: right;"><b>&nbsp;</b></td>
+        </tr>
+        <tr id="statistik">
+            <td>Statistik</td>
+            <td style="text-align: right;"><b>&nbsp;</b></td>
+        </tr>
+    </table>
+</div>

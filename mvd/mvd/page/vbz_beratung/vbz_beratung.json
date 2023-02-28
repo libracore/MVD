@@ -1,0 +1,35 @@
+{
+ "content": null,
+ "creation": "2023-02-14 12:09:56.996034",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2023-02-14 12:09:56.996034",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "vbz-beratung",
+ "owner": "Administrator",
+ "page_name": "vbz-beratung",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "MV_RB"
+  },
+  {
+   "role": "MV_MA"
+  },
+  {
+   "role": "MV_RW"
+  },
+  {
+   "role": "MV_GL"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Verarbeitungszentrale"
+}
