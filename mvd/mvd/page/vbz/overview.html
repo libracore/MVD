@@ -28,7 +28,26 @@
             <div class="vbz-indikator-grey"><span>*</span></div>
         </center>
     </div>
-    <div class="control-card blue-card" id="beratung">
+    
+    <!-- muss entfernt werden wenn beratung offiziell deployed -->
+    <div class="control-card blue-card" id="termin">
+        <center>
+            <i class="fa fa-calendar-check-o blue-icon"></i>
+            <p>Termine</p>
+            <!--{#{% if termin.qty > 0 %}
+                {% if termin.qty > 99 %}
+                <div class="vbz-indikator"><span>99+</span></div>
+                {% else %}
+                    <div class="vbz-indikator"><span>{{ termin.qty }}</span></div>
+                {% endif %}
+            {% endif %}#}-->
+            <div class="vbz-indikator-grey"><span>*</span></div>
+        </center>
+    </div>
+    <!-- ende -->
+    
+    <!-- hidden bis das Feature offiziell Deployed wird -->
+    <div class="control-card blue-card" id="beratung" style="display: none;">
         <center>
             <i class="fa fa-calendar-check-o blue-icon"></i>
             <p>Beratung</p>
@@ -42,6 +61,8 @@
             <div class="vbz-indikator-grey"><span>*</span></div>
         </center>
     </div>
+    <!-- end hidden -->
+    
     <div class="control-card blue-card" id="handbuch">
         <center>
             <i class="fa fa-book blue-icon"></i>

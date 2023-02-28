@@ -257,7 +257,7 @@
    "label": "datum_mietzinsanzeige"
   }
  ],
- "modified": "2023-02-27 11:59:20.969344",
+ "modified": "2023-02-28 20:28:59.323799",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
@@ -279,6 +279,16 @@
    "email": 1,
    "read": 1,
    "role": "Guest"
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "write": 1
   }
  ],
  "search_fields": "titel",
