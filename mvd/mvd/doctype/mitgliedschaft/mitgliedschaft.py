@@ -1833,7 +1833,8 @@ def get_uebersicht_html(name):
                 'ist_geschenkmitgliedschaft': mitgliedschaft.ist_geschenkmitgliedschaft,
                 'language': mitgliedschaft.language or 'de',
                 'sektion': mitgliedschaft.sektion_id,
-                'region': '({0})'.format(mitgliedschaft.region) if mitgliedschaft.region else ''
+                'region': '({0})'.format(mitgliedschaft.region) if mitgliedschaft.region else '',
+                'mitglied_nr': mitgliedschaft.mitglied_nr
             }
         }
         
@@ -1862,7 +1863,8 @@ def get_uebersicht_html(name):
             'ist_geschenkmitgliedschaft': mitgliedschaft.ist_geschenkmitgliedschaft,
             'language': mitgliedschaft.language or 'de',
             'sektion': mitgliedschaft.sektion_id,
-            'region': '({0})'.format(mitgliedschaft.region) if mitgliedschaft.region else ''
+            'region': '({0})'.format(mitgliedschaft.region) if mitgliedschaft.region else '',
+            'mitglied_nr': mitgliedschaft.mitglied_nr
         }
         
         # Hauptmitglied

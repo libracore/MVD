@@ -27,6 +27,7 @@
         <div class="col-sm-5">
             <div class="address-box">
                 <p>
+                    <b>{{ allgemein.mitglied_nr }}</b><br>
                     <b>Sektion:</b> {{ allgemein.sektion }} {{ allgemein.region }}<br>
                     <b>Status:</b> {{ allgemein.status }}{% if allgemein.kuendigung and allgemein.status == 'Regulär' %} &dagger; (<b>Gekündigt per {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}</b>){% endif %}<br>
                     <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }} {% if allgemein.ist_geschenkmitgliedschaft %}🎁{% endif %}<br>
@@ -34,6 +35,9 @@
                         <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
                         {% if allgemein.austritt %}
                             <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
+                        {% endif %}
+                        {% if allgemein.kuendigung %}
+                            <b>Kündigung per:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}<br>
                         {% endif %}
                         {% if allgemein.zuzug %}
                             <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}{% if allgemein.zuzug_von %} (von {{ allgemein.zuzug_von }}){% endif %}<br>
@@ -76,6 +80,7 @@
                     <span class="css-ampel {{ allgemein.ampelfarbe }}"><span></span></span>
                 </p>
                 <p>
+                    <b>{{ allgemein.mitglied_nr }}</b><br>
                     <b>Sektion:</b> {{ allgemein.sektion }} {{ allgemein.region }}<br>
                     <b>Status:</b> {{ allgemein.status }}{% if allgemein.kuendigung and allgemein.status == 'Regulär' %} &dagger; (<b>Gekündigt per {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}</b>){% endif %}<br>
                     <b>Mitgliedtyp:</b> {{ allgemein.mitgliedtyp_c }} {% if allgemein.ist_geschenkmitgliedschaft %}🎁{% endif %}<br>
@@ -83,6 +88,9 @@
                         <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}<br>
                         {% if allgemein.austritt %}
                             <b>Austritt:</b> {{ frappe.utils.get_datetime(allgemein.austritt).strftime('%d.%m.%Y') }}<br>
+                        {% endif %}
+                        {% if allgemein.kuendigung %}
+                            <b>Kündigung per:</b> {{ frappe.utils.get_datetime(allgemein.kuendigung).strftime('%d.%m.%Y') }}<br>
                         {% endif %}
                         {% if allgemein.zuzug %}
                             <b>Zuzug:</b> {{ frappe.utils.get_datetime(allgemein.zuzug).strftime('%d.%m.%Y') }}{% if allgemein.zuzug_von %} (von {{ allgemein.zuzug_von }}){% endif %}<br>
