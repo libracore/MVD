@@ -147,6 +147,10 @@ def get_verknuepfungsuebersicht(beratung):
     else:
         table = """<p>Keine Verknüpfungen vorhanden</p>"""
     
+    if frappe.db.get_value("Beratung", beratung, 'mv_mitgliedschaft'):
+        anzahl_beratungen_zu_mitglied = frappe.db.count('Beratung', {'mv_mitgliedschaft': frappe.db.get_value("Beratung", beratung, 'mv_mitgliedschaft')}) or 0
+        table += """<br><p><b>Anzahl Beratungen dieser Mitgliedschaft: {0}</b></p>""".format(anzahl_beratungen_zu_mitglied)
+    
     return table
 
 @frappe.whitelist()
