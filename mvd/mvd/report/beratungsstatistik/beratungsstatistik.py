@@ -18,19 +18,20 @@ def get_columns():
 
 def get_data(filters):
     data = []
-    # ~ closed_as_main = frappe.db.sql("""
-                                        # ~ SELECT
-                                            # ~ COUNT(`name`) AS `qty`,
-                                            # ~ `beratungskategorie`
-                                        # ~ FROM `tabBeratung`
-                                        # ~ WHERE `status` = 'Closed'
-                                        # ~ AND `geschlossen_am` >= '{from}'
-                                        # ~ AND `geschlossen_am` <= '{to}'
-                                        # ~ GROUP BY `beratungskategorie`""".format(from=filters.from, to=filters.to), as_dict=True)
-    # ~ for cam in closed_as_main:
-        # ~ data.append({
-            # ~ 'beratungskategorie': cam.beratungskategorie,
-            # ~ 'closed': cam.qty
-        # ~ })
+    closed_as_main = frappe.db.sql("""
+                                        SELECT
+                                            COUNT(`name`) AS `qty`,
+                                            `beratungskategorie`
+                                        FROM `tabBeratung`
+                                        WHERE `status` = 'Closed'
+                                        AND `geschlossen_am` >= '{from_filter}'
+                                        AND `geschlossen_am` <= '{to_filter}'
+                                        GROUP BY `beratungskategorie`""".format(from_filter=filters.from_date, to_filter=filters.to), as_dict=True)
+    
+    for cam in closed_as_main:
+        data.append({
+            'beratungskategorie': cam.beratungskategorie,
+            'closed': cam.qty
+        })
     
     return data
