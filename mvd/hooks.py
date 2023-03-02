@@ -122,6 +122,9 @@ doc_events = {
     },
     "Address": {
         "on_update": "mvd.mvd.doctype.retouren.retouren.check_dates"
+    },
+    "Communication": {
+        "after_insert": "mvd.mvd.doctype.beratung.beratung.check_communication"
     }
 }
 
