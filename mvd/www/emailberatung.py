@@ -94,6 +94,7 @@ def context_erweiterung(context, mitgliedschaft):
 @frappe.whitelist(allow_guest=True)
 def new_beratung(**kwargs):
     args = json.loads(kwargs['kwargs'])
+    frappe.log_error("{0}".format(str(args)), "Neue Beratung wird angelegt (OK)")
     if frappe.db.exists("Mitgliedschaft", args['mv_mitgliedschaft']):
         if args['telefon']:
             telefon = """<b>Telefon:</b> {0}<br>""".format(args['telefon'])

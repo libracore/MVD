@@ -46,6 +46,26 @@ class Beratung(Document):
         else:
             if self.geschlossen_am:
                 self.geschlossen_am = None
+        
+        # bei "Menü > E-Mail" gewährleisten, dass Empfänger von 'raised_by' übernommen wird
+        if self.raised_by:
+            self.email_id = self.raised_by
+        
+        # verknüpfung von mitgliedschaft auf basis email (wenn eingangsmailaccount-sektion == mitgliedschafts sektion)
+        if self.raised_by and not self.mv_mitgliedschaft:
+                mitgliedschaften = frappe.db.sql("""
+                                                    SELECT
+                                                        `name`,
+                                                        `sektion_id`
+                                                    FROM `tabMitgliedschaft`
+                                                    WHERE `e_mail_1` = '{email}'
+                                                    OR `e_mail_2` = '{email}'
+                                                    AND `status_c` = 'Regulär'""".format(email=self.raised_by), as_dict=True)
+                
+                if len(mitgliedschaften) == 1:
+                    if self.sektion_id:
+                        if self.sektion_id == mitgliedschaften[0].sektion_id:
+                            self.mv_mitgliedschaft = mitgliedschaften[0].name
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
@@ -198,3 +218,17 @@ def raise_xxx(code, title, message):
             "message": "{message}".format(message=message)
         }
     }]
+
+def check_communication(self, event):
+    communication = self
+    if communication.sent_or_received == 'Received':
+        if communication.reference_doctype == 'Beratung':
+            if frappe.db.count("Communication", {'reference_doctype': 'Beratung', 'reference_name': communication.reference_name}) < 2:
+                beratung = frappe.get_doc("Beratung", communication.reference_name)
+                if not beratung.notiz:
+                    beratung.notiz = communication.content
+                if not beratung.sektion_id:
+                    beratung.sektion_id = frappe.db.get_value("Email Account", communication.email_account, 'sektion_id')
+                if not beratung.raised_by_name:
+                    beratung.raised_by_name = communication.sender_full_name
+                beratung.save()
