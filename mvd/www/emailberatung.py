@@ -214,8 +214,13 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                 message += " {0}".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1"))
             if frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"):
                 message += " {0}".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"))
-            message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
-                        <br><br><b>Mitgliedernummer</b>: {0}<br>{1}""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+            
+            if frappe.get_value("Sektion", sektion, "emailberatung_email_text"):
+                einleitung = frappe.get_value("Sektion", sektion, "emailberatung_email_text")
+            else:
+                einleitung = """Die untenstehende Frage ist bei uns eingetroffen."""
+            
+            message += """<br><br>{0}<br><br><b>Mitgliedernummer</b>: {1}<br>{2}""".format(einleitung, frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
             message += """<br><br>Freundliche Grüsse<br>
                         Ihr Mieterinnen- und Mieterverband"""
             
