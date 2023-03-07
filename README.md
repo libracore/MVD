@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.7.2
+Bugfix: Redirect bei Emailberatung ohne Token
 #### 7.7.1
 Bugfix: Zuordnung Mitgliedschaft <> Beratung aus Maileingang
 #### 7.7.0
