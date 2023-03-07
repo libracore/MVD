@@ -63,7 +63,8 @@
   "legacy_mode",
   "legacy_email",
   "legacy_mail_absender_mail",
-  "legacy_mail_absende_name"
+  "legacy_mail_absende_name",
+  "emailberatung_email_text"
  ],
  "fields": [
   {
@@ -413,9 +414,14 @@
    "fieldname": "legacy_mail_absende_name",
    "fieldtype": "Data",
    "label": "E-Mail Absender Name"
+  },
+  {
+   "fieldname": "emailberatung_email_text",
+   "fieldtype": "Text",
+   "label": "E-Mail Text"
   }
  ],
- "modified": "2023-02-23 10:12:28.400406",
+ "modified": "2023-03-06 20:14:46.262565",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
