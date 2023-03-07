@@ -17,6 +17,13 @@ frappe.query_reports["Beratungsstatistik"] = {
             'fieldtype': "Date",
             'reqd': 1,
             'default': frappe.datetime.now_date()
+        },
+        {
+            'fieldname': "sektion_id",
+            'label': __("Sektion"),
+            'fieldtype': "Link",
+            'reqd': 1,
+            'options': 'Sektion'
         }
     ]
 };
