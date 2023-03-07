@@ -69,12 +69,20 @@ class Beratung(Document):
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
-    multiselect = frappe.get_doc({
+    multiselect_1 = frappe.get_doc({
         'doctype': 'Beratung Multiselect',
         'parentfield': 'verknuepfungen',
         'parenttype': 'Beratung',
         'parent': beratung,
         'beratung': verknuepfung
+    }).insert()
+    
+    multiselect_2 = frappe.get_doc({
+        'doctype': 'Beratung Multiselect',
+        'parentfield': 'verknuepfungen',
+        'parenttype': 'Beratung',
+        'parent': verknuepfung,
+        'beratung': beratung
     }).insert()
 
 @frappe.whitelist()
