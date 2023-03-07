@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.8.0
+Differenzierte Ampelfarben Kalkulation MVZH
 #### 7.7.2
 Bugfix: Redirect bei Emailberatung ohne Token
 #### 7.7.1

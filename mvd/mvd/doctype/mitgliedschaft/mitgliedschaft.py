@@ -14,6 +14,7 @@ from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_
 from frappe.utils.pdf import get_file_data_from_writer
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen, replace_mv_keywords
 from frappe import _
+import datetime
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
@@ -3668,11 +3669,24 @@ def get_ampelfarbe(mitgliedschaft):
         - Grün: ampelgruen --> Mitglied kann alle Dienstleistungen beziehen (keine Karenzfristen, keine überfälligen oder offen Rechnungen)
         - Gelb: ampelgelb --> Karenzfristen oder offene Rechnungen
         - Rot: ampelrot --> überfällige offene Rechnungen
+        
+        MVZH Ausnahme:
+        - Grün --> Jahr bezahlt >= aktuelles Jahr
+        - Rot --> Jahr bezahlt < aktuelles Jahr
     '''
     
     if mitgliedschaft.status_c in ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in'):
         ampelfarbe = 'ampelrot'
     else:
+        
+        # MVZH Ausnahme Start
+        if mitgliedschaft.sektion_id == 'MVZH':
+            if int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) < int(datetime.date.today().year):
+                return 'ampelrot'
+            else:
+                return 'ampelgruen'
+        # MVZH Ausnahme Ende
+        
         ueberfaellige_rechnungen = 0
         offene_rechnungen = 0
         
