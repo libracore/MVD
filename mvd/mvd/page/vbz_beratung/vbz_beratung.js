@@ -70,8 +70,9 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#zugewiesene_termine").click(function(){
-            frappe.route_options = {"_assign": ['like', '%' + frappe.session.user + '%'], "hat_termine": 1}
-            frappe.set_route("List", "Beratung", "List");
+            frappe.route_options = {"_assign": frappe.session.user}
+            frappe.set_route("query-report/Beratungs Termine");
+            
         });
         $("#rechtsberaterinnen").click(function(){
             frappe.set_route("List", "Termin Kontaktperson", "List");

@@ -1,5 +1,12 @@
 ## MVD
 ### Version Log
+#### 7.7.1
+Bugfix: Zuordnung Mitgliedschaft <> Beratung aus Maileingang
+#### 7.7.0
+Beratung:
+- Titel Management
+VBZ:
+- Routing auf Termin-Report mit Filter von Beratungen
 #### 7.6.2
 Bugfix: Beratung; Multiselect Verknüpfung
 #### 7.6.1
