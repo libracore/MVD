@@ -8,15 +8,6 @@ from frappe.model.document import Document
 from frappe.utils.data import today
 
 class Beratung(Document):
-    def set_new_name(self):
-        titel = '{0}'.format(self.start_date)
-        if self.mv_mitgliedschaft:
-            titel += ' {0} {1}'.format(frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1"), frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "nachname_1"))
-        if self.beratungskategorie:
-            titel += ' {0}'.format(self.beratungskategorie)
-        self.titel = titel
-        return
-    
     def validate(self):
         # Termin Filter handling
         if len(self.termin) > 0:
@@ -66,6 +57,14 @@ class Beratung(Document):
                     if self.sektion_id:
                         if self.sektion_id == mitgliedschaften[0].sektion_id:
                             self.mv_mitgliedschaft = mitgliedschaften[0].name
+        
+        # Titel aktualisierung
+        titel = '{0}'.format(self.start_date)
+        if self.mv_mitgliedschaft:
+            titel += ' {0} {1}'.format(frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1"), frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "nachname_1"))
+        if self.beratungskategorie:
+            titel += ' {0}'.format(self.beratungskategorie)
+        self.titel = titel
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):

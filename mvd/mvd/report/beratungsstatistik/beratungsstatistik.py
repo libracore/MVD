@@ -12,7 +12,6 @@ def execute(filters=None):
 def get_columns():
     return[
         {"label": _("Beratungskategorie"), "fieldname": "beratungskategorie", "fieldtype": "Link", "options": "Beratungskategorie"},
-        {"label": _("Ist Unterkategorie"), "fieldname": "unterkategorie", "fieldtype": "Check"},
         {"label": _("Anzahl Geschlossen"), "fieldname": "closed", "fieldtype": "Int"}
     ]
 
@@ -26,7 +25,8 @@ def get_data(filters):
                                         WHERE `status` = 'Closed'
                                         AND `geschlossen_am` >= '{from_filter}'
                                         AND `geschlossen_am` <= '{to_filter}'
-                                        GROUP BY `beratungskategorie`""".format(from_filter=filters.from_date, to_filter=filters.to), as_dict=True)
+                                        AND `sektion_id` = '{sektion}'
+                                        GROUP BY `beratungskategorie`""".format(from_filter=filters.from_date, to_filter=filters.to, sektion=filters.sektion_id), as_dict=True)
     
     for cam in closed_as_main:
         data.append({
