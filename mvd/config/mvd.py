@@ -142,6 +142,12 @@ def get_data():
                     "description": _("Beratungsstatistik"),
                     "doctype": "Beratung",
                     "is_query_report": True
+                },
+                {
+                    "type": "doctype",
+                    "name": "Beratungs Log",
+                    "label": _("Beratungs Log"),
+                    "description": _("Beratungs Log")
                 }
             ]
         },
