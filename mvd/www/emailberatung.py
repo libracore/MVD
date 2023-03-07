@@ -13,52 +13,52 @@ from frappe.utils.data import get_datetime_str
 no_cache = 1
 
 def get_context(context):
-    try:
-        authorization_header = frappe.get_request_header("Cookie", None)
-        jwt_token = None
-        
-        if authorization_header:
-            for cookie in authorization_header.split(";"):
-                if cookie.startswith(" jwt_auth="):
-                    jwt_token = cookie.split(" jwt_auth=")[1]
-                elif cookie.startswith("jwt_auth="):
-                    jwt_token = cookie.split("jwt_auth=")[1]
-        
-        if jwt_token:
+    authorization_header = frappe.get_request_header("Cookie", None)
+    jwt_token = None
+    
+    if authorization_header:
+        for cookie in authorization_header.split(";"):
+            if cookie.startswith(" jwt_auth="):
+                jwt_token = cookie.split(" jwt_auth=")[1]
+            elif cookie.startswith("jwt_auth="):
+                jwt_token = cookie.split("jwt_auth=")[1]
+    else:
+        create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='Aufruf ohne Cookies', json=None)
+        raise_redirect()
+    
+    if jwt_token:
+        try:
             public_key = frappe.db.get_single_value('JWT', 'public_key')
             algorythmus = frappe.db.get_single_value('JWT', 'algorythmus')
             decoded_jwt_token = jwt.decode(jwt_token, public_key, algorithms=[algorythmus])
             context.jwt_token = decoded_jwt_token
-            if 'mitglied_nr' in decoded_jwt_token:
-                mitglied_id = get_mitglied_id_from_nr(decoded_jwt_token["mitglied_nr"])
-                if mitglied_id:
-                    if frappe.db.exists("Mitgliedschaft", mitglied_id):
-                        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
-                        context = context_erweiterung(context, mitgliedschaft)
-                    else:
-                        # Mitglied-ID in ERPNext unbekannt
-                        create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='E-Mail Beratung (500)', json="{0}\n\n{1}".format(str(mitglied_id), str(authorization_header)))
-                        # ~ frappe.log_error("{0}\n\n{1}".format(str(mitglied_id), str(authorization_header)), 'E-Mail Beratung (500)')
-                        raise_redirect(typ='500')
+        except Exception as err:
+            create_beratungs_log(error=1, info=0, beratung=None, method='get_context', title='Exception in JWT decode', json="{0}".format(str(err)))
+            raise_redirect()
+        
+        if 'mitglied_nr' in decoded_jwt_token:
+            mitglied_id = get_mitglied_id_from_nr(decoded_jwt_token["mitglied_nr"])
+            if mitglied_id:
+                if frappe.db.exists("Mitgliedschaft", mitglied_id):
+                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
+                    context = context_erweiterung(context, mitgliedschaft)
+                    return context
                 else:
                     # Mitglied-ID in ERPNext unbekannt
-                    create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='E-Mail Beratung (500)', json="{0}\n\n{1}".format(str(decoded_jwt_token["mitglied_nr"]), str(authorization_header)))
-                    # ~ frappe.log_error("{0}\n\n{1}".format(str(decoded_jwt_token["mitglied_nr"]), str(authorization_header)), 'E-Mail Beratung (500)')
+                    create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='E-Mail Beratung (500)', json="{0}\n\n{1}".format(str(mitglied_id), str(authorization_header)))
                     raise_redirect(typ='500')
             else:
-                # ungültiger JWT Token
-                create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='ungültiger JWT Token', json="{0}".format(str(authorization_header)))
-                # ~ frappe.log_error("{0}".format(str(authorization_header)), 'E-Mail Beratung (ungültiger JWT Token)')
-                raise_redirect()
+                # Mitglied-ID in ERPNext unbekannt
+                create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='E-Mail Beratung (500)', json="{0}\n\n{1}".format(str(decoded_jwt_token["mitglied_nr"]), str(authorization_header)))
+                raise_redirect(typ='500')
         else:
-            # KEIN JWT Token
-            create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='KEIN JWT Token', json="{0}".format(str(authorization_header)))
-            # ~ frappe.log_error("{0}".format(str(authorization_header)), 'E-Mail Beratung (KEIN JWT Token)')
+            # ungültiger JWT Token
+            create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='ungültiger JWT Token', json="{0}".format(str(authorization_header)))
             raise_redirect()
-    except Exception as err:
-        # allgemeiner Fehler
-        create_beratungs_log(error=1, info=0, beratung=None, method='get_context', title='Exception', json="{0}".format(str(err)))
-        # ~ frappe.log_error("{0}".format(str(err)), 'E-Mail Beratung (Allg. Fehler in get_context)')
+    else:
+        # KEIN JWT Token
+        create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='KEIN JWT Token', json="{0}".format(str(authorization_header)))
+        raise_redirect()
 
 def raise_redirect(typ=None):
     if not typ:
@@ -103,14 +103,13 @@ def context_erweiterung(context, mitgliedschaft):
     except Exception as err:
         # allgemeiner Fehler
         create_beratungs_log(error=1, info=0, beratung=None, method='context_erweiterung', title='Exception', json="{0}".format(str(err)))
-        # ~ frappe.log_error("{0}".format(str(err)), 'E-Mail Beratung (Allg. Fehler in context_erweiterung)')
+        raise_redirect(typ='500')
 
 @frappe.whitelist(allow_guest=True)
 def new_beratung(**kwargs):
     try:
         args = json.loads(kwargs['kwargs'])
         create_beratungs_log(error=0, info=1, beratung=None, method='new_beratung', title='Neue Beratung wird angelegt', json="{0}".format(str(args)))
-        # ~ frappe.log_error("{0}".format(str(args)), "Neue Beratung wird angelegt (OK)")
         if frappe.db.exists("Mitgliedschaft", args['mv_mitgliedschaft']):
             if args['telefon']:
                 telefon = """<b>Telefon:</b> {0}<br>""".format(args['telefon'])
@@ -158,7 +157,7 @@ def new_beratung(**kwargs):
     except Exception as err:
         # allgemeiner Fehler
         create_beratungs_log(error=1, info=0, beratung=None, method='new_beratung', title='Exception', json="{0}".format(str(err)))
-        # ~ frappe.log_error("{0}".format(str(err)), 'E-Mail Beratung (Allg. Fehler in new_beratung)')
+        raise_redirect(typ='500')
 
 @frappe.whitelist(allow_guest=True)
 def new_file_to_beratung(**kwargs):
@@ -197,14 +196,12 @@ def new_file_to_beratung(**kwargs):
                 frappe.db.commit()
             except Exception as e:
                 create_beratungs_log(error=1, info=0, beratung=args['beratung'], method='new_file_to_beratung', title='File Upload fehlerhaft', json="{0}".format(str(e)))
-                # ~ frappe.log_error("{0}".format(str(e)), "File Upload fehlerhaft")
         else:
             create_beratungs_log(error=0, info=1, beratung=args['beratung'], method='new_file_to_beratung', title='File Upload unvollständig', json="{0}".format(args['beratung']))
-            # ~ frappe.log_error("{0}".format(args['beratung']), "File Upload unvollständig")
     except Exception as err:
         # allgemeiner Fehler
         create_beratungs_log(error=1, info=0, beratung=None, method='new_file_to_beratung', title='Exception', json="{0}".format(str(err)))
-        # ~ frappe.log_error("{0}".format(str(err)), 'E-Mail Beratung (Allg. Fehler in new_file_to_beratung)')
+        raise_redirect(typ='500')
 
 @frappe.whitelist(allow_guest=True)
 def get_upload_keys():
@@ -216,7 +213,7 @@ def get_upload_keys():
     except Exception as err:
         # allgemeiner Fehler
         create_beratungs_log(error=1, info=0, beratung=None, method='get_upload_keys', title='Exception', json="{0}".format(str(err)))
-        # ~ frappe.log_error("{0}".format(str(err)), 'E-Mail Beratung (Allg. Fehler in get_upload_keys)')
+        raise_redirect(typ='500')
 
 def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, legacy_mail=False, sektion=None):
     try:
@@ -357,13 +354,13 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                     )
             except Exception as e:
                 create_beratungs_log(error=1, info=0, beratung=beratung, method='send_confirmation_mail', title='Legacy Mail failed', json="{0}".format(str(e)))
-                # ~ frappe.log_error("{0}".format(str(e)), "Legacy Mail failed")
+                raise_redirect(typ='500')
             
         return
     except Exception as err:
         # allgemeiner Fehler
         create_beratungs_log(error=1, info=0, beratung=beratung, method='send_confirmation_mail', title='Exception', json="{0}".format(str(err)))
-        # ~ frappe.log_error("{0}".format(str(err)), 'E-Mail Beratung (Allg. Fehler in send_confirmation_mail)')
+        raise_redirect(typ='500')
 
 @frappe.whitelist(allow_guest=True)
 def check_legacy_mode(**kwargs):
@@ -378,7 +375,7 @@ def check_legacy_mode(**kwargs):
     except Exception as err:
         # allgemeiner Fehler
         create_beratungs_log(error=1, info=0, beratung=None, method='check_legacy_mode', title='Exception', json="{0}".format(str(err)))
-        # ~ frappe.log_error("{0}".format(str(err)), 'E-Mail Beratung (Allg. Fehler in check_legacy_mode)')
+        raise_redirect(typ='500')
 
 @frappe.whitelist(allow_guest=True)
 def send_legacy_mail(**kwargs):
@@ -396,14 +393,14 @@ def send_legacy_mail(**kwargs):
         notiz = frappe.db.get_value("Beratung", beratung, 'notiz')
         
         create_beratungs_log(error=0, info=1, beratung=beratung, method='send_legacy_mail', title='Trigger Legacy Mail', json="{0},\n{1},\n{2},\n{3},\n{4}".format(beratung, raised_by, mitgliedschaft_id, sektion, notiz))
-        # ~ frappe.log_error("{0},\n{1},\n{2},\n{3},\n{4}".format(beratung, raised_by, mitgliedschaft_id, sektion, notiz), "Trigger Legacy Mail (OK)")
+        
         if frappe.db.get_value("Sektion", sektion, 'legacy_mode') != '0':
             send_confirmation_mail(mitgliedschaft_id, beratung, notiz, legacy_mail=frappe.db.get_value("Sektion", sektion, 'legacy_mode'), sektion=sektion, raised_by=raised_by)
             return
     except Exception as err:
         # allgemeiner Fehler
         create_beratungs_log(error=1, info=0, beratung=None, method='send_legacy_mail', title='Exception', json="{0}".format(str(err)))
-        # ~ frappe.log_error("{0}".format(str(err)), 'E-Mail Beratung (Allg. Fehler in send_legacy_mail)')
+        raise_redirect(typ='500')
 
 def send_to_sp():
     try:
@@ -439,7 +436,6 @@ def send_to_sp():
                 }
                 
                 create_beratungs_log(error=0, info=1, beratung=beratung.name, method='send_to_sp', title='Beratung an SP gesendet', json="{0}".format(str(json_to_send)))
-                # ~ frappe.log_error("{0}".format(str(json_to_send)), "Beratung an SP gesendet (OK)")
                 send_beratung(json_to_send)
             
             # remove mark for SP API
@@ -447,7 +443,6 @@ def send_to_sp():
     except Exception as err:
         # allgemeiner Fehler
         create_beratungs_log(error=1, info=0, beratung=None, method='send_to_sp', title='Exception', json="{0}".format(str(err)))
-        # ~ frappe.log_error("{0}".format(str(err)), 'E-Mail Beratung (Allg. Fehler in send_to_sp)')
 
 def create_beratungs_log(error=0, info=0, beratung=None, method=None, title=None, json=None):
     frappe.get_doc({
