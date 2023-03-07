@@ -238,4 +238,6 @@ def check_communication(self, event):
                     beratung.sektion_id = frappe.db.get_value("Email Account", communication.email_account, 'sektion_id')
                 if not beratung.raised_by_name:
                     beratung.raised_by_name = communication.sender_full_name
+                if not beratung.raised_by:
+                    beratung.raised_by = communication.sender
                 beratung.save()
