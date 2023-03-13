@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.8.1
+Bugfix: Freizügigkeitsabfrage "Zuletzt bezahlt"
 #### 7.8.0
 Differenzierte Ampelfarben Kalkulation MVZH
 #### 7.7.2
