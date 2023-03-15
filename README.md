@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 7.9.0
+Setzen von Austrittsdatum bei manueller Inaktivierung
+#### 7.8.1
+Bugfix: Freizügigkeitsabfrage "Zuletzt bezahlt"
 #### 7.8.0
 Differenzierte Ampelfarben Kalkulation MVZH
 #### 7.7.2

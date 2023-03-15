@@ -2165,8 +2165,7 @@ function mitglied_inaktivieren(frm) {
             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', 'Manuelle Inaktivierung');
             cur_frm.refresh_field('status_change');
             cur_frm.set_value("status_c", 'Inaktiv');
-            // Auskommentiert da diese nie beigetretten sind, ergo kein Austrittsdatum
-            //~ cur_frm.set_value("austritt", frappe.datetime.get_today());
+            cur_frm.set_value("austritt", frappe.datetime.get_today());
             cur_frm.save();
             frappe.msgprint("Das Mitglied wurde inaktiviert.");
         },
