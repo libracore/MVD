@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.12.0
+Visualisierung der offenen Rechnungen in der Mitgliedschaft nur für die entsprechende Sektion
 #### 7.11.0
 Anpassung der Visualisierung der Anzahl(PDF/Mail) in einem Mahnlauf
 #### 7.10.1
