@@ -290,6 +290,12 @@ class Mahnlauf(Document):
                 
                 create_reminder_record_check = True
                 
+                if int(self.zahlungserinnerungen) == 1 and mahnungen_per_mail == 1:
+                    # Zahlungserinnerung per Mail --> Kein PDF Massenlauf
+                    massenlauf_check = 0
+                else:
+                    massenlauf_check = 1
+                
                 if int(self.zahlungserinnerungen) == 1 and mahnungen_per_mail == 0:
                     create_reminder_record_check = False
                 
@@ -300,6 +306,7 @@ class Mahnlauf(Document):
                         "customer": invoice.customer,
                         "mahnlauf": self.name,
                         "per_mail": mahnungen_per_mail,
+                        "massenlauf": massenlauf_check,
                         "zahlungserinnerung": self.zahlungserinnerungen,
                         "mv_mitgliedschaft": invoice.mv_mitgliedschaft,
                         "mv_kunde": invoice.mv_kunde,

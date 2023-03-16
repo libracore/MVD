@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.10.0
+Zahlungserinnerungen per Mail nicht in PDF Massenlauf
 #### 7.9.0
 Setzen von Austrittsdatum bei manueller Inaktivierung
 #### 7.8.1
