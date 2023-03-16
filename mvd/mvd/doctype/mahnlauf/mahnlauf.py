@@ -124,7 +124,10 @@ class Mahnlauf(Document):
                                         AND `sinv`.`payment_reminder_level` = {mahnstufe}
                                         AND ((`sinv`.`exclude_from_payment_reminder_until` IS NULL) OR (`sinv`.`exclude_from_payment_reminder_until` < CURDATE()))""".format(sektion_id=self.sektion_id, \
                                         ueberfaellig_seit=self.ueberfaellig_seit, mahnstufe=int(self.mahnstufe) - 1, rg_typ_filter=rg_typ_filter), as_dict=True)[0].qty or 0
-                return alle - e_mails, e_mails, alle
+                if self.mahnungen_per_mail == 'Nein':
+                    return alle, 0, alle
+                else:
+                    return alle - e_mails, e_mails, alle
             else:
                 e_mails = frappe.db.sql("""SELECT
                                             SUM(CASE
@@ -172,7 +175,10 @@ class Mahnlauf(Document):
                                                 SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}'
                                             )
                                         )""".format(mahnlauf=self.name), as_dict=True)[0].qty or 0
-                return alle - e_mails, e_mails, alle
+                if self.mahnungen_per_mail == 'Nein':
+                    return alle, 0, alle
+                else:
+                    return alle - e_mails, e_mails, alle
             else:
                 e_mails = frappe.db.sql("""SELECT
                                             SUM(CASE
@@ -290,6 +296,12 @@ class Mahnlauf(Document):
                 
                 create_reminder_record_check = True
                 
+                if int(self.zahlungserinnerungen) == 1 and mahnungen_per_mail == 1:
+                    # Zahlungserinnerung per Mail --> Kein PDF Massenlauf
+                    massenlauf_check = 0
+                else:
+                    massenlauf_check = 1
+                
                 if int(self.zahlungserinnerungen) == 1 and mahnungen_per_mail == 0:
                     create_reminder_record_check = False
                 
@@ -300,6 +312,7 @@ class Mahnlauf(Document):
                         "customer": invoice.customer,
                         "mahnlauf": self.name,
                         "per_mail": mahnungen_per_mail,
+                        "massenlauf": massenlauf_check,
                         "zahlungserinnerung": self.zahlungserinnerungen,
                         "mv_mitgliedschaft": invoice.mv_mitgliedschaft,
                         "mv_kunde": invoice.mv_kunde,

@@ -1787,13 +1787,15 @@ def get_uebersicht_html(name):
                                                     FROM `tabSales Invoice` 
                                                     WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
                                                     AND `due_date` < CURDATE()
-                                                    AND `docstatus` = 1""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)[0].open_amount
+                                                    AND `docstatus` = 1
+                                                    AND `sektion_id` = '{sektion}'""".format(mitgliedschaft=mitgliedschaft.name, sektion=mitgliedschaft.sektion_id), as_dict=True)[0].open_amount
         
         offene_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
                                             FROM `tabSales Invoice` 
                                             WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
                                             AND `due_date` >= CURDATE()
-                                            AND `docstatus` = 1""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)[0].open_amount
+                                            AND `docstatus` = 1
+                                            AND `sektion_id` = '{sektion}'""".format(mitgliedschaft=mitgliedschaft.name, sektion=mitgliedschaft.sektion_id), as_dict=True)[0].open_amount
         
         if mitgliedschaft.status_c not in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
             eintritt = mitgliedschaft.eintrittsdatum
