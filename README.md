@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.11.0
+Anpassung der Visualisierung der Anzahl(PDF/Mail) in einem Mahnlauf
 #### 7.10.1
 Korrektur Mitgliedschafts Datenblatt
 #### 7.10.0
