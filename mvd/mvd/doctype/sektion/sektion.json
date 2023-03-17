@@ -64,7 +64,8 @@
   "legacy_email",
   "legacy_mail_absender_mail",
   "legacy_mail_absende_name",
-  "emailberatung_email_text"
+  "emailberatung_email_text",
+  "default_emailberatung_todo_gruppe"
  ],
  "fields": [
   {
@@ -419,9 +420,15 @@
    "fieldname": "emailberatung_email_text",
    "fieldtype": "Text",
    "label": "E-Mail Text"
+  },
+  {
+   "fieldname": "default_emailberatung_todo_gruppe",
+   "fieldtype": "Link",
+   "label": "Standard ToDo Gruppe",
+   "options": "ToDo Gruppe"
   }
  ],
- "modified": "2023-03-06 20:14:46.262565",
+ "modified": "2023-03-17 10:02:04.924389",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

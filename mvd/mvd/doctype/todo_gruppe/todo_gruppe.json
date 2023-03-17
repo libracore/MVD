@@ -1,0 +1,51 @@
+{
+ "autoname": "field:virt_user",
+ "creation": "2023-03-17 09:33:51.819501",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "virt_user",
+  "user"
+ ],
+ "fields": [
+  {
+   "fieldname": "virt_user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Virtueller User",
+   "options": "User",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Table MultiSelect",
+   "label": "User",
+   "options": "ToDo Gruppen Multiselect"
+  }
+ ],
+ "modified": "2023-03-17 09:33:51.819501",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "ToDo Gruppe",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

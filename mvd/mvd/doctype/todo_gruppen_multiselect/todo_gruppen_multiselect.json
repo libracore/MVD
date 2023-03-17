@@ -1,29 +1,28 @@
 {
- "creation": "2022-08-17 20:39:27.734546",
+ "creation": "2023-03-17 09:15:50.356009",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "todo_gruppe"
+  "user"
  ],
  "fields": [
   {
-   "fieldname": "todo_gruppe",
+   "fieldname": "user",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "ToDo Gruppe",
-   "options": "ToDo Gruppe",
+   "label": "User",
+   "options": "User",
    "reqd": 1
   }
  ],
  "istable": 1,
- "modified": "2023-03-17 09:34:31.764586",
+ "modified": "2023-03-17 09:15:50.356009",
  "modified_by": "Administrator",
  "module": "MVD",
- "name": "ToDo Gruppen",
+ "name": "ToDo Gruppen Multiselect",
  "owner": "Administrator",
  "permissions": [],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

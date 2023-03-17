@@ -57,6 +57,20 @@ class Beratung(Document):
                     if self.sektion_id:
                         if self.sektion_id == mitgliedschaften[0].sektion_id:
                             self.mv_mitgliedschaft = mitgliedschaften[0].name
+                            
+                            # auto ToDo assign an ToDo Gruppe wenn Default hinterlegt
+                            if frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe"):
+                                todo = frappe.get_doc({
+                                    "doctype":"ToDo",
+                                    "owner": frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe"),
+                                    "reference_type": "Beratung",
+                                    "reference_name": self.name,
+                                    "description": 'Automatische Gruppen Zuweisung E-Mail Beratung.',
+                                    "priority": "Medium",
+                                    "status": "Open",
+                                    "date": today(),
+                                    "assigned_by": "Administrator"
+                                }).insert(ignore_permissions=True)
         
         # Titel aktualisierung
         titel = '{0}'.format(self.start_date)
