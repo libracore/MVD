@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 7.16.0
+Statischer E-Mail-Beratungs-Redirect MVSO
+#### 7.15.0
+Anpassungen Beratung
 #### 7.14.0
 Auto. ToDo Handling in Beratung
 #### 7.13.0

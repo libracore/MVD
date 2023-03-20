@@ -56,6 +56,7 @@ website_redirects = [
     # absolute location
     {"source": "/nologin", "target": "https://www.mieterverband.ch/mv/prozesse/login.html"},
     {"source": "/mvd-500", "target": "https://www.mieterverband.ch/mv/500"},
+    {"source": "/mvd-mvso", "target": "https://www.mieterverband.ch/mv-so/hilfe-von-fachleuten/email-beratung"},
     # ~ {"source": "/(^(?!.*login)(?!.*emailberatung)(?!.*desk).*$)", "target": "https://www.mieterverband.ch/"}
     {"source": "/", "target": "https://www.mieterverband.ch/"}
 ]
@@ -125,6 +126,9 @@ doc_events = {
     },
     "Communication": {
         "after_insert": "mvd.mvd.doctype.beratung.beratung.check_communication"
+    },
+    "Beratung": {
+        "after_insert": "mvd.mvd.doctype.beratung.beratung.new_initial_todo"
     }
 }
 

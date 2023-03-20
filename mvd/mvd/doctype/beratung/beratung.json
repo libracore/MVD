@@ -74,7 +74,7 @@
   {
    "fieldname": "kontaktperson",
    "fieldtype": "Link",
-   "label": "Kontaktperson",
+   "label": "Berater*in",
    "options": "Termin Kontaktperson"
   },
   {
@@ -281,7 +281,7 @@
    "label": "auto_todo_log"
   }
  ],
- "modified": "2023-03-17 13:32:22.764662",
+ "modified": "2023-03-20 11:49:08.939804",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

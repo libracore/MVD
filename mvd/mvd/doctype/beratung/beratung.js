@@ -27,6 +27,24 @@ frappe.ui.form.on('Beratung', {
             });
         }
         
+        if (!frm.doc.__islocal) {
+            frm.add_custom_button(__("Übernehmen"),  function() {
+                //~ frappe.call({
+                    //~ method: "mvd.mvd.doctype.beratung.beratung.uebernahme",
+                    //~ args:{
+                            //~ 'beratung': cur_frm.doc.name,
+                            //~ 'user': frappe.session.user
+                    //~ },
+                    //~ callback: function(r)
+                    //~ {
+                        //~ cur_frm.reload_doc();
+                        //~ frappe.msgprint("Beratung übernommen");
+                    //~ }
+                //~ });
+                frappe.msgprint("TBD");
+            });
+        }
+        
         if (cur_frm.doc.kontaktperson&&cur_frm.doc.create_todo) {
             frappe.call({
                 method: "mvd.mvd.doctype.beratung.beratung.new_todo",
