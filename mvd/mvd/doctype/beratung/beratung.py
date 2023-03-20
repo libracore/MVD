@@ -110,18 +110,9 @@ class Beratung(Document):
                             self.mv_mitgliedschaft = mitgliedschaften[0].name
                             
                             # auto ToDo assign an ToDo Gruppe wenn Default hinterlegt
-                            if frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe"):
-                                todo = frappe.get_doc({
-                                    "doctype":"ToDo",
-                                    "owner": frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe"),
-                                    "reference_type": "Beratung",
-                                    "reference_name": self.name,
-                                    "description": 'Automatische Gruppen Zuweisung E-Mail Beratung.',
-                                    "priority": "Medium",
-                                    "status": "Open",
-                                    "date": today(),
-                                    "assigned_by": "Administrator"
-                                }).insert(ignore_permissions=True)
+                            self.kontaktperson = frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe")
+                            self.auto_todo_log = self.kontaktperson
+                            self.create_todo = 1
         
         # Titel aktualisierung
         titel = '{0}'.format(self.start_date)
@@ -306,3 +297,34 @@ def check_communication(self, event):
                 if not beratung.raised_by:
                     beratung.raised_by = communication.sender
                 beratung.save()
+
+def new_initial_todo(self, event):
+    if int(self.create_todo == 1):
+        new_todo(self.name, self.kontaktperson)
+        frappe.db.set_value("Beratung", self.name, 'status', 'Open', update_modified=False)
+        frappe.db.commit()
+
+@frappe.whitelist()
+def uebernahme(beratung, user):
+    # ~ todos_to_remove = frappe.db.sql("""
+                                        # ~ SELECT
+                                            # ~ `name`
+                                        # ~ FROM `tabToDo`
+                                        # ~ WHERE `status` = 'Open'
+                                        # ~ AND `reference_type` = 'Beratung'
+                                        # ~ AND `reference_name` = '{0}'""".format(beratung), as_dict=True)
+    # ~ for todo in todos_to_remove:
+        # ~ t = frappe.get_doc("ToDo", todo.name)
+        # ~ t.status = 'Cancelled'
+        # ~ t.save()
+    
+    # ~ frappe.get_doc({
+        # ~ 'doctype': 'ToDo',
+        # ~ 'description': 'Zuweisung für Beratung {0}'.format(beratung),
+        # ~ 'reference_type': 'Beratung',
+        # ~ 'reference_name': beratung,
+        # ~ 'assigned_by': 'Administrator',
+        # ~ 'owner': user
+    # ~ }).insert(ignore_permissions=True)
+    
+    return

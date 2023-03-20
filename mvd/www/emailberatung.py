@@ -41,8 +41,13 @@ def get_context(context):
             if mitglied_id:
                 if frappe.db.exists("Mitgliedschaft", mitglied_id):
                     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
-                    context = context_erweiterung(context, mitgliedschaft)
-                    return context
+                    if mitgliedschaft.sektion_id == 'MVSO':
+                        # MVSO führt keine E-Mail Beratung durch
+                        create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='Keine MVSO E-Mail Beratung', json="{0}\n\n{1}".format(str(mitglied_id), str(authorization_header)))
+                        raise_redirect(typ='MVSO')
+                    else:
+                        context = context_erweiterung(context, mitgliedschaft)
+                        return context
                 else:
                     # Mitglied-ID in ERPNext unbekannt
                     create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='E-Mail Beratung (500)', json="{0}\n\n{1}".format(str(mitglied_id), str(authorization_header)))
@@ -67,6 +72,9 @@ def raise_redirect(typ=None):
     else:
         if typ == '500':
             frappe.local.flags.redirect_location = "/mvd-500"
+            raise frappe.Redirect
+        if typ == 'MVSO':
+            frappe.local.flags.redirect_location = "/mvd-mvso"
             raise frappe.Redirect
 
 def context_erweiterung(context, mitgliedschaft):
