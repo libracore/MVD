@@ -121,6 +121,12 @@ class Beratung(Document):
         if self.beratungskategorie:
             titel += ' {0}'.format(self.beratungskategorie)
         self.titel = titel
+    
+    # ~ def onload(self):
+        # ~ if self.ungelesen == 1:
+            # ~ frappe.db.set_value("Beratung", self.name, 'ungelesen', 0, update_modified=False)
+            # ~ frappe.db.commit()
+            # ~ self.ungelesen = frappe.db.get_value("Beratung", self.name, 'ungelesen')
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
@@ -232,7 +238,7 @@ def get_verknuepfungsuebersicht(beratung):
     
     if frappe.db.get_value("Beratung", beratung, 'mv_mitgliedschaft'):
         anzahl_beratungen_zu_mitglied = frappe.db.count('Beratung', {'mv_mitgliedschaft': frappe.db.get_value("Beratung", beratung, 'mv_mitgliedschaft')}) or 0
-        table += """<br><p><b>Anzahl Beratungen dieser Mitgliedschaft: {0}</b></p>""".format(anzahl_beratungen_zu_mitglied)
+        table += """<br><p id="route_to_list_view" style="cursor: pointer;"><b>Anzahl Beratungen dieser Mitgliedschaft: {0}</b></p>""".format(anzahl_beratungen_zu_mitglied)
     
     return table
 
@@ -286,8 +292,8 @@ def check_communication(self, event):
     communication = self
     if communication.sent_or_received == 'Received':
         if communication.reference_doctype == 'Beratung':
+            beratung = frappe.get_doc("Beratung", communication.reference_name)
             if frappe.db.count("Communication", {'reference_doctype': 'Beratung', 'reference_name': communication.reference_name}) < 2:
-                beratung = frappe.get_doc("Beratung", communication.reference_name)
                 if not beratung.notiz:
                     beratung.notiz = communication.content
                 if not beratung.sektion_id:
@@ -296,6 +302,10 @@ def check_communication(self, event):
                     beratung.raised_by_name = communication.sender_full_name
                 if not beratung.raised_by:
                     beratung.raised_by = communication.sender
+                beratung.ungelesen = 1
+                beratung.save()
+            else:
+                beratung.ungelesen = 1
                 beratung.save()
 
 def new_initial_todo(self, event):
