@@ -29,19 +29,26 @@ frappe.ui.form.on('Beratung', {
         
         if (!frm.doc.__islocal) {
             frm.add_custom_button(__("Übernehmen"),  function() {
-                //~ frappe.call({
-                    //~ method: "mvd.mvd.doctype.beratung.beratung.uebernahme",
-                    //~ args:{
-                            //~ 'beratung': cur_frm.doc.name,
-                            //~ 'user': frappe.session.user
-                    //~ },
-                    //~ callback: function(r)
-                    //~ {
-                        //~ cur_frm.reload_doc();
-                        //~ frappe.msgprint("Beratung übernommen");
-                    //~ }
-                //~ });
-                frappe.msgprint("TBD");
+                frappe.call({
+                    method: "mvd.mvd.doctype.beratung.beratung.uebernahme",
+                    args:{
+                            'beratung': cur_frm.doc.name,
+                            'user': frappe.session.user
+                    },
+                    callback: function(r)
+                    {
+                        if (r.message) {
+                            if (cur_frm.doc.kontaktperson != r.message) {
+                                cur_frm.set_value("kontaktperson", r.message);
+                                frappe.msgprint('Sie wurden als "Berater*in" erfasst.<br>Die ToDo anpassungen erfolgen mit dem <b>Speichern</b> der Beratung.');
+                            } else {
+                                frappe.msgprint('Sie sind bereits als "Berater*in" erfasst.');
+                            }
+                        } else {
+                            frappe.msgprint('Die automatische Übernahme dieser Beratung für Sie konnte nicht durchgeführt werden, weil es keine "Berater*in" gibt die Ihnen zugeordnet ist.');
+                        }
+                    }
+                });
             });
         }
         

@@ -306,25 +306,25 @@ def new_initial_todo(self, event):
 
 @frappe.whitelist()
 def uebernahme(beratung, user):
-    # ~ todos_to_remove = frappe.db.sql("""
-                                        # ~ SELECT
-                                            # ~ `name`
-                                        # ~ FROM `tabToDo`
-                                        # ~ WHERE `status` = 'Open'
-                                        # ~ AND `reference_type` = 'Beratung'
-                                        # ~ AND `reference_name` = '{0}'""".format(beratung), as_dict=True)
-    # ~ for todo in todos_to_remove:
-        # ~ t = frappe.get_doc("ToDo", todo.name)
-        # ~ t.status = 'Cancelled'
-        # ~ t.save()
-    
-    # ~ frappe.get_doc({
-        # ~ 'doctype': 'ToDo',
-        # ~ 'description': 'Zuweisung für Beratung {0}'.format(beratung),
-        # ~ 'reference_type': 'Beratung',
-        # ~ 'reference_name': beratung,
-        # ~ 'assigned_by': 'Administrator',
-        # ~ 'owner': user
-    # ~ }).insert(ignore_permissions=True)
-    
-    return
+    kontaktpersonen = frappe.db.sql("""
+                                        SELECT
+                                            `parent`
+                                        FROM `tabTermin Kontaktperson Multi User`
+                                        WHERE `parent` IN (
+                                            SELECT
+                                                `parent`
+                                            FROM `tabTermin Kontaktperson Multi User`
+                                            WHERE `user` = '{user}'
+                                            AND `idx` = 1
+                                        )
+                                        AND `parent` NOT IN (
+                                            SELECT
+                                                `parent`
+                                            FROM `tabTermin Kontaktperson Multi User`
+                                            WHERE `user` != '{user}'
+                                        )
+                                    """.format(user=user), as_dict=True)
+    if len(kontaktpersonen) > 0:
+        return kontaktpersonen[0].parent
+    else:
+        return False

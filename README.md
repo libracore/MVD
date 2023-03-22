@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.17.0
+Übernahme Funktionalität in Beratung
 #### 7.16.0
 Statischer E-Mail-Beratungs-Redirect MVSO
 #### 7.15.0
