@@ -6,6 +6,7 @@
  "field_order": [
   "von",
   "bis",
+  "art",
   "ort"
  ],
  "fields": [
@@ -28,10 +29,17 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Ort"
+  },
+  {
+   "fieldname": "art",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Art",
+   "options": "telefonisch\nE-Mail\npers\u00f6nlich"
   }
  ],
  "istable": 1,
- "modified": "2023-01-25 13:36:04.938931",
+ "modified": "2023-03-22 10:29:52.044458",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung Termin",

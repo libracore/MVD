@@ -14,6 +14,8 @@
   "anderes_mietobjekt",
   "frage",
   "datum_mietzinsanzeige",
+  "ignore_abschluss_mail",
+  "ungelesen",
   "section_allgemein",
   "beratungskategorie",
   "beratungskategorie_code",
@@ -23,8 +25,8 @@
   "start_date",
   "raised_by",
   "email_id",
-  "subject",
   "cb_1",
+  "subject",
   "mv_mitgliedschaft",
   "sektion_id",
   "status",
@@ -49,8 +51,7 @@
   {
    "fieldname": "subject",
    "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Thema"
+   "label": "Betreff"
   },
   {
    "fieldname": "status",
@@ -131,12 +132,12 @@
   {
    "fieldname": "section_anfrage",
    "fieldtype": "Section Break",
-   "label": "Problemstellung/Anfrage"
+   "label": "Problemstellung/Anfrage (Intern)"
   },
   {
    "fieldname": "antwort",
    "fieldtype": "Text Editor",
-   "label": "Antwort/Protokoll"
+   "label": "Antwort/Protokoll (Intern)"
   },
   {
    "fieldname": "section_dokumente",
@@ -158,7 +159,7 @@
   {
    "fieldname": "notiz",
    "fieldtype": "Text Editor",
-   "label": "Notiz"
+   "label": "Notiz (Intern)"
   },
   {
    "default": "0",
@@ -279,9 +280,23 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "auto_todo_log"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_abschluss_mail",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "ignore_abschluss_mail"
+  },
+  {
+   "default": "0",
+   "fieldname": "ungelesen",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "ungelesen"
   }
  ],
- "modified": "2023-03-20 11:49:08.939804",
+ "modified": "2023-03-22 13:59:57.303808",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

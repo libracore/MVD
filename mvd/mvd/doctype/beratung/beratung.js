@@ -3,17 +3,16 @@
 
 frappe.ui.form.on('Beratung', {
     refresh: function(frm) {
-        if ((!frm.doc.__islocal)&&(cur_frm.doc.mv_mitgliedschaft)) {
-            // load html overview
-            load_html_overview(frm);
-        }
-        
         if (!frm.doc.__islocal) {
+            if (cur_frm.doc.mv_mitgliedschaft) {
+                // load html overview
+                load_html_overview(frm);
+            }
+            
             // load html verknüpfungen
             load_html_verknuepfungen(frm);
-        }
-        
-        if (!frm.doc.__islocal) {
+            
+            //btn zum Verknüpfen
             frm.add_custom_button(__("Verknüpfen"),  function() {
                 frappe.prompt([
                     {'fieldname': 'beratung', 'fieldtype': 'Link', 'options': 'Beratung', 'label': 'Beratung', 'reqd': 1}  
@@ -25,24 +24,65 @@ frappe.ui.form.on('Beratung', {
                 'Verknüpfen'
                 );
             });
-        }
-        
-        if (!frm.doc.__islocal) {
+            
+            // btn zum übernehmen
             frm.add_custom_button(__("Übernehmen"),  function() {
-                //~ frappe.call({
-                    //~ method: "mvd.mvd.doctype.beratung.beratung.uebernahme",
-                    //~ args:{
-                            //~ 'beratung': cur_frm.doc.name,
-                            //~ 'user': frappe.session.user
-                    //~ },
-                    //~ callback: function(r)
-                    //~ {
-                        //~ cur_frm.reload_doc();
-                        //~ frappe.msgprint("Beratung übernommen");
-                    //~ }
-                //~ });
-                frappe.msgprint("TBD");
+                frappe.call({
+                    method: "mvd.mvd.doctype.beratung.beratung.uebernahme",
+                    args:{
+                            'beratung': cur_frm.doc.name,
+                            'user': frappe.session.user
+                    },
+                    callback: function(r)
+                    {
+                        if (r.message) {
+                            if (cur_frm.doc.kontaktperson != r.message) {
+                                cur_frm.set_value("kontaktperson", r.message);
+                                frappe.msgprint('Sie wurden als "Berater*in" erfasst.<br>Die ToDo anpassungen erfolgen mit dem <b>Speichern</b> der Beratung.');
+                            } else {
+                                frappe.msgprint('Sie sind bereits als "Berater*in" erfasst.');
+                            }
+                        } else {
+                            frappe.msgprint('Die automatische Übernahme dieser Beratung für Sie konnte nicht durchgeführt werden, weil es keine "Berater*in" gibt die Ihnen zugeordnet ist.');
+                        }
+                    }
+                });
             });
+            
+            if ((cur_frm.doc.status == 'Closed')&&(cur_frm.doc.ignore_abschluss_mail != 1)) {
+                // Abfrage ob Abschluss Mail gesendet werden soll
+                var d = new frappe.ui.Dialog({
+                    'fields': [
+                        {'fieldname': 'ht', 'fieldtype': 'HTML'},
+                        {'fieldname': 'mail', 'fieldtype': 'Button', 'label': 'Abschluss E-Mail senden', 'click': function() {
+                                d.hide();
+                                cur_frm.set_value("ignore_abschluss_mail", 1).then(function(){
+                                    cur_frm.save().then(function(){
+                                        frm.email_doc();
+                                    })
+                                })
+                            }
+                        },
+                        {'fieldname': 'ignore', 'fieldtype': 'Button', 'label': 'Diese Meldung deaktivieren', 'click': function() {
+                                d.hide();
+                                cur_frm.set_value("ignore_abschluss_mail", 1).then(function(){
+                                    cur_frm.save();
+                                })
+                            }
+                        }
+                    ],
+                    'title': "Abschluss E-Mail"
+                });
+                d.fields_dict.ht.$wrapper.html('Diese Beratung besitzt den Status "Geschlossen".<br>Sie können nun entweder ein Abschluss E-Mail schreiben, oder diese Erinnerung für die Zukunft deaktivieren.');
+                d.show();
+            }
+            
+            // als gelesen markieren
+            if (cur_frm.doc.ungelesen) {
+                frappe.db.set_value("Beratung", cur_frm.doc.name, 'ungelesen', 0).then(function(){
+                    cur_frm.reload_doc();
+                })
+            }
         }
         
         if (cur_frm.doc.kontaktperson&&cur_frm.doc.create_todo) {
@@ -92,6 +132,7 @@ function load_html_verknuepfungen(frm) {
             cur_frm.set_df_property('verknuepfungen_html','options', r.message);
             add_jump_icons_event_handler(frm);
             add_trash_icons_event_handler(frm);
+            add_route_to_list_view_event_handler(frm);
         }
     });
 }
@@ -133,10 +174,20 @@ function add_trash_icons_event_handler(frm) {
 }
 
 function add_jump_icons_event_handler(frm) {
-    // event handler für kump icons (verknüpfungen)
+    // event handler für jump icons (verknüpfungen)
     $(".verknuepfung_jump").each(function() {
         $(this).bind( "click", function() {
             frappe.set_route("Form", "Beratung", $(this).attr("data-jump"));
         });
+    });
+}
+
+function add_route_to_list_view_event_handler(frm) {
+    // event handler für anz. Beratungen (verknüpfungen)
+    $("#route_to_list_view").bind( "click", function() {
+        frappe.route_options = {
+            'mv_mitgliedschaft': cur_frm.doc.mv_mitgliedschaft
+        }
+        frappe.set_route("List", "Beratung", "List");
     });
 }

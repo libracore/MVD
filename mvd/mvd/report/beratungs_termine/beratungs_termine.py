@@ -16,7 +16,9 @@ def get_columns():
         {"label": _("Bis"), "fieldname": "bis", "fieldtype": "Datetime"},
         {"label": _("Ort"), "fieldname": "ort", "fieldtype": "Data"},
         {"label": _("Titel"), "fieldname": "titel", "fieldtype": "Data"},
-        {"label": _("Status"), "fieldname": "status", "fieldtype": "Data"}
+        {"label": _("Thema"), "fieldname": "thema", "fieldtype": "Data"},
+        {"label": _("Status"), "fieldname": "status", "fieldtype": "Data"},
+        {"label": _("Beratung"), "fieldname": "beratung", "fieldtype": "Link", "options": "Beratung"}
     ]
 
 def get_data(filters):
@@ -32,7 +34,9 @@ def get_data(filters):
                                     `bt`.`bis` AS `bis`,
                                     `bt`.`ort` AS `ort`,
                                     `b`.`titel` AS `titel`,
-                                    `b`.`status` AS `status`
+                                    `b`.`status` AS `status`,
+                                    `b`.`subject` AS `thema`,
+                                    `b`.`name` AS `beratung`
                                 FROM `tabBeratung Termin` AS `bt`
                                 LEFT JOIN `tabBeratung` AS `b` on `bt`.`parent` = `b`.`name`
                                 WHERE `b`.`_assign` LIKE '%{user}%'
