@@ -38,6 +38,9 @@ frappe.ui.form.on('Beratung', {
                         if (r.message) {
                             if (cur_frm.doc.kontaktperson != r.message) {
                                 cur_frm.set_value("kontaktperson", r.message);
+                                if (cur_frm.doc.status == 'Eingang') {
+                                    cur_frm.set_value("status", 'Open');
+                                }
                                 frappe.msgprint('Sie wurden als "Berater*in" erfasst.<br>Die ToDo anpassungen erfolgen mit dem <b>Speichern</b> der Beratung.');
                             } else {
                                 frappe.msgprint('Sie sind bereits als "Berater*in" erfasst.');
@@ -47,6 +50,29 @@ frappe.ui.form.on('Beratung', {
                         }
                     }
                 });
+            });
+            
+            // btn zum zusammenführen
+            frm.add_custom_button(__("Zusammenführen"),  function() {
+                frappe.prompt([
+                    {'fieldname': 'master', 'fieldtype': 'Link', 'label': 'Master Beratung', 'reqd': 1, 'options': 'Beratung'}  
+                ],
+                function(values){
+                    frappe.call({
+                        method: "mvd.mvd.doctype.beratung.beratung.merge",
+                        args:{
+                                'slave': cur_frm.doc.name,
+                                'master': values.master
+                        },
+                        callback: function(r)
+                        {
+                            cur_frm.reload_doc();
+                        }
+                    });
+                },
+                'Beratungen zusammenführen',
+                'Zusammenführen'
+                )
             });
             
             if ((cur_frm.doc.status == 'Closed')&&(cur_frm.doc.ignore_abschluss_mail != 1)) {
@@ -98,6 +124,10 @@ frappe.ui.form.on('Beratung', {
                     frappe.msgprint("ToDo erstellt");
                 }
             });
+        }
+        
+        if (cur_frm.doc.status == 'Zusammengeführt') {
+            setze_read_only(frm);
         }
     },
     mv_mitgliedschaft: function(frm) {
@@ -190,4 +220,11 @@ function add_route_to_list_view_event_handler(frm) {
         }
         frappe.set_route("List", "Beratung", "List");
     });
+}
+
+function setze_read_only(frm) {
+    var i = 0;
+    for (i; i<cur_frm.fields.length; i++) {
+        cur_frm.set_df_property(cur_frm.fields[i].df.fieldname,'read_only', 1);
+    }
 }

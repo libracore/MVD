@@ -338,3 +338,31 @@ def uebernahme(beratung, user):
         return kontaktpersonen[0].parent
     else:
         return False
+
+@frappe.whitelist()
+def merge(slave, master):
+    slave_doc = frappe.get_doc("Beratung", slave)
+    master_doc = frappe.get_doc("Beratung", master)
+    
+    if master_doc.notiz:
+        master_doc.notiz += slave_doc.notiz
+    else:
+        master_doc.notiz = slave_doc.notiz
+    
+    if master_doc.antwort:
+        master_doc.antwort += slave_doc.antwort
+    else:
+        master_doc.antwort = slave_doc.antwort
+    
+    master_doc.save()
+    
+    frappe.db.set_value("Beratung", slave_doc.name, "master", master_doc.name)
+    frappe.db.set_value("Beratung", slave_doc.name, "status", 'Zusammengeführt')
+    
+    # relink files
+    beratungs_files = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_name` = '{0}'""".format(slave_doc.name), as_dict=True)
+    if len(beratungs_files) > 0:
+        for beratung_file in beratungs_files:
+            frappe.db.set_value("File", beratung_file.name, "attached_to_name", master_doc.name)
+    
+    return

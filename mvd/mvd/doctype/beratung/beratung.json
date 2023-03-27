@@ -16,6 +16,8 @@
   "datum_mietzinsanzeige",
   "ignore_abschluss_mail",
   "ungelesen",
+  "section_merge",
+  "master",
   "section_allgemein",
   "beratungskategorie",
   "beratungskategorie_code",
@@ -58,7 +60,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Eingang\nOpen\nR\u00fcckfragen\nin Arbeit\nNicht-Mitglied-Abgewiesen\nClosed",
+   "options": "Eingang\nOpen\nR\u00fcckfragen\nin Arbeit\nNicht-Mitglied-Abgewiesen\nClosed\nZusammengef\u00fchrt",
    "reqd": 1
   },
   {
@@ -294,9 +296,22 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "ungelesen"
+  },
+  {
+   "depends_on": "eval:doc.status=='Zusammengef\u00fchrt'&&doc.master",
+   "fieldname": "section_merge",
+   "fieldtype": "Section Break",
+   "label": "Zusammenf\u00fchrung"
+  },
+  {
+   "depends_on": "eval:doc.status=='Zusammengef\u00fchrt'",
+   "fieldname": "master",
+   "fieldtype": "Link",
+   "label": "Zusammengef\u00fchrt mit Beratung",
+   "options": "Beratung"
   }
  ],
- "modified": "2023-03-22 13:59:57.303808",
+ "modified": "2023-03-27 15:39:02.176351",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
