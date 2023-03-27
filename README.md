@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.19.0
+Beratungs Merge Funktion
 #### 7.18.0
 Anpassungen/Erweiterungen Beratung
 #### 7.17.0
