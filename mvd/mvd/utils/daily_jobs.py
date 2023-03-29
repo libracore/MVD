@@ -139,3 +139,37 @@ def reset_geschenk_mitgliedschaften():
             ms.geschenkunterlagen_an_schenker = None
             ms.geschenk_reset_rechnung = None
             ms.save()
+
+def mahnlauf_ausschluss():
+    rgs_ohne_mitgl_mit = frappe.db.sql("""
+                                        SELECT
+                                            `name`,
+                                            `mv_mitgliedschaft`
+                                        FROM `tabSales Invoice`
+                                        WHERE `sektion_id` != 'MVD'
+                                        AND `docstatus` = 1
+                                        AND `mv_mitgliedschaft` IS NOT NULL
+                                        AND `exclude_from_payment_reminder_until` IS NULL
+                                        AND `mv_mitgliedschaft` IN (
+                                            SELECT `name` FROM `tabMitgliedschaft` WHERE `mahnstopp` IS NOT NULL
+                                        )""", as_dict=True)
+    
+    for rg in rgs_ohne_mitgl_mit:
+        mahnstopp = frappe.db.get_value("Mitgliedschaft", rg.mv_mitgliedschaft, 'mahnstopp')
+        frappe.db.set_value("Sales Invoice", rg.name, 'exclude_from_payment_reminder_until', mahnstopp)
+    
+    rgs_mit_mitgl_ohne = frappe.db.sql("""
+                                        SELECT
+                                            `name`,
+                                            `mv_mitgliedschaft`
+                                        FROM `tabSales Invoice`
+                                        WHERE `sektion_id` != 'MVD'
+                                        AND `docstatus` = 1
+                                        AND `mv_mitgliedschaft` IS NOT NULL
+                                        AND `exclude_from_payment_reminder_until` IS NOT NULL
+                                        AND `mv_mitgliedschaft` IN (
+                                            SELECT `name` FROM `tabMitgliedschaft` WHERE `mahnstopp` IS NULL
+                                        )""", as_dict=True)
+    
+    for rg in rgs_mit_mitgl_ohne:
+        frappe.db.set_value("Sales Invoice", rg.name, 'exclude_from_payment_reminder_until', None)
