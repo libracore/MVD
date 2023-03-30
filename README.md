@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.19.2
+M+W Export Fixes
 #### 7.19.1
 Daily BG-Job: Schreiben Mahnlaufausschluss bis in RG
 #### 7.19.0
