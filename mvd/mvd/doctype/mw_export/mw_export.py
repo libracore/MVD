@@ -243,7 +243,8 @@ def get_csv_data(mw_export, query=False):
                                     `kundentyp`,
                                     `firma`,
                                     `zusatz_adresse`,
-                                    `zusatz_firma`
+                                    `zusatz_firma`,
+                                    `hat_solidarmitglied`
                                 FROM `tabMitgliedschaft`
                                 WHERE (
                                     `status_c` NOT IN ('Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')
@@ -258,7 +259,7 @@ def get_csv_data(mw_export, query=False):
             mitglied_nr = entry.mitglied_nr
             
             anrede = ''
-            if not entry.nachname_2:
+            if int(entry.hat_solidarmitglied) != 1:
                 anrede = entry.anrede_c
             
             if entry.kundentyp == 'Unternehmen':
@@ -271,8 +272,11 @@ def get_csv_data(mw_export, query=False):
                 name_1 = " ".join([entry.vorname_1 or '', entry.nachname_1 or ''])
                 if name_1 == ' ':
                     name_1 = ''
-                name_2 = " ".join([entry.vorname_2 or '', entry.nachname_2 or ''])
-                if name_2 == ' ':
+                if int(entry.hat_solidarmitglied) == 1:
+                    name_2 = " ".join([entry.vorname_2 or '', entry.nachname_2 or ''])
+                    if name_2 == ' ':
+                        name_2 = ''
+                else:
                     name_2 = ''
             
                 if entry.zusatz_adresse:
