@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.20.3
+Bugfix Mitgliedschafts HTML-Overview: Entfernung fehlerhafter Eintritts-Visualisierung
 #### 7.20.2
 Bugfix Suchmaske: Ermöglichung der Suche nach Namen mit "'"
 #### 7.20.1
