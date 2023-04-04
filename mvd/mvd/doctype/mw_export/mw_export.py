@@ -268,6 +268,11 @@ def get_csv_data(mw_export, query=False):
                 name_3 = " ".join([entry.vorname_1 or '', entry.nachname_1 or ''])
                 if name_3 == ' ':
                     name_3 = ''
+                # name_3 wird mit zusatz_adresse überschrieben falls diese vorhanden ist.
+                if entry.zusatz_adresse:
+                    name_3 = entry.zusatz_adresse
+                else:
+                    name_3 = ''
             else:
                 name_1 = " ".join([entry.vorname_1 or '', entry.nachname_1 or ''])
                 if name_1 == ' ':

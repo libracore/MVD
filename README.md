@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 7.20.1
+Korrektur M+W Export: zusatz_adresse bei Unternehmen
+#### 7.20.0
+Errorlog ergänzung um JSON bei Fehler: 400 Bad Request mitgliedId == 0 NoneType: None
 #### 7.19.2
 M+W Export Fixes
 #### 7.19.1

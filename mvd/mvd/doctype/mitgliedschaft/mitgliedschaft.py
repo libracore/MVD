@@ -2407,9 +2407,9 @@ def mvm_mitglieder(kwargs):
         if kwargs["mitgliedId"] > 0:
             return check_update_vs_neuanlage(kwargs)
         else:
-            return raise_xxx(400, 'Bad Request', 'mitgliedId == 0')
+            return raise_xxx(400, 'Bad Request', 'mitgliedId == 0', str(kwargs))
     else:
-        return raise_xxx(400, 'Bad Request', 'mitgliedId missing')
+        return raise_xxx(400, 'Bad Request', 'mitgliedId missing', str(kwargs))
 
 # Status Returns
 def raise_xxx(code, title, message, daten=None):
