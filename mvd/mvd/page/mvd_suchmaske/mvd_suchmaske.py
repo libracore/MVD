@@ -43,9 +43,9 @@ def suche(suchparameter, goto_list=False):
     
     # Kontaktdaten
     if suchparameter["vorname"]:
-        filters_list.append("""(`vorname_1` LIKE '{vorname}%' OR `rg_vorname` LIKE '{vorname}%' OR `vorname_2` LIKE '{vorname}%')""".format(vorname=suchparameter["vorname"]))
+        filters_list.append("""(`vorname_1` LIKE "{vorname}%" OR `rg_vorname` LIKE "{vorname}%" OR `vorname_2` LIKE "{vorname}%")""".format(vorname=suchparameter["vorname"]))
     if suchparameter["nachname"]:
-        filters_list.append("""(`nachname_1` LIKE '{nachname}%' OR `rg_nachname` LIKE '{nachname}%' OR `nachname_2` LIKE '{nachname}%')""".format(nachname=suchparameter["nachname"]))
+        filters_list.append("""(`nachname_1` LIKE "{nachname}%" OR `rg_nachname` LIKE "{nachname}%" OR `nachname_2` LIKE "{nachname}%")""".format(nachname=suchparameter["nachname"]))
     if suchparameter["tel"]:
         filters_list.append("""
                             ((REPLACE(`tel_p_1`, ' ', '') LIKE '{tel}%' OR REPLACE(`rg_tel_p`, ' ', '') LIKE '{tel}%' OR REPLACE(`tel_p_2`, ' ', '') LIKE '{tel}%')
@@ -60,23 +60,23 @@ def suche(suchparameter, goto_list=False):
             if suchparameter["firma"]:
                 if suchparameter["zusatz_firma"]:
                     firma = str(suchparameter["firma"] + "%" + suchparameter["zusatz_firma"]).replace(" ", "")
-                    filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE '{firma}%'
+                    filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE "{firma}%"
                                             OR
-                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE '{firma}%')""".format(firma=firma))
+                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE "{firma}%")""".format(firma=firma))
                 else:
-                    filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE '{firma}%'
+                    filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE "{firma}%"
                                             OR
-                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE '{firma}%')""".format(firma=str(suchparameter["firma"]).replace(" ", "")))
+                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE "{firma}%")""".format(firma=str(suchparameter["firma"]).replace(" ", "")))
             else:
                 if suchparameter["zusatz_firma"]:
-                    filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE '{zusatz_firma}%'
+                    filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE "{zusatz_firma}%"
                                             OR
-                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE '{zusatz_firma}%')""".format(zusatz_firma=str(suchparameter["zusatz_firma"]).replace(" ", "")))
+                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE "{zusatz_firma}%")""".format(zusatz_firma=str(suchparameter["zusatz_firma"]).replace(" ", "")))
         else:
             if suchparameter["firma"]:
-                filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE '{firma}%'
+                filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE "{firma}%"
                                         OR
-                                        REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE '{firma}%')""".format(firma=str(suchparameter["firma"]).replace(" ", "")))
+                                        REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE "{firma}%")""".format(firma=str(suchparameter["firma"]).replace(" ", "")))
     
     # Adressdaten
     if suchparameter["zusatz_adresse"]:

@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.20.2
+Bugfix Suchmaske: Ermöglichung der Suche nach Namen mit "'"
 #### 7.20.1
 Korrektur M+W Export: zusatz_adresse bei Unternehmen
 #### 7.20.0
