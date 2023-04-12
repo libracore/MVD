@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.21.0
+Errorhandling für ungültige Mailadressen im Zahlungserinnerungsmailversand
 #### 7.20.3
 Bugfix Mitgliedschafts HTML-Overview: Entfernung fehlerhafter Eintritts-Visualisierung
 #### 7.20.2
