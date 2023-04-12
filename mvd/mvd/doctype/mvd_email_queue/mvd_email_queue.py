@@ -30,70 +30,75 @@ class MVDEmailQueue(Document):
             for mahnung_row in self.mahnungen:
                 if send_counter < max_mails:
                     if mahnung_row.status == 'Not send':
-                        mahnung = frappe.get_doc("Mahnung", mahnung_row.mahnung)
-                        email_vorlage = self.email_vorlage
-                        betreff = self.betreff
-                        message = self.message
-                        if self.email_vorlage:
-                            if mahnung.mv_mitgliedschaft:
-                                mitgliedschaft = mahnung.mv_mitgliedschaft
-                            else:
-                                mitgliedschaft = mahnung.mv_kunde
-                            email_vorlage = frappe.get_doc("Druckvorlage", email_vorlage)
-                            betreff = replace_mv_keywords(email_vorlage.e_mail_betreff, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
-                            message = replace_mv_keywords(email_vorlage.e_mail_text, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
-                        attachments = [frappe.attach_print("Mahnung", mahnung.name, file_name=mahnung.name, print_format='Mahnung')]
-                        comm = make(
-                            recipients=get_recipients(mahnung),
-                            sender=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
-                            subject=betreff,
-                            content=message,
-                            doctype='Mahnung',
-                            name=mahnung.name,
-                            attachments=attachments,
-                            send_email=False,
-                            sender_full_name=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name")
-                        )["name"]
-                        
-                        sendmail(
-                            recipients=get_recipients(mahnung),
-                            sender="{0} <{1}>".format(frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name"), frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse")),
-                            subject=betreff,
-                            message=message,
-                            as_markdown=False,
-                            delayed=True,
-                            reference_doctype='Mahnung',
-                            reference_name=mahnung.name,
-                            unsubscribe_method=None,
-                            unsubscribe_params=None,
-                            unsubscribe_message=None,
-                            attachments=attachments,
-                            content=None,
-                            doctype='Mahnung',
-                            name=mahnung.name,
-                            reply_to=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
-                            cc=[],
-                            bcc=[],
-                            message_id=frappe.get_value("Communication", comm, "message_id"),
-                            in_reply_to=None,
-                            send_after=None,
-                            expose_recipients=None,
-                            send_priority=1,
-                            communication=comm,
-                            retry=1,
-                            now=None,
-                            read_receipt=None,
-                            is_notification=False,
-                            inline_images=None,
-                            template='mahnung',
-                            args={
-                                "message": message,
-                                "footer": frappe.get_value("Sektion", mahnung.sektion_id, "footer")
-                            },
-                            header=None,
-                            print_letterhead=False
-                        )
-                        mahnung_row.status = 'Send'
+                        try:
+                            mahnung = frappe.get_doc("Mahnung", mahnung_row.mahnung)
+                            email_vorlage = self.email_vorlage
+                            betreff = self.betreff
+                            message = self.message
+                            if self.email_vorlage:
+                                if mahnung.mv_mitgliedschaft:
+                                    mitgliedschaft = mahnung.mv_mitgliedschaft
+                                else:
+                                    mitgliedschaft = mahnung.mv_kunde
+                                email_vorlage = frappe.get_doc("Druckvorlage", email_vorlage)
+                                betreff = replace_mv_keywords(email_vorlage.e_mail_betreff, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
+                                message = replace_mv_keywords(email_vorlage.e_mail_text, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
+                            attachments = [frappe.attach_print("Mahnung", mahnung.name, file_name=mahnung.name, print_format='Mahnung')]
+                            comm = make(
+                                recipients=get_recipients(mahnung),
+                                sender=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
+                                subject=betreff,
+                                content=message,
+                                doctype='Mahnung',
+                                name=mahnung.name,
+                                attachments=attachments,
+                                send_email=False,
+                                sender_full_name=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name")
+                            )["name"]
+                            
+                            sendmail(
+                                recipients=get_recipients(mahnung),
+                                sender="{0} <{1}>".format(frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name"), frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse")),
+                                subject=betreff,
+                                message=message,
+                                as_markdown=False,
+                                delayed=True,
+                                reference_doctype='Mahnung',
+                                reference_name=mahnung.name,
+                                unsubscribe_method=None,
+                                unsubscribe_params=None,
+                                unsubscribe_message=None,
+                                attachments=attachments,
+                                content=None,
+                                doctype='Mahnung',
+                                name=mahnung.name,
+                                reply_to=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
+                                cc=[],
+                                bcc=[],
+                                message_id=frappe.get_value("Communication", comm, "message_id"),
+                                in_reply_to=None,
+                                send_after=None,
+                                expose_recipients=None,
+                                send_priority=1,
+                                communication=comm,
+                                retry=1,
+                                now=None,
+                                read_receipt=None,
+                                is_notification=False,
+                                inline_images=None,
+                                template='mahnung',
+                                args={
+                                    "message": message,
+                                    "footer": frappe.get_value("Sektion", mahnung.sektion_id, "footer")
+                                },
+                                header=None,
+                                print_letterhead=False
+                            )
+                            mahnung_row.status = 'Send'
+                        except:
+                            # Mail konnte nicht erstellt werden. Überspringen...
+                            pass
+                        # wichtig: muss nach "except" sein, damit der Fehlerhafte übersprungen wird!
                         send_counter += 1
         
         # post send sended check
