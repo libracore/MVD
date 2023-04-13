@@ -1,36 +1,36 @@
 {
  "creation": "2023-02-09 10:25:55.082796",
+ "doctype": "DocType",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "mahnung",
   "status"
  ],
- "engine": "InnoDB",
- "owner": "Administrator",
- "modified": "2023-02-09 10:25:55.082796",
- "istable": 1,
- "name": "MVD Email Queue Mail",
- "quick_entry": 1,
  "fields": [
   {
-   "label": "mahnung",
    "fieldname": "mahnung",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "fieldtype": "Data"
+   "label": "mahnung"
   },
   {
-   "label": "Status",
    "fieldname": "status",
+   "fieldtype": "Select",
    "in_list_view": 1,
-   "options": "Not send\nSend",
-   "fieldtype": "Select"
+   "label": "Status",
+   "options": "Not send\nSend\nFailed"
   }
  ],
- "track_changes": 1,
+ "istable": 1,
+ "modified": "2023-04-13 08:35:19.714156",
+ "modified_by": "Administrator",
  "module": "MVD",
- "sort_field": "modified",
+ "name": "MVD Email Queue Mail",
+ "owner": "Administrator",
  "permissions": [],
- "doctype": "DocType",
+ "quick_entry": 1,
+ "sort_field": "modified",
  "sort_order": "DESC",
- "modified_by": "Administrator"
+ "track_changes": 1
 }
