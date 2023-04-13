@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.22.0
+Erweiterung von 7.21.0 mit sepzifischem Errorlog sowie 'Failed' Status
 #### 7.21.0
 Errorhandling für ungültige Mailadressen im Zahlungserinnerungsmailversand
 #### 7.20.3

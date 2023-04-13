@@ -95,8 +95,10 @@ class MVDEmailQueue(Document):
                                 print_letterhead=False
                             )
                             mahnung_row.status = 'Send'
-                        except:
-                            # Mail konnte nicht erstellt werden. Überspringen...
+                        except Exception as err:
+                            # Mail konnte nicht erstellt werden. Error-log und Überspringen...
+                            frappe.log_error("{0}\n\n{1}".format(err, frappe.utils.get_traceback() or ''), 'MVD Email Queue Error')
+                            mahnung_row.status = 'Failed'
                             pass
                         # wichtig: muss nach "except" sein, damit der Fehlerhafte übersprungen wird!
                         send_counter += 1
