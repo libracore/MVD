@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.22.1
+Daily Regionen Zuteilung als BG-Job
 #### 7.22.0
 Erweiterung von 7.21.0 mit sepzifischem Errorlog sowie 'Failed' Status
 #### 7.21.0

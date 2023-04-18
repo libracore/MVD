@@ -86,7 +86,9 @@ def ampel_neuberechnung():
     frappe.db.commit()
 
 def regionen_zuteilung():
-    _regionen_zuteilung()
+    args = {}
+    enqueue("mvd.mvd.doctype.region.region._regionen_zuteilung", queue='long', job_name='Regionen Zuteilung', timeout=5000, **args)
+    # ~ _regionen_zuteilung()
 
 def spenden_versand():
         spenden_jahresversand = frappe.db.sql("""SELECT `name` FROM `tabSpendenversand` WHERE `status` = 'Vorgemerkt' AND `docstatus` = 1""", as_dict=True)
