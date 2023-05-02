@@ -51,7 +51,7 @@ class Beratung(Document):
                         for todo in todos_to_remove:
                             t = frappe.get_doc("ToDo", todo.name)
                             t.status = 'Cancelled'
-                            t.save()
+                            t.save(ignore_permissions=True)
                     
                     # trigger neue ToDos
                     self.create_todo = 1
@@ -76,7 +76,7 @@ class Beratung(Document):
                     for todo in todos_to_remove:
                         t = frappe.get_doc("ToDo", todo.name)
                         t.status = 'Cancelled'
-                        t.save()
+                        t.save(ignore_permissions=True)
                 
                 # reset ToDo-Log
                 self.auto_todo_log = None
@@ -121,6 +121,9 @@ class Beratung(Document):
         if self.beratungskategorie:
             titel += ' {0}'.format(self.beratungskategorie)
         self.titel = titel
+        
+        if self.mv_mitgliedschaft:
+            self.mitgliedname = " ".join((frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1") or '', frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "nachname_1") or ''))
     
     # ~ def onload(self):
         # ~ if self.ungelesen == 1:

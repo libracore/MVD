@@ -16,6 +16,7 @@
   "datum_mietzinsanzeige",
   "ignore_abschluss_mail",
   "ungelesen",
+  "mitgliedname",
   "section_merge",
   "master",
   "section_allgemein",
@@ -25,6 +26,7 @@
   "beratungskategorie_3",
   "kontaktperson",
   "start_date",
+  "beratungskanal",
   "raised_by",
   "email_id",
   "cb_1",
@@ -33,6 +35,7 @@
   "sektion_id",
   "status",
   "beratung_prio",
+  "beratungsaufwand",
   "raised_by_name",
   "verknuepfungen",
   "zuweisung",
@@ -309,9 +312,27 @@
    "fieldtype": "Link",
    "label": "Zusammengef\u00fchrt mit Beratung",
    "options": "Beratung"
+  },
+  {
+   "fieldname": "beratungskanal",
+   "fieldtype": "Select",
+   "label": "Beratungskanal",
+   "options": "E-Mail\nTelefon\npers\u00f6nlich\nschriftlich"
+  },
+  {
+   "fieldname": "beratungsaufwand",
+   "fieldtype": "Select",
+   "label": "Beratungsaufwand",
+   "options": "S\nM\nL"
+  },
+  {
+   "fieldname": "mitgliedname",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "mitgliedname"
   }
  ],
- "modified": "2023-03-27 15:39:02.176351",
+ "modified": "2023-05-02 11:50:08.344326",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
