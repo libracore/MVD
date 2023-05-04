@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.22.3
+Permission Issue Bugfix (Faktura Kunden Update durch Sektions-User)
 #### 7.22.2
 Ländercode Bugfix ('None Type' object has no attribute 'upper')
 #### 7.22.1

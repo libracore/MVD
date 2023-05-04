@@ -882,4 +882,4 @@ def update_faktura_kunde(mitgliedschaft=None, kunde=None):
     faktura_kunde.rg_plz = mitgliedschaft.rg_plz
     faktura_kunde.rg_ort = mitgliedschaft.rg_ort
     faktura_kunde.rg_land = mitgliedschaft.rg_land
-    faktura_kunde.save()
+    faktura_kunde.save(ignore_permissions=True)
