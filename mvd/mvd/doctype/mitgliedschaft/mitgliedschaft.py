@@ -656,7 +656,7 @@ def get_adressblock(mitgliedschaft):
             adressblock += str(mitgliedschaft.postfach_nummer) or ''
             adressblock += '\n'
         
-        if mitgliedschaft.land != 'Schweiz':
+        if mitgliedschaft.land and mitgliedschaft.land != 'Schweiz':
             laender_code = frappe.get_value("Country", mitgliedschaft.land, "code").upper() + "-"
         else:
             laender_code = ''
@@ -699,7 +699,7 @@ def get_adressblock(mitgliedschaft):
             adressblock += str(mitgliedschaft.postfach_nummer) or ''
             adressblock += '\n'
         
-        if mitgliedschaft.land != 'Schweiz':
+        if mitgliedschaft.land and mitgliedschaft.land != 'Schweiz':
             laender_code = frappe.get_value("Country", mitgliedschaft.land, "code").upper() + "-"
         else:
             laender_code = ''
