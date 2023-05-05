@@ -176,7 +176,7 @@ class Mitgliedschaft(Document):
                 self.rg_tel_g = None
     
     def get_region(self):
-        plz = self.plz
+        plz = ''.join(filter(str.isdigit, self.plz)) # remove characters except digits (e.g.: 'D-12345' -> '12345')
         region = frappe.db.sql("""SELECT
                                     `parent`
                                 FROM `tabRegion PLZ`
@@ -656,7 +656,7 @@ def get_adressblock(mitgliedschaft):
             adressblock += str(mitgliedschaft.postfach_nummer) or ''
             adressblock += '\n'
         
-        if mitgliedschaft.land != 'Schweiz':
+        if mitgliedschaft.land and mitgliedschaft.land != 'Schweiz':
             laender_code = frappe.get_value("Country", mitgliedschaft.land, "code").upper() + "-"
         else:
             laender_code = ''
@@ -699,7 +699,7 @@ def get_adressblock(mitgliedschaft):
             adressblock += str(mitgliedschaft.postfach_nummer) or ''
             adressblock += '\n'
         
-        if mitgliedschaft.land != 'Schweiz':
+        if mitgliedschaft.land and mitgliedschaft.land != 'Schweiz':
             laender_code = frappe.get_value("Country", mitgliedschaft.land, "code").upper() + "-"
         else:
             laender_code = ''

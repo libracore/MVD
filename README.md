@@ -1,5 +1,11 @@
 ## MVD
 ### Version Log
+#### 7.22.4
+Bugfix Regions-Abfrage aus Basis PLZ: entfernung aller Zeichen (ausser Zahlen) aus PLZ-String
+#### 7.22.3
+Permission Issue Bugfix (Faktura Kunden Update durch Sektions-User)
+#### 7.22.2
+Ländercode Bugfix ('None Type' object has no attribute 'upper')
 #### 7.22.1
 Daily Regionen Zuteilung als BG-Job
 #### 7.22.0
