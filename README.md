@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 7.22.4
+Bugfix Regions-Abfrage aus Basis PLZ: entfernung aller Zeichen (ausser Zahlen) aus PLZ-String
 #### 7.22.3
 Permission Issue Bugfix (Faktura Kunden Update durch Sektions-User)
 #### 7.22.2
