@@ -75,6 +75,14 @@ frappe.ui.form.on('Beratung', {
                 )
             });
             
+            if (cur_frm.doc.status != 'Closed') {
+                frm.add_custom_button(__("Schliessen"),  function() {
+                    cur_frm.set_value("status", 'Closed').then(function(){
+                        cur_frm.save();
+                    })
+                });
+            }
+            
             if ((cur_frm.doc.status == 'Closed')&&(cur_frm.doc.ignore_abschluss_mail != 1)) {
                 // Abfrage ob Abschluss Mail gesendet werden soll
                 var d = new frappe.ui.Dialog({
