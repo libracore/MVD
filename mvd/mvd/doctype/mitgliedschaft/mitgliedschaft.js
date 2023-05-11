@@ -203,6 +203,7 @@ frappe.ui.form.on('Mitgliedschaft', {
                 }
             });
             
+            load_beratungen_overview(frm);
             
             // assign hack
             $(".add-assignment.text-muted").remove();
@@ -539,6 +540,36 @@ function load_retouren_overview(frm) {
             if (show) {
                 cur_frm.dashboard.add_indicator(info, color);
             }
+        }
+    });
+}
+
+function load_beratungen_overview(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_beratungen_dashboard",
+        args:{
+                'mitgliedschaft': cur_frm.doc.name
+        },
+        callback: function(r)
+        {
+            var datas = r.message;
+            var info = '';
+            var color = 'red';
+            var show = false;
+            if (datas.anz_offen > 1) {
+                info += "Offene Beratungen: " + data.anz_offen;
+                show = true;
+            } else if (datas.anz_offen > 0) {
+                info += "Offene Beratung";
+                show = true;
+            }
+            if (datas.anz_termine > 0) {
+                info += datas.termine;
+            }
+            if (show) {
+                cur_frm.dashboard.add_indicator(info, color);
+            }
+            console.log(r.message)
         }
     });
 }
