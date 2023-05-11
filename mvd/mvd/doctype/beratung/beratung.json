@@ -323,7 +323,7 @@
    "fieldname": "beratungsaufwand",
    "fieldtype": "Select",
    "label": "Beratungsaufwand",
-   "options": "S\nM\nL"
+   "options": "\nS\nM\nL"
   },
   {
    "fieldname": "mitgliedname",
@@ -332,7 +332,7 @@
    "label": "mitgliedname"
   }
  ],
- "modified": "2023-05-02 11:50:08.344326",
+ "modified": "2023-05-11 16:42:48.340780",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
