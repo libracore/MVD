@@ -17,6 +17,7 @@
   "ignore_abschluss_mail",
   "ungelesen",
   "mitgliedname",
+  "migriert_von_termin",
   "section_merge",
   "master",
   "section_allgemein",
@@ -27,6 +28,7 @@
   "kontaktperson",
   "start_date",
   "beratungskanal",
+  "terminkategorie",
   "raised_by",
   "email_id",
   "cb_1",
@@ -330,9 +332,21 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "mitgliedname"
+  },
+  {
+   "fieldname": "terminkategorie",
+   "fieldtype": "Link",
+   "label": "Terminkategorie",
+   "options": "Terminkategorie"
+  },
+  {
+   "fieldname": "migriert_von_termin",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "migriert von termin"
   }
  ],
- "modified": "2023-05-12 08:46:28.692441",
+ "modified": "2023-05-12 13:22:13.771361",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
