@@ -20,7 +20,7 @@ def get_open_data():
             'offen_zuweisung_ja': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'zuweisung': 1}, limit=100, distinct=True, ignore_ifnull=True)),
             'offen_zuweisung_nein': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'zuweisung': 0}, limit=100, distinct=True, ignore_ifnull=True)),
             'offen_ungelesen': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
-            'rueckfragen': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen'}, limit=100, distinct=True, ignore_ifnull=True)),
+            'rueckfragen': len(frappe.get_list('Beratung', fields='name', filters={'status': ['IN', ['Rückfragen', 'Rückfrage: Termin vereinbaren']]}, limit=100, distinct=True, ignore_ifnull=True)),
             'termine': len(frappe.get_list('Beratung', fields='name', filters={'hat_termine': 1}, limit=100, distinct=True, ignore_ifnull=True)),
             'ungelesen': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
             'zugewiesene_beratungen': frappe.db.count('ToDo', {'status': 'Open', 'owner': frappe.session.user, 'reference_type': 'Beratung'}),
