@@ -63,7 +63,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Eingang\nOpen\nR\u00fcckfragen\nin Arbeit\nNicht-Mitglied-Abgewiesen\nClosed\nZusammengef\u00fchrt",
+   "options": "Eingang\nOpen\nin Arbeit\nR\u00fcckfragen\nR\u00fcckfrage: Termin vereinbaren\nTermin vergeben\nClosed\nNicht-Mitglied-Abgewiesen\nZusammengef\u00fchrt",
    "reqd": 1
   },
   {
@@ -332,7 +332,7 @@
    "label": "mitgliedname"
   }
  ],
- "modified": "2023-05-11 16:42:48.340780",
+ "modified": "2023-05-12 08:46:28.692441",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

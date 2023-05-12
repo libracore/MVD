@@ -25,18 +25,67 @@ class Beratung(Document):
         if not self.beratungskategorie:
             self.beratungskategorie_2 = None
         
-        # Auto ToDo handling
-        if self.kontaktperson:
-            if not frappe.db.get_value("Beratung", self.name, "kontaktperson"):
-                # vor dem speichern war noch kein Kontakt vorhanden, erstelle Gruppen-Todo
-                self.create_todo = 1
-                
-                # setze todo-log
-                self.auto_todo_log = self.kontaktperson
+        if self.status == 'Rückfrage: Termin vereinbaren' and self.sektion_id == 'MVBE':
+            self.create_todo = 0
+            self.auto_todo_log = None
+            self.kontaktperson = None
+            todos_to_remove = frappe.db.sql("""
+                                                SELECT
+                                                    `name`
+                                                FROM `tabToDo`
+                                                WHERE `status` = 'Open'
+                                                AND `reference_type` = 'Beratung'
+                                                AND `reference_name` = '{0}'""".format(self.name), as_dict=True)
+            for todo in todos_to_remove:
+                t = frappe.get_doc("ToDo", todo.name)
+                t.status = 'Cancelled'
+                t.save(ignore_permissions=True)
+            frappe.get_doc({
+                'doctype': 'ToDo',
+                'description': 'Termin vergeben.<br>Zuweisung für Beratung {0}'.format(self.name),
+                'reference_type': 'Beratung',
+                'reference_name': self.name,
+                'assigned_by': frappe.session.user or 'Administrator',
+                'owner': 'libracore@be.mieterverband.ch'
+            }).insert(ignore_permissions=True)
+        else:
+            # Auto ToDo handling
+            if self.kontaktperson:
+                if not frappe.db.get_value("Beratung", self.name, "kontaktperson"):
+                    # vor dem speichern war noch kein Kontakt vorhanden, erstelle Gruppen-Todo
+                    self.create_todo = 1
+                    
+                    # setze todo-log
+                    self.auto_todo_log = self.kontaktperson
+                else:
+                    # vor dem speichern war bereits ein Kontakt vorhanden
+                    if self.kontaktperson != frappe.db.get_value("Beratung", self.name, "kontaktperson"):
+                        # der Kontakt hat geändert -> entferne alte ToDos & erstelle neue ToDos
+                        # entferne alte ToDos
+                        kontaktperson = frappe.get_doc("Termin Kontaktperson", self.auto_todo_log)
+                        for user in kontaktperson.user:
+                            todos_to_remove = frappe.db.sql("""
+                                                                SELECT
+                                                                    `name`
+                                                                FROM `tabToDo`
+                                                                WHERE `status` = 'Open'
+                                                                AND `owner` = '{0}'
+                                                                AND `reference_type` = 'Beratung'
+                                                                AND `reference_name` = '{1}'""".format(user.user, self.name), as_dict=True)
+                            for todo in todos_to_remove:
+                                t = frappe.get_doc("ToDo", todo.name)
+                                t.status = 'Cancelled'
+                                t.save(ignore_permissions=True)
+                        
+                        # trigger neue ToDos
+                        self.create_todo = 1
+                        
+                        # setze todo-log
+                        self.auto_todo_log = self.kontaktperson
+                        
             else:
-                # vor dem speichern war bereits ein Kontakt vorhanden
-                if self.kontaktperson != frappe.db.get_value("Beratung", self.name, "kontaktperson"):
-                    # der Kontakt hat geändert -> entferne alte ToDos & erstelle neue ToDos
+                if frappe.db.get_value("Beratung", self.name, "kontaktperson"):
+                    # vor dem entfernen war ein Kontakt hinterlegt -> entferne alte ToDos und resete ToDo-Log
                     # entferne alte ToDos
                     kontaktperson = frappe.get_doc("Termin Kontaktperson", self.auto_todo_log)
                     for user in kontaktperson.user:
@@ -53,33 +102,8 @@ class Beratung(Document):
                             t.status = 'Cancelled'
                             t.save(ignore_permissions=True)
                     
-                    # trigger neue ToDos
-                    self.create_todo = 1
-                    
-                    # setze todo-log
-                    self.auto_todo_log = self.kontaktperson
-                    
-        else:
-            if frappe.db.get_value("Beratung", self.name, "kontaktperson"):
-                # vor dem entfernen war ein Kontakt hinterlegt -> entferne alte ToDos und resete ToDo-Log
-                # entferne alte ToDos
-                kontaktperson = frappe.get_doc("Termin Kontaktperson", self.auto_todo_log)
-                for user in kontaktperson.user:
-                    todos_to_remove = frappe.db.sql("""
-                                                        SELECT
-                                                            `name`
-                                                        FROM `tabToDo`
-                                                        WHERE `status` = 'Open'
-                                                        AND `owner` = '{0}'
-                                                        AND `reference_type` = 'Beratung'
-                                                        AND `reference_name` = '{1}'""".format(user.user, self.name), as_dict=True)
-                    for todo in todos_to_remove:
-                        t = frappe.get_doc("ToDo", todo.name)
-                        t.status = 'Cancelled'
-                        t.save(ignore_permissions=True)
-                
-                # reset ToDo-Log
-                self.auto_todo_log = None
+                    # reset ToDo-Log
+                    self.auto_todo_log = None
         
         # Statistik handling -> closed date tracker
         if self.status == 'Closed':
