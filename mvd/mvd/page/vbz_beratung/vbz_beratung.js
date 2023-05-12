@@ -58,11 +58,11 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#rueckfragen").click(function(){
-            frappe.route_options = {"status": 'Rückfragen'}
+            frappe.route_options = {"status": ['like', 'Rückfrage%']}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#termine").click(function(){
-            frappe.route_options = {"hat_termine": 1}
+            frappe.route_options = {"hat_termine": 1, 'status': ['!=', 'Closed']}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#zugewiesene_beratungen").click(function(){

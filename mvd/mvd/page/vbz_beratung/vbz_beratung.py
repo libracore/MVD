@@ -20,16 +20,31 @@ def get_open_data():
             'offen_zuweisung_ja': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'zuweisung': 1}, limit=100, distinct=True, ignore_ifnull=True)),
             'offen_zuweisung_nein': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'zuweisung': 0}, limit=100, distinct=True, ignore_ifnull=True)),
             'offen_ungelesen': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
-            'rueckfragen': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen'}, limit=100, distinct=True, ignore_ifnull=True)),
-            'termine': len(frappe.get_list('Beratung', fields='name', filters={'hat_termine': 1}, limit=100, distinct=True, ignore_ifnull=True)),
+            'rueckfragen': len(frappe.get_list('Beratung', fields='name', filters={'status': ['IN', ['Rückfragen', 'Rückfrage: Termin vereinbaren']]}, limit=100, distinct=True, ignore_ifnull=True)),
+            'termine': len(frappe.get_list('Beratung', fields='name', filters={'hat_termine': 1, 'status': ['!=', 'Closed']}, limit=100, distinct=True, ignore_ifnull=True)),
             'ungelesen': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
-            'zugewiesene_beratungen': frappe.db.count('ToDo', {'status': 'Open', 'owner': frappe.session.user, 'reference_type': 'Beratung'}),
+            'zugewiesene_beratungen': zugewiesene_beratungen(frappe.session.user),
             'zugewiesene_termine': get_zugewiesene_termine(frappe.session.user),
             'zugewiesene_ungelesene_beratungen': get_zugewiesene_ungelesene_beratungen(frappe.session.user)
         }
     }
     
     return open_data
+
+def zugewiesene_beratungen(user):
+    zugewiesene_beratungen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratung`
+                                            WHERE `name` IN (
+                                                SELECT `reference_name`
+                                                FROM `tabToDo`
+                                                WHERE `reference_type` = 'Beratung'
+                                                AND `status` = 'Open'
+                                                AND `owner` = '{user}'
+                                            )
+                                            AND `status` != 'Closed'""".format(user=user), as_dict=True)
+    if len(zugewiesene_beratungen) > 0:
+        return zugewiesene_beratungen[0].qty
+    else:
+        return 0
 
 def get_zugewiesene_termine(user):
     zugewiesene_termine = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratung`
@@ -42,7 +57,8 @@ def get_zugewiesene_termine(user):
                                             )
                                             AND `name` IN (
                                                 SELECT `parent` FROM `tabBeratung Termin`
-                                            )""".format(user=user), as_dict=True)
+                                            )
+                                            AND `status` != 'Closed'""".format(user=user), as_dict=True)
     if len(zugewiesene_termine) > 0:
         return zugewiesene_termine[0].qty
     else:

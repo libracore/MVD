@@ -4074,6 +4074,33 @@ def get_returen_dashboard(mitgliedschaft):
     }
 
 @frappe.whitelist()
+def get_beratungen_dashboard(mitgliedschaft):
+    offen = frappe.db.sql("""SELECT `name`, `status` FROM `tabBeratung` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` NOT IN ('Closed', 'Zusammengeführt')""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
+    termine = []
+    anz_offen = 0
+    anz_termine = 0
+    if len(offen) > 0:
+        anz_offen = len(offen)
+        for beratung in offen:
+            if beratung.status == 'Rückfrage: Termin vereinbaren':
+                termine.append('Offen')
+                anz_termine += 1
+            else:
+                termin_dates = frappe.db.sql("""SELECT `von` FROM `tabBeratung Termin` WHERE `parent` = '{beratung}' AND `von` >= CURDATE() ORDER BY `von` ASC""".format(beratung=beratung.name, mitgliedschaft=mitgliedschaft), as_dict=True)
+                for termin_date in termin_dates:
+                    termine.append(frappe.utils.get_datetime(termin_date.von).strftime('%d.%m.%Y %H:%M'))
+                    anz_termine += 1
+        if len(termine) > 1:
+            termine = ", nächste Termine: {0}".format(" / ".join(termine))
+        elif len(termine) > 0:
+            termine = ", nächster Termin: {0}".format(termine[0])
+    return {
+        'anz_offen': anz_offen,
+        'termine': termine,
+        'anz_termine': anz_termine
+    }
+
+@frappe.whitelist()
 def get_kuendigungsmail_txt(mitgliedschaft, sektion_id, language):
     if language == 'fr':
         txt_field = 'kuendigungs_bestaetigung_fr'

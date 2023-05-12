@@ -16,6 +16,8 @@
   "datum_mietzinsanzeige",
   "ignore_abschluss_mail",
   "ungelesen",
+  "mitgliedname",
+  "migriert_von_termin",
   "section_merge",
   "master",
   "section_allgemein",
@@ -25,6 +27,8 @@
   "beratungskategorie_3",
   "kontaktperson",
   "start_date",
+  "beratungskanal",
+  "terminkategorie",
   "raised_by",
   "email_id",
   "cb_1",
@@ -33,6 +37,7 @@
   "sektion_id",
   "status",
   "beratung_prio",
+  "beratungsaufwand",
   "raised_by_name",
   "verknuepfungen",
   "zuweisung",
@@ -60,7 +65,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Eingang\nOpen\nR\u00fcckfragen\nin Arbeit\nNicht-Mitglied-Abgewiesen\nClosed\nZusammengef\u00fchrt",
+   "options": "Eingang\nOpen\nin Arbeit\nR\u00fcckfragen\nR\u00fcckfrage: Termin vereinbaren\nTermin vergeben\nClosed\nNicht-Mitglied-Abgewiesen\nZusammengef\u00fchrt",
    "reqd": 1
   },
   {
@@ -309,9 +314,39 @@
    "fieldtype": "Link",
    "label": "Zusammengef\u00fchrt mit Beratung",
    "options": "Beratung"
+  },
+  {
+   "fieldname": "beratungskanal",
+   "fieldtype": "Select",
+   "label": "Beratungskanal",
+   "options": "E-Mail\nTelefon\npers\u00f6nlich\nschriftlich"
+  },
+  {
+   "fieldname": "beratungsaufwand",
+   "fieldtype": "Select",
+   "label": "Beratungsaufwand",
+   "options": "\nS\nM\nL"
+  },
+  {
+   "fieldname": "mitgliedname",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "mitgliedname"
+  },
+  {
+   "fieldname": "terminkategorie",
+   "fieldtype": "Link",
+   "label": "Terminkategorie",
+   "options": "Terminkategorie"
+  },
+  {
+   "fieldname": "migriert_von_termin",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "migriert von termin"
   }
  ],
- "modified": "2023-03-27 15:39:02.176351",
+ "modified": "2023-05-12 13:22:13.771361",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

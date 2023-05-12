@@ -1,9 +1,14 @@
 from __future__ import unicode_literals
 
 from frappe import _
+import frappe
 
 
 def get_data():
+    bootinfo = frappe.sessions.get()
+    termine_beratungen = ['Termin', 'Wohnungsabgabe']
+    if bootinfo.default_sektion == "MVBE":
+        termine_beratungen = ['Beratung', 'Wohnungsabgabe']
     return {
         'heatmap': True,
         'heatmap_message': _('Diese Heatmap zeigt alle Interaktionen mit dieser Mitgliedschaft im vergangenen Jahr'),
@@ -11,7 +16,7 @@ def get_data():
         'transactions': [
             {
                 'label': _('Termine / Beratungen'),
-                'items': ['Termin', 'Wohnungsabgabe'],
+                'items': termine_beratungen,
             },
             {
                 'label': _('Externe Korrespondenz'),
