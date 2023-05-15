@@ -129,6 +129,9 @@ def new_beratung(**kwargs):
                         beratungskategorie = '202 - MZ-Erhöhung'
                     elif args['thema'] == 'Heiz- und Nebenkosten':
                         beratungskategorie = '300 - Nebenkosten'
+            else:
+                if args['mz'] == '1':
+                    beratungskategorie = '202 - MZ-Erhöhung'
             if args['telefon']:
                 telefon = """<b>Telefon:</b> {0}<br>""".format(args['telefon'])
             else:
