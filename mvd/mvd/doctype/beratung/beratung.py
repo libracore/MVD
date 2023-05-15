@@ -109,6 +109,17 @@ class Beratung(Document):
         if self.status == 'Closed':
             if not self.geschlossen_am:
                 self.geschlossen_am = today()
+                todos_to_remove = frappe.db.sql("""
+                                                SELECT
+                                                    `name`
+                                                FROM `tabToDo`
+                                                WHERE `status` = 'Open'
+                                                AND `reference_type` = 'Beratung'
+                                                AND `reference_name` = '{0}'""".format(self.name), as_dict=True)
+                for todo in todos_to_remove:
+                    t = frappe.get_doc("ToDo", todo.name)
+                    t.status = 'Cancelled'
+                    t.save(ignore_permissions=True)
         else:
             if self.geschlossen_am:
                 self.geschlossen_am = None

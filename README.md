@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.0.2
+Beratung: Auto close von ToDo wenn Beratung geschlossen
 #### 8.0.1
 Bugfix Beratungsdashboard in Mitglied
 #### 8.0.0
