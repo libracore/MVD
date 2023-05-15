@@ -557,7 +557,7 @@ function load_beratungen_overview(frm) {
             var color = 'red';
             var show = false;
             if (datas.anz_offen > 1) {
-                info += "Offene Beratungen: " + data.anz_offen;
+                info += "Offene Beratungen: " + datas.anz_offen;
                 show = true;
             } else if (datas.anz_offen > 0) {
                 info += "Offene Beratung";
