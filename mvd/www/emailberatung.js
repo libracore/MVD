@@ -11,7 +11,8 @@ function new_onlineberatung() {
                 'anderes_mietobjekt': document.getElementById("anderes_mietobjekt").value,
                 'frage': document.getElementById("frage").value,
                 'datum_mietzinsanzeige': document.getElementById("datum_mietzinsanzeige").value,
-                'thema': sektion_id == 'MVBE' ? document.getElementById("themen_wahl").value:''
+                'thema': sektion_id == 'MVBE' ? document.getElementById("themen_wahl").value:'',
+                'mz': localStorage.getItem('mz_anfrage')
             }
             frappe.call({
                 'method': 'mvd.www.emailberatung.new_beratung',
