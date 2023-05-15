@@ -26,28 +26,46 @@ class Beratung(Document):
             self.beratungskategorie_2 = None
         
         if self.status == 'Rückfrage: Termin vereinbaren' and self.sektion_id == 'MVBE':
-            self.create_todo = 0
-            self.auto_todo_log = None
-            self.kontaktperson = None
-            todos_to_remove = frappe.db.sql("""
-                                                SELECT
-                                                    `name`
-                                                FROM `tabToDo`
-                                                WHERE `status` = 'Open'
-                                                AND `reference_type` = 'Beratung'
-                                                AND `reference_name` = '{0}'""".format(self.name), as_dict=True)
-            for todo in todos_to_remove:
-                t = frappe.get_doc("ToDo", todo.name)
-                t.status = 'Cancelled'
-                t.save(ignore_permissions=True)
-            frappe.get_doc({
-                'doctype': 'ToDo',
-                'description': 'Termin vergeben.<br>Zuweisung für Beratung {0}'.format(self.name),
-                'reference_type': 'Beratung',
-                'reference_name': self.name,
-                'assigned_by': frappe.session.user or 'Administrator',
-                'owner': 'libracore@be.mieterverband.ch'
-            }).insert(ignore_permissions=True)
+            if self.kontaktperson and len(self.termin) > 0:
+                self.status = 'Termin vergeben'
+                todos_to_remove = frappe.db.sql("""
+                                                    SELECT
+                                                        `name`
+                                                    FROM `tabToDo`
+                                                    WHERE `status` = 'Open'
+                                                    AND `owner` = 'libracore@be.mieterverband.ch'
+                                                    AND `reference_type` = 'Beratung'
+                                                    AND `reference_name` = '{0}'""".format(self.name), as_dict=True)
+                for todo in todos_to_remove:
+                    t = frappe.get_doc("ToDo", todo.name)
+                    t.status = 'Cancelled'
+                    t.save(ignore_permissions=True)
+                self.create_todo = 1
+                # setze todo-log
+                self.auto_todo_log = self.kontaktperson
+            else:
+                self.create_todo = 0
+                self.auto_todo_log = None
+                self.kontaktperson = None
+                todos_to_remove = frappe.db.sql("""
+                                                    SELECT
+                                                        `name`
+                                                    FROM `tabToDo`
+                                                    WHERE `status` = 'Open'
+                                                    AND `reference_type` = 'Beratung'
+                                                    AND `reference_name` = '{0}'""".format(self.name), as_dict=True)
+                for todo in todos_to_remove:
+                    t = frappe.get_doc("ToDo", todo.name)
+                    t.status = 'Cancelled'
+                    t.save(ignore_permissions=True)
+                frappe.get_doc({
+                    'doctype': 'ToDo',
+                    'description': 'Termin vergeben.<br>Zuweisung für Beratung {0}'.format(self.name),
+                    'reference_type': 'Beratung',
+                    'reference_name': self.name,
+                    'assigned_by': frappe.session.user or 'Administrator',
+                    'owner': 'libracore@be.mieterverband.ch'
+                }).insert(ignore_permissions=True)
         else:
             # Auto ToDo handling
             if self.kontaktperson:

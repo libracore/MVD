@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.2.1
+Terminvergabe Auto ToDo handling
 #### 8.1.1
 Zuweisung an ToDo Gruppe bei initialer Anlage durch Webformular
 #### 8.1.0
