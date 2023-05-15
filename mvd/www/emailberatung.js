@@ -1,6 +1,7 @@
 function new_onlineberatung() {
     if (localStorage.getItem('anfage_gesendet') == '0') {
-        var failed_validations = check_mandatory();
+        var sektion_id = document.getElementById("sektion_id").value;
+        var failed_validations = check_mandatory(sektion_id);
         if (failed_validations.length < 1) {
             localStorage.setItem('anfage_gesendet', '1');
             var kwargs = {
@@ -9,7 +10,8 @@ function new_onlineberatung() {
                 'email': document.getElementById("email").value,
                 'anderes_mietobjekt': document.getElementById("anderes_mietobjekt").value,
                 'frage': document.getElementById("frage").value,
-                'datum_mietzinsanzeige': document.getElementById("datum_mietzinsanzeige").value
+                'datum_mietzinsanzeige': document.getElementById("datum_mietzinsanzeige").value,
+                'thema': sektion_id == 'MVBE' ? document.getElementById("themen_wahl").value:''
             }
             frappe.call({
                 'method': 'mvd.www.emailberatung.new_beratung',
@@ -32,12 +34,16 @@ function new_onlineberatung() {
     }
 }
 
-function check_mandatory() {
+function check_mandatory(sektion_id) {
     mandatory_fields = [
         'telefon',
         'email',
         'frage'
     ]
+    
+    if (sektion_id == 'MVBE') {
+        mandatory_fields.push('themen_wahl');
+    }
     
     if (localStorage.getItem('mz_anfrage') == '1') {
         mandatory_fields.push('datum_mietzinsanzeige');
@@ -49,8 +55,15 @@ function check_mandatory() {
         if (!$("#" + mandatory_fields[i]).val()) {
             failed_validations.push(mandatory_fields[i]);
             $("#" + mandatory_fields[i]).css("border", "1px solid red");
+            if (mandatory_fields[i] == 'themen_wahl') {
+                $("#themen_wahl_box").css("border", "1px solid red");
+            }
+            
         } else {
             $("#" + mandatory_fields[i]).css("border", "1px solid #ccc");
+            if (mandatory_fields[i] == 'themen_wahl') {
+                $("#themen_wahl_box").css("border", "1px solid #e7f1f2");
+            }
         }
     }
     
@@ -287,6 +300,19 @@ function hide_mz() {
             $(this).prev().prev().prev().children('input').val('');
         }
     });
+}
+
+function check_mietzinserhoehung() {
+    show_mz();
+    $("#themen_wahl").val("Mietzinserhöhung");
+}
+function check_heiz_und_nebenkosten() {
+    hide_mz();
+    $("#themen_wahl").val("Heiz- und Nebenkosten");
+}
+function check_anderes() {
+    hide_mz();
+    $("#themen_wahl").val("anderes");
 }
 
 // AWESOMPLETE
