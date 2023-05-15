@@ -182,6 +182,46 @@
                                                 <input type="hidden" name="field" value="">
                                                 <input type="hidden" name="mgnlFormToken" value="CL7DyBuSQ4XVZm4CW5gYQ9raZ97K7lZu">
                                             </div>
+                                            {% if sektion == 'MVBE' %}
+                                            <fieldset class="fieldset">
+                                                <span class="e-copy-small required-hint position-right"><span>*</span> Pflichtfeld</span>
+                                                <h2 class="e-h3 fieldset-title">Beratungsanfrage</h2>
+                                                <div class="form-row">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="thema" class="label radio">
+                                                                Thema*
+                                                            </label>
+                                                        </div>
+                                                        <div id="themen_wahl_box" class="col-sm-12 col-md-8 col-lg-8">
+                                                            <fieldset>
+                                                                <div class="form-item">
+                                                                    <input type="radio" id="thema_0" name="thema" value="Mietzinserhöhung" onclick="check_mietzinserhoehung();">
+                                                                    <label for="thema_0">Mietzinserhöhung</label>
+                                                                </div>
+                                                                <!-- end form-item -->
+                                                                <div class="form-item">
+                                                                    <input type="radio" id="thema_1" name="thema" value="Heiz- und Nebenkosten" onclick="check_heiz_und_nebenkosten();">
+                                                                    <label for="thema_1">Heiz- und Nebenkosten</label>
+                                                                </div>
+                                                                <!-- end form-item -->
+                                                                <div class="form-item">
+                                                                    <input type="radio" id="thema_2" name="thema" value="anderes" onclick="check_anderes();">
+                                                                    <label for="thema_2">anderes</label>
+                                                                </div>
+                                                                <!-- end form-item -->
+                                                                <div id="checkbox-error" class="text error" style="display:none">
+                                                                    <ul>
+                                                                        <li>Bitte wählen Sie mindestens eine Checkbox aus.</li>
+                                                                    </ul>
+                                                                </div>
+                                                                <input type="text" class="h-hide" aria-hidden="true" name="themen_wahl" id="themen_wahl" value="" maxlength="50">
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                            {% endif %}
                                             <fieldset class="fieldset">
                                                 <span class="e-copy-small required-hint position-right"><span>*</span> Pflichtfeld</span>
                                                 <h2 class="e-h3 fieldset-title">Mitgliedschaftsdaten</h2>
@@ -196,6 +236,7 @@
                                                             <p class="value-read-only">{{ mitglied_nr }}</p>
                                                             <input type="text" class="h-hide" aria-hidden="true" name="mitgliedschaft_nr" id="mitgliedschaft_nr" value="{{ mitglied_nr }}" maxlength="50">
                                                             <input type="text" class="h-hide" aria-hidden="true" name="mitgliedschaft_id" id="mitgliedschaft_id" value="{{ mitglied_id }}" maxlength="50">
+                                                            <input type="text" class="h-hide" aria-hidden="true" name="sektion_id" id="sektion_id" value="{{ sektion }}" maxlength="50">
                                                         </div>
                                                     </div>
                                                 </div>
