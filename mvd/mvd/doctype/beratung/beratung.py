@@ -149,6 +149,13 @@ class Beratung(Document):
                             self.auto_todo_log = self.kontaktperson
                             self.create_todo = 1
         
+        if (self.mv_mitgliedschaft and self.status == 'Eingang') and not self.kontaktperson:
+            default_emailberatung_todo_gruppe = frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe")
+            if default_emailberatung_todo_gruppe:
+                self.kontaktperson = default_emailberatung_todo_gruppe
+                self.auto_todo_log = self.kontaktperson
+                self.create_todo = 1
+        
         # Titel aktualisierung
         titel = '{0}'.format(self.start_date)
         if self.mv_mitgliedschaft:
