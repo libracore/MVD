@@ -26,11 +26,42 @@ def get_open_data():
             'zugewiesene_beratungen': zugewiesene_beratungen(frappe.session.user),
             'zugewiesene_termine': get_zugewiesene_termine(frappe.session.user),
             'zugewiesene_ungelesene_beratungen': get_zugewiesene_ungelesene_beratungen(frappe.session.user),
-            'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S")
+            'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
+            'exklusive_zuweisungen': get_exklusive_zuweisungen(frappe.session.user)
         }
     }
     
     return open_data
+
+def get_exklusive_zuweisungen(user, names=False):
+    if not names:
+        response_filter = """COUNT(`name`) AS `qty`"""
+    else:
+        response_filter = """`name`"""
+    exklusive_zuweisungen = frappe.db.sql("""SELECT
+                                                {response_filter}
+                                            FROM (
+                                                SELECT
+                                                    `name`,
+                                                    `owner`
+                                                FROM (
+                                                    SELECT
+                                                        COUNT(`name`) AS `qty`,
+                                                        `name`,
+                                                        `owner`
+                                                    FROM `tabToDo`
+                                                    WHERE `status` = 'Open'
+                                                    GROUP BY `reference_name`
+                                                ) AS `unique`
+                                                WHERE `unique`.`qty` = 1
+                                            ) AS `exklusiv`
+                                            WHERE `exklusiv`.`owner` = '{user}'""".format(response_filter=response_filter, user=user), as_dict=True)
+    if len(exklusive_zuweisungen) > 0:
+        if not names:
+            return exklusive_zuweisungen[0].qty
+    else:
+        if not names:
+            return 0
 
 def zugewiesene_beratungen(user):
     zugewiesene_beratungen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratung`
