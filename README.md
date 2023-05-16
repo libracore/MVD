@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.4.1
+Mitgliedschaft Dashboard: Beratung wird bei allen immer angezeigt
 #### 8.4.0
 Datenstand Anzeige in VBZ Beratung
 #### 8.3.0
