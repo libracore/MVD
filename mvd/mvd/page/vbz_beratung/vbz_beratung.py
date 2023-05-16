@@ -25,7 +25,8 @@ def get_open_data():
             'ungelesen': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
             'zugewiesene_beratungen': zugewiesene_beratungen(frappe.session.user),
             'zugewiesene_termine': get_zugewiesene_termine(frappe.session.user),
-            'zugewiesene_ungelesene_beratungen': get_zugewiesene_ungelesene_beratungen(frappe.session.user)
+            'zugewiesene_ungelesene_beratungen': get_zugewiesene_ungelesene_beratungen(frappe.session.user),
+            'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S")
         }
     }
     

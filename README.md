@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 8.4.0
+Datenstand Anzeige in VBZ Beratung
+#### 8.3.0
+Daily-Job: Termine/Beratungen in Vergangenheit schliessen
 #### 8.2.1
 Terminvergabe Auto ToDo handling
 #### 8.1.1

@@ -37,6 +37,10 @@ Allgemein
 h2.place-holder-left {
     padding-left: 7em;
 }
+#datenstand {
+    font-weight: normal !important;
+    font-size: 15px !important;
+}
 
 .vbz-indikator {
     height: 2em;

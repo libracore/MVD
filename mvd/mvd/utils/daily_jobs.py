@@ -175,3 +175,28 @@ def mahnlauf_ausschluss():
     
     for rg in rgs_mit_mitgl_ohne:
         frappe.db.set_value("Sales Invoice", rg.name, 'exclude_from_payment_reminder_until', None)
+
+def cleanup_beratungen():
+    beratungen = frappe.db.sql("""
+                                SELECT `name`
+                                FROM `tabBeratung`
+                                WHERE `status` != 'Closed'
+                                AND `name` IN (
+                                    SELECT `parent` FROM `tabBeratung Termin`
+                                    WHERE `bis` < CURDATE()
+                                )""", as_dict=True)
+    
+    for beratung in beratungen:
+        todos_to_remove = frappe.db.sql("""
+                                            SELECT
+                                                `name`
+                                            FROM `tabToDo`
+                                            WHERE `status` = 'Open'
+                                            AND `reference_type` = 'Beratung'
+                                            AND `reference_name` = '{0}'""".format(beratung.name), as_dict=True)
+        for todo in todos_to_remove:
+            t = frappe.get_doc("ToDo", todo.name)
+            t.status = 'Cancelled'
+            t.save(ignore_permissions=True)
+        
+        frappe.db.set_value("Beratung", beratung.name, 'status', 'Closed')
