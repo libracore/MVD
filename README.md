@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.5.5
+Name und Vorname des Mitglieds steht in der E-Mail an die Sektion.
 #### 8.5.4
 wird einer neuen Beratung ein Termin und eine Berater*in gesetzt, wird der Status automatisch «Termin vergeben» beim Speichern
 #### 8.5.3

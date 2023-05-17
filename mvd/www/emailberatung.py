@@ -307,7 +307,7 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                     # legacy mail mit links
                     message = """Guten Tag {0}""".format(sektion)
                     message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
-                            <br><br><b>Mitgliedernummer</b>: {0}<br>{1}<br><br>Anhänge:<br>""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+                            <br><br><b>Mitglied</b>: {0} {1}<br><b>Mitgliedernummer</b>: {2}<br>{3}<br><br>Anhänge:<br>""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1"), frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"), frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
                     for file_data in frappe.get_doc("Beratung", beratung).dokumente:
                         message += """<a href="{0}">{1}</a><br>""".format(get_url(file_data.file), file_data.filename)
                     
@@ -318,7 +318,7 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                     # legacy mail mit anhängen
                     message = """Guten Tag {0}""".format(sektion)
                     message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
-                            <br><br><b>Mitgliedernummer</b>: {0}<br>{1}""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+                            <br><br><b>Mitglied</b>: {0} {1}<br><b>Mitgliedernummer</b>: {2}<br>{3}""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1"), frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"), frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
                     message += """<br>Freundliche Grüsse<br>
                                 libracore"""
                     attachments = []
