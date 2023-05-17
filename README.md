@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.5.3
+Beratung: Bei Kategorie 202&300 keine Zuweisung an Pool sondern an Sekretariat zur Vorprüfung
 #### 8.5.2
 Bericht "MVBE Admin: HK_u_MZ" in VBZ Beratung wenn Sektion MVBE
 #### 8.5.1

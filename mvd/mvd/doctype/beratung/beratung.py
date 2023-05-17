@@ -163,16 +163,36 @@ class Beratung(Document):
                             self.mv_mitgliedschaft = mitgliedschaften[0].name
                             
                             # auto ToDo assign an ToDo Gruppe wenn Default hinterlegt
-                            self.kontaktperson = frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe")
-                            self.auto_todo_log = self.kontaktperson
-                            self.create_todo = 1
+                            if self.beratungskategorie not in ('202 - MZ-Erhöhung', '300 - Nebenkosten'):
+                                self.kontaktperson = frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe")
+                                self.auto_todo_log = self.kontaktperson
+                                self.create_todo = 1
+                            else:
+                                frappe.get_doc({
+                                    'doctype': 'ToDo',
+                                    'description': 'Vorprüfung {0}<br>Zuweisung für Beratung {0}'.format(self.beratungskategorie, self.name),
+                                    'reference_type': 'Beratung',
+                                    'reference_name': self.name,
+                                    'assigned_by': frappe.session.user or 'Administrator',
+                                    'owner': 'libracore@be.mieterverband.ch'
+                                }).insert(ignore_permissions=True)
         
         if (self.mv_mitgliedschaft and self.status == 'Eingang') and not self.kontaktperson:
-            default_emailberatung_todo_gruppe = frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe")
-            if default_emailberatung_todo_gruppe:
-                self.kontaktperson = default_emailberatung_todo_gruppe
-                self.auto_todo_log = self.kontaktperson
-                self.create_todo = 1
+            if self.beratungskategorie not in ('202 - MZ-Erhöhung', '300 - Nebenkosten'):
+                default_emailberatung_todo_gruppe = frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe")
+                if default_emailberatung_todo_gruppe:
+                    self.kontaktperson = default_emailberatung_todo_gruppe
+                    self.auto_todo_log = self.kontaktperson
+                    self.create_todo = 1
+            else:
+                frappe.get_doc({
+                    'doctype': 'ToDo',
+                    'description': 'Vorprüfung {0}<br>Zuweisung für Beratung {0}'.format(self.beratungskategorie, self.name),
+                    'reference_type': 'Beratung',
+                    'reference_name': self.name,
+                    'assigned_by': frappe.session.user or 'Administrator',
+                    'owner': 'libracore@be.mieterverband.ch'
+                }).insert(ignore_permissions=True)
         
         # Titel aktualisierung
         titel = '{0}'.format(self.start_date)
