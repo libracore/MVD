@@ -125,7 +125,7 @@ def update_mvm(mvm, update):
         frappe.log_error("{0}".format(mvm), 'update_mvm deaktiviert')
         return
 
-def send_beratung(beratungs_data):
+def send_beratung(beratungs_data, beratung):
     if auth_check(SVCPF_SCOPE):
         config = frappe.get_doc("Service Plattform API", "Service Plattform API")
         sub_url = str(config.get_value(SVCPF_SCOPE, "api_url"))
@@ -145,6 +145,16 @@ def send_beratung(beratungs_data):
                 frappe.db.commit()
                 return
             else:
+                frappe.get_doc({
+                    'doctype': 'Beratungs Log',
+                    'error': 0,
+                    'info': 1,
+                    'beratung': beratung,
+                    'method': 'send_beratung',
+                    'title': 'Beratung an SP übermittelt',
+                    'json': "{0}".format(sp_connection.status_code)
+                }).insert(ignore_permissions=True)
+                frappe.db.commit()
                 return
         except Exception as err:
             frappe.log_error("{0}\n\n{1}".format(err, beratungs_data), 'send beratung failed')

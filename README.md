@@ -1,5 +1,23 @@
 ## MVD
 ### Version Log
+#### 8.5.5
+Name und Vorname des Mitglieds steht in der E-Mail an die Sektion.
+#### 8.5.4
+wird einer neuen Beratung ein Termin und eine Berater*in gesetzt, wird der Status automatisch «Termin vergeben» beim Speichern
+#### 8.5.3
+Beratung: Bei Kategorie 202&300 keine Zuweisung an Pool sondern an Sekretariat zur Vorprüfung
+#### 8.5.2
+Bericht "MVBE Admin: HK_u_MZ" in VBZ Beratung wenn Sektion MVBE
+#### 8.5.1
+Erweitertes Logging von Beratungs API Posts
+#### 8.5.0
+VBZ Beratung: anzeigen von Anz. exklusiver Zuweisungen
+#### 8.4.1
+Mitgliedschaft Dashboard: Beratung wird bei allen immer angezeigt
+#### 8.4.0
+Datenstand Anzeige in VBZ Beratung
+#### 8.3.0
+Daily-Job: Termine/Beratungen in Vergangenheit schliessen
 #### 8.2.1
 Terminvergabe Auto ToDo handling
 #### 8.1.1

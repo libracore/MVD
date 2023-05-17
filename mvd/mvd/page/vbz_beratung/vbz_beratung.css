@@ -37,6 +37,10 @@ Allgemein
 h2.place-holder-left {
     padding-left: 7em;
 }
+#datenstand {
+    font-weight: normal !important;
+    font-size: 15px !important;
+}
 
 .vbz-indikator {
     height: 2em;
@@ -124,6 +128,7 @@ Validierung
 #rechtsberaterinnen:hover,
 #beratungskategorien:hover,
 #statistik:hover,
+#hk_u_mz:hover,
 #termine:hover {
     background-color: #91bf1f;
     cursor: pointer;

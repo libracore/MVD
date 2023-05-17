@@ -307,7 +307,7 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                     # legacy mail mit links
                     message = """Guten Tag {0}""".format(sektion)
                     message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
-                            <br><br><b>Mitgliedernummer</b>: {0}<br>{1}<br><br>Anhänge:<br>""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+                            <br><br><b>Mitglied</b>: {0} {1}<br><b>Mitgliedernummer</b>: {2}<br>{3}<br><br>Anhänge:<br>""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1"), frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"), frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
                     for file_data in frappe.get_doc("Beratung", beratung).dokumente:
                         message += """<a href="{0}">{1}</a><br>""".format(get_url(file_data.file), file_data.filename)
                     
@@ -318,7 +318,7 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                     # legacy mail mit anhängen
                     message = """Guten Tag {0}""".format(sektion)
                     message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
-                            <br><br><b>Mitgliedernummer</b>: {0}<br>{1}""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+                            <br><br><b>Mitglied</b>: {0} {1}<br><b>Mitgliedernummer</b>: {2}<br>{3}""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1"), frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"), frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
                     message += """<br>Freundliche Grüsse<br>
                                 libracore"""
                     attachments = []
@@ -458,7 +458,7 @@ def send_to_sp():
                 }
                 
                 create_beratungs_log(error=0, info=1, beratung=beratung.name, method='send_to_sp', title='Beratung an SP gesendet', json="{0}".format(str(json_to_send)))
-                send_beratung(json_to_send)
+                send_beratung(json_to_send, beratung.name)
             
             # remove mark for SP API
             frappe.db.set_value("Beratung", beratung.name, 'trigger_api', 0, update_modified=False)

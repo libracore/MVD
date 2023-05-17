@@ -83,6 +83,9 @@ frappe.vbz_beratung = {
         $("#statistik").click(function(){
             frappe.set_route(["query-report", "Beratungsstatistik"]);
         });
+        $("#hk_u_mz").click(function(){
+            frappe.set_route(["#List/Beratung/Report/MVBE Admin: HK_u_MZ"]);
+        });
         
         frappe.dom.unfreeze();
     }
