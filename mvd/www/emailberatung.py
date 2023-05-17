@@ -458,7 +458,7 @@ def send_to_sp():
                 }
                 
                 create_beratungs_log(error=0, info=1, beratung=beratung.name, method='send_to_sp', title='Beratung an SP gesendet', json="{0}".format(str(json_to_send)))
-                send_beratung(json_to_send)
+                send_beratung(json_to_send, beratung.name)
             
             # remove mark for SP API
             frappe.db.set_value("Beratung", beratung.name, 'trigger_api', 0, update_modified=False)

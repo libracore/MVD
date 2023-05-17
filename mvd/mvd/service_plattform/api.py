@@ -15,7 +15,6 @@ from frappe import _
 from mvd.mvd.utils.post import _post_retouren
 from mvd.mvd.utils.post import _post_responses
 from mvd.mvd.doctype.beratung.beratung import _get_beratungs_dokument
-from mvd.www.emailberatung import create_beratungs_log
 
 AUTH0_SCOPE = "Auth0"
 SVCPF_SCOPE = "ServicePF"
@@ -146,7 +145,15 @@ def send_beratung(beratungs_data, beratung):
                 frappe.db.commit()
                 return
             else:
-                create_beratungs_log(error=0, info=1, beratung=beratung, method='send_beratung', title='Beratung an SP übermittelt', json="{0}".format(sp_connection.status_code))
+                frappe.get_doc({
+                    'doctype': 'Beratungs Log',
+                    'error': 0,
+                    'info': 1,
+                    'beratung': beratung,
+                    'method': 'send_beratung',
+                    'title': 'Beratung an SP übermittelt',
+                    'json': "{0}".format(sp_connection.status_code)
+                }).insert(ignore_permissions=True)
                 frappe.db.commit()
                 return
         except Exception as err:
