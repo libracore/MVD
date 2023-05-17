@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.5.4
+wird einer neuen Beratung ein Termin und eine Berater*in gesetzt, wird der Status automatisch «Termin vergeben» beim Speichern
 #### 8.5.3
 Beratung: Bei Kategorie 202&300 keine Zuweisung an Pool sondern an Sekretariat zur Vorprüfung
 #### 8.5.2

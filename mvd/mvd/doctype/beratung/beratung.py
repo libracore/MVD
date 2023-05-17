@@ -123,6 +123,10 @@ class Beratung(Document):
                     # reset ToDo-Log
                     self.auto_todo_log = None
         
+        if self.kontaktperson and len(self.termin) > 0:
+            if self.status in ('Eingang', 'Open'):
+                self.status = 'Termin vergeben'
+        
         # Statistik handling -> closed date tracker
         if self.status == 'Closed':
             if not self.geschlossen_am:
