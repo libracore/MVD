@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.5.1
+Erweitertes Logging von Beratungs API Posts
 #### 8.5.0
 VBZ Beratung: anzeigen von Anz. exklusiver Zuweisungen
 #### 8.4.1
