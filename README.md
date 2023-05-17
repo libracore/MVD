@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.5.2
+Bericht "MVBE Admin: HK_u_MZ" in VBZ Beratung wenn Sektion MVBE
 #### 8.5.1
 Erweitertes Logging von Beratungs API Posts
 #### 8.5.0

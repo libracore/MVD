@@ -129,5 +129,11 @@
             <td>Statistik</td>
             <td style="text-align: right;"><b>&nbsp;</b></td>
         </tr>
+        {% if frappe.boot.default_sektion == "MVBE" %}
+        <tr id="hk_u_mz">
+            <td>MVBE Admin: HK_u_MZ</td>
+            <td style="text-align: right;"><b>&nbsp;</b></td>
+        </tr>
+        {% endif %}
     </table>
 </div>
