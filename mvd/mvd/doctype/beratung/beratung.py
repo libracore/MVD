@@ -172,14 +172,18 @@ class Beratung(Document):
                                 self.auto_todo_log = self.kontaktperson
                                 self.create_todo = 1
                             else:
-                                frappe.get_doc({
-                                    'doctype': 'ToDo',
-                                    'description': 'Vorprüfung {0}<br>Zuweisung für Beratung {0}'.format(self.beratungskategorie, self.name),
-                                    'reference_type': 'Beratung',
-                                    'reference_name': self.name,
-                                    'assigned_by': frappe.session.user or 'Administrator',
-                                    'owner': 'libracore@be.mieterverband.ch'
-                                }).insert(ignore_permissions=True)
+                                # MVBE Spezial-Hack
+                                if frappe.db.exists("Beratung", self.name):
+                                    frappe.get_doc({
+                                        'doctype': 'ToDo',
+                                        'description': 'Vorprüfung {0}<br>Zuweisung für Beratung {0}'.format(self.beratungskategorie, self.name),
+                                        'reference_type': 'Beratung',
+                                        'reference_name': self.name,
+                                        'assigned_by': frappe.session.user or 'Administrator',
+                                        'owner': 'libracore@be.mieterverband.ch'
+                                    }).insert(ignore_permissions=True)
+                                else:
+                                    self.create_be_admin_todo = 1
         
         if (self.mv_mitgliedschaft and self.status == 'Eingang') and not self.kontaktperson:
             if self.beratungskategorie not in ('202 - MZ-Erhöhung', '300 - Nebenkosten'):
@@ -189,14 +193,18 @@ class Beratung(Document):
                     self.auto_todo_log = self.kontaktperson
                     self.create_todo = 1
             else:
-                frappe.get_doc({
-                    'doctype': 'ToDo',
-                    'description': 'Vorprüfung {0}<br>Zuweisung für Beratung {0}'.format(self.beratungskategorie, self.name),
-                    'reference_type': 'Beratung',
-                    'reference_name': self.name,
-                    'assigned_by': frappe.session.user or 'Administrator',
-                    'owner': 'libracore@be.mieterverband.ch'
-                }).insert(ignore_permissions=True)
+                # MVBE Spezial-Hack
+                if frappe.db.exists("Beratung", self.name):
+                    frappe.get_doc({
+                        'doctype': 'ToDo',
+                        'description': 'Vorprüfung {0}<br>Zuweisung für Beratung {0}'.format(self.beratungskategorie, self.name),
+                        'reference_type': 'Beratung',
+                        'reference_name': self.name,
+                        'assigned_by': frappe.session.user or 'Administrator',
+                        'owner': 'libracore@be.mieterverband.ch'
+                    }).insert(ignore_permissions=True)
+                else:
+                    self.create_be_admin_todo = 1
         
         # Titel aktualisierung
         titel = '{0}'.format(self.start_date)
