@@ -18,6 +18,7 @@
   "ungelesen",
   "mitgliedname",
   "migriert_von_termin",
+  "create_be_admin_todo",
   "section_merge",
   "master",
   "section_allgemein",
@@ -344,9 +345,16 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "migriert von termin"
+  },
+  {
+   "default": "0",
+   "fieldname": "create_be_admin_todo",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "create_be_admin_todo"
   }
  ],
- "modified": "2023-05-12 13:22:13.771361",
+ "modified": "2023-05-23 08:51:11.903774",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

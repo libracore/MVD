@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.5.6
+Bugfix: Anlage Mitziens-Beratung via Webformular (Behebung raise condition in Auto-Tuweisung (MVBE spezifisch))
 #### 8.5.5
 Name und Vorname des Mitglieds steht in der E-Mail an die Sektion.
 #### 8.5.4
