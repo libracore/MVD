@@ -83,7 +83,7 @@ def raise_redirect(typ=None):
             frappe.local.flags.redirect_location = "/mvd-mvso"
             raise frappe.Redirect
         if typ == 'durchlassquote':
-            frappe.local.flags.redirect_location = frappe.db.get_value("MVD Settings", "MVD Settings", 'redirect_url_ablehnung') or '/404'
+            frappe.local.flags.redirect_location = frappe.db.get_value("MVD Settings", "MVD Settings", 'redirect_url_ablehnung') or '/503'
             raise frappe.Redirect
 
 def context_erweiterung(context, mitgliedschaft):
