@@ -30,6 +30,11 @@ frappe.ui.form.on('Payment Entry', {
                     }, __("Ausgleichen mit ..."));
                     
                 }
+                if (check_underpaid(frm)) {
+                    frm.add_custom_button(__("Differenz als Kulanz ausgleichen"), function() {
+                        kulanz_ausgleich(frm);
+                    });
+                }
             }
             if (cur_frm.doc.docstatus == 0) {
                 frm.add_custom_button(__("Mitgliedschaft"), function() {
@@ -362,4 +367,14 @@ function kulanz_ausgleich(frm) {
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
     }
+}
+
+function check_underpaid(frm) {
+    var underpaid = false;
+    cur_frm.doc.references.forEach(function(entry) {
+       if (entry.allocated_amount < entry.outstanding_amount) {
+           underpaid = true;
+       }
+    });
+    return underpaid
 }

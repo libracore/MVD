@@ -1462,6 +1462,34 @@ def reopen_sinv_as_admin(sinv):
     frappe.db.sql("""UPDATE `tabSales Invoice` SET `docstatus` = 0 WHERE `name` = '{sinv}'""".format(sinv=sinv), as_list=True)
     return
 
+@frappe.whitelist()
+def kulanz_ausgleich(pe):
+    payment_entry = frappe.get_doc("Payment Entry", pe)
+    pe = frappe.copy_doc(payment_entry)
+    pe.reference_no = 'Kulanzausgleich {0}'.format(payment_entry.name)
+    pe.paid_to = frappe.get_value("Sektion", pe.sektion_id, "kulanz_konto")
+    
+    new_payment = 0
+    for sinv in pe.references:
+        if sinv.outstanding_amount > sinv.allocated_amount:
+            outstanding_amount = frappe.get_value("Sales Invoice", sinv.reference_name, "outstanding_amount")
+            if outstanding_amount > 0:
+                new_payment += outstanding_amount
+                sinv.allocated_amount = outstanding_amount
+                sinv.outstanding_amount = outstanding_amount
+    if new_payment > 0:
+        pe.paid_amount = new_payment
+        pe.difference_amount = 0
+        pe.base_received_amount = new_payment
+        pe.received_amount = new_payment
+        pe.insert()
+        pe.save()
+        pe.submit()
+        payment_entry.add_comment('Comment', text='Kulanzausgleich erfolgte mittels {0}'.format(pe.name))
+        return
+    else:
+        frappe.throw("Die Rechnung wurde bereits andersweitig beglichen!")
+
 # HILFS-/KONTROLL-FUNKTION
 # ----------------------------
 def check_pes_against_camt(camt_file):

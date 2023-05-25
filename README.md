@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.6.0
+Wiedereinführung des CAMT Kulanzausgleichs
 #### 8.5.9
 Korrektur Boolean in Ampelberechnung
 #### 8.5.8
