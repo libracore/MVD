@@ -434,12 +434,11 @@ class Mitgliedschaft(Document):
                             fr.cancel()
                     
                     # cancel linked mahnungen
-                    if sinv.payment_reminder_level > 0:
-                        linked_mahnungen = frappe.db.sql("""SELECT DISTINCT `parent` FROM `tabMahnung Invoices` WHERE `sales_invoice` = '{sinv}' AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
-                        if len(linked_mahnungen) > 0:
-                            for _mahnung in linked_mahnungen:
-                                mahnung = frappe.get_doc("Mahnung", _mahnung.parent)
-                                mahnung.cancel()
+                    linked_mahnungen = frappe.db.sql("""SELECT DISTINCT `parent` FROM `tabMahnung Invoices` WHERE `sales_invoice` = '{sinv}' AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
+                    if len(linked_mahnungen) > 0:
+                        for _mahnung in linked_mahnungen:
+                            mahnung = frappe.get_doc("Mahnung", _mahnung.parent)
+                            mahnung.cancel()
                     
                     # reload & cancel sinv
                     sinv = frappe.get_doc("Sales Invoice", sinv.name)

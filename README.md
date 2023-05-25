@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.5.8
+Stornierung von Mahnungen auch auf Stufe Zahlungserinnerung bei Wegzug eines Mitglieds
 #### 8.5.7
 Ermöglichung von Inaktivierung Mitglieder mit Status Interessent*in
 #### 8.5.6
