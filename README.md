@@ -1,7 +1,7 @@
 ## MVD
 ### Version Log
 #### 8.7.0
-Definierbare Durchlassquote für Emailberatungs-Webformular inkl. Redirect (Definiert oder 404)
+Definierbare Durchlassquote für Emailberatungs-Webformular inkl. Redirect (Definiert oder default 503)
 #### 8.6.0
 Wiedereinführung des CAMT Kulanzausgleichs
 #### 8.5.9
