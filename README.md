@@ -1,5 +1,13 @@
 ## MVD
 ### Version Log
+#### 8.6.0
+Wiedereinführung des CAMT Kulanzausgleichs
+#### 8.5.9
+Korrektur Boolean in Ampelberechnung
+#### 8.5.8
+Stornierung von Mahnungen auch auf Stufe Zahlungserinnerung bei Wegzug eines Mitglieds
+#### 8.5.7
+Ermöglichung von Inaktivierung Mitglieder mit Status Interessent*in
 #### 8.5.6
 Bugfix: Anlage Mitziens-Beratung via Webformular (Behebung raise condition in Auto-Tuweisung (MVBE spezifisch))
 #### 8.5.5

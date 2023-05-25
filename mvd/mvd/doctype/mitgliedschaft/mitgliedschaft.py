@@ -103,7 +103,7 @@ class Mitgliedschaft(Document):
                     close_open_validations(self.name, 'Anmeldung mit EZ')
             
             # beziehe mitglied_nr wenn umwandlung von Interessent*in
-            if self.status_c != 'Interessent*in' and self.mitglied_nr == 'MV':
+            if self.status_c not in ('Interessent*in', 'Inaktiv') and self.mitglied_nr == 'MV':
                 self.mitglied_nr = mvm_mitglieder_nummer_update(self.name)
                 self.letzte_bearbeitung_von = 'User'
             
@@ -434,12 +434,11 @@ class Mitgliedschaft(Document):
                             fr.cancel()
                     
                     # cancel linked mahnungen
-                    if sinv.payment_reminder_level > 0:
-                        linked_mahnungen = frappe.db.sql("""SELECT DISTINCT `parent` FROM `tabMahnung Invoices` WHERE `sales_invoice` = '{sinv}' AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
-                        if len(linked_mahnungen) > 0:
-                            for _mahnung in linked_mahnungen:
-                                mahnung = frappe.get_doc("Mahnung", _mahnung.parent)
-                                mahnung.cancel()
+                    linked_mahnungen = frappe.db.sql("""SELECT DISTINCT `parent` FROM `tabMahnung Invoices` WHERE `sales_invoice` = '{sinv}' AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
+                    if len(linked_mahnungen) > 0:
+                        for _mahnung in linked_mahnungen:
+                            mahnung = frappe.get_doc("Mahnung", _mahnung.parent)
+                            mahnung.cancel()
                     
                     # reload & cancel sinv
                     sinv = frappe.get_doc("Sales Invoice", sinv.name)
@@ -3701,7 +3700,9 @@ def get_ampelfarbe(mitgliedschaft):
         else:
             karenzfrist = True
         
-        aktuelles_jahr_bezahlt = bool( 1 + int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - int(now().split("-")[0]) )
+        # musste mit v8.5.9 umgeschrieben werden, da negative Werte ebenfalls == True ergeben. (Beispiel: (1 + 2015 - 2023) == True)
+        # ~ aktuelles_jahr_bezahlt = bool( 1 + int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - int(now().split("-")[0]) )
+        aktuelles_jahr_bezahlt = False if ( 1 + int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - int(now().split("-")[0]) ) <= 0 else True
         
         if not aktuelles_jahr_bezahlt:
             ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
