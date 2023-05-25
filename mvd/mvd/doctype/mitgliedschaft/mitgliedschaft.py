@@ -3700,7 +3700,9 @@ def get_ampelfarbe(mitgliedschaft):
         else:
             karenzfrist = True
         
-        aktuelles_jahr_bezahlt = bool( 1 + int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - int(now().split("-")[0]) )
+        # musste mit v8.5.9 umgeschrieben werden, da negative Werte ebenfalls == True ergeben. (Beispiel: (1 + 2015 - 2023) == True)
+        # ~ aktuelles_jahr_bezahlt = bool( 1 + int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - int(now().split("-")[0]) )
+        aktuelles_jahr_bezahlt = False if ( 1 + int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - int(now().split("-")[0]) ) <= 0 else True
         
         if not aktuelles_jahr_bezahlt:
             ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`

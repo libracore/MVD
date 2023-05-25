@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.5.9
+Korrektur Boolean in Ampelberechnung
 #### 8.5.8
 Stornierung von Mahnungen auch auf Stufe Zahlungserinnerung bei Wegzug eines Mitglieds
 #### 8.5.7
