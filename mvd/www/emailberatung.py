@@ -9,61 +9,67 @@ from frappe.utils import get_url, sanitize_html
 from frappe import sendmail
 from mvd.mvd.service_plattform.api import send_beratung
 from frappe.utils.data import get_datetime_str
+import random
 
 no_cache = 1
 
 def get_context(context):
-    authorization_header = frappe.get_request_header("Cookie", None)
-    jwt_token = None
-    
-    if authorization_header:
-        for cookie in authorization_header.split(";"):
-            if cookie.startswith(" jwt_auth="):
-                jwt_token = cookie.split(" jwt_auth=")[1]
-            elif cookie.startswith("jwt_auth="):
-                jwt_token = cookie.split("jwt_auth=")[1]
-    else:
-        create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='Aufruf ohne Cookies', json=None)
-        raise_redirect()
-    
-    if jwt_token:
-        try:
-            public_key = frappe.db.get_single_value('JWT', 'public_key')
-            algorythmus = frappe.db.get_single_value('JWT', 'algorythmus')
-            decoded_jwt_token = jwt.decode(jwt_token, public_key, algorithms=[algorythmus])
-            context.jwt_token = decoded_jwt_token
-        except Exception as err:
-            create_beratungs_log(error=1, info=0, beratung=None, method='get_context', title='Exception in JWT decode', json="{0}".format(str(err)))
+    if check_durchlass():
+        authorization_header = frappe.get_request_header("Cookie", None)
+        jwt_token = None
+
+        if authorization_header:
+            for cookie in authorization_header.split(";"):
+                if cookie.startswith(" jwt_auth="):
+                    jwt_token = cookie.split(" jwt_auth=")[1]
+                elif cookie.startswith("jwt_auth="):
+                    jwt_token = cookie.split("jwt_auth=")[1]
+        else:
+            create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='Aufruf ohne Cookies', json=None)
             raise_redirect()
-        
-        if 'mitglied_nr' in decoded_jwt_token:
-            mitglied_id = get_mitglied_id_from_nr(decoded_jwt_token["mitglied_nr"])
-            if mitglied_id:
-                if frappe.db.exists("Mitgliedschaft", mitglied_id):
-                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
-                    if mitgliedschaft.sektion_id == 'MVSO':
-                        # MVSO führt keine E-Mail Beratung durch
-                        create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='Keine MVSO E-Mail Beratung', json="{0}\n\n{1}".format(str(mitglied_id), str(authorization_header)))
-                        raise_redirect(typ='MVSO')
+
+        if jwt_token:
+            try:
+                public_key = frappe.db.get_single_value('JWT', 'public_key')
+                algorythmus = frappe.db.get_single_value('JWT', 'algorythmus')
+                decoded_jwt_token = jwt.decode(jwt_token, public_key, algorithms=[algorythmus])
+                context.jwt_token = decoded_jwt_token
+            except Exception as err:
+                create_beratungs_log(error=1, info=0, beratung=None, method='get_context', title='Exception in JWT decode', json="{0}".format(str(err)))
+                raise_redirect()
+            
+            if 'mitglied_nr' in decoded_jwt_token:
+                mitglied_id = get_mitglied_id_from_nr(decoded_jwt_token["mitglied_nr"])
+                if mitglied_id:
+                    if frappe.db.exists("Mitgliedschaft", mitglied_id):
+                        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
+                        if mitgliedschaft.sektion_id == 'MVSO':
+                            # MVSO führt keine E-Mail Beratung durch
+                            create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='Keine MVSO E-Mail Beratung', json="{0}\n\n{1}".format(str(mitglied_id), str(authorization_header)))
+                            raise_redirect(typ='MVSO')
+                        else:
+                            context = context_erweiterung(context, mitgliedschaft)
+                            return context
                     else:
-                        context = context_erweiterung(context, mitgliedschaft)
-                        return context
+                        # Mitglied-ID in ERPNext unbekannt
+                        create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='E-Mail Beratung (500)', json="{0}\n\n{1}".format(str(mitglied_id), str(authorization_header)))
+                        raise_redirect(typ='500')
                 else:
                     # Mitglied-ID in ERPNext unbekannt
-                    create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='E-Mail Beratung (500)', json="{0}\n\n{1}".format(str(mitglied_id), str(authorization_header)))
+                    create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='E-Mail Beratung (500)', json="{0}\n\n{1}".format(str(decoded_jwt_token["mitglied_nr"]), str(authorization_header)))
                     raise_redirect(typ='500')
             else:
-                # Mitglied-ID in ERPNext unbekannt
-                create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='E-Mail Beratung (500)', json="{0}\n\n{1}".format(str(decoded_jwt_token["mitglied_nr"]), str(authorization_header)))
-                raise_redirect(typ='500')
+                # ungültiger JWT Token
+                create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='ungültiger JWT Token', json="{0}".format(str(authorization_header)))
+                raise_redirect()
         else:
-            # ungültiger JWT Token
-            create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='ungültiger JWT Token', json="{0}".format(str(authorization_header)))
+            # KEIN JWT Token
+            create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='KEIN JWT Token', json="{0}".format(str(authorization_header)))
             raise_redirect()
     else:
-        # KEIN JWT Token
-        create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='KEIN JWT Token', json="{0}".format(str(authorization_header)))
-        raise_redirect()
+        # Durchlassquote überschritten
+        create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='Durchlassquote überschritten', json=None)
+        raise_redirect(typ='durchlassquote')
 
 def raise_redirect(typ=None):
     if not typ:
@@ -75,6 +81,9 @@ def raise_redirect(typ=None):
             raise frappe.Redirect
         if typ == 'MVSO':
             frappe.local.flags.redirect_location = "/mvd-mvso"
+            raise frappe.Redirect
+        if typ == 'durchlassquote':
+            frappe.local.flags.redirect_location = frappe.db.get_value("MVD Settings", "MVD Settings", 'redirect_url_ablehnung') or '/404'
             raise frappe.Redirect
 
 def context_erweiterung(context, mitgliedschaft):
@@ -488,3 +497,14 @@ def create_beratungs_log(error=0, info=0, beratung=None, method=None, title=None
         'title': title,
         'json': json
     }).insert(ignore_permissions=True)
+    frappe.db.commit()
+
+def check_durchlass():
+    durchlassquote = int(frappe.db.get_value("MVD Settings", "MVD Settings", 'durchlassquote'))
+    if durchlassquote >= 100:
+        return True
+    ticket = random.randint(1, 100)
+    if ticket <= durchlassquote:
+        return True
+    else:
+        return False

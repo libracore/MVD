@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from . import __version__ as app_version
+import frappe
 
 app_name = "mvd"
 app_title = "MVD"
@@ -57,7 +58,6 @@ website_redirects = [
     {"source": "/nologin", "target": "https://www.mieterverband.ch/mv/prozesse/login.html"},
     {"source": "/mvd-500", "target": "https://www.mieterverband.ch/mv/500"},
     {"source": "/mvd-mvso", "target": "https://www.mieterverband.ch/mv-so/hilfe-von-fachleuten/email-beratung"},
-    # ~ {"source": "/(^(?!.*login)(?!.*emailberatung)(?!.*desk).*$)", "target": "https://www.mieterverband.ch/"}
     {"source": "/", "target": "https://www.mieterverband.ch/"}
 ]
 
