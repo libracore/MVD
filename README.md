@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.7.2
+MVBE: Deaktivierung Erstellung neuer Termine
 #### 8.7.1
 Deaktivierung der Überprüfung von Libracore-User bei Termin Kontakte
 #### 8.7.0
