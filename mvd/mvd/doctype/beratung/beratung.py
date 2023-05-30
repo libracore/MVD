@@ -9,6 +9,11 @@ from frappe.utils.data import today
 
 class Beratung(Document):
     def validate(self):
+        # keine Termine für nicht Mitglieder
+        if len(self.termin) > 0:
+            if not self.mv_mitgliedschaft or self.status == 'Nicht-Mitglied-Abgewiesen':
+                frappe.throw("Nicht-Mitglieder dürfen keine Termine besitzen.")
+        
         # Termin Filter handling
         if len(self.termin) > 0:
             self.hat_termine = 1

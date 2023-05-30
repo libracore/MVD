@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.7.3
+Keine Terminvergabe-Möglichkeit in Beratungen für Nicht-Mitglieder
 #### 8.7.2
 MVBE: Deaktivierung Erstellung neuer Termine
 #### 8.7.1
