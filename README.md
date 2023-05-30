@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.7.1
+Deaktivierung der Überprüfung von Libracore-User bei Termin Kontakte
 #### 8.7.0
 Definierbare Durchlassquote für Emailberatungs-Webformular inkl. Redirect (Definiert oder default 503)
 #### 8.6.0
