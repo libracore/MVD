@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.7.4
+Ergänzung Mitglied-Dashboard: Bei Beratungsterminen einblenden des/der Berater*in
 #### 8.7.3
 Keine Terminvergabe-Möglichkeit in Beratungen für Nicht-Mitglieder
 #### 8.7.2
