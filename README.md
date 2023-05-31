@@ -1,5 +1,13 @@
 ## MVD
 ### Version Log
+#### 8.7.4
+Ergänzung Mitglied-Dashboard: Bei Beratungsterminen einblenden des/der Berater*in
+#### 8.7.3
+Keine Terminvergabe-Möglichkeit in Beratungen für Nicht-Mitglieder
+#### 8.7.2
+MVBE: Deaktivierung Erstellung neuer Termine
+#### 8.7.1
+Deaktivierung der Überprüfung von Libracore-User bei Termin Kontakte
 #### 8.7.0
 Definierbare Durchlassquote für Emailberatungs-Webformular inkl. Redirect (Definiert oder default 503)
 #### 8.6.0

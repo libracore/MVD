@@ -4076,7 +4076,7 @@ def get_returen_dashboard(mitgliedschaft):
 
 @frappe.whitelist()
 def get_beratungen_dashboard(mitgliedschaft):
-    offen = frappe.db.sql("""SELECT `name`, `status` FROM `tabBeratung` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` NOT IN ('Closed', 'Zusammengeführt')""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
+    offen = frappe.db.sql("""SELECT `name`, `status`, `kontaktperson` FROM `tabBeratung` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` NOT IN ('Closed', 'Zusammengeführt')""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
     termine = []
     anz_offen = 0
     anz_termine = 0
@@ -4089,7 +4089,7 @@ def get_beratungen_dashboard(mitgliedschaft):
             else:
                 termin_dates = frappe.db.sql("""SELECT `von` FROM `tabBeratung Termin` WHERE `parent` = '{beratung}' AND `von` >= CURDATE() ORDER BY `von` ASC""".format(beratung=beratung.name, mitgliedschaft=mitgliedschaft), as_dict=True)
                 for termin_date in termin_dates:
-                    termine.append(frappe.utils.get_datetime(termin_date.von).strftime('%d.%m.%Y %H:%M'))
+                    termine.append("{0} ({1})".format(frappe.utils.get_datetime(termin_date.von).strftime('%d.%m.%Y %H:%M'), beratung.kontaktperson or 'Ohne Berater*in Zuweisung'))
                     anz_termine += 1
         if len(termine) > 1:
             termine = ", nächste Termine: {0}".format(" / ".join(termine))
