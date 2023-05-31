@@ -160,6 +160,16 @@ frappe.ui.form.on('Beratung', {
                         cur_frm.reload_doc();
                     })
                 }
+            } else {
+                // disable E-Mail BTN
+                $("[data-label='Email']").parent().off("click");
+                $("[data-label='Email']").parent().click(function(){frappe.msgprint("Diese Beratung ist zur Bearbeitung gesperrt.");});
+                $(".btn.btn-default.btn-new-email.btn-xs").off("click");
+                $(".btn.btn-default.btn-new-email.btn-xs").click(function(){frappe.msgprint("Diese Beratung ist zur Bearbeitung gesperrt.");}); 
+                $("[title='Reply']").hide();
+                $("[title='Reply All']").hide();
+                frappe.ui.keys.off('ctrl+e', cur_frm.page);
+                frappe.ui.keys.on('ctrl+e', function(e) {frappe.msgprint("Diese Beratung ist zur Bearbeitung gesperrt.");});
             }
             
             if (cur_frm.doc.kontaktperson&&cur_frm.doc.create_todo) {
