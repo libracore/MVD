@@ -88,14 +88,14 @@ $(document).on('click','#navbar-breadcrumbs a, a.navbar-home',function(event){
                 }
             }
         }  else {
-            if(navURL.endsWith("vbz")) {
-                if (frappe._cur_route != "#vbz") {
-                    frappe.dom.freeze('Lade Verarbeitungszentrale...');
+                if(navURL.endsWith("vbz")) {
+                    if (frappe._cur_route != "#vbz") {
+                        frappe.dom.freeze('Lade Verarbeitungszentrale...');
+                    }
+                    window.location.href = navURL;
+                } else {
+                    window.location.href = navURL;
                 }
-                window.location.href = navURL;
-            } else {
-                window.location.href = navURL;
-            }
         }
     } else {
         if(navURL.endsWith("vbz")) {
@@ -129,3 +129,52 @@ window.onload = function() {
     });
 };
 
+$(document).on("page-change", function() {
+    if (window.location.hash.includes('#Form/Beratung/')) {
+        // Funktion zum gewährleisten, dass die Beratung beim öffnen ohne onload-Trigger gesperrt wird
+        var beratung = window.location.hash.split("/")[window.location.hash.split("/").length - 1]
+        frappe.db.get_value("Beratung", beratung, 'gesperrt_am')
+            .then(({ message }) => {
+                    var gesperrt_am = message.gesperrt_am
+                    if (!gesperrt_am) {
+                        cur_frm.reload_doc();
+                    } else {
+                        // Funktion zum gewährleisten, dass die Beratung beim öffnen ohne onload-Trigger neugeladen wird wenn sie gesperrt ist
+                        frappe.db.get_value("Beratung", beratung, 'gesperrt_von')
+                            .then(({ message }) => {
+                                    gesperrt_von = message.gesperrt_von
+                                    if ((gesperrt_von != frappe.session.user)&&(gesperrt_am != cur_frm.doc.gesperrt_am)) {
+                                        cur_frm.reload_doc();
+                                    }
+                                });
+                    }
+                });
+    } else {
+        // Funktion zum gewährleisten, dass die Beratung beim verlassen freigegeben wird
+        if (frappe.route_history.length >= 2) {
+            if (frappe.route_history[frappe.route_history.length - 2]) {
+                if (frappe.route_history[frappe.route_history.length - 2][0] == 'Form') {
+                    if (frappe.route_history[frappe.route_history.length - 2][1] == 'Beratung') {
+                        frappe.call({
+                            method: "mvd.mvd.doctype.beratung.beratung.clear_protection",
+                            args:{
+                                    'beratung': frappe.route_history[frappe.route_history.length - 2][2]
+                            }
+                        });
+                    }
+                } else if (frappe.route_history.length >= 3) {
+                    if (frappe.route_history[frappe.route_history.length - 3][0] == 'Form') {
+                        if (frappe.route_history[frappe.route_history.length - 3][1] == 'Beratung') {
+                            frappe.call({
+                                method: "mvd.mvd.doctype.beratung.beratung.clear_protection",
+                                args:{
+                                        'beratung': frappe.route_history[frappe.route_history.length - 3][2]
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
+});

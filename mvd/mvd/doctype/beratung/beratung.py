@@ -5,9 +5,23 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils.data import today
+from frappe.utils.data import today, now
 
 class Beratung(Document):
+    def onload(self):
+        # Sperren der Beratung beim öffnen
+        if frappe.db.exists("Beratung", self.name):
+            if not frappe.db.get_value("Beratung", self.name, 'gesperrt_am'):
+                self.gesperrt_von = frappe.session.user
+                now_date_time = now().split(".")[0]
+                self.gesperrt_am = now_date_time
+                frappe.db.set_value("Beratung", self.name, 'gesperrt_von', frappe.session.user, update_modified=False)
+                frappe.db.set_value("Beratung", self.name, 'gesperrt_am', now_date_time, update_modified=False)
+                frappe.db.commit()
+            else:
+                self.gesperrt_von = frappe.db.get_value("Beratung", self.name, 'gesperrt_von')
+                self.gesperrt_am = frappe.db.get_value("Beratung", self.name, 'gesperrt_am')
+    
     def validate(self):
         # keine Termine für nicht Mitglieder
         if len(self.termin) > 0:
@@ -466,3 +480,14 @@ def merge(slave, master):
             frappe.db.set_value("File", beratung_file.name, "attached_to_name", master_doc.name)
     
     return
+
+@frappe.whitelist()
+def clear_protection(beratung, force=False):
+    if frappe.db.get_value("Beratung", beratung, 'gesperrt_von') == frappe.session.user or force:
+        frappe.db.set_value("Beratung", beratung, 'gesperrt_von', None, update_modified=False)
+        frappe.db.set_value("Beratung", beratung, 'gesperrt_am', None, update_modified=False)
+        frappe.db.commit()
+    
+    if force:
+        frappe.get_doc("Beratung", beratung).add_comment('Submitted', 'Hat manuell die aktive Beratungssperre aufgehoben')
+        return
