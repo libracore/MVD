@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.8.0
+Beratungs Status-Handler
 #### 8.7.4
 Ergänzung Mitglied-Dashboard: Bei Beratungsterminen einblenden des/der Berater*in
 #### 8.7.3
