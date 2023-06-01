@@ -236,6 +236,41 @@ class Beratung(Document):
         if self.mv_mitgliedschaft:
             self.mitgliedname = " ".join((frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1") or '', frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "nachname_1") or ''))
     
+        # Handling des Status
+        self.status_handler()
+    
+    def status_handler(self):
+        # Prüfung ob Beratung gerade angelegt wird
+        if frappe.db.exists("Beratung", self.name):
+            # Beratung existiert und wurde verändert
+            alter_status = frappe.db.get_value("Beratung", self.name, 'status')
+            if alter_status == 'Eingang':
+                if self.kontaktperson:
+                    self.status = 'Open'
+                if self.beratungskategorie:
+                    self.status = 'Open'
+        else:
+            # Beratung wird aktuell angelegt
+            if self.raised_by:
+                # Anlage via Mail
+                if self.mv_mitgliedschaft:
+                    # Konnte einem Mitglied zugewiesen werden
+                    self.status = 'Open'
+                else:
+                    # Konnte nicht einem Mitglied zugewiesen werden
+                    self.status = 'Eingang'
+            else:
+                # Anlage manuell oder via Beratungsformular
+                self.status = 'Eingang'
+                '''
+                Achtung MVBE-Hack
+                '''
+                if self.beratungskategorie not in ('202 - MZ-Erhöhung', '300 - Nebenkosten'):
+                    self.status = 'Open'
+                '''
+                /MVBE-Hack
+                '''
+    
     # ~ def onload(self):
         # ~ if self.ungelesen == 1:
             # ~ frappe.db.set_value("Beratung", self.name, 'ungelesen', 0, update_modified=False)
@@ -425,7 +460,7 @@ def check_communication(self, event):
 def new_initial_todo(self, event):
     if int(self.create_todo == 1):
         new_todo(self.name, self.kontaktperson)
-        frappe.db.set_value("Beratung", self.name, 'status', 'Open', update_modified=False)
+        # ~ frappe.db.set_value("Beratung", self.name, 'status', 'Open', update_modified=False)
         frappe.db.commit()
 
 @frappe.whitelist()
