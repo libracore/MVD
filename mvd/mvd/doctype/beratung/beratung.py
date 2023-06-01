@@ -526,3 +526,19 @@ def clear_protection(beratung, force=False):
     if force:
         frappe.get_doc("Beratung", beratung).add_comment('Submitted', 'Hat manuell die aktive Beratungssperre aufgehoben')
         return
+
+@frappe.whitelist()
+def get_beratungsorte(sektion, kontakt=None):
+    if not kontakt:
+        orte = frappe.db.sql("""SELECT `name` AS `ort_def` FROM `tabBeratungsort` WHERE `sektion_id` = '{sektion}' ORDER BY `ort` ASC""".format(sektion=sektion), as_dict=True)
+    else:
+        orte = frappe.db.sql("""SELECT `ort` AS `ort_def` FROM `tabBeratungsort Multiselect` WHERE `parent` = '{kontakt}' ORDER BY `ort` ASC""".format(kontakt=kontakt), as_dict=True)
+    
+    ort_list = []
+    for ort in orte:
+        ort_list.append(ort.ort_def)
+    ort_string = "\n".join(ort_list)
+    return {
+        'ort_string': ort_string,
+        'default': orte[0].ort_def if len(orte) > 0 else ''
+    }

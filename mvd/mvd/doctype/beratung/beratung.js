@@ -160,6 +160,13 @@ frappe.ui.form.on('Beratung', {
                         cur_frm.reload_doc();
                     })
                 }
+                
+                if ((cur_frm.doc.status != 'Closed')&&(cur_frm.doc.termin.length < 1)) {
+                    frm.add_custom_button(__("Termin erstellen"),  function() {
+                        termin_quick_entry(frm);
+                    });
+                }
+                
             } else {
                 // disable E-Mail BTN
                 $("[data-label='Email']").parent().off("click");
@@ -289,4 +296,88 @@ function setze_read_only(frm) {
     for (i; i<cur_frm.fields.length; i++) {
         cur_frm.set_df_property(cur_frm.fields[i].df.fieldname,'read_only', 1);
     }
+}
+
+function termin_quick_entry(frm) {
+    frappe.call({
+        'method': "mvd.mvd.doctype.beratung.beratung.get_beratungsorte",
+        'args': {
+            'sektion': cur_frm.doc.sektion_id
+        },
+        'callback': function(r) {
+            var orte = r.message.ort_string;
+            var default_von = roundMinutes(frappe.datetime.now_datetime()); // default "von"-Zeit = aktuelle Zeit gerundet auf nächste volle Stunde
+            var d = new frappe.ui.Dialog({
+              'title': __('Termin erstellen'),
+              'fields': [
+                {'fieldname': 'kontaktperson', 'fieldtype': 'Link', 'label': __('Kontaktperson'), 'options': 'Termin Kontaktperson', 'reqd': 1,
+                    'get_query': function() {
+                        return {
+                            filters: {
+                                'sektion_id': cur_frm.doc.sektion_id
+                            }
+                        }
+                    },
+                    'change': function() {
+                        if (d.get_value('kontaktperson')) {
+                            frappe.call({
+                                method: "mvd.mvd.doctype.beratung.beratung.get_beratungsorte",
+                                args:{
+                                    'sektion': cur_frm.doc.sektion_id,
+                                    'kontakt': d.get_value('kontaktperson')
+                                },
+                                callback: function(r) {
+                                    if (r.message) {
+                                        // hinterlegen von Orten auf Basis Kontakt
+                                        var orte_kontaktbasis = r.message.ort_string;
+                                        var default_ort_kontaktbasis = r.message.default;
+                                        d.set_df_property('ort', 'options', orte_kontaktbasis);
+                                        d.set_value('ort',  default_ort_kontaktbasis);
+                                    } else {
+                                        // Keine Orte zu Kontakt
+                                        d.set_value('ort',  '');
+                                        d.set_df_property('ort', 'options', '');
+                                    }
+                                }
+                            });
+                          } else {
+                              // reset to default
+                              d.set_value('ort',  '');
+                              d.set_df_property('ort', 'options', orte);
+                          }
+                      }
+                },
+                {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 1, 'default': ''},
+                {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich\nE-Mail', 'reqd': 1, 'default': 'telefonisch'},
+                {'fieldname': 'von', 'fieldtype': 'Datetime', 'label': __('Zeit von'), 'reqd': 1, 'default': default_von,
+                    'change': function() {
+                        var newDateObj = moment(d.get_value('von')).add(45, 'm').toDate(); // default "bis"-Zeit = "von"-Zeit + 45'
+                        d.set_value('bis',  newDateObj);
+                    }
+                },
+                {'fieldname': 'bis', 'fieldtype': 'Datetime', 'label': __('Zeit bis'), 'reqd': 1}
+              ],
+              'primary_action': function() {
+                    d.hide();
+                    var child = cur_frm.add_child('termin');
+                    frappe.model.set_value(child.doctype, child.name, 'von', d.get_value('von'));
+                    frappe.model.set_value(child.doctype, child.name, 'bis', d.get_value('bis'));
+                    frappe.model.set_value(child.doctype, child.name, 'art', d.get_value('art'));
+                    frappe.model.set_value(child.doctype, child.name, 'ort', d.get_value('ort'));
+                    cur_frm.refresh_field('termin');
+                    cur_frm.save();
+              },
+              'primary_action_label': __('Erstellen')
+            });
+            d.show();
+        }
+    });
+    
+}
+
+function roundMinutes(date_string) {
+    var date = new Date(date_string);
+    date.setHours(date.getHours() + Math.round(date.getMinutes()/60));
+    date.setMinutes(0, 0, 0);
+    return date
 }

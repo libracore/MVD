@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 8.8.2
+Termin erfassungs-Maske in DT Beratung (inkl. Eingabehilfen)
+#### 8.8.1
+Separierung Termin-Kontaktperson & Ort
 #### 8.8.0
 Beratungs Redesign
 #### 8.7.4
