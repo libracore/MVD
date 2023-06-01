@@ -251,9 +251,12 @@ class Beratung(Document):
             # Beratung existiert und wurde verändert
             alter_status = frappe.db.get_value("Beratung", self.name, 'status')
             if alter_status == 'Eingang':
-                if self.kontaktperson:
+                if self.kontaktperson and self.mv_mitgliedschaft:
                     self.status = 'Open'
-                if self.beratungskategorie:
+                if self.beratungskategorie and self.mv_mitgliedschaft:
+                    self.status = 'Open'
+            if alter_status == 'Rückfrage':
+                if self.kontaktperson and self.mv_mitgliedschaft:
                     self.status = 'Open'
         else:
             # Beratung wird aktuell angelegt
@@ -268,6 +271,9 @@ class Beratung(Document):
             else:
                 # Anlage manuell oder via Beratungsformular
                 self.status = 'Eingang'
+                if len(self.termin) > 0:
+                    self.status = 'Termin vergeben'
+                
                 '''
                 Achtung MVBE-Hack
                 '''
