@@ -7,7 +7,8 @@
   "von",
   "bis",
   "art",
-  "ort"
+  "ort",
+  "berater_in"
  ],
  "fields": [
   {
@@ -20,7 +21,6 @@
   {
    "fieldname": "bis",
    "fieldtype": "Datetime",
-   "in_list_view": 1,
    "label": "Datum bis",
    "reqd": 1
   },
@@ -36,10 +36,17 @@
    "in_list_view": 1,
    "label": "Art",
    "options": "telefonisch\nE-Mail\npers\u00f6nlich"
+  },
+  {
+   "fieldname": "berater_in",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Berater*in",
+   "options": "Termin Kontaktperson"
   }
  ],
  "istable": 1,
- "modified": "2023-03-22 10:29:52.044458",
+ "modified": "2023-06-01 11:23:23.896677",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung Termin",

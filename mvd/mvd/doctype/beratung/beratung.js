@@ -364,7 +364,9 @@ function termin_quick_entry(frm) {
                     frappe.model.set_value(child.doctype, child.name, 'bis', d.get_value('bis'));
                     frappe.model.set_value(child.doctype, child.name, 'art', d.get_value('art'));
                     frappe.model.set_value(child.doctype, child.name, 'ort', d.get_value('ort'));
+                    frappe.model.set_value(child.doctype, child.name, 'berater_in', d.get_value('kontaktperson'));
                     cur_frm.refresh_field('termin');
+                    cur_frm.set_value("kontaktperson", d.get_value('kontaktperson'));
                     cur_frm.save();
               },
               'primary_action_label': __('Erstellen')
