@@ -554,3 +554,7 @@ def get_beratungsorte(sektion, kontakt=None):
         'ort_string': ort_string,
         'default': orte[0].ort_def if len(orte) > 0 else ''
     }
+
+@frappe.whitelist()
+def anz_beratungen_ohne_termine(mv_mitgliedschaft):
+    return int(frappe.db.count('Beratung', {'mv_mitgliedschaft': mv_mitgliedschaft, 'hat_termine': 0}))

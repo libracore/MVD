@@ -181,7 +181,7 @@ frappe.ui.form.on('Beratung', {
                     }, __("Rückfrage"));
                 }
                 
-                if ((cur_frm.doc.status != 'Closed')&&(cur_frm.doc.termin.length < 1)) {
+                if ((cur_frm.doc.status != 'Closed')&&(cur_frm.doc.termin.length < 1)&&(cur_frm.doc.mv_mitgliedschaft)) {
                     frm.add_custom_button(__("Termin vergeben"),  function() {
                         termin_quick_entry(frm);
                     });

@@ -2527,115 +2527,131 @@ function termin_quick_entry(frm) {
         'callback': function(r) {
             var orte = r.message.ort_string;
             var default_von = roundMinutes(frappe.datetime.now_datetime()); // default "von"-Zeit = aktuelle Zeit gerundet auf nächste volle Stunde
-            var d = new frappe.ui.Dialog({
-              'title': __('Termin erstellen'),
-              'fields': [
-                {'fieldname': 'beratung', 'fieldtype': 'Link', 'label': __('Für Beratung'), 'options': 'Beratung', 'reqd': 1,
-                    'get_query': function() {
-                        return {
-                            filters: {
-                                'mv_mitgliedschaft': cur_frm.doc.name
-                            }
-                        }
-                    }
+            
+            frappe.call({
+                method: "mvd.mvd.doctype.beratung.beratung.anz_beratungen_ohne_termine",
+                args:{
+                        'mv_mitgliedschaft': cur_frm.doc.name
                 },
-                {'fieldname': 'neue_beratung', 'fieldtype': 'Check', 'label': __('Erstelle neue Beratung'),
-                    'change': function() {
-                        if (d.get_value('neue_beratung') == 1) {
-                            d.set_df_property('beratung', 'reqd', 0);
-                            d.set_df_property('beratung', 'hidden', 1);
-                        } else {
-                            d.set_df_property('beratung', 'reqd', 1);
-                            d.set_df_property('beratung', 'hidden', 0);
-                        }
+                callback: function(r)
+                {
+                    var anz_beratungen_ohne_termine = 0;
+                    if (r.message) {
+                        anz_beratungen_ohne_termine = r.message;
                     }
-                },
-                {'fieldname': 'kontaktperson', 'fieldtype': 'Link', 'label': __('Kontaktperson'), 'options': 'Termin Kontaktperson', 'reqd': 1,
-                    'get_query': function() {
-                        return {
-                            filters: {
-                                'sektion_id': cur_frm.doc.sektion_id
+                
+                    var d = new frappe.ui.Dialog({
+                      'title': __('Termin erstellen'),
+                      'fields': [
+                        {'fieldname': 'beratung', 'fieldtype': 'Link', 'label': __('Für Beratung'), 'options': 'Beratung', 'reqd': anz_beratungen_ohne_termine > 0 ? 1:0, 'hidden': anz_beratungen_ohne_termine > 0 ? 0:1,
+                            'get_query': function() {
+                                return {
+                                    filters: {
+                                        'mv_mitgliedschaft': cur_frm.doc.name,
+                                        'hat_termine': 0
+                                    }
+                                }
                             }
-                        }
-                    },
-                    'change': function() {
-                        if (d.get_value('kontaktperson')) {
+                        },
+                        {'fieldname': 'neue_beratung', 'fieldtype': 'Check', 'label': __('Erstelle neue Beratung'), 'default': anz_beratungen_ohne_termine > 0 ? 0:1,
+                            'change': function() {
+                                if (d.get_value('neue_beratung') == 1) {
+                                    d.set_df_property('beratung', 'reqd', 0);
+                                    d.set_df_property('beratung', 'hidden', 1);
+                                } else {
+                                    d.set_df_property('beratung', 'reqd', 1);
+                                    d.set_df_property('beratung', 'hidden', 0);
+                                }
+                            }
+                        },
+                        {'fieldname': 'kontaktperson', 'fieldtype': 'Link', 'label': __('Kontaktperson'), 'options': 'Termin Kontaktperson', 'reqd': 1,
+                            'get_query': function() {
+                                return {
+                                    filters: {
+                                        'sektion_id': cur_frm.doc.sektion_id
+                                    }
+                                }
+                            },
+                            'change': function() {
+                                if (d.get_value('kontaktperson')) {
+                                    frappe.call({
+                                        method: "mvd.mvd.doctype.beratung.beratung.get_beratungsorte",
+                                        args:{
+                                            'sektion': cur_frm.doc.sektion_id,
+                                            'kontakt': d.get_value('kontaktperson')
+                                        },
+                                        callback: function(r) {
+                                            if (r.message) {
+                                                // hinterlegen von Orten auf Basis Kontakt
+                                                var orte_kontaktbasis = r.message.ort_string;
+                                                var default_ort_kontaktbasis = r.message.default;
+                                                d.set_df_property('ort', 'options', orte_kontaktbasis);
+                                                d.set_value('ort',  default_ort_kontaktbasis);
+                                            } else {
+                                                // Keine Orte zu Kontakt
+                                                d.set_value('ort',  '');
+                                                d.set_df_property('ort', 'options', '');
+                                            }
+                                        }
+                                    });
+                                  } else {
+                                      // reset to default
+                                      d.set_value('ort',  '');
+                                      d.set_df_property('ort', 'options', orte);
+                                  }
+                              }
+                        },
+                        {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 1, 'default': ''},
+                        {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich\nE-Mail', 'reqd': 1, 'default': 'telefonisch'},
+                        {'fieldname': 'von', 'fieldtype': 'Datetime', 'label': __('Zeit von'), 'reqd': 1, 'default': default_von,
+                            'change': function() {
+                                var newDateObj = moment(d.get_value('von')).add(45, 'm').toDate(); // default "bis"-Zeit = "von"-Zeit + 45'
+                                d.set_value('bis',  newDateObj);
+                            }
+                        },
+                        {'fieldname': 'bis', 'fieldtype': 'Datetime', 'label': __('Zeit bis'), 'reqd': 1}
+                      ],
+                      'primary_action': function() {
+                            d.hide();
+                            if (d.get_value('neue_beratung') == 1) {
+                                var kwargs = {
+                                    'von': d.get_value('von'),
+                                    'bis': d.get_value('bis'),
+                                    'sektion_id': cur_frm.doc.sektion_id,
+                                    'mv_mitgliedschaft': cur_frm.doc.name,
+                                    'art': d.get_value('art'),
+                                    'ort': d.get_value('ort'),
+                                    'berater_in': d.get_value('kontaktperson')
+                                }
+                            } else {
+                                var kwargs = {
+                                    'beratung': d.get_value('beratung'),
+                                    'von': d.get_value('von'),
+                                    'bis': d.get_value('bis'),
+                                    'art': d.get_value('art'),
+                                    'ort': d.get_value('ort'),
+                                    'berater_in': d.get_value('kontaktperson')
+                                }
+                            }
+                            
                             frappe.call({
-                                method: "mvd.mvd.doctype.beratung.beratung.get_beratungsorte",
-                                args:{
-                                    'sektion': cur_frm.doc.sektion_id,
-                                    'kontakt': d.get_value('kontaktperson')
-                                },
-                                callback: function(r) {
+                                method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_neue_beratung",
+                                args: kwargs,
+                                freeze: true,
+                                freeze_message: d.get_value('neue_beratung') == 1 ? 'Erstelle Beratung und Termin...':'Erstelle Termin...',
+                                callback: function(r)
+                                {
                                     if (r.message) {
-                                        // hinterlegen von Orten auf Basis Kontakt
-                                        var orte_kontaktbasis = r.message.ort_string;
-                                        var default_ort_kontaktbasis = r.message.default;
-                                        d.set_df_property('ort', 'options', orte_kontaktbasis);
-                                        d.set_value('ort',  default_ort_kontaktbasis);
-                                    } else {
-                                        // Keine Orte zu Kontakt
-                                        d.set_value('ort',  '');
-                                        d.set_df_property('ort', 'options', '');
+                                        frappe.set_route("Form", "Beratung", r.message);
                                     }
                                 }
                             });
-                          } else {
-                              // reset to default
-                              d.set_value('ort',  '');
-                              d.set_df_property('ort', 'options', orte);
-                          }
-                      }
-                },
-                {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 1, 'default': ''},
-                {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich\nE-Mail', 'reqd': 1, 'default': 'telefonisch'},
-                {'fieldname': 'von', 'fieldtype': 'Datetime', 'label': __('Zeit von'), 'reqd': 1, 'default': default_von,
-                    'change': function() {
-                        var newDateObj = moment(d.get_value('von')).add(45, 'm').toDate(); // default "bis"-Zeit = "von"-Zeit + 45'
-                        d.set_value('bis',  newDateObj);
-                    }
-                },
-                {'fieldname': 'bis', 'fieldtype': 'Datetime', 'label': __('Zeit bis'), 'reqd': 1}
-              ],
-              'primary_action': function() {
-                    d.hide();
-                    if (d.get_value('neue_beratung') == 1) {
-                        var kwargs = {
-                            'von': d.get_value('von'),
-                            'bis': d.get_value('bis'),
-                            'sektion_id': cur_frm.doc.sektion_id,
-                            'mv_mitgliedschaft': cur_frm.doc.name,
-                            'art': d.get_value('art'),
-                            'ort': d.get_value('ort'),
-                            'berater_in': d.get_value('kontaktperson')
-                        }
-                    } else {
-                        var kwargs = {
-                            'beratung': d.get_value('beratung'),
-                            'von': d.get_value('von'),
-                            'bis': d.get_value('bis'),
-                            'art': d.get_value('art'),
-                            'ort': d.get_value('ort'),
-                            'berater_in': d.get_value('kontaktperson')
-                        }
-                    }
-                    
-                    frappe.call({
-                        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_neue_beratung",
-                        args: kwargs,
-                        freeze: true,
-                        freeze_message: d.get_value('neue_beratung') == 1 ? 'Erstelle Beratung und Termin...':'Erstelle Termin...',
-                        callback: function(r)
-                        {
-                            if (r.message) {
-                                frappe.set_route("Form", "Beratung", r.message);
-                            }
-                        }
+                      },
+                      'primary_action_label': __('Erstellen')
                     });
-              },
-              'primary_action_label': __('Erstellen')
+                    d.show();
+                }
             });
-            d.show();
         }
     });
     
