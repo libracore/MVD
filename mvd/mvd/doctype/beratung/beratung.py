@@ -243,31 +243,26 @@ class Beratung(Document):
         # Prüfung ob Beratung gerade angelegt wird
         if frappe.db.exists("Beratung", self.name):
             # Beratung existiert und wurde verändert
-            alter_status = frappe.db.get_value("Beratung", self.name, 'status')
-            if alter_status == 'Eingang':
-                if self.kontaktperson and self.mv_mitgliedschaft:
-                    self.status = 'Open'
-                if self.beratungskategorie and self.mv_mitgliedschaft:
-                    self.status = 'Open'
-            if alter_status == 'Rückfrage':
-                if self.kontaktperson and self.mv_mitgliedschaft:
-                    self.status = 'Open'
+            if len(self.termin) > 0 and self.status not in ('Closed', 'Nicht-Mitglied-Abgewiesen'):
+                # Manuelle Anlage via "Termin erstellen"
+                self.status = 'Termin vergeben'
+            else:
+                if self.status not in ('Rückfragen', 'Rückfrage: Termin vereinbaren', 'Closed', 'Nicht-Mitglied-Abgewiesen'):
+                    alter_status = frappe.db.get_value("Beratung", self.name, 'status')
+                    if alter_status == 'Eingang':
+                        if self.kontaktperson and self.mv_mitgliedschaft:
+                            self.status = 'Open'
+                        if self.beratungskategorie and self.mv_mitgliedschaft:
+                            self.status = 'Open'
+                else:
+                    if self.status not in ('Closed', 'Nicht-Mitglied-Abgewiesen'):
+                        if self.status == 'Rückfragen' and self.kontaktperson:
+                            self.status = 'Open'
         else:
             # Beratung wird aktuell angelegt
-            if self.raised_by:
-                # Anlage via Mail
-                if self.mv_mitgliedschaft:
-                    # Konnte einem Mitglied zugewiesen werden
-                    self.status = 'Open'
-                else:
-                    # Konnte nicht einem Mitglied zugewiesen werden
-                    self.status = 'Eingang'
-            else:
-                # Anlage manuell oder via Beratungsformular
+            if self.anlage_durch_web_formular:
+                # anlage via web formular
                 self.status = 'Eingang'
-                if len(self.termin) > 0:
-                    self.status = 'Termin vergeben'
-                
                 '''
                 Achtung MVBE-Hack
                 '''
@@ -276,6 +271,23 @@ class Beratung(Document):
                 '''
                 /MVBE-Hack
                 '''
+            else:
+                if self.raised_by:
+                    # Anlage via Mail
+                    if self.mv_mitgliedschaft:
+                        # Konnte einem Mitglied zugewiesen werden
+                        self.status = 'Open'
+                    else:
+                        # Konnte nicht einem Mitglied zugewiesen werden
+                        self.status = 'Eingang'
+                else:
+                    # Anlage manuell
+                    self.status = 'Eingang'
+                    if len(self.termin) > 0:
+                        # Manuelle Anlage via "Termin erstellen"
+                        self.status = 'Termin vergeben'
+                    
+                    
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):

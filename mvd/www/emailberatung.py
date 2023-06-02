@@ -175,7 +175,8 @@ def new_beratung(**kwargs):
                 'telefon_privat_mobil': args['telefon'] if args['telefon'] else None,
                 'anderes_mietobjekt': args['anderes_mietobjekt'] if args['anderes_mietobjekt'] else None,
                 'frage': args['frage'] if args['frage'] else None,
-                'datum_mietzinsanzeige': args['datum_mietzinsanzeige'] if args['datum_mietzinsanzeige'] else None
+                'datum_mietzinsanzeige': args['datum_mietzinsanzeige'] if args['datum_mietzinsanzeige'] else None,
+                'anlage_durch_web_formular': 1
             })
             new_ber.insert(ignore_permissions=True)
             frappe.db.commit()

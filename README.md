@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.8.7
+Status-Handler Update
 #### 8.8.6
 Manuelle gelesen Markierung
 #### 8.8.5

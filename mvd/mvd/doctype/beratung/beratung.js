@@ -55,19 +55,6 @@ frappe.ui.form.on('Beratung', {
             load_html_verknuepfungen(frm);
             
             if (!gesperrt) {
-                //btn zum Verknüpfen
-                frm.add_custom_button(__("Verknüpfen"),  function() {
-                    frappe.prompt([
-                        {'fieldname': 'beratung', 'fieldtype': 'Link', 'options': 'Beratung', 'label': 'Beratung', 'reqd': 1}  
-                    ],
-                    function(values){
-                        verknuepfen(cur_frm.doc.name, values.beratung, false);
-                    },
-                    'Beratungs Verknüpfung',
-                    'Verknüpfen'
-                    );
-                });
-                
                 // btn zum übernehmen
                 frm.add_custom_button(__("Übernehmen"),  function() {
                     frappe.call({
@@ -93,7 +80,20 @@ frappe.ui.form.on('Beratung', {
                             }
                         }
                     });
-                });
+                }, __("Beratungs Aktionen"));
+                
+                //btn zum Verknüpfen
+                frm.add_custom_button(__("Verknüpfen"),  function() {
+                    frappe.prompt([
+                        {'fieldname': 'beratung', 'fieldtype': 'Link', 'options': 'Beratung', 'label': 'Beratung', 'reqd': 1}  
+                    ],
+                    function(values){
+                        verknuepfen(cur_frm.doc.name, values.beratung, false);
+                    },
+                    'Beratungs Verknüpfung',
+                    'Verknüpfen'
+                    );
+                }, __("Beratungs Aktionen"));
                 
                 // btn zum zusammenführen
                 frm.add_custom_button(__("Zusammenführen"),  function() {
@@ -116,14 +116,14 @@ frappe.ui.form.on('Beratung', {
                     'Beratungen zusammenführen',
                     'Zusammenführen'
                     )
-                });
+                }, __("Beratungs Aktionen"));
                 
                 if (cur_frm.doc.status != 'Closed') {
                     frm.add_custom_button(__("Schliessen"),  function() {
                         cur_frm.set_value("status", 'Closed').then(function(){
                             cur_frm.save();
                         })
-                    });
+                    }, __("Beratungs Aktionen"));
                 }
                 
                 if ((cur_frm.doc.status == 'Closed')&&(cur_frm.doc.ignore_abschluss_mail != 1)) {
@@ -168,8 +168,21 @@ frappe.ui.form.on('Beratung', {
                     });
                 }
                 
+                if (['Eingang', 'Open'].includes(cur_frm.doc.status)) {
+                    frm.add_custom_button(__("E-Mail"),  function() {
+                        cur_frm.set_value("status", "Rückfragen");
+                        cur_frm.save();
+                        frappe.msgprint("TBD");
+                    }, __("Rückfrage"));
+                    frm.add_custom_button(__("Termin vereinbaren"),  function() {
+                        cur_frm.set_value("status", "Rückfrage: Termin vereinbaren");
+                        cur_frm.save();
+                        frappe.msgprint("TBD");
+                    }, __("Rückfrage"));
+                }
+                
                 if ((cur_frm.doc.status != 'Closed')&&(cur_frm.doc.termin.length < 1)) {
-                    frm.add_custom_button(__("Termin erstellen"),  function() {
+                    frm.add_custom_button(__("Termin vergeben"),  function() {
                         termin_quick_entry(frm);
                     });
                 }
