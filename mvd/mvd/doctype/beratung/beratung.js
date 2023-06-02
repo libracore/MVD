@@ -187,6 +187,20 @@ frappe.ui.form.on('Beratung', {
                     });
                 }
                 
+                // overwrite E-Mail BTN
+                $("[data-label='Email']").parent().off("click");
+                $("[data-label='Email']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
+                $(".btn.btn-default.btn-new-email.btn-xs").off("click");
+                $(".btn.btn-default.btn-new-email.btn-xs").click(function(){frappe.mvd.new_mail(cur_frm);}); 
+                //~ $("[title='Reply']").hide();
+                //~ $("[title='Reply All']").hide();
+                $("[data-communication-type='Communication']").off("click");
+                //~ $("[data-communication-type='Communication']").click(function(){frappe.mvd.new_mail(cur_frm);}); 
+                $(".reply-link").off("click");
+                $(".reply-link").click(function(e){prepare_mvd_mail_composer(e);}); 
+                $(".reply-link-all").click(function(e){prepare_mvd_mail_composer(e);});
+                frappe.ui.keys.off('ctrl+e', cur_frm.page);
+                frappe.ui.keys.on('ctrl+e', function(e) {frappe.mvd.new_mail(cur_frm);});
             } else {
                 // disable E-Mail BTN
                 $("[data-label='Email']").parent().off("click");
@@ -402,4 +416,38 @@ function roundMinutes(date_string) {
     date.setHours(date.getHours() + Math.round(date.getMinutes()/60));
     date.setMinutes(0, 0, 0);
     return date
+}
+
+function prepare_mvd_mail_composer(e) {
+    var last_email = null;
+
+    const $target = $(e.currentTarget);
+    const name = $target.data().name;
+
+    // find the email to reply to
+    cur_frm.timeline.get_communications().forEach(function(c) {
+        if(c.name == name) {
+            last_email = c;
+            return false;
+        }
+    });
+
+    const opts = {
+        doc: cur_frm.doc,
+        txt: "",
+        title: __('Reply'),
+        frm: cur_frm,
+        last_email,
+        is_a_reply: true
+    };
+
+    if ($target.is('.reply-link-all')) {
+        if (last_email) {
+            opts.cc = last_email.cc;
+            opts.bcc = last_email.bcc;
+        }
+    }
+
+    // make the composer
+    new frappe.mvd.MailComposer(opts);
 }

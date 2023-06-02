@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.0
+MVD spezifischer E-Mail Composer
 #### 8.8.8
 Termin Anlage Dialog erweiterung
 #### 8.8.7
