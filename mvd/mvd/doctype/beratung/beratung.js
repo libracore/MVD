@@ -156,9 +156,16 @@ frappe.ui.form.on('Beratung', {
                 
                 // als gelesen markieren
                 if (cur_frm.doc.ungelesen) {
-                    frappe.db.set_value("Beratung", cur_frm.doc.name, 'ungelesen', 0).then(function(){
-                        cur_frm.reload_doc();
-                    })
+                    frm.add_custom_button(__("Als gelesen markieren"),  function() {
+                        if (cur_frm.is_dirty()) {
+                            cur_frm.set_value("ungelesen", 0);
+                            cur_frm.save();
+                        } else {
+                            frappe.db.set_value("Beratung", cur_frm.doc.name, 'ungelesen', 0).then(function(){
+                                cur_frm.reload_doc();
+                            })
+                        }
+                    });
                 }
                 
                 if ((cur_frm.doc.status != 'Closed')&&(cur_frm.doc.termin.length < 1)) {

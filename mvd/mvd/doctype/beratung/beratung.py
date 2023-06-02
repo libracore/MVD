@@ -21,12 +21,6 @@ class Beratung(Document):
             else:
                 self.gesperrt_von = frappe.db.get_value("Beratung", self.name, 'gesperrt_von')
                 self.gesperrt_am = frappe.db.get_value("Beratung", self.name, 'gesperrt_am')
-        
-        # Markierung als gelesen wenn ungelesen
-        if self.ungelesen == 1:
-            frappe.db.set_value("Beratung", self.name, 'ungelesen', 0, update_modified=False)
-            frappe.db.commit()
-            self.ungelesen = frappe.db.get_value("Beratung", self.name, 'ungelesen')
     
     def validate(self):
         # keine Termine für nicht Mitglieder
