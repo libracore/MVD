@@ -282,7 +282,7 @@ frappe.mvd.MailComposer = Class.extend({
                 label:__("Message"),
                 fieldtype:"Text Editor", reqd: 1,
                 fieldname:"content",
-                onchange: frappe.utils.debounce(this.save_as_draft.bind(this), 300)
+                //~ onchange: frappe.utils.debounce(this.save_as_draft.bind(this), 300) --> Deaktiviert da mühsam. Speichert eigentlich den Draft des Mails im localstorage
             },
 
             {fieldtype: "Section Break"},
