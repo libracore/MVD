@@ -172,7 +172,7 @@ frappe.ui.form.on('Beratung', {
                     frm.add_custom_button(__("E-Mail"),  function() {
                         cur_frm.set_value("status", "Rückfragen");
                         cur_frm.save();
-                        frappe.msgprint("TBD");
+                        frappe.mvd.new_mail(cur_frm);
                     }, __("Rückfrage"));
                     frm.add_custom_button(__("Termin vereinbaren"),  function() {
                         cur_frm.set_value("status", "Rückfrage: Termin vereinbaren");
