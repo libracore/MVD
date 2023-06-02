@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.2
+MVD-E-Mail-Dialog: Auto. Empfängeradresse & Default E-Mail-Template
 #### 8.9.1
 Beratungs-Rückfrage öffnet MVD-E-Mail-Dialog
 #### 8.9.0

@@ -65,7 +65,8 @@
   "legacy_mail_absender_mail",
   "legacy_mail_absende_name",
   "emailberatung_email_text",
-  "default_emailberatung_todo_gruppe"
+  "default_emailberatung_todo_gruppe",
+  "default_rueckfragen_email_template"
  ],
  "fields": [
   {
@@ -426,9 +427,15 @@
    "fieldtype": "Link",
    "label": "Standard Berater*in",
    "options": "Termin Kontaktperson"
+  },
+  {
+   "fieldname": "default_rueckfragen_email_template",
+   "fieldtype": "Link",
+   "label": "Default E-Mail Template f\u00fcr R\u00fcckfragen",
+   "options": "Email Template"
   }
  ],
- "modified": "2023-03-20 13:28:38.994213",
+ "modified": "2023-06-02 14:32:19.392808",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

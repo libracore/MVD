@@ -235,7 +235,10 @@ class Beratung(Document):
         
         if self.mv_mitgliedschaft:
             self.mitgliedname = " ".join((frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1") or '', frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "nachname_1") or ''))
-    
+        
+        # check for default_rueckfragen_email_template
+        self.check_default_rueckfragen_email_template()
+        
         # Handling des Status
         self.status_handler()
     
@@ -287,7 +290,11 @@ class Beratung(Document):
                         # Manuelle Anlage via "Termin erstellen"
                         self.status = 'Termin vergeben'
                     
-                    
+    def check_default_rueckfragen_email_template(self):
+        if self.sektion_id:
+            default_rueckfragen_email_template = frappe.db.get_value("Sektion", self.sektion_id, "default_rueckfragen_email_template")
+            if self.default_rueckfragen_email_template != default_rueckfragen_email_template:
+                self.default_rueckfragen_email_template = default_rueckfragen_email_template
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):

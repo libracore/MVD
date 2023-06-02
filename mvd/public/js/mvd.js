@@ -181,14 +181,23 @@ $(document).on("page-change", function() {
 
 frappe.provide('frappe.mvd.new_mail');
 frappe.mvd.new_mail = function(cur_frm) {
+    $(".modal.fade").remove();
+    var recpts;
+    if (cur_frm.doctype == 'Beratung') {
+        recpts = cur_frm.doc.raised_by || cur_frm.doc.email_id;
+    }
+    if (!recpts) {
+        cur_frm.doc.email || cur_frm.doc.email_id || cur_frm.doc.contact_email
+    }
     new frappe.mvd.MailComposer({
         doc: cur_frm.doc,
         frm: cur_frm,
         subject: __(cur_frm.meta.name) + ': ' + cur_frm.docname,
-        recipients: cur_frm.doc.email || cur_frm.doc.email_id || cur_frm.doc.contact_email,
+        recipients: recpts,
         attach_document_print: false,
-        message: '',
-        real_name: cur_frm.doc.real_name || cur_frm.doc.contact_display || cur_frm.doc.contact_name
+        //~ txt: '<div>Das kann der initiale Standart-Text sein.</div>',
+        real_name: cur_frm.doc.real_name || cur_frm.doc.contact_display || cur_frm.doc.contact_name,
+        email_template: cur_frm.default_rueckfragen_email_template ? cur_frm.default_rueckfragen_email_template:cur_frm.doc.email_template || ''
     });
 }
 frappe.provide('frappe.mvd.MailComposer');
@@ -315,7 +324,11 @@ frappe.mvd.MailComposer = Class.extend({
         this.setup_email();
         this.setup_last_edited_communication();
         this.setup_email_template();
-
+        
+        if (this.email_template) {
+            this.dialog.fields_dict.email_template.set_value(this.email_template);
+        }
+        
         this.dialog.set_value("recipients", this.recipients || '');
         this.dialog.set_value("cc", this.cc || '');
         this.dialog.set_value("bcc", this.bcc || '');
