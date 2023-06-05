@@ -192,12 +192,11 @@ frappe.ui.form.on('Beratung', {
                 // overwrite E-Mail BTN
                 $("[data-label='Email']").parent().off("click");
                 $("[data-label='Email']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
+                $("[data-label='E-Mail']").parent().off("click");
+                $("[data-label='E-Mail']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
                 $(".btn.btn-default.btn-new-email.btn-xs").off("click");
-                $(".btn.btn-default.btn-new-email.btn-xs").click(function(){frappe.mvd.new_mail(cur_frm);}); 
-                //~ $("[title='Reply']").hide();
-                //~ $("[title='Reply All']").hide();
+                $(".btn.btn-default.btn-new-email.btn-xs").click(function(){frappe.mvd.new_mail(cur_frm);});
                 $("[data-communication-type='Communication']").off("click");
-                //~ $("[data-communication-type='Communication']").click(function(){frappe.mvd.new_mail(cur_frm);}); 
                 $(".reply-link").off("click");
                 $(".reply-link").click(function(e){prepare_mvd_mail_composer(e);}); 
                 $(".reply-link-all").click(function(e){prepare_mvd_mail_composer(e);});
@@ -207,6 +206,8 @@ frappe.ui.form.on('Beratung', {
                 // disable E-Mail BTN
                 $("[data-label='Email']").parent().off("click");
                 $("[data-label='Email']").parent().click(function(){frappe.msgprint("Diese Beratung ist zur Bearbeitung gesperrt.");});
+                $("[data-label='E-Mail']").parent().off("click");
+                $("[data-label='E-Mail']").parent().click(function(){frappe.msgprint("Diese Beratung ist zur Bearbeitung gesperrt.");});
                 $(".btn.btn-default.btn-new-email.btn-xs").off("click");
                 $(".btn.btn-default.btn-new-email.btn-xs").click(function(){frappe.msgprint("Diese Beratung ist zur Bearbeitung gesperrt.");}); 
                 $("[title='Reply']").hide();

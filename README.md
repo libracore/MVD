@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.3
+MVD-E-Mail-Dialog: Auto. Absenderadresse
 #### 8.9.2
 MVD-E-Mail-Dialog: Auto. Empfängeradresse & Default E-Mail-Template
 #### 8.9.1
