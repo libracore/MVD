@@ -174,7 +174,16 @@ frappe.ui.form.on('Beratung', {
                         cur_frm.save();
                         frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_rueckfragen_email_template').then(function(value){
                             cur_frm['default_rueckfragen_email_template'] = value.message.default_rueckfragen_email_template;
-                            frappe.mvd.new_mail(cur_frm);
+                            var communications = cur_frm.timeline.get_communications();
+                            var last_email = '';
+                            if (communications.length > 0) {
+                                for (var i = communications.length - 1; i >= 0; i--) {
+                                    if (communications[i].communication_medium == 'Email') {
+                                        last_email = communications[i];
+                                    }
+                                }
+                            }
+                            frappe.mvd.new_mail(cur_frm, last_email);
                             cur_frm['default_rueckfragen_email_template'] = false;
                         });
                     }, __("Rückfrage"));

@@ -180,7 +180,7 @@ $(document).on("page-change", function() {
 });
 
 frappe.provide('frappe.mvd.new_mail');
-frappe.mvd.new_mail = function(cur_frm) {
+frappe.mvd.new_mail = function(cur_frm, last_email='') {
     $(".modal.fade").remove();
     var recpts;
     var default_sender;
@@ -208,7 +208,9 @@ frappe.mvd.new_mail = function(cur_frm) {
         //~ txt: '<div>Das kann der initiale Standart-Text sein.</div>',
         real_name: cur_frm.doc.real_name || cur_frm.doc.contact_display || cur_frm.doc.contact_name,
         email_template: temp_email_template ? temp_email_template:cur_frm.doc.email_template || '',
-        sender: default_sender
+        sender: default_sender,
+        last_email: last_email ? last_email:'',
+        is_a_reply: last_email ? true:false
     });
 }
 

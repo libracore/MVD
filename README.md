@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.7
+Rückfrage E-Mail-Dialog inkl. Bezug auf letztes E-Mail sowie Default Template  wenn vorhanden
 #### 8.9.6
 Terminbestätigun -> Autom. E-Mail-Dialog inkl. Template wenn hinterlegt in Sektion
 #### 8.9.5
