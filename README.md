@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.8
+Alle Beratungs BTN sind immer eingeblendet, aber situativ deaktiviert
 #### 8.9.7
 Rückfrage E-Mail-Dialog inkl. Bezug auf letztes E-Mail sowie Default Template  wenn vorhanden
 #### 8.9.6
