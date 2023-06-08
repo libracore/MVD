@@ -4185,12 +4185,13 @@ def get_mitglied_id_from_nr(mitglied_nr=None):
         return None
 
 @frappe.whitelist()
-def create_neue_beratung(von, bis, art, ort, berater_in, beratung=None, sektion_id=None, mv_mitgliedschaft=None):
+def create_neue_beratung(von, bis, art, ort, berater_in, beratungskategorie=None, beratung=None, sektion_id=None, mv_mitgliedschaft=None):
     if not beratung:
         # erstelle neue Beratung
         beratung = frappe.get_doc({
             "doctype": "Beratung",
             "sektion_id": sektion_id,
+            "beratungskategorie": beratungskategorie,
             "mv_mitgliedschaft": mv_mitgliedschaft,
             "termin": [
                 {

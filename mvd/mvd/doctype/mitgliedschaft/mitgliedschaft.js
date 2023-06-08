@@ -2602,6 +2602,7 @@ function termin_quick_entry(frm) {
                               }
                         },
                         {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 1, 'default': ''},
+                        {'fieldname': 'beratungskategorie', 'fieldtype': 'Link', 'label': __('Beratungskategorie'), 'options': 'Beratungskategorie'},
                         {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich\nE-Mail', 'reqd': 1, 'default': 'telefonisch'},
                         {'fieldname': 'von', 'fieldtype': 'Datetime', 'label': __('Zeit von'), 'reqd': 1, 'default': default_von,
                             'change': function() {
@@ -2621,7 +2622,8 @@ function termin_quick_entry(frm) {
                                     'mv_mitgliedschaft': cur_frm.doc.name,
                                     'art': d.get_value('art'),
                                     'ort': d.get_value('ort'),
-                                    'berater_in': d.get_value('kontaktperson')
+                                    'berater_in': d.get_value('kontaktperson'),
+                                    'beratungskategorie': d.get_value('beratungskategorie')
                                 }
                             } else {
                                 var kwargs = {
@@ -2630,7 +2632,8 @@ function termin_quick_entry(frm) {
                                     'bis': d.get_value('bis'),
                                     'art': d.get_value('art'),
                                     'ort': d.get_value('ort'),
-                                    'berater_in': d.get_value('kontaktperson')
+                                    'berater_in': d.get_value('kontaktperson'),
+                                    'beratungskategorie': d.get_value('beratungskategorie')
                                 }
                             }
                             
