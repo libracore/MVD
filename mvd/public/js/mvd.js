@@ -192,6 +192,13 @@ frappe.mvd.new_mail = function(cur_frm) {
     if (!recpts) {
         cur_frm.doc.email || cur_frm.doc.email_id || cur_frm.doc.contact_email
     }
+    var temp_email_template = false;
+    if (cur_frm.default_rueckfragen_email_template) {
+        temp_email_template = cur_frm.default_rueckfragen_email_template;
+    }
+    if (cur_frm.default_terminbestaetigung_email_template) {
+        temp_email_template = cur_frm.default_terminbestaetigung_email_template;
+    }
     new frappe.mvd.MailComposer({
         doc: cur_frm.doc,
         frm: cur_frm,
@@ -200,7 +207,7 @@ frappe.mvd.new_mail = function(cur_frm) {
         attach_document_print: false,
         //~ txt: '<div>Das kann der initiale Standart-Text sein.</div>',
         real_name: cur_frm.doc.real_name || cur_frm.doc.contact_display || cur_frm.doc.contact_name,
-        email_template: cur_frm.default_rueckfragen_email_template ? cur_frm.default_rueckfragen_email_template:cur_frm.doc.email_template || '',
+        email_template: temp_email_template ? temp_email_template:cur_frm.doc.email_template || '',
         sender: default_sender
     });
 }

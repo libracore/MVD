@@ -169,17 +169,18 @@ frappe.ui.form.on('Beratung', {
                 }
                 
                 if (['Eingang', 'Open'].includes(cur_frm.doc.status)) {
-                    frm.add_custom_button(__("E-Mail"),  function() {
+                    frm.add_custom_button(__("E-Mail Rückfrage"),  function() {
                         cur_frm.set_value("status", "Rückfragen");
                         cur_frm.save();
-                        cur_frm['default_rueckfragen_email_template'] = cur_frm.doc.default_rueckfragen_email_template;
-                        frappe.mvd.new_mail(cur_frm);
-                        cur_frm.default_rueckfragen_email_template = false;
+                        frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_rueckfragen_email_template').then(function(value){
+                            cur_frm['default_rueckfragen_email_template'] = value.message.default_rueckfragen_email_template;
+                            frappe.mvd.new_mail(cur_frm);
+                            cur_frm['default_rueckfragen_email_template'] = false;
+                        });
                     }, __("Rückfrage"));
                     frm.add_custom_button(__("Termin vereinbaren"),  function() {
                         cur_frm.set_value("status", "Rückfrage: Termin vereinbaren");
                         cur_frm.save();
-                        frappe.msgprint("TBD");
                     }, __("Rückfrage"));
                 }
                 
@@ -406,6 +407,11 @@ function termin_quick_entry(frm) {
                     cur_frm.refresh_field('termin');
                     cur_frm.set_value("kontaktperson", d.get_value('kontaktperson'));
                     cur_frm.save();
+                    frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_terminbestaetigung_email_template').then(function(value){
+                        cur_frm['default_terminbestaetigung_email_template'] = value.message.default_terminbestaetigung_email_template;
+                        frappe.mvd.new_mail(cur_frm);
+                        cur_frm['default_terminbestaetigung_email_template'] = false;
+                    });
               },
               'primary_action_label': __('Erstellen')
             });

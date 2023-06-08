@@ -67,7 +67,8 @@
   "emailberatung_email_text",
   "default_emailberatung_todo_gruppe",
   "default_rueckfragen_email_template",
-  "default_termindauer"
+  "default_termindauer",
+  "default_terminbestaetigung_email_template"
  ],
  "fields": [
   {
@@ -440,9 +441,15 @@
    "fieldname": "default_termindauer",
    "fieldtype": "Int",
    "label": "Default Termindauer"
+  },
+  {
+   "fieldname": "default_terminbestaetigung_email_template",
+   "fieldtype": "Link",
+   "label": "Default E-Mail Template f\u00fcr Terminbest\u00e4tigung",
+   "options": "Email Template"
   }
  ],
- "modified": "2023-06-08 10:14:39.153226",
+ "modified": "2023-06-08 11:59:08.930275",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
