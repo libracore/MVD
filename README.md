@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.4
+Standarddauer Beratung konfigurierbar
 #### 8.9.3
 MVD-E-Mail-Dialog: Auto. Absenderadresse
 #### 8.9.2

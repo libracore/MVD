@@ -66,7 +66,8 @@
   "legacy_mail_absende_name",
   "emailberatung_email_text",
   "default_emailberatung_todo_gruppe",
-  "default_rueckfragen_email_template"
+  "default_rueckfragen_email_template",
+  "default_termindauer"
  ],
  "fields": [
   {
@@ -433,9 +434,15 @@
    "fieldtype": "Link",
    "label": "Default E-Mail Template f\u00fcr R\u00fcckfragen",
    "options": "Email Template"
+  },
+  {
+   "default": "45",
+   "fieldname": "default_termindauer",
+   "fieldtype": "Int",
+   "label": "Default Termindauer"
   }
  ],
- "modified": "2023-06-02 14:32:19.392808",
+ "modified": "2023-06-08 10:14:39.153226",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

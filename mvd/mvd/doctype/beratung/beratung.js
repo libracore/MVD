@@ -135,7 +135,7 @@ frappe.ui.form.on('Beratung', {
                                     d.hide();
                                     cur_frm.set_value("ignore_abschluss_mail", 1).then(function(){
                                         cur_frm.save().then(function(){
-                                            frm.email_doc();
+                                            frappe.mvd.new_mail(cur_frm);
                                         })
                                     })
                                 }
@@ -343,6 +343,7 @@ function termin_quick_entry(frm) {
         },
         'callback': function(r) {
             var orte = r.message.ort_string;
+            var default_termindauer = r.message.default_termindauer;
             var default_von = roundMinutes(frappe.datetime.now_datetime()); // default "von"-Zeit = aktuelle Zeit gerundet auf nächste volle Stunde
             var d = new frappe.ui.Dialog({
               'title': __('Termin erstellen'),
@@ -388,7 +389,7 @@ function termin_quick_entry(frm) {
                 {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich\nE-Mail', 'reqd': 1, 'default': 'telefonisch'},
                 {'fieldname': 'von', 'fieldtype': 'Datetime', 'label': __('Zeit von'), 'reqd': 1, 'default': default_von,
                     'change': function() {
-                        var newDateObj = moment(d.get_value('von')).add(45, 'm').toDate(); // default "bis"-Zeit = "von"-Zeit + 45'
+                        var newDateObj = moment(d.get_value('von')).add(default_termindauer, 'm').toDate(); // default "bis"-Zeit = "von"-Zeit + default_termindauer oder 45'
                         d.set_value('bis',  newDateObj);
                     }
                 },

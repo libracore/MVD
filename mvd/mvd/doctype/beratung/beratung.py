@@ -559,7 +559,8 @@ def get_beratungsorte(sektion, kontakt=None):
     ort_string = "\n".join(ort_list)
     return {
         'ort_string': ort_string,
-        'default': orte[0].ort_def if len(orte) > 0 else ''
+        'default': orte[0].ort_def if len(orte) > 0 else '',
+        'default_termindauer': frappe.db.get_value("Sektion", sektion, 'default_termindauer') or 45
     }
 
 @frappe.whitelist()
