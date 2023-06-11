@@ -1,5 +1,41 @@
 ## MVD
 ### Version Log
+#### 8.9.8
+Alle Beratungs BTN sind immer eingeblendet, aber situativ deaktiviert
+#### 8.9.7
+Rückfrage E-Mail-Dialog inkl. Bezug auf letztes E-Mail sowie Default Template  wenn vorhanden
+#### 8.9.6
+Terminbestätigun -> Autom. E-Mail-Dialog inkl. Template wenn hinterlegt in Sektion
+#### 8.9.5
+Termin Beratungskategorie in Schnelleingabe
+#### 8.9.4
+Standarddauer Beratung konfigurierbar
+#### 8.9.3
+MVD-E-Mail-Dialog: Auto. Absenderadresse
+#### 8.9.2
+MVD-E-Mail-Dialog: Auto. Empfängeradresse & Default E-Mail-Template
+#### 8.9.1
+Beratungs-Rückfrage öffnet MVD-E-Mail-Dialog
+#### 8.9.0
+MVD spezifischer E-Mail Composer
+#### 8.8.8
+Termin Anlage Dialog erweiterung
+#### 8.8.7
+Status-Handler Update
+#### 8.8.6
+Manuelle gelesen Markierung
+#### 8.8.5
+Status-Handler Update
+#### 8.8.4
+Termin erfassungs-Maske in DT Mitgliedschaft (inkl. Eingabehilfen)
+#### 8.8.3
+Berater*in in Termin
+#### 8.8.2
+Termin erfassungs-Maske in DT Beratung (inkl. Eingabehilfen)
+#### 8.8.1
+Separierung Termin-Kontaktperson & Ort
+#### 8.8.0
+Beratungs Redesign
 #### 8.7.4
 Ergänzung Mitglied-Dashboard: Bei Beratungsterminen einblenden des/der Berater*in
 #### 8.7.3

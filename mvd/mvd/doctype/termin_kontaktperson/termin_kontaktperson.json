@@ -9,7 +9,8 @@
   "kontakt",
   "user",
   "sektion_id",
-  "disabled"
+  "disabled",
+  "ort"
  ],
  "fields": [
   {
@@ -38,9 +39,15 @@
    "fieldtype": "Table MultiSelect",
    "label": "libracore User",
    "options": "Termin Kontaktperson Multi User"
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Table MultiSelect",
+   "label": "Ort",
+   "options": "Beratungsort Multiselect"
   }
  ],
- "modified": "2023-02-20 10:51:51.009482",
+ "modified": "2023-06-01 09:02:00.781140",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin Kontaktperson",

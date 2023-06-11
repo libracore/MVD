@@ -7,6 +7,7 @@ import frappe
 
 def boot_session(bootinfo):
     bootinfo.default_sektion, bootinfo.multi_sektion = get_default_sektion()
+    bootinfo.default_beratungs_sender = get_default_beratungs_sender(bootinfo.default_sektion)
 
 def get_default_sektion():
     # ~ sektionen = frappe.db.sql("""SELECT `for_value` FROM `tabUser Permission` WHERE `allow` = 'Sektion' AND `is_default` = 1 AND `user` = '{user}'""".format(user=frappe.session.user), as_dict=True)
@@ -17,3 +18,10 @@ def get_default_sektion():
         return sektionen[0].for_value, False
     else:
         return '', False
+
+def get_default_beratungs_sender(default_sektion=None):
+    if default_sektion:
+        default_beratungs_sender = frappe.db.get_value("Sektion", default_sektion, 'legacy_mail_absender_mail')
+        return default_beratungs_sender
+    else:
+        return None

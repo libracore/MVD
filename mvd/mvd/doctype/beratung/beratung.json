@@ -19,6 +19,11 @@
   "mitgliedname",
   "migriert_von_termin",
   "create_be_admin_todo",
+  "gesperrt_von",
+  "gesperrt_am",
+  "anlage_durch_web_formular",
+  "email_template",
+  "default_rueckfragen_email_template",
   "section_merge",
   "master",
   "section_allgemein",
@@ -352,9 +357,40 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "create_be_admin_todo"
+  },
+  {
+   "fieldname": "gesperrt_von",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Gesperrt von"
+  },
+  {
+   "fieldname": "gesperrt_am",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Gesperrt am"
+  },
+  {
+   "default": "0",
+   "fieldname": "anlage_durch_web_formular",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "anlage_durch_web_formular"
+  },
+  {
+   "fieldname": "email_template",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "email_template"
+  },
+  {
+   "fieldname": "default_rueckfragen_email_template",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "default_rueckfragen_email_template"
   }
  ],
- "modified": "2023-05-23 08:51:11.903774",
+ "modified": "2023-06-02 14:39:01.051439",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

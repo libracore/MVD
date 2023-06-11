@@ -3,6 +3,48 @@
 
 frappe.ui.form.on('Beratung', {
     refresh: function(frm) {
+        // Handler für gesperrte Ansicht
+        var gesperrt = false;
+        if (cur_frm.doc.gesperrt_am) {
+            if (cur_frm.doc.gesperrt_von != frappe.session.user) {
+                gesperrt = true;
+                setze_read_only(frm);
+                var confirm_message = "Die Beratung ist seit <b>" + cur_frm.doc.gesperrt_am + "</b> durch <b>" + cur_frm.doc.gesperrt_von + "</b> geöffnet und dadurch die Bearbeitung gesperrt.<br><br>Wollen Sie in der Gesperrten Ansicht weiterfahren?";
+                frappe.confirm(confirm_message,
+                () => {
+                    // yes -> do nothing
+                }, () => {
+                    // No -> nachfragen
+                    frappe.confirm("Sind Sie sicher?",
+                    () => {
+                        // yes -> entsperren
+                        frappe.call({
+                            method: "mvd.mvd.doctype.beratung.beratung.clear_protection",
+                            args:{
+                                    'beratung': cur_frm.doc.name,
+                                    'force': true
+                            },
+                            async: false,
+                            callback: function(done) {
+                                location.reload();
+                                cur_frm.timeline.render_timeline_item({
+                                    content: __("created"),
+                                    comment_type: "Created",
+                                    communication_type: "Comment",
+                                    sender: frappe.session.user,
+                                    communication_date: cur_frm.doc.gesperrt_am,
+                                    creation: cur_frm.doc.gesperrt_am,
+                                    frm: cur_frm
+                                });
+                            }
+                        });
+                    }, () => {
+                        // No -> do nothing
+                    })
+                })
+            }
+        }
+        
         if (!frm.doc.__islocal) {
             if (cur_frm.doc.mv_mitgliedschaft) {
                 // load html overview
@@ -12,130 +54,237 @@ frappe.ui.form.on('Beratung', {
             // load html verknüpfungen
             load_html_verknuepfungen(frm);
             
-            //btn zum Verknüpfen
-            frm.add_custom_button(__("Verknüpfen"),  function() {
-                frappe.prompt([
-                    {'fieldname': 'beratung', 'fieldtype': 'Link', 'options': 'Beratung', 'label': 'Beratung', 'reqd': 1}  
-                ],
-                function(values){
-                    verknuepfen(cur_frm.doc.name, values.beratung, false);
-                },
-                'Beratungs Verknüpfung',
-                'Verknüpfen'
-                );
-            });
-            
-            // btn zum übernehmen
-            frm.add_custom_button(__("Übernehmen"),  function() {
-                frappe.call({
-                    method: "mvd.mvd.doctype.beratung.beratung.uebernahme",
-                    args:{
-                            'beratung': cur_frm.doc.name,
-                            'user': frappe.session.user
-                    },
-                    callback: function(r)
-                    {
-                        if (r.message) {
-                            if (cur_frm.doc.kontaktperson != r.message) {
-                                cur_frm.set_value("kontaktperson", r.message);
-                                if (cur_frm.doc.status == 'Eingang') {
-                                    cur_frm.set_value("status", 'Open');
+            if (!gesperrt) {
+                // Abfrage ob Abschluss Mail gesendet werden soll
+                if ((cur_frm.doc.status == 'Closed')&&(cur_frm.doc.ignore_abschluss_mail != 1)) {
+                    var d = new frappe.ui.Dialog({
+                        'fields': [
+                            {'fieldname': 'ht', 'fieldtype': 'HTML'},
+                            {'fieldname': 'mail', 'fieldtype': 'Button', 'label': 'Abschluss E-Mail senden', 'click': function() {
+                                    d.hide();
+                                    cur_frm.set_value("ignore_abschluss_mail", 1).then(function(){
+                                        cur_frm.save().then(function(){
+                                            frappe.mvd.new_mail(cur_frm);
+                                        })
+                                    })
                                 }
-                                frappe.msgprint('Sie wurden als "Berater*in" erfasst.<br>Die ToDo anpassungen erfolgen mit dem <b>Speichern</b> der Beratung.');
-                            } else {
-                                frappe.msgprint('Sie sind bereits als "Berater*in" erfasst.');
+                            },
+                            {'fieldname': 'ignore', 'fieldtype': 'Button', 'label': 'Diese Meldung deaktivieren', 'click': function() {
+                                    d.hide();
+                                    cur_frm.set_value("ignore_abschluss_mail", 1).then(function(){
+                                        cur_frm.save();
+                                    })
+                                }
                             }
-                        } else {
-                            frappe.msgprint('Die automatische Übernahme dieser Beratung für Sie konnte nicht durchgeführt werden, weil es keine "Berater*in" gibt die Ihnen zugeordnet ist.');
-                        }
-                    }
-                });
-            });
-            
-            // btn zum zusammenführen
-            frm.add_custom_button(__("Zusammenführen"),  function() {
-                frappe.prompt([
-                    {'fieldname': 'master', 'fieldtype': 'Link', 'label': 'Master Beratung', 'reqd': 1, 'options': 'Beratung'}  
-                ],
-                function(values){
+                        ],
+                        'title': "Abschluss E-Mail"
+                    });
+                    d.fields_dict.ht.$wrapper.html('Diese Beratung besitzt den Status "Geschlossen".<br>Sie können nun entweder ein Abschluss E-Mail schreiben, oder diese Erinnerung für die Zukunft deaktivieren.');
+                    d.show();
+                }
+                
+                // Add BTN Übernehmen
+                frm.add_custom_button(__("Übernehmen"),  function() {
                     frappe.call({
-                        method: "mvd.mvd.doctype.beratung.beratung.merge",
+                        method: "mvd.mvd.doctype.beratung.beratung.uebernahme",
                         args:{
-                                'slave': cur_frm.doc.name,
-                                'master': values.master
+                                'beratung': cur_frm.doc.name,
+                                'user': frappe.session.user
                         },
                         callback: function(r)
                         {
-                            cur_frm.reload_doc();
+                            if (r.message) {
+                                if (cur_frm.doc.kontaktperson != r.message) {
+                                    cur_frm.set_value("kontaktperson", r.message);
+                                    if (cur_frm.doc.status == 'Eingang') {
+                                        cur_frm.set_value("status", 'Open');
+                                    }
+                                    frappe.msgprint('Sie wurden als "Berater*in" erfasst.<br>Die ToDo anpassungen erfolgen mit dem <b>Speichern</b> der Beratung.');
+                                } else {
+                                    frappe.msgprint('Sie sind bereits als "Berater*in" erfasst.');
+                                }
+                            } else {
+                                frappe.msgprint('Die automatische Übernahme dieser Beratung für Sie konnte nicht durchgeführt werden, weil es keine "Berater*in" gibt die Ihnen zugeordnet ist.');
+                            }
                         }
                     });
-                },
-                'Beratungen zusammenführen',
-                'Zusammenführen'
-                )
-            });
-            
-            if (cur_frm.doc.status != 'Closed') {
+                }, __("Beratungs Aktionen"));
+                // Immer aktiv
+                
+                //Add BTN Verknüpfen
+                frm.add_custom_button(__("Verknüpfen"),  function() {
+                    frappe.prompt([
+                        {'fieldname': 'beratung', 'fieldtype': 'Link', 'options': 'Beratung', 'label': 'Beratung', 'reqd': 1}  
+                    ],
+                    function(values){
+                        verknuepfen(cur_frm.doc.name, values.beratung, false);
+                    },
+                    'Beratungs Verknüpfung',
+                    'Verknüpfen'
+                    );
+                }, __("Beratungs Aktionen"));
+                // Immer Aktiv
+                
+                // Add BTN Zusammenführen
+                frm.add_custom_button(__("Zusammenführen"),  function() {
+                    frappe.prompt([
+                        {'fieldname': 'master', 'fieldtype': 'Link', 'label': 'Master Beratung', 'reqd': 1, 'options': 'Beratung'}  
+                    ],
+                    function(values){
+                        frappe.call({
+                            method: "mvd.mvd.doctype.beratung.beratung.merge",
+                            args:{
+                                    'slave': cur_frm.doc.name,
+                                    'master': values.master
+                            },
+                            callback: function(r)
+                            {
+                                cur_frm.reload_doc();
+                            }
+                        });
+                    },
+                    'Beratungen zusammenführen',
+                    'Zusammenführen'
+                    )
+                }, __("Beratungs Aktionen"));
+                // Deaktivierung BTN wenn notwendig
+                if (cur_frm.doc.status == 'Zusammengeführt') {
+                    cur_frm.custom_buttons["Zusammenführen"].off()
+                    cur_frm.custom_buttons["Zusammenführen"].on("click", function(){
+                        frappe.msgprint("Diese Funktion steht nur zur Verfügung wenn:<br><ul><li>Status nicht Zusammengeführt</li></ul>");
+                    })
+                }
+                
+                // Add BTN Schliessen
                 frm.add_custom_button(__("Schliessen"),  function() {
                     cur_frm.set_value("status", 'Closed').then(function(){
                         cur_frm.save();
                     })
+                }, __("Beratungs Aktionen"));
+                // Deaktivierung BTN wenn notwendig
+                if (cur_frm.doc.status == 'Closed') {
+                    cur_frm.custom_buttons["Schliessen"].off()
+                    cur_frm.custom_buttons["Schliessen"].on("click", function(){
+                        frappe.msgprint("Diese Funktion steht nur zur Verfügung wenn:<br><ul><li>Status nicht Geschlossen</li></ul>");
+                    })
+                }
+                
+                // Add BTN Als gelesen markieren
+                frm.add_custom_button(__("Als gelesen markieren"),  function() {
+                    if (cur_frm.is_dirty()) {
+                        cur_frm.set_value("ungelesen", 0);
+                        cur_frm.save();
+                    } else {
+                        frappe.db.set_value("Beratung", cur_frm.doc.name, 'ungelesen', 0).then(function(){
+                            cur_frm.reload_doc();
+                        })
+                    }
                 });
-            }
-            
-            if ((cur_frm.doc.status == 'Closed')&&(cur_frm.doc.ignore_abschluss_mail != 1)) {
-                // Abfrage ob Abschluss Mail gesendet werden soll
-                var d = new frappe.ui.Dialog({
-                    'fields': [
-                        {'fieldname': 'ht', 'fieldtype': 'HTML'},
-                        {'fieldname': 'mail', 'fieldtype': 'Button', 'label': 'Abschluss E-Mail senden', 'click': function() {
-                                d.hide();
-                                cur_frm.set_value("ignore_abschluss_mail", 1).then(function(){
-                                    cur_frm.save().then(function(){
-                                        frm.email_doc();
-                                    })
-                                })
-                            }
-                        },
-                        {'fieldname': 'ignore', 'fieldtype': 'Button', 'label': 'Diese Meldung deaktivieren', 'click': function() {
-                                d.hide();
-                                cur_frm.set_value("ignore_abschluss_mail", 1).then(function(){
-                                    cur_frm.save();
-                                })
+                // Deaktivierung BTN wenn notwendig
+                if (!cur_frm.doc.ungelesen) {
+                    cur_frm.custom_buttons["Als gelesen markieren"].off()
+                    cur_frm.custom_buttons["Als gelesen markieren"].on("click", function(){
+                        frappe.msgprint("Diese Funktion steht nur zur Verfügung wenn:<br><ul><li>Die Beratung als ungelesen markiert ist</li></ul>");
+                    })
+                }
+                
+                // Add BTN E-Mail Rückfrage
+                frm.add_custom_button(__("E-Mail Rückfrage"),  function() {
+                    cur_frm.set_value("status", "Rückfragen");
+                    cur_frm.save();
+                    frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_rueckfragen_email_template').then(function(value){
+                        cur_frm['default_rueckfragen_email_template'] = value.message.default_rueckfragen_email_template;
+                        var communications = cur_frm.timeline.get_communications();
+                        var last_email = '';
+                        if (communications.length > 0) {
+                            for (var i = communications.length - 1; i >= 0; i--) {
+                                if (communications[i].communication_medium == 'Email') {
+                                    last_email = communications[i];
+                                }
                             }
                         }
-                    ],
-                    'title': "Abschluss E-Mail"
+                        frappe.mvd.new_mail(cur_frm, last_email);
+                        cur_frm['default_rueckfragen_email_template'] = false;
+                    });
+                }, __("Rückfrage"));
+                // Deaktivierung BTN wenn notwendig
+                if (!['Eingang', 'Open'].includes(cur_frm.doc.status)) {
+                    cur_frm.custom_buttons["E-Mail Rückfrage"].off()
+                    cur_frm.custom_buttons["E-Mail Rückfrage"].on("click", function(){
+                        frappe.msgprint("Diese Funktion steht nur zur Verfügung wenn:<br><ul><li>Status Eingang oder Offen</li></ul>");
+                    })
+                }
+                
+                // Add BTN Termin vereinbaren
+                frm.add_custom_button(__("Termin vereinbaren"),  function() {
+                    cur_frm.set_value("status", "Rückfrage: Termin vereinbaren");
+                    cur_frm.save();
+                }, __("Rückfrage"));
+                // Deaktivierung BTN wenn notwendig
+                if (!['Eingang', 'Open'].includes(cur_frm.doc.status)) {
+                    cur_frm.custom_buttons["Termin vereinbaren"].off()
+                    cur_frm.custom_buttons["Termin vereinbaren"].on("click", function(){
+                        frappe.msgprint("Diese Funktion steht nur zur Verfügung wenn:<br><ul><li>Status Eingang oder Offen</li></ul>");
+                    })
+                }
+                
+                // Add BTN Termin vergeben
+                frm.add_custom_button(__("Termin vergeben"),  function() {
+                    termin_quick_entry(frm);
                 });
-                d.fields_dict.ht.$wrapper.html('Diese Beratung besitzt den Status "Geschlossen".<br>Sie können nun entweder ein Abschluss E-Mail schreiben, oder diese Erinnerung für die Zukunft deaktivieren.');
-                d.show();
+                // Deaktivierung BTN wenn notwendig
+                if ((cur_frm.doc.status == 'Closed')||(cur_frm.doc.termin.length > 0)||(!cur_frm.doc.mv_mitgliedschaft)) {
+                    cur_frm.custom_buttons["Termin vergeben"].off()
+                    cur_frm.custom_buttons["Termin vergeben"].on("click", function(){
+                        frappe.msgprint("Diese Funktion steht nur zur Verfügung wenn:<br><ul><li>Status nicht geschlossen</li><li>Keine Termine</li><li>Verknüpfte Mitgliedschaft</li></ul>");
+                    })
+                }
+                
+                // overwrite E-Mail BTN
+                $("[data-label='Email']").parent().off("click");
+                $("[data-label='Email']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
+                $("[data-label='E-Mail']").parent().off("click");
+                $("[data-label='E-Mail']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
+                $(".btn.btn-default.btn-new-email.btn-xs").off("click");
+                $(".btn.btn-default.btn-new-email.btn-xs").click(function(){frappe.mvd.new_mail(cur_frm);});
+                $("[data-communication-type='Communication']").off("click");
+                $(".reply-link").off("click");
+                $(".reply-link").click(function(e){prepare_mvd_mail_composer(e);}); 
+                $(".reply-link-all").click(function(e){prepare_mvd_mail_composer(e);});
+                frappe.ui.keys.off('ctrl+e', cur_frm.page);
+                frappe.ui.keys.on('ctrl+e', function(e) {frappe.mvd.new_mail(cur_frm);});
+            } else {
+                // disable E-Mail BTN
+                $("[data-label='Email']").parent().off("click");
+                $("[data-label='Email']").parent().click(function(){frappe.msgprint("Diese Beratung ist zur Bearbeitung gesperrt.");});
+                $("[data-label='E-Mail']").parent().off("click");
+                $("[data-label='E-Mail']").parent().click(function(){frappe.msgprint("Diese Beratung ist zur Bearbeitung gesperrt.");});
+                $(".btn.btn-default.btn-new-email.btn-xs").off("click");
+                $(".btn.btn-default.btn-new-email.btn-xs").click(function(){frappe.msgprint("Diese Beratung ist zur Bearbeitung gesperrt.");}); 
+                $("[title='Reply']").hide();
+                $("[title='Reply All']").hide();
+                frappe.ui.keys.off('ctrl+e', cur_frm.page);
+                frappe.ui.keys.on('ctrl+e', function(e) {frappe.msgprint("Diese Beratung ist zur Bearbeitung gesperrt.");});
             }
             
-            // als gelesen markieren
-            if (cur_frm.doc.ungelesen) {
-                frappe.db.set_value("Beratung", cur_frm.doc.name, 'ungelesen', 0).then(function(){
-                    cur_frm.reload_doc();
-                })
+            if (cur_frm.doc.kontaktperson&&cur_frm.doc.create_todo) {
+                frappe.call({
+                    method: "mvd.mvd.doctype.beratung.beratung.new_todo",
+                    args:{
+                            'beratung': cur_frm.doc.name,
+                            'kontaktperson': cur_frm.doc.kontaktperson
+                    },
+                    callback: function(r)
+                    {
+                        cur_frm.reload_doc();
+                        frappe.msgprint("ToDo erstellt");
+                    }
+                });
             }
-        }
-        
-        if (cur_frm.doc.kontaktperson&&cur_frm.doc.create_todo) {
-            frappe.call({
-                method: "mvd.mvd.doctype.beratung.beratung.new_todo",
-                args:{
-                        'beratung': cur_frm.doc.name,
-                        'kontaktperson': cur_frm.doc.kontaktperson
-                },
-                callback: function(r)
-                {
-                    cur_frm.reload_doc();
-                    frappe.msgprint("ToDo erstellt");
-                }
-            });
-        }
-        
-        if (cur_frm.doc.status == 'Zusammengeführt') {
-            setze_read_only(frm);
+            
+            if (cur_frm.doc.status == 'Zusammengeführt') {
+                setze_read_only(frm);
+            }
         }
     },
     mv_mitgliedschaft: function(frm) {
@@ -235,4 +384,130 @@ function setze_read_only(frm) {
     for (i; i<cur_frm.fields.length; i++) {
         cur_frm.set_df_property(cur_frm.fields[i].df.fieldname,'read_only', 1);
     }
+}
+
+function termin_quick_entry(frm) {
+    frappe.call({
+        'method': "mvd.mvd.doctype.beratung.beratung.get_beratungsorte",
+        'args': {
+            'sektion': cur_frm.doc.sektion_id
+        },
+        'callback': function(r) {
+            var orte = r.message.ort_string;
+            var default_termindauer = r.message.default_termindauer;
+            var default_von = roundMinutes(frappe.datetime.now_datetime()); // default "von"-Zeit = aktuelle Zeit gerundet auf nächste volle Stunde
+            var d = new frappe.ui.Dialog({
+              'title': __('Termin erstellen'),
+              'fields': [
+                {'fieldname': 'kontaktperson', 'fieldtype': 'Link', 'label': __('Kontaktperson'), 'options': 'Termin Kontaktperson', 'reqd': 1,
+                    'get_query': function() {
+                        return {
+                            filters: {
+                                'sektion_id': cur_frm.doc.sektion_id
+                            }
+                        }
+                    },
+                    'change': function() {
+                        if (d.get_value('kontaktperson')) {
+                            frappe.call({
+                                method: "mvd.mvd.doctype.beratung.beratung.get_beratungsorte",
+                                args:{
+                                    'sektion': cur_frm.doc.sektion_id,
+                                    'kontakt': d.get_value('kontaktperson')
+                                },
+                                callback: function(r) {
+                                    if (r.message) {
+                                        // hinterlegen von Orten auf Basis Kontakt
+                                        var orte_kontaktbasis = r.message.ort_string;
+                                        var default_ort_kontaktbasis = r.message.default;
+                                        d.set_df_property('ort', 'options', orte_kontaktbasis);
+                                        d.set_value('ort',  default_ort_kontaktbasis);
+                                    } else {
+                                        // Keine Orte zu Kontakt
+                                        d.set_value('ort',  '');
+                                        d.set_df_property('ort', 'options', '');
+                                    }
+                                }
+                            });
+                          } else {
+                              // reset to default
+                              d.set_value('ort',  '');
+                              d.set_df_property('ort', 'options', orte);
+                          }
+                      }
+                },
+                {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 1, 'default': ''},
+                {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich\nE-Mail', 'reqd': 1, 'default': 'telefonisch'},
+                {'fieldname': 'von', 'fieldtype': 'Datetime', 'label': __('Zeit von'), 'reqd': 1, 'default': default_von,
+                    'change': function() {
+                        var newDateObj = moment(d.get_value('von')).add(default_termindauer, 'm').toDate(); // default "bis"-Zeit = "von"-Zeit + default_termindauer oder 45'
+                        d.set_value('bis',  newDateObj);
+                    }
+                },
+                {'fieldname': 'bis', 'fieldtype': 'Datetime', 'label': __('Zeit bis'), 'reqd': 1}
+              ],
+              'primary_action': function() {
+                    d.hide();
+                    var child = cur_frm.add_child('termin');
+                    frappe.model.set_value(child.doctype, child.name, 'von', d.get_value('von'));
+                    frappe.model.set_value(child.doctype, child.name, 'bis', d.get_value('bis'));
+                    frappe.model.set_value(child.doctype, child.name, 'art', d.get_value('art'));
+                    frappe.model.set_value(child.doctype, child.name, 'ort', d.get_value('ort'));
+                    frappe.model.set_value(child.doctype, child.name, 'berater_in', d.get_value('kontaktperson'));
+                    cur_frm.refresh_field('termin');
+                    cur_frm.set_value("kontaktperson", d.get_value('kontaktperson'));
+                    cur_frm.save();
+                    frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_terminbestaetigung_email_template').then(function(value){
+                        cur_frm['default_terminbestaetigung_email_template'] = value.message.default_terminbestaetigung_email_template;
+                        frappe.mvd.new_mail(cur_frm);
+                        cur_frm['default_terminbestaetigung_email_template'] = false;
+                    });
+              },
+              'primary_action_label': __('Erstellen')
+            });
+            d.show();
+        }
+    });
+    
+}
+
+function roundMinutes(date_string) {
+    var date = new Date(date_string);
+    date.setHours(date.getHours() + Math.round(date.getMinutes()/60));
+    date.setMinutes(0, 0, 0);
+    return date
+}
+
+function prepare_mvd_mail_composer(e) {
+    var last_email = null;
+
+    const $target = $(e.currentTarget);
+    const name = $target.data().name;
+
+    // find the email to reply to
+    cur_frm.timeline.get_communications().forEach(function(c) {
+        if(c.name == name) {
+            last_email = c;
+            return false;
+        }
+    });
+
+    const opts = {
+        doc: cur_frm.doc,
+        txt: "",
+        title: __('Reply'),
+        frm: cur_frm,
+        last_email,
+        is_a_reply: true
+    };
+
+    if ($target.is('.reply-link-all')) {
+        if (last_email) {
+            opts.cc = last_email.cc;
+            opts.bcc = last_email.bcc;
+        }
+    }
+
+    // make the composer
+    new frappe.mvd.MailComposer(opts);
 }

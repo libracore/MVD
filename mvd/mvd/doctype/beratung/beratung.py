@@ -5,9 +5,23 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils.data import today
+from frappe.utils.data import today, now
 
 class Beratung(Document):
+    def onload(self):
+        # Sperren der Beratung beim öffnen
+        if frappe.db.exists("Beratung", self.name):
+            if not frappe.db.get_value("Beratung", self.name, 'gesperrt_am'):
+                self.gesperrt_von = frappe.session.user
+                now_date_time = now().split(".")[0]
+                self.gesperrt_am = now_date_time
+                frappe.db.set_value("Beratung", self.name, 'gesperrt_von', frappe.session.user, update_modified=False)
+                frappe.db.set_value("Beratung", self.name, 'gesperrt_am', now_date_time, update_modified=False)
+                frappe.db.commit()
+            else:
+                self.gesperrt_von = frappe.db.get_value("Beratung", self.name, 'gesperrt_von')
+                self.gesperrt_am = frappe.db.get_value("Beratung", self.name, 'gesperrt_am')
+    
     def validate(self):
         # keine Termine für nicht Mitglieder
         if len(self.termin) > 0:
@@ -221,12 +235,66 @@ class Beratung(Document):
         
         if self.mv_mitgliedschaft:
             self.mitgliedname = " ".join((frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1") or '', frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "nachname_1") or ''))
+        
+        # check for default_rueckfragen_email_template
+        self.check_default_rueckfragen_email_template()
+        
+        # Handling des Status
+        self.status_handler()
     
-    # ~ def onload(self):
-        # ~ if self.ungelesen == 1:
-            # ~ frappe.db.set_value("Beratung", self.name, 'ungelesen', 0, update_modified=False)
-            # ~ frappe.db.commit()
-            # ~ self.ungelesen = frappe.db.get_value("Beratung", self.name, 'ungelesen')
+    def status_handler(self):
+        # Prüfung ob Beratung gerade angelegt wird
+        if frappe.db.exists("Beratung", self.name):
+            # Beratung existiert und wurde verändert
+            if len(self.termin) > 0 and self.status not in ('Closed', 'Nicht-Mitglied-Abgewiesen'):
+                # Manuelle Anlage via "Termin erstellen"
+                self.status = 'Termin vergeben'
+            else:
+                if self.status not in ('Rückfragen', 'Rückfrage: Termin vereinbaren', 'Closed', 'Nicht-Mitglied-Abgewiesen'):
+                    alter_status = frappe.db.get_value("Beratung", self.name, 'status')
+                    if alter_status == 'Eingang':
+                        if self.kontaktperson and self.mv_mitgliedschaft:
+                            self.status = 'Open'
+                        if self.beratungskategorie and self.mv_mitgliedschaft:
+                            self.status = 'Open'
+                else:
+                    if self.status not in ('Closed', 'Nicht-Mitglied-Abgewiesen'):
+                        if self.status == 'Rückfragen' and self.kontaktperson:
+                            self.status = 'Open'
+        else:
+            # Beratung wird aktuell angelegt
+            if self.anlage_durch_web_formular:
+                # anlage via web formular
+                self.status = 'Eingang'
+                '''
+                Achtung MVBE-Hack
+                '''
+                if self.beratungskategorie not in ('202 - MZ-Erhöhung', '300 - Nebenkosten'):
+                    self.status = 'Open'
+                '''
+                /MVBE-Hack
+                '''
+            else:
+                if self.raised_by:
+                    # Anlage via Mail
+                    if self.mv_mitgliedschaft:
+                        # Konnte einem Mitglied zugewiesen werden
+                        self.status = 'Open'
+                    else:
+                        # Konnte nicht einem Mitglied zugewiesen werden
+                        self.status = 'Eingang'
+                else:
+                    # Anlage manuell
+                    self.status = 'Eingang'
+                    if len(self.termin) > 0:
+                        # Manuelle Anlage via "Termin erstellen"
+                        self.status = 'Termin vergeben'
+                    
+    def check_default_rueckfragen_email_template(self):
+        if self.sektion_id:
+            default_rueckfragen_email_template = frappe.db.get_value("Sektion", self.sektion_id, "default_rueckfragen_email_template")
+            if self.default_rueckfragen_email_template != default_rueckfragen_email_template:
+                self.default_rueckfragen_email_template = default_rueckfragen_email_template
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
@@ -411,7 +479,7 @@ def check_communication(self, event):
 def new_initial_todo(self, event):
     if int(self.create_todo == 1):
         new_todo(self.name, self.kontaktperson)
-        frappe.db.set_value("Beratung", self.name, 'status', 'Open', update_modified=False)
+        # ~ frappe.db.set_value("Beratung", self.name, 'status', 'Open', update_modified=False)
         frappe.db.commit()
 
 @frappe.whitelist()
@@ -466,3 +534,35 @@ def merge(slave, master):
             frappe.db.set_value("File", beratung_file.name, "attached_to_name", master_doc.name)
     
     return
+
+@frappe.whitelist()
+def clear_protection(beratung, force=False):
+    if frappe.db.get_value("Beratung", beratung, 'gesperrt_von') == frappe.session.user or force:
+        frappe.db.set_value("Beratung", beratung, 'gesperrt_von', None, update_modified=False)
+        frappe.db.set_value("Beratung", beratung, 'gesperrt_am', None, update_modified=False)
+        frappe.db.commit()
+    
+    if force:
+        frappe.get_doc("Beratung", beratung).add_comment('Submitted', 'Hat manuell die aktive Beratungssperre aufgehoben')
+        return
+
+@frappe.whitelist()
+def get_beratungsorte(sektion, kontakt=None):
+    if not kontakt:
+        orte = frappe.db.sql("""SELECT `name` AS `ort_def` FROM `tabBeratungsort` WHERE `sektion_id` = '{sektion}' ORDER BY `ort` ASC""".format(sektion=sektion), as_dict=True)
+    else:
+        orte = frappe.db.sql("""SELECT `ort` AS `ort_def` FROM `tabBeratungsort Multiselect` WHERE `parent` = '{kontakt}' ORDER BY `ort` ASC""".format(kontakt=kontakt), as_dict=True)
+    
+    ort_list = []
+    for ort in orte:
+        ort_list.append(ort.ort_def)
+    ort_string = "\n".join(ort_list)
+    return {
+        'ort_string': ort_string,
+        'default': orte[0].ort_def if len(orte) > 0 else '',
+        'default_termindauer': frappe.db.get_value("Sektion", sektion, 'default_termindauer') or 45
+    }
+
+@frappe.whitelist()
+def anz_beratungen_ohne_termine(mv_mitgliedschaft):
+    return int(frappe.db.count('Beratung', {'mv_mitgliedschaft': mv_mitgliedschaft, 'hat_termine': 0}))
