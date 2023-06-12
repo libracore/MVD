@@ -3,137 +3,202 @@
     <h1 class="vbz">Rechtsberatung und Disposition<span id="datenstand" class="pull-right">Datenstand: {{ datenstand }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
 </div>
 <div class="row">
-    <!--<p class="place-holder-left">Alle Änderungen, die nicht von der Sektion von Hand vorgenommen werden, müssen validiert werden.</p>-->
     <table id="table_beratungs_uebersicht">
         <tr>
             <th></th>
+            <th></th>
             <th style="text-align: right;"><b>Anzahl</b></th>
         </tr>
-        <tr id="eingang">
-            <td><b>Unbearbeitete Beratungsanfragen</b> (Status Eingang)</td>
-            {% if eingang > 99 %}
+        <tr id="s">
+            <td>S</td>
+            <td>Sekretariat</td>
+            {% if s > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ eingang }}</b></td>
+                <td style="text-align: right;"><b>{{ s }}</b></td>
             {% endif %}
         </tr>
-        <tr id="eingang_ohne_zuordnung">
-            <td>davon nicht Mitgliedern zugeordnet</td>
-            {% if eingang_ohne_zuordnung > 99 %}
-                <td style="text-align: right;">99+</td>
+        <tr id="s1">
+            <td>S1</td>
+            <td>Nicht MItgliedern zugeordnet</td>
+            {% if s1 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;">{{ eingang_ohne_zuordnung }}</td>
+                <td style="text-align: right;"><b>{{ s1 }}</b></td>
             {% endif %}
         </tr>
-        <tr id="eingang_ungelesen">
-            <td>davon ungelesen</td>
-            {% if eingang_ungelesen > 99 %}
-                <td style="text-align: right;">99+</td>
+        <tr id="s2">
+            <td>S2</td>
+            <td>HK/NK und MZ</td>
+            {% if s2 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;">{{ eingang_ungelesen }}</td>
+                <td style="text-align: right;"><b>{{ s2 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="s3">
+            <td>S3</td>
+            <td>Termin vereinbaren</td>
+            {% if s3 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ s3 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="s4">
+            <td>S4</td>
+            <td>Offene Rückfragen</td>
+            {% if s4 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ s4 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="s5">
+            <td>S5</td>
+            <td>Beantwortete Rückfragen (Posteingang)</td>
+            {% if s5 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ s5 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="s6">
+            <td>S6</td>
+            <td>Weitere Rückfragen (Posteingang 2)</td>
+            {% if s6 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ s6 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="s7">
+            <td>S7</td>
+            <td>Beratungsanfragen von allgemeiner Adresse</td>
+            {% if s7 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ s7 }}</b></td>
             {% endif %}
         </tr>
         <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-        <tr id="offen">
-            <td><b>Warteschlangen</b> (Status Offen)</td>
-            {% if offen > 99 %}
+        <tr id="r">
+            <td>R</td>
+            <td>Rechtsberatung</td>
+            {% if r > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ offen }}</b></td>
+                <td style="text-align: right;"><b>{{ r }}</b></td>
             {% endif %}
         </tr>
-        <tr id="offen_dringend">
+        <tr id="r1">
+            <td>R1</td>
             <td>Dringend</td>
-            {% if offen_dringend > 99 %}
-                <td style="text-align: right;">99+</td>
+            {% if r1 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;">{{ offen_dringend }}</td>
+                <td style="text-align: right;"><b>{{ r1 }}</b></td>
             {% endif %}
         </tr>
-        <tr id="offen_zuweisung">
-            <td>Zugewiesen/Nicht-Zugewiesen zu Person/Pool</td>
-            <td style="text-align: right;">{% if offen_zuweisung_ja > 99 %}99+{% else %}{{ offen_zuweisung_ja }}{% endif %}/{% if offen_zuweisung_nein > 99 %}99+{% else %}{{ offen_zuweisung_nein }}{% endif %}</td>
-        </tr>
-        <tr id="offen_ungelesen">
-            <td>Ungelesen</td>
-            {% if offen_ungelesen > 99 %}
-                <td style="text-align: right;">99+</td>
+        <tr id="r2">
+            <td>R2</td>
+            <td>Im Pool</td>
+            {% if r2 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;">{{ offen_ungelesen }}</td>
+                <td style="text-align: right;"><b>{{ r2 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r3">
+            <td>R3</td>
+            <td>Nicht im Pool/Einzelzuweisung</td>
+            {% if r3 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r3 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r4">
+            <td>R4</td>
+            <td>Nicht im Pool/Einzelzuweisung</td>
+            {% if r4 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r4 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r5">
+            <td>R5</td>
+            <td>Beantwortete Rückfragen (Posteingang)</td>
+            {% if r5 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r5 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r6">
+            <td>R6</td>
+            <td>Beantwortete Rückfragen für einzelne Berater*in (Posteingang)</td>
+            {% if r6 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r6 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r7">
+            <td>R7</td>
+            <td>Alle vereinbarten Termine</td>
+            {% if r7 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r7 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r8">
+            <td>R8</td>
+            <td>Vergangene Termine</td>
+            {% if r8 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r8 }}</b></td>
             {% endif %}
         </tr>
         <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-        <tr id="rueckfragen">
-            <td><b>Rückfragen</b></td>
-            {% if rueckfragen > 99 %}
+        <tr id="p1">
+            <td>P1</td>
+            <td>Exklusiv zugewiesene Beratungen</td>
+            {% if p1 > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ rueckfragen }}</b></td>
+                <td style="text-align: right;"><b>{{ p1 }}</b></td>
             {% endif %}
         </tr>
-        <tr id="termine">
-            <td><b>Termine</b></td>
-            {% if termine > 99 %}
+        <tr id="p2">
+            <td>P2</td>
+            <td>Offene eigene Rückfragen</td>
+            {% if p2 > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ termine }}</b></td>
+                <td style="text-align: right;"><b>{{ p2 }}</b></td>
             {% endif %}
         </tr>
-        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-        <tr id="fullname">
-            <td><b>{{ frappe.session.user_fullname}}</b></td>
-            <td style="text-align: right;"><b>&nbsp;</b></td>
-        </tr>
-        <tr id="zugewiesene_beratungen">
-            <td>zugewiesene Beratungen</td>
-            {% if zugewiesene_beratungen > 99 %}
+        <tr id="p3">
+            <td>P3</td>
+            <td>Beantwortete Rückfragen (Posteingang)</td>
+            {% if p3 > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ zugewiesene_beratungen }}</b></td>
+                <td style="text-align: right;"><b>{{ p3 }}</b></td>
             {% endif %}
         </tr>
-        <tr id="zugewiesene_termine">
-            <td>zugewiesene Termine</td>
-            {% if zugewiesene_termine > 99 %}
+        <tr id="p4">
+            <td>P4</td>
+            <td>Termine</td>
+            {% if p4 > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ zugewiesene_termine }}</b></td>
+                <td style="text-align: right;"><b>{{ p4 }}</b></td>
             {% endif %}
         </tr>
-        <tr id="zugewiesene_ungelesen">
-            <td>zugewiesene ungelesene Beratungen</td>
-            {% if zugewiesene_ungelesene_beratungen > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ zugewiesene_ungelesene_beratungen }}</b></td>
-            {% endif %}
-        </tr>
-        <tr id="exklusive_zuweisungen">
-            <td>exklusive zugewiesene Beratungen</td>
-            {% if exklusive_zuweisungen > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ exklusive_zuweisungen }}</b></td>
-            {% endif %}
-        </tr>
-        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-        <tr id="rechtsberaterinnen">
-            <td>Liste der Rechtsberater*innen</td>
-            <td style="text-align: right;"><b>&nbsp;</b></td>
-        </tr>
-        <tr id="beratungskategorien">
-            <td>Liste der Beratungskategorien</td>
-            <td style="text-align: right;"><b>&nbsp;</b></td>
-        </tr>
-        <tr id="statistik">
-            <td>Statistik</td>
-            <td style="text-align: right;"><b>&nbsp;</b></td>
-        </tr>
-        {% if frappe.boot.default_sektion == "MVBE" %}
-        <tr id="hk_u_mz">
-            <td>MVBE Admin: HK_u_MZ</td>
-            <td style="text-align: right;"><b>&nbsp;</b></td>
-        </tr>
-        {% endif %}
     </table>
 </div>

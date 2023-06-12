@@ -37,43 +37,76 @@ frappe.vbz_beratung = {
     add_click_handlers: function(open_datas) {
         //~ frappe.vbz_beratung.remove_click_handlers();
         
-        $("#eingang").click(function(){
+        $("#s").click(function(){
             frappe.route_options = {"status": 'Eingang'}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#eingang_ohne_zuordnung").click(function(){
-            frappe.route_options = {"status": 'Eingang', "mv_mitgliedschaft": ['is', 'not set']}
+        $("#s1").click(function(){
+            frappe.route_options = {"mv_mitgliedschaft": ['is', 'not set']}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#offen").click(function(){
+        $("#s2").click(function(){
+            frappe.route_options = {"status": 'Eingang', "beratungskategorie": ['in', ['202 - MZ-Erhöhung', '300 - Nebenkosten']]}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#s3").click(function(){
+            frappe.route_options = {"status": 'Rückfrage: Termin vereinbaren'}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#s4").click(function(){
+            frappe.route_options = {"status": "Rückfragen", "kontaktperson": ['is', 'not set']}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#s5").click(function(){
+            frappe.route_options = {"status": "Rückfragen", "kontaktperson": ['is', 'not set'], "ungelesen": 1}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#s6").click(function(){
+            frappe.route_options = {"status": ["!=", "Rückfragen"], "ungelesen": 1}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#s7").click(function(){
+            frappe.route_options = {"status": 'Eingang'}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        
+        $("#r").click(function(){
             frappe.route_options = {"status": 'Open'}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#offen_dringend").click(function(){
+        $("#r1").click(function(){
             frappe.route_options = {"status": 'Open', 'beratung_prio': 'Hoch'}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#offen_zuweisung").click(function(){
-            frappe.route_options = {"status": 'Open', 'zuweisung': 0}
+        $("#r2").click(function(){
+            frappe.route_options = {'status': 'Open', 'kontaktperson': 'Rechtsberatung Pool (MVBE)'}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#rueckfragen").click(function(){
-            frappe.route_options = {"status": ['like', 'Rückfrage%']}
+        $("#r3").click(function(){
+            frappe.route_options = {'status': 'Open', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)'], 'kontaktperson': ['is', 'set']}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#termine").click(function(){
-            frappe.route_options = {"hat_termine": 1, 'status': ['!=', 'Closed']}
+        $("#r4").click(function(){
+            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['!=', '???'], 'kontaktperson': ['is', 'set']}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#zugewiesene_beratungen").click(function(){
-            frappe.route_options = {"_assign": ['like', '%' + frappe.session.user + '%']}
+        $("#r5").click(function(){
+            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['!=', '???'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#zugewiesene_termine").click(function(){
-            frappe.route_options = {"_assign": frappe.session.user}
-            frappe.set_route("query-report/Beratungs Termine");
-            
+        $("#r6").click(function(){
+            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['!=', '???'], 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1}
+            frappe.set_route("List", "Beratung", "List");
         });
+        $("#r7").click(function(){
+            frappe.route_options = {'status': ['!=', 'Closed'], 'hat_termine': 1}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r8").click(function(){
+            frappe.route_options = {'status': 'Closed', 'hat_termine': 1}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        
         $("#rechtsberaterinnen").click(function(){
             frappe.set_route("List", "Termin Kontaktperson", "List");
         });
@@ -82,9 +115,6 @@ frappe.vbz_beratung = {
         });
         $("#statistik").click(function(){
             frappe.set_route(["query-report", "Beratungsstatistik"]);
-        });
-        $("#hk_u_mz").click(function(){
-            frappe.set_route(["#List/Beratung/Report/MVBE Admin: HK_u_MZ"]);
         });
         
         frappe.dom.unfreeze();
