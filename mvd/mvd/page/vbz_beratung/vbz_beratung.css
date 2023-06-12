@@ -1,84 +1,10 @@
-/*
-Allgemein
-*/
-.control-card {
-    float: left;
-    height: 150px;
-    padding: 5px;
-    margin: 5px;
-    cursor: pointer;
-    width: 150px;
-    border-radius: 5px;
-}
-
-.green-card:hover {
-    box-shadow: 10px 10px 5px #91bf1f;
-    border: 1px solid #91bf1f;
-}
-
-.blue-card:hover {
-    box-shadow: 10px 10px 5px #0063ae;
-    border: 1px solid #0063ae;
-}
-
-.control-card .fa {
-    font-size: 5em;
-}
-
-.back-to-overview {
-    cursor: pointer;
-    padding-right: 4em;
-}
-
-.place-holder-left {
-    padding-left: 10em;
-}
-
-h2.place-holder-left {
-    padding-left: 7em;
-}
-#datenstand {
-    font-weight: normal !important;
-    font-size: 15px !important;
-}
-
-.vbz-indikator {
-    height: 2em;
-    border-radius: 2em;
-    width: 2em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #ff5858;
-    color: white;
-}
-
-.vbz-indikator span {
-    font-size: 1em;
-    font-weight: bold;
-}
-
 #page-vbz-beratung {
     background-color: #fafad9;
-}
-
-.green-icon {
-    color: #91bf1f;
-}
-
-.blue-icon {
-    color: #0063ae;
 }
 
 h1.vbz {
     font-weight: bold;
     padding-left: 15px;
-}
-
-#goto_klassisch {
-    font-weight: normal !important;
-    font-size: 15px !important;
-    cursor: pointer;
 }
 
 #datenstand {
@@ -91,71 +17,32 @@ h1.vbz {
     font-size: 15px !important;
 }
 
-/*
-Validierung, Massenlauf, Adresspflege
-*/
-#table_beratungs_uebersicht,
-#table_massenlauf_uebersicht,
-#table_adressrecherche_uebersicht,
-#table_adresspflege_uebersicht {
+#table_beratungs_uebersicht {
     margin-left: 10em;
     width: 50%;
 }
 
-/*
-Validierung
-*/
-#table_validierungs_uebersicht > tbody > tr > td:nth-child(odd) {
-    text-align: left;
-}
-
-#table_validierungs_uebersicht > tbody > tr > td:nth-child(even) {
-    text-align: right;
-}
-
-#table_validierungs_uebersicht > tbody > tr > th:nth-child(even) {
-    text-align: right;
-}
-
-#eingang:hover,
-#eingang_ohne_zuordnung:hover,
-#offen:hover,
-#offen_dringend:hover,
-#offen_zuweisung:hover,
-#rueckfragen:hover,
-#zugewiesene_beratungen:hover,
-#zugewiesene_termine:hover,
-#rechtsberaterinnen:hover,
-#beratungskategorien:hover,
-#statistik:hover,
-#hk_u_mz:hover,
-#termine:hover {
-    background-color: #91bf1f;
-    cursor: pointer;
-}
-
-/*
-Massenlauf
-*/
-#table_massenlauf_uebersicht > tbody > tr:nth-child(n+2):hover {
-    background-color: #91bf1f;
-}
-
-#table_massenlauf_uebersicht > tbody > tr:nth-child(n+2) > td:nth-child(n+3) > i:hover {
-    cursor: pointer;
-}
-
-/*
-Adresspflege
-*/
-#einmal_unzustellbar:hover,
-#zweimal_unzustellbar:hover,
-#umzugsanzeige_objekt:hover,
-#umzugsanzeige_solidarmitglied:hover,
-#verstorben_erloschen:hover,
-#weggezogen_unbekannt:hover,
-#treffer_ausland:hover,
-#personen_nicht_bekannt:hover {
+#s:hover,
+#s1:hover,
+#s2:hover,
+#s3:hover,
+#s4:hover,
+#s5:hover,
+#s6:hover,
+#s7:hover,
+#r:hover,
+#r1:hover,
+#r2:hover,
+#r3:hover,
+#r4:hover,
+#r5:hover,
+#r6:hover,
+#r7:hover,
+#r8:hover,
+#p1:hover,
+#p2:hover,
+#p3:hover,
+#p4:hover {
     background-color: #91bf1f;
     cursor: pointer;
 }
