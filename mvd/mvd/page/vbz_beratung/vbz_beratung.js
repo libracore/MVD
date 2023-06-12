@@ -107,6 +107,56 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         
+        $("#p1").click(function(){
+            frappe.call({
+                'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_user_kontaktperson",
+                'args': {},
+                'async': false,
+                'callback': function(r)
+                {
+                    frappe.route_options = {'status': 'Open', 'kontaktperson': ['in', r.message]}
+                    frappe.set_route("List", "Beratung", "List");
+                }
+            });
+        });
+        $("#p2").click(function(){
+            frappe.call({
+                'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_user_kontaktperson",
+                'args': {},
+                'async': false,
+                'callback': function(r)
+                {
+                    frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['in', r.message]}
+                    frappe.set_route("List", "Beratung", "List");
+                }
+            });
+        });
+        $("#p3").click(function(){
+            frappe.call({
+                'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_user_kontaktperson",
+                'args': {},
+                'async': false,
+                'callback': function(r)
+                {
+                    frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['in', r.message], 'ungelesen': 1}
+                    frappe.set_route("List", "Beratung", "List");
+                }
+            });
+        });
+        $("#p4").click(function(){
+            frappe.call({
+                'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_user_kontaktperson",
+                'args': {},
+                'async': false,
+                'callback': function(r)
+                {
+                    frappe.route_options = {'status': 'Termin vergeben', 'kontaktperson': ['in', r.message], 'hat_termine': 1}
+                    frappe.set_route("List", "Beratung", "List");
+                }
+            });
+        });
+        
+        
         $("#rechtsberaterinnen").click(function(){
             frappe.set_route("List", "Termin Kontaktperson", "List");
         });

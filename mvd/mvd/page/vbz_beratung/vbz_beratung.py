@@ -79,3 +79,13 @@ def get_p4(user):
                                             )
                                             AND `status` = 'Termin vergeben'""".format(user=user), as_dict=True)[0].qty
     return p4_qty or 0
+
+@frappe.whitelist()
+def get_user_kontaktperson():
+    user_kontaktperson = frappe.db.sql("""SELECT `parent`
+                                        FROM `tabTermin Kontaktperson Multi User`
+                                        WHERE `user` = '{user}'""".format(user=frappe.session.user), as_dict=True)
+    user_kontaktpersonen = []
+    for uk in user_kontaktperson:
+        user_kontaktpersonen.append(uk.parent)
+    return user_kontaktpersonen
