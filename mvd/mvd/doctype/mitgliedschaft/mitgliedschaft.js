@@ -52,7 +52,7 @@ frappe.ui.form.on('Mitgliedschaft', {
             
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
                 
-                frm.add_custom_button(__("Beratung"),  function() {
+                frm.add_custom_button(__("Beratungs Termin"),  function() {
                     erstelle_beratung(frm);
                 }, __("Erstelle"));
                 
@@ -573,7 +573,6 @@ function load_beratungen_overview(frm) {
             if (show) {
                 cur_frm.dashboard.add_indicator(info, color);
             }
-            console.log(r.message)
         }
     });
 }
@@ -2610,7 +2609,8 @@ function termin_quick_entry(frm) {
                                 d.set_value('bis',  newDateObj);
                             }
                         },
-                        {'fieldname': 'bis', 'fieldtype': 'Datetime', 'label': __('Zeit bis'), 'reqd': 1}
+                        {'fieldname': 'bis', 'fieldtype': 'Datetime', 'label': __('Zeit bis'), 'reqd': 1},
+                        {'fieldname': 'notiz', 'fieldtype': 'Text Editor', 'label': __('Notiz (Intern)')}
                       ],
                       'primary_action': function() {
                             d.hide();
@@ -2623,7 +2623,8 @@ function termin_quick_entry(frm) {
                                     'art': d.get_value('art'),
                                     'ort': d.get_value('ort'),
                                     'berater_in': d.get_value('kontaktperson'),
-                                    'beratungskategorie': d.get_value('beratungskategorie')
+                                    'beratungskategorie': d.get_value('beratungskategorie'),
+                                    'notiz': d.get_value('notiz')
                                 }
                             } else {
                                 var kwargs = {
@@ -2633,12 +2634,13 @@ function termin_quick_entry(frm) {
                                     'art': d.get_value('art'),
                                     'ort': d.get_value('ort'),
                                     'berater_in': d.get_value('kontaktperson'),
-                                    'beratungskategorie': d.get_value('beratungskategorie')
+                                    'beratungskategorie': d.get_value('beratungskategorie'),
+                                    'notiz': d.get_value('notiz')
                                 }
                             }
                             
                             frappe.call({
-                                method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_neue_beratung",
+                                method: "mvd.mvd.doctype.beratung.beratung.create_neue_beratung",
                                 args: kwargs,
                                 freeze: true,
                                 freeze_message: d.get_value('neue_beratung') == 1 ? 'Erstelle Beratung und Termin...':'Erstelle Termin...',
