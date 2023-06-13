@@ -444,7 +444,8 @@ function termin_quick_entry(frm) {
                         d.set_value('bis',  newDateObj);
                     }
                 },
-                {'fieldname': 'bis', 'fieldtype': 'Datetime', 'label': __('Zeit bis'), 'reqd': 1}
+                {'fieldname': 'bis', 'fieldtype': 'Datetime', 'label': __('Zeit bis'), 'reqd': 1},
+                {'fieldname': 'notiz', 'fieldtype': 'Text Editor', 'label': __('Notiz (Intern)')}
               ],
               'primary_action': function() {
                     d.hide();
@@ -456,6 +457,7 @@ function termin_quick_entry(frm) {
                     frappe.model.set_value(child.doctype, child.name, 'berater_in', d.get_value('kontaktperson'));
                     cur_frm.refresh_field('termin');
                     cur_frm.set_value("kontaktperson", d.get_value('kontaktperson'));
+                    cur_frm.set_value("notiz", d.get_value('notiz'));
                     cur_frm.save();
                     frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_terminbestaetigung_email_template').then(function(value){
                         cur_frm['default_terminbestaetigung_email_template'] = value.message.default_terminbestaetigung_email_template;
