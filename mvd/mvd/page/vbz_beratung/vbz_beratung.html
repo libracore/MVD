@@ -11,7 +11,7 @@
         </tr>
         <tr id="s">
             <td>S</td>
-            <td>Sekretariat</td>
+            <td><b>Sekretariat</b></td>
             {% if s > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
@@ -84,7 +84,7 @@
         <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
         <tr id="r">
             <td>R</td>
-            <td>Rechtsberatung</td>
+            <td><b>Rechtsberatung</b></td>
             {% if r > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
@@ -164,6 +164,11 @@
             {% endif %}
         </tr>
         <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr>
+            <td></td>
+            <td><b>{{ frappe.user.full_name() }}</b></td>
+            <td>&nbsp;</td>
+        </tr>
         <tr id="p1">
             <td>P1</td>
             <td>Exklusiv zugewiesene Beratungen</td>
@@ -199,6 +204,22 @@
             {% else %}
                 <td style="text-align: right;"><b>{{ p4 }}</b></td>
             {% endif %}
+        </tr>
+        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr id="rechtsberaterinnen">
+            <td></td>
+            <td>Liste der Rechtsberater*innen</td>
+            <td style="text-align: right;"><b>&nbsp;</b></td>
+        </tr>
+        <tr id="beratungskategorien">
+            <td></td>
+            <td>Liste der Beratungskategorien</td>
+            <td style="text-align: right;"><b>&nbsp;</b></td>
+        </tr>
+        <tr id="statistik">
+            <td></td>
+            <td>Statistik</td>
+            <td style="text-align: right;"><b>&nbsp;</b></td>
         </tr>
     </table>
 </div>
