@@ -20,6 +20,8 @@
   "default",
   "e_mail_vorlage",
   "deaktiviert",
+  "section_content",
+  "seiten",
   "section_seitenmanagement",
   "anzahl_seiten",
   "cb_2",
@@ -432,9 +434,20 @@
    "fieldname": "e_mail_text",
    "fieldtype": "Text Editor",
    "label": "Text"
+  },
+  {
+   "fieldname": "section_content",
+   "fieldtype": "Section Break",
+   "label": "Inhalt"
+  },
+  {
+   "fieldname": "seiten",
+   "fieldtype": "Table",
+   "label": "Seiten",
+   "options": "Druckvorlage Seite"
   }
  ],
- "modified": "2023-01-13 09:33:51.748679",
+ "modified": "2023-06-14 11:23:08.277640",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

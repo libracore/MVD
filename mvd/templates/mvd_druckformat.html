@@ -1,0 +1,187 @@
+{% set druckvorlage = frappe.get_doc("Druckvorlage", "x mit EZ-MVBE") %}
+{% for seite in druckvorlage.seiten %}
+    <!-- ggf. Page Break -->
+    {% if seite.idx > 1 %}
+        <div class="page-break"></div>
+    {% endif %}
+    
+    <!-- Header -->
+    {% if seite.kopfzeile %}
+        <div id='kopfzeile'>
+            <img src="/assets/mvd/img/mvs_nationales_logo.png" style="width: 58.1mm;">
+        </div>
+    {% endif %}
+    
+    <!-- Mitglieder Ausweis -->
+    {% if seite.ausweis %}
+    
+    {% endif %}
+    
+    <!-- Adressblock -->
+    {% if seite.adressblock %}
+        {% if seite.pp %}
+            <!-- mit P.P. -->
+            <div id='adressblock_pp'>adresse mit pp</div>
+        {% else %}
+            <!-- ohne P.P. -->
+            <div id='adressblock'>adresse ohne pp</div>
+        {% endif %}
+    {% endif %}
+    
+    <!-- Referenzblock -->
+    {% if seite.referenzblock %}
+        <div id='referenzblock'>referenzblock</div>
+    {% endif %}
+    
+    <!-- Content -->
+    {% if seite.inhalt %}
+        <div id='content-{{seite.idx }}'>{{ seite.inhalt }}</div>
+    {% endif %}
+    
+    <!-- Fusszeile -->
+    {% if seite.fusszeile %}
+        <div id='fusszeile'><div id='fusszeile-content'>Seite {{ seite.idx }} / {{ druckvorlage.seiten|len }}</div></div>
+    {% endif %}
+    
+    <!-- Einzahlungsschein -->
+    {% if seite.einzahlungsschein %}
+        {% if seite.ez_typ == 'Haftpflicht' %}
+            <!-- Haftpflicht EZ -->
+            <div id='einzahlungsschein'>einzahlungsschein</div>
+        {% else %}
+            <!-- Mitgliedschaft EZ -->
+        {% endif %}
+    {% endif %}
+
+
+<style>
+    #kopfzeile {
+        padding-left: 24.5mm;
+        padding-top: 17.5mm;
+        min-height: 57mm;
+        max-height: 57mm;
+        border: 1px solid black;
+    }
+    
+    #adressblock {
+        margin-left: 26mm;
+        min-height: 43mm;
+        max-height: 43mm;
+        min-width: 102mm;
+        max-width: 102mm;
+        float: left;
+        border: 1px solid black;
+    }
+    
+    #referenzblock {
+        min-height: 43mm;
+        max-height: 43mm;
+        min-width: 70mm;
+        max-width: 70mm;
+        float: left;
+        border: 1px solid black;
+    }
+    
+    #content-{{seite.idx }} {
+        border: 1px solid black;
+        margin-left: 26mm;
+        min-width: 161.5mm;
+        max-width: 161.5mm;
+        clear: both;
+        {% if not seite.einzahlungsschein %}
+            {% if seite.kopfzeile %}
+                {% if seite.adressblock or seite.referenzblock %}
+                    {% if seite.fusszeile %}
+                        min-height: 168.5mm;
+                        max-height: 168.5mm;
+                    {% else %}
+                        min-height: 197mm;
+                        max-height: 197mm;
+                    {% endif %}
+                {% else %}
+                    {% if seite.fusszeile %}
+                        min-height: 211.5mm;
+                        max-height: 211.5mm;
+                    {% else %}
+                        min-height: 240mm;
+                        max-height: 240mm;
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                {% if seite.adressblock or seite.referenzblock %}
+                    {% if seite.fusszeile %}
+                        min-height: 225.5mm;
+                        max-height: 225.5mm;
+                    {% else %}
+                        min-height: 254mm;
+                        max-height: 254mm;
+                    {% endif %}
+                {% else %}
+                    {% if seite.fusszeile %}
+                        min-height: 268.5mm;
+                        max-height: 268.5mm;
+                    {% else %}
+                        min-height: 297mm;
+                        max-height: 297mm;
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% else %}
+            {% if seite.kopfzeile %}
+                {% if seite.adressblock or seite.referenzblock %}
+                    {% if seite.fusszeile %}
+                        min-height: 63.5mm;
+                        max-height: 63.5mm;
+                    {% else %}
+                        min-height: 92mm;
+                        max-height: 92mm;
+                    {% endif %}
+                {% else %}
+                    {% if seite.fusszeile %}
+                        min-height: 106.5mm;
+                        max-height: 106.5mm;
+                    {% else %}
+                        min-height: 135mm;
+                        max-height: 135mm;
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                {% if seite.adressblock or seite.referenzblock %}
+                    {% if seite.fusszeile %}
+                        min-height: 120.5mm;
+                        max-height: 120.5mm;
+                    {% else %}
+                        min-height: 149mm;
+                        max-height: 149mm;
+                    {% endif %}
+                {% else %}
+                    {% if seite.fusszeile %}
+                        min-height: 163.5mm;
+                        max-height: 163.5mm;
+                    {% else %}
+                        min-height: 192mm;
+                        max-height: 192mm;
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    }
+    
+    #fusszeile {
+        margin-left: 172.5mm;
+        border: 1px solid black;
+        min-height: 28.5mm;
+        max-height: 28.5mm;
+    }
+    
+    #fusszeile-content {
+        margin-top: 20mm;
+    }
+    
+    #einzahlungsschein {
+        min-height: 105mm;
+        max-height: 105mm;
+        border: 1px solid black;
+    }
+</style>
+{% endfor %}

@@ -1,0 +1,98 @@
+{
+ "creation": "2023-06-14 11:22:44.675619",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "stichwort",
+  "kopfzeile",
+  "ausweis",
+  "adressblock",
+  "pp",
+  "referenzblock",
+  "inhalt",
+  "fusszeile",
+  "einzahlungsschein",
+  "ez_typ"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "kopfzeile",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Kopfzeile"
+  },
+  {
+   "fieldname": "inhalt",
+   "fieldtype": "Text Editor",
+   "label": "Inhalt"
+  },
+  {
+   "default": "0",
+   "fieldname": "fusszeile",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Fusszeile"
+  },
+  {
+   "default": "0",
+   "fieldname": "ausweis",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Ausweis"
+  },
+  {
+   "default": "0",
+   "fieldname": "einzahlungsschein",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Einzahlungsschein"
+  },
+  {
+   "default": "0",
+   "fieldname": "adressblock",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Adressblock"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.adressblock",
+   "fieldname": "pp",
+   "fieldtype": "Check",
+   "label": "mit P.P."
+  },
+  {
+   "default": "0",
+   "fieldname": "referenzblock",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Referenzblock"
+  },
+  {
+   "depends_on": "eval:doc.einzahlungsschein",
+   "fieldname": "ez_typ",
+   "fieldtype": "Select",
+   "label": "EZ Typ",
+   "options": "Haftpflicht\nMitgliedschaft"
+  },
+  {
+   "fieldname": "stichwort",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Stichwort"
+  }
+ ],
+ "istable": 1,
+ "modified": "2023-06-14 11:35:33.259273",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Druckvorlage Seite",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
