@@ -45,6 +45,8 @@
   "fz_mitte",
   "cb_3",
   "fz_rechts",
+  "section_referenzblock",
+  "referenzblock",
   "section_mitgliederausweis",
   "ausweis_rueckseite",
   "section_todo",
@@ -447,9 +449,20 @@
    "fieldtype": "Link",
    "label": "Default E-Mail Template f\u00fcr Terminbest\u00e4tigung",
    "options": "Email Template"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_referenzblock",
+   "fieldtype": "Section Break",
+   "label": "Referenzblock"
+  },
+  {
+   "fieldname": "referenzblock",
+   "fieldtype": "Code",
+   "label": "Referenzblock"
   }
  ],
- "modified": "2023-06-08 11:59:08.930275",
+ "modified": "2023-06-15 12:14:49.649014",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

@@ -9,6 +9,7 @@
   "ausweis",
   "adressblock",
   "pp",
+  "plz_und_ort",
   "referenzblock",
   "inhalt",
   "fusszeile",
@@ -82,10 +83,16 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Stichwort"
+  },
+  {
+   "depends_on": "eval:doc.pp",
+   "fieldname": "plz_und_ort",
+   "fieldtype": "Data",
+   "label": "Postleitzahl und Ort (PP)"
   }
  ],
  "istable": 1,
- "modified": "2023-06-14 11:35:33.259273",
+ "modified": "2023-06-15 12:55:39.422755",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage Seite",
