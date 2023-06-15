@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 8.9.15
+Beratungskontakt: Korrektur Validierung der User-Zuweisung
+#### 8.9.14
+Neuer Beratungskanal: Schlichtungs-Coaching
 #### 8.9.13
 Beratung: Synchronhaltung Berater*in (Beratung und Termin)
 #### 8.9.12
