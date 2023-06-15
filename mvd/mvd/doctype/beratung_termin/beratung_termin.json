@@ -35,7 +35,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Art",
-   "options": "telefonisch\nE-Mail\npers\u00f6nlich"
+   "options": "telefonisch\nE-Mail\npers\u00f6nlich\nSchlichtungs-Coaching"
   },
   {
    "fieldname": "berater_in",
@@ -46,7 +46,7 @@
   }
  ],
  "istable": 1,
- "modified": "2023-06-01 11:23:23.896677",
+ "modified": "2023-06-15 13:47:08.211600",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung Termin",

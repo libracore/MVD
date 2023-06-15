@@ -328,7 +328,7 @@
    "fieldname": "beratungskanal",
    "fieldtype": "Select",
    "label": "Beratungskanal",
-   "options": "E-Mail\nTelefon\npers\u00f6nlich\nschriftlich"
+   "options": "E-Mail\nTelefon\npers\u00f6nlich\nschriftlich\nSchlichtungs-Coaching"
   },
   {
    "fieldname": "beratungsaufwand",
@@ -400,7 +400,7 @@
    "label": "N\u00e4chster Termin"
   }
  ],
- "modified": "2023-06-15 09:36:14.640112",
+ "modified": "2023-06-15 13:46:57.523221",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

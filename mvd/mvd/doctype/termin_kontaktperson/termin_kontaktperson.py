@@ -29,6 +29,7 @@ class TerminKontaktperson(Document):
                                                                     SELECT `parent` FROM `tabTermin Kontaktperson Multi User`
                                                                     WHERE `user` = '{user}'
                                                                 )
-                                                            """.format(user=user), as_dict=True)
+                                                                AND `parent` != '{itself}'
+                                                            """.format(user=user, itself=self.name), as_dict=True)
                 if len(vorhandene_einzel_verknuepfung) > 0:
                     frappe.throw("""{0} ist bereits mit <a href="https://libracore.mieterverband.ch/desk#Form/Termin Kontaktperson/{1}">{1}</a> verknüpft.<br>Es dürfen keine doppel Einzelverknüpfungen existieren.""".format(user, vorhandene_einzel_verknuepfung[0].parent))
