@@ -239,6 +239,12 @@ class Beratung(Document):
         # check for default_rueckfragen_email_template
         self.check_default_rueckfragen_email_template()
         
+        # setzen von naechster_termin für Listenansicht
+        self.set_naechster_termin()
+        
+        # synchron-haltung von kontaktperson in Beratung und in Beratungs-Termin
+        self.synchron_kontaktperson()
+        
         # Handling des Status
         self.status_handler()
     
@@ -295,6 +301,21 @@ class Beratung(Document):
             default_rueckfragen_email_template = frappe.db.get_value("Sektion", self.sektion_id, "default_rueckfragen_email_template")
             if self.default_rueckfragen_email_template != default_rueckfragen_email_template:
                 self.default_rueckfragen_email_template = default_rueckfragen_email_template
+    
+    def set_naechster_termin(self):
+        if len(self.termin) > 0:
+            self.naechster_termin = frappe.utils.get_datetime(self.termin[len(self.termin) - 1].von).strftime('%d.%m.%Y %H:%M')
+        else:
+            self.naechster_termin = None
+    
+    def synchron_kontaktperson(self):
+        if len(self.termin) > 0:
+            if self.kontaktperson != self.termin[len(self.termin) - 1].berater_in:
+                kontaktperson_alt = frappe.db.get_value("Beratung", self.name, 'kontaktperson')
+                if kontaktperson_alt != self.kontaktperson:
+                    self.termin[len(self.termin) - 1].berater_in = self.kontaktperson
+                else:
+                    self.kontaktperson = self.termin[len(self.termin) - 1].berater_in
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):

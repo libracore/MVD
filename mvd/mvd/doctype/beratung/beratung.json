@@ -24,6 +24,7 @@
   "anlage_durch_web_formular",
   "email_template",
   "default_rueckfragen_email_template",
+  "naechster_termin",
   "section_merge",
   "master",
   "section_allgemein",
@@ -390,9 +391,16 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "default_rueckfragen_email_template"
+  },
+  {
+   "fieldname": "naechster_termin",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "N\u00e4chster Termin"
   }
  ],
- "modified": "2023-06-13 09:39:06.060012",
+ "modified": "2023-06-15 09:36:14.640112",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

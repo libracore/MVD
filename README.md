@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 8.9.13
+Beratung: Synchronhaltung Berater*in (Beratung und Termin)
+#### 8.9.12
+Beratung: nächster Termin in Listenansicht inkl. Patch
 #### 8.9.11
 VBZ Beratung anp.
 #### 8.9.10
