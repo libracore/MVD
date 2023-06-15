@@ -68,7 +68,8 @@
   "default_emailberatung_todo_gruppe",
   "default_rueckfragen_email_template",
   "default_termindauer",
-  "default_terminbestaetigung_email_template"
+  "default_terminbestaetigung_email_template",
+  "hinweis_mietzinsrechner"
  ],
  "fields": [
   {
@@ -447,9 +448,15 @@
    "fieldtype": "Link",
    "label": "Default E-Mail Template f\u00fcr Terminbest\u00e4tigung",
    "options": "Email Template"
+  },
+  {
+   "fieldname": "hinweis_mietzinsrechner",
+   "fieldtype": "Code",
+   "label": "Hinweis Mietzinsrechner",
+   "permlevel": 1
   }
  ],
- "modified": "2023-06-08 11:59:08.930275",
+ "modified": "2023-06-15 14:13:30.592075",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
@@ -482,6 +489,18 @@
   {
    "read": 1,
    "role": "MV_GL"
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
   }
  ],
  "sort_field": "modified",

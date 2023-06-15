@@ -5,6 +5,7 @@ frappe.pages['vbz-beratung'].on_page_load = function(wrapper) {
         single_column: true
     });
     frappe.vbz_beratung.add_views(page);
+    localStorage['firstLoad'] = true;
 }
 frappe.pages['vbz-beratung'].refresh= function(wrapper){
     frappe.vbz_beratung.show_view('vbz_beratung');
@@ -24,6 +25,7 @@ frappe.vbz_beratung = {
                 if (r.message) {
                     page.add_view('vbz_beratung', frappe.render_template("vbz_beratung", eval(r.message.beratung)))
                     frappe.vbz_beratung.add_click_handlers(eval(r.message));
+                    localStorage['firstLoad'] = true;
                 }
             }
         });

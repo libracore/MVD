@@ -177,6 +177,23 @@ $(document).on("page-change", function() {
             }
         }
     }
+    // gewährleistung VBZ Beratung Reload
+    if (!window.location.hash.includes('#vbz-beratung')) {
+        if( window.localStorage ) {
+            if( localStorage.getItem('firstLoad') ) {
+                localStorage.removeItem('firstLoad');
+            }
+        }
+    } else {
+        if( window.localStorage ) {
+            if( !localStorage.getItem('firstLoad') ) {
+                localStorage['firstLoad'] = true;
+                window.location.reload();
+            } else {
+                localStorage.removeItem('firstLoad');
+            }
+        }
+    }
 });
 
 frappe.provide('frappe.mvd.new_mail');
