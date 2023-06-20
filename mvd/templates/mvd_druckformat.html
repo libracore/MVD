@@ -2,7 +2,7 @@
     <!-- ---------------------------------------------------------------------------------------- -->
     <!-- Allgemeine Daten -->
     <!-- ---------------------------------------------------------------------------------------- -->
-    {% set druckvorlage = frappe.get_doc("Druckvorlage", "x mit EZ-MVBE") %}
+    {% set druckvorlage = frappe.get_doc("Druckvorlage", doc.druckvorlage) %}
     <!-- {#{% set druckvorlage = frappe.get_doc("Druckvorlage", doc.druckvorlage) %}#} -->
     {% set print_language = 'de' %}
     {% set mitgliedschaft_qrr = False %}
