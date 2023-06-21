@@ -12,7 +12,7 @@
   "plz_und_ort",
   "referenzblock",
   "inhalt",
-  "fusszeile",
+  "seitenzahlen",
   "einzahlungsschein",
   "ez_typ"
  ],
@@ -28,13 +28,6 @@
    "fieldname": "inhalt",
    "fieldtype": "Text Editor",
    "label": "Inhalt"
-  },
-  {
-   "default": "0",
-   "fieldname": "fusszeile",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "label": "Fusszeile"
   },
   {
    "default": "0",
@@ -89,10 +82,17 @@
    "fieldname": "plz_und_ort",
    "fieldtype": "Data",
    "label": "Postleitzahl und Ort (PP)"
+  },
+  {
+   "default": "0",
+   "fieldname": "seitenzahlen",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Seitenzahlen"
   }
  ],
  "istable": 1,
- "modified": "2023-06-15 12:55:39.422755",
+ "modified": "2023-06-21 09:15:00.150898",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage Seite",

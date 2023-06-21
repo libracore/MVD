@@ -261,7 +261,17 @@
         
         <!-- Mitglieder Ausweis -->
         {% if seite.ausweis %}
-        
+            <div id='ausweis'>
+                <b>Mitgliederausweis</b>
+                <div id='ausweis-content'>
+                    firma<br>
+                    vorname_1 nachname_1<br>
+                    vorname_2 nachname_2
+                </div>
+                <div id="ausweis-footer">
+                        <b>Sektion:</b> Solothurn<span id="ausweis-footer-placeholder">....................</span><b>Mitgliedernummer:</b> 01234567
+                </div>
+            </div>
         {% endif %}
         
         <!-- Adressblock -->
@@ -290,10 +300,8 @@
             <div id='content-{{seite.idx }}'>{{ replace_mv_keywords(seite.inhalt, mitgliedschaft, sinv=sales_invoice) }}</div>
         {% endif %}
         
-        <!-- Fusszeile -->
-        {% if seite.fusszeile %}
-            <div id='fusszeile'><div id='fusszeile-content'>Seite {{ seite.idx }} / {{ druckvorlage.seiten|len }}</div></div>
-        {% endif %}
+        <!-- Seitenzahlen (Fusszeile) -->
+        <div id='seitenzahlen'><div id='seitenzahlen-content'>{% if seite.seitenzahlen %}Seite {{ seite.idx }} / {{ druckvorlage.seiten|len }}{% else %}&nbsp;{% endif %}</div></div>
         
         <!-- Einzahlungsschein -->
         {% if seite.einzahlungsschein %}
@@ -312,6 +320,15 @@
                     {% endif %}
                 </div>
             {% endif %}
+        {% endif %}
+        
+        <!-- Erzwungene Rückseite bei Mitglieder Ausweis -->
+        {% if seite.ausweis %}
+            <div class="page-break"></div>
+            <div id='ausweis-rueckseite'>
+                {{ sektion.ausweis_rueckseite }}
+            </div>
+            <div id="ausweis-rueckseite-zusatz">Karte an der Perforation herauslösen</div>
         {% endif %}
 
 
@@ -332,17 +349,55 @@
             #kopfzeile {
                 padding-left: 24.5mm;
                 padding-top: 17.5mm;
-                min-height: 57mm;
-                max-height: 57mm;
+                min-height: 55mm;
+                max-height: 55mm;
+                min-width: 128mm;
+                max-width: 128mm;
+                float: left;
+            }
+            
+            #ausweis {
+                float: right;
+                min-width: 82mm;
+                max-width: 82mm;
+                min-height: 55mm;
+                max-height: 55mm;
+                padding-top: 4mm;
+                font-size: 7.5pt !important;
+            }
+            
+            #ausweis-content {
+                padding-top: 20mm;
+                font-size: 9.5pt !important;
+            }
+            
+            #ausweis-footer {
+                padding-top: 4mm;
+                font-size: 7.5pt !important;
+            }
+            
+            #ausweis-footer-placeholder {
+                color: white;
+            }
+            
+            #ausweis-rueckseite {
+                min-height: 58mm;
+                padding-left: 128mm;
+            }
+            
+            #ausweis-rueckseite-zusatz {
+                padding-left: 124mm;
+                font-size: 6pt !important;
             }
             
             #adressblock {
                 margin-left: 26mm;
-                min-height: 43mm;
-                max-height: 43mm;
+                min-height: 40mm;
+                max-height: 40mm;
                 min-width: 102mm;
                 max-width: 102mm;
                 float: left;
+                clear: both;
                 font-size: 9.5pt !important;
                 line-height: 13.5pt !important;
             }
@@ -364,8 +419,8 @@
             }
             
             #referenzblock {
-                min-height: 43mm;
-                max-height: 43mm;
+                min-height: 40mm;
+                max-height: 40mm;
                 min-width: 70mm;
                 max-width: 70mm;
                 float: left;
@@ -380,6 +435,7 @@
                 font-size: 9.5pt !important;
                 line-height: 13.5pt !important;
                 clear: both;
+                overflow-y: hidden !important;
                 {% if not seite.einzahlungsschein %}
                     {% if seite.kopfzeile %}
                         {% if seite.adressblock or seite.referenzblock %}
@@ -391,7 +447,7 @@
                                 max-height: 197mm;
                             {% endif %}
                         {% else %}
-                            {% if seite.fusszeile %}
+                            {% if seite.seitenzahlen %}
                                 min-height: 211.5mm;
                                 max-height: 211.5mm;
                             {% else %}
@@ -409,7 +465,7 @@
                                 max-height: 254mm;
                             {% endif %}
                         {% else %}
-                            {% if seite.fusszeile %}
+                            {% if seite.seitenzahlen %}
                                 min-height: 268.5mm;
                                 max-height: 268.5mm;
                             {% else %}
@@ -429,9 +485,9 @@
                                 max-height: 92mm;
                             {% endif %}
                         {% else %}
-                            {% if seite.fusszeile %}
-                                min-height: 106.5mm;
-                                max-height: 106.5mm;
+                            {% if seite.seitenzahlen %}
+                                min-height: 133.5mm;
+                                max-height: 133.5mm;
                             {% else %}
                                 min-height: 135mm;
                                 max-height: 135mm;
@@ -447,7 +503,7 @@
                                 max-height: 149mm;
                             {% endif %}
                         {% else %}
-                            {% if seite.fusszeile %}
+                            {% if seite.seitenzahlen %}
                                 min-height: 163.5mm;
                                 max-height: 163.5mm;
                             {% else %}
@@ -459,17 +515,15 @@
                 {% endif %}
             }
             
-            #fusszeile {
+            #seitenzahlen {
                 margin-left: 172.5mm;
-                min-height: 28.5mm;
-                max-height: 28.5mm;
+                min-height: 2mm;
                 /* HACK weil sonst alles verschoben! */
                 border: 1px solid white;
                 /* ENDE: HACK */
             }
             
-            #fusszeile-content {
-                margin-top: 20mm;
+            #seitenzahlen-content {
                 font-size: 7.5pt !important;
             }
             
