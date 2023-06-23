@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.19
+Umwandlungsmöglichkeit von Geschäftsmitglieder zu Faktura-Kunden
 #### 8.9.18
 Mahnungen mit Nachname
 #### 8.9.17
