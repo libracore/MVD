@@ -1,5 +1,20 @@
 ## MVD
 ### Version Log
+#### 8.9.26
+Relink Attachements vom DT Communication zu DT Beratung wenn Communication ist Eingang zu Beratung
+#### 8.9.25
+Filter Anpassung P1
+#### 8.9.24
+Nach einer Rückfrage (per E-Mail-Dialog) sollte automatisch der Status "Rückfrage" sein (wenn keine oder keine neue Kontaktperson hinterlegt).
+#### 8.9.23
+Knopf in Beratung Statt «Als gelesen markieren» → «Neuer Input verarbeitet»
+#### 8.9.22
+Anpassung Filter:  S1 & R4
+Umbenennung S6 in "Weitere Korrespondenz"
+#### 8.9.21
+Bei Wechsel von "Eingang" auf "Offen ohne Berater*in -> Eintragung Standardberater*in
+#### 8.9.20
+Beratungen via E-Mail ohne Mitgliedschaft: Titel gem. E-Mail-Adresse
 #### 8.9.19
 Umwandlungsmöglichkeit von Geschäftsmitglieder zu Faktura-Kunden
 #### 8.9.18

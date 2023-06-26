@@ -229,6 +229,8 @@ class Beratung(Document):
         titel = '{0}'.format(self.start_date)
         if self.mv_mitgliedschaft:
             titel += ' {0} {1}'.format(frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1"), frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "nachname_1"))
+        elif self.raised_by:
+            titel += ' {0}'.format(self.raised_by.split("@")[0])
         if self.beratungskategorie:
             titel += ' {0}'.format(self.beratungskategorie)
         self.titel = titel
@@ -263,10 +265,21 @@ class Beratung(Document):
                             self.status = 'Open'
                         if self.beratungskategorie and self.mv_mitgliedschaft:
                             self.status = 'Open'
+                        
+                        # Bei Wechsel von "Eingang" auf "Offen ohne Berater*in -> Eintragung Standardberater*in
+                        if self.status == 'Open' and not self.kontaktperson:
+                            default_emailberatung_todo_gruppe = frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe")
+                            if default_emailberatung_todo_gruppe:
+                                self.kontaktperson = default_emailberatung_todo_gruppe
+                                self.auto_todo_log = self.kontaktperson
+                                self.create_todo = 1
+                        
                 else:
                     if self.status not in ('Closed', 'Nicht-Mitglied-Abgewiesen'):
                         if self.status == 'Rückfragen' and self.kontaktperson:
-                            self.status = 'Open'
+                            bisherige_kontaktperson = frappe.db.get_value("Beratung", self.name, 'kontaktperson') or None
+                            if not bisherige_kontaktperson:
+                                self.status = 'Open'
         else:
             # Beratung wird aktuell angelegt
             if self.anlage_durch_web_formular:
@@ -496,6 +509,7 @@ def check_communication(self, event):
             else:
                 beratung.ungelesen = 1
                 beratung.save()
+            relink_attachements(communication.name, beratung.name)
 
 def new_initial_todo(self, event):
     if int(self.create_todo == 1):
@@ -626,3 +640,9 @@ def create_neue_beratung(von, bis, art, ort, berater_in, notiz=None, beratungska
         beratung.save()
     
     return beratung.name
+
+def relink_attachements(communication, beratung):
+    files = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Communication' AND `attached_to_name` = '{0}'""".format(communication), as_dict=True)
+    for file_record in files:
+        frappe.db.set_value("File", file_record.name, 'attached_to_doctype', "Beratung")
+        frappe.db.set_value("File", file_record.name, 'attached_to_name', beratung)
