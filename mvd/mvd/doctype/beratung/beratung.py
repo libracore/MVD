@@ -277,7 +277,9 @@ class Beratung(Document):
                 else:
                     if self.status not in ('Closed', 'Nicht-Mitglied-Abgewiesen'):
                         if self.status == 'Rückfragen' and self.kontaktperson:
-                            self.status = 'Open'
+                            bisherige_kontaktperson = frappe.db.get_value("Beratung", self.name, 'kontaktperson') or None
+                            if not bisherige_kontaktperson:
+                                self.status = 'Open'
         else:
             # Beratung wird aktuell angelegt
             if self.anlage_durch_web_formular:
