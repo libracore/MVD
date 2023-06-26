@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.23
+Knopf in Beratung Statt «Als gelesen markieren» → «Neuer Input verarbeitet»
 #### 8.9.22
 Anpassung Filter:  S1 & R4
 Umbenennung S6 in "Weitere Korrespondenz"

@@ -170,7 +170,7 @@ frappe.ui.form.on('Beratung', {
                 }
                 
                 // Add BTN Als gelesen markieren
-                frm.add_custom_button(__("Als gelesen markieren"),  function() {
+                frm.add_custom_button(__("Neuer Input verarbeitet"),  function() {
                     if (cur_frm.is_dirty()) {
                         cur_frm.set_value("ungelesen", 0);
                         cur_frm.save();
@@ -182,8 +182,8 @@ frappe.ui.form.on('Beratung', {
                 });
                 // Deaktivierung BTN wenn notwendig
                 if (!cur_frm.doc.ungelesen) {
-                    cur_frm.custom_buttons["Als gelesen markieren"].off()
-                    cur_frm.custom_buttons["Als gelesen markieren"].on("click", function(){
+                    cur_frm.custom_buttons["Neuer Input verarbeitet"].off()
+                    cur_frm.custom_buttons["Neuer Input verarbeitet"].on("click", function(){
                         frappe.msgprint("Diese Funktion steht nur zur Verfügung wenn:<br><ul><li>Die Beratung als ungelesen markiert ist</li></ul>");
                     })
                 }
