@@ -509,6 +509,7 @@ def check_communication(self, event):
             else:
                 beratung.ungelesen = 1
                 beratung.save()
+            relink_attachements(communication.name, beratung.name)
 
 def new_initial_todo(self, event):
     if int(self.create_todo == 1):
@@ -639,3 +640,9 @@ def create_neue_beratung(von, bis, art, ort, berater_in, notiz=None, beratungska
         beratung.save()
     
     return beratung.name
+
+def relink_attachements(communication, beratung):
+    files = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Communication' AND `attached_to_name` = '{0}'""".format(communication), as_dict=True)
+    for file_record in files:
+        frappe.db.set_value("File", file_record.name, 'attached_to_doctype', "Beratung")
+        frappe.db.set_value("File", file_record.name, 'attached_to_name', beratung)
