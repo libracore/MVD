@@ -265,6 +265,15 @@ class Beratung(Document):
                             self.status = 'Open'
                         if self.beratungskategorie and self.mv_mitgliedschaft:
                             self.status = 'Open'
+                        
+                        # Bei Wechsel von "Eingang" auf "Offen ohne Berater*in -> Eintragung Standardberater*in
+                        if self.status == 'Open' and not self.kontaktperson:
+                            default_emailberatung_todo_gruppe = frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe")
+                            if default_emailberatung_todo_gruppe:
+                                self.kontaktperson = default_emailberatung_todo_gruppe
+                                self.auto_todo_log = self.kontaktperson
+                                self.create_todo = 1
+                        
                 else:
                     if self.status not in ('Closed', 'Nicht-Mitglied-Abgewiesen'):
                         if self.status == 'Rückfragen' and self.kontaktperson:
