@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.20
+Beratungen via E-Mail ohne Mitgliedschaft: Titel gem. E-Mail-Adresse
 #### 8.9.19
 Umwandlungsmöglichkeit von Geschäftsmitglieder zu Faktura-Kunden
 #### 8.9.18

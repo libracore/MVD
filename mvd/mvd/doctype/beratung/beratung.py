@@ -229,6 +229,8 @@ class Beratung(Document):
         titel = '{0}'.format(self.start_date)
         if self.mv_mitgliedschaft:
             titel += ' {0} {1}'.format(frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1"), frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "nachname_1"))
+        elif self.raised_by:
+            titel += ' {0}'.format(self.raised_by.split("@")[0])
         if self.beratungskategorie:
             titel += ' {0}'.format(self.beratungskategorie)
         self.titel = titel
