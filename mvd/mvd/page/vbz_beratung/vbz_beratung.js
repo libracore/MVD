@@ -112,7 +112,7 @@ frappe.vbz_beratung = {
         $("#p1").click(function(){
             frappe.call({
                 'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_user_kontaktperson",
-                'args': {},
+                'args': {'only_session_user': 1},
                 'async': false,
                 'callback': function(r)
                 {

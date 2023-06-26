@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.25
+Filter Anpassung P1
 #### 8.9.24
 Nach einer Rückfrage (per E-Mail-Dialog) sollte automatisch der Status "Rückfrage" sein (wenn keine oder keine neue Kontaktperson hinterlegt).
 #### 8.9.23
