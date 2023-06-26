@@ -1,5 +1,8 @@
 ## MVD
 ### Version Log
+#### 8.9.22
+Anpassung Filter:  S1 & R4
+Umbenennung S6 in "Weitere Korrespondenz"
 #### 8.9.21
 Bei Wechsel von "Eingang" auf "Offen ohne Berater*in -> Eintragung Standardberater*in
 #### 8.9.20
