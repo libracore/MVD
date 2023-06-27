@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.28
+Hotfix: SP API bei Beratungsanlage inkl. Bereinigungs-Script
 #### 8.9.27
 Korrektur Online-Beratung Fristbeginn (Schnittstelle)
 #### 8.9.26
