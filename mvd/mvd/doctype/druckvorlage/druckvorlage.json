@@ -20,15 +20,18 @@
   "default",
   "e_mail_vorlage",
   "deaktiviert",
+  "section_tipps",
+  "tipps",
+  "tipps_mahnung",
+  "tipps_geschenkmitgliedschaft",
+  "section_content",
+  "seiten",
+  "migriert_neues_cd",
   "section_seitenmanagement",
   "anzahl_seiten",
   "cb_2",
   "doppelseitiger_druck",
   "logo_ausblenden",
-  "section_tipps",
-  "tipps",
-  "tipps_mahnung",
-  "tipps_geschenkmitgliedschaft",
   "section_inhalt_1",
   "h1",
   "seite_1a",
@@ -86,7 +89,7 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:!doc.e_mail_vorlage",
+   "depends_on": "eval:!doc.migriert_neues_cd&&!doc.e_mail_vorlage",
    "fieldname": "section_seitenmanagement",
    "fieldtype": "Section Break",
    "label": "Seitenmanagement"
@@ -200,7 +203,7 @@
    "label": "Fusszeile Blatt 3 ausblenden"
   },
   {
-   "depends_on": "eval:!doc.e_mail_vorlage",
+   "depends_on": "eval:!doc.migriert_neues_cd&&!doc.e_mail_vorlage",
    "fieldname": "section_inhalt_1",
    "fieldtype": "Section Break",
    "label": "Inhalt"
@@ -432,9 +435,28 @@
    "fieldname": "e_mail_text",
    "fieldtype": "Text Editor",
    "label": "Text"
+  },
+  {
+   "depends_on": "eval:!doc.e_mail_vorlage",
+   "fieldname": "section_content",
+   "fieldtype": "Section Break",
+   "label": "Inhalt"
+  },
+  {
+   "fieldname": "seiten",
+   "fieldtype": "Table",
+   "label": "Seiten",
+   "options": "Druckvorlage Seite"
+  },
+  {
+   "default": "0",
+   "fieldname": "migriert_neues_cd",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Migriert (Neues CD)"
   }
  ],
- "modified": "2023-01-13 09:33:51.748679",
+ "modified": "2023-06-21 09:55:29.236849",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",
