@@ -4140,6 +4140,8 @@ def erstellung_faktura_kunde(mitgliedschaft):
         'anrede': mitgliedschaft.anrede_c,
         'vorname': mitgliedschaft.vorname_1,
         'nachname': mitgliedschaft.nachname_1,
+        'firma': mitgliedschaft.firma,
+        'zusatz_firma': mitgliedschaft.zusatz_firma,
         'tel_p': mitgliedschaft.tel_p_1,
         'tel_m': mitgliedschaft.tel_m_1,
         'tel_g': mitgliedschaft.tel_g_1,

@@ -44,7 +44,7 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s1").click(function(){
-            frappe.route_options = {"mv_mitgliedschaft": ['is', 'not set']}
+            frappe.route_options = {"status": 'Eingang', "mv_mitgliedschaft": ['is', 'not set']}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s2").click(function(){
@@ -112,7 +112,7 @@ frappe.vbz_beratung = {
         $("#p1").click(function(){
             frappe.call({
                 'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_user_kontaktperson",
-                'args': {},
+                'args': {'only_session_user': 1},
                 'async': false,
                 'callback': function(r)
                 {

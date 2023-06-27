@@ -13,6 +13,19 @@ from frappe.utils.background_jobs import enqueue
 from frappe import _
 
 class Mahnung(Document):
+    def validate(self):
+        if self.mv_mitgliedschaft:
+            if self.customer == frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, 'kunde_mitglied'):
+                self.nachname_kunde = frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, 'nachname_1')
+            elif self.customer == frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, 'rg_kunde'):
+                self.nachname_kunde = frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, 'rg_nachname')
+            else:
+                self.nachname_kunde = None
+        elif self.mv_kunde:
+            self.nachname_kunde = frappe.db.get_value("Kunden", self.mv_kunde, 'nachname')
+        else:
+            self.nachname_kunde = None
+    
     # this will apply all payment reminder levels in the sales invoices
     def update_reminder_levels(self):
         if not int(self.zahlungserinnerung) == 1:

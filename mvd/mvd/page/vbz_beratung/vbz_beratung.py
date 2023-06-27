@@ -81,11 +81,16 @@ def get_p4(user):
     return p4_qty or 0
 
 @frappe.whitelist()
-def get_user_kontaktperson():
+def get_user_kontaktperson(only_session_user=False):
     user_kontaktperson = frappe.db.sql("""SELECT `parent`
                                         FROM `tabTermin Kontaktperson Multi User`
                                         WHERE `user` = '{user}'""".format(user=frappe.session.user), as_dict=True)
     user_kontaktpersonen = []
     for uk in user_kontaktperson:
-        user_kontaktpersonen.append(uk.parent)
+        if not only_session_user:
+            user_kontaktpersonen.append(uk.parent)
+        else:
+            if frappe.db.count('Termin Kontaktperson Multi User', {'parent': uk.parent}) < 2:
+                user_kontaktpersonen.append(uk.parent)
     return user_kontaktpersonen
+                
