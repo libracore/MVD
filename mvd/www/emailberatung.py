@@ -478,7 +478,7 @@ def send_to_sp():
                     "email": beratung.raised_by,
                     "anderesMietobjekt": beratung.anderes_mietobjekt,
                     "frage": beratung.frage,
-                    "datumBeginnFrist": beratung.datum_mietzinsanzeige or get_datetime_str(beratung.start_date).replace(" ", "T"),
+                    "datumBeginnFrist": get_datetime_str(beratung.datum_mietzinsanzeige).replace(" ", "T") if beratung.datum_mietzinsanzeige else get_datetime_str(beratung.start_date).replace(" ", "T"),
                     "dokumente": dokumente
                 }
                 
