@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from mvd.mvd.service_plattform.api import send_beratung
 import time
+from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import prepare_mvm_for_sp
 
 def nachsenden():
     beratungen = frappe.db.sql("""SELECT `name` FROM `tabBeratung` WHERE `trigger_api` = 1""", as_dict=True)
