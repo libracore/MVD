@@ -1,5 +1,13 @@
 ## MVD
 ### Version Log
+#### 8.10.0
+Split-Funktion für Beratungen
+#### 8.9.31
+Überarbeitung autom. Zuweisung an Defaultberater*in
+#### 8.9.30
+Notification in Mitgliedschaft wenn Beratung ungelesen
+#### 8.9.29
+Beratungs Titel: Wenn ohne Mitgl. dann mit Name anahnd E-Mail-Adresse
 #### 8.9.28
 Hotfix: SP API bei Beratungsanlage inkl. Bereinigungs-Script
 #### 8.9.27
