@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.31
+Überarbeitung autom. Zuweisung an Defaultberater*in
 #### 8.9.30
 Notification in Mitgliedschaft wenn Beratung ungelesen
 #### 8.9.29

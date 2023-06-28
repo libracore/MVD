@@ -44,6 +44,7 @@ class Beratung(Document):
         if not self.beratungskategorie:
             self.beratungskategorie_2 = None
         
+        # MVBE-HACK
         if self.status == 'Rückfrage: Termin vereinbaren' and self.sektion_id == 'MVBE':
             if self.kontaktperson and len(self.termin) > 0:
                 self.status = 'Termin vergeben'
@@ -203,7 +204,12 @@ class Beratung(Document):
                                     }).insert(ignore_permissions=True)
                                 else:
                                     self.create_be_admin_todo = 1
-        
+        '''
+        -------------------------------------------------------------------------------------------------------
+            Nachfolgende Stelle auskommentiert weil nach Rücksprache mit ChLa dies falsch zu sein scheint.
+            Bei der Anlage von Beratungen (Status Eingang inkl. Mitglied) soll keine autom. Zuweisung erfolgen!
+            Siehe uch https://wiki.mieterverband.ch/pages/viewpage.action?pageId=107184296#BeratungDokumentation(Entwurf)-Status%C3%A4nderungen(automatisiert)
+        --------------------------------------------------------------------------------------------------------
         if (self.mv_mitgliedschaft and self.status == 'Eingang') and not self.kontaktperson:
             if self.beratungskategorie not in ('202 - MZ-Erhöhung', '300 - Nebenkosten'):
                 default_emailberatung_todo_gruppe = frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe")
@@ -224,6 +230,7 @@ class Beratung(Document):
                     }).insert(ignore_permissions=True)
                 else:
                     self.create_be_admin_todo = 1
+        '''
         
         # Titel aktualisierung
         titel = '{0}'.format(self.start_date)
@@ -265,8 +272,10 @@ class Beratung(Document):
                     if alter_status == 'Eingang':
                         if self.kontaktperson and self.mv_mitgliedschaft:
                             self.status = 'Open'
-                        if self.beratungskategorie and self.mv_mitgliedschaft:
+                        elif self.beratungskategorie and self.mv_mitgliedschaft:
                             self.status = 'Open'
+                            # Zuweisung Defaultberater*in
+                            self.zuweisung_default_berater_in()
                         
                         # Bei Wechsel von "Eingang" auf "Offen ohne Berater*in -> Eintragung Standardberater*in
                         if self.status == 'Open' and not self.kontaktperson:
@@ -282,6 +291,10 @@ class Beratung(Document):
                             bisherige_kontaktperson = frappe.db.get_value("Beratung", self.name, 'kontaktperson') or None
                             if not bisherige_kontaktperson:
                                 self.status = 'Open'
+                        elif self.status == 'Rückfragen' and self.ungelesen == 1 and not self.kontaktperson:
+                            self.status = 'Open'
+                            # Zuweisung Defaultberater*in
+                            self.zuweisung_default_berater_in()
         else:
             # Beratung wird aktuell angelegt
             if self.anlage_durch_web_formular:
@@ -292,6 +305,8 @@ class Beratung(Document):
                 '''
                 if self.beratungskategorie not in ('202 - MZ-Erhöhung', '300 - Nebenkosten'):
                     self.status = 'Open'
+                    # Zuweisung Defaultberater*in
+                    self.zuweisung_default_berater_in()
                 '''
                 /MVBE-Hack
                 '''
@@ -301,6 +316,8 @@ class Beratung(Document):
                     if self.mv_mitgliedschaft:
                         # Konnte einem Mitglied zugewiesen werden
                         self.status = 'Open'
+                        # Zuweisung Defaultberater*in
+                        self.zuweisung_default_berater_in()
                     else:
                         # Konnte nicht einem Mitglied zugewiesen werden
                         self.status = 'Eingang'
@@ -310,6 +327,14 @@ class Beratung(Document):
                     if len(self.termin) > 0:
                         # Manuelle Anlage via "Termin erstellen"
                         self.status = 'Termin vergeben'
+    
+    def zuweisung_default_berater_in(self):
+        if self.sektion_id:
+            default_emailberatung_todo_gruppe = frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe")
+            if default_emailberatung_todo_gruppe:
+                self.kontaktperson = default_emailberatung_todo_gruppe
+                self.auto_todo_log = self.kontaktperson
+                self.create_todo = 1
                     
     def check_default_rueckfragen_email_template(self):
         if self.sektion_id:
