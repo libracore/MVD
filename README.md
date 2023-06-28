@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.30
+Notification in Mitgliedschaft wenn Beratung ungelesen
 #### 8.9.29
 Beratungs Titel: Wenn ohne Mitgl. dann mit Name anahnd E-Mail-Adresse
 #### 8.9.28

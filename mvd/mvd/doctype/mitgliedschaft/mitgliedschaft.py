@@ -4095,10 +4095,13 @@ def get_beratungen_dashboard(mitgliedschaft):
             termine = ", nächste Termine: {0}".format(" / ".join(termine))
         elif len(termine) > 0:
             termine = ", nächster Termin: {0}".format(termine[0])
+    
+    ungelesen_qty = frappe.db.count("Beratung", {'mv_mitgliedschaft': mitgliedschaft, 'ungelesen': 1}) or 0
     return {
         'anz_offen': anz_offen,
         'termine': termine,
-        'anz_termine': anz_termine
+        'anz_termine': anz_termine,
+        'ungelesen_qty': ungelesen_qty
     }
 
 @frappe.whitelist()

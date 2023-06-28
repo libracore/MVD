@@ -573,6 +573,9 @@ function load_beratungen_overview(frm) {
             if (show) {
                 cur_frm.dashboard.add_indicator(info, color);
             }
+            if (datas.ungelesen_qty > 0) {
+                cur_frm.set_intro("Dieses Mitglied besitzt ungelesene Beratungen");
+            }
         }
     });
 }
