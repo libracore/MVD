@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.10.0
+Split-Funktion für Beratungen
 #### 8.9.31
 Überarbeitung autom. Zuweisung an Defaultberater*in
 #### 8.9.30

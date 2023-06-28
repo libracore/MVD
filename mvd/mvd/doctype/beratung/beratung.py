@@ -356,6 +356,35 @@ class Beratung(Document):
                     self.termin[len(self.termin) - 1].berater_in = self.kontaktperson
                 else:
                     self.kontaktperson = self.termin[len(self.termin) - 1].berater_in
+    
+    def split_beratung(self, communication_id):
+        from copy import deepcopy
+
+        replicated_beratung = deepcopy(self)
+
+        frappe.get_doc(replicated_beratung).insert()
+
+        # Replicate linked Communications
+        comm_to_split_from = frappe.get_doc("Communication", communication_id)
+        communications = frappe.get_all("Communication",
+            filters={"reference_doctype": "Beratung",
+                "reference_name": comm_to_split_from.reference_name,
+                "creation": ('>=', comm_to_split_from.creation)})
+
+        for communication in communications:
+            doc = frappe.get_doc("Communication", communication.name)
+            doc.reference_name = replicated_beratung.name
+            doc.save(ignore_permissions=True)
+
+        frappe.get_doc({
+            "doctype": "Comment",
+            "comment_type": "Info",
+            "reference_doctype": "Beratung",
+            "reference_name": replicated_beratung.name,
+            "content": " - Beratung gesplittet von <a href='#Form/Beratung/{0}'>{1}</a>".format(self.name, frappe.bold(self.name)),
+        }).insert(ignore_permissions=True)
+
+        return replicated_beratung.name
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
