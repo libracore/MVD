@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.9.29
+Beratungs Titel: Wenn ohne Mitgl. dann mit Name anahnd E-Mail-Adresse
 #### 8.9.28
 Hotfix: SP API bei Beratungsanlage inkl. Bereinigungs-Script
 #### 8.9.27
