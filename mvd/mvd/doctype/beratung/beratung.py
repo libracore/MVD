@@ -361,6 +361,7 @@ class Beratung(Document):
         from copy import deepcopy
 
         replicated_beratung = deepcopy(self)
+        replicated_beratung.start_date = today()
 
         frappe.get_doc(replicated_beratung).insert()
 
@@ -382,6 +383,14 @@ class Beratung(Document):
             "reference_doctype": "Beratung",
             "reference_name": replicated_beratung.name,
             "content": " - Beratung gesplittet von <a href='#Form/Beratung/{0}'>{1}</a>".format(self.name, frappe.bold(self.name)),
+        }).insert(ignore_permissions=True)
+        
+        frappe.get_doc({
+            "doctype": "Comment",
+            "comment_type": "Info",
+            "reference_doctype": "Beratung",
+            "reference_name": self.name,
+            "content": " - Beratung wurde in neue Beratung <a href='#Form/Beratung/{0}'>{1}</a> gesplittet".format(replicated_beratung.name, frappe.bold(replicated_beratung.name)),
         }).insert(ignore_permissions=True)
 
         return replicated_beratung.name
