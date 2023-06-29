@@ -177,14 +177,7 @@ frappe.ui.form.on('Beratung', {
                 
                 // Add BTN Als gelesen markieren
                 frm.add_custom_button(__("Neuer Input verarbeitet"),  function() {
-                    if (cur_frm.is_dirty()) {
-                        cur_frm.set_value("ungelesen", 0);
-                        cur_frm.save();
-                    } else {
-                        frappe.db.set_value("Beratung", cur_frm.doc.name, 'ungelesen', 0).then(function(){
-                            cur_frm.reload_doc();
-                        })
-                    }
+                    als_gelesen_markieren(cur_frm);
                 });
                 // Deaktivierung BTN wenn notwendig
                 if (!cur_frm.doc.ungelesen) {
@@ -291,6 +284,11 @@ frappe.ui.form.on('Beratung', {
             if (cur_frm.doc.status == 'Zusammengeführt') {
                 setze_read_only(frm);
             }
+        }
+        
+        if (cur_frm.doc.ungelesen == 1) {
+            cur_frm.set_intro('Diese Beratung ist als ungelesen markiert. Sie können diese als <a id="gelesen_neuer_input_verarbeitet">"gelesen"/"Neuer Input verarbeitet" markieren</a>');
+            $("#gelesen_neuer_input_verarbeitet").click(function(){cur_frm.custom_buttons["Neuer Input verarbeitet"].click();});
         }
     },
     mv_mitgliedschaft: function(frm) {
@@ -554,4 +552,15 @@ function prepare_mvd_mail_composer(e) {
 
     // make the composer
     new frappe.mvd.MailComposer(opts);
+}
+
+function als_gelesen_markieren(cur_frm) {
+    if (cur_frm.is_dirty()) {
+        cur_frm.set_value("ungelesen", 0);
+        cur_frm.save();
+    } else {
+        frappe.db.set_value("Beratung", cur_frm.doc.name, 'ungelesen', 0).then(function(){
+            cur_frm.reload_doc();
+        })
+    }
 }
