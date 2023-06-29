@@ -533,7 +533,9 @@ function prepare_mvd_mail_composer(e) {
             return false;
         }
     });
-
+    if (last_email.sender.includes(".mieterverband.ch")){
+        last_email.sender = cur_frm.doc.raised_by;
+    }
     const opts = {
         doc: cur_frm.doc,
         txt: "",
