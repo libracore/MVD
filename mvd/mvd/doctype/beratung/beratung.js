@@ -306,25 +306,20 @@ frappe.ui.form.on('Beratung', {
                 .appendTo(frm.timeline.wrapper.find('.comment-header .asset-details:not([data-communication-type="Comment"])'))
             if (!frm.timeline.wrapper.data("split-issue-event-attached")){
                 frm.timeline.wrapper.on('click', '.btn-split-issue', (e) => {
-                    frappe.confirm(
-                        'Alle Nachrichten oberhalb dieser werden in eine neue Beratung überführt.<br> Sind Sie sicher?',
-                        function(){
-                            // on yes
-                            frm.call("split_beratung", {
-                                communication_id: e.currentTarget.closest(".timeline-item").getAttribute("data-name")
-                            }, (r) => {
-                                //~ let url = window.location.href
-                                //~ let arr = url.split("/");
-                                //~ let result = arr[0] + "//" + arr[2]
-                                //~ frappe.msgprint(`Neue Beratung erstellt: <a href="${result}/desk#Form/Beratung/${r.message}">${r.message}</a>`)
-                                frm.reload_doc();
-                                frappe.set_route("Form", "Beratung", r.message);
-                            });
-                        },
-                        function(){
-                            // on no
-                            show_alert('Beratungs-Split abgebrochen')
-                        }
+                    frappe.prompt([
+                        {'fieldname': 'type', 'fieldtype': 'Select', 'label': 'Art der Splittung', 'reqd': 1, 'options': "\n1:1 Kopie\nNeuanlage"}  
+                    ],
+                    function(values){
+                        frm.call("split_beratung", {
+                            split_type: values.type,
+                            communication_id: e.currentTarget.closest(".timeline-item").getAttribute("data-name")
+                        }, (r) => {
+                            frm.reload_doc();
+                            frappe.set_route("Form", "Beratung", r.message);
+                        });
+                    },
+                    'Splitten der Beratung',
+                    'Splitten'
                     )
                 })
                 frm.timeline.wrapper.data("split-issue-event-attached", true)
