@@ -1,5 +1,19 @@
 ## MVD
 ### Version Log
+#### 8.11.0
+Reaktivierung E-Mail Validierung in Mitgliedschaft
+#### 8.10.6
+Beratung: wenn ungelesen Notification-Header inkl. gelesen-Shortcut
+#### 8.10.5
+Antwortadresse in Beratung immer Mitglied wenn Sender von ursprungs Mail beinhaltet '.mieterverband.ch'
+#### 8.10.4
+Rename 'Beratungs Aktionen' in 'Beratungsfunktionen'
+#### 8.10.3
+Nach splitten autom. Weiterleitung in neue Beratung
+#### 8.10.2
+Beim splitten von Beratung Audittrail in beien Beratungen
+#### 8.10.1
+Neuer Info Button "Splitten" unter Beratungs Aktionen
 #### 8.10.0
 Split-Funktion für Beratungen
 #### 8.9.31
