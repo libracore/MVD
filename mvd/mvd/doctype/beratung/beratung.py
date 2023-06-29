@@ -357,13 +357,21 @@ class Beratung(Document):
                 else:
                     self.kontaktperson = self.termin[len(self.termin) - 1].berater_in
     
-    def split_beratung(self, communication_id):
-        from copy import deepcopy
+    def split_beratung(self, split_type, communication_id):
+        if split_type == '1:1 Kopie':
+            from copy import deepcopy
+            replicated_beratung = deepcopy(self)
+        elif split_type == 'Neuanlage':
+            replicated_beratung = {
+                "doctype": "Beratung",
+                "mv_mitgliedschaft": self.mv_mitgliedschaft,
+                "sektion_id": self.sektion_id,
+                "start_date": today()
+            }
+        else:
+            frappe.throw("Fehlender split_type")
 
-        replicated_beratung = deepcopy(self)
-        replicated_beratung.start_date = today()
-
-        frappe.get_doc(replicated_beratung).insert()
+        replicated_beratung = frappe.get_doc(replicated_beratung).insert()
 
         # Replicate linked Communications
         comm_to_split_from = frappe.get_doc("Communication", communication_id)
