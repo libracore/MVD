@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.10.4
+Rename 'Beratungs Aktionen' in 'Beratungsfunktionen'
 #### 8.10.3
 Nach splitten autom. Weiterleitung in neue Beratung
 #### 8.10.2

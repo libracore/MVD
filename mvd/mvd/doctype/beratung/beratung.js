@@ -108,7 +108,7 @@ frappe.ui.form.on('Beratung', {
                             }
                         }
                     });
-                }, __("Beratungs Aktionen"));
+                }, __("Beratungsfunktionen"));
                 // Immer aktiv
                 
                 //Add BTN Verknüpfen
@@ -122,7 +122,7 @@ frappe.ui.form.on('Beratung', {
                     'Beratungs Verknüpfung',
                     'Verknüpfen'
                     );
-                }, __("Beratungs Aktionen"));
+                }, __("Beratungsfunktionen"));
                 // Immer Aktiv
                 
                 // Add BTN Zusammenführen
@@ -146,7 +146,7 @@ frappe.ui.form.on('Beratung', {
                     'Beratungen zusammenführen',
                     'Zusammenführen'
                     )
-                }, __("Beratungs Aktionen"));
+                }, __("Beratungsfunktionen"));
                 // Deaktivierung BTN wenn notwendig
                 if (cur_frm.doc.status == 'Zusammengeführt') {
                     cur_frm.custom_buttons["Zusammenführen"].off()
@@ -158,7 +158,7 @@ frappe.ui.form.on('Beratung', {
                 // Add BTN Splitten
                 frm.add_custom_button(__("Splitten"),  function() {
                     frappe.msgprint('Um diese Beratung in zwei Beratungen zu splitten, nutzen Sie den Button "Beratung splitten" im jeweiligen E-Mail');
-                }, __("Beratungs Aktionen"));
+                }, __("Beratungsfunktionen"));
                 // Immer aktiv
                 
                 // Add BTN Schliessen
@@ -166,7 +166,7 @@ frappe.ui.form.on('Beratung', {
                     cur_frm.set_value("status", 'Closed').then(function(){
                         cur_frm.save();
                     })
-                }, __("Beratungs Aktionen"));
+                }, __("Beratungsfunktionen"));
                 // Deaktivierung BTN wenn notwendig
                 if (cur_frm.doc.status == 'Closed') {
                     cur_frm.custom_buttons["Schliessen"].off()
