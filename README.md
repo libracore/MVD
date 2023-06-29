@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 8.11.0
+Reaktivierung E-Mail Validierung in Mitgliedschaft
+#### 8.10.6
+Beratung: wenn ungelesen Notification-Header inkl. gelesen-Shortcut
 #### 8.10.5
 Antwortadresse in Beratung immer Mitglied wenn Sender von ursprungs Mail beinhaltet '.mieterverband.ch'
 #### 8.10.4
