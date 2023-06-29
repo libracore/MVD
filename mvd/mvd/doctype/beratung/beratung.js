@@ -315,11 +315,12 @@ frappe.ui.form.on('Beratung', {
                             frm.call("split_beratung", {
                                 communication_id: e.currentTarget.closest(".timeline-item").getAttribute("data-name")
                             }, (r) => {
-                                let url = window.location.href
-                                let arr = url.split("/");
-                                let result = arr[0] + "//" + arr[2]
-                                frappe.msgprint(`Neue Beratung erstellt: <a href="${result}/desk#Form/Beratung/${r.message}">${r.message}</a>`)
+                                //~ let url = window.location.href
+                                //~ let arr = url.split("/");
+                                //~ let result = arr[0] + "//" + arr[2]
+                                //~ frappe.msgprint(`Neue Beratung erstellt: <a href="${result}/desk#Form/Beratung/${r.message}">${r.message}</a>`)
                                 frm.reload_doc();
+                                frappe.set_route("Form", "Beratung", r.message);
                             });
                         },
                         function(){
