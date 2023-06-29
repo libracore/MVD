@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.10.1
+Neuer Info Button "Splitten" unter Beratungs Aktionen
 #### 8.10.0
 Split-Funktion für Beratungen
 #### 8.9.31

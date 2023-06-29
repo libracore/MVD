@@ -155,6 +155,12 @@ frappe.ui.form.on('Beratung', {
                     })
                 }
                 
+                // Add BTN Splitten
+                frm.add_custom_button(__("Splitten"),  function() {
+                    frappe.msgprint('Um diese Beratung in zwei Beratungen zu splitten, nutzen Sie den Button "Beratung splitten" im jeweiligen E-Mail');
+                }, __("Beratungs Aktionen"));
+                // Immer aktiv
+                
                 // Add BTN Schliessen
                 frm.add_custom_button(__("Schliessen"),  function() {
                     cur_frm.set_value("status", 'Closed').then(function(){
