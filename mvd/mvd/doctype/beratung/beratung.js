@@ -108,7 +108,7 @@ frappe.ui.form.on('Beratung', {
                             }
                         }
                     });
-                }, __("Beratungs Aktionen"));
+                }, __("Beratungsfunktionen"));
                 // Immer aktiv
                 
                 //Add BTN Verknüpfen
@@ -122,7 +122,7 @@ frappe.ui.form.on('Beratung', {
                     'Beratungs Verknüpfung',
                     'Verknüpfen'
                     );
-                }, __("Beratungs Aktionen"));
+                }, __("Beratungsfunktionen"));
                 // Immer Aktiv
                 
                 // Add BTN Zusammenführen
@@ -146,7 +146,7 @@ frappe.ui.form.on('Beratung', {
                     'Beratungen zusammenführen',
                     'Zusammenführen'
                     )
-                }, __("Beratungs Aktionen"));
+                }, __("Beratungsfunktionen"));
                 // Deaktivierung BTN wenn notwendig
                 if (cur_frm.doc.status == 'Zusammengeführt') {
                     cur_frm.custom_buttons["Zusammenführen"].off()
@@ -155,12 +155,18 @@ frappe.ui.form.on('Beratung', {
                     })
                 }
                 
+                // Add BTN Splitten
+                frm.add_custom_button(__("Splitten"),  function() {
+                    frappe.msgprint('Um diese Beratung in zwei Beratungen zu splitten, nutzen Sie den Button "Beratung splitten" im jeweiligen E-Mail');
+                }, __("Beratungsfunktionen"));
+                // Immer aktiv
+                
                 // Add BTN Schliessen
                 frm.add_custom_button(__("Schliessen"),  function() {
                     cur_frm.set_value("status", 'Closed').then(function(){
                         cur_frm.save();
                     })
-                }, __("Beratungs Aktionen"));
+                }, __("Beratungsfunktionen"));
                 // Deaktivierung BTN wenn notwendig
                 if (cur_frm.doc.status == 'Closed') {
                     cur_frm.custom_buttons["Schliessen"].off()
@@ -309,11 +315,12 @@ frappe.ui.form.on('Beratung', {
                             frm.call("split_beratung", {
                                 communication_id: e.currentTarget.closest(".timeline-item").getAttribute("data-name")
                             }, (r) => {
-                                let url = window.location.href
-                                let arr = url.split("/");
-                                let result = arr[0] + "//" + arr[2]
-                                frappe.msgprint(`Neue Beratung erstellt: <a href="${result}/desk#Form/Beratung/${r.message}">${r.message}</a>`)
+                                //~ let url = window.location.href
+                                //~ let arr = url.split("/");
+                                //~ let result = arr[0] + "//" + arr[2]
+                                //~ frappe.msgprint(`Neue Beratung erstellt: <a href="${result}/desk#Form/Beratung/${r.message}">${r.message}</a>`)
                                 frm.reload_doc();
+                                frappe.set_route("Form", "Beratung", r.message);
                             });
                         },
                         function(){
@@ -526,7 +533,9 @@ function prepare_mvd_mail_composer(e) {
             return false;
         }
     });
-
+    if (last_email.sender.includes(".mieterverband.ch")){
+        last_email.sender = cur_frm.doc.raised_by;
+    }
     const opts = {
         doc: cur_frm.doc,
         txt: "",
