@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.11.2
+Mahnung Listenansicht: Neu Feld Nachname
 #### 8.11.1
 Beratungssplitt: Möglichkeit zur Auswahl von 1:1 Kopie und Neuanlage
 #### 8.11.0
