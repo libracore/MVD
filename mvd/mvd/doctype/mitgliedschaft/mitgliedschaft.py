@@ -129,9 +129,6 @@ class Mitgliedschaft(Document):
             # halte ggf. Faktura Kunde synchron
             self.check_faktura_kunde()
             
-            # validiere E-Mail Adressen und entferne sie ggf.
-            self.email_validierung()
-            
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
                 if self.creation == self.modified:
@@ -144,10 +141,11 @@ class Mitgliedschaft(Document):
                     if self.wegzug_zu == 'MVZH' and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
     
-    def email_validierung(self):
+    def email_validierung(self, check=False):
         import re
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         email_felder = ['e_mail_1', 'e_mail_2', 'rg_e_mail']
+        failed_mails = []
         for email_feld in email_felder:
             email = self.get(email_feld)
             if email:
@@ -155,8 +153,15 @@ class Mitgliedschaft(Document):
                     # all good
                     pass
                 else:
-                    self.add_comment('Comment', text='Die E-Mail-Adresse {0} musste entfernt werden, da sie als ungültig erkannt wurde.'.format(email))
-                    self.set(email_feld, None)
+                    if not check:
+                        self.add_comment('Comment', text='Die E-Mail-Adresse {0} musste entfernt werden, da sie als ungültig erkannt wurde.'.format(email))
+                        self.set(email_feld, None)
+                    else:
+                        failed_mails.append(email)
+        if len(failed_mails) > 0:
+            return ", ".join(failed_mails)
+        else:
+            return 1
     
     def remove_unnecessary_blanks(self):
         # Hauptmitglied
