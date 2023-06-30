@@ -6,6 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "validierungsstring",
+  "test_dt",
+  "test_dn",
   "titel",
   "section_allgemein",
   "sektion_id",
@@ -454,9 +456,21 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Migriert (Neues CD)"
+  },
+  {
+   "fieldname": "test_dt",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "test_dt"
+  },
+  {
+   "fieldname": "test_dn",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "test_dn"
   }
  ],
- "modified": "2023-06-21 09:55:29.236849",
+ "modified": "2023-06-30 11:57:20.688037",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

@@ -2,7 +2,11 @@
     <!-- ---------------------------------------------------------------------------------------- -->
     <!-- Allgemeine Daten -->
     <!-- ---------------------------------------------------------------------------------------- -->
-    {% set mahnung_druckvorlage = frappe.get_doc("Druckvorlage", mahnung.druckvorlage) %}
+    {% if test_druckvorlage %}
+        {% set mahnung_druckvorlage = frappe.get_doc("Druckvorlage", test_druckvorlage) %}
+    {% else %}
+        {% set mahnung_druckvorlage = frappe.get_doc("Druckvorlage", mahnung.druckvorlage) %}
+    {% endif %}
     {% set print_language = 'de' %}
     {% set adressblock = 'Fehlende Daten' %}
     {% set invoice = mahnung.sales_invoices[0].sales_invoice %}

@@ -223,6 +223,11 @@ class Druckvorlage(Document):
         else:
             if self.default != 1:
                 self.default = 1
+    
+    def test_druck(self, test_dt, test_dn):
+        frappe.db.set_value("Druckvorlage", self.name, "test_dt", test_dt, update_modified=False)
+        frappe.db.set_value("Druckvorlage", self.name, "test_dn", test_dn, update_modified=False)
+        return
 
 @frappe.whitelist()
 def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, reduzierte_mitgliedschaft=False, language=False, serienbrief=False):

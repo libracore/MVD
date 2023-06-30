@@ -1,7 +1,10 @@
+{% if not test_druckvorlage %}
+    {% set test_druckvorlage = False %}
+{% endif %}
 <!-- ---------------------------------------------------------------------------------------- -->
 <!-- DocType Sales Invoice -->
 <!-- ---------------------------------------------------------------------------------------- -->
-{% if doc.doctype == 'Sales Invoice' %}{{ frappe.render_template('templates/mvd/sales_invoice_drucktemplate.html', {'doc': doc}) }}{% endif %}
+{% if doc.doctype == 'Sales Invoice' %}{{ frappe.render_template('templates/mvd/sales_invoice_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
 <!-- ---------------------------------------------------------------------------------------- -->
 <!-- ENDE: DocType Sales Invoice -->
 <!-- ---------------------------------------------------------------------------------------- -->
@@ -9,7 +12,7 @@
 <!-- ---------------------------------------------------------------------------------------- -->
 <!-- DocType Mahnung -->
 <!-- ---------------------------------------------------------------------------------------- -->
-{% if doc.doctype == 'Mahnung' %}{{ frappe.render_template('templates/mvd/mahnung_drucktemplate.html', {'mahnung': doc}) }}{% endif %}
+{% if doc.doctype == 'Mahnung' %}{{ frappe.render_template('templates/mvd/mahnung_drucktemplate.html', {'mahnung': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
 <!-- ---------------------------------------------------------------------------------------- -->
 <!-- ENDE: DocType Mahnung -->
 <!-- ---------------------------------------------------------------------------------------- -->
@@ -17,7 +20,7 @@
 <!-- ---------------------------------------------------------------------------------------- -->
 <!-- DocType Fakultative Rechnung -->
 <!-- ---------------------------------------------------------------------------------------- -->
-{% if doc.doctype == 'Fakultative Rechnung' %}{{ frappe.render_template('templates/mvd/fakultative_rechnung_drucktemplate.html', {'doc': doc}) }}{% endif %}
+{% if doc.doctype == 'Fakultative Rechnung' %}{{ frappe.render_template('templates/mvd/fakultative_rechnung_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
 <!-- ---------------------------------------------------------------------------------------- -->
 <!-- ENDE: DocType Fakultative Rechnung -->
 <!-- ---------------------------------------------------------------------------------------- -->

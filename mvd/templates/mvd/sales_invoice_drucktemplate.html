@@ -2,7 +2,11 @@
     <!-- ---------------------------------------------------------------------------------------- -->
     <!-- Allgemeine Daten -->
     <!-- ---------------------------------------------------------------------------------------- -->
-    {% set druckvorlage = frappe.get_doc("Druckvorlage", doc.druckvorlage) %}
+    {% if test_druckvorlage %}
+        {% set druckvorlage = frappe.get_doc("Druckvorlage", test_druckvorlage) %}
+    {% else %}
+        {% set druckvorlage = frappe.get_doc("Druckvorlage", doc.druckvorlage) %}
+    {% endif %}
     {% set print_language = 'de' %}
     {% set mitgliedschaft_qrr = False %}
     {% set hv_qrr = False %}
