@@ -402,6 +402,28 @@ frappe.ui.form.on('Mitgliedschaft', {
         }
     },
     validate: function(frm) {
+        // E-Mail Adressen Validierung
+        if (!locals.dont_check_email) {
+            frm.call("email_validierung", {check: 1}, (r) => {
+                if (r.message != 1) {
+                    frappe.validated=false;
+                    frappe.prompt([
+                        {'fieldname': 'message', 'fieldtype': 'HTML', 'label': '', 'options': "Diese Mitgliedschaft enthält nachfolgende E-Mail-Adressen welche als fehlerhaft erkannt wurden:<br>" + r.message + "<br>Wenn Sie diese entfernen lass möchten, können Sie oben auf " + '"Entfernen" klicken.<br>Um die Adressen manuell zu korrigieren, klicken Sie auf "Schliessen".'}  
+                    ],
+                    function(values){
+                        locals.dont_check_email = true;
+                        cur_frm.save();
+                    },
+                    'Fehlerhafte E-Mail-Adressen',
+                    'Entfernen'
+                    );
+                }
+            });
+        } else {
+            frm.call("email_validierung", {}, (r) => {});
+            locals.dont_check_email = false;
+        }
+        
         if (cur_frm.doc.kundentyp == 'Unternehmen') {
             if (cur_frm.doc.mitgliedtyp_c != 'Geschäft') {
                 frappe.msgprint( "Unternehmen können nur Mitgliedschaften vom Typ Geschäft besitzen!", __("Validation") );
