@@ -27,11 +27,11 @@
         {% endif %}
         
         <!-- Header -->
-        {% if seite.kopfzeile %}
-            <div id='kopfzeile'>
+        <div id='kopfzeile'>
+            {% if seite.kopfzeile %}
                 <img src="/assets/mvd/img/mvs_nationales_logo.png" style="width: 58.1mm;">
-            </div>
-        {% endif %}
+            {% endif %}
+        </div>
         
         <!-- Mitglieder Ausweis -->
         {% if seite.ausweis %}
@@ -203,79 +203,39 @@
                 clear: both;
                 overflow-y: hidden !important;
                 {% if not seite.einzahlungsschein %}
-                    {% if seite.kopfzeile %}
-                        {% if seite.adressblock or seite.referenzblock %}
-                            {% if seite.fusszeile %}
-                                min-height: 168.5mm;
-                                max-height: 168.5mm;
-                            {% else %}
-                                min-height: 197mm;
-                                max-height: 197mm;
-                            {% endif %}
+                    {% if seite.adressblock or seite.referenzblock %}
+                        {% if seite.fusszeile %}
+                            min-height: 168.5mm;
+                            max-height: 168.5mm;
                         {% else %}
-                            {% if seite.seitenzahlen %}
-                                min-height: 211.5mm;
-                                max-height: 211.5mm;
-                            {% else %}
-                                min-height: 240mm;
-                                max-height: 240mm;
-                            {% endif %}
+                            min-height: 197mm;
+                            max-height: 197mm;
                         {% endif %}
                     {% else %}
-                        {% if seite.adressblock or seite.referenzblock %}
-                            {% if seite.fusszeile %}
-                                min-height: 225.5mm;
-                                max-height: 225.5mm;
-                            {% else %}
-                                min-height: 254mm;
-                                max-height: 254mm;
-                            {% endif %}
+                        {% if seite.seitenzahlen %}
+                            min-height: 211.5mm;
+                            max-height: 211.5mm;
                         {% else %}
-                            {% if seite.seitenzahlen %}
-                                min-height: 268.5mm;
-                                max-height: 268.5mm;
-                            {% else %}
-                                min-height: 297mm;
-                                max-height: 297mm;
-                            {% endif %}
+                            min-height: 240mm;
+                            max-height: 240mm;
                         {% endif %}
                     {% endif %}
                 {% else %}
-                    {% if seite.kopfzeile %}
-                        {% if seite.adressblock or seite.referenzblock %}
-                            {% if seite.fusszeile %}
-                                min-height: 63.5mm;
-                                max-height: 63.5mm;
-                            {% else %}
-                                min-height: 92mm;
-                                max-height: 92mm;
-                            {% endif %}
+                    {% if seite.adressblock or seite.referenzblock %}
+                        {% if seite.fusszeile %}
+                            min-height: 63.5mm;
+                            max-height: 63.5mm;
                         {% else %}
-                            {% if seite.seitenzahlen %}
-                                min-height: 133.5mm;
-                                max-height: 133.5mm;
-                            {% else %}
-                                min-height: 135mm;
-                                max-height: 135mm;
-                            {% endif %}
+                            min-height: 92mm;
+                            max-height: 92mm;
                         {% endif %}
                     {% else %}
-                        {% if seite.adressblock or seite.referenzblock %}
-                            {% if seite.fusszeile %}
-                                min-height: 120.5mm;
-                                max-height: 120.5mm;
-                            {% else %}
-                                min-height: 149mm;
-                                max-height: 149mm;
-                            {% endif %}
+                        {% if seite.seitenzahlen %}
+                            min-height: 133.5mm;
+                            max-height: 133.5mm;
                         {% else %}
-                            {% if seite.seitenzahlen %}
-                                min-height: 163.5mm;
-                                max-height: 163.5mm;
-                            {% else %}
-                                min-height: 192mm;
-                                max-height: 192mm;
-                            {% endif %}
+                            min-height: 135mm;
+                            max-height: 135mm;
                         {% endif %}
                     {% endif %}
                 {% endif %}
