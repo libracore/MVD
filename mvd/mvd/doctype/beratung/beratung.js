@@ -287,8 +287,9 @@ frappe.ui.form.on('Beratung', {
         }
         
         if (cur_frm.doc.ungelesen == 1) {
-            cur_frm.set_intro('Diese Beratung ist als ungelesen markiert. Sie können diese als <a id="gelesen_neuer_input_verarbeitet">"gelesen"/"Neuer Input verarbeitet" markieren</a>');
+            cur_frm.set_intro('<span class="indicator whitespace-nowrap red"></span> Auf diese Beratung wurde per <a id="jump_comment">E-Mail</a> vom Mitglied geantwortet. Bitte neuen Input zur Kenntnis nehmen und dann als <a id="gelesen_neuer_input_verarbeitet">"gelesen"/"Neuer Input verarbeitet" markieren</a>');
             $("#gelesen_neuer_input_verarbeitet").click(function(){cur_frm.custom_buttons["Neuer Input verarbeitet"].click();});
+            $("#jump_comment").click(function(){frappe.utils.scroll_to(cur_frm.footer.wrapper.find(".reply-link"), !0);});
         }
     },
     mv_mitgliedschaft: function(frm) {
