@@ -155,6 +155,10 @@
   "datum_online_gutschrift",
   "online_payment_method",
   "online_payment_id",
+  "section_haftpflicht",
+  "haftpflicht",
+  "section_mandat",
+  "mandat",
   "section_status_historie",
   "status_change",
   "section_workflow_helpers",
@@ -1243,10 +1247,34 @@
    "fieldname": "geschenk_reset_rechnung",
    "fieldtype": "Data",
    "label": "Geschenk-Reset Rechnung"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_haftpflicht",
+   "fieldtype": "Section Break",
+   "label": "Haftpflicht"
+  },
+  {
+   "fieldname": "haftpflicht",
+   "fieldtype": "Table",
+   "label": "Haftpflicht\u00fcbersicht",
+   "options": "Haftpflicht Mitgliedschaft"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_mandat",
+   "fieldtype": "Section Break",
+   "label": "Mandat"
+  },
+  {
+   "fieldname": "mandat",
+   "fieldtype": "Table",
+   "label": "Mandat\u00fcbersicht",
+   "options": "Mandat Mitgliedschaft"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2022-12-18 11:08:58.365240",
+ "modified": "2023-07-03 13:35:45.656374",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

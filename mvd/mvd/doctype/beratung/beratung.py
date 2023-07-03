@@ -719,3 +719,22 @@ def relink_attachements(communication, beratung):
     for file_record in files:
         frappe.db.set_value("File", file_record.name, 'attached_to_doctype', "Beratung")
         frappe.db.set_value("File", file_record.name, 'attached_to_name', beratung)
+
+@frappe.whitelist()
+def admin_todo(beratung, sektion_id=None, description=None, datum=None):
+    try:
+        virt_user = frappe.db.get_value("Sektion", sektion_id, "virtueller_user") or None
+        if not virt_user:
+            frappe.throw("Diese Siektion besitzt keinen virtuellen User")
+        frappe.get_doc({
+            'doctype': 'ToDo',
+            'description': 'Zuweisung für Beratung {0}:<br>{1}'.format(beratung, description),
+            'date': datum,
+            'reference_type': 'Beratung',
+            'reference_name': beratung,
+            'assigned_by': frappe.session.user or 'Administrator',
+            'owner': virt_user
+        }).insert(ignore_permissions=True)
+        return
+    except Exception as err:
+        frappe.throw("Da ist etwas schief gelaufen.<br>{0}".format(str(err)))

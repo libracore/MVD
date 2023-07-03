@@ -128,7 +128,7 @@ frappe.ui.form.on('Beratung', {
                 // Add BTN Zusammenführen
                 frm.add_custom_button(__("Zusammenführen"),  function() {
                     frappe.prompt([
-                        {'fieldname': 'master', 'fieldtype': 'Link', 'label': 'Master Beratung', 'reqd': 1, 'options': 'Beratung'}  
+                        {'fieldname': 'master', 'fieldtype': 'Link', 'label': 'Primär Beratung', 'reqd': 1, 'options': 'Beratung'}  
                     ],
                     function(values){
                         frappe.call({
@@ -239,6 +239,11 @@ frappe.ui.form.on('Beratung', {
                     })
                 }
                 
+                // Add BTN Admin ToDo
+                frm.add_custom_button(__("Admin ToDo"),  function() {
+                    admin_todo(frm);
+                });
+                
                 // overwrite E-Mail BTN
                 $("[data-label='Email']").parent().off("click");
                 $("[data-label='Email']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
@@ -287,8 +292,9 @@ frappe.ui.form.on('Beratung', {
         }
         
         if (cur_frm.doc.ungelesen == 1) {
-            cur_frm.set_intro('Diese Beratung ist als ungelesen markiert. Sie können diese als <a id="gelesen_neuer_input_verarbeitet">"gelesen"/"Neuer Input verarbeitet" markieren</a>');
+            cur_frm.set_intro('<i class="fa fa-envelope" style="color: red;"></i>&nbsp;&nbsp;Auf diese Beratung wurde per <a id="jump_comment">E-Mail</a> vom Mitglied geantwortet. Bitte neuen Input zur Kenntnis nehmen und dann als <a id="gelesen_neuer_input_verarbeitet">"gelesen"/"Neuer Input verarbeitet" markieren</a>');
             $("#gelesen_neuer_input_verarbeitet").click(function(){cur_frm.custom_buttons["Neuer Input verarbeitet"].click();});
+            $("#jump_comment").click(function(){frappe.utils.scroll_to(cur_frm.footer.wrapper.find(".reply-link"), !0);});
         }
     },
     mv_mitgliedschaft: function(frm) {
@@ -558,4 +564,30 @@ function als_gelesen_markieren(cur_frm) {
             cur_frm.reload_doc();
         })
     }
+}
+
+function admin_todo(cur_frm) {
+    frappe.prompt([
+        {'fieldname': 'description', 'fieldtype': 'Text', 'label': 'Beschreibung', 'reqd': 1},
+        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0}
+        //{'fieldname': 'notify', 'fieldtype': 'Check', 'label': 'Per E-Mail benachrichtigen', 'default': 0}
+    ],
+    function(values){
+        frappe.call({
+            "method": "mvd.mvd.doctype.beratung.beratung.admin_todo",
+            "args": {
+                "beratung": cur_frm.doc.name,
+                "sektion_id": cur_frm.doc.sektion_id,
+                "description": values.description,
+                "datum": values.datum
+            },
+            "callback": function(response) {
+                cur_frm.reload_doc();
+                frappe.msgprint( "Das ToDo wurde erstellt." );
+            }
+        });
+    },
+    'Admin ToDo erstellen',
+    'Erstellen'
+    )
 }
