@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.11.4
+Anpassung Filter S6
 #### 8.11.3
 Erweiterung E-Mail-Adressen Validierung
 #### 8.11.2
