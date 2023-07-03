@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.11.6
+Renaming in Funktion 'Zusammenführen' von Beratungen
 #### 8.11.5
 Beratung Gelesen-Button überarbeitet
 #### 8.11.4

@@ -128,7 +128,7 @@ frappe.ui.form.on('Beratung', {
                 // Add BTN Zusammenführen
                 frm.add_custom_button(__("Zusammenführen"),  function() {
                     frappe.prompt([
-                        {'fieldname': 'master', 'fieldtype': 'Link', 'label': 'Master Beratung', 'reqd': 1, 'options': 'Beratung'}  
+                        {'fieldname': 'master', 'fieldtype': 'Link', 'label': 'Primär Beratung', 'reqd': 1, 'options': 'Beratung'}  
                     ],
                     function(values){
                         frappe.call({
