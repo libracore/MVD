@@ -1,5 +1,15 @@
 ## MVD
 ### Version Log
+#### 8.12.0
+Abschnitte 'Mandat' und 'Haftpflicht' in DT Mitgliedschaft
+#### 8.11.7
+'Admin ToDo' BTN in Beratung
+#### 8.11.6
+Renaming in Funktion 'Zusammenführen' von Beratungen
+#### 8.11.5
+Beratung Gelesen-Button überarbeitet
+#### 8.11.4
+Anpassung Filter S6
 #### 8.11.3
 Erweiterung E-Mail-Adressen Validierung
 #### 8.11.2

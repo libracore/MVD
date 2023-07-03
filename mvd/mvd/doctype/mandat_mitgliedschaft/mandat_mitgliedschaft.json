@@ -1,0 +1,43 @@
+{
+ "creation": "2023-07-03 13:35:02.731980",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "datum",
+  "bemerkung",
+  "beratung"
+ ],
+ "fields": [
+  {
+   "fieldname": "datum",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Datum"
+  },
+  {
+   "fieldname": "bemerkung",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Bemerkung"
+  },
+  {
+   "fieldname": "beratung",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Beratung",
+   "options": "Beratung"
+  }
+ ],
+ "istable": 1,
+ "modified": "2023-07-03 13:36:16.351769",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Mandat Mitgliedschaft",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
