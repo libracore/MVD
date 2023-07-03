@@ -239,6 +239,11 @@ frappe.ui.form.on('Beratung', {
                     })
                 }
                 
+                // Add BTN Admin ToDo
+                frm.add_custom_button(__("Admin ToDo"),  function() {
+                    admin_todo(frm);
+                });
+                
                 // overwrite E-Mail BTN
                 $("[data-label='Email']").parent().off("click");
                 $("[data-label='Email']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
@@ -559,4 +564,30 @@ function als_gelesen_markieren(cur_frm) {
             cur_frm.reload_doc();
         })
     }
+}
+
+function admin_todo(cur_frm) {
+    frappe.prompt([
+        {'fieldname': 'description', 'fieldtype': 'Text', 'label': 'Beschreibung', 'reqd': 1},
+        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0}
+        //{'fieldname': 'notify', 'fieldtype': 'Check', 'label': 'Per E-Mail benachrichtigen', 'default': 0}
+    ],
+    function(values){
+        frappe.call({
+            "method": "mvd.mvd.doctype.beratung.beratung.admin_todo",
+            "args": {
+                "beratung": cur_frm.doc.name,
+                "sektion_id": cur_frm.doc.sektion_id,
+                "description": values.description,
+                "datum": values.datum
+            },
+            "callback": function(response) {
+                cur_frm.reload_doc();
+                frappe.msgprint( "Das ToDo wurde erstellt." );
+            }
+        });
+    },
+    'Admin ToDo erstellen',
+    'Erstellen'
+    )
 }
