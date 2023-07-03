@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.12.0
+Abschnitte 'Mandat' und 'Haftpflicht' in DT Mitgliedschaft
 #### 8.11.7
 'Admin ToDo' BTN in Beratung
 #### 8.11.6
