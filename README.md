@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.13.0
+Bei der Beratungsanlage via E-Mail werden E-Mail-Anhänge autom. der Beratung angehängt und in der Dokuemnten-Tabelle ausgewiesen
 #### 8.12.4
 VBZ-Beratung: 'Zusammengeführt' aus S6 ausgeschlossen
 #### 8.12.3

@@ -22,6 +22,7 @@
   "gesperrt_von",
   "gesperrt_am",
   "anlage_durch_web_formular",
+  "anlage_durch_mail_check_attachments",
   "email_template",
   "default_rueckfragen_email_template",
   "naechster_termin",
@@ -398,9 +399,16 @@
    "hidden": 1,
    "in_list_view": 1,
    "label": "N\u00e4chster Termin"
+  },
+  {
+   "default": "0",
+   "fieldname": "anlage_durch_mail_check_attachments",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "anlage_durch_mail_check_attachments"
   }
  ],
- "modified": "2023-06-15 13:46:57.523221",
+ "modified": "2023-07-04 13:41:13.334118",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

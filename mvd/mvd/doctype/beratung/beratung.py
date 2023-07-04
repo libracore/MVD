@@ -321,6 +321,8 @@ class Beratung(Document):
                     else:
                         # Konnte nicht einem Mitglied zugewiesen werden
                         self.status = 'Eingang'
+                    # flag für sync Mail attachements
+                    self.anlage_durch_mail_check_attachments = 1
                 else:
                     # Anlage manuell
                     self.status = 'Eingang'
@@ -747,3 +749,34 @@ def admin_todo(beratung, sektion_id=None, description=None, datum=None):
         return
     except Exception as err:
         frappe.throw("Da ist etwas schief gelaufen.<br>{0}".format(str(err)))
+
+def sync_attachements_after_anlage_durch_mail(self, event):
+    if int(self.anlage_durch_mail_check_attachments) == 1:
+        attachment_list = []
+        communications = frappe.db.sql("""SELECT `name` FROM `tabCommunication` WHERE `reference_doctype` = 'Beratung' AND `reference_name` = '{0}' AND `sent_or_received` = 'Received'""".format(self.name), as_dict=True)
+        for communication in communications:
+            c = communication.name
+            attachements = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Communication' AND `attached_to_name` = '{0}'""".format(c), as_dict=True)
+            for attachment in attachements:
+                a = frappe.get_doc("File", attachment.name)
+                attachment_list.append({
+                    'file': a.file_url,
+                    'document_type': 'Sonstiges',
+                    'filename': a.file_name
+                })
+                from copy import deepcopy
+                new_file = deepcopy(a)
+                a.content = None
+                a.attached_to_doctype = 'Beratung'
+                a.attached_to_name = self.name
+                a.insert(ignore_permissions=True)
+        
+        beratung = frappe.get_doc("Beratung", self.name)
+        if len(attachment_list) > 0:
+            for attchmnt in attachment_list:
+                row = beratung.append('dokumente', {})
+                row.file = attchmnt['file']
+                row.document_type = attchmnt['document_type']
+                row.filename = attchmnt['filename']
+        beratung.anlage_durch_mail_check_attachments = 0
+        beratung.save()
