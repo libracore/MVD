@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.12.4
+VBZ-Beratung: 'Zusammengeführt' aus S6 ausgeschlossen
 #### 8.12.3
 VBZ-Beratung: entfernung S7
 #### 8.12.2
