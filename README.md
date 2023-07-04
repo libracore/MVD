@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.13.1
+Abfrage ob Beratung als gelesen markiert werden soll, wenn ungelesen und Rückfrage Mail versendet
 #### 8.13.0
 Bei der Beratungsanlage via E-Mail werden E-Mail-Anhänge autom. der Beratung angehängt und in der Dokuemnten-Tabelle ausgewiesen
 #### 8.12.4

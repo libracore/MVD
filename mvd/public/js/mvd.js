@@ -806,7 +806,6 @@ frappe.mvd.MailComposer = Class.extend({
             callback: function(r) {
                 if(!r.exc) {
                     frappe.utils.play_sound("email");
-
                     if(r.message["emails_not_sent_to"]) {
                         frappe.msgprint(__("Email not sent to {0} (unsubscribed / disabled)",
                             [ frappe.utils.escape_html(r.message["emails_not_sent_to"]) ]) );
@@ -816,6 +815,9 @@ frappe.mvd.MailComposer = Class.extend({
                         delete frappe.last_edited_communication[me.doc][me.key];
                     }
                     if (cur_frm) {
+                        if (cur_frm.doctype == 'Beratung') {
+                            locals.rueckfrage_erzeugt = true;
+                        }
                         // clear input
                         cur_frm.timeline.input && cur_frm.timeline.input.val("");
                         cur_frm.reload_doc();

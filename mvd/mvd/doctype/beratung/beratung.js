@@ -202,6 +202,7 @@ frappe.ui.form.on('Beratung', {
                                 }
                             }
                         }
+                        
                         frappe.mvd.new_mail(cur_frm, last_email);
                         cur_frm['default_rueckfragen_email_template'] = false;
                     });
@@ -295,6 +296,20 @@ frappe.ui.form.on('Beratung', {
             cur_frm.set_intro('<i class="fa fa-envelope" style="color: red;"></i>&nbsp;&nbsp;Auf diese Beratung wurde per <a id="jump_comment">E-Mail</a> vom Mitglied geantwortet. Bitte neuen Input zur Kenntnis nehmen und dann als <a id="gelesen_neuer_input_verarbeitet">"gelesen"/"Neuer Input verarbeitet" markieren</a>');
             $("#gelesen_neuer_input_verarbeitet").click(function(){cur_frm.custom_buttons["Neuer Input verarbeitet"].click();});
             $("#jump_comment").click(function(){frappe.utils.scroll_to(cur_frm.footer.wrapper.find(".reply-link"), !0);});
+        }
+        
+        // abfrage ob nach Rückfragemail die Beratung als gelesen markiert werden soll
+        if(locals.rueckfrage_erzeugt&&cur_frm.doc.ungelesen) {
+            frappe.confirm(
+                'Diese Beratung ist als ungelesen markiert, möchten Sie den Input als verarbeitet markieren?',
+                function(){
+                    // on yes
+                    cur_frm.custom_buttons["Neuer Input verarbeitet"].click();
+                },
+                function(){
+                    // on no
+                }
+            )
         }
     },
     mv_mitgliedschaft: function(frm) {
