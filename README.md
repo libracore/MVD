@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 8.12.3
+VBZ-Beratung: entfernung S7
+#### 8.12.2
+Audit-Trail eintrag im Master wenn Beratungen zusammengeführt werden
 #### 8.12.1
 Korrektur VBZ-Beratung HTML
 #### 8.12.0

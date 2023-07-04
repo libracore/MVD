@@ -641,6 +641,15 @@ def merge(slave, master):
         for beratung_file in beratungs_files:
             frappe.db.set_value("File", beratung_file.name, "attached_to_name", master_doc.name)
     
+    # Info in Audit-Trail
+    frappe.get_doc({
+        "doctype": "Comment",
+        "comment_type": "Info",
+        "reference_doctype": "Beratung",
+        "reference_name": master,
+        "content": " - Die Beratung <a href='#Form/Beratung/{0}'>{1}</a> wurde mit dieser zusammengeführt".format(slave, frappe.bold(slave)),
+    }).insert(ignore_permissions=True)
+    
     return
 
 @frappe.whitelist()
