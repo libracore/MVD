@@ -1,5 +1,17 @@
 ## MVD
 ### Version Log
+#### 8.13.1
+Abfrage ob Beratung als gelesen markiert werden soll, wenn ungelesen und Rückfrage Mail versendet
+#### 8.13.0
+Bei der Beratungsanlage via E-Mail werden E-Mail-Anhänge autom. der Beratung angehängt und in der Dokuemnten-Tabelle ausgewiesen
+#### 8.12.4
+VBZ-Beratung: 'Zusammengeführt' aus S6 ausgeschlossen
+#### 8.12.3
+VBZ-Beratung: entfernung S7
+#### 8.12.2
+Audit-Trail eintrag im Master wenn Beratungen zusammengeführt werden
+#### 8.12.1
+Korrektur VBZ-Beratung HTML
 #### 8.12.0
 Abschnitte 'Mandat' und 'Haftpflicht' in DT Mitgliedschaft
 #### 8.11.7
