@@ -37,6 +37,10 @@ def execute():
                     
                     # auf Seite 1 ist der Adressblock immer eingeblendet
                     neue_1_seite.adressblock = 1
+                
+                    # Ausweis
+                    if d.seite_1_ausweis:
+                        neue_1_seite.ausweis = 1
                     
                     # Einzahlungsschein
                     if d.seite_1_qrr == 'Keiner':
@@ -78,6 +82,10 @@ def execute():
                         neue_2_seite.referenzblock = 1
                         neue_2_seite.adressblock = 1
                     
+                    # Ausweis
+                    if d.seite_2_ausweis:
+                        neue_2_seite.ausweis = 1
+                    
                     # Einzahlungsschein
                     if d.seite_2_qrr == 'Keiner':
                         neue_2_seite.einzahlungsschein = 0
@@ -117,6 +125,10 @@ def execute():
                     if not d.seite_3_adressblock_ausblenden:
                         neue_3_seite.referenzblock = 1
                         neue_3_seite.adressblock = 1
+                    
+                    # Ausweis
+                    if d.seite_3_ausweis:
+                        neue_3_seite.ausweis = 1
                     
                     # Einzahlungsschein
                     if d.seite_3_qrr == 'Keiner':

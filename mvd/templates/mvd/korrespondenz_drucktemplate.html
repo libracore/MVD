@@ -1,0 +1,236 @@
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- Allgemeine Daten -->
+<!-- ---------------------------------------------------------------------------------------- -->
+{% set print_language = 'de' %}
+{% set adressblock = get_rg_adressblock(frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft)) %}
+{% set mitgliedschaft = frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft) %}
+{% set sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id) %}
+{% if test_druckvorlage %}
+    {% set druckvorlage = frappe.get_doc("Druckvorlage", test_druckvorlage) %}
+{% else %}
+    <!--{#{% set druckvorlage = frappe.get_doc("Korrespondenz", doc.name) %}#}-->
+    {% set druckvorlage = doc %}
+{% endif %}
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- ENDE: Allgemeine Daten -->
+<!-- ---------------------------------------------------------------------------------------- -->
+
+
+{% if druckvorlage %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- DRUCKFORMAT -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+    {% for seite in druckvorlage.seiten %}
+        <!-- ggf. Page Break -->
+        {% if seite.idx > 1 %}
+            <div class="page-break"></div>
+        {% endif %}
+        
+        <!-- Header -->
+        <div id='kopfzeile'>
+            {% if seite.kopfzeile %}
+                <img src="/assets/mvd/img/mvs_nationales_logo.png" style="width: 58.1mm;">
+            {% endif %}
+        </div>
+        
+        <!-- Mitglieder Ausweis -->
+        {% if seite.ausweis %}
+            <div id='ausweis'>
+                <b>Mitgliederausweis</b>
+                <div id='ausweis-content'>
+                    firma<br>
+                    vorname_1 nachname_1<br>
+                    vorname_2 nachname_2
+                </div>
+                <div id="ausweis-footer">
+                        <b>Sektion:</b> Solothurn<span id="ausweis-footer-placeholder">....................</span><b>Mitgliedernummer:</b> 01234567
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Adressblock -->
+        {% if seite.adressblock %}
+            <div id='adressblock'>
+                {% if seite.pp %}
+                    <!-- mit P.P. -->
+                    <div id='adressblock_pp'><span id='pp_post'><b>P.P.</b></span> {{ seite.plz_und_ort or '' }} <span id='pp_span' class="pull-right">Post CH AG</span></div>
+                {% endif %}
+                {{ adressblock|replace("\n", "<br>") }}
+            </div>
+        {% endif %}
+        
+        <!-- Referenzblock -->
+        {% if seite.referenzblock %}
+            <div id='referenzblock'>
+                {% if sektion %}
+                    {{ _(sektion.default_ort, print_language) }}, {{ frappe.utils.get_datetime(doc.posting_date).strftime('%d.%m.%Y') }}<br><br>
+                    {{ sektion.referenzblock }}
+                {% endif %}
+            </div>
+        {% endif %}
+        
+        <!-- Content -->
+        {% if seite.inhalt %}
+            <div id='content-{{seite.idx }}'>{{ replace_mv_keywords(seite.inhalt, mitgliedschaft, sinv=sales_invoice) }}</div>
+        {% endif %}
+        
+        <!-- Seitenzahlen (Fusszeile) -->
+        <div id='seitenzahlen'><div id='seitenzahlen-content'>{% if seite.seitenzahlen %}Seite {{ seite.idx }} / {{ druckvorlage.seiten|len }}{% else %}&nbsp;{% endif %}</div></div>
+        
+        <!-- Erzwungene Rückseite bei Mitglieder Ausweis -->
+        {% if seite.ausweis %}
+            <div class="page-break"></div>
+            <div id='ausweis-rueckseite'>
+                {{ sektion.ausweis_rueckseite }}
+            </div>
+            <div id="ausweis-rueckseite-zusatz">Karte an der Perforation herauslösen</div>
+        {% endif %}
+
+
+        <style>
+            @font-face {
+                font-family: 'Frutiger';
+                font-style: normal;
+                font-weight: normal;
+                src: url('/assets/erpnextswiss/fonts/frutiger/Frutiger.woff');
+            }
+            @font-face {
+                font-family: 'Frutiger Bold';
+                font-style: normal;
+                font-weight: normal;
+                src: url('/assets/erpnextswiss/fonts/frutiger/Frutiger_bold.woff');
+            }
+            
+            #kopfzeile {
+                padding-left: 24.5mm;
+                padding-top: 17.5mm;
+                min-height: 55mm;
+                max-height: 55mm;
+                min-width: 128mm;
+                max-width: 128mm;
+                float: left;
+            }
+            
+            #ausweis {
+                float: right;
+                min-width: 82mm;
+                max-width: 82mm;
+                min-height: 55mm;
+                max-height: 55mm;
+                padding-top: 4mm;
+                font-size: 7.5pt !important;
+            }
+            
+            #ausweis-content {
+                padding-top: 20mm;
+                font-size: 9.5pt !important;
+            }
+            
+            #ausweis-footer {
+                padding-top: 4mm;
+                font-size: 7.5pt !important;
+            }
+            
+            #ausweis-footer-placeholder {
+                color: white;
+            }
+            
+            #ausweis-rueckseite {
+                min-height: 58mm;
+                padding-left: 128mm;
+            }
+            
+            #ausweis-rueckseite-zusatz {
+                padding-left: 124mm;
+                font-size: 6pt !important;
+            }
+            
+            #adressblock {
+                margin-left: 26mm;
+                min-height: 40mm;
+                max-height: 40mm;
+                min-width: 102mm;
+                max-width: 102mm;
+                float: left;
+                clear: both;
+                font-size: 9.5pt !important;
+                line-height: 13.5pt !important;
+            }
+            
+            #adressblock_pp {
+                border-bottom: 1px solid black;
+                margin-bottom: 3mm;
+                font-size: 8pt !important;
+                font-family: 'Frutiger';
+            }
+            
+            #pp_post {
+                font-size: 12pt !important;
+                font-family: 'Frutiger Bold';
+            }
+            
+            #pp_span {
+                padding-top: 2px;
+            }
+            
+            #referenzblock {
+                min-height: 40mm;
+                max-height: 40mm;
+                min-width: 70mm;
+                max-width: 70mm;
+                float: left;
+                font-size: 7.5pt !important;
+                line-height: 10.1pt !important;
+            }
+            
+            #content-{{seite.idx }} {
+                margin-left: 26mm;
+                min-width: 161.5mm;
+                max-width: 161.5mm;
+                font-size: 9.5pt !important;
+                line-height: 13.5pt !important;
+                clear: both;
+                overflow-y: hidden !important;
+                {% if seite.adressblock or seite.referenzblock %}
+                    {% if seite.fusszeile %}
+                        min-height: 168.5mm;
+                        max-height: 168.5mm;
+                    {% else %}
+                        min-height: 197mm;
+                        max-height: 197mm;
+                    {% endif %}
+                {% else %}
+                    {% if seite.seitenzahlen %}
+                        min-height: 211.5mm;
+                        max-height: 211.5mm;
+                    {% else %}
+                        min-height: 240mm;
+                        max-height: 240mm;
+                    {% endif %}
+                {% endif %}
+            }
+            
+            #seitenzahlen {
+                margin-left: 172.5mm;
+                min-height: 2mm;
+                /* HACK weil sonst alles verschoben! */
+                border: 1px solid white;
+                /* ENDE: HACK */
+            }
+            
+            #seitenzahlen-content {
+                font-size: 7.5pt !important;
+            }
+            
+            #einzahlungsschein {
+                min-height: 105mm;
+                max-height: 105mm;
+            }
+        </style>
+    {% endfor %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- ENDE: DRUCKFORMAT -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+{% else %}
+    <div>Das Dokument {{ doc.name }} ({{ doc.doctype }}) besitzt keine Druckvorlage!</div>
+{% endif %}
