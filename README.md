@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.12.1
+Korrektur VBZ-Beratung HTML
 #### 8.12.0
 Abschnitte 'Mandat' und 'Haftpflicht' in DT Mitgliedschaft
 #### 8.11.7
