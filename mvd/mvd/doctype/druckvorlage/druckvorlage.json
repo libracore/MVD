@@ -1,4 +1,5 @@
 {
+ "allow_rename": 1,
  "autoname": "format:{titel}-{sektion_id}",
  "creation": "2022-01-31 11:33:15.542331",
  "doctype": "DocType",
@@ -470,7 +471,7 @@
    "label": "test_dn"
   }
  ],
- "modified": "2023-06-30 11:57:20.688037",
+ "modified": "2023-07-06 10:57:04.204547",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

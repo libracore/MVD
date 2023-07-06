@@ -15,3 +15,4 @@ mvd.patches.v8_9_12.naechster_termin_liste
 mvd.patches.v8_9_18.nachname_nach_mahnung
 mvd.patches.redesign_druckvorlagen_migration.migration
 mvd.patches.redesign_korrespondenz_migration.migration
+mvd.patches.redesign_druckvorlagen_renaming.renaming

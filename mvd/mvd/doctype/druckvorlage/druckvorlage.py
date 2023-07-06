@@ -14,6 +14,7 @@ class Druckvorlage(Document):
             self.check_default()
         else:
             self.default = '0'
+        self.titel = self.titel.replace("ä", "ae").replace("Ä", "Ae").replace("ö", "oe").replace("Ö", "Oe").replace("ü", "ue").replace("Ü", "Ue")
     
     def validiere_inhalt(self):
         if self.dokument in ('Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ', 'Jahresrechnung'):

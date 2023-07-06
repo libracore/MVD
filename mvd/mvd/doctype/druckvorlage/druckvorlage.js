@@ -16,7 +16,7 @@ frappe.ui.form.on('Druckvorlage', {
             if (!cur_frm.is_dirty()) {
                 frappe.prompt([
                     {'fieldname': 'test_dt', 'fieldtype': 'Link', 'label': 'Doctype', 'reqd': 1, 'options': 'DocType',
-                        'get_query': function() { return { filters: {'name': ['in', ['Mahnung', 'Sales Invoice', 'Fakultative Rechnung', 'Korrespondenz']] } } }
+                        'get_query': function() { return { filters: {'name': ['in', ['Mahnung', 'Sales Invoice', 'Fakultative Rechnung', 'Korrespondenz', 'Mitgliedschaft']] } } }
                     },
                     {'fieldname': 'test_dn', 'fieldtype': 'Dynamic Link', 'label': 'Datensatz', 'reqd': 1, 'options': 'test_dt'}
                 ],
