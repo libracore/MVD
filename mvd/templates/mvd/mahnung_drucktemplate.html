@@ -7,15 +7,18 @@
     {% else %}
         {% set mahnung_druckvorlage = frappe.get_doc("Druckvorlage", mahnung.druckvorlage) %}
     {% endif %}
+    {% set sektion = frappe.get_doc("Sektion", frappe.db.get_value("Druckvorlage", mahnung_druckvorlage.name, "sektion_id")) %}
     {% set print_language = 'de' %}
     {% set adressblock = 'Fehlende Daten' %}
     {% set invoice = mahnung.sales_invoices[0].sales_invoice %}
     {% if mahnung.mv_kunde %}
         {% set mahnung_kunde_mitglied_referenz = mahnung.mv_kunde %}
         {% set adressblock = get_rg_adressblock(frappe.get_doc("Kunden", mahnung_kunde_mitglied_referenz)) %}
+        {% set mitgliedschaft = False %}
     {% else %}
         {% set mahnung_kunde_mitglied_referenz = mahnung.mv_mitgliedschaft %}
         {% set adressblock = get_rg_adressblock(frappe.get_doc("Mitgliedschaft", mahnung_kunde_mitglied_referenz)) %}
+        {% set mitgliedschaft = frappe.get_doc("Mitgliedschaft", mahnung_kunde_mitglied_referenz) %}
     {% endif %}
     <!-- ---------------------------------------------------------------------------------------- -->
     <!-- ENDE: Allgemeine Daten -->
@@ -38,16 +41,16 @@
         </div>
         
         <!-- Mitglieder Ausweis -->
-        {% if seite.ausweis %}
+        {% if seite.ausweis and mitgliedschaft %}
             <div id='ausweis'>
                 <b>Mitgliederausweis</b>
                 <div id='ausweis-content'>
-                    firma<br>
-                    vorname_1 nachname_1<br>
-                    vorname_2 nachname_2
+                    {% if mitgliedschaft.kundentyp == 'Unternehmen' %}{{ mitgliedschaft.firma }}<br>{% endif %}
+                    {{ mitgliedschaft.vorname_1 }} {{ mitgliedschaft.nachname_1 }}
+                    {% if mitgliedschaft.hat_solidarmitglied %}<br>{{ mitgliedschaft.vorname_2 }} {{ mitgliedschaft.nachname_2 }}{% endif %}
                 </div>
                 <div id="ausweis-footer">
-                        <b>Sektion:</b> Solothurn<span id="ausweis-footer-placeholder">....................</span><b>Mitgliedernummer:</b> 01234567
+                        <b>Sektion:</b> {{ mitgliedschaft.sektion_id }}<span id="ausweis-footer-placeholder">....................</span><b>Mitgliedernummer:</b> {{ mitgliedschaft.mitglied_nr }}
                 </div>
             </div>
         {% endif %}

@@ -267,12 +267,12 @@
             <div id='ausweis'>
                 <b>Mitgliederausweis</b>
                 <div id='ausweis-content'>
-                    firma<br>
-                    vorname_1 nachname_1<br>
-                    vorname_2 nachname_2
+                    {% if mitgliedschaft.kundentyp == 'Unternehmen' %}{{ mitgliedschaft.firma }}<br>{% endif %}
+                    {{ mitgliedschaft.vorname_1 }} {{ mitgliedschaft.nachname_1 }}
+                    {% if mitgliedschaft.hat_solidarmitglied %}<br>{{ mitgliedschaft.vorname_2 }} {{ mitgliedschaft.nachname_2 }}{% endif %}
                 </div>
                 <div id="ausweis-footer">
-                        <b>Sektion:</b> Solothurn<span id="ausweis-footer-placeholder">....................</span><b>Mitgliedernummer:</b> 01234567
+                        <b>Sektion:</b> {{ mitgliedschaft.sektion_id }}<span id="ausweis-footer-placeholder">....................</span><b>Mitgliedernummer:</b> {{ mitgliedschaft.mitglied_nr }}
                 </div>
             </div>
         {% endif %}
