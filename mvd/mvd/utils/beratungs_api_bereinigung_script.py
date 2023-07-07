@@ -7,6 +7,7 @@ import frappe
 from mvd.mvd.service_plattform.api import send_beratung
 import time
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import prepare_mvm_for_sp
+from frappe.utils.data import get_datetime_str
 
 def nachsenden():
     frappe.db.set_value("Service Plattform API", "Service Plattform API", 'send_beratung_to_sp_unterbrechen', 1)
