@@ -9,6 +9,8 @@ import time
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import prepare_mvm_for_sp
 
 def nachsenden():
+    frappe.db.set_value("Service Plattform API", "Service Plattform API", 'send_beratung_to_sp_unterbrechen', 1)
+    frappe.db.commit()
     beratungen = frappe.db.sql("""SELECT `name` FROM `tabBeratung` WHERE `trigger_api` = 1""", as_dict=True)
     loop = 1
     total = len(beratungen)
@@ -56,6 +58,8 @@ def nachsenden():
         time.sleep(120)
         print("Timeout abwarten...({0} von {1})".format(loop, total))
         loop += 1
+    frappe.db.set_value("Service Plattform API", "Service Plattform API", 'send_beratung_to_sp_unterbrechen', 0)
+    frappe.db.commit()
 
 def create_beratungs_log(error=0, info=0, beratung=None, method=None, title=None, json=None):
     frappe.get_doc({

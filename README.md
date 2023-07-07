@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.13.2
+Gestaffelte nachsende Möglichkeit für MVZH Beratungen
 #### 8.13.1
 Abfrage ob Beratung als gelesen markiert werden soll, wenn ungelesen und Rückfrage Mail versendet
 #### 8.13.0
