@@ -56,8 +56,8 @@ def nachsenden():
             # allgemeiner Fehler
             create_beratungs_log(error=1, info=0, beratung=None, method='send_to_sp', title='Exception', json="{0}".format(str(err)))
             print("Fehlgeschlagen...({0} von {1})".format(loop, total))
-        time.sleep(120)
         print("Timeout abwarten...({0} von {1})".format(loop, total))
+        time.sleep(30)
         loop += 1
     frappe.db.set_value("Service Plattform API", "Service Plattform API", 'send_beratung_to_sp_unterbrechen', 0)
     frappe.db.commit()
