@@ -13,6 +13,7 @@
   "section_danger",
   "not_get_number_and_id",
   "no_sp_update",
+  "send_beratung_to_sp_unterbrechen",
   "json_error_log",
   "queue",
   "flush_queue",
@@ -95,10 +96,16 @@
    "fieldtype": "Data",
    "label": "Beratungs Endpoint",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_beratung_to_sp_unterbrechen",
+   "fieldtype": "Check",
+   "label": "Send Beratung to SP unterbrechen"
   }
  ],
  "issingle": 1,
- "modified": "2023-02-25 15:43:41.316412",
+ "modified": "2023-07-07 10:15:00.383021",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",
