@@ -3083,7 +3083,7 @@ def check_email(email=None):
             # ~ return False
     # ~ else:
         # ~ return False
-    if email != 'None'
+    if email != 'None':
         return True
     else:
         return False
