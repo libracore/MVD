@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.13.4
+Bugfix: Bei Anlage via Website E-Mail 'None' ersetzen durch ''
 #### 8.13.3
 Anpassung S6, R9 neu
 #### 8.13.2
