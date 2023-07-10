@@ -3083,7 +3083,10 @@ def check_email(email=None):
             # ~ return False
     # ~ else:
         # ~ return False
-    return True
+    if email != 'None'
+        return True
+    else:
+        return False
     
 def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
     try:
