@@ -64,7 +64,7 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s6").click(function(){
-            frappe.route_options = {"status": ["not in", ["Rückfragen", "Rückfrage: Termin vereinbaren", "Eingang", "Open", "Zusammengeführt"]], "ungelesen": 1}
+            frappe.route_options = {"status": ["not in", ["Rückfragen", "Rückfrage: Termin vereinbaren", "Eingang", "Open", "Zusammengeführt"]], "ungelesen": 1, "kontaktperson": ['is', 'not set']}
             frappe.set_route("List", "Beratung", "List");
         });
         
@@ -102,6 +102,10 @@ frappe.vbz_beratung = {
         });
         $("#r8").click(function(){
             frappe.route_options = {'status': 'Closed', 'hat_termine': 1}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r9").click(function(){
+            frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt"]], "ungelesen": 1, "kontaktperson": ['is', 'set']}
             frappe.set_route("List", "Beratung", "List");
         });
         
