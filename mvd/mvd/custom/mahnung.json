@@ -8,14 +8,14 @@
    "_comments": null,
    "_liked_by": null,
    "_user_tags": null,
-   "creation": "2022-02-21 20:08:10.084465",
+   "creation": "2023-07-11 09:35:46.200100",
    "default_value": null,
    "doc_type": "Mahnung",
    "docstatus": 0,
    "doctype_or_field": "DocType",
    "field_name": null,
    "idx": 0,
-   "modified": "2022-02-21 20:08:10.084465",
+   "modified": "2023-07-11 09:35:46.200100",
    "modified_by": "Administrator",
    "name": "Mahnung-sort_field",
    "owner": "Administrator",
@@ -24,7 +24,7 @@
    "parenttype": null,
    "property": "sort_field",
    "property_type": "Data",
-   "value": "total_with_charge"
+   "value": "nachname_kunde"
   },
   {
    "_assign": null,
