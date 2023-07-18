@@ -1,3 +1,27 @@
+<style>
+    @font-face {
+        font-family: 'TWKEverett';
+        font-style: normal;
+        font-weight: normal;
+        src: url('/assets/mvd/font/TWKEverettMedium.woff');
+    }
+    @font-face {
+        font-family: 'TWKEverettLight';
+        font-style: normal;
+        font-weight: normal;
+        src: url('/assets/mvd/font/TWKEverettLight.woff');
+    }
+    .print-format {
+        margin-right: 0mm;
+        margin-left: 0mm;
+        margin-top: 0mm;
+        margin-bottom: 0mm;
+        font-family: 'TWKEverett';
+    }
+    #referenzblock {
+        font-family: 'TWKEverettLight';
+    }
+</style>
 {% if not test_druckvorlage %}
     {% set test_druckvorlage = False %}
 {% endif %}
