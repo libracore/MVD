@@ -42,7 +42,7 @@
                     {% if mitgliedschaft.hat_solidarmitglied %}<br>{{ mitgliedschaft.vorname_2 }} {{ mitgliedschaft.nachname_2 }}{% endif %}
                 </div>
                 <div id="ausweis-footer">
-                        <b>Sektion:</b> {{ mitgliedschaft.sektion_id }}<span id="ausweis-footer-placeholder">....................</span><b>Mitgliedernummer:</b> {{ mitgliedschaft.mitglied_nr }}
+                        <b>Sektion:</b> {{ mitgliedschaft.sektion_id }}<span id="ausweis-footer-placeholder">...............</span><b>Mitgliedernummer:</b> {{ mitgliedschaft.mitglied_nr }}
                 </div>
             </div>
         {% endif %}
@@ -87,101 +87,6 @@
 
 
         <style>
-            @font-face {
-                font-family: 'Frutiger';
-                font-style: normal;
-                font-weight: normal;
-                src: url('/assets/erpnextswiss/fonts/frutiger/Frutiger.woff');
-            }
-            @font-face {
-                font-family: 'Frutiger Bold';
-                font-style: normal;
-                font-weight: normal;
-                src: url('/assets/erpnextswiss/fonts/frutiger/Frutiger_bold.woff');
-            }
-            
-            #kopfzeile {
-                padding-left: 24.5mm;
-                padding-top: 17.5mm;
-                min-height: 55mm;
-                max-height: 55mm;
-                min-width: 128mm;
-                max-width: 128mm;
-                float: left;
-            }
-            
-            #ausweis {
-                float: right;
-                min-width: 82mm;
-                max-width: 82mm;
-                min-height: 55mm;
-                max-height: 55mm;
-                padding-top: 4mm;
-                font-size: 7.5pt !important;
-            }
-            
-            #ausweis-content {
-                padding-top: 20mm;
-                font-size: 9.5pt !important;
-            }
-            
-            #ausweis-footer {
-                padding-top: 4mm;
-                font-size: 7.5pt !important;
-            }
-            
-            #ausweis-footer-placeholder {
-                color: white;
-            }
-            
-            #ausweis-rueckseite {
-                min-height: 58mm;
-                padding-left: 128mm;
-            }
-            
-            #ausweis-rueckseite-zusatz {
-                padding-left: 124mm;
-                font-size: 6pt !important;
-            }
-            
-            #adressblock {
-                margin-left: 26mm;
-                min-height: 40mm;
-                max-height: 40mm;
-                min-width: 102mm;
-                max-width: 102mm;
-                float: left;
-                clear: both;
-                font-size: 9.5pt !important;
-                line-height: 13.5pt !important;
-            }
-            
-            #adressblock_pp {
-                border-bottom: 1px solid black;
-                margin-bottom: 3mm;
-                font-size: 8pt !important;
-                font-family: 'Frutiger';
-            }
-            
-            #pp_post {
-                font-size: 12pt !important;
-                font-family: 'Frutiger Bold';
-            }
-            
-            #pp_span {
-                padding-top: 2px;
-            }
-            
-            #referenzblock {
-                min-height: 40mm;
-                max-height: 40mm;
-                min-width: 70mm;
-                max-width: 70mm;
-                float: left;
-                font-size: 7.5pt !important;
-                line-height: 10.1pt !important;
-            }
-            
             #content-{{seite.idx }} {
                 margin-left: 26mm;
                 min-width: 161.5mm;
@@ -207,23 +112,6 @@
                         max-height: 240mm;
                     {% endif %}
                 {% endif %}
-            }
-            
-            #seitenzahlen {
-                margin-left: 172.5mm;
-                min-height: 2mm;
-                /* HACK weil sonst alles verschoben! */
-                border: 1px solid white;
-                /* ENDE: HACK */
-            }
-            
-            #seitenzahlen-content {
-                font-size: 7.5pt !important;
-            }
-            
-            #einzahlungsschein {
-                min-height: 105mm;
-                max-height: 105mm;
             }
         </style>
     {% endfor %}
