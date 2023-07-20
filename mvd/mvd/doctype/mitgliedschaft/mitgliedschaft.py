@@ -95,11 +95,9 @@ class Mitgliedschaft(Document):
             
             # schliesse offene abreits backlogs
             close_open_validations(self.name, 'Daten Validieren')
-            if self.interessent_innenbrief_mit_ez:
-                if not int(self.interessent_innenbrief_mit_ez) == 1:
+            if not int(self.interessent_innenbrief_mit_ez) == 1:
                     close_open_validations(self.name, 'Interessent*Innenbrief mit EZ')
-            if self.anmeldung_mit_ez:
-                if not int(self.anmeldung_mit_ez) == 1:
+            if not int(self.anmeldung_mit_ez) == 1:
                     close_open_validations(self.name, 'Anmeldung mit EZ')
             
             # beziehe mitglied_nr wenn umwandlung von Interessent*in
@@ -453,7 +451,11 @@ class Mitgliedschaft(Document):
                     if len(linked_fr) > 0:
                         for _fr in linked_fr:
                             fr = frappe.get_doc("Fakultative Rechnung", _fr.name)
-                            fr.cancel()
+                            if fr.status == 'Paid':
+                                fr.add_comment('Comment', text="Verknüpfung zu Rechnung {0} aufgrund Sektionswechsel aufgehoben".format(fr.sales_invoice))
+                                frappe.db.sql("""UPDATE `tabFakultative Rechnung` SET `sales_invoice` = '' WHERE `name` = '{0}'""".format(fr.name), as_list=True)
+                            else:
+                                fr.cancel()
                     
                     # cancel linked mahnungen
                     linked_mahnungen = frappe.db.sql("""SELECT DISTINCT `parent` FROM `tabMahnung Invoices` WHERE `sales_invoice` = '{sinv}' AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)

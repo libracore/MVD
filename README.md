@@ -1,5 +1,13 @@
 ## MVD
 ### Version Log
+#### 8.13.11
+Korrektur Schliessung ABL inkl. Patch
+#### 8.13.10
+Entfernung libracore Gruss
+#### 8.13.9
+Fix Sektionswechsel bei bezahlter HV und gemahnter Mitgl.
+#### 8.13.8
+Bugfix M+W Export (Unternehmen, Name 3)
 #### 8.13.7
 Druckformat Korrektur (Abw. RG-Adresse Faktura Kunde)
 #### 8.13.6
