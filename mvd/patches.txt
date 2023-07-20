@@ -13,6 +13,7 @@ mvd.patches.v7_8_0.ampelfarbe_mvzh
 mvd.patches.v7_14_0.auto_todo_beratung
 mvd.patches.v8_9_12.naechster_termin_liste
 mvd.patches.v8_9_18.nachname_nach_mahnung
+mvd.patches.v8_13_11.abl_korr
 mvd.patches.redesign_druckvorlagen_migration.migration
 mvd.patches.redesign_korrespondenz_migration.migration
 mvd.patches.redesign_druckvorlagen_renaming.renaming
