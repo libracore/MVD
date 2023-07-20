@@ -95,11 +95,9 @@ class Mitgliedschaft(Document):
             
             # schliesse offene abreits backlogs
             close_open_validations(self.name, 'Daten Validieren')
-            if self.interessent_innenbrief_mit_ez:
-                if not int(self.interessent_innenbrief_mit_ez) == 1:
+            if not int(self.interessent_innenbrief_mit_ez) == 1:
                     close_open_validations(self.name, 'Interessent*Innenbrief mit EZ')
-            if self.anmeldung_mit_ez:
-                if not int(self.anmeldung_mit_ez) == 1:
+            if not int(self.anmeldung_mit_ez) == 1:
                     close_open_validations(self.name, 'Anmeldung mit EZ')
             
             # beziehe mitglied_nr wenn umwandlung von Interessent*in
