@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.13.10
+Entfernung libracore Gruss
 #### 8.13.9
 Fix Sektionswechsel bei bezahlter HV und gemahnter Mitgl.
 #### 8.13.8
