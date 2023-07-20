@@ -13,13 +13,16 @@
   "mitgliedschafts_jahr_manuell",
   "mitgliedschafts_jahr",
   "geschenk",
+  "migriert_neues_cd",
+  "section_tipps",
+  "tipps",
+  "section_content",
+  "seiten",
   "section_seitenmanagement",
   "anzahl_seiten",
   "cb_2",
   "doppelseitiger_druck",
   "logo_ausblenden",
-  "section_tipps",
-  "tipps",
   "section_inhalt_1",
   "h1",
   "seite_1a",
@@ -77,6 +80,7 @@
   {
    "fieldname": "section_seitenmanagement",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Seitenmanagement"
   },
   {
@@ -117,6 +121,7 @@
   {
    "fieldname": "section_inhalt_1",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Inhalt"
   },
   {
@@ -284,9 +289,27 @@
    "fieldname": "mitgliedschafts_jahr",
    "fieldtype": "Data",
    "label": "Mitgliedschaftsjahr"
+  },
+  {
+   "fieldname": "section_content",
+   "fieldtype": "Section Break",
+   "label": "Inhalt"
+  },
+  {
+   "fieldname": "seiten",
+   "fieldtype": "Table",
+   "label": "Seiten",
+   "options": "Druckvorlage Seite"
+  },
+  {
+   "default": "0",
+   "fieldname": "migriert_neues_cd",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Migriert (Neues CD)"
   }
  ],
- "modified": "2022-12-15 17:16:05.582495",
+ "modified": "2023-07-04 10:09:43.463637",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Korrespondenz",

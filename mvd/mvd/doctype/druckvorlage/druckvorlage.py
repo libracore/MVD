@@ -14,6 +14,7 @@ class Druckvorlage(Document):
             self.check_default()
         else:
             self.default = '0'
+        self.titel = self.titel.replace("ä", "ae").replace("Ä", "Ae").replace("ö", "oe").replace("Ö", "Oe").replace("ü", "ue").replace("Ü", "Ue")
     
     def validiere_inhalt(self):
         if self.dokument in ('Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ', 'Jahresrechnung'):
@@ -223,6 +224,11 @@ class Druckvorlage(Document):
         else:
             if self.default != 1:
                 self.default = 1
+    
+    def test_druck(self, test_dt, test_dn):
+        frappe.db.set_value("Druckvorlage", self.name, "test_dt", test_dt, update_modified=False)
+        frappe.db.set_value("Druckvorlage", self.name, "test_dn", test_dn, update_modified=False)
+        return
 
 @frappe.whitelist()
 def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, reduzierte_mitgliedschaft=False, language=False, serienbrief=False):
