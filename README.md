@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.13.12
+Erw. um MWST 0%
 #### 8.13.11
 Korrektur Schliessung ABL inkl. Patch
 #### 8.13.10
