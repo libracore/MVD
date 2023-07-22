@@ -394,7 +394,7 @@ def get_item_table(sinv):
                                     bez=bezeichnung, \
                                     einzp="{:,.2f}".format(item.rate).replace(",", "'"), \
                                     total="{:,.2f}".format(item.amount).replace(",", "'"), \
-                                    mwst=item.item_tax_template)
+                                    mwst=item.item_tax_template or '0%')
         if item.item_tax_template and item.item_tax_template in taxes:
             taxes[item.item_tax_template] += item.amount
     
