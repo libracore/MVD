@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils.data import today, now
+import json
 
 class Beratung(Document):
     def onload(self):
@@ -780,3 +781,10 @@ def sync_attachements_after_anlage_durch_mail(self, event):
                 row.filename = attchmnt['filename']
         beratung.anlage_durch_mail_check_attachments = 0
         beratung.save()
+
+@frappe.whitelist()
+def remove_comments(comments):
+    comments = json.loads(comments)
+    for comment in comments:
+        frappe.db.sql("""DELETE FROM `tabComment` WHERE `name` = '{c_name}'""".format(c_name=comment), as_list=True)
+    return True
