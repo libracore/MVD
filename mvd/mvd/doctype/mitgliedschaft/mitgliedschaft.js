@@ -402,6 +402,9 @@ frappe.ui.form.on('Mitgliedschaft', {
         }
     },
     validate: function(frm) {
+        // aktivierung sync
+        cur_frm.set_value("letzte_bearbeitung_von", 'User');
+        
         // E-Mail Adressen Validierung
         if (!locals.dont_check_email) {
             frm.call("email_validierung", {check: 1}, (r) => {
@@ -430,8 +433,6 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frappe.validated=false;
             }
         }
-        
-        cur_frm.set_value("letzte_bearbeitung_von", 'User');
         
         // Abfrage ob M+W Retouren geschlossen werden sollen
         frappe.call({
