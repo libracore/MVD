@@ -2,6 +2,12 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Beratung', {
+    onload: function(frm) {
+        if (!frm.doc.__islocal) {
+            // timeline bereinigung
+            reset_timeline(frm);
+        }
+    },
     refresh: function(frm) {
         // Handler für gesperrte Ansicht
         var gesperrt = false;
@@ -605,4 +611,25 @@ function admin_todo(cur_frm) {
     'Admin ToDo erstellen',
     'Erstellen'
     )
+}
+
+function reset_timeline(frm) {
+    var comments = cur_frm.timeline.get_comments();
+    var assignements = [];
+    comments.forEach(function(comment){
+       if ((comment.comment_type == 'Assigned')||(comment.comment_type == 'Assignment Completed')) {
+           assignements.push(comment.name);
+       }
+    });
+    if (assignements.length > 0) {
+        frappe.call({
+            "method": "mvd.mvd.doctype.beratung.beratung.remove_comments",
+            "args": {
+                "comments": assignements
+            },
+            "callback": function(response) {
+                cur_frm.reload_doc();
+            }
+        });
+    }
 }
