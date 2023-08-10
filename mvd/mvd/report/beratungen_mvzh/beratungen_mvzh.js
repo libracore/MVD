@@ -5,13 +5,6 @@
 frappe.query_reports["Beratungen MVZH"] = {
     "filters": [
         {
-            'fieldname': "sektion",
-            'label': __("Sektion"),
-            'fieldtype': "Link",
-            'options': 'Sektion',
-            'default': 'MVZH'
-        },
-        {
             'fieldname': "von",
             'label': __("Datum >="),
             'fieldtype': "Date",
