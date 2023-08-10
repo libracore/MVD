@@ -27,9 +27,6 @@ def get_data(filters):
     data = []
     
     date_filter = """WHERE `creation` BETWEEN '{0} 00:00:00' AND '{1} 23:59:59'""".format(filters.von, filters.bis)
-    sektion_filter = ''
-    if filters.sektion:
-        sektion_filter = """ AND `sektion_id` = '{sektion}'""".format(sektion=filters.sektion)
     
     beratungen = frappe.db.sql("""
                                 SELECT
@@ -39,7 +36,8 @@ def get_data(filters):
                                     `raised_by` AS `e_mail_person`,
                                     `raised_by_name` AS `name_person`
                                 FROM `tabBeratung`
-                                {date_filter}{sektion_filter}""".format(date_filter=date_filter, sektion_filter=sektion_filter), as_dict=True)
+                                {date_filter}
+                                AND `sektion_id` = 'MVZH'""".format(date_filter=date_filter), as_dict=True)
     for beratung in beratungen:
         beratung.update(get_mitglied_name(beratung))
         beratung.update(get_sp_details(beratung))
