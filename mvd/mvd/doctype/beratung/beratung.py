@@ -727,10 +727,22 @@ def create_neue_beratung(von, bis, art, ort, berater_in, notiz=None, beratungska
     return beratung.name
 
 def relink_attachements(communication, beratung):
-    files = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Communication' AND `attached_to_name` = '{0}'""".format(communication), as_dict=True)
+    files = frappe.db.sql("""SELECT `name`, `file_url`, `file_name` FROM `tabFile` WHERE `attached_to_doctype` = 'Communication' AND `attached_to_name` = '{0}'""".format(communication), as_dict=True)
+    
+    # relink file from communication to beratung
     for file_record in files:
         frappe.db.set_value("File", file_record.name, 'attached_to_doctype', "Beratung")
         frappe.db.set_value("File", file_record.name, 'attached_to_name', beratung)
+    
+    # add files to dokumente table in beratung
+    beratung = frappe.get_doc("Beratung", beratung)
+    if len(files) > 0:
+        for attchmnt in files:
+            row = beratung.append('dokumente', {})
+            row.file = attchmnt.file_url
+            row.document_type = 'Sonstiges'
+            row.filename = attchmnt.file_name
+        beratung.save()
 
 @frappe.whitelist()
 def admin_todo(beratung, sektion_id=None, description=None, datum=None):

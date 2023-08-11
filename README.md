@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.16.0
+Beratung: Anhänge aus Eingangs-Mail zusätzlich in Dokumente-Table aufnehmen nach Attachment Relink
 #### 8.15.1
 Beratungs-Report MVZH; Hard-Coded MVZH Filter
 #### 8.15.0
