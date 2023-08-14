@@ -3128,6 +3128,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
             return False
         
         if mitglied:
+            found_solidarmitglied = False
             # erfassung mitglied-daten
             for kontaktdaten in mitglied["kontakte"]:
                 if kontaktdaten["istHauptkontakt"]:
@@ -3171,6 +3172,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                         new_mitgliedschaft.adressen_gesperrt = 1
                 else:
                     # solidarmitglied
+                    found_solidarmitglied = True
                     new_mitgliedschaft.hat_solidarmitglied = 1
                     if kontaktdaten["anrede"] != 'Unbekannt':
                         new_mitgliedschaft.anrede_2 = str(kontaktdaten["anrede"]) if kontaktdaten["anrede"] else ''
@@ -3186,6 +3188,9 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                         new_mitgliedschaft.tel_m_2 = ''
                     new_mitgliedschaft.tel_g_2 = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
                     new_mitgliedschaft.e_mail_2 = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
+            
+            if not found_solidarmitglied:
+                new_mitgliedschaft.hat_solidarmitglied = 0
         
         if objekt:
             if objekt["strasse"]:
@@ -3227,12 +3232,17 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
             new_mitgliedschaft.rg_postfach_nummer = str(rechnung["postfachNummer"]) if rechnung["postfachNummer"] else ''
             new_mitgliedschaft.rg_plz = str(rechnung["postleitzahl"]) if rechnung["postleitzahl"] else ''
             new_mitgliedschaft.rg_ort = str(rechnung["ort"]) if rechnung["ort"] else ''
+            
             if rechnung["fuerKorrespondenzGesperrt"]:
                 new_mitgliedschaft.adressen_gesperrt = 1
+            
+            found_unabhaengiger_debitor = False
+            
             for kontaktdaten in rechnung["kontakte"]:
                 if kontaktdaten["istHauptkontakt"]:
                     if (str(kontaktdaten["nachname"]) + str(kontaktdaten["vorname"])) != (new_mitgliedschaft.nachname_1 + new_mitgliedschaft.vorname_1):
                         # unabhängiger debitor
+                        found_unabhaengiger_debitor = True
                         new_mitgliedschaft.unabhaengiger_debitor = 1
                         if kontaktdaten["firma"]:
                             new_mitgliedschaft.rg_kundentyp = 'Unternehmen'
@@ -3254,7 +3264,10 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                             new_mitgliedschaft.rg_tel_m = ''
                         new_mitgliedschaft.rg_tel_g = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
                         new_mitgliedschaft.rg_e_mail = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
-                    
+            if not found_unabhaengiger_debitor:
+                new_mitgliedschaft.unabhaengiger_debitor = 0
+        else:
+            new_mitgliedschaft.abweichende_rechnungsadresse = 0
         
         if zeitung:
             # manuelle erfassung zeitung
