@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.16.1
+Mitgliedschafts-Update; Korrektes Updaten der CB 'Solidarmitlgied', 'Abweichende Rechnungsadresse' sowie 'Unabhängiger Debitor'
 #### 8.16.0
 Beratung: Anhänge aus Eingangs-Mail zusätzlich in Dokumente-Table aufnehmen nach Attachment Relink
 #### 8.15.1
