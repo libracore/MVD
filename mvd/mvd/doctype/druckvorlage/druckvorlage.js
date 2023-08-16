@@ -10,6 +10,34 @@ frappe.ui.form.on('Druckvorlage', {
                 cur_frm.set_df_property('seite_1_referenzblock_ausblenden','read_only',0);
             }
         }
+        
+        // Add BTN Testen
+        frm.add_custom_button(__("Druckvorlage Test-Druck"),  function() {
+            if (!cur_frm.is_dirty()) {
+                frappe.prompt([
+                    {'fieldname': 'test_dt', 'fieldtype': 'Link', 'label': 'Doctype', 'reqd': 1, 'options': 'DocType',
+                        'get_query': function() { return { filters: {'name': ['in', ['Mahnung', 'Sales Invoice', 'Fakultative Rechnung', 'Korrespondenz', 'Mitgliedschaft']] } } }
+                    },
+                    {'fieldname': 'test_dn', 'fieldtype': 'Dynamic Link', 'label': 'Datensatz', 'reqd': 1, 'options': 'test_dt'}
+                ],
+                function(values){
+                    frm.call("test_druck", {
+                        test_dt: values.test_dt,
+                        test_dn: values.test_dn
+                    }, (r) => {
+                        frm.reload_doc();
+                        var url = '/api/method/frappe.utils.print_format.download_pdf?doctype=Druckvorlage&name=' + cur_frm.doc.name + '&format=Testdruck&no_letterhead=0&_lang=de';
+                        window.open(url, '_blank').focus();
+                    });
+                    
+                },
+                'Testdruck erstellen',
+                'Drucken'
+                )
+            } else {
+                frappe.msgprint("Bitte zuerst speichern.");
+            }
+        });
     },
     dokument: function(frm) {
         if (cur_frm.doc.dokument == 'Mahnung') {

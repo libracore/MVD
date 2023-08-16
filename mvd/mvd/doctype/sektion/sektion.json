@@ -45,6 +45,8 @@
   "fz_mitte",
   "cb_3",
   "fz_rechts",
+  "section_referenzblock",
+  "referenzblock",
   "section_mitgliederausweis",
   "ausweis_rueckseite",
   "section_todo",
@@ -139,6 +141,7 @@
    "collapsible": 1,
    "fieldname": "section_fusszeile",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Fusszeile"
   },
   {
@@ -450,13 +453,24 @@
    "options": "Email Template"
   },
   {
+   "collapsible": 1,
+   "fieldname": "section_referenzblock",
+   "fieldtype": "Section Break",
+   "label": "Referenzblock"
+  },
+  {
+   "fieldname": "referenzblock",
+   "fieldtype": "Code",
+   "label": "Referenzblock"
+  },
+  {
    "fieldname": "hinweis_mietzinsrechner",
    "fieldtype": "Code",
    "label": "Hinweis Mietzinsrechner",
    "permlevel": 1
   }
  ],
- "modified": "2023-06-15 14:13:30.592075",
+ "modified": "2023-06-21 10:46:01.809637",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
