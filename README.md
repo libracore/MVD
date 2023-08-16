@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.17.0
+Attachement Handler für eingehende Mails im Zusammenhang mit Beratungen
 #### 8.16.1
 Mitgliedschafts-Update; Korrektes Updaten der CB 'Solidarmitlgied', 'Abweichende Rechnungsadresse' sowie 'Unabhängiger Debitor'
 #### 8.16.0

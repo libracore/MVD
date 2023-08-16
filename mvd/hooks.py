@@ -126,8 +126,11 @@ doc_events = {
     "Communication": {
         "after_insert": "mvd.mvd.doctype.beratung.beratung.check_communication"
     },
+    "File": {
+        "after_insert": "mvd.mvd.doctype.beratung.beratung.sync_mail_attachements"
+    },
     "Beratung": {
-        "after_insert": ["mvd.mvd.doctype.beratung.beratung.new_initial_todo", "mvd.mvd.doctype.beratung.beratung.sync_attachements_after_anlage_durch_mail"]
+        "after_insert": "mvd.mvd.doctype.beratung.beratung.new_initial_todo"
     }
 }
 
