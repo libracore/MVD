@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.17.3
+Hotfix (ISS-2023-00010)
 #### 8.17.2
 Patch für Bugfix von v8.17.1 (ISS-2023-00010)
 #### 8.17.1

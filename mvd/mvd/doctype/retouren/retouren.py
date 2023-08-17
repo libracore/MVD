@@ -272,21 +272,25 @@ def adresse_geaendert_check(adr=None, datum_adressexport=None, adresse_fuer_verg
             else:
                 return 0
         else:
-            latest_adress = adresse_fuer_vergleich._doc_before_save
-            if latest_adress.zusatz != adresse_fuer_vergleich.zusatz:
-                return 1
-            if latest_adress.strasse != adresse_fuer_vergleich.strasse:
-                return 1
-            if latest_adress.postfach != adresse_fuer_vergleich.postfach:
-                return 1
-            if latest_adress.postfach_nummer != adresse_fuer_vergleich.postfach_nummer:
-                return 1
-            if latest_adress.plz != adresse_fuer_vergleich.plz:
-                return 1
-            if latest_adress.city != adresse_fuer_vergleich.city:
-                return 1
-            if latest_adress.address_line2 != adresse_fuer_vergleich.address_line2:
-                return 1
+            try:
+                latest_adress = adresse_fuer_vergleich._doc_before_save
+                if latest_adress.zusatz != adresse_fuer_vergleich.zusatz:
+                    return 1
+                if latest_adress.strasse != adresse_fuer_vergleich.strasse:
+                    return 1
+                if latest_adress.postfach != adresse_fuer_vergleich.postfach:
+                    return 1
+                if latest_adress.postfach_nummer != adresse_fuer_vergleich.postfach_nummer:
+                    return 1
+                if latest_adress.plz != adresse_fuer_vergleich.plz:
+                    return 1
+                if latest_adress.city != adresse_fuer_vergleich.city:
+                    return 1
+                if latest_adress.address_line2 != adresse_fuer_vergleich.address_line2:
+                    return 1
+            except:
+                # no older version avaible
+                return 0
             # no changes
             return 0
         
