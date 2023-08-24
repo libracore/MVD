@@ -825,3 +825,63 @@ def sync_mail_attachements(file_record, event):
                 row.document_type = 'Sonstiges'
                 row.filename = new_file.file_name
                 b.save()
+    elif file_record.attached_to_doctype == 'Beratung':
+        if file_record.folder == "Home/Attachments":
+            # siehe auch sync_attachments_and_beratungs_table
+            vorhanden = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `file` = '{fileurl}' AND `parent` = '{beratung}'""".format(\
+                fileurl=file_record.file_url, \
+                beratung=file_record.attached_to_name), as_dict=True)[0].qty
+            if vorhanden < 1:
+                b = frappe.get_doc("Beratung", file_record.attached_to_name)
+                row = b.append('dokumente', {})
+                row.file = file_record.file_url
+                row.document_type = 'Sonstiges'
+                row.filename = file_record.file_name
+                b.save()
+
+def sync_attachments_and_beratungs_table(doc, event):
+    if doc.doctype == "Beratung":
+        old_doc = doc._doc_before_save
+        if old_doc.dokumente and doc.dokumente:
+            if len(old_doc.dokumente) < len(doc.dokumente):
+                # es wurde ein File zur Dokumenten Table hinzugefügt.
+                # hier muss nicht eingegriffen werden, da das File autom. als Attachment gespeichert wird.
+                pass
+            if len(old_doc.dokumente) > len(doc.dokumente):
+                # es wurde ein File aus der Dokumente-Table entfernt, der Filedatensatz muss nun noch gelöscht werden.
+                alte_dok_list = [json.dumps({'file': alt.file, 'name': alt.name}) for alt in old_doc.dokumente]
+                neue_dok_list = [json.dumps({'file': neu.file, 'name': neu.name}) for neu in doc.dokumente]
+                diff = list(set(alte_dok_list).difference(set(neue_dok_list)))
+                for entry_to_delete in diff:
+                    file_to_delete = json.loads(entry_to_delete)['file']
+                    _f = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `file_url` = '{file_to_delete}' AND `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{docname}'""".format(\
+                        file_to_delete=file_to_delete, \
+                        docname=doc.name), as_dict=True)
+                    if len(_f) > 0:
+                        f = frappe.get_doc("File", _f[0].name)
+                        f.delete()
+        elif old_doc.dokumente:
+            for file_to_delete in old_doc.dokumente:
+                _f = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `file_url` = '{file_to_delete}' AND `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{docname}'""".format(\
+                    file_to_delete=file_to_delete.file, \
+                    docname=doc.name), as_dict=True)
+                if len(_f) > 0:
+                    f = frappe.get_doc("File", _f[0].name)
+                    f.delete()
+        elif doc.dokumente:
+            # es wurde ein File zur Dokumenten Table hinzugefügt.
+            # hier muss nicht eingegriffen werden, da das File autom. als Attachment gespeichert wird.
+            pass
+    if doc.doctype == 'File':
+        # Diese Funktion synchrinisiert nur das entfernen, für die Anlage siehe sync_mail_attachements
+        if doc.attached_to_doctype == 'Beratung':
+            vorhanden = frappe.db.sql("""SELECT `name` FROM `tabBeratungsdateien` WHERE `file` = '{fileurl}' AND `parent` = '{beratung}'""".format(fileurl=doc.file_url, \
+                beratung=doc.attached_to_name), as_dict=True)
+            if len(vorhanden) > 0:
+                files_to_delete = [v.name for v in vorhanden]
+                b = frappe.get_doc("Beratung", doc.attached_to_name)
+                for row in b.dokumente:
+                    if row.name in files_to_delete:
+                        b.remove(row)
+                b.save()
+                
