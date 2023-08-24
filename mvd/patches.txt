@@ -15,3 +15,4 @@ mvd.patches.v8_9_12.naechster_termin_liste
 mvd.patches.v8_9_18.nachname_nach_mahnung
 mvd.patches.v8_13_11.abl_korr
 mvd.patches.v8_17_2.retouren_adress_flag
+mvd.patches.v8_17_5.beratungs_attachements
