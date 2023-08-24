@@ -127,10 +127,12 @@ doc_events = {
         "after_insert": "mvd.mvd.doctype.beratung.beratung.check_communication"
     },
     "File": {
-        "after_insert": "mvd.mvd.doctype.beratung.beratung.sync_mail_attachements"
+        "after_insert": "mvd.mvd.doctype.beratung.beratung.sync_mail_attachements",
+        "after_delete": "mvd.mvd.doctype.beratung.beratung.sync_attachments_and_beratungs_table"
     },
     "Beratung": {
-        "after_insert": "mvd.mvd.doctype.beratung.beratung.new_initial_todo"
+        "after_insert": "mvd.mvd.doctype.beratung.beratung.new_initial_todo",
+        "on_update": "mvd.mvd.doctype.beratung.beratung.sync_attachments_and_beratungs_table"
     }
 }
 
