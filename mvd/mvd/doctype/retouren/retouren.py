@@ -199,7 +199,7 @@ def close_open_retouren(mitgliedschaft):
             r.save()
 
 def check_dates(adresse, event):
-    changed = adresse_geaendert_check(adr=adresse.name)
+    changed = adresse_geaendert_check(adr=adresse.name, adresse_fuer_vergleich=adresse)
     if changed == 1:
         mitgliedschaften = frappe.db.sql("""SELECT
                                                 `name`
@@ -219,8 +219,7 @@ def check_dates(adresse, event):
                                                             FROM `tabMW`
                                                             WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=retoure.retoure_mw_sequence_number), as_dict=True)
                     if len(datum_adressexport) > 0:
-                        datum_adressexport = datum_adressexport[0].datum_adressexport
-                        adresse_geaendert = adresse_geaendert_check(adr=adresse.name, datum_adressexport=datum_adressexport)
+                        adresse_geaendert = adresse_geaendert_check(adr=adresse.name, adresse_fuer_vergleich=adresse)
                         frappe.db.sql("""UPDATE `tabRetouren` SET `adresse_geaendert` = {adresse_geaendert} WHERE `name` = '{name}'""".format(adresse_geaendert=adresse_geaendert, name=retoure.name), as_list=True)
 
 @frappe.whitelist()
@@ -240,36 +239,61 @@ def get_mail_data(mitgliedschaft, retoure, grund_bezeichnung):
     else:
         return None
 
-def adresse_geaendert_check(adr=None, datum_adressexport=None):
+def adresse_geaendert_check(adr=None, datum_adressexport=None, adresse_fuer_vergleich=False):
     if adr:
-        adresse_geaendert = frappe.db.sql("""SELECT 
-                                                    `creation`
-                                                FROM `tabVersion`
-                                                WHERE `docname` = '{adr}'
-                                                AND `ref_doctype` = 'Address'
-                                                AND (
-                                                    `data` LIKE '%zusatz%'
-                                                    or `data` LIKE '%strasse%'
-                                                    or `data` LIKE '%postfach%'
-                                                    or `data` LIKE '%postfach_nummer%'
-                                                    or `data` LIKE '%plz%'
-                                                    or `data` LIKE '%city%'
-                                                    or `data` LIKE '%address_line2%'
-                                                )
-                                                ORDER BY `creation` DESC
-                                                LIMIT 1""".format(adr=adr), as_dict=True)
-        if len(adresse_geaendert) > 0:
-            if datum_adressexport:
-                adresse_geaendert = getdate(adresse_geaendert[0].creation)
-                datum_adressexport = getdate(datum_adressexport)
-                if adresse_geaendert >= datum_adressexport:
-                    return 1
+        if not adresse_fuer_vergleich:
+            adresse_geaendert = frappe.db.sql("""SELECT 
+                                                        `creation`
+                                                    FROM `tabVersion`
+                                                    WHERE `docname` = '{adr}'
+                                                    AND `ref_doctype` = 'Address'
+                                                    AND (
+                                                        `data` LIKE '%zusatz%'
+                                                        or `data` LIKE '%strasse%'
+                                                        or `data` LIKE '%postfach%'
+                                                        or `data` LIKE '%postfach_nummer%'
+                                                        or `data` LIKE '%plz%'
+                                                        or `data` LIKE '%city%'
+                                                        or `data` LIKE '%address_line2%'
+                                                    )
+                                                    ORDER BY `creation` DESC
+                                                    LIMIT 1""".format(adr=adr), as_dict=True)
+            if len(adresse_geaendert) > 0:
+                if datum_adressexport:
+                    adresse_geaendert = getdate(adresse_geaendert[0].creation)
+                    datum_adressexport = getdate(datum_adressexport)
+                    frappe.log_error("adresse_geaendert: {0}\ndatum_adressexport: {1}".format(adresse_geaendert, datum_adressexport), "adresse_geaendert_check: {0}".format(adr))
+                    if adresse_geaendert >= datum_adressexport:
+                        return 1
+                    else:
+                        return 0
                 else:
-                    return 0
+                    return 1
             else:
-                return 1
+                return 0
         else:
+            try:
+                latest_adress = adresse_fuer_vergleich._doc_before_save
+                if latest_adress.zusatz != adresse_fuer_vergleich.zusatz:
+                    return 1
+                if latest_adress.strasse != adresse_fuer_vergleich.strasse:
+                    return 1
+                if latest_adress.postfach != adresse_fuer_vergleich.postfach:
+                    return 1
+                if latest_adress.postfach_nummer != adresse_fuer_vergleich.postfach_nummer:
+                    return 1
+                if latest_adress.plz != adresse_fuer_vergleich.plz:
+                    return 1
+                if latest_adress.city != adresse_fuer_vergleich.city:
+                    return 1
+                if latest_adress.address_line2 != adresse_fuer_vergleich.address_line2:
+                    return 1
+            except:
+                # no older version avaible
+                return 0
+            # no changes
             return 0
+        
     else:
         return 0
 

@@ -1,5 +1,17 @@
 ## MVD
 ### Version Log
+#### 8.17.5
+Beratungs-Attachments Patch (ISS-2023-00002)
+#### 8.17.4
+Beratungs-Attachments Synchronisation mit Childtable Dokumente (ISS-2023-00002)
+#### 8.17.3
+Hotfix (ISS-2023-00010)
+#### 8.17.2
+Patch für Bugfix von v8.17.1 (ISS-2023-00010)
+#### 8.17.1
+Bugfix Retouren Adressänderung (ISS-2023-00010)
+#### 8.17.0
+Attachement Handler für eingehende Mails im Zusammenhang mit Beratungen
 #### 8.16.1
 Mitgliedschafts-Update; Korrektes Updaten der CB 'Solidarmitlgied', 'Abweichende Rechnungsadresse' sowie 'Unabhängiger Debitor'
 #### 8.16.0

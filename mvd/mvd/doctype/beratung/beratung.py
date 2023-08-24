@@ -585,7 +585,8 @@ def check_communication(self, event):
             else:
                 beratung.ungelesen = 1
                 beratung.save()
-            relink_attachements(communication.name, beratung.name)
+            ''' obsolet, kann später entfernt werden '''
+            # ~ relink_attachements(communication.name, beratung.name)
 
 def new_initial_todo(self, event):
     if int(self.create_todo == 1):
@@ -726,23 +727,24 @@ def create_neue_beratung(von, bis, art, ort, berater_in, notiz=None, beratungska
     
     return beratung.name
 
-def relink_attachements(communication, beratung):
-    files = frappe.db.sql("""SELECT `name`, `file_url`, `file_name` FROM `tabFile` WHERE `attached_to_doctype` = 'Communication' AND `attached_to_name` = '{0}'""".format(communication), as_dict=True)
+''' obsolet, kann später entfernt werden'''
+# ~ def relink_attachements(communication, beratung):
+    # ~ files = frappe.db.sql("""SELECT `name`, `file_url`, `file_name` FROM `tabFile` WHERE `attached_to_doctype` = 'Communication' AND `attached_to_name` = '{0}'""".format(communication), as_dict=True)
     
-    # relink file from communication to beratung
-    for file_record in files:
-        frappe.db.set_value("File", file_record.name, 'attached_to_doctype', "Beratung")
-        frappe.db.set_value("File", file_record.name, 'attached_to_name', beratung)
+    # ~ # relink file from communication to beratung
+    # ~ for file_record in files:
+        # ~ frappe.db.set_value("File", file_record.name, 'attached_to_doctype', "Beratung")
+        # ~ frappe.db.set_value("File", file_record.name, 'attached_to_name', beratung)
     
-    # add files to dokumente table in beratung
-    beratung = frappe.get_doc("Beratung", beratung)
-    if len(files) > 0:
-        for attchmnt in files:
-            row = beratung.append('dokumente', {})
-            row.file = attchmnt.file_url
-            row.document_type = 'Sonstiges'
-            row.filename = attchmnt.file_name
-        beratung.save()
+    # ~ # add files to dokumente table in beratung
+    # ~ beratung = frappe.get_doc("Beratung", beratung)
+    # ~ if len(files) > 0:
+        # ~ for attchmnt in files:
+            # ~ row = beratung.append('dokumente', {})
+            # ~ row.file = attchmnt.file_url
+            # ~ row.document_type = 'Sonstiges'
+            # ~ row.filename = attchmnt.file_name
+        # ~ beratung.save()
 
 @frappe.whitelist()
 def admin_todo(beratung, sektion_id=None, description=None, datum=None):
@@ -763,36 +765,37 @@ def admin_todo(beratung, sektion_id=None, description=None, datum=None):
     except Exception as err:
         frappe.throw("Da ist etwas schief gelaufen.<br>{0}".format(str(err)))
 
-def sync_attachements_after_anlage_durch_mail(self, event):
-    if int(self.anlage_durch_mail_check_attachments) == 1:
-        attachment_list = []
-        communications = frappe.db.sql("""SELECT `name` FROM `tabCommunication` WHERE `reference_doctype` = 'Beratung' AND `reference_name` = '{0}' AND `sent_or_received` = 'Received'""".format(self.name), as_dict=True)
-        for communication in communications:
-            c = communication.name
-            attachements = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Communication' AND `attached_to_name` = '{0}'""".format(c), as_dict=True)
-            for attachment in attachements:
-                a = frappe.get_doc("File", attachment.name)
-                attachment_list.append({
-                    'file': a.file_url,
-                    'document_type': 'Sonstiges',
-                    'filename': a.file_name
-                })
-                from copy import deepcopy
-                new_file = deepcopy(a)
-                a.content = None
-                a.attached_to_doctype = 'Beratung'
-                a.attached_to_name = self.name
-                a.insert(ignore_permissions=True)
+'''Obsolet, kann später entfernt werden '''
+# ~ def sync_attachements_after_anlage_durch_mail(self, event):
+    # ~ if int(self.anlage_durch_mail_check_attachments) == 1:
+        # ~ attachment_list = []
+        # ~ communications = frappe.db.sql("""SELECT `name` FROM `tabCommunication` WHERE `reference_doctype` = 'Beratung' AND `reference_name` = '{0}' AND `sent_or_received` = 'Received'""".format(self.name), as_dict=True)
+        # ~ for communication in communications:
+            # ~ c = communication.name
+            # ~ attachements = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Communication' AND `attached_to_name` = '{0}'""".format(c), as_dict=True)
+            # ~ for attachment in attachements:
+                # ~ a = frappe.get_doc("File", attachment.name)
+                # ~ attachment_list.append({
+                    # ~ 'file': a.file_url,
+                    # ~ 'document_type': 'Sonstiges',
+                    # ~ 'filename': a.file_name
+                # ~ })
+                # ~ from copy import deepcopy
+                # ~ new_file = deepcopy(a)
+                # ~ a.content = None
+                # ~ a.attached_to_doctype = 'Beratung'
+                # ~ a.attached_to_name = self.name
+                # ~ a.insert(ignore_permissions=True)
         
-        beratung = frappe.get_doc("Beratung", self.name)
-        if len(attachment_list) > 0:
-            for attchmnt in attachment_list:
-                row = beratung.append('dokumente', {})
-                row.file = attchmnt['file']
-                row.document_type = attchmnt['document_type']
-                row.filename = attchmnt['filename']
-        beratung.anlage_durch_mail_check_attachments = 0
-        beratung.save()
+        # ~ beratung = frappe.get_doc("Beratung", self.name)
+        # ~ if len(attachment_list) > 0:
+            # ~ for attchmnt in attachment_list:
+                # ~ row = beratung.append('dokumente', {})
+                # ~ row.file = attchmnt['file']
+                # ~ row.document_type = attchmnt['document_type']
+                # ~ row.filename = attchmnt['filename']
+        # ~ beratung.anlage_durch_mail_check_attachments = 0
+        # ~ beratung.save()
 
 @frappe.whitelist()
 def remove_comments(comments):
@@ -800,3 +803,85 @@ def remove_comments(comments):
     for comment in comments:
         frappe.db.sql("""DELETE FROM `tabComment` WHERE `name` = '{c_name}'""".format(c_name=comment), as_list=True)
     return True
+
+def sync_mail_attachements(file_record, event):
+    if file_record.attached_to_doctype == 'Communication':
+        communication = file_record.attached_to_name
+        if frappe.db.get_value("Communication", communication, 'sent_or_received') == 'Received':
+            if frappe.db.get_value("Communication", communication, 'reference_doctype') == 'Beratung':
+                beratung = frappe.db.get_value("Communication", communication, 'reference_name')
+                # copy file and link to beratung
+                from copy import deepcopy
+                new_file = deepcopy(file_record)
+                new_file.name = None
+                new_file.content = None
+                new_file.attached_to_doctype = 'Beratung'
+                new_file.attached_to_name = beratung
+                new_file.insert(ignore_permissions=True)
+                # create new file row in beratung
+                b = frappe.get_doc("Beratung", beratung)
+                row = b.append('dokumente', {})
+                row.file = new_file.file_url
+                row.document_type = 'Sonstiges'
+                row.filename = new_file.file_name
+                b.save()
+    elif file_record.attached_to_doctype == 'Beratung':
+        if file_record.folder == "Home/Attachments":
+            # siehe auch sync_attachments_and_beratungs_table
+            vorhanden = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `file` = '{fileurl}' AND `parent` = '{beratung}'""".format(\
+                fileurl=file_record.file_url, \
+                beratung=file_record.attached_to_name), as_dict=True)[0].qty
+            if vorhanden < 1:
+                b = frappe.get_doc("Beratung", file_record.attached_to_name)
+                row = b.append('dokumente', {})
+                row.file = file_record.file_url
+                row.document_type = 'Sonstiges'
+                row.filename = file_record.file_name
+                b.save()
+
+def sync_attachments_and_beratungs_table(doc, event):
+    if doc.doctype == "Beratung":
+        old_doc = doc._doc_before_save
+        if old_doc.dokumente and doc.dokumente:
+            if len(old_doc.dokumente) < len(doc.dokumente):
+                # es wurde ein File zur Dokumenten Table hinzugefügt.
+                # hier muss nicht eingegriffen werden, da das File autom. als Attachment gespeichert wird.
+                pass
+            if len(old_doc.dokumente) > len(doc.dokumente):
+                # es wurde ein File aus der Dokumente-Table entfernt, der Filedatensatz muss nun noch gelöscht werden.
+                alte_dok_list = [json.dumps({'file': alt.file, 'name': alt.name}) for alt in old_doc.dokumente]
+                neue_dok_list = [json.dumps({'file': neu.file, 'name': neu.name}) for neu in doc.dokumente]
+                diff = list(set(alte_dok_list).difference(set(neue_dok_list)))
+                for entry_to_delete in diff:
+                    file_to_delete = json.loads(entry_to_delete)['file']
+                    _f = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `file_url` = '{file_to_delete}' AND `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{docname}'""".format(\
+                        file_to_delete=file_to_delete, \
+                        docname=doc.name), as_dict=True)
+                    if len(_f) > 0:
+                        f = frappe.get_doc("File", _f[0].name)
+                        f.delete()
+        elif old_doc.dokumente:
+            for file_to_delete in old_doc.dokumente:
+                _f = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `file_url` = '{file_to_delete}' AND `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{docname}'""".format(\
+                    file_to_delete=file_to_delete.file, \
+                    docname=doc.name), as_dict=True)
+                if len(_f) > 0:
+                    f = frappe.get_doc("File", _f[0].name)
+                    f.delete()
+        elif doc.dokumente:
+            # es wurde ein File zur Dokumenten Table hinzugefügt.
+            # hier muss nicht eingegriffen werden, da das File autom. als Attachment gespeichert wird.
+            pass
+    if doc.doctype == 'File':
+        # Diese Funktion synchrinisiert nur das entfernen, für die Anlage siehe sync_mail_attachements
+        if doc.attached_to_doctype == 'Beratung':
+            vorhanden = frappe.db.sql("""SELECT `name` FROM `tabBeratungsdateien` WHERE `file` = '{fileurl}' AND `parent` = '{beratung}'""".format(fileurl=doc.file_url, \
+                beratung=doc.attached_to_name), as_dict=True)
+            if len(vorhanden) > 0:
+                files_to_delete = [v.name for v in vorhanden]
+                b = frappe.get_doc("Beratung", doc.attached_to_name)
+                for row in b.dokumente:
+                    if row.name in files_to_delete:
+                        b.remove(row)
+                b.save()
+                
