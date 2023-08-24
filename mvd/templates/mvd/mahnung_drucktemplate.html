@@ -1,0 +1,173 @@
+{% if mahnung.druckvorlage %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- Allgemeine Daten -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+    {% if test_druckvorlage %}
+        {% set mahnung_druckvorlage = frappe.get_doc("Druckvorlage", test_druckvorlage) %}
+    {% else %}
+        {% set mahnung_druckvorlage = frappe.get_doc("Druckvorlage", mahnung.druckvorlage) %}
+    {% endif %}
+    {% set sektion = frappe.get_doc("Sektion", frappe.db.get_value("Druckvorlage", mahnung_druckvorlage.name, "sektion_id")) %}
+    {% set print_language = 'de' %}
+    {% set adressblock = 'Fehlende Daten' %}
+    {% set invoice = mahnung.sales_invoices[0].sales_invoice %}
+    {% if mahnung.mv_kunde %}
+        {% set mahnung_kunde_mitglied_referenz = mahnung.mv_kunde %}
+        {% set adressblock = get_rg_adressblock(frappe.get_doc("Kunden", mahnung_kunde_mitglied_referenz)) %}
+        {% set mitgliedschaft = False %}
+    {% else %}
+        {% set mahnung_kunde_mitglied_referenz = mahnung.mv_mitgliedschaft %}
+        {% set adressblock = get_rg_adressblock(frappe.get_doc("Mitgliedschaft", mahnung_kunde_mitglied_referenz)) %}
+        {% set mitgliedschaft = frappe.get_doc("Mitgliedschaft", mahnung_kunde_mitglied_referenz) %}
+    {% endif %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- ENDE: Allgemeine Daten -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+    
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- DRUCKFORMAT -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+    {% for seite in mahnung_druckvorlage.seiten %}
+        <!-- ggf. Page Break -->
+        {% if seite.idx > 1 %}
+            <div class="page-break"></div>
+        {% endif %}
+        
+        <!-- Header -->
+        <div id='kopfzeile'>
+            {% if seite.kopfzeile %}
+                <img src="/assets/mvd/img/mvs_nationales_logo.png" style="width: 58.1mm;">
+            {% endif %}
+        </div>
+        
+        <!-- Mitglieder Ausweis -->
+        {% if seite.ausweis and mitgliedschaft %}
+            <div id='ausweis'>
+                <b>Mitgliederausweis</b>
+                <div id='ausweis-content'>
+                    {% if mitgliedschaft.kundentyp == 'Unternehmen' %}{{ mitgliedschaft.firma }}<br>{% endif %}
+                    {{ mitgliedschaft.vorname_1 }} {{ mitgliedschaft.nachname_1 }}
+                    {% if mitgliedschaft.hat_solidarmitglied %}<br>{{ mitgliedschaft.vorname_2 }} {{ mitgliedschaft.nachname_2 }}{% endif %}
+                </div>
+                <div id="ausweis-footer">
+                        <b>Sektion:</b> {{ mitgliedschaft.sektion_id }}<span id="ausweis-footer-placeholder">...............</span><b>Mitgliedernummer:</b> {{ mitgliedschaft.mitglied_nr }}
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Adressblock -->
+        {% if seite.adressblock %}
+            <div id='adressblock'>
+                {% if seite.pp %}
+                    <!-- mit P.P. -->
+                    <div id='adressblock_pp'><span id='pp_post'><b>P.P.</b></span> {{ seite.plz_und_ort or '' }} <span id='pp_span' class="pull-right">Post CH AG</span></div>
+                {% endif %}
+                {{ adressblock|replace("\n", "<br>") }}
+            </div>
+        {% endif %}
+        
+        <!-- Referenzblock -->
+        {% if seite.referenzblock %}
+            <div id='referenzblock'>
+                {% if sektion %}
+                    {{ _(sektion.default_ort, print_language) }}, {{ frappe.utils.get_datetime(mahnung.date).strftime('%d.%m.%Y') }}<br><br>
+                    {{ sektion.referenzblock }}
+                {% endif %}
+            </div>
+        {% endif %}
+        
+        <!-- Content -->
+        {% if seite.inhalt %}
+            <div id='content-{{seite.idx }}'>{{ replace_mv_keywords(seite.inhalt, mahnung_kunde_mitglied_referenz, mahnung=mahnung.name, sinv=invoice, idx=0) }}</div>
+        {% endif %}
+        
+        <!-- Seitenzahlen (Fusszeile) -->
+        <div id='seitenzahlen'><div id='seitenzahlen-content'>{% if seite.seitenzahlen %}Seite {{ seite.idx }} / {{ mahnung_druckvorlage.seiten|len }}{% else %}&nbsp;{% endif %}</div></div>
+        
+        <!-- Einzahlungsschein -->
+        {% if seite.einzahlungsschein %}
+            {% if seite.ez_typ == 'Haftpflicht' %}
+                <!-- Haftpflicht EZ -->
+                <div id='einzahlungsschein'><!-- gibt es nicht direkt in Mahnung --></div>
+            {% else %}
+                <!-- Mitgliedschaft EZ -->
+                <div id='einzahlungsschein'><!-- gibt es nicht direkt in Mahnung --></div>
+            {% endif %}
+        {% endif %}
+        
+        <!-- Erzwungene Rückseite bei Mitglieder Ausweis -->
+        {% if seite.ausweis %}
+            <div class="page-break"></div>
+            <div id='ausweis-rueckseite'>
+                {{ sektion.ausweis_rueckseite }}
+            </div>
+            <div id="ausweis-rueckseite-zusatz">Karte an der Perforation herauslösen</div>
+        {% endif %}
+
+
+        <style>
+            #content-{{seite.idx }} {
+                margin-left: 26mm;
+                min-width: 161.5mm;
+                max-width: 161.5mm;
+                font-size: 9.5pt !important;
+                line-height: 13.5pt !important;
+                clear: both;
+                overflow-y: hidden !important;
+                {% if not seite.einzahlungsschein %}
+                    {% if seite.adressblock or seite.referenzblock %}
+                        {% if seite.fusszeile %}
+                            min-height: 168.5mm;
+                            max-height: 168.5mm;
+                        {% else %}
+                            min-height: 197mm;
+                            max-height: 197mm;
+                        {% endif %}
+                    {% else %}
+                        {% if seite.seitenzahlen %}
+                            min-height: 211.5mm;
+                            max-height: 211.5mm;
+                        {% else %}
+                            min-height: 240mm;
+                            max-height: 240mm;
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    {% if seite.adressblock or seite.referenzblock %}
+                        {% if seite.fusszeile %}
+                            min-height: 63.5mm;
+                            max-height: 63.5mm;
+                        {% else %}
+                            min-height: 92mm;
+                            max-height: 92mm;
+                        {% endif %}
+                    {% else %}
+                        {% if seite.seitenzahlen %}
+                            min-height: 133.5mm;
+                            max-height: 133.5mm;
+                        {% else %}
+                            min-height: 135mm;
+                            max-height: 135mm;
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            }
+        </style>
+    {% endfor %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- ENDE: DRUCKFORMAT -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- NACHDRUCK DER RECHNUNGEN -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <div class="page-break"></div>
+    {% for sales_invoice in mahnung.sales_invoices %}
+        {% set sinv = frappe.get_doc("Sales Invoice", sales_invoice.sales_invoice) %}
+        {{ frappe.render_template('templates/mvd/sales_invoice_drucktemplate.html', {'doc': sinv}) }}
+    {% endfor %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- ENDE: NACHDRUCK DER RECHNUNGEN -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+{% else %}
+    <div>Das Dokument {{ mahnung.name }} ({{ mahnung.doctype }}) besitzt keine Druckvorlage!</div>
+{% endif %}

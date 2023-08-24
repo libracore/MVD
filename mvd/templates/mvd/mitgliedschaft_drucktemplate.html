@@ -1,0 +1,123 @@
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- Allgemeine Daten -->
+<!-- ---------------------------------------------------------------------------------------- -->
+{% set print_language = 'de' %}
+{% set mitgliedschaft = frappe.get_doc("Mitgliedschaft", doc.name) %}
+{% set adressblock = get_rg_adressblock(mitgliedschaft) %}
+{% set sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id) %}
+{% if test_druckvorlage %}
+    {% set druckvorlage = frappe.get_doc("Druckvorlage", test_druckvorlage) %}
+{% else %}
+    {% set druckvorlage = frappe.get_doc("Druckvorlage", mitgliedschaft.kuendigung_druckvorlage) %}
+{% endif %}
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- ENDE: Allgemeine Daten -->
+<!-- ---------------------------------------------------------------------------------------- -->
+
+
+{% if druckvorlage %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- DRUCKFORMAT -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+    {% for seite in druckvorlage.seiten %}
+        <!-- ggf. Page Break -->
+        {% if seite.idx > 1 %}
+            <div class="page-break"></div>
+        {% endif %}
+        
+        <!-- Header -->
+        <div id='kopfzeile'>
+            {% if seite.kopfzeile %}
+                <img src="/assets/mvd/img/mvs_nationales_logo.png" style="width: 58.1mm;">
+            {% endif %}
+        </div>
+        
+        <!-- Mitglieder Ausweis -->
+        {% if seite.ausweis %}
+            <div id='ausweis'>
+                <b>Mitgliederausweis</b>
+                <div id='ausweis-content'>
+                    {% if mitgliedschaft.kundentyp == 'Unternehmen' %}{{ mitgliedschaft.firma }}<br>{% endif %}
+                    {{ mitgliedschaft.vorname_1 }} {{ mitgliedschaft.nachname_1 }}
+                    {% if mitgliedschaft.hat_solidarmitglied %}<br>{{ mitgliedschaft.vorname_2 }} {{ mitgliedschaft.nachname_2 }}{% endif %}
+                </div>
+                <div id="ausweis-footer">
+                        <b>Sektion:</b> {{ mitgliedschaft.sektion_id }}<span id="ausweis-footer-placeholder">...............</span><b>Mitgliedernummer:</b> {{ mitgliedschaft.mitglied_nr }}
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Adressblock -->
+        {% if seite.adressblock %}
+            <div id='adressblock'>
+                {% if seite.pp %}
+                    <!-- mit P.P. -->
+                    <div id='adressblock_pp'><span id='pp_post'><b>P.P.</b></span> {{ seite.plz_und_ort or '' }} <span id='pp_span' class="pull-right">Post CH AG</span></div>
+                {% endif %}
+                {{ adressblock|replace("\n", "<br>") }}
+            </div>
+        {% endif %}
+        
+        <!-- Referenzblock -->
+        {% if seite.referenzblock %}
+            <div id='referenzblock'>
+                {% if sektion %}
+                    {{ _(sektion.default_ort, print_language) }}, {{ frappe.utils.get_datetime(doc.posting_date).strftime('%d.%m.%Y') }}<br><br>
+                    {{ sektion.referenzblock }}
+                {% endif %}
+            </div>
+        {% endif %}
+        
+        <!-- Content -->
+        {% if seite.inhalt %}
+            <div id='content-{{seite.idx }}'>{{ replace_mv_keywords(seite.inhalt, mitgliedschaft, sinv=sales_invoice) }}</div>
+        {% endif %}
+        
+        <!-- Seitenzahlen (Fusszeile) -->
+        <div id='seitenzahlen'><div id='seitenzahlen-content'>{% if seite.seitenzahlen %}Seite {{ seite.idx }} / {{ druckvorlage.seiten|len }}{% else %}&nbsp;{% endif %}</div></div>
+        
+        <!-- Erzwungene Rückseite bei Mitglieder Ausweis -->
+        {% if seite.ausweis %}
+            <div class="page-break"></div>
+            <div id='ausweis-rueckseite'>
+                {{ sektion.ausweis_rueckseite }}
+            </div>
+            <div id="ausweis-rueckseite-zusatz">Karte an der Perforation herauslösen</div>
+        {% endif %}
+
+
+        <style>
+            #content-{{seite.idx }} {
+                margin-left: 26mm;
+                min-width: 161.5mm;
+                max-width: 161.5mm;
+                font-size: 9.5pt !important;
+                line-height: 13.5pt !important;
+                clear: both;
+                overflow-y: hidden !important;
+                {% if seite.adressblock or seite.referenzblock %}
+                    {% if seite.fusszeile %}
+                        min-height: 168.5mm;
+                        max-height: 168.5mm;
+                    {% else %}
+                        min-height: 197mm;
+                        max-height: 197mm;
+                    {% endif %}
+                {% else %}
+                    {% if seite.seitenzahlen %}
+                        min-height: 211.5mm;
+                        max-height: 211.5mm;
+                    {% else %}
+                        min-height: 240mm;
+                        max-height: 240mm;
+                    {% endif %}
+                {% endif %}
+            }
+        </style>
+    {% endfor %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- ENDE: DRUCKFORMAT -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+{% else %}
+    <div>Das Dokument {{ doc.name }} ({{ doc.doctype }}) besitzt keine Druckvorlage!</div>
+{% endif %}
