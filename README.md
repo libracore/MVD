@@ -1,7 +1,9 @@
 ## MVD
 ### Version Log
+#### 8.17.5
+Beratungs-Attachments Patch (ISS-2023-00002)
 #### 8.17.4
-Beratungs-Attachments Synchronisation mit Childtable Dokumente
+Beratungs-Attachments Synchronisation mit Childtable Dokumente (ISS-2023-00002)
 #### 8.17.3
 Hotfix (ISS-2023-00010)
 #### 8.17.2
