@@ -164,8 +164,13 @@ function erstelle_rechnung_sonstiges(frm) {
                             label: __('Item Code'),
                             change: function() {
                                 if (this.get_value()) {
-                                    var rate_field = this.grid_row.on_grid_fields[2];
-                                    var qty_field = this.grid_row.on_grid_fields[1];
+                                    if (this.section) {
+                                        var rate_field = this.section.fields_dict.rate;
+                                        var qty_field = this.section.fields_dict.qty;
+                                    } else {
+                                        var rate_field = this.grid_row.on_grid_fields[2];
+                                        var qty_field = this.grid_row.on_grid_fields[1];
+                                    }
                                     frappe.call({
                                         method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
                                         args:{
@@ -173,7 +178,7 @@ function erstelle_rechnung_sonstiges(frm) {
                                         },
                                         callback: function(r)
                                         {
-                                            rate_field.set_value(r.message);
+                                            rate_field.set_value(r.message.price);
                                             qty_field.set_value(1);
                                         }
                                     });
@@ -198,6 +203,15 @@ function erstelle_rechnung_sonstiges(frm) {
                             read_only: 0,
                             label: __('Rate'),
                             reqd: 1
+                        },
+                        {
+                            fieldtype:'Text Editor',
+                            fieldname:"description",
+                            in_list_view: 0,
+                            read_only: 0,
+                            label: __('Description'),
+                            reqd: 0,
+                            description: 'Dieses Feld soll nur beschrieben werden, wenn der Standard-Artikel-Text überschrieben werden soll.',
                         }]
                     }
                 ],

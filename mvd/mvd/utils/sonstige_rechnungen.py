@@ -54,6 +54,11 @@ def create_rechnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, 
         del item['__islocal']
         #item['qty'] = 1
         item['cost_center'] = company.cost_center
+        if 'description' in item:
+            if item['description'] == '' or \
+            item['description'] == '<div></div>' or \
+            item['description'] == '<div><br></div>':
+                del item['description']
     item = rechnungs_artikel
     
     sinv = frappe.get_doc({
