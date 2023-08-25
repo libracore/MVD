@@ -842,35 +842,39 @@ def sync_mail_attachements(file_record, event):
 def sync_attachments_and_beratungs_table(doc, event):
     if doc.doctype == "Beratung":
         old_doc = doc._doc_before_save
-        if old_doc.dokumente and doc.dokumente:
-            if len(old_doc.dokumente) < len(doc.dokumente):
-                # es wurde ein File zur Dokumenten Table hinzugefügt.
-                # hier muss nicht eingegriffen werden, da das File autom. als Attachment gespeichert wird.
-                pass
-            if len(old_doc.dokumente) > len(doc.dokumente):
-                # es wurde ein File aus der Dokumente-Table entfernt, der Filedatensatz muss nun noch gelöscht werden.
-                alte_dok_list = [json.dumps({'file': alt.file, 'name': alt.name}) for alt in old_doc.dokumente]
-                neue_dok_list = [json.dumps({'file': neu.file, 'name': neu.name}) for neu in doc.dokumente]
-                diff = list(set(alte_dok_list).difference(set(neue_dok_list)))
-                for entry_to_delete in diff:
-                    file_to_delete = json.loads(entry_to_delete)['file']
+        try:
+            if old_doc.dokumente and doc.dokumente:
+                if len(old_doc.dokumente) < len(doc.dokumente):
+                    # es wurde ein File zur Dokumenten Table hinzugefügt.
+                    # hier muss nicht eingegriffen werden, da das File autom. als Attachment gespeichert wird.
+                    pass
+                if len(old_doc.dokumente) > len(doc.dokumente):
+                    # es wurde ein File aus der Dokumente-Table entfernt, der Filedatensatz muss nun noch gelöscht werden.
+                    alte_dok_list = [json.dumps({'file': alt.file, 'name': alt.name}) for alt in old_doc.dokumente]
+                    neue_dok_list = [json.dumps({'file': neu.file, 'name': neu.name}) for neu in doc.dokumente]
+                    diff = list(set(alte_dok_list).difference(set(neue_dok_list)))
+                    for entry_to_delete in diff:
+                        file_to_delete = json.loads(entry_to_delete)['file']
+                        _f = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `file_url` = '{file_to_delete}' AND `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{docname}'""".format(\
+                            file_to_delete=file_to_delete, \
+                            docname=doc.name), as_dict=True)
+                        if len(_f) > 0:
+                            f = frappe.get_doc("File", _f[0].name)
+                            f.delete()
+            elif old_doc.dokumente:
+                for file_to_delete in old_doc.dokumente:
                     _f = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `file_url` = '{file_to_delete}' AND `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{docname}'""".format(\
-                        file_to_delete=file_to_delete, \
+                        file_to_delete=file_to_delete.file, \
                         docname=doc.name), as_dict=True)
                     if len(_f) > 0:
                         f = frappe.get_doc("File", _f[0].name)
                         f.delete()
-        elif old_doc.dokumente:
-            for file_to_delete in old_doc.dokumente:
-                _f = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `file_url` = '{file_to_delete}' AND `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{docname}'""".format(\
-                    file_to_delete=file_to_delete.file, \
-                    docname=doc.name), as_dict=True)
-                if len(_f) > 0:
-                    f = frappe.get_doc("File", _f[0].name)
-                    f.delete()
-        elif doc.dokumente:
-            # es wurde ein File zur Dokumenten Table hinzugefügt.
-            # hier muss nicht eingegriffen werden, da das File autom. als Attachment gespeichert wird.
+            elif doc.dokumente:
+                # es wurde ein File zur Dokumenten Table hinzugefügt.
+                # hier muss nicht eingegriffen werden, da das File autom. als Attachment gespeichert wird.
+                pass
+        except Exception as err:
+            frappe.log_error("Error:\n{0}\n\nDocument:\n{1}".format(err, str(doc.as_dict())), "sync_attachments_and_beratungs_table")
             pass
     if doc.doctype == 'File':
         # Diese Funktion synchrinisiert nur das entfernen, für die Anlage siehe sync_mail_attachements
