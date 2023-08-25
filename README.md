@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.17.8
+Email Queue Hook to prevent Admin-Mails (ISS-2023-00012)
 #### 8.17.7
 Hotfix: Beratungs-Attachments Synchronisation
 #### 8.17.6
