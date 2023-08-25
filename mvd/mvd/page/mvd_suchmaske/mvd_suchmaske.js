@@ -609,7 +609,7 @@ frappe.mvd_such_client = {
                 click: function(){
                     if (frappe.user.has_role("MV_MA")) {
                         frappe.prompt([
-                            {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Interessent*in\nRegulär\nAnmeldung',
+                            {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Faktura Kund*in\nInteressent*in\nRegulär\nAnmeldung',
                                 'default': cur_page.page.search_fields.status_c.get_value() == 'Interessent*in' ? 'Interessent*in':'Anmeldung',
                                 'change': function() {
                                     if (cur_dialog.fields_dict.status.get_value() == 'Regulär') {
@@ -633,7 +633,11 @@ frappe.mvd_such_client = {
                                     } else {
                                         // auto rg
                                         cur_dialog.fields_dict.autom_rechnung.set_value(0);
-                                        cur_dialog.fields_dict.autom_rechnung.df.hidden = 0;
+                                        if (cur_dialog.fields_dict.status.get_value() == 'Faktura Kund*in') {
+                                            cur_dialog.fields_dict.autom_rechnung.df.hidden = 1;
+                                        } else {
+                                            cur_dialog.fields_dict.autom_rechnung.df.hidden = 0;
+                                        }
                                         cur_dialog.fields_dict.autom_rechnung.df.read_only = 0;
                                         cur_dialog.fields_dict.autom_rechnung.refresh();
                                         // rg bez
@@ -810,26 +814,46 @@ frappe.mvd_such_client = {
                                     }
                                 });
                             } else {
-                                frappe.call({
-                                    method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.anlage_prozess",
-                                    args:{
-                                            'anlage_daten': values
-                                    },
-                                    freeze: true,
-                                    freeze_message: 'Erstelle Mitgliedschaften...',
-                                    callback: function(r)
-                                    {
-                                        if (r.message) {
-                                            cur_page.page.search_fields.neuanlage.df.hidden = 1;
-                                            cur_page.page.search_fields.neuanlage.refresh();
-                                            frappe.set_route("Form", "Mitgliedschaft", r.message);
+                                if (values.status != 'Faktura Kund*in') {
+                                    frappe.call({
+                                        method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.anlage_prozess",
+                                        args:{
+                                                'anlage_daten': values
+                                        },
+                                        freeze: true,
+                                        freeze_message: 'Erstelle Mitgliedschaften...',
+                                        callback: function(r)
+                                        {
+                                            if (r.message) {
+                                                cur_page.page.search_fields.neuanlage.df.hidden = 1;
+                                                cur_page.page.search_fields.neuanlage.refresh();
+                                                frappe.set_route("Form", "Mitgliedschaft", r.message);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                } else {
+                                    frappe.call({
+                                        method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.anlage_prozess",
+                                        args:{
+                                                'anlage_daten': values,
+                                                'faktura': 1
+                                        },
+                                        freeze: true,
+                                        freeze_message: 'Erstelle Faktura Kund*in...',
+                                        callback: function(r)
+                                        {
+                                            if (r.message) {
+                                                cur_page.page.search_fields.neuanlage.df.hidden = 1;
+                                                cur_page.page.search_fields.neuanlage.refresh();
+                                                frappe.set_route("Form", "Kunden", r.message);
+                                            }
+                                        }
+                                    });
+                                }
                             }
                         },
                         'Neuanlage',
-                        'Anlegen'
+                        'Anlage'
                         )
                     } else {
                         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");

@@ -200,7 +200,7 @@ def get_resultate_html(mitgliedschaften):
     return frappe.render_template('templates/includes/mvd_suchresultate.html', data)
 
 @frappe.whitelist()
-def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False):
+def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=False):
     if isinstance(anlage_daten, six.string_types):
         anlage_daten = json.loads(anlage_daten)
     
@@ -220,71 +220,100 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False):
     else:
         anlage_daten_status = anlage_daten["status"]
     
-    # erstelle mitgliedschaft
-    mitgliedschaft = frappe.get_doc({
-        "doctype": "Mitgliedschaft",
-        "sektion_id": anlage_daten["sektion_id"],
-        "status_c": anlage_daten_status,
-        "language": anlage_daten["language"],
-        "m_und_w": 1,
-        "mitgliedtyp_c": anlage_daten["mitgliedtyp"],
-        "inkl_hv": 1,
-        "eintrittsdatum": eintritt,
-        "kundentyp": anlage_daten["kundentyp"],
-        "firma": firma,
-        "zusatz_firma": zusatz_firma,
-        "anrede_c": anlage_daten["anrede"] if 'anrede' in anlage_daten else '',
-        "nachname_1": anlage_daten["nachname"],
-        "vorname_1": anlage_daten["vorname"],
-        "tel_p_1": anlage_daten["telefon"] if 'telefon' in anlage_daten else '',
-        "tel_m_1": anlage_daten["telefon_m"] if 'telefon_m' in anlage_daten else '',
-        "tel_g_1": anlage_daten["telefon_g"] if 'telefon_g' in anlage_daten else '',
-        "e_mail_1": anlage_daten["email"] if 'email' in anlage_daten else '',
-        "zusatz_adresse": anlage_daten["zusatz_adresse"] if 'zusatz_adresse' in anlage_daten else '',
-        "strasse": anlage_daten["strasse"] if 'strasse' in anlage_daten else '',
-        "nummer": anlage_daten["nummer"] if 'nummer' in anlage_daten else '',
-        "nummer_zu": anlage_daten["nummer_zu"] if 'nummer_zu' in anlage_daten else '',
-        "postfach": anlage_daten["postfach"],
-        "postfach_nummer": anlage_daten["postfach_nummer"] if 'postfach_nummer' in anlage_daten else '',
-        "plz": anlage_daten["plz"],
-        "ort": anlage_daten["ort"],
-        "objekt_strasse": anlage_daten["strasse"] if int(anlage_daten["postfach"]) == 1 else '',
-        "objekt_plz": anlage_daten["plz"] if int(anlage_daten["postfach"]) == 1 else '',
-        "objekt_ort": anlage_daten["ort"] if int(anlage_daten["postfach"]) == 1 else '',
-        "abweichende_objektadresse": 1 if int(anlage_daten["postfach"]) == 1 else '0'
-    })
-    mitgliedschaft.insert(ignore_permissions=True)
-    
-    # optional: erstelle Rechnung
-    if anlage_daten["status"] == 'Regulär':
-        bezahlt = True
-        hv_bar_bezahlt = False
-        if int(anlage_daten["hv_bar_bezahlt"]) == 1:
-            hv_bar_bezahlt = True
-        if int(massendruck) == 1:
-            massendruck = True
-        sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck)
-    else:
-        if int(anlage_daten["autom_rechnung"]) == 1:
-            bezahlt = False
+    if not faktura:
+        # erstelle mitgliedschaft
+        mitgliedschaft = frappe.get_doc({
+            "doctype": "Mitgliedschaft",
+            "sektion_id": anlage_daten["sektion_id"],
+            "status_c": anlage_daten_status,
+            "language": anlage_daten["language"],
+            "m_und_w": 1,
+            "mitgliedtyp_c": anlage_daten["mitgliedtyp"],
+            "inkl_hv": 1,
+            "eintrittsdatum": eintritt,
+            "kundentyp": anlage_daten["kundentyp"],
+            "firma": firma,
+            "zusatz_firma": zusatz_firma,
+            "anrede_c": anlage_daten["anrede"] if 'anrede' in anlage_daten else '',
+            "nachname_1": anlage_daten["nachname"],
+            "vorname_1": anlage_daten["vorname"],
+            "tel_p_1": anlage_daten["telefon"] if 'telefon' in anlage_daten else '',
+            "tel_m_1": anlage_daten["telefon_m"] if 'telefon_m' in anlage_daten else '',
+            "tel_g_1": anlage_daten["telefon_g"] if 'telefon_g' in anlage_daten else '',
+            "e_mail_1": anlage_daten["email"] if 'email' in anlage_daten else '',
+            "zusatz_adresse": anlage_daten["zusatz_adresse"] if 'zusatz_adresse' in anlage_daten else '',
+            "strasse": anlage_daten["strasse"] if 'strasse' in anlage_daten else '',
+            "nummer": anlage_daten["nummer"] if 'nummer' in anlage_daten else '',
+            "nummer_zu": anlage_daten["nummer_zu"] if 'nummer_zu' in anlage_daten else '',
+            "postfach": anlage_daten["postfach"],
+            "postfach_nummer": anlage_daten["postfach_nummer"] if 'postfach_nummer' in anlage_daten else '',
+            "plz": anlage_daten["plz"],
+            "ort": anlage_daten["ort"],
+            "objekt_strasse": anlage_daten["strasse"] if int(anlage_daten["postfach"]) == 1 else '',
+            "objekt_plz": anlage_daten["plz"] if int(anlage_daten["postfach"]) == 1 else '',
+            "objekt_ort": anlage_daten["ort"] if int(anlage_daten["postfach"]) == 1 else '',
+            "abweichende_objektadresse": 1 if int(anlage_daten["postfach"]) == 1 else '0'
+        })
+        mitgliedschaft.insert(ignore_permissions=True)
+        
+        # optional: erstelle Rechnung
+        if anlage_daten["status"] == 'Regulär':
+            bezahlt = True
             hv_bar_bezahlt = False
+            if int(anlage_daten["hv_bar_bezahlt"]) == 1:
+                hv_bar_bezahlt = True
             if int(massendruck) == 1:
                 massendruck = True
-            else:
-                massendruck = False
             sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck)
         else:
-            if anlage_daten["status"] == 'Interessent*in':
-                # erstelle ABL für Interessent*Innenbrief mit EZ
-                create_abl("Interessent*Innenbrief mit EZ", mitgliedschaft)
-                mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
-                mitgliedschaft.interessent_innenbrief_mit_ez = 1
-                mitgliedschaft.save()
-            if anlage_daten["status"] == 'Anmeldung' and anlage_daten["sektion_id"] != "M+W-Abo":
-                # erstelle ABL für Anmeldung mit EZ
-                create_abl("Anmeldung mit EZ", mitgliedschaft)
-                mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
-                mitgliedschaft.anmeldung_mit_ez = 1
-                mitgliedschaft.save()
-    
-    return mitgliedschaft.name
+            if int(anlage_daten["autom_rechnung"]) == 1:
+                bezahlt = False
+                hv_bar_bezahlt = False
+                if int(massendruck) == 1:
+                    massendruck = True
+                else:
+                    massendruck = False
+                sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck)
+            else:
+                if anlage_daten["status"] == 'Interessent*in':
+                    # erstelle ABL für Interessent*Innenbrief mit EZ
+                    create_abl("Interessent*Innenbrief mit EZ", mitgliedschaft)
+                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                    mitgliedschaft.interessent_innenbrief_mit_ez = 1
+                    mitgliedschaft.save()
+                if anlage_daten["status"] == 'Anmeldung' and anlage_daten["sektion_id"] != "M+W-Abo":
+                    # erstelle ABL für Anmeldung mit EZ
+                    create_abl("Anmeldung mit EZ", mitgliedschaft)
+                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                    mitgliedschaft.anmeldung_mit_ez = 1
+                    mitgliedschaft.save()
+        
+        return mitgliedschaft.name
+    else:
+        # erstelle Faktura Kunde
+        faktura_kunde = frappe.get_doc({
+            "doctype": "Kunden",
+            "sektion_id": anlage_daten["sektion_id"],
+            "language": anlage_daten["language"],
+            "kundentyp": anlage_daten["kundentyp"],
+            "firma": firma,
+            "zusatz_firma": zusatz_firma,
+            "anrede_c": anlage_daten["anrede"] if 'anrede' in anlage_daten else '',
+            "nachname": anlage_daten["nachname"],
+            "vorname": anlage_daten["vorname"],
+            "tel_p": anlage_daten["telefon"] if 'telefon' in anlage_daten else '',
+            "tel_m": anlage_daten["telefon_m"] if 'telefon_m' in anlage_daten else '',
+            "tel_g": anlage_daten["telefon_g"] if 'telefon_g' in anlage_daten else '',
+            "e_mail": anlage_daten["email"] if 'email' in anlage_daten else '',
+            "zusatz_adresse": anlage_daten["zusatz_adresse"] if 'zusatz_adresse' in anlage_daten else '',
+            "strasse": anlage_daten["strasse"] if 'strasse' in anlage_daten else '',
+            "nummer": anlage_daten["nummer"] if 'nummer' in anlage_daten else '',
+            "nummer_zu": anlage_daten["nummer_zu"] if 'nummer_zu' in anlage_daten else '',
+            "postfach": anlage_daten["postfach"],
+            "postfach_nummer": anlage_daten["postfach_nummer"] if 'postfach_nummer' in anlage_daten else '',
+            "plz": anlage_daten["plz"],
+            "ort": anlage_daten["ort"],
+            "abweichende_rechnungsadresse": 0
+        })
+        faktura_kunde.insert(ignore_permissions=True)
+        return faktura_kunde.name
