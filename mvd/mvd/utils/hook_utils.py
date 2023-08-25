@@ -82,3 +82,14 @@ def relink_fr(sinv, event):
             update_fr = frappe.db.sql("""UPDATE `tabFakultative Rechnung` SET `sales_invoice` = '{sinv}' WHERE `name` = '{hv_fr}'""".format(sinv=sinv.name, hv_fr=sinv.zugehoerige_fr), as_list=True)
             frappe.db.commit()
             sinv.zugehoerige_fr = None
+
+def remove_admin_mails(self, event):
+    if self.recipients:
+        for recipient in self.recipients:
+            if recipient.recipient == 'Administrator ':
+                if len(self.recipients) > 1:
+                    # entferne Admin Zeile
+                    self.remove(recipient)
+                    self.save()
+                else:
+                    self.delete()

@@ -133,6 +133,9 @@ doc_events = {
     "Beratung": {
         "after_insert": "mvd.mvd.doctype.beratung.beratung.new_initial_todo",
         "on_update": "mvd.mvd.doctype.beratung.beratung.sync_attachments_and_beratungs_table"
+    },
+    "Email Queue": {
+        "after_insert": "mvd.mvd.utils.hook_utils.remove_admin_mails"
     }
 }
 
