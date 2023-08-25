@@ -17,14 +17,14 @@ def get_open_data():
             's1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set']}, limit=100, distinct=True, ignore_ifnull=True)),
             's2': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'beratungskategorie': ['in', ['202 - MZ-Erhöhung', '300 - Nebenkosten']]}, limit=100, distinct=True, ignore_ifnull=True)),
             's3': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfrage: Termin vereinbaren'}, limit=100, distinct=True, ignore_ifnull=True)),
-            's4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set']}, limit=100, distinct=True, ignore_ifnull=True)),
+            's4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 0}, limit=100, distinct=True, ignore_ifnull=True)),
             's5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
             's6': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set']}, limit=100, distinct=True, ignore_ifnull=True)),
             'r': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open'}, limit=100, distinct=True, ignore_ifnull=True)),
             'r1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': 'Hoch'}, limit=100, distinct=True, ignore_ifnull=True)),
             'r2': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': 'Rechtsberatung Pool (MVBE)'}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r3': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)'], 'kontaktperson': ['is', 'set']}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set']}, limit=100, distinct=True, ignore_ifnull=True)),
+            'r3': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)']}, limit=100, distinct=True, ignore_ifnull=True)),
+            'r4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 0}, limit=100, distinct=True, ignore_ifnull=True)),
             'r5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
             'r6': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
             'r7': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 'hat_termine': 1}, limit=100, distinct=True, ignore_ifnull=True)),
@@ -44,7 +44,8 @@ def get_p1(user):
                                             WHERE `kontaktperson` IN (
                                                 SELECT `parent`
                                                 FROM `tabTermin Kontaktperson Multi User`
-                                                WHERE `user` = '{user}'
+                                                WHERE `user` = '{user}'  
+                                                AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
                                             AND `status` = 'Open'""".format(user=user), as_dict=True)[0].qty
     return p1_qty or 0
@@ -54,9 +55,11 @@ def get_p2(user):
                                             WHERE `kontaktperson` IN (
                                                 SELECT `parent`
                                                 FROM `tabTermin Kontaktperson Multi User`
-                                                WHERE `user` = '{user}'
+                                                WHERE `user` = '{user}'  
+                                                AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
-                                            AND `status` = 'Rückfragen'""".format(user=user), as_dict=True)[0].qty
+                                            AND `status` = 'Rückfragen'
+                                            AND `ungelesen` = 0""".format(user=user), as_dict=True)[0].qty
     return p2_qty or 0
 
 def get_p3(user):
@@ -64,7 +67,7 @@ def get_p3(user):
                                             WHERE `kontaktperson` IN (
                                                 SELECT `parent`
                                                 FROM `tabTermin Kontaktperson Multi User`
-                                                WHERE `user` = '{user}'
+                                                WHERE `user` = '{user}'  AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
                                             AND `status` = 'Rückfragen'
                                             AND `ungelesen` = 1""".format(user=user), as_dict=True)[0].qty
@@ -75,7 +78,8 @@ def get_p4(user):
                                             WHERE `kontaktperson` IN (
                                                 SELECT `parent`
                                                 FROM `tabTermin Kontaktperson Multi User`
-                                                WHERE `user` = '{user}'
+                                                WHERE `user` = '{user}'  
+                                                AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
                                             AND `status` = 'Termin vergeben'""".format(user=user), as_dict=True)[0].qty
     return p4_qty or 0
@@ -84,7 +88,8 @@ def get_p4(user):
 def get_user_kontaktperson(only_session_user=False):
     user_kontaktperson = frappe.db.sql("""SELECT `parent`
                                         FROM `tabTermin Kontaktperson Multi User`
-                                        WHERE `user` = '{user}'""".format(user=frappe.session.user), as_dict=True)
+                                        WHERE `user` = '{user}' 
+                                        AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'""".format(user=frappe.session.user), as_dict=True)
     user_kontaktpersonen = []
     for uk in user_kontaktperson:
         if not only_session_user:

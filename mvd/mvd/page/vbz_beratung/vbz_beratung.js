@@ -81,7 +81,7 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r3").click(function(){
-            frappe.route_options = {'status': 'Open', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)'], 'kontaktperson': ['is', 'set']}
+            frappe.route_options = {'status': 'Open', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)']}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r4").click(function(){
@@ -128,7 +128,7 @@ frappe.vbz_beratung = {
                 'async': false,
                 'callback': function(r)
                 {
-                    frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['in', r.message]}
+                    frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['in', r.message], 'ungelesen': 0}
                     frappe.set_route("List", "Beratung", "List");
                 }
             });
