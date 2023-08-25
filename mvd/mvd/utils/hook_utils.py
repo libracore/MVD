@@ -86,7 +86,8 @@ def relink_fr(sinv, event):
 def remove_admin_mails(self, event):
     if self.recipients:
         for recipient in self.recipients:
-            if recipient.recipient == 'Administrator ':
+            if recipient.recipient == 'Administrator ' or \
+            'admin@example.com' in recipient.recipient:
                 if len(self.recipients) > 1:
                     # entferne Admin Zeile
                     self.remove(recipient)
