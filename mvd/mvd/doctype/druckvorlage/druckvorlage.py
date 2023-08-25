@@ -366,6 +366,8 @@ def get_item_table(sinv):
     for tax in sinv.taxes:
         taxes[tax.description] = 0
     
+    mwst = 0 if frappe.db.get_value("Sektion", sinv.sektion_id, "mwst_faktura_ausblenden") == 1 else 1
+    
     table = """
                 <table id="item_table" style="width: 100%;">
                     <thead>
@@ -374,10 +376,10 @@ def get_item_table(sinv):
                             <th style="text-align: left;">Bezeichnung</th>
                             <th style="text-align: right;">Einzelpreis</th>
                             <th style="text-align: right;">Total</th>
-                            <th style="text-align: right;">MWST</th>
+                            <th style="text-align: right;">{mwst}</th>
                         </tr>
                     </thead>
-                    <tbody>"""
+                    <tbody>""".format(mwst="MWST" if mwst == 1 else '')
     for item in sinv.items:
         if item.description.replace("<div>", "").replace("</div>", "") == item.item_code:
             bezeichnung = item.item_name
@@ -394,34 +396,35 @@ def get_item_table(sinv):
                                     bez=bezeichnung, \
                                     einzp="{:,.2f}".format(item.rate).replace(",", "'"), \
                                     total="{:,.2f}".format(item.amount).replace(",", "'"), \
-                                    mwst=item.item_tax_template or '0%')
+                                    mwst=item.item_tax_template or '0%' if mwst == 1 else '')
         if item.item_tax_template and item.item_tax_template in taxes:
             taxes[item.item_tax_template] += item.amount
     
     table += """
                 <tr style="border-bottom: 1px solid black; border-top: 1px solid black;">
-                    <td colspan="2" style="text-align: left;"><b>Total</b> (inkl. MWSt.)</td>
+                    <td colspan="2" style="text-align: left;"><b>Total</b>{mwst}</td>
                     <td style="text-align: right;">Fr.</td>
                     <td style="text-align: right;">{grand_total}</td>
                     <td></td>
-                </tr>""".format(grand_total="{:,.2f}".format(sinv.grand_total).replace(",", "'"))
+                </tr>""".format(grand_total="{:,.2f}".format(sinv.grand_total).replace(",", "'"), mwst=" (inkl. MWSt.)" if mwst == 1 else '')
     
-    table += """
-                <tr style="line-height: 1;">
-                    <td colspan="2" style="text-align: left; font-size: 8px;">Unsere MWST-Nr: CHE-100.822.971 MWST</td>
-                    <td colspan="3" style="text-align: right;"><table style="width: 100%;">"""
-    for tax in sinv.taxes:
-        table += """<tr style="line-height: 1;">
-                        <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Satz:</td>
-                        <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{satz}</td>
-                        <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Betrag:</td>
-                        <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{betrag}</td>
-                        <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Steuer:</td>
-                        <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{steuer}</td>
-                    </tr>""".format(satz=tax.description, \
-                                    betrag="{:,.2f}".format(taxes[tax.description]).replace(",", "'"), \
-                                    steuer="{:,.2f}".format(tax.tax_amount).replace(",", "'"))
-    table += """</table></td>"""
+    if mwst == 1:
+        table += """
+                    <tr style="line-height: 1;">
+                        <td colspan="2" style="text-align: left; font-size: 8px;">Unsere MWST-Nr: CHE-100.822.971 MWST</td>
+                        <td colspan="3" style="text-align: right;"><table style="width: 100%;">"""
+        for tax in sinv.taxes:
+            table += """<tr style="line-height: 1;">
+                            <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Satz:</td>
+                            <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{satz}</td>
+                            <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Betrag:</td>
+                            <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{betrag}</td>
+                            <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Steuer:</td>
+                            <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{steuer}</td>
+                        </tr>""".format(satz=tax.description, \
+                                        betrag="{:,.2f}".format(taxes[tax.description]).replace(",", "'"), \
+                                        steuer="{:,.2f}".format(tax.tax_amount).replace(",", "'"))
+        table += """</table></td></tr>"""
     
     table += """
                     </tbody>

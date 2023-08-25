@@ -33,6 +33,7 @@
   "pos_barzahlung",
   "betrag_hv",
   "folgejahr_regelung",
+  "mwst_faktura_ausblenden",
   "section_camt_import",
   "default_customer",
   "cb_5",
@@ -468,9 +469,15 @@
    "fieldtype": "Code",
    "label": "Hinweis Mietzinsrechner",
    "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "mwst_faktura_ausblenden",
+   "fieldtype": "Check",
+   "label": "MWST In Faktura Rechnung ausblenden"
   }
  ],
- "modified": "2023-06-21 10:46:01.809637",
+ "modified": "2023-08-25 15:04:00.495209",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
