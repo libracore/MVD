@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 8.19.0
+Möglichkeit zur hinterlegung eigener Artikelbeschreibung bei Anlage Faktura Rechnung
 #### 8.18.0
 Anlagemöglichkeit von Fakturakunden via Suchmaske
 #### 8.17.8
