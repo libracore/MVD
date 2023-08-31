@@ -61,33 +61,37 @@ frappe.ui.form.on('Beratung', {
             load_html_verknuepfungen(frm);
             
             if (!gesperrt) {
+                // *******************************************************************
+                // Diese Funktion wurde aktuell aufgrund ISS-2023-00031 deaktiviert
+                // *******************************************************************
                 // Abfrage ob Abschluss Mail gesendet werden soll
-                if ((cur_frm.doc.status == 'Closed')&&(cur_frm.doc.ignore_abschluss_mail != 1)) {
-                    var d = new frappe.ui.Dialog({
-                        'fields': [
-                            {'fieldname': 'ht', 'fieldtype': 'HTML'},
-                            {'fieldname': 'mail', 'fieldtype': 'Button', 'label': 'Abschluss E-Mail senden', 'click': function() {
-                                    d.hide();
-                                    cur_frm.set_value("ignore_abschluss_mail", 1).then(function(){
-                                        cur_frm.save().then(function(){
-                                            frappe.mvd.new_mail(cur_frm);
-                                        })
-                                    })
-                                }
-                            },
-                            {'fieldname': 'ignore', 'fieldtype': 'Button', 'label': 'Diese Meldung deaktivieren', 'click': function() {
-                                    d.hide();
-                                    cur_frm.set_value("ignore_abschluss_mail", 1).then(function(){
-                                        cur_frm.save();
-                                    })
-                                }
-                            }
-                        ],
-                        'title': "Abschluss E-Mail"
-                    });
-                    d.fields_dict.ht.$wrapper.html('Diese Beratung besitzt den Status "Geschlossen".<br>Sie können nun entweder ein Abschluss E-Mail schreiben, oder diese Erinnerung für die Zukunft deaktivieren.');
-                    d.show();
-                }
+                //~ if ((cur_frm.doc.status == 'Closed')&&(cur_frm.doc.ignore_abschluss_mail != 1)) {
+                    //~ var d = new frappe.ui.Dialog({
+                        //~ 'fields': [
+                            //~ {'fieldname': 'ht', 'fieldtype': 'HTML'},
+                            //~ {'fieldname': 'mail', 'fieldtype': 'Button', 'label': 'Abschluss E-Mail senden', 'click': function() {
+                                    //~ d.hide();
+                                    //~ cur_frm.set_value("ignore_abschluss_mail", 1).then(function(){
+                                        //~ cur_frm.save().then(function(){
+                                            //~ frappe.mvd.new_mail(cur_frm);
+                                        //~ })
+                                    //~ })
+                                //~ }
+                            //~ },
+                            //~ {'fieldname': 'ignore', 'fieldtype': 'Button', 'label': 'Diese Meldung deaktivieren', 'click': function() {
+                                    //~ d.hide();
+                                    //~ cur_frm.set_value("ignore_abschluss_mail", 1).then(function(){
+                                        //~ cur_frm.save();
+                                    //~ })
+                                //~ }
+                            //~ }
+                        //~ ],
+                        //~ 'title': "Abschluss E-Mail"
+                    //~ });
+                    //~ d.fields_dict.ht.$wrapper.html('Diese Beratung besitzt den Status "Geschlossen".<br>Sie können nun entweder ein Abschluss E-Mail schreiben, oder diese Erinnerung für die Zukunft deaktivieren.');
+                    //~ d.show();
+                //~ }
+                // *******************************************************************
                 
                 // Add BTN Übernehmen
                 frm.add_custom_button(__("Übernehmen"),  function() {
@@ -542,6 +546,7 @@ function roundMinutes(date_string) {
 
 function prepare_mvd_mail_composer(e) {
     var last_email = null;
+    var default_sender = frappe.boot.default_beratungs_sender || '';
 
     const $target = $(e.currentTarget);
     const name = $target.data().name;
@@ -561,6 +566,7 @@ function prepare_mvd_mail_composer(e) {
         txt: "",
         title: __('Reply'),
         frm: cur_frm,
+        sender: default_sender,
         last_email,
         is_a_reply: true
     };
