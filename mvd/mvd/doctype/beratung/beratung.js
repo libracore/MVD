@@ -577,7 +577,7 @@ function prepare_mvd_mail_composer(e) {
             opts.bcc = last_email.bcc;
         }
     }
-console.log("here i am");
+
     // make the composer
     new frappe.mvd.MailComposer(opts);
 }
