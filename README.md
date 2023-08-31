@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 9.0.0
+Neues Corporate Design
 #### 8.19.0
 Möglichkeit zur hinterlegung eigener Artikelbeschreibung bei Anlage Faktura Rechnung
 #### 8.18.0
