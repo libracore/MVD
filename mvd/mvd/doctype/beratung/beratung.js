@@ -546,6 +546,7 @@ function roundMinutes(date_string) {
 
 function prepare_mvd_mail_composer(e) {
     var last_email = null;
+    var default_sender = frappe.boot.default_beratungs_sender || '';
 
     const $target = $(e.currentTarget);
     const name = $target.data().name;
@@ -565,6 +566,7 @@ function prepare_mvd_mail_composer(e) {
         txt: "",
         title: __('Reply'),
         frm: cur_frm,
+        sender: default_sender,
         last_email,
         is_a_reply: true
     };
@@ -575,7 +577,7 @@ function prepare_mvd_mail_composer(e) {
             opts.bcc = last_email.bcc;
         }
     }
-
+console.log("here i am");
     // make the composer
     new frappe.mvd.MailComposer(opts);
 }

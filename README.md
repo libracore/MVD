@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 9.2.2
+Definition von default_sender in mvd Mail Composer im Beratungskontext
 #### 9.2.1
 PupUp Deaktivierung
 #### 9.2.0
