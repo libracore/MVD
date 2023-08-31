@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 9.2.0
+Einführung Mahnstufe 4
 #### 9.1.0
 Möglichkeit zum Ausblenden des Rechnungsbetrags bei Fakture Rechnungen
 #### 9.0.0
