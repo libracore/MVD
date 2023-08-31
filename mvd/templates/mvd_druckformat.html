@@ -1,0 +1,189 @@
+<style>
+    @font-face {
+        font-family: 'TWKEverett';
+        font-style: normal;
+        font-weight: normal;
+        src: url('/assets/mvd/font/TWKEverett_Regular_web.woff');
+    }
+    
+    @font-face {
+        font-family: 'TWKEverettBold';
+        font-style: normal;
+        font-weight: bold;
+        src: url('/assets/mvd/font/TWKEverett_Bold_web.woff');
+    }
+
+    @font-face {
+        font-family: 'Frutiger';
+        font-style: normal;
+        font-weight: normal;
+        src: url('/assets/erpnextswiss/fonts/frutiger/Frutiger.woff');
+    }
+    
+    @font-face {
+        font-family: 'Frutiger Bold';
+        font-style: normal;
+        font-weight: normal;
+        src: url('/assets/erpnextswiss/fonts/frutiger/Frutiger_bold.woff');
+    }
+    
+    .print-format {
+        margin-right: 0mm;
+        margin-left: 0mm;
+        margin-top: 0mm;
+        margin-bottom: 0mm;
+        font-family: 'TWKEverett';
+    }
+    
+    .print-format b {
+        font-family: 'TWKEverettBold';
+    }
+
+    #kopfzeile {
+        padding-left: 24.5mm;
+        padding-top: 17.5mm;
+        min-height: 55mm;
+        max-height: 55mm;
+        min-width: 128mm;
+        max-width: 128mm;
+        float: left;
+    }
+
+    #ausweis {
+        float: right;
+        min-width: 82mm;
+        max-width: 82mm;
+        min-height: 55mm;
+        max-height: 55mm;
+        padding-top: 4mm;
+        font-size: 7.5pt !important;
+    }
+
+    #ausweis-content {
+        padding-top: 20mm;
+        font-size: 9.5pt !important;
+    }
+
+    #ausweis-footer {
+        padding-top: 4mm;
+        font-size: 7.5pt !important;
+    }
+
+    #ausweis-footer-placeholder {
+        color: white;
+    }
+
+    #ausweis-rueckseite {
+        min-height: 58mm;
+        padding-left: 4mm;
+        padding-top: 4mm;
+        font-size: 7.5pt !important;
+        min-width: 82mm;
+        max-width: 82mm;
+        min-height: 55mm;
+        max-height: 55mm;
+    }
+
+    #ausweis-rueckseite-zusatz {
+        padding-left: 4mm;
+        font-size: 6pt !important;
+    }
+
+    #adressblock {
+        margin-left: 26mm;
+        min-height: 40mm;
+        max-height: 40mm;
+        min-width: 102mm;
+        max-width: 102mm;
+        float: left;
+        clear: both;
+        font-size: 9.5pt !important;
+        line-height: 13.5pt !important;
+        padding-right: 20mm;
+    }
+
+    #adressblock_pp {
+        border-bottom: 1px solid black;
+        margin-bottom: 3mm;
+        font-size: 8pt !important;
+        font-family: 'Frutiger';
+    }
+
+    #pp_post {
+        font-size: 12pt !important;
+        font-family: 'Frutiger Bold';
+    }
+
+    #pp_span {
+        padding-top: 2px;
+    }
+
+    #referenzblock {
+        min-height: 40mm;
+        max-height: 40mm;
+        min-width: 70mm;
+        max-width: 70mm;
+        float: left;
+        font-size: 7.5pt !important;
+        line-height: 10.1pt !important;
+    }
+
+    #seitenzahlen {
+        margin-left: 172.5mm;
+        min-height: 2mm;
+        /* HACK weil sonst alles verschoben! */
+        border: 1px solid white;
+        /* ENDE: HACK */
+    }
+
+    #seitenzahlen-content {
+        font-size: 7.5pt !important;
+    }
+
+    #einzahlungsschein {
+        min-height: 105mm;
+        max-height: 105mm;
+    }
+</style>
+{% if not test_druckvorlage %}
+    {% set test_druckvorlage = False %}
+{% endif %}
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- DocType Sales Invoice -->
+<!-- ---------------------------------------------------------------------------------------- -->
+{% if doc.doctype == 'Sales Invoice' %}{{ frappe.render_template('templates/mvd/sales_invoice_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- ENDE: DocType Sales Invoice -->
+<!-- ---------------------------------------------------------------------------------------- -->
+
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- DocType Mahnung -->
+<!-- ---------------------------------------------------------------------------------------- -->
+{% if doc.doctype == 'Mahnung' %}{{ frappe.render_template('templates/mvd/mahnung_drucktemplate.html', {'mahnung': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- ENDE: DocType Mahnung -->
+<!-- ---------------------------------------------------------------------------------------- -->
+
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- DocType Fakultative Rechnung -->
+<!-- ---------------------------------------------------------------------------------------- -->
+{% if doc.doctype == 'Fakultative Rechnung' %}{{ frappe.render_template('templates/mvd/fakultative_rechnung_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- ENDE: DocType Fakultative Rechnung -->
+<!-- ---------------------------------------------------------------------------------------- -->
+
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- DocType Korrespondenz -->
+<!-- ---------------------------------------------------------------------------------------- -->
+{% if doc.doctype == 'Korrespondenz' %}{{ frappe.render_template('templates/mvd/korrespondenz_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- ENDE: DocType Korrespondenz -->
+<!-- ---------------------------------------------------------------------------------------- -->
+
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- DocType Mitgliedschaft -->
+<!-- ---------------------------------------------------------------------------------------- -->
+{% if doc.doctype == 'Mitgliedschaft' %}{{ frappe.render_template('templates/mvd/mitgliedschaft_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
+<!-- ---------------------------------------------------------------------------------------- -->
+<!-- ENDE: DocType Mitgliedschaft -->
+<!-- ---------------------------------------------------------------------------------------- -->
