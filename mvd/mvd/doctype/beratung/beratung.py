@@ -567,21 +567,25 @@ def raise_xxx(code, title, message):
     }]
 
 def check_communication(self, event):
+    from frappe.utils.data import get_datetime, add_to_date
     communication = self
     if communication.sent_or_received == 'Received':
         if communication.reference_doctype == 'Beratung':
             beratung = frappe.get_doc("Beratung", communication.reference_name)
             if frappe.db.count("Communication", {'reference_doctype': 'Beratung', 'reference_name': communication.reference_name}) < 2:
-                if not beratung.notiz:
-                    beratung.notiz = communication.content
-                if not beratung.sektion_id:
-                    beratung.sektion_id = frappe.db.get_value("Email Account", communication.email_account, 'sektion_id')
-                if not beratung.raised_by_name:
-                    beratung.raised_by_name = communication.sender_full_name
-                if not beratung.raised_by:
-                    beratung.raised_by = communication.sender
-                beratung.ungelesen = 1
-                beratung.save()
+                time_stamp_communication = get_datetime(communication.creation)
+                time_stamp_beratung = add_to_date(get_datetime(beratung.creation), minutes=1, as_datetime=True)
+                if time_stamp_beratung < time_stamp_communication:
+                    if not beratung.notiz:
+                        beratung.notiz = communication.content
+                    if not beratung.sektion_id:
+                        beratung.sektion_id = frappe.db.get_value("Email Account", communication.email_account, 'sektion_id')
+                    if not beratung.raised_by_name:
+                        beratung.raised_by_name = communication.sender_full_name
+                    if not beratung.raised_by:
+                        beratung.raised_by = communication.sender
+                    beratung.ungelesen = 1
+                    beratung.save()
             else:
                 beratung.ungelesen = 1
                 beratung.save()

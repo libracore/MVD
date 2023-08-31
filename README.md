@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+### 9.3.0
+Beratungsanlagen durch Mail nicht als Ungelesen markieren (ISS-2023-00024)
 #### 9.2.2
 Definition von default_sender in mvd Mail Composer im Beratungskontext
 #### 9.2.1
