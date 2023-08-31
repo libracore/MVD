@@ -139,6 +139,7 @@ function erstelle_rechnung_sonstiges(frm) {
                         }
                     },
                     {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0},
+                    {'fieldname': 'ohne_betrag', 'fieldtype': 'Check', 'label': 'Betrag ausblenden', 'reqd': 0, 'default': 0, 'hidden': 0},
                     {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 1, 'read_only': 1},
                     {'fieldname': 'ignore_pricing_rule', 'fieldtype': 'Check', 'label': 'Preisregeln ignorieren', 'reqd': 0, 'default': 0, 'read_only': 0},
                     {
@@ -226,6 +227,11 @@ function erstelle_rechnung_sonstiges(frm) {
                     } else {
                         var ignore_pricing_rule = null;
                     }
+                    if (values.ohne_betrag == 1) {
+                        var ohne_betrag = true;
+                    } else {
+                        var ohne_betrag = null;
+                    }
                     frappe.call({
                         method: "mvd.mvd.utils.sonstige_rechnungen.create_rechnung_sonstiges",
                         args:{
@@ -236,6 +242,7 @@ function erstelle_rechnung_sonstiges(frm) {
                                 'submit': true,
                                 'druckvorlage': values.druckvorlage,
                                 'rechnungs_artikel': values.rechnungs_artikel,
+                                'ohne_betrag': ohne_betrag,
                                 'mv_mitgliedschaft': cur_frm.doc.mv_mitgliedschaft,
                                 'ignore_pricing_rule': ignore_pricing_rule
                         },
