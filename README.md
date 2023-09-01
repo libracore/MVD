@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 9.4.1
+Font Change in DF (ISS-2023-00036)
 #### 9.4.0
 Haftpflicht und Mandat in Mitgliedschafts-Overview (ISS-2023-00035)
 ### 9.3.0
