@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 9.4.0
+Haftpflicht und Mandat in Mitgliedschafts-Overview (ISS-2023-00035)
 ### 9.3.0
 Beratungsanlagen durch Mail nicht als Ungelesen markieren (ISS-2023-00024)
 #### 9.2.2
