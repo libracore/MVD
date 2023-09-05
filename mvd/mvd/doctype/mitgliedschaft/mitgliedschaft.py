@@ -1825,6 +1825,18 @@ def get_uebersicht_html(name):
         else:
             eintritt = mitgliedschaft.eintritt if mitgliedschaft.eintritt else mitgliedschaft.creation
         
+        haftpflicht = False
+        if len(mitgliedschaft.haftpflicht) > 0:
+            haftpflicht = []
+            for hv in mitgliedschaft.haftpflicht:
+                haftpflicht.append(hv.datum.strftime("%d.%m.%Y"))
+        
+        mandat = False
+        if len(mitgliedschaft.mandat) > 0:
+            mandat = []
+            for mnd in mitgliedschaft.mandat:
+                mandat.append(mnd.datum.strftime("%d.%m.%Y"))
+        
         data = {
             'kunde_mitglied': kunde_mitglied,
             'kontakt_mitglied': kontakt_mitglied,
@@ -1860,7 +1872,9 @@ def get_uebersicht_html(name):
                 'language': mitgliedschaft.language or 'de',
                 'sektion': mitgliedschaft.sektion_id,
                 'region': '({0})'.format(mitgliedschaft.region) if mitgliedschaft.region else '',
-                'mitglied_nr': mitgliedschaft.mitglied_nr
+                'mitglied_nr': mitgliedschaft.mitglied_nr,
+                'mandat': mandat,
+                'haftpflicht': haftpflicht
             }
         }
         
