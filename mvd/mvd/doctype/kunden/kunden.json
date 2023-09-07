@@ -11,6 +11,7 @@
   "section_allgemein",
   "sektion_id",
   "mv_mitgliedschaft",
+  "mitglied_nr",
   "cb_1",
   "language",
   "daten_aus_mitgliedschaft",
@@ -436,10 +437,17 @@
    "fieldname": "daten_aus_mitgliedschaft",
    "fieldtype": "Check",
    "label": "Daten aus Mitgliedschaft beziehen"
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.mitglied_nr",
+   "fieldname": "mitglied_nr",
+   "fieldtype": "Data",
+   "label": "Mitglied Nr.",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2023-01-17 11:36:26.903670",
+ "modified": "2023-09-01 11:33:18.999941",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kunden",
