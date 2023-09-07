@@ -115,6 +115,29 @@
                     </tr>
                 {% endif %}
             {% endfor %}
+            {% for faktura_kunde in faktura_kunden %}
+                <tr>
+                    <td style="padding-left: 0px !important; background: lightskyblue;">&nbsp;</td>
+                    <td>
+                        {% if not meine_sektionen or faktura_kunde.sektion_id in meine_sektionen %}
+                            <a href="/desk#Form/Kunden/{{ faktura_kunde.name }}">{{ faktura_kunde.name }}</a>
+                        {% else %}
+                            {{ faktura_kunde.name }}
+                        {% endif %}
+                    </td>
+                    <td>Faktura Kunde</td>
+                    <td>{{ faktura_kunde.firma or '' }}</td>
+                    <td>{{ faktura_kunde.nachname or '' }}</td>
+                    <td>{{ faktura_kunde.vorname or '' }}</td>
+                    <td>{{ faktura_kunde.strasse or '' }}</td>
+                    <td>{% if faktura_kunde.postfach %}{{ faktura_kunde.postfach_nummer or '' }}{% else %}{{ faktura_kunde.nummer or '' }}{{ faktura_kunde.nummer_zu or '' }}{% endif %}</td>
+                    <td>{{ faktura_kunde.plz or '' }} {{ faktura_kunde.ort or '' }}</td>
+                    <td>{{ faktura_kunde.tel_p or '' }}</td>
+                    <td>{{ faktura_kunde.tel_m or '' }}</td>
+                    <td>{{ faktura_kunde.tel_g or '' }}</td>
+                    <td>Faktura Kunde</td>
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>

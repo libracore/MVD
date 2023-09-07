@@ -17,18 +17,26 @@ def suche(suchparameter, goto_list=False):
         suchparameter = json.loads(suchparameter)
     
     filters_list = []
+    faktura_filters_list = []
     
     # allgemein
     if suchparameter["sektion_id"]:
-        filters_list.append("""`sektion_id` = '{sektion_id}'""".format(sektion_id=suchparameter["sektion_id"]))
+        query_string = """`sektion_id` = '{sektion_id}'""".format(sektion_id=suchparameter["sektion_id"])
+        filters_list.append(query_string)
+        faktura_filters_list.append(query_string)
     if suchparameter["language"]:
-        filters_list.append("""`language` = '{language}'""".format(language=suchparameter["language"]))
+        query_string = """`language` = '{language}'""".format(language=suchparameter["language"])
+        filters_list.append(query_string)
+        faktura_filters_list.append(query_string)
     if suchparameter["mitglied_nr"]:
         mitglied_nr_bereinigt = suchparameter["mitglied_nr"]
         if 'MV' not in suchparameter["mitglied_nr"]:
             mitglied_nr_bereinigt = "MV" + suchparameter["mitglied_nr"]
-        filters_list.append("""`mitglied_nr` LIKE '{mitglied_nr}%'""".format(mitglied_nr=mitglied_nr_bereinigt))
+        query_string = """`mitglied_nr` LIKE '{mitglied_nr}%'""".format(mitglied_nr=mitglied_nr_bereinigt)
+        filters_list.append(query_string)
+        faktura_filters_list.append(query_string)
     if suchparameter["status_c"] and suchparameter["sektion_id"]:
+        # Dieser Filter ist für Faktura Kunden nicht anwendbar
         if suchparameter["status_c"] != 'Alle':
             if 'Regulär' in suchparameter["status_c"]:
                 filters_list.append("""`status_c` IN ('Regulär', 'Online-Mutation')""")
@@ -38,14 +46,17 @@ def suche(suchparameter, goto_list=False):
             if not suchparameter["inaktive"]:
                 filters_list.append("""(`aktive_mitgliedschaft` = 1 OR `status_c` = 'Gestorben')""")
     if suchparameter["mitgliedtyp_c"] and suchparameter["sektion_id"]:
+        # Dieser Filter ist für Faktura Kunden nicht anwendbar
         if suchparameter["mitgliedtyp_c"] != 'Alle':
             filters_list.append("""`mitgliedtyp_c` = '{mitgliedtyp_c}'""".format(mitgliedtyp_c=suchparameter["mitgliedtyp_c"]))
     
     # Kontaktdaten
     if suchparameter["vorname"]:
         filters_list.append("""(`vorname_1` LIKE "{vorname}%" OR `rg_vorname` LIKE "{vorname}%" OR `vorname_2` LIKE "{vorname}%")""".format(vorname=suchparameter["vorname"]))
+        faktura_filters_list.append("""(`vorname` LIKE "{vorname}%" OR `rg_vorname` LIKE "{vorname}%")""".format(vorname=suchparameter["vorname"]))
     if suchparameter["nachname"]:
         filters_list.append("""(`nachname_1` LIKE "{nachname}%" OR `rg_nachname` LIKE "{nachname}%" OR `nachname_2` LIKE "{nachname}%")""".format(nachname=suchparameter["nachname"]))
+        faktura_filters_list.append("""(`nachname` LIKE "{nachname}%" OR `rg_nachname` LIKE "{nachname}%")""".format(nachname=suchparameter["nachname"]))
     if suchparameter["tel"]:
         filters_list.append("""
                             ((REPLACE(`tel_p_1`, ' ', '') LIKE '{tel}%' OR REPLACE(`rg_tel_p`, ' ', '') LIKE '{tel}%' OR REPLACE(`tel_p_2`, ' ', '') LIKE '{tel}%')
@@ -53,34 +64,50 @@ def suche(suchparameter, goto_list=False):
                             (REPLACE(`tel_m_1`, ' ', '') LIKE '{tel}%' OR REPLACE(`rg_tel_m`, ' ', '') LIKE '{tel}%' OR REPLACE(`tel_m_2`, ' ', '') LIKE '{tel}%')
                             OR
                             (REPLACE(`tel_g_1`, ' ', '') LIKE '{tel}%' OR REPLACE(`rg_tel_g`, ' ', '') LIKE '{tel}%' OR REPLACE(`tel_g_2`, ' ', '') LIKE '{tel}%'))""".format(tel=suchparameter["tel"].replace(" ", "")))
+        faktura_filters_list.append("""
+                            ((REPLACE(`tel_p`, ' ', '') LIKE '{tel}%' OR REPLACE(`rg_tel_p`, ' ', '') LIKE '{tel}%')
+                            OR
+                            (REPLACE(`tel_m`, ' ', '') LIKE '{tel}%' OR REPLACE(`rg_tel_m`, ' ', '') LIKE '{tel}%')
+                            OR
+                            (REPLACE(`tel_g`, ' ', '') LIKE '{tel}%' OR REPLACE(`rg_tel_g`, ' ', '') LIKE '{tel}%'))""".format(tel=suchparameter["tel"].replace(" ", "")))
     if suchparameter["email"]:
         filters_list.append("""(`e_mail_1` LIKE '{email}%' OR `rg_e_mail` LIKE '{email}%' OR `e_mail_2` LIKE '{email}%')""".format(email=suchparameter["email"]))
+        faktura_filters_list.append("""(`e_mail` LIKE '{email}%' OR `rg_e_mail` LIKE '{email}%')""".format(email=suchparameter["email"]))
     if 'firma' in suchparameter:
         if 'zusatz_firma' in suchparameter:
             if suchparameter["firma"]:
                 if suchparameter["zusatz_firma"]:
                     firma = str(suchparameter["firma"] + "%" + suchparameter["zusatz_firma"]).replace(" ", "")
-                    filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE "{firma}%"
+                    query_string = """(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE "{firma}%"
                                             OR
-                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE "{firma}%")""".format(firma=firma))
+                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE "{firma}%")""".format(firma=firma)
+                    filters_list.append(query_string)
+                    faktura_filters_list.append(query_string)
                 else:
-                    filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE "{firma}%"
+                    query_string = """(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE "{firma}%"
                                             OR
-                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE "{firma}%")""".format(firma=str(suchparameter["firma"]).replace(" ", "")))
+                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE "{firma}%")""".format(firma=str(suchparameter["firma"]).replace(" ", ""))
+                    filters_list.append(query_string)
+                    faktura_filters_list.append(query_string)
             else:
                 if suchparameter["zusatz_firma"]:
-                    filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE "{zusatz_firma}%"
+                    query_string = """(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE "{zusatz_firma}%"
                                             OR
-                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE "{zusatz_firma}%")""".format(zusatz_firma=str(suchparameter["zusatz_firma"]).replace(" ", "")))
+                                            REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE "{zusatz_firma}%")""".format(zusatz_firma=str(suchparameter["zusatz_firma"]).replace(" ", ""))
+                    filters_list.append(query_string)
+                    faktura_filters_list.append(query_string)
         else:
             if suchparameter["firma"]:
-                filters_list.append("""(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE "{firma}%"
+                query_string = """(REPLACE(CONCAT(IFNULL(`firma`, ''), IFNULL(`zusatz_firma`, '')), ' ', '') LIKE "{firma}%"
                                         OR
-                                        REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE "{firma}%")""".format(firma=str(suchparameter["firma"]).replace(" ", "")))
+                                        REPLACE(CONCAT(IFNULL(`rg_firma`, ''), IFNULL(`rg_zusatz_firma`, '')), ' ', '') LIKE "{firma}%")""".format(firma=str(suchparameter["firma"]).replace(" ", ""))
+                filters_list.append(query_string)
+                faktura_filters_list.append(query_string)
     
     # Adressdaten
     if suchparameter["zusatz_adresse"]:
         filters_list.append("""(`zusatz_adresse` LIKE '{zusatz_adresse}%' OR `rg_zusatz_adresse` LIKE '{zusatz_adresse}%' OR `objekt_zusatz_adresse` LIKE '{zusatz_adresse}%')""".format(zusatz_adresse=suchparameter["zusatz_adresse"]))
+        faktura_filters_list.append("""(`zusatz_adresse` LIKE '{zusatz_adresse}%' OR `rg_zusatz_adresse` LIKE '{zusatz_adresse}%')""".format(zusatz_adresse=suchparameter["zusatz_adresse"]))
     
     strassensuchwert = ''
     if suchparameter["strasse"]:
@@ -95,21 +122,36 @@ def suche(suchparameter, goto_list=False):
                                 REPLACE(CONCAT(IFNULL(`rg_strasse`, ''), IFNULL(`rg_nummer`, ''), IFNULL(`rg_nummer_zu`, '')), ' ', '') LIKE '{strassensuchwert}'
                                 OR
                                 REPLACE(CONCAT(IFNULL(`objekt_strasse`, ''), IFNULL(`objekt_hausnummer`, ''), IFNULL(`objekt_nummer_zu`, '')), ' ', '') LIKE '{strassensuchwert}')""".format(strassensuchwert=strassensuchwert.replace(" ", "")))
+        faktura_filters_list.append("""(REPLACE(CONCAT(IFNULL(`strasse`, ''), IFNULL(`nummer`, ''), IFNULL(`nummer_zu`, '')), ' ', '') LIKE '{strassensuchwert}'
+                                        OR
+                                        REPLACE(CONCAT(IFNULL(`rg_strasse`, ''), IFNULL(`rg_nummer`, ''), IFNULL(`rg_nummer_zu`, '')), ' ', '') LIKE '{strassensuchwert}')""".format(strassensuchwert=strassensuchwert.replace(" ", "")))
     
     if suchparameter["postfach_nummer"]:
-        filters_list.append("""(`postfach_nummer` LIKE '{postfach_nummer}%' OR `rg_postfach_nummer` LIKE '{postfach_nummer}%')""".format(postfach_nummer=suchparameter["postfach_nummer"]))
+        query_string = """(`postfach_nummer` LIKE '{postfach_nummer}%' OR `rg_postfach_nummer` LIKE '{postfach_nummer}%')""".format(postfach_nummer=suchparameter["postfach_nummer"])
+        filters_list.append(query_string)
+        faktura_filters_list.append(query_string)
     if suchparameter["postfach"]:
-        filters_list.append("""(`postfach` = 1 OR `rg_postfach` = 1)""")
+        query_string = """(`postfach` = 1 OR `rg_postfach` = 1)"""
+        filters_list.append(query_string)
+        faktura_filters_list.append(query_string)
     if suchparameter["plz"]:
         filters_list.append("""(`plz` LIKE '{plz}%' OR `rg_plz` LIKE '{plz}%' OR `objekt_plz` LIKE '{plz}%')""".format(plz=suchparameter["plz"]))
+        faktura_filters_list.append("""(`plz` LIKE '{plz}%' OR `rg_plz` LIKE '{plz}%')""".format(plz=suchparameter["plz"]))
     if suchparameter["ort"]:
         filters_list.append("""(`ort` LIKE '{ort}%' OR `rg_ort` LIKE '{ort}%' OR `objekt_ort` LIKE '{ort}%')""".format(ort=suchparameter["ort"]))
+        faktura_filters_list.append("""(`ort` LIKE '{ort}%' OR `rg_ort` LIKE '{ort}%')""".format(ort=suchparameter["ort"]))
     
     if len(filters_list) > 0:
         filters = (" AND ").join(filters_list)
         filters = 'WHERE ' + filters
     else:
         filters = ''
+        
+    if len(faktura_filters_list) > 0:
+        faktura_filters = (" AND ").join(faktura_filters_list)
+        faktura_filters = 'WHERE ' + faktura_filters
+    else:
+        faktura_filters = ''
     
     if goto_list:
         search_hash = frappe.generate_hash(length=10)
@@ -167,10 +209,12 @@ def suche(suchparameter, goto_list=False):
                         sortierung = """`mitgliedtyp_c` ASC"""
             
             mitgliedschaften = frappe.db.sql("""SELECT * FROM `tabMitgliedschaft` {filters} ORDER BY {sortierung}""".format(filters=filters, sortierung=sortierung), as_dict=True)
+            # ~ frappe.throw("""SELECT * FROM `tabKunden` {filters}""".format(filters=faktura_filters))
+            faktura_kunden = frappe.db.sql("""SELECT * FROM `tabKunden` {filters}""".format(filters=faktura_filters), as_dict=True)
         
-        if len(mitgliedschaften) > 0:
+        if len(mitgliedschaften) > 0 or len(faktura_kunden) > 0:
             if not suchparameter["sektions_uebergreifend"]:
-                resultate_html = get_resultate_html(mitgliedschaften)
+                resultate_html = get_resultate_html(mitgliedschaften, faktura_kunden=faktura_kunden)
                 return resultate_html
             else:
                 if len(mitgliedschaften) > 1:
@@ -184,7 +228,7 @@ def suche(suchparameter, goto_list=False):
         else:
             return False
 
-def get_resultate_html(mitgliedschaften):
+def get_resultate_html(mitgliedschaften, faktura_kunden=None):
     meine_sektionen = []
     from frappe.defaults import get_user_permissions
     restriktionen = frappe.defaults.get_user_permissions(str(frappe.session.user))
@@ -194,7 +238,8 @@ def get_resultate_html(mitgliedschaften):
     
     data = {
         'mitgliedschaften': mitgliedschaften,
-        'meine_sektionen': meine_sektionen if len(meine_sektionen) > 0 else False
+        'meine_sektionen': meine_sektionen if len(meine_sektionen) > 0 else False,
+        'faktura_kunden': faktura_kunden
     }
     
     return frappe.render_template('templates/includes/mvd_suchresultate.html', data)
