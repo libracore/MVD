@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 9.5.0
+SP API Update; TimestampMismatchError Retry Mechanismus
 #### 9.4.1
 Font Change in DF (ISS-2023-00036)
 #### 9.4.0

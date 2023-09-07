@@ -2475,7 +2475,7 @@ def check_update_vs_neuanlage(kwargs):
         return mvm_update(mitgliedschaft, kwargs)
         
 
-def mvm_update(mitgliedschaft, kwargs):
+def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
     missing_keys = check_main_keys(kwargs)
     if not missing_keys:
         try:
@@ -2716,8 +2716,17 @@ def mvm_update(mitgliedschaft, kwargs):
                     mitgliedschaft.zuzug = today()
             
             mitgliedschaft.flags.ignore_links=True
-            mitgliedschaft.save()
-            frappe.db.commit()
+            try:
+                mitgliedschaft.save()
+                frappe.db.commit()
+            except frappe.TimestampMismatchError as err:
+                if not timestamp_mismatch_retry:
+                    frappe.log_error("{0}".format(kwargs), 'TimestampMismatchError: Retry')
+                    frappe.clear_messages()
+                    reloaded_mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                    mvm_update(reloaded_mitgliedschaft, kwargs, timestamp_mismatch_retry=True)
+                else:
+                    return raise_xxx(500, 'Internal Server Error', err, daten=kwargs)
             
             create_sp_log(mitgliedschaft.name, False, kwargs)
             
