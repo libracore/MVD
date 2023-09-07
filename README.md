@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 9.5.1
+Error Log 'sync_attachments_and_beratungs_table' Improvement
 #### 9.5.0
 SP API Update; TimestampMismatchError Retry Mechanismus
 #### 9.4.1
