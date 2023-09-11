@@ -1615,3 +1615,39 @@ def bg_restart_verbuche_matches(camt_import):
     except Exception as err:
         camt_status_update(camt_import, 'Failed')
         frappe.log_error("{0}".format(err), 'CAMT-Import {0} failed'.format(camt_import))
+
+@frappe.whitelist()
+def reset_camt(camt):
+    payments = frappe.db.sql("""SELECT `name` FROM `tabPayment Entry` WHERE `camt_import` = '{camt}'""".format(camt=camt), as_dict=True)
+    for payment in payments:
+        pe = frappe.get_doc("Payment Entry", payment.name)
+        if pe.docstatus == 0:
+            pe.delete()
+        elif pe.docstatus == 1:
+            pe.cancel()
+            pe.delete()
+        elif pe.docstatus == 2:
+            pe.delete()
+    
+    camt_import = frappe.get_doc("CAMT Import", camt)
+    camt_import.ausgelesene_zahlungen_qty = 0
+    camt_import.eingelesene_zahlungen_qty = 0
+    camt_import.rg_match_qty = 0
+    camt_import.verbuchte_zahlung_qty = 0
+    camt_import.stornierte_zahlungen_qty = 0
+    camt_import.fehlgeschlagenes_auslesen_qty = 0
+    camt_import.nicht_eingelesene_zahlungen_qty = 0
+    camt_import.anz_unmatched_payments = 0
+    camt_import.zugewiesen_unverbucht_qty = 0
+    camt_import.hv_qty = 0
+    camt_import.produkte_qty = 0
+    camt_import.ueberzahlung_qty = 0
+    camt_import.mitgliedschaften_qty = 0
+    camt_import.spenden_qty = 0
+    camt_import.guthaben_qty = 0
+    camt_import.ausgelesene_zahlungen = ''
+    camt_import.eingelesene_zahlungen = ''
+    camt_import.save()
+    frappe.db.commit()
+    aktualisiere_camt_uebersicht(camt_import.name)
+    
