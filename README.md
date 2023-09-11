@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.0.0
+SP API Request Worker
 #### 9.5.1
 Error Log 'sync_attachments_and_beratungs_table' Improvement
 #### 9.5.0
