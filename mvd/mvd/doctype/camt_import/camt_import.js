@@ -46,6 +46,21 @@ frappe.ui.form.on('CAMT Import', {
                 change_state_manual(frm);
             }).addClass("btn-warning")
         }
+        if (frappe.user.has_role("System Manager")) {
+            frm.add_custom_button(__("CAMT Reset"), function() {
+                frappe.confirm(
+                    'Der komplette CAMT Import wird zurückgesetzt, wollen Sie fortfahren?',
+                    function(){
+                        // on yes
+                        reset_camt(frm);
+                    },
+                    function(){
+                        // on no
+                        show_alert('Abbruch');
+                    }
+                )
+            }).addClass("btn-danger")
+        }
     },
     account: function(frm) {
         cur_frm.save();
@@ -254,4 +269,18 @@ function change_state_manual(frm) {
     'Manuelle Status Änderung',
     'Ändern'
     )
+}
+
+function reset_camt(frm) {
+    frappe.call({
+        method: 'mvd.mvd.doctype.camt_import.camt_import.reset_camt',
+        args: {
+            'camt': cur_frm.doc.name
+        },
+        freeze: true,
+        freeze_message: 'Entferne Zahlungen...',
+        callback: function(r) {
+            cur_frm.reload_doc();
+        }
+    });
 }
