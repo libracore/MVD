@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import mvm_mitglieder
+from mvd.mvd.service_plattform.request_worker import api_request_check
 import json
 import requests
 from frappe.utils.background_jobs import enqueue
@@ -233,8 +233,8 @@ def get_token(scope=SVCPF_SCOPE):
 # ---------------------------------------------------
 # create/update existing MV Mitgliedschaft
 @frappe.whitelist()
-def mitglieder(**mitgliedschaft):
-    return mvm_mitglieder(mitgliedschaft)
+def mitglieder(**api_request):
+    return api_request_check(api_request)
 
 # abfrage Attachment zu Beratung
 @frappe.whitelist()
