@@ -153,9 +153,10 @@ def get_existing_failed_log(mv_mitgliedschaft, sp_log):
 def execute_sp_log(sp_log, manual_execution=False):
     if manual_execution:
         sp_log = frappe.get_doc("Service Plattform Log", sp_log)
-        existing_failed_log = get_existing_failed_log(sp_log.mv_mitgliedschaft, sp_log.name)
-        if existing_failed_log > 0:
-            return 0
+        if sp_log.mv_mitgliedschaft:
+            existing_failed_log = get_existing_failed_log(sp_log.mv_mitgliedschaft, sp_log.name)
+            if existing_failed_log > 0:
+                return 0
     
     import json
     json_object = json.loads(sp_log.json)
@@ -170,7 +171,20 @@ def execute_sp_log(sp_log, manual_execution=False):
         error_in_execution = mvm_update(mitgliedschaft, api_kwargs)
     
     if sp_log.neuanlage == 1:
-        error_in_execution = mvm_neuanlage(api_kwargs)
+        # check ob wirklich neuanlage, oder in zwischenzeit bereits angelegt
+        if frappe.db.exists("Mitgliedschaft", api_kwargs["mitgliedId"]):
+            # wurde in der Zwischenzeit angelegt, sp_log wird als Update verarbeitet
+            existing_failed_log = get_existing_failed_log(api_kwargs["mitgliedId"], sp_log.name)
+            if existing_failed_log < 1:
+                sp_log.neuanlage = 0
+                sp_log.update = 1
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", api_kwargs["mitgliedId"])
+                error_in_execution = mvm_update(mitgliedschaft, api_kwargs)
+            else:
+                return
+        else:
+            # effektive neuanlage
+            error_in_execution = mvm_neuanlage(api_kwargs)
     
     if error_in_execution:
         sp_log.status = 'Failed'
