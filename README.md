@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.1.2
+Request Worker improvements
 #### 10.1.1
 Request Worker fixes
 #### 10.1.0
