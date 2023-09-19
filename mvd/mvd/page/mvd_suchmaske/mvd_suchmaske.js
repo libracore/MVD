@@ -13,6 +13,9 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.$listenansicht_button = me.page.add_menu_item('Listenansicht zeigen<span class="text-muted pull-right">Ctrl+L</span>', () => {
         frappe.mvd_such_client.goto_list(page);
     });
+    me.$serien_mail_button = me.page.add_menu_item('Serien E-Mail erstellen<span class="text-muted pull-right">Ctrl+m</span>', () => {
+        frappe.mvd_such_client.create_serien_email(page);
+    });
     me.$reset_button = me.page.set_secondary_action('Suche zurücksetzen<span class="text-muted pull-right" style="padding-left: 5px;">Ctrl+R</span>', () => {
         location.reload();
     });
@@ -40,6 +43,15 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
         var route = frappe.get_route();
         if(route[0]==='mvd-suchmaske') {
             me.$listenansicht_button.click();
+            e.preventDefault();
+            return false;
+        }
+    });
+    // trigger für ctrl + m
+    frappe.ui.keys.on('ctrl+m', function(e) {
+        var route = frappe.get_route();
+        if(route[0]==='mvd-suchmaske') {
+            me.$serien_mail_button.click();
             e.preventDefault();
             return false;
         }
@@ -222,9 +234,50 @@ frappe.mvd_such_client = {
             freeze_message: 'Aufbereitung Mitgliedschafts Liste...',
             callback: function(r)
             {
+                console.log(r.message);
                 if (r.message) {
                     frappe.route_options = {"search_hash": r.message}
                     frappe.set_route("List", "Mitgliedschaft");
+                }
+            }
+        });
+    },
+    create_serien_email: function(page) {
+        var search_data = {};
+        for (const [ key, value ] of Object.entries(cur_page.page.search_fields)) {
+            if (value.get_value()) {
+                search_data[key] = value.get_value();
+            } else {
+                search_data[key] = false;
+            }
+        }
+        frappe.call({
+            method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.suche",
+            args:{
+                    'suchparameter': search_data,
+                    'goto_list': true
+            },
+            freeze: true,
+            freeze_message: 'Erstelle Serien E-Mail Datensatz...',
+            callback: function(r)
+            {
+                if (r.message) {
+                    frappe.call({
+                        method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.create_serien_email",
+                        args:{
+                                'search_hash': r.message
+                        },
+                        freeze: true,
+                        freeze_message: 'Erstelle Serien E-Mail Datensatz...',
+                        callback: function(response)
+                        {
+                            if (response.message) {
+                                frappe.set_route("Form", "Serien Email", response.message);
+                            }
+                        }
+                    });
+                } else {
+                    frappe.msgprint("Für ein Serien E-Mail müssen mind. 2 Mitgliedschaften vorliegen");
                 }
             }
         });

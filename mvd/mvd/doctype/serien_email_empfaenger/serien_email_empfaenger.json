@@ -1,0 +1,73 @@
+{
+ "creation": "2023-09-19 08:46:47.755803",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "mv_mitgliedschaft",
+  "mitglied_nr",
+  "vorname",
+  "nachname",
+  "email",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Mitglied ID",
+   "options": "Mitgliedschaft",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.mitglied_nr",
+   "fieldname": "mitglied_nr",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mitglied Nr",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.vorname_1",
+   "fieldname": "vorname",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Vorname",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.nachname_1",
+   "fieldname": "nachname",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nachname",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nQueue\nSend\nFailed\nE-Mail missing\nManuelle E-Mail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "E-Mail"
+  }
+ ],
+ "istable": 1,
+ "modified": "2023-09-19 14:41:57.322677",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Serien Email Empfaenger",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

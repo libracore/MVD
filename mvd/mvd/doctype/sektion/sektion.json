@@ -60,6 +60,10 @@
   "mahnung_absender_adresse",
   "mahnung_absender_name",
   "footer",
+  "section_serien_email",
+  "serien_email_absender_adresse",
+  "serien_email_absender_name",
+  "serien_email_footer",
   "section_e_mail",
   "kuendigungs_bestaetigung_de",
   "kuendigungs_bestaetigung_fr",
@@ -482,9 +486,32 @@
    "fieldtype": "Int",
    "label": "Mahnung 4 nach ... Tagen (ab F\u00e4lligkeitsdatum)",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_serien_email",
+   "fieldtype": "Section Break",
+   "label": "Serien E-Mail"
+  },
+  {
+   "fieldname": "serien_email_absender_adresse",
+   "fieldtype": "Data",
+   "label": "E-Mail Absender Adresse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "serien_email_absender_name",
+   "fieldtype": "Data",
+   "label": "E-Mail Absender Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "serien_email_footer",
+   "fieldtype": "HTML Editor",
+   "label": "E-Mail Footer"
   }
  ],
- "modified": "2023-08-31 09:56:58.635062",
+ "modified": "2023-09-19 14:30:08.269976",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
