@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.3.0
+Serien E-Mail Feature (ISS-7)
 #### 10.2.0
 Anpassungen Druckformat Mahnung (ISS-51)
 #### 10.1.2

@@ -362,3 +362,39 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
         })
         faktura_kunde.insert(ignore_permissions=True)
         return faktura_kunde.name
+
+@frappe.whitelist()
+def create_serien_email(search_hash):
+    # get mitgliedschafts data
+    mitgliedschaften = frappe.db.sql("""
+                                        SELECT
+                                            `name` AS `mv_mitgliedschaft`,
+                                            `e_mail_1` AS `email`,
+                                            CASE
+                                                WHEN `e_mail_1` IS NOT NULL THEN
+                                                    CASE
+                                                        WHEN `e_mail_1` NOT IN ('', 'None') THEN 'Open'
+                                                        ELSE 'E-Mail missing'
+                                                    END
+                                                ELSE 'E-Mail missing'
+                                            END AS `status`
+                                        FROM `tabMitgliedschaft`
+                                        WHERE `search_hash` = '{search_hash}'""".format(search_hash=search_hash), as_dict=True)
+    
+    if len(mitgliedschaften) < 1:
+        return
+    
+    sektion_id = frappe.db.get_value("Mitgliedschaft", mitgliedschaften[0].mv_mitgliedschaft, "sektion_id")
+    empfaenger = mitgliedschaften
+    
+    # erstelle Serien Email
+    serien_email = frappe.get_doc({
+        "doctype": "Serien Email",
+        "sektion_id": sektion_id,
+        "title": now().split(".")[0],
+        "empfaenger": empfaenger
+    })
+    serien_email.flags.ignore_validate = True
+    
+    serien_email.insert(ignore_permissions=True)
+    return serien_email.name

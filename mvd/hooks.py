@@ -157,7 +157,8 @@ scheduler_events = {
         "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue",
         "mvd.mvd.doctype.mvd_email_queue.mvd_email_queue.mvd_mail_flush",
         "mvd.www.emailberatung.send_to_sp",
-        "mvd.mvd.service_plattform.request_worker.service_plattform_log_worker"
+        "mvd.mvd.service_plattform.request_worker.service_plattform_log_worker",
+        "mvd.mvd.doctype.serien_email.serien_email.send_mails"
     ]
 }
 # scheduler_events = {
