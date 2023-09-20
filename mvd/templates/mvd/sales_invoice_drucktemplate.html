@@ -33,17 +33,9 @@
                 {% set mitgliedschaft = frappe.get_doc("Kunden", doc.mv_kunde) %}
                 {% set sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id) %}
             {% endif %}
-            {% if doc.druckvorlage and not doc.manueller_rechnungstext %}
-                {% set textkonserve = frappe.get_doc("Druckvorlage", doc.druckvorlage) %}
-                {% set print_language = textkonserve.language %}
-            {% else %}
-                {% if doc.manueller_rechnungstext %}
-                    {% set textkonserve = doc %}
-                    {% set print_language = mitgliedschaft.language %}
-                {% else %}
-                    {% set textkonserve = '<h1>Keine Druckvorlage gefunden!</h1>' %}
-                    {% set print_language = mitgliedschaft.language %}
-                {% endif %}
+            {% set print_language = mitgliedschaft.language %}
+            {% if doc.manueller_rechnungstext %}
+                {% set druckvorlage = doc %}
             {% endif %}
             
             
