@@ -19,3 +19,4 @@ mvd.patches.v8_17_5.beratungs_attachements
 mvd.patches.redesign_druckvorlagen_migration.migration
 mvd.patches.redesign_korrespondenz_migration.migration
 mvd.patches.redesign_druckvorlagen_renaming.renaming
+mvd.patches.v10_3_3.reset_beratungs_protection
