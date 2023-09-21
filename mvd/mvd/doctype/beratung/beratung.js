@@ -9,7 +9,11 @@ frappe.ui.form.on('Beratung', {
         }
     },
     refresh: function(frm) {
+        console.log("bini refresh");
         // Handler für gesperrte Ansicht
+        if (!cur_frm.doc.gesperrt_am) {
+            cur_frm.reload_doc();
+        }
         var gesperrt = false;
         if (cur_frm.doc.gesperrt_am) {
             if (cur_frm.doc.gesperrt_von != frappe.session.user) {
