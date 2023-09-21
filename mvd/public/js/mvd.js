@@ -123,60 +123,90 @@ window.onload = function() {
                 (e || window.event).returnValue = confirmationMessage; //Gecko + IE
                 return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
             } else {
-                return undefined;
+                // ***********************************************************************************
+                // Handler zum ENTSPERREN von Beratungen
+                // Hinweis: Dieser Handler fängt nur das Schliessen des Browsers/Fensters.
+                //          Alles andere  wird unter "check_protect_unprotect_beratung()" verarbeitet
+                // ***********************************************************************************
+                if(cur_frm.doctype == 'Beratung') {
+                    frappe.call({
+                        method: "mvd.mvd.doctype.beratung.beratung.clear_protection",
+                        args:{
+                                'beratung': cur_frm.doc.name
+                        }
+                    });
+                    return undefined;
+                } else {
+                    return undefined;
+                }
             }
         }
     });
 };
 
-$(document).on("page-change", function() {
-    if (window.location.hash.includes('#Form/Beratung/')) {
-        // Funktion zum gewährleisten, dass die Beratung beim öffnen ohne onload-Trigger gesperrt wird
-        var beratung = window.location.hash.split("/")[window.location.hash.split("/").length - 1]
-        frappe.db.get_value("Beratung", beratung, 'gesperrt_am')
-            .then(({ message }) => {
-                    var gesperrt_am = message.gesperrt_am
-                    if (!gesperrt_am) {
-                        cur_frm.reload_doc();
-                    } else {
-                        // Funktion zum gewährleisten, dass die Beratung beim öffnen ohne onload-Trigger neugeladen wird wenn sie gesperrt ist
-                        frappe.db.get_value("Beratung", beratung, 'gesperrt_von')
-                            .then(({ message }) => {
-                                    gesperrt_von = message.gesperrt_von
-                                    if ((gesperrt_von != frappe.session.user)&&(gesperrt_am != cur_frm.doc.gesperrt_am)) {
-                                        cur_frm.reload_doc();
-                                    }
-                                });
-                    }
-                });
-    } else {
-        // Funktion zum gewährleisten, dass die Beratung beim verlassen freigegeben wird
-        if (frappe.route_history.length >= 2) {
-            if (frappe.route_history[frappe.route_history.length - 2]) {
-                if (frappe.route_history[frappe.route_history.length - 2][0] == 'Form') {
-                    if (frappe.route_history[frappe.route_history.length - 2][1] == 'Beratung') {
-                        frappe.call({
-                            method: "mvd.mvd.doctype.beratung.beratung.clear_protection",
-                            args:{
-                                    'beratung': frappe.route_history[frappe.route_history.length - 2][2]
-                            }
-                        });
-                    }
-                } else if (frappe.route_history.length >= 3) {
-                    if (frappe.route_history[frappe.route_history.length - 3][0] == 'Form') {
-                        if (frappe.route_history[frappe.route_history.length - 3][1] == 'Beratung') {
-                            frappe.call({
-                                method: "mvd.mvd.doctype.beratung.beratung.clear_protection",
-                                args:{
-                                        'beratung': frappe.route_history[frappe.route_history.length - 3][2]
-                                }
-                            });
-                        }
-                    }
-                }
+function check_protect_unprotect_beratung() {
+    // ***********************************************************************************
+    // Handler zum ENTSPERREN von Beratungen
+    // Hinweis: Dieser Handler fängt alles ab ausser das Schliessen des Browsers/Fensters.
+    //          Dies wird unter "window.onload = function()" verarbeitet
+    // ***********************************************************************************
+    var beratung_entsperren = false;
+    
+    // Dieser Abschnitt funktioniert bei Seitenchanges von Beratungsformular nach X, ausgenommen nach "List/Beratung"
+    var prev_route_array = frappe.get_prev_route();
+    //~ console.log(prev_route_array);
+    if (prev_route_array.length > 2) {
+        if ((prev_route_array[0] == 'Form')&&(prev_route_array[1] == 'Beratung')) {
+            beratung_entsperren = prev_route_array[2];
+        }
+    }
+    
+    // Dieser Abschnitt ist die Fallbacklösung für Seitenchanges von Beratungsformular nach "List/Beratung"
+    if (!beratung_entsperren) {
+        var route_history = frappe.route_history;
+        if (route_history.length >= 3) {
+            if ((route_history[route_history.length - 3][0] == 'Form')&&(route_history[route_history.length - 3][1] == 'Beratung')) {
+                beratung_entsperren = route_history[route_history.length - 3][2];
             }
         }
     }
+    
+    // Entsperren der Beratung
+    if (beratung_entsperren) {
+        console.log("Entsperren von " + beratung_entsperren);
+        frappe.call({
+            method: "mvd.mvd.doctype.beratung.beratung.clear_protection",
+            args:{
+                    'beratung': beratung_entsperren
+            }
+        });
+    }
+    
+    // **********************************
+    // Handler zum SPERREN von Beratungen
+    // **********************************
+    var beratung_sperren = false;
+    var cur_route = frappe.get_route();
+    if (cur_route.length == 3) {
+        if ((cur_route[0] == 'Form')&&(cur_route[1] == 'Beratung')) {
+            beratung_sperren = cur_route[2];
+        }
+    }
+    
+    if (beratung_sperren) {
+        console.log("Sperren von " + beratung_sperren);
+        frappe.call({
+            method: "mvd.mvd.doctype.beratung.beratung.set_protection",
+            args:{
+                    'beratung': beratung_sperren
+            }
+        });
+    }
+}
+$(document).on("page-change", function() {
+    // Sperren/Freigeben von Beratungen
+    check_protect_unprotect_beratung();
+    
     // gewährleistung VBZ Beratung Reload
     if (!window.location.hash.includes('#vbz-beratung')) {
         if( window.localStorage ) {

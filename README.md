@@ -1,5 +1,11 @@
 ## MVD
 ### Version Log
+#### 10.3.3
+Bugfix Sperren/Entsperren Beratung (ISS-6)
+#### 10.3.2
+Korrekturen/Anpassungen CD (ISS-50)
+#### 10.3.1
+Manuelle RG-Text Anpassung (ISS-45)
 #### 10.3.0
 Serien E-Mail Feature (ISS-7)
 #### 10.2.0
