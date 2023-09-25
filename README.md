@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.3.4
+Hotfix ISS-2023-00075
 #### 10.3.3
 Bugfix Sperren/Entsperren Beratung (ISS-6)
 #### 10.3.2

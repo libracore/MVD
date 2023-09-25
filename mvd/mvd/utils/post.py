@@ -50,6 +50,8 @@ def _post_responses(data):
 
 # SP Log
 def create_sp_log(mitgliedschaft, retoure, data):
+    import json
+    json_formatted_str = json.dumps(data, indent=2)
     if retoure:
         retoure = 1
         response = 0
@@ -60,9 +62,10 @@ def create_sp_log(mitgliedschaft, retoure, data):
     sp_log = frappe.get_doc({
         "doctype":"Service Plattform Log",
         "mv_mitgliedschaft": mitgliedschaft,
-        "json": str(data),
+        "json": json_formatted_str,
         "retoure": retoure,
-        "response": response
+        "response": response,
+        "status": "Done"
     }).insert(ignore_permissions=True)
     
     return
