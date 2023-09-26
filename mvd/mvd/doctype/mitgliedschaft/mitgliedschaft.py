@@ -2138,6 +2138,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             new_mitgliedschaft.status_c = 'Zuzug'
             new_mitgliedschaft.zuzug = zuzug_per
             new_mitgliedschaft.wegzug = ''
+            new_mitgliedschaft.wegzug_zu = ''
             new_mitgliedschaft.kunde_mitglied = ''
             new_mitgliedschaft.kontakt_mitglied = ''
             new_mitgliedschaft.adresse_mitglied = ''
@@ -2694,8 +2695,14 @@ def prepare_mvm_for_sp(mitgliedschaft):
             kuendigungsgrund = None
         
     
+    # Bei Wegzügen muss gem. SP-API der Key alteSektionCode leer sein
+    if mitgliedschaft.status_c == 'Wegzug':
+        alteSektionCode = ''
+    else:
+        alteSektionCode = str(get_sektion_code(mitgliedschaft.zuzug_von)) if mitgliedschaft.zuzug_von else None
+    
     prepared_mvm = {
-        "mitgliedNummer": str(mitgliedschaft.mitglied_nr),
+        "mitgliedNummer": str(mitgliedschaft.mitglied_nr) if str(mitgliedschaft.mitglied_nr) != 'MV' else None,
         "mitgliedId": int(mitgliedschaft.mitglied_id),
         "sektionCode": str(get_sektion_code(mitgliedschaft.sektion_id)),
         "regionCode": frappe.get_value("Region", mitgliedschaft.region, "region_c") if mitgliedschaft.region else None,
@@ -2708,7 +2715,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "erfassungsdatum": str(mitgliedschaft.creation).replace(" ", "T"),
         "eintrittsdatum": str(mitgliedschaft.eintrittsdatum).replace(" ", "T") + "T00:00:00" if mitgliedschaft.eintrittsdatum else None,
         "austrittsdatum": str(mitgliedschaft.austritt).replace(" ", "T") + "T00:00:00" if mitgliedschaft.austritt else None,
-        "alteSektionCode": str(get_sektion_code(mitgliedschaft.zuzug_von)) if mitgliedschaft.zuzug_von else None,
+        "alteSektionCode": alteSektionCode,
         "zuzugsdatum": str(mitgliedschaft.zuzug).replace(" ", "T") + "T00:00:00" if mitgliedschaft.zuzug else None,
         "neueSektionCode": str(get_sektion_code(mitgliedschaft.wegzug_zu)) if mitgliedschaft.wegzug_zu else None,
         "wegzugsdatum": str(mitgliedschaft.wegzug).replace(" ", "T") + "T00:00:00" if mitgliedschaft.wegzug else None,
