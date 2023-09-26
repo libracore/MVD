@@ -2702,7 +2702,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         alteSektionCode = str(get_sektion_code(mitgliedschaft.zuzug_von)) if mitgliedschaft.zuzug_von else None
     
     prepared_mvm = {
-        "mitgliedNummer": str(mitgliedschaft.mitglied_nr),
+        "mitgliedNummer": str(mitgliedschaft.mitglied_nr) if str(mitgliedschaft.mitglied_nr) != 'MV' else None,
         "mitgliedId": int(mitgliedschaft.mitglied_id),
         "sektionCode": str(get_sektion_code(mitgliedschaft.sektion_id)),
         "regionCode": frappe.get_value("Region", mitgliedschaft.region, "region_c") if mitgliedschaft.region else None,
