@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.3.8
+Bugfix (Typo) in Serien E-Mail
 #### 10.3.7
 ISS-2023-00074
 #### 10.5.6

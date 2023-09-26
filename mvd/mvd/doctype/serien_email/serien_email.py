@@ -40,7 +40,7 @@ def send_mails():
                     else:
                         sm.save()
                         return
-                sm.status = 'Complete'
+                sm.status = 'Complet'
                 sm.save()
             else:
                 return
