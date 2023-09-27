@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.3.9
+Bugfix; Typo in MVD-Drucktemplates
 #### 10.3.8
 Bugfix (Typo) in Serien E-Mail
 #### 10.3.7
