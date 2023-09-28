@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.4.1
+E-Mail Notification Fix bei Mitgliedschaft ToDo
 #### 10.4.0
 Serien E-Mail Feature in VBZ & Serien E-Mail Feature in Listenansicht
 #### 10.3.9

@@ -3325,6 +3325,12 @@ def erstelle_todo(owner, mitglied, description=False, datum=False, notify=0):
         "assigned_by": frappe.session.user,
         "mv_mitgliedschaft": mitglied
     }).insert(ignore_permissions=True)
+    
+    # notify
+    if int(notify) == 1:
+        from frappe.desk.form.assign_to import notify_assignment
+        notify_assignment(todo.assigned_by, todo.owner, todo.reference_type, todo.reference_name, action='ASSIGN',\
+                 description=todo.description, notify=notify)
     return
 
 @frappe.whitelist()
