@@ -364,25 +364,54 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
         return faktura_kunde.name
 
 @frappe.whitelist()
-def create_serien_email(search_hash):
-    # get mitgliedschafts data
-    mitgliedschaften = frappe.db.sql("""
-                                        SELECT
-                                            `name` AS `mv_mitgliedschaft`,
-                                            `e_mail_1` AS `email`,
-                                            CASE
-                                                WHEN `e_mail_1` IS NOT NULL THEN
-                                                    CASE
-                                                        WHEN `e_mail_1` NOT IN ('', 'None') THEN 'Open'
-                                                        ELSE 'E-Mail missing'
-                                                    END
-                                                ELSE 'E-Mail missing'
-                                            END AS `status`
-                                        FROM `tabMitgliedschaft`
-                                        WHERE `search_hash` = '{search_hash}'""".format(search_hash=search_hash), as_dict=True)
-    
-    if len(mitgliedschaften) < 1:
+def create_serien_email(search_hash=None, mitglied_selektion=None):
+    if not search_hash and not mitglied_selektion:
         return
+    
+    if search_hash:
+        # get mitgliedschafts data basierend auf search_hash aus Mitgliedschaftssuchmaske
+        mitgliedschaften = frappe.db.sql("""
+                                            SELECT
+                                                `name` AS `mv_mitgliedschaft`,
+                                                `e_mail_1` AS `email`,
+                                                CASE
+                                                    WHEN `e_mail_1` IS NOT NULL THEN
+                                                        CASE
+                                                            WHEN `e_mail_1` NOT IN ('', 'None') THEN 'Open'
+                                                            ELSE 'E-Mail missing'
+                                                        END
+                                                    ELSE 'E-Mail missing'
+                                                END AS `status`
+                                            FROM `tabMitgliedschaft`
+                                            WHERE `search_hash` = '{search_hash}'""".format(search_hash=search_hash), as_dict=True)
+        
+        if len(mitgliedschaften) < 1:
+            return
+    elif mitglied_selektion:
+        # get mitgliedschafts data basierend auf mitgliedschaftsliste aus Selektion
+        if isinstance(mitglied_selektion, str):
+            mitglied_selektion = json.loads(mitglied_selektion)
+            mitgliedschaften_list = []
+            for mitgliedschaft in mitglied_selektion:
+                mitgliedschaften_list.append(mitgliedschaft['name'])
+            mitgliedschaften_list_filter = ", ".join(mitgliedschaften_list)
+            mitgliedschaften = frappe.db.sql("""
+                                            SELECT
+                                                `name` AS `mv_mitgliedschaft`,
+                                                `e_mail_1` AS `email`,
+                                                CASE
+                                                    WHEN `e_mail_1` IS NOT NULL THEN
+                                                        CASE
+                                                            WHEN `e_mail_1` NOT IN ('', 'None') THEN 'Open'
+                                                            ELSE 'E-Mail missing'
+                                                        END
+                                                    ELSE 'E-Mail missing'
+                                                END AS `status`
+                                            FROM `tabMitgliedschaft`
+                                            WHERE `name` IN ({mitgliedschaften_list_filter})""".format(mitgliedschaften_list_filter=mitgliedschaften_list_filter), as_dict=True)
+            if len(mitgliedschaften) < 1:
+                return
+    
     
     sektion_id = frappe.db.get_value("Mitgliedschaft", mitgliedschaften[0].mv_mitgliedschaft, "sektion_id")
     empfaenger = mitgliedschaften
