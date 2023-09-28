@@ -50,8 +50,11 @@ def _post_responses(data):
 
 # SP Log
 def create_sp_log(mitgliedschaft, retoure, data):
-    import json
-    json_formatted_str = json.dumps(data, indent=2)
+    if isinstance(data, str):
+        import json
+        json_formatted_str = json.dumps(data, indent=2)
+    else:
+        json_formatted_str = data
     if retoure:
         retoure = 1
         response = 0
