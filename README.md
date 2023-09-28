@@ -1,7 +1,7 @@
 ## MVD
 ### Version Log
 #### 10.4.0
-Serien E-Mail Feature in VBZ
+Serien E-Mail Feature in VBZ & Serien E-Mail Feature in Listenansicht
 #### 10.3.9
 Bugfix; Typo in MVD-Drucktemplates
 #### 10.3.8
