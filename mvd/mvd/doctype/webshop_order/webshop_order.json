@@ -4,16 +4,43 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "request"
+  "section_api_data",
+  "request",
+  "section_datatrans",
+  "online_payment_id",
+  "online_payment_zahlungsfile"
  ],
  "fields": [
   {
    "fieldname": "request",
    "fieldtype": "Code",
    "label": "Request"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_api_data",
+   "fieldtype": "Section Break",
+   "label": "API Data"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_datatrans",
+   "fieldtype": "Section Break",
+   "label": "Datatrans Data"
+  },
+  {
+   "fieldname": "online_payment_id",
+   "fieldtype": "Data",
+   "label": "onlinePaymentId"
+  },
+  {
+   "fieldname": "online_payment_zahlungsfile",
+   "fieldtype": "Link",
+   "label": "onlinePaymentZahlungsfile",
+   "options": "Datatrans Zahlungsfile"
   }
  ],
- "modified": "2023-09-28 14:50:28.372665",
+ "modified": "2023-09-29 08:28:50.940569",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Webshop Order",
