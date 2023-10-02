@@ -35,8 +35,13 @@
         
         <!-- Mitglieder Ausweis -->
         {% if seite.ausweis %}
+            {% if doc.mitgliedschafts_jahr_manuell %}
+                {% set ausweisjahr = doc.mitgliedschafts_jahr %}
+            {% else %}
+                {% set ausweisjahr = mitgliedschaft.bezahltes_mitgliedschaftsjahr %}
+            {% endif %}
             <div id='ausweis'>
-                <b>Mitgliederausweis {{ mitgliedschaft.bezahltes_mitgliedschaftsjahr }}</b>
+                <b>Mitgliederausweis {{ ausweisjahr }}</b>
                 <div id='ausweis-content'>
                     {% if mitgliedschaft.kundentyp == 'Unternehmen' %}{{ mitgliedschaft.firma }}<br>{% endif %}
                     {{ mitgliedschaft.vorname_1 }} {{ mitgliedschaft.nachname_1 }}
