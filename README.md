@@ -1,6 +1,9 @@
 ## MVD
 ### Version Log
-#### 10.4.2 Retouren Bugfix: the JSON must be str not None Type
+#### 10.4.3
+Bugfix; Mitgliedschaftsjahr auf Ausweis in MVD-Drucktemplates
+#### 10.4.2
+Retouren Bugfix: the JSON must be str not None Type
 #### 10.4.1
 E-Mail Notification Fix bei Mitgliedschaft ToDo
 #### 10.4.0
