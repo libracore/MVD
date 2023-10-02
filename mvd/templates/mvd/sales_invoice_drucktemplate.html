@@ -257,7 +257,7 @@
         <!-- Mitglieder Ausweis -->
         {% if seite.ausweis %}
             <div id='ausweis'>
-                <b>Mitgliederausweis {{ doc.bezahltes_mitgliedschaftsjahr }}</b>
+                <b>Mitgliederausweis {{ doc.mitgliedschafts_jahr }}</b>
                 <div id='ausweis-content'>
                     {% if mitgliedschaft.kundentyp == 'Unternehmen' %}{{ mitgliedschaft.firma }}<br>{% endif %}
                     {{ mitgliedschaft.vorname_1 }} {{ mitgliedschaft.nachname_1 }}
