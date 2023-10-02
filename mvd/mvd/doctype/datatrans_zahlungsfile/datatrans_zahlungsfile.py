@@ -63,7 +63,8 @@ class DatatransZahlungsfile(Document):
                                                                         `online_betrag`,
                                                                         `datum_online_verbucht`,
                                                                         `datum_online_gutschrift`,
-                                                                        `online_payment_method`
+                                                                        `online_payment_method`,
+                                                                        `online_payment_zahlungsfile`
                                                                     FROM `tabMitgliedschaft`
                                                                     WHERE `online_payment_id` = '{refnumber}'
                                                                     ORDER BY `creation` ASC
@@ -79,9 +80,27 @@ class DatatransZahlungsfile(Document):
                                 entry.datum_online_verbucht = mitgliedschaft_lookup[0].datum_online_verbucht
                                 entry.datum_online_gutschrift = mitgliedschaft_lookup[0].datum_online_gutschrift
                                 entry.online_payment_method = mitgliedschaft_lookup[0].online_payment_method
-                                entry.status = 'Mitglied Match'
-                                # update mitgliedschaft
-                                mitgl_update = frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `online_payment_zahlungsfile` = '{zahlungsfile}' WHERE `name` = '{name}'""".format(zahlungsfile=self.name, name=mitgliedschaft_lookup[0].name), as_list=True)
+                                
+                                if mitgliedschaft_lookup[0].online_payment_zahlungsfile:
+                                    # zu diesem Mitglied wurde bereits eine Datatrans Zahlung eingelesen
+                                    entry.status = 'Mitglied: Doppelimport'
+                                else:
+                                    if float(entry.amount) > 0:
+                                        # Zahlung
+                                        if float(entry.amount) != float(mitgliedschaft_lookup[0].online_betrag):
+                                            # abweichender Betrag
+                                            entry.status = 'Mitglied: Abweichender Betrag'
+                                        else:
+                                            # all good
+                                            entry.status = 'Mitglied: Match'
+                                            # update mitgliedschaft
+                                            mitgl_update = frappe.db.sql("""UPDATE
+                                                                                `tabMitgliedschaft`
+                                                                            SET `online_payment_zahlungsfile` = '{zahlungsfile}'
+                                                                            WHERE `name` = '{name}'""".format(zahlungsfile=self.name, name=mitgliedschaft_lookup[0].name), as_list=True)
+                                    else:
+                                        # Gutschrift
+                                        entry.status = 'Mitglied: Gutschrift'
                             else:
                                 entry.status = 'Mitglied: No Match'
                         else:
@@ -90,167 +109,29 @@ class DatatransZahlungsfile(Document):
                             # ~ entry.status = 'Webshop Order Match'
         self.save()
     
+    def reset_data(self):
+        to_delete = []
+        for entry in self.datatrans_entries:
+            to_delete.append(entry.name)
+            if entry.mitglied_id:
+                # update mitgliedschaft
+                mitgl_update = frappe.db.sql("""UPDATE
+                                                    `tabMitgliedschaft`
+                                                SET `online_payment_zahlungsfile` = NULL
+                                                WHERE `name` = '{name}'""".format(name=entry.mitglied_id), as_list=True)
+        self.datatrans_entries = []
+        self.save()
+        delete_datatrans_entries = frappe.db.sql("""DELETE FROM `tabDatatrans Entry` WHERE `name` IN ({to_delete})""".format(to_delete="'{0}'".format("', '".join(to_delete))), as_list=True)
+    
     def create_single_report(self):
         create_mitgliedschaften_pro_file(self)
     
     def create_reports(self):
+        from mvd.mvd.doctype.datatrans_report.datatrans_report import create_mitgliedschaften_pro_file
+        
         create_mitgliedschaften_pro_file(self)
         sektions_list = create_monatsreport_mvd(self)
         create_monatsreport_sektionen(self, sektions_list)
-
-def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
-    raw_filedatum = datatrans_zahlungsfile.datatrans_entries[0].transdatetime.split(" ")[0]
-    filedatum = raw_filedatum.split("/")[2] + "." + raw_filedatum.split("/")[1] + "." + raw_filedatum.split("/")[0]
-    main_html = '''
-        <h1>Zahlungsreport Datatrans  (Valuta bis {filedatum})</h1>
-        <h2>Zahlungsdatei</h2>
-        <table style="width: 100%;">
-            <tr>
-                <td style="text-align: left; width: 70%;">Filedatum</td>
-                <td style="text-align: right; width: 30%;">{filedatum}</td>
-            </tr>
-            <tr>
-                <td style="text-align: left;">Anzahl Zahlungen</td>
-                <td style="text-align: right;">{total_number_of_records}</td>
-            </tr>
-            <tr>
-                <td style="text-align: left;"><b>Totalbetrag</b></td>
-                <td style="text-align: right;"><b>{total_settlement_amount}</b></td>
-            </tr>
-        </table>
-        <h2>Verbuchte Zahlungen</h2>
-        <table style="width: 100%;">
-            <tr>
-                <td style="text-align: left;">Anzahl verbuchte Zahlungen</td>
-                <td style="text-align: right;">999</td>
-            </tr>
-            <tr>
-                <td style="text-align: left;">Davon Gutschriften</td>
-                <td style="text-align: right;">999</td>
-            </tr>
-            <tr>
-                <td style="text-align: left;"><b>Verbuchter Betrag</b></td>
-                <td style="text-align: right;"><b>999</b></td>
-            </tr>
-        </table>
-        <h2>Nicht verbuchte Zahlungen</h2>
-        <table style="width: 100%;">
-            <tr>
-                <td style="text-align: left;">Faktura/Mitgliedschaft doppelt bezahlt</td>
-                <td style="text-align: right;">999</td>
-            </tr>
-            <tr>
-                <td style="text-align: left;">Faktura/Mitgliedschaft doppelt gutgeschrieben</td>
-                <td style="text-align: right;">999</td>
-            </tr>
-            <tr>
-                <td style="text-align: left;">Faktura/Mitgliedschaft nicht gefunden</td>
-                <td style="text-align: right;">999</td>
-            </tr>
-            <tr>
-                <td style="text-align: left;">Betrag stimmt nicht überein</td>
-                <td style="text-align: right;">999</td>
-            </tr>
-            <tr>
-                <td style="text-align: left;">Andere Gründe</td>
-                <td style="text-align: right;">999</td>
-            </tr>
-            <tr>
-                <td style="text-align: left;">Anzahl unverbuchter Zahlungen</td>
-                <td style="text-align: right;">999</td>
-            </tr>
-            <tr>
-                <td style="text-align: left;"><b>Nicht verbuchter Betrag</b></td>
-                <td style="text-align: right;"><b>999</b></td>
-            </tr>
-        </table>
-    '''.format(total_number_of_records=datatrans_zahlungsfile.total_number_of_records, \
-                total_settlement_amount=frappe.utils.fmt_money(datatrans_zahlungsfile.total_settlement_amount), \
-                filedatum=filedatum)
-    
-    html_nicht_verbucht = '''
-        <h1>Nicht verbuchte Zahlungen</h1>
-        <table style="width: 100%;">
-            <thead>
-                <tr>
-                    <th style="border-bottom: 1px solid black;">Fak./Mitnr.</th>
-                    <th style="border-bottom: 1px solid black;">EmpfängerIn</th>
-                    <th style="border-bottom: 1px solid black;">Valuta</th>
-                    <th style="border-bottom: 1px solid black;">Betrag</th>
-                    <th style="border-bottom: 1px solid black;">Grund</th>
-                </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-            </tr>
-            </tbody>
-        </table>
-    '''
-    
-    html_gutschriften = '''
-        <h1>Gutschriften</h1>
-        <table style="width: 100%;">
-            <thead>
-                <tr>
-                    <th style="border-bottom: 1px solid black;">Fak./Mitnr.</th>
-                    <th style="border-bottom: 1px solid black;">EmpfängerIn</th>
-                    <th style="border-bottom: 1px solid black;">Valuta</th>
-                    <th style="border-bottom: 1px solid black;">Betrag</th>
-                    <th style="border-bottom: 1px solid black;">Transaktions-ID</th>
-                </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-            </tr>
-            </tbody>
-        </table>
-    '''
-    
-    html_ausstehende_records = '''
-        <h1>Ausstehende Datatrans-Zahlungsrecords</h1>
-        <table style="width: 100%;">
-            <thead>
-                <tr>
-                    <th style="border-bottom: 1px solid black;">Fak./Mitnr.</th>
-                    <th style="border-bottom: 1px solid black;">EmpfängerIn</th>
-                    <th style="border-bottom: 1px solid black;">Valuta</th>
-                    <th style="border-bottom: 1px solid black;">Betrag</th>
-                    <th style="border-bottom: 1px solid black;">Transaktions-ID</th>
-                </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-            </tr>
-            </tbody>
-        </table>
-    '''
-    
-    html = main_html + html_nicht_verbucht + html_gutschriften + html_ausstehende_records
-    
-    report = frappe.get_doc({
-        "doctype": "Datatrans Report",
-        "report_typ": "Mitgliedschaften pro File",
-        "sektion": "MVD",
-        "datatrans_zahlungsfile": datatrans_zahlungsfile.name,
-        "content_code": html
-    }).insert()
-    
-    return
 
 def create_monatsreport_mvd(datatrans_zahlungsfile):
     def get_sektions_values(sektion):

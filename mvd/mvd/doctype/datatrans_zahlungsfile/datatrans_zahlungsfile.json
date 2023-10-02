@@ -9,6 +9,7 @@
   "btn_file_einlesen",
   "cb_1",
   "btn_daten_verarbeiten",
+  "btn_reset",
   "cb_2",
   "btn_single_report",
   "cb_3",
@@ -136,9 +137,14 @@
    "hidden": 1,
    "label": "kommissions_prozent",
    "read_only": 1
+  },
+  {
+   "fieldname": "btn_reset",
+   "fieldtype": "Button",
+   "label": "Reset Daten"
   }
  ],
- "modified": "2023-09-29 14:03:10.704744",
+ "modified": "2023-10-02 12:44:09.373784",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Datatrans Zahlungsfile",

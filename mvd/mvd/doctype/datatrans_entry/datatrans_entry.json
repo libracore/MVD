@@ -159,7 +159,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Open\nMitglied Match\nWebshop Order Match\nMitglied: No Match\nWebshop: No Match",
+   "options": "Open\nMitglied: Match\nWebshop: Match\nMitglied: No Match\nWebshop: No Match\nMitglied: Abweichender Betrag\nWebshop: Abweichender Betrag\nMitglied: Gutschrift\nWebshop: Gutschrift\nMitglied: Doppelimport\nWebshop: Doppelimport",
    "read_only": 1
   },
   {
@@ -182,7 +182,7 @@
   }
  ],
  "istable": 1,
- "modified": "2023-09-29 15:23:41.241103",
+ "modified": "2023-10-02 12:37:52.795108",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Datatrans Entry",

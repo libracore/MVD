@@ -30,6 +30,18 @@ frappe.ui.form.on('Datatrans Zahlungsfile', {
             }
         });
     },
+    btn_reset: function(frm) {
+        frappe.call({
+            method: 'reset_data',
+            doc: frm.doc,
+            freeze: true,
+            freeze_message: "Bitte warten, die Daten werden zurückgesetzt...",
+            callback: function(response) {
+                frappe.show_alert( __("Done!") );
+                cur_frm.reload_doc();
+            }
+        });
+    },
     btn_single_report: function(frm) {
         frappe.call({
             method: 'create_single_report',
