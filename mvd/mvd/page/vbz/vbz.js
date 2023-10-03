@@ -44,6 +44,7 @@ frappe.vbz = {
         $("#massenlauf").off("click");
         $("#adresspflege").off("click");
         $("#serienbrief").off("click");
+        $("#serienmail").off("click");
         $("#camt").off("click");
         $("#goto_klassisch").off("click");
         $("#todo").off("click");
@@ -73,8 +74,51 @@ frappe.vbz = {
             frappe.set_route("modules/MVD");
         });
         $("#serienbrief").click(function(){
+            var prompt_txt = `
+                    <p>
+                        Durch Bestätigung mit "Weiter" können Sie folgenden Workflow verfolgen:
+                    </p>
+                    <ol>
+                        <li>Suchen nach Mitgliedschaften via <a href="/desk#mvd-suchmaske">Suchmaske</a></li>
+                        <li>Absprung in die vorgefilterte Listenansicht (ctrl+L oder "Menü > Listenansicht zeigen")</li>
+                        <li>Selektieren der Mitgliedschaften</li>
+                        <li>Auswahl der Druckvorlage</li>
+                        <li>Generierung Korrespondenzen mit Massenvermerkung</li>
+                    </ol>
+                    <p>
+                        Im Anschluss an den obigen Workflow können in der Verarbeitungszentrale unter "Massenlauf > Korrespondenz" ein entsprechendes Sammel-PDF erzeugen und downloaden.
+                    </p>
+                    <p><b>Hinweis:</b> Sie können auch direkt via <a href="/desk#List/Mitgliedschaft/List">Listenansicht</a> die relevanten Mitglieder selektieren und mit "Aktionen > Erstelle Serienbrief" einen Serienbrief erstellen.</p>`;
             frappe.prompt([
-                {'fieldname': 'html', 'fieldtype': 'HTML', 'label': '', 'options': '<p>Durch Bestätigung mit "Weiter" können Sie folgenden Workflow verfolgen:</p><ol><li>Suchen nach Mitgliedschaften</li><li>Selektieren der Mitgliedschaften</li><li>Auswahl der Druckvorlage</li><li>Generierung Korrespondenzen mit Massenvermerkung</li></ol><p>Im Anschluss an den obigen Workflow können in der Verarbeitungszentrale unter "Massenlauf > Korrespondenz" ein entsprechendes Sammel-PDF erzeugen und downloaden.</p>'}  
+                {'fieldname': 'html', 'fieldtype': 'HTML', 'label': '', 'options': prompt_txt}
+            ],
+            function(values){
+                frappe.set_route("mvd-suchmaske");
+            },
+            'Wollen Sie weiterfahren?',
+            'Weiter'
+            )
+        });
+        $("#serienmail").click(function(){
+            var prompt_txt = `
+                    <p>
+                        Durch Bestätigung mit "Weiter" können Sie folgenden Workflow verfolgen:
+                    </p>
+                    <ol>
+                        <li>Suchen nach Mitgliedschaften via <a href="/desk#mvd-suchmaske">Suchmaske</a></li>
+                        <li>Erstellen eines "Serien E-Mail"-Datensatzes (ctrl+M oder "Menü > Serien E-Mail erstellen")</li>
+                    </ol>
+                    <p><b>Optional<br></b>Sie können auch:<br>
+                        <ul>
+                            <li>Direkt via <a href="/desk#List/Mitgliedschaft/List">Listenansicht</a> die relevanten Mitglieder selektieren.</li>
+                            <li>Oder nach dem Suchen via  <a href="/desk#mvd-suchmaske">Suchmaske</a> in die vorgefilterte Listenansicht (ctrl+L oder "Menü > Listenansicht zeigen") abspringen und
+                                den Serien E-Mail Datensatz mittels "Aktionen > Erstelle Serien E-Mail" erzeugen.
+                            </li>
+                            <li>Oder eine <a href="/desk#List/Serien Email/List">Liste aller "Serien E-Mail"-Datensätze</a> anzeigen.</li>
+                        </ul>
+                    </p>`;
+            frappe.prompt([
+                {'fieldname': 'html', 'fieldtype': 'HTML', 'label': '', 'options': prompt_txt}
             ],
             function(values){
                 frappe.set_route("mvd-suchmaske");

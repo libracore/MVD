@@ -12,6 +12,9 @@
   "section_zahlungserinnerung",
   "email_queue",
   "emails_per_flush",
+  "section_serien_email",
+  "serien_email_queue",
+  "serien_email_per_flush",
   "section_email_beratung",
   "upload_key",
   "upload_secret",
@@ -90,10 +93,26 @@
    "fieldname": "redirect_url_ablehnung",
    "fieldtype": "Data",
    "label": "Redirect URL bei Ablehnung"
+  },
+  {
+   "fieldname": "section_serien_email",
+   "fieldtype": "Section Break",
+   "label": "Serien E-Mail Versand"
+  },
+  {
+   "default": "0",
+   "fieldname": "serien_email_queue",
+   "fieldtype": "Check",
+   "label": "Email Queue"
+  },
+  {
+   "fieldname": "serien_email_per_flush",
+   "fieldtype": "Int",
+   "label": "Anzahl Emails pro Flush"
   }
  ],
  "issingle": 1,
- "modified": "2023-05-25 22:09:23.173129",
+ "modified": "2023-09-19 13:52:18.122218",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Settings",

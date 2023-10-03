@@ -17,7 +17,8 @@
   "json_error_log",
   "queue",
   "flush_queue",
-  "flush_limit"
+  "flush_limit",
+  "flush_limit_eingehend"
  ],
  "fields": [
   {
@@ -78,18 +79,18 @@
    "default": "0",
    "fieldname": "queue",
    "fieldtype": "Check",
-   "label": "Queue aktiv"
+   "label": "Queue aktiv (SP Ausgehend)"
   },
   {
    "fieldname": "flush_queue",
    "fieldtype": "Button",
-   "label": "Flush Queue"
+   "label": "Flush Queue (SP Ausgehend)"
   },
   {
    "default": "0",
    "fieldname": "flush_limit",
    "fieldtype": "Int",
-   "label": "Flush Limit"
+   "label": "Flush Limit (SP Ausgehend)"
   },
   {
    "fieldname": "beratung",
@@ -102,10 +103,16 @@
    "fieldname": "send_beratung_to_sp_unterbrechen",
    "fieldtype": "Check",
    "label": "Send Beratung to SP unterbrechen"
+  },
+  {
+   "default": "20",
+   "fieldname": "flush_limit_eingehend",
+   "fieldtype": "Int",
+   "label": "Flush Limit (SP Eingehend)"
   }
  ],
  "issingle": 1,
- "modified": "2023-07-07 10:15:00.383021",
+ "modified": "2023-09-11 11:49:49.563192",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",

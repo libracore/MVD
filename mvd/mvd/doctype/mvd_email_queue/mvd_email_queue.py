@@ -23,8 +23,9 @@ class MVDEmailQueue(Document):
         else:
             self.status = 'Not send'
         
-        # send if necessary
-        if self.status != 'Send':
+        # send if necessary and allowed
+        allowed_to_send = int(frappe.get_value('MVD Settings', 'MVD Settings', 'email_queue'))
+        if self.status != 'Send' and allowed_to_send == 1:
             send_counter = 0
             max_mails = int(frappe.get_value('MVD Settings', 'MVD Settings', 'emails_per_flush'))
             for mahnung_row in self.mahnungen:

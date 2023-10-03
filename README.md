@@ -1,5 +1,47 @@
 ## MVD
 ### Version Log
+#### 10.4.3
+Bugfix; Mitgliedschaftsjahr auf Ausweis in MVD-Drucktemplates
+#### 10.4.2
+Retouren Bugfix: the JSON must be str not None Type
+#### 10.4.1
+E-Mail Notification Fix bei Mitgliedschaft ToDo
+#### 10.4.0
+Serien E-Mail Feature in VBZ & Serien E-Mail Feature in Listenansicht
+#### 10.3.9
+Bugfix; Typo in MVD-Drucktemplates
+#### 10.3.8
+Bugfix (Typo) in Serien E-Mail
+#### 10.3.7
+ISS-2023-00074
+#### 10.5.6
+ISS-2023-00077
+#### 10.3.5
+ISS-2023-00050
+#### 10.3.4
+Hotfix ISS-2023-00075
+#### 10.3.3
+Bugfix Sperren/Entsperren Beratung (ISS-6)
+#### 10.3.2
+Korrekturen/Anpassungen CD (ISS-50)
+#### 10.3.1
+Manuelle RG-Text Anpassung (ISS-45)
+#### 10.3.0
+Serien E-Mail Feature (ISS-7)
+#### 10.2.0
+Anpassungen Druckformat Mahnung (ISS-51)
+#### 10.1.2
+Request Worker improvements
+#### 10.1.1
+Request Worker fixes
+#### 10.1.0
+CAMT Reset Funktion
+#### 10.0.0
+SP API Request Worker
+#### 9.5.1
+Error Log 'sync_attachments_and_beratungs_table' Improvement
+#### 9.5.0
+SP API Update; TimestampMismatchError Retry Mechanismus
 #### 9.4.1
 Font Change in DF (ISS-2023-00036)
 #### 9.4.0
