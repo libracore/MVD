@@ -20,9 +20,13 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
         'abweichender_betrag': 0,
         'no_match': 0,
         'anzahl': 0,
-        'betrag': 0
+        'betrag': 0,
+        'detail_liste': []
     }
     for entry in datatrans_zahlungsfile.datatrans_entries:
+        nicht_verbuchbar_flag = False
+        # Verbuchbar
+        # -----------
         if entry.status in ['Mitglied: Match', 'Webshop: Match']:
             verbuchbare_zahlungen['anzahl'] += 1
             verbuchbare_zahlungen['betrag'] += float(entry.amount)
@@ -32,7 +36,10 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
             verbuchbare_zahlungen['gutschriften'] += 1
             verbuchbare_zahlungen['betrag'] += (float(entry.amount) * -1)
             
+        # Nicht verbuchbar
+        # -----------
         elif entry.status in ['Mitglied: No Match', 'Webshop: No Match']:
+            nicht_verbuchbar_flag = True
             nicht_verbuchbare_zahlungen['no_match'] += 1
             nicht_verbuchbare_zahlungen['anzahl'] += 1
             if float(entry.amount) > 0:
@@ -41,17 +48,28 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
                 nicht_verbuchbare_zahlungen['betrag'] += (float(entry.amount) * -1)
         
         elif entry.status in ['Mitglied: Abweichender Betrag', 'Webshop: Abweichender Betrag']:
+            nicht_verbuchbar_flag = True
             nicht_verbuchbare_zahlungen['abweichender_betrag'] += 1
             nicht_verbuchbare_zahlungen['anzahl'] += 1
             nicht_verbuchbare_zahlungen['betrag'] += float(entry.amount)
         
         elif entry.status in ['Mitglied: Doppelimport', 'Webshop: Doppelimport']:
+            nicht_verbuchbar_flag = True
             nicht_verbuchbare_zahlungen['anderes'] += 1
             nicht_verbuchbare_zahlungen['anzahl'] += 1
             if float(entry.amount) > 0:
                 nicht_verbuchbare_zahlungen['betrag'] += float(entry.amount)
             else:
                 nicht_verbuchbare_zahlungen['betrag'] += (float(entry.amount) * -1)
+        
+        if nicht_verbuchbar_flag:
+            nicht_verbuchbare_zahlungen.append({
+                'match': entry.mitglied_nr or '-',
+                'empfaenger': entry.adressblock or '-',
+                'valuta': entry.transdatetime or '-',
+                'betrag': entry.amount or '-',
+                'grund': '???'
+            })
     
     main_html = '''
         <h1>Zahlungsreport Datatrans  (Valuta bis n/a)</h1>
