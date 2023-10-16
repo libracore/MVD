@@ -115,7 +115,7 @@
                                                         </li>
                                                         <li>
                                                             <a href="https://mieterverband.ch/mv/prozesse/protected/emailConsultation.html" id="smv-email-consultation">
-                                                                E-Mail Beratung
+                                                                E-Mail-Beratung
                                                             </a>
                                                         </li>
                                                         <li>
@@ -145,7 +145,7 @@
                             <div class="col-sm-12 col-md-12 col-lg-12">
                                 <div class="logo-section">
                                     <a class="section-title" href="https://mieterverband.ch/{{ sektion }}.html" title="Startseite">
-                                       {{ sektion }}
+                                       {{ sektionsname }}
                                     </a>
                                 </div>
                             </div>
@@ -173,7 +173,13 @@
                             <main role="main" class="">
                                 <div class="form js-form">
                                     <div class="form-intro">
-                                        <h1 class="e-h1 form-title">E-Mail Beratung</h1>
+                                        <h1 class="e-h1 form-title">E-Mail-Beratung</h1>
+                                    </div>
+                                    <!-- Hinweis Beratungsformular und Adressänderungen -->
+                                    <div class="text-image text-image-mv rich-text highlight no-img">
+                                        <p>Bitte verwenden Sie dieses Formular nur für Beratungsanfragen an unsere Rechtsberater*innen.</p>
+                                        <p><a href="https://mieterverband.ch/mv/prozesse/protected/datenAendern.html">» Adressen ändern…</a>
+                                        </p>
                                     </div>
                                     <div class="form-wrapper">
                                         <form id="form0" method="post" action="" onsubmit=";" enctype="multipart/form-data">
@@ -326,12 +332,12 @@
                                                     <div class="row">
                                                         <div class="col-sm-12 col-md-4 col-lg-4">
                                                             <label for="email" class="label email required">
-                                                                E-Mail Adresse&nbsp;*
+                                                                E-Mail-Adresse&nbsp;*
                                                             </label>
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
                                                             <input type="text" name="email" id="email" value="{{ email }}" maxlength="50">
-                                                            <span class="hint">Bitte ändern, wenn die Antwort auf Ihre Frage an eine andere E-Mail Adresse geschickt werden soll.</span>
+                                                            <span class="hint">Bitte ändern, wenn die Antwort auf Ihre Frage an eine andere E-Mail-Adresse geschickt werden soll.</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -553,7 +559,7 @@
                 </section>
                 <section class="footer-bottom">
                     <div class="container-inner">
-                        <span class="copyright">© 2014  Mieterinnen- und Mieterverband</span>
+                        <span class="copyright">© 2023 Mieterinnen- und Mieterverband</span>
                         <ul>
                             <li>
                                 <a href="https://mieterverband.ch/mv/mitgliedschaft-verband/impressum.html">Impressum</a>
