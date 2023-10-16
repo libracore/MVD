@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.4.4
+Bugfix; Matching Beratung <> Mitgliedschaft
 #### 10.4.3
 Bugfix; Mitgliedschaftsjahr auf Ausweis in MVD-Drucktemplates
 #### 10.4.2
