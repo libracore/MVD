@@ -164,8 +164,8 @@ class Beratung(Document):
                                                         `name`,
                                                         `sektion_id`
                                                     FROM `tabMitgliedschaft`
-                                                    WHERE `e_mail_1` = '{email}'
-                                                    OR `e_mail_2` = '{email}'
+                                                    WHERE
+                                                    (`e_mail_1` = '{email}' OR `e_mail_2` = '{email}')
                                                     AND `status_c` = 'Regulär'""".format(email=self.raised_by), as_dict=True)
                 
                 if len(mitgliedschaften) == 1:
