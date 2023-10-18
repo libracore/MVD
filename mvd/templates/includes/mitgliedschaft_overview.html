@@ -135,6 +135,18 @@
                         {{ allgemein.wichtig|replace("\n", "<br>") }}
                     {% endif %}
                 </p>
+                {% if allgemein.mandat or allgemein.haftpflicht %}
+                    {% if allgemein.haftpflicht %}
+                        <p>
+                            <b>Haftpflicht ({{ ", ".join(allgemein.haftpflicht) }})</b>
+                        </p>
+                    {% endif %}
+                    {% if allgemein.mandat %}
+                        <p>
+                            <b>Mandat ({{ ", ".join(allgemein.mandat) }})</b>
+                        </p>
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
         {% endif %}

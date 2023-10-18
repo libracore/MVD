@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.4.5
+Bugfix; ISS-2023-00035
 #### 10.4.4
 Bugfix; Matching Beratung <> Mitgliedschaft
 #### 10.4.3
