@@ -207,6 +207,9 @@ $(document).on("page-change", function() {
     // Sperren/Freigeben von Beratungen
     check_protect_unprotect_beratung();
     
+    // Change the timeline specification, from "X days ago" to the exact date and time
+    set_timestamps();
+    
     // gewährleistung VBZ Beratung Reload
     if (!window.location.hash.includes('#vbz-beratung')) {
         if( window.localStorage ) {
@@ -225,6 +228,19 @@ $(document).on("page-change", function() {
         }
     }
 });
+
+// Change the timeline specification, from "X days ago" to the exact date and time
+function set_timestamps(){
+    if (!window.location.hash.includes('List')) {
+        setTimeout(function() {
+            // mark navbar
+            var timestamps = document.getElementsByClassName("frappe-timestamp");
+            for (var i = 0; i < timestamps.length; i++) {
+                timestamps[i].innerHTML = timestamps[i].title
+            }
+        }, 1000);
+    }
+}
 
 frappe.provide('frappe.mvd.new_mail');
 frappe.mvd.new_mail = function(cur_frm, last_email='') {

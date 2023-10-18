@@ -156,7 +156,7 @@ frappe.vbz_beratung = {
                 'async': false,
                 'callback': function(r)
                 {
-                    frappe.route_options = {'status': 'Termin vergeben', 'kontaktperson': ['in', r.message], 'hat_termine': 1}
+                    frappe.route_options = {'status': 'Termin vereinbart', 'kontaktperson': ['in', r.message], 'hat_termine': 1}
                     frappe.set_route("List", "Beratung", "List");
                 }
             });
