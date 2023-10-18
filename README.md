@@ -1,5 +1,17 @@
 ## MVD
 ### Version Log
+#### 10.7.1
+ISS-2023-00062
+#### 10.7.0
+ISS-2023-00094
+#### 10.6.1
+ISS-2023-00076
+#### 10.6.0
+Zeitstempel absolut; ISS-2023-00095
+#### 10.5.0
+Status Change; ISS-2023-00092
+#### 10.4.5
+Bugfix; ISS-2023-00035
 #### 10.4.4
 Bugfix; Matching Beratung <> Mitgliedschaft
 #### 10.4.3

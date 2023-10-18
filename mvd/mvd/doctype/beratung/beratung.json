@@ -73,7 +73,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Eingang\nOpen\nin Arbeit\nR\u00fcckfragen\nR\u00fcckfrage: Termin vereinbaren\nTermin vergeben\nClosed\nNicht-Mitglied-Abgewiesen\nZusammengef\u00fchrt",
+   "options": "Eingang\nOpen\nin Arbeit\nR\u00fcckfragen\nR\u00fcckfrage: Termin vereinbaren\nTermin vergeben\nTermin vereinbart\nClosed\nNicht-Mitglied-Abgewiesen\nZusammengef\u00fchrt",
    "reqd": 1
   },
   {
@@ -408,7 +408,7 @@
    "label": "anlage_durch_mail_check_attachments"
   }
  ],
- "modified": "2023-07-04 13:41:13.334118",
+ "modified": "2023-10-18 10:10:51.200480",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

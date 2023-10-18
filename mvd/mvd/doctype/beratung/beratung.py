@@ -34,7 +34,7 @@ class Beratung(Document):
         # MVBE-HACK
         if self.status == 'Rückfrage: Termin vereinbaren' and self.sektion_id == 'MVBE':
             if self.kontaktperson and len(self.termin) > 0:
-                self.status = 'Termin vergeben'
+                self.status = 'Termin vereinbart'
                 todos_to_remove = frappe.db.sql("""
                                                     SELECT
                                                         `name`
@@ -67,7 +67,7 @@ class Beratung(Document):
                     t.save(ignore_permissions=True)
                 frappe.get_doc({
                     'doctype': 'ToDo',
-                    'description': 'Termin vergeben.<br>Zuweisung für Beratung {0}'.format(self.name),
+                    'description': 'Termin vereinbart.<br>Zuweisung für Beratung {0}'.format(self.name),
                     'reference_type': 'Beratung',
                     'reference_name': self.name,
                     'assigned_by': frappe.session.user or 'Administrator',
@@ -132,7 +132,7 @@ class Beratung(Document):
         
         if self.kontaktperson and len(self.termin) > 0:
             if self.status in ('Eingang', 'Open'):
-                self.status = 'Termin vergeben'
+                self.status = 'Termin vereinbart'
         
         # Statistik handling -> closed date tracker
         if self.status == 'Closed':
@@ -252,7 +252,7 @@ class Beratung(Document):
             # Beratung existiert und wurde verändert
             if len(self.termin) > 0 and self.status not in ('Closed', 'Nicht-Mitglied-Abgewiesen'):
                 # Manuelle Anlage via "Termin erstellen"
-                self.status = 'Termin vergeben'
+                self.status = 'Termin vereinbart'
             else:
                 if self.status not in ('Rückfragen', 'Rückfrage: Termin vereinbaren', 'Closed', 'Nicht-Mitglied-Abgewiesen'):
                     alter_status = frappe.db.get_value("Beratung", self.name, 'status')
@@ -315,7 +315,7 @@ class Beratung(Document):
                     self.status = 'Eingang'
                     if len(self.termin) > 0:
                         # Manuelle Anlage via "Termin erstellen"
-                        self.status = 'Termin vergeben'
+                        self.status = 'Termin vereinbart'
     
     def zuweisung_default_berater_in(self):
         if self.sektion_id:
