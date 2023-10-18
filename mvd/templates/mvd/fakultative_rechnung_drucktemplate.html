@@ -26,6 +26,9 @@
         {% endif %}
     {% endif %}
 {% endif %}
+{% if druckvorlage %}
+    {% set print_language = druckvorlage.language %}
+{% endif %}
 <!-- ---------------------------------------------------------------------------------------- -->
 <!-- ENDE: Allgemeine Daten -->
 <!-- ---------------------------------------------------------------------------------------- -->
@@ -205,14 +208,14 @@
         <!-- Mitglieder Ausweis -->
         {% if seite.ausweis %}
             <div id='ausweis'>
-                <b>Mitgliederausweis {{ mitgliedschaft.bezahltes_mitgliedschaftsjahr }}</b>
+                <b>{{ _("Mitgliederausweis", print_language) }} {{ mitgliedschaft.bezahltes_mitgliedschaftsjahr }}</b>
                 <div id='ausweis-content'>
                     {% if mitgliedschaft.kundentyp == 'Unternehmen' %}{{ mitgliedschaft.firma }}<br>{% endif %}
                     {{ mitgliedschaft.vorname_1 }} {{ mitgliedschaft.nachname_1 }}
                     {% if mitgliedschaft.hat_solidarmitglied %}<br>{{ mitgliedschaft.vorname_2 }} {{ mitgliedschaft.nachname_2 }}{% endif %}
                 </div>
                 <div id="ausweis-footer">
-                        <b>Sektion:</b> {{ mitgliedschaft.sektion_id }}<span id="ausweis-footer-placeholder">...............</span><b>Mitglied:</b> {{ mitgliedschaft.mitglied_nr }}
+                        <b>{{ _("Sektion", print_language) }}:</b> {{ mitgliedschaft.sektion_id }}<span id="ausweis-footer-placeholder">...............</span><b>{{ _("Mitglied", print_language) }}:</b> {{ mitgliedschaft.mitglied_nr }}
                 </div>
             </div>
         {% endif %}
