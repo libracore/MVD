@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.6.0
+Zeitstempel absolut; ISS-2023-00095
 #### 10.5.0
 Status Change; ISS-2023-00092
 #### 10.4.5
