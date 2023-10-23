@@ -1,0 +1,97 @@
+<mxfile host="Electron" modified="2023-10-23T11:32:40.582Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.0.2 Chrome/114.0.5735.289 Electron/25.8.4 Safari/537.36" etag="fxz3mflIF2RrJd6DV1Ib" version="22.0.2" type="device">
+  <diagram name="Seite-1" id="VbslcjGJmoW7QYrER_-2">
+    <mxGraphModel dx="1234" dy="995" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="vTTedFNQrRN53l3e3OFT-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="P67zAp-eeaC6jsMLET4H-1" target="P67zAp-eeaC6jsMLET4H-3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-1" value="Mail Eingang" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#d80073;fontColor=#ffffff;strokeColor=#A50040;" parent="1" vertex="1">
+          <mxGeometry x="230" y="110" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-2" value="E-Mail-Konto (ERPNext Extern)" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;position2=0;fillColor=#d80073;fontColor=#ffffff;strokeColor=#A50040;" parent="1" vertex="1">
+          <mxGeometry x="360" y="79" width="120" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="vTTedFNQrRN53l3e3OFT-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="P67zAp-eeaC6jsMLET4H-3" target="P67zAp-eeaC6jsMLET4H-8" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-3" value="Abrufen aller ungelesenen Mails aus Mailaccounts" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" parent="1" vertex="1">
+          <mxGeometry x="230" y="210" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-12" value="Ja" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="P67zAp-eeaC6jsMLET4H-4" target="P67zAp-eeaC6jsMLET4H-5" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-13" value="Nein" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="P67zAp-eeaC6jsMLET4H-4" target="P67zAp-eeaC6jsMLET4H-6" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-4" value="Ist Mail eine Antwort?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" parent="1" vertex="1">
+          <mxGeometry x="250" y="430" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-5" value="Zu bestehender Beratung hinzufügen" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" parent="1" vertex="1">
+          <mxGeometry x="381" y="440" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="P67zAp-eeaC6jsMLET4H-6" target="P67zAp-eeaC6jsMLET4H-15" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-6" value="Neue Beratung anlegen" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" parent="1" vertex="1">
+          <mxGeometry x="230" y="550" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-7" value="Mail-Konto (Incoming) in ERPNext" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;position2=0;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" parent="1" vertex="1">
+          <mxGeometry x="360" y="190" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-10" value="Nein" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="P67zAp-eeaC6jsMLET4H-8" target="P67zAp-eeaC6jsMLET4H-9" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-11" value="Ja" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="P67zAp-eeaC6jsMLET4H-8" target="P67zAp-eeaC6jsMLET4H-4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-8" value="&quot;Append-To&quot; Mail-Konto?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" parent="1" vertex="1">
+          <mxGeometry x="250" y="310" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-9" value="Anlage Mail als Communication" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" parent="1" vertex="1">
+          <mxGeometry x="381" y="320" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="P67zAp-eeaC6jsMLET4H-15" target="P67zAp-eeaC6jsMLET4H-16" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-15" value="Anlage Mail als Communication" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" parent="1" vertex="1">
+          <mxGeometry x="230" y="650" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-21" value="Nein" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="P67zAp-eeaC6jsMLET4H-16" target="P67zAp-eeaC6jsMLET4H-17" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-22" value="Ja" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="P67zAp-eeaC6jsMLET4H-16" target="P67zAp-eeaC6jsMLET4H-18" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-16" value="1. Mail zur Beratung?" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="401" y="640" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-17" value="Markieren der Beratung als &quot;Ungelesen&quot;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="1" vertex="1">
+          <mxGeometry x="530" y="650" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-23" value="Nein" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="P67zAp-eeaC6jsMLET4H-18" target="P67zAp-eeaC6jsMLET4H-17" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-25" value="Ja" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="P67zAp-eeaC6jsMLET4H-18" target="P67zAp-eeaC6jsMLET4H-24" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-18" value="Beratungs-Anlage durch dieses Mail?" style="rhombus;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="401" y="760" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="P67zAp-eeaC6jsMLET4H-24" value="Ergänzung der Beratung mit folgenden Infos aus E-Mail:&lt;br&gt;- Notiz = Mailinhalt&lt;br&gt;- Sektion = Sektion aus E-Mail-Konto (Wenn Sektion in Beratung leer)&lt;br&gt;- raised_by_name = Absender Name aus E-Mail&lt;br&gt;- raised_by = Absender-Adresse aus Mail" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="291.5" y="876" width="299" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="EMiL2Q7muS3NzvGM_GIw-1" value="Extern" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d80073;fontColor=#ffffff;strokeColor=#A50040;" parent="1" vertex="1">
+          <mxGeometry x="591" y="94" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="EMiL2Q7muS3NzvGM_GIw-2" value="Frappe Framework" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;" parent="1" vertex="1">
+          <mxGeometry x="591" y="164" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="EMiL2Q7muS3NzvGM_GIw-3" value="beratung.py" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="590.5" y="234" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

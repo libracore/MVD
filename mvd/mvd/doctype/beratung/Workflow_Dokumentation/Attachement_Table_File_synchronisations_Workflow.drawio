@@ -1,0 +1,64 @@
+<mxfile host="Electron" modified="2023-10-23T14:24:13.482Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.0.2 Chrome/114.0.5735.289 Electron/25.8.4 Safari/537.36" etag="P2bHTsDYjTpvHqOaCfoE" version="22.0.2" type="device">
+  <diagram name="Seite-1" id="0maRsmd5nw7pFS6Q1xa_">
+    <mxGraphModel dx="1114" dy="995" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="XsffGIPSWRkVv7n9pCAp-1" target="XsffGIPSWRkVv7n9pCAp-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-1" value="Beratung:&lt;br&gt;on_update" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-2" value="sync_attachments_and_beratungs_table" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="36" y="250" width="290" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="XsffGIPSWRkVv7n9pCAp-3" target="XsffGIPSWRkVv7n9pCAp-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-3" value="File:&lt;br&gt;after_delete" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="40" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="XsffGIPSWRkVv7n9pCAp-4" target="XsffGIPSWRkVv7n9pCAp-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-4" value="File:&lt;br&gt;after_insert" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="41" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-5" value="sync_mail_attachements" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="250" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-9" value="" style="endArrow=none;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="40" y="360" as="sourcePoint" />
+            <mxPoint x="560" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-10" value="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="36" y="250" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-13" value="2" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="340" y="250" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-14" value="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="40" y="403" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-15" value="Diese Methode:&lt;br&gt;&lt;br&gt;- Entfernt File-Datensätze wenn ein oder mehrere File(s) der Tabelle &quot;Dokumente&quot; einer Beratung entfernt werden&lt;br&gt;&lt;br&gt;- Entfernt eine oder mehrere Zeilen in der/den Tabelle(n) &quot;Dokumente&quot; in einer oder mehreren Beratungen wenn ein dazugehöriger File-Datensatz gelöscht wird." style="whiteSpace=wrap;html=1;aspect=fixed;align=left;" vertex="1" parent="1">
+          <mxGeometry x="127" y="400" width="190" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=-0.005;entryY=0.121;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="XsffGIPSWRkVv7n9pCAp-14" target="XsffGIPSWRkVv7n9pCAp-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-18" value="2" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="40" y="623" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-19" value="Diese Methode:&lt;br&gt;&lt;br&gt;- Dupliziert File-Datensätze wenn die Originale zu einem Communication-Record gehören Welcher mit einer Beratung verknüpft ist&lt;br&gt;&lt;br&gt;- Erstellt eine Zeile in der Tabelle &quot;Dokumente&quot; der Beratung welche mit dem jeweiligen File-Datensatz verknüpft ist" style="whiteSpace=wrap;html=1;aspect=fixed;align=left;" vertex="1" parent="1">
+          <mxGeometry x="127" y="620" width="190" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="XsffGIPSWRkVv7n9pCAp-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=-0.005;entryY=0.121;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="XsffGIPSWRkVv7n9pCAp-18" target="XsffGIPSWRkVv7n9pCAp-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
