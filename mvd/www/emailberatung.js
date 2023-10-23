@@ -186,6 +186,9 @@ function upload_files(beratung, key, secret, loop=1) {
             upload_file.append('is_private', 1);
             upload_file.append('doctype', 'Beratung');
             upload_file.append('docname', beratung);
+            upload_file.append('folder', 'Home/Attachments');
+            upload_file.append('document_date', $("#upload_files_dateupload_files_date_" + String(loop)).val());
+            
             fetch('/api/method/upload_file', {
                 headers: {
                     'Authorization': 'token ' + key + ':' + secret

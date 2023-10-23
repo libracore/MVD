@@ -729,25 +729,6 @@ def create_neue_beratung(von, bis, art, ort, berater_in, notiz=None, beratungska
     
     return beratung.name
 
-''' obsolet, kann später entfernt werden'''
-# ~ def relink_attachements(communication, beratung):
-    # ~ files = frappe.db.sql("""SELECT `name`, `file_url`, `file_name` FROM `tabFile` WHERE `attached_to_doctype` = 'Communication' AND `attached_to_name` = '{0}'""".format(communication), as_dict=True)
-    
-    # ~ # relink file from communication to beratung
-    # ~ for file_record in files:
-        # ~ frappe.db.set_value("File", file_record.name, 'attached_to_doctype', "Beratung")
-        # ~ frappe.db.set_value("File", file_record.name, 'attached_to_name', beratung)
-    
-    # ~ # add files to dokumente table in beratung
-    # ~ beratung = frappe.get_doc("Beratung", beratung)
-    # ~ if len(files) > 0:
-        # ~ for attchmnt in files:
-            # ~ row = beratung.append('dokumente', {})
-            # ~ row.file = attchmnt.file_url
-            # ~ row.document_type = 'Sonstiges'
-            # ~ row.filename = attchmnt.file_name
-        # ~ beratung.save()
-
 @frappe.whitelist()
 def admin_todo(beratung, sektion_id=None, description=None, datum=None):
     try:
@@ -766,38 +747,6 @@ def admin_todo(beratung, sektion_id=None, description=None, datum=None):
         return
     except Exception as err:
         frappe.throw("Da ist etwas schief gelaufen.<br>{0}".format(str(err)))
-
-'''Obsolet, kann später entfernt werden '''
-# ~ def sync_attachements_after_anlage_durch_mail(self, event):
-    # ~ if int(self.anlage_durch_mail_check_attachments) == 1:
-        # ~ attachment_list = []
-        # ~ communications = frappe.db.sql("""SELECT `name` FROM `tabCommunication` WHERE `reference_doctype` = 'Beratung' AND `reference_name` = '{0}' AND `sent_or_received` = 'Received'""".format(self.name), as_dict=True)
-        # ~ for communication in communications:
-            # ~ c = communication.name
-            # ~ attachements = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Communication' AND `attached_to_name` = '{0}'""".format(c), as_dict=True)
-            # ~ for attachment in attachements:
-                # ~ a = frappe.get_doc("File", attachment.name)
-                # ~ attachment_list.append({
-                    # ~ 'file': a.file_url,
-                    # ~ 'document_type': 'Sonstiges',
-                    # ~ 'filename': a.file_name
-                # ~ })
-                # ~ from copy import deepcopy
-                # ~ new_file = deepcopy(a)
-                # ~ a.content = None
-                # ~ a.attached_to_doctype = 'Beratung'
-                # ~ a.attached_to_name = self.name
-                # ~ a.insert(ignore_permissions=True)
-        
-        # ~ beratung = frappe.get_doc("Beratung", self.name)
-        # ~ if len(attachment_list) > 0:
-            # ~ for attchmnt in attachment_list:
-                # ~ row = beratung.append('dokumente', {})
-                # ~ row.file = attchmnt['file']
-                # ~ row.document_type = attchmnt['document_type']
-                # ~ row.filename = attchmnt['filename']
-        # ~ beratung.anlage_durch_mail_check_attachments = 0
-        # ~ beratung.save()
 
 @frappe.whitelist()
 def remove_comments(comments):
@@ -820,13 +769,6 @@ def sync_mail_attachements(file_record, event):
                 new_file.attached_to_doctype = 'Beratung'
                 new_file.attached_to_name = beratung
                 new_file.insert(ignore_permissions=True)
-                # create new file row in beratung
-                b = frappe.get_doc("Beratung", beratung)
-                row = b.append('dokumente', {})
-                row.file = new_file.file_url
-                row.document_type = 'Sonstiges'
-                row.filename = new_file.file_name
-                b.save()
     elif file_record.attached_to_doctype == 'Beratung':
         if file_record.folder == "Home/Attachments":
             # siehe auch sync_attachments_and_beratungs_table
@@ -880,7 +822,7 @@ def sync_attachments_and_beratungs_table(doc, event):
                 frappe.log_error("Error:\n{0}\n\nDocument:\n{1}".format(err, str(doc.as_dict())), "sync_attachments_and_beratungs_table")
                 pass
     if doc.doctype == 'File':
-        # Diese Funktion synchrinisiert nur das entfernen, für die Anlage siehe sync_mail_attachements
+        # Diese Funktion synchronisiert nur das entfernen, für die Anlage siehe sync_mail_attachements
         if doc.attached_to_doctype == 'Beratung':
             vorhanden = frappe.db.sql("""SELECT `name` FROM `tabBeratungsdateien` WHERE `file` = '{fileurl}' AND `parent` = '{beratung}'""".format(fileurl=doc.file_url, \
                 beratung=doc.attached_to_name), as_dict=True)
