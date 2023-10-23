@@ -233,6 +233,11 @@ def new_file_to_beratung(**kwargs):
                     man_document_type = args['document_type']
             try:
                 file_path = '/private/files/{0}'.format(args['filename'])
+                existing_row = frappe.db.sql("""SELECT `name` FROM `tabBeratungsdateien` WHERE `parent` = '{0}' AND `file` = '{1}'""".format(args['beratung'], file_path), as_dict=True)
+                if len(existing_row) > 0:
+                    row_to_delete = frappe.get_doc("Beratungsdateien", existing_row[0].name)
+                    row_to_delete.delete()
+                
                 new_file = frappe.get_doc({
                     'doctype': 'Beratungsdateien',
                     'parentfield': 'dokumente',
