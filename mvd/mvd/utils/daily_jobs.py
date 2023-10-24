@@ -8,6 +8,7 @@ from frappe.utils.data import today, getdate, now
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_ampelfarbe
 from mvd.mvd.doctype.region.region import _regionen_zuteilung
 from frappe.utils.background_jobs import enqueue
+from frappe.utils import cint
 
 def set_inaktiv():
     mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Ausschluss', 'Wegzug') OR (`status_c` = 'Regulär' AND `kuendigung` IS NOT NULL)""", as_dict=True)
@@ -129,7 +130,7 @@ def reset_geschenk_mitgliedschaften():
         """, as_dict=True)
     for mitgliedschaft in mitgliedschaften:
         ms = frappe.get_doc("Mitgliedschaft", mitgliedschaft.mv_mitgliedschaft)
-        if not ms.validierung_notwendig:
+        if not ms.validierung_notwendig and cint(ms.ist_einmalige_schenkung) == 1:
             # erstelle status change log und entferne Mitgliedschafts CBs
             change_log_row = ms.append('status_change', {})
             change_log_row.datum = today()
