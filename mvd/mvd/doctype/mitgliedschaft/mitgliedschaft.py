@@ -15,6 +15,7 @@ from frappe.utils.pdf import get_file_data_from_writer
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen, replace_mv_keywords
 from frappe import _
 import datetime
+from frappe.utils import cint
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
@@ -40,7 +41,7 @@ class Mitgliedschaft(Document):
             self.handling_kontakt_adresse_kunde()
             
             # entferne "Postfach" aus Strasse falls vorhanden
-            if int(self.postfach) == 1 and self.strasse == 'Postfach':
+            if cint(self.postfach) == 1 and self.strasse == 'Postfach':
                 self.strasse = ''
             
             # Briefanrede
@@ -75,14 +76,14 @@ class Mitgliedschaft(Document):
             if self.zuzug_von:
                 # mit Massenlauf-Vormerkung
                 if self.zuzug_massendruck:
-                    if int(self.zuzug_massendruck) == 1:
+                    if cint(self.zuzug_massendruck) == 1:
                         if not self.zuzugs_rechnung and not self.zuzug_korrespondenz:
                             if self.kunde_mitglied:
                                 self.zuzug_massenlauf_korrespondenz()
                                 self.zuzug_durch_sp = 0
                 # ohne Massenlauf-Vormerkung
                 elif self.zuzug_durch_sp:
-                    if int(self.zuzug_durch_sp) == 1:
+                    if cint(self.zuzug_durch_sp) == 1:
                         if self.kunde_mitglied:
                             self.zuzug_massenlauf_korrespondenz()
                             self.zuzug_durch_sp = 0
@@ -95,9 +96,9 @@ class Mitgliedschaft(Document):
             
             # schliesse offene abreits backlogs
             close_open_validations(self.name, 'Daten Validieren')
-            if not int(self.interessent_innenbrief_mit_ez) == 1:
+            if not cint(self.interessent_innenbrief_mit_ez) == 1:
                     close_open_validations(self.name, 'Interessent*Innenbrief mit EZ')
-            if not int(self.anmeldung_mit_ez) == 1:
+            if not cint(self.anmeldung_mit_ez) == 1:
                     close_open_validations(self.name, 'Anmeldung mit EZ')
             
             # beziehe mitglied_nr wenn umwandlung von Interessent*in
@@ -110,7 +111,7 @@ class Mitgliedschaft(Document):
                 self.online_haftpflicht = '0'
             
             # Regions-Zuordnung anhand PLZ
-            if not int(self.region_manuell) == 1:
+            if not cint(self.region_manuell) == 1:
                 self.region = self.get_region()
         
             # Mahnstopp in Rechnungen setzen
@@ -216,9 +217,9 @@ class Mitgliedschaft(Document):
     def zuzug_massenlauf_korrespondenz(self):
         # erstelle ggf. neue Rechnung
         mit_rechnung = False
-        if self.bezahltes_mitgliedschaftsjahr < int(now().split("-")[0]):
+        if self.bezahltes_mitgliedschaftsjahr < cint(now().split("-")[0]):
             if self.naechstes_jahr_geschuldet == 1:
-                mit_rechnung = create_mitgliedschaftsrechnung(self.name, mitgliedschaft_obj=self, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=self.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=self.mitgliedtyp_c, reduzierte_mitgliedschaft=self.reduzierte_mitgliedschaft, language=self.language)['default_druckvorlage'])
+                mit_rechnung = create_mitgliedschaftsrechnung(self.name, mitgliedschaft_obj=self, jahr=cint(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=self.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=self.mitgliedtyp_c, reduzierte_mitgliedschaft=self.reduzierte_mitgliedschaft, language=self.language)['default_druckvorlage'])
         
         
         if mit_rechnung:
@@ -299,7 +300,7 @@ class Mitgliedschaft(Document):
             self.rg_adresse = ''
     
     def check_preisregel(self):
-        if int(self.reduzierte_mitgliedschaft) == 1:
+        if cint(self.reduzierte_mitgliedschaft) == 1:
             if not self.existing_preisregel():
                 self.erstelle_preisregel()
             else:
@@ -311,7 +312,7 @@ class Mitgliedschaft(Document):
     def existing_preisregel(self):
         qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabPricing Rule`
                                 WHERE `name` = 'Reduzierung {mitglied_id}'""".format(mitglied_id=str(self.mitglied_id)), as_dict=True)[0].qty
-        if int(qty) > 0:
+        if cint(qty) > 0:
             return True
         else:
             return False
@@ -387,7 +388,7 @@ class Mitgliedschaft(Document):
                                 ORDER BY `mitgliedschafts_jahr` DESC""".format(mvm=self.name), as_dict=True)
         if len(sinvs) > 0:
             sinv = sinvs[0]
-            sinv_year = int(sinv.mitgliedschafts_jahr)
+            sinv_year = cint(sinv.mitgliedschafts_jahr)
             if sinv.is_pos == 1:
                 # Fallback wenn sinv.mitgliedschafts_jahr == 0
                 if sinv_year < 1:
@@ -407,8 +408,8 @@ class Mitgliedschaft(Document):
             if self.bezahltes_mitgliedschaftsjahr < sinv_year:
                 self.bezahltes_mitgliedschaftsjahr = sinv_year
         
-        current_year = int(now().split("-")[0])
-        if int(self.zahlung_mitgliedschaft) > current_year:
+        current_year = cint(now().split("-")[0])
+        if cint(self.zahlung_mitgliedschaft) > current_year:
             self.naechstes_jahr_geschuldet = '0'
         else:
             self.naechstes_jahr_geschuldet = 1
@@ -504,12 +505,12 @@ class Mitgliedschaft(Document):
     
     def check_folgejahr_regelung(self):
         # prüfe ob Folgejahr Regelung der Sektion aktiviert ist:
-        if int(frappe.get_value("Sektion", self.sektion_id, "folgejahr_regelung")) == 1:
+        if cint(frappe.get_value("Sektion", self.sektion_id, "folgejahr_regelung")) == 1:
             if self.datum_zahlung_mitgliedschaft:
             # prüfe Mitgliedschaftsjahr
                 datum_zahlung_mitgliedschaft = getdate(self.datum_zahlung_mitgliedschaft)
-                jahr_datum_zahlung_mitgliedschaft = int(datum_zahlung_mitgliedschaft.strftime("%Y"))
-                bezahltes_mitgliedschaftsjahr = int(self.bezahltes_mitgliedschaftsjahr)
+                jahr_datum_zahlung_mitgliedschaft = cint(datum_zahlung_mitgliedschaft.strftime("%Y"))
+                bezahltes_mitgliedschaftsjahr = cint(self.bezahltes_mitgliedschaftsjahr)
                 
                 if bezahltes_mitgliedschaftsjahr == jahr_datum_zahlung_mitgliedschaft:
                     current_year = str(now().split("-")[0])
@@ -519,8 +520,8 @@ class Mitgliedschaft(Document):
             if self.datum_hv_zahlung:
                 # prüfe HV-Jahr
                 datum_hv_zahlung = getdate(self.datum_hv_zahlung)
-                jahr_datum_hv_zahlung = int(datum_hv_zahlung.strftime("%Y"))
-                zahlung_hv = int(self.zahlung_hv)
+                jahr_datum_hv_zahlung = cint(datum_hv_zahlung.strftime("%Y"))
+                zahlung_hv = cint(self.zahlung_hv)
                 
                 if zahlung_hv == jahr_datum_hv_zahlung:
                     current_year = str(now().split("-")[0])
@@ -674,7 +675,7 @@ def get_adressblock(mitgliedschaft):
                     adressblock += str(mitgliedschaft.nummer_zu) or ''
             adressblock += '\n'
         
-        if int(mitgliedschaft.postfach) == 1:
+        if cint(mitgliedschaft.postfach) == 1:
             adressblock += 'Postfach '
             adressblock += str(mitgliedschaft.postfach_nummer) or ''
             adressblock += '\n'
@@ -717,7 +718,7 @@ def get_adressblock(mitgliedschaft):
                     adressblock += str(mitgliedschaft.nummer_zu) or ''
             adressblock += '\n'
         
-        if int(mitgliedschaft.postfach) == 1:
+        if cint(mitgliedschaft.postfach) == 1:
             adressblock += 'Postfach '
             adressblock += str(mitgliedschaft.postfach_nummer) or ''
             adressblock += '\n'
@@ -735,10 +736,10 @@ def get_adressblock(mitgliedschaft):
 def get_rg_adressblock(mitgliedschaft):
     adressblock = ''
     if mitgliedschaft.doctype == 'Mitgliedschaft':
-        if int(mitgliedschaft.abweichende_rechnungsadresse) != 1:
+        if cint(mitgliedschaft.abweichende_rechnungsadresse) != 1:
             return get_adressblock(mitgliedschaft)
         
-        if int(mitgliedschaft.unabhaengiger_debitor) != 1:
+        if cint(mitgliedschaft.unabhaengiger_debitor) != 1:
             if mitgliedschaft.kundentyp == 'Unternehmen':
                 if mitgliedschaft.firma:
                     adressblock += mitgliedschaft.firma or ''
@@ -790,7 +791,7 @@ def get_rg_adressblock(mitgliedschaft):
                 adressblock += str(mitgliedschaft.rg_nummer_zu) or ''
         adressblock += '\n'
         
-        if int(mitgliedschaft.rg_postfach) == 1:
+        if cint(mitgliedschaft.rg_postfach) == 1:
             adressblock += 'Postfach '
             adressblock += str(mitgliedschaft.rg_postfach_nummer) or ''
             adressblock += '\n'
@@ -805,10 +806,10 @@ def get_rg_adressblock(mitgliedschaft):
         
         return adressblock
     elif mitgliedschaft.doctype == 'Kunden':
-        if int(mitgliedschaft.abweichende_rechnungsadresse) != 1:
+        if cint(mitgliedschaft.abweichende_rechnungsadresse) != 1:
             return get_adressblock(mitgliedschaft)
         
-        if int(mitgliedschaft.unabhaengiger_debitor) != 1:
+        if cint(mitgliedschaft.unabhaengiger_debitor) != 1:
             if mitgliedschaft.kundentyp == 'Unternehmen':
                 if mitgliedschaft.firma:
                     adressblock += mitgliedschaft.firma or ''
@@ -851,7 +852,7 @@ def get_rg_adressblock(mitgliedschaft):
                 adressblock += str(mitgliedschaft.rg_nummer_zu) or ''
         adressblock += '\n'
         
-        if int(mitgliedschaft.rg_postfach) == 1:
+        if cint(mitgliedschaft.rg_postfach) == 1:
             adressblock += 'Postfach '
             adressblock += str(mitgliedschaft.rg_postfach_nummer) or ''
             adressblock += '\n'
@@ -1847,7 +1848,7 @@ def get_uebersicht_html(name):
             'rg_kontakt': rg_kontakt,
             'rg_adresse': rg_adresse,
             'rg_sep': rg_sep,
-            'col_qty': int(12 / col_qty),
+            'col_qty': cint(12 / col_qty),
             'allgemein': {
                 'status': mitgliedschaft.status_c,
                 'eintritt': eintritt,
@@ -1864,7 +1865,7 @@ def get_uebersicht_html(name):
                 'hv_status': hv_status,
                 'wichtig': mitgliedschaft.wichtig,
                 'kuendigung': kuendigung,
-                'validierung': int(mitgliedschaft.validierung_notwendig),
+                'validierung': cint(mitgliedschaft.validierung_notwendig),
                 'tel_g_1': mitgliedschaft.tel_g_1 or '',
                 'tel_g_2': mitgliedschaft.tel_g_2 or '',
                 'rg_tel_g': mitgliedschaft.rg_tel_g or '',
@@ -1934,7 +1935,7 @@ def get_uebersicht_html(name):
             }
         
         # Solidarmitglied
-        if int(mitgliedschaft.hat_solidarmitglied) == 1:
+        if cint(mitgliedschaft.hat_solidarmitglied) == 1:
             solidarmitglied = {
                 'anrede': mitgliedschaft.anrede_2 if mitgliedschaft.anrede_2 else False,
                 'nachname': mitgliedschaft.nachname_2,
@@ -1952,14 +1953,14 @@ def get_uebersicht_html(name):
             'strasse': mitgliedschaft.strasse if mitgliedschaft.strasse else False,
             'nummer': mitgliedschaft.nummer if mitgliedschaft.nummer else False,
             'nummer_zu': mitgliedschaft.nummer_zu if mitgliedschaft.nummer_zu else False,
-            'postfach': 1 if int(mitgliedschaft.postfach) == 1 else 0,
+            'postfach': 1 if cint(mitgliedschaft.postfach) == 1 else 0,
             'postfach_nummer': mitgliedschaft.postfach_nummer if mitgliedschaft.postfach_nummer else False,
             'plz': mitgliedschaft.plz,
             'ort': mitgliedschaft.ort
         }
         
         # Objektadresse
-        if int(mitgliedschaft.abweichende_objektadresse) == 1:
+        if cint(mitgliedschaft.abweichende_objektadresse) == 1:
             objektadresse = {
                 'zusatz': mitgliedschaft.objekt_zusatz_adresse if mitgliedschaft.objekt_zusatz_adresse else False,
                 'strasse': mitgliedschaft.objekt_strasse if mitgliedschaft.objekt_strasse else False,
@@ -1973,13 +1974,13 @@ def get_uebersicht_html(name):
         col_qty += 1
         
         # Rechnungsadresse
-        if int(mitgliedschaft.abweichende_rechnungsadresse) == 1:
+        if cint(mitgliedschaft.abweichende_rechnungsadresse) == 1:
             rechnungsadresse = {
                 'zusatz': mitgliedschaft.rg_zusatz_adresse if mitgliedschaft.rg_zusatz_adresse else False,
                 'strasse': mitgliedschaft.rg_strasse if mitgliedschaft.rg_strasse else False,
                 'nummer': mitgliedschaft.rg_nummer if mitgliedschaft.rg_nummer else False,
                 'nummer_zu': mitgliedschaft.rg_nummer_zu if mitgliedschaft.rg_nummer_zu else False,
-                'postfach': 1 if int(mitgliedschaft.rg_postfach) == 1 else 0,
+                'postfach': 1 if cint(mitgliedschaft.rg_postfach) == 1 else 0,
                 'postfach_nummer': mitgliedschaft.rg_postfach_nummer if mitgliedschaft.rg_postfach_nummer else False,
                 'plz': mitgliedschaft.rg_plz,
                 'ort': mitgliedschaft.rg_ort
@@ -1987,7 +1988,7 @@ def get_uebersicht_html(name):
             col_qty += 1
         
         # Rechnungsempfänger
-        if int(mitgliedschaft.unabhaengiger_debitor) == 1:
+        if cint(mitgliedschaft.unabhaengiger_debitor) == 1:
             if mitgliedschaft.rg_kundentyp == 'Einzelperson':
                 rechnungsempfaenger = {
                     'firma': False,
@@ -2014,7 +2015,7 @@ def get_uebersicht_html(name):
                 }
         
         data = {
-            'col_qty': int(12 / col_qty),
+            'col_qty': cint(12 / col_qty),
             'allgemein': allgemein,
             'mitglied': mitglied,
             'solidarmitglied': solidarmitglied,
@@ -2033,7 +2034,7 @@ def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     
     if mitgliedschaft.doctype == 'Kunden':
-        if int(mitgliedschaft.unabhaengiger_debitor) == 1:
+        if cint(mitgliedschaft.unabhaengiger_debitor) == 1:
             # Rechnungs Anrede
             if mitgliedschaft.rg_anrede == 'Herr':
                 return _('Sehr geehrter Herr {nachname}', mitgliedschaft.language or 'de').format(nachname=mitgliedschaft.rg_nachname)
@@ -2110,7 +2111,7 @@ def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
             else:
                 return _('Guten Tag {vorname} {nachname}', mitgliedschaft.language or 'de').format(vorname=mitgliedschaft.vorname_1 or '', nachname=mitgliedschaft.nachname_1)
         else:
-            if int(mitgliedschaft.unabhaengiger_debitor) == 1:
+            if cint(mitgliedschaft.unabhaengiger_debitor) == 1:
                 # Rechnungs Anrede
                 if mitgliedschaft.rg_anrede == 'Herr':
                     return _('Sehr geehrter Herr {nachname}', mitgliedschaft.language or 'de').format(nachname=mitgliedschaft.rg_nachname)
@@ -2125,7 +2126,7 @@ def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
 def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
     if str(get_sektion_code(neue_sektion)) not in ('ZH'):
         # Pseudo Sektion handling
-        if int(frappe.db.get_value("Sektion", neue_sektion, "pseudo_sektion")) == 1:
+        if cint(frappe.db.get_value("Sektion", neue_sektion, "pseudo_sektion")) == 1:
             return 1
         
         try:
@@ -2168,9 +2169,9 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             
             # erstelle ggf. neue Rechnung
             mit_rechnung = False
-            if new_mitgliedschaft.bezahltes_mitgliedschaftsjahr < int(now().split("-")[0]):
+            if new_mitgliedschaft.bezahltes_mitgliedschaftsjahr < cint(now().split("-")[0]):
                 if new_mitgliedschaft.naechstes_jahr_geschuldet == 1:
-                    mit_rechnung = create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug mit EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
+                    mit_rechnung = create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=cint(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug mit EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
             
             # markiere neue Mitgliedschaft als zu validieren
             new_mitgliedschaft = frappe.get_doc("Mitgliedschaft", new_mitgliedschaft.name)
@@ -2250,7 +2251,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         address = mitgliedschaft.rg_adresse
         contact = mitgliedschaft.rg_kontakt
     
-    if not eigene_items or int(eigene_items) == 0:
+    if not eigene_items or cint(eigene_items) == 0:
         # finde passenden Artikel
         if mitgliedschaft.mitgliedtyp_c == 'Privat':
             item = [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center}]
@@ -2264,10 +2265,10 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
                             {"item_code": sektion.mitgliedschafts_artikel_gratis,"qty": 1, "cost_center": company.cost_center},
                             {"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center}
                         ]
-                        jahr = int(getdate(today()).strftime("%Y")) + 1
+                        jahr = cint(getdate(today()).strftime("%Y")) + 1
             
             # prüfe Beitrittsgebühr
-            if int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) == 0 and sektion.mitgliedschafts_artikel_beitritt:
+            if cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) == 0 and sektion.mitgliedschafts_artikel_beitritt:
                 item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt,"qty": 1, "cost_center": company.cost_center})
         
         if mitgliedschaft.mitgliedtyp_c == 'Geschäft':
@@ -2279,9 +2280,9 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
                     {"item_code": sektion.mitgliedschafts_artikel_gratis,"qty": 1, "cost_center": company.cost_center},
                     {"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center}
                 ]
-                jahr = int(getdate(today()).strftime("%Y")) + 1
+                jahr = cint(getdate(today()).strftime("%Y")) + 1
             # prüfe Beitrittsgebühr
-            if int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) == 0 and sektion.mitgliedschafts_artikel_beitritt_geschaeft:
+            if cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) == 0 and sektion.mitgliedschafts_artikel_beitritt_geschaeft:
                 item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt_geschaeft,"qty": 1, "cost_center": company.cost_center})
     else:
         rechnungs_artikel = json.loads(rechnungs_artikel)
@@ -2306,7 +2307,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         "customer": customer,
         "customer_address": address,
         "contact_person": contact,
-        'mitgliedschafts_jahr': jahr or int(getdate(today()).strftime("%Y")),
+        'mitgliedschafts_jahr': jahr or cint(getdate(today()).strftime("%Y")),
         'due_date': add_days(today(), 30),
         'debit_to': company.default_receivable_account,
         'sektions_code': str(sektion.sektion_id) or '00',
@@ -2343,7 +2344,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         sinv.save(ignore_permissions=True)
     
     if inkl_hv and mitgliedschaft.mitgliedtyp_c != 'Geschäft':
-        bezugsjahr = jahr or int(getdate(today()).strftime("%Y"))
+        bezugsjahr = jahr or cint(getdate(today()).strftime("%Y"))
         fr_rechnung = create_hv_fr(mitgliedschaft=mitgliedschaft.name, sales_invoice=sinv.name, bezahlt=hv_bar_bezahlt, bezugsjahr=bezugsjahr)
     
     if attach_as_pdf:
@@ -2352,7 +2353,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         
         # erstellung Rechnungs PDF
         output = PdfFileWriter()
-        output = frappe.get_print("Sales Invoice", sinv.name, 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)
+        output = frappe.get_prcint("Sales Invoice", sinv.name, 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)
         
         file_name = "{sinv}_{datetime}".format(sinv=sinv.name, datetime=now().replace(" ", "_"))
         file_name = file_name.split(".")[0]
@@ -2409,7 +2410,7 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druck
     
     # erstellung Kündigungs PDF
     output = PdfFileWriter()
-    output = frappe.get_print("Mitgliedschaft", mitgliedschaft.name, 'Kündigungsbestätigung', as_pdf = True, output = output)
+    output = frappe.get_prcint("Mitgliedschaft", mitgliedschaft.name, 'Kündigungsbestätigung', as_pdf = True, output = output)
     
     pdf = frappe.utils.pdf.get_file_data_from_writer(output)
     file_name = "Kündigungsbestätigung_{mitgliedschaft}_{datetime}.pdf".format(mitgliedschaft=mitgliedschaft.name, datetime=now().replace(" ", "_"))
@@ -2578,9 +2579,9 @@ def get_mitgliedtyp_c(mitgliedtyp_c):
         return False
 
 def get_inkl_hv(inkl_hv):
-    curr_year = int(getdate().strftime("%Y"))
+    curr_year = cint(getdate().strftime("%Y"))
     if inkl_hv:
-        if int(inkl_hv) >= curr_year:
+        if cint(inkl_hv) >= curr_year:
             return 1
         else:
             return 0
@@ -2622,7 +2623,7 @@ def mvm_mitglieder_nummer_update(mitgliedId):
 
 def send_mvm_to_sp(mitgliedschaft, update):
     if str(get_sektion_code(mitgliedschaft.sektion_id)) not in ('ZH', 'M+W-Abo'):
-        if not int(frappe.db.get_single_value('Service Plattform API', 'queue')) == 1:
+        if not cint(frappe.db.get_single_value('Service Plattform API', 'queue')) == 1:
             from mvd.mvd.service_plattform.api import update_mvm
             prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
             update_status = update_mvm(prepared_mvm, update)
@@ -2703,7 +2704,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
     
     prepared_mvm = {
         "mitgliedNummer": str(mitgliedschaft.mitglied_nr) if str(mitgliedschaft.mitglied_nr) != 'MV' else None,
-        "mitgliedId": int(mitgliedschaft.mitglied_id),
+        "mitgliedId": cint(mitgliedschaft.mitglied_id),
         "sektionCode": str(get_sektion_code(mitgliedschaft.sektion_id)),
         "regionCode": frappe.get_value("Region", mitgliedschaft.region, "region_c") if mitgliedschaft.region else None,
         "regionManuell": True if mitgliedschaft.region_manuell else False,
@@ -2726,12 +2727,12 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "betragBezahltHaftpflicht": None, # ???
         "naechstesJahrGeschuldet": True if mitgliedschaft.naechstes_jahr_geschuldet == 1 else False,
         "bemerkungen": str(mitgliedschaft.wichtig) if mitgliedschaft.wichtig else None,
-        "anzahlZeitungen": int(mitgliedschaft.m_und_w),
+        "anzahlZeitungen": cint(mitgliedschaft.m_und_w),
         "zeitungAlsPdf": True if mitgliedschaft.m_und_w_pdf else False,
-        "isKollektiv": True if int(mitgliedschaft.ist_kollektiv) == 1 else False,
-        "isGeschenkmitgliedschaft": True if int(mitgliedschaft.ist_geschenkmitgliedschaft) == 1 else False,
-        "isEinmaligeSchenkung": True if int(mitgliedschaft.ist_einmalige_schenkung) == 1 else False,
-        "schenkerHasGeschenkunterlagen": True if int(mitgliedschaft.geschenkunterlagen_an_schenker) == 1 else False,
+        "isKollektiv": True if cint(mitgliedschaft.ist_kollektiv) == 1 else False,
+        "isGeschenkmitgliedschaft": True if cint(mitgliedschaft.ist_geschenkmitgliedschaft) == 1 else False,
+        "isEinmaligeSchenkung": True if cint(mitgliedschaft.ist_einmalige_schenkung) == 1 else False,
+        "schenkerHasGeschenkunterlagen": True if cint(mitgliedschaft.geschenkunterlagen_an_schenker) == 1 else False,
         "datumBezahltHaftpflicht": str(mitgliedschaft.datum_hv_zahlung).replace(" ", "T") + "T00:00:00" if mitgliedschaft.datum_hv_zahlung else None,
         "adressen": adressen,
         "onlineHaftpflicht": mitgliedschaft.online_haftpflicht if mitgliedschaft.online_haftpflicht and mitgliedschaft.online_haftpflicht != '' else None,
@@ -2775,7 +2776,7 @@ def get_adressen_for_sp(mitgliedschaft):
         ]
     }
     
-    if int(mitgliedschaft.hat_solidarmitglied) == 1:
+    if cint(mitgliedschaft.hat_solidarmitglied) == 1:
         solidarmitglied = {
             "anrede": str(mitgliedschaft.anrede_2) if mitgliedschaft.anrede_2 else "Unbekannt",
             "istHauptkontakt": False,
@@ -2792,7 +2793,7 @@ def get_adressen_for_sp(mitgliedschaft):
     
     adressen.append(mitglied)
     
-    if int(mitgliedschaft.abweichende_objektadresse) == 1:
+    if cint(mitgliedschaft.abweichende_objektadresse) == 1:
         objekt = {
             "typ": "Objekt",
             "strasse": str(mitgliedschaft.objekt_strasse) if mitgliedschaft.objekt_strasse else None,
@@ -2808,7 +2809,7 @@ def get_adressen_for_sp(mitgliedschaft):
         }
         adressen.append(objekt)
     
-    if int(mitgliedschaft.abweichende_rechnungsadresse) == 1:
+    if cint(mitgliedschaft.abweichende_rechnungsadresse) == 1:
         rechnung = {
             "typ": "Rechnung",
             "strasse": str(mitgliedschaft.rg_strasse) if mitgliedschaft.rg_strasse else None,
@@ -2823,7 +2824,7 @@ def get_adressen_for_sp(mitgliedschaft):
             "kontakte": []
         }
         
-        if int(mitgliedschaft.unabhaengiger_debitor) == 1:
+        if cint(mitgliedschaft.unabhaengiger_debitor) == 1:
             rechnungskontakt = {
                 "anrede": str(mitgliedschaft.rg_anrede) if mitgliedschaft.rg_anrede else "Unbekannt",
                 "istHauptkontakt": True,
@@ -2876,7 +2877,7 @@ def sinv_check_zahlung_mitgliedschaft(sinv, event):
         if getdate(sinv.modified) < getdate(ref_date):
             skip = True
             # gewährleistung dass trotz skip das Mitgliedschaftsjahr und bezahldatum korrekt geschrieben wird.
-            if int(frappe.db.get_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr')) < int(sinv.mitgliedschafts_jahr):
+            if cint(frappe.db.get_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr')) < cint(sinv.mitgliedschafts_jahr):
                 if sinv.is_pos == 1:
                     frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'datum_zahlung_mitgliedschaft', sinv.posting_date)
                     frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr', sinv.mitgliedschafts_jahr)
@@ -2910,7 +2911,7 @@ def sinv_check_zahlung_mitgliedschaft(sinv, event):
                     max_level = 0
             except:
                 max_level = 0
-            sinv_max_level = int(sinv.payment_reminder_level or 0)
+            sinv_max_level = cint(sinv.payment_reminder_level or 0)
             if max_level < sinv_max_level:
                 max_level = sinv_max_level
             mitgliedschaft.max_reminder_level = max_level
@@ -2960,7 +2961,7 @@ def sektionswechsel_pseudo_sektion(mitgliedschaft, eintrittsdatum, bezahltes_mit
     try:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
         mitgliedschaft.eintrittsdatum = eintrittsdatum
-        mitgliedschaft.bezahltes_mitgliedschaftsjahr = int(bezahltes_mitgliedschaftsjahr)
+        mitgliedschaft.bezahltes_mitgliedschaftsjahr = cint(bezahltes_mitgliedschaftsjahr)
         mitgliedschaft.zuzug_von = sektion_id
         mitgliedschaft.zuzug = zuzug
         mitgliedschaft.status_c = 'Regulär'
@@ -2968,9 +2969,9 @@ def sektionswechsel_pseudo_sektion(mitgliedschaft, eintrittsdatum, bezahltes_mit
         
         # erstelle ggf. neue Rechnung
         mit_rechnung = False
-        if mitgliedschaft.bezahltes_mitgliedschaftsjahr < int(now().split("-")[0]):
+        if mitgliedschaft.bezahltes_mitgliedschaftsjahr < cint(now().split("-")[0]):
             if mitgliedschaft.naechstes_jahr_geschuldet == 1:
-                mit_rechnung = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=int(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=mitgliedschaft.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=mitgliedschaft.reduzierte_mitgliedschaft, language=mitgliedschaft.language)['default_druckvorlage'])
+                mit_rechnung = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=cint(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=mitgliedschaft.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=mitgliedschaft.reduzierte_mitgliedschaft, language=mitgliedschaft.language)['default_druckvorlage'])
         
         if mit_rechnung:
             mitgliedschaft.zuzugs_rechnung = mit_rechnung
@@ -3016,7 +3017,7 @@ def sektionswechsel_pseudo_sektion(mitgliedschaft, eintrittsdatum, bezahltes_mit
         
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
         mitgliedschaft.eintrittsdatum = eintrittsdatum
-        mitgliedschaft.bezahltes_mitgliedschaftsjahr = int(bezahltes_mitgliedschaftsjahr)
+        mitgliedschaft.bezahltes_mitgliedschaftsjahr = cint(bezahltes_mitgliedschaftsjahr)
         mitgliedschaft.zuzug_von = sektion_id
         mitgliedschaft.zuzug = zuzug
         mitgliedschaft.status_c = 'Regulär'
@@ -3044,7 +3045,7 @@ def get_ampelfarbe(mitgliedschaft):
         
         # MVZH Ausnahme Start
         if mitgliedschaft.sektion_id == 'MVZH':
-            if int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) < int(datetime.date.today().year):
+            if cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) < cint(datetime.date.today().year):
                 return 'ampelrot'
             else:
                 return 'ampelgruen'
@@ -3063,8 +3064,8 @@ def get_ampelfarbe(mitgliedschaft):
             karenzfrist = True
         
         # musste mit v8.5.9 umgeschrieben werden, da negative Werte ebenfalls == True ergeben. (Beispiel: (1 + 2015 - 2023) == True)
-        # ~ aktuelles_jahr_bezahlt = bool( 1 + int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - int(now().split("-")[0]) )
-        aktuelles_jahr_bezahlt = False if ( 1 + int(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - int(now().split("-")[0]) ) <= 0 else True
+        # ~ aktuelles_jahr_bezahlt = bool( 1 + cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - cint(now().split("-")[0]) )
+        aktuelles_jahr_bezahlt = False if ( 1 + cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - cint(now().split("-")[0]) ) <= 0 else True
         
         if not aktuelles_jahr_bezahlt:
             ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
@@ -3163,7 +3164,7 @@ def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=F
             
             # erstellung Rechnungs PDF
             output = PdfFileWriter()
-            output = frappe.get_print("Korrespondenz", new_korrespondenz.name, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+            output = frappe.get_prcint("Korrespondenz", new_korrespondenz.name, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
             
             file_name = "{new_korrespondenz}_{datetime}".format(new_korrespondenz=new_korrespondenz.name, datetime=now().replace(" ", "_"))
             file_name = file_name.split(".")[0]
@@ -3278,8 +3279,8 @@ def create_geschenk_korrespondenz(mitgliedschaft, druckvorlage_inhaber=False, dr
     
     output = PdfFileWriter()
     if druckvorlage_zahler:
-        output = frappe.get_print("Korrespondenz", zahler, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
-    output = frappe.get_print("Korrespondenz", inhaber, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+        output = frappe.get_prcint("Korrespondenz", zahler, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+    output = frappe.get_prcint("Korrespondenz", inhaber, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
     
     file_name = "Geschenk_Korrespondenz_{datetime}".format(datetime=now().replace(" ", "_"))
     file_name = file_name.split(".")[0]
@@ -3327,7 +3328,7 @@ def erstelle_todo(owner, mitglied, description=False, datum=False, notify=0):
     }).insert(ignore_permissions=True)
     
     # notify
-    if int(notify) == 1:
+    if cint(notify) == 1:
         from frappe.desk.form.assign_to import notify_assignment
         notify_assignment(todo.assigned_by, todo.owner, todo.reference_type, todo.reference_name, action='ASSIGN',\
                  description=todo.description, notify=notify)
@@ -3390,9 +3391,9 @@ def wieder_beitritt(mitgliedschaft):
 def check_erstelle_rechnung(mitgliedschaft, typ, sektion, jahr=False):
     gratis_case = False
     if not jahr:
-        jahr = int(getdate(today()).strftime("%Y"))
+        jahr = cint(getdate(today()).strftime("%Y"))
     else:
-        jahr = int(jahr)
+        jahr = cint(jahr)
     if typ == 'Privat':
         gratis_bis_ende_jahr = frappe.get_value("Sektion", sektion, "gratis_bis_ende_jahr")
         gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(gratis_bis_ende_jahr).strftime("%d"))
