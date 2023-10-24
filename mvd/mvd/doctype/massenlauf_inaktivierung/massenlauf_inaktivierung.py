@@ -82,7 +82,8 @@ def start_massenlauf_inaktivierung(doc):
             ms = frappe.get_doc("Mitgliedschaft", mitgliedschaft.mv_mitgliedschaft)
             
             if ms.status_c in ('Ausschluss', 'Inaktiv'):
-                frappe.throw("Mitgliedschaft {0} ist bereits ausgeschlossen repsektive Inaktiv!".format(ms.mitglied_nr))
+                doc.add_comment('Comment', text="Mitgliedschaft {0} ist bereits ausgeschlossen repsektive Inaktiv!".format(ms.mitglied_nr))
+                continue
             
             change_log_row = ms.append('status_change', {})
             change_log_row.datum = now()
