@@ -7,15 +7,16 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.data import now, getdate
 from frappe.utils.background_jobs import enqueue
+from frappe.utils import cint
 
 class MassenlaufInaktivierung(Document):
     def before_save(self):
         if not self.mitgliedschaften:
             additional_filters = """"""
-            if int(self.relevantes_mitgliedschaftsjahr) > 0:
+            if cint(self.relevantes_mitgliedschaftsjahr) > 0:
                 additional_filters += """AND `mitgliedschafts_jahr` = '{0}'""".format(self.relevantes_mitgliedschaftsjahr)
-                if int(self.ausnahme_folgejahr) == 1:
-                    if int(self.ausnahme_jahr) > 0:
+                if cint(self.ausnahme_folgejahr) == 1:
+                    if cint(self.ausnahme_jahr) > 0:
                         additional_filters += """AND `mv_mitgliedschaft` NOT IN (
                                                     SELECT
                                                         `name`
@@ -114,7 +115,7 @@ def start_massenlauf_inaktivierung(doc):
             ms.add_comment('Comment', text='Ausschluss vollzogen ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
             
             if doc.rg_storno:
-                if int(doc.rg_storno) == 1:
+                if cint(doc.rg_storno) == 1:
                     curr_year = getdate(now()).strftime("%Y")
                     
                     # Sales Invoice Storno

@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.8.2
+Bugfix ISS-2023-00104
 #### 10.8.1
 Bugfix ISS-2023-00103
 #### 10.8.0
