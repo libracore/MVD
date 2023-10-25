@@ -2353,7 +2353,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         
         # erstellung Rechnungs PDF
         output = PdfFileWriter()
-        output = frappe.get_prcint("Sales Invoice", sinv.name, 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)
+        output = frappe.get_print("Sales Invoice", sinv.name, 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)
         
         file_name = "{sinv}_{datetime}".format(sinv=sinv.name, datetime=now().replace(" ", "_"))
         file_name = file_name.split(".")[0]
@@ -2410,7 +2410,7 @@ def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druck
     
     # erstellung Kündigungs PDF
     output = PdfFileWriter()
-    output = frappe.get_prcint("Mitgliedschaft", mitgliedschaft.name, 'Kündigungsbestätigung', as_pdf = True, output = output)
+    output = frappe.get_print("Mitgliedschaft", mitgliedschaft.name, 'Kündigungsbestätigung', as_pdf = True, output = output)
     
     pdf = frappe.utils.pdf.get_file_data_from_writer(output)
     file_name = "Kündigungsbestätigung_{mitgliedschaft}_{datetime}.pdf".format(mitgliedschaft=mitgliedschaft.name, datetime=now().replace(" ", "_"))
@@ -3164,7 +3164,7 @@ def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=F
             
             # erstellung Rechnungs PDF
             output = PdfFileWriter()
-            output = frappe.get_prcint("Korrespondenz", new_korrespondenz.name, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+            output = frappe.get_print("Korrespondenz", new_korrespondenz.name, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
             
             file_name = "{new_korrespondenz}_{datetime}".format(new_korrespondenz=new_korrespondenz.name, datetime=now().replace(" ", "_"))
             file_name = file_name.split(".")[0]
@@ -3279,8 +3279,8 @@ def create_geschenk_korrespondenz(mitgliedschaft, druckvorlage_inhaber=False, dr
     
     output = PdfFileWriter()
     if druckvorlage_zahler:
-        output = frappe.get_prcint("Korrespondenz", zahler, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
-    output = frappe.get_prcint("Korrespondenz", inhaber, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+        output = frappe.get_print("Korrespondenz", zahler, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
+    output = frappe.get_print("Korrespondenz", inhaber, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
     
     file_name = "Geschenk_Korrespondenz_{datetime}".format(datetime=now().replace(" ", "_"))
     file_name = file_name.split(".")[0]
