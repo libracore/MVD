@@ -417,12 +417,18 @@ def create_invoices(jahresversand):
                                             WHERE `mitgliedschafts_jahr` = '{mitgliedschafts_jahr}'
                                             AND `ist_mitgliedschaftsrechnung` = 1
                                             AND `docstatus` = 1)
+                                        AND `name` NOT IN (
+                                            SELECT
+                                                `mv_mitgliedschaft`
+                                            FROM `tabSales Invoice`
+                                            WHERE `rechnungs_jahresversand` = '{jahresversand}'
+                                            AND `docstatus` = 1)
                                         AND (`kuendigung` IS NULL or `kuendigung` > '{mitgliedschafts_jahr}-12-31')
                                         AND `bezahltes_mitgliedschaftsjahr` < {mitgliedschafts_jahr}
-                                        {filters}""".format(sektion_id=jahresversand_doc.sektion_id, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters), as_dict=True)
+                                        {filters}""".format(sektion_id=jahresversand_doc.sektion_id, jahresversand=jahresversand, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters), as_dict=True)
     
-    if len(mitgliedschaften) <= 1000:
-        jahresversand_doc.add_comment('Comment', text='Rechnungserstellung erfolgt in einem Batch (Menge <= 1000)...')
+    if len(mitgliedschaften) <= 500:
+        jahresversand_doc.add_comment('Comment', text='Rechnungserstellung erfolgt in einem Batch (Menge <= 500)...')
         frappe.db.commit()
         args = {
             'jahresversand': jahresversand,
@@ -432,9 +438,9 @@ def create_invoices(jahresversand):
         }
         enqueue("mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.create_invoices_one_batch", queue='long', job_name='Rechnungs Jahresversand {0}'.format(jahresversand), timeout=6000, **args)
     else:
-        # calc 1000er batches
-        qty = int(len(mitgliedschaften)/1000) + 1
-        jahresversand_doc.add_comment('Comment', text='Rechnungserstellung erfolgt Batchweise ({0}) (Menge > 1000)...'.format(qty))
+        # calc 500er batches
+        qty = int(len(mitgliedschaften)/500) + 1
+        jahresversand_doc.add_comment('Comment', text='Rechnungserstellung erfolgt Batchweise ({0}) (Menge > 500)...'.format(qty))
         frappe.db.commit()
         
         batches = range(qty)
@@ -442,7 +448,7 @@ def create_invoices(jahresversand):
             loop = batch + 1
             args = {
                 'jahresversand': jahresversand,
-                'limit': 1000,
+                'limit': 500,
                 'loop': loop,
                 'last': False if loop < qty else True
             }
@@ -486,11 +492,18 @@ def create_invoices_one_batch(jahresversand, limit=False, loop=False, last=False
                                                 WHERE `mitgliedschafts_jahr` = '{mitgliedschafts_jahr}'
                                                 AND `ist_mitgliedschaftsrechnung` = 1
                                                 AND `docstatus` = 1)
+                                            AND `name` NOT IN (
+                                                SELECT
+                                                    `mv_mitgliedschaft`
+                                                FROM `tabSales Invoice`
+                                                WHERE `rechnungs_jahresversand` = '{jahresversand}'
+                                                AND `docstatus` = 1)
                                             AND (`kuendigung` IS NULL or `kuendigung` > '{mitgliedschafts_jahr}-12-31')
                                             AND `bezahltes_mitgliedschaftsjahr` < {mitgliedschafts_jahr}
-                                            {filters}{limit}""".format(sektion_id=jahresversand_doc.sektion_id, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters, limit=limit), as_dict=True)
+                                            {filters}{limit}""".format(sektion_id=jahresversand_doc.sektion_id, jahresversand=jahresversand, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters, limit=limit), as_dict=True)
         
         try:
+            rg_loop = 1
             for mitgliedschaft in mitgliedschaften:
                 # ------------------------------------------------------------------------------------
                 # ------------------------------------------------------------------------------------
@@ -508,6 +521,11 @@ def create_invoices_one_batch(jahresversand, limit=False, loop=False, last=False
                 
                 if not skip:
                     sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=jahresversand_doc.jahr, submit=True, ignore_stichtage=True, rechnungs_jahresversand=jahresversand_doc.name)
+                if rg_loop == 10:
+                    frappe.db.commit()
+                    rg_loop = 1
+                else:
+                    rg_loop += 1
             
             frappe.db.commit()
             
