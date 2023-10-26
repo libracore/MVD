@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import csv
+from mvd.mvd.doctype.datatrans_report.datatrans_report import create_mitgliedschaften_pro_file
 
 class DatatransZahlungsfile(Document):
     def read_file(self):
@@ -85,6 +86,7 @@ class DatatransZahlungsfile(Document):
                                     # zu diesem Mitglied wurde bereits eine Datatrans Zahlung eingelesen
                                     entry.status = 'Mitglied: Doppelimport'
                                 else:
+                                    # achtung debit = D und credit = C
                                     if float(entry.amount) > 0:
                                         # Zahlung
                                         if float(entry.amount) != float(mitgliedschaft_lookup[0].online_betrag):
@@ -127,8 +129,6 @@ class DatatransZahlungsfile(Document):
         create_mitgliedschaften_pro_file(self)
     
     def create_reports(self):
-        from mvd.mvd.doctype.datatrans_report.datatrans_report import create_mitgliedschaften_pro_file
-        
         create_mitgliedschaften_pro_file(self)
         sektions_list = create_monatsreport_mvd(self)
         create_monatsreport_sektionen(self, sektions_list)

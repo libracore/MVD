@@ -63,7 +63,7 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
                 nicht_verbuchbare_zahlungen['betrag'] += (float(entry.amount) * -1)
         
         if nicht_verbuchbar_flag:
-            nicht_verbuchbare_zahlungen.append({
+            nicht_verbuchbare_zahlungen['detail_liste'].append({
                 'match': entry.mitglied_nr or '-',
                 'empfaenger': entry.adressblock or '-',
                 'valuta': entry.transdatetime or '-',
