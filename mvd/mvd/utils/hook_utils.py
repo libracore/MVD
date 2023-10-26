@@ -74,7 +74,7 @@ def relink_fr(sinv, event):
     skip = False
     if sinv.rechnungs_jahresversand:
         from frappe.utils.data import add_to_date
-        ref_date = add_to_date(date=sinv.creation, hours=1)
+        ref_date = add_to_date(date=sinv.creation, hours=12)
         if sinv.modified < ref_date:
             skip = True
     if not skip:
