@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.10.0
+ISS-2023-00080
 #### 10.9.0
 Überarbeitung/Optimierung Rechnungs Jahresversand
 #### 10.8.3
