@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 10.13.2
+Bugfix Druckformat Mahnung
+#### 10.13.1
+Bugfix Freizügigkeitsabfrage
 #### 10.13.0
 Priorisierung Sektions-Updates vor MVZH-Updates
 #### 10.12.0

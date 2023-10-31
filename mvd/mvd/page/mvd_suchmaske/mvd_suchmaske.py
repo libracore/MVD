@@ -169,6 +169,7 @@ def suche(suchparameter, goto_list=False):
                                                 ORDER BY CASE WHEN `status_c` NOT IN ('Inaktiv', 'Wegzug') THEN 1
                                                 ELSE 2 END
                                                 LIMIT 1""".format(filters=filters), as_dict=True)
+            faktura_kunden = []
         else:
             sortierung = """CASE
                                 WHEN `status_c` = 'Regulär' THEN 1
