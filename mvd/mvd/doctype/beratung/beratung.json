@@ -44,6 +44,7 @@
   "mv_mitgliedschaft",
   "sektion_id",
   "status",
+  "zusatzinfo_status",
   "beratung_prio",
   "beratungsaufwand",
   "raised_by_name",
@@ -406,9 +407,14 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "anlage_durch_mail_check_attachments"
+  },
+  {
+   "fieldname": "zusatzinfo_status",
+   "fieldtype": "Small Text",
+   "label": "Zusatzinfo Status"
   }
  ],
- "modified": "2023-10-23 12:22:30.798214",
+ "modified": "2023-10-31 08:34:51.119241",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

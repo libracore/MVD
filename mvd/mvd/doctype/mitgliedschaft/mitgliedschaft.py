@@ -514,8 +514,10 @@ class Mitgliedschaft(Document):
                 
                 if bezahltes_mitgliedschaftsjahr == jahr_datum_zahlung_mitgliedschaft:
                     current_year = str(now().split("-")[0])
-                    if datum_zahlung_mitgliedschaft >= getdate(current_year + '-09-15') and datum_zahlung_mitgliedschaft <= getdate(current_year + '-12-31'):
-                        self.bezahltes_mitgliedschaftsjahr += 1
+                    eintrittsjahr = cint(getdate(self.eintrittsdatum).strftime("%Y"))
+                    if cint(current_year) == eintrittsjahr:
+                        if datum_zahlung_mitgliedschaft >= getdate(current_year + '-09-15') and datum_zahlung_mitgliedschaft <= getdate(current_year + '-12-31'):
+                            self.bezahltes_mitgliedschaftsjahr += 1
             
             if self.datum_hv_zahlung:
                 # prüfe HV-Jahr
@@ -523,10 +525,13 @@ class Mitgliedschaft(Document):
                 jahr_datum_hv_zahlung = cint(datum_hv_zahlung.strftime("%Y"))
                 zahlung_hv = cint(self.zahlung_hv)
                 
-                if zahlung_hv == jahr_datum_hv_zahlung:
-                    current_year = str(now().split("-")[0])
-                    if datum_hv_zahlung >= getdate(current_year + '-09-15') and datum_hv_zahlung <= getdate(current_year + '-12-31'):
-                        self.zahlung_hv += 1
+                current_year = str(now().split("-")[0])
+                eintrittsjahr = cint(getdate(self.eintrittsdatum).strftime("%Y"))
+                if cint(current_year) == eintrittsjahr:
+                    if zahlung_hv == jahr_datum_hv_zahlung:
+                        current_year = str(now().split("-")[0])
+                        if datum_hv_zahlung >= getdate(current_year + '-09-15') and datum_hv_zahlung <= getdate(current_year + '-12-31'):
+                            self.zahlung_hv += 1
         
         return
         

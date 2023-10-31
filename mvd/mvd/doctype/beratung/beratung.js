@@ -9,7 +9,6 @@ frappe.ui.form.on('Beratung', {
         }
     },
     refresh: function(frm) {
-        console.log("bini refresh");
         // Handler für gesperrte Ansicht
         if (!cur_frm.doc.gesperrt_am) {
             cur_frm.reload_doc();
@@ -113,7 +112,7 @@ frappe.ui.form.on('Beratung', {
                                     if (cur_frm.doc.status == 'Eingang') {
                                         cur_frm.set_value("status", 'Open');
                                     }
-                                    frappe.msgprint('Sie wurden als "Berater*in" erfasst.<br>Die ToDo anpassungen erfolgen mit dem <b>Speichern</b> der Beratung.');
+                                    frappe.msgprint('Sie wurden als "Berater*in" erfasst.');
                                 } else {
                                     frappe.msgprint('Sie sind bereits als "Berater*in" erfasst.');
                                 }
@@ -286,20 +285,21 @@ frappe.ui.form.on('Beratung', {
                 frappe.ui.keys.on('ctrl+e', function(e) {frappe.msgprint("Diese Beratung ist zur Bearbeitung gesperrt.");});
             }
             
-            if (cur_frm.doc.kontaktperson&&cur_frm.doc.create_todo) {
-                frappe.call({
-                    method: "mvd.mvd.doctype.beratung.beratung.new_todo",
-                    args:{
-                            'beratung': cur_frm.doc.name,
-                            'kontaktperson': cur_frm.doc.kontaktperson
-                    },
-                    callback: function(r)
-                    {
-                        cur_frm.reload_doc();
-                        frappe.msgprint("ToDo erstellt");
-                    }
-                });
-            }
+            // Auto ToDo wurden entfernt. Kann später gelöscht werden
+            //~ if (cur_frm.doc.kontaktperson&&cur_frm.doc.create_todo) {
+                //~ frappe.call({
+                    //~ method: "mvd.mvd.doctype.beratung.beratung.new_todo",
+                    //~ args:{
+                            //~ 'beratung': cur_frm.doc.name,
+                            //~ 'kontaktperson': cur_frm.doc.kontaktperson
+                    //~ },
+                    //~ callback: function(r)
+                    //~ {
+                        //~ cur_frm.reload_doc();
+                        //~ frappe.msgprint("ToDo erstellt");
+                    //~ }
+                //~ });
+            //~ }
             
             if (cur_frm.doc.status == 'Zusammengeführt') {
                 setze_read_only(frm);
@@ -312,19 +312,20 @@ frappe.ui.form.on('Beratung', {
             $("#jump_comment").click(function(){frappe.utils.scroll_to(cur_frm.footer.wrapper.find(".reply-link"), !0);});
         }
         
-        // abfrage ob nach Rückfragemail die Beratung als gelesen markiert werden soll
-        if(locals.rueckfrage_erzeugt&&cur_frm.doc.ungelesen) {
-            frappe.confirm(
-                'Diese Beratung ist als ungelesen markiert, möchten Sie den Input als verarbeitet markieren?',
-                function(){
-                    // on yes
-                    cur_frm.custom_buttons["Neuer Input verarbeitet"].click();
-                },
-                function(){
-                    // on no
-                }
-            )
-        }
+        // Aufgrind Ticket entfernt
+        //~ // abfrage ob nach Rückfragemail die Beratung als gelesen markiert werden soll
+        //~ if(locals.rueckfrage_erzeugt&&cur_frm.doc.ungelesen) {
+            //~ frappe.confirm(
+                //~ 'Diese Beratung ist als ungelesen markiert, möchten Sie den Input als verarbeitet markieren?',
+                //~ function(){
+                    //~ // on yes
+                    //~ cur_frm.custom_buttons["Neuer Input verarbeitet"].click();
+                //~ },
+                //~ function(){
+                    //~ // on no
+                //~ }
+            //~ )
+        //~ }
     },
     mv_mitgliedschaft: function(frm) {
         if ((!frm.doc.__islocal)&&(cur_frm.doc.mv_mitgliedschaft)) {

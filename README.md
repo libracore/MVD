@@ -1,5 +1,11 @@
 ## MVD
 ### Version Log
+#### 10.12.0
+ISS-2023-00110
+#### 10.11.0
+ISS-2023-00106 & ISS-2023-00030; Entfernung Auto-ToDos
+#### 10.10.0
+ISS-2023-00080
 #### 10.9.0
 Überarbeitung/Optimierung Rechnungs Jahresversand
 #### 10.8.3
