@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.13.0
+Priorisierung Sektions-Updates vor MVZH-Updates
 #### 10.12.0
 ISS-2023-00110
 #### 10.11.0
