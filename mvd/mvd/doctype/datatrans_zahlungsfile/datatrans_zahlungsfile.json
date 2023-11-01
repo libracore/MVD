@@ -1,0 +1,169 @@
+{
+ "creation": "2023-09-29 08:28:24.195940",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "datatrans_file",
+  "section_aktionen",
+  "btn_file_einlesen",
+  "cb_1",
+  "btn_daten_verarbeiten",
+  "btn_reset",
+  "cb_2",
+  "btn_single_report",
+  "cb_3",
+  "btn_erzeuge_reports",
+  "section_datatrans_entries",
+  "datatrans_entries",
+  "total_number_of_records",
+  "total_number_of_debits",
+  "total_number_of_credits",
+  "total_debit_amount",
+  "total_credit_amount",
+  "total_settlement_amount",
+  "report_year",
+  "report_month",
+  "kommissions_prozent"
+ ],
+ "fields": [
+  {
+   "fieldname": "datatrans_file",
+   "fieldtype": "Attach",
+   "label": "Datatrans File"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_datatrans_entries",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "datatrans_entries",
+   "fieldtype": "Table",
+   "label": "Datatrans Entries",
+   "options": "Datatrans Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_aktionen",
+   "fieldtype": "Section Break",
+   "label": "Aktionen"
+  },
+  {
+   "fieldname": "btn_file_einlesen",
+   "fieldtype": "Button",
+   "label": "File einlesen"
+  },
+  {
+   "fieldname": "btn_daten_verarbeiten",
+   "fieldtype": "Button",
+   "label": "Daten verarbeiten"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "btn_erzeuge_reports",
+   "fieldtype": "Button",
+   "label": "Erzeuge alle Reports"
+  },
+  {
+   "fieldname": "total_number_of_records",
+   "fieldtype": "Data",
+   "label": "Total number of records",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_number_of_debits",
+   "fieldtype": "Data",
+   "label": "Total number of debits",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_number_of_credits",
+   "fieldtype": "Data",
+   "label": "Total number of credits",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_debit_amount",
+   "fieldtype": "Data",
+   "label": "Total debit amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_credit_amount",
+   "fieldtype": "Data",
+   "label": "Total credit amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_settlement_amount",
+   "fieldtype": "Data",
+   "label": "Total settlement amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "btn_single_report",
+   "fieldtype": "Button",
+   "label": "Erzeuge Filespezifischer Report"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "report_year",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "report_year",
+   "read_only": 1
+  },
+  {
+   "fieldname": "report_month",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "report_month",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kommissions_prozent",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "kommissions_prozent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "btn_reset",
+   "fieldtype": "Button",
+   "label": "Reset Daten"
+  }
+ ],
+ "modified": "2023-10-02 12:44:09.373784",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Datatrans Zahlungsfile",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

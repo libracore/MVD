@@ -15,6 +15,7 @@ from frappe import _
 from mvd.mvd.utils.post import _post_retouren
 from mvd.mvd.utils.post import _post_responses
 from mvd.mvd.doctype.beratung.beratung import _get_beratungs_dokument
+from mvd.mvd.doctype.webshop_order.webshop_order import create_order_from_api
 
 AUTH0_SCOPE = "Auth0"
 SVCPF_SCOPE = "ServicePF"
@@ -235,6 +236,11 @@ def get_token(scope=SVCPF_SCOPE):
 @frappe.whitelist()
 def mitglieder(**api_request):
     return api_request_check(api_request)
+
+# create webshop order
+@frappe.whitelist()
+def shop(**api_request):
+    return create_order_from_api(api_request)
 
 # abfrage Attachment zu Beratung
 @frappe.whitelist()
