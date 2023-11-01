@@ -298,7 +298,8 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
             "objekt_strasse": anlage_daten["strasse"] if int(anlage_daten["postfach"]) == 1 else '',
             "objekt_plz": anlage_daten["plz"] if int(anlage_daten["postfach"]) == 1 else '',
             "objekt_ort": anlage_daten["ort"] if int(anlage_daten["postfach"]) == 1 else '',
-            "abweichende_objektadresse": 1 if int(anlage_daten["postfach"]) == 1 else '0'
+            "abweichende_objektadresse": 1 if int(anlage_daten["postfach"]) == 1 else '0',
+            "interessent_typ": anlage_daten["interessent_typ"]
         })
         mitgliedschaft.insert(ignore_permissions=True)
         
