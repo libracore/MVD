@@ -704,8 +704,16 @@ frappe.mvd_such_client = {
                                             cur_dialog.fields_dict.hv_bar_bezahlt.refresh();
                                         }, 100);
                                     }
+                                    if (cur_dialog.fields_dict.status.get_value() == 'Interessent*in') {
+                                        cur_dialog.fields_dict.interessent_typ.df.hidden = 0;
+                                        cur_dialog.fields_dict.interessent_typ.refresh();
+                                    } else {
+                                        cur_dialog.fields_dict.interessent_typ.df.hidden = 1;
+                                        cur_dialog.fields_dict.interessent_typ.refresh();
+                                    }
                                 }
                             },
+                            {'fieldname': 'interessent_typ', 'fieldtype': 'Link', 'label': 'Interessent*in Typ', 'reqd': 1, 'hidden': cur_page.page.search_fields.status_c.get_value() == 'Interessent*in' ? 0:1, 'options': 'InteressentIn Typ', 'default': 'Mitgliedschafts-Interessent*in'},
                             {'fieldname': 'mitgliedtyp', 'fieldtype': 'Select', 'label': 'Mitgliedtyp', 'reqd': 1, 'options': 'Privat\nGeschäft', 'default': cur_page.page.search_fields.mitgliedtyp_c.get_value() == 'Geschäft' ? 'Geschäft':'Privat', 'change': function() {
                                     if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Privat') {
                                         cur_dialog.fields_dict.kundentyp.set_value("Einzelperson");

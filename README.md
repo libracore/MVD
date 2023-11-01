@@ -1,5 +1,13 @@
 ## MVD
 ### Version Log
+#### 10.14.0
+Einführung von "Interessent*in Typ" sowie "Kontakt-Kategorien"
+#### 10.13.2
+Bugfix Druckformat Mahnung
+#### 10.13.1
+Bugfix Freizügigkeitsabfrage
+#### 10.13.0
+Priorisierung Sektions-Updates vor MVZH-Updates
 #### 10.12.0
 ISS-2023-00110
 #### 10.11.0

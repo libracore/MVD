@@ -25,6 +25,7 @@
   "status_c",
   "interessent_typ",
   "mitgliedtyp_c",
+  "kontaktkategorien",
   "todesfall_uebernahme",
   "inkl_hv",
   "statuten_ok",
@@ -1274,6 +1275,12 @@
    "options": "Mandat Mitgliedschaft"
   },
   {
+   "fieldname": "kontaktkategorien",
+   "fieldtype": "Table MultiSelect",
+   "label": "Kontakt-Kategorien",
+   "options": "Kontaktkategorien Multiselect"
+  },
+  {
    "fieldname": "online_payment_zahlungsfile",
    "fieldtype": "Link",
    "label": "onlinePaymentZahlungsfile",
@@ -1281,7 +1288,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2023-09-29 08:40:48.741658",
+ "modified": "2023-11-01 15:54:30.085944",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

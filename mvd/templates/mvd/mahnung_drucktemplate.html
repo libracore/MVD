@@ -8,7 +8,7 @@
         {% set mahnung_druckvorlage = frappe.get_doc("Druckvorlage", mahnung.druckvorlage) %}
     {% endif %}
     {% set sektion = frappe.get_doc("Sektion", frappe.db.get_value("Druckvorlage", mahnung_druckvorlage.name, "sektion_id")) %}
-    {% set print_language = druckvorlage.language %}
+    {% set print_language = mahnung_druckvorlage.language %}
     {% set adressblock = 'Fehlende Daten' %}
     {% set invoice = mahnung.sales_invoices[0].sales_invoice %}
     {% if mahnung.mv_kunde %}

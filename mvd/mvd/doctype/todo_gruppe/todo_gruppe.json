@@ -1,11 +1,14 @@
 {
- "autoname": "field:virt_user",
+ "allow_rename": 1,
+ "autoname": "format:{gruppenname} ({sektion_id})",
  "creation": "2023-03-17 09:33:51.819501",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "gruppenname",
   "virt_user",
+  "sektion_id",
   "user"
  ],
  "fields": [
@@ -23,9 +26,23 @@
    "fieldtype": "Table MultiSelect",
    "label": "User",
    "options": "ToDo Gruppen Multiselect"
+  },
+  {
+   "fieldname": "gruppenname",
+   "fieldtype": "Data",
+   "label": "Gruppenname",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
   }
  ],
- "modified": "2023-03-17 09:33:51.819501",
+ "modified": "2023-10-31 10:23:00.809746",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "ToDo Gruppe",
@@ -45,7 +62,9 @@
   }
  ],
  "quick_entry": 1,
+ "search_fields": "gruppenname",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "gruppenname",
  "track_changes": 1
 }
