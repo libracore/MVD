@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.14.0
+Einführung von "Interessent*in Typ" sowie "Kontakt-Kategorien"
 #### 10.13.2
 Bugfix Druckformat Mahnung
 #### 10.13.1

@@ -21,3 +21,5 @@ mvd.patches.redesign_korrespondenz_migration.migration
 mvd.patches.redesign_druckvorlagen_renaming.renaming
 mvd.patches.v10_3_3.reset_beratungs_protection
 mvd.patches.v10_5_0.change_status
+mvd.patches.interessent_typ.neuanlage
+mvd.patches.default_interessent_typ.anlage
