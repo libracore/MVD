@@ -156,6 +156,7 @@
   "datum_online_gutschrift",
   "online_payment_method",
   "online_payment_id",
+  "online_payment_zahlungsfile",
   "section_haftpflicht",
   "haftpflicht",
   "section_mandat",
@@ -1278,6 +1279,12 @@
    "fieldtype": "Table MultiSelect",
    "label": "Kontakt-Kategorien",
    "options": "Kontaktkategorien Multiselect"
+  },
+  {
+   "fieldname": "online_payment_zahlungsfile",
+   "fieldtype": "Link",
+   "label": "onlinePaymentZahlungsfile",
+   "options": "Datatrans Zahlungsfile"
   }
  ],
  "icon": "fa fa-tag",

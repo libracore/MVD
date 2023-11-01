@@ -1,0 +1,194 @@
+{
+ "creation": "2023-09-29 08:33:43.054450",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "transdatetime",
+  "cdscount",
+  "bookingperiod",
+  "kku",
+  "vunumber",
+  "termid",
+  "cardnumber",
+  "expiry",
+  "authocode",
+  "booktyp",
+  "currency",
+  "amount",
+  "refnumber",
+  "section_mitgliedschaft",
+  "mitglied_id",
+  "mitglied_nr",
+  "adressblock",
+  "online_haftpflicht",
+  "online_gutschrift",
+  "online_betrag",
+  "datum_online_verbucht",
+  "datum_online_gutschrift",
+  "online_payment_method",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "transdatetime",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "TRANSDATETIME",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cdscount",
+   "fieldtype": "Data",
+   "label": "CDSCOUNT",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bookingperiod",
+   "fieldtype": "Data",
+   "label": "BOOKINGPERIOD",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kku",
+   "fieldtype": "Data",
+   "label": "KKU",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vunumber",
+   "fieldtype": "Data",
+   "label": "VUNUMBER",
+   "read_only": 1
+  },
+  {
+   "fieldname": "termid",
+   "fieldtype": "Data",
+   "label": "TERMID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expiry",
+   "fieldtype": "Data",
+   "label": "EXPIRY",
+   "read_only": 1
+  },
+  {
+   "fieldname": "authocode",
+   "fieldtype": "Data",
+   "label": "AUTHOCODE",
+   "read_only": 1
+  },
+  {
+   "fieldname": "booktyp",
+   "fieldtype": "Data",
+   "label": "BOOKTYP",
+   "read_only": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "CURRENCY",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "AMOUNT",
+   "read_only": 1
+  },
+  {
+   "fieldname": "refnumber",
+   "fieldtype": "Data",
+   "label": "REFNUMBER",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cardnumber",
+   "fieldtype": "Data",
+   "label": "CARDNUMBER",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_mitgliedschaft",
+   "fieldtype": "Section Break",
+   "label": "Daten aus Mitgliedschaft",
+   "read_only": 1
+  },
+  {
+   "fieldname": "online_haftpflicht",
+   "fieldtype": "Data",
+   "label": "online_haftpflicht",
+   "read_only": 1
+  },
+  {
+   "fieldname": "online_gutschrift",
+   "fieldtype": "Data",
+   "label": "online_gutschrift",
+   "read_only": 1
+  },
+  {
+   "fieldname": "online_betrag",
+   "fieldtype": "Data",
+   "label": "online_betrag",
+   "read_only": 1
+  },
+  {
+   "fieldname": "datum_online_verbucht",
+   "fieldtype": "Data",
+   "label": "datum_online_verbucht",
+   "read_only": 1
+  },
+  {
+   "fieldname": "datum_online_gutschrift",
+   "fieldtype": "Data",
+   "label": "datum_online_gutschrift",
+   "read_only": 1
+  },
+  {
+   "fieldname": "online_payment_method",
+   "fieldtype": "Data",
+   "label": "online_payment_method",
+   "read_only": 1
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nMitglied: Match\nWebshop: Match\nMitglied: No Match\nWebshop: No Match\nMitglied: Abweichender Betrag\nWebshop: Abweichender Betrag\nMitglied: Gutschrift\nWebshop: Gutschrift\nMitglied: Doppelimport\nWebshop: Doppelimport",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mitglied_id",
+   "fieldtype": "Data",
+   "label": "Mitglied ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mitglied_nr",
+   "fieldtype": "Data",
+   "label": "Mitglied Nr",
+   "read_only": 1
+  },
+  {
+   "fieldname": "adressblock",
+   "fieldtype": "Data",
+   "label": "Adressblock",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2023-10-02 12:37:52.795108",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Datatrans Entry",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
