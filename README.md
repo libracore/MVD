@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 10.15.0
+ISS-2023-00063
 #### 10.14.0
 Einführung von "Interessent*in Typ" sowie "Kontakt-Kategorien"
 #### 10.13.2

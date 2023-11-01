@@ -152,14 +152,26 @@ def get_data():
             ]
         },
         {
-            "label": _("Faktura Kunden"),
+            "label": _("Faktura / Webshop / Datatrans"),
             "icon": "fa fa-cog",
             "items": [
                 {
                     "type": "doctype",
                     "name": "Kunden",
-                    "label": _("Kunden"),
-                    "description": _("Kunden")
+                    "label": _("Faktura Kunden"),
+                    "description": _("Faktura Kunden")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Webshop Order",
+                    "label": _("Webshop Bestellungen"),
+                    "description": _("Webshop Order")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Datatrans Zahlungsfile",
+                    "label": _("Datatrans Zahlungsfile"),
+                    "description": _("Datatrans Zahlungsfile")
                 }
             ]
         },

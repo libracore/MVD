@@ -1418,7 +1418,7 @@ function erstelle_normale_rechnung(frm) {
                                                         },
                                                         callback: function(r)
                                                         {
-                                                            rate_field.set_value(r.message);
+                                                            rate_field.set_value(r.message.price);
                                                             qty_field.set_value(1);
                                                         }
                                                     });
@@ -1609,7 +1609,7 @@ function erstelle_folgejahr_rechnung(frm, jahr) {
                                             },
                                             callback: function(r)
                                             {
-                                                rate_field.set_value(r.message);
+                                                rate_field.set_value(r.message.price);
                                             }
                                         });
                                     }
@@ -2401,9 +2401,11 @@ function erstelle_rechnung_sonstiges(frm) {
                                             if (this.section) {
                                                 var rate_field = this.section.fields_dict.rate;
                                                 var qty_field = this.section.fields_dict.qty;
+                                                var description_field = this.section.fields_dict.description;
                                             } else {
                                                 var rate_field = this.grid_row.on_grid_fields[2];
                                                 var qty_field = this.grid_row.on_grid_fields[1];
+                                                var description_field = this.grid_row.on_grid_fields[3];
                                             }
                                             frappe.call({
                                                 method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
@@ -2413,6 +2415,7 @@ function erstelle_rechnung_sonstiges(frm) {
                                                 callback: function(r)
                                                 {
                                                     rate_field.set_value(r.message.price);
+                                                    description_field.set_value(r.message.description);
                                                     qty_field.set_value(1);
                                                 }
                                             });
@@ -2441,11 +2444,10 @@ function erstelle_rechnung_sonstiges(frm) {
                                 {
                                     fieldtype:'Text Editor',
                                     fieldname:"description",
-                                    in_list_view: 0,
+                                    in_list_view: 1,
                                     read_only: 0,
                                     label: __('Description'),
-                                    reqd: 0,
-                                    description: 'Dieses Feld soll nur beschrieben werden, wenn der Standard-Artikel-Text überschrieben werden soll.',
+                                    reqd: 0
                                 }]
                             }
                         ],
