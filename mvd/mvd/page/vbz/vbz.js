@@ -49,6 +49,7 @@ frappe.vbz = {
         $("#goto_klassisch").off("click");
         $("#todo").off("click");
         $("#beratung").off("click");
+        $("#beratung_alle_sektionen").off("click");
         
         //~ muss entfernt werden wenn beratung offiziell deployed
         $("#termin").off("click");
@@ -160,6 +161,10 @@ frappe.vbz = {
         $("#beratung").click(function(){
             frappe.dom.freeze('Öffne Beratungen...');
             frappe.set_route("vbz-beratung");
+        });
+        $("#beratung_alle_sektionen").click(function(){
+            frappe.dom.freeze('Öffne Beratungen...');
+            frappe.set_route("vbz-beratung-alle-se");
         });
         
         //~ muss entfernt werden wenn beratung offiziell deployed

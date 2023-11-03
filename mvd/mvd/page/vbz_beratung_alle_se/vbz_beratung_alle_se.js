@@ -1,21 +1,21 @@
-frappe.pages['vbz-beratung'].on_page_load = function(wrapper) {
+frappe.pages['vbz-beratung-alle-se'].on_page_load = function(wrapper) {
     var page = frappe.ui.make_app_page({
         parent: wrapper,
         title: 'Verarbeitungszentrale',
         single_column: true
     });
-    frappe.vbz_beratung.add_views(page);
+    frappe.vbz_beratung_alle_se.add_views(page);
     localStorage['firstLoad'] = true;
 }
-frappe.pages['vbz-beratung'].refresh= function(wrapper){
-    frappe.vbz_beratung.show_view('vbz_beratung');
+frappe.pages['vbz-beratung-alle-se'].refresh= function(wrapper){
+    frappe.vbz_beratung_alle_se.show_view('vbz_beratung_alle_se');
     frappe.dom.unfreeze();
 } 
 
-frappe.vbz_beratung = {
+frappe.vbz_beratung_alle_se = {
     add_views: function(page) {
         frappe.call({
-            'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_open_data",
+            'method': "mvd.mvd.page.vbz_beratung_alle_se.vbz_beratung_alle_se.get_open_data",
             'args': {},
             'freeze': true,
             'freeze_message': 'Lade Verarbeitungszentrale...',
@@ -23,8 +23,8 @@ frappe.vbz_beratung = {
             'callback': function(r)
             {
                 if (r.message) {
-                    page.add_view('vbz_beratung', frappe.render_template("vbz_beratung", eval(r.message.beratung)))
-                    frappe.vbz_beratung.add_click_handlers(eval(r.message));
+                    page.add_view('vbz_beratung_alle_se', frappe.render_template("vbz_beratung_alle_se", eval(r.message.beratung)))
+                    frappe.vbz_beratung_alle_se.add_click_handlers(eval(r.message));
                     localStorage['firstLoad'] = true;
                 }
             }
@@ -37,7 +37,7 @@ frappe.vbz_beratung = {
         //
     },
     add_click_handlers: function(open_datas) {
-        //~ frappe.vbz_beratung.remove_click_handlers();
+        //~ frappe.vbz_beratung_alle_se.remove_click_handlers();
         
         $("#s").click(function(){
             frappe.route_options = {"status": 'Eingang'}
@@ -115,7 +115,7 @@ frappe.vbz_beratung = {
         
         $("#p1").click(function(){
             frappe.call({
-                'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_user_kontaktperson",
+                'method': "mvd.mvd.page.vbz_beratung_alle_se.vbz_beratung_alle_se.get_user_kontaktperson",
                 'args': {'only_session_user': 1},
                 'async': false,
                 'callback': function(r)
@@ -127,7 +127,7 @@ frappe.vbz_beratung = {
         });
         $("#p2").click(function(){
             frappe.call({
-                'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_user_kontaktperson",
+                'method': "mvd.mvd.page.vbz_beratung_alle_se.vbz_beratung_alle_se.get_user_kontaktperson",
                 'args': {},
                 'async': false,
                 'callback': function(r)
@@ -139,7 +139,7 @@ frappe.vbz_beratung = {
         });
         $("#p3").click(function(){
             frappe.call({
-                'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_user_kontaktperson",
+                'method': "mvd.mvd.page.vbz_beratung_alle_se.vbz_beratung_alle_se.get_user_kontaktperson",
                 'args': {},
                 'async': false,
                 'callback': function(r)
@@ -151,7 +151,7 @@ frappe.vbz_beratung = {
         });
         $("#p4").click(function(){
             frappe.call({
-                'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_user_kontaktperson",
+                'method': "mvd.mvd.page.vbz_beratung_alle_se.vbz_beratung_alle_se.get_user_kontaktperson",
                 'args': {},
                 'async': false,
                 'callback': function(r)
