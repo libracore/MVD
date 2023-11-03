@@ -81,7 +81,7 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r2").click(function(){
-            frappe.route_options = {'status': 'Open', 'kontaktperson': 'Rechtsberatung Pool (MVBE)'}
+            frappe.route_options = {'status': 'Open', 'kontaktperson': 'Rechtsberatung Pool (MVBE)', 'beratung_prio': ['!=', 'Hoch']}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r3").click(function(){
