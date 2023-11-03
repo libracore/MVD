@@ -1,0 +1,180 @@
+
+<div class="row">
+    <h1 class="vbz">Rechtsberatung und Disposition<span id="datenstand" class="pull-right">Datenstand: {{ datenstand }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
+</div>
+<div class="row">
+    <table id="table_beratungs_uebersicht">
+        <tr>
+            <th></th>
+            <th></th>
+            <th style="text-align: right;"><b>Anzahl</b></th>
+        </tr>
+        <tr id="s">
+            <td>S</td>
+            <td><b>Sekretariat</b></td>
+            {% if s > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ s }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="s1">
+            <td>S1</td>
+            <td>Nicht Mitgliedern zugeordnet</td>
+            {% if s1 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ s1 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr id="r">
+            <td>R</td>
+            <td><b>Rechtsberatung</b></td>
+            {% if r > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r1">
+            <td>R1</td>
+            <td>Dringend</td>
+            {% if r1 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r1 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r2">
+            <td>R2</td>
+            <td>Im Pool</td>
+            {% if r2 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r2 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r3">
+            <td>R3</td>
+            <td>Nicht im Pool/Einzelzuweisung</td>
+            {% if r3 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r3 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r4">
+            <td>R4</td>
+            <td>Offene Rückfragen</td>
+            {% if r4 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r4 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r5">
+            <td>R5</td>
+            <td>Beantwortete Rückfragen (Posteingang)</td>
+            {% if r5 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r5 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r6">
+            <td>R6</td>
+            <td>Beantwortete Rückfragen für einzelne Berater*in (Posteingang)</td>
+            {% if r6 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r6 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r7">
+            <td>R7</td>
+            <td>Alle vereinbarten Termine</td>
+            {% if r7 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r7 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r8">
+            <td>R8</td>
+            <td>Vergangene Termine</td>
+            {% if r8 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r8 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r9">
+            <td>R9</td>
+            <td>Weitere Korrespondenz</td>
+            {% if r9 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r9 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr>
+            <td></td>
+            <td><b>{{ frappe.user.full_name() }}</b></td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr id="p1">
+            <td>P1</td>
+            <td>Exklusiv zugewiesene Beratungen</td>
+            {% if p1 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ p1 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="p2">
+            <td>P2</td>
+            <td>Offene eigene Rückfragen</td>
+            {% if p2 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ p2 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="p3">
+            <td>P3</td>
+            <td>Beantwortete Rückfragen (Posteingang)</td>
+            {% if p3 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ p3 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="p4">
+            <td>P4</td>
+            <td>Termine</td>
+            {% if p4 > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ p4 }}</b></td>
+            {% endif %}
+        </tr>
+        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+        <tr id="rechtsberaterinnen">
+            <td></td>
+            <td>Liste der Rechtsberater*innen</td>
+            <td style="text-align: right;"><b>&nbsp;</b></td>
+        </tr>
+        <tr id="beratungskategorien">
+            <td></td>
+            <td>Liste der Beratungskategorien</td>
+            <td style="text-align: right;"><b>&nbsp;</b></td>
+        </tr>
+        <tr id="statistik">
+            <td></td>
+            <td>Statistik</td>
+            <td style="text-align: right;"><b>&nbsp;</b></td>
+        </tr>
+    </table>
+</div>
