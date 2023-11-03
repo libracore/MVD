@@ -12,8 +12,8 @@ Allgemein
 }
 
 .green-card:hover {
-    box-shadow: 10px 10px 5px #91bf1f;
-    border: 1px solid #91bf1f;
+    box-shadow: 10px 10px 5px #219D84;
+    border: 1px solid #219D84;
 }
 
 .blue-card:hover {
@@ -66,11 +66,11 @@ height: 2em;
 }
 
 #page-vbz-massenlauf {
-    background-color: #fafad9;
+    background-color: #e6ebef;
 }
 
 .green-icon {
-    color: #91bf1f;
+    color: #219D84;
 }
 
 .blue-icon {
@@ -132,7 +132,7 @@ Validierung
 #geschenk_mitgliedschaften:hover,
 #zuzuege:hover,
 #autom_adressaenderungen:hover {
-    background-color: #91bf1f;
+    background-color: #219D84;
     cursor: pointer;
 }
 
@@ -140,7 +140,7 @@ Validierung
 Massenlauf
 */
 #table_massenlauf_uebersicht > tbody > tr:nth-child(n+2):hover {
-    background-color: #91bf1f;
+    background-color: #219D84;
 }
 
 #table_massenlauf_uebersicht > tbody > tr:nth-child(n+2) > td:nth-child(n+3) > i:hover {
@@ -158,6 +158,6 @@ Adresspflege
 #weggezogen_unbekannt:hover,
 #treffer_ausland:hover,
 #personen_nicht_bekannt:hover {
-    background-color: #91bf1f;
+    background-color: #219D84;
     cursor: pointer;
 }

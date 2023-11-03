@@ -1,5 +1,5 @@
 #page-vbz-beratung {
-    background-color: #fafad9;
+    background-color: #e6ebef;
 }
 
 h1.vbz {
@@ -47,6 +47,6 @@ h1.vbz {
 #rechtsberaterinnen:hover,
 #beratungskategorien:hover,
 #statistik:hover {
-    background-color: #91bf1f;
+    background-color: #219D84;
     cursor: pointer;
 }
