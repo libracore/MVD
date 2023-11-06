@@ -23,7 +23,7 @@ def get_open_data():
             's7': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['is', 'not set']}, limit=100, distinct=True, ignore_ifnull=True)),
             'r': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open'}, limit=100, distinct=True, ignore_ifnull=True)),
             'r1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': 'Hoch'}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r2': frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratung` WHERE `status` = 'Open' AND `kontaktperson` = 'Rechtsberatung Pool (MVBE)' AND (`beratung_prio` != 'Hoch' OR `beratung_prio` IS NULL)""", as_dcit=True)[0].qty,
+            'r2': frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratung` WHERE `status` = 'Open' AND `kontaktperson` = 'Rechtsberatung Pool (MVBE)' AND (`beratung_prio` != 'Hoch' OR `beratung_prio` IS NULL) AND `sektion_id` = 'MVBE'""", as_dict=True)[0].qty,
             'r3': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)']}, limit=100, distinct=True, ignore_ifnull=True)),
             'r4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 0}, limit=100, distinct=True, ignore_ifnull=True)),
             'r5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
