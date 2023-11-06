@@ -39,81 +39,81 @@ frappe.vbz_beratung_alle_se = {
     add_click_handlers: function(open_datas) {
         //~ frappe.vbz_beratung_alle_se.remove_click_handlers();
         
-        $("#s").click(function(){
+        $("#s_as").click(function(){
             frappe.route_options = {"status": 'Eingang'}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#s1").click(function(){
+        $("#s1_as").click(function(){
             frappe.route_options = {"status": 'Eingang', "mv_mitgliedschaft": ['is', 'not set']}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#s2").click(function(){
+        $("#s2_as").click(function(){
             frappe.route_options = {"status": 'Eingang', "beratungskategorie": ['in', ['202 - MZ-Erhöhung', '300 - Nebenkosten']]}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#s3").click(function(){
+        $("#s3_as").click(function(){
             frappe.route_options = {"status": 'Rückfrage: Termin vereinbaren'}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#s4").click(function(){
+        $("#s4_as").click(function(){
             frappe.route_options = {"status": "Rückfragen", "kontaktperson": ['is', 'not set']}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#s5").click(function(){
+        $("#s5_as").click(function(){
             frappe.route_options = {"status": "Rückfragen", "kontaktperson": ['is', 'not set'], "ungelesen": 1}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#s6").click(function(){
+        $("#s6_as").click(function(){
             frappe.route_options = {"status": ["not in", ["Rückfragen", "Rückfrage: Termin vereinbaren", "Eingang", "Open", "Zusammengeführt"]], "ungelesen": 1, "kontaktperson": ['is', 'not set']}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#s7").click(function(){
+        $("#s7_as").click(function(){
             frappe.route_options = {"status": 'Open', "kontaktperson": ['is', 'not set']}
             frappe.set_route("List", "Beratung", "List");
         });
         
-        $("#r").click(function(){
+        $("#r_as").click(function(){
             frappe.route_options = {"status": 'Open'}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#r1").click(function(){
+        $("#r1_as").click(function(){
             frappe.route_options = {"status": 'Open', 'beratung_prio': 'Hoch'}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#r2").click(function(){
+        $("#r2_as").click(function(){
             frappe.route_options = {'status': 'Open', 'kontaktperson': 'Rechtsberatung Pool (MVBE)', 'beratung_prio': ['!=', 'Hoch']}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#r3").click(function(){
+        $("#r3_as").click(function(){
             frappe.route_options = {'status': 'Open', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)']}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#r4").click(function(){
+        $("#r4_as").click(function(){
             frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['is', 'set']}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#r5").click(function(){
+        $("#r5_as").click(function(){
             frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 1}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#r6").click(function(){
+        $("#r6_as").click(function(){
             frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#r7").click(function(){
+        $("#r7_as").click(function(){
             frappe.route_options = {'status': ['!=', 'Closed'], 'hat_termine': 1}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#r8").click(function(){
+        $("#r8_as").click(function(){
             frappe.route_options = {'status': 'Closed', 'hat_termine': 1}
             frappe.set_route("List", "Beratung", "List");
         });
-        $("#r9").click(function(){
+        $("#r9_as").click(function(){
             frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt"]], "ungelesen": 1, "kontaktperson": ['is', 'set']}
             frappe.set_route("List", "Beratung", "List");
         });
         
-        $("#p1").click(function(){
+        $("#p1_as").click(function(){
             frappe.call({
                 'method': "mvd.mvd.page.vbz_beratung_alle_se.vbz_beratung_alle_se.get_user_kontaktperson",
                 'args': {'only_session_user': 1},
@@ -125,7 +125,7 @@ frappe.vbz_beratung_alle_se = {
                 }
             });
         });
-        $("#p2").click(function(){
+        $("#p2_as").click(function(){
             frappe.call({
                 'method': "mvd.mvd.page.vbz_beratung_alle_se.vbz_beratung_alle_se.get_user_kontaktperson",
                 'args': {},
@@ -137,7 +137,7 @@ frappe.vbz_beratung_alle_se = {
                 }
             });
         });
-        $("#p3").click(function(){
+        $("#p3_as").click(function(){
             frappe.call({
                 'method': "mvd.mvd.page.vbz_beratung_alle_se.vbz_beratung_alle_se.get_user_kontaktperson",
                 'args': {},
@@ -149,7 +149,7 @@ frappe.vbz_beratung_alle_se = {
                 }
             });
         });
-        $("#p4").click(function(){
+        $("#p4_as").click(function(){
             frappe.call({
                 'method': "mvd.mvd.page.vbz_beratung_alle_se.vbz_beratung_alle_se.get_user_kontaktperson",
                 'args': {},
@@ -163,13 +163,13 @@ frappe.vbz_beratung_alle_se = {
         });
         
         
-        $("#rechtsberaterinnen").click(function(){
+        $("#rechtsberaterinnen_as").click(function(){
             frappe.set_route("List", "Termin Kontaktperson", "List");
         });
-        $("#beratungskategorien").click(function(){
+        $("#beratungskategorien_as").click(function(){
             frappe.set_route("List", "Beratungskategorie", "List");
         });
-        $("#statistik").click(function(){
+        $("#statistik_as").click(function(){
             frappe.set_route(["query-report", "Beratungsstatistik"]);
         });
         
