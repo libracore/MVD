@@ -1,6 +1,6 @@
 
 <div class="row">
-    <h1 class="vbz">Rechtsberatung und Disposition<span id="datenstand" class="pull-right">Datenstand: {{ datenstand }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
+    <h1 class="vbz">Rechtsberatung und Disposition<span id="datenstand_as" class="pull-right">Datenstand: {{ datenstand_as }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
 </div>
 <div class="row">
     <table id="table_beratungs_uebersicht">
@@ -9,113 +9,113 @@
             <th></th>
             <th style="text-align: right;"><b>Anzahl</b></th>
         </tr>
-        <tr id="s">
+        <tr id="s_as">
             <td>S</td>
             <td><b>Sekretariat</b></td>
-            {% if s > 99 %}
+            {% if s_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ s }}</b></td>
+                <td style="text-align: right;"><b>{{ s_as }}</b></td>
             {% endif %}
         </tr>
-        <tr id="s1">
+        <tr id="s1_as">
             <td>S1</td>
             <td>Nicht Mitgliedern zugeordnet</td>
-            {% if s1 > 99 %}
+            {% if s1_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ s1 }}</b></td>
+                <td style="text-align: right;"><b>{{ s1_as }}</b></td>
             {% endif %}
         </tr>
         <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-        <tr id="r">
+        <tr id="r_as">
             <td>R</td>
             <td><b>Rechtsberatung</b></td>
-            {% if r > 99 %}
+            {% if r_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ r }}</b></td>
+                <td style="text-align: right;"><b>{{ r_as }}</b></td>
             {% endif %}
         </tr>
-        <tr id="r1">
+        <tr id="r1_as">
             <td>R1</td>
             <td>Dringend</td>
-            {% if r1 > 99 %}
+            {% if r1_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ r1 }}</b></td>
+                <td style="text-align: right;"><b>{{ r1_as }}</b></td>
             {% endif %}
         </tr>
-        <tr id="r2">
+        <tr id="r2_as">
             <td>R2</td>
             <td>Im Pool</td>
-            {% if r2 > 99 %}
+            {% if r2_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ r2 }}</b></td>
+                <td style="text-align: right;"><b>{{ r2_as }}</b></td>
             {% endif %}
         </tr>
-        <tr id="r3">
+        <tr id="r3_as">
             <td>R3</td>
             <td>Nicht im Pool/Einzelzuweisung</td>
-            {% if r3 > 99 %}
+            {% if r3_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ r3 }}</b></td>
+                <td style="text-align: right;"><b>{{ r3_as }}</b></td>
             {% endif %}
         </tr>
-        <tr id="r4">
+        <tr id="r4_as">
             <td>R4</td>
             <td>Offene Rückfragen</td>
-            {% if r4 > 99 %}
+            {% if r4_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ r4 }}</b></td>
+                <td style="text-align: right;"><b>{{ r4_as }}</b></td>
             {% endif %}
         </tr>
-        <tr id="r5">
+        <tr id="r5_as">
             <td>R5</td>
             <td>Beantwortete Rückfragen (Posteingang)</td>
-            {% if r5 > 99 %}
+            {% if r5_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ r5 }}</b></td>
+                <td style="text-align: right;"><b>{{ r5_as }}</b></td>
             {% endif %}
         </tr>
-        <tr id="r6">
+        <tr id="r6_as">
             <td>R6</td>
             <td>Beantwortete Rückfragen für einzelne Berater*in (Posteingang)</td>
-            {% if r6 > 99 %}
+            {% if r6_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ r6 }}</b></td>
+                <td style="text-align: right;"><b>{{ r6_as }}</b></td>
             {% endif %}
         </tr>
-        <tr id="r7">
+        <tr id="r7_as">
             <td>R7</td>
             <td>Alle vereinbarten Termine</td>
-            {% if r7 > 99 %}
+            {% if r7_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ r7 }}</b></td>
+                <td style="text-align: right;"><b>{{ r7_as }}</b></td>
             {% endif %}
         </tr>
-        <tr id="r8">
+        <tr id="r8_as">
             <td>R8</td>
             <td>Vergangene Termine</td>
-            {% if r8 > 99 %}
+            {% if r8_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ r8 }}</b></td>
+                <td style="text-align: right;"><b>{{ r8_as }}</b></td>
             {% endif %}
         </tr>
-        <tr id="r9">
+        <tr id="r9_as">
             <td>R9</td>
             <td>Weitere Korrespondenz</td>
-            {% if r9 > 99 %}
+            {% if r9_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ r9 }}</b></td>
+                <td style="text-align: right;"><b>{{ r9_as }}</b></td>
             {% endif %}
         </tr>
         <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -124,54 +124,54 @@
             <td><b>{{ frappe.user.full_name() }}</b></td>
             <td>&nbsp;</td>
         </tr>
-        <tr id="p1">
+        <tr id="p1_as">
             <td>P1</td>
             <td>Exklusiv zugewiesene Beratungen</td>
-            {% if p1 > 99 %}
+            {% if p1_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ p1 }}</b></td>
+                <td style="text-align: right;"><b>{{ p1_as }}</b></td>
             {% endif %}
         </tr>
-        <tr id="p2">
+        <tr id="p2_as">
             <td>P2</td>
             <td>Offene eigene Rückfragen</td>
-            {% if p2 > 99 %}
+            {% if p2_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ p2 }}</b></td>
+                <td style="text-align: right;"><b>{{ p2_as }}</b></td>
             {% endif %}
         </tr>
-        <tr id="p3">
+        <tr id="p3_as">
             <td>P3</td>
             <td>Beantwortete Rückfragen (Posteingang)</td>
-            {% if p3 > 99 %}
+            {% if p3_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ p3 }}</b></td>
+                <td style="text-align: right;"><b>{{ p3_as }}</b></td>
             {% endif %}
         </tr>
-        <tr id="p4">
+        <tr id="p4_as">
             <td>P4</td>
             <td>Termine</td>
-            {% if p4 > 99 %}
+            {% if p4_as > 99 %}
                 <td style="text-align: right;"><b>99+</b></td>
             {% else %}
-                <td style="text-align: right;"><b>{{ p4 }}</b></td>
+                <td style="text-align: right;"><b>{{ p4_as }}</b></td>
             {% endif %}
         </tr>
         <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-        <tr id="rechtsberaterinnen">
+        <tr id="rechtsberaterinnen_as">
             <td></td>
             <td>Liste der Rechtsberater*innen</td>
             <td style="text-align: right;"><b>&nbsp;</b></td>
         </tr>
-        <tr id="beratungskategorien">
+        <tr id="beratungskategorien_as">
             <td></td>
             <td>Liste der Beratungskategorien</td>
             <td style="text-align: right;"><b>&nbsp;</b></td>
         </tr>
-        <tr id="statistik">
+        <tr id="statistik_as">
             <td></td>
             <td>Statistik</td>
             <td style="text-align: right;"><b>&nbsp;</b></td>

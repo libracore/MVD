@@ -12,23 +12,23 @@ from frappe.utils.pdf import get_file_data_from_writer
 def get_open_data():
     open_data = {
         'beratung': {
-            'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
-            's': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang'}, limit=100, distinct=True, ignore_ifnull=True)),
-            's1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set']}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open'}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': 'Hoch'}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r2': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['is', 'not set'], 'beratung_prio': ['!=', 'Hoch']}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r3': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)']}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'ungelesen': 0}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r6': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r7': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 'hat_termine': 1}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r8': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Closed', 'hat_termine': 1}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r9': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Open', 'Zusammengeführt']], 'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
-            'p1': get_p1(frappe.session.user),
-            'p2': get_p2(frappe.session.user),
-            'p3': get_p3(frappe.session.user),
-            'p4': get_p4(frappe.session.user)
+            'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
+            's_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang'}, limit=100, distinct=True, ignore_ifnull=True)),
+            's1_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set']}, limit=100, distinct=True, ignore_ifnull=True)),
+            'r_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open'}, limit=100, distinct=True, ignore_ifnull=True)),
+            'r1_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': 'Hoch'}, limit=100, distinct=True, ignore_ifnull=True)),
+            'r2_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['is', 'not set'], 'beratung_prio': ['!=', 'Hoch']}, limit=100, distinct=True, ignore_ifnull=True)),
+            'r3_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)']}, limit=100, distinct=True, ignore_ifnull=True)),
+            'r4_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'ungelesen': 0}, limit=100, distinct=True, ignore_ifnull=True)),
+            'r5_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
+            'r6_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
+            'r7_as': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 'hat_termine': 1}, limit=100, distinct=True, ignore_ifnull=True)),
+            'r8_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Closed', 'hat_termine': 1}, limit=100, distinct=True, ignore_ifnull=True)),
+            'r9_as': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Open', 'Zusammengeführt']], 'ungelesen': 1}, limit=100, distinct=True, ignore_ifnull=True)),
+            'p1_as': get_p1(frappe.session.user),
+            'p2_as': get_p2(frappe.session.user),
+            'p3_as': get_p3(frappe.session.user),
+            'p4_as': get_p4(frappe.session.user)
         }
     }
     
