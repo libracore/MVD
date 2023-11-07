@@ -16,7 +16,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Open\nClosed",
+   "options": "Open\nClosed\nFailed\nIgnore",
    "reqd": 1
   },
   {
@@ -45,7 +45,7 @@
    "label": "Sektion"
   }
  ],
- "modified": "2022-06-01 15:13:23.328096",
+ "modified": "2023-11-07 10:40:58.574247",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Platform Queue",

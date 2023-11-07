@@ -115,16 +115,16 @@ def update_mvm(mvm, update):
                 if sp_connection.status_code != 204:
                     frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), 'update_mvm failed')
                     frappe.db.commit()
-                    return
+                    return 0
                 else:
-                    return
+                    return 1
             except Exception as err:
                 frappe.log_error("{0}\n\n{1}".format(err, mvm), 'update_mvm failed')
                 frappe.db.commit()
-                return
+                return 0
     else:
         frappe.log_error("{0}".format(mvm), 'update_mvm deaktiviert')
-        return
+        return 0
 
 def send_beratung(beratungs_data, beratung):
     if auth_check(SVCPF_SCOPE):

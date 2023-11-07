@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.1.0
+SP Queue Improvement (Resending)
 #### 11.0.1
 Hotfix MVBE Beratungen
 #### 11.0.0

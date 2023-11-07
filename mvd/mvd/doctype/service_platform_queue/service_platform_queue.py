@@ -8,6 +8,8 @@ from frappe.model.document import Document
 from mvd.mvd.service_plattform.api import update_mvm
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import prepare_mvm_for_sp
 from frappe.utils.background_jobs import enqueue
+import json
+from frappe.utils import cint
 
 class ServicePlatformQueue(Document):
     pass
@@ -19,7 +21,7 @@ def flush_queue(limit=100):
         limit = 'LIMIT {limit}'.format(limit=limit)
     else:
         limit = ''
-    queues = frappe.db.sql("""SELECT `name` FROM `tabService Platform Queue` WHERE `status` = 'Open' AND `eingehend` != 1 ORDER BY `creation` ASC {limit}""".format(limit=limit), as_dict=True)
+    queues = frappe.db.sql("""SELECT `name` FROM `tabService Platform Queue` WHERE `status` IN ('Open', 'Failed') AND `eingehend` != 1 ORDER BY `creation` ASC {limit}""".format(limit=limit), as_dict=True)
     for _queue in queues:
         queue = frappe.get_doc("Service Platform Queue", _queue.name)
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", queue.mv_mitgliedschaft)
@@ -29,8 +31,12 @@ def flush_queue(limit=100):
                 update = True
             prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
             update_status = update_mvm(prepared_mvm, update)
-            queue.status = 'Closed'
-            queue.objekt = str(prepared_mvm)
+            if cint(update_status) == 1:
+                queue.status = 'Closed'
+            else:
+                queue.status = 'Failed'
+            json_formatted_str = json.dumps(prepared_mvm, indent=2)
+            queue.objekt = json_formatted_str
             queue.save(ignore_permissions=True)
         else:
             frappe.log_error("Mitglied: {0}\nStatus: {1}".format(mitgliedschaft.name, mitgliedschaft.status_c), 'API Queue: Falscher Status')
