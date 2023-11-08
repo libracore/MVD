@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.2.1
+Bugfix: Mysteriös verschwindende Druckvorlagen-Inhalte
 #### 11.2.0
 Beratung; Implementierung auto-set von Berater*in
 #### 11.1.0
