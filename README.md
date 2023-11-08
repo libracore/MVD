@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.2.2
+VBZ Beratungs Bugfix in Visualisierung
 #### 11.2.1
 Bugfix: Mysteriös verschwindende Druckvorlagen-Inhalte
 #### 11.2.0
