@@ -31,7 +31,8 @@ doctype_js = {
     "Sales Invoice" : "public/js/custom_scripts/sales_invoice.js",
     "User" : "public/js/custom_scripts/user.js",
     "Role" : "public/js/custom_scripts/role.js",
-    "Payment Entry" : "public/js/custom_scripts/payment_entry.js"
+    "Payment Entry" : "public/js/custom_scripts/payment_entry.js",
+    "Communication" : "public/js/custom_scripts/communication.js"
 }
 doctype_list_js = {
     "Error Log" : "public/js/custom_scripts/error_log_list.js",
