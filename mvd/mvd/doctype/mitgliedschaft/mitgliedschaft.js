@@ -2,11 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Mitgliedschaft', {
-    setup: function(frm) {
+    refresh: function(frm) {
         // override_default_email_dialog
         override_default_email_dialog(frm);
-    },
-    refresh: function(frm) {
+        
        // Datensatz-Titel ergänzen
        mitglied_name_anzeigen(frm);
        
@@ -1799,59 +1798,18 @@ function pincode_lookup(pincode, ort) {
 }
 
 function override_default_email_dialog(frm) {
-    $('.menu-item-label[data-label="Email"]').parent().off('click');
-            $('.menu-item-label[data-label="E-Mail"]').parent().off('click');
-    document.addEventListener('click',function(event) {
-        // Replace email dialog to get a more sensible draft message and recipients
-        var on_email_menutext = event.target.classList.contains('menu-item-label') && ['E-Mail','Email'].includes(event.target.innerText);
-        var on_email_menuitem = event.target.children.length > 0
-                                                 && event.target.children[0].classList.contains('menu-item-label')
-                                                 && ['E-Mail','Email'].includes(event.target.children[0].innerText);
-                                                 
-      if(on_email_menutext || on_email_menuitem) {
-          custom_email_dialog(event);
-            $('.menu-item-label[data-label="Email"]').parent().off('click');
-            $('.menu-item-label[data-label="E-Mail"]').parent().off('click');
-        }
-     
-    }, true);
-    
-    // Catch Ctrl+E
-    document.addEventListener('keydown',function(event) {
-        if (event.key == 'e' && event.ctrlKey){
-            custom_email_dialog(event);
-            event.stopPropagation();
-            event.preventDefault();
-        }
-    }, true);
-}
-
-function custom_email_dialog(e) {
-    var cc = '';
-    var bcc = '';
-    frappe.last_edited_communication = {};
-    localStorage.clear(); /* Not strictly necessary, just clear localStorage to avoid "drafts" showing up */
-    var comcom = new frappe.views.CommunicationComposer({
-        title: "Neues E-Mail",
-        doc: cur_frm.doc,
-        frm: cur_frm,
-        subject: 'Ihre Mitgliedschaft: ' + cur_frm.doc.mitglied_nr,
-        recipients: cur_frm.doc.e_mail_1 || '',
-        cc: cc,
-        bcc: bcc,
-        attach_document_print: false, /* This tick is changed by JS along with the attachment ticks - which can't be passed as arguments */
-        message: '', /* Gets overwritten by txt (txt must be passed to avoid loading draft messages from LocalStorage) */
-        real_name: '', /* Do not pass this as it triggers automatic salutation with "Dear" */
-        txt: '<div>' + cur_frm.doc.briefanrede + '</div>'
-    });
-    /* hack to remove attach_document_print */
-    setTimeout(function(){
-        if (cur_dialog) {
-            cur_dialog.fields_dict.attach_document_print.set_value(0);
-        } else {
-            setTimeout(function(){cur_dialog.fields_dict.attach_document_print.set_value(0);}, 500);
-        }
-    }, 500);
+    // overwrite E-Mail BTN
+    $("[data-label='Email']").parent().off("click");
+    $("[data-label='Email']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
+    $("[data-label='E-Mail']").parent().off("click");
+    $("[data-label='E-Mail']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
+    $(".btn.btn-default.btn-new-email.btn-xs").off("click");
+    $(".btn.btn-default.btn-new-email.btn-xs").click(function(){frappe.mvd.new_mail(cur_frm);});
+    $("[data-communication-type='Communication']").off("click");
+    $(".reply-link").off("click");
+    $(".reply-link").click(function(e){prepare_mvd_mail_composer(e);}); 
+    $(".reply-link-all").click(function(e){prepare_mvd_mail_composer(e);});
+    frappe.ui.keys.off('ctrl+e', cur_frm.page);
 }
 
 function erstelle_hv_rechnung(frm) {

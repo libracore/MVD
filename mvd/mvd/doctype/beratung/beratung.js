@@ -259,18 +259,7 @@ frappe.ui.form.on('Beratung', {
                 });
                 
                 // overwrite E-Mail BTN
-                $("[data-label='Email']").parent().off("click");
-                $("[data-label='Email']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
-                $("[data-label='E-Mail']").parent().off("click");
-                $("[data-label='E-Mail']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
-                $(".btn.btn-default.btn-new-email.btn-xs").off("click");
-                $(".btn.btn-default.btn-new-email.btn-xs").click(function(){frappe.mvd.new_mail(cur_frm);});
-                $("[data-communication-type='Communication']").off("click");
-                $(".reply-link").off("click");
-                $(".reply-link").click(function(e){prepare_mvd_mail_composer(e);}); 
-                $(".reply-link-all").click(function(e){prepare_mvd_mail_composer(e);});
-                frappe.ui.keys.off('ctrl+e', cur_frm.page);
-                frappe.ui.keys.on('ctrl+e', function(e) {frappe.mvd.new_mail(cur_frm);});
+                override_default_email_dialog(frm);
             } else {
                 // disable E-Mail BTN
                 $("[data-label='Email']").parent().off("click");
@@ -282,7 +271,6 @@ frappe.ui.form.on('Beratung', {
                 $("[title='Reply']").hide();
                 $("[title='Reply All']").hide();
                 frappe.ui.keys.off('ctrl+e', cur_frm.page);
-                frappe.ui.keys.on('ctrl+e', function(e) {frappe.msgprint("Diese Beratung ist zur Bearbeitung gesperrt.");});
             }
             
             // Auto ToDo wurden entfernt. Kann später gelöscht werden
@@ -643,4 +631,19 @@ function reset_timeline(frm) {
             }
         });
     }
+}
+
+function override_default_email_dialog(frm) {
+    // overwrite E-Mail BTN
+    $("[data-label='Email']").parent().off("click");
+    $("[data-label='Email']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
+    $("[data-label='E-Mail']").parent().off("click");
+    $("[data-label='E-Mail']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
+    $(".btn.btn-default.btn-new-email.btn-xs").off("click");
+    $(".btn.btn-default.btn-new-email.btn-xs").click(function(){frappe.mvd.new_mail(cur_frm);});
+    $("[data-communication-type='Communication']").off("click");
+    $(".reply-link").off("click");
+    $(".reply-link").click(function(e){prepare_mvd_mail_composer(e);}); 
+    $(".reply-link-all").click(function(e){prepare_mvd_mail_composer(e);});
+    frappe.ui.keys.off('ctrl+e', cur_frm.page);
 }
