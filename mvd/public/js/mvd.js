@@ -247,13 +247,22 @@ frappe.mvd.new_mail = function(cur_frm, last_email='') {
     $(".modal.fade").remove();
     var recpts;
     var default_sender;
+    var subject = __(cur_frm.meta.name) + ': ' + cur_frm.docname;
+    var txt_string = '';
+    
     if (cur_frm.doctype == 'Beratung') {
         recpts = cur_frm.doc.raised_by || cur_frm.doc.email_id;
         default_sender = frappe.boot.default_beratungs_sender || '';
     }
     
+    if (cur_frm.doctype == 'Mitgliedschaft') {
+        recpts = cur_frm.doc.e_mail_1 || '';
+        subject = 'Ihre Mitgliedschaft: ' + cur_frm.doc.mitglied_nr;
+        txt_string = '<div>' + cur_frm.doc.briefanrede + '</div>';
+    }
+    
     if (!recpts) {
-        cur_frm.doc.email || cur_frm.doc.email_id || cur_frm.doc.contact_email
+        recpts = cur_frm.doc.email || cur_frm.doc.email_id || cur_frm.doc.contact_email
     }
     var temp_email_template = false;
     if (cur_frm.default_rueckfragen_email_template) {
@@ -265,10 +274,10 @@ frappe.mvd.new_mail = function(cur_frm, last_email='') {
     new frappe.mvd.MailComposer({
         doc: cur_frm.doc,
         frm: cur_frm,
-        subject: __(cur_frm.meta.name) + ': ' + cur_frm.docname,
+        subject: subject,
         recipients: recpts,
         attach_document_print: false,
-        //~ txt: '<div>Das kann der initiale Standart-Text sein.</div>',
+        txt: txt_string,
         real_name: cur_frm.doc.real_name || cur_frm.doc.contact_display || cur_frm.doc.contact_name,
         email_template: temp_email_template ? temp_email_template:cur_frm.doc.email_template || '',
         sender: default_sender,
