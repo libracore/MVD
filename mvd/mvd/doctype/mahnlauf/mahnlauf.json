@@ -21,6 +21,7 @@
   "mahnungen_per_mail",
   "zahlungserinnerungen",
   "ueberfaellig_seit",
+  "manuelles_faelligkeitsdaum",
   "amended_from",
   "section_uebersicht",
   "anzahl_pdf",
@@ -268,10 +269,16 @@
    "fieldname": "sprach_filter",
    "fieldtype": "Check",
    "label": "Auf Basis der Mitgliedsprache filtern"
+  },
+  {
+   "default": "0",
+   "fieldname": "manuelles_faelligkeitsdaum",
+   "fieldtype": "Check",
+   "label": "Manuelles F\u00e4lligkeitsdatum"
   }
  ],
  "is_submittable": 1,
- "modified": "2023-08-31 09:54:03.039616",
+ "modified": "2023-11-13 11:27:54.465281",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnlauf",

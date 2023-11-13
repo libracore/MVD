@@ -18,6 +18,10 @@ frappe.ui.form.on('Mahnlauf', {
                  }
              }
         }
+        
+        if (cur_frm.doc.manuelles_faelligkeitsdaum == 1) {
+            cur_frm.set_df_property('ueberfaellig_seit', 'read_only', 0);
+        }
     },
     mahnungen_buchen: function(frm) {
         frappe.dom.freeze('Bitte warten, buche Mahnungen...');
@@ -182,6 +186,13 @@ frappe.ui.form.on('Mahnlauf', {
             cur_frm.set_df_property('typ', 'read_only', 0);
             cur_frm.set_df_property('mahnstufe', 'read_only', 0);
             cur_frm.set_df_property('mahnungen_per_mail', 'read_only', 0);
+        }
+    },
+    manuelles_faelligkeitsdaum: function(frm) {
+        if (cur_frm.doc.manuelles_faelligkeitsdaum == 1) {
+            cur_frm.set_df_property('ueberfaellig_seit', 'read_only', 0);
+        } else {
+            cur_frm.set_df_property('ueberfaellig_seit', 'read_only', 1);
         }
     }
 });
