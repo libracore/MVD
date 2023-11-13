@@ -11,6 +11,7 @@ from frappe.utils.background_jobs import enqueue
 from frappe.core.doctype.communication.email import make
 from frappe import sendmail, get_print
 from mvd.mvd.doctype.druckvorlage.druckvorlage import replace_mv_keywords
+from frappe.utils import cint
 
 class Mahnlauf(Document):
     def onload(self):
@@ -21,9 +22,10 @@ class Mahnlauf(Document):
     
     def validate(self):
        # berechne relevantes Fälligkeitsdatum
-        mahnstufen_frist = frappe.db.get_value('Sektion', self.sektion_id, 'mahnstufe_{0}'.format(self.mahnstufe)) * -1
-        ueberfaellig_seit = add_to_date(nowdate(), days=mahnstufen_frist)
-        self.ueberfaellig_seit = ueberfaellig_seit
+        if not cint(self.manuelles_faelligkeitsdaum) == 1:
+            mahnstufen_frist = frappe.db.get_value('Sektion', self.sektion_id, 'mahnstufe_{0}'.format(self.mahnstufe)) * -1
+            ueberfaellig_seit = add_to_date(nowdate(), days=mahnstufen_frist)
+            self.ueberfaellig_seit = ueberfaellig_seit
         if not self.druckvorlage:
             self.druckvorlage = self.get_druckvorlage()
         if not self.e_mail_vorlage:

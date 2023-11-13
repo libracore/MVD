@@ -296,7 +296,7 @@ def get_verknuepfungsuebersicht(beratung):
                                             FROM `tabBeratung Multiselect`
                                             WHERE `parent` = '{beratung}'
                                         )""".format(beratung=beratung), as_dict=True)
-    if len(verknuepfungen_zu) > 0:
+    if len(verknuepfungen_zu) > 0 or len(verknuepfungen_von) > 0:
         table = """<table style="width: 100%;">
                         <thead>
                             <tr>

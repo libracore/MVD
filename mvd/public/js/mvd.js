@@ -259,6 +259,7 @@ frappe.mvd.new_mail = function(cur_frm, last_email='') {
         recpts = cur_frm.doc.e_mail_1 || '';
         subject = 'Ihre Mitgliedschaft: ' + cur_frm.doc.mitglied_nr;
         txt_string = '<div>' + cur_frm.doc.briefanrede + '</div>';
+        default_sender = 'libracore@mvd.mieterverband.ch'
     }
     
     if (!recpts) {
