@@ -323,6 +323,20 @@ frappe.ui.form.on('Beratung', {
     },
     timeline_refresh: function(frm) {
         if (!frm.timeline.wrapper.find('.btn-split-issue').length) {
+            // Mail Forward
+            let forward_email = __("Forward");
+            $(`<button class="btn btn-xs btn-link btn-add-to-kb text-muted hidden-xs btn-mail-forward pull-right" style="display:inline-block; margin-right: 15px">
+                ${forward_email}
+            </button>`)
+                .appendTo(frm.timeline.wrapper.find('.comment-header .asset-details:not([data-communication-type="Comment"])'))
+            if (!frm.timeline.wrapper.data("btn-mail-forward-event-attached")){
+                frm.timeline.wrapper.on('click', '.btn-mail-forward', (e) => {
+                    prepare_mvd_mail_composer(e, true);
+                })
+                frm.timeline.wrapper.data("btn-mail-forward-event-attached", true)
+            }
+            
+            // Beratung Splitten
             let split_issue = __("Beratung splitten")
             $(`<button class="btn btn-xs btn-link btn-add-to-kb text-muted hidden-xs btn-split-issue pull-right" style="display:inline-block; margin-right: 15px">
                 ${split_issue}
@@ -537,13 +551,13 @@ function roundMinutes(date_string) {
     return date
 }
 
-function prepare_mvd_mail_composer(e) {
+function prepare_mvd_mail_composer(e, forward=false) {
     var last_email = null;
     var default_sender = frappe.boot.default_beratungs_sender || '';
 
     const $target = $(e.currentTarget);
-    const name = $target.data().name;
-
+    const name = $target.data().name ? $target.data().name:e.currentTarget.closest(".timeline-item").getAttribute("data-name");
+    
     // find the email to reply to
     cur_frm.timeline.get_communications().forEach(function(c) {
         if(c.name == name) {
@@ -554,14 +568,16 @@ function prepare_mvd_mail_composer(e) {
     if (last_email.sender.includes(".mieterverband.ch")){
         last_email.sender = cur_frm.doc.raised_by;
     }
+    
     const opts = {
         doc: cur_frm.doc,
         txt: "",
-        title: __('Reply'),
+        title: forward ? __('Forward'):__('Reply'),
         frm: cur_frm,
         sender: default_sender,
         last_email,
-        is_a_reply: true
+        is_a_reply: true,
+        subject: forward ? __("Fw: {0}", [last_email.subject]):''
     };
 
     if ($target.is('.reply-link-all')) {
