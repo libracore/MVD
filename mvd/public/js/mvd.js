@@ -173,7 +173,6 @@ function check_protect_unprotect_beratung() {
     
     // Entsperren der Beratung
     if (beratung_entsperren) {
-        console.log("Entsperren von " + beratung_entsperren);
         frappe.call({
             method: "mvd.mvd.doctype.beratung.beratung.clear_protection",
             args:{
@@ -194,7 +193,6 @@ function check_protect_unprotect_beratung() {
     }
     
     if (beratung_sperren) {
-        console.log("Sperren von " + beratung_sperren);
         frappe.call({
             method: "mvd.mvd.doctype.beratung.beratung.set_protection",
             args:{
