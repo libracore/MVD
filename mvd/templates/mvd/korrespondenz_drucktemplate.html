@@ -4,6 +4,13 @@
 {% set print_language = 'de' %}
 {% set adressblock = get_rg_adressblock(frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft)) %}
 {% set mitgliedschaft = frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft) %}
+{% if mitgliedschaft.ist_geschenkmitgliedschaft %}
+    {% if mitgliedschaft.ist_geschenkmitgliedschaft == 1 %}
+        {% if not mitgliedschaft.gechenkunterlagen_an_schenker %}
+            {% set adressblock = mitgliedschaft.adressblock %}
+        {% endif %}
+    {% endif %}
+{% endif %}
 {% set sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id) %}
 {% if test_druckvorlage %}
     {% set druckvorlage = frappe.get_doc("Druckvorlage", test_druckvorlage) %}
