@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.7.1
+Bei initialen Beratungsmails nicht mehr als neuen Input markieren
 #### 11.7.0
 ISS-2023-00120
 #### 11.6.0

@@ -409,7 +409,6 @@ def check_communication(self, event):
                         beratung.raised_by_name = communication.sender_full_name
                     if not beratung.raised_by:
                         beratung.raised_by = communication.sender
-                    beratung.ungelesen = 1
                     beratung.save()
                 else:
                     beratung.ungelesen = 1
