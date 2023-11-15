@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 11.9.0
+ISS-2023-00125
+#### 11.8.0
+ISS-115; Hinterlegung Druckvorlage in Rechnungs Jahresversand
 #### 11.7.1
 Bei initialen Beratungsmails nicht mehr als neuen Input markieren
 #### 11.7.0

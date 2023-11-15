@@ -520,7 +520,7 @@ def create_invoices_one_batch(jahresversand, limit=False, loop=False, last=False
                 # ------------------------------------------------------------------------------------
                 
                 if not skip:
-                    sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=jahresversand_doc.jahr, submit=True, ignore_stichtage=True, rechnungs_jahresversand=jahresversand_doc.name)
+                    sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=jahresversand_doc.jahr, druckvorlage=jahresversand_doc.druckvorlage, submit=True, ignore_stichtage=True, rechnungs_jahresversand=jahresversand_doc.name)
                 if rg_loop == 10:
                     frappe.db.commit()
                     rg_loop = 1
