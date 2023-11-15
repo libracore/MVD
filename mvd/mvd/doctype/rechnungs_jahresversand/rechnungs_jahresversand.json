@@ -9,6 +9,7 @@
   "title",
   "sektion_id",
   "jahr",
+  "druckvorlage",
   "cb_1",
   "status",
   "download_draft",
@@ -137,10 +138,17 @@
    "fieldtype": "Link",
    "label": "Region",
    "options": "Region"
+  },
+  {
+   "description": "Diese Druckvorlage wird in der Rechnung hinterlegt und dient als Vorlage f\u00fcr den manuellen Nachdruck von Rechnungen direkt im System.",
+   "fieldname": "druckvorlage",
+   "fieldtype": "Link",
+   "label": "Druckvorlage",
+   "options": "Druckvorlage"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-12-13 09:24:54.069827",
+ "modified": "2023-11-15 10:06:24.185816",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Rechnungs Jahresversand",
