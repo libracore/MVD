@@ -1,7 +1,6 @@
 <!-- ---------------------------------------------------------------------------------------- -->
 <!-- Allgemeine Daten -->
 <!-- ---------------------------------------------------------------------------------------- -->
-{% set print_language = 'de' %}
 {% set adressblock = get_rg_adressblock(frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft)) %}
 {% set mitgliedschaft = frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft) %}
 {% if mitgliedschaft.ist_geschenkmitgliedschaft %}
@@ -18,9 +17,7 @@
     <!--{#{% set druckvorlage = frappe.get_doc("Korrespondenz", doc.name) %}#}-->
     {% set druckvorlage = doc %}
 {% endif %}
-{% if druckvorlage %}
-    {% set print_language = druckvorlage.language %}
-{% endif %}
+{% set print_language = mitgliedschaft.language or 'de' %}
 <!-- ---------------------------------------------------------------------------------------- -->
 <!-- ENDE: Allgemeine Daten -->
 <!-- ---------------------------------------------------------------------------------------- -->

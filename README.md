@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.11.0
+ISS-2023-00062
 #### 11.10.0
 ISS-2023-00108; Draft E-Mail Speicher (Beratungsspezifisch)
 #### 11.9.0
