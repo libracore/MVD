@@ -124,11 +124,15 @@ window.onload = function() {
                 return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
             } else {
                 // ***********************************************************************************
-                // Handler zum ENTSPERREN von Beratungen
+                // Handler zum ENTSPERREN von Beratungen sowie dem speichern von Draft E-Mails
                 // Hinweis: Dieser Handler fängt nur das Schliessen des Browsers/Fensters.
-                //          Alles andere  wird unter "check_protect_unprotect_beratung()" verarbeitet
+                //          Alles andere  wird unter "check_protect_unprotect_beratung()" und "save_draft_beratungs_mail()" verarbeitet
                 // ***********************************************************************************
                 if(cur_frm.doctype == 'Beratung') {
+                    // Handler zum speichern von Draft Beratungs E-Mails
+                    save_draft_beratungs_mail(cur_frm.doc.name);
+                    
+                    // Handler zum ENTSPERREN von Beratungen
                     frappe.call({
                         method: "mvd.mvd.doctype.beratung.beratung.clear_protection",
                         args:{
@@ -144,9 +148,59 @@ window.onload = function() {
     });
 };
 
+function save_draft_beratungs_mail(docname) {
+    // Handler zum speichern von Beratungs Draft E-Mails
+    var localstorage_mail = localStorage.getItem('Beratung' + docname) || false;
+    if (localstorage_mail) {
+        // Speichern des Draft Mails
+        frappe.call({
+            method: "mvd.mvd.utils.mail_drafts.save_draft_mail",
+            args:{
+                    'doctype_reference': 'Beratung',
+                    'docname': docname,
+                    'mail': localstorage_mail,
+                    'user': frappe.session.user 
+            }
+        });
+    }
+}
+
+function load_draft_beratungs_mail(docname) {
+    // Handler zum laden von Beratungs Draft E-Mails
+    var localstorage_mail = localStorage.getItem('Beratung' + docname) || false;
+    if (!localstorage_mail) {
+        // laden des Draft Mails
+        frappe.call({
+            method: "mvd.mvd.utils.mail_drafts.load_draft_mail",
+            args:{
+                    'doctype_reference': 'Beratung',
+                    'docname': docname,
+                    'user': frappe.session.user 
+            },
+            callback: (r) => {
+                if (r.message) {
+                    localStorage.setItem('Beratung' + docname, r.message);
+                }
+            }
+        });
+    }
+}
+
+function delete_draft_beratungs_mail(docname) {
+    // Löschen des Draft Mails
+    frappe.call({
+        method: "mvd.mvd.utils.mail_drafts.delete_draft_mail",
+        args:{
+                'doctype_reference': 'Beratung',
+                'docname': docname,
+                'user': frappe.session.user 
+        }
+    });
+}
+
 function check_protect_unprotect_beratung() {
     // ***********************************************************************************
-    // Handler zum ENTSPERREN von Beratungen
+    // Handler zum ENTSPERREN von Beratungen inkl. speichern von Draft Beratungs E-Mails
     // Hinweis: Dieser Handler fängt alles ab ausser das Schliessen des Browsers/Fensters.
     //          Dies wird unter "window.onload = function()" verarbeitet
     // ***********************************************************************************
@@ -171,8 +225,11 @@ function check_protect_unprotect_beratung() {
         }
     }
     
-    // Entsperren der Beratung
     if (beratung_entsperren) {
+        // Speichern von Beratungs Draft E-Mails
+        save_draft_beratungs_mail(beratung_entsperren);
+        
+        // Entsperren der Beratung
         frappe.call({
             method: "mvd.mvd.doctype.beratung.beratung.clear_protection",
             args:{
@@ -193,6 +250,10 @@ function check_protect_unprotect_beratung() {
     }
     
     if (beratung_sperren) {
+        // Laden von Beratungs Draft E-Mails
+        load_draft_beratungs_mail(beratung_sperren);
+        
+        // Entsperren der Beratung
         frappe.call({
             method: "mvd.mvd.doctype.beratung.beratung.set_protection",
             args:{
@@ -202,7 +263,7 @@ function check_protect_unprotect_beratung() {
     }
 }
 $(document).on("page-change", function() {
-    // Sperren/Freigeben von Beratungen
+    // Sperren/Freigeben von Beratungen (inkl. speichern von Draft Beratungs E-Mails)
     check_protect_unprotect_beratung();
     
     // Change the timeline specification, from "X days ago" to the exact date and time
@@ -281,7 +342,8 @@ frappe.mvd.new_mail = function(cur_frm, last_email='') {
         email_template: temp_email_template ? temp_email_template:cur_frm.doc.email_template || '',
         sender: default_sender,
         last_email: last_email ? last_email:'',
-        is_a_reply: last_email ? true:false
+        is_a_reply: last_email ? true:false,
+        save_mail_txt_as_draft: cur_frm.doctype == 'Beratung' ? true:false
     });
 }
 
@@ -367,7 +429,7 @@ frappe.mvd.MailComposer = Class.extend({
                 label:__("Message"),
                 fieldtype:"Text Editor", reqd: 1,
                 fieldname:"content",
-                //~ onchange: frappe.utils.debounce(this.save_as_draft.bind(this), 300) --> Deaktiviert da mühsam. Speichert eigentlich den Draft des Mails im localstorage
+                onchange: this.save_mail_txt_as_draft ? frappe.utils.debounce(this.save_as_draft.bind(this), 300):''
             },
 
             {fieldtype: "Section Break"},
@@ -810,6 +872,7 @@ frappe.mvd.MailComposer = Class.extend({
                 console.log(e);
                 console.warn('[Communication] Cannot delete localStorage item'); // eslint-disable-line
             }
+            delete_draft_beratungs_mail(this.frm.docname);
         }
     },
 
