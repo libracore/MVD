@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.12.0
+Bei Update Errors nur einmalige Info an Slack
 #### 11.11.0
 ISS-2023-00062
 #### 11.10.0

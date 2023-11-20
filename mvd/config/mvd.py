@@ -234,5 +234,29 @@ def get_data():
                     "description": _("Interessent*in Typ")
                 }
             ]
+        },
+        {
+            "label": _("Schnittstellen Logs"),
+            "icon": "fa fa-cog",
+            "items": [
+                {
+                    "type": "doctype",
+                    "name": "Service Platform Queue",
+                    "label": _("Ausgehende Queue (ERPNext > SP)"),
+                    "description": _("Service Platform Queue")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Service Plattform Log",
+                    "label": _("Eingehende Queue (SP > ERPNext)"),
+                    "description": _("Service Plattform Log")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Beratungs Log",
+                    "label": _("Beratungs Log"),
+                    "description": _("Beratungs Log")
+                }
+            ]
         }
     ]
