@@ -339,6 +339,25 @@ def get_verknuepfungsuebersicht(beratung):
     else:
         table = """<p>Keine Verknüpfungen vorhanden</p>"""
     
+    slaves = frappe.db.sql("""SELECT `name` FROM `tabBeratung` WHERE `master` = '{beratung}'""".format(beratung=beratung), as_dict=True)
+    if len(slaves) > 0:
+        table += """<table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Zu Grunde liegende Beratung</th>
+                                <th>Verkn. öffnen</th>
+                            </tr>
+                        </thead>
+                        <tbody>"""
+        for slave in slaves:
+            table += """
+                        <tr>
+                            <td>{beratung}</td>
+                            <td style="text-align: center;"><i class="fa fa-external-link verknuepfung_jump" data-jump="{beratung}" style="cursor: pointer;"></i></td>
+                        </tr>""".format(beratung=slave.name)
+        table += """</tbody>
+                    </table>"""
+    
     if frappe.db.get_value("Beratung", beratung, 'mv_mitgliedschaft'):
         anzahl_beratungen_zu_mitglied = frappe.db.count('Beratung', {'mv_mitgliedschaft': frappe.db.get_value("Beratung", beratung, 'mv_mitgliedschaft')}) or 0
         table += """<br><p id="route_to_list_view" style="cursor: pointer;"><b>Anzahl Beratungen dieser Mitgliedschaft: {0}</b></p>""".format(anzahl_beratungen_zu_mitglied)
