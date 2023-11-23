@@ -496,6 +496,8 @@ def merge(slave, master):
         "content": " - Die Beratung <a href='#Form/Beratung/{0}'>{1}</a> wurde mit dieser zusammengeführt".format(slave, frappe.bold(slave)),
     }).insert(ignore_permissions=True)
     
+    master_doc.save()
+    
     return
 
 @frappe.whitelist()
@@ -670,6 +672,33 @@ def sync_attachments_and_beratungs_table(doc, event):
             except Exception as err:
                 frappe.log_error("Error:\n{0}\n\nDocument:\n{1}".format(err, str(doc.as_dict())), "sync_attachments_and_beratungs_table")
                 pass
+        
+        # Abgleich anz Files als Attachment und anz. File in Tabelle.
+        # Hat es mehr Files als Attachments, so wird das Delta zur Tabelle hinzugefügt.
+        file_attachments = frappe.db.sql("""SELECT * FROM `tabFile` WHERE `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{docname}'""".format(\
+                            docname=doc.name), as_dict=True)
+        if len(file_attachments) > 0:
+            start_sync = False
+            if not doc.dokumente:
+                start_sync = True
+            elif len(file_attachments) != len(doc.dokumente):
+                start_sync = True
+            if start_sync:
+                new_row_added = False
+                for file_attachment in file_attachments:
+                    file_found = False
+                    for present_file in doc.dokumente:
+                        if present_file.file == file_attachment.file_url:
+                            file_found = True
+                    if not file_found:
+                        row = doc.append('dokumente', {})
+                        row.file = file_attachment.file_url
+                        row.document_type = 'Sonstiges'
+                        row.filename = file_attachment.file_name
+                        new_row_added = True
+                if new_row_added:
+                    doc.save()
+    
     if doc.doctype == 'File':
         # Diese Funktion synchronisiert nur das entfernen, für die Anlage siehe sync_mail_attachements
         if doc.attached_to_doctype == 'Beratung':
