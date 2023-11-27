@@ -285,7 +285,7 @@ frappe.ui.form.on('Mitgliedschaft', {
         }
         
         // Kündigungs-Mail-Button für MVBE
-        if (cur_frm.doc.kuendigung && cur_frm.doc.status_c != 'Inaktiv' && cur_frm.doc.e_mail_1 && ['MVBE', 'MVOS'].includes(cur_frm.doc.sektion_id)) {
+        if (cur_frm.doc.kuendigung && cur_frm.doc.status_c != 'Inaktiv' && cur_frm.doc.e_mail_1) {
             frm.add_custom_button(__("K-Best. E-Mail"),  function() {
                 sende_k_best_email(frm);
             });
@@ -2486,11 +2486,7 @@ function sende_k_best_email(frm) {
         {
             if (r.message) {
                 var mail_data = r.message;
-                var email = cur_frm.doc.e_mail_1;
-                var cc = mail_data.cc;
-                var subject = mail_data.subject;
-                var email_body = mail_data.email_body;
-                document.location = "mailto:"+email+"?cc="+cc+"&subject="+subject+"&body="+email_body;
+                frappe.mvd.new_mail(cur_frm, '', mail_data);
             }
         }
     });
