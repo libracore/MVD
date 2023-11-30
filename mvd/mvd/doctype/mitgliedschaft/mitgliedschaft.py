@@ -3492,9 +3492,8 @@ def get_kuendigungsmail_txt(mitgliedschaft, sektion_id, language):
         txt = replace_mv_keywords(txt_raw, mitgliedschaft)
     else:
         txt = ''
-    email_body = '{0}'.format(txt.replace("\n", "%0d%0a"))
+    email_body = '<div>{0}</div>'.format(txt.replace("\n", "<br>"))
     return {
-        'cc': 'mv+Mitgliedschaft+{0}@libracore.io'.format(mitgliedschaft),
         'subject': subject,
         'email_body': email_body
     }

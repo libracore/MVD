@@ -302,7 +302,7 @@ function set_timestamps(){
 }
 
 frappe.provide('frappe.mvd.new_mail');
-frappe.mvd.new_mail = function(cur_frm, last_email='') {
+frappe.mvd.new_mail = function(cur_frm, last_email='', kuendigungsmail=false) {
     $(".modal.fade").remove();
     var recpts;
     var default_sender;
@@ -316,8 +316,13 @@ frappe.mvd.new_mail = function(cur_frm, last_email='') {
     
     if (cur_frm.doctype == 'Mitgliedschaft') {
         recpts = cur_frm.doc.e_mail_1 || '';
-        subject = 'Ihre Mitgliedschaft: ' + cur_frm.doc.mitglied_nr;
-        txt_string = '<div>' + cur_frm.doc.briefanrede + '</div>';
+        if (!kuendigungsmail) {
+            subject = 'Ihre Mitgliedschaft: ' + cur_frm.doc.mitglied_nr;
+            txt_string = '<div>' + cur_frm.doc.briefanrede + '</div>';
+        } else {
+            subject = kuendigungsmail.subject;
+            txt_string = kuendigungsmail.email_body;
+        }
         default_sender = 'libracore@mvd.mieterverband.ch'
     }
     

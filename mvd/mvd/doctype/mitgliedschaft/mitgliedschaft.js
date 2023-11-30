@@ -285,7 +285,7 @@ frappe.ui.form.on('Mitgliedschaft', {
         }
         
         // Kündigungs-Mail-Button für MVBE
-        if (cur_frm.doc.kuendigung && cur_frm.doc.status_c != 'Inaktiv' && cur_frm.doc.e_mail_1 && ['MVBE', 'MVOS'].includes(cur_frm.doc.sektion_id)) {
+        if (cur_frm.doc.kuendigung && cur_frm.doc.status_c != 'Inaktiv' && cur_frm.doc.e_mail_1) {
             frm.add_custom_button(__("K-Best. E-Mail"),  function() {
                 sende_k_best_email(frm);
             });
@@ -429,6 +429,38 @@ frappe.ui.form.on('Mitgliedschaft', {
         if (cur_frm.doc.kundentyp == 'Unternehmen') {
             if (cur_frm.doc.mitgliedtyp_c != 'Geschäft') {
                 frappe.msgprint( "Unternehmen können nur Mitgliedschaften vom Typ Geschäft besitzen!", __("Validation") );
+                frappe.validated=false;
+            }
+        }
+        
+        // Maximale Zeichenlängen Prüfung (SP lehnt sonst die Updates ab)
+        if (cur_frm.doc.zusatz_adresse) {
+            if (cur_frm.doc.zusatz_adresse.length > 40) {
+                frappe.msgprint( "Die Serviceplatform lässt nur Adresszusätze bis zu einer Zeichenlänge von <b>40</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.zusatz_adresse.length + ":</b><br>" + cur_frm.doc.zusatz_adresse, __("Validation") );
+                frappe.validated=false;
+            }
+        }
+        if (cur_frm.doc.objekt_zusatz_adresse) {
+            if (cur_frm.doc.objekt_zusatz_adresse.length > 40) {
+                frappe.msgprint( "Die Serviceplatform lässt nur Adresszusätze bis zu einer Zeichenlänge von <b>40</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.objekt_zusatz_adresse.length + ":</b><br>" + cur_frm.doc.objekt_zusatz_adresse, __("Validation") );
+                frappe.validated=false;
+            }
+        }
+        if (cur_frm.doc.rg_zusatz_adresse) {
+            if (cur_frm.doc.rg_zusatz_adresse.length > 40) {
+                frappe.msgprint( "Die Serviceplatform lässt nur Adresszusätze bis zu einer Zeichenlänge von <b>40</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.rg_zusatz_adresse.length + ":</b><br>" + cur_frm.doc.rg_zusatz_adresse, __("Validation") );
+                frappe.validated=false;
+            }
+        }
+        if (cur_frm.doc.firma) {
+            if (cur_frm.doc.firma.length > 36) {
+                frappe.msgprint( "Die Serviceplatform lässt nur Firmennamen bis zu einer Zeichenlänge von <b>36</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.firma.length + ":</b><br>" + cur_frm.doc.firma, __("Validation") );
+                frappe.validated=false;
+            }
+        }
+        if (cur_frm.doc.rg_firma) {
+            if (cur_frm.doc.rg_firma.length > 36) {
+                frappe.msgprint( "Die Serviceplatform lässt nur Firmennamen bis zu einer Zeichenlänge von <b>36</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.rg_firma.length + ":</b><br>" + cur_frm.doc.rg_firma, __("Validation") );
                 frappe.validated=false;
             }
         }
@@ -636,13 +668,23 @@ function kuendigung(frm) {
                             var abw_grund = '';
                             
                             cur_frm.doc.status_change.forEach(function(entry) {
-                                if (entry.grund){
-                                    if (entry.grund.includes("Andere Gründe")&&entry.idx == cur_frm.doc.status_change.length) {
-                                        default_grund = 'Andere Gründe';
-                                        if (entry.grund.split("Andere Gründe: ").length > 1) {
-                                            abw_grund = entry.grund.split("Andere Gründe: ")[1];
+                                if (entry.status_neu == 'Online-Kündigung') {
+                                    if (entry.grund){
+                                        if (entry.grund.includes("Andere Gründe")&&entry.idx == cur_frm.doc.status_change.length) {
+                                            default_grund = 'Andere Gründe';
+                                            if (entry.grund.split("Andere Gründe: ").length > 1) {
+                                                abw_grund = entry.grund.split("Andere Gründe: ")[1];
+                                            }
+                                            kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
+                                        } else if (entry.idx == cur_frm.doc.status_change.length) {
+                                            if (entry.grund) {
+                                                default_grund = entry.grund;
+                                                kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
+                                            } else {
+                                                default_grund = 'Keine Angabe';
+                                                kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
+                                            }
                                         }
-                                        kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
                                     } else if (entry.idx == cur_frm.doc.status_change.length) {
                                         if (entry.grund) {
                                             default_grund = entry.grund;
@@ -651,14 +693,6 @@ function kuendigung(frm) {
                                             default_grund = 'Keine Angabe';
                                             kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
                                         }
-                                    }
-                                } else if (entry.idx == cur_frm.doc.status_change.length) {
-                                    if (entry.grund) {
-                                        default_grund = entry.grund;
-                                        kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
-                                    } else {
-                                        default_grund = 'Keine Angabe';
-                                        kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
                                     }
                                 }
                             });
@@ -2486,11 +2520,7 @@ function sende_k_best_email(frm) {
         {
             if (r.message) {
                 var mail_data = r.message;
-                var email = cur_frm.doc.e_mail_1;
-                var cc = mail_data.cc;
-                var subject = mail_data.subject;
-                var email_body = mail_data.email_body;
-                document.location = "mailto:"+email+"?cc="+cc+"&subject="+subject+"&body="+email_body;
+                frappe.mvd.new_mail(cur_frm, '', mail_data);
             }
         }
     });
