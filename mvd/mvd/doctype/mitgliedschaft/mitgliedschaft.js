@@ -668,13 +668,23 @@ function kuendigung(frm) {
                             var abw_grund = '';
                             
                             cur_frm.doc.status_change.forEach(function(entry) {
-                                if (entry.grund){
-                                    if (entry.grund.includes("Andere Gründe")&&entry.idx == cur_frm.doc.status_change.length) {
-                                        default_grund = 'Andere Gründe';
-                                        if (entry.grund.split("Andere Gründe: ").length > 1) {
-                                            abw_grund = entry.grund.split("Andere Gründe: ")[1];
+                                if (entry.status_neu == 'Online-Kündigung') {
+                                    if (entry.grund){
+                                        if (entry.grund.includes("Andere Gründe")&&entry.idx == cur_frm.doc.status_change.length) {
+                                            default_grund = 'Andere Gründe';
+                                            if (entry.grund.split("Andere Gründe: ").length > 1) {
+                                                abw_grund = entry.grund.split("Andere Gründe: ")[1];
+                                            }
+                                            kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
+                                        } else if (entry.idx == cur_frm.doc.status_change.length) {
+                                            if (entry.grund) {
+                                                default_grund = entry.grund;
+                                                kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
+                                            } else {
+                                                default_grund = 'Keine Angabe';
+                                                kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
+                                            }
                                         }
-                                        kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
                                     } else if (entry.idx == cur_frm.doc.status_change.length) {
                                         if (entry.grund) {
                                             default_grund = entry.grund;
@@ -683,14 +693,6 @@ function kuendigung(frm) {
                                             default_grund = 'Keine Angabe';
                                             kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
                                         }
-                                    }
-                                } else if (entry.idx == cur_frm.doc.status_change.length) {
-                                    if (entry.grund) {
-                                        default_grund = entry.grund;
-                                        kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
-                                    } else {
-                                        default_grund = 'Keine Angabe';
-                                        kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
                                     }
                                 }
                             });
