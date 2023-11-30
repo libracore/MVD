@@ -1,12 +1,12 @@
 <!-- ---------------------------------------------------------------------------------------- -->
 <!-- Allgemeine Daten -->
 <!-- ---------------------------------------------------------------------------------------- -->
-{% set adressblock = get_rg_adressblock(frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft)) %}
 {% set mitgliedschaft = frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft) %}
+{% set adressblock = mitgliedschaft.adressblock %}
 {% if mitgliedschaft.ist_geschenkmitgliedschaft %}
     {% if mitgliedschaft.ist_geschenkmitgliedschaft == 1 %}
-        {% if not mitgliedschaft.gechenkunterlagen_an_schenker %}
-            {% set adressblock = mitgliedschaft.adressblock %}
+        {% if mitgliedschaft.gechenkunterlagen_an_schenker %}
+            {% set adressblock = get_rg_adressblock(mitgliedschaft) %}
         {% endif %}
     {% endif %}
 {% endif %}

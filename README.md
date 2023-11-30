@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.16.2
+Korrespondenz immer an Korrespondenzadresse ausser bei Geschenkmitgliedschaft mit Geschenkunterlagen an Schenker
 #### 11.16.1
 ISS-2023-00150
 #### 11.16.0
