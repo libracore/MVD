@@ -433,6 +433,38 @@ frappe.ui.form.on('Mitgliedschaft', {
             }
         }
         
+        // Maximale Zeichenlängen Prüfung (SP lehnt sonst die Updates ab)
+        if (cur_frm.doc.zusatz_adresse) {
+            if (cur_frm.doc.zusatz_adresse.length > 40) {
+                frappe.msgprint( "Die Serviceplatform lässt nur Adresszusätze bis zu einer Zeichenlänge von <b>40</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.zusatz_adresse.length + ":</b><br>" + cur_frm.doc.zusatz_adresse, __("Validation") );
+                frappe.validated=false;
+            }
+        }
+        if (cur_frm.doc.objekt_zusatz_adresse) {
+            if (cur_frm.doc.objekt_zusatz_adresse.length > 40) {
+                frappe.msgprint( "Die Serviceplatform lässt nur Adresszusätze bis zu einer Zeichenlänge von <b>40</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.objekt_zusatz_adresse.length + ":</b><br>" + cur_frm.doc.objekt_zusatz_adresse, __("Validation") );
+                frappe.validated=false;
+            }
+        }
+        if (cur_frm.doc.rg_zusatz_adresse) {
+            if (cur_frm.doc.rg_zusatz_adresse.length > 40) {
+                frappe.msgprint( "Die Serviceplatform lässt nur Adresszusätze bis zu einer Zeichenlänge von <b>40</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.rg_zusatz_adresse.length + ":</b><br>" + cur_frm.doc.rg_zusatz_adresse, __("Validation") );
+                frappe.validated=false;
+            }
+        }
+        if (cur_frm.doc.firma) {
+            if (cur_frm.doc.firma.length > 36) {
+                frappe.msgprint( "Die Serviceplatform lässt nur Firmennamen bis zu einer Zeichenlänge von <b>36</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.firma.length + ":</b><br>" + cur_frm.doc.firma, __("Validation") );
+                frappe.validated=false;
+            }
+        }
+        if (cur_frm.doc.rg_firma) {
+            if (cur_frm.doc.rg_firma.length > 36) {
+                frappe.msgprint( "Die Serviceplatform lässt nur Firmennamen bis zu einer Zeichenlänge von <b>36</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.rg_firma.length + ":</b><br>" + cur_frm.doc.rg_firma, __("Validation") );
+                frappe.validated=false;
+            }
+        }
+        
         // Abfrage ob M+W Retouren geschlossen werden sollen
         frappe.call({
             'method': "frappe.client.get",

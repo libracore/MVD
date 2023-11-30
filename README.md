@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.16.0
+ISS-2023-00148
 #### 11.15.0
 Minor Verbesserung in SQL Query von just_match (camt_import.py)
 #### 11.14.0
