@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.17.0
+Minor Verbesserung in SQL Query von verbuche_matches (camt_import.py)
 #### 11.16.2
 Korrespondenz immer an Korrespondenzadresse ausser bei Geschenkmitgliedschaft mit Geschenkunterlagen an Schenker
 #### 11.16.1

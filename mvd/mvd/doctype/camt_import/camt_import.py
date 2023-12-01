@@ -448,7 +448,8 @@ def verbuche_matches(camt_import):
                                 `name`
                             FROM `tabPayment Entry`
                             WHERE `docstatus` = 0
-                            AND `camt_import` = '{camt_import}'""".format(camt_import=camt_import), as_dict=True)
+                            AND `camt_import` = '{camt_import}'
+                            AND `camt_status` != 'Überbezahlt'""".format(camt_import=camt_import), as_dict=True)
     commit_counter = 1
     for pe in pes:
         pe_doc = frappe.get_doc("Payment Entry", pe.name)
