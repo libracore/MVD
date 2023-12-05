@@ -1,0 +1,95 @@
+{
+ "autoname": "APB-.######",
+ "creation": "2023-12-05 10:24:51.748737",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "from_date",
+  "sektion_id",
+  "cb_1",
+  "to_date",
+  "description",
+  "amended_from",
+  "section_einteilung",
+  "einteilung"
+ ],
+ "fields": [
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Beschreibung"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Arbeitsplan Beratung",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Von",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Bis",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_einteilung",
+   "fieldtype": "Section Break",
+   "label": "Einteilung Berater*inn"
+  },
+  {
+   "fieldname": "einteilung",
+   "fieldtype": "Table",
+   "label": "Einteilung",
+   "options": "APB Zuweisung"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2023-12-05 11:20:02.452064",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Arbeitsplan Beratung",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

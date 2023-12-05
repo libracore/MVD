@@ -10,7 +10,31 @@
   "user",
   "sektion_id",
   "disabled",
-  "ort"
+  "ort",
+  "section_default_einteilung",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+  "cb_1",
+  "monday_from",
+  "tuesday_from",
+  "wednesday_from",
+  "thursday_from",
+  "friday_from",
+  "saturday_from",
+  "sunday_from",
+  "cb_2",
+  "monday_to",
+  "tuesday_to",
+  "wednesday_to",
+  "thursday_to",
+  "friday_to",
+  "saturday_to",
+  "sunday_to"
  ],
  "fields": [
   {
@@ -45,9 +69,134 @@
    "fieldtype": "Table MultiSelect",
    "label": "Ort",
    "options": "Beratungsort Multiselect"
+  },
+  {
+   "fieldname": "section_default_einteilung",
+   "fieldtype": "Section Break",
+   "label": "Standardzeiten f\u00fcr Arbeitsplan Einteilung"
+  },
+  {
+   "default": "0",
+   "fieldname": "monday",
+   "fieldtype": "Check",
+   "label": "Montag<br><br><br>"
+  },
+  {
+   "default": "0",
+   "fieldname": "tuesday",
+   "fieldtype": "Check",
+   "label": "Dienstag<br><br><br>"
+  },
+  {
+   "default": "0",
+   "fieldname": "wednesday",
+   "fieldtype": "Check",
+   "label": "Mittwoch<br><br><br>"
+  },
+  {
+   "default": "0",
+   "fieldname": "thursday",
+   "fieldtype": "Check",
+   "label": "Donnerstag<br><br><br>"
+  },
+  {
+   "default": "0",
+   "fieldname": "friday",
+   "fieldtype": "Check",
+   "label": "Freitag<br><br><br>"
+  },
+  {
+   "default": "0",
+   "fieldname": "saturday",
+   "fieldtype": "Check",
+   "label": "Samstag<br><br><br>"
+  },
+  {
+   "default": "0",
+   "fieldname": "sunday",
+   "fieldtype": "Check",
+   "label": "Sonntag<br><br><br>"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "monday_from",
+   "fieldtype": "Time",
+   "label": "Von"
+  },
+  {
+   "fieldname": "tuesday_from",
+   "fieldtype": "Time",
+   "label": "Von"
+  },
+  {
+   "fieldname": "wednesday_from",
+   "fieldtype": "Time",
+   "label": "Von"
+  },
+  {
+   "fieldname": "thursday_from",
+   "fieldtype": "Time",
+   "label": "Von"
+  },
+  {
+   "fieldname": "friday_from",
+   "fieldtype": "Time",
+   "label": "Von"
+  },
+  {
+   "fieldname": "saturday_from",
+   "fieldtype": "Time",
+   "label": "Von"
+  },
+  {
+   "fieldname": "sunday_from",
+   "fieldtype": "Time",
+   "label": "Von"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "monday_to",
+   "fieldtype": "Time",
+   "label": "Bis"
+  },
+  {
+   "fieldname": "tuesday_to",
+   "fieldtype": "Time",
+   "label": "Bis"
+  },
+  {
+   "fieldname": "wednesday_to",
+   "fieldtype": "Time",
+   "label": "Bis"
+  },
+  {
+   "fieldname": "thursday_to",
+   "fieldtype": "Time",
+   "label": "Bis"
+  },
+  {
+   "fieldname": "friday_to",
+   "fieldtype": "Time",
+   "label": "Bis"
+  },
+  {
+   "fieldname": "saturday_to",
+   "fieldtype": "Time",
+   "label": "Bis"
+  },
+  {
+   "fieldname": "sunday_to",
+   "fieldtype": "Time",
+   "label": "Bis"
   }
  ],
- "modified": "2023-06-01 09:02:00.781140",
+ "modified": "2023-12-05 11:32:41.591174",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin Kontaktperson",

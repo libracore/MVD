@@ -470,7 +470,29 @@ function termin_quick_entry(frm) {
             var d = new frappe.ui.Dialog({
               'title': __('Termin erstellen'),
               'fields': [
-                {'fieldname': 'kontaktperson', 'fieldtype': 'Link', 'label': __('Kontaktperson'), 'options': 'Termin Kontaktperson', 'reqd': 1,
+                {'fieldname': 'zeige_verfuegbarkeiten', 'fieldtype': 'Button', 'label': __('Zeige Verfügbarkeiten'),
+                    'click': function() {
+                        frappe.call({
+                            method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
+                            args:{
+                                'sektion': cur_frm.doc.sektion_id,
+                                'datum': d.get_value('von')
+                            },
+                            callback: function(r) {
+                                if (r.message) {
+                                    // anzeigen der Verfügbarkeiten
+                                    console.log(r.message);
+                                    d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                                } else {
+                                    // keine freien Beratungspersonen
+                                    d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
+                                }
+                            }
+                        });
+                    }
+                },
+                {'fieldname': 'verfuegbarkeiten_html', 'fieldtype': 'HTML', 'label': '', 'options': ''},
+                {'fieldname': 'kontaktperson', 'fieldtype': 'Link', 'label': __('Berater*in'), 'options': 'Termin Kontaktperson', 'reqd': 1,
                     'get_query': function() {
                         return {
                             filters: {
