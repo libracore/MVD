@@ -102,9 +102,34 @@ def zeige_verfuegbarkeiten(sektion, datum):
     return beratungspersonen
 
 def bereinigt_mit_erfassten_termine(beratungsperson, datum):
-    erfasste_termine = [] # muss eine sql abfrage werden
+    # ~ erfasste_termine = [] # muss eine sql abfrage werden
+    erfasste_termine = frappe.db.sql("""
+                                        SELECT
+                                            `von`,
+                                            `bis`,
+                                            `parent`,
+                                            `ort`,
+                                            `art`
+                                        FROM `tabBeratung Termin`
+                                        WHERE `berater_in` = '{berater_in}'
+                                        AND `von` BETWEEN '{datum} 00:00:00' AND '{datum} 23:59:59'
+                                    """.format(berater_in=beratungsperson.beratungsperson, \
+                                                datum=beratungsperson.date), as_dict=True)
     if len(erfasste_termine) > 0:
-        return '' # muss durch bereinigung ersetzt werden
+        return_html = "{0} ({1} - {2}): {3}<br>".format(getdate(beratungsperson.date).strftime("%d.%m.%Y"), \
+                                                        beratungsperson.from_time, \
+                                                        beratungsperson.to_time, \
+                                                        beratungsperson.beratungsperson)
+        for erfasster_termin in erfasste_termine:
+            return_html += "--> {0} - {1}: {2}; {3} ({4})<br>".format(erfasster_termin.von.strftime("%H:%M:%S"), \
+                                                            erfasster_termin.bis.strftime("%H:%M:%S"), \
+                                                            erfasster_termin.art, \
+                                                            erfasster_termin.ort, \
+                                                            erfasster_termin.parent)
+        
+        return_html += "<br>"
+        return return_html
+        # ~ return '' # muss durch bereinigung ersetzt werden
     else:
         return "{0} ({1} - {2}): {3}<br>".format(getdate(beratungsperson.date).strftime("%d.%m.%Y"), \
                                                         beratungsperson.from_time, \
