@@ -50,11 +50,7 @@ frappe.vbz = {
         $("#todo").off("click");
         $("#beratung").off("click");
         $("#beratung_alle_sektionen").off("click");
-        
-        //~ muss entfernt werden wenn beratung offiziell deployed
         $("#termin").off("click");
-        //~ ende
-        
         $("#mahnung").off("click");
         $("#zweimal_unzustellbar").off("click");
         $("#einmal_unzustellbar").off("click");
@@ -166,16 +162,10 @@ frappe.vbz = {
             frappe.dom.freeze('Öffne Beratungen...');
             frappe.set_route("vbz-beratung-alle-se");
         });
-        
-        //~ muss entfernt werden wenn beratung offiziell deployed
         $("#termin").click(function(){
-            frappe.route_options = {
-                "von": ['between', [frappe.datetime.nowdate(), frappe.datetime.add_days(frappe.datetime.nowdate(), 7)]],
-            };
-            frappe.set_route("List", "Termin", "List");
+            frappe.dom.freeze('Öffne Beratungs Terminübersicht...');
+            frappe.set_route("vbz_beratung_termine");
         });
-        //~ ende
-        
         $("#todo").click(function(){
             frappe.route_options = {'status': 'Open'};
             frappe.set_route("List", "ToDo", "List");

@@ -1,0 +1,27 @@
+#page-vbz-beratung {
+    background-color: #e6ebef;
+}
+
+h1.vbz {
+    font-weight: bold;
+    padding-left: 15px;
+}
+
+#datenstand {
+    font-weight: normal !important;
+    font-size: 15px !important;
+}
+
+#reload_info {
+    font-weight: normal !important;
+    font-size: 15px !important;
+}
+
+#table_termin_uebersicht {
+    width: 100%;
+}
+
+.termin-tr:hover {
+    background-color: #219D84;
+    cursor: pointer;
+}
