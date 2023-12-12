@@ -82,18 +82,22 @@ class ArbeitsplanBeratung(Document):
         self.save()
 
 @frappe.whitelist()
-def zeige_verfuegbarkeiten(sektion, datum):
+def zeige_verfuegbarkeiten(sektion, datum, beraterin=None):
     von_datum = getdate(datum)
     delta = timedelta(days=1)
     bis_datum = von_datum + timedelta(days=7)
     beratungspersonen = ""
+    beraterin_filter = ''
+    if beraterin and beraterin != '':
+        beraterin_filter = '''AND `beratungsperson` = '{0}' '''.format(beraterin)
     
     while von_datum <= bis_datum:
         zugeteilte_beratungspersonen = frappe.db.sql("""
                                                         SELECT *
                                                         FROM `tabAPB Zuweisung`
                                                         WHERE `date` = '{von_datum}'
-                                                    """.format(von_datum=von_datum.strftime("%Y-%m-%d")), as_dict=True)
+                                                        {beraterin_filter}
+                                                    """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter), as_dict=True)
         if len(zugeteilte_beratungspersonen) > 0:
             for zugeteilte_beratungsperson in zugeteilte_beratungspersonen:
                 beratungspersonen += bereinigt_mit_erfassten_termine(zugeteilte_beratungsperson, von_datum)

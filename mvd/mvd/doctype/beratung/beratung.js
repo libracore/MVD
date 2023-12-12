@@ -511,12 +511,48 @@ function termin_quick_entry(frm) {
                                                 d.set_value('ort',  '');
                                                 d.set_df_property('ort', 'options', '');
                                             }
+
+                                            // aktualisierung verfügbarkeiten
+                                            frappe.call({
+                                                method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
+                                                args:{
+                                                    'sektion': cur_frm.doc.sektion_id,
+                                                    'datum': d.get_value('von'),
+                                                    'beraterin': d.get_value('kontaktperson')||''
+                                                },
+                                                callback: function(r) {
+                                                    if (r.message) {
+                                                        // anzeigen der Verfügbarkeiten
+                                                        d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                                                    } else {
+                                                        // keine freien Beratungspersonen
+                                                        d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
+                                                    }
+                                                }
+                                            });
                                         }
                                     });
                                 } else {
                                     // reset to default
                                     d.set_value('ort',  '');
                                     d.set_df_property('ort', 'options', orte);
+                                    // aktualisierung verfügbarkeiten
+                                    frappe.call({
+                                        method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
+                                        args:{
+                                            'sektion': cur_frm.doc.sektion_id,
+                                            'datum': d.get_value('von')
+                                        },
+                                        callback: function(r) {
+                                            if (r.message) {
+                                                // anzeigen der Verfügbarkeiten
+                                                d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                                            } else {
+                                                // keine freien Beratungspersonen
+                                                d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
+                                            }
+                                        }
+                                    });
                                 }
                             }
                         },
@@ -533,7 +569,8 @@ function termin_quick_entry(frm) {
                                     method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
                                     args:{
                                         'sektion': cur_frm.doc.sektion_id,
-                                        'datum': d.get_value('von')
+                                        'datum': d.get_value('von'),
+                                        'beraterin': d.get_value('kontaktperson')||''
                                     },
                                     callback: function(r) {
                                         if (r.message) {
