@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.18.0
+Funktion 'Tabellen durch Paragraphen ersetzen' in Beratung
 #### 11.17.2
 Korrektur VBZ Beratung (MVBE)
 #### 11.17.1
