@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.17.1
+Verbesserung in SQL Query vom Spendernversand (berücksichtigung gesperrter Adressen)
 #### 11.17.0
 Minor Verbesserung in SQL Query von verbuche_matches (camt_import.py)
 #### 11.16.2
