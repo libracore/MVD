@@ -82,7 +82,8 @@ def get_p4(user):
                                                 WHERE `user` = '{user}'  
                                                 AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
-                                            AND `status` = 'Termin vereinbart'""".format(user=user), as_dict=True)[0].qty
+                                            AND `status` = 'Termin vereinbart'
+                                            AND `hat_termine` = 1""".format(user=user), as_dict=True)[0].qty
     return p4_qty or 0
 
 @frappe.whitelist()
