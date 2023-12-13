@@ -122,7 +122,7 @@
    "default": "0",
    "fieldname": "inkl_gesperrt",
    "fieldtype": "Check",
-   "label": "Gesperrte Adressen ber\u00fccksichtigen"
+   "label": "Gesperrte Adressen exportieren"
   },
   {
    "default": "0",
@@ -132,7 +132,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-09-19 15:33:57.174380",
+ "modified": "2023-12-13 10:10:10.174380",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Spendenversand",
