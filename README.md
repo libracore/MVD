@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.17.2
+Korrektur VBZ Beratung (MVBE)
 #### 11.17.1
 Verbesserung in SQL Query vom Spendernversand (berücksichtigung gesperrter Adressen)
 #### 11.17.0
