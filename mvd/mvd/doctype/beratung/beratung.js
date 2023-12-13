@@ -363,6 +363,16 @@ frappe.ui.form.on('Beratung', {
                 frm.timeline.wrapper.data("split-issue-event-attached", true)
             }
         }
+    },
+    replace_table_as_p: function(frm) {
+        if (cur_frm.is_dirty()) {
+            frappe.msgprint("Bitte speichern Sie die Beratung zuerst.");
+        } else {
+            frm.call("replace_table_as_p")
+            .then(r => {
+                cur_frm.reload_doc();
+            })
+        }
     }
 });
 

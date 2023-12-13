@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.data import today, now
 import json
+from bs4 import BeautifulSoup
 
 class Beratung(Document):
     def validate(self):
@@ -230,6 +231,27 @@ class Beratung(Document):
         }).insert(ignore_permissions=True)
 
         return replicated_beratung.name
+    
+    def replace_table_as_p(self):
+        soup = BeautifulSoup(self.notiz, 'lxml')
+        tables = soup.find_all("table")
+
+        for table in tables:
+            tds = table.find_all("td")
+            div_tag = soup.new_tag("div")
+
+            for td in tds:
+                p_tag = soup.new_tag("p")
+                p_tag.string = td.get_text()
+                div_tag.append(p_tag)
+                div_tag.append(soup.new_tag("br"))
+            
+            table.replace_with(div_tag)
+        
+        self.notiz = soup.prettify()
+        self.save()
+        
+        return
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
