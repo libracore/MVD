@@ -295,7 +295,12 @@
         
         <!-- Content -->
         {% if seite.inhalt %}
-            <div id='content-{{seite.idx }}'>{{ replace_mv_keywords(seite.inhalt, mitgliedschaft, sinv=sales_invoice) }}</div>
+            {% if ('%%ARTIKELTABELLE%%' in seite.inhalt) and doc.items|length > 7 %}
+                <!-- Weil die Artikeltabelle zu lang wird und der EZ darüber liegen würde, muss ein Dirty Hack angewendet werden-->
+                <div id='content-{{seite.idx }}-no-limit'>{{ replace_mv_keywords(seite.inhalt, mitgliedschaft, sinv=sales_invoice) }}</div>
+            {% else %}
+                <div id='content-{{seite.idx }}'>{{ replace_mv_keywords(seite.inhalt, mitgliedschaft, sinv=sales_invoice) }}</div>
+            {% endif %}
         {% endif %}
         
         <!-- Seitenzahlen (Fusszeile) -->
@@ -312,6 +317,11 @@
                 </div>
             {% else %}
                 <!-- Mitgliedschaft EZ -->
+                {% if ('%%ARTIKELTABELLE%%' in seite.inhalt) and doc.items|length > 7 %}
+                    <!-- Weil die Artikeltabelle zu lang wird und der EZ darüber liegen würde, muss ein Dirty Hack angewendet werden-->
+                    <div class="page-break"></div>
+                    <div id="dirty-hack-{{seite.idx }}"></div>
+                {% endif %}
                 <div id='einzahlungsschein'>
                     {% if mitgliedschaft_qrr %}
                         {{ frappe.render_template('templates/includes/mvd_qrr_invoice.html', {'qrr': mitgliedschaft_qrr}) }}
@@ -376,6 +386,41 @@
                         {% endif %}
                     {% endif %}
                 {% endif %}
+            }
+            /* Weil die Artikeltabelle zu lang wird und der EZ darüber liegen würde, muss ein Dirty Hack angewendet werden */
+            #content-{{seite.idx }}-no-limit {
+                margin-left: 26mm;
+                min-width: 161.5mm;
+                max-width: 161.5mm;
+                font-size: 9.5pt !important;
+                line-height: 13.5pt !important;
+                clear: both;
+                overflow-y: hidden !important;
+                {% if seite.adressblock or seite.referenzblock %}
+                    {% if seite.fusszeile %}
+                        min-height: 168.5mm;
+                        max-height: 168.5mm;
+                    {% else %}
+                        min-height: 197mm;
+                        max-height: 197mm;
+                    {% endif %}
+                {% else %}
+                    {% if seite.seitenzahlen %}
+                        min-height: 211.5mm;
+                        max-height: 211.5mm;
+                    {% else %}
+                        min-height: 240mm;
+                        max-height: 240mm;
+                    {% endif %}
+                {% endif %}
+            }
+
+            #dirty-hack-{{seite.idx }} {
+                min-height: 191mm;
+                max-height: 191mm;
+                margin-left: 26mm;
+                min-width: 161.5mm;
+                max-width: 161.5mm;
             }
         </style>
     {% endfor %}
