@@ -71,6 +71,10 @@ frappe.vbz_beratung = {
             frappe.route_options = {"status": 'Open', "kontaktperson": ['is', 'not set']}
             frappe.set_route("List", "Beratung", "List");
         });
+        $("#s8").click(function(){
+            frappe.route_options = {"status": ['!=', 'Closed'], "s8": 1}
+            frappe.set_route("List", "Beratung", "List");
+        });
         
         $("#r").click(function(){
             frappe.route_options = {"status": 'Open'}
