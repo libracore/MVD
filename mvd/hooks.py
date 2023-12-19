@@ -151,7 +151,8 @@ scheduler_events = {
         "mvd.mvd.utils.daily_jobs.spenden_versand",
         "mvd.mvd.utils.daily_jobs.rechnungs_jahresversand",
         "mvd.mvd.utils.daily_jobs.mahnlauf_ausschluss",
-        "mvd.mvd.utils.daily_jobs.cleanup_beratungen"
+        "mvd.mvd.utils.daily_jobs.cleanup_beratungen",
+        "mvd.mvd.utils.daily_jobs.mark_beratungen_as_s8"
     ],
     "all": [
         "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue",

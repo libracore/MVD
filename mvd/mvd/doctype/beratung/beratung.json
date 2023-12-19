@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "titel",
+  "s8",
   "create_todo",
   "auto_todo_log",
   "geschlossen_am",
@@ -58,7 +59,6 @@
   "section_verknuepfungen",
   "verknuepfungen_html",
   "section_anfrage",
-  "replace_table_as_p",
   "notiz",
   "antwort",
   "section_dokumente",
@@ -415,12 +415,14 @@
    "label": "Zusatzinfo Status"
   },
   {
-   "fieldname": "replace_table_as_p",
-   "fieldtype": "Button",
-   "label": "Tabellen durch Paragraphen ersetzen"
+   "default": "0",
+   "fieldname": "s8",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "s8"
   }
  ],
- "modified": "2023-12-13 13:11:46.099424",
+ "modified": "2023-12-19 14:01:45.630648",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

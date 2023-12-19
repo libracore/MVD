@@ -21,6 +21,7 @@ def get_open_data():
             's5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 1}, limit=100, distinct=True)),
             's6': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set']}, limit=100, distinct=True)),
             's7': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['is', 'not set']}, limit=100, distinct=True)),
+            's8': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 's8': 1}, limit=100, distinct=True, ignore_ifnull=True)),
             'r': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open'}, limit=100, distinct=True)),
             'r1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': 'Hoch'}, limit=100, distinct=True)),
             'r2': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': ['!=', 'Hoch'], 'kontaktperson': 'Rechtsberatung Pool (MVBE)'}, limit=100, distinct=True)),
