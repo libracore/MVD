@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.21.0
+ISS-2023-00166
 #### 11.20.0
 Anpassung MWST-Satz auf Formular Wohnungsabgaben MVBE
 #### 11.19.0
