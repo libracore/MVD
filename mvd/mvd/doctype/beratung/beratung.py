@@ -366,7 +366,7 @@ def get_verknuepfungsuebersicht(beratung):
         table += """<table style="width: 100%;">
                         <thead>
                             <tr>
-                                <th>Zu Grunde liegende Beratung</th>
+                                <th>Zusammengeführt mit</th>
                                 <th>Verkn. öffnen</th>
                             </tr>
                         </thead>
@@ -489,14 +489,14 @@ def merge(slave, master):
     master_doc = frappe.get_doc("Beratung", master)
     
     if master_doc.notiz:
-        master_doc.notiz += slave_doc.notiz
+        master_doc.notiz += "<br><h3>Anfrage aus der zusammengeführten Beratung</h3><br>" + str(slave_doc.notiz)
     else:
-        master_doc.notiz = slave_doc.notiz
+        master_doc.notiz = "<h3>Anfrage aus der zusammengeführten Beratung</h3><br>" + str(slave_doc.notiz)
     
     if master_doc.antwort:
-        master_doc.antwort += slave_doc.antwort
+        master_doc.antwort += "<br><h3>Antwort aus der zusammengeführten Beratung</h3><br>" + str(slave_doc.antwort)
     else:
-        master_doc.antwort = slave_doc.antwort
+        master_doc.antwort = "<br><h3>Antwort aus der zusammengeführten Beratung</h3><br>" + str(slave_doc.antwort)
     
     master_doc.save()
     
