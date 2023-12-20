@@ -27,6 +27,9 @@
   "datum_online_verbucht",
   "datum_online_gutschrift",
   "online_payment_method",
+  "section_webshop",
+  "webshop_order",
+  "section_status",
   "status"
  ],
  "fields": [
@@ -112,6 +115,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.mitglied_id",
    "fieldname": "section_mitgliedschaft",
    "fieldtype": "Section Break",
    "label": "Daten aus Mitgliedschaft",
@@ -179,10 +183,27 @@
    "fieldtype": "Data",
    "label": "Adressblock",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_status",
+   "fieldtype": "Section Break",
+   "label": "Status",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.webshop_order",
+   "fieldname": "section_webshop",
+   "fieldtype": "Section Break",
+   "label": "Daten aus Webshop Order"
+  },
+  {
+   "fieldname": "webshop_order",
+   "fieldtype": "Data",
+   "label": "Webshop Order"
   }
  ],
  "istable": 1,
- "modified": "2023-10-02 12:37:52.795108",
+ "modified": "2023-12-20 13:06:58.508191",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Datatrans Entry",
