@@ -1031,6 +1031,7 @@ function daten_validiert(frm) {
                         },
                         function(){
                             // on no
+                            cur_frm.set_value("zuzug_massendruck", 0);
                             cur_frm.set_value("validierung_notwendig", 0);
                             var status_change_log = cur_frm.add_child('status_change');
                             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());

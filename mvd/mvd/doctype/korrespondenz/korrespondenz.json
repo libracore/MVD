@@ -9,6 +9,7 @@
   "titel",
   "sektion_id",
   "mv_mitgliedschaft",
+  "cb_1",
   "massenlauf",
   "mitgliedschafts_jahr_manuell",
   "mitgliedschafts_jahr",
@@ -272,11 +273,10 @@
   },
   {
    "default": "0",
+   "description": "Wenn diese CB aktiviert ist, wird als Anschrift jene des/der Schenker*inn ber\u00fccksichtigt.",
    "fieldname": "geschenk",
    "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Geschenk",
-   "read_only": 1
+   "label": "Adresse des/der Schenker*inn ber\u00fccksichtigen"
   },
   {
    "default": "0",
@@ -307,9 +307,13 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Migriert (Neues CD)"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2023-07-04 10:09:43.463637",
+ "modified": "2023-12-20 09:59:02.948788",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Korrespondenz",

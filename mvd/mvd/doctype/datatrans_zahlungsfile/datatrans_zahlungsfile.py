@@ -107,8 +107,22 @@ class DatatransZahlungsfile(Document):
                                 entry.status = 'Mitglied: No Match'
                         else:
                             # Drucksachen
-                            entry.status = 'Webshop: No Match'
-                            # ~ entry.status = 'Webshop Order Match'
+                            webshop_order_lookup = frappe.db.sql("""
+                                                                    SELECT
+                                                                        `name`
+                                                                    FROM `tabWebshop Order`
+                                                                    WHERE `online_payment_id` = '{refnumber}'
+                                                                    ORDER BY `creation` ASC
+                                                                    LIMIT 1""".format(refnumber=refnumber), as_dict=True)
+                            if len(webshop_order_lookup) > 0:
+                                webshop_order_update = frappe.db.sql("""UPDATE
+                                                                            `tabWebshop Order`
+                                                                        SET `online_payment_zahlungsfile` = '{zahlungsfile}'
+                                                                        WHERE `name` = '{name}'""".format(zahlungsfile=self.name, name=webshop_order_lookup[0].name), as_list=True)
+                                entry.webshop_order = webshop_order_lookup[0].name
+                                entry.status = 'Webshop: Match'
+                            else:
+                                entry.status = 'Webshop: No Match'
         self.save()
     
     def reset_data(self):
@@ -121,6 +135,13 @@ class DatatransZahlungsfile(Document):
                                                     `tabMitgliedschaft`
                                                 SET `online_payment_zahlungsfile` = NULL
                                                 WHERE `name` = '{name}'""".format(name=entry.mitglied_id), as_list=True)
+            
+            if entry.webshop_order:
+                # update websho order
+                webshop_order_update = frappe.db.sql("""UPDATE
+                                                    `tabWebshop Order`
+                                                SET `online_payment_zahlungsfile` = NULL
+                                                WHERE `name` = '{name}'""".format(name=entry.webshop_order), as_list=True)
         self.datatrans_entries = []
         self.save()
         delete_datatrans_entries = frappe.db.sql("""DELETE FROM `tabDatatrans Entry` WHERE `name` IN ({to_delete})""".format(to_delete="'{0}'".format("', '".join(to_delete))), as_list=True)
