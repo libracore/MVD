@@ -3,11 +3,9 @@
 <!-- ---------------------------------------------------------------------------------------- -->
 {% set mitgliedschaft = frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft) %}
 {% set adressblock = mitgliedschaft.adressblock %}
-{% if mitgliedschaft.ist_geschenkmitgliedschaft %}
-    {% if mitgliedschaft.ist_geschenkmitgliedschaft == 1 %}
-        {% if mitgliedschaft.gechenkunterlagen_an_schenker %}
-            {% set adressblock = get_rg_adressblock(mitgliedschaft) %}
-        {% endif %}
+{% if doc.geschenk %}
+    {% if doc.geschenk == 1 %}
+        {% set adressblock = mitgliedschaft.rg_adressblock %}
     {% endif %}
 {% endif %}
 {% set sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id) %}

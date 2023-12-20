@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.23.0
+CB in Korrespondenz für berücksichtigung der Adresse des/der Schenker*inn
 #### 11.22.0
 ISS-2023-00134
 #### 11.21.0
