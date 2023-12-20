@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.24.0
+Bei der Stornierung einer Rechnung wird das zugehörige Mitglied aus einem allfälligen Zuzugs-Massenlauf entfernt
 #### 11.23.0
 CB in Korrespondenz für berücksichtigung der Adresse des/der Schenker*inn
 #### 11.22.0
