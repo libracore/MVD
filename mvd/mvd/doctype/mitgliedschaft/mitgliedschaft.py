@@ -2168,6 +2168,8 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             new_mitgliedschaft.region_manuell = 0
             new_mitgliedschaft.region = None
             new_mitgliedschaft.status_change = []
+            new_mitgliedschaft.haftpflicht = []
+            new_mitgliedschaft.mandat = []
             new_mitgliedschaft.insert(ignore_permissions=True)
             
             frappe.db.commit()

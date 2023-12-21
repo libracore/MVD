@@ -64,11 +64,11 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
         
         if nicht_verbuchbar_flag:
             nicht_verbuchbare_zahlungen['detail_liste'].append({
-                'match': entry.mitglied_nr or '-',
+                'match': entry.mitglied_nr or entry.webshop_order or '-',
                 'empfaenger': entry.adressblock or '-',
                 'valuta': entry.transdatetime or '-',
                 'betrag': entry.amount or '-',
-                'grund': '???'
+                'grund': entry.status
             })
     
     main_html = '''
@@ -178,13 +178,23 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
                 </tr>
             </thead>
             <tbody>
+    '''
+    for nvz in nicht_verbuchbare_zahlungen['detail_liste']:
+        html_nicht_verbucht += '''
             <tr>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
+                <td>{match}</td>
+                <td>{empfaenger}</td>
+                <td>{valuta}</td>
+                <td>{betrag}</td>
+                <td>{grund}</td>
             </tr>
+        '''.format(match=nvz['match'], \
+                    empfaenger=nvz['empfaenger'], \
+                    valuta=nvz['valuta'], \
+                    betrag=nvz['betrag'], \
+                    grund=nvz['grund'])
+
+    html_nicht_verbucht += '''
             </tbody>
         </table>
     '''
