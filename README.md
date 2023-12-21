@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.24.1
+Sektionswechsel Fix im Zusammenhang mit Haftpflicht und Mandat
 #### 11.24.0
 Bei der Stornierung einer Rechnung wird das zugehörige Mitglied aus einem allfälligen Zuzugs-Massenlauf entfernt
 #### 11.23.0
