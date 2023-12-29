@@ -23,3 +23,4 @@ mvd.patches.v10_3_3.reset_beratungs_protection
 mvd.patches.v10_5_0.change_status
 mvd.patches.interessent_typ.neuanlage
 mvd.patches.default_interessent_typ.anlage
+mvd.patches.v11_25_0.change_mwst_accounts
