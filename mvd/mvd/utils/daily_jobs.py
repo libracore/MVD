@@ -11,7 +11,7 @@ from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
 
 def set_inaktiv():
-    mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Ausschluss', 'Wegzug') OR (`status_c` = 'Regulär' AND `kuendigung` IS NOT NULL)""", as_dict=True)
+    mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `status_c` IN ('Gestorben', 'Ausschluss', 'Wegzug') OR (`status_c` = 'Regulär' AND `kuendigung` IS NOT NULL) LIMIT 1000""", as_dict=True)
     submit_counter = 1
     for mitgliedschaft in mitgliedschaften:
         m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)

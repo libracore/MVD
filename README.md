@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.25.1
+Limit von 1000 für nächtlichen inaktivierungslauf
 #### 11.25.0
 Patch zur autom. Umstellung der MwSt relevanten Datensätze und -verknüpfungen
 #### 11.24.1
