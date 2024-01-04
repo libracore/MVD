@@ -13,7 +13,7 @@ from frappe.utils import cint
 def set_inaktiv():
     mitgliedschaften = frappe.db.sql("""
                                     SELECT
-                                        COUNT(`name`)
+                                        `name`
                                     FROM `tabMitgliedschaft`
                                     WHERE
                                         (
