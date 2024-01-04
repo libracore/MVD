@@ -9,54 +9,40 @@ import frappe
 def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000 00000 00000 0000'):
     if sales_invoice:
         sinv = frappe.get_doc("Sales Invoice", sales_invoice)
+        reference_raw = '00 00000 '
         if sinv.mv_mitgliedschaft:
             mvm = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
             if mvm.status_c != 'Interessent*in':
-                reference_raw = '00 00000 00 '
-                reference_raw += mvm.mitglied_nr.replace("MV", "")[:3]
-                reference_raw += ' '
-                reference_raw += mvm.mitglied_nr.replace("MV", "")[3:8]
+                reference_raw += f"{mvm.mitglied_nr.replace('MV', '')[:5]} {mvm.mitglied_nr.replace('MV', '')[5:8]}"
             else:
-                reference_raw = '00 00000 0000'
-                reference_raw += sinv.customer.replace("K-", "")[:1]
-                reference_raw += ' '
-                reference_raw += sinv.customer.replace("K-", "")[1:6]
+                new_customer = sinv.customer.replace("K-", "").rjust(8, "0")
+                reference_raw += f"{new_customer[:5]} {new_customer[5:8]}"
         else:
-            reference_raw = '00 00000 0000'
-            reference_raw += sinv.customer.replace("K-", "")[:1]
-            reference_raw += ' '
-            reference_raw += sinv.customer.replace("K-", "")[1:6]
-        reference_raw += ' 00'
-        reference_raw += sales_invoice.replace("R-", "")[:3]
-        reference_raw += ' '
-        reference_raw += sales_invoice.replace("R-", "")[3:7]
+            new_customer = sinv.customer.replace("K-", "").rjust(8, "0")
+            reference_raw += f"{new_customer[:5]} {new_customer[5:8]}"
+        new_invoice_nr = sales_invoice.replace("R-", "").rjust(10, "0")
+        reference_raw += f"0{new_invoice_nr[:1]} {new_invoice_nr[1:6]} {new_invoice_nr[6:10]}"
     
     if fr:
         fr_sinv = frappe.get_doc("Fakultative Rechnung", fr)
         mvm = frappe.get_doc("Mitgliedschaft", fr_sinv.mv_mitgliedschaft)
         if fr_sinv.typ == 'HV':
-            reference_raw = '11 00000 00'
+            reference_raw = '11 00000 '
         elif fr_sinv.typ == 'Spende':
-            reference_raw = '12 00000 00'
+            reference_raw = '12 00000 '
         else:
-            reference_raw = '13 00000 00'
+            reference_raw = '13 00000 '
         if mvm.status_c != 'Interessent*in':
-            reference_raw += mvm.mitglied_nr.replace("MV", "")[:3]
-            reference_raw += ' '
-            reference_raw += mvm.mitglied_nr.replace("MV", "")[3:8]
-            reference_raw += ' 00'
+            reference_raw += f"{mvm.mitglied_nr.replace('MV', '')[:5]} {mvm.mitglied_nr.replace('MV', '')[5:8]}"
         else:
-            reference_raw += '000 0'
             if int(mvm.abweichende_rechnungsadresse) == 1 and int(mvm.unabhaengiger_debitor) == 1:
                 customer = mvm.rg_kunde
             else:
                 customer = mvm.kunde_mitglied
-            reference_raw += customer.replace("K-", "")[:4]
-            reference_raw += ' '
-            reference_raw += customer.replace("K-", "")[4:6]
-        reference_raw += fr.replace("FR-", "")[:3]
-        reference_raw += ' '
-        reference_raw += fr.replace("FR-", "")[3:8]
+            new_customer = customer.replace("K-", "").rjust(8, "0")
+            reference_raw += f"{new_customer[:5]} {new_customer[5:8]}"
+        new_invoice_nr = fr.replace("FR-", "").rjust(10, "0")
+        reference_raw += f"0{new_invoice_nr[:1]} {new_invoice_nr[1:6]} {new_invoice_nr[6:10]}"
     
     check_digit_matrix = {
         '0': [0, 9, 4, 6, 8, 2, 7, 1, 3, 5, 0],
