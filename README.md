@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.26.0
+ISS-2023-00192
 #### 11.25.1
 Limit von 1000 für nächtlichen inaktivierungslauf
 #### 11.25.0
