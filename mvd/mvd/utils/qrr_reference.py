@@ -14,15 +14,15 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
         if sinv.mv_mitgliedschaft:
             mvm = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
             if mvm.status_c != 'Interessent*in':
-                reference_raw += f"{mvm.mitglied_nr.replace('MV', '')[:5]} {mvm.mitglied_nr.replace('MV', '')[5:8]}"
+                reference_raw += "{0} {1}".format(mvm.mitglied_nr.replace('MV', '')[:5], mvm.mitglied_nr.replace('MV', '')[5:8])
             else:
                 new_customer = sinv.customer.replace("K-", "").rjust(8, "0")
-                reference_raw += f"{new_customer[:5]} {new_customer[5:8]}"
+                reference_raw += "{0} {1}".format(new_customer[:5], new_customer[5:8])
         else:
             new_customer = sinv.customer.replace("K-", "").rjust(8, "0")
-            reference_raw += f"{new_customer[:5]} {new_customer[5:8]}"
+            reference_raw += "{0} {1}".format(new_customer[:5], new_customer[5:8])
         new_invoice_nr = re.sub("-[0-9]+", "", sales_invoice.replace("R-", "")).rjust(10, "0")
-        reference_raw += f"0{new_invoice_nr[:1]} {new_invoice_nr[1:6]} {new_invoice_nr[6:10]}"
+        reference_raw += "0{0} {1} {2}".format(new_invoice_nr[:1], new_invoice_nr[1:6], new_invoice_nr[6:10])
     
     if fr:
         fr_sinv = frappe.get_doc("Fakultative Rechnung", fr)
@@ -34,16 +34,16 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
         else:
             reference_raw = '13 00000 '
         if mvm.status_c != 'Interessent*in':
-            reference_raw += f"{mvm.mitglied_nr.replace('MV', '')[:5]} {mvm.mitglied_nr.replace('MV', '')[5:8]}"
+            reference_raw += "{0} {1}".format(mvm.mitglied_nr.replace('MV', '')[:5], mvm.mitglied_nr.replace('MV', '')[5:8])
         else:
             if int(mvm.abweichende_rechnungsadresse) == 1 and int(mvm.unabhaengiger_debitor) == 1:
                 customer = mvm.rg_kunde
             else:
                 customer = mvm.kunde_mitglied
             new_customer = customer.replace("K-", "").rjust(8, "0")
-            reference_raw += f"{new_customer[:5]} {new_customer[5:8]}"
+            reference_raw += "{0} {1}".format(new_customer[:5], new_customer[5:8])
         new_invoice_nr = re.sub("-[0-9]+", "", fr.replace("FR-", "")).rjust(10, "0")
-        reference_raw += f"0{new_invoice_nr[:1]} {new_invoice_nr[1:6]} {new_invoice_nr[6:10]}"
+        reference_raw += "0{0} {1} {2}".format(new_invoice_nr[:1], new_invoice_nr[1:6], new_invoice_nr[6:10])
     
     check_digit_matrix = {
         '0': [0, 9, 4, 6, 8, 2, 7, 1, 3, 5, 0],

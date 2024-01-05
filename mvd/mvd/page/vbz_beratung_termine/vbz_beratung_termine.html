@@ -1,0 +1,59 @@
+
+<div class="row">
+    <h1 class="vbz">Meine Beratungs Termine<span id="datenstand_as" class="pull-right">Datenstand: {{ datenstand_as }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
+</div>
+<div class="row">
+    <table id="table_termin_uebersicht">
+        <tr>
+            <th>Datum</th>
+            <th>Von - Bis</th>
+            <th>Art</th>
+            <th>Ort</th>
+            <th>Beratung</th>
+        </tr>
+        {% for termin in meine_termine %}
+            <tr class="termin-tr" data-beratung="{{ termin.beratung }}">
+                <td>{{ termin.von_date }}</td>
+                <td>{{ termin.von_time }} - {{ termin.bis_time }}</td>
+                <td>{{ termin.art }}</td>
+                <td>{{ termin.ort }}</td>
+                <td>{{ termin.beratung }}</td>
+            </tr>
+        {% endfor %}
+        {% if meine_termine|length < 1%}
+            <tr class="termin-tr">
+                <td>Keine eigene Beratungstermine</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        {% endif %}
+    </table>
+</div>
+
+<div class="row">
+    <h1 class="vbz">Alle Beratungs Termine</h1>
+</div>
+<div class="row">
+    <table id="table_termin_uebersicht">
+        <tr>
+            <th>Berater*inn</th>
+            <th>Datum</th>
+            <th>Von - Bis</th>
+            <th>Art</th>
+            <th>Ort</th>
+            <th>Beratung</th>
+        </tr>
+        {% for termin in alle_termine %}
+            <tr class="termin-tr" data-beratung="{{ termin.beratung }}">
+                <td>{{ termin.beraterinn }}</td>
+                <td>{{ termin.von_date }}</td>
+                <td>{{ termin.von_time }} - {{ termin.bis_time }}</td>
+                <td>{{ termin.art }}</td>
+                <td>{{ termin.ort }}</td>
+                <td>{{ termin.beratung }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
