@@ -148,6 +148,12 @@ def get_data():
                     "name": "Beratungs Log",
                     "label": _("Beratungs Log"),
                     "description": _("Beratungs Log")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Arbeitsplan Beratung",
+                    "label": _("Arbeitspläne"),
+                    "description": _("Arbeitsplan Beratung")
                 }
             ]
         },
