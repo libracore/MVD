@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import re
 
 @frappe.whitelist()
 def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000 00000 00000 0000'):
@@ -20,7 +21,7 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
         else:
             new_customer = sinv.customer.replace("K-", "").rjust(8, "0")
             reference_raw += f"{new_customer[:5]} {new_customer[5:8]}"
-        new_invoice_nr = sales_invoice.replace("R-", "").rjust(10, "0")
+        new_invoice_nr = re.sub("-[0-9]+", "", sales_invoice.replace("R-", "")).rjust(10, "0")
         reference_raw += f"0{new_invoice_nr[:1]} {new_invoice_nr[1:6]} {new_invoice_nr[6:10]}"
     
     if fr:
@@ -41,7 +42,7 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
                 customer = mvm.kunde_mitglied
             new_customer = customer.replace("K-", "").rjust(8, "0")
             reference_raw += f"{new_customer[:5]} {new_customer[5:8]}"
-        new_invoice_nr = fr.replace("FR-", "").rjust(10, "0")
+        new_invoice_nr = re.sub("-[0-9]+", "", fr.replace("FR-", "")).rjust(10, "0")
         reference_raw += f"0{new_invoice_nr[:1]} {new_invoice_nr[1:6]} {new_invoice_nr[6:10]}"
     
     check_digit_matrix = {
