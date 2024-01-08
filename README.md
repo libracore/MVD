@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.27.0
+ISS-2023-00136
 #### 11.26.1
 Datatrans Import/Report
 #### 11.26.0

@@ -34,7 +34,15 @@
   "thursday_to",
   "friday_to",
   "saturday_to",
-  "sunday_to"
+  "sunday_to",
+  "cb_3",
+  "monday_art",
+  "tuesday_art",
+  "wednesday_art",
+  "thursday_art",
+  "friday_art",
+  "saturday_art",
+  "sunday_art"
  ],
  "fields": [
   {
@@ -194,9 +202,55 @@
    "fieldname": "sunday_to",
    "fieldtype": "Time",
    "label": "Bis"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "monday_art",
+   "fieldtype": "Select",
+   "label": "Art",
+   "options": "Ohne Einschr\u00e4nkung\ntelefonisch\nE-Mail\npers\u00f6nlich"
+  },
+  {
+   "fieldname": "tuesday_art",
+   "fieldtype": "Select",
+   "label": "Art",
+   "options": "Ohne Einschr\u00e4nkung\ntelefonisch\nE-Mail\npers\u00f6nlich"
+  },
+  {
+   "fieldname": "wednesday_art",
+   "fieldtype": "Select",
+   "label": "Art",
+   "options": "Ohne Einschr\u00e4nkung\ntelefonisch\nE-Mail\npers\u00f6nlich"
+  },
+  {
+   "fieldname": "thursday_art",
+   "fieldtype": "Select",
+   "label": "Art",
+   "options": "Ohne Einschr\u00e4nkung\ntelefonisch\nE-Mail\npers\u00f6nlich"
+  },
+  {
+   "fieldname": "friday_art",
+   "fieldtype": "Select",
+   "label": "Art",
+   "options": "Ohne Einschr\u00e4nkung\ntelefonisch\nE-Mail\npers\u00f6nlich"
+  },
+  {
+   "fieldname": "saturday_art",
+   "fieldtype": "Select",
+   "label": "Art",
+   "options": "Ohne Einschr\u00e4nkung\ntelefonisch\nE-Mail\npers\u00f6nlich"
+  },
+  {
+   "fieldname": "sunday_art",
+   "fieldtype": "Select",
+   "label": "Art",
+   "options": "Ohne Einschr\u00e4nkung\ntelefonisch\nE-Mail\npers\u00f6nlich"
   }
  ],
- "modified": "2023-12-05 11:32:41.591174",
+ "modified": "2024-01-08 15:18:39.433791",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin Kontaktperson",
