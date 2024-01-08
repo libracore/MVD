@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils.data import getdate, add_to_date
 
 class DatatransReport(Document):
     pass
@@ -15,6 +16,7 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
         'gutschriften': 0,
         'betrag': 0
     }
+    gutschriften_detail_liste = []
     nicht_verbuchbare_zahlungen = {
         'anderes': 0,
         'abweichender_betrag': 0,
@@ -35,6 +37,13 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
             verbuchbare_zahlungen['anzahl'] += 1
             verbuchbare_zahlungen['gutschriften'] += 1
             verbuchbare_zahlungen['betrag'] += (float(entry.amount) * -1)
+            gutschriften_detail_liste.append({
+                'match': entry.mitglied_nr or entry.webshop_order or '-',
+                'empfaenger': entry.adressblock or '-',
+                'valuta': entry.transdatetime or '-',
+                'betrag': entry.amount or '-',
+                'transaktion_id': entry.refnumber
+            })
             
         # Nicht verbuchbar
         # -----------
@@ -71,13 +80,16 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
                 'grund': entry.status
             })
     
+    valuta_date = getdate(datatrans_zahlungsfile.datatrans_entries[0].transdatetime)
+    file_date = add_to_date(valuta_date, days=1)
+    
     main_html = '''
-        <h1>Zahlungsreport Datatrans  (Valuta bis n/a)</h1>
+        <h1>Zahlungsreport Datatrans  (Valuta bis {valuta})</h1>
         <h2>Zahlungsdatei</h2>
         <table style="width: 100%;">
             <tr>
                 <td style="text-align: left; width: 70%;">Filedatum</td>
-                <td style="text-align: right; width: 30%;">n/a</td>
+                <td style="text-align: right; width: 30%;">{file_date}</td>
             </tr>
             <tr>
                 <td style="text-align: left;">Anzahl Zahlungen (Total number of records)</td>
@@ -163,7 +175,9 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
                 nicht_verbuchbare_zahlungen_abweichender_betrag=nicht_verbuchbare_zahlungen['abweichender_betrag'], \
                 nicht_verbuchbare_zahlungen_anderes=nicht_verbuchbare_zahlungen['anderes'], \
                 nicht_verbuchbare_zahlungen_anzahl=nicht_verbuchbare_zahlungen['anzahl'], \
-                nicht_verbuchbare_zahlungen_betrag=nicht_verbuchbare_zahlungen['betrag'])
+                nicht_verbuchbare_zahlungen_betrag=nicht_verbuchbare_zahlungen['betrag'], \
+                valuta=frappe.utils.get_datetime(valuta_date).strftime('%d.%m.%Y'), \
+                file_date=frappe.utils.get_datetime(file_date).strftime('%d.%m.%Y'))
     
     html_nicht_verbucht = '''
         <h1>Nicht verbuchte Zahlungen</h1>
@@ -212,6 +226,25 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
                 </tr>
             </thead>
             <tbody>
+    '''
+
+    for credit in gutschriften_detail_liste:
+        html_gutschriften += '''
+            <tr>
+                <td>{match}</td>
+                <td>{empfaenger}</td>
+                <td>{valuta}</td>
+                <td>{betrag}</td>
+                <td>{transaktion_id}</td>
+            </tr>
+        '''.format(match=credit['match'], \
+                    empfaenger=credit['empfaenger'], \
+                    valuta=credit['valuta'], \
+                    betrag=credit['betrag'], \
+                    transaktion_id=credit['transaktion_id'])
+    
+    if len(gutschriften_detail_liste) < 1:
+        html_gutschriften += '''
             <tr>
                 <td>...</td>
                 <td>...</td>
@@ -219,9 +252,27 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
                 <td>...</td>
                 <td>...</td>
             </tr>
+        '''
+    
+    html_gutschriften += '''
             </tbody>
         </table>
     '''
+
+    query_ausstehende_records = frappe.db.sql("""
+                                                SELECT
+                                                    `mitglied_nr` AS `mitgl`,
+                                                    `adressblock` AS `empfaenger`,
+                                                    `creation` AS `valuta`,
+                                                    `online_betrag` AS `betrag`,
+                                                    `online_payment_id` AS `transaktion_id`
+                                                FROM `tabMitgliedschaft`
+                                                WHERE `online_betrag` > 0
+                                                AND `online_payment_zahlungsfile` IS NULL
+                                                AND `creation` <= '{valuta}'
+                                                AND `creation` >= '2022-01-01'
+                                                ORDER BY `creation` ASC
+                                              """.format(valuta=frappe.utils.get_datetime(valuta_date).strftime('%Y-%m-%d')), as_dict=True)
     
     html_ausstehende_records = '''
         <h1>Ausstehende Datatrans-Zahlungsrecords</h1>
@@ -236,13 +287,35 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
                 </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-                <td>...</td>
-            </tr>
+    '''
+
+    for ausstehend in query_ausstehende_records:
+        html_ausstehende_records += '''
+                <tr>
+                    <td>{mitgl}</td>
+                    <td>{empfaenger}</td>
+                    <td>{valuta}</td>
+                    <td>{betrag}</td>
+                    <td>{transaktion_id}</td>
+                </tr>
+        '''.format(mitgl=ausstehend['mitgl'], \
+                   empfaenger=ausstehend['empfaenger'].replace("\n", ", "), \
+                   valuta=frappe.utils.get_datetime(ausstehend['valuta']).strftime('%d.%m.%Y'), \
+                   betrag=ausstehend['betrag'], \
+                   transaktion_id=ausstehend['transaktion_id'])
+    
+    if len(query_ausstehende_records) < 1:
+        html_ausstehende_records += '''
+                <tr>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                </tr>
+        '''
+
+    html_ausstehende_records += '''
             </tbody>
         </table>
     '''

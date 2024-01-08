@@ -87,7 +87,7 @@ class DatatransZahlungsfile(Document):
                                     entry.status = 'Mitglied: Doppelimport'
                                 else:
                                     # achtung debit = D und credit = C
-                                    if float(entry.amount) > 0:
+                                    if entry.booktyp == 'D':
                                         # Zahlung
                                         if float(entry.amount) != float(mitgliedschaft_lookup[0].online_betrag):
                                             # abweichender Betrag
