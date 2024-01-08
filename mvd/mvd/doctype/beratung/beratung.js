@@ -484,7 +484,8 @@ function termin_quick_entry(frm) {
                 method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
                 args:{
                     'sektion': cur_frm.doc.sektion_id,
-                    'datum': frappe.datetime.now_datetime()
+                    'datum': frappe.datetime.now_datetime(),
+                    'art': 'telefonisch'
                 },
                 callback: function(verfuegbarkeiten) {
                     var verfuegbarkeiten_html = '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>';
@@ -531,7 +532,8 @@ function termin_quick_entry(frm) {
                                                 args:{
                                                     'sektion': cur_frm.doc.sektion_id,
                                                     'datum': d.get_value('von'),
-                                                    'beraterin': d.get_value('kontaktperson')||''
+                                                    'beraterin': d.get_value('kontaktperson')||'',
+                                                    'art': d.get_value('art')||''
                                                 },
                                                 callback: function(r) {
                                                     if (r.message) {
@@ -554,7 +556,8 @@ function termin_quick_entry(frm) {
                                         method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
                                         args:{
                                             'sektion': cur_frm.doc.sektion_id,
-                                            'datum': d.get_value('von')
+                                            'datum': d.get_value('von'),
+                                            'art': d.get_value('art')||''
                                         },
                                         callback: function(r) {
                                             if (r.message) {
@@ -570,7 +573,29 @@ function termin_quick_entry(frm) {
                             }
                         },
                         {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 1, 'default': ''},
-                        {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich\nE-Mail', 'reqd': 1, 'default': 'telefonisch'},
+                        {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich\nE-Mail', 'reqd': 1, 'default': 'telefonisch',
+                            'change': function() {
+                                // aktualisierung verfügbarkeiten
+                                frappe.call({
+                                    method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
+                                    args:{
+                                        'sektion': cur_frm.doc.sektion_id,
+                                        'datum': d.get_value('von'),
+                                        'beraterin': d.get_value('kontaktperson')||'',
+                                        'art': d.get_value('art')||''
+                                    },
+                                    callback: function(r) {
+                                        if (r.message) {
+                                            // anzeigen der Verfügbarkeiten
+                                            d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                                        } else {
+                                            // keine freien Beratungspersonen
+                                            d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
+                                        }
+                                    }
+                                });
+                            }
+                        },
                         {'fieldname': 'von', 'fieldtype': 'Datetime', 'label': __('Zeit von'), 'reqd': 1, 'default': default_von,
                             'change': function() {
                                 // setzen neues "bis"-Datum
@@ -583,7 +608,8 @@ function termin_quick_entry(frm) {
                                     args:{
                                         'sektion': cur_frm.doc.sektion_id,
                                         'datum': d.get_value('von'),
-                                        'beraterin': d.get_value('kontaktperson')||''
+                                        'beraterin': d.get_value('kontaktperson')||'',
+                                        'art': d.get_value('art')||''
                                     },
                                     callback: function(r) {
                                         if (r.message) {
