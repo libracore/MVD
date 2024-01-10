@@ -95,9 +95,6 @@ frappe.ui.form.on('Beratung', {
                     //~ d.show();
                 //~ }
                 // *******************************************************************
-                
-                // setzen der Beratungskategorie als Mandatory
-                cur_frm.set_df_property('beratungskategorie','reqd', 1);
 
                 // Add BTN Übernehmen
                 frm.add_custom_button(__("Übernehmen"),  function() {
