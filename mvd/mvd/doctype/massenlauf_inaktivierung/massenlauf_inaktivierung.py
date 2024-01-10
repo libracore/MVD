@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from frappe.utils.data import now, getdate
 from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
+from mvd.mvd.doctype.retouren.retouren import close_open_retouren
 
 class MassenlaufInaktivierung(Document):
     def before_save(self):
@@ -116,6 +117,9 @@ def start_massenlauf_inaktivierung(doc):
                 
                 ms.save()
                 ms.add_comment('Comment', text='Ausschluss vollzogen ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
+
+                if cint(doc.m_w_retouren_schliessen) ==1:
+                    close_open_retouren(ms.name)
                 
                 if doc.rg_storno:
                     if cint(doc.rg_storno) == 1:

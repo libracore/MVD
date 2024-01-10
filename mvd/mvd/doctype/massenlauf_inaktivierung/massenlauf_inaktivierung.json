@@ -12,6 +12,7 @@
   "cb_1",
   "grund",
   "status",
+  "m_w_retouren_schliessen",
   "section_hinweis",
   "hinweis",
   "section_selektion",
@@ -133,10 +134,16 @@
    "fieldname": "ausnahme_jahr",
    "fieldtype": "Int",
    "label": "Ausnahmejahr"
+  },
+  {
+   "default": "0",
+   "fieldname": "m_w_retouren_schliessen",
+   "fieldtype": "Check",
+   "label": "M+W-Retouren schliessen"
   }
  ],
  "is_submittable": 1,
- "modified": "2023-01-25 08:41:43.862797",
+ "modified": "2024-01-10 09:44:26.305590",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Massenlauf Inaktivierung",
