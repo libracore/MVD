@@ -87,15 +87,23 @@
         <!-- Seitenzahlen (Fusszeile) -->
         <div id='seitenzahlen'><div id='seitenzahlen-content'>{% if seite.seitenzahlen %}Seite {{ seite.idx }} / {{ druckvorlage.seiten|len }}{% else %}&nbsp;{% endif %}</div></div>
         
-        <!-- Erzwungene Rückseite bei Mitglieder Ausweis -->
+        <!-- Rückseite bei Mitglieder Ausweis -->
         {% if seite.ausweis %}
-            <div class="page-break"></div>
-            <div id='ausweis-rueckseite'>
-                {{ sektion.ausweis_rueckseite }}
-            </div>
-            <div id="ausweis-rueckseite-zusatz">Karte an der Perforation herauslösen</div>
+            {% if seite.ausweis_beidseitig == 'beidseitig' %}
+                <div class="page-break"></div>
+                <div id='ausweis-rueckseite'>{{ sektion.ausweis_rueckseite }}</div>
+                <div id="ausweis-rueckseite-zusatz">Karte an der Perforation herauslösen</div>
+            {% else %}
+                <div class="page-break"></div>
+                <div id='ausweis-rueckseite'></div>
+                <div id="ausweis-rueckseite-zusatz" style="color:transparent">Karte an der Perforation herauslösen</div>
+            {% endif %}
         {% endif %}
-
+        
+        <!-- Rückseite bearbeitbar-->
+        {% if seite.ausweis and seite.inhalt_rueckseite %}
+            <br><br><div id="content-{{seite.idx }}">{{ replace_mv_keywords(seite.inhalt_rueckseite, mitgliedschaft, sinv=sales_invoice) }}</div>
+        {% endif %}
 
         <style>
             #content-{{seite.idx }} {
