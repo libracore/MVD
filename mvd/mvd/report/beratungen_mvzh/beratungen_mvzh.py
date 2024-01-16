@@ -61,8 +61,8 @@ def get_sp_details(beratung):
                                         `method`
                                     FROM `tabBeratungs Log`
                                     WHERE `beratung` = '{beratung}'
-                                    AND `method` IN ('send_to_sp', 'send_beratung')
-                                    """.format(beratung=beratung.beratung_id), as_dict=True)
+                                    AND `method` IN ('send_to_sp', 'send_beratung', 'send_beratung_failed')
+                                    ORDER BY `creation` ASC""".format(beratung=beratung.beratung_id), as_dict=True)
     
     for log in sp_send_log:
         if log.method == 'send_to_sp':
@@ -71,5 +71,6 @@ def get_sp_details(beratung):
             sp_info.update({'sp_annahme': log.sp_lieferung})
             sp_info.update({'sp_status': log.sp_status})
             sp_info.update({'sp_ok': 1})
-    
+        if log.method == 'send_beratung_failed':
+            sp_info.update({'sp_status': log.sp_status})
     return sp_info
