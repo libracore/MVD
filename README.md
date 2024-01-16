@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.32.0
+Update-Sperre (ERPNext > SP) für Sektion MW (M+W-Abo)
 #### 11.31.0
 ISS-2024-00017; Erweiterung v11.29.0 um Anzeige von 'failed_only'
 #### 11.30.0

@@ -25,18 +25,23 @@ def flush_queue(limit=100):
     for _queue in queues:
         queue = frappe.get_doc("Service Platform Queue", _queue.name)
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", queue.mv_mitgliedschaft)
-        if mitgliedschaft.status_c not in ('Online-Beitritt', 'Online-Mutation'):
-            update = False
-            if int(queue.update) == 1:
-                update = True
-            prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
-            update_status = update_mvm(prepared_mvm, update)
-            if cint(update_status) == 1:
-                queue.status = 'Closed'
+        if mitgliedschaft.sektion_id != 'M+W-Abo':
+            if mitgliedschaft.status_c not in ('Online-Beitritt', 'Online-Mutation'):
+                update = False
+                if int(queue.update) == 1:
+                    update = True
+                prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
+                update_status = update_mvm(prepared_mvm, update)
+                if cint(update_status) == 1:
+                    queue.status = 'Closed'
+                else:
+                    queue.status = 'Failed'
+                json_formatted_str = json.dumps(prepared_mvm, indent=2)
+                queue.objekt = json_formatted_str
+                queue.save(ignore_permissions=True)
             else:
-                queue.status = 'Failed'
-            json_formatted_str = json.dumps(prepared_mvm, indent=2)
-            queue.objekt = json_formatted_str
-            queue.save(ignore_permissions=True)
+                frappe.log_error("Mitglied: {0}\nStatus: {1}".format(mitgliedschaft.name, mitgliedschaft.status_c), 'API Queue: Falscher Status')
         else:
-            frappe.log_error("Mitglied: {0}\nStatus: {1}".format(mitgliedschaft.name, mitgliedschaft.status_c), 'API Queue: Falscher Status')
+            queue.status = 'Ignore'
+            queue.add_comment('Comment', text='Update wird ignoriert. Sektion = M+W-Abo')
+            queue.save(ignore_permissions=True)
