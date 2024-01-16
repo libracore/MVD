@@ -136,6 +136,12 @@ def get_data():
                     "description": _("Beratung")
                 },
                 {
+                    "type": "doctype",
+                    "name": "Arbeitsplan Beratung",
+                    "label": _("Arbeitspläne"),
+                    "description": _("Arbeitsplan Beratung")
+                },
+                {
                     "type": "report",
                     "name": "Beratungsstatistik",
                     "label": _("Beratungsstatistik"),
@@ -150,10 +156,12 @@ def get_data():
                     "description": _("Beratungs Log")
                 },
                 {
-                    "type": "doctype",
-                    "name": "Arbeitsplan Beratung",
-                    "label": _("Arbeitspläne"),
-                    "description": _("Arbeitsplan Beratung")
+                    "type": "report",
+                    "name": "Beratungen MVZH",
+                    "label": _("Beratungen MVZH"),
+                    "description": _("Beratungen MVZH"),
+                    "doctype": "Beratung",
+                    "is_query_report": True
                 }
             ]
         },

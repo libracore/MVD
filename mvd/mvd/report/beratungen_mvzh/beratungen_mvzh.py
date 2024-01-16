@@ -19,6 +19,7 @@ def get_columns():
         {"label": _("Name Person"), "fieldname": "name_person", "fieldtype": "Data"},
         {"label": _("E-Mail Person"), "fieldname": "e_mail_person", "fieldtype": "Data"},
         {"label": _("SP Lieferung"), "fieldname": "sp_lieferung", "fieldtype": "Date"},
+        {"label": _("SP Annahme"), "fieldname": "sp_annahme", "fieldtype": "Date"},
         {"label": _("SP Status"), "fieldname": "sp_status", "fieldtype": "Code"},
         {"label": _("Übermittelt an SP"), "fieldname": "sp_ok", "fieldtype": "Check"}
     ]
@@ -26,7 +27,7 @@ def get_columns():
 def get_data(filters):
     data = []
     
-    date_filter = """WHERE `creation` BETWEEN '{0} 00:00:00' AND '{1} 23:59:59'""".format(filters.von, filters.bis)
+    date_filter = """WHERE `creation` BETWEEN '{0} 00:00:00' AND '{1} 23:59:59'""".format(filters.get('von'), filters.get('bis'))
     
     beratungen = frappe.db.sql("""
                                 SELECT
@@ -56,14 +57,19 @@ def get_sp_details(beratung):
     sp_send_log = frappe.db.sql("""
                                     SELECT
                                         `json` AS `sp_status`,
-                                        `creation` AS `sp_lieferung`
+                                        `creation` AS `sp_lieferung`,
+                                        `method`
                                     FROM `tabBeratungs Log`
                                     WHERE `beratung` = '{beratung}'
-                                    AND `method` = 'send_beratung'
-                                    AND `info` = 1
-                                    AND `title` = 'Beratung an SP übermittelt'""".format(beratung=beratung.beratung_id), as_dict=True)
-    if len(sp_send_log) > 0:
-        sp_info.update(sp_send_log[0])
-        sp_info.update({'sp_ok': 1})
+                                    AND `method` IN ('send_to_sp', 'send_beratung')
+                                    """.format(beratung=beratung.beratung_id), as_dict=True)
+    
+    for log in sp_send_log:
+        if log.method == 'send_to_sp':
+            sp_info.update({'sp_lieferung': log.sp_lieferung})
+        if log.method == 'send_beratung':
+            sp_info.update({'sp_annahme': log.sp_lieferung})
+            sp_info.update({'sp_status': log.sp_status})
+            sp_info.update({'sp_ok': 1})
     
     return sp_info
