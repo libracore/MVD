@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cint
 
 def execute(filters=None):
     columns = get_columns()
@@ -26,8 +27,10 @@ def get_columns():
 
 def get_data(filters):
     data = []
+    return_data = []
     
     date_filter = """WHERE `creation` BETWEEN '{0} 00:00:00' AND '{1} 23:59:59'""".format(filters.get('von'), filters.get('bis'))
+    failed_only = True if cint(filters.get('failed_only')) == 1 else False
     
     beratungen = frappe.db.sql("""
                                 SELECT
@@ -44,7 +47,14 @@ def get_data(filters):
         beratung.update(get_sp_details(beratung))
         data.append(beratung)
     
-    return data
+    if failed_only:
+        for entry in data:
+            if entry.sp_ok != 1:
+                return_data.append(entry)
+    else:
+        return_data = data
+    
+    return return_data
 
 def get_mitglied_name(beratung):
     mitglied_info = {}
