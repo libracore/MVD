@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 11.30.0
+ISS-2024-00017; Zusätzliches Loggin von HTTP Status Codes und/oder API Fails
+#### 11.29.0
+ISS-2024-00017; Verbesserte Beratungs-Logging-Auswertung
 #### 11.28.0
 ISS-2023-00053
 #### 11.27.1

@@ -142,6 +142,16 @@ def send_beratung(beratungs_data, beratung):
         
         try:
             if sp_connection.status_code != 204:
+                frappe.get_doc({
+                    'doctype': 'Beratungs Log',
+                    'error': 1,
+                    'info': 0,
+                    'beratung': beratung,
+                    'method': 'send_beratung_failed',
+                    'title': 'SP-übermittlung fehlgeschlagen',
+                    'json': "{0}".format(sp_connection.status_code)
+                }).insert(ignore_permissions=True)
+
                 frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, beratungs_data), 'send beratung failed')
                 frappe.db.commit()
                 return
@@ -158,6 +168,16 @@ def send_beratung(beratungs_data, beratung):
                 frappe.db.commit()
                 return
         except Exception as err:
+            frappe.get_doc({
+                    'doctype': 'Beratungs Log',
+                    'error': 1,
+                    'info': 0,
+                    'beratung': beratung,
+                    'method': 'send_beratung_failed',
+                    'title': 'SP-übermittlung fehlgeschlagen',
+                    'json': "{0}\n\n{1}".format(err, beratungs_data)
+                }).insert(ignore_permissions=True)
+            
             frappe.log_error("{0}\n\n{1}".format(err, beratungs_data), 'send beratung failed')
             frappe.db.commit()
             
