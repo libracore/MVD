@@ -17,6 +17,11 @@ frappe.query_reports["Beratungen MVZH"] = {
             'fieldtype': "Date",
             'default': frappe.datetime.now_date(),
             'reqd': 1
+        },
+        {
+            'fieldname': "failed_only",
+            'label': __("Zeige nur Fehlerhafte"),
+            'fieldtype': "Check"
         }
     ]
 };
