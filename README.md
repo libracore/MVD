@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.32.2
+ISS-2024-00017; verbessertes Error-Logging
 #### 11.32.1
 ISS-2024-00017; Anzeige von 'failed_only' als Default
 #### 11.32.0

@@ -149,7 +149,7 @@ def send_beratung(beratungs_data, beratung):
                     'beratung': beratung,
                     'method': 'send_beratung_failed',
                     'title': 'SP-übermittlung fehlgeschlagen',
-                    'json': "{0}".format(sp_connection.status_code)
+                    'json': "{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, beratungs_data)
                 }).insert(ignore_permissions=True)
 
                 frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, beratungs_data), 'send beratung failed')
