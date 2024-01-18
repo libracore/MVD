@@ -13,25 +13,25 @@ def get_open_data():
     open_data = {
         'beratung': {
             'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
-            's': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang'}, limit=100, distinct=True)),
-            's1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set']}, limit=100, distinct=True)),
-            's2': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'beratungskategorie': ['in', ['202 - MZ-Erhöhung', '300 - Nebenkosten']]}, limit=100, distinct=True)),
-            's3': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfrage: Termin vereinbaren'}, limit=100, distinct=True)),
-            's4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 0}, limit=100, distinct=True)),
-            's5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 1}, limit=100, distinct=True)),
-            's6': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set']}, limit=100, distinct=True)),
-            's7': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['is', 'not set']}, limit=100, distinct=True)),
-            's8': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 's8': 1}, limit=100, distinct=True, ignore_ifnull=True)),
-            'r': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open'}, limit=100, distinct=True)),
-            'r1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': 'Hoch'}, limit=100, distinct=True)),
-            'r2': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': ['!=', 'Hoch'], 'kontaktperson': 'Rechtsberatung Pool (MVBE)'}, limit=100, distinct=True)),
-            'r3': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)']}, limit=100, distinct=True)),
-            'r4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 0}, limit=100, distinct=True)),
-            'r5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 1}, limit=100, distinct=True)),
-            'r6': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1}, limit=100, distinct=True)),
-            'r7': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 'hat_termine': 1}, limit=100, distinct=True)),
-            'r8': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Closed', 'hat_termine': 1}, limit=100, distinct=True)),
-            'r9': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'set']}, limit=100, distinct=True)),
+            's': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            's1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            's2': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'beratungskategorie': ['in', ['202 - MZ-Erhöhung', '300 - Nebenkosten']], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            's3': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfrage: Termin vereinbaren', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            's4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 0, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            's5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            's6': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            's7': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            's8': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 's8': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True, ignore_ifnull=True)),
+            'r': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': 'Hoch', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r2': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': ['!=', 'Hoch'], 'kontaktperson': 'Rechtsberatung Pool (MVBE)', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r3': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 0, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r6': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r7': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 'hat_termine': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r8': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Closed', 'hat_termine': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r9': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'p1': get_p1(frappe.session.user),
             'p2': get_p2(frappe.session.user),
             'p3': get_p3(frappe.session.user),
@@ -49,7 +49,8 @@ def get_p1(user):
                                                 WHERE `user` = '{user}'  
                                                 AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
-                                            AND `status` = 'Open'""".format(user=user), as_dict=True)[0].qty
+                                            AND `status` = 'Open'
+                                            AND `sektion_id` != 'MVDF'""".format(user=user), as_dict=True)[0].qty
     return p1_qty or 0
 
 def get_p2(user):
@@ -61,7 +62,8 @@ def get_p2(user):
                                                 AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
                                             AND `status` = 'Rückfragen'
-                                            AND `ungelesen` = 0""".format(user=user), as_dict=True)[0].qty
+                                            AND `ungelesen` = 0
+                                            AND `sektion_id` != 'MVDF'""".format(user=user), as_dict=True)[0].qty
     return p2_qty or 0
 
 def get_p3(user):
@@ -72,7 +74,8 @@ def get_p3(user):
                                                 WHERE `user` = '{user}'  AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
                                             AND `status` = 'Rückfragen'
-                                            AND `ungelesen` = 1""".format(user=user), as_dict=True)[0].qty
+                                            AND `ungelesen` = 1
+                                            AND `sektion_id` != 'MVDF'""".format(user=user), as_dict=True)[0].qty
     return p3_qty or 0
 
 def get_p4(user):
@@ -84,7 +87,8 @@ def get_p4(user):
                                                 AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
                                             AND `status` = 'Termin vereinbart'
-                                            AND `hat_termine` = 1""".format(user=user), as_dict=True)[0].qty
+                                            AND `hat_termine` = 1
+                                            AND `sektion_id` != 'MVDF'""".format(user=user), as_dict=True)[0].qty
     return p4_qty or 0
 
 @frappe.whitelist()
