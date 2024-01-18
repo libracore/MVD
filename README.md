@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.34.0
+ISS-2023-00044; Druckvorlage: Seiteninhalt der Seite mit der Ausweis-Rückseite kann neu befüllt oder gänzlich weggelassen werden
 #### 11.33.0
 ISS-2024-00007; Filter (!= MVDF) in VBZ Beratung (MVBE)
 #### 11.32.2
