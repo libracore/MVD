@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.34.1
+Wiederherstellung des Buttons 'Tabellen durch Paragraphen ersetzen' in Beratung aus v11.18.0
 #### 11.34.0
 ISS-2023-00044; Druckvorlage: Seiteninhalt der Seite mit der Ausweis-Rückseite kann neu befüllt oder gänzlich weggelassen werden
 #### 11.33.0
