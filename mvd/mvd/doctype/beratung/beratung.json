@@ -59,6 +59,7 @@
   "section_verknuepfungen",
   "verknuepfungen_html",
   "section_anfrage",
+  "replace_table_as_p",
   "notiz",
   "antwort",
   "section_dokumente",
@@ -420,9 +421,14 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "s8"
+  },
+  {
+   "fieldname": "replace_table_as_p",
+   "fieldtype": "Button",
+   "label": "Tabellen durch Paragraphen ersetzen"
   }
  ],
- "modified": "2023-12-19 14:01:45.630648",
+ "modified": "2024-01-18 20:51:22.981585",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
