@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.33.0
+ISS-2024-00007; Filter (!= MVDF) in VBZ Beratung (MVBE)
 #### 11.32.2
 ISS-2024-00017; verbessertes Error-Logging
 #### 11.32.1
