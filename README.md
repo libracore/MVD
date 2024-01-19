@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.34.2
+Verbesserung der Definitions-Logik des CAMT-Import Status
 #### 11.34.1
 Wiederherstellung des Buttons 'Tabellen durch Paragraphen ersetzen' in Beratung aus v11.18.0
 #### 11.34.0
