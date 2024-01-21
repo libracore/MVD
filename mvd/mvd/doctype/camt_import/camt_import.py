@@ -1169,7 +1169,10 @@ def aktualisiere_camt_uebersicht(camt_import):
     if alter_status != 'Failed':
         if alter_status != 'Zahlungen eingelesen':
             if (frappe.db.get_value('CAMT Import', camt_import, 'verbuchte_zahlung_qty') - frappe.db.get_value('CAMT Import', camt_import, 'ueberzahlung_qty')) == frappe.db.get_value('CAMT Import', camt_import, 'eingelesene_zahlungen_qty'):
-                frappe.db.set_value('CAMT Import', camt_import, 'status', 'Closed')
+                if (frappe.db.get_value('CAMT Import', camt_import, 'zugewiesen_unverbucht_qty')) > 0:
+                    frappe.db.set_value('CAMT Import', camt_import, 'status', 'Verarbeitet')
+                else:
+                    frappe.db.set_value('CAMT Import', camt_import, 'status', 'Closed')
             else:
                 frappe.db.set_value('CAMT Import', camt_import, 'status', 'Verarbeitet')
 
