@@ -1,7 +1,7 @@
 ## MVD
 ### Version Log
 #### 11.35.0
-Visualisierung der maximalen Anzahl Zeichen für Strasse und Zusatzadresse in DT Mitgliedschaft
+Visualisierung und Validierung der maximalen Anzahl Zeichen für Strasse und Zusatzadresse in DT Mitgliedschaft
 #### 11.34.3
 Datatrans; Stichtag 2024-01-01
 #### 11.34.2
