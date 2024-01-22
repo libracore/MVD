@@ -270,7 +270,7 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
                                                 WHERE `online_betrag` > 0
                                                 AND `online_payment_zahlungsfile` IS NULL
                                                 AND `creation` <= '{valuta}'
-                                                AND `creation` >= '2022-01-01'
+                                                AND `creation` >= '2024-01-01'
                                                 ORDER BY `creation` ASC
                                               """.format(valuta=frappe.utils.get_datetime(valuta_date).strftime('%Y-%m-%d')), as_dict=True)
     

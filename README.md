@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.34.3
+Datatrans; Stichtag 2024-01-01
 #### 11.34.2
 Verbesserung der Definitions-Logik des CAMT-Import Status
 #### 11.34.1
