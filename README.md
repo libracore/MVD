@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.36.0
+Im Report der Doppelten Mitgliedschaften hat es immer Weg- und Zuzüge, die am Morgen weg sind. Diese werden nun ignoriert.
 #### 11.35.0
 Visualisierung und Validierung der maximalen Anzahl Zeichen für Strasse und Zusatzadresse in DT Mitgliedschaft
 #### 11.34.3
