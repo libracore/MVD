@@ -335,11 +335,13 @@
    "label": "E-Mail"
   },
   {
+   "description": "(max. 40 Zeichen)",
    "fieldname": "zusatz_adresse",
    "fieldtype": "Data",
    "label": "Zusatzadresse"
   },
   {
+   "description": "(max. 30 Zeichen)",
    "fieldname": "strasse",
    "fieldtype": "Data",
    "label": "Strasse"
@@ -467,6 +469,7 @@
   },
   {
    "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
+   "description": "(max. 30 Zeichen)",
    "fieldname": "objekt_strasse",
    "fieldtype": "Data",
    "label": "Strasse (Objekt)"
@@ -510,6 +513,7 @@
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "description": "(max. 30 Zeichen)",
    "fieldname": "rg_strasse",
    "fieldtype": "Data",
    "label": "Strasse (Rechnung)"
@@ -683,12 +687,14 @@
   },
   {
    "depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "description": "(max. 40 Zeichen)",
    "fieldname": "rg_zusatz_adresse",
    "fieldtype": "Data",
    "label": "Zusatzadresse (Rechnung)"
   },
   {
    "depends_on": "eval:doc.postfach=='1'||doc.abweichende_objektadresse",
+   "description": "(max. 40 Zeichen)",
    "fieldname": "objekt_zusatz_adresse",
    "fieldtype": "Data",
    "label": "Zusatzadresse (Objekt)"
@@ -1288,7 +1294,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2023-11-01 15:54:30.085944",
+ "modified": "2024-01-22 14:40:56.967547",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

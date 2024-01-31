@@ -44,6 +44,10 @@ def get_data():
                                 GROUP BY `mitglied_nr`
                                 HAVING COUNT(`name`) > 1
                             ) AS `tbl_b` ON `tbl_b`.`mitglied_nr` = `tbl_a`.`mitglied_nr`
-                            WHERE `tbl_a`.`status_c` NOT IN ('Interessent*in', 'Inaktiv')
+                            WHERE `tbl_a`.`status_c` NOT IN ('Interessent*in', 'Inaktiv') AND
+                                (
+                                    (`tbl_a`.`wegzug` < DATE_SUB(CURDATE(), INTERVAL 1 DAY) OR `tbl_a`.`wegzug` IS NULL) AND 
+                                    (`tbl_a`.`zuzug` < DATE_SUB(CURDATE(), INTERVAL 1 DAY) OR `tbl_a`.`zuzug` IS NULL)
+                                )
                             ORDER BY `tbl_a`.`mitglied_nr` ASC""", as_dict=True)
     return data

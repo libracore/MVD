@@ -440,15 +440,33 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frappe.validated=false;
             }
         }
+        if (cur_frm.doc.strasse) {
+            if (cur_frm.doc.strasse.length > 30) {
+                frappe.msgprint( "Die Serviceplatform lässt nur Strassen bis zu einer Zeichenlänge von <b>30</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.strasse.length + ":</b><br>" + cur_frm.doc.strasse, __("Validation") );
+                frappe.validated=false;
+            }
+        }
         if (cur_frm.doc.objekt_zusatz_adresse) {
             if (cur_frm.doc.objekt_zusatz_adresse.length > 40) {
                 frappe.msgprint( "Die Serviceplatform lässt nur Adresszusätze bis zu einer Zeichenlänge von <b>40</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.objekt_zusatz_adresse.length + ":</b><br>" + cur_frm.doc.objekt_zusatz_adresse, __("Validation") );
                 frappe.validated=false;
             }
         }
+        if (cur_frm.doc.objekt_strasse) {
+            if (cur_frm.doc.objekt_strasse.length > 30) {
+                frappe.msgprint( "Die Serviceplatform lässt nur Strassen bis zu einer Zeichenlänge von <b>30</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.objekt_strasse.length + ":</b><br>" + cur_frm.doc.objekt_strasse, __("Validation") );
+                frappe.validated=false;
+            }
+        }
         if (cur_frm.doc.rg_zusatz_adresse) {
             if (cur_frm.doc.rg_zusatz_adresse.length > 40) {
                 frappe.msgprint( "Die Serviceplatform lässt nur Adresszusätze bis zu einer Zeichenlänge von <b>40</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.rg_zusatz_adresse.length + ":</b><br>" + cur_frm.doc.rg_zusatz_adresse, __("Validation") );
+                frappe.validated=false;
+            }
+        }
+        if (cur_frm.doc.rg_strasse) {
+            if (cur_frm.doc.rg_strasse.length > 30) {
+                frappe.msgprint( "Die Serviceplatform lässt nur Strassen bis zu einer Zeichenlänge von <b>30</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.rg_strasse.length + ":</b><br>" + cur_frm.doc.rg_strasse, __("Validation") );
                 frappe.validated=false;
             }
         }
