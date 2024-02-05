@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.38.0
+ISS-2024-00010
 #### 11.37.0
 ISS-2024-00032: Anzeigen von Pseudo-Status "Inaktiv (verstorben)" wenn verstorben und Inaktiv
 #### 11.36.0
