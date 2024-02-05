@@ -1831,6 +1831,12 @@ def get_uebersicht_html(name):
         else:
             eintritt = mitgliedschaft.eintritt if mitgliedschaft.eintritt else mitgliedschaft.creation
         
+        # Anzeigen von Pseudo-Status "Inaktiv (verstorben)" wenn verstorben und Inaktiv
+        if mitgliedschaft.verstorben_am and mitgliedschaft.status_c == 'Inaktiv':
+            status = "Inaktiv (verstorben)"
+        else:
+            status = mitgliedschaft.status_c
+
         haftpflicht = False
         if len(mitgliedschaft.haftpflicht) > 0:
             haftpflicht = []
@@ -1855,7 +1861,7 @@ def get_uebersicht_html(name):
             'rg_sep': rg_sep,
             'col_qty': cint(12 / col_qty),
             'allgemein': {
-                'status': mitgliedschaft.status_c,
+                'status': status,
                 'eintritt': eintritt,
                 'austritt': mitgliedschaft.austritt,
                 'ampelfarbe': mitgliedschaft.ampel_farbe or 'ampelrot',

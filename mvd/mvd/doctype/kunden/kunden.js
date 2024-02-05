@@ -47,6 +47,9 @@ frappe.ui.form.on('Kunden', {
         // erstelle Debitorenübersicht in Dashboard
         set_party_dashboard_indicators(frm);
     },
+    postfach: function(frm){
+        strasse_mandatory(frm);
+    },
     abweichende_rechnungsadresse: function(frm) {
         // set strasse, plz und ort mandatory (Rechnungsempfänger)
         rechnungsadresse_mandatory(frm);
@@ -61,6 +64,10 @@ frappe.ui.form.on('Kunden', {
         // set nachname und vorname mandatory (Rechnungsempfänger)
         rechnungsempfaenger_mandatory(frm);
     },
+    rg_postfach: function(frm) {
+        // set nachname und vorname mandatory (Rechnungsempfänger)
+        rg_strasse_mandatory(frm);
+    },
     rg_kundentyp: function(frm) {
         // set firma mandatory (Rechnungsempfänger)
         firmenrechnungsempfaenger_mandatory(frm);
@@ -73,13 +80,33 @@ frappe.ui.form.on('Kunden', {
     }
 });
 
+function strasse_mandatory(frm){
+    if (cur_frm.doc.postfach) {
+        cur_frm.set_df_property('strasse', 'reqd', 0);
+    } else {
+        cur_frm.set_df_property('strasse', 'reqd', 1);
+    }
+}
+
+function rg_strasse_mandatory(frm){
+    if (cur_frm.doc.rg_postfach) {
+        cur_frm.set_df_property('rg_strasse', 'reqd', 0);
+    } else {
+        cur_frm.set_df_property('rg_strasse', 'reqd', 1);
+    }
+}
+
 function rechnungsadresse_mandatory(frm) {
     // set strasse, plz und ort mandatory (Rechnungsempfänger)
     if (cur_frm.doc.abweichende_rechnungsadresse) {
+        if (cur_frm.doc.rg_postfach) {
+            cur_frm.set_value('rg_postfach', 0);
+        }
         cur_frm.set_df_property('rg_strasse', 'reqd', 1);
         cur_frm.set_df_property('rg_plz', 'reqd', 1);
         cur_frm.set_df_property('rg_ort', 'reqd', 1);
     } else {
+
         cur_frm.set_df_property('rg_strasse', 'reqd', 0);
         cur_frm.set_df_property('rg_plz', 'reqd', 0);
         cur_frm.set_df_property('rg_ort', 'reqd', 0);
