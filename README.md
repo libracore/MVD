@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.37.0
+ISS-2024-00032: Anzeigen von Pseudo-Status "Inaktiv (verstorben)" wenn verstorben und Inaktiv
 #### 11.36.0
 Im Report der Doppelten Mitgliedschaften hat es immer Weg- und Zuzüge, die am Morgen weg sind. Diese werden nun ignoriert.
 #### 11.35.0

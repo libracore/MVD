@@ -1831,7 +1831,8 @@ def get_uebersicht_html(name):
         else:
             eintritt = mitgliedschaft.eintritt if mitgliedschaft.eintritt else mitgliedschaft.creation
         
-        if mitgliedschaft.verstorben_am:
+        # Anzeigen von Pseudo-Status "Inaktiv (verstorben)" wenn verstorben und Inaktiv
+        if mitgliedschaft.verstorben_am and mitgliedschaft.status_c == 'Inaktiv':
             status = "Inaktiv (verstorben)"
         else:
             status = mitgliedschaft.status_c
