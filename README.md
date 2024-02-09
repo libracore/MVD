@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.39.0
+Direktabsprung zu Errorlog aus Service Platform Queue wenn failed
 #### 11.38.1
 Bei Kündigungs PDFs wird der älteste offene EZ angedruckt, insofern in der Druckvorlage definiert.
 #### 11.38.0
