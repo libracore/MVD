@@ -3569,3 +3569,19 @@ def get_mitglied_id_from_nr(mitglied_nr=None):
             return None
     else:
         return None
+
+def get_last_open_sinv(mitgliedschaft):
+    # diese Funktion übergibt die letzte ausstehende Mitgliedschaftsrechnung an das Kündigungsdruckformat
+    sinvs = frappe.db.sql("""
+                          SELECT `name`
+                          FROM `tabSales Invoice`
+                          WHERE `ist_mitgliedschaftsrechnung` = 1
+                          AND `mv_mitgliedschaft` = '{0}'
+                          AND `outstanding_amount` > 0
+                          ORDER BY `mitgliedschafts_jahr` ASC
+                          LIMIT 1
+                          """.format(mitgliedschaft), as_dict=True)
+    if len(sinvs) > 0:
+        return sinvs[0].name
+    else:
+        return None

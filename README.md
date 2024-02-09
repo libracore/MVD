@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.38.1
+Bei Kündigungs PDFs wird der älteste offene EZ angedruckt, insofern in der Druckvorlage definiert.
 #### 11.38.0
 ISS-2024-00010
 #### 11.37.0
