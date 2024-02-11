@@ -22,6 +22,7 @@ def get_open_data():
             's6': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's7': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's8': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 's8': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True, ignore_ifnull=True)),
+            's9': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'status': 'Zusammengeführt', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True, ignore_ifnull=True)),
             'r': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': 'Hoch', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r2': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': ['!=', 'Hoch'], 'kontaktperson': 'Rechtsberatung Pool (MVBE)', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
