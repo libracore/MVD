@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 11.40.1
+Bugfix: ISS-2024-00010
+#### 11.40.0
+ISS-2024-00042
 #### 11.39.0
 Direktabsprung zu Errorlog aus Service Platform Queue wenn failed
 #### 11.38.1

@@ -35,6 +35,8 @@ frappe.ui.form.on('Kunden', {
             }
         }
         
+        // set strasse ggf. mandatory
+        strasse_mandatory(frm);
         // set strasse, plz und ort mandatory (Rechnungsempfänger)
         rechnungsadresse_mandatory(frm);
         // set firma mandatory (Kunde)
