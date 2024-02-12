@@ -478,3 +478,20 @@ def get_mitglied_data(**api_request):
             return raise_xxx(400, 'Bad Request', 'Mitglied not found', str(api_request))
     else:
         return raise_xxx(400, 'Bad Request', 'MitgliedNummer missing', str(api_request))
+
+# Endpunkt für Bezug Mitgliednummern basierend auf E-Mailadressen durch SP
+@frappe.whitelist()
+def get_mitglied_from_mail(**api_request):
+    if 'Emailadresse' in api_request:
+        mitgliedschaften = frappe.db.sql("""
+                                        SELECT
+                                            `mitglied_nr`
+                                        FROM `tabMitgliedschaft`
+                                        WHERE `e_mail_1` LIKE '%{0}%'
+                                        """.format(api_request['Emailadresse']), as_dict=True)
+        mitgl_list = []
+        for mitgl in mitgliedschaften:
+            mitgl_list.append(mitgl.mitglied_nr)
+        return mitgl_list
+    else:
+        return raise_xxx(400, 'Bad Request', 'Emailadresse missing', str(api_request))
