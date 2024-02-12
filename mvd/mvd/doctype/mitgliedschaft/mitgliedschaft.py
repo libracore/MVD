@@ -127,6 +127,10 @@ class Mitgliedschaft(Document):
             
             # halte ggf. Faktura Kunde synchron
             self.check_faktura_kunde()
+
+            # Festlegen von Flag naechstes_jahr_geschuldet
+            if self.kuendigung:
+                self.set_naechstes_jahr_geschuldet()
             
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             if self.letzte_bearbeitung_von == 'User':
@@ -139,6 +143,15 @@ class Mitgliedschaft(Document):
                     # special case sektionswechsel nach ZH
                     if self.wegzug_zu == 'MVZH' and self.status_c == 'Wegzug':
                         send_mvm_sektionswechsel(self)
+    
+    def set_naechstes_jahr_geschuldet(self):
+        self.naechstes_jahr_geschuldet = '0'
+        stichtag_kuendigung = str(frappe.db.get_value("Sektion", self.sektion_id, "kuendigungs_stichtag")).replace('2000-', '')
+        kuendigung_check = datetime.datetime.strptime(str(self.kuendigung), "%Y-%m-%d")
+        end = datetime.datetime.strptime("{0}-12-31".format(datetime.date.today().year), "%Y-%m-%d")
+        stichtag_kuendigung = datetime.datetime.strptime("{0}-{1}".format(datetime.date.today().year, stichtag_kuendigung), "%Y-%m-%d")
+        if stichtag_kuendigung <= kuendigung_check <= end:
+            self.naechstes_jahr_geschuldet = 1
     
     def email_validierung(self, check=False):
         import re
@@ -218,8 +231,7 @@ class Mitgliedschaft(Document):
         # erstelle ggf. neue Rechnung
         mit_rechnung = False
         if self.bezahltes_mitgliedschaftsjahr < cint(now().split("-")[0]):
-            if self.naechstes_jahr_geschuldet == 1:
-                mit_rechnung = create_mitgliedschaftsrechnung(self.name, mitgliedschaft_obj=self, jahr=cint(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=self.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=self.mitgliedtyp_c, reduzierte_mitgliedschaft=self.reduzierte_mitgliedschaft, language=self.language)['default_druckvorlage'])
+            mit_rechnung = create_mitgliedschaftsrechnung(self.name, mitgliedschaft_obj=self, jahr=cint(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=self.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=self.mitgliedtyp_c, reduzierte_mitgliedschaft=self.reduzierte_mitgliedschaft, language=self.language)['default_druckvorlage'])
         
         
         if mit_rechnung:
@@ -407,12 +419,6 @@ class Mitgliedschaft(Document):
             
             if self.bezahltes_mitgliedschaftsjahr < sinv_year:
                 self.bezahltes_mitgliedschaftsjahr = sinv_year
-        
-        current_year = cint(now().split("-")[0])
-        if cint(self.zahlung_mitgliedschaft) > current_year:
-            self.naechstes_jahr_geschuldet = '0'
-        else:
-            self.naechstes_jahr_geschuldet = 1
         
         
         # Zahldatum = Eintrittsdatum
@@ -2183,8 +2189,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             # erstelle ggf. neue Rechnung
             mit_rechnung = False
             if new_mitgliedschaft.bezahltes_mitgliedschaftsjahr < cint(now().split("-")[0]):
-                if new_mitgliedschaft.naechstes_jahr_geschuldet == 1:
-                    mit_rechnung = create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=cint(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug mit EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
+                mit_rechnung = create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=cint(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug mit EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
             
             # markiere neue Mitgliedschaft als zu validieren
             new_mitgliedschaft = frappe.get_doc("Mitgliedschaft", new_mitgliedschaft.name)
@@ -2983,8 +2988,7 @@ def sektionswechsel_pseudo_sektion(mitgliedschaft, eintrittsdatum, bezahltes_mit
         # erstelle ggf. neue Rechnung
         mit_rechnung = False
         if mitgliedschaft.bezahltes_mitgliedschaftsjahr < cint(now().split("-")[0]):
-            if mitgliedschaft.naechstes_jahr_geschuldet == 1:
-                mit_rechnung = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=cint(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=mitgliedschaft.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=mitgliedschaft.reduzierte_mitgliedschaft, language=mitgliedschaft.language)['default_druckvorlage'])
+            mit_rechnung = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=cint(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=mitgliedschaft.sektion_id, dokument='Zuzug mit EZ', mitgliedtyp=mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=mitgliedschaft.reduzierte_mitgliedschaft, language=mitgliedschaft.language)['default_druckvorlage'])
         
         if mit_rechnung:
             mitgliedschaft.zuzugs_rechnung = mit_rechnung
@@ -3365,7 +3369,7 @@ def wieder_beitritt(mitgliedschaft):
     mitgliedschafts_copy.bezahltes_mitgliedschaftsjahr = 0
     mitgliedschafts_copy.zahlung_hv = 0
     mitgliedschafts_copy.zahlung_mitgliedschaft = 0
-    mitgliedschafts_copy.naechstes_jahr_geschuldet = 1
+    mitgliedschafts_copy.naechstes_jahr_geschuldet = 0
     mitgliedschafts_copy.datum_hv_zahlung = None
     mitgliedschafts_copy.letzte_bearbeitung_von = 'SP'
     mitgliedschafts_copy.online_haftpflicht = None
