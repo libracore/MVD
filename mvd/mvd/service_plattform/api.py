@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from mvd.mvd.service_plattform.request_worker import api_request_check
+from mvd.mvd.service_plattform.request_worker import api_request_check, raise_200, raise_xxx
 import json
 import requests
 from frappe.utils.background_jobs import enqueue
@@ -16,6 +16,7 @@ from mvd.mvd.utils.post import _post_retouren
 from mvd.mvd.utils.post import _post_responses
 from mvd.mvd.doctype.beratung.beratung import _get_beratungs_dokument
 from mvd.mvd.doctype.webshop_order.webshop_order import create_order_from_api
+from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import prepare_mvm_for_sp
 
 AUTH0_SCOPE = "Auth0"
 SVCPF_SCOPE = "ServicePF"
@@ -462,3 +463,18 @@ def post_retouren(**data):
 @frappe.whitelist()
 def post_responses(**data):
     return _post_responses(data)
+
+# Endpunkt für Bezug Mitgliedschaftsdaten durch SP
+@frappe.whitelist()
+def get_mitglied_data(**api_request):
+    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
+    if 'MitgliedNummer' in api_request:
+        mitglied_nummer = get_mitglied_id_from_nr(api_request["MitgliedNummer"])
+        if frappe.db.exists("Mitgliedschaft", mitglied_nummer):
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_nummer)
+            data =  prepare_mvm_for_sp(mitgliedschaft)
+            return data
+        else:
+            return raise_xxx(400, 'Bad Request', 'Mitglied not found', str(api_request))
+    else:
+        return raise_xxx(400, 'Bad Request', 'MitgliedNummer missing', str(api_request))
