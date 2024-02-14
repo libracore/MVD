@@ -10,3 +10,7 @@
 .reply.timeline-content-show {
     overflow: visible !important;
 }
+
+.file-browser-list.border.rounded {
+    visibility: hidden !important;
+}
