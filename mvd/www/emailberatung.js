@@ -75,7 +75,7 @@ $(':file').on('change',function(){
     var myFile = $(this).val();
     var upld = myFile.split('.').pop();
     var file_element = this;
-    if(!["pdf", "jpg", "jpeg", "zip"].includes(upld)){
+    if(!["pdf", "jpg", "jpeg"].includes(upld)){
         alert("Nur Dateien vom Typ PDF und JPEG/JPG sind erlaubt.");
         $(file_element).val("");
     } else {
