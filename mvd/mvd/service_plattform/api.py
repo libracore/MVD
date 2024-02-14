@@ -475,7 +475,7 @@ def get_mitglied_data(**api_request):
             data =  prepare_mvm_for_sp(mitgliedschaft)
             return data
         else:
-            return raise_xxx(400, 'Bad Request', 'Mitglied not found', str(api_request))
+            return raise_xxx(404, 'Not Found', 'No Activ Mitglied found', str(api_request))
     else:
         return raise_xxx(400, 'Bad Request', 'MitgliedNummer missing', str(api_request))
 
@@ -488,10 +488,14 @@ def get_mitglied_from_mail(**api_request):
                                             `mitglied_nr`
                                         FROM `tabMitgliedschaft`
                                         WHERE `e_mail_1` LIKE '%{0}%'
+                                        AND `status_c` != 'Inaktiv'
                                         """.format(api_request['Emailadresse']), as_dict=True)
-        mitgl_list = []
-        for mitgl in mitgliedschaften:
-            mitgl_list.append(mitgl.mitglied_nr)
-        return mitgl_list
+        if len(mitgliedschaften) >= 1:
+            mitgl_list = []
+            for mitgl in mitgliedschaften:
+                mitgl_list.append(mitgl.mitglied_nr)
+            return mitgl_list
+        else:
+            return raise_xxx(404, 'Not Found', 'No Activ Mitglied found', str(api_request))
     else:
         return raise_xxx(400, 'Bad Request', 'Emailadresse missing', str(api_request))
