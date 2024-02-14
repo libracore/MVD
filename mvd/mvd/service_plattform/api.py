@@ -467,6 +467,14 @@ def post_responses(**data):
 # Endpunkt für Bezug Mitgliedschaftsdaten durch SP
 @frappe.whitelist()
 def get_mitglied_data(**api_request):
+    '''
+    Dieser Endpunkt liefert Mitgliedschaftsdaten als JSON auf Basis einer Mitgliedernummer.
+    Folgende Outputs sind nun möglich:
+        - 200; Mitgliedschaft als JSON
+        - 404 ('Not Found', 'No Activ Mitglied found'); Wenn Mitgliedschaft inaktiv oder nicht vorhanden
+        - 400 ('Bad Request', 'MitgliedNummer missing'); Wenn der Parameter MitgliedNummer in der Anfrage fehlt
+    Sollte es mehrere aktive Mitgliedschaften zu einer Mitgliednummer geben, werden jene zurückgegeben, welche als letztes in ERPNext angelegt wurden.
+    '''
     from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
     if 'MitgliedNummer' in api_request:
         mitglied_nummer = get_mitglied_id_from_nr(api_request["MitgliedNummer"])
@@ -482,6 +490,13 @@ def get_mitglied_data(**api_request):
 # Endpunkt für Bezug Mitgliednummern basierend auf E-Mailadressen durch SP
 @frappe.whitelist()
 def get_mitglied_from_mail(**api_request):
+    '''
+    Dieser Endpunkt gibt Mitgliednummern zurück, die zu aktiven Mitgliedschaften gehören.
+    Folgende Outputs sind möglich:
+        - 200; Mitgliednummer(n) als List/Array
+        - 404 ('Not Found', 'No Activ Mitglied found'); Wenn keine aktive Mitgliedschaft vorhanden
+        - 400 ('Bad Request', 'Emailadresse missing'); Wenn der Parameter Emailadresse in der Anfrage fehlt
+    '''
     if 'Emailadresse' in api_request:
         mitgliedschaften = frappe.db.sql("""
                                         SELECT
