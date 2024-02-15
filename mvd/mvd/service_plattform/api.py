@@ -521,13 +521,21 @@ def get_mitglied_from_mail(**api_request):
 @frappe.whitelist()
 def naming_service_new_id(**api_request):
     '''ISS-2024-00064'''
-    if 'with_nr' in api_request:
-        with_nr = api_request['with_nr']
+    if 'new_nr' in api_request:
+        new_nr = api_request['new_nr']
     else:
-        with_nr = False
+        new_nr = False
     
-    new_id = create_new_id(with_nr)
-    return raise_200(answer=new_id)
+    if 'existing_nr' in api_request:
+        existing_nr = api_request['existing_nr']
+    else:
+        existing_nr = False
+    
+    new_id = create_new_id(new_nr, existing_nr)
+    if not 'error' in new_id:
+        return raise_200(answer=new_id)
+    else:
+        return raise_xxx(new_id['code'], new_id['title'], new_id['msg'])
 
 @frappe.whitelist()
 def naming_service_new_number(**api_request):

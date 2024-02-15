@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 
 class MitgliedMainNaming(Document):
-    def set_new_id(self):
+    def set_new_id(self, existing_nr):
         if not self.mitglied_id:
             last_id = frappe.db.sql("""
                                     SELECT `mitglied_id` AS `last_id`
@@ -17,6 +17,10 @@ class MitgliedMainNaming(Document):
                                     """, as_dict=True)[0].last_id or 499999
             new_id = last_id + 1
             self.mitglied_id = new_id
+
+            if existing_nr:
+                self.mitglied_nr = existing_nr
+                self.mitglied_nr_raw = int(existing_nr.replace("MV", ""))
 
     def set_new_number(self):
         if not self.mitglied_nr_raw:
@@ -32,18 +36,26 @@ class MitgliedMainNaming(Document):
             mitglied_nr = "MV{0}".format(str(new_nr).zfill(8))
             self.mitglied_nr = mitglied_nr
 
-def create_new_id(with_nr=False):
+def create_new_id(new_nr=False, existing_nr=False):
     # create record
     new_mitglied_main_naming = frappe.get_doc({
         'doctype': "Mitglied Main Naming"
     })
     new_mitglied_main_naming.insert(ignore_permissions=True)
 
+    if new_nr and existing_nr:
+        return {
+            'error': True,
+            'msg': "unauthorized combination (new_nr and existing_nr)",
+            'code': 400,
+            'title': 'Bad Request'
+        }
+
     # create new ID
-    new_mitglied_main_naming.set_new_id()
+    new_mitglied_main_naming.set_new_id(existing_nr)
 
     # create new nr
-    if with_nr:
+    if new_nr:
         new_mitglied_main_naming.set_new_number()
     
     new_mitglied_main_naming.save(ignore_permissions=True)
