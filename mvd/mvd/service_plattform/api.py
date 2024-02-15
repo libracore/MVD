@@ -468,6 +468,7 @@ def post_responses(**data):
 @frappe.whitelist()
 def get_mitglied_data(**api_request):
     '''
+    ISS-2024-00058
     Dieser Endpunkt liefert Mitgliedschaftsdaten als JSON auf Basis einer Mitgliedernummer.
     Folgende Outputs sind nun möglich:
         - 200; Mitgliedschaft als JSON
@@ -491,6 +492,7 @@ def get_mitglied_data(**api_request):
 @frappe.whitelist()
 def get_mitglied_from_mail(**api_request):
     '''
+    ISS-2024-00063
     Dieser Endpunkt gibt Mitgliednummern zurück, die zu aktiven Mitgliedschaften gehören.
     Folgende Outputs sind möglich:
         - 200; Mitgliednummer(n) als List/Array
