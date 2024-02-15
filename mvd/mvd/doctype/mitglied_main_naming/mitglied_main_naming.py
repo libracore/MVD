@@ -14,7 +14,7 @@ class MitgliedMainNaming(Document):
                                     FROM `tabMitglied Main Naming`
                                     ORDER BY `mitglied_id` DESC
                                     LIMIT 1
-                                    """, as_dict=True)[0].last_id or 499999
+                                    """, as_dict=True)[0].last_id or 999999
             new_id = last_id + 1
             self.mitglied_id = new_id
 
@@ -29,7 +29,7 @@ class MitgliedMainNaming(Document):
                                     FROM `tabMitglied Main Naming`
                                     ORDER BY `mitglied_nr_raw` DESC
                                     LIMIT 1
-                                    """, as_dict=True)[0].last_nr or 3900000
+                                    """, as_dict=True)[0].last_nr or 4999999
             new_nr = last_nr + 1
             self.mitglied_nr_raw = new_nr
 
