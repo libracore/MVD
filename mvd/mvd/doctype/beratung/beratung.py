@@ -634,14 +634,22 @@ def sync_mail_attachements(file_record, event):
         if frappe.db.get_value("Communication", communication, 'sent_or_received') == 'Received':
             if frappe.db.get_value("Communication", communication, 'reference_doctype') == 'Beratung':
                 beratung = frappe.db.get_value("Communication", communication, 'reference_name')
-                # copy file and link to beratung
-                from copy import deepcopy
-                new_file = deepcopy(file_record)
-                new_file.name = None
-                new_file.content = None
-                new_file.attached_to_doctype = 'Beratung'
-                new_file.attached_to_name = beratung
-                new_file.insert(ignore_permissions=True)
+                # check for -zip and delete if neccessary
+                no_zip = True
+                if ".zip" in file_record.file_url:
+                    no_zip = False
+                    frappe.get_doc("Beratung", beratung).add_comment('Comment', 'Der Anhang {0} musste aus sicherheitstechnischen Gründen entfernt werden.'.format(file_record.file_name))
+                    file_record.delete()
+                
+                if no_zip:
+                    # copy file and link to beratung
+                    from copy import deepcopy
+                    new_file = deepcopy(file_record)
+                    new_file.name = None
+                    new_file.content = None
+                    new_file.attached_to_doctype = 'Beratung'
+                    new_file.attached_to_name = beratung
+                    new_file.insert(ignore_permissions=True)
     elif file_record.attached_to_doctype == 'Beratung':
         if file_record.folder == "Home/Attachments":
             # siehe auch sync_attachments_and_beratungs_table
