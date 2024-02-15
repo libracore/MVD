@@ -535,7 +535,7 @@ def naming_service_new_id(**api_request):
     if not 'error' in new_id:
         return raise_200(answer=new_id)
     else:
-        return raise_xxx(new_id['code'], new_id['title'], new_id['msg'])
+        return raise_xxx(new_id['code'], new_id['title'], new_id['msg'], str(api_request))
 
 @frappe.whitelist()
 def naming_service_new_number(**api_request):
@@ -545,6 +545,6 @@ def naming_service_new_number(**api_request):
         if not 'error' in new_number:
             return raise_200(answer=new_number)
         else:
-            return raise_xxx(new_number['code'], new_number['title'], new_number['msg'])
+            return raise_xxx(new_number['code'], new_number['title'], new_number['msg'], str(api_request))
     else:
         return raise_xxx(400, 'Bad Request', 'ID missing', str(api_request))
