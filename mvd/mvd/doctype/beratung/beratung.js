@@ -711,9 +711,8 @@ function als_gelesen_markieren(cur_frm) {
 
 function admin_todo(cur_frm) {
     frappe.prompt([
-        {'fieldname': 'description', 'fieldtype': 'Text', 'label': 'Beschreibung', 'reqd': 1},
+        {'fieldname': 'description', 'fieldtype': 'Text', 'label': 'Beschreibung', 'reqd': 1, 'default': `Mitgliedschaft: https://libracore.mieterverband.ch/desk#form/Mitgliedschaft/${cur_frm.doc.mv_mitgliedschaft}\n\n`},
         {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0}
-        //{'fieldname': 'notify', 'fieldtype': 'Check', 'label': 'Per E-Mail benachrichtigen', 'default': 0}
     ],
     function(values){
         frappe.call({
@@ -721,7 +720,7 @@ function admin_todo(cur_frm) {
             "args": {
                 "beratung": cur_frm.doc.name,
                 "sektion_id": cur_frm.doc.sektion_id,
-                "description": values.description,
+                "description": values.description.replace("\n", "<br>"),
                 "datum": values.datum
             },
             "callback": function(response) {
