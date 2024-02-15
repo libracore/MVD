@@ -50,9 +50,17 @@ def create_new_id(new_nr=False, existing_nr=False):
             'code': 400,
             'title': 'Bad Request'
         }
-
-    # create new ID
-    new_mitglied_main_naming.set_new_id(existing_nr)
+    
+    if "MV" in existing_nr or not existing_nr:
+        # create new ID
+        new_mitglied_main_naming.set_new_id(existing_nr)
+    else:
+        return {
+            'error': True,
+            'msg': "Bad Value (existing_nr)",
+            'code': 400,
+            'title': 'Bad Request'
+        }
 
     # create new nr
     if new_nr:
