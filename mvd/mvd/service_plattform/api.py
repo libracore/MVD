@@ -17,6 +17,7 @@ from mvd.mvd.utils.post import _post_responses
 from mvd.mvd.doctype.beratung.beratung import _get_beratungs_dokument
 from mvd.mvd.doctype.webshop_order.webshop_order import create_order_from_api
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import prepare_mvm_for_sp
+from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new_id, create_new_number
 
 AUTH0_SCOPE = "Auth0"
 SVCPF_SCOPE = "ServicePF"
@@ -516,3 +517,34 @@ def get_mitglied_from_mail(**api_request):
             return raise_xxx(404, 'Not Found', 'No Activ Mitglied found', str(api_request))
     else:
         return raise_xxx(400, 'Bad Request', 'Emailadresse missing', str(api_request))
+
+@frappe.whitelist()
+def naming_service_new_id(**api_request):
+    '''ISS-2024-00064'''
+    if 'new_nr' in api_request:
+        new_nr = api_request['new_nr']
+    else:
+        new_nr = False
+    
+    if 'existing_nr' in api_request:
+        existing_nr = api_request['existing_nr']
+    else:
+        existing_nr = False
+    
+    new_id = create_new_id(new_nr, existing_nr)
+    if not 'error' in new_id:
+        return raise_200(answer=new_id)
+    else:
+        return raise_xxx(new_id['code'], new_id['title'], new_id['msg'], str(api_request))
+
+@frappe.whitelist()
+def naming_service_new_number(**api_request):
+    '''ISS-2024-00064'''
+    if 'id' in api_request:
+        new_number = create_new_number(api_request['id'])
+        if not 'error' in new_number:
+            return raise_200(answer=new_number)
+        else:
+            return raise_xxx(new_number['code'], new_number['title'], new_number['msg'], str(api_request))
+    else:
+        return raise_xxx(400, 'Bad Request', 'ID missing', str(api_request))
