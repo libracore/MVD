@@ -254,8 +254,8 @@ frappe.ui.form.on('Beratung', {
                 }
                 
                 // Add BTN Admin ToDo
-                frm.add_custom_button(__("Admin ToDo"),  function() {
-                    admin_todo(frm);
+                frm.add_custom_button(__("Erstelle ToDo"),  function() {
+                    erstelle_todo(frm);
                 });
                 
                 // overwrite E-Mail BTN
@@ -709,31 +709,6 @@ function als_gelesen_markieren(cur_frm) {
     }
 }
 
-function admin_todo(cur_frm) {
-    frappe.prompt([
-        {'fieldname': 'description', 'fieldtype': 'Text', 'label': 'Beschreibung', 'reqd': 1, 'default': `Mitgliedschaft: https://libracore.mieterverband.ch/desk#form/Mitgliedschaft/${cur_frm.doc.mv_mitgliedschaft}\n\n`},
-        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0}
-    ],
-    function(values){
-        frappe.call({
-            "method": "mvd.mvd.doctype.beratung.beratung.admin_todo",
-            "args": {
-                "beratung": cur_frm.doc.name,
-                "sektion_id": cur_frm.doc.sektion_id,
-                "description": values.description.replace("\n", "<br>"),
-                "datum": values.datum
-            },
-            "callback": function(response) {
-                cur_frm.reload_doc();
-                frappe.msgprint( "Das ToDo wurde erstellt." );
-            }
-        });
-    },
-    'Admin ToDo erstellen',
-    'Erstellen'
-    )
-}
-
 function reset_timeline(frm) {
     var comments = cur_frm.timeline.get_comments();
     var assignements = [];
@@ -768,4 +743,62 @@ function override_default_email_dialog(frm) {
     $(".reply-link").click(function(e){prepare_mvd_mail_composer(e);}); 
     $(".reply-link-all").click(function(e){prepare_mvd_mail_composer(e);});
     frappe.ui.keys.off('ctrl+e', cur_frm.page);
+}
+
+function erstelle_todo(frm) {
+    frappe.call({
+        'method': "frappe.client.get",
+        'args': {
+            'doctype': "Sektion",
+            'name': frm.doc.sektion_id
+        },
+        'callback': function(response) {
+            var sektion = response.message;
+            if (!sektion.virtueller_user) {
+                frappe.throw("Es muss zuerst ein virtueller Sektions-User in den Sektionseinstellungen hinterlegt werden!");
+            }
+            frappe.prompt([
+                {'fieldname': 'owner', 'fieldtype': 'Link', 'label': 'Benutzer', 'reqd': 0, 'options': 'User', 'depends_on': 'eval:!doc.virtueller_user&&!doc.me', 'filters': { 'user_type': 'System User', 'name': ['!=', frappe.session.user] }, 'default': sektion.virtueller_user},
+                {'fieldname': 'me', 'fieldtype': 'Check', 'label': 'An mich zuweisen', 'default': 0, 'depends_on': 'eval:!doc.virtueller_user', 'change': function() {
+                        if(cur_dialog.fields_dict.me.get_value()) {
+                            cur_dialog.fields_dict.owner.set_value(frappe.session.user);
+                        } else {
+                            cur_dialog.fields_dict.owner.set_value('');
+                        }
+                    }
+                },
+                {'fieldname': 'virtueller_user', 'fieldtype': 'Check', 'label': 'An Sekretariat/Admin (virtuelle Gruppe) zuweisen', 'default': 1, 'depends_on': 'eval:!doc.me', 'hidden': !sektion.virtueller_user ? 1:0, 'change': function() {
+                        if(cur_dialog.fields_dict.virtueller_user.get_value()) {
+                            cur_dialog.fields_dict.owner.set_value(sektion.virtueller_user);
+                        } else {
+                            cur_dialog.fields_dict.owner.set_value('');
+                        }
+                    }
+                },
+                {'fieldname': 'description', 'fieldtype': 'Text', 'label': 'Beschreibung', 'reqd': 1},
+                {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0},
+                {'fieldname': 'notify', 'fieldtype': 'Check', 'label': 'Per E-Mail benachrichtigen', 'default': 0}
+            ],
+            function(values){
+                frappe.call({
+                    "method": "mvd.mvd.doctype.beratung.beratung.erstelle_todo",
+                    "args": {
+                        "owner": values.owner,
+                        "beratung": frm.doc.name,
+                        "description": values.description,
+                        "datum": values.datum,
+                        "notify": values.notify,
+                        "mitgliedschaft": frm.doc.mv_mitgliedschaft
+                    },
+                    "callback": function(response) {
+                        cur_frm.reload_doc();
+                        frappe.msgprint( "Das ToDo wurde erstellt." );
+                    }
+                });
+            },
+            'ToDo erstellen',
+            'Erstellen'
+            )
+        }
+    });
 }

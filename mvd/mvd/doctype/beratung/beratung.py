@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from frappe.utils.data import today, now
 import json
 from bs4 import BeautifulSoup
+from frappe.utils import cint
 
 class Beratung(Document):
     def validate(self):
@@ -603,25 +604,6 @@ def create_neue_beratung(von, bis, art, ort, berater_in, notiz=None, beratungska
     return beratung.name
 
 @frappe.whitelist()
-def admin_todo(beratung, sektion_id=None, description=None, datum=None):
-    try:
-        virt_user = frappe.db.get_value("Sektion", sektion_id, "virtueller_user") or None
-        if not virt_user:
-            frappe.throw("Diese Siektion besitzt keinen virtuellen User")
-        frappe.get_doc({
-            'doctype': 'ToDo',
-            'description': 'Zuweisung für Beratung {0}:<br>{1}'.format(beratung, description),
-            'date': datum,
-            'reference_type': 'Beratung',
-            'reference_name': beratung,
-            'assigned_by': frappe.session.user or 'Administrator',
-            'owner': virt_user
-        }).insert(ignore_permissions=True)
-        return
-    except Exception as err:
-        frappe.throw("Da ist etwas schief gelaufen.<br>{0}".format(str(err)))
-
-@frappe.whitelist()
 def remove_comments(comments):
     comments = json.loads(comments)
     for comment in comments:
@@ -741,4 +723,27 @@ def sync_attachments_and_beratungs_table(doc, event):
                     if row.name in files_to_delete:
                         b.remove(row)
                 b.save()
-                
+
+@frappe.whitelist()
+def erstelle_todo(owner, beratung, description=False, datum=False, notify=0, mitgliedschaft=None):
+    description_string = description or ''
+    if mitgliedschaft:
+        description_string += '<br><br><a href="/desk#Form/Mitgliedschaft/{0}">Link zur Mitgliedschaft</a>'.format(mitgliedschaft)
+    todo = frappe.get_doc({
+        "doctype":"ToDo",
+        "owner": owner,
+        "reference_type": "Beratung",
+        "reference_name": beratung,
+        "description": description_string,
+        "priority": "Medium",
+        "status": "Open",
+        "date": datum or '',
+        "assigned_by": frappe.session.user
+    }).insert(ignore_permissions=True)
+    
+    # notify
+    if cint(notify) == 1:
+        from frappe.desk.form.assign_to import notify_assignment
+        notify_assignment(todo.assigned_by, todo.owner, todo.reference_type, todo.reference_name, action='ASSIGN',\
+                 description=todo.description, notify=notify)
+    return
