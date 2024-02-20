@@ -2176,6 +2176,9 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             new_mitgliedschaft.status_change = []
             new_mitgliedschaft.haftpflicht = []
             new_mitgliedschaft.mandat = []
+            new_mitgliedschaft.zuzug_massendruck = 0
+            new_mitgliedschaft.zuzugs_rechnung = None
+            new_mitgliedschaft.zuzug_korrespondenz = None
             new_mitgliedschaft.insert(ignore_permissions=True)
             
             frappe.db.commit()
