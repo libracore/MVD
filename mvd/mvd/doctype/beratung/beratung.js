@@ -254,7 +254,7 @@ frappe.ui.form.on('Beratung', {
                 }
                 
                 // Add BTN Admin ToDo
-                frm.add_custom_button(__("Admin ToDo"),  function() {
+                frm.add_custom_button(__("Erstelle ToDo"),  function() {
                     erstelle_todo(frm);
                 });
                 
@@ -787,7 +787,8 @@ function erstelle_todo(frm) {
                         "beratung": frm.doc.name,
                         "description": values.description,
                         "datum": values.datum,
-                        "notify": values.notify
+                        "notify": values.notify,
+                        "mitgliedschaft": frm.doc.mv_mitgliedschaft
                     },
                     "callback": function(response) {
                         cur_frm.reload_doc();
