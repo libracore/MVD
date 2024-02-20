@@ -725,13 +725,16 @@ def sync_attachments_and_beratungs_table(doc, event):
                 b.save()
 
 @frappe.whitelist()
-def erstelle_todo(owner, beratung, description=False, datum=False, notify=0):
+def erstelle_todo(owner, beratung, description=False, datum=False, notify=0, mitgliedschaft=None):
+    description_string = description or ''
+    if mitgliedschaft:
+        description_string += '<br><br><a href="/desk#Form/Mitgliedschaft/{0}">Link zur Mitgliedschaft</a>'.format(mitgliedschaft)
     todo = frappe.get_doc({
         "doctype":"ToDo",
         "owner": owner,
         "reference_type": "Beratung",
         "reference_name": beratung,
-        "description": description or '',
+        "description": description_string,
         "priority": "Medium",
         "status": "Open",
         "date": datum or '',
