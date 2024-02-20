@@ -2748,7 +2748,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "schenkerHasGeschenkunterlagen": True if cint(mitgliedschaft.geschenkunterlagen_an_schenker) == 1 else False,
         "datumBezahltHaftpflicht": str(mitgliedschaft.datum_hv_zahlung).replace(" ", "T") + "T00:00:00" if mitgliedschaft.datum_hv_zahlung else None,
         "adressen": adressen,
-        "onlineHaftpflicht": mitgliedschaft.online_haftpflicht if mitgliedschaft.online_haftpflicht and mitgliedschaft.online_haftpflicht != '' else None,
+        "onlineHaftpflicht": cint(mitgliedschaft.online_haftpflicht),
         "onlineGutschrift": mitgliedschaft.online_gutschrift if mitgliedschaft.online_gutschrift and mitgliedschaft.online_gutschrift != '' else None,
         "onlineBetrag": mitgliedschaft.online_betrag if mitgliedschaft.online_betrag and mitgliedschaft.online_betrag != '' else None,
         "datumOnlineVerbucht": mitgliedschaft.datum_online_verbucht if mitgliedschaft.datum_online_verbucht and mitgliedschaft.datum_online_verbucht != '' else None,
