@@ -9,6 +9,7 @@
   "update",
   "retoure",
   "response",
+  "immediately_executing",
   "cb_1",
   "mv_mitgliedschaft",
   "section_data",
@@ -73,9 +74,15 @@
    "fieldname": "response",
    "fieldtype": "Check",
    "label": "Response"
+  },
+  {
+   "default": "0",
+   "fieldname": "immediately_executing",
+   "fieldtype": "Check",
+   "label": "Sofortige Ausf\u00fchrung"
   }
  ],
- "modified": "2023-09-25 17:50:46.470708",
+ "modified": "2024-02-20 13:50:25.698481",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform Log",

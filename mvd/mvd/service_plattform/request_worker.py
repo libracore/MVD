@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_sektion_id, get_status_c, get_mitgliedtyp_c, get_inkl_hv, get_sprache_abk, check_email
 from frappe.utils.data import getdate, now, today
+from frappe.utils import cint
 
 '''
 API Request Eingang
@@ -85,13 +86,18 @@ def create_sp_log(kwargs):
         existing = False
     import json
     json_formatted_str = json.dumps(kwargs, indent=2)
+
+    # Prüfung ob die Queue aktiv ist, oder der Request sofort ausgeführt werden soll
+    sp_incoming_immediately_executing = cint(frappe.db.get_single_value('Service Plattform API', 'sp_incoming_immediately_executing'))
+
     sp_log = frappe.get_doc({
         "doctype": "Service Plattform Log",
         "status": "New",
         "mv_mitgliedschaft": kwargs["mitgliedId"] if existing else None,
         "json": json_formatted_str,
         "neuanlage": 0 if existing else 1,
-        "update": 1 if existing else 0
+        "update": 1 if existing else 0,
+        "immediately_executing": sp_incoming_immediately_executing
     }).insert(ignore_permissions=True)
     
     return
@@ -914,3 +920,8 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
     
     
     return new_mitgliedschaft
+
+def check_immediately_executing(self, event):
+    if cint(self.immediately_executing) == 1:
+        service_plattform_log_worker()
+    return

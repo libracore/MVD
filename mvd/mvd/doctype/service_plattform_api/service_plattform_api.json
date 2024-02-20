@@ -18,7 +18,8 @@
   "queue",
   "flush_queue",
   "flush_limit",
-  "flush_limit_eingehend"
+  "flush_limit_eingehend",
+  "sp_incoming_immediately_executing"
  ],
  "fields": [
   {
@@ -109,10 +110,16 @@
    "fieldname": "flush_limit_eingehend",
    "fieldtype": "Int",
    "label": "Flush Limit (SP Eingehend)"
+  },
+  {
+   "default": "0",
+   "fieldname": "sp_incoming_immediately_executing",
+   "fieldtype": "Check",
+   "label": "SP Eingehende Requests sofort ausf\u00fchren"
   }
  ],
  "issingle": 1,
- "modified": "2023-09-11 11:49:49.563192",
+ "modified": "2024-02-20 13:45:56.586511",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",

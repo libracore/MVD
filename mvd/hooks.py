@@ -137,6 +137,9 @@ doc_events = {
     },
     "Email Queue": {
         "after_insert": "mvd.mvd.utils.hook_utils.remove_admin_mails"
+    },
+    "Service Plattform Log": {
+        "after_insert": "mvd.mvd.service_plattform.request_worker.check_immediately_executing"
     }
 }
 
