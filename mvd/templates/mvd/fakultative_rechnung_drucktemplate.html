@@ -155,35 +155,6 @@
     {% set receiver_country = False %}
 {% endif %}
 
-<!-- qrr dict -->
-{% if doc.typ == 'HV' %}
-    {% set qrr_message = doc.name + " // " + _("Haftpflichtversicherung", druckvorlage.language or 'de') + " // " + mitgliedschaft.mitglied_nr %}
-{% else %}
-    {% set qrr_message = doc.name + " // " + _("Spende", druckvorlage.language or 'de') + " // " + mitgliedschaft.mitglied_nr %}
-{% endif %}
-{% set hv_qrr = {
-    'top_position': '191mm',
-    'iban': bankkonto.iban or '',
-    'reference': doc.qrr_referenz,
-    'reference_type': 'QRR',
-    'currency': 'CHF',
-    'amount': "{:,.2f}".format(doc.betrag).replace(",", "'"),
-    'message': qrr_message,
-    'additional_information': ' ',
-    'receiver_name': receiver_name,
-    'receiver_street': receiver_street,
-    'receiver_number': receiver_number,
-    'receiver_country': receiver_country,
-    'receiver_pincode': receiver_pincode,
-    'receiver_town': _(receiver_town, druckvorlage.language or 'de'),
-    'payer_name': payer_name,
-    'payer_street': payer_street,
-    'payer_number': payer_number,
-    'payer_country': payer_country,
-    'payer_pincode': payer_pincode,
-    'payer_town': payer_town,
-    'language': druckvorlage.language or 'de'
-} %}
 <!-- ---------------------------------------------------------------------------------------- -->
 <!-- ENDE: Daten bei DocType Fakultative Rechnung -->
 <!-- ---------------------------------------------------------------------------------------- -->
@@ -251,8 +222,58 @@
         
         <!-- Einzahlungsschein -->
         {% if seite.einzahlungsschein %}
+            <!-- qrr dict -->
+            {% if doc.typ == 'HV' %}
+                {% set qrr_message = doc.name + " // " + _("Haftpflichtversicherung", druckvorlage.language or 'de') + " // " + mitgliedschaft.mitglied_nr %}
+                {% set qrr_amount = "{:,.2f}".format(doc.betrag).replace(",", "'") %}
+            {% elif seite.ez_typ == 'Offene Spende' %}
+                {% set qrr_message = doc.name + " // " + _("Freie Spende", druckvorlage.language or 'de') + " // " + mitgliedschaft.mitglied_nr %}
+                {% set qrr_amount = False %}
+            {% else %}
+                {% set qrr_message = doc.name + " // " + _("Spende", druckvorlage.language or 'de') + " // " + mitgliedschaft.mitglied_nr %}
+                {% set qrr_amount = "{:,.2f}".format(doc.betrag).replace(",", "'") %}
+            {% endif %}
+
+            {% set hv_qrr = {
+                'top_position': '191mm',
+                'iban': bankkonto.iban or '',
+                'reference': doc.qrr_referenz,
+                'reference_type': 'QRR',
+                'currency': 'CHF',
+                'amount': qrr_amount,
+                'message': qrr_message,
+                'additional_information': ' ',
+                'receiver_name': receiver_name,
+                'receiver_street': receiver_street,
+                'receiver_number': receiver_number,
+                'receiver_country': receiver_country,
+                'receiver_pincode': receiver_pincode,
+                'receiver_town': _(receiver_town, druckvorlage.language or 'de'),
+                'payer_name': payer_name,
+                'payer_street': payer_street,
+                'payer_number': payer_number,
+                'payer_country': payer_country,
+                'payer_pincode': payer_pincode,
+                'payer_town': payer_town,
+                'language': druckvorlage.language or 'de'
+            } %}
+
             {% if seite.ez_typ == 'Haftpflicht' %}
                 <!-- Haftpflicht EZ -->
+                <div id='einzahlungsschein'>
+                    {% if hv_qrr %}
+                        {{ frappe.render_template('templates/includes/mvd_qrr_invoice.html', {'qrr': hv_qrr}) }}
+                    {% endif %}
+                </div>
+            {% elif seite.ez_typ == 'Spendenbetrag' %}
+                <!-- Spende EZ -->
+                <div id='einzahlungsschein'>
+                    {% if hv_qrr %}
+                        {{ frappe.render_template('templates/includes/mvd_qrr_invoice.html', {'qrr': hv_qrr}) }}
+                    {% endif %}
+                </div>
+            {% elif seite.ez_typ == 'Offene Spende' %}
+                <!-- Offene Spende EZ -->
                 <div id='einzahlungsschein'>
                     {% if hv_qrr %}
                         {{ frappe.render_template('templates/includes/mvd_qrr_invoice.html', {'qrr': hv_qrr}) }}
