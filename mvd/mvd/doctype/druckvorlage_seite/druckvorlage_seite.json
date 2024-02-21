@@ -71,7 +71,7 @@
    "fieldname": "ez_typ",
    "fieldtype": "Select",
    "label": "EZ Typ",
-   "options": "Haftpflicht\nMitgliedschaft"
+   "options": "Haftpflicht\nMitgliedschaft\nOffene Spende\nSpendenbetrag"
   },
   {
    "fieldname": "stichwort",
@@ -108,7 +108,7 @@
   }
  ],
  "istable": 1,
- "modified": "2024-01-15 10:49:34.414181",
+ "modified": "2024-02-12 14:10:20.130164",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage Seite",
