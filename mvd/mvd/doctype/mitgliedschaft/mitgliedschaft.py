@@ -1831,7 +1831,8 @@ def get_uebersicht_html(name):
         else:
             eintritt = mitgliedschaft.eintritt if mitgliedschaft.eintritt else mitgliedschaft.creation
         
-        if mitgliedschaft.verstorben_am:
+        # Anzeigen von Pseudo-Status "Inaktiv (verstorben)" wenn verstorben und Inaktiv
+        if mitgliedschaft.verstorben_am and mitgliedschaft.status_c == 'Inaktiv':
             status = "Inaktiv (verstorben)"
         else:
             status = mitgliedschaft.status_c
@@ -2175,6 +2176,9 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             new_mitgliedschaft.status_change = []
             new_mitgliedschaft.haftpflicht = []
             new_mitgliedschaft.mandat = []
+            new_mitgliedschaft.zuzug_massendruck = 0
+            new_mitgliedschaft.zuzugs_rechnung = None
+            new_mitgliedschaft.zuzug_korrespondenz = None
             new_mitgliedschaft.insert(ignore_permissions=True)
             
             frappe.db.commit()
@@ -3553,7 +3557,6 @@ def erstellung_faktura_kunde(mitgliedschaft):
     return kunde.name
 
 def get_mitglied_id_from_nr(mitglied_nr=None):
-    # ~ frappe.log_error("{0}".format(mitglied_nr), "get_mitglied_id_from_nr")
     if mitglied_nr:
         mitgliedschaften = frappe.db.sql("""SELECT
                                                 `name`
@@ -3562,9 +3565,24 @@ def get_mitglied_id_from_nr(mitglied_nr=None):
                                             AND `status_c` != 'Inaktiv'
                                             ORDER BY `creation` DESC LIMIT 1""".format(mitglied_nr), as_dict=True)
         if len(mitgliedschaften) > 0:
-            # ~ frappe.log_error("{0}".format(mitgliedschaften[0].name), "if len(mitgliedschaften) > 0")
             return mitgliedschaften[0].name
         else:
             return None
+    else:
+        return None
+
+def get_last_open_sinv(mitgliedschaft):
+    # diese Funktion übergibt die letzte ausstehende Mitgliedschaftsrechnung an das Kündigungsdruckformat
+    sinvs = frappe.db.sql("""
+                          SELECT `name`
+                          FROM `tabSales Invoice`
+                          WHERE `ist_mitgliedschaftsrechnung` = 1
+                          AND `mv_mitgliedschaft` = '{0}'
+                          AND `outstanding_amount` > 0
+                          ORDER BY `mitgliedschafts_jahr` ASC
+                          LIMIT 1
+                          """.format(mitgliedschaft), as_dict=True)
+    if len(sinvs) > 0:
+        return sinvs[0].name
     else:
         return None

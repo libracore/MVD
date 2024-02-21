@@ -1,5 +1,31 @@
 ## MVD
 ### Version Log
+#### 11.45.1
+ISS-2024-00074
+#### 11.45.0
+ISS-2023-00133
+#### 11.44.1
+ISS-2024-00066
+#### 11.44.0
+ISS-2024-00058 & ISS-2024-00063
+#### 11.43.0
+ISS-2024-00043
+#### 11.42.0
+ISS-2024-00066
+#### 11.41.0
+ISS-2024-00024
+#### 11.40.1
+Bugfix: ISS-2024-00010
+#### 11.40.0
+ISS-2024-00042
+#### 11.39.0
+Direktabsprung zu Errorlog aus Service Platform Queue wenn failed
+#### 11.38.1
+Bei Kündigungs PDFs wird der älteste offene EZ angedruckt, insofern in der Druckvorlage definiert.
+#### 11.38.0
+ISS-2024-00010
+#### 11.37.0
+ISS-2024-00032: Anzeigen von Pseudo-Status "Inaktiv (verstorben)" wenn verstorben und Inaktiv
 #### 11.36.0
 Im Report der Doppelten Mitgliedschaften hat es immer Weg- und Zuzüge, die am Morgen weg sind. Diese werden nun ignoriert.
 #### 11.35.0

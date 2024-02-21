@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from mvd.mvd.service_plattform.request_worker import api_request_check
+from mvd.mvd.service_plattform.request_worker import api_request_check, raise_200, raise_xxx
 import json
 import requests
 from frappe.utils.background_jobs import enqueue
@@ -16,6 +16,8 @@ from mvd.mvd.utils.post import _post_retouren
 from mvd.mvd.utils.post import _post_responses
 from mvd.mvd.doctype.beratung.beratung import _get_beratungs_dokument
 from mvd.mvd.doctype.webshop_order.webshop_order import create_order_from_api
+from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import prepare_mvm_for_sp
+from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new_id, create_new_number
 
 AUTH0_SCOPE = "Auth0"
 SVCPF_SCOPE = "ServicePF"
@@ -462,3 +464,87 @@ def post_retouren(**data):
 @frappe.whitelist()
 def post_responses(**data):
     return _post_responses(data)
+
+# Endpunkt für Bezug Mitgliedschaftsdaten durch SP
+@frappe.whitelist()
+def get_mitglied_data(**api_request):
+    '''
+    ISS-2024-00058
+    Dieser Endpunkt liefert Mitgliedschaftsdaten als JSON auf Basis einer Mitgliedernummer.
+    Folgende Outputs sind nun möglich:
+        - 200; Mitgliedschaft als JSON
+        - 404 ('Not Found', 'No Activ Mitglied found'); Wenn Mitgliedschaft inaktiv oder nicht vorhanden
+        - 400 ('Bad Request', 'MitgliedNummer missing'); Wenn der Parameter MitgliedNummer in der Anfrage fehlt
+    Sollte es mehrere aktive Mitgliedschaften zu einer Mitgliednummer geben, werden jene zurückgegeben, welche als letztes in ERPNext angelegt wurden.
+    '''
+    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
+    if 'MitgliedNummer' in api_request:
+        mitglied_nummer = get_mitglied_id_from_nr(api_request["MitgliedNummer"])
+        if frappe.db.exists("Mitgliedschaft", mitglied_nummer):
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_nummer)
+            data =  prepare_mvm_for_sp(mitgliedschaft)
+            return data
+        else:
+            return raise_xxx(404, 'Not Found', 'No Activ Mitglied found', str(api_request))
+    else:
+        return raise_xxx(400, 'Bad Request', 'MitgliedNummer missing', str(api_request))
+
+# Endpunkt für Bezug Mitgliednummern basierend auf E-Mailadressen durch SP
+@frappe.whitelist()
+def get_mitglied_from_mail(**api_request):
+    '''
+    ISS-2024-00063
+    Dieser Endpunkt gibt Mitgliednummern zurück, die zu aktiven Mitgliedschaften gehören.
+    Folgende Outputs sind möglich:
+        - 200; Mitgliednummer(n) als List/Array
+        - 404 ('Not Found', 'No Activ Mitglied found'); Wenn keine aktive Mitgliedschaft vorhanden
+        - 400 ('Bad Request', 'Emailadresse missing'); Wenn der Parameter Emailadresse in der Anfrage fehlt
+    '''
+    if 'Emailadresse' in api_request:
+        mitgliedschaften = frappe.db.sql("""
+                                        SELECT
+                                            `mitglied_nr`
+                                        FROM `tabMitgliedschaft`
+                                        WHERE `e_mail_1` LIKE '%{0}%'
+                                        AND `status_c` != 'Inaktiv'
+                                        """.format(api_request['Emailadresse']), as_dict=True)
+        if len(mitgliedschaften) >= 1:
+            mitgl_list = []
+            for mitgl in mitgliedschaften:
+                mitgl_list.append(mitgl.mitglied_nr)
+            return mitgl_list
+        else:
+            return raise_xxx(404, 'Not Found', 'No Activ Mitglied found', str(api_request))
+    else:
+        return raise_xxx(400, 'Bad Request', 'Emailadresse missing', str(api_request))
+
+@frappe.whitelist()
+def naming_service_new_id(**api_request):
+    '''ISS-2024-00064'''
+    if 'new_nr' in api_request:
+        new_nr = api_request['new_nr']
+    else:
+        new_nr = False
+    
+    if 'existing_nr' in api_request:
+        existing_nr = api_request['existing_nr']
+    else:
+        existing_nr = False
+    
+    new_id = create_new_id(new_nr, existing_nr)
+    if not 'error' in new_id:
+        return raise_200(answer=new_id)
+    else:
+        return raise_xxx(new_id['code'], new_id['title'], new_id['msg'], str(api_request))
+
+@frappe.whitelist()
+def naming_service_new_number(**api_request):
+    '''ISS-2024-00064'''
+    if 'id' in api_request:
+        new_number = create_new_number(api_request['id'])
+        if not 'error' in new_number:
+            return raise_200(answer=new_number)
+        else:
+            return raise_xxx(new_number['code'], new_number['title'], new_number['msg'], str(api_request))
+    else:
+        return raise_xxx(400, 'Bad Request', 'ID missing', str(api_request))

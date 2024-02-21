@@ -151,8 +151,7 @@
   {
    "fieldname": "strasse",
    "fieldtype": "Data",
-   "label": "Strasse",
-   "reqd": 1
+   "label": "Strasse"
   },
   {
    "fieldname": "nummer",
@@ -447,7 +446,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2023-09-01 11:33:18.999941",
+ "modified": "2024-02-11 11:47:18.999941",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kunden",
