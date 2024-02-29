@@ -138,7 +138,7 @@ frappe.vbz = {
             frappe.vbz.show_view('overview');
         });
         $("#handbuch").click(function(){
-            window.open('https://wiki.mieterverband.ch/pages/viewpage.action?pageId=74744863', '_blank').focus();
+            window.open('https://wiki.mieterverband.ch/pages/viewpage.action?pageId=135266538', '_blank').focus();
         });
         $("#info_blog").click(function(){
             window.open('https://wiki.mieterverband.ch/pages/viewrecentblogposts.action?key=AMV', '_blank').focus();

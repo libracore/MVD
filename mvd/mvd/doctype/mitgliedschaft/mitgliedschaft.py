@@ -2758,7 +2758,8 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "datumOnlineGutschrift": mitgliedschaft.datum_online_gutschrift if mitgliedschaft.datum_online_gutschrift and mitgliedschaft.datum_online_gutschrift != '' else None,
         "onlinePaymentMethod": mitgliedschaft.online_payment_method if mitgliedschaft.online_payment_method and mitgliedschaft.online_payment_method != '' else None,
         "onlinePaymentId": mitgliedschaft.online_payment_id if mitgliedschaft.online_payment_id and mitgliedschaft.online_payment_id != '' else None,
-        "kuendigungsgrund": kuendigungsgrund
+        "kuendigungsgrund": kuendigungsgrund,
+        "mvb_typ":  mitgliedschaft.mvb_typ if mitgliedschaft.mvb_typ and mitgliedschaft.mvb_typ != '' else None
     }
     
     return prepared_mvm

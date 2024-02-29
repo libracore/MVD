@@ -2717,3 +2717,43 @@ function roundMinutes(date_string) {
     date.setMinutes(0, 0, 0);
     return date
 }
+
+function prepare_mvd_mail_composer(e, forward=false) {
+    var last_email = null;
+    var default_sender = frappe.boot.default_beratungs_sender || '';
+
+    const $target = $(e.currentTarget);
+    const name = $target.data().name ? $target.data().name:e.currentTarget.closest(".timeline-item").getAttribute("data-name");
+    
+    // find the email to reply to
+    cur_frm.timeline.get_communications().forEach(function(c) {
+        if(c.name == name) {
+            last_email = c;
+            return false;
+        }
+    });
+    if (last_email.sender.includes(".mieterverband.ch")){
+        last_email.sender = cur_frm.doc.e_mail_1 || '';
+    }
+    
+    const opts = {
+        doc: cur_frm.doc,
+        txt: "",
+        title: forward ? __('Forward'):__('Reply'),
+        frm: cur_frm,
+        sender: default_sender,
+        last_email,
+        is_a_reply: true,
+        subject: forward ? __("Fw: {0}", [last_email.subject]):''
+    };
+
+    if ($target.is('.reply-link-all')) {
+        if (last_email) {
+            opts.cc = last_email.cc;
+            opts.bcc = last_email.bcc;
+        }
+    }
+
+    // make the composer
+    new frappe.mvd.MailComposer(opts);
+}
