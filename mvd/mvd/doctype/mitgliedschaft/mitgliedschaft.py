@@ -3587,3 +3587,18 @@ def get_last_open_sinv(mitgliedschaft):
         return sinvs[0].name
     else:
         return None
+
+def get_naechstes_jahr_geschuldet(mitglied_id):
+    bezahltes_mitgliedschafsjahr = cint(frappe.db.get_value("Mitgliedschaft", mitglied_id, 'bezahltes_mitgliedschaftsjahr'))
+    current_year = cint(now().split("-")[0])
+
+    if current_year > bezahltes_mitgliedschafsjahr:
+        return True
+    else:
+        sektion = frappe.db.get_value("Mitgliedschaft", mitglied_id, 'sektion_id')
+        stichtag = frappe.db.get_value("Sektion", sektion, 'kuendigungs_stichtag')
+        stichtag_datum = getdate("{0}-{1}-{2}".format(current_year, stichtag.strftime("%Y-%m-%d").split("-")[1], stichtag.strftime("%Y-%m-%d").split("-")[2]))
+        if getdate(today()) > stichtag_datum:
+            return True
+        else:
+            return False
