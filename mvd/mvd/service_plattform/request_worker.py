@@ -365,7 +365,11 @@ def mvm_neuanlage(kwargs):
         else:
             online_payment_id = None
         
-        
+        # MVB Standard und MVB Mini
+        if kwargs['mvb_typ']:
+            mvb_typ = kwargs['mvb_typ']
+        else:
+            mvb_typ = None
         
         new_mitgliedschaft = frappe.get_doc({
             'doctype': 'Mitgliedschaft',
@@ -405,7 +409,8 @@ def mvm_neuanlage(kwargs):
             'datum_online_gutschrift': datum_online_gutschrift,
             'online_payment_method': online_payment_method,
             'online_payment_id': online_payment_id,
-            'datum_zahlung_mitgliedschaft': datum_zahlung_mitgliedschaft
+            'datum_zahlung_mitgliedschaft': datum_zahlung_mitgliedschaft,
+            'mvb_typ': mvb_typ
         })
         
         new_mitgliedschaft = adressen_und_kontakt_handling(new_mitgliedschaft, kwargs)
@@ -613,6 +618,13 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         bezahltes_mitgliedschaftsjahr = int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0
         
         naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
+
+        # MVB Standard und MVB Mini
+        if kwargs['mvb_typ']:
+            mvb_typ = kwargs['mvb_typ']
+        else:
+            mvb_typ = None
+        
         # -----------------------------------------------------------------
         
         # erstelle ggf. status change log und Status-Änderung
@@ -665,6 +677,7 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         mitgliedschaft.datum_online_gutschrift = datum_online_gutschrift
         mitgliedschaft.online_payment_method = online_payment_method
         mitgliedschaft.online_payment_id = online_payment_id
+        mitgliedschaft.mvb_typ = mvb_typ
         
         try:
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
