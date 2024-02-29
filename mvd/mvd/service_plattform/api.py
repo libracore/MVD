@@ -548,3 +548,13 @@ def naming_service_new_number(**api_request):
             return raise_xxx(new_number['code'], new_number['title'], new_number['msg'], str(api_request))
     else:
         return raise_xxx(400, 'Bad Request', 'ID missing', str(api_request))
+
+@frappe.whitelist()
+def naechstes_jahr_geschuldet(**api_request):
+    '''ISS-2024-00080'''
+    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_naechstes_jahr_geschuldet
+    if 'id' in api_request:
+        njg = get_naechstes_jahr_geschuldet(api_request['id'])
+        return raise_200(answer=njg)
+    else:
+        return raise_xxx(400, 'Bad Request', 'ID missing', str(api_request))
