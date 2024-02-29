@@ -55,6 +55,7 @@
   "bezahltes_mitgliedschaftsjahr",
   "naechstes_jahr_geschuldet",
   "ampel_farbe",
+  "mvb_typ",
   "cb_1",
   "austritt",
   "zuzug_von",
@@ -1291,10 +1292,17 @@
    "fieldtype": "Link",
    "label": "onlinePaymentZahlungsfile",
    "options": "Datatrans Zahlungsfile"
-  }
+  },
+  {
+    "fieldname": "mvb_typ",
+    "fieldtype": "Data",
+    "label": "mvb_typ Nr.",
+    "read_only": 1,
+    "permlevel": 2
+   }
  ],
  "icon": "fa fa-tag",
- "modified": "2024-01-22 14:40:56.967547",
+ "modified": "2024-02-29 14:10:56.967547",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

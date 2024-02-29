@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.47.0
+ISS-2024-00082; MVB Standard und MVB Mini
 #### 11.46.1
 ISS-2024-00075
 #### 11.46.0
