@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.48.1
+ISS-2024-00082; hotfix
 #### 11.48.0
 ISS-2024-00080; API Endpunkt naechstes_jahr_geschuldet
 #### 11.47.0

@@ -366,10 +366,12 @@ def mvm_neuanlage(kwargs):
             online_payment_id = None
         
         # MVB Standard und MVB Mini
-        if kwargs['mvb_typ']:
-            mvb_typ = kwargs['mvb_typ']
-        else:
-            mvb_typ = None
+        mvb_typ = None
+        if 'mvb_typ' in kwargs:
+            if kwargs['mvb_typ']:
+                mvb_typ = kwargs['mvb_typ']
+            else:
+                mvb_typ = None
         
         new_mitgliedschaft = frappe.get_doc({
             'doctype': 'Mitgliedschaft',
@@ -620,10 +622,12 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
 
         # MVB Standard und MVB Mini
-        if kwargs['mvb_typ']:
-            mvb_typ = kwargs['mvb_typ']
-        else:
-            mvb_typ = None
+        mvb_typ = None
+        if 'mvb_typ' in kwargs:
+            if kwargs['mvb_typ']:
+                mvb_typ = kwargs['mvb_typ']
+            else:
+                mvb_typ = None
         
         # -----------------------------------------------------------------
         
