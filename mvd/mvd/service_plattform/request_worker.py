@@ -294,7 +294,12 @@ def mvm_neuanlage(kwargs):
         if kwargs['zuzugsdatum']:
             zuzug = kwargs['zuzugsdatum'].split("T")[0]
         else:
-            zuzug = ''
+            if status_c == 'Zuzug':
+                # hotfix ISS-2024-00060
+                # Online Sektionswechsel geben kein Zuzugsdatum an ERPNext weiter.
+                zuzug = today()
+            else:
+                zuzug = None
         
         if kwargs['wegzugsdatum']:
             wegzug = kwargs['wegzugsdatum'].split("T")[0]
