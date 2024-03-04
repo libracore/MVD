@@ -71,6 +71,9 @@ class Mitgliedschaft(Document):
             
             # ampelfarbe
             self.ampel_farbe = get_ampelfarbe(self)
+
+            # prüfen und setzen des Wertes naechstes_jahr_geschuldet
+            self.naechstes_jahr_geschuldet = cint(get_naechstes_jahr_geschuldet(self.name, live_data=self))
             
             # Hotfix Zuzugs-Korrespondenz
             if self.zuzug_von:
@@ -407,13 +410,6 @@ class Mitgliedschaft(Document):
             
             if self.bezahltes_mitgliedschaftsjahr < sinv_year:
                 self.bezahltes_mitgliedschaftsjahr = sinv_year
-        
-        current_year = cint(now().split("-")[0])
-        if cint(self.zahlung_mitgliedschaft) > current_year:
-            self.naechstes_jahr_geschuldet = '0'
-        else:
-            self.naechstes_jahr_geschuldet = 1
-        
         
         # Zahldatum = Eintrittsdatum
         if self.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in') and self.bezahltes_mitgliedschaftsjahr > 0:
@@ -3588,14 +3584,21 @@ def get_last_open_sinv(mitgliedschaft):
     else:
         return None
 
-def get_naechstes_jahr_geschuldet(mitglied_id):
-    bezahltes_mitgliedschafsjahr = cint(frappe.db.get_value("Mitgliedschaft", mitglied_id, 'bezahltes_mitgliedschaftsjahr'))
+def get_naechstes_jahr_geschuldet(mitglied_id, live_data=False):
+    if not live_data:
+        bezahltes_mitgliedschafsjahr = cint(frappe.db.get_value("Mitgliedschaft", mitglied_id, 'bezahltes_mitgliedschaftsjahr'))
+    else:
+        bezahltes_mitgliedschafsjahr = cint(live_data.bezahltes_mitgliedschaftsjahr)
     current_year = cint(now().split("-")[0])
 
     if current_year > bezahltes_mitgliedschafsjahr:
         return True
     else:
-        sektion = frappe.db.get_value("Mitgliedschaft", mitglied_id, 'sektion_id')
+        if not live_data:
+            sektion = frappe.db.get_value("Mitgliedschaft", mitglied_id, 'sektion_id')
+        else:
+            sektion = live_data.sektion_id
+        
         stichtag = frappe.db.get_value("Sektion", sektion, 'kuendigungs_stichtag')
         stichtag_datum = getdate("{0}-{1}-{2}".format(current_year, stichtag.strftime("%Y-%m-%d").split("-")[1], stichtag.strftime("%Y-%m-%d").split("-")[2]))
         if getdate(today()) > stichtag_datum:
