@@ -555,6 +555,8 @@ def naechstes_jahr_geschuldet(**api_request):
     from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_naechstes_jahr_geschuldet
     if 'id' in api_request:
         njg = get_naechstes_jahr_geschuldet(api_request['id'])
-        return raise_200(answer=njg)
+        frappe.local.response.http_status_code = 200
+        frappe.local.response.message = {"naechstesJahrGeschuldet": njg}
+        return {"naechstesJahrGeschuldet": njg}
     else:
         return raise_xxx(400, 'Bad Request', 'ID missing', str(api_request))
