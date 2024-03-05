@@ -1294,15 +1294,15 @@
    "options": "Datatrans Zahlungsfile"
   },
   {
-    "fieldname": "mvb_typ",
+    "fieldname": "MVB Typ",
     "fieldtype": "Data",
     "label": "mvb_typ",
     "read_only": 1,
-    "permlevel": 2
+    "permlevel": 1
    }
  ],
  "icon": "fa fa-tag",
- "modified": "2024-03-01 08:40:56.967547",
+ "modified": "2024-03-05 17:46:00.967547",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
