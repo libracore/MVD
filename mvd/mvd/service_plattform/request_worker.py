@@ -378,9 +378,9 @@ def mvm_neuanlage(kwargs):
         
         # MVB Standard und MVB Mini
         mvb_typ = None
-        if 'mvb_typ' in kwargs:
-            if kwargs['mvb_typ']:
-                mvb_typ = kwargs['mvb_typ']
+        if 'mvbTyp' in kwargs:
+            if kwargs['mvbTyp']:
+                mvb_typ = kwargs['mvbTyp']
             else:
                 mvb_typ = None
         
@@ -634,9 +634,9 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
 
         # MVB Standard und MVB Mini
         mvb_typ = None
-        if 'mvb_typ' in kwargs:
-            if kwargs['mvb_typ']:
-                mvb_typ = kwargs['mvb_typ']
+        if 'mvbTyp' in kwargs:
+            if kwargs['mvbTyp']:
+                mvb_typ = kwargs['mvbTyp']
             else:
                 mvb_typ = None
         
@@ -694,6 +694,7 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         mitgliedschaft.online_payment_id = online_payment_id
         mitgliedschaft.mvb_typ = mvb_typ
         
+
         try:
             mitgliedschaft = adressen_und_kontakt_handling(mitgliedschaft, kwargs)
         except Exception as err:
