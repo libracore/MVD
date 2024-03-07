@@ -591,7 +591,7 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         else:
             datum_hv_zahlung = None
         
-        if kwargs['onlineHaftpflicht']:
+        if kwargs['onlineHaftpflicht'] or kwargs['onlineHaftpflicht'] == 0:
             online_haftpflicht = kwargs['onlineHaftpflicht']
         else:
             online_haftpflicht = None
