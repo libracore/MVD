@@ -16,7 +16,6 @@ def _post_retouren(data):
             else:
                 missing_keys = check_main_keys(data, 'retouren')
                 if not missing_keys:
-                    # hier würde ich nun die Meldungen verarbeiten
                     job = create_post_retouren(data)
                     if job == 1:
                         return raise_200()
@@ -50,27 +49,37 @@ def _post_responses(data):
 
 # SP Log
 def create_sp_log(mitgliedschaft, retoure, data):
-    if isinstance(data, str):
-        import json
-        json_formatted_str = json.dumps(data, indent=2)
-    else:
-        json_formatted_str = data
-    if retoure:
-        retoure = 1
-        response = 0
-    else:
-        retoure = 0
-        response = 1
+    import json
+    try: 
+        if isinstance(data, str):
+            json_formatted_str = json.dumps(data, indent=2)
+        else:
+            json_formatted_str = json.dumps(str(data), indent=2)
+        
+        if retoure:
+            retoure = 1
+            response = 0
+        else:
+            retoure = 0
+            response = 1
+        
+        sp_log = frappe.get_doc({
+            "doctype": "Service Plattform Log",
+            "mv_mitgliedschaft": mitgliedschaft,
+            "json": json_formatted_str,
+            "retoure": retoure,
+            "response": response,
+            "status": "Done"
+        }).insert(ignore_permissions=True)
     
-    sp_log = frappe.get_doc({
-        "doctype":"Service Plattform Log",
-        "mv_mitgliedschaft": mitgliedschaft,
-        "json": json_formatted_str,
-        "retoure": retoure,
-        "response": response,
-        "status": "Done"
-    }).insert(ignore_permissions=True)
-    
+    except Exception as err:
+        frappe.log_error("""
+                         Error: {0}\n\n
+                         mitgliedschaft: {1}\n\n
+                         json_formatted_str: {2}\n\n
+                         retoure: {3}\n\n
+                         response: {4}
+        """.format(err, mitgliedschaft, json_formatted_str, retoure, response), "Post: create_sp_log")
     return
 
 # key check
