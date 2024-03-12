@@ -37,63 +37,69 @@ def whoami(type='light'):
 # ---------------------------------------------------
 # ausgehend
 # ---------------------------------------------------
-def neue_mitglieder_nummer(sektion_code, sprache='Deutsch', typ='Privat', needsMitgliedNummer=True):
-    if not int(frappe.db.get_single_value('Service Plattform API', 'not_get_number_and_id')) == 1:
-        if auth_check(SVCPF_SCOPE):
-            config = frappe.get_doc("Service Plattform API", "Service Plattform API")
-            sub_url = config.get_value(SVCPF_SCOPE, "api_url")
-            endpoint = config.get('neue_mitglieder_nummer')
-            url = sub_url + endpoint
-            json = {
-                "sektionCode": sektion_code,
-                "sprache": sprache,
-                "typ": typ,
-                "needsMitgliedNummer": needsMitgliedNummer
-            }
-            token = config.get_value(SVCPF_SCOPE, 'api_token')
-            headers = {"authorization": "Bearer {token}".format(token=token)}
+'''
+Dieser Code ist mit SP4 obsolet da ERPNext die ID/Nr Vergabe selbständig durchführt.
+'''
+# def neue_mitglieder_nummer(sektion_code, sprache='Deutsch', typ='Privat', needsMitgliedNummer=True):
+#     if not int(frappe.db.get_single_value('Service Plattform API', 'not_get_number_and_id')) == 1:
+#         if auth_check(SVCPF_SCOPE):
+#             config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+#             sub_url = config.get_value(SVCPF_SCOPE, "api_url")
+#             endpoint = config.get('neue_mitglieder_nummer')
+#             url = sub_url + endpoint
+#             json = {
+#                 "sektionCode": sektion_code,
+#                 "sprache": sprache,
+#                 "typ": typ,
+#                 "needsMitgliedNummer": needsMitgliedNummer
+#             }
+#             token = config.get_value(SVCPF_SCOPE, 'api_token')
+#             headers = {"authorization": "Bearer {token}".format(token=token)}
             
-            try:
-                mitglied_nr_obj = requests.post(url, json = json, headers = headers)
-                mitglied_nr_obj = mitglied_nr_obj.json()
-                if 'mitgliedNummer' not in mitglied_nr_obj:
-                    frappe.log_error("{0}".format(mitglied_nr_obj), 'neue_mitglieder_nummer failed')
-                    frappe.throw("Zur Zeit können keine Daten von der Serviceplatform bezogen werden.")
+#             try:
+#                 mitglied_nr_obj = requests.post(url, json = json, headers = headers)
+#                 mitglied_nr_obj = mitglied_nr_obj.json()
+#                 if 'mitgliedNummer' not in mitglied_nr_obj:
+#                     frappe.log_error("{0}".format(mitglied_nr_obj), 'neue_mitglieder_nummer failed')
+#                     frappe.throw("Zur Zeit können keine Daten von der Serviceplatform bezogen werden.")
                 
-                return mitglied_nr_obj
-            except Exception as err:
-                frappe.log_error("{0}".format(err), 'neue_mitglieder_nummer failed')
-                frappe.db.commit()
-    else:
-        frappe.log_error("SektionsCode: {0}".format(sektion_code), 'neue_mitglieder_nummer deaktiviert: manuelle vergabe')
-        return {
-            'mitgliedNummer': '00000000',
-            'mitgliedId': int("9{0}".format(frappe.db.count('Mitgliedschaft'))) + 1
-        }
+#                 return mitglied_nr_obj
+#             except Exception as err:
+#                 frappe.log_error("{0}".format(err), 'neue_mitglieder_nummer failed')
+#                 frappe.db.commit()
+#     else:
+#         frappe.log_error("SektionsCode: {0}".format(sektion_code), 'neue_mitglieder_nummer deaktiviert: manuelle vergabe')
+#         return {
+#             'mitgliedNummer': '00000000',
+#             'mitgliedId': int("9{0}".format(frappe.db.count('Mitgliedschaft'))) + 1
+#         }
 
-def mitglieder_nummer_update(mitgliedId):
-    if not int(frappe.db.get_single_value('Service Plattform API', 'not_get_number_and_id')) == 1:
-        if auth_check(SVCPF_SCOPE):
-            config = frappe.get_doc("Service Plattform API", "Service Plattform API")
-            sub_url = config.get_value(SVCPF_SCOPE, "api_url")
-            endpoint = "/mitglieder/{mitgliedId}/neueMitgliederNummer".format(mitgliedId=mitgliedId)
-            url = sub_url + endpoint
-            token = config.get_value(SVCPF_SCOPE, 'api_token')
-            headers = {"authorization": "Bearer {token}".format(token=token)}
+'''
+Dieser Code ist mit SP4 obsolet da ERPNext die ID/Nr Vergabe selbständig durchführt.
+'''
+# def mitglieder_nummer_update(mitgliedId):
+#     if not int(frappe.db.get_single_value('Service Plattform API', 'not_get_number_and_id')) == 1:
+#         if auth_check(SVCPF_SCOPE):
+#             config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+#             sub_url = config.get_value(SVCPF_SCOPE, "api_url")
+#             endpoint = "/mitglieder/{mitgliedId}/neueMitgliederNummer".format(mitgliedId=mitgliedId)
+#             url = sub_url + endpoint
+#             token = config.get_value(SVCPF_SCOPE, 'api_token')
+#             headers = {"authorization": "Bearer {token}".format(token=token)}
             
-            try:
-                mitglied_nr_obj = requests.post(url, headers = headers)
-                mitglied_nr_obj = mitglied_nr_obj.json()
-                if 'mitgliedNummer' not in mitglied_nr_obj:
-                    frappe.log_error("{0}".format(mitglied_nr_obj), 'neue_mitglieder_nummer failed')
-                    frappe.throw("Zur Zeit können keine Daten von der Serviceplatform bezogen werden.")
+#             try:
+#                 mitglied_nr_obj = requests.post(url, headers = headers)
+#                 mitglied_nr_obj = mitglied_nr_obj.json()
+#                 if 'mitgliedNummer' not in mitglied_nr_obj:
+#                     frappe.log_error("{0}".format(mitglied_nr_obj), 'neue_mitglieder_nummer failed')
+#                     frappe.throw("Zur Zeit können keine Daten von der Serviceplatform bezogen werden.")
                 
-                return mitglied_nr_obj
-            except Exception as err:
-                frappe.log_error("{0}".format(err), 'neue_mitglieder_nummer failed')
-                frappe.db.commit()
-    else:
-        frappe.throw("neue_mitglieder_nummer deaktiviert")
+#                 return mitglied_nr_obj
+#             except Exception as err:
+#                 frappe.log_error("{0}".format(err), 'neue_mitglieder_nummer failed')
+#                 frappe.db.commit()
+#     else:
+#         frappe.throw("neue_mitglieder_nummer deaktiviert")
 
 def update_mvm(mvm, update):
     if not int(frappe.db.get_single_value('Service Plattform API', 'no_sp_update')) == 1:
@@ -479,15 +485,24 @@ def get_mitglied_data(**api_request):
     '''
     from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
     if 'MitgliedNummer' in api_request:
-        mitglied_nummer = get_mitglied_id_from_nr(api_request["MitgliedNummer"])
-        if frappe.db.exists("Mitgliedschaft", mitglied_nummer):
-            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_nummer)
-            data =  prepare_mvm_for_sp(mitgliedschaft)
-            return data
+        if "MV" in api_request["MitgliedNummer"]:
+            mitglied_nummer = get_mitglied_id_from_nr(api_request["MitgliedNummer"])
+            if frappe.db.exists("Mitgliedschaft", mitglied_nummer):
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_nummer)
+                data =  prepare_mvm_for_sp(mitgliedschaft)
+                return data
+            else:
+                frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(404, 'Not Found', 'No Activ Mitglied found', frappe.utils.get_traceback(), str(api_request)), 'SP API Error!')
+                frappe.local.response.http_status_code = 404
+                frappe.local.response.message = 'No Activ Mitglied found'
         else:
-            return raise_xxx(404, 'Not Found', 'No Activ Mitglied found', str(api_request))
+            frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(400, 'Bad Request', 'MitgliedNummer missing MV', frappe.utils.get_traceback(), str(api_request)), 'SP API Error!')
+            frappe.local.response.http_status_code = 400
+            frappe.local.response.message = 'MitgliedNummer missing MV'
     else:
-        return raise_xxx(400, 'Bad Request', 'MitgliedNummer missing', str(api_request))
+        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(400, 'Bad Request', 'MitgliedNummer missing', frappe.utils.get_traceback(), str(api_request)), 'SP API Error!')
+        frappe.local.response.http_status_code = 400
+        frappe.local.response.message = 'MitgliedNummer missing'
 
 # Endpunkt für Bezug Mitgliednummern basierend auf E-Mailadressen durch SP
 @frappe.whitelist()

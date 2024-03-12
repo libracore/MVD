@@ -43,8 +43,8 @@
   {
    "fieldname": "neue_mitglieder_nummer",
    "fieldtype": "Data",
-   "label": "Neue Mitgliedernummer",
-   "reqd": 1
+   "hidden": 1,
+   "label": "Neue Mitgliedernummer"
   },
   {
    "collapsible": 1,
@@ -56,6 +56,7 @@
    "default": "0",
    "fieldname": "not_get_number_and_id",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Mitglied Nr. & ID Bezug deaktivieren"
   },
   {
@@ -119,7 +120,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2024-02-20 13:45:56.586511",
+ "modified": "2024-03-12 17:39:38.435858",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",

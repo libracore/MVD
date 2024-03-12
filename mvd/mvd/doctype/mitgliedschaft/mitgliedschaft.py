@@ -16,16 +16,29 @@ from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen, replace
 from frappe import _
 import datetime
 from frappe.utils import cint
+from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new_id, create_new_number
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
         if not self.mitglied_id:
-            mitglied_nummer_obj = mvm_neue_mitglieder_nummer(self)
+            # check ob neue ID inkl. oder exkl. neuer Nummer
+            if self.status_c in ('Interessent*in', 'Zuzug'):
+                new_nr = False
+            else:
+                new_nr = True
+            
+            # check ob nur neue ID zu bestehender Nummer
+            if self.status_c == 'Zuzug':
+                existing_nr = self.mitglied_nr
+            else:
+                existing_nr = False
+            
+            mitglied_nummer_obj = create_new_id(new_nr=new_nr, existing_nr=existing_nr)
             if mitglied_nummer_obj:
-                self.mitglied_id = mitglied_nummer_obj["mitgliedId"]
+                self.mitglied_id = mitglied_nummer_obj["id"]
                 if not self.mitglied_nr or self.mitglied_nr == 'MV':
-                    if mitglied_nummer_obj["mitgliedNummer"]:
-                        self.mitglied_nr = mitglied_nummer_obj["mitgliedNummer"]
+                    if mitglied_nummer_obj["nr"]:
+                        self.mitglied_nr = mitglied_nummer_obj["nr"]
                     else:
                         self.mitglied_nr = 'MV'
             else:
@@ -106,7 +119,7 @@ class Mitgliedschaft(Document):
             
             # beziehe mitglied_nr wenn umwandlung von Interessent*in
             if self.status_c not in ('Interessent*in', 'Inaktiv') and self.mitglied_nr == 'MV':
-                self.mitglied_nr = mvm_mitglieder_nummer_update(self.name)
+                self.mitglied_nr = create_new_number(id=self.name)['nr']
                 self.letzte_bearbeitung_von = 'User'
             
             # hotfix für onlineHaftpflicht value (null vs 0)
@@ -2619,19 +2632,25 @@ def check_email(email=None):
 # API (ausgehend zu Service-Platform)
 # -----------------------------------------------
 
+'''
+Dieser Code ist mit SP4 obsolet da ERPNext die ID/Nr Vergabe selbständig durchführt.
+'''
 # Bezug neuer mitgliedId 
-def mvm_neue_mitglieder_nummer(mitgliedschaft):
-    from mvd.mvd.service_plattform.api import neue_mitglieder_nummer
-    sektion_code = get_sektion_code(mitgliedschaft.sektion_id)
-    needsMitgliedNummer = True
-    if mitgliedschaft.status_c in ('Interessent*in', 'Zuzug'):
-        needsMitgliedNummer = False
-    return neue_mitglieder_nummer(sektion_code, needsMitgliedNummer=needsMitgliedNummer)
+# def mvm_neue_mitglieder_nummer(mitgliedschaft):
+#     from mvd.mvd.service_plattform.api import neue_mitglieder_nummer
+#     sektion_code = get_sektion_code(mitgliedschaft.sektion_id)
+#     needsMitgliedNummer = True
+#     if mitgliedschaft.status_c in ('Interessent*in', 'Zuzug'):
+#         needsMitgliedNummer = False
+#     return neue_mitglieder_nummer(sektion_code, needsMitgliedNummer=needsMitgliedNummer)
 
+'''
+Dieser Code ist mit SP4 obsolet da ERPNext die ID/Nr Vergabe selbständig durchführt.
+'''
 # Bezug neuer mitgliedId 
-def mvm_mitglieder_nummer_update(mitgliedId):
-    from mvd.mvd.service_plattform.api import mitglieder_nummer_update
-    return mitglieder_nummer_update(mitgliedId)['mitgliedNummer']
+# def mvm_mitglieder_nummer_update(mitgliedId):
+#     from mvd.mvd.service_plattform.api import mitglieder_nummer_update
+#     return mitglieder_nummer_update(mitgliedId)['mitgliedNummer']
 
 def send_mvm_to_sp(mitgliedschaft, update):
     if str(get_sektion_code(mitgliedschaft.sektion_id)) not in ('ZH', 'M+W-Abo'):
