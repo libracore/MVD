@@ -51,8 +51,11 @@ def create_new_id(new_nr=False, existing_nr=False):
             'title': 'Bad Request'
         }
     
-    if "MV" in existing_nr or not existing_nr:
+    if not existing_nr:
         # create new ID
+        new_mitglied_main_naming.set_new_id(existing_nr)
+    elif "MV" in existing_nr:
+        # create new ID with existing_nr
         new_mitglied_main_naming.set_new_id(existing_nr)
     else:
         return {
