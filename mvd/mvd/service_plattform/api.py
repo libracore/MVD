@@ -531,23 +531,35 @@ def naming_service_new_id(**api_request):
     else:
         existing_nr = False
     
-    new_id = create_new_id(new_nr, existing_nr)
-    if not 'error' in new_id:
-        return raise_200(answer=new_id)
+    response = create_new_id(new_nr, existing_nr)
+    if not 'error' in response:
+        frappe.local.response.http_status_code = 200
+        frappe.local.response.message = response
+        return
     else:
-        return raise_xxx(new_id['code'], new_id['title'], new_id['msg'], str(api_request))
+        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(response['code'], response['title'], response['msg'], frappe.utils.get_traceback(), str(api_request)), 'SP API Error!')
+        frappe.local.response.http_status_code = response['code']
+        frappe.local.response.message = response['msg']
+        return
 
 @frappe.whitelist()
 def naming_service_new_number(**api_request):
     '''ISS-2024-00064'''
     if 'id' in api_request:
-        new_number = create_new_number(api_request['id'])
-        if not 'error' in new_number:
-            return raise_200(answer=new_number)
+        response = create_new_number(api_request['id'])
+        if not 'error' in response:
+            frappe.local.response.http_status_code = 200
+            frappe.local.response.message = response
         else:
-            return raise_xxx(new_number['code'], new_number['title'], new_number['msg'], str(api_request))
+            frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(response['code'], response['title'], response['msg'], str(api_request), ''), 'SP API Error!')
+            frappe.local.response.http_status_code = response['code']
+            frappe.local.response.message = response['msg']
+            return
     else:
-        return raise_xxx(400, 'Bad Request', 'ID missing', str(api_request))
+        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(400, 'Bad Request', 'ID missing', str(api_request), ''), 'SP API Error!')
+        frappe.local.response.http_status_code = 400
+        frappe.local.response.message = 'ID missing'
+        return
 
 @frappe.whitelist()
 def naechstes_jahr_geschuldet(**api_request):
@@ -557,6 +569,6 @@ def naechstes_jahr_geschuldet(**api_request):
         njg = get_naechstes_jahr_geschuldet(api_request['id'])
         frappe.local.response.http_status_code = 200
         frappe.local.response.message = {"naechstesJahrGeschuldet": njg}
-        return {"naechstesJahrGeschuldet": njg}
+        return
     else:
         return raise_xxx(400, 'Bad Request', 'ID missing', str(api_request))
