@@ -720,6 +720,12 @@ def get_mitglied_from_mail(**api_request):
     else:
         return raise_xxx(400, 'Bad Request', 'Emailadresse missing', str(api_request))
 
+'''
+Endpunkt für den Bezug einer neuen ID:
+    - ohne Nummer
+    - inkl. einer neuen Nummer
+    - zu einer bestehenden Nummer
+'''
 @frappe.whitelist()
 def naming_service_new_id(**api_request):
     '''ISS-2024-00064'''
@@ -744,6 +750,7 @@ def naming_service_new_id(**api_request):
         frappe.local.response.message = response['msg']
         return
 
+# Endpunkt für den Bezug einer neuen Mitgliednummer zu einer existierenden ID
 @frappe.whitelist()
 def naming_service_new_number(**api_request):
     '''ISS-2024-00064'''
@@ -763,6 +770,7 @@ def naming_service_new_number(**api_request):
         frappe.local.response.message = 'ID missing'
         return
 
+# Endpunkt zum Abfragen ob bei einer Kündigung das nächste Jahr geschuldet ist
 @frappe.whitelist()
 def naechstes_jahr_geschuldet(**api_request):
     '''ISS-2024-00080'''
