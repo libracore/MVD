@@ -416,7 +416,7 @@ def naming_service_new_number(**api_request):
 @frappe.whitelist()
 def naechstes_jahr_geschuldet(**api_request):
     '''ISS-2024-00080'''
-    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_naechstes_jahr_geschuldet
+    from mvd.mvd.doctype.mitgliedschaft.utils import get_naechstes_jahr_geschuldet
     if 'id' in api_request:
         njg = get_naechstes_jahr_geschuldet(api_request['id'])
         frappe.local.response.http_status_code = 200

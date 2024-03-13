@@ -284,7 +284,7 @@ def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, redu
         return alle_druckvorlagen
 
 def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=False, fr=False):
-    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_anredekonvention
+    from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention
     nur_kunde = False
     try:
         mitgliedschaft.name

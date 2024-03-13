@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_ampelfarbe
+from mvd.mvd.doctype.mitgliedschaft.utils import get_ampelfarbe
 
 def execute():
     beratungs_kategorien = [
