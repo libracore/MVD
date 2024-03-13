@@ -35,7 +35,6 @@ def check_main_keys(kwargs):
         'typ',
         'status',
         'regionCode',
-        'istTemporaeresMitglied',
         'fuerBewirtschaftungGesperrt',
         'erfassungsdatum',
         'eintrittsdatum',
@@ -68,6 +67,7 @@ def check_main_keys(kwargs):
         - datumOnlineVerbucht
         - datumOnlineGutschrift
         - isKollektiv
+        - istTemporaeresMitglied
     '''
     for key in mandatory_keys:
         if key not in kwargs:

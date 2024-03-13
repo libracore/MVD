@@ -2509,7 +2509,6 @@ def check_main_keys(kwargs):
         'typ',
         'status',
         'regionCode',
-        'istTemporaeresMitglied',
         'fuerBewirtschaftungGesperrt',
         'erfassungsdatum',
         'eintrittsdatum',
@@ -2736,6 +2735,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
             - datumOnlineVerbucht
             - datumOnlineGutschrift
             - isKollektiv
+            - istTemporaeresMitglied
     '''
     prepared_mvm = {
         "mitgliedNummer": str(mitgliedschaft.mitglied_nr) if str(mitgliedschaft.mitglied_nr) != 'MV' else None,
@@ -2745,7 +2745,6 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "typ": str(typ_mapper[mitgliedschaft.mitgliedtyp_c]),
         "status": str(status_mapper[mitgliedschaft.status_c]) if mitgliedschaft.status_c != 'Online-Mutation' else str(status_mapper[mitgliedschaft.status_vor_onl_mutation]),
         "sprache": get_sprache(language=mitgliedschaft.language) if mitgliedschaft.language else 'Deutsch',
-        "istTemporaeresMitglied": False, # ???
         "fuerBewirtschaftungGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
         "erfassungsdatum": str(mitgliedschaft.creation).replace(" ", "T"),
         "eintrittsdatum": str(mitgliedschaft.eintrittsdatum).replace(" ", "T") + "T00:00:00" if mitgliedschaft.eintrittsdatum else None,
