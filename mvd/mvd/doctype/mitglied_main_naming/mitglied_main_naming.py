@@ -138,11 +138,14 @@ def create_new_number(id=None):
         }
 
 '''
-Diese Methode wird nur verwendet um alle ID/Nr Datensätze zu löschen und mit der aktuellen Mitgliederliste abzugleichen.
+    Diese Methode wird nur (zu Migrationszwecken) verwendet,
+    um alle ID/Nr Datensätze zu löschen und mit der aktuellen Mitgliederliste abzugleichen.
 '''
 def reset_mitglied_main_naming():
-    # call to action:
-    # bench --site [site_name] execute mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming.reset_mitglied_main_naming
+    '''
+        call to action:
+        bench --site [site_name] execute mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming.reset_mitglied_main_naming
+    '''
     print("lösche Tab Mitglied Main Naming...")
     safe_update_out = frappe.db.sql("""SET SQL_SAFE_UPDATES = 0""", as_list=True)
     delete_mitglied_main_naming = frappe.db.sql("""

@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_sektion_id, get_status_c, get_mitgliedtyp_c, get_inkl_hv, get_sprache_abk, check_email
+from mvd.mvd.doctype.mitgliedschaft.utils import get_sektion_id, get_status_c, get_mitgliedtyp_c, get_inkl_hv, get_sprache_abk
 from frappe.utils.data import getdate, now, today
 from frappe.utils import cint
 
@@ -821,7 +821,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 else:
                     new_mitgliedschaft.tel_m_1 = ''
                 new_mitgliedschaft.tel_g_1 = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
-                new_mitgliedschaft.e_mail_1 = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
+                new_mitgliedschaft.e_mail_1 = str(kontaktdaten["email"]).replace("None", "") if kontaktdaten["email"] else ''
                 new_mitgliedschaft.zusatz_adresse = str(mitglied["adresszusatz"]) if mitglied["adresszusatz"] else ''
                 new_mitgliedschaft.strasse = str(mitglied["strasse"]) if mitglied["strasse"] else ''
                 new_mitgliedschaft.nummer = str(mitglied["hausnummer"]) if mitglied["hausnummer"] else ''
@@ -849,7 +849,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 else:
                     new_mitgliedschaft.tel_m_2 = ''
                 new_mitgliedschaft.tel_g_2 = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
-                new_mitgliedschaft.e_mail_2 = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
+                new_mitgliedschaft.e_mail_2 = str(kontaktdaten["email"]).replace("None", "") if kontaktdaten["email"] else ''
         
         if not found_solidarmitglied:
             new_mitgliedschaft.hat_solidarmitglied = 0
@@ -925,7 +925,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                     else:
                         new_mitgliedschaft.rg_tel_m = ''
                     new_mitgliedschaft.rg_tel_g = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
-                    new_mitgliedschaft.rg_e_mail = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
+                    new_mitgliedschaft.rg_e_mail = str(kontaktdaten["email"]).replace("None", "") if kontaktdaten["email"] else ''
         if not found_unabhaengiger_debitor:
             new_mitgliedschaft.unabhaengiger_debitor = 0
     else:
