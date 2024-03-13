@@ -52,20 +52,23 @@ def check_main_keys(kwargs):
         'adressen',
         'sprache',
         'needsValidation',
-        'isKollektiv',
         'isGeschenkmitgliedschaft',
         'isEinmaligeSchenkung',
         'schenkerHasGeschenkunterlagen',
         'datumBezahltHaftpflicht',
         'onlineHaftpflicht',
-        'onlineGutschrift',
         'onlineBetrag',
-        'datumOnlineVerbucht',
-        'datumOnlineGutschrift',
-        'onlinePaymentMethod',
         'onlinePaymentId',
         'kuendigungsgrund'
     ]
+    '''
+        Achtung; gestrichene mandatory_keys:
+        - onlineGutschrift
+        - onlinePaymentMethod
+        - datumOnlineVerbucht
+        - datumOnlineGutschrift
+        - isKollektiv
+    '''
     for key in mandatory_keys:
         if key not in kwargs:
             return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=key), daten=kwargs)
@@ -250,10 +253,11 @@ def mvm_neuanlage(kwargs):
         else:
             m_und_w_pdf = 0
         
-        if kwargs['isKollektiv']:
-            ist_kollektiv = 1
-        else:
-            ist_kollektiv = '0'
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['isKollektiv']:
+        #     ist_kollektiv = 1
+        # else:
+        #     ist_kollektiv = '0'
         
         if kwargs['isGeschenkmitgliedschaft']:
             ist_geschenkmitgliedschaft = 1
@@ -280,7 +284,8 @@ def mvm_neuanlage(kwargs):
         
         mitglied_id = str(kwargs['mitgliedId'])
         
-        region_manuell = 1 if kwargs['regionManuell'] else '0'
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # region_manuell = 1 if kwargs['regionManuell'] else '0'
         
         inkl_hv = get_inkl_hv(kwargs["jahrBezahltHaftpflicht"])
         
@@ -341,35 +346,39 @@ def mvm_neuanlage(kwargs):
         else:
             online_haftpflicht = None
         
-        if kwargs['onlineGutschrift']:
-            online_gutschrift = kwargs['onlineGutschrift']
-        else:
-            online_gutschrift = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['onlineGutschrift']:
+        #     online_gutschrift = kwargs['onlineGutschrift']
+        # else:
+        #     online_gutschrift = None
         
         if kwargs['onlineBetrag']:
             online_betrag = kwargs['onlineBetrag']
         else:
             online_betrag = None
         
-        if kwargs['datumOnlineVerbucht']:
-            datum_online_verbucht = kwargs['datumOnlineVerbucht']
-            if zuzug_von != 'MVZH':
-                datum_zahlung_mitgliedschaft = datum_online_verbucht.split("T")[0]
-            else:
-                datum_zahlung_mitgliedschaft = None
-        else:
-            datum_online_verbucht = None
-            datum_zahlung_mitgliedschaft = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['datumOnlineVerbucht']:
+        #     datum_online_verbucht = kwargs['datumOnlineVerbucht']
+        #     if zuzug_von != 'MVZH':
+        #         datum_zahlung_mitgliedschaft = datum_online_verbucht.split("T")[0]
+        #     else:
+        #         datum_zahlung_mitgliedschaft = None
+        # else:
+        #     datum_online_verbucht = None
+        #     datum_zahlung_mitgliedschaft = None
         
-        if kwargs['datumOnlineGutschrift']:
-            datum_online_gutschrift = kwargs['datumOnlineGutschrift']
-        else:
-            datum_online_gutschrift = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['datumOnlineGutschrift']:
+        #     datum_online_gutschrift = kwargs['datumOnlineGutschrift']
+        # else:
+        #     datum_online_gutschrift = None
         
-        if kwargs['onlinePaymentMethod']:
-            online_payment_method = kwargs['onlinePaymentMethod']
-        else:
-            online_payment_method = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['onlinePaymentMethod']:
+        #     online_payment_method = kwargs['onlinePaymentMethod']
+        # else:
+        #     online_payment_method = None
         
         if kwargs['onlinePaymentId']:
             online_payment_id = kwargs['onlinePaymentId']
@@ -389,7 +398,6 @@ def mvm_neuanlage(kwargs):
             'mitglied_nr': mitglied_nr,
             'sektion_id': sektion_id,
             'region': region,
-            'region_manuell': region_manuell,
             'status_c': status_c,
             'mitglied_id': mitglied_id,
             'mitgliedtyp_c': mitgliedtyp_c,
@@ -409,20 +417,14 @@ def mvm_neuanlage(kwargs):
             'naechstes_jahr_geschuldet': naechstes_jahr_geschuldet,
             'validierung_notwendig': 0,
             'language': language,
-            'ist_kollektiv': ist_kollektiv,
             'ist_geschenkmitgliedschaft': ist_geschenkmitgliedschaft,
             'ist_einmalige_schenkung': ist_einmalige_schenkung,
             'geschenkunterlagen_an_schenker': geschenkunterlagen_an_schenker,
             'datum_hv_zahlung': datum_hv_zahlung,
             'letzte_bearbeitung_von': 'SP',
             'online_haftpflicht': online_haftpflicht,
-            'online_gutschrift': online_gutschrift,
             'online_betrag': online_betrag,
-            'datum_online_verbucht': datum_online_verbucht,
-            'datum_online_gutschrift': datum_online_gutschrift,
-            'online_payment_method': online_payment_method,
             'online_payment_id': online_payment_id,
-            'datum_zahlung_mitgliedschaft': datum_zahlung_mitgliedschaft,
             'mvb_typ': mvb_typ
         })
         
@@ -510,10 +512,11 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         
         m_und_w = kwargs['anzahlZeitungen']
         
-        if kwargs['isKollektiv']:
-            ist_kollektiv = 1
-        else:
-            ist_kollektiv = '0'
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['isKollektiv']:
+        #     ist_kollektiv = 1
+        # else:
+        #     ist_kollektiv = '0'
         
         if kwargs['isGeschenkmitgliedschaft']:
             ist_geschenkmitgliedschaft = 1
@@ -536,7 +539,8 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
             if len(regionen) > 0:
                 region = regionen[0].name
         
-        region_manuell = 1 if kwargs['regionManuell'] else '0'
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # region_manuell = 1 if kwargs['regionManuell'] else '0'
         
         mitglied_nr = kwargs['mitgliedNummer']
         
@@ -598,30 +602,34 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         
         zahlung_hv = int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0
         
-        if kwargs['onlineGutschrift']:
-            online_gutschrift = kwargs['onlineGutschrift']
-        else:
-            online_gutschrift = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['onlineGutschrift']:
+        #     online_gutschrift = kwargs['onlineGutschrift']
+        # else:
+        #     online_gutschrift = None
         
         if kwargs['onlineBetrag']:
             online_betrag = kwargs['onlineBetrag']
         else:
             online_betrag = None
         
-        if kwargs['datumOnlineVerbucht']:
-            datum_online_verbucht = kwargs['datumOnlineVerbucht']
-        else:
-            datum_online_verbucht = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['datumOnlineVerbucht']:
+        #     datum_online_verbucht = kwargs['datumOnlineVerbucht']
+        # else:
+        #     datum_online_verbucht = None
         
-        if kwargs['datumOnlineGutschrift']:
-            datum_online_gutschrift = kwargs['datumOnlineGutschrift']
-        else:
-            datum_online_gutschrift = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['datumOnlineGutschrift']:
+        #     datum_online_gutschrift = kwargs['datumOnlineGutschrift']
+        # else:
+        #     datum_online_gutschrift = None
         
-        if kwargs['onlinePaymentMethod']:
-            online_payment_method = kwargs['onlinePaymentMethod']
-        else:
-            online_payment_method = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['onlinePaymentMethod']:
+        #     online_payment_method = kwargs['onlinePaymentMethod']
+        # else:
+        #     online_payment_method = None
         
         if kwargs['onlinePaymentId']:
             online_payment_id = kwargs['onlinePaymentId']
@@ -659,7 +667,6 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         mitgliedschaft.mitglied_nr = mitglied_nr
         mitgliedschaft.sektion_id = sektion_id
         mitgliedschaft.region = region
-        mitgliedschaft.region_manuell = region_manuell
         mitgliedschaft.status_c = status_c
         mitgliedschaft.mitglied_id = mitglied_id
         mitgliedschaft.mitgliedtyp_c = mitgliedtyp_c
@@ -679,18 +686,13 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         mitgliedschaft.naechstes_jahr_geschuldet = naechstes_jahr_geschuldet
         mitgliedschaft.validierung_notwendig = 0
         mitgliedschaft.language = language
-        mitgliedschaft.ist_kollektiv = ist_kollektiv
         mitgliedschaft.ist_geschenkmitgliedschaft = ist_geschenkmitgliedschaft
         mitgliedschaft.ist_einmalige_schenkung = ist_einmalige_schenkung
         mitgliedschaft.geschenkunterlagen_an_schenker = geschenkunterlagen_an_schenker
         mitgliedschaft.datum_hv_zahlung = datum_hv_zahlung
         mitgliedschaft.letzte_bearbeitung_von = 'SP'
         mitgliedschaft.online_haftpflicht = online_haftpflicht
-        mitgliedschaft.online_gutschrift = online_gutschrift
         mitgliedschaft.online_betrag = online_betrag
-        mitgliedschaft.datum_online_verbucht = datum_online_verbucht
-        mitgliedschaft.datum_online_gutschrift = datum_online_gutschrift
-        mitgliedschaft.online_payment_method = online_payment_method
         mitgliedschaft.online_payment_id = online_payment_id
         mitgliedschaft.mvb_typ = mvb_typ
         

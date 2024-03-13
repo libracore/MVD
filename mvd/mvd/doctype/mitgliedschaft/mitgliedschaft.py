@@ -2526,17 +2526,12 @@ def check_main_keys(kwargs):
         'adressen',
         'sprache',
         'needsValidation',
-        'isKollektiv',
         'isGeschenkmitgliedschaft',
         'isEinmaligeSchenkung',
         'schenkerHasGeschenkunterlagen',
         'datumBezahltHaftpflicht',
         'onlineHaftpflicht',
-        'onlineGutschrift',
         'onlineBetrag',
-        'datumOnlineVerbucht',
-        'datumOnlineGutschrift',
-        'onlinePaymentMethod',
         'onlinePaymentId',
         'kuendigungsgrund'
     ]
@@ -2733,12 +2728,20 @@ def prepare_mvm_for_sp(mitgliedschaft):
     else:
         alteSektionCode = str(get_sektion_code(mitgliedschaft.zuzug_von)) if mitgliedschaft.zuzug_von else None
     
+    '''
+        Nachfolgende Keys wurden entfernt, weil definiert wurde dass diese nicht mehr gebraucht werden:
+            - regionManuell
+            - onlineGutschrift
+            - onlinePaymentMethod
+            - datumOnlineVerbucht
+            - datumOnlineGutschrift
+            - isKollektiv
+    '''
     prepared_mvm = {
         "mitgliedNummer": str(mitgliedschaft.mitglied_nr) if str(mitgliedschaft.mitglied_nr) != 'MV' else None,
         "mitgliedId": cint(mitgliedschaft.mitglied_id),
         "sektionCode": str(get_sektion_code(mitgliedschaft.sektion_id)),
         "regionCode": frappe.get_value("Region", mitgliedschaft.region, "region_c") if mitgliedschaft.region else None,
-        "regionManuell": True if mitgliedschaft.region_manuell else False,
         "typ": str(typ_mapper[mitgliedschaft.mitgliedtyp_c]),
         "status": str(status_mapper[mitgliedschaft.status_c]) if mitgliedschaft.status_c != 'Online-Mutation' else str(status_mapper[mitgliedschaft.status_vor_onl_mutation]),
         "sprache": get_sprache(language=mitgliedschaft.language) if mitgliedschaft.language else 'Deutsch',
@@ -2760,18 +2763,13 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "bemerkungen": str(mitgliedschaft.wichtig) if mitgliedschaft.wichtig else None,
         "anzahlZeitungen": cint(mitgliedschaft.m_und_w),
         "zeitungAlsPdf": True if mitgliedschaft.m_und_w_pdf else False,
-        "isKollektiv": True if cint(mitgliedschaft.ist_kollektiv) == 1 else False,
         "isGeschenkmitgliedschaft": True if cint(mitgliedschaft.ist_geschenkmitgliedschaft) == 1 else False,
         "isEinmaligeSchenkung": True if cint(mitgliedschaft.ist_einmalige_schenkung) == 1 else False,
         "schenkerHasGeschenkunterlagen": True if cint(mitgliedschaft.geschenkunterlagen_an_schenker) == 1 else False,
         "datumBezahltHaftpflicht": str(mitgliedschaft.datum_hv_zahlung).replace(" ", "T") + "T00:00:00" if mitgliedschaft.datum_hv_zahlung else None,
         "adressen": adressen,
         "onlineHaftpflicht": cint(mitgliedschaft.online_haftpflicht),
-        "onlineGutschrift": mitgliedschaft.online_gutschrift if mitgliedschaft.online_gutschrift and mitgliedschaft.online_gutschrift != '' else None,
         "onlineBetrag": mitgliedschaft.online_betrag if mitgliedschaft.online_betrag and mitgliedschaft.online_betrag != '' else None,
-        "datumOnlineVerbucht": mitgliedschaft.datum_online_verbucht if mitgliedschaft.datum_online_verbucht and mitgliedschaft.datum_online_verbucht != '' else None,
-        "datumOnlineGutschrift": mitgliedschaft.datum_online_gutschrift if mitgliedschaft.datum_online_gutschrift and mitgliedschaft.datum_online_gutschrift != '' else None,
-        "onlinePaymentMethod": mitgliedschaft.online_payment_method if mitgliedschaft.online_payment_method and mitgliedschaft.online_payment_method != '' else None,
         "onlinePaymentId": mitgliedschaft.online_payment_id if mitgliedschaft.online_payment_id and mitgliedschaft.online_payment_id != '' else None,
         "kuendigungsgrund": kuendigungsgrund,
         "mvbTyp":  mitgliedschaft.mvb_typ if mitgliedschaft.mvb_typ and mitgliedschaft.mvb_typ != '' else None
