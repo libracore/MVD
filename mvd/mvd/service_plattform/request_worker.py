@@ -82,7 +82,7 @@ def check_main_keys(kwargs):
         return False
 
 def check_missing_address(kwargs):
-    if kwargs["adressen"]["adressenListe"].length >= 1:
+    if len(kwargs["adressen"]["adressenListe"]) >= 1:
         for adresse in kwargs["adressen"]["adressenListe"]:
             adressen_dict = adresse
             
