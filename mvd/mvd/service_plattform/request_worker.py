@@ -7,6 +7,7 @@ import frappe
 from mvd.mvd.doctype.mitgliedschaft.utils import get_sektion_id, get_status_c, get_mitgliedtyp_c, get_inkl_hv, get_sprache_abk
 from frappe.utils.data import getdate, now, today
 from frappe.utils import cint
+import json
 
 '''
 API Request Eingang
