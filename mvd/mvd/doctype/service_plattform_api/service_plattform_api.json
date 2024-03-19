@@ -19,7 +19,9 @@
   "flush_queue",
   "flush_limit",
   "flush_limit_eingehend",
-  "sp_incoming_immediately_executing"
+  "sp_incoming_immediately_executing",
+  "emailberatung_test",
+  "emailberatung_testtoken"
  ],
  "fields": [
   {
@@ -117,10 +119,22 @@
    "fieldname": "sp_incoming_immediately_executing",
    "fieldtype": "Check",
    "label": "SP Eingehende Requests sofort ausf\u00fchren"
+  },
+  {
+   "default": "0",
+   "fieldname": "emailberatung_test",
+   "fieldtype": "Check",
+   "label": "Aktiviere E-Mailberatungs Testing"
+  },
+  {
+   "depends_on": "eval:doc.emailberatung_test",
+   "fieldname": "emailberatung_testtoken",
+   "fieldtype": "Data",
+   "label": "E-Mailberatung Test Token"
   }
  ],
  "issingle": 1,
- "modified": "2024-03-12 17:39:38.435858",
+ "modified": "2024-03-19 10:12:06.208574",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",
