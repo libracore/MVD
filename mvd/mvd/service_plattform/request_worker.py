@@ -18,8 +18,12 @@ def api_request_check(kwargs):
         if kwargs["mitgliedId"] > 0:
             missing_keys = check_main_keys(kwargs)
             if not missing_keys:
-                create_sp_log(kwargs)
-                return raise_200()
+                missing_address = check_missing_address(kwargs)
+                if not missing_address:
+                    create_sp_log(kwargs)
+                    return raise_200()
+                else:
+                    return missing_address
             else:
                 return missing_keys
         else:
@@ -76,6 +80,23 @@ def check_main_keys(kwargs):
         return raise_xxx(400, 'Bad Request', 'Geschenkmitgliedschaft unbekannt', daten=kwargs)
     else:
         return False
+
+def check_missing_address(kwargs):
+    if kwargs["adressen"]["adressenListe"].length >= 1:
+        for adresse in kwargs["adressen"]["adressenListe"]:
+            adressen_dict = adresse
+            
+            if isinstance(adressen_dict, str):
+                adressen_dict = json.loads(adressen_dict)
+            
+            if adressen_dict['typ'] == 'Mitglied':
+                mitglied = adressen_dict
+                if mitglied["postleitzahl"]:
+                    return False
+                else:
+                    return raise_xxx(400, 'Bad Request', 'Postleitzahl in Mitglied Address missing', daten=kwargs)
+    
+    return raise_xxx(400, 'Bad Request', 'Mitglied Address missing', daten=kwargs)
 
 '''
 Schritt 2:
