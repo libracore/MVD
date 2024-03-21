@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.52.0
+ISS-2024-00053 (Erfassung Datum aus Zahlungsfile in Reports)
 #### 11.51.0
 ISS-2024-00053 (Entfernung von ASI, ASLOCA, M+W-Abos und MVD)
 #### 11.50.0

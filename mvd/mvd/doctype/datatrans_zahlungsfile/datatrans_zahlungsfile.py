@@ -294,6 +294,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
         "report_typ": "Monatsreport MVD",
         "sektion": "MVD",
         "datatrans_zahlungsfile": datatrans_zahlungsfile.name,
+        "datum_zahlungsfile": datatrans_zahlungsfile.title,
         "content_code": html
     }).insert()
     
@@ -363,6 +364,7 @@ def create_monatsreport_sektionen(datatrans_zahlungsfile, sektions_list):
             "report_typ": "Monatsreport Sektion",
             "sektion": sektions_dict['name'],
             "datatrans_zahlungsfile": datatrans_zahlungsfile.name,
+            "datum_zahlungsfile": datatrans_zahlungsfile.title,
             "content_code": html
         }).insert()
     
