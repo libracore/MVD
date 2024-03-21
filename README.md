@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.49.2
+Verbesserung des Schliess-Prozess von offenen M+W Retouren zu Mitgliedschaft
 #### 11.49.1
 ISS-2024-00091; Post Retouren
 #### 11.49.0
