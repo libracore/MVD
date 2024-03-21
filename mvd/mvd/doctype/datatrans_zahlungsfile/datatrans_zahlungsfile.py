@@ -240,7 +240,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
     
     sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` ORDER BY `name` ASC""", as_dict=True)
     for sektion in sektionen:
-        if sektion.name != 'MVD':
+        if sektion.name not in ('MVD', 'M+W-Abo', 'ASI', 'ASLOCA'):
             priv, hv, mitgliedschaften = get_sektions_values(sektion.name)
             abzug = ((priv + hv) / 100) * datatrans_zahlungsfile.kommissions_prozent
             sektions_dict = {}
