@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.50.0
+ISS-2024-00053 (Titel des Datatrans Zahlungfiles)
 #### 11.49.4
 ISS-2024-00052
 #### 11.49.3

@@ -9,6 +9,10 @@ import csv
 from mvd.mvd.doctype.datatrans_report.datatrans_report import create_mitgliedschaften_pro_file
 
 class DatatransZahlungsfile(Document):
+    def validate(self):
+        if len(self.datatrans_entries) > 0:
+            self.title = self.datatrans_entries[0].transdatetime.split(" ")[0]
+    
     def read_file(self):
         physical_path = "/home/frappe/frappe-bench/sites/{0}{1}".format(frappe.local.site_path.replace("./", ""), self.datatrans_file)
         with open(physical_path, newline='') as csvfile:
