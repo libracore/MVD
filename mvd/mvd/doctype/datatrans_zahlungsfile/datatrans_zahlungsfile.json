@@ -4,6 +4,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "title",
   "datatrans_file",
   "section_aktionen",
   "btn_file_einlesen",
@@ -142,9 +143,15 @@
    "fieldname": "btn_reset",
    "fieldtype": "Button",
    "label": "Reset Daten"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Titel"
   }
  ],
- "modified": "2023-10-02 12:44:09.373784",
+ "modified": "2024-03-21 10:43:41.215705",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Datatrans Zahlungsfile",
@@ -165,5 +172,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "title",
  "track_changes": 1
 }

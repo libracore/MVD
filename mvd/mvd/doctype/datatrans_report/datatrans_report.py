@@ -327,6 +327,7 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
         "report_typ": "Mitgliedschaften pro File",
         "sektion": "MVD",
         "datatrans_zahlungsfile": datatrans_zahlungsfile.name,
+        "datum_zahlungsfile": datatrans_zahlungsfile.title,
         "content_code": html
     }).insert()
     
