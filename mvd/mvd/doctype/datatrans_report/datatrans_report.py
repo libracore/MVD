@@ -299,7 +299,7 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
                     <td>{transaktion_id}</td>
                 </tr>
         '''.format(mitgl=ausstehend['mitgl'], \
-                   empfaenger=ausstehend['empfaenger'].replace("\n", ", "), \
+                   empfaenger=ausstehend['empfaenger'].replace("\n", ", ") if ausstehend['empfaenger'] else 'Kein Angaben', \
                    valuta=frappe.utils.get_datetime(ausstehend['valuta']).strftime('%d.%m.%Y'), \
                    betrag=ausstehend['betrag'], \
                    transaktion_id=ausstehend['transaktion_id'])

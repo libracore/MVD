@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.49.4
+ISS-2024-00052
 #### 11.49.3
 Korrektur an DF Fakultative Rechnung; Berücksichtigung von Postfach-Adresse bei Receiver
 #### 11.49.2
