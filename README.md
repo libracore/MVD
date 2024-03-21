@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.49.3
+Korrektur an DF Fakultative Rechnung; Berücksichtigung von Postfach-Adresse bei Receiver
 #### 11.49.2
 Verbesserung des Schliess-Prozess von offenen M+W Retouren zu Mitgliedschaft
 #### 11.49.1
