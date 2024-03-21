@@ -9,6 +9,10 @@ import csv
 from mvd.mvd.doctype.datatrans_report.datatrans_report import create_mitgliedschaften_pro_file
 
 class DatatransZahlungsfile(Document):
+    def validate(self):
+        if len(self.datatrans_entries) > 0:
+            self.title = self.datatrans_entries[0].transdatetime.split(" ")[0]
+    
     def read_file(self):
         physical_path = "/home/frappe/frappe-bench/sites/{0}{1}".format(frappe.local.site_path.replace("./", ""), self.datatrans_file)
         with open(physical_path, newline='') as csvfile:
@@ -236,7 +240,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
     
     sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` ORDER BY `name` ASC""", as_dict=True)
     for sektion in sektionen:
-        if sektion.name != 'MVD':
+        if sektion.name not in ('MVD', 'M+W-Abo', 'ASI', 'ASLOCA'):
             priv, hv, mitgliedschaften = get_sektions_values(sektion.name)
             abzug = ((priv + hv) / 100) * datatrans_zahlungsfile.kommissions_prozent
             sektions_dict = {}
@@ -290,6 +294,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
         "report_typ": "Monatsreport MVD",
         "sektion": "MVD",
         "datatrans_zahlungsfile": datatrans_zahlungsfile.name,
+        "datum_zahlungsfile": datatrans_zahlungsfile.title,
         "content_code": html
     }).insert()
     
@@ -359,6 +364,7 @@ def create_monatsreport_sektionen(datatrans_zahlungsfile, sektions_list):
             "report_typ": "Monatsreport Sektion",
             "sektion": sektions_dict['name'],
             "datatrans_zahlungsfile": datatrans_zahlungsfile.name,
+            "datum_zahlungsfile": datatrans_zahlungsfile.title,
             "content_code": html
         }).insert()
     
