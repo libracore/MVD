@@ -482,7 +482,8 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frappe.validated=false;
             }
         }
-        
+    },
+    after_save: function(frm) {
         // Abfrage ob M+W Retouren geschlossen werden sollen
         frappe.call({
             'method': "frappe.client.get",
@@ -498,22 +499,22 @@ frappe.ui.form.on('Mitgliedschaft', {
                         frappe.confirm(
                             'Dieses Mitglied besitzt offene M+W Retouren. Möchten Sie diese als Abgeschlossen markieren?',
                             function(){
+                                frappe.show_alert('Die offenen M+W Retouren werden geschlossen...', 5);
                                 // on yes
                                 frappe.call({
                                     method: "mvd.mvd.doctype.retouren.retouren.close_open_retouren",
                                     args:{
                                             'mitgliedschaft': cur_frm.doc.name
                                     },
+                                    freeze: true,
+                                    freeze_message: 'Die offenen M+W Retouren werden geschlossen...',
                                     callback: function(r){
                                         var resolve_reload = new Promise(function(resolve) {
                                             cur_frm.reload_doc();
                                             resolve(true);
                                         });
                                         resolve_reload.then(function(resolve_reload) {
-                                            cur_frm.set_value("m_w_retouren_offen", 0);
-                                            cur_frm.set_value("m_w_retouren_in_bearbeitung", 0);
-                                            cur_frm.set_value("m_w_anzahl", 0);
-                                            cur_frm.save();
+                                            frappe.show_alert('Die M+W Retouren sind geschlossen...', 5);
                                         });
                                     }
                                 });
