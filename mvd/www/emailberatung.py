@@ -549,15 +549,17 @@ def check_for_testing():
     if cint(frappe.db.get_value("Service Plattform API", "Service Plattform API", "emailberatung_test")) == 1:
         from urllib.parse import urlparse
         from urllib.parse import parse_qs
-
-        url = frappe.request.url
-        parsed_url = urlparse(url)
-        test_token = parse_qs(parsed_url.query)['test'][0]
-        if test_token == frappe.db.get_value("Service Plattform API", "Service Plattform API", "emailberatung_testtoken"):
-            mitglied_id = parse_qs(parsed_url.query)['mitglied_id'][0]
-            return mitglied_id
-        else:
-            # invalid token
+        try:
+            url = frappe.request.url
+            parsed_url = urlparse(url)
+            test_token = parse_qs(parsed_url.query)['test'][0]
+            if test_token == frappe.db.get_value("Service Plattform API", "Service Plattform API", "emailberatung_testtoken"):
+                mitglied_id = parse_qs(parsed_url.query)['mitglied_id'][0]
+                return mitglied_id
+            else:
+                # invalid token
+                return False
+        except:
             return False
     else:
         # testing is disabled
