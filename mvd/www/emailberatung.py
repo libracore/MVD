@@ -118,6 +118,9 @@ def context_erweiterung(context, mitgliedschaft):
         context.telefon = mitgliedschaft.tel_m_1 if mitgliedschaft.tel_m_1 else mitgliedschaft.tel_p_1 if mitgliedschaft.tel_p_1 else mitgliedschaft.tel_g_1 if mitgliedschaft.tel_g_1 else ''
         context.email = mitgliedschaft.e_mail_1 if mitgliedschaft.e_mail_1 else ''
         context.sektion = mitgliedschaft.sektion_id
+        context.mitgliedtyp_c = mitgliedschaft.mitgliedtyp_c
+        context.firma = mitgliedschaft.firma
+        context.mvb_typ = mitgliedschaft.mvb_typ
         
         if mitgliedschaft.abweichende_objektadresse:
             context.strasse = mitgliedschaft.objekt_strasse
