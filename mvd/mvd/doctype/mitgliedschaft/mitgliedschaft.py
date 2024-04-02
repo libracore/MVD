@@ -581,14 +581,18 @@ class Mitgliedschaft(Document):
     def validate_kontakt_mitglied(self, primary):
         if primary:
             if self.kontakt_mitglied:
-                update_kontakt_mitglied(self, primary)
+                possible_new_name = update_kontakt_mitglied(self, primary)
+                if possible_new_name:
+                    return possible_new_name
                 return self.kontakt_mitglied
             else:
                 contact = create_kontakt_mitglied(self, primary)
                 return contact
         else:
             if self.kontakt_solidarmitglied:
-                update_kontakt_mitglied(self, primary)
+                possible_new_name = update_kontakt_mitglied(self, primary)
+                if possible_new_name:
+                    return possible_new_name
                 return self.kontakt_solidarmitglied
             else:
                 contact = create_kontakt_mitglied(self, primary)
@@ -1262,8 +1266,23 @@ def update_kontakt_mitglied(mitgliedschaft, primary=True):
             phone_row = contact.append("phone_nos", {})
             phone_row.phone = phone
     
+    
     contact.save(ignore_permissions=True)
-    return
+
+    # check for possible renaming
+    from frappe.utils import cstr
+    possible_new_name = " ".join(filter(None,
+            [cstr(contact.get(f)).strip() for f in ["first_name", "last_name"]]))
+    for link in contact.links:
+        possible_new_name = possible_new_name + '-' + link.link_name.strip()
+        break
+    if contact.name != possible_new_name:
+        frappe.rename_doc('Contact', contact.name, possible_new_name)
+        frappe.db.commit()
+        return possible_new_name
+    
+    # None = no renaming
+    return None
 
 def create_kontakt_mitglied(mitgliedschaft, primary=True):
     if primary:
@@ -1312,15 +1331,14 @@ def create_kontakt_mitglied(mitgliedschaft, primary=True):
             first_name = mitgliedschaft.firma
             frappe.log_error("{0}\n---\n{1}".format('fallback: first_name was " "', mitgliedschaft.as_json()), 'create_kontakt_mitglied')
     
-    new_contact = frappe.get_doc({
-        'doctype': 'Contact',
-        'first_name': first_name,
-        'last_name': last_name,
-        'salutation': salutation,
-        'sektion': sektion,
-        'company_name': company_name,
-        'is_primary_contact': is_primary_contact
-    })
+    new_contact = frappe.new_doc('Contact')
+    new_contact.first_name = first_name
+    new_contact.last_name = last_name
+    new_contact.salutation = salutation
+    new_contact.sektion = sektion
+    new_contact.company_name = company_name
+    new_contact.is_primary_contact = is_primary_contact
+    new_contact.insert(ignore_permissions=True)
     
     link = new_contact.append("links", {})
     link.link_doctype = 'Customer'
@@ -1381,14 +1399,8 @@ def create_kontakt_mitglied(mitgliedschaft, primary=True):
             phone_row = new_contact.append("phone_nos", {})
             phone_row.phone = phone
     
-    try:
-        new_contact.insert(ignore_permissions=True)
-        frappe.db.commit()
-    except frappe.DuplicateEntryError:
-        frappe.local.message_log = []
-        mitgliedschaft.kontakt_solidarmitglied = new_contact.name
-        update_kontakt_mitglied(mitgliedschaft, primary)
-        return new_contact.name
+    new_contact.save(ignore_permissions=True)
+    frappe.db.commit()
     
     return new_contact.name
 

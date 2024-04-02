@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.52.2
+#870 Bugfix: Verschiebung von Mitglied zu Solidarmitglied
 #### 11.52.1
 #871 (FAK-RG Adressen Hotfix)
 #### 11.52.0
