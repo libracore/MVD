@@ -858,7 +858,7 @@ frappe.mvd_such_client = {
                                                         'massendruck': prompt_values.massendruck
                                                 },
                                                 freeze: true,
-                                                freeze_message: 'Erstelle Mitgliedschaften...',
+                                                freeze_message: 'Erstelle Mitgliedschaft...',
                                                 callback: function(r)
                                                 {
                                                     if (r.message) {
@@ -882,7 +882,7 @@ frappe.mvd_such_client = {
                                                 'anlage_daten': values
                                         },
                                         freeze: true,
-                                        freeze_message: 'Erstelle Mitgliedschaften...',
+                                        freeze_message: 'Erstelle Mitgliedschaft...',
                                         callback: function(r)
                                         {
                                             if (r.message) {
