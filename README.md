@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.52.4
+#878, !879; Neues Kontakt-Handling
 #### 11.52.3
 #874 Bugfix: Sektionswechsel
 #### 11.52.2
