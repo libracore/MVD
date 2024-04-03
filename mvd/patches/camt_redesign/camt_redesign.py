@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_anredekonvention
+from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention
 
 def execute():
     print("Markiere alle CAMT Imports der Version 1")

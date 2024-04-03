@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils import nowdate, flt, now
 import json
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung, create_abl
+from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung
 
 class Kunden(Document):
     def onload(self):
@@ -822,14 +822,10 @@ def anlage_prozess(anlage_daten, status):
         hv_bar_bezahlt = False
         sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage='', massendruck=False)
     elif status == 'Interessent*in':
-        # erstelle ABL für Interessent*Innenbrief mit EZ
-        create_abl("Interessent*Innenbrief mit EZ", mitgliedschaft)
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
         mitgliedschaft.interessent_innenbrief_mit_ez = 1
         mitgliedschaft.save()
     elif status == 'Anmeldung':
-        # erstelle ABL für Anmeldung mit EZ
-        create_abl("Anmeldung mit EZ", mitgliedschaft)
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
         mitgliedschaft.anmeldung_mit_ez = 1
         mitgliedschaft.save()

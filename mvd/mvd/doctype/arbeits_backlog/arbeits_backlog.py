@@ -72,3 +72,11 @@ def exist_kuendigungen_folder():
         new_folder.insert(ignore_permissions=True)
         frappe.db.commit()
     return True
+
+def close_open_validations(mitgliedschaft, typ):
+    open_abl = frappe.db.sql("""SELECT `name` FROM `tabArbeits Backlog` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Open' AND `typ` = '{typ}'""".format(mitgliedschaft=mitgliedschaft, typ=typ), as_dict=True)
+    
+    for abl in open_abl:
+        abl = frappe.get_doc("Arbeits Backlog", abl.name)
+        abl.status = 'Completed'
+        abl.save(ignore_permissions=True)
