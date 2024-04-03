@@ -1563,11 +1563,12 @@ def create_kontakt_mitglied(mitgliedschaft, primary=True):
     new_contact.sektion = sektion
     new_contact.company_name = company_name
     new_contact.is_primary_contact = is_primary_contact
-    new_contact.insert(ignore_permissions=True)
     
     link = new_contact.append("links", {})
     link.link_doctype = 'Customer'
     link.link_name = mitgliedschaft.kunde_mitglied
+
+    new_contact.insert(ignore_permissions=True)
     
     if primary:
         # email
@@ -2195,7 +2196,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             mit_rechnung = False
             if new_mitgliedschaft.bezahltes_mitgliedschaftsjahr < cint(now().split("-")[0]):
                 if new_mitgliedschaft.naechstes_jahr_geschuldet == 1:
-                    mit_rechnung = create_mitgliedschaftsrechnung(new_mitgliedschaft.name, jahr=cint(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug mit EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
+                    mit_rechnung = create_mitgliedschaftsrechnung(new_mitgliedschaft.name, mitgliedschaft_obj=new_mitgliedschaft, jahr=cint(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug mit EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
             
             # markiere neue Mitgliedschaft als zu validieren
             new_mitgliedschaft = frappe.get_doc("Mitgliedschaft", new_mitgliedschaft.name)

@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.52.3
+#874 Bugfix: Sektionswechsel
 #### 11.52.2
 #870 Bugfix: Verschiebung von Mitglied zu Solidarmitglied
 #### 11.52.1
