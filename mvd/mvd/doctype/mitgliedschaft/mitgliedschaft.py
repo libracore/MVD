@@ -272,27 +272,15 @@ class Mitgliedschaft(Document):
         # Mitglied
         self.kunde_mitglied = self.validate_kunde_mitglied()
         self.kontakt_mitglied = self.validate_kontakt_mitglied(primary=True)
-        self.kontakt_solidarmitglied = self.validate_kontakt_mitglied(primary=False)
         self.adresse_mitglied, self.objekt_adresse = self.validate_adresse_mitglied()
         join_mitglied_contact_and_address(self.kontakt_mitglied, self.adresse_mitglied)
+
+        # Solidarmitglied
+        self.kontakt_solidarmitglied = self.validate_kontakt_mitglied(primary=False)
         if self.objekt_adresse:
             join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.objekt_adresse)
         else:
             join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.adresse_mitglied)
-        
-        # Solidarmitglied
-        # if self.hat_solidarmitglied:
-        #     self.kontakt_solidarmitglied = self.validate_kontakt_mitglied(primary=False)
-        #     if not self.kontakt_solidarmitglied:
-        #         self.hat_solidarmitglied = '0'
-        #     else:
-        #         if self.objekt_adresse:
-        #             join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.objekt_adresse)
-        #         else:
-        #             join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.adresse_mitglied)
-        # else:
-        #     if self.kontakt_solidarmitglied:
-        #         self.kontakt_solidarmitglied = self.remove_solidarmitglied()
         
         # Rechnungsempfaenger
         if self.abweichende_rechnungsadresse:
@@ -572,29 +560,13 @@ class Mitgliedschaft(Document):
     def validate_kontakt_mitglied(self, primary):
         if primary:
             if self.kontakt_mitglied and self.kontakt_mitglied not in ['', 'None']:
-                # possible_new_name = update_kontakt_mitglied(self, primary)
-                # if possible_new_name:
-                #     return possible_new_name
-                # return self.kontakt_mitglied
-                frappe.log_error("", "primary - update")
                 return update_kontakt(self, primary)
             else:
-                # contact = create_kontakt_mitglied(self, primary)
-                # return contact
-                frappe.log_error("", "primary - anlage")
                 return create_kontakt(self, primary)
         else:
             if self.kontakt_solidarmitglied and self.kontakt_solidarmitglied not in ['', 'None']:
-                # possible_new_name = update_kontakt_mitglied(self, primary)
-                # if possible_new_name:
-                #     return possible_new_name
-                # return self.kontakt_solidarmitglied
-                frappe.log_error("", "sec - update")
                 return update_kontakt(self, primary)
             else:
-                # contact = create_kontakt_mitglied(self, primary)
-                # return contact
-                frappe.log_error("", "sec - anlage")
                 return create_kontakt(self, primary)
     
     def validate_adresse_mitglied(self):
@@ -1383,269 +1355,6 @@ def create_adresse_mitglied(mitgliedschaft):
     
     return new_address.name
 
-def remove_solidarmitglied(mitgliedschaft):
-    return
-
-def update_kontakt_mitglied(mitgliedschaft, primary=True):
-    return
-    # if primary:
-    #     contact = frappe.get_doc("Contact", mitgliedschaft.kontakt_mitglied)
-    #     sektion = mitgliedschaft.sektion_id
-    #     is_primary_contact = 1
-    #     if mitgliedschaft.kundentyp == 'Unternehmen':
-    #         salutation = ''
-    #         company_name = mitgliedschaft.firma
-    #         if not mitgliedschaft.nachname_1 and not mitgliedschaft.vorname_1:
-    #             first_name = company_name
-    #             last_name = ''
-    #         else:
-    #             company_name = ''
-    #             salutation = mitgliedschaft.anrede_c
-    #             first_name = mitgliedschaft.vorname_1 or mitgliedschaft.nachname_1
-    #             if first_name != mitgliedschaft.nachname_1:
-    #                 last_name = mitgliedschaft.nachname_1
-    #             else:
-    #                 last_name = ''
-    #     else:
-    #         company_name = ''
-    #         salutation = mitgliedschaft.anrede_c
-    #         first_name = mitgliedschaft.vorname_1 or mitgliedschaft.nachname_1
-    #         if first_name != mitgliedschaft.nachname_1:
-    #             last_name = mitgliedschaft.nachname_1
-    #         else:
-    #             last_name = ''
-    # else:
-    #     contact = frappe.get_doc("Contact", mitgliedschaft.kontakt_solidarmitglied)
-    #     sektion = mitgliedschaft.sektion_id
-    #     is_primary_contact = 0
-    #     company_name = ''
-    #     salutation = mitgliedschaft.anrede_2
-    #     first_name = mitgliedschaft.vorname_2 or mitgliedschaft.nachname_2
-    #     if first_name != mitgliedschaft.nachname_2:
-    #         last_name = mitgliedschaft.nachname_2
-    #     else:
-    #         last_name = ''
-    
-    # # company fallback
-    # if not first_name:
-    #     if mitgliedschaft.firma and not mitgliedschaft.nachname_1 and not mitgliedschaft.vorname_1:
-    #         first_name = mitgliedschaft.firma
-    
-    # contact.first_name = first_name
-    # contact.last_name = last_name
-    # contact.salutation = salutation
-    # contact.sektion = sektion
-    # contact.company_name = company_name
-    # contact.is_primary_contact = is_primary_contact
-    
-    # contact.links = []
-    # link = contact.append("links", {})
-    # link.link_doctype = 'Customer'
-    # link.link_name = mitgliedschaft.kunde_mitglied
-    
-    # if primary:
-    #     # email
-    #     contact.email_ids = []
-    #     email_id = mitgliedschaft.e_mail_1
-    #     if email_id:
-    #         email_row = contact.append("email_ids", {})
-    #         email_row.email_id = email_id
-    #         email_row.is_primary = 1
-            
-    #     contact.phone_nos = []
-    #     contact.phone = ''
-    #     contact.mobile_no = ''
-    #     # private phone
-    #     is_primary_phone = mitgliedschaft.tel_p_1
-    #     if is_primary_phone:
-    #         is_primary_phone_row = contact.append("phone_nos", {})
-    #         is_primary_phone_row.phone = is_primary_phone
-    #         is_primary_phone_row.is_primary_phone = 1
-            
-    #     # mobile phone
-    #     is_primary_mobile_no = mitgliedschaft.tel_m_1
-    #     if is_primary_mobile_no:
-    #         is_primary_mobile_no_row = contact.append("phone_nos", {})
-    #         is_primary_mobile_no_row.phone = is_primary_mobile_no
-    #         is_primary_mobile_no_row.is_primary_mobile_no = 1
-            
-    #     # other (company) phone
-    #     phone = mitgliedschaft.tel_g_1
-    #     if phone:
-    #         phone_row = contact.append("phone_nos", {})
-    #         phone_row.phone = phone
-    # else:
-    #     # email
-    #     contact.email_ids = []
-    #     email_id = mitgliedschaft.e_mail_2
-    #     if email_id:
-    #         email_row = contact.append("email_ids", {})
-    #         email_row.email_id = email_id
-    #         email_row.is_primary = 1
-            
-    #     contact.phone_nos = []
-    #     contact.phone = ''
-    #     contact.mobile_no = ''
-    #     # private phone
-    #     is_primary_phone = mitgliedschaft.tel_p_2
-    #     if is_primary_phone:
-    #         is_primary_phone_row = contact.append("phone_nos", {})
-    #         is_primary_phone_row.phone = is_primary_phone
-    #         is_primary_phone_row.is_primary_phone = 1
-            
-    #     # mobile phone
-    #     is_primary_mobile_no = mitgliedschaft.tel_m_2
-    #     if is_primary_mobile_no:
-    #         is_primary_mobile_no_row = contact.append("phone_nos", {})
-    #         is_primary_mobile_no_row.phone = is_primary_mobile_no
-    #         is_primary_mobile_no_row.is_primary_mobile_no = 1
-            
-    #     # other (company) phone
-    #     phone = mitgliedschaft.tel_g_2
-    #     if phone:
-    #         phone_row = contact.append("phone_nos", {})
-    #         phone_row.phone = phone
-    
-    
-    # contact.save(ignore_permissions=True)
-
-    # # check for possible renaming
-    # from frappe.utils import cstr
-    # possible_new_name = " ".join(filter(None,
-    #         [cstr(contact.get(f)).strip() for f in ["first_name", "last_name"]]))
-    # for link in contact.links:
-    #     possible_new_name = possible_new_name + '-' + link.link_name.strip()
-    #     break
-    # if contact.name != possible_new_name:
-    #     frappe.rename_doc('Contact', contact.name, possible_new_name)
-    #     frappe.db.commit()
-    #     return possible_new_name
-    
-    # # None = no renaming
-    # return None
-
-def xxx_create_kontakt_mitglied(mitgliedschaft, primary=True):
-    return
-    # if primary:
-    #     sektion = mitgliedschaft.sektion_id
-    #     is_primary_contact = 1
-    #     if mitgliedschaft.kundentyp == 'Unternehmen':
-    #         salutation = ''
-    #         company_name = mitgliedschaft.firma
-    #         if not mitgliedschaft.nachname_1 and not mitgliedschaft.vorname_1:
-    #             first_name = company_name
-    #             last_name = ''
-    #         else:
-    #             company_name = ''
-    #             salutation = mitgliedschaft.anrede_c
-    #             first_name = mitgliedschaft.vorname_1 or mitgliedschaft.nachname_1
-    #             if first_name != mitgliedschaft.nachname_1:
-    #                 last_name = mitgliedschaft.nachname_1
-    #             else:
-    #                 last_name = ''
-    #     else:
-    #         company_name = ''
-    #         salutation = mitgliedschaft.anrede_c
-    #         first_name = mitgliedschaft.vorname_1 or mitgliedschaft.nachname_1
-    #         if first_name != mitgliedschaft.nachname_1:
-    #             last_name = mitgliedschaft.nachname_1
-    #         else:
-    #             last_name = ''
-    # else:
-    #     if not  mitgliedschaft.nachname_2 and not mitgliedschaft.vorname_2:
-    #         # Weder Vor- noch Nachname, Anlage Solidarmitglied abgebrochen
-    #         return ''
-        
-    #     sektion = mitgliedschaft.sektion_id
-    #     is_primary_contact = 0
-    #     company_name = ''
-    #     salutation = mitgliedschaft.anrede_2
-    #     first_name = mitgliedschaft.vorname_2 or mitgliedschaft.nachname_2
-    #     if first_name != mitgliedschaft.nachname_2:
-    #         last_name = mitgliedschaft.nachname_2
-    #     else:
-    #         last_name = ''
-    
-    # # company fallback
-    # if not first_name:
-    #     if mitgliedschaft.firma and not mitgliedschaft.nachname_1 and not mitgliedschaft.vorname_1:
-    #         first_name = mitgliedschaft.firma
-    #         frappe.log_error("{0}\n---\n{1}".format('fallback: first_name was " "', mitgliedschaft.as_json()), 'create_kontakt_mitglied')
-    
-    # new_contact = frappe.new_doc('Contact')
-    # new_contact.first_name = first_name
-    # new_contact.last_name = last_name
-    # new_contact.salutation = salutation
-    # new_contact.sektion = sektion
-    # new_contact.company_name = company_name
-    # new_contact.is_primary_contact = is_primary_contact
-    
-    # link = new_contact.append("links", {})
-    # link.link_doctype = 'Customer'
-    # link.link_name = mitgliedschaft.kunde_mitglied
-
-    # new_contact.insert(ignore_permissions=True)
-    
-    # if primary:
-    #     # email
-    #     email_id = mitgliedschaft.e_mail_1
-    #     if email_id:
-    #         email_row = new_contact.append("email_ids", {})
-    #         email_row.email_id = email_id
-    #         email_row.is_primary = 1
-            
-    #     # private phone
-    #     is_primary_phone = mitgliedschaft.tel_p_1
-    #     if is_primary_phone:
-    #         is_primary_phone_row = new_contact.append("phone_nos", {})
-    #         is_primary_phone_row.phone = is_primary_phone
-    #         is_primary_phone_row.is_primary_phone = 1
-            
-    #     # mobile phone
-    #     is_primary_mobile_no = mitgliedschaft.tel_m_1
-    #     if is_primary_mobile_no:
-    #         is_primary_mobile_no_row = new_contact.append("phone_nos", {})
-    #         is_primary_mobile_no_row.phone = is_primary_mobile_no
-    #         is_primary_mobile_no_row.is_primary_mobile_no = 1
-            
-    #     # other (company) phone
-    #     phone = mitgliedschaft.tel_g_1
-    #     if phone:
-    #         phone_row = new_contact.append("phone_nos", {})
-    #         phone_row.phone = phone
-    # else:
-    #     # email
-    #     email_id = mitgliedschaft.e_mail_2
-    #     if email_id:
-    #         email_row = new_contact.append("email_ids", {})
-    #         email_row.email_id = email_id
-    #         email_row.is_primary = 1
-            
-    #     # private phone
-    #     is_primary_phone = mitgliedschaft.tel_p_2
-    #     if is_primary_phone:
-    #         is_primary_phone_row = new_contact.append("phone_nos", {})
-    #         is_primary_phone_row.phone = is_primary_phone
-    #         is_primary_phone_row.is_primary_phone = 1
-            
-    #     # mobile phone
-    #     is_primary_mobile_no = mitgliedschaft.tel_m_2
-    #     if is_primary_mobile_no:
-    #         is_primary_mobile_no_row = new_contact.append("phone_nos", {})
-    #         is_primary_mobile_no_row.phone = is_primary_mobile_no
-    #         is_primary_mobile_no_row.is_primary_mobile_no = 1
-            
-    #     # other (company) phone
-    #     phone = mitgliedschaft.tel_g_2
-    #     if phone:
-    #         phone_row = new_contact.append("phone_nos", {})
-    #         phone_row.phone = phone
-    
-    # new_contact.save(ignore_permissions=True)
-    # frappe.db.commit()
-    
-    # return new_contact.name
-
 def update_kunde_mitglied(mitgliedschaft):
     customer = frappe.get_doc("Customer", mitgliedschaft.kunde_mitglied)
     if mitgliedschaft.kundentyp == 'Unternehmen':
@@ -1772,7 +1481,7 @@ def get_uebersicht_html(name):
             col_qty += 1
         
         kontakt_solidarmitglied = False
-        if mitgliedschaft.kontakt_solidarmitglied:
+        if cint(mitgliedschaft.hat_solidarmitglied) == 1:
             kontakt_solidarmitglied = frappe.get_doc("Contact", mitgliedschaft.kontakt_solidarmitglied).as_dict()
             col_qty += 1
         

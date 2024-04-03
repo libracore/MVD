@@ -123,21 +123,17 @@ def create_kontakt(mitgliedschaft, primary):
     
     new_contact.save(ignore_permissions=True)
     frappe.db.commit()
-    try:
-        # check for possible renaming
-        from frappe.utils import cstr
-        new_name = ""
-        for link in new_contact.links:
-            new_name = link.link_name.strip()
-            break
-        if primary:
-            new_name += "-Mitglied"
-        else:
-            new_name += "-Solidarmitglied"
-        frappe.rename_doc('Contact', new_contact.name, new_name)
-        frappe.db.commit()
-    except Exception as err:
-        frappe.log_error("new_contact.name: {0}\nnew_name: {1}\nerr: {2}".format(new_contact.name, new_name, err), "rename")
+
+    new_name = ""
+    for link in new_contact.links:
+        new_name = link.link_name.strip()
+        break
+    if primary:
+        new_name += "-Mitglied"
+    else:
+        new_name += "-Solidarmitglied"
+    frappe.rename_doc('Contact', new_contact.name, new_name)
+    frappe.db.commit()
     
     return new_name
 
@@ -262,7 +258,50 @@ def update_kontakt(mitgliedschaft, primary):
     
     
     contact.save(ignore_permissions=True)
-    return contact.name
+    frappe.db.commit()
 
-def reset_solidar_kontakt(kontakt):
-    return
+    contact_name = contact.name
+    if '-Mitglied' not in contact.name or '-Solidarmitglied' not in contact.name:
+        contact_name = rename_contact(contact_name, primary)
+    
+    return contact_name
+
+def rename_contact(contact_name, primary):
+    contact = frappe.get_doc("Contact", contact_name)
+    new_name = ""
+    for link in contact.links:
+        new_name = link.link_name.strip()
+        break
+    if primary:
+        new_name += "-Mitglied"
+    else:
+        new_name += "-Solidarmitglied"
+    frappe.rename_doc('Contact', contact.name, new_name)
+    frappe.db.commit()
+    return new_name
+
+'''
+Nur für Migrationszwecke
+bench --site [site] execute mvd.mvd.doctype.mitgliedschaft.kontakt_handling.initial_rename_contacts
+'''
+def initial_rename_contacts():
+    haupt_kontakte = frappe.db.sql("""
+                                    SELECT
+                                        `kontakt_mitglied` AS `contact`
+                                    FROM `tabMitgliedschaft`
+                                    WHERE `kontakt_mitglied` NOT LIKE '%-Mitglied'
+                                   """, as_dict=True)
+    total = len(haupt_kontakte)
+    loop = 1
+    for haupt_kontakt in haupt_kontakte:
+        print("{0} of {1}".format(loop, total))
+        contact = frappe.get_doc("Contact", haupt_kontakt.contact)
+        new_name = ""
+        for link in contact.links:
+            new_name = link.link_name.strip()
+            break
+        new_name += "-Mitglied"
+        print("{0} >>> {1}".format(contact.name, new_name))
+        frappe.rename_doc('Contact', contact.name, new_name)
+        frappe.db.commit()
+        loop += 1
