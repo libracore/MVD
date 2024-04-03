@@ -20,40 +20,40 @@
 # from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, update_kontakt
 
 # Develop
-from __future__ import unicode_literals
-import frappe
-from frappe.model.document import Document
-from frappe.utils.data import add_days, getdate, now, today
-from mvd.mvd.utils.qrr_reference import get_qrr_reference
-import json
-from PyPDF2 import PdfFileWriter
-from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
-from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
-from frappe.utils.pdf import get_file_data_from_writer
-from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen, replace_mv_keywords
-from frappe import _
-import datetime
-from frappe.utils import cint
-from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, update_kontakt
-
-# Webserv
 # from __future__ import unicode_literals
 # import frappe
+# from frappe.model.document import Document
+# from frappe.utils.data import add_days, getdate, now, today
+# from mvd.mvd.utils.qrr_reference import get_qrr_reference
 # import json
 # from PyPDF2 import PdfFileWriter
-# import datetime
-# from frappe import _
-# from frappe.model.document import Document
-# from frappe.utils import cint
-# from frappe.utils.data import add_days, getdate, now, today
-# from frappe.utils.pdf import get_file_data_from_writer
-# from mvd.mvd.utils.qrr_reference import get_qrr_reference
+# from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
 # from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
+# from frappe.utils.pdf import get_file_data_from_writer
 # from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen, replace_mv_keywords
-# from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new_id, create_new_number
-# from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention, get_adressblock, get_rg_adressblock, get_ampelfarbe, \
-#                                                 get_naechstes_jahr_geschuldet, mahnstopp
-# from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import close_open_validations
+# from frappe import _
+# import datetime
+# from frappe.utils import cint
+# from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, update_kontakt
+
+# Webserv
+from __future__ import unicode_literals
+import frappe
+import json
+from PyPDF2 import PdfFileWriter
+import datetime
+from frappe import _
+from frappe.model.document import Document
+from frappe.utils import cint
+from frappe.utils.data import add_days, getdate, now, today
+from frappe.utils.pdf import get_file_data_from_writer
+from mvd.mvd.utils.qrr_reference import get_qrr_reference
+from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
+from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen, replace_mv_keywords
+from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new_id, create_new_number
+from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention, get_adressblock, get_rg_adressblock, get_ampelfarbe, \
+                                                get_naechstes_jahr_geschuldet, mahnstopp
+from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import close_open_validations
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
