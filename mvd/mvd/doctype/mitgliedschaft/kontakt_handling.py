@@ -276,8 +276,10 @@ def rename_contact(contact_name, primary):
         new_name += "-Mitglied"
     else:
         new_name += "-Solidarmitglied"
-    frappe.rename_doc('Contact', contact.name, new_name)
-    frappe.db.commit()
+    
+    if contact.name != new_name:
+        frappe.rename_doc('Contact', contact.name, new_name)
+        frappe.db.commit()
     return new_name
 
 '''

@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.52.5
+#881, !884; Bugfix Kontakt Renaming
 #### 11.52.4
 #878, !879; Neues Kontakt-Handling
 #### 11.52.3
