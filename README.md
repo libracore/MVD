@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.53.0
+#883 !886: CAMT-Reset setzt auch Total-Werte zurück
 #### 11.52.5
 #881, !884; Bugfix Kontakt Renaming
 #### 11.52.4

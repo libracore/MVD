@@ -1651,6 +1651,8 @@ def reset_camt(camt):
     camt_import.guthaben_qty = 0
     camt_import.ausgelesene_zahlungen = ''
     camt_import.eingelesene_zahlungen = ''
+    camt_import.camt_taxen = 0
+    camt_import.camt_amount = 0
     camt_import.save()
     frappe.db.commit()
     aktualisiere_camt_uebersicht(camt_import.name)
