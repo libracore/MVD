@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.54.0
+#884; Neuer "Was ist neu in Libracore?" Link
 #### 11.53.0
 #883 !886: CAMT-Reset setzt auch Total-Werte zurück
 #### 11.52.5
