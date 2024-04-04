@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.55.0
+#885; Nächtlicher Job zum umbenennen der Kontakte
 #### 11.54.0
 #884; Neuer "Was ist neu in Libracore?" Link
 #### 11.53.0
