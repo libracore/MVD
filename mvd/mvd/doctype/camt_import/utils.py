@@ -198,7 +198,15 @@ def zahlungen_einlesen(camt_file, camt_import):
     return
 
 def zahlungen_matchen(camt_import):
-    payment_entries = frappe.db.sql("""SELECT `name`, `remarks`, `received_amount` FROM `tabPayment Entry` WHERE `camt_import` = '{camt_import}' AND `docstatus` = 0 AND (`mv_mitgliedschaft` IS NULL OR `mv_mitgliedschaft` = '')""".format(camt_import=camt_import), as_dict=True)
+    payment_entries = frappe.db.sql("""
+                                    SELECT `name`,
+                                    `remarks`,
+                                    `received_amount`
+                                    FROM `tabPayment Entry`
+                                    WHERE `camt_import` = '{camt_import}'
+                                    AND `docstatus` = 0
+                                    AND (`mv_mitgliedschaft` IS NULL OR `mv_mitgliedschaft` = '')
+                                    AND (`mv_kunde` IS NULL OR `mv_kunde` = '')""".format(camt_import=camt_import), as_dict=True)
     commit_counter = 1
     for payment_entry in payment_entries:
         transaction_reference = payment_entry.remarks.split(", ")[0].replace("QRR: ", "")
