@@ -215,21 +215,21 @@ def zahlungen_matchen(camt_import):
             sinv_lookup_data = sinv_lookup(transaction_reference, received_amount)
             if sinv_lookup_data:
                 pe = frappe.get_doc("Payment Entry", payment_entry.name)
-                pe.party = sinv_lookup_data.customer
-                pe.mv_mitgliedschaft = sinv_lookup_data.mv_mitgliedschaft
-                pe.mv_kunde = sinv_lookup_data.mv_kunde
+                pe.party = sinv_lookup_data.get('customer')
+                pe.mv_mitgliedschaft = sinv_lookup_data.get('mv_mitgliedschaft')
+                pe.mv_kunde = sinv_lookup_data.get('mv_kunde')
                     
                 row = pe.append('references', {})
                 row.reference_doctype = 'Sales Invoice'
-                row.reference_name = sinv_lookup_data.sinv
+                row.reference_name = sinv_lookup_data.get('sinv')
                     
-                if received_amount <= sinv_lookup_data.outstanding_amount:
+                if received_amount <= sinv_lookup_data.get('outstanding_amount'):
                     pe.camt_status = 'Rechnungs Match'
                     row.allocated_amount = pe.paid_amount
                 else:
 
                     pe.camt_status = 'Überbezahlt'
-                    row.allocated_amount = sinv_lookup_data.outstanding_amount
+                    row.allocated_amount = sinv_lookup_data.get('outstanding_amount')
                 pe.save()
                 erfasse_rg_match(camt_import)
         if commit_counter == 100:
