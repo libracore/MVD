@@ -49,7 +49,7 @@ def verarbeite_camt_file(camt_file, camt_import, einlesen, matchen, verbuchen):
             camt_status_update(camt_import, 'Zahlungen eingelesen')
         except Exception as err:
             camt_status_update(camt_import, 'Failed')
-            frappe.log_error("{0}".format(err), 'CAMT-Import {0} failed in einlesen'.format(camt_import))
+            frappe.log_error("{0}\n\n{1}".format(err, frappe.get_traceback()), 'CAMT-Import {0} failed in einlesen'.format(camt_import))
     
     if int(matchen) == 1:
         # Matchen von Zahlungen
@@ -60,7 +60,7 @@ def verarbeite_camt_file(camt_file, camt_import, einlesen, matchen, verbuchen):
             camt_status_update(camt_import, 'Zahlungen zugeordnet')
         except Exception as err:
             camt_status_update(camt_import, 'Failed')
-            frappe.log_error("{0}".format(err), 'CAMT-Import {0} failed in just_match'.format(camt_import))
+            frappe.log_error("{0}\n\n{1}".format(err, frappe.get_traceback()), 'CAMT-Import {0} failed in just_match'.format(camt_import))
     
     if  int(verbuchen) == 1:
         # Verbuche Matches
@@ -68,7 +68,7 @@ def verarbeite_camt_file(camt_file, camt_import, einlesen, matchen, verbuchen):
             verbuche_matches(camt_import)
         except Exception as err:
             camt_status_update(camt_import, 'Failed')
-            frappe.log_error("{0}".format(err), 'CAMT-Import {0} failed in verbuchen'.format(camt_import))
+            frappe.log_error("\n\n{1}".format(err, frappe.get_traceback()), 'CAMT-Import {0} failed in verbuchen'.format(camt_import))
         
         # Aktualisiere CAMT Übersicht
         aktualisiere_camt_uebersicht(camt_import)
