@@ -213,7 +213,7 @@ function erstelle_zahlung(hv, ezs, datum=false, betrag=false) {
         }
     }
     frappe.call({
-        method:"mvd.mvd.doctype.camt_import.camt_import.sinv_bez_mit_ezs_oder_bar",
+        method:"mvd.mvd.doctype.camt_import.utils.sinv_bez_mit_ezs_oder_bar",
         'args': args,
         'async': true,
         'freeze': true,
@@ -280,7 +280,7 @@ function erstelle_zahlung(hv, ezs, datum=false, betrag=false) {
 
 function storno_rollback(frm) {
     frappe.call({
-        method: "mvd.mvd.doctype.camt_import.camt_import.reopen_sinv_as_admin",
+        method: "mvd.mvd.doctype.camt_import.utils.reopen_sinv_as_admin",
         args:{
                 'sinv': cur_frm.doc.name
         },

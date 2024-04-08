@@ -56,7 +56,7 @@ frappe.ui.form.on('Payment Entry', {
 
 function storno_rollback(frm) {
     frappe.call({
-        method: "mvd.mvd.doctype.camt_import.camt_import.reopen_payment_as_admin",
+        method: "mvd.mvd.doctype.camt_import.utils.reopen_payment_as_admin",
         args:{
                 'pe': cur_frm.doc.name
         },
@@ -69,7 +69,7 @@ function storno_rollback(frm) {
 
 function mitgliedschaft_zuweisen(frm) {
     frappe.call({
-        method: "mvd.mvd.doctype.camt_import.camt_import.suche_mitgliedschaft_aus_pe",
+        method: "mvd.mvd.doctype.camt_import.utils.suche_mitgliedschaft_aus_pe",
         args:{
                 'payment_entry': cur_frm.doc.name
         },
@@ -92,7 +92,7 @@ function mitgliedschaft_zuweisen(frm) {
             frappe.prompt(field_list,
             function(values){
                 frappe.call({
-                    method: "mvd.mvd.doctype.camt_import.camt_import.mitgliedschaft_zuweisen",
+                    method: "mvd.mvd.doctype.camt_import.utils.mitgliedschaft_zuweisen",
                     args:{
                             'mitgliedschaft': values.mitgliedschaft
                     },
@@ -123,7 +123,7 @@ function faktura_kunde_zuweisen(frm) {
     frappe.prompt(field_list,
     function(values){
         frappe.call({
-            method: "mvd.mvd.doctype.camt_import.camt_import.mitgliedschaft_zuweisen",
+            method: "mvd.mvd.doctype.camt_import.utils.mitgliedschaft_zuweisen",
             args:{
                     'mitgliedschaft': values.faktura_kunde,
                     'faktura': 1
@@ -231,7 +231,7 @@ function als_hv_verbuchen(frm) {
             function(){
                 // on yes
                 frappe.call({
-                    method: "mvd.mvd.doctype.camt_import.camt_import.als_hv_verbuchen",
+                    method: "mvd.mvd.doctype.camt_import.utils.als_hv_verbuchen",
                     args:{
                         'pe': cur_frm.doc.name
                     },
@@ -264,7 +264,7 @@ function mit_spende_ausgleichen(frm) {
                 var spendenlauf_referenz = null
             }
             frappe.call({
-                method: "mvd.mvd.doctype.camt_import.camt_import.mit_spende_ausgleichen",
+                method: "mvd.mvd.doctype.camt_import.utils.mit_spende_ausgleichen",
                 args:{
                     'pe': cur_frm.doc.name,
                     'spendenlauf_referenz': spendenlauf_referenz
@@ -292,7 +292,7 @@ function mit_folgejahr_ausgleichen(frm) {
             function(){
                 // on yes
                 frappe.call({
-                    method: "mvd.mvd.doctype.camt_import.camt_import.mit_folgejahr_ausgleichen",
+                    method: "mvd.mvd.doctype.camt_import.utils.mit_folgejahr_ausgleichen",
                     args:{
                         'pe': cur_frm.doc.name
                     },
@@ -320,7 +320,7 @@ function rueckzahlung(frm) {
             function(){
                 // on yes
                 frappe.call({
-                    method: "mvd.mvd.doctype.camt_import.camt_import.rueckzahlung",
+                    method: "mvd.mvd.doctype.camt_import.utils.rueckzahlung",
                     args:{
                         'pe': cur_frm.doc.name
                     },
@@ -348,7 +348,7 @@ function kulanz_ausgleich(frm) {
             function(){
                 // on yes
                 frappe.call({
-                    method: "mvd.mvd.doctype.camt_import.camt_import.kulanz_ausgleich",
+                    method: "mvd.mvd.doctype.camt_import.utils.kulanz_ausgleich",
                     args:{
                         'pe': cur_frm.doc.name
                     },

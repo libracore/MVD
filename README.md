@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.56.0
+#887; CAMT Importer Rewrite
 #### 11.55.0
 #885; Nächtlicher Job zum umbenennen der Kontakte
 #### 11.54.0

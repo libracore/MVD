@@ -287,15 +287,15 @@ Nur für Migrationszwecke
 bench --site [site] execute mvd.mvd.doctype.mitgliedschaft.kontakt_handling.initial_rename_contacts
 Wird anfänglich einmal pro Nacht ausgeführt
 '''
-def initial_rename_contacts():
+def initial_rename_contacts(sql_limit=1000):
     haupt_kontakte = frappe.db.sql("""
                                     SELECT
                                         `kontakt_mitglied` AS `contact`
                                     FROM `tabMitgliedschaft`
                                     WHERE `kontakt_mitglied` NOT LIKE '%-Mitglied'
                                     AND `status_c` != 'Inaktiv'
-                                    LIMIT 1000
-                                   """, as_dict=True)
+                                    LIMIT {sql_limit}}
+                                   """.format(sql_limit=sql_limit), as_dict=True)
     total = len(haupt_kontakte)
     loop = 1
     commit_count = 1
