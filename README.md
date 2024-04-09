@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.57.2
+#893; DatatransReport Verbesserungen
 #### 11.57.1
 #892; vorübergehende Deaktivierung der Kontakt-Renaming-Methode bei Updates
 #### 11.57.0
