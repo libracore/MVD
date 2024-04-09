@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.57.3
+#894; DatatransReport Gesamttotal in Bericht
 #### 11.57.2
 #893; DatatransReport Verbesserungen
 #### 11.57.1

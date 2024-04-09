@@ -238,6 +238,8 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
     html = main_html
     
     sektions_list = []
+    gesammt_total_inkl_komm = 0
+    gesammt_total_exkl_komm = 0
     
     sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` ORDER BY `name` ASC""", as_dict=True)
     for sektion in sektionen:
@@ -289,7 +291,14 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                         abzug=sektions_dict['abzug'], total=sektions_dict['total'])
             sektions_list.append(sektions_dict)
             html += sektion_html
+            gesammt_total_exkl_komm += float(sektions_dict['total'])
+            gesammt_total_inkl_komm += float(sektions_dict['zwi_tot'])
     
+    html += '''
+        <h3>Gesamttotal exkl. Kommision {0}</h3>
+        <h3>Gesamttotal inkl. Kommision {1}</h3>
+    '''.format(gesammt_total_exkl_komm, gesammt_total_inkl_komm)
+
     report = frappe.get_doc({
         "doctype": "Datatrans Report",
         "report_typ": "Monatsreport MVD",
