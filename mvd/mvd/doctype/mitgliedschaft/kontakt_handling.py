@@ -261,8 +261,11 @@ def update_kontakt(mitgliedschaft, primary):
     frappe.db.commit()
 
     contact_name = contact.name
-    if '-Mitglied' not in contact.name or '-Solidarmitglied' not in contact.name:
-        contact_name = rename_contact(contact_name, primary)
+    # Aktuell aufgrund #892 deaktiviert. Wird im Anschluss durch #886 wieder aktiviert.
+    # ---
+    # if '-Mitglied' not in contact.name or '-Solidarmitglied' not in contact.name:
+    #     contact_name = rename_contact(contact_name, primary)
+    #---
     
     return contact_name
 
