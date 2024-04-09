@@ -213,7 +213,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
             priv = priv - (hv * 12)
             hv = hv * 12
             mitgliedschaften = frappe.db.sql("""
-                                        SELECT
+                                        SELECT DISTINCT
                                             `mitglied_nr`,
                                             `adressblock`,
                                             `transdatetime`,
@@ -222,6 +222,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                         FROM `tabDatatrans Entry`
                                         WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
                                         AND `refnumber` LIKE '{sektion_short}_%'
+                                        ORDER BY `mitglied_nr` ASC
                                     """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
                                                 last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=sektion.replace("MV", "")), as_dict=True)
         else:
