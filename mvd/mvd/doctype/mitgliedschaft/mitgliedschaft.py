@@ -4,19 +4,21 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils.data import add_days, getdate, now, today
-from mvd.mvd.utils.qrr_reference import get_qrr_reference
+from frappe.utils.pdf import get_file_data_from_writer
+from frappe.utils import cint
 import json
 from PyPDF2 import PdfFileWriter
-from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import create_abl
-from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
-from frappe.utils.pdf import get_file_data_from_writer
-from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen, replace_mv_keywords
-from frappe import _
 import datetime
-from frappe.utils import cint
+from mvd.mvd.service_plattform.request_worker import mvm_neuanlage, mvm_update
+from mvd.mvd.utils.qrr_reference import get_qrr_reference
+from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
+from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen, replace_mv_keywords
 from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, update_kontakt
+from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_zahlung_mitgliedschaft, get_ampelfarbe, set_max_reminder_level
+from mvd.mvd.doctype.mitgliedschaft.utils import create_korrespondenz
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
@@ -58,10 +60,12 @@ class Mitgliedschaft(Document):
             self.rg_adressblock = get_rg_adressblock(self)
             
             # update Zahlung Mitgliedschaft
-            self.check_zahlung_mitgliedschaft()
+            check_zahlung_mitgliedschaft(self)
             
             # update Zahlung HV
             self.check_zahlung_hv()
+
+            set_max_reminder_level(self)
             
             # Prüfe Jahr Bezahlt (Mitgliedschaft & HV) bezgl. Folgejahr Regelung
             if self.status_c != 'Inaktiv':
@@ -71,7 +75,7 @@ class Mitgliedschaft(Document):
             self.check_preisregel()
             
             # ampelfarbe
-            self.ampel_farbe = get_ampelfarbe(self)
+            get_ampelfarbe(self)
 
             # prüfen und setzen des Wertes naechstes_jahr_geschuldet
             self.naechstes_jahr_geschuldet = cint(get_naechstes_jahr_geschuldet(self.name, live_data=self))
@@ -366,103 +370,6 @@ class Mitgliedschaft(Document):
             return
         else:
             return
-        
-    def check_zahlung_mitgliedschaft(self):
-        noch_kein_eintritt = False
-        if not self.datum_zahlung_mitgliedschaft:
-            noch_kein_eintritt = True
-        
-        sinvs = frappe.db.sql("""SELECT
-                                    `name`,
-                                    `is_pos`,
-                                    `posting_date`,
-                                    `mitgliedschafts_jahr`
-                                FROM `tabSales Invoice`
-                                WHERE `docstatus` = 1
-                                AND `ist_mitgliedschaftsrechnung` = 1
-                                AND `mv_mitgliedschaft` = '{mvm}'
-                                AND `status` = 'Paid'
-                                ORDER BY `mitgliedschafts_jahr` DESC""".format(mvm=self.name), as_dict=True)
-        if len(sinvs) > 0:
-            sinv = sinvs[0]
-            sinv_year = cint(sinv.mitgliedschafts_jahr)
-            if sinv.is_pos == 1:
-                # Fallback wenn sinv.mitgliedschafts_jahr == 0
-                if sinv_year < 1:
-                    sinv_year = getdate(sinv.posting_date).strftime("%Y")
-                self.datum_zahlung_mitgliedschaft = sinv.posting_date
-            else:
-                pes = frappe.db.sql("""SELECT `parent` FROM `tabPayment Entry Reference`
-                                        WHERE `reference_doctype` = 'Sales Invoice'
-                                        AND `reference_name` = '{sinv}' ORDER BY `creation` DESC""".format(sinv=sinv.name), as_dict=True)
-                if len(pes) > 0:
-                    pe = frappe.get_doc("Payment Entry", pes[0].parent)
-                    # Fallback wenn sinv.mitgliedschafts_jahr == 0
-                    if sinv_year < 1:
-                        sinv_year = getdate(pe.reference_date).strftime("%Y")
-                    self.datum_zahlung_mitgliedschaft = pe.reference_date
-            
-            if self.bezahltes_mitgliedschaftsjahr < sinv_year:
-                self.bezahltes_mitgliedschaftsjahr = sinv_year
-        
-        # Zahldatum = Eintrittsdatum
-        if self.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in') and self.bezahltes_mitgliedschaftsjahr > 0:
-            if noch_kein_eintritt:
-                self.eintrittsdatum = self.datum_zahlung_mitgliedschaft
-        
-        if self.bezahltes_mitgliedschaftsjahr > 0 and self.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
-            # erstelle status change log und Status-Änderung
-            change_log_row = self.append('status_change', {})
-            change_log_row.datum = now()
-            change_log_row.status_alt = self.status_c
-            change_log_row.status_neu = 'Regulär'
-            change_log_row.grund = 'Zahlungseingang'
-            self.status_c = 'Regulär'
-            
-            # erstellung Begrüssungsschreiben
-            self.begruessung_massendruck = 1
-            self.begruessung_via_zahlung = 1
-            druckvorlage = get_druckvorlagen(sektion=self.sektion_id, dokument='Begrüssung mit Ausweis', mitgliedtyp=self.mitgliedtyp_c, language=self.language)['default_druckvorlage']
-            self.begruessung_massendruck_dokument = create_korrespondenz(mitgliedschaft=self.name, druckvorlage=druckvorlage, titel='Begrüssung (Autom.)')
-        
-        # prüfe offene Rechnungen bei sektionswechsel
-        if self.status_c == 'Wegzug':
-            sinvs = frappe.db.sql("""SELECT
-                                        `name`
-                                    FROM `tabSales Invoice`
-                                    WHERE `docstatus` != 2
-                                    AND `ist_mitgliedschaftsrechnung` = 1
-                                    AND `mv_mitgliedschaft` = '{mvm}'
-                                    AND `status` != 'Paid'""".format(mvm=self.name), as_dict=True)
-            for sinv in sinvs:
-                sinv = frappe.get_doc("Sales Invoice", sinv.name)
-                if sinv.docstatus == 1:
-                    # cancel linked FR
-                    linked_fr = frappe.db.sql("""SELECT `name` FROM `tabFakultative Rechnung` WHERE `sales_invoice` = '{sinv}' AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
-                    if len(linked_fr) > 0:
-                        for _fr in linked_fr:
-                            fr = frappe.get_doc("Fakultative Rechnung", _fr.name)
-                            if fr.status == 'Paid':
-                                fr.add_comment('Comment', text="Verknüpfung zu Rechnung {0} aufgrund Sektionswechsel aufgehoben".format(fr.sales_invoice))
-                                frappe.db.sql("""UPDATE `tabFakultative Rechnung` SET `sales_invoice` = '' WHERE `name` = '{0}'""".format(fr.name), as_list=True)
-                            else:
-                                fr.cancel()
-                    
-                    # cancel linked mahnungen
-                    linked_mahnungen = frappe.db.sql("""SELECT DISTINCT `parent` FROM `tabMahnung Invoices` WHERE `sales_invoice` = '{sinv}' AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
-                    if len(linked_mahnungen) > 0:
-                        for _mahnung in linked_mahnungen:
-                            mahnung = frappe.get_doc("Mahnung", _mahnung.parent)
-                            mahnung.cancel()
-                    
-                    # reload & cancel sinv
-                    sinv = frappe.get_doc("Sales Invoice", sinv.name)
-                    sinv.cancel()
-                else:
-                    if sinv.docstatus == 0:
-                        sinv.delete()
-        
-        return
     
     def check_zahlung_hv(self):
         sinvs = frappe.db.sql("""SELECT
@@ -2618,65 +2525,6 @@ def get_sprache(language='de'):
 # /API
 # -----------------------------------------------
 
-# Hooks functions
-# -----------------------------------------------
-def sinv_check_zahlung_mitgliedschaft(sinv, event):
-    skip = False
-    if sinv.rechnungs_jahresversand:
-        from frappe.utils.data import add_to_date
-        ref_date = add_to_date(date=sinv.creation, hours=12)
-        if getdate(sinv.modified) < getdate(ref_date):
-            skip = True
-            # gewährleistung dass trotz skip das Mitgliedschaftsjahr und bezahldatum korrekt geschrieben wird.
-            if cint(frappe.db.get_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr')) < cint(sinv.mitgliedschafts_jahr):
-                if sinv.is_pos == 1:
-                    frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'datum_zahlung_mitgliedschaft', sinv.posting_date)
-                    frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr', sinv.mitgliedschafts_jahr)
-                else:
-                    pes = frappe.db.sql("""SELECT `parent` FROM `tabPayment Entry Reference`
-                                            WHERE `reference_doctype` = 'Sales Invoice'
-                                            AND `reference_name` = '{sinv}' ORDER BY `creation` DESC""".format(sinv=sinv.name), as_dict=True)
-                    if len(pes) > 0:
-                        pe = frappe.get_doc("Payment Entry", pes[0].parent)
-                        frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'datum_zahlung_mitgliedschaft', pe.reference_date)
-                        frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr', sinv.mitgliedschafts_jahr)
-                    else:
-                        if len(sinv.advances) > 0:
-                            pe = frappe.get_doc("Payment Entry", sinv.advances[0].reference_name)
-                            frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'datum_zahlung_mitgliedschaft', pe.reference_date)
-                            frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'bezahltes_mitgliedschaftsjahr', sinv.mitgliedschafts_jahr)
-            # gewährleistung dass trotz skip die Mitgliedschafts Ampel aktualisiert wird
-            if sinv.mv_mitgliedschaft:
-                mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
-                ampelfarbe = get_ampelfarbe(mitgliedschaft)
-                frappe.db.set_value('Mitgliedschaft', sinv.mv_mitgliedschaft, 'ampel_farbe', ampelfarbe)
-    
-    if not skip:
-        # mitgliedschaft speichern um SP Update zu triggern und höchste Mahnstufe zu setzen
-        if sinv.mv_mitgliedschaft:
-            mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
-            try:
-                sql_query = ("""SELECT MAX(`payment_reminder_level`) AS `max` FROM `tabSales Invoice` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Overdue'""".format(mitgliedschaft=mitgliedschaft.name))
-                max_level = frappe.db.sql(sql_query, as_dict=True)[0]['max']
-                if not max_level:
-                    max_level = 0
-            except:
-                max_level = 0
-            sinv_max_level = cint(sinv.payment_reminder_level or 0)
-            if max_level < sinv_max_level:
-                max_level = sinv_max_level
-            mitgliedschaft.max_reminder_level = max_level
-            mitgliedschaft.save(ignore_permissions=True)
-
-def pe_check_zahlung_mitgliedschaft(pe, event):
-    for ref in pe.references:
-        if ref.reference_doctype == 'Sales Invoice':
-            sinv = frappe.get_doc("Sales Invoice", ref.reference_name)
-            if sinv.mv_mitgliedschaft:
-                mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
-                mitgliedschaft.letzte_bearbeitung_von = 'User'
-                mitgliedschaft.save(ignore_permissions=True)
-
 # -----------------------------------------------
 # other helpers
 # -----------------------------------------------
@@ -2778,164 +2626,6 @@ def sektionswechsel_pseudo_sektion(mitgliedschaft, eintrittsdatum, bezahltes_mit
     except Exception as err:
         frappe.log_error("{0}\n---\n{1}".format(err, mitgliedschaft.as_json()), 'sektionswechsel_pseudo_sektion')
         return err
-
-def get_ampelfarbe(mitgliedschaft):
-    ''' mögliche Ampelfarben:
-        - Grün: ampelgruen --> Mitglied kann alle Dienstleistungen beziehen (keine Karenzfristen, keine überfälligen oder offen Rechnungen)
-        - Gelb: ampelgelb --> Karenzfristen oder offene Rechnungen
-        - Rot: ampelrot --> überfällige offene Rechnungen
-        
-        MVZH Ausnahme:
-        - Grün --> Jahr bezahlt >= aktuelles Jahr
-        - Rot --> Jahr bezahlt < aktuelles Jahr
-    '''
-    
-    if mitgliedschaft.status_c in ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in'):
-        ampelfarbe = 'ampelrot'
-    else:
-        
-        # MVZH Ausnahme Start
-        if mitgliedschaft.sektion_id == 'MVZH':
-            if cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) < cint(datetime.date.today().year):
-                return 'ampelrot'
-            else:
-                return 'ampelgruen'
-        # MVZH Ausnahme Ende
-        
-        ueberfaellige_rechnungen = 0
-        offene_rechnungen = 0
-        
-        sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
-        karenzfrist_in_d = sektion.karenzfrist
-        ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintrittsdatum), karenzfrist_in_d)
-        
-        if getdate() < ablauf_karenzfrist:
-            karenzfrist = False
-        else:
-            karenzfrist = True
-        
-        # musste mit v8.5.9 umgeschrieben werden, da negative Werte ebenfalls == True ergeben. (Beispiel: (1 + 2015 - 2023) == True)
-        # ~ aktuelles_jahr_bezahlt = bool( 1 + cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - cint(now().split("-")[0]) )
-        aktuelles_jahr_bezahlt = False if ( 1 + cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - cint(now().split("-")[0]) ) <= 0 else True
-        
-        if not aktuelles_jahr_bezahlt:
-            ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
-                                                        FROM `tabSales Invoice` 
-                                                        WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
-                                                        AND `ist_mitgliedschaftsrechnung` = 1
-                                                        AND `due_date` < CURDATE()
-                                                        AND `docstatus` = 1""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)[0].open_amount
-        else:
-            ueberfaellige_rechnungen = 0
-        
-        if ueberfaellige_rechnungen > 0:
-            ampelfarbe = 'ampelrot'
-        else:
-            if not aktuelles_jahr_bezahlt:
-                offene_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
-                                                    FROM `tabSales Invoice` 
-                                                    WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
-                                                    AND `ist_mitgliedschaftsrechnung` = 1
-                                                    AND `due_date` >= CURDATE()
-                                                    AND `docstatus` = 1""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)[0].open_amount
-            else:
-                offene_rechnungen = 0
-            
-            if offene_rechnungen > 0:
-                ampelfarbe = 'ampelgelb'
-            else:
-                if not karenzfrist:
-                    ampelfarbe = 'ampelgelb'
-                else:
-                    ampelfarbe = 'ampelgruen'
-    
-    return ampelfarbe
-
-@frappe.whitelist()
-def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=False, attach_as_pdf=False, sinv_mitgliedschaftsjahr=False):
-    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
-    if druckvorlage == 'keine':
-        new_korrespondenz = frappe.get_doc({
-            "doctype": "Korrespondenz",
-            "mv_mitgliedschaft": mitgliedschaft.name,
-            "sektion_id": mitgliedschaft.sektion_id,
-            "titel": titel
-        })
-        new_korrespondenz.insert(ignore_permissions=True)
-        frappe.db.commit()
-        return new_korrespondenz.name
-    else:
-        druckvorlage = frappe.get_doc("Druckvorlage", druckvorlage)
-        _new_korrespondenz = frappe.copy_doc(druckvorlage)
-        _new_korrespondenz.doctype = 'Korrespondenz'
-        _new_korrespondenz.sektion_id = mitgliedschaft.sektion_id
-        _new_korrespondenz.titel = titel
-        
-        new_korrespondenz = frappe._dict(_new_korrespondenz.as_dict())
-        
-        keys_to_remove = [
-            'mitgliedtyp_c',
-            'validierungsstring',
-            'language',
-            'reduzierte_mitgliedschaft',
-            'dokument',
-            'default',
-            'deaktiviert',
-            'seite_1_qrr',
-            'seite_1_qrr_spende_hv',
-            'seite_2_qrr',
-            'seite_2_qrr_spende_hv',
-            'seite_3_qrr',
-            'seite_3_qrr_spende_hv',
-            'blatt_2_info_mahnung',
-            'tipps_mahnung',
-            'geschenkmitgliedschaft_dok_empfaenger',
-            'tipps_geschenkmitgliedschaft'
-        ]
-        for key in keys_to_remove:
-            try:
-                new_korrespondenz.pop(key)
-            except:
-                pass
-        
-        new_korrespondenz['mv_mitgliedschaft'] = mitgliedschaft.name
-        new_korrespondenz['massenlauf'] = 1 if massenlauf else 0
-        
-        new_korrespondenz = frappe.get_doc(new_korrespondenz)
-        if sinv_mitgliedschaftsjahr:
-            bezugsjahr = frappe.db.get_value("Sales Invoice", sinv_mitgliedschaftsjahr, 'mitgliedschafts_jahr')
-            new_korrespondenz.mitgliedschafts_jahr_manuell = 1
-            new_korrespondenz.mitgliedschafts_jahr = bezugsjahr
-        new_korrespondenz.insert(ignore_permissions=True)
-        frappe.db.commit()
-        
-        if attach_as_pdf:
-            # add doc signature to allow print
-            frappe.form_dict.key = new_korrespondenz.get_signature()
-            
-            # erstellung Rechnungs PDF
-            output = PdfFileWriter()
-            output = frappe.get_print("Korrespondenz", new_korrespondenz.name, 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
-            
-            file_name = "{new_korrespondenz}_{datetime}".format(new_korrespondenz=new_korrespondenz.name, datetime=now().replace(" ", "_"))
-            file_name = file_name.split(".")[0]
-            file_name = file_name.replace(":", "-")
-            file_name = file_name + ".pdf"
-            
-            filedata = get_file_data_from_writer(output)
-            
-            _file = frappe.get_doc({
-                "doctype": "File",
-                "file_name": file_name,
-                "folder": "Home/Attachments",
-                "is_private": 1,
-                "content": filedata,
-                "attached_to_doctype": 'Mitgliedschaft',
-                "attached_to_name": mitgliedschaft.name
-            })
-            
-            _file.save(ignore_permissions=True)
-        return new_korrespondenz.name
 
 @frappe.whitelist()
 def create_geschenk_korrespondenz(mitgliedschaft, druckvorlage_inhaber=False, druckvorlage_zahler=False, massenlauf=False):
