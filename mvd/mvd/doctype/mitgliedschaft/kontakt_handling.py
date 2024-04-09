@@ -294,7 +294,7 @@ def initial_rename_contacts(sql_limit=1000):
                                     FROM `tabMitgliedschaft`
                                     WHERE `kontakt_mitglied` NOT LIKE '%-Mitglied'
                                     AND `status_c` != 'Inaktiv'
-                                    LIMIT {sql_limit}}
+                                    LIMIT {sql_limit}
                                    """.format(sql_limit=sql_limit), as_dict=True)
     total = len(haupt_kontakte)
     loop = 1

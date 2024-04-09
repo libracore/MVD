@@ -110,14 +110,12 @@ extend_bootinfo = "mvd.mvd.utils.mvd_bootinfo.boot_session"
 
 doc_events = {
     "Sales Invoice": {
-        "on_update": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.sinv_check_zahlung_mitgliedschaft",
-        "on_update_after_submit": "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.sinv_check_zahlung_mitgliedschaft",
-        "on_cancel": "mvd.mvd.utils.hook_utils.resave_mitgliedschaft",
         "before_cancel": "mvd.mvd.utils.hook_utils.unlink_fr",
-        "after_insert": "mvd.mvd.utils.hook_utils.relink_fr"
+        "after_insert": "mvd.mvd.utils.hook_utils.relink_fr",
+        "on_change": "mvd.mvd.doctype.mitgliedschaft.finance_utils.sinv_update"
     },
     "Payment Entry": {
-        "on_submit": ["mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.pe_check_zahlung_mitgliedschaft", "mvd.mvd.utils.hook_utils.check_mitgliedschaft_in_pe"]
+        "on_submit": "mvd.mvd.doctype.mitgliedschaft.finance_utils.check_mitgliedschaft_in_pe"
     },
     "ToDo": {
         "on_update": "mvd.mvd.utils.hook_utils.todo_permissions"

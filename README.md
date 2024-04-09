@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.57.0
+#891; Weniger Validation-Methods in Mitgliedschaft (Performance Optimierung)
 #### 11.56.0
 #887; CAMT Importer Rewrite
 #### 11.55.0

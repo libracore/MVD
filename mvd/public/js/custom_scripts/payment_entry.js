@@ -195,7 +195,7 @@ function erstelle_korrespondenz(frm) {
                                     var druckvorlage = 'keine'
                                 }
                                 frappe.call({
-                                    method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_korrespondenz",
+                                    method: "mvd.mvd.doctype.mitgliedschaft.utils.create_korrespondenz",
                                     args:{
                                             'mitgliedschaft': mitgliedschaft.name,
                                             'druckvorlage': druckvorlage,
