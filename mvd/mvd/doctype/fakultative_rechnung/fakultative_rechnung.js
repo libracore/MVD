@@ -53,7 +53,7 @@ function bezahlt_in_bar(frm) {
     ],
     function(values){
         frappe.call({
-            method:"mvd.mvd.doctype.camt_import.camt_import.fr_bez_bar",
+            method:"mvd.mvd.doctype.camt_import.utils.fr_bez_bar",
             'args': {
                 'fr': cur_frm.doc.name,
                 'datum': values.datum,
@@ -79,7 +79,7 @@ function bezahlt_mit_ezs(frm) {
     ],
     function(values){
         frappe.call({
-            method:"mvd.mvd.doctype.camt_import.camt_import.fr_bez_ezs",
+            method:"mvd.mvd.doctype.camt_import.utils.fr_bez_ezs",
             'args': {
                 'fr': cur_frm.doc.name,
                 'datum': values.datum,

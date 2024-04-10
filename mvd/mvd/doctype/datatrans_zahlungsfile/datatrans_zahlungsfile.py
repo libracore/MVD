@@ -213,7 +213,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
             priv = priv - (hv * 12)
             hv = hv * 12
             mitgliedschaften = frappe.db.sql("""
-                                        SELECT
+                                        SELECT DISTINCT
                                             `mitglied_nr`,
                                             `adressblock`,
                                             `transdatetime`,
@@ -222,6 +222,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                         FROM `tabDatatrans Entry`
                                         WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
                                         AND `refnumber` LIKE '{sektion_short}_%'
+                                        ORDER BY `mitglied_nr` ASC
                                     """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
                                                 last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=sektion.replace("MV", "")), as_dict=True)
         else:
@@ -237,6 +238,8 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
     html = main_html
     
     sektions_list = []
+    gesammt_total_inkl_komm = 0
+    gesammt_total_exkl_komm = 0
     
     sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` ORDER BY `name` ASC""", as_dict=True)
     for sektion in sektionen:
@@ -288,7 +291,14 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                         abzug=sektions_dict['abzug'], total=sektions_dict['total'])
             sektions_list.append(sektions_dict)
             html += sektion_html
+            gesammt_total_exkl_komm += float(sektions_dict['total'])
+            gesammt_total_inkl_komm += float(sektions_dict['zwi_tot'])
     
+    html += '''
+        <h3>Gesamttotal exkl. Kommision {0}</h3>
+        <h3>Gesamttotal inkl. Kommision {1}</h3>
+    '''.format(gesammt_total_exkl_komm, gesammt_total_inkl_komm)
+
     report = frappe.get_doc({
         "doctype": "Datatrans Report",
         "report_typ": "Monatsreport MVD",

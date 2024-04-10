@@ -1,5 +1,23 @@
 ## MVD
 ### Version Log
+#### 11.57.3
+#894; DatatransReport Gesamttotal in Bericht
+#### 11.57.2
+#893; DatatransReport Verbesserungen
+#### 11.57.1
+#892; vorübergehende Deaktivierung der Kontakt-Renaming-Methode bei Updates
+#### 11.57.0
+#891; Weniger Validation-Methods in Mitgliedschaft (Performance Optimierung)
+#### 11.56.0
+#887; CAMT Importer Rewrite
+#### 11.55.0
+#885; Nächtlicher Job zum umbenennen der Kontakte
+#### 11.54.0
+#884; Neuer "Was ist neu in Libracore?" Link
+#### 11.53.0
+#883 !886: CAMT-Reset setzt auch Total-Werte zurück
+#### 11.52.5
+#881, !884; Bugfix Kontakt Renaming
 #### 11.52.4
 #878, !879; Neues Kontakt-Handling
 #### 11.52.3

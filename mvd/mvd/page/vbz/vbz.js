@@ -141,7 +141,7 @@ frappe.vbz = {
             window.open('https://wiki.mieterverband.ch/pages/viewpage.action?pageId=135266538', '_blank').focus();
         });
         $("#info_blog").click(function(){
-            window.open('https://wiki.mieterverband.ch/pages/viewrecentblogposts.action?key=AMV', '_blank').focus();
+            window.open('https://wiki.mieterverband.ch/pages/viewrecentblogposts.action?key=LIB', '_blank').focus();
         });
         $("#mitglieder").click(function(){
             frappe.route_options = {"aktive_mitgliedschaft": 1};

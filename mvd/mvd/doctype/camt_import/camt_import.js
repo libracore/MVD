@@ -273,7 +273,7 @@ function change_state_manual(frm) {
 
 function reset_camt(frm) {
     frappe.call({
-        method: 'mvd.mvd.doctype.camt_import.camt_import.reset_camt',
+        method: 'mvd.mvd.doctype.camt_import.utils.reset_camt',
         args: {
             'camt': cur_frm.doc.name
         },

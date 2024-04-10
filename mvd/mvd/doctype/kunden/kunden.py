@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _, msgprint, scrub
+from frappe import _, scrub
 from frappe.model.document import Document
 from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils import nowdate, flt, now
@@ -422,7 +422,7 @@ class Kunden(Document):
         if int(self.unabhaengiger_debitor) == 1:
             link.link_name = self.rg_kunde
         else:
-            ink.link_name = self.kunde_kunde
+            link.link_name = self.kunde_kunde
         
         # email
         email_id = self.rg_e_mail
