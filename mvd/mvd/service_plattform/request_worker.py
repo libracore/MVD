@@ -760,7 +760,7 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
             frappe.db.commit()
         except frappe.TimestampMismatchError as err:
             if not timestamp_mismatch_retry:
-                frappe.log_error("{0}".format(kwargs), 'TimestampMismatchError: Retry')
+                frappe.log_error("{0}\n\n{1}".format(frappe.get_traceback(), kwargs), 'TimestampMismatchError: Retry')
                 frappe.clear_messages()
                 reloaded_mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
                 mvm_update(reloaded_mitgliedschaft, kwargs, timestamp_mismatch_retry=True)
