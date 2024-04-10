@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from mvd.mvd.doctype.mitgliedschaft.utils import get_sektion_id, get_status_c, get_mitgliedtyp_c, get_inkl_hv, get_sprache_abk
 from frappe.utils.data import getdate, now, today
 from frappe.utils import cint
 import json
@@ -246,6 +245,7 @@ Neuanlage einer Mitgliedschaft
 (exklusiv der Adressen und Kontakte)
 '''
 def mvm_neuanlage(kwargs):
+    from mvd.mvd.doctype.mitgliedschaft.utils import get_sektion_id, get_status_c, get_mitgliedtyp_c, get_inkl_hv, get_sprache_abk
     try:
         # allgemeine Daten
         sektion_id = get_sektion_id(kwargs['sektionCode'])
@@ -502,6 +502,7 @@ def mvm_neuanlage(kwargs):
 
 '''
 def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
+    from mvd.mvd.doctype.mitgliedschaft.utils import get_sektion_id, get_status_c, get_mitgliedtyp_c, get_inkl_hv, get_sprache_abk
     try:
         # allgemeine Daten
         sektion_id = get_sektion_id(kwargs['sektionCode'])
@@ -776,6 +777,7 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
 
 '''
 def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
+    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import check_email
     mitglied = False
     objekt = False
     rechnung = False

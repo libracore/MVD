@@ -261,8 +261,11 @@ def update_kontakt(mitgliedschaft, primary):
     frappe.db.commit()
 
     contact_name = contact.name
-    if '-Mitglied' not in contact.name or '-Solidarmitglied' not in contact.name:
-        contact_name = rename_contact(contact_name, primary)
+    # Aktuell aufgrund #892 deaktiviert. Wird im Anschluss durch #886 wieder aktiviert.
+    # ---
+    # if '-Mitglied' not in contact.name or '-Solidarmitglied' not in contact.name:
+    #     contact_name = rename_contact(contact_name, primary)
+    #---
     
     return contact_name
 
@@ -276,32 +279,46 @@ def rename_contact(contact_name, primary):
         new_name += "-Mitglied"
     else:
         new_name += "-Solidarmitglied"
-    frappe.rename_doc('Contact', contact.name, new_name)
-    frappe.db.commit()
+    
+    if contact.name != new_name:
+        frappe.rename_doc('Contact', contact.name, new_name)
+        frappe.db.commit()
     return new_name
 
 '''
 Nur für Migrationszwecke
 bench --site [site] execute mvd.mvd.doctype.mitgliedschaft.kontakt_handling.initial_rename_contacts
+Wird anfänglich einmal pro Nacht ausgeführt
 '''
-def initial_rename_contacts():
+def initial_rename_contacts(sql_limit=1000):
     haupt_kontakte = frappe.db.sql("""
                                     SELECT
                                         `kontakt_mitglied` AS `contact`
                                     FROM `tabMitgliedschaft`
                                     WHERE `kontakt_mitglied` NOT LIKE '%-Mitglied'
-                                   """, as_dict=True)
+                                    AND `status_c` != 'Inaktiv'
+                                    LIMIT {sql_limit}
+                                   """.format(sql_limit=sql_limit), as_dict=True)
     total = len(haupt_kontakte)
     loop = 1
+    commit_count = 1
     for haupt_kontakt in haupt_kontakte:
         print("{0} of {1}".format(loop, total))
-        contact = frappe.get_doc("Contact", haupt_kontakt.contact)
-        new_name = ""
-        for link in contact.links:
-            new_name = link.link_name.strip()
-            break
-        new_name += "-Mitglied"
-        print("{0} >>> {1}".format(contact.name, new_name))
-        frappe.rename_doc('Contact', contact.name, new_name)
-        frappe.db.commit()
-        loop += 1
+        try:
+            contact = frappe.get_doc("Contact", haupt_kontakt.contact)
+            new_name = ""
+            for link in contact.links:
+                new_name = link.link_name.strip()
+                break
+            new_name += "-Mitglied"
+            print("{0} >>> {1}".format(contact.name, new_name))
+            frappe.rename_doc('Contact', contact.name, new_name)
+            if commit_count == 10:
+                frappe.db.commit()
+                commit_count = 0
+            else:
+                commit_count += 1
+            loop += 1
+        except Exception as err:
+            pass
+    frappe.db.commit()
