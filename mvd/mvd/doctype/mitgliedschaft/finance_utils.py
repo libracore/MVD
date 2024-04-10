@@ -10,9 +10,7 @@ import datetime
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
 from mvd.mvd.doctype.mitgliedschaft.utils import create_korrespondenz
 
-def check_zahlung_mitgliedschaft(mitgliedschaft, external=False):
-    if external:
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+def check_zahlung_mitgliedschaft(mitgliedschaft):
     noch_kein_eintritt = False
     if not mitgliedschaft.datum_zahlung_mitgliedschaft:
         noch_kein_eintritt = True
@@ -130,15 +128,9 @@ def check_zahlung_mitgliedschaft(mitgliedschaft, external=False):
                     # load & delete sinv
                     sinv.delete()
     
-    if external:
-        mitgliedschaft.save()
-    
     return
 
 def set_max_reminder_level(mitgliedschaft):
-    # mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
-    # mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
-    
     try:
         sql_query = ("""SELECT MAX(`payment_reminder_level`) AS `max` FROM `tabSales Invoice` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Overdue' AND `docstatus` = 1""".format(mitgliedschaft=mitgliedschaft.name))
         max_level = frappe.db.sql(sql_query, as_dict=True)[0]['max']
@@ -146,19 +138,11 @@ def set_max_reminder_level(mitgliedschaft):
             max_level = 0
     except:
         max_level = 0
-    # sinv_max_level = cint(sinv.payment_reminder_level or 0)
-    # if max_level < sinv_max_level:
-    #     max_level = sinv_max_level
     mitgliedschaft.max_reminder_level = max_level
-    # frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'max_reminder_level', max_level)
-    # frappe.db.commit()
-
-    # if external:
-    #     mitgliedschaft.save(ignore_permissions=True)
     
     return
 
-def get_ampelfarbe(mitgliedschaft, external=False):
+def get_ampelfarbe(mitgliedschaft):
     ''' mögliche Ampelfarben:
         - Grün: ampelgruen --> Mitglied kann alle Dienstleistungen beziehen (keine Karenzfristen, keine überfälligen oder offen Rechnungen)
         - Gelb: ampelgelb --> Karenzfristen oder offene Rechnungen
@@ -168,9 +152,6 @@ def get_ampelfarbe(mitgliedschaft, external=False):
         - Grün --> Jahr bezahlt >= aktuelles Jahr
         - Rot --> Jahr bezahlt < aktuelles Jahr
     '''
-    
-    if external:
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
 
     if mitgliedschaft.status_c in ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in'):
         ampelfarbe = 'ampelrot'
@@ -232,16 +213,13 @@ def get_ampelfarbe(mitgliedschaft, external=False):
                         ampelfarbe = 'ampelgruen'
     
     mitgliedschaft.ampel_farbe = ampelfarbe
-
-    if external:
-        mitgliedschaft.save()
-
+    
     return
 
 def sinv_update(sinv, event):
     if sinv.mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
-        mitgliedschaft.save()
+        mitgliedschaft.save(ignore_permissions=True)
     
     return
 
