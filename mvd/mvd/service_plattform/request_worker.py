@@ -4,8 +4,10 @@
 
 from __future__ import unicode_literals
 import frappe
-import json
+from mvd.mvd.doctype.mitgliedschaft.utils import get_sektion_id, get_status_c, get_mitgliedtyp_c, get_inkl_hv, get_sprache_abk
 from frappe.utils.data import getdate, now, today
+from frappe.utils import cint
+import json
 
 '''
 API Request Eingang
@@ -17,8 +19,12 @@ def api_request_check(kwargs):
         if kwargs["mitgliedId"] > 0:
             missing_keys = check_main_keys(kwargs)
             if not missing_keys:
-                create_sp_log(kwargs)
-                return raise_200()
+                missing_address = check_missing_address(kwargs)
+                if not missing_address:
+                    create_sp_log(kwargs)
+                    return raise_200()
+                else:
+                    return missing_address
             else:
                 return missing_keys
         else:
@@ -34,7 +40,6 @@ def check_main_keys(kwargs):
         'typ',
         'status',
         'regionCode',
-        'istTemporaeresMitglied',
         'fuerBewirtschaftungGesperrt',
         'erfassungsdatum',
         'eintrittsdatum',
@@ -51,20 +56,24 @@ def check_main_keys(kwargs):
         'adressen',
         'sprache',
         'needsValidation',
-        'isKollektiv',
         'isGeschenkmitgliedschaft',
         'isEinmaligeSchenkung',
         'schenkerHasGeschenkunterlagen',
         'datumBezahltHaftpflicht',
         'onlineHaftpflicht',
-        'onlineGutschrift',
         'onlineBetrag',
-        'datumOnlineVerbucht',
-        'datumOnlineGutschrift',
-        'onlinePaymentMethod',
         'onlinePaymentId',
         'kuendigungsgrund'
     ]
+    '''
+        Achtung; gestrichene mandatory_keys:
+        - onlineGutschrift
+        - onlinePaymentMethod
+        - datumOnlineVerbucht
+        - datumOnlineGutschrift
+        - isKollektiv
+        - istTemporaeresMitglied
+    '''
     for key in mandatory_keys:
         if key not in kwargs:
             return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=key), daten=kwargs)
@@ -72,6 +81,23 @@ def check_main_keys(kwargs):
         return raise_xxx(400, 'Bad Request', 'Geschenkmitgliedschaft unbekannt', daten=kwargs)
     else:
         return False
+
+def check_missing_address(kwargs):
+    if len(kwargs["adressen"]["adressenListe"]) >= 1:
+        for adresse in kwargs["adressen"]["adressenListe"]:
+            adressen_dict = adresse
+            
+            if isinstance(adressen_dict, str):
+                adressen_dict = json.loads(adressen_dict)
+            
+            if adressen_dict['typ'] == 'Mitglied':
+                mitglied = adressen_dict
+                if mitglied["postleitzahl"]:
+                    return False
+                else:
+                    return raise_xxx(400, 'Bad Request', 'Postleitzahl in Mitglied Address missing', daten=kwargs)
+    
+    return raise_xxx(400, 'Bad Request', 'Mitglied Address missing', daten=kwargs)
 
 '''
 Schritt 2:
@@ -85,13 +111,18 @@ def create_sp_log(kwargs):
         existing = False
     import json
     json_formatted_str = json.dumps(kwargs, indent=2)
+
+    # Prüfung ob die Queue aktiv ist, oder der Request sofort ausgeführt werden soll
+    sp_incoming_immediately_executing = cint(frappe.db.get_single_value('Service Plattform API', 'sp_incoming_immediately_executing'))
+
     sp_log = frappe.get_doc({
         "doctype": "Service Plattform Log",
         "status": "New",
         "mv_mitgliedschaft": kwargs["mitgliedId"] if existing else None,
         "json": json_formatted_str,
         "neuanlage": 0 if existing else 1,
-        "update": 1 if existing else 0
+        "update": 1 if existing else 0,
+        "immediately_executing": sp_incoming_immediately_executing
     }).insert(ignore_permissions=True)
     
     return
@@ -245,10 +276,11 @@ def mvm_neuanlage(kwargs):
         else:
             m_und_w_pdf = 0
         
-        if kwargs['isKollektiv']:
-            ist_kollektiv = 1
-        else:
-            ist_kollektiv = '0'
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['isKollektiv']:
+        #     ist_kollektiv = 1
+        # else:
+        #     ist_kollektiv = '0'
         
         if kwargs['isGeschenkmitgliedschaft']:
             ist_geschenkmitgliedschaft = 1
@@ -275,7 +307,8 @@ def mvm_neuanlage(kwargs):
         
         mitglied_id = str(kwargs['mitgliedId'])
         
-        region_manuell = 1 if kwargs['regionManuell'] else '0'
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # region_manuell = 1 if kwargs['regionManuell'] else '0'
         
         inkl_hv = get_inkl_hv(kwargs["jahrBezahltHaftpflicht"])
         
@@ -336,35 +369,39 @@ def mvm_neuanlage(kwargs):
         else:
             online_haftpflicht = None
         
-        if kwargs['onlineGutschrift']:
-            online_gutschrift = kwargs['onlineGutschrift']
-        else:
-            online_gutschrift = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['onlineGutschrift']:
+        #     online_gutschrift = kwargs['onlineGutschrift']
+        # else:
+        #     online_gutschrift = None
         
         if kwargs['onlineBetrag']:
             online_betrag = kwargs['onlineBetrag']
         else:
             online_betrag = None
         
-        if kwargs['datumOnlineVerbucht']:
-            datum_online_verbucht = kwargs['datumOnlineVerbucht']
-            if zuzug_von != 'MVZH':
-                datum_zahlung_mitgliedschaft = datum_online_verbucht.split("T")[0]
-            else:
-                datum_zahlung_mitgliedschaft = None
-        else:
-            datum_online_verbucht = None
-            datum_zahlung_mitgliedschaft = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['datumOnlineVerbucht']:
+        #     datum_online_verbucht = kwargs['datumOnlineVerbucht']
+        #     if zuzug_von != 'MVZH':
+        #         datum_zahlung_mitgliedschaft = datum_online_verbucht.split("T")[0]
+        #     else:
+        #         datum_zahlung_mitgliedschaft = None
+        # else:
+        #     datum_online_verbucht = None
+        #     datum_zahlung_mitgliedschaft = None
         
-        if kwargs['datumOnlineGutschrift']:
-            datum_online_gutschrift = kwargs['datumOnlineGutschrift']
-        else:
-            datum_online_gutschrift = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['datumOnlineGutschrift']:
+        #     datum_online_gutschrift = kwargs['datumOnlineGutschrift']
+        # else:
+        #     datum_online_gutschrift = None
         
-        if kwargs['onlinePaymentMethod']:
-            online_payment_method = kwargs['onlinePaymentMethod']
-        else:
-            online_payment_method = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['onlinePaymentMethod']:
+        #     online_payment_method = kwargs['onlinePaymentMethod']
+        # else:
+        #     online_payment_method = None
         
         if kwargs['onlinePaymentId']:
             online_payment_id = kwargs['onlinePaymentId']
@@ -384,7 +421,6 @@ def mvm_neuanlage(kwargs):
             'mitglied_nr': mitglied_nr,
             'sektion_id': sektion_id,
             'region': region,
-            'region_manuell': region_manuell,
             'status_c': status_c,
             'mitglied_id': mitglied_id,
             'mitgliedtyp_c': mitgliedtyp_c,
@@ -404,20 +440,14 @@ def mvm_neuanlage(kwargs):
             'naechstes_jahr_geschuldet': naechstes_jahr_geschuldet,
             'validierung_notwendig': 0,
             'language': language,
-            'ist_kollektiv': ist_kollektiv,
             'ist_geschenkmitgliedschaft': ist_geschenkmitgliedschaft,
             'ist_einmalige_schenkung': ist_einmalige_schenkung,
             'geschenkunterlagen_an_schenker': geschenkunterlagen_an_schenker,
             'datum_hv_zahlung': datum_hv_zahlung,
             'letzte_bearbeitung_von': 'SP',
             'online_haftpflicht': online_haftpflicht,
-            'online_gutschrift': online_gutschrift,
             'online_betrag': online_betrag,
-            'datum_online_verbucht': datum_online_verbucht,
-            'datum_online_gutschrift': datum_online_gutschrift,
-            'online_payment_method': online_payment_method,
             'online_payment_id': online_payment_id,
-            'datum_zahlung_mitgliedschaft': datum_zahlung_mitgliedschaft,
             'mvb_typ': mvb_typ
         })
         
@@ -506,10 +536,11 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         
         m_und_w = kwargs['anzahlZeitungen']
         
-        if kwargs['isKollektiv']:
-            ist_kollektiv = 1
-        else:
-            ist_kollektiv = '0'
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['isKollektiv']:
+        #     ist_kollektiv = 1
+        # else:
+        #     ist_kollektiv = '0'
         
         if kwargs['isGeschenkmitgliedschaft']:
             ist_geschenkmitgliedschaft = 1
@@ -532,7 +563,8 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
             if len(regionen) > 0:
                 region = regionen[0].name
         
-        region_manuell = 1 if kwargs['regionManuell'] else '0'
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # region_manuell = 1 if kwargs['regionManuell'] else '0'
         
         mitglied_nr = kwargs['mitgliedNummer']
         
@@ -587,37 +619,41 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         else:
             datum_hv_zahlung = None
         
-        if kwargs['onlineHaftpflicht']:
+        if kwargs['onlineHaftpflicht'] or kwargs['onlineHaftpflicht'] == 0:
             online_haftpflicht = kwargs['onlineHaftpflicht']
         else:
             online_haftpflicht = None
         
         zahlung_hv = int(kwargs['jahrBezahltHaftpflicht']) if kwargs['jahrBezahltHaftpflicht'] else 0
         
-        if kwargs['onlineGutschrift']:
-            online_gutschrift = kwargs['onlineGutschrift']
-        else:
-            online_gutschrift = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['onlineGutschrift']:
+        #     online_gutschrift = kwargs['onlineGutschrift']
+        # else:
+        #     online_gutschrift = None
         
         if kwargs['onlineBetrag']:
             online_betrag = kwargs['onlineBetrag']
         else:
             online_betrag = None
         
-        if kwargs['datumOnlineVerbucht']:
-            datum_online_verbucht = kwargs['datumOnlineVerbucht']
-        else:
-            datum_online_verbucht = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['datumOnlineVerbucht']:
+        #     datum_online_verbucht = kwargs['datumOnlineVerbucht']
+        # else:
+        #     datum_online_verbucht = None
         
-        if kwargs['datumOnlineGutschrift']:
-            datum_online_gutschrift = kwargs['datumOnlineGutschrift']
-        else:
-            datum_online_gutschrift = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['datumOnlineGutschrift']:
+        #     datum_online_gutschrift = kwargs['datumOnlineGutschrift']
+        # else:
+        #     datum_online_gutschrift = None
         
-        if kwargs['onlinePaymentMethod']:
-            online_payment_method = kwargs['onlinePaymentMethod']
-        else:
-            online_payment_method = None
+        # Auskommentiert, weil definiert wurde dass dies nicht mehr verwendet wird.
+        # if kwargs['onlinePaymentMethod']:
+        #     online_payment_method = kwargs['onlinePaymentMethod']
+        # else:
+        #     online_payment_method = None
         
         if kwargs['onlinePaymentId']:
             online_payment_id = kwargs['onlinePaymentId']
@@ -655,7 +691,6 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         mitgliedschaft.mitglied_nr = mitglied_nr
         mitgliedschaft.sektion_id = sektion_id
         mitgliedschaft.region = region
-        mitgliedschaft.region_manuell = region_manuell
         mitgliedschaft.status_c = status_c
         mitgliedschaft.mitglied_id = mitglied_id
         mitgliedschaft.mitgliedtyp_c = mitgliedtyp_c
@@ -675,18 +710,13 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         mitgliedschaft.naechstes_jahr_geschuldet = naechstes_jahr_geschuldet
         mitgliedschaft.validierung_notwendig = 0
         mitgliedschaft.language = language
-        mitgliedschaft.ist_kollektiv = ist_kollektiv
         mitgliedschaft.ist_geschenkmitgliedschaft = ist_geschenkmitgliedschaft
         mitgliedschaft.ist_einmalige_schenkung = ist_einmalige_schenkung
         mitgliedschaft.geschenkunterlagen_an_schenker = geschenkunterlagen_an_schenker
         mitgliedschaft.datum_hv_zahlung = datum_hv_zahlung
         mitgliedschaft.letzte_bearbeitung_von = 'SP'
         mitgliedschaft.online_haftpflicht = online_haftpflicht
-        mitgliedschaft.online_gutschrift = online_gutschrift
         mitgliedschaft.online_betrag = online_betrag
-        mitgliedschaft.datum_online_verbucht = datum_online_verbucht
-        mitgliedschaft.datum_online_gutschrift = datum_online_gutschrift
-        mitgliedschaft.online_payment_method = online_payment_method
         mitgliedschaft.online_payment_id = online_payment_id
         mitgliedschaft.mvb_typ = mvb_typ
         
@@ -816,7 +846,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 else:
                     new_mitgliedschaft.tel_m_1 = ''
                 new_mitgliedschaft.tel_g_1 = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
-                new_mitgliedschaft.e_mail_1 = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
+                new_mitgliedschaft.e_mail_1 = str(kontaktdaten["email"]).replace("None", "") if kontaktdaten["email"] else ''
                 new_mitgliedschaft.zusatz_adresse = str(mitglied["adresszusatz"]) if mitglied["adresszusatz"] else ''
                 new_mitgliedschaft.strasse = str(mitglied["strasse"]) if mitglied["strasse"] else ''
                 new_mitgliedschaft.nummer = str(mitglied["hausnummer"]) if mitglied["hausnummer"] else ''
@@ -844,7 +874,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 else:
                     new_mitgliedschaft.tel_m_2 = ''
                 new_mitgliedschaft.tel_g_2 = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
-                new_mitgliedschaft.e_mail_2 = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
+                new_mitgliedschaft.e_mail_2 = str(kontaktdaten["email"]).replace("None", "") if kontaktdaten["email"] else ''
         
         if not found_solidarmitglied:
             new_mitgliedschaft.hat_solidarmitglied = 0
@@ -920,7 +950,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                     else:
                         new_mitgliedschaft.rg_tel_m = ''
                     new_mitgliedschaft.rg_tel_g = str(kontaktdaten["telefonGeschaeft"]) if kontaktdaten["telefonGeschaeft"] else ''
-                    new_mitgliedschaft.rg_e_mail = str(kontaktdaten["email"]) if check_email(kontaktdaten["email"]) else ''
+                    new_mitgliedschaft.rg_e_mail = str(kontaktdaten["email"]).replace("None", "") if kontaktdaten["email"] else ''
         if not found_unabhaengiger_debitor:
             new_mitgliedschaft.unabhaengiger_debitor = 0
     else:
@@ -940,3 +970,8 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
     
     
     return new_mitgliedschaft
+
+def check_immediately_executing(self, event):
+    if cint(self.immediately_executing) == 1:
+        service_plattform_log_worker()
+    return

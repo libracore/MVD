@@ -17,6 +17,28 @@ def get_context(context):
     if check_durchlass():
         authorization_header = frappe.get_request_header("Cookie", None)
         jwt_token = None
+        testing = check_for_testing()
+
+        if testing:
+            mitglied_id = testing
+            if mitglied_id:
+                if frappe.db.exists("Mitgliedschaft", mitglied_id):
+                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
+                    if mitgliedschaft.sektion_id == 'MVSO':
+                        # MVSO führt keine E-Mail Beratung durch
+                        create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='Keine MVSO E-Mail Beratung', json="{0}\n\n{1}".format(str(mitglied_id), str(authorization_header)))
+                        raise_redirect(typ='MVSO')
+                    else:
+                        context = context_erweiterung(context, mitgliedschaft)
+                        return context
+                else:
+                    # Mitglied-ID in ERPNext unbekannt
+                    create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='E-Mail Beratung (500)', json="{0}\n\n{1}".format(str(mitglied_id), str(authorization_header)))
+                    raise_redirect(typ='500')
+            else:
+                # Mitglied-ID in ERPNext unbekannt
+                create_beratungs_log(error=0, info=1, beratung=None, method='get_context', title='E-Mail Beratung (500)', json="{0}\n\n{1}".format(str(decoded_jwt_token["mitglied_nr"]), str(authorization_header)))
+                raise_redirect(typ='500')
 
         if authorization_header:
             for cookie in authorization_header.split(";"):
@@ -96,6 +118,9 @@ def context_erweiterung(context, mitgliedschaft):
         context.telefon = mitgliedschaft.tel_m_1 if mitgliedschaft.tel_m_1 else mitgliedschaft.tel_p_1 if mitgliedschaft.tel_p_1 else mitgliedschaft.tel_g_1 if mitgliedschaft.tel_g_1 else ''
         context.email = mitgliedschaft.e_mail_1 if mitgliedschaft.e_mail_1 else ''
         context.sektion = mitgliedschaft.sektion_id
+        context.mitgliedtyp_c = mitgliedschaft.mitgliedtyp_c
+        context.firma = mitgliedschaft.firma
+        context.mvb_typ = mitgliedschaft.mvb_typ
         
         if mitgliedschaft.abweichende_objektadresse:
             context.strasse = mitgliedschaft.objekt_strasse
@@ -519,4 +544,26 @@ def check_durchlass():
     if ticket <= durchlassquote:
         return True
     else:
+        return False
+
+def check_for_testing():
+    from frappe.utils import cint
+    # check if testing is enabled
+    if cint(frappe.db.get_value("Service Plattform API", "Service Plattform API", "emailberatung_test")) == 1:
+        from urllib.parse import urlparse
+        from urllib.parse import parse_qs
+        try:
+            url = frappe.request.url
+            parsed_url = urlparse(url)
+            test_token = parse_qs(parsed_url.query)['test'][0]
+            if test_token == frappe.db.get_value("Service Plattform API", "Service Plattform API", "emailberatung_testtoken"):
+                mitglied_id = parse_qs(parsed_url.query)['mitglied_id'][0]
+                return mitglied_id
+            else:
+                # invalid token
+                return False
+        except:
+            return False
+    else:
+        # testing is disabled
         return False

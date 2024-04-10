@@ -43,10 +43,10 @@ doctype_list_js = {
 
 jenv = {
     "methods": [
-        "get_anredekonvention:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_anredekonvention",
+        "get_anredekonvention:mvd.mvd.doctype.mitgliedschaft.utils.get_anredekonvention",
         "replace_mv_keywords:mvd.mvd.doctype.druckvorlage.druckvorlage.replace_mv_keywords",
         "get_mahnungs_qrrs:mvd.mvd.doctype.mahnung.mahnung.get_mahnungs_qrrs",
-        "get_rg_adressblock:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_rg_adressblock",
+        "get_rg_adressblock:mvd.mvd.doctype.mitgliedschaft.utils.get_rg_adressblock",
         "get_last_open_sinv:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_last_open_sinv"
     ]
 }
@@ -135,6 +135,9 @@ doc_events = {
     },
     "Email Queue": {
         "after_insert": "mvd.mvd.utils.hook_utils.remove_admin_mails"
+    },
+    "Service Plattform Log": {
+        "after_insert": "mvd.mvd.service_plattform.request_worker.check_immediately_executing"
     }
 }
 
