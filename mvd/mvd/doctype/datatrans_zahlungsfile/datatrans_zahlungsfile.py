@@ -194,16 +194,44 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                 'Dezember': '31'
             }
             return months[month]
+        def get_sektion_short(sektion):
+            if sektion == "MVDF":
+                return '''
+                    (
+                        `refnumber` LIKE 'FR_%'
+                        OR
+                        `refnumber` LIKE 'DF_%'
+                    )
+                '''
+            if sektion == "MVAG":
+                return '''
+                    (
+                        `refnumber` LIKE 'AG_%'
+                        OR
+                        `refnumber` LIKE 'BD_%'
+                    )
+                '''
+            if sektion == "MVGR":
+                return '''
+                    (
+                        `refnumber` LIKE 'GR_%'
+                        OR
+                        `refnumber` LIKE 'CH_%'
+                    )
+                '''
+            return '''
+                    `refnumber` LIKE '{sektion_short}_%'
+                '''.format(sektion_short=sektion.replace("MV", ""))
         
         priv = frappe.db.sql("""
                                 SELECT
                                     SUM(`amount`) AS `qty`
                                 FROM `tabDatatrans Entry`
                                 WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
-                                AND `refnumber` LIKE '{sektion_short}_%'
+                                AND {sektion_short}
                                 AND `mitgliedtyp_c` = 'Privat'
                             """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
-                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=sektion.replace("MV", "")), as_dict=True)[0].qty
+                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion)), as_dict=True)[0].qty
         
         gesch = frappe.db.sql("""
                                 SELECT
