@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.57.5
+#901; DatatransReport; Ausstehende Datatransrecords: keine Berücksichtigung von Online-Anmeldungen
 #### 11.57.4
 #895; Bugfix Permission Error Sektionswechsel
 #### 11.57.3
