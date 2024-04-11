@@ -268,6 +268,7 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
                                                     `online_payment_id` AS `transaktion_id`
                                                 FROM `tabMitgliedschaft`
                                                 WHERE `online_betrag` > 0
+                                                AND `status_c` != 'Online-Anmeldung'
                                                 AND `online_payment_zahlungsfile` IS NULL
                                                 AND `creation` <= '{valuta}'
                                                 AND `creation` >= '2024-01-01'
