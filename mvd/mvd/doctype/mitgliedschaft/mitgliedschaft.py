@@ -474,7 +474,10 @@ class Mitgliedschaft(Document):
             if self.kontakt_solidarmitglied and self.kontakt_solidarmitglied not in ['', 'None']:
                 return update_kontakt(self, primary)
             else:
-                return create_kontakt(self, primary)
+                if cint(self.hat_solidarmitglied) == 1:
+                    return create_kontakt(self, primary)
+                else:
+                    return None
     
     def validate_adresse_mitglied(self):
         if self.adresse_mitglied:
