@@ -40,7 +40,7 @@ def create_kontakt(mitgliedschaft, primary):
         is_primary_contact = 0
         company_name = ''
         salutation = mitgliedschaft.anrede_2
-        first_name = mitgliedschaft.vorname_2 or mitgliedschaft.nachname_2 or 'n/a'
+        first_name = mitgliedschaft.vorname_2 or 'n/a'
         if first_name != mitgliedschaft.nachname_2:
             last_name = mitgliedschaft.nachname_2 or 'n/a'
         else:
