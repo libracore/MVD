@@ -281,10 +281,11 @@ class Mitgliedschaft(Document):
 
         # Solidarmitglied
         self.kontakt_solidarmitglied = self.validate_kontakt_mitglied(primary=False)
-        if self.objekt_adresse:
-            join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.objekt_adresse)
-        else:
-            join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.adresse_mitglied)
+        if self.kontakt_solidarmitglied:
+            if self.objekt_adresse:
+                join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.objekt_adresse)
+            else:
+                join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.adresse_mitglied)
         
         # Rechnungsempfaenger
         if self.abweichende_rechnungsadresse:
