@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.57.7
+#902; DatatransReport; Sektionskürzel Erweiterung
 #### 11.57.6
 #898; DatatransReport; Unterteilung Geschäfts- und Privatmitgliedschaften
 #### 11.57.5
