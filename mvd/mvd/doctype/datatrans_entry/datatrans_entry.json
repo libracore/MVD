@@ -20,6 +20,7 @@
   "section_mitgliedschaft",
   "mitglied_id",
   "mitglied_nr",
+  "mitgliedtyp_c",
   "adressblock",
   "online_haftpflicht",
   "online_gutschrift",
@@ -200,10 +201,16 @@
    "fieldname": "webshop_order",
    "fieldtype": "Data",
    "label": "Webshop Order"
+  },
+  {
+   "fieldname": "mitgliedtyp_c",
+   "fieldtype": "Data",
+   "label": "Mitgliedtyp",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2023-12-20 13:06:58.508191",
+ "modified": "2024-04-11 09:00:04.242413",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Datatrans Entry",

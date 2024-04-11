@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.57.6
+#898; DatatransReport; Unterteilung Geschäfts- und Privatmitgliedschaften
 #### 11.57.5
 #901; DatatransReport; Ausstehende Datatransrecords: keine Berücksichtigung von Online-Anmeldungen
 #### 11.57.4
