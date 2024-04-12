@@ -43,6 +43,7 @@ def set_inaktiv():
                 change_log_row.status_neu = 'Inaktiv'
                 change_log_row.grund = 'Autom. Inaktivierung'
                 m.status_c = 'Inaktiv'
+                m.letzte_bearbeitung_von = 'User'
                 m.save(ignore_permissions=True)
             else:
                 if m.austritt and m.austritt <= getdate(today()):
@@ -52,6 +53,7 @@ def set_inaktiv():
                     change_log_row.status_neu = 'Inaktiv'
                     change_log_row.grund = 'Autom. Inaktivierung'
                     m.status_c = 'Inaktiv'
+                    m.letzte_bearbeitung_von = 'User'
                     m.save(ignore_permissions=True)
         elif m.status_c == 'Ausschluss':
             if m.austritt and m.austritt <= getdate(today()):
@@ -61,6 +63,7 @@ def set_inaktiv():
                 change_log_row.status_neu = 'Inaktiv'
                 change_log_row.grund = 'Autom. Inaktivierung'
                 m.status_c = 'Inaktiv'
+                m.letzte_bearbeitung_von = 'User'
                 m.save(ignore_permissions=True)
         elif m.status_c == 'Wegzug':
             change_log_row = m.append('status_change', {})
@@ -69,6 +72,7 @@ def set_inaktiv():
             change_log_row.status_neu = 'Inaktiv'
             change_log_row.grund = 'Wegzug zu Sektion {0}'.format(m.wegzug_zu)
             m.status_c = 'Inaktiv'
+            m.letzte_bearbeitung_von = 'User'
             m.save(ignore_permissions=True)
         if submit_counter == 100:
             frappe.db.commit()

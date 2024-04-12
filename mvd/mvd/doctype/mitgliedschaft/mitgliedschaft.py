@@ -296,10 +296,11 @@ class Mitgliedschaft(Document):
 
         # Solidarmitglied
         self.kontakt_solidarmitglied = self.validate_kontakt_mitglied(primary=False)
-        if self.objekt_adresse:
-            join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.objekt_adresse)
-        else:
-            join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.adresse_mitglied)
+        if self.kontakt_solidarmitglied:
+            if self.objekt_adresse:
+                join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.objekt_adresse)
+            else:
+                join_mitglied_contact_and_address(self.kontakt_solidarmitglied, self.adresse_mitglied)
         
         # Rechnungsempfaenger
         if self.abweichende_rechnungsadresse:
@@ -489,7 +490,10 @@ class Mitgliedschaft(Document):
             if self.kontakt_solidarmitglied and self.kontakt_solidarmitglied not in ['', 'None']:
                 return update_kontakt(self, primary)
             else:
-                return create_kontakt(self, primary)
+                if cint(self.hat_solidarmitglied) == 1:
+                    return create_kontakt(self, primary)
+                else:
+                    return None
     
     def validate_adresse_mitglied(self):
         if self.adresse_mitglied:
