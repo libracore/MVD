@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.58.0
+#903; CAMT-Import: All-In-One
 #### 11.57.8
 #905; Autom. Inaktivierung (BG-Job): Gewährleistung dass Updates an die SP gesendet werden
 #### 11.57.7
