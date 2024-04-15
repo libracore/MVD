@@ -101,7 +101,6 @@
    "description": "oder bei grossen Zahlungsfiles (&gt;2MB)<br>Verarbeitung in drei Schritten:",
    "fieldname": "import",
    "fieldtype": "Button",
-   "hidden": 1,
    "label": "Verarbeite CAMT File"
   },
   {
@@ -569,7 +568,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2024-04-08 22:13:34.984643",
+ "modified": "2024-04-15 09:59:33.065018",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "CAMT Import",
