@@ -777,7 +777,6 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
 
 '''
 def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
-    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import check_email
     mitglied = False
     objekt = False
     rechnung = False
