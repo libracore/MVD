@@ -22,7 +22,8 @@ from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention, get_adres
                                                 get_naechstes_jahr_geschuldet, mahnstopp, create_korrespondenz, \
                                                 sp_updater, get_sektion_code
 from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, update_kontakt
-from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_zahlung_mitgliedschaft, check_zahlung_hv, get_ampelfarbe, set_max_reminder_level, check_folgejahr_regelung
+from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_zahlung_mitgliedschaft, check_zahlung_hv, get_ampelfarbe, \
+                                                        set_max_reminder_level, check_folgejahr_regelung
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
