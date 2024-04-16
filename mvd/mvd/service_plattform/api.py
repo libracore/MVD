@@ -16,7 +16,7 @@ from mvd.mvd.utils.post import _post_retouren
 from mvd.mvd.utils.post import _post_responses
 from mvd.mvd.doctype.beratung.beratung import _get_beratungs_dokument
 from mvd.mvd.doctype.webshop_order.webshop_order import create_order_from_api
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import prepare_mvm_for_sp
+from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
 from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new_id, create_new_number
 
 AUTH0_SCOPE = "Auth0"

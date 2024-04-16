@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.59.0
+#910; Performance Optimierungen
 #### 11.58.0
 #903; CAMT-Import: All-In-One
 #### 11.57.8

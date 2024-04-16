@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from mvd.mvd.service_plattform.api import send_beratung
 import time
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import prepare_mvm_for_sp
+from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
 from frappe.utils.data import get_datetime_str
 
 def nachsenden():
