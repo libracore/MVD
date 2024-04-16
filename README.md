@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.60.0
+#911
 #### 11.59.0
 #910; Performance Optimierungen
 #### 11.58.0
