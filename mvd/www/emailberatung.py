@@ -2,7 +2,8 @@ from __future__ import unicode_literals
 import frappe
 import json
 import jwt
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr, prepare_mvm_for_sp
+from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
+from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
 from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.utils import get_url, sanitize_html

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from mvd.mvd.service_plattform.api import update_mvm
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import prepare_mvm_for_sp
+from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
 
 class ServicePlattformAPI(Document):
     # this function will get a child value from a scope
