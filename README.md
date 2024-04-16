@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 11.60.1
+#907; RaiseTimeCondition ISS-2024-00109
+#### 11.60.0
+#911
 #### 11.59.0
 #910; Performance Optimierungen
 #### 11.58.0
