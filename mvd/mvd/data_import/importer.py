@@ -951,7 +951,7 @@ def ampel_reset():
         Example:
         sudo bench --site [site_name] execute mvd.mvd.data_import.importer.ampel_reset
     '''
-    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_ampelfarbe
+    from mvd.mvd.doctype.mitgliedschaft.utils import get_ampelfarbe
     
     # neuberechnung aller roten ampeln
     mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `ampel_farbe` = 'ampelrot'""", as_dict=True)

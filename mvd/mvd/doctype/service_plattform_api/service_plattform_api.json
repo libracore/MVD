@@ -18,7 +18,10 @@
   "queue",
   "flush_queue",
   "flush_limit",
-  "flush_limit_eingehend"
+  "flush_limit_eingehend",
+  "sp_incoming_immediately_executing",
+  "emailberatung_test",
+  "emailberatung_testtoken"
  ],
  "fields": [
   {
@@ -42,8 +45,8 @@
   {
    "fieldname": "neue_mitglieder_nummer",
    "fieldtype": "Data",
-   "label": "Neue Mitgliedernummer",
-   "reqd": 1
+   "hidden": 1,
+   "label": "Neue Mitgliedernummer"
   },
   {
    "collapsible": 1,
@@ -55,6 +58,7 @@
    "default": "0",
    "fieldname": "not_get_number_and_id",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Mitglied Nr. & ID Bezug deaktivieren"
   },
   {
@@ -109,10 +113,28 @@
    "fieldname": "flush_limit_eingehend",
    "fieldtype": "Int",
    "label": "Flush Limit (SP Eingehend)"
+  },
+  {
+   "default": "0",
+   "fieldname": "sp_incoming_immediately_executing",
+   "fieldtype": "Check",
+   "label": "SP Eingehende Requests sofort ausf\u00fchren"
+  },
+  {
+   "default": "0",
+   "fieldname": "emailberatung_test",
+   "fieldtype": "Check",
+   "label": "Aktiviere E-Mailberatungs Testing"
+  },
+  {
+   "depends_on": "eval:doc.emailberatung_test",
+   "fieldname": "emailberatung_testtoken",
+   "fieldtype": "Data",
+   "label": "E-Mailberatung Test Token"
   }
  ],
  "issingle": 1,
- "modified": "2023-09-11 11:49:49.563192",
+ "modified": "2024-03-19 10:12:06.208574",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",
