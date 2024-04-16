@@ -8,9 +8,16 @@ from frappe.utils import cint
 from frappe.utils.data import add_days, getdate, now
 import datetime
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
-from mvd.mvd.doctype.mitgliedschaft.utils import create_korrespondenz
+from mvd.mvd.doctype.mitgliedschaft.utils import create_korrespondenz, sp_updater
 
-def check_zahlung_mitgliedschaft(mitgliedschaft):
+def check_zahlung_mitgliedschaft(mitgliedschaft, db_direct=False):
+    '''
+        mitgliedschaft -> Muss immer einem Objekt entsprechen!
+    
+        db_direct -> Ist dieser Parameter gesetzt, so werden die Werte mittels db.set_value direkt in die DB geschrieben.
+        Dadurch können die Werte aktualisiert werden, ohne dass die gesamte Mitgliedschaft gespeichert werden muss (Performance verbesserung).
+    '''
+    
     noch_kein_eintritt = False
     if not mitgliedschaft.datum_zahlung_mitgliedschaft:
         noch_kein_eintritt = True
@@ -33,7 +40,10 @@ def check_zahlung_mitgliedschaft(mitgliedschaft):
             # Fallback wenn sinv.mitgliedschafts_jahr == 0
             if sinv_year < 1:
                 sinv_year = getdate(sinv.posting_date).strftime("%Y")
+            
             mitgliedschaft.datum_zahlung_mitgliedschaft = sinv.posting_date
+            if db_direct:
+                frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'datum_zahlung_mitgliedschaft', sinv.posting_date)
         else:
             pes = frappe.db.sql("""SELECT
                                         `parent`
@@ -43,42 +53,56 @@ def check_zahlung_mitgliedschaft(mitgliedschaft):
                                     AND `docstatus` = 1
                                     ORDER BY `creation` DESC""".format(sinv=sinv.name), as_dict=True)
             if len(pes) > 0:
-                # pe = frappe.get_doc("Payment Entry", pes[0].parent)
                 pe_reference_date = frappe.db.get_value("Payment Entry", pes[0].parent, 'reference_date')
                 # # Fallback wenn sinv.mitgliedschafts_jahr == 0
                 if sinv_year < 1:
                     sinv_year = getdate(pe_reference_date).strftime("%Y")
+                
                 mitgliedschaft.datum_zahlung_mitgliedschaft = pe_reference_date
-                # self.datum_zahlung_mitgliedschaft = pe.reference_date
+                if db_direct:
+                    frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'datum_zahlung_mitgliedschaft', pe_reference_date)
         
         if mitgliedschaft.bezahltes_mitgliedschaftsjahr < sinv_year:
             mitgliedschaft.bezahltes_mitgliedschaftsjahr = sinv_year
+            if db_direct:
+                frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'bezahltes_mitgliedschaftsjahr', sinv_year)
     
     # Zahldatum = Eintrittsdatum
     if mitgliedschaft.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in') and mitgliedschaft.bezahltes_mitgliedschaftsjahr > 0:
         if noch_kein_eintritt:
             mitgliedschaft.eintrittsdatum = mitgliedschaft.datum_zahlung_mitgliedschaft
+            if db_direct:
+                frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'eintrittsdatum', mitgliedschaft.datum_zahlung_mitgliedschaft)
     
     if mitgliedschaft.bezahltes_mitgliedschaftsjahr > 0 and mitgliedschaft.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
         # erstelle status change log und Status-Änderung
-        change_log_row = mitgliedschaft.append('status_change', {})
-        change_log_row.datum = now()
-        change_log_row.status_alt = mitgliedschaft.status_c
-        change_log_row.status_neu = 'Regulär'
-        change_log_row.grund = 'Zahlungseingang'
-        mitgliedschaft.status_c = 'Regulär'
-        
-        # erstellung Begrüssungsschreiben
-        mitgliedschaft.begruessung_massendruck = 1
-        mitgliedschaft.begruessung_via_zahlung = 1
         druckvorlage = get_druckvorlagen(sektion=mitgliedschaft.sektion_id, \
-                                         dokument='Begrüssung mit Ausweis', \
-                                        mitgliedtyp=mitgliedschaft.mitgliedtyp_c, \
-                                        language=mitgliedschaft.language)['default_druckvorlage']
-        
-        mitgliedschaft.begruessung_massendruck_dokument = create_korrespondenz(mitgliedschaft=mitgliedschaft.name, \
-                                                                               druckvorlage=druckvorlage, \
-                                                                               titel='Begrüssung (Autom.)')
+                                            dokument='Begrüssung mit Ausweis', \
+                                            mitgliedtyp=mitgliedschaft.mitgliedtyp_c, \
+                                            language=mitgliedschaft.language)['default_druckvorlage']
+            
+        begruessung_massendruck_dokument = create_korrespondenz(mitgliedschaft=mitgliedschaft.name, \
+                                                                            druckvorlage=druckvorlage, \
+                                                                            titel='Begrüssung (Autom.)')
+        if not db_direct:
+            change_log_row = mitgliedschaft.append('status_change', {})
+            change_log_row.datum = now()
+            change_log_row.status_alt = mitgliedschaft.status_c
+            change_log_row.status_neu = 'Regulär'
+            change_log_row.grund = 'Zahlungseingang'
+            mitgliedschaft.status_c = 'Regulär'
+            
+            # erstellung Begrüssungsschreiben
+            mitgliedschaft.begruessung_massendruck = 1
+            mitgliedschaft.begruessung_via_zahlung = 1
+            mitgliedschaft.begruessung_massendruck_dokument = begruessung_massendruck_dokument
+            
+        else:
+            create_zahlungseingang_change_log_row(mitgliedschaft, mitgliedschaft.status_c)
+            frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'status_c', 'Regulär')
+            frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'begruessung_massendruck', 1)
+            frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'begruessung_via_zahlung', 1)
+            frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'begruessung_massendruck_dokument', begruessung_massendruck_dokument)
     
     # prüfe offene Rechnungen bei sektionswechsel
     if mitgliedschaft.status_c == 'Wegzug':
@@ -128,9 +152,18 @@ def check_zahlung_mitgliedschaft(mitgliedschaft):
                     # load & delete sinv
                     sinv.delete()
     
+    if db_direct:
+        frappe.db.commit()
+    
     return
 
-def set_max_reminder_level(mitgliedschaft):
+def set_max_reminder_level(mitgliedschaft, db_direct=False):
+    '''
+        mitgliedschaft -> Muss immer einem Objekt entsprechen!
+    
+        db_direct -> Ist dieser Parameter gesetzt, so werden die Werte mittels db.set_value direkt in die DB geschrieben.
+        Dadurch können die Werte aktualisiert werden, ohne dass die gesamte Mitgliedschaft gespeichert werden muss (Performance verbesserung).
+    '''
     try:
         sql_query = ("""SELECT MAX(`payment_reminder_level`) AS `max` FROM `tabSales Invoice` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` = 'Overdue' AND `docstatus` = 1""".format(mitgliedschaft=mitgliedschaft.name))
         max_level = frappe.db.sql(sql_query, as_dict=True)[0]['max']
@@ -139,10 +172,15 @@ def set_max_reminder_level(mitgliedschaft):
     except:
         max_level = 0
     mitgliedschaft.max_reminder_level = max_level
+    if db_direct:
+        frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'max_reminder_level', max_level)
+    
+    if db_direct:
+        frappe.db.commit()
     
     return
 
-def get_ampelfarbe(mitgliedschaft):
+def get_ampelfarbe(mitgliedschaft, db_direct=False):
     ''' mögliche Ampelfarben:
         - Grün: ampelgruen --> Mitglied kann alle Dienstleistungen beziehen (keine Karenzfristen, keine überfälligen oder offen Rechnungen)
         - Gelb: ampelgelb --> Karenzfristen oder offene Rechnungen
@@ -151,6 +189,11 @@ def get_ampelfarbe(mitgliedschaft):
         MVZH Ausnahme:
         - Grün --> Jahr bezahlt >= aktuelles Jahr
         - Rot --> Jahr bezahlt < aktuelles Jahr
+        ---------------------------------------------------------
+        mitgliedschaft -> Muss immer einem Objekt entsprechen!
+    
+        db_direct -> Ist dieser Parameter gesetzt, so werden die Werte mittels db.set_value direkt in die DB geschrieben.
+        Dadurch können die Werte aktualisiert werden, ohne dass die gesamte Mitgliedschaft gespeichert werden muss (Performance verbesserung).
     '''
 
     if mitgliedschaft.status_c in ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in'):
@@ -213,13 +256,113 @@ def get_ampelfarbe(mitgliedschaft):
                         ampelfarbe = 'ampelgruen'
     
     mitgliedschaft.ampel_farbe = ampelfarbe
+    if db_direct:
+        frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'ampel_farbe', ampelfarbe)
+        frappe.db.commit()
+    
+    return
+
+def check_zahlung_hv(mitgliedschaft, db_direct=False):
+    '''
+        mitgliedschaft -> Muss immer einem Objekt entsprechen!
+    
+        db_direct -> Ist dieser Parameter gesetzt, so werden die Werte mittels db.set_value direkt in die DB geschrieben.
+        Dadurch können die Werte aktualisiert werden, ohne dass die gesamte Mitgliedschaft gespeichert werden muss (Performance verbesserung).
+    '''
+
+    sinvs = frappe.db.sql("""SELECT
+                                `name`,
+                                `is_pos`,
+                                `posting_date`,
+                                `mitgliedschafts_jahr`
+                            FROM `tabSales Invoice`
+                            WHERE `docstatus` = 1
+                            AND `ist_hv_rechnung` = 1
+                            AND `mv_mitgliedschaft` = '{mvm}'
+                            AND `status` = 'Paid'
+                            ORDER BY `posting_date` DESC""".format(mvm=mitgliedschaft.name), as_dict=True)
+    if len(sinvs) > 0:
+        sinv = sinvs[0]
+        if sinv.is_pos == 1:
+            sinv_year = sinv.mitgliedschafts_jahr if sinv.mitgliedschafts_jahr and sinv.mitgliedschafts_jahr > 0 else getdate(sinv.posting_date).strftime("%Y")
+            mitgliedschaft.datum_hv_zahlung = sinv.posting_date
+            if db_direct:
+                frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'datum_hv_zahlung', sinv.posting_date)
+        else:
+            pes = frappe.db.sql("""SELECT `parent` FROM `tabPayment Entry Reference`
+                                    WHERE `reference_doctype` = 'Sales Invoice'
+                                    AND `reference_name` = '{sinv}' ORDER BY `creation` DESC""".format(sinv=sinv.name), as_dict=True)
+            if len(pes) > 0:
+                pe = frappe.get_doc("Payment Entry", pes[0].parent)
+                sinv_year = sinv.mitgliedschafts_jahr if sinv.mitgliedschafts_jahr and sinv.mitgliedschafts_jahr > 0 else getdate(pe.reference_date).strftime("%Y")
+                mitgliedschaft.datum_hv_zahlung = pe.reference_date
+                if db_direct:
+                    frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'datum_hv_zahlung', pe.reference_date)
+        
+        mitgliedschaft.zahlung_hv = sinv_year
+        if db_direct:
+            frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'zahlung_hv', sinv_year)
+    
+    if db_direct:
+        frappe.db.commit()
+    
+    return
+
+def check_folgejahr_regelung(mitgliedschaft, db_direct=False):
+    '''
+        mitgliedschaft -> Muss immer einem Objekt entsprechen!
+    
+        db_direct -> Ist dieser Parameter gesetzt, so werden die Werte mittels db.set_value direkt in die DB geschrieben.
+        Dadurch können die Werte aktualisiert werden, ohne dass die gesamte Mitgliedschaft gespeichert werden muss (Performance verbesserung).
+    '''
+    # prüfe ob Folgejahr Regelung der Sektion aktiviert ist:
+    if cint(frappe.get_value("Sektion", mitgliedschaft.sektion_id, "folgejahr_regelung")) == 1:
+        if mitgliedschaft.datum_zahlung_mitgliedschaft:
+        # prüfe Mitgliedschaftsjahr
+            datum_zahlung_mitgliedschaft = getdate(mitgliedschaft.datum_zahlung_mitgliedschaft)
+            jahr_datum_zahlung_mitgliedschaft = cint(datum_zahlung_mitgliedschaft.strftime("%Y"))
+            bezahltes_mitgliedschaftsjahr = cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr)
+            
+            if bezahltes_mitgliedschaftsjahr == jahr_datum_zahlung_mitgliedschaft:
+                current_year = str(now().split("-")[0])
+                eintrittsjahr = cint(getdate(mitgliedschaft.eintrittsdatum).strftime("%Y"))
+                if cint(current_year) == eintrittsjahr:
+                    if datum_zahlung_mitgliedschaft >= getdate(current_year + '-09-15') and datum_zahlung_mitgliedschaft <= getdate(current_year + '-12-31'):
+                        bezahltes_mitgliedschaftsjahr_neu = mitgliedschaft.bezahltes_mitgliedschaftsjahr + 1
+                        mitgliedschaft.bezahltes_mitgliedschaftsjahr = bezahltes_mitgliedschaftsjahr_neu
+                        if db_direct:
+                            frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'bezahltes_mitgliedschaftsjahr', bezahltes_mitgliedschaftsjahr_neu)
+        
+        if mitgliedschaft.datum_hv_zahlung:
+            # prüfe HV-Jahr
+            datum_hv_zahlung = getdate(mitgliedschaft.datum_hv_zahlung)
+            jahr_datum_hv_zahlung = cint(datum_hv_zahlung.strftime("%Y"))
+            zahlung_hv = cint(mitgliedschaft.zahlung_hv)
+            
+            current_year = str(now().split("-")[0])
+            eintrittsjahr = cint(getdate(mitgliedschaft.eintrittsdatum).strftime("%Y"))
+            if cint(current_year) == eintrittsjahr:
+                if zahlung_hv == jahr_datum_hv_zahlung:
+                    current_year = str(now().split("-")[0])
+                    if datum_hv_zahlung >= getdate(current_year + '-09-15') and datum_hv_zahlung <= getdate(current_year + '-12-31'):
+                        zahlung_hv_neu = mitgliedschaft.zahlung_hv + 1
+                        mitgliedschaft.zahlung_hv = zahlung_hv_neu
+                        if db_direct:
+                            frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'zahlung_hv', zahlung_hv_neu)
+    if db_direct:
+        frappe.db.commit()
     
     return
 
 def sinv_update(sinv, event):
     if sinv.mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
-        mitgliedschaft.save(ignore_permissions=True)
+        check_zahlung_mitgliedschaft(mitgliedschaft, db_direct=True)
+        check_zahlung_hv(mitgliedschaft, db_direct=True)
+        check_folgejahr_regelung(mitgliedschaft, db_direct=True)
+        set_max_reminder_level(mitgliedschaft, db_direct=True)
+        get_ampelfarbe(mitgliedschaft, db_direct=True)
+        sp_updater(mitgliedschaft)
     
     return
 
@@ -236,3 +379,18 @@ def suche_nach_mitgliedschaft(customer):
         return mitgliedschaften[0][0]
     else:
         return False
+
+def create_zahlungseingang_change_log_row(mitgliedschaft, status_alt):
+    idx = len(mitgliedschaft.status_change) + 1
+    change_log_row = frappe.get_doc({
+        "doctype": "Status Change",
+        "parent": mitgliedschaft.name,
+        "parentfield": "status_change",
+        "parenttype": "Mitgliedschaft",
+        "datum": now(),
+        "status_alt": status_alt,
+        "status_neu": 'Regulär',
+        "grund": 'Zahlungseingang',
+        "idx": idx
+    }).insert()
+    return

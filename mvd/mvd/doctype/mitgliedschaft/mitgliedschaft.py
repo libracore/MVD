@@ -21,7 +21,12 @@ from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import close_open_validatio
 from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention, get_adressblock, get_rg_adressblock, \
                                                 get_naechstes_jahr_geschuldet, mahnstopp, create_korrespondenz
 from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, update_kontakt
+<<<<<<< HEAD
 from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_zahlung_mitgliedschaft, get_ampelfarbe, set_max_reminder_level
+=======
+from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_zahlung_mitgliedschaft, check_zahlung_hv, get_ampelfarbe, set_max_reminder_level, check_folgejahr_regelung
+from mvd.mvd.doctype.mitgliedschaft.utils import create_korrespondenz, sp_updater, get_sektion_code
+>>>>>>> 825c882 (v11.59.0)
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
@@ -78,13 +83,14 @@ class Mitgliedschaft(Document):
             check_zahlung_mitgliedschaft(self)
             
             # update Zahlung HV
-            self.check_zahlung_hv()
+            check_zahlung_hv(self)
 
+            # Update max Reminder Level
             set_max_reminder_level(self)
             
             # Prüfe Jahr Bezahlt (Mitgliedschaft & HV) bezgl. Folgejahr Regelung
             if self.status_c != 'Inaktiv':
-                self.check_folgejahr_regelung()
+                check_folgejahr_regelung(self)
             
             # preisregel
             self.check_preisregel()
@@ -152,16 +158,7 @@ class Mitgliedschaft(Document):
             self.check_faktura_kunde()
             
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
-            if self.letzte_bearbeitung_von == 'User':
-                if self.creation == self.modified:
-                    # sende neuanlage an SP
-                    send_mvm_to_sp(self, False)
-                else:
-                    # sende update an SP
-                    send_mvm_to_sp(self, True)
-                    # special case sektionswechsel nach ZH
-                    if self.wegzug_zu == 'MVZH' and self.status_c == 'Wegzug':
-                        send_mvm_sektionswechsel(self)
+            sp_updater(self)
     
     def email_validierung(self, check=False):
         import re
@@ -387,67 +384,6 @@ class Mitgliedschaft(Document):
         else:
             return
     
-    def check_zahlung_hv(self):
-        sinvs = frappe.db.sql("""SELECT
-                                    `name`,
-                                    `is_pos`,
-                                    `posting_date`,
-                                    `mitgliedschafts_jahr`
-                                FROM `tabSales Invoice`
-                                WHERE `docstatus` = 1
-                                AND `ist_hv_rechnung` = 1
-                                AND `mv_mitgliedschaft` = '{mvm}'
-                                AND `status` = 'Paid'
-                                ORDER BY `posting_date` DESC""".format(mvm=self.name), as_dict=True)
-        if len(sinvs) > 0:
-            sinv = sinvs[0]
-            if sinv.is_pos == 1:
-                sinv_year = sinv.mitgliedschafts_jahr if sinv.mitgliedschafts_jahr and sinv.mitgliedschafts_jahr > 0 else getdate(sinv.posting_date).strftime("%Y")
-                self.datum_hv_zahlung = sinv.posting_date
-            else:
-                pes = frappe.db.sql("""SELECT `parent` FROM `tabPayment Entry Reference`
-                                        WHERE `reference_doctype` = 'Sales Invoice'
-                                        AND `reference_name` = '{sinv}' ORDER BY `creation` DESC""".format(sinv=sinv.name), as_dict=True)
-                if len(pes) > 0:
-                    pe = frappe.get_doc("Payment Entry", pes[0].parent)
-                    sinv_year = sinv.mitgliedschafts_jahr if sinv.mitgliedschafts_jahr and sinv.mitgliedschafts_jahr > 0 else getdate(pe.reference_date).strftime("%Y")
-                    self.datum_hv_zahlung = pe.reference_date
-            self.zahlung_hv = sinv_year
-        
-        return
-    
-    def check_folgejahr_regelung(self):
-        # prüfe ob Folgejahr Regelung der Sektion aktiviert ist:
-        if cint(frappe.get_value("Sektion", self.sektion_id, "folgejahr_regelung")) == 1:
-            if self.datum_zahlung_mitgliedschaft:
-            # prüfe Mitgliedschaftsjahr
-                datum_zahlung_mitgliedschaft = getdate(self.datum_zahlung_mitgliedschaft)
-                jahr_datum_zahlung_mitgliedschaft = cint(datum_zahlung_mitgliedschaft.strftime("%Y"))
-                bezahltes_mitgliedschaftsjahr = cint(self.bezahltes_mitgliedschaftsjahr)
-                
-                if bezahltes_mitgliedschaftsjahr == jahr_datum_zahlung_mitgliedschaft:
-                    current_year = str(now().split("-")[0])
-                    eintrittsjahr = cint(getdate(self.eintrittsdatum).strftime("%Y"))
-                    if cint(current_year) == eintrittsjahr:
-                        if datum_zahlung_mitgliedschaft >= getdate(current_year + '-09-15') and datum_zahlung_mitgliedschaft <= getdate(current_year + '-12-31'):
-                            self.bezahltes_mitgliedschaftsjahr += 1
-            
-            if self.datum_hv_zahlung:
-                # prüfe HV-Jahr
-                datum_hv_zahlung = getdate(self.datum_hv_zahlung)
-                jahr_datum_hv_zahlung = cint(datum_hv_zahlung.strftime("%Y"))
-                zahlung_hv = cint(self.zahlung_hv)
-                
-                current_year = str(now().split("-")[0])
-                eintrittsjahr = cint(getdate(self.eintrittsdatum).strftime("%Y"))
-                if cint(current_year) == eintrittsjahr:
-                    if zahlung_hv == jahr_datum_hv_zahlung:
-                        current_year = str(now().split("-")[0])
-                        if datum_hv_zahlung >= getdate(current_year + '-09-15') and datum_hv_zahlung <= getdate(current_year + '-12-31'):
-                            self.zahlung_hv += 1
-        
-        return
-        
     def validate_rg_kunde(self):
         if self.rg_kunde:
             update_rg_kunde(self)
@@ -1850,10 +1786,84 @@ def check_main_keys(kwargs):
     else:
         return False
 
+<<<<<<< HEAD
 def get_sektion_code(sektion):
     sektionen = frappe.db.sql("""SELECT `sektion_c` FROM `tabSektion` WHERE `name` = '{sektion}'""".format(sektion=sektion), as_dict=True)
     if len(sektionen) > 0:
         return sektionen[0].sektion_c
+=======
+def get_sektion_id(sektion_c):
+    sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` WHERE `sektion_c` = '{sektion_c}'""".format(sektion_c=sektion_c), as_dict=True)
+    if len(sektionen) > 0:
+        return sektionen[0].name
+    else:
+        return False
+
+def get_sprache_abk(language='Deutsch'):
+    language = frappe.db.sql("""SELECT `name` FROM `tabLanguage` WHERE `language_name` = '{language}'""".format(language=language), as_list=True)
+    if len(language) > 0:
+        return language[0][0]
+    else:
+        return 'de'
+
+def get_status_c(status_c):
+    mapper = {
+        'Anmeldung': 'Anmeldung',
+        'OnlineAnmeldung': 'Online-Anmeldung',
+        'OnlineBeitritt': 'Online-Beitritt',
+        'OnlineKuendigung': 'Online-Kündigung',
+        'Zuzug': 'Zuzug',
+        'Regulaer': 'Regulär',
+        'Gestorben': 'Gestorben',
+        'Kuendigung': 'Kündigung',
+        'Wegzug': 'Wegzug',
+        'Ausschluss': 'Ausschluss',
+        'Inaktiv': 'Inaktiv',
+        'InteressentIn': 'Interessent*in'
+    }
+    if status_c in mapper:
+        return mapper[status_c]
+    else:
+        return False
+
+def get_mitgliedtyp_c(mitgliedtyp_c):
+    mapper = {
+        'privat': 'Privat',
+        'kollektiv': 'Kollektiv',
+        'geschaeft': 'Geschäft',
+        'Privat': 'Privat',
+        'Kollektiv': 'Kollektiv',
+        'Geschaeft': 'Geschäft'
+    }
+    if mitgliedtyp_c.lower() in mapper:
+        return mapper[mitgliedtyp_c.lower()]
+    else:
+        return False
+
+def get_inkl_hv(inkl_hv):
+    curr_year = cint(getdate().strftime("%Y"))
+    if inkl_hv:
+        if cint(inkl_hv) >= curr_year:
+            return 1
+        else:
+            return 0
+    else:
+        return 0
+
+def check_email(email=None):
+    # ~ import re
+    # ~ regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    # ~ if email:
+        # ~ if(re.fullmatch(regex, email)):
+            # ~ return True
+        # ~ else:
+            # ~ frappe.log_error("Folgende E-Mail musste entfernt werden: {0}".format(email), 'Fehlerhafte E-Mail')
+            # ~ return False
+    # ~ else:
+        # ~ return False
+    if email != 'None':
+        return True
+>>>>>>> 825c882 (v11.59.0)
     else:
         return False
 
@@ -1880,6 +1890,7 @@ Dieser Code ist mit SP4 obsolet da ERPNext die ID/Nr Vergabe selbständig durchf
 #     from mvd.mvd.service_plattform.api import mitglieder_nummer_update
 #     return mitglieder_nummer_update(mitgliedId)['mitgliedNummer']
 
+<<<<<<< HEAD
 def send_mvm_to_sp(mitgliedschaft, update):
     if str(get_sektion_code(mitgliedschaft.sektion_id)) not in ('ZH', 'M+W-Abo'):
         if not cint(frappe.db.get_single_value('Service Plattform API', 'queue')) == 1:
@@ -2127,6 +2138,8 @@ def get_sprache(language='de'):
     else:
         return 'Deutsch'
 
+=======
+>>>>>>> 825c882 (v11.59.0)
 # /API
 # -----------------------------------------------
 

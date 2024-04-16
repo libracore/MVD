@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import send_mvm_to_sp
+from mvd.mvd.doctype.mitgliedschaft.utils import send_mvm_to_sp
 from frappe.utils.background_jobs import enqueue
 
 class Region(Document):

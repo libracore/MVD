@@ -898,7 +898,7 @@ def update_adressen(site_name, file_name, limit=False):
         Example:
         sudo bench execute mvd.mvd.data_import.importer.update_adressen --kwargs "{'site_name': 'site1.local', 'file_name': 'hausnummer_zusatz_gefiltert.csv'}"
     '''
-    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_sp_queue
+    from mvd.mvd.doctype.mitgliedschaft.utils import create_sp_queue
     # display all coloumns for error handling
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
     
@@ -1017,7 +1017,7 @@ def update_beitritt(site_name, file_name, limit=False):
         Example:
         sudo bench execute mvd.mvd.data_import.importer.update_beitritt --kwargs "{'site_name': 'site1.local', 'file_name': 'mitglieder_ids_2022.csv'}"
     '''
-    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_sp_queue
+    from mvd.mvd.doctype.mitgliedschaft.utils import create_sp_queue
     # display all coloumns for error handling
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
     
@@ -1061,7 +1061,7 @@ def update_online_payment(site_name, file_name, limit=False):
         Example:
         sudo bench execute mvd.mvd.data_import.importer.update_online_payment --kwargs "{'site_name': 'site1.local', 'file_name': 'mitglied_nr_paymentId_vor_7_Maerz.csv'}"
     '''
-    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_sp_queue
+    from mvd.mvd.doctype.mitgliedschaft.utils import create_sp_queue
     # display all coloumns for error handling
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
     
@@ -1181,7 +1181,7 @@ def nachmigration_fuer_sp():
         sudo bench --site [site_name] execute mvd.mvd.data_import.importer.nachmigration_fuer_sp
     '''
     
-    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import send_mvm_to_sp
+    from mvd.mvd.doctype.mitgliedschaft.utils import send_mvm_to_sp
     
     mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `datum_zahlung_mitgliedschaft` BETWEEN CAST('2022-03-01' AS DATE) AND CAST('2022-05-03' AS DATE)""", as_dict=True)
     submit_counter = 1
@@ -1206,7 +1206,7 @@ def update_region_code(site_name, file_name, limit=False):
         Example:
         sudo bench execute mvd.mvd.data_import.importer.update_region_code --kwargs "{'site_name': 'site1.local', 'file_name': 'update_region_code.csv'}"
     '''
-    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import send_mvm_to_sp
+    from mvd.mvd.doctype.mitgliedschaft.utils import send_mvm_to_sp
     # display all coloumns for error handling
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
     
@@ -1345,7 +1345,7 @@ def nachsendung_auschluss_ohne_eintrittsdatum_an_sp():
         sudo bench --site [site_name] execute mvd.mvd.data_import.importer.nachsendung_auschluss_ohne_eintrittsdatum_an_sp
     '''
     
-    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import send_mvm_to_sp
+    from mvd.mvd.doctype.mitgliedschaft.utils import send_mvm_to_sp
     
     mitgliedschaften = frappe.db.sql("""SELECT DISTINCT
                                             `name`
