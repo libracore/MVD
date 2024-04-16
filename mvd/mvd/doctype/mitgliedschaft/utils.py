@@ -840,3 +840,11 @@ def get_adressen_for_sp(mitgliedschaft):
         adressen.append(rechnung)
     
     return adressen
+
+def get_sprache(language='de'):
+    language = frappe.db.sql("""SELECT `language_name` FROM `tabLanguage` WHERE `name` = '{language}'""".format(language=language), as_list=True)
+    if len(language) > 0:
+        return language[0][0]
+    else:
+        return 'Deutsch'
+
