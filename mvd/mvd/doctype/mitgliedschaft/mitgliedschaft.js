@@ -1079,8 +1079,9 @@ function daten_validiert(frm) {
                     cur_frm.refresh_field('status_change');
                     cur_frm.set_value("status_c", 'Regulär');
                     cur_frm.timeline.insert_comment("Validierung durchgeführt.");
-                    cur_frm.save();
-                    erstelle_begruessungs_korrespondenz(frm);
+                    cur_frm.save().then(function(){
+                        erstelle_begruessungs_korrespondenz(frm);
+                    });
                 } else if (cur_frm.doc.status_c == 'Online-Mutation') {
                     if (cur_frm.doc.status_vor_onl_mutation) {
                         var alter_status = cur_frm.doc.status_vor_onl_mutation;
@@ -2115,6 +2116,7 @@ function erstelle_begruessungs_korrespondenz(frm) {
                     freeze_message: 'Erstelle Korrespondenz...',
                     callback: function(r)
                     {
+                        console.log(r.message)
                         frappe.confirm(
                             'Möchten Sie den Druck des Begrüssungsdokument für den Massenlauf vormerken?',
                             function(){
