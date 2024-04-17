@@ -840,8 +840,9 @@ function kuendigung_rueckzug(frm) {
             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär');
             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Kündigungs Rückzug");
             cur_frm.refresh_field('status_change');
-            cur_frm.save();
-            frappe.msgprint("Die Kündigung wurde zurückgezogen.");
+            cur_frm.save().then(function(){
+                frappe.msgprint("Die Kündigung wurde zurückgezogen.");
+            });
         },
         function(){
             // on no
@@ -874,9 +875,10 @@ function todesfall(frm) {
             if (values.todesfall_uebernahme) {
                 cur_frm.set_value("todesfall_uebernahme", values.todesfall_uebernahme);
             }
-            cur_frm.save();
-            cur_frm.timeline.insert_comment("Todesfall erfasst.");
-            frappe.msgprint("Der Todesfall sowie der damit verbundene Austritt wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
+            cur_frm.save().then(function(){
+                cur_frm.timeline.insert_comment("Todesfall erfasst.");
+                frappe.msgprint("Der Todesfall sowie der damit verbundene Austritt wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
+            });
         },
         'Todesfall',
         'Erfassen'
@@ -908,9 +910,10 @@ function ausschluss(frm) {
                 cur_frm.set_value("wichtig", neue_infos);
             }
             cur_frm.set_value("adressen_gesperrt", 1);
-            cur_frm.save();
-            cur_frm.timeline.insert_comment("Ausschluss vollzogen.");
-            frappe.msgprint("Der Ausschluss wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
+            cur_frm.save().then(function(){
+                cur_frm.timeline.insert_comment("Ausschluss vollzogen.");
+                frappe.msgprint("Der Ausschluss wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.");
+            });
         },
         'Ausschluss',
         'Erfassen'
@@ -1005,9 +1008,10 @@ function sektionswechsel(frm) {
                                 frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Sektionswechsel zu " + values.sektion_neu);
                                 cur_frm.refresh_field('status_change');
                                 cur_frm.set_value("status_c", 'Wegzug');
-                                cur_frm.save();
-                                cur_frm.timeline.insert_comment("Sektionswechsel zu " + values.sektion_neu + " vollzogen.");
-                                frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
+                                cur_frm.save().then(function(){
+                                    cur_frm.timeline.insert_comment("Sektionswechsel zu " + values.sektion_neu + " vollzogen.");
+                                    frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
+                                });
                             } else {
                                 frappe.msgprint("oops, da ist etwas schiefgelaufen!");
                             }
@@ -1044,9 +1048,10 @@ function daten_validiert(frm) {
                             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Zuzugsvalidierung");
                             cur_frm.refresh_field('status_change');
                             cur_frm.set_value("status_c", 'Regulär');
-                            cur_frm.save();
-                            cur_frm.timeline.insert_comment("Validierung durchgeführt.");
-                            frappe.msgprint("Die Daten wurden als validert bestätigt und der Druck des Zuzugsdokument für den Massenlauf vorgemerkt.");
+                            cur_frm.save().then(function(){
+                                cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                                frappe.msgprint("Die Daten wurden als validert bestätigt und der Druck des Zuzugsdokument für den Massenlauf vorgemerkt.");
+                            });
                         },
                         function(){
                             // on no
@@ -1059,16 +1064,18 @@ function daten_validiert(frm) {
                             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Zuzugsvalidierung");
                             cur_frm.refresh_field('status_change');
                             cur_frm.set_value("status_c", 'Regulär');
-                            cur_frm.save();
-                            cur_frm.timeline.insert_comment("Validierung durchgeführt.");
-                            frappe.msgprint("Die Daten wurden als validert bestätigt.");
+                            cur_frm.save().then(function(){
+                                cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                                frappe.msgprint("Die Daten wurden als validert bestätigt.");
+                            });
                         }
                     )
                 } else if (cur_frm.doc.status_c == 'Online-Anmeldung') {
                     cur_frm.set_value("validierung_notwendig", '0');
                     cur_frm.timeline.insert_comment("Validierung durchgeführt.");
-                    cur_frm.save();
-                    erstelle_rechnung(frm);
+                    cur_frm.save().then(function(){
+                        erstelle_rechnung(frm);
+                    });
                 } else if (cur_frm.doc.status_c == 'Online-Beitritt') {
                     cur_frm.set_value("validierung_notwendig", '0');
                     var status_change_log = cur_frm.add_child('status_change');
@@ -1109,21 +1116,23 @@ function daten_validiert(frm) {
                         cur_frm.set_value("validierung_notwendig", '0');
                     }
                     cur_frm.set_value("status_vor_onl_mutation", '');
-                    cur_frm.save();
-                    cur_frm.timeline.insert_comment("Validierung durchgeführt.");
-                    if (cur_frm.doc.ist_geschenkmitgliedschaft) {
-                        frappe.msgprint("Die Daten wurden als validert bestätigt.<br><b>Achtung:</b> es handelt sich um eine Geschenkmitgliedschaft.");
-                    }
+                    cur_frm.save().then(function(){
+                        cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                        if (cur_frm.doc.ist_geschenkmitgliedschaft) {
+                            frappe.msgprint("Die Daten wurden als validert bestätigt.<br><b>Achtung:</b> es handelt sich um eine Geschenkmitgliedschaft.");
+                        }
+                    });
                 } else {
                     cur_frm.set_value("validierung_notwendig", '0');
                     cur_frm.set_value("status_c", 'Regulär');
-                    cur_frm.save();
-                    cur_frm.timeline.insert_comment("Validierung durchgeführt.");
-                    if (cur_frm.doc.ist_geschenkmitgliedschaft) {
-                        frappe.msgprint("Die Daten wurden als validert bestätigt.<br><b>Achtung:</b> es handelt sich um eine Geschenkmitgliedschaft.");
-                    } else {
-                        frappe.msgprint("Die Daten wurden als validert bestätigt.");
-                    }
+                    cur_frm.save().then(function(){
+                        cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                        if (cur_frm.doc.ist_geschenkmitgliedschaft) {
+                            frappe.msgprint("Die Daten wurden als validert bestätigt.<br><b>Achtung:</b> es handelt sich um eine Geschenkmitgliedschaft.");
+                        } else {
+                            frappe.msgprint("Die Daten wurden als validert bestätigt.");
+                        }
+                    });
                 }
             },
             function(){
@@ -1142,9 +1151,10 @@ function kuendigung_verarbeitet(frm) {
             function(){
                 // on yes
                 cur_frm.set_value("kuendigung_verarbeiten", '0');
-                cur_frm.save();
-                cur_frm.timeline.insert_comment("Kündigung verarbeitet.");
-                frappe.msgprint("Die Kündigung wurde aus dem Massenlauf entfernt.");
+                cur_frm.save().then(function(){
+                    cur_frm.timeline.insert_comment("Kündigung verarbeitet.");
+                    frappe.msgprint("Die Kündigung wurde aus dem Massenlauf entfernt.");
+                });
             },
             function(){
                 // on no
@@ -1162,9 +1172,10 @@ function interessent_innenbrief_mit_ez_verarbeitet(frm) {
             function(){
                 // on yes
                 cur_frm.set_value("interessent_innenbrief_mit_ez", '0');
-                cur_frm.save();
-                cur_frm.timeline.insert_comment("Interessent*Innenbrief mit EZ erstellt.");
-                frappe.msgprint("Der Interessent*Innenbrief mit EZ wurde als verarbeitet bestätigt.");
+                cur_frm.save().then(function(){
+                    cur_frm.timeline.insert_comment("Interessent*Innenbrief mit EZ erstellt.");
+                    frappe.msgprint("Der Interessent*Innenbrief mit EZ wurde als verarbeitet bestätigt.");
+                });
             },
             function(){
                 // on no
@@ -1182,9 +1193,10 @@ function anmeldung_mit_ez_verarbeitet(frm) {
             function(){
                 // on yes
                 cur_frm.set_value("anmeldung_mit_ez", '0');
-                cur_frm.save();
-                cur_frm.timeline.insert_comment("Anmeldung mit EZ erstellt.");
-                frappe.msgprint("Die Anmeldung mit EZ wurde als verarbeitet bestätigt.");
+                cur_frm.save().then(function(){
+                    cur_frm.timeline.insert_comment("Anmeldung mit EZ erstellt.");
+                    frappe.msgprint("Die Anmeldung mit EZ wurde als verarbeitet bestätigt.");
+                });
             },
             function(){
                 // on no
@@ -1203,8 +1215,9 @@ function rg_massendruck_verarbeitet(frm) {
                 // on yes
                 cur_frm.set_value("rg_massendruck_vormerkung", '0');
                 cur_frm.set_value("rg_massendruck", '');
-                cur_frm.save();
-                frappe.msgprint("Der Druck der Mitgliedschaftsrechnung wurde aus dem Massenlauf entfernt.");
+                cur_frm.save().then(function(){
+                    frappe.msgprint("Der Druck der Mitgliedschaftsrechnung wurde aus dem Massenlauf entfernt.");
+                });
             },
             function(){
                 // on no
@@ -1224,8 +1237,9 @@ function begruessung_massendruck_verarbeitet(frm) {
                 cur_frm.set_value("begruessung_massendruck", '0');
                 cur_frm.set_value("begruessung_via_zahlung", '0');
                 cur_frm.set_value("begruessung_massendruck_dokument", '');
-                cur_frm.save();
-                frappe.msgprint("Der Druck des Begrüssungsschreibens wurde aus dem Massenlauf entfernt.");
+                cur_frm.save().then(function(){
+                    frappe.msgprint("Der Druck des Begrüssungsschreibens wurde aus dem Massenlauf entfernt.");
+                });
             },
             function(){
                 // on no
@@ -2125,15 +2139,17 @@ function erstelle_begruessungs_korrespondenz(frm) {
                                 cur_frm.set_value("begruessung_massendruck_dokument", r.message);
                                 cur_frm.set_value("validierung_notwendig", '0');
                                 cur_frm.set_value("status_c", 'Regulär');
-                                cur_frm.save();
-                                frappe.msgprint("Die Daten wurden als validert bestätigt und der Druck des Begrüssungsdokument für den Massenlauf vorgemerkt.");
+                                cur_frm.save().then(function(){
+                                    frappe.msgprint("Die Daten wurden als validert bestätigt und der Druck des Begrüssungsdokument für den Massenlauf vorgemerkt.");
+                                });
                             },
                             function(){
                                 // on no
                                 cur_frm.set_value("validierung_notwendig", '0');
                                 cur_frm.set_value("status_c", 'Regulär');
-                                cur_frm.save();
-                                frappe.msgprint("Die Daten wurden als validert bestätigt, das erstellte Begrüssungsdokument finden Sie unter Korrespondenz.");
+                                cur_frm.save().then(function(){
+                                    frappe.msgprint("Die Daten wurden als validert bestätigt, das erstellte Begrüssungsdokument finden Sie unter Korrespondenz.");
+                                });
                             }
                         )
                     }
@@ -2240,8 +2256,9 @@ function mitglied_inaktivieren(frm) {
             cur_frm.refresh_field('status_change');
             cur_frm.set_value("status_c", 'Inaktiv');
             cur_frm.set_value("austritt", frappe.datetime.get_today());
-            cur_frm.save();
-            frappe.msgprint("Das Mitglied wurde inaktiviert.");
+            cur_frm.save().then(function(){
+                frappe.msgprint("Das Mitglied wurde inaktiviert.");
+            });
         },
         function(){
             // on no
