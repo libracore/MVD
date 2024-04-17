@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.60.3
+#909; Korrektur Schönheitsfehler Mitgliedschaft-Übersicht (Dashboard)
 #### 11.60.2
 #915; Verhinderung RaiseTimeIssue
 #### 11.60.1

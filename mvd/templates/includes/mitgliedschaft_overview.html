@@ -298,7 +298,9 @@
                         {% if rg_kontakt.salutation %}
                             {{ rg_kontakt.salutation }}<br>
                         {% endif %}
-                        {{ rg_kontakt.first_name or '' }} {{ rg_kontakt.last_name or '' }}
+                        {% if rg_kunde.customer_name != rg_kontakt.first_name %}
+                            {{ rg_kontakt.first_name or '' }} {{ rg_kontakt.last_name or '' }}
+                        {% endif %}
                     </p>
                 {% endif %}
             {% endif %}
