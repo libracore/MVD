@@ -12,6 +12,8 @@
   "disabled",
   "ort",
   "section_default_einteilung",
+  "arbeitsplan_standardzeit",
+  "section_old",
   "monday",
   "tuesday",
   "wednesday",
@@ -80,8 +82,7 @@
   },
   {
    "fieldname": "section_default_einteilung",
-   "fieldtype": "Section Break",
-   "label": "Standardzeiten f\u00fcr Arbeitsplan Einteilung"
+   "fieldtype": "Section Break"
   },
   {
    "default": "0",
@@ -248,9 +249,20 @@
    "fieldtype": "Select",
    "label": "Art",
    "options": "Ohne Einschr\u00e4nkung\ntelefonisch\nE-Mail\npers\u00f6nlich"
+  },
+  {
+   "fieldname": "arbeitsplan_standardzeit",
+   "fieldtype": "Table",
+   "label": "Standardzeiten f\u00fcr Arbeitsplan Einteilung",
+   "options": "Arbeitsplan Standardzeit"
+  },
+  {
+   "fieldname": "section_old",
+   "fieldtype": "Section Break",
+   "label": "old"
   }
  ],
- "modified": "2024-01-08 15:18:39.433791",
+ "modified": "2024-04-18 15:31:44.241479",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin Kontaktperson",

@@ -1,0 +1,55 @@
+{
+ "creation": "2024-04-18 15:30:10.263019",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "day",
+  "from",
+  "to",
+  "art"
+ ],
+ "fields": [
+  {
+   "fieldname": "day",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Tag",
+   "options": "Montag\nDienstag\nMittwoch\nDonnerstag\nFreitag\nSamstag\nSonntag",
+   "reqd": 1
+  },
+  {
+   "fieldname": "from",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Von",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Bis",
+   "reqd": 1
+  },
+  {
+   "fieldname": "art",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Art",
+   "options": "Ohne Einschr\u00e4nkung\ntelefonisch\nE-Mail\npers\u00f6nlich",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2024-04-18 15:30:10.263019",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Arbeitsplan Standardzeit",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
