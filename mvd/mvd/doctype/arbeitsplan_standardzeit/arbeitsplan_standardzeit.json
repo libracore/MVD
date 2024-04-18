@@ -7,7 +7,7 @@
   "day",
   "from",
   "to",
-  "art"
+  "ort"
  ],
  "fields": [
   {
@@ -33,16 +33,16 @@
    "reqd": 1
   },
   {
-   "fieldname": "art",
-   "fieldtype": "Data",
+   "fieldname": "ort",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Art",
-   "options": "Ohne Einschr\u00e4nkung\ntelefonisch\nE-Mail\npers\u00f6nlich",
+   "label": "Ort / Art",
+   "options": "Beratungsort",
    "reqd": 1
   }
  ],
  "istable": 1,
- "modified": "2024-04-18 15:30:10.263019",
+ "modified": "2024-04-18 15:42:52.299022",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Arbeitsplan Standardzeit",
