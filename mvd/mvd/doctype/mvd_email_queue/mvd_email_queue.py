@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.core.doctype.communication.email import make
 from frappe import sendmail, get_print
+from frappe.utils import cint
 from mvd.mvd.doctype.druckvorlage.druckvorlage import replace_mv_keywords
 
 class MVDEmailQueue(Document):
@@ -24,7 +25,9 @@ class MVDEmailQueue(Document):
             self.status = 'Not send'
         
         # send if necessary and allowed
-        allowed_to_send = int(frappe.get_value('MVD Settings', 'MVD Settings', 'email_queue'))
+        allowed_to_send = cint(frappe.get_value('MVD Settings', 'MVD Settings', 'email_queue'))
+        if cint(self.blocked) == 1:
+            allowed_to_send = False
         if self.status != 'Send' and allowed_to_send == 1:
             send_counter = 0
             max_mails = int(frappe.get_value('MVD Settings', 'MVD Settings', 'emails_per_flush'))
