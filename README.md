@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.60.4
+#920 MVD Email Queue Blockier Möglichkeit
 #### 11.60.3
 #909; Korrektur Schönheitsfehler Mitgliedschaft-Übersicht (Dashboard)
 #### 11.60.2
