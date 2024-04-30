@@ -103,6 +103,7 @@ def check_zahlung_mitgliedschaft(mitgliedschaft, db_direct=False):
             frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'begruessung_massendruck', 1)
             frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'begruessung_via_zahlung', 1)
             frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'begruessung_massendruck_dokument', begruessung_massendruck_dokument)
+            get_and_set_mitgliednr(mitgliedschaft.name)
     
     # prüfe offene Rechnungen bei sektionswechsel
     if mitgliedschaft.status_c == 'Wegzug':
@@ -393,4 +394,14 @@ def create_zahlungseingang_change_log_row(mitgliedschaft, status_alt):
         "grund": 'Zahlungseingang',
         "idx": idx
     }).insert()
+    return
+
+def get_and_set_mitgliednr(mitgliedId):
+    from mvd.mvd.service_plattform.api import mitglieder_nummer_update
+    try:
+        mitgliedNr = mitglieder_nummer_update(mitgliedId)['mitgliedNummer']
+        frappe.db.set_value("Mitgliedschaft", mitgliedId, 'mitglied_nr', mitgliedNr)
+    except Exception as err:
+        frappe.log_error("Mitgliednummer für Mitglied {0} konnte nicht bezogen werden".format(mitgliedId), 'get_and_set_mitgliednr')
+        pass
     return
