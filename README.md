@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.60.5
+#922 Bugfix Fehlende Mitgliedernr. bei Umwandlung Interessent durch Zahlung
 #### 11.60.4
 #920 MVD Email Queue Blockier Möglichkeit
 #### 11.60.3
