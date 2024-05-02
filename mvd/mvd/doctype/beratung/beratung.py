@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils.data import today, now
+from frappe.utils.data import today, now, getdate
 import json
 from bs4 import BeautifulSoup
 from frappe.utils import cint
@@ -36,11 +36,23 @@ class Beratung(Document):
         # MVBE-HACK
         if self.status == 'Rückfrage: Termin vereinbaren' and self.sektion_id == 'MVBE':
             if self.kontaktperson and len(self.termin) > 0:
-                self.status = 'Termin vereinbart'
+                found_past_termin = False
+                for termin in self.termin:
+                    if getdate(termin.von) < getdate(now()):
+                        found_past_termin = True
+                
+                if not found_past_termin:
+                    self.status = 'Termin vereinbart'
         
         if self.kontaktperson and len(self.termin) > 0:
             if self.status in ('Eingang', 'Open'):
-                self.status = 'Termin vereinbart'
+                found_past_termin = False
+                for termin in self.termin:
+                    if getdate(termin.von) < getdate(now()):
+                        found_past_termin = True
+                
+                if not found_past_termin:
+                    self.status = 'Termin vereinbart'
         
         # Statistik handling -> closed date tracker
         if self.status == 'Closed':
@@ -104,8 +116,14 @@ class Beratung(Document):
         if frappe.db.exists("Beratung", self.name):
             # Beratung existiert und wurde verändert
             if len(self.termin) > 0 and self.status not in ('Closed', 'Nicht-Mitglied-Abgewiesen'):
-                # Manuelle Anlage via "Termin erstellen"
-                self.status = 'Termin vereinbart'
+                found_past_termin = False
+                for termin in self.termin:
+                    if getdate(termin.von) < getdate(now()):
+                        found_past_termin = True
+                
+                if not found_past_termin:
+                    # Manuelle Anlage via "Termin erstellen"
+                    self.status = 'Termin vereinbart'
             else:
                 if self.status not in ('Rückfragen', 'Rückfrage: Termin vereinbaren', 'Closed', 'Nicht-Mitglied-Abgewiesen'):
                     alter_status = frappe.db.get_value("Beratung", self.name, 'status')
@@ -157,8 +175,14 @@ class Beratung(Document):
                     # Anlage manuell
                     self.status = 'Eingang'
                     if len(self.termin) > 0:
-                        # Manuelle Anlage via "Termin erstellen"
-                        self.status = 'Termin vereinbart'
+                        found_past_termin = False
+                        for termin in self.termin:
+                            if getdate(termin.von) < getdate(now()):
+                                found_past_termin = True
+                        
+                        if not found_past_termin:
+                            # Manuelle Anlage via "Termin erstellen"
+                            self.status = 'Termin vereinbart'
     
     def zuweisung_default_berater_in(self):
         if self.sektion_id:
