@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.61.0
+#924 Status Beratung Termin vereinbart nur wenn der Termin in der Zukunft liegt
 #### 11.60.5
 #922 Bugfix Fehlende Mitgliedernr. bei Umwandlung Interessent durch Zahlung
 #### 11.60.4
