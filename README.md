@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 11.61.2
+#921 S8 MVBE Umbenannt
 #### 11.61.1
 #923 Resolve "mysql Deadlock bei CAMT-Import" 
 #### 11.61.0
