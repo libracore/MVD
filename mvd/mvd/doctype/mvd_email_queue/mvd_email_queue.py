@@ -134,7 +134,7 @@ def get_recipients(mahnung):
             return [kunde.e_mail]
 
 def mvd_mail_flush():
-    mail_queues = frappe.db.sql("""SELECT `name` FROM `tabMVD Email Queue` WHERE `status` != 'Send' ORDER BY `creation` ASC LIMIT 1""", as_dict=True)
+    mail_queues = frappe.db.sql("""SELECT `name` FROM `tabMVD Email Queue` WHERE `status` != 'Send' AND `blocked` != 1 ORDER BY `creation` ASC LIMIT 1""", as_dict=True)
     if len(mail_queues) > 0:
         queue = frappe.get_doc("MVD Email Queue", mail_queues[0].name)
         queue.save()
