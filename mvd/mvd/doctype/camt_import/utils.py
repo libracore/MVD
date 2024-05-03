@@ -275,6 +275,8 @@ def verbuche_matches(camt_import):
             commit_counter += 1
     
     camt_status_update(camt_import, 'Verarbeitet')
+    frappe.db.commit()
+    return
 
 @frappe.whitelist()
 def suche_mitgliedschaft_aus_pe(payment_entry):
