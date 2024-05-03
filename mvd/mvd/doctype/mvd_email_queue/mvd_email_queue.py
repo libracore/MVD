@@ -109,13 +109,19 @@ class MVDEmailQueue(Document):
         
         # post send sended check
         sended = 0
+        failed = 0
         for mahnung_row in self.mahnungen:
             if mahnung_row.status == 'Send':
                 sended += 1
+            if mahnung_row.status == 'Failed':
+                failed += 1
         if sended == len(self.mahnungen):
             self.status = 'Send'
         elif sended > 0:
-            self.status = 'Partially send'
+            if (sended + failed) == len(self.mahnungen):
+                self.status = 'Sending finished with errors'
+            else:
+                self.status = 'Partially send'
         else:
             self.status = 'Not send'
 
