@@ -43,7 +43,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Not send\nPartially send\nSend"
+   "options": "Not send\nPartially send\nSending finished with errors\nSend"
   },
   {
    "default": "0",
@@ -53,7 +53,7 @@
    "permlevel": 1
   }
  ],
- "modified": "2024-04-29 11:22:55.617070",
+ "modified": "2024-05-03 13:51:32.637224",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Email Queue",
