@@ -7,7 +7,7 @@
   "date",
   "from_time",
   "to_time",
-  "art",
+  "art_ort",
   "beratungsperson"
  ],
  "fields": [
@@ -41,16 +41,16 @@
    "reqd": 1
   },
   {
-   "fieldname": "art",
-   "fieldtype": "Select",
+   "fieldname": "art_ort",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Art",
-   "options": "Ohne Einschr\u00e4nkung\ntelefonisch\nE-Mail\npers\u00f6nlich",
+   "label": "Ort / Art",
+   "options": "Beratungsort",
    "reqd": 1
   }
  ],
  "istable": 1,
- "modified": "2024-01-08 15:06:30.661386",
+ "modified": "2024-05-07 10:34:20.715920",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "APB Zuweisung",

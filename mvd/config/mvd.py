@@ -137,6 +137,12 @@ def get_data():
                 },
                 {
                     "type": "doctype",
+                    "name": "Termin Kontaktperson",
+                    "label": _("Berater*inn"),
+                    "description": _("Berater*inn")
+                },
+                {
+                    "type": "doctype",
                     "name": "Arbeitsplan Beratung",
                     "label": _("Arbeitspläne"),
                     "description": _("Arbeitsplan Beratung")
