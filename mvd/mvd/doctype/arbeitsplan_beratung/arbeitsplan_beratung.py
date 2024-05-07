@@ -127,7 +127,7 @@ def bereinigt_mit_erfassten_termine(beratungsperson, datum):
                                                 datum=beratungsperson.date), as_dict=True)
     if len(erfasste_termine) > 0:
         return_html = "{0} / {1} ({2} - {3}): {4}<br>".format(getdate(beratungsperson.date).strftime("%d.%m.%Y"), \
-                                                        beratungsperson.art, \
+                                                        beratungsperson.art_ort, \
                                                         beratungsperson.from_time, \
                                                         beratungsperson.to_time, \
                                                         beratungsperson.beratungsperson)
@@ -142,7 +142,7 @@ def bereinigt_mit_erfassten_termine(beratungsperson, datum):
         return return_html
     else:
         return "{0} / {1} ({2} - {3}): {4}<br>".format(getdate(beratungsperson.date).strftime("%d.%m.%Y"), \
-                                                        beratungsperson.art, \
+                                                        beratungsperson.art_ort, \
                                                         beratungsperson.from_time, \
                                                         beratungsperson.to_time, \
                                                         beratungsperson.beratungsperson)
