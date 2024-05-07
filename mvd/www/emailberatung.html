@@ -511,6 +511,7 @@
                                                         </td>
                                                     </tr>
                                                 </table>
+                                                
                                                 <div class="button-wrapper">
                                                     <script type="text/javascript">
                                                         function mgnlFormHandleBackButton(el) {
@@ -524,9 +525,13 @@
                                                             el.form.submit()
                                                         }
                                                     </script>
+                                                    {% if sektion == 'MVBE' %}
+                                                        <input type="checkbox" id="termin_vereinbaren_cb" name="termin_vereinbaren_cb" value="hallo">&nbsp;Ich möchte einen Termin vereinbaren, bitte nehmen Sie Kontakt mit mir auf.</input><br><br>
+                                                    {% endif %}
                                                     <input type="submit" onclick="return mgnlFormHandleBackButton(this)" value="Abbrechen">
                                                     <input type="button" value="Beratungsanfrage senden" onclick="new_onlineberatung();">
                                                 </div>
+                                                
                                                 <!-- end navigation-button-wrapper -->
                                             </fieldset>
                                         </form>

@@ -147,14 +147,15 @@ class Beratung(Document):
             # Beratung wird aktuell angelegt
             if self.anlage_durch_web_formular:
                 # anlage via web formular
-                self.status = 'Eingang'
                 '''
                 Achtung MVBE-Hack
                 '''
-                if self.beratungskategorie not in ('202 - MZ-Erhöhung', '300 - Nebenkosten'):
-                    self.status = 'Open'
-                    # Zuweisung Defaultberater*in
-                    self.zuweisung_default_berater_in()
+                if self.sektion_id == 'MVBE':
+                    if self.status == 'Eingang':
+                        if self.beratungskategorie not in ('202 - MZ-Erhöhung', '300 - Nebenkosten'):
+                            self.status = 'Open'
+                            # Zuweisung Defaultberater*in
+                            self.zuweisung_default_berater_in()
                 '''
                 /MVBE-Hack
                 '''

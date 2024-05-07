@@ -166,6 +166,7 @@ def new_beratung(**kwargs):
             sektion = frappe.db.get_value("Mitgliedschaft", args['mv_mitgliedschaft'], "sektion_id")
             thema = None
             beratungskategorie = None
+            termin_vereinbaren = False
             if sektion == 'MVBE':
                 if args['thema'] != 'anderes':
                     thema = args['thema']
@@ -173,6 +174,8 @@ def new_beratung(**kwargs):
                         beratungskategorie = '202 - MZ-Erhöhung'
                     elif args['thema'] == 'Heiz- und Nebenkosten':
                         beratungskategorie = '300 - Nebenkosten'
+                if args['termin_vereinbaren']:
+                    termin_vereinbaren = True
             else:
                 if args['mz'] == '1':
                     beratungskategorie = '202 - MZ-Erhöhung'
@@ -201,7 +204,7 @@ def new_beratung(**kwargs):
             
             new_ber = frappe.get_doc({
                 'doctype': 'Beratung',
-                'status': 'Eingang',
+                'status': 'Rückfrage: Termin vereinbaren' if termin_vereinbaren else 'Eingang',
                 'subject': thema,
                 'beratungskategorie': beratungskategorie,
                 'mv_mitgliedschaft': args['mv_mitgliedschaft'],
@@ -211,7 +214,8 @@ def new_beratung(**kwargs):
                 'anderes_mietobjekt': args['anderes_mietobjekt'] if args['anderes_mietobjekt'] else None,
                 'frage': args['frage'] if args['frage'] else None,
                 'datum_mietzinsanzeige': args['datum_mietzinsanzeige'] if args['datum_mietzinsanzeige'] else None,
-                'anlage_durch_web_formular': 1
+                'anlage_durch_web_formular': 1,
+                'sektion_id': sektion
             })
             new_ber.insert(ignore_permissions=True)
             frappe.db.commit()
