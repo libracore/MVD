@@ -79,6 +79,10 @@ frappe.vbz_beratung = {
             frappe.route_options = {"status": 'Zusammengeführt', "ungelesen": 1, "sektion_id": "MVBE"}
             frappe.set_route("List", "Beratung", "List");
         });
+        $("#s10").click(function(){
+            frappe.route_options = {"hat_termine": 1, "ungelesen": 1, "sektion_id": "MVBE"}
+            frappe.set_route("List", "Beratung", "List");
+        });
         
         $("#r").click(function(){
             frappe.route_options = {"status": 'Open', "sektion_id": "MVBE"}
