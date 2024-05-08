@@ -12,6 +12,7 @@ function new_onlineberatung() {
                 'frage': document.getElementById("frage").value,
                 'datum_mietzinsanzeige': document.getElementById("datum_mietzinsanzeige").value,
                 'thema': sektion_id == 'MVBE' ? document.getElementById("themen_wahl").value:'',
+                'termin_vereinbaren': sektion_id == 'MVBE' ? document.getElementById("termin_vereinbaren_cb").checked:'',
                 'mz': localStorage.getItem('mz_anfrage')
             }
             frappe.call({

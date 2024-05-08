@@ -5525,3 +5525,7 @@ border-radius: 2px;
 padding: 3px;
 z-index: 3;
 }
+
+#termin_vereinbaren_cb {
+    position: relative;
+}
