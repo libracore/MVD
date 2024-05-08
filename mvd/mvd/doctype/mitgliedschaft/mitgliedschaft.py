@@ -215,6 +215,10 @@ class Mitgliedschaft(Document):
     
     def get_region(self):
         plz = ''.join(filter(str.isdigit, self.plz)) # remove characters except digits (e.g.: 'D-12345' -> '12345')
+        
+        if len(plz) < 1:
+            return None
+        
         region = frappe.db.sql("""SELECT
                                     `parent`
                                 FROM `tabRegion PLZ`
