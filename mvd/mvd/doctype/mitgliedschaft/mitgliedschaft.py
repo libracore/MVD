@@ -36,6 +36,11 @@ class Mitgliedschaft(Document):
         return
     
     def validate(self):
+        # Hotfix ISS-2024-60 / #942
+        zuzugsdatum = None
+        if self.zuzug:
+            zuzugsdatum = self.zuzug
+
         if not self.validierung_notwendig or str(self.validierung_notwendig) == '0':
             # entferne Telefonnummern mit vergessenen Leerschlägen
             self.remove_unnecessary_blanks()
@@ -137,8 +142,16 @@ class Mitgliedschaft(Document):
             # halte ggf. Faktura Kunde synchron
             self.check_faktura_kunde()
             
+            # Hotfix ISS-2024-60 / #942
+            if not self.zuzug and zuzugsdatum:
+                self.zuzug = zuzugsdatum
+
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             sp_updater(self)
+        
+        # Hotfix ISS-2024-60 / #942
+        if not self.zuzug and zuzugsdatum:
+            self.zuzug = zuzugsdatum
     
     def email_validierung(self, check=False):
         import re
