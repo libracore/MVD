@@ -624,42 +624,52 @@ function termin_quick_entry(frm) {
                         {'fieldname': 'notiz', 'fieldtype': 'Text Editor', 'label': __('Notiz (Intern)')}
                     ],
                     'primary_action': function() {
-                            d.hide();
-                            var child = cur_frm.add_child('termin');
-                            frappe.model.set_value(child.doctype, child.name, 'von', d.get_value('von'));
-                            frappe.model.set_value(child.doctype, child.name, 'bis', d.get_value('bis'));
-                            frappe.model.set_value(child.doctype, child.name, 'art', d.get_value('art'));
-                            frappe.model.set_value(child.doctype, child.name, 'ort', d.get_value('ort'));
-                            frappe.model.set_value(child.doctype, child.name, 'berater_in', d.get_value('kontaktperson'));
-                            cur_frm.refresh_field('termin');
-                            cur_frm.set_value("kontaktperson", d.get_value('kontaktperson'));
-                            cur_frm.set_value("notiz", d.get_value('notiz'));
-                            cur_frm.save();
-                            frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_terminbestaetigung_email_template').then(function(value){
-                                if (value.message.default_terminbestaetigung_email_template) {
-                                    cur_frm['default_terminbestaetigung_email_template'] = value.message.default_terminbestaetigung_email_template;
-                                    frappe.mvd.new_mail(cur_frm);
-                                    cur_frm['default_terminbestaetigung_email_template'] = false;
-                                } else {
-                                    frappe.call({
-                                        method: "mvd.mvd.doctype.beratung.beratung.get_termin_mail_txt",
-                                        args:{
-                                            'von': d.get_value('von'),
-                                            'bis': d.get_value('bis'),
-                                            'art': d.get_value('art')||'',
-                                            'ort': d.get_value('ort')||'',
-                                            'telefonnummer': d.get_value('telefonnummer')||''
-                                        },
-                                        callback: function(r) {
-                                            if (r.message) {
-                                                frappe.mvd.new_mail(cur_frm, "", false, r.message);
-                                            } else {
-                                                frappe.mvd.new_mail(cur_frm);
+                        d.hide();
+                        var child = cur_frm.add_child('termin');
+                        frappe.model.set_value(child.doctype, child.name, 'von', d.get_value('von'));
+                        frappe.model.set_value(child.doctype, child.name, 'bis', d.get_value('bis'));
+                        frappe.model.set_value(child.doctype, child.name, 'art', d.get_value('art'));
+                        frappe.model.set_value(child.doctype, child.name, 'ort', d.get_value('ort'));
+                        frappe.model.set_value(child.doctype, child.name, 'berater_in', d.get_value('kontaktperson'));
+                        cur_frm.refresh_field('termin');
+                        cur_frm.set_value("kontaktperson", d.get_value('kontaktperson'));
+                        cur_frm.set_value("notiz", d.get_value('notiz'));
+                        cur_frm.save();
+                        frappe.call({
+                            method: "mvd.mvd.doctype.beratung.beratung.set_termin_block_as_used",
+                            args:{
+                                'von': d.get_value('von'),
+                                'bis': d.get_value('bis'),
+                                'kontaktperson': d.get_value('kontaktperson')
+                            },
+                            callback: function(r) {
+                                frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_terminbestaetigung_email_template').then(function(value){
+                                    if (value.message.default_terminbestaetigung_email_template) {
+                                        cur_frm['default_terminbestaetigung_email_template'] = value.message.default_terminbestaetigung_email_template;
+                                        frappe.mvd.new_mail(cur_frm);
+                                        cur_frm['default_terminbestaetigung_email_template'] = false;
+                                    } else {
+                                        frappe.call({
+                                            method: "mvd.mvd.doctype.beratung.beratung.get_termin_mail_txt",
+                                            args:{
+                                                'von': d.get_value('von'),
+                                                'bis': d.get_value('bis'),
+                                                'art': d.get_value('art')||'',
+                                                'ort': d.get_value('ort')||'',
+                                                'telefonnummer': d.get_value('telefonnummer')||''
+                                            },
+                                            callback: function(r) {
+                                                if (r.message) {
+                                                    frappe.mvd.new_mail(cur_frm, "", false, r.message);
+                                                } else {
+                                                    frappe.mvd.new_mail(cur_frm);
+                                                }
                                             }
-                                        }
-                                    });
-                                }
-                            });
+                                        });
+                                    }
+                                });
+                            }
+                        });
                     },
                     'primary_action_label': __('Erstellen')
                     });

@@ -8,7 +8,8 @@
   "from_time",
   "to_time",
   "art_ort",
-  "beratungsperson"
+  "beratungsperson",
+  "verwendet"
  ],
  "fields": [
   {
@@ -47,10 +48,15 @@
    "label": "Ort / Art",
    "options": "Beratungsort",
    "reqd": 1
+  },
+  {
+   "fieldname": "verwendet",
+   "fieldtype": "Int",
+   "label": "Verwendet"
   }
  ],
  "istable": 1,
- "modified": "2024-05-07 10:34:20.715920",
+ "modified": "2024-05-16 13:29:19.371945",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "APB Zuweisung",

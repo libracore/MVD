@@ -138,16 +138,18 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None):
                     'ort': zugeteilte_beratungsperson.art_ort.replace("({sektion})".format(sektion=sektion), ""),
                     'from_time': zugeteilte_beratungsperson.from_time,
                     'to_time': zugeteilte_beratungsperson.to_time,
-                    'beratungsperson': zugeteilte_beratungsperson.beratungsperson.replace("({sektion})".format(sektion=sektion), "")
+                    'beratungsperson': zugeteilte_beratungsperson.beratungsperson.replace("({sektion})".format(sektion=sektion), ""),
+                    'color': 'green' if zugeteilte_beratungsperson.verwendet == 0 else 'orange' if zugeteilte_beratungsperson.verwendet < 100 else 'red'
                 }
                 zugeteilte_beratungspersonen_liste.append(x)
             sorted_list = sorted(zugeteilte_beratungspersonen_liste, key = lambda x: (x['ort'], x['from_time'], x['beratungsperson']))
             for entry in sorted_list:
                 verfuegbarkeiten_html += """
-                    <p>{from_time} - {to_time} / {ort} / {beratungsperson}</p>
+                    <p><span class="indicator {color}">&nbsp;</span>{from_time} - {to_time} / {ort} / {beratungsperson}</p>
                 """.format(from_time=':'.join(str(entry['from_time']).split(':')[:2]), \
                            to_time=':'.join(str(entry['to_time']).split(':')[:2]), \
-                            ort=entry['ort'], beratungsperson=entry['beratungsperson'])
+                            ort=entry['ort'], beratungsperson=entry['beratungsperson'], \
+                            color=entry['color'] )
         else:
             verfuegbarkeiten_html += """<p>Kein(e) Berater*in verfügbar</p>"""
         von_datum += delta

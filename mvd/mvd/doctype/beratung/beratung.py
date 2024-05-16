@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils.data import today, now, getdate
+from frappe.utils.data import today, now, getdate, get_datetime
 import json
 from bs4 import BeautifulSoup
 from frappe.utils import cint
@@ -777,8 +777,7 @@ def erstelle_todo(owner, beratung, description=False, datum=False, notify=0, mit
 @frappe.whitelist()
 def get_termin_mail_txt(von, bis, art, ort, telefonnummer):
     von_datum = getdate(von)
-    bis_datum = getdate(bis)
-    ort_info = frappe.db.get_value("Ort", "infofeld") or 'Keine ortsspezifische Angaben'
+    ort_info = frappe.db.get_value("Beratungsort", ort, "infofeld") or 'Keine ortsspezifische Angaben'
     mail_txt = """
         <div>
             Termin vom {wochentag}, {datum}, {von} bis {bis}<br>
@@ -790,3 +789,31 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer):
                ort_info=ort_info, telefonnummer="Telefonnummer: {0}".format(telefonnummer or 'Keine Angaben' if art == 'telefonisch' else ''))
 
     return mail_txt
+
+@frappe.whitelist()
+def set_termin_block_as_used(von, bis, kontaktperson):
+    from_datetime = get_datetime(von)
+    to_datetime = get_datetime(bis)
+    arbeitsplan_einteilung = frappe.db.sql("""
+                                            SELECT *
+                                            FROM `tabAPB Zuweisung`
+                                            WHERE `date` = '{von_datum}'
+                                            AND `from_time` <= '{from_time}'
+                                            AND `to_time` > '{from_time}'
+                                            AND `beratungsperson` = '{kontaktperson}'
+                                        """.format(von_datum=from_datetime.strftime('%Y-%m-%d'), \
+                                                   from_time=from_datetime.strftime('%H:%M:%S'), \
+                                                   to_time=from_datetime.strftime('%H:%M:%S'), \
+                                                    kontaktperson=kontaktperson), as_dict=True)
+    if len(arbeitsplan_einteilung) > 0:
+        termin_block_minutes = to_datetime - from_datetime
+        termin_block_seconds = termin_block_minutes.total_seconds()
+        arbeitsplan_einteilung_minutes = get_datetime("2000-01-01 {0}".format(arbeitsplan_einteilung[0].to_time)) - get_datetime("2000-01-01 {0}".format(arbeitsplan_einteilung[0].from_time))
+        arbeitsplan_einteilung_seconds = arbeitsplan_einteilung_minutes.total_seconds()
+
+        if arbeitsplan_einteilung_seconds <= termin_block_seconds:
+            frappe.db.set_value("APB Zuweisung", arbeitsplan_einteilung[0].name, 'verwendet', 100)
+        else:
+            delta = int((100 / arbeitsplan_einteilung_seconds) * termin_block_seconds)
+            frappe.db.set_value("APB Zuweisung", arbeitsplan_einteilung[0].name, 'verwendet', delta)
+    return
