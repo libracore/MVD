@@ -11,6 +11,8 @@
   "sektion_id",
   "disabled",
   "ort",
+  "cb_1",
+  "dispositions_hinweis",
   "section_default_einteilung",
   "arbeitsplan_standardzeit"
  ],
@@ -57,9 +59,18 @@
    "fieldtype": "Table",
    "label": "Standardzeiten",
    "options": "Arbeitsplan Standardzeit"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dispositions_hinweis",
+   "fieldtype": "Data",
+   "label": "Dispositions Hinweis"
   }
  ],
- "modified": "2024-05-07 10:14:22.108215",
+ "modified": "2024-05-16 11:05:15.721954",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin Kontaktperson",

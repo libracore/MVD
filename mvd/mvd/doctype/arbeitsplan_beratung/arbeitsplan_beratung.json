@@ -12,6 +12,7 @@
   "description",
   "amended_from",
   "section_einteilung",
+  "dispositions_hinweis",
   "einteilung"
  ],
  "fields": [
@@ -67,10 +68,15 @@
    "fieldtype": "Table",
    "label": "Einteilung",
    "options": "APB Zuweisung"
+  },
+  {
+   "fieldname": "dispositions_hinweis",
+   "fieldtype": "Small Text",
+   "label": "Dispositions Hinweis"
   }
  ],
  "is_submittable": 1,
- "modified": "2023-12-05 11:20:02.452064",
+ "modified": "2024-05-16 10:57:23.918407",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Arbeitsplan Beratung",

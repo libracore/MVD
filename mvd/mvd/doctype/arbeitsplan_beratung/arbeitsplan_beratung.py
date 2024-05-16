@@ -54,7 +54,8 @@ class ArbeitsplanBeratung(Document):
                                                     `as`.`parent` AS `beratungsperson`,
                                                     `as`.`from` AS `from_time`,
                                                     `as`.`to` AS `to_time`,
-                                                    `as`.`ort` AS `art_ort`
+                                                    `as`.`ort` AS `art_ort`,
+                                                    `tk`.`dispositions_hinweis`
                                                 from `tabArbeitsplan Standardzeit` AS `as`
                                                 LEFT JOIN `tabTermin Kontaktperson` AS `tk` ON `as`.`parent` = `tk`.`name`
                                                 WHERE `tk`.`sektion_id` = '{sektion}'
@@ -70,6 +71,8 @@ class ArbeitsplanBeratung(Document):
         end_date = getdate(self.to_date)
         delta = timedelta(days=1)
         einteilung_list = []
+        dispositions_hinweise = {}
+        dispositions_hinweise_txt = ""
 
         while start_date <= end_date:
             beratungspersonen = get_beratungspersonen(start_date.weekday(), self.sektion_id)
@@ -82,6 +85,9 @@ class ArbeitsplanBeratung(Document):
                     x['art_ort'] = beratungsperson.art_ort
                     x['beratungsperson'] = beratungsperson.beratungsperson
                     einteilung_list.append(x)
+                    if beratungsperson.beratungsperson not in dispositions_hinweise:
+                        if beratungsperson.dispositions_hinweis:
+                            dispositions_hinweise[beratungsperson.beratungsperson] = beratungsperson.dispositions_hinweis
             start_date += delta
         
         sorted_einteilung_list = sorted(einteilung_list, key = lambda x: (x['art_ort'], x['date'], x['from_time']))
@@ -93,6 +99,10 @@ class ArbeitsplanBeratung(Document):
             row.to_time = eintrag['to_time']
             row.art_ort = eintrag['art_ort']
             row.beratungsperson = eintrag['beratungsperson']
+        
+        for key in dispositions_hinweise:
+            dispositions_hinweise_txt += "{0}: {1}\n".format(key, dispositions_hinweise[key])
+        self.dispositions_hinweis = dispositions_hinweise_txt
         
         self.save()
 
