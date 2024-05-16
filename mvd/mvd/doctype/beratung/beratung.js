@@ -482,7 +482,7 @@ function termin_quick_entry(frm) {
                 args:{
                     'sektion': cur_frm.doc.sektion_id,
                     'datum': frappe.datetime.now_datetime(),
-                    'art': 'telefonisch'
+                    // 'art': 'telefonisch' --> obsolet da neu die Art in den Ort integriert wird
                 },
                 callback: function(verfuegbarkeiten) {
                     var verfuegbarkeiten_html = '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>';
@@ -583,7 +583,7 @@ function termin_quick_entry(frm) {
                                                     'sektion': cur_frm.doc.sektion_id,
                                                     'datum': d.get_value('von'),
                                                     'beraterin': d.get_value('kontaktperson')||'',
-                                                    'art': d.get_value('art')||''
+                                                    // 'art': d.get_value('art')||'' --> obsolet da neu die Art in den Ort integriert wird
                                                 },
                                                 callback: function(r) {
                                                     if (r.message) {
@@ -607,7 +607,7 @@ function termin_quick_entry(frm) {
                                         args:{
                                             'sektion': cur_frm.doc.sektion_id,
                                             'datum': d.get_value('von'),
-                                            'art': d.get_value('art')||''
+                                            // 'art': d.get_value('art')||'' --> obsolet da neu die Art in den Ort integriert wird
                                         },
                                         callback: function(r) {
                                             if (r.message) {

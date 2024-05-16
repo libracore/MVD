@@ -43,23 +43,26 @@ class ArbeitsplanBeratung(Document):
     def get_personen(self):
         def get_beratungspersonen(weekday, sektion):
             weekday_query = [
-                ['''`monday_from` AS `from_time`, `monday_to` AS `to_time`, `monday_art` AS `art`''', '''AND `monday` = 1'''],
-                ['''`tuesday_from` AS `from_time`, `tuesday_to` AS `to_time`, `tuesday_art` AS `art`''', '''AND `tuesday` = 1'''],
-                ['''`wednesday_from` AS `from_time`, `wednesday_to` AS `to_time`, `wednesday_art` AS `art`''', '''AND `wednesday` = 1'''],
-                ['''`thursday_from` AS `from_time`, `thursday_to` AS `to_time`, `thursday_art` AS `art`''', '''AND `thursday` = 1'''],
-                ['''`friday_from` AS `from_time`, `friday_to` AS `to_time`, `friday_art` AS `art`''', '''AND `friday` = 1'''],
-                ['''`saturday_from` AS `from_time`, `saturday_to` AS `to_time`, `saturday_art` AS `art`''', '''AND `saturday` = 1'''],
-                ['''`sunday_from` AS `from_time`, `sunday_to` AS `to_time`, `sunday_art` AS `art`''', '''AND `sunday` = 1'''],
+                "Montag",
+                "Dienstag",
+                "Mittwoch",
+                "Donnerstag",
+                "Freitag",
+                "Samstag",
+                "Sonntag"
             ]
             beratungspersonen = frappe.db.sql("""SELECT
-                                                    `name`,
-                                                    {selections}
-                                                from `tabTermin Kontaktperson`
-                                                WHERE `sektion_id` = '{sektion}'
-                                                AND `disabled` != 1
-                                                {wheres}""".format(selections=weekday_query[weekday][0], \
-                                                                    sektion=sektion, \
-                                                                    wheres=weekday_query[weekday][1]), as_dict=True)
+                                                    `as`.`parent` AS `beratungsperson`,
+                                                    `as`.`from` AS `from_time`,
+                                                    `as`.`to` AS `to_time`,
+                                                    `as`.`ort` AS `art_ort`,
+                                                    `tk`.`dispositions_hinweis`
+                                                from `tabArbeitsplan Standardzeit` AS `as`
+                                                LEFT JOIN `tabTermin Kontaktperson` AS `tk` ON `as`.`parent` = `tk`.`name`
+                                                WHERE `tk`.`sektion_id` = '{sektion}'
+                                                AND `tk`.`disabled` != 1
+                                                AND `as`.`day` = '{weekday}'""".format(weekday=weekday_query[weekday], \
+                                                                    sektion=sektion,), as_dict=True)
             if len(beratungspersonen) > 0:
                 return beratungspersonen
             else:
@@ -68,18 +71,39 @@ class ArbeitsplanBeratung(Document):
         start_date = getdate(self.from_date)
         end_date = getdate(self.to_date)
         delta = timedelta(days=1)
-        
+        einteilung_list = []
+        dispositions_hinweise = {}
+        dispositions_hinweise_txt = ""
+
         while start_date <= end_date:
             beratungspersonen = get_beratungspersonen(start_date.weekday(), self.sektion_id)
             if beratungspersonen:
                 for beratungsperson in beratungspersonen:
-                    row = self.append('einteilung', {})
-                    row.date = start_date.strftime("%Y-%m-%d")
-                    row.from_time = beratungsperson.from_time
-                    row.to_time = beratungsperson.to_time
-                    row.art = beratungsperson.art if beratungsperson.art else 'Ohne Einschränkung'
-                    row.beratungsperson = beratungsperson.name
+                    x = {}
+                    x['date'] = start_date.strftime("%Y-%m-%d")
+                    x['from_time'] = beratungsperson.from_time
+                    x['to_time'] = beratungsperson.to_time
+                    x['art_ort'] = beratungsperson.art_ort
+                    x['beratungsperson'] = beratungsperson.beratungsperson
+                    einteilung_list.append(x)
+                    if beratungsperson.beratungsperson not in dispositions_hinweise:
+                        if beratungsperson.dispositions_hinweis:
+                            dispositions_hinweise[beratungsperson.beratungsperson] = beratungsperson.dispositions_hinweis
             start_date += delta
+        
+        sorted_einteilung_list = sorted(einteilung_list, key = lambda x: (x['art_ort'], x['date'], x['from_time']))
+
+        for eintrag in sorted_einteilung_list:
+            row = self.append('einteilung', {})
+            row.date = eintrag['date']
+            row.from_time = eintrag['from_time']
+            row.to_time = eintrag['to_time']
+            row.art_ort = eintrag['art_ort']
+            row.beratungsperson = eintrag['beratungsperson']
+        
+        for key in dispositions_hinweise:
+            dispositions_hinweise_txt += "{0}: {1}\n".format(key, dispositions_hinweise[key])
+        self.dispositions_hinweis = dispositions_hinweise_txt
         
         self.save()
 

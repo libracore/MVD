@@ -1,47 +1,39 @@
 {
- "creation": "2023-12-05 11:18:50.215869",
+ "creation": "2024-04-18 15:30:10.263019",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "date",
-  "from_time",
-  "to_time",
-  "art_ort",
-  "beratungsperson"
+  "day",
+  "from",
+  "to",
+  "ort"
  ],
  "fields": [
   {
-   "fieldname": "date",
-   "fieldtype": "Date",
+   "fieldname": "day",
+   "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Datum",
+   "label": "Wochentag",
+   "options": "Montag\nDienstag\nMittwoch\nDonnerstag\nFreitag\nSamstag\nSonntag",
    "reqd": 1
   },
   {
-   "fieldname": "from_time",
+   "fieldname": "from",
    "fieldtype": "Time",
    "in_list_view": 1,
    "label": "Von",
    "reqd": 1
   },
   {
-   "fieldname": "to_time",
+   "fieldname": "to",
    "fieldtype": "Time",
    "in_list_view": 1,
    "label": "Bis",
    "reqd": 1
   },
   {
-   "fieldname": "beratungsperson",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Berater*inn",
-   "options": "Termin Kontaktperson",
-   "reqd": 1
-  },
-  {
-   "fieldname": "art_ort",
+   "fieldname": "ort",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Ort / Art",
@@ -50,10 +42,10 @@
   }
  ],
  "istable": 1,
- "modified": "2024-05-07 10:34:20.715920",
+ "modified": "2024-05-16 08:53:14.078645",
  "modified_by": "Administrator",
  "module": "MVD",
- "name": "APB Zuweisung",
+ "name": "Arbeitsplan Standardzeit",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
