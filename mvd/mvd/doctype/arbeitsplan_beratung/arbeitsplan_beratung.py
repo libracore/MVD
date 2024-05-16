@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from datetime import date, timedelta
 from frappe.utils.data import getdate
+from frappe import _
 
 class ArbeitsplanBeratung(Document):
     def validate(self):
@@ -87,13 +88,11 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, art=None):
     von_datum = getdate(datum)
     delta = timedelta(days=1)
     bis_datum = von_datum + timedelta(days=7)
-    beratungspersonen = ""
+    # beratungspersonen = ""
     beraterin_filter = ''
-    art_filter = ''
+    verfuegbarkeiten_html = ""
     if beraterin and beraterin != '':
         beraterin_filter = '''AND `beratungsperson` = '{0}' '''.format(beraterin)
-    if art and art != '':
-        art_filter = '''AND `art` IN ('Ohne Einschränkung', '{0}') '''.format(art)
     
     while von_datum <= bis_datum:
         zugeteilte_beratungspersonen = frappe.db.sql("""
@@ -101,46 +100,64 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, art=None):
                                                         FROM `tabAPB Zuweisung`
                                                         WHERE `date` = '{von_datum}'
                                                         {beraterin_filter}
-                                                        {art_filter}
-                                                    """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter, art_filter=art_filter), as_dict=True)
+                                                    """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter), as_dict=True)
+        verfuegbarkeiten_html += """
+            <p><b>{wochentag}, {datum}</b></p>
+        """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'))
         if len(zugeteilte_beratungspersonen) > 0:
+            zugeteilte_beratungspersonen_liste = []
             for zugeteilte_beratungsperson in zugeteilte_beratungspersonen:
-                beratungspersonen += bereinigt_mit_erfassten_termine(zugeteilte_beratungsperson, von_datum)
+                x = {
+                    'ort': 'tbd',
+                    'from_time': zugeteilte_beratungsperson.from_time,
+                    'to_time': zugeteilte_beratungsperson.to_time,
+                    'beratungsperson': zugeteilte_beratungsperson.beratungsperson.replace("({sektion})".format(sektion=sektion), "")
+                }
+                zugeteilte_beratungspersonen_liste.append(x)
+            sorted_list = sorted(zugeteilte_beratungspersonen_liste, key = lambda x: (x['ort'], x['from_time'], x['beratungsperson']))
+            for entry in sorted_list:
+                verfuegbarkeiten_html += """
+                    <p>{from_time} - {to_time} / {ort} / {beratungsperson}</p>
+                """.format(from_time=':'.join(str(entry['from_time']).split(':')[:2]), \
+                           to_time=':'.join(str(entry['to_time']).split(':')[:2]), \
+                            ort=entry['ort'], beratungsperson=entry['beratungsperson'])
+        else:
+            verfuegbarkeiten_html += """<p>Kein(e) Berater*in verfügbar</p>"""
         von_datum += delta
     
-    return beratungspersonen
+    return verfuegbarkeiten_html
 
-def bereinigt_mit_erfassten_termine(beratungsperson, datum):
-    erfasste_termine = frappe.db.sql("""
-                                        SELECT
-                                            `von`,
-                                            `bis`,
-                                            `parent`,
-                                            `ort`,
-                                            `art`
-                                        FROM `tabBeratung Termin`
-                                        WHERE `berater_in` = '{berater_in}'
-                                        AND `von` BETWEEN '{datum} 00:00:00' AND '{datum} 23:59:59'
-                                    """.format(berater_in=beratungsperson.beratungsperson, \
-                                                datum=beratungsperson.date), as_dict=True)
-    if len(erfasste_termine) > 0:
-        return_html = "{0} / {1} ({2} - {3}): {4}<br>".format(getdate(beratungsperson.date).strftime("%d.%m.%Y"), \
-                                                        beratungsperson.art, \
-                                                        beratungsperson.from_time, \
-                                                        beratungsperson.to_time, \
-                                                        beratungsperson.beratungsperson)
-        for erfasster_termin in erfasste_termine:
-            return_html += "--> {0} - {1}: {2}; {3} ({4})<br>".format(erfasster_termin.von.strftime("%H:%M:%S"), \
-                                                            erfasster_termin.bis.strftime("%H:%M:%S"), \
-                                                            erfasster_termin.art, \
-                                                            erfasster_termin.ort, \
-                                                            erfasster_termin.parent)
+# def bereinigt_mit_erfassten_termine(beratungsperson, datum):
+#     erfasste_termine = frappe.db.sql("""
+#                                         SELECT
+#                                             `von`,
+#                                             `bis`,
+#                                             `parent`,
+#                                             `ort`,
+#                                             `art`
+#                                         FROM `tabBeratung Termin`
+#                                         WHERE `berater_in` = '{berater_in}'
+#                                         AND `von` BETWEEN '{datum} 00:00:00' AND '{datum} 23:59:59'
+#                                     """.format(berater_in=beratungsperson.beratungsperson, \
+#                                                 datum=beratungsperson.date), as_dict=True)
+#     if len(erfasste_termine) > 0:
+#         return_html = "{0} / {1} ({2} - {3}): {4}<br>".format(getdate(beratungsperson.date).strftime("%d.%m.%Y"), \
+#                                                         beratungsperson.art, \
+#                                                         beratungsperson.from_time, \
+#                                                         beratungsperson.to_time, \
+#                                                         beratungsperson.beratungsperson)
+#         for erfasster_termin in erfasste_termine:
+#             return_html += "--> {0} - {1}: {2}; {3} ({4})<br>".format(erfasster_termin.von.strftime("%H:%M:%S"), \
+#                                                             erfasster_termin.bis.strftime("%H:%M:%S"), \
+#                                                             erfasster_termin.art, \
+#                                                             erfasster_termin.ort, \
+#                                                             erfasster_termin.parent)
         
-        return_html += "<br>"
-        return return_html
-    else:
-        return "{0} / {1} ({2} - {3}): {4}<br>".format(getdate(beratungsperson.date).strftime("%d.%m.%Y"), \
-                                                        beratungsperson.art, \
-                                                        beratungsperson.from_time, \
-                                                        beratungsperson.to_time, \
-                                                        beratungsperson.beratungsperson)
+#         return_html += "<br>"
+#         return return_html
+#     else:
+#         return "{0} / {1} ({2} - {3}): {4}<br>".format(getdate(beratungsperson.date).strftime("%d.%m.%Y"), \
+#                                                         beratungsperson.art, \
+#                                                         beratungsperson.from_time, \
+#                                                         beratungsperson.to_time, \
+#                                                         beratungsperson.beratungsperson)
