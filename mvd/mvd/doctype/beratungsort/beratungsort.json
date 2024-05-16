@@ -6,7 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "ort",
-  "sektion_id"
+  "sektion_id",
+  "infofeld"
  ],
  "fields": [
   {
@@ -23,9 +24,14 @@
    "label": "Sektion",
    "options": "Sektion",
    "reqd": 1
+  },
+  {
+   "fieldname": "infofeld",
+   "fieldtype": "Small Text",
+   "label": "Infofeld Best\u00e4tigungsmail"
   }
  ],
- "modified": "2023-06-01 09:00:22.518306",
+ "modified": "2024-05-16 12:32:44.564236",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratungsort",

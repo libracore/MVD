@@ -9,6 +9,7 @@ from frappe.utils.data import today, now, getdate
 import json
 from bs4 import BeautifulSoup
 from frappe.utils import cint
+from frappe import _
 
 class Beratung(Document):
     def validate(self):
@@ -772,3 +773,20 @@ def erstelle_todo(owner, beratung, description=False, datum=False, notify=0, mit
         notify_assignment(todo.assigned_by, todo.owner, todo.reference_type, todo.reference_name, action='ASSIGN',\
                  description=todo.description, notify=notify)
     return
+
+@frappe.whitelist()
+def get_termin_mail_txt(von, bis, art, ort, telefonnummer):
+    von_datum = getdate(von)
+    bis_datum = getdate(bis)
+    ort_info = frappe.db.get_value("Ort", "infofeld") or 'Keine ortsspezifische Angaben'
+    mail_txt = """
+        <div>
+            Termin vom {wochentag}, {datum}, {von} bis {bis}<br>
+            {ort_info}<br>
+            {telefonnummer}
+        </div>
+    """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+               von=":".join(von.split(" ")[1].split(":")[:2]), bis=":".join(bis.split(" ")[1].split(":")[:2]), \
+               ort_info=ort_info, telefonnummer="Telefonnummer: {0}".format(telefonnummer or 'Keine Angaben' if art == 'telefonisch' else ''))
+
+    return mail_txt

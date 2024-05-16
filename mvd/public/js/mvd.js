@@ -302,7 +302,7 @@ function set_timestamps(){
 }
 
 frappe.provide('frappe.mvd.new_mail');
-frappe.mvd.new_mail = function(cur_frm, last_email='', kuendigungsmail=false) {
+frappe.mvd.new_mail = function(cur_frm, last_email='', kuendigungsmail=false, default_txt=false) {
     $(".modal.fade").remove();
     var recpts;
     var default_sender;
@@ -312,6 +312,9 @@ frappe.mvd.new_mail = function(cur_frm, last_email='', kuendigungsmail=false) {
     if (cur_frm.doctype == 'Beratung') {
         recpts = cur_frm.doc.raised_by || cur_frm.doc.email_id;
         default_sender = frappe.boot.default_beratungs_sender || '';
+        if ((!cur_frm.default_terminbestaetigung_email_template)&&(default_txt)) {
+            txt_string = default_txt;
+        }
     }
     
     if (cur_frm.doctype == 'Mitgliedschaft') {

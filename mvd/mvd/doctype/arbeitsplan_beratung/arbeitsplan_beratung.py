@@ -108,15 +108,17 @@ class ArbeitsplanBeratung(Document):
         self.save()
 
 @frappe.whitelist()
-def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, art=None):
+def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None):
     von_datum = getdate(datum)
     delta = timedelta(days=1)
     bis_datum = von_datum + timedelta(days=7)
-    # beratungspersonen = ""
     beraterin_filter = ''
+    ort_filter = ''
     verfuegbarkeiten_html = ""
     if beraterin and beraterin != '':
         beraterin_filter = '''AND `beratungsperson` = '{0}' '''.format(beraterin)
+    if ort and ort != '' and ort != ' ':
+        ort_filter = '''AND `art_ort` = '{0}' '''.format(ort)
     
     while von_datum <= bis_datum:
         zugeteilte_beratungspersonen = frappe.db.sql("""
@@ -124,7 +126,8 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, art=None):
                                                         FROM `tabAPB Zuweisung`
                                                         WHERE `date` = '{von_datum}'
                                                         {beraterin_filter}
-                                                    """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter), as_dict=True)
+                                                        {ort_filter}
+                                                    """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter, ort_filter=ort_filter), as_dict=True)
         verfuegbarkeiten_html += """
             <p><b>{wochentag}, {datum}</b></p>
         """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'))
@@ -132,7 +135,7 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, art=None):
             zugeteilte_beratungspersonen_liste = []
             for zugeteilte_beratungsperson in zugeteilte_beratungspersonen:
                 x = {
-                    'ort': 'tbd',
+                    'ort': zugeteilte_beratungsperson.art_ort.replace("({sektion})".format(sektion=sektion), ""),
                     'from_time': zugeteilte_beratungsperson.from_time,
                     'to_time': zugeteilte_beratungsperson.to_time,
                     'beratungsperson': zugeteilte_beratungsperson.beratungsperson.replace("({sektion})".format(sektion=sektion), "")
@@ -150,38 +153,3 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, art=None):
         von_datum += delta
     
     return verfuegbarkeiten_html
-
-# def bereinigt_mit_erfassten_termine(beratungsperson, datum):
-#     erfasste_termine = frappe.db.sql("""
-#                                         SELECT
-#                                             `von`,
-#                                             `bis`,
-#                                             `parent`,
-#                                             `ort`,
-#                                             `art`
-#                                         FROM `tabBeratung Termin`
-#                                         WHERE `berater_in` = '{berater_in}'
-#                                         AND `von` BETWEEN '{datum} 00:00:00' AND '{datum} 23:59:59'
-#                                     """.format(berater_in=beratungsperson.beratungsperson, \
-#                                                 datum=beratungsperson.date), as_dict=True)
-#     if len(erfasste_termine) > 0:
-#         return_html = "{0} / {1} ({2} - {3}): {4}<br>".format(getdate(beratungsperson.date).strftime("%d.%m.%Y"), \
-#                                                         beratungsperson.art, \
-#                                                         beratungsperson.from_time, \
-#                                                         beratungsperson.to_time, \
-#                                                         beratungsperson.beratungsperson)
-#         for erfasster_termin in erfasste_termine:
-#             return_html += "--> {0} - {1}: {2}; {3} ({4})<br>".format(erfasster_termin.von.strftime("%H:%M:%S"), \
-#                                                             erfasster_termin.bis.strftime("%H:%M:%S"), \
-#                                                             erfasster_termin.art, \
-#                                                             erfasster_termin.ort, \
-#                                                             erfasster_termin.parent)
-        
-#         return_html += "<br>"
-#         return return_html
-#     else:
-#         return "{0} / {1} ({2} - {3}): {4}<br>".format(getdate(beratungsperson.date).strftime("%d.%m.%Y"), \
-#                                                         beratungsperson.art, \
-#                                                         beratungsperson.from_time, \
-#                                                         beratungsperson.to_time, \
-#                                                         beratungsperson.beratungsperson)

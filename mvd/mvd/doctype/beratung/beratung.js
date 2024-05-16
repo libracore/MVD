@@ -481,8 +481,7 @@ function termin_quick_entry(frm) {
                 method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
                 args:{
                     'sektion': cur_frm.doc.sektion_id,
-                    'datum': frappe.datetime.now_datetime(),
-                    // 'art': 'telefonisch' --> obsolet da neu die Art in den Ort integriert wird
+                    'datum': frappe.datetime.now_datetime()
                 },
                 callback: function(verfuegbarkeiten) {
                     var verfuegbarkeiten_html = '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>';
@@ -494,8 +493,7 @@ function termin_quick_entry(frm) {
                     'fields': [
                         {'fieldname': 'verfuegbarkeiten_titel', 'fieldtype': 'HTML', 'options': '<h4>Berater*innen Verfügbarkeiten</h4>'},
                         {'fieldname': 'verfuegbarkeiten_html', 'fieldtype': 'HTML', 'label': '', 'options': verfuegbarkeiten_html},
-                        {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 1, 'default': ''},
-                        {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich', 'reqd': 1, 'default': 'telefonisch',
+                        {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 1, 'default': '',
                             'change': function() {
                                 // aktualisierung verfügbarkeiten
                                 frappe.call({
@@ -504,7 +502,7 @@ function termin_quick_entry(frm) {
                                         'sektion': cur_frm.doc.sektion_id,
                                         'datum': d.get_value('von'),
                                         'beraterin': d.get_value('kontaktperson')||'',
-                                        'art': d.get_value('art')||''
+                                        'ort': d.get_value('ort')||''
                                     },
                                     callback: function(r) {
                                         if (r.message) {
@@ -518,6 +516,7 @@ function termin_quick_entry(frm) {
                                 });
                             }
                         },
+                        {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich', 'reqd': 1, 'default': 'telefonisch'},
                         {'fieldname': 'telefonnummer', 'fieldtype': 'Data', 'label': __('Telefonnummer'), 'depends_on': 'eval:doc.art=="telefonisch"'},
                         {'fieldname': 'von', 'fieldtype': 'Datetime', 'label': __('Zeit von'), 'reqd': 1, 'default': default_von, 'description': '"Zeit von" ist relevant für die Anzeige der Verfügbarkeiten. Es wird immer 7 Tage in Zukunft geblickt.',
                             'change': function() {
@@ -532,7 +531,7 @@ function termin_quick_entry(frm) {
                                         'sektion': cur_frm.doc.sektion_id,
                                         'datum': d.get_value('von'),
                                         'beraterin': d.get_value('kontaktperson')||'',
-                                        'art': d.get_value('art')||''
+                                        'ort': d.get_value('ort')||''
                                     },
                                     callback: function(r) {
                                         if (r.message) {
@@ -583,7 +582,7 @@ function termin_quick_entry(frm) {
                                                     'sektion': cur_frm.doc.sektion_id,
                                                     'datum': d.get_value('von'),
                                                     'beraterin': d.get_value('kontaktperson')||'',
-                                                    // 'art': d.get_value('art')||'' --> obsolet da neu die Art in den Ort integriert wird
+                                                    'ort': d.get_value('ort')||''
                                                 },
                                                 callback: function(r) {
                                                     if (r.message) {
@@ -607,7 +606,7 @@ function termin_quick_entry(frm) {
                                         args:{
                                             'sektion': cur_frm.doc.sektion_id,
                                             'datum': d.get_value('von'),
-                                            // 'art': d.get_value('art')||'' --> obsolet da neu die Art in den Ort integriert wird
+                                            'ort': d.get_value('ort')||''
                                         },
                                         callback: function(r) {
                                             if (r.message) {
@@ -637,9 +636,29 @@ function termin_quick_entry(frm) {
                             cur_frm.set_value("notiz", d.get_value('notiz'));
                             cur_frm.save();
                             frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_terminbestaetigung_email_template').then(function(value){
-                                cur_frm['default_terminbestaetigung_email_template'] = value.message.default_terminbestaetigung_email_template;
-                                frappe.mvd.new_mail(cur_frm);
-                                cur_frm['default_terminbestaetigung_email_template'] = false;
+                                if (value.message.default_terminbestaetigung_email_template) {
+                                    cur_frm['default_terminbestaetigung_email_template'] = value.message.default_terminbestaetigung_email_template;
+                                    frappe.mvd.new_mail(cur_frm);
+                                    cur_frm['default_terminbestaetigung_email_template'] = false;
+                                } else {
+                                    frappe.call({
+                                        method: "mvd.mvd.doctype.beratung.beratung.get_termin_mail_txt",
+                                        args:{
+                                            'von': d.get_value('von'),
+                                            'bis': d.get_value('bis'),
+                                            'art': d.get_value('art')||'',
+                                            'ort': d.get_value('ort')||'',
+                                            'telefonnummer': d.get_value('telefonnummer')||''
+                                        },
+                                        callback: function(r) {
+                                            if (r.message) {
+                                                frappe.mvd.new_mail(cur_frm, "", false, r.message);
+                                            } else {
+                                                frappe.mvd.new_mail(cur_frm);
+                                            }
+                                        }
+                                    });
+                                }
                             });
                     },
                     'primary_action_label': __('Erstellen')
