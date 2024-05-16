@@ -69,18 +69,30 @@ class ArbeitsplanBeratung(Document):
         start_date = getdate(self.from_date)
         end_date = getdate(self.to_date)
         delta = timedelta(days=1)
-        
+        einteilung_list = []
+
         while start_date <= end_date:
             beratungspersonen = get_beratungspersonen(start_date.weekday(), self.sektion_id)
             if beratungspersonen:
                 for beratungsperson in beratungspersonen:
-                    row = self.append('einteilung', {})
-                    row.date = start_date.strftime("%Y-%m-%d")
-                    row.from_time = beratungsperson.from_time
-                    row.to_time = beratungsperson.to_time
-                    row.art_ort = beratungsperson.art_ort
-                    row.beratungsperson = beratungsperson.beratungsperson
+                    x = {}
+                    x['date'] = start_date.strftime("%Y-%m-%d")
+                    x['from_time'] = beratungsperson.from_time
+                    x['to_time'] = beratungsperson.to_time
+                    x['art_ort'] = beratungsperson.art_ort
+                    x['beratungsperson'] = beratungsperson.beratungsperson
+                    einteilung_list.append(x)
             start_date += delta
+        
+        sorted_einteilung_list = sorted(einteilung_list, key = lambda x: (x['art_ort'], x['date'], x['from_time']))
+
+        for eintrag in sorted_einteilung_list:
+            row = self.append('einteilung', {})
+            row.date = eintrag['date']
+            row.from_time = eintrag['from_time']
+            row.to_time = eintrag['to_time']
+            row.art_ort = eintrag['art_ort']
+            row.beratungsperson = eintrag['beratungsperson']
         
         self.save()
 
