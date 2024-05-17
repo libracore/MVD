@@ -226,6 +226,9 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="form-row">
+                                                    <input type="checkbox" id="termin_vereinbaren_cb" name="termin_vereinbaren_cb" value="hallo">&nbsp;&nbsp;Ich möchte einen Termin vereinbaren, bitte nehmen Sie Kontakt mit mir auf.</input>
+                                                </div>
                                             </fieldset>
                                             {% endif %}
                                             <fieldset class="fieldset">
@@ -525,9 +528,6 @@
                                                             el.form.submit()
                                                         }
                                                     </script>
-                                                    {% if sektion == 'MVBE' %}
-                                                        <input type="checkbox" id="termin_vereinbaren_cb" name="termin_vereinbaren_cb" value="hallo">&nbsp;Ich möchte einen Termin vereinbaren, bitte nehmen Sie Kontakt mit mir auf.</input><br><br>
-                                                    {% endif %}
                                                     <input type="submit" onclick="return mgnlFormHandleBackButton(this)" value="Abbrechen">
                                                     <input type="button" value="Beratungsanfrage senden" onclick="new_onlineberatung();">
                                                 </div>
