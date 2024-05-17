@@ -634,7 +634,10 @@ function termin_quick_entry(frm) {
                         frappe.model.set_value(child.doctype, child.name, 'telefonnummer', d.get_value('telefonnummer'));
                         cur_frm.refresh_field('termin');
                         cur_frm.set_value("kontaktperson", d.get_value('kontaktperson'));
-                        cur_frm.set_value("notiz", d.get_value('notiz'));
+                        if (d.get_value('notiz')) {
+                            var sammel_notiz = `Terminnotiz:<br>${d.get_value('notiz')}<br><br>${cur_frm.doc.notiz}`;
+                            cur_frm.set_value("notiz", sammel_notiz);
+                        }
                         cur_frm.save();
                         frappe.call({
                             method: "mvd.mvd.doctype.beratung.beratung.set_termin_block_as_used",

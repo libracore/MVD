@@ -610,7 +610,7 @@ def create_neue_beratung(von, bis, art, ort, berater_in, notiz=None, beratungska
                 }
             ],
             "kontaktperson": berater_in,
-            "notiz": notiz
+            "notiz": "Terminnotiz:<br>{0}".format(notiz)
         })
         beratung.insert()
     else:
@@ -624,7 +624,9 @@ def create_neue_beratung(von, bis, art, ort, berater_in, notiz=None, beratungska
         row.berater_in = berater_in
         row.telefonnummer = telefonnummer
         beratung.kontaktperson = berater_in
-        beratung.notiz = notiz
+        if notiz:
+            sammel_notiz = "Terminnotiz:<br>{0}<br><br>{1}".format(notiz, beratung.notiz)
+            beratung.notiz = sammel_notiz
         if mv_mitgliedschaft:
             beratung.mv_mitgliedschaft = mv_mitgliedschaft
         beratung.save()
