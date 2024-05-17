@@ -247,10 +247,20 @@ frappe.ui.form.on('Beratung', {
                 });
                 // Deaktivierung BTN wenn notwendig
                 if ((cur_frm.doc.status == 'Closed')||(cur_frm.doc.termin.length > 0)||(!cur_frm.doc.mv_mitgliedschaft)) {
-                    cur_frm.custom_buttons["Termin vergeben"].off()
-                    cur_frm.custom_buttons["Termin vergeben"].on("click", function(){
-                        frappe.msgprint("Diese Funktion steht nur zur Verfügung wenn:<br><ul><li>Status nicht geschlossen</li><li>Keine Termine</li><li>Verknüpfte Mitgliedschaft</li></ul>");
-                    })
+                    var found_termin_in_future = false;
+                    var today = new Date();
+                    for (var i = 0; i < cur_frm.doc.termin.length; i++) {
+                        var termin_date = new Date(cur_frm.doc.termin[i].von);
+                        if (today.getTime() < termin_date.getTime()) {
+                            found_termin_in_future = true;
+                        }
+                    }
+                    if (found_termin_in_future) {
+                        cur_frm.custom_buttons["Termin vergeben"].off()
+                        cur_frm.custom_buttons["Termin vergeben"].on("click", function(){
+                            frappe.msgprint("Diese Funktion steht nur zur Verfügung wenn:<br><ul><li>Status nicht geschlossen</li><li>Keine Termine in Zukunft</li><li>Verknüpfte Mitgliedschaft</li></ul>");
+                        })
+                    }
                 }
                 
                 // Add BTN Admin ToDo
