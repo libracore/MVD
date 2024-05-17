@@ -1,0 +1,35 @@
+{
+ "creation": "2024-05-17 11:32:42.218649",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "auftrags_nummer",
+  "sendungs_nummer"
+ ],
+ "fields": [
+  {
+   "fieldname": "auftrags_nummer",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Auftragsnummer"
+  },
+  {
+   "fieldname": "sendungs_nummer",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Sendungsnummer"
+  }
+ ],
+ "istable": 1,
+ "modified": "2024-05-17 11:33:28.827601",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Handled Postretouren",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

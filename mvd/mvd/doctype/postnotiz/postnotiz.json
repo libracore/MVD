@@ -1,0 +1,45 @@
+{
+ "creation": "2024-05-17 13:47:20.369936",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "postretouren_log",
+  "postnotiz"
+ ],
+ "fields": [
+  {
+   "fieldname": "postretouren_log",
+   "fieldtype": "Link",
+   "label": "Postretouren Log",
+   "options": "Postretouren Log"
+  },
+  {
+   "fieldname": "postnotiz",
+   "fieldtype": "Code",
+   "label": "Postnotiz"
+  }
+ ],
+ "modified": "2024-05-17 13:47:20.369936",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Postnotiz",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -31,7 +31,9 @@
   "retoure_mw_sequence_number",
   "retoure_dmc",
   "retoure_sendungsbild",
-  "ignore_validation"
+  "ignore_validation",
+  "section_raw_data",
+  "raw_data"
  ],
  "fields": [
   {
@@ -189,9 +191,18 @@
    "fieldtype": "Date",
    "label": "Neue Adresse g\u00fcltig ab",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_raw_data",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "raw_data",
+   "fieldtype": "Code",
+   "label": "RawData"
   }
  ],
- "modified": "2023-02-06 16:23:04.133251",
+ "modified": "2024-05-17 13:33:20.920652",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren",
