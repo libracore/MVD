@@ -566,12 +566,13 @@ function termin_quick_entry(frm) {
                                             if (r.message) {
                                                 // hinterlegen von Orten auf Basis Kontakt
                                                 var orte_kontaktbasis = " \n" + r.message.ort_string;
-                                                var default_ort_kontaktbasis = r.message.default;
+                                                if ((d.get_value('ort'))&&(d.get_value('ort') != ' ')&&(!orte_kontaktbasis.includes(d.get_value('ort')))) {
+                                                    d.set_value('ort', '');
+                                                }
                                                 d.set_df_property('ort', 'options', orte_kontaktbasis);
-                                                d.set_value('ort',  default_ort_kontaktbasis);
                                             } else {
                                                 // Keine Orte zu Kontakt
-                                                d.set_value('ort',  '');
+                                                d.set_value('ort', '');
                                                 d.set_df_property('ort', 'options', '');
                                             }
 
@@ -598,7 +599,6 @@ function termin_quick_entry(frm) {
                                     });
                                 } else {
                                     // reset to default
-                                    d.set_value('ort',  '');
                                     d.set_df_property('ort', 'options', orte);
                                     // aktualisierung verfügbarkeiten
                                     frappe.call({
@@ -631,6 +631,7 @@ function termin_quick_entry(frm) {
                         frappe.model.set_value(child.doctype, child.name, 'art', d.get_value('art'));
                         frappe.model.set_value(child.doctype, child.name, 'ort', d.get_value('ort'));
                         frappe.model.set_value(child.doctype, child.name, 'berater_in', d.get_value('kontaktperson'));
+                        frappe.model.set_value(child.doctype, child.name, 'telefonnummer', d.get_value('telefonnummer'));
                         cur_frm.refresh_field('termin');
                         cur_frm.set_value("kontaktperson", d.get_value('kontaktperson'));
                         cur_frm.set_value("notiz", d.get_value('notiz'));

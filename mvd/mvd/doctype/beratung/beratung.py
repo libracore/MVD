@@ -591,7 +591,7 @@ def anz_beratungen_ohne_termine(mv_mitgliedschaft):
     return int(frappe.db.count('Beratung', {'mv_mitgliedschaft': mv_mitgliedschaft, 'hat_termine': 0}))
 
 @frappe.whitelist()
-def create_neue_beratung(von, bis, art, ort, berater_in, notiz=None, beratungskategorie=None, beratung=None, sektion_id=None, mv_mitgliedschaft=None):
+def create_neue_beratung(von, bis, art, ort, berater_in, notiz=None, beratungskategorie=None, beratung=None, sektion_id=None, mv_mitgliedschaft=None, telefonnummer=None):
     if not beratung:
         # erstelle neue Beratung
         beratung = frappe.get_doc({
@@ -605,7 +605,8 @@ def create_neue_beratung(von, bis, art, ort, berater_in, notiz=None, beratungska
                     "bis": bis,
                     "art": art,
                     'ort': ort,
-                    'berater_in': berater_in
+                    'berater_in': berater_in,
+                    'telefonnummer': telefonnummer
                 }
             ],
             "kontaktperson": berater_in,
@@ -621,6 +622,7 @@ def create_neue_beratung(von, bis, art, ort, berater_in, notiz=None, beratungska
         row.art = art
         row.ort = ort
         row.berater_in = berater_in
+        row.telefonnummer = telefonnummer
         beratung.kontaktperson = berater_in
         beratung.notiz = notiz
         if mv_mitgliedschaft:

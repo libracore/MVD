@@ -8,7 +8,8 @@
   "bis",
   "art",
   "ort",
-  "berater_in"
+  "berater_in",
+  "telefonnummer"
  ],
  "fields": [
   {
@@ -43,10 +44,15 @@
    "in_list_view": 1,
    "label": "Berater*in",
    "options": "Termin Kontaktperson"
+  },
+  {
+   "fieldname": "telefonnummer",
+   "fieldtype": "Data",
+   "label": "Telefonnummer"
   }
  ],
  "istable": 1,
- "modified": "2023-06-15 13:47:08.211600",
+ "modified": "2024-05-17 09:05:48.350953",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung Termin",

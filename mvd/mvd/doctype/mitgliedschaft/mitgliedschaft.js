@@ -2671,7 +2671,8 @@ function termin_quick_entry(frm) {
                         },
                         {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 1, 'default': ''},
                         {'fieldname': 'beratungskategorie', 'fieldtype': 'Link', 'label': __('Beratungskategorie'), 'options': 'Beratungskategorie'},
-                        {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich\nE-Mail', 'reqd': 1, 'default': 'telefonisch'},
+                        {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich', 'reqd': 1, 'default': 'telefonisch'},
+                        {'fieldname': 'telefonnummer', 'fieldtype': 'Data', 'label': __('Telefonnummer'), 'depends_on': 'eval:doc.art=="telefonisch"'},
                         {'fieldname': 'von', 'fieldtype': 'Datetime', 'label': __('Zeit von'), 'reqd': 1, 'default': default_von,
                             'change': function() {
                                 var newDateObj = moment(d.get_value('von')).add(default_termindauer, 'm').toDate(); // default "bis"-Zeit = "von"-Zeit + 45'
@@ -2693,7 +2694,8 @@ function termin_quick_entry(frm) {
                                     'ort': d.get_value('ort'),
                                     'berater_in': d.get_value('kontaktperson'),
                                     'beratungskategorie': d.get_value('beratungskategorie'),
-                                    'notiz': d.get_value('notiz')
+                                    'notiz': d.get_value('notiz'),
+                                    'telefonnummer': d.get_value('telefonnummer')
                                 }
                             } else {
                                 var kwargs = {
@@ -2704,7 +2706,8 @@ function termin_quick_entry(frm) {
                                     'ort': d.get_value('ort'),
                                     'berater_in': d.get_value('kontaktperson'),
                                     'beratungskategorie': d.get_value('beratungskategorie'),
-                                    'notiz': d.get_value('notiz')
+                                    'notiz': d.get_value('notiz'),
+                                    'telefonnummer': d.get_value('telefonnummer')
                                 }
                             }
                             
