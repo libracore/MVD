@@ -1,0 +1,36 @@
+{
+ "creation": "2024-05-17 10:27:50.161284",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "type",
+  "message"
+ ],
+ "fields": [
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "Warning\nSkip\nError"
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Message"
+  }
+ ],
+ "istable": 1,
+ "modified": "2024-05-17 11:27:20.025296",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Postretouren Log tbl",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

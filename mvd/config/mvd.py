@@ -222,6 +222,24 @@ def get_data():
                     "name": "MW",
                     "label": _("MW"),
                     "description": _("MW")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Postretouren Einstellungen",
+                    "label": _("Postretouren Einstellungen"),
+                    "description": _("Postretouren Einstellungen")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Postretouren Log",
+                    "label": _("Postretouren Log"),
+                    "description": _("Postretouren Log")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Postnotiz",
+                    "label": _("Postnotiz"),
+                    "description": _("Postnotiz")
                 }
             ]
         },

@@ -1,0 +1,55 @@
+{
+ "creation": "2024-05-17 10:24:34.024905",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "status",
+  "logs",
+  "handled_postretouren"
+ ],
+ "fields": [
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nWiP\nClosed\nFailed",
+   "reqd": 1
+  },
+  {
+   "fieldname": "logs",
+   "fieldtype": "Table",
+   "label": "Logs",
+   "options": "Postretouren Log tbl"
+  },
+  {
+   "fieldname": "handled_postretouren",
+   "fieldtype": "Table",
+   "label": "Handled Postretouren",
+   "options": "Handled Postretouren"
+  }
+ ],
+ "modified": "2024-05-17 11:33:08.793497",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Postretouren Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

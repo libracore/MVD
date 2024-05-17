@@ -21,6 +21,7 @@ from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new
 
 AUTH0_SCOPE = "Auth0"
 SVCPF_SCOPE = "ServicePF"
+POST_SCOPE = "PostNotiz"
 
 # ---------------------------------------------------
 # ---------------------------------------------------
@@ -174,6 +175,26 @@ def send_beratung(beratungs_data, beratung):
             
             frappe.log_error("{0}\n\n{1}".format(err, beratungs_data), 'send beratung failed')
             frappe.db.commit()
+
+def send_postnotiz_to_sp(postnotiz_for_sp):
+    if not int(frappe.db.get_single_value('Service Plattform API', 'no_postnotiz_to_sp')) == 1:
+        if auth_check(POST_SCOPE):
+            config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+            sub_url = config.get_value(POST_SCOPE, "api_url")
+            endpoint = str(config.get('retouren_mvz'))
+            url = sub_url + endpoint
+            token = config.get_value(POST_SCOPE, 'api_token')
+            headers = {"authorization": "Bearer {token}".format(token=token)}
+            
+            try:
+                requests.post(url, json = json.dumps(postnotiz_for_sp.__dict__), headers = headers)
+                return
+            except Exception as err:
+                frappe.log_error("{0}".format(err), 'send_postnotiz_to_sp failed')
+                frappe.db.commit()
+    else:
+        frappe.log_error("{0}".format(json.dumps(postnotiz_for_sp.__dict__)), 'send_postnotiz_to_sp deaktiviert')
+        return
 
 '''
     Damit Requests an die SP gesendet werden können, wird ein API Token benötigt, welcher i.d.R. nach 24h abläuft.

@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils.data import getdate
+import json
+from frappe.utils import cint
 
 class Retouren(Document):
     def onload(self):
@@ -118,38 +120,38 @@ def get_retouren_qty(mitgliedschaft, self):
 
 def create_post_retouren(data):
     try:
-        ausgabe_kurz = frappe.db.sql("""SELECT `ausgabe_kurz` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=data['retoureMuWSequenceNumber']), as_dict=True)[0].ausgabe_kurz
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", data['mitgliedId'])
+        ausgabe_kurz = frappe.db.sql("""SELECT `ausgabe_kurz` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=data.retoureMuWSequenceNumber), as_dict=True)[0].ausgabe_kurz
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", data.mitgliedId)
         
         if mitgliedschaft.adresse_mitglied and mitgliedschaft.adresse_mitglied != 'None':
-            datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=data['retoureMuWSequenceNumber']), as_dict=True)[0].datum_adressexport
+            datum_adressexport = frappe.db.sql("""SELECT `datum_adressexport` FROM `tabMW` WHERE `laufnummer` = '{retoure_mw_sequence_number}' LIMIT 1""".format(retoure_mw_sequence_number=data.retoureMuWSequenceNumber), as_dict=True)[0].datum_adressexport
             adresse_geaendert = adresse_geaendert_check(adr=mitgliedschaft.adresse_mitglied, datum_adressexport=datum_adressexport)
         else:
             adresse_geaendert = 0
         
-        if data['neueAddresse']:
-            neue_adresse_json = data['neueAddresse']
+        if data.neueAdresse:
+            neue_adresse_json = json.dumps(data.neueAdresse.__dict__)
             neue_adresse = """"""
             try:
-                gueltig_ab = neue_adresse_json['validFrom'].split(" ")[0].split("/")[2] + "-" + neue_adresse_json['validFrom'].split(" ")[0].split("/")[0] + "-" + neue_adresse_json['validFrom'].split(" ")[0].split("/")[1]
+                gueltig_ab = data.neueAdresse.validFrom.split(" ")[0].split("/")[2] + "-" + data.neueAdresse.validFrom.split(" ")[0].split("/")[0] + "-" + data.neueAdresse.validFrom.split(" ")[0].split("/")[1]
             except:
                 gueltig_ab = None
-            if neue_adresse_json['validTo']:
-                neue_adresse += """\nGültig bis {0}""".format(neue_adresse_json['validTo'])
-            if neue_adresse_json['adresszusatz']:
-                neue_adresse += """\n{0}""".format(neue_adresse_json['adresszusatz'])
-            if neue_adresse_json['postfach']:
-                neue_adresse += """\n{0}""".format(neue_adresse_json['postfach'])
-                if neue_adresse_json['postfachNummer']:
-                    neue_adresse += """ {0}""".format(neue_adresse_json['postfachNummer'])
-            if neue_adresse_json['strasse']:
-                neue_adresse += """\n{0}""".format(neue_adresse_json['strasse'])
-                if neue_adresse_json['hausnummer']:
-                    neue_adresse += """ {0}""".format(neue_adresse_json['hausnummer'])
-                if neue_adresse_json['hausnummerZusatz']:
-                    neue_adresse += """{0}""".format(neue_adresse_json['hausnummerZusatz'])
-            if neue_adresse_json['postleitzahl']:
-                neue_adresse += """\n{0} {1}""".format(neue_adresse_json['postleitzahl'], neue_adresse_json['ort'])
+            if data.neueAdresse.validTo:
+                neue_adresse += """\nGültig bis {0}""".format(data.neueAdresse.validTo)
+            if data.neueAdresse.adresszusatz:
+                neue_adresse += """\n{0}""".format(data.neueAdresse.adresszusatz)
+            if data.neueAdresse.postfach:
+                neue_adresse += """\n{0}""".format(data.neueAdresse.postfach)
+                if data.neueAdresse.postfachNummer:
+                    neue_adresse += """ {0}""".format(data.neueAdresse.postfachNummer)
+            if data.neueAdresse.strasse:
+                neue_adresse += """\n{0}""".format(data.neueAdresse.strasse)
+                if data.neueAdresse.hausnummer:
+                    neue_adresse += """ {0}""".format(data.neueAdresse.hausnummer)
+                if data.neueAdresse.hausnummerZusatz:
+                    neue_adresse += """{0}""".format(data.neueAdresse.hausnummerZusatz)
+            if data.neueAdresse.postleitzahl:
+                neue_adresse += """\n{0} {1}""".format(data.neueAdresse.postleitzahl, data.neueAdresse.ort)
             
         else:
             neue_adresse_json = None
@@ -158,32 +160,33 @@ def create_post_retouren(data):
         
         post_retoure = frappe.get_doc({
             'doctype': 'Retouren',
-            'mv_mitgliedschaft': data['mitgliedId'],
+            'mv_mitgliedschaft': data.mitgliedId,
             'sektion_id': mitgliedschaft.sektion_id,
             'adressblock': mitgliedschaft.adressblock,
             'ausgabe': ausgabe_kurz,
-            'legacy_kategorie_code': data['legacyKategorieCode'],
-            'legacy_notiz': data['legacyNotiz'],
-            'grund_code': data['grundCode'],
-            'grund_bezeichnung': data['grundBezeichnung'],
-            'retoure_mw_sequence_number': data['retoureMuWSequenceNumber'],
-            'retoure_dmc': data['retoureDMC'],
-            'retoureSendungsbild': data['retoureSendungsbild'],
-            'datum_erfasst_post': data['datumErfasstPost'],
+            'legacy_kategorie_code': data.legacyKategorieCode,
+            'legacy_notiz': data.legacyNotiz,
+            'grund_code': data.grundCode,
+            'grund_bezeichnung': data.grundBezeichnung,
+            'retoure_mw_sequence_number': data.retoureMuWSequenceNumber,
+            'retoure_dmc': data.retoureDMC,
+            'retoureSendungsbild': data.retoureSendungsbild,
+            'datum_erfasst_post': data.datumErfasstPost,
             'adresse_geaendert': adresse_geaendert,
-            'retoure_in_folge': check_retoure_in_folge(data['retoureMuWSequenceNumber'], data['mitgliedId']),
+            'retoure_in_folge': check_retoure_in_folge(data.retoureMuWSequenceNumber, data.mitgliedId),
             'neue_adresse_json': str(neue_adresse_json),
             'neue_adresse': neue_adresse,
-            'neue_adresse_gueltig_ab': gueltig_ab
+            'neue_adresse_gueltig_ab': gueltig_ab,
+            'raw_data': data.rawData
         })
         
         post_retoure.insert(ignore_permissions=True)
         frappe.db.commit()
         
-        return 1
+        return 1, cint(post_retoure.retoure_in_folge)
         
     except Exception as err:
-        return err
+        return err, 0
 
 @frappe.whitelist()
 def close_open_retouren(mitgliedschaft):

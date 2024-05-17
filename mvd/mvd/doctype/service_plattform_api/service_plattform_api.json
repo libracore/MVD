@@ -10,10 +10,12 @@
   "mitglieder",
   "beratung",
   "neue_mitglieder_nummer",
+  "retouren_mvz",
   "section_danger",
   "not_get_number_and_id",
   "no_sp_update",
   "send_beratung_to_sp_unterbrechen",
+  "no_postnotiz_to_sp",
   "json_error_log",
   "queue",
   "flush_queue",
@@ -115,6 +117,18 @@
    "label": "Flush Limit (SP Eingehend)"
   },
   {
+   "fieldname": "retouren_mvz",
+   "fieldtype": "Data",
+   "label": "Postnotiz Retouren MVZH",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "no_postnotiz_to_sp",
+   "fieldtype": "Check",
+   "label": "Senden von MVZH Postnotizen deaktivieren"
+  },
+  {
    "default": "0",
    "fieldname": "sp_incoming_immediately_executing",
    "fieldtype": "Check",
@@ -134,7 +148,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2024-03-19 10:12:06.208574",
+ "modified": "2024-05-17 14:17:49.756463",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",
