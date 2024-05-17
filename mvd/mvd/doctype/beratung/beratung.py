@@ -574,7 +574,7 @@ def get_beratungsorte(sektion, kontakt=None):
     if not kontakt:
         orte = frappe.db.sql("""SELECT `name` AS `ort_def` FROM `tabBeratungsort` WHERE `sektion_id` = '{sektion}' ORDER BY `ort` ASC""".format(sektion=sektion), as_dict=True)
     else:
-        orte = frappe.db.sql("""SELECT `ort` AS `ort_def` FROM `tabBeratungsort Multiselect` WHERE `parent` = '{kontakt}' ORDER BY `ort` ASC""".format(kontakt=kontakt), as_dict=True)
+        orte = frappe.db.sql("""SELECT DISTINCT `ort` AS `ort_def` FROM `tabArbeitsplan Standardzeit` WHERE `parent` = '{kontakt}' ORDER BY `ort` ASC""".format(kontakt=kontakt), as_dict=True)
     
     ort_list = []
     for ort in orte:

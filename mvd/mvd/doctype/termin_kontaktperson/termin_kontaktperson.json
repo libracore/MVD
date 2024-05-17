@@ -10,7 +10,6 @@
   "user",
   "sektion_id",
   "disabled",
-  "ort",
   "cb_1",
   "dispositions_hinweis",
   "section_default_einteilung",
@@ -45,12 +44,6 @@
    "options": "Termin Kontaktperson Multi User"
   },
   {
-   "fieldname": "ort",
-   "fieldtype": "Table MultiSelect",
-   "label": "Ort",
-   "options": "Beratungsort Multiselect"
-  },
-  {
    "fieldname": "section_default_einteilung",
    "fieldtype": "Section Break"
   },
@@ -70,7 +63,7 @@
    "label": "Dispositions Hinweis"
   }
  ],
- "modified": "2024-05-16 11:05:15.721954",
+ "modified": "2024-05-17 09:31:02.014941",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin Kontaktperson",
