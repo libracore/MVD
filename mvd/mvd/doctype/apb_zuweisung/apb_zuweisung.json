@@ -4,10 +4,10 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "art_ort",
   "date",
   "from_time",
   "to_time",
-  "art_ort",
   "beratungsperson",
   "verwendet"
  ],
@@ -56,7 +56,7 @@
   }
  ],
  "istable": 1,
- "modified": "2024-05-16 13:29:19.371945",
+ "modified": "2024-05-17 08:31:30.739418",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "APB Zuweisung",
