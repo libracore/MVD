@@ -173,7 +173,7 @@
                             <main role="main" class="">
                                 <div class="form js-form">
                                     <div class="form-intro">
-                                        <h1 class="e-h1 form-title">E-Mail-Beratung</h1>
+                                        <h1 class="e-h1 form-title">E-Mail-Beratung {% if sektion == 'MVZH' %}{% if mitgliedtyp_c == 'Geschäft' %}MV Business{% endif %}{% endif %}</h1>
                                     </div>
                                     <!-- Hinweis Beratungsformular und Adressänderungen -->
                                     <div class="text-image text-image-mv rich-text highlight no-img">
@@ -226,6 +226,9 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="form-row">
+                                                    <input type="checkbox" id="termin_vereinbaren_cb" name="termin_vereinbaren_cb" value="hallo">&nbsp;&nbsp;Ich möchte einen Termin vereinbaren, bitte nehmen Sie Kontakt mit mir auf.</input>
+                                                </div>
                                             </fieldset>
                                             {% endif %}
                                             <fieldset class="fieldset">
@@ -237,10 +240,26 @@
                                                             <label for="mitgliedschaft_nr" class="label mitgliedschaft_nr">
                                                                 Mitgliedernummer
                                                             </label>
+                                                            {% if sektion == 'MVZH' %}
+                                                                {% if mitgliedtyp_c == 'Geschäft' %}
+                                                                    <label for="mitgliedschaft_typ" class="label mitgliedschaft_nr">
+                                                                        Mitgliedschaft Typ
+                                                                    </label>
+                                                                    <label for="firma" class="label mitgliedschaft_nr">
+                                                                        Firma
+                                                                    </label>
+                                                                {% endif %}
+                                                            {% endif %}
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
                                                             <p class="value-read-only">{{ mitglied_nr }}</p>
                                                             <input type="text" class="h-hide" aria-hidden="true" name="mitgliedschaft_nr" id="mitgliedschaft_nr" value="{{ mitglied_nr }}" maxlength="50">
+                                                            {% if sektion == 'MVZH' %}
+                                                                {% if mitgliedtyp_c == 'Geschäft' %}
+                                                                    <p class="value-read-only">{{ mvb_typ }}</p>
+                                                                    <p class="value-read-only">{{ firma }}</p>
+                                                                {% endif %}
+                                                            {% endif %}
                                                             <input type="text" class="h-hide" aria-hidden="true" name="mitgliedschaft_id" id="mitgliedschaft_id" value="{{ mitglied_id }}" maxlength="50">
                                                             <input type="text" class="h-hide" aria-hidden="true" name="sektion_id" id="sektion_id" value="{{ sektion }}" maxlength="50">
                                                         </div>
@@ -509,9 +528,6 @@
                                                             el.form.submit()
                                                         }
                                                     </script>
-                                                    {% if sektion == 'MVBE' %}
-                                                        <input type="checkbox" id="termin_vereinbaren_cb" name="termin_vereinbaren_cb" value="hallo">&nbsp;Ich möchte einen Termin vereinbaren, bitte nehmen Sie Kontakt mit mir auf.</input><br><br>
-                                                    {% endif %}
                                                     <input type="submit" onclick="return mgnlFormHandleBackButton(this)" value="Abbrechen">
                                                     <input type="button" value="Beratungsanfrage senden" onclick="new_onlineberatung();">
                                                 </div>
