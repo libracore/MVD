@@ -270,7 +270,9 @@ $(document).on("page-change", function() {
     set_timestamps();
     
     // gewährleistung VBZ Beratung Reload
-    if (!window.location.hash.includes('#vbz-beratung')) {
+    if (!window.location.hash.includes('#vbz-beratung')&&
+        !window.location.hash.includes('#vbz-beratung-alle-se')&&
+        !window.location.hash.includes('#vbz_beratung_termine')) {
         if( window.localStorage ) {
             if( localStorage.getItem('firstLoad') ) {
                 localStorage.removeItem('firstLoad');
