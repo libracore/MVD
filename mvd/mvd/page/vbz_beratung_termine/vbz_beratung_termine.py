@@ -43,6 +43,7 @@ def get_alle_beratungs_termine(user):
                                         `berTer`.`ort`,
                                         `berTer`.`parent`,
                                         `berTer`.`berater_in`,
+                                        `berTer`.`telefonnummer`,
                                         `beratung`.`sektion_id`
                                     FROM `tabBeratung Termin` AS `berTer`
                                     LEFT JOIN `tabBeratung` AS `beratung` ON `berTer`.`parent` = `beratung`.`name`
@@ -60,7 +61,8 @@ def get_alle_beratungs_termine(user):
                 'ort': termin.ort,
                 'beratung': termin.parent,
                 'beraterinn': termin.berater_in,
-                'hat_attachement': hat_attachement
+                'hat_attachement': hat_attachement,
+                'telefonnummer': termin.telefonnummer
             }
             alle.append(termin_data)
         if termin.berater_in in kontaktperson_multi_user:

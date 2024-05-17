@@ -9,6 +9,7 @@
             <th>Datum</th>
             <th>Von - Bis</th>
             <th>Art</th>
+            <th>Telefonnummer</th>
             <th>Ort</th>
             <th>Dokumente</th>
             <th>Beratung</th>
@@ -19,6 +20,7 @@
                 <td>{{ termin.von_date }}</td>
                 <td>{{ termin.von_time }} - {{ termin.bis_time }}</td>
                 <td>{{ termin.art }}</td>
+                <td>{% if termin.art == "telefonisch" %}<a href="tel:{{ termin.telefonnummer }}">{{ termin.telefonnummer }}</a>{% else %}---{% endif %}</td>
                 <td>{{ termin.ort }}</td>
                 <td><center>{% if termin.hat_attachement == 1 %}<i class="fa fa-folder-open"></i>{% else %}&nbsp;{% endif %}</center></td>
                 <td>{{ termin.beratung }}</td>
@@ -46,6 +48,7 @@
             <th>Datum</th>
             <th>Von - Bis</th>
             <th>Art</th>
+            <th>Telefonnummer</th>
             <th>Ort</th>
             <th>Dokumente</th>
             <th>Beratung</th>
@@ -56,6 +59,7 @@
                 <td>{{ termin.von_date }}</td>
                 <td>{{ termin.von_time }} - {{ termin.bis_time }}</td>
                 <td>{{ termin.art }}</td>
+                <td>{% if termin.art == "telefonisch" %}<a href="tel:{{ termin.telefonnummer }}">{{ termin.telefonnummer }}</a>{% else %}---{% endif %}</td>
                 <td>{{ termin.ort }}</td>
                 <td><center>{% if termin.hat_attachement == 1 %}<i class="fa fa-folder-open"></i>{% else %}&nbsp;{% endif %}</center></td>
                 <td>{{ termin.beratung }}</td>
