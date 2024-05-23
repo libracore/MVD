@@ -814,3 +814,20 @@ def get_termin_block_data(abp_zuweisungen):
             'date': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'date')
         })
     return return_data
+
+@frappe.whitelist()
+def get_tel_for_termin(mitgliedschaft=None):
+    if not mitgliedschaft:
+        return ''
+    
+    tel = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'tel_m_1')
+    if tel:
+        return tel
+    tel = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'tel_p_1')
+    if tel:
+        return tel
+    tel = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'tel_g_1')
+    if tel:
+        return tel
+    
+    return ''
