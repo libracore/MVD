@@ -60,6 +60,7 @@ class PostRetourHandler:
         mw_ausgabe = self.libracore.get_mw_ausgabe(sequence_nr)
 
         notiz = "M+W Retoure (M+W Nr. {0}): {1} (Hauptmitglied".format(mw_ausgabe, message)
+        
         if company:
             notiz += ", {0}".format(company)
 

@@ -130,7 +130,13 @@ class LibraCoreFacade:
         return
 
     def send_to_sp4(self, postnotiz_for_sp):
-        send_postnotiz_to_sp(postnotiz_for_sp)
+        json_to_send = {
+            "mitgliedId": postnotiz_for_sp.mitgliedId,
+            "mitgliedNummer": postnotiz_for_sp.mitgliedNummer,
+            "kategorie": postnotiz_for_sp.kategorie,
+            "notiz": postnotiz_for_sp.notiz
+        }
+        send_postnotiz_to_sp(json_to_send)
         return
 
     @staticmethod
