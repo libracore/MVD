@@ -15,7 +15,7 @@ def create_postnotiz(postnotiz, postretouren_log):
         new_postnotiz = frappe.get_doc({
             'doctype': 'Postnotiz',
             'postretouren_log': postretouren_log,
-            'postnotiz': json.dumps(postnotiz.__dict__)
+            'postnotiz': json.dumps(postnotiz.__dict__, ensure_ascii=False)
         })
         
         new_postnotiz.insert(ignore_permissions=True)
