@@ -195,7 +195,7 @@ def send_postnotiz_to_sp(postnotiz_for_sp):
                 frappe.log_error("{0}".format(err), 'send_postnotiz_to_sp failed')
                 frappe.db.commit()
     else:
-        frappe.log_error("{0}".format(json.dumps(postnotiz_for_sp.__dict__)), 'send_postnotiz_to_sp deaktiviert')
+        frappe.log_error("{0}".format(str(postnotiz_for_sp)), 'send_postnotiz_to_sp deaktiviert')
         return
 
 '''

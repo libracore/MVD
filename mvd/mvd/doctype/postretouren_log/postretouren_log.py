@@ -9,9 +9,22 @@ from mvd.mvd.doctype.postretouren_log.postretourhandler import PostRetourHandler
 from mvd.mvd.doctype.postretouren_log.libracore_facade import LibraCoreFacade
 
 class PostretourenLog(Document):
-    def validate(self):
-        if self.status == 'WiP':
-            process_post_retouren(self)
+    pass
+
+def start_post_retouren_process():
+    new_postretouren_log = frappe.get_doc({
+        'doctype': 'Postretouren Log',
+        'status': 'Open'
+    })
+        
+    new_postretouren_log.insert(ignore_permissions=True)
+    frappe.db.commit()
+
+    new_postretouren_log.status = 'WiP'
+    new_postretouren_log.save()
+    frappe.db.commit()
+
+    process_post_retouren(new_postretouren_log)
 
 def process_post_retouren(postretouren_log):
     pr_handler = PostRetourHandler()
