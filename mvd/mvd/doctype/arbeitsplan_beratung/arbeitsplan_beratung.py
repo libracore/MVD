@@ -125,11 +125,17 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None):
                                                         SELECT *
                                                         FROM `tabAPB Zuweisung`
                                                         WHERE `date` = '{von_datum}'
+                                                        AND `name` NOT IN (
+                                                            SELECT `abp_referenz`
+                                                            FROM `tabBeratung Termin`
+                                                            WHERE `abp_referenz` IS NOT NULL
+                                                        )
                                                         {beraterin_filter}
                                                         {ort_filter}
                                                     """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter, ort_filter=ort_filter), as_dict=True)
+        
         verfuegbarkeiten_html += """
-            <p><b>{wochentag}, {datum}</b></p>
+            <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>
         """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'))
         if len(zugeteilte_beratungspersonen) > 0:
             zugeteilte_beratungspersonen_liste = []
@@ -139,19 +145,26 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None):
                     'from_time': zugeteilte_beratungsperson.from_time,
                     'to_time': zugeteilte_beratungsperson.to_time,
                     'beratungsperson': zugeteilte_beratungsperson.beratungsperson.replace("({sektion})".format(sektion=sektion), ""),
-                    'color': 'green' if zugeteilte_beratungsperson.verwendet == 0 else 'orange' if zugeteilte_beratungsperson.verwendet < 100 else 'red'
+                    'name': zugeteilte_beratungsperson.name
                 }
                 zugeteilte_beratungspersonen_liste.append(x)
             sorted_list = sorted(zugeteilte_beratungspersonen_liste, key = lambda x: (x['ort'], x['from_time'], x['beratungsperson']))
             for entry in sorted_list:
                 verfuegbarkeiten_html += """
-                    <p><span class="indicator {color}">&nbsp;</span>{from_time} - {to_time} / {ort} / {beratungsperson}</p>
+                    <div class="form-group frappe-control input-max-width" style="margin-bottom: 0px !important;" data-fieldtype="Check">
+                        <div class="checkbox" style="margin-bottom: 0px !important; margin-top: 0px !important;">
+                            <label>
+                                <span class="input-area"><input type="checkbox" autocomplete="off" class="input-with-feedback" data-fieldtype="Check" data-abpzuweisung="{abpzuweisung}" onclick="cur_dialog.checkbox_clicked(this);"></span>
+                                <span class="label-area small">{from_time} - {to_time} / {ort} / {beratungsperson}</span>
+                            </label>
+                        </div>
+                    </div>
                 """.format(from_time=':'.join(str(entry['from_time']).split(':')[:2]), \
                            to_time=':'.join(str(entry['to_time']).split(':')[:2]), \
                             ort=entry['ort'], beratungsperson=entry['beratungsperson'], \
-                            color=entry['color'] )
+                            abpzuweisung=entry['name'])
         else:
-            verfuegbarkeiten_html += """<p>Kein(e) Berater*in verfügbar</p>"""
+            verfuegbarkeiten_html += """<pstyle="margin-top: 0px !important;">Kein(e) Berater*in verfügbar</p>"""
         von_datum += delta
     
     return verfuegbarkeiten_html

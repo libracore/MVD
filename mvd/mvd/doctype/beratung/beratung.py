@@ -780,44 +780,37 @@ def erstelle_todo(owner, beratung, description=False, datum=False, notify=0, mit
 
 @frappe.whitelist()
 def get_termin_mail_txt(von, bis, art, ort, telefonnummer):
-    von_datum = getdate(von)
-    ort_info = frappe.db.get_value("Beratungsort", ort, "infofeld") or 'Keine ortsspezifische Angaben'
-    mail_txt = """
-        <div>
-            Termin vom {wochentag}, {datum}, {von} bis {bis}<br>
-            {ort_info}<br>
-            {telefonnummer}
-        </div>
-    """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
-               von=":".join(von.split(" ")[1].split(":")[:2]), bis=":".join(bis.split(" ")[1].split(":")[:2]), \
-               ort_info=ort_info, telefonnummer="Telefonnummer: {0}".format(telefonnummer or 'Keine Angaben' if art == 'telefonisch' else ''))
+    mail_txt = ''
+    index = 0
+    von = json.loads(von)
+    bis = json.loads(bis)
+    
+    for entry in von:
+        von_datum = getdate(entry)
+        ort_info = frappe.db.get_value("Beratungsort", ort, "infofeld") or 'Keine ortsspezifische Angaben'
+        mail_txt += """
+            <div>
+                Termin vom {wochentag}, {datum}, {von} bis {bis}<br>
+                {ort_info}<br>
+                {telefonnummer}
+            </div>
+        """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+                von=":".join(von[index].split(" ")[1].split(":")[:2]), bis=":".join(bis[index].split(" ")[1].split(":")[:2]), \
+                ort_info=ort_info, telefonnummer="Telefonnummer: {0}".format(telefonnummer or 'Keine Angaben' if art == 'telefonisch' else ''))
+        index += 1
 
     return mail_txt
 
 @frappe.whitelist()
-def set_termin_block_as_used(von, bis, kontaktperson):
-    from_datetime = get_datetime(von)
-    to_datetime = get_datetime(bis)
-    arbeitsplan_einteilung = frappe.db.sql("""
-                                            SELECT *
-                                            FROM `tabAPB Zuweisung`
-                                            WHERE `date` = '{von_datum}'
-                                            AND `from_time` <= '{from_time}'
-                                            AND `to_time` > '{from_time}'
-                                            AND `beratungsperson` = '{kontaktperson}'
-                                        """.format(von_datum=from_datetime.strftime('%Y-%m-%d'), \
-                                                   from_time=from_datetime.strftime('%H:%M:%S'), \
-                                                   to_time=from_datetime.strftime('%H:%M:%S'), \
-                                                    kontaktperson=kontaktperson), as_dict=True)
-    if len(arbeitsplan_einteilung) > 0:
-        termin_block_minutes = to_datetime - from_datetime
-        termin_block_seconds = termin_block_minutes.total_seconds()
-        arbeitsplan_einteilung_minutes = get_datetime("2000-01-01 {0}".format(arbeitsplan_einteilung[0].to_time)) - get_datetime("2000-01-01 {0}".format(arbeitsplan_einteilung[0].from_time))
-        arbeitsplan_einteilung_seconds = arbeitsplan_einteilung_minutes.total_seconds()
-
-        if arbeitsplan_einteilung_seconds <= termin_block_seconds:
-            frappe.db.set_value("APB Zuweisung", arbeitsplan_einteilung[0].name, 'verwendet', 100)
-        else:
-            delta = int((100 / arbeitsplan_einteilung_seconds) * termin_block_seconds)
-            frappe.db.set_value("APB Zuweisung", arbeitsplan_einteilung[0].name, 'verwendet', delta)
-    return
+def get_termin_block_data(abp_zuweisungen):
+    if abp_zuweisungen.startswith("-"):
+        abp_zuweisungen = abp_zuweisungen.replace("-", "", 1)
+    return_data = []
+    for abp_zuweisung in abp_zuweisungen.split("-"):
+        return_data.append({
+            'referenz': abp_zuweisung,
+            'von': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'from_time'),
+            'bis': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'to_time'),
+            'date': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'date')
+        })
+    return return_data
