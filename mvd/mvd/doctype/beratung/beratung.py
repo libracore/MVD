@@ -110,6 +110,18 @@ class Beratung(Document):
         
         # Handling des Status
         self.status_handler()
+
+        # Keine Beratung ohne Sektion
+        if not self.sektion_id:
+            self.set_sektion()
+    
+    def set_sektion(self):
+        # check if default Sektion = MVBE
+        default_sektion = frappe.db.sql("""SELECT `for_value` FROM `tabUser Permission` WHERE `allow` = 'Sektion' AND `user` = '{user}' AND `is_default` = 1""".format(user=frappe.session.user), as_dict=True)
+        if len(default_sektion) > 0:
+            self.sektion_id = default_sektion[0].for_value
+        else:
+            frappe.throw("Es wurde keine Standard Sektion für den User {user} gefunden.<br>Ohne Sektion kann keine Beratung angelegt werden.".format(user=frappe.session.user))
     
     def status_handler(self):
         # Prüfung ob Beratung gerade angelegt wird
