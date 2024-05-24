@@ -138,8 +138,14 @@ def get_data():
                 {
                     "type": "doctype",
                     "name": "Termin Kontaktperson",
-                    "label": _("Berater*inn"),
-                    "description": _("Berater*inn")
+                    "label": _("Berater*in"),
+                    "description": _("Berater*in")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Beratungsort",
+                    "label": _("Beratungsort"),
+                    "description": _("Beratungsort")
                 },
                 {
                     "type": "doctype",
