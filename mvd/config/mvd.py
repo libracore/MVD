@@ -174,6 +174,12 @@ def get_data():
                     "description": _("Beratungen MVZH"),
                     "doctype": "Beratung",
                     "is_query_report": True
+                },
+                {
+                    "type": "doctype",
+                    "name": "Calendar Sync Settings",
+                    "label": _("Beratungs Kalender Einstellungen"),
+                    "description": _("Beratungs Kalender Einstellungen")
                 }
             ]
         },
