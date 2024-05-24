@@ -108,10 +108,12 @@ class ArbeitsplanBeratung(Document):
         self.save()
 
 @frappe.whitelist()
-def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None):
+def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None):
     von_datum = getdate(datum)
     delta = timedelta(days=1)
     bis_datum = von_datum + timedelta(days=7)
+    if marked:
+        marked = marked.split("-")
     beraterin_filter = ''
     ort_filter = ''
     verfuegbarkeiten_html = ""
@@ -142,19 +144,24 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None):
             for zugeteilte_beratungsperson in zugeteilte_beratungspersonen:
                 x = {
                     'ort': zugeteilte_beratungsperson.art_ort.replace("({sektion})".format(sektion=sektion), ""),
+                    'ort_mit_sektion': zugeteilte_beratungsperson.art_ort,
                     'from_time': zugeteilte_beratungsperson.from_time,
                     'to_time': zugeteilte_beratungsperson.to_time,
                     'beratungsperson': zugeteilte_beratungsperson.beratungsperson.replace("({sektion})".format(sektion=sektion), ""),
+                    'beratungsperson_mit_sektion': zugeteilte_beratungsperson.beratungsperson,
                     'name': zugeteilte_beratungsperson.name
                 }
                 zugeteilte_beratungspersonen_liste.append(x)
             sorted_list = sorted(zugeteilte_beratungspersonen_liste, key = lambda x: (x['ort'], x['from_time'], x['beratungsperson']))
             for entry in sorted_list:
+                checked = ''
+                if entry['name'] in marked:
+                    checked = 'checked'
                 verfuegbarkeiten_html += """
                     <div class="form-group frappe-control input-max-width" style="margin-bottom: 0px !important;" data-fieldtype="Check">
                         <div class="checkbox" style="margin-bottom: 0px !important; margin-top: 0px !important;">
                             <label>
-                                <span class="input-area"><input type="checkbox" autocomplete="off" class="input-with-feedback" data-fieldtype="Check" data-abpzuweisung="{abpzuweisung}" onclick="cur_dialog.checkbox_clicked(this);"></span>
+                                <span class="input-area"><input type="checkbox" {checked} autocomplete="off" class="input-with-feedback" data-fieldtype="Check" data-abpzuweisung="{abpzuweisung}" data-ort="{ort_mit_sektion}" data-beratungsperson="{beratungsperson_mit_sektion}" onclick="cur_dialog.checkbox_clicked(this);"></span>
                                 <span class="label-area small">{from_time} - {to_time} / {ort} / {beratungsperson}</span>
                             </label>
                         </div>
@@ -162,7 +169,8 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None):
                 """.format(from_time=':'.join(str(entry['from_time']).split(':')[:2]), \
                            to_time=':'.join(str(entry['to_time']).split(':')[:2]), \
                             ort=entry['ort'], beratungsperson=entry['beratungsperson'], \
-                            abpzuweisung=entry['name'])
+                            abpzuweisung=entry['name'], ort_mit_sektion=entry['ort_mit_sektion'], \
+                            checked=checked, beratungsperson_mit_sektion=entry['beratungsperson_mit_sektion'])
         else:
             verfuegbarkeiten_html += """<pstyle="margin-top: 0px !important;">Kein(e) Berater*in verfügbar</p>"""
         von_datum += delta

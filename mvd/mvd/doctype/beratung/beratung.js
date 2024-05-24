@@ -492,7 +492,8 @@ function termin_quick_entry(frm) {
                 method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
                 args:{
                     'sektion': cur_frm.doc.sektion_id,
-                    'datum': frappe.datetime.nowdate()
+                    'datum': frappe.datetime.nowdate(),
+                    'marked': ''
                 },
                 callback: function(verfuegbarkeiten) {
                     var verfuegbarkeiten_html = '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>';
@@ -518,7 +519,8 @@ function termin_quick_entry(frm) {
                                                     'sektion': cur_frm.doc.sektion_id,
                                                     'datum': d.get_value('von'),
                                                     'beraterin': d.get_value('kontaktperson')||'',
-                                                    'ort': d.get_value('ort')||''
+                                                    'ort': d.get_value('ort')||'',
+                                                    'marked': localStorage.getItem('selected_termine')
                                                 },
                                                 callback: function(r) {
                                                     if (r.message) {
@@ -528,7 +530,6 @@ function termin_quick_entry(frm) {
                                                         // keine freien Beratungspersonen
                                                         d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
                                                     }
-                                                    localStorage.setItem('selected_termine', '')
                                                 }
                                             });
                                         }
@@ -544,7 +545,8 @@ function termin_quick_entry(frm) {
                                                     'sektion': cur_frm.doc.sektion_id,
                                                     'datum': d.get_value('von'),
                                                     'beraterin': d.get_value('kontaktperson')||'',
-                                                    'ort': d.get_value('ort')||''
+                                                    'ort': d.get_value('ort')||'',
+                                                    'marked': localStorage.getItem('selected_termine')
                                                 },
                                                 callback: function(r) {
                                                     if (r.message) {
@@ -554,7 +556,6 @@ function termin_quick_entry(frm) {
                                                         // keine freien Beratungspersonen
                                                         d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
                                                     }
-                                                    localStorage.setItem('selected_termine', '')
                                                 }
                                             });
                                         }
@@ -596,7 +597,8 @@ function termin_quick_entry(frm) {
                                                                 'sektion': cur_frm.doc.sektion_id,
                                                                 'datum': d.get_value('von'),
                                                                 'beraterin': d.get_value('kontaktperson')||'',
-                                                                'ort': d.get_value('ort')||''
+                                                                'ort': d.get_value('ort')||'',
+                                                                'marked': localStorage.getItem('selected_termine')
                                                             },
                                                             callback: function(r) {
                                                                 if (r.message) {
@@ -606,7 +608,6 @@ function termin_quick_entry(frm) {
                                                                     // keine freien Beratungspersonen
                                                                     d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
                                                                 }
-                                                                localStorage.setItem('selected_termine', '')
                                                             }
                                                         });
                                                     }
@@ -620,7 +621,8 @@ function termin_quick_entry(frm) {
                                                     args:{
                                                         'sektion': cur_frm.doc.sektion_id,
                                                         'datum': d.get_value('von'),
-                                                        'ort': d.get_value('ort')||''
+                                                        'ort': d.get_value('ort')||'',
+                                                        'marked': localStorage.getItem('selected_termine')
                                                     },
                                                     callback: function(r) {
                                                         if (r.message) {
@@ -630,7 +632,6 @@ function termin_quick_entry(frm) {
                                                             // keine freien Beratungspersonen
                                                             d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
                                                         }
-                                                        localStorage.setItem('selected_termine', '')
                                                     }
                                                 });
                                             }
@@ -712,12 +713,27 @@ function termin_quick_entry(frm) {
                                 'primary_action_label': __('Erstellen'),
                                 'checkbox_clicked': function(cb) {
                                     var termin = $(cb).data().abpzuweisung;
+                                    var ort = $(cb).data().ort;
+                                    if (!d.get_value('ort')) {
+                                        d.set_value('ort', ort)
+                                    }
+                                    var beratungsperson = $(cb).data().beratungsperson;
+                                    if (!d.get_value('kontaktperson')) {
+                                        d.set_value('kontaktperson', beratungsperson)
+                                    }
                                     if (localStorage.getItem('selected_termine').includes(`-${termin}`)) {
                                         localStorage.setItem('selected_termine', localStorage.getItem('selected_termine').replace(`-${termin}`, ''));
                                         
                                     } else {
                                         var marks = localStorage.getItem('selected_termine')
                                         localStorage.setItem('selected_termine', `${marks}-${termin}`);
+                                    }
+                                    if (localStorage.getItem('selected_termine').length > 0) {
+                                        d.set_df_property("ort", "read_only", 1);
+                                        d.set_df_property("kontaktperson", "read_only", 1);
+                                    } else {
+                                        d.set_df_property("ort", "read_only", 0);
+                                        d.set_df_property("kontaktperson", "read_only", 0);
                                     }
                                     
                                 }
