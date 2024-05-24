@@ -477,11 +477,8 @@ function setze_read_only(frm) {
     }
 }
 
-// function checkbox_clicked(abpzuweisung) {
-//     console.log(abpzuweisung);
-// }
-
 function termin_quick_entry(frm) {
+    localStorage.setItem('selected_termine', '');
     frappe.call({
         'method': "mvd.mvd.doctype.beratung.beratung.get_beratungsorte",
         'args': {
@@ -531,7 +528,7 @@ function termin_quick_entry(frm) {
                                                         // keine freien Beratungspersonen
                                                         d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
                                                     }
-                                                    d.set_value('selected_termin', '')
+                                                    localStorage.setItem('selected_termine', '')
                                                 }
                                             });
                                         }
@@ -557,7 +554,7 @@ function termin_quick_entry(frm) {
                                                         // keine freien Beratungspersonen
                                                         d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
                                                     }
-                                                    d.set_value('selected_termin', '')
+                                                    localStorage.setItem('selected_termine', '')
                                                 }
                                             });
                                         }
@@ -609,7 +606,7 @@ function termin_quick_entry(frm) {
                                                                     // keine freien Beratungspersonen
                                                                     d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
                                                                 }
-                                                                d.set_value('selected_termin', '')
+                                                                localStorage.setItem('selected_termine', '')
                                                             }
                                                         });
                                                     }
@@ -633,7 +630,7 @@ function termin_quick_entry(frm) {
                                                             // keine freien Beratungspersonen
                                                             d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
                                                         }
-                                                        d.set_value('selected_termin', '')
+                                                        localStorage.setItem('selected_termine', '')
                                                     }
                                                 });
                                             }
@@ -641,14 +638,13 @@ function termin_quick_entry(frm) {
                                     },
                                     {'fieldname': 'notiz', 'fieldtype': 'Text Editor', 'label': __('Notiz (Intern)')},
                                     {'fieldname': 'verfuegbarkeiten_titel', 'fieldtype': 'HTML', 'options': '<h4>Berater*innen Verfügbarkeiten</h4>'},
-                                    {'fieldname': 'verfuegbarkeiten_html', 'fieldtype': 'HTML', 'label': '', 'options': verfuegbarkeiten_html},
-                                    {'fieldname': 'selected_termin', 'fieldtype': 'Data', 'label': 'Ausgewählte Termine', 'hidden': 1}
+                                    {'fieldname': 'verfuegbarkeiten_html', 'fieldtype': 'HTML', 'label': '', 'options': verfuegbarkeiten_html}
                                 ],
                                 'primary_action': function() {
                                     frappe.call({
                                         method: "mvd.mvd.doctype.beratung.beratung.get_termin_block_data",
                                         args:{
-                                            'abp_zuweisungen': d.get_value('selected_termin')
+                                            'abp_zuweisungen': localStorage.getItem('selected_termine')
                                         },
                                         callback: function(r) {
                                             console.log(r.message)
@@ -716,12 +712,12 @@ function termin_quick_entry(frm) {
                                 'primary_action_label': __('Erstellen'),
                                 'checkbox_clicked': function(cb) {
                                     var termin = $(cb).data().abpzuweisung;
-                                    if (d.get_value('selected_termin').includes(`-${termin}`)) {
-                                        d.set_value('selected_termin', d.get_value('selected_termin').replace(`-${termin}`, ''))
+                                    if (localStorage.getItem('selected_termine').includes(`-${termin}`)) {
+                                        localStorage.setItem('selected_termine', localStorage.getItem('selected_termine').replace(`-${termin}`, ''));
                                         
                                     } else {
-                                        var marks = d.get_value('selected_termin');
-                                        d.set_value('selected_termin', `${marks}-${termin}`);
+                                        var marks = localStorage.getItem('selected_termine')
+                                        localStorage.setItem('selected_termine', `${marks}-${termin}`);
                                     }
                                     
                                 }

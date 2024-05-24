@@ -168,3 +168,42 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None):
         von_datum += delta
     
     return verfuegbarkeiten_html
+
+@frappe.whitelist()
+def verwendete_einteilungen(arbeitsplan_beratung):
+    verwendet = frappe.db.sql("""
+        SELECT *
+        FROM `tabBeratung Termin`
+        WHERE `abp_referenz` IN (
+            SELECT `name` FROM `tabAPB Zuweisung`
+            WHERE `parent` = '{arbeitsplan_beratung}'
+        )
+    """.format(arbeitsplan_beratung=arbeitsplan_beratung), as_dict=True)
+
+    verwendet_as_sting = ''
+    reset_values = []
+
+    for v in verwendet:
+        verwendet_as_sting += "-{0}".format(v.abp_referenz)
+
+        values_for_reset = frappe.db.sql("""
+            SELECT *
+            FROM `tabAPB Zuweisung`
+            WHERE `name`  = '{zuweisung}'
+        """.format(zuweisung=v.abp_referenz), as_dict=True)
+
+        reset_values.append({
+            'referenz': v.abp_referenz,
+            'reset_data': [
+                values_for_reset[0].art_ort,
+                values_for_reset[0].date,
+                values_for_reset[0].from_time,
+                values_for_reset[0].to_time,
+                values_for_reset[0].beratungsperson
+            ]
+        })
+    
+    return {
+        'einteilung_verwendet': verwendet_as_sting,
+        'reset_values': reset_values
+    }
