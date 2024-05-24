@@ -215,3 +215,46 @@ def verwendete_einteilungen(arbeitsplan_beratung):
         'einteilung_verwendet': verwendet_as_sting,
         'reset_values': reset_values
     }
+
+@frappe.whitelist()
+def get_termin_uebersicht(berater_in):
+    termine = frappe.db.sql("""
+        SELECT
+            `bt`.`von`,
+            `bt`.`bis`,
+            `bt`.`art`,
+            `bt`.`ort`,
+            `bt`.`telefonnummer`,
+            REPLACE(`mitgl`.`adressblock`, '\n', '<br>') AS `adressblock`,
+            `ber`.`sektion_id`,
+            `mitgl`.`mitglied_nr`,
+            `mitgl`.`eintrittsdatum`,
+            `mitgl`.`bezahltes_mitgliedschaftsjahr`,
+            `bt`.`creation`,
+            `bt`.`notiz`,
+            '' AS `von_zeit`
+        FROM `tabBeratung Termin` AS `bt`
+        LEFT JOIN `tabBeratung` AS `ber` ON `bt`.`parent` = `ber`.`name`
+        LEFT JOIN `tabMitgliedschaft` AS `mitgl` ON `ber`.`mv_mitgliedschaft` = `mitgl`.`name`
+        WHERE `berater_in` = '{berater_in}'
+        ORDER BY `von` ASC
+    """.format(berater_in=berater_in), as_dict=True)
+    return termine
+
+@frappe.whitelist()
+def get_arbeitsplan_pdf(berater_in):
+    # berater_in = 'Stefanie Zillig (MVBE)'
+    termine = get_termin_uebersicht(berater_in)
+    for termin in termine:
+        termin.von_zeit = frappe.utils.getdate(termin.von).strftime("%H:%M")
+        termin.von = frappe.utils.getdate(termin.von).strftime("%d.%m.%Y")
+        termin.bis = frappe.utils.getdate(termin.bis).strftime("%H:%M")
+        termin.eintrittsdatum = frappe.utils.getdate(termin.eintrittsdatum).strftime("%d.%m.%Y")
+        termin.creation = frappe.utils.getdate(termin.creation).strftime("%d.%m.%Y")
+
+    html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'termine': termine})
+    from frappe.utils.pdf import get_pdf
+    pdf = get_pdf(html)
+    frappe.local.response.filename = "{name}.pdf".format(name=berater_in.replace(" ", "-").replace("/", "-"))
+    frappe.local.response.filecontent = pdf
+    frappe.local.response.type = "download"

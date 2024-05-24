@@ -154,6 +154,12 @@ def get_data():
                     "description": _("Arbeitsplan Beratung")
                 },
                 {
+                   "type": "page",
+                   "name": "individueller-arbeitsplan",
+                   "label": _("Individueller Arbeitsplan (Druckversion)"),
+                   "description": _("Individueller Arbeitsplan (Druckversion)")
+                },
+                {
                     "type": "report",
                     "name": "Beratungsstatistik",
                     "label": _("Beratungsstatistik"),
