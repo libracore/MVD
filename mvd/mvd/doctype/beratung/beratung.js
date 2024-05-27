@@ -247,10 +247,20 @@ frappe.ui.form.on('Beratung', {
                 });
                 // Deaktivierung BTN wenn notwendig
                 if ((cur_frm.doc.status == 'Closed')||(cur_frm.doc.termin.length > 0)||(!cur_frm.doc.mv_mitgliedschaft)) {
-                    cur_frm.custom_buttons["Termin vergeben"].off()
-                    cur_frm.custom_buttons["Termin vergeben"].on("click", function(){
-                        frappe.msgprint("Diese Funktion steht nur zur Verfügung wenn:<br><ul><li>Status nicht geschlossen</li><li>Keine Termine</li><li>Verknüpfte Mitgliedschaft</li></ul>");
-                    })
+                    var found_termin_in_future = false;
+                    var today = new Date();
+                    for (var i = 0; i < cur_frm.doc.termin.length; i++) {
+                        var termin_date = new Date(cur_frm.doc.termin[i].von);
+                        if (today.getTime() < termin_date.getTime()) {
+                            found_termin_in_future = true;
+                        }
+                    }
+                    if (found_termin_in_future) {
+                        cur_frm.custom_buttons["Termin vergeben"].off()
+                        cur_frm.custom_buttons["Termin vergeben"].on("click", function(){
+                            frappe.msgprint("Diese Funktion steht nur zur Verfügung wenn:<br><ul><li>Status nicht geschlossen</li><li>Keine Termine in Zukunft</li><li>Verknüpfte Mitgliedschaft</li></ul>");
+                        })
+                    }
                 }
                 
                 // Add BTN Admin ToDo
@@ -468,61 +478,40 @@ function setze_read_only(frm) {
 }
 
 function termin_quick_entry(frm) {
+    localStorage.setItem('selected_termine', '');
     frappe.call({
         'method': "mvd.mvd.doctype.beratung.beratung.get_beratungsorte",
         'args': {
             'sektion': cur_frm.doc.sektion_id
         },
         'callback': function(r) {
-            var orte = r.message.ort_string;
+            var orte = " \n" + r.message.ort_string;
             var default_termindauer = r.message.default_termindauer;
-            var default_von = roundMinutes(frappe.datetime.now_datetime()); // default "von"-Zeit = aktuelle Zeit gerundet auf nächste volle Stunde
+            var default_von = frappe.datetime.nowdate();
             frappe.call({
                 method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
                 args:{
                     'sektion': cur_frm.doc.sektion_id,
-                    'datum': frappe.datetime.now_datetime(),
-                    'art': 'telefonisch'
+                    'datum': frappe.datetime.nowdate(),
+                    'marked': ''
                 },
                 callback: function(verfuegbarkeiten) {
                     var verfuegbarkeiten_html = '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>';
                     if (verfuegbarkeiten.message) {
                         verfuegbarkeiten_html = verfuegbarkeiten.message;
                     }
-                    var d = new frappe.ui.Dialog({
-                    'title': __('Termin erstellen'),
-                    'fields': [
-                        {'fieldname': 'verfuegbarkeiten_titel', 'fieldtype': 'HTML', 'options': '<h4>Berater*innen Verfügbarkeiten</h4>'},
-                        {'fieldname': 'verfuegbarkeiten_html', 'fieldtype': 'HTML', 'label': '', 'options': verfuegbarkeiten_html},
-                        {'fieldname': 'kontaktperson', 'fieldtype': 'Link', 'label': __('Berater*in'), 'options': 'Termin Kontaktperson', 'reqd': 1,
-                            'get_query': function() {
-                                return {
-                                    filters: {
-                                        'sektion_id': cur_frm.doc.sektion_id
-                                    }
-                                }
-                            },
-                            'change': function() {
-                                if (d.get_value('kontaktperson')) {
-                                    frappe.call({
-                                        method: "mvd.mvd.doctype.beratung.beratung.get_beratungsorte",
-                                        args:{
-                                            'sektion': cur_frm.doc.sektion_id,
-                                            'kontakt': d.get_value('kontaktperson')
-                                        },
-                                        callback: function(r) {
-                                            if (r.message) {
-                                                // hinterlegen von Orten auf Basis Kontakt
-                                                var orte_kontaktbasis = r.message.ort_string;
-                                                var default_ort_kontaktbasis = r.message.default;
-                                                d.set_df_property('ort', 'options', orte_kontaktbasis);
-                                                d.set_value('ort',  default_ort_kontaktbasis);
-                                            } else {
-                                                // Keine Orte zu Kontakt
-                                                d.set_value('ort',  '');
-                                                d.set_df_property('ort', 'options', '');
-                                            }
-
+                    frappe.call({
+                        'method': "mvd.mvd.doctype.beratung.beratung.get_tel_for_termin",
+                        'args': {
+                            'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft
+                        },
+                        'callback': function(telefon) {
+                            var tel = telefon.message;
+                            var d = new frappe.ui.Dialog({
+                                'title': __('Termin erstellen'),
+                                'fields': [
+                                    {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 1, 'default': '',
+                                        'change': function() {
                                             // aktualisierung verfügbarkeiten
                                             frappe.call({
                                                 method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
@@ -530,7 +519,8 @@ function termin_quick_entry(frm) {
                                                     'sektion': cur_frm.doc.sektion_id,
                                                     'datum': d.get_value('von'),
                                                     'beraterin': d.get_value('kontaktperson')||'',
-                                                    'art': d.get_value('art')||''
+                                                    'ort': d.get_value('ort')||'',
+                                                    'marked': localStorage.getItem('selected_termine')
                                                 },
                                                 callback: function(r) {
                                                     if (r.message) {
@@ -543,119 +533,226 @@ function termin_quick_entry(frm) {
                                                 }
                                             });
                                         }
-                                    });
-                                } else {
-                                    // reset to default
-                                    d.set_value('ort',  '');
-                                    d.set_df_property('ort', 'options', orte);
-                                    // aktualisierung verfügbarkeiten
-                                    frappe.call({
-                                        method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
-                                        args:{
-                                            'sektion': cur_frm.doc.sektion_id,
-                                            'datum': d.get_value('von'),
-                                            'art': d.get_value('art')||''
-                                        },
-                                        callback: function(r) {
-                                            if (r.message) {
-                                                // anzeigen der Verfügbarkeiten
-                                                d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                                    },
+                                    {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich', 'reqd': 1, 'default': 'telefonisch', 
+                                        'change': function() {
+                                            if (d.get_value('art') == 'telefonisch') {
+                                                d.set_df_property('telefonnummer', 'reqd', 1);
                                             } else {
-                                                // keine freien Beratungspersonen
-                                                d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
+                                                d.set_df_property('telefonnummer', 'reqd', 0);
                                             }
                                         }
-                                    });
+                                    },
+                                    {'fieldname': 'telefonnummer', 'fieldtype': 'Data', 'label': __('Telefonnummer'), 'default': tel, 'reqd': 1},
+                                    {'fieldname': 'von', 'fieldtype': 'Date', 'label': __('Datum'), 'reqd': 1, 'default': default_von, 'description': '"Datum" ist relevant für die Anzeige der Verfügbarkeiten. Es wird immer 7 Tage in Zukunft geblickt.',
+                                        'change': function() {
+                                            // aktualisierung verfügbarkeiten
+                                            frappe.call({
+                                                method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
+                                                args:{
+                                                    'sektion': cur_frm.doc.sektion_id,
+                                                    'datum': d.get_value('von'),
+                                                    'beraterin': d.get_value('kontaktperson')||'',
+                                                    'ort': d.get_value('ort')||'',
+                                                    'marked': localStorage.getItem('selected_termine')
+                                                },
+                                                callback: function(r) {
+                                                    if (r.message) {
+                                                        // anzeigen der Verfügbarkeiten
+                                                        d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                                                    } else {
+                                                        // keine freien Beratungspersonen
+                                                        d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    },
+                                    {'fieldname': 'kontaktperson', 'fieldtype': 'Link', 'label': __('Berater*in'), 'options': 'Termin Kontaktperson', 'reqd': 1,
+                                        'get_query': function() {
+                                            return {
+                                                filters: {
+                                                    'sektion_id': cur_frm.doc.sektion_id
+                                                }
+                                            }
+                                        },
+                                        'change': function() {
+                                            if (d.get_value('kontaktperson')) {
+                                                frappe.call({
+                                                    method: "mvd.mvd.doctype.beratung.beratung.get_beratungsorte",
+                                                    args:{
+                                                        'sektion': cur_frm.doc.sektion_id,
+                                                        'kontakt': d.get_value('kontaktperson')
+                                                    },
+                                                    callback: function(r) {
+                                                        if (r.message) {
+                                                            // hinterlegen von Orten auf Basis Kontakt
+                                                            var orte_kontaktbasis = " \n" + r.message.ort_string;
+                                                            if ((d.get_value('ort'))&&(d.get_value('ort') != ' ')&&(!orte_kontaktbasis.includes(d.get_value('ort')))) {
+                                                                d.set_value('ort', '');
+                                                            }
+                                                            d.set_df_property('ort', 'options', orte_kontaktbasis);
+                                                        } else {
+                                                            // Keine Orte zu Kontakt
+                                                            d.set_value('ort', '');
+                                                            d.set_df_property('ort', 'options', '');
+                                                        }
+
+                                                        // aktualisierung verfügbarkeiten
+                                                        frappe.call({
+                                                            method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
+                                                            args:{
+                                                                'sektion': cur_frm.doc.sektion_id,
+                                                                'datum': d.get_value('von'),
+                                                                'beraterin': d.get_value('kontaktperson')||'',
+                                                                'ort': d.get_value('ort')||'',
+                                                                'marked': localStorage.getItem('selected_termine')
+                                                            },
+                                                            callback: function(r) {
+                                                                if (r.message) {
+                                                                    // anzeigen der Verfügbarkeiten
+                                                                    d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                                                                } else {
+                                                                    // keine freien Beratungspersonen
+                                                                    d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            } else {
+                                                // reset to default
+                                                d.set_df_property('ort', 'options', orte);
+                                                // aktualisierung verfügbarkeiten
+                                                frappe.call({
+                                                    method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
+                                                    args:{
+                                                        'sektion': cur_frm.doc.sektion_id,
+                                                        'datum': d.get_value('von'),
+                                                        'ort': d.get_value('ort')||'',
+                                                        'marked': localStorage.getItem('selected_termine')
+                                                    },
+                                                    callback: function(r) {
+                                                        if (r.message) {
+                                                            // anzeigen der Verfügbarkeiten
+                                                            d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                                                        } else {
+                                                            // keine freien Beratungspersonen
+                                                            d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    },
+                                    {'fieldname': 'notiz', 'fieldtype': 'Text Editor', 'label': __('Notiz (Intern)')},
+                                    {'fieldname': 'verfuegbarkeiten_titel', 'fieldtype': 'HTML', 'options': '<h4>Berater*innen Verfügbarkeiten</h4>'},
+                                    {'fieldname': 'verfuegbarkeiten_html', 'fieldtype': 'HTML', 'label': '', 'options': verfuegbarkeiten_html}
+                                ],
+                                'primary_action': function() {
+                                    frappe.call({
+                                        method: "mvd.mvd.doctype.beratung.beratung.get_termin_block_data",
+                                        args:{
+                                            'abp_zuweisungen': localStorage.getItem('selected_termine')
+                                        },
+                                        callback: function(r) {
+                                            console.log(r.message)
+                                            if (r.message) {
+                                                var termin_block_data = r.message;
+                                                d.hide();
+                                                var vons = []
+                                                var bises = []
+                                                termin_block_data.forEach(function(entry) {
+                                                    var child = cur_frm.add_child('termin');
+                                                    frappe.model.set_value(child.doctype, child.name, 'von', `${entry['date']} ${entry['von']}`);
+                                                    frappe.model.set_value(child.doctype, child.name, 'bis', `${entry['date']} ${entry['bis']}`);
+                                                    frappe.model.set_value(child.doctype, child.name, 'art', d.get_value('art'));
+                                                    frappe.model.set_value(child.doctype, child.name, 'ort', d.get_value('ort'));
+                                                    frappe.model.set_value(child.doctype, child.name, 'berater_in', d.get_value('kontaktperson'));
+                                                    frappe.model.set_value(child.doctype, child.name, 'telefonnummer', d.get_value('telefonnummer'));
+                                                    frappe.model.set_value(child.doctype, child.name, 'abp_referenz', `${entry['referenz']}`);
+                                                    if ((d.get_value('notiz'))&&(d.get_value('notiz') != '')&&(d.get_value('notiz') != '<div></div>')&&(d.get_value('notiz')!= '<div><br></div>')) {
+                                                        frappe.model.set_value(child.doctype, child.name, 'notiz', d.get_value('notiz'));
+                                                    }
+                                                    cur_frm.refresh_field('termin');
+                                                    cur_frm.set_value("kontaktperson", d.get_value('kontaktperson'));
+                                                    vons.push(`${entry['date']} ${entry['von']}`)
+                                                    bises.push(`${entry['date']} ${entry['bis']}`)
+                                                })
+                                                
+                                                if ((d.get_value('notiz'))&&(d.get_value('notiz') != '')&&(d.get_value('notiz') != '<div></div>')&&(d.get_value('notiz')!= '<div><br></div>')) {
+                                                    var sammel_notiz = `Terminnotiz:<br>${d.get_value('notiz')}<br><br>${cur_frm.doc.notiz}`;
+                                                    cur_frm.set_value("notiz", sammel_notiz);
+                                                }
+                                                cur_frm.save();
+                                                frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_terminbestaetigung_email_template').then(function(value){
+                                                    if (value.message.default_terminbestaetigung_email_template) {
+                                                        cur_frm['default_terminbestaetigung_email_template'] = value.message.default_terminbestaetigung_email_template;
+                                                        frappe.mvd.new_mail(cur_frm);
+                                                        cur_frm['default_terminbestaetigung_email_template'] = false;
+                                                    } else {
+                                                        frappe.call({
+                                                            method: "mvd.mvd.doctype.beratung.beratung.get_termin_mail_txt",
+                                                            args:{
+                                                                'von': vons,
+                                                                'bis': bises,
+                                                                'art': d.get_value('art')||'',
+                                                                'ort': d.get_value('ort')||'',
+                                                                'telefonnummer': d.get_value('telefonnummer')||''
+                                                            },
+                                                            callback: function(r) {
+                                                                if (r.message) {
+                                                                    frappe.mvd.new_mail(cur_frm, "", false, r.message);
+                                                                } else {
+                                                                    frappe.mvd.new_mail(cur_frm);
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            } else {
+                                                frappe.msgprint("Ups, da ist etwas schief gelaufen.");
+                                            }
+                                        }
+                                    })
+                                    
+                                    
+                                },
+                                'primary_action_label': __('Erstellen'),
+                                'checkbox_clicked': function(cb) {
+                                    var termin = $(cb).data().abpzuweisung;
+                                    var ort = $(cb).data().ort;
+                                    if (!d.get_value('ort')) {
+                                        d.set_value('ort', ort)
+                                    }
+                                    var beratungsperson = $(cb).data().beratungsperson;
+                                    if (!d.get_value('kontaktperson')) {
+                                        d.set_value('kontaktperson', beratungsperson)
+                                    }
+                                    if (localStorage.getItem('selected_termine').includes(`-${termin}`)) {
+                                        localStorage.setItem('selected_termine', localStorage.getItem('selected_termine').replace(`-${termin}`, ''));
+                                        
+                                    } else {
+                                        var marks = localStorage.getItem('selected_termine')
+                                        localStorage.setItem('selected_termine', `${marks}-${termin}`);
+                                    }
+                                    if (localStorage.getItem('selected_termine').length > 0) {
+                                        d.set_df_property("ort", "read_only", 1);
+                                        d.set_df_property("kontaktperson", "read_only", 1);
+                                    } else {
+                                        d.set_df_property("ort", "read_only", 0);
+                                        d.set_df_property("kontaktperson", "read_only", 0);
+                                    }
+                                    
                                 }
-                            }
-                        },
-                        {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 1, 'default': ''},
-                        {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich\nE-Mail', 'reqd': 1, 'default': 'telefonisch',
-                            'change': function() {
-                                // aktualisierung verfügbarkeiten
-                                frappe.call({
-                                    method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
-                                    args:{
-                                        'sektion': cur_frm.doc.sektion_id,
-                                        'datum': d.get_value('von'),
-                                        'beraterin': d.get_value('kontaktperson')||'',
-                                        'art': d.get_value('art')||''
-                                    },
-                                    callback: function(r) {
-                                        if (r.message) {
-                                            // anzeigen der Verfügbarkeiten
-                                            d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
-                                        } else {
-                                            // keine freien Beratungspersonen
-                                            d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
-                                        }
-                                    }
-                                });
-                            }
-                        },
-                        {'fieldname': 'von', 'fieldtype': 'Datetime', 'label': __('Zeit von'), 'reqd': 1, 'default': default_von,
-                            'change': function() {
-                                // setzen neues "bis"-Datum
-                                var newDateObj = moment(d.get_value('von')).add(default_termindauer, 'm').toDate(); // default "bis"-Zeit = "von"-Zeit + default_termindauer oder 45'
-                                d.set_value('bis',  newDateObj);
-                                
-                                // aktualisierung verfügbarkeiten
-                                frappe.call({
-                                    method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
-                                    args:{
-                                        'sektion': cur_frm.doc.sektion_id,
-                                        'datum': d.get_value('von'),
-                                        'beraterin': d.get_value('kontaktperson')||'',
-                                        'art': d.get_value('art')||''
-                                    },
-                                    callback: function(r) {
-                                        if (r.message) {
-                                            // anzeigen der Verfügbarkeiten
-                                            d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
-                                        } else {
-                                            // keine freien Beratungspersonen
-                                            d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
-                                        }
-                                    }
-                                });
-                            }
-                        },
-                        {'fieldname': 'bis', 'fieldtype': 'Datetime', 'label': __('Zeit bis'), 'reqd': 1},
-                        {'fieldname': 'notiz', 'fieldtype': 'Text Editor', 'label': __('Notiz (Intern)')}
-                    ],
-                    'primary_action': function() {
-                            d.hide();
-                            var child = cur_frm.add_child('termin');
-                            frappe.model.set_value(child.doctype, child.name, 'von', d.get_value('von'));
-                            frappe.model.set_value(child.doctype, child.name, 'bis', d.get_value('bis'));
-                            frappe.model.set_value(child.doctype, child.name, 'art', d.get_value('art'));
-                            frappe.model.set_value(child.doctype, child.name, 'ort', d.get_value('ort'));
-                            frappe.model.set_value(child.doctype, child.name, 'berater_in', d.get_value('kontaktperson'));
-                            cur_frm.refresh_field('termin');
-                            cur_frm.set_value("kontaktperson", d.get_value('kontaktperson'));
-                            cur_frm.set_value("notiz", d.get_value('notiz'));
-                            cur_frm.save();
-                            frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_terminbestaetigung_email_template').then(function(value){
-                                cur_frm['default_terminbestaetigung_email_template'] = value.message.default_terminbestaetigung_email_template;
-                                frappe.mvd.new_mail(cur_frm);
-                                cur_frm['default_terminbestaetigung_email_template'] = false;
                             });
-                    },
-                    'primary_action_label': __('Erstellen')
+                            d.show();
+                        }
                     });
-                    d.show();
                 }
             });
         }
     });
-    
-}
-
-function roundMinutes(date_string) {
-    var date = new Date(date_string);
-    date.setHours(date.getHours() + Math.round(date.getMinutes()/60));
-    date.setMinutes(0, 0, 0);
-    return date
 }
 
 function prepare_mvd_mail_composer(e, forward=false) {

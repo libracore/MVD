@@ -137,9 +137,27 @@ def get_data():
                 },
                 {
                     "type": "doctype",
+                    "name": "Termin Kontaktperson",
+                    "label": _("Berater*in"),
+                    "description": _("Berater*in")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Beratungsort",
+                    "label": _("Beratungsort"),
+                    "description": _("Beratungsort")
+                },
+                {
+                    "type": "doctype",
                     "name": "Arbeitsplan Beratung",
                     "label": _("Arbeitspläne"),
                     "description": _("Arbeitsplan Beratung")
+                },
+                {
+                   "type": "page",
+                   "name": "individueller-arbeitsplan",
+                   "label": _("Individueller Arbeitsplan (Druckversion)"),
+                   "description": _("Individueller Arbeitsplan (Druckversion)")
                 },
                 {
                     "type": "report",
@@ -162,6 +180,12 @@ def get_data():
                     "description": _("Beratungen MVZH"),
                     "doctype": "Beratung",
                     "is_query_report": True
+                },
+                {
+                    "type": "doctype",
+                    "name": "Calendar Sync Settings",
+                    "label": _("Beratungs Kalender Einstellungen"),
+                    "description": _("Beratungs Kalender Einstellungen")
                 }
             ]
         },
