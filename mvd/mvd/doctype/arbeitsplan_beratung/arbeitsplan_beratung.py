@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from datetime import date, timedelta
 from frappe.utils.data import getdate
+from frappe import _
 
 class ArbeitsplanBeratung(Document):
     def validate(self):
@@ -42,23 +43,26 @@ class ArbeitsplanBeratung(Document):
     def get_personen(self):
         def get_beratungspersonen(weekday, sektion):
             weekday_query = [
-                ['''`monday_from` AS `from_time`, `monday_to` AS `to_time`, `monday_art` AS `art`''', '''AND `monday` = 1'''],
-                ['''`tuesday_from` AS `from_time`, `tuesday_to` AS `to_time`, `tuesday_art` AS `art`''', '''AND `tuesday` = 1'''],
-                ['''`wednesday_from` AS `from_time`, `wednesday_to` AS `to_time`, `wednesday_art` AS `art`''', '''AND `wednesday` = 1'''],
-                ['''`thursday_from` AS `from_time`, `thursday_to` AS `to_time`, `thursday_art` AS `art`''', '''AND `thursday` = 1'''],
-                ['''`friday_from` AS `from_time`, `friday_to` AS `to_time`, `friday_art` AS `art`''', '''AND `friday` = 1'''],
-                ['''`saturday_from` AS `from_time`, `saturday_to` AS `to_time`, `saturday_art` AS `art`''', '''AND `saturday` = 1'''],
-                ['''`sunday_from` AS `from_time`, `sunday_to` AS `to_time`, `sunday_art` AS `art`''', '''AND `sunday` = 1'''],
+                "Montag",
+                "Dienstag",
+                "Mittwoch",
+                "Donnerstag",
+                "Freitag",
+                "Samstag",
+                "Sonntag"
             ]
             beratungspersonen = frappe.db.sql("""SELECT
-                                                    `name`,
-                                                    {selections}
-                                                from `tabTermin Kontaktperson`
-                                                WHERE `sektion_id` = '{sektion}'
-                                                AND `disabled` != 1
-                                                {wheres}""".format(selections=weekday_query[weekday][0], \
-                                                                    sektion=sektion, \
-                                                                    wheres=weekday_query[weekday][1]), as_dict=True)
+                                                    `as`.`parent` AS `beratungsperson`,
+                                                    `as`.`from` AS `from_time`,
+                                                    `as`.`to` AS `to_time`,
+                                                    `as`.`ort` AS `art_ort`,
+                                                    `tk`.`dispositions_hinweis`
+                                                from `tabArbeitsplan Standardzeit` AS `as`
+                                                LEFT JOIN `tabTermin Kontaktperson` AS `tk` ON `as`.`parent` = `tk`.`name`
+                                                WHERE `tk`.`sektion_id` = '{sektion}'
+                                                AND `tk`.`disabled` != 1
+                                                AND `as`.`day` = '{weekday}'""".format(weekday=weekday_query[weekday], \
+                                                                    sektion=sektion,), as_dict=True)
             if len(beratungspersonen) > 0:
                 return beratungspersonen
             else:
@@ -67,80 +71,222 @@ class ArbeitsplanBeratung(Document):
         start_date = getdate(self.from_date)
         end_date = getdate(self.to_date)
         delta = timedelta(days=1)
-        
+        einteilung_list = []
+        dispositions_hinweise = {}
+        dispositions_hinweise_txt = ""
+
         while start_date <= end_date:
             beratungspersonen = get_beratungspersonen(start_date.weekday(), self.sektion_id)
             if beratungspersonen:
                 for beratungsperson in beratungspersonen:
-                    row = self.append('einteilung', {})
-                    row.date = start_date.strftime("%Y-%m-%d")
-                    row.from_time = beratungsperson.from_time
-                    row.to_time = beratungsperson.to_time
-                    row.art = beratungsperson.art if beratungsperson.art else 'Ohne Einschränkung'
-                    row.beratungsperson = beratungsperson.name
+                    x = {}
+                    x['date'] = start_date.strftime("%Y-%m-%d")
+                    x['from_time'] = beratungsperson.from_time
+                    x['to_time'] = beratungsperson.to_time
+                    x['art_ort'] = beratungsperson.art_ort
+                    x['beratungsperson'] = beratungsperson.beratungsperson
+                    einteilung_list.append(x)
+                    if beratungsperson.beratungsperson not in dispositions_hinweise:
+                        if beratungsperson.dispositions_hinweis:
+                            dispositions_hinweise[beratungsperson.beratungsperson] = beratungsperson.dispositions_hinweis
             start_date += delta
+        
+        sorted_einteilung_list = sorted(einteilung_list, key = lambda x: (x['art_ort'], x['date'], x['from_time']))
+
+        for eintrag in sorted_einteilung_list:
+            row = self.append('einteilung', {})
+            row.date = eintrag['date']
+            row.from_time = eintrag['from_time']
+            row.to_time = eintrag['to_time']
+            row.art_ort = eintrag['art_ort']
+            row.beratungsperson = eintrag['beratungsperson']
+        
+        for key in dispositions_hinweise:
+            dispositions_hinweise_txt += "{0}: {1}\n".format(key, dispositions_hinweise[key])
+        self.dispositions_hinweis = dispositions_hinweise_txt
         
         self.save()
 
 @frappe.whitelist()
-def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, art=None):
+def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None):
     von_datum = getdate(datum)
     delta = timedelta(days=1)
     bis_datum = von_datum + timedelta(days=7)
-    beratungspersonen = ""
+    if marked:
+        marked = marked.split("-")
     beraterin_filter = ''
-    art_filter = ''
+    ort_filter = ''
+    verfuegbarkeiten_html = ""
     if beraterin and beraterin != '':
         beraterin_filter = '''AND `beratungsperson` = '{0}' '''.format(beraterin)
-    if art and art != '':
-        art_filter = '''AND `art` IN ('Ohne Einschränkung', '{0}') '''.format(art)
+    if ort and ort != '' and ort != ' ':
+        ort_filter = '''AND `art_ort` = '{0}' '''.format(ort)
     
     while von_datum <= bis_datum:
         zugeteilte_beratungspersonen = frappe.db.sql("""
                                                         SELECT *
                                                         FROM `tabAPB Zuweisung`
                                                         WHERE `date` = '{von_datum}'
+                                                        AND `name` NOT IN (
+                                                            SELECT `abp_referenz`
+                                                            FROM `tabBeratung Termin`
+                                                            WHERE `abp_referenz` IS NOT NULL
+                                                        )
                                                         {beraterin_filter}
-                                                        {art_filter}
-                                                    """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter, art_filter=art_filter), as_dict=True)
+                                                        {ort_filter}
+                                                    """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter, ort_filter=ort_filter), as_dict=True)
+        
+        verfuegbarkeiten_html += """
+            <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>
+        """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'))
         if len(zugeteilte_beratungspersonen) > 0:
+            zugeteilte_beratungspersonen_liste = []
             for zugeteilte_beratungsperson in zugeteilte_beratungspersonen:
-                beratungspersonen += bereinigt_mit_erfassten_termine(zugeteilte_beratungsperson, von_datum)
+                x = {
+                    'ort': zugeteilte_beratungsperson.art_ort.replace("({sektion})".format(sektion=sektion), ""),
+                    'ort_mit_sektion': zugeteilte_beratungsperson.art_ort,
+                    'from_time': zugeteilte_beratungsperson.from_time,
+                    'to_time': zugeteilte_beratungsperson.to_time,
+                    'beratungsperson': zugeteilte_beratungsperson.beratungsperson.replace("({sektion})".format(sektion=sektion), ""),
+                    'beratungsperson_mit_sektion': zugeteilte_beratungsperson.beratungsperson,
+                    'name': zugeteilte_beratungsperson.name
+                }
+                zugeteilte_beratungspersonen_liste.append(x)
+            sorted_list = sorted(zugeteilte_beratungspersonen_liste, key = lambda x: (x['ort'], x['from_time'], x['beratungsperson']))
+            for entry in sorted_list:
+                checked = ''
+                if entry['name'] in marked:
+                    checked = 'checked'
+                verfuegbarkeiten_html += """
+                    <div class="form-group frappe-control input-max-width" style="margin-bottom: 0px !important;" data-fieldtype="Check">
+                        <div class="checkbox" style="margin-bottom: 0px !important; margin-top: 0px !important;">
+                            <label>
+                                <span class="input-area"><input type="checkbox" {checked} autocomplete="off" class="input-with-feedback" data-fieldtype="Check" data-abpzuweisung="{abpzuweisung}" data-ort="{ort_mit_sektion}" data-beratungsperson="{beratungsperson_mit_sektion}" onclick="cur_dialog.checkbox_clicked(this);"></span>
+                                <span class="label-area small">{from_time} - {to_time} / {ort} / {beratungsperson}</span>
+                            </label>
+                        </div>
+                    </div>
+                """.format(from_time=':'.join(str(entry['from_time']).split(':')[:2]), \
+                           to_time=':'.join(str(entry['to_time']).split(':')[:2]), \
+                            ort=entry['ort'], beratungsperson=entry['beratungsperson'], \
+                            abpzuweisung=entry['name'], ort_mit_sektion=entry['ort_mit_sektion'], \
+                            checked=checked, beratungsperson_mit_sektion=entry['beratungsperson_mit_sektion'])
+        else:
+            verfuegbarkeiten_html += """<pstyle="margin-top: 0px !important;">Kein(e) Berater*in verfügbar</p>"""
         von_datum += delta
     
-    return beratungspersonen
+    return verfuegbarkeiten_html
 
-def bereinigt_mit_erfassten_termine(beratungsperson, datum):
-    erfasste_termine = frappe.db.sql("""
-                                        SELECT
-                                            `von`,
-                                            `bis`,
-                                            `parent`,
-                                            `ort`,
-                                            `art`
-                                        FROM `tabBeratung Termin`
-                                        WHERE `berater_in` = '{berater_in}'
-                                        AND `von` BETWEEN '{datum} 00:00:00' AND '{datum} 23:59:59'
-                                    """.format(berater_in=beratungsperson.beratungsperson, \
-                                                datum=beratungsperson.date), as_dict=True)
-    if len(erfasste_termine) > 0:
-        return_html = "{0} / {1} ({2} - {3}): {4}<br>".format(getdate(beratungsperson.date).strftime("%d.%m.%Y"), \
-                                                        beratungsperson.art, \
-                                                        beratungsperson.from_time, \
-                                                        beratungsperson.to_time, \
-                                                        beratungsperson.beratungsperson)
-        for erfasster_termin in erfasste_termine:
-            return_html += "--> {0} - {1}: {2}; {3} ({4})<br>".format(erfasster_termin.von.strftime("%H:%M:%S"), \
-                                                            erfasster_termin.bis.strftime("%H:%M:%S"), \
-                                                            erfasster_termin.art, \
-                                                            erfasster_termin.ort, \
-                                                            erfasster_termin.parent)
-        
-        return_html += "<br>"
-        return return_html
-    else:
-        return "{0} / {1} ({2} - {3}): {4}<br>".format(getdate(beratungsperson.date).strftime("%d.%m.%Y"), \
-                                                        beratungsperson.art, \
-                                                        beratungsperson.from_time, \
-                                                        beratungsperson.to_time, \
-                                                        beratungsperson.beratungsperson)
+@frappe.whitelist()
+def verwendete_einteilungen(arbeitsplan_beratung):
+    verwendet = frappe.db.sql("""
+        SELECT *
+        FROM `tabBeratung Termin`
+        WHERE `abp_referenz` IN (
+            SELECT `name` FROM `tabAPB Zuweisung`
+            WHERE `parent` = '{arbeitsplan_beratung}'
+        )
+    """.format(arbeitsplan_beratung=arbeitsplan_beratung), as_dict=True)
+
+    verwendet_as_sting = ''
+    reset_values = []
+
+    for v in verwendet:
+        verwendet_as_sting += "-{0}".format(v.abp_referenz)
+
+        values_for_reset = frappe.db.sql("""
+            SELECT *
+            FROM `tabAPB Zuweisung`
+            WHERE `name`  = '{zuweisung}'
+        """.format(zuweisung=v.abp_referenz), as_dict=True)
+
+        reset_values.append({
+            'referenz': v.abp_referenz,
+            'reset_data': [
+                values_for_reset[0].art_ort,
+                values_for_reset[0].date,
+                values_for_reset[0].from_time,
+                values_for_reset[0].to_time,
+                values_for_reset[0].beratungsperson
+            ]
+        })
+    
+    return {
+        'einteilung_verwendet': verwendet_as_sting,
+        'reset_values': reset_values
+    }
+
+@frappe.whitelist()
+def get_termin_uebersicht(berater_in, von=None, bis=None):
+    von_filter = ''
+    bis_filter = ''
+    if von:
+        von_filter = """AND `bt`.`von` >= '{0}'""".format(von)
+    if bis:
+        bis_filter = """AND `bt`.`bis` <= '{0}'""".format(bis)
+    # frappe.throw("{0} --- {1}".format(von, bis))
+    termine = frappe.db.sql("""
+        SELECT
+            `bt`.`von`,
+            `bt`.`bis`,
+            `bt`.`art`,
+            `bt`.`ort`,
+            `bt`.`telefonnummer`,
+            REPLACE(`mitgl`.`adressblock`, '\n', '<br>') AS `adressblock`,
+            `ber`.`sektion_id`,
+            `mitgl`.`mitglied_nr`,
+            `mitgl`.`eintrittsdatum`,
+            `mitgl`.`bezahltes_mitgliedschaftsjahr`,
+            `bt`.`creation`,
+            `bt`.`notiz`,
+            '' AS `von_zeit`,
+            `ber`.`name` AS `beratung_name`
+        FROM `tabBeratung Termin` AS `bt`
+        LEFT JOIN `tabBeratung` AS `ber` ON `bt`.`parent` = `ber`.`name`
+        LEFT JOIN `tabMitgliedschaft` AS `mitgl` ON `ber`.`mv_mitgliedschaft` = `mitgl`.`name`
+        WHERE `berater_in` = '{berater_in}'
+        {von_filter}
+        {bis_filter}
+        ORDER BY `von` ASC
+    """.format(berater_in=berater_in, von_filter=von_filter, bis_filter=bis_filter), as_dict=True)
+    return termine
+
+@frappe.whitelist()
+def get_arbeitsplan_pdf(berater_in, von=None, bis=None):
+    termine = get_termin_uebersicht(berater_in, von, bis)
+    for termin in termine:
+        termin.von_zeit = frappe.utils.getdate(termin.von).strftime("%H:%M")
+        termin.von = frappe.utils.getdate(termin.von).strftime("%d.%m.%Y")
+        termin.bis = frappe.utils.getdate(termin.bis).strftime("%H:%M")
+        termin.eintrittsdatum = frappe.utils.getdate(termin.eintrittsdatum).strftime("%d.%m.%Y")
+        termin.creation = frappe.utils.getdate(termin.creation).strftime("%d.%m.%Y")
+        termin.hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.beratung_name), as_dict=True)[0].qty > 0 else 0
+
+    html_von = frappe.utils.getdate(von).strftime("%d.%m.%Y") if von else ''
+    html_bis = frappe.utils.getdate(bis).strftime("%d.%m.%Y") if bis else ''
+    html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'termine': termine, 'von': html_von, 'bis': html_bis})
+    from frappe.utils.pdf import get_pdf
+    pdf = get_pdf(html)
+    frappe.local.response.filename = "{name}.pdf".format(name=berater_in.replace(" ", "-").replace("/", "-"))
+    frappe.local.response.filecontent = pdf
+    frappe.local.response.type = "download"
+
+
+@frappe.whitelist()
+def get_arbeitsplan_word(berater_in, von=None, bis=None):
+    termine = get_termin_uebersicht(berater_in, von, bis)
+    for termin in termine:
+        termin.von_zeit = frappe.utils.getdate(termin.von).strftime("%H:%M")
+        termin.von = frappe.utils.getdate(termin.von).strftime("%d.%m.%Y")
+        termin.bis = frappe.utils.getdate(termin.bis).strftime("%H:%M")
+        termin.eintrittsdatum = frappe.utils.getdate(termin.eintrittsdatum).strftime("%d.%m.%Y")
+        termin.creation = frappe.utils.getdate(termin.creation).strftime("%d.%m.%Y")
+        termin.hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.beratung_name), as_dict=True)[0].qty > 0 else 0
+
+    html_von = frappe.utils.getdate(von).strftime("%d.%m.%Y") if von else ''
+    html_bis = frappe.utils.getdate(bis).strftime("%d.%m.%Y") if bis else ''
+    html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'termine': termine, 'von': html_von, 'bis': html_bis})
+    html = '<html><body>{0}</body></html>'.format(html)
+    frappe.local.response.filename = "{name}.docx".format(name=berater_in.replace(" ", "-").replace("/", "-"))
+    frappe.local.response.filecontent = html
+    frappe.local.response.type = "download"

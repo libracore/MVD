@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2024-05-24 14:17:12.134800",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2024-05-24 14:18:12.134800",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "individueller-arbeitsplan",
+ "owner": "Administrator",
+ "page_name": "individueller-arbeitsplan",
+ "roles": [
+  {
+   "role": "MV_MA"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Individueller Arbeitsplan"
+}
