@@ -534,8 +534,16 @@ function termin_quick_entry(frm) {
                                             });
                                         }
                                     },
-                                    {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich', 'reqd': 1, 'default': 'telefonisch'},
-                                    {'fieldname': 'telefonnummer', 'fieldtype': 'Data', 'label': __('Telefonnummer'), 'depends_on': 'eval:doc.art=="telefonisch"', 'default': tel},
+                                    {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich', 'reqd': 1, 'default': 'telefonisch', 
+                                        'change': function() {
+                                            if (d.get_value('art') == 'telefonisch') {
+                                                d.set_df_property('telefonnummer', 'reqd', 1);
+                                            } else {
+                                                d.set_df_property('telefonnummer', 'reqd', 0);
+                                            }
+                                        }
+                                    },
+                                    {'fieldname': 'telefonnummer', 'fieldtype': 'Data', 'label': __('Telefonnummer'), 'default': tel, 'reqd': 1},
                                     {'fieldname': 'von', 'fieldtype': 'Date', 'label': __('Datum'), 'reqd': 1, 'default': default_von, 'description': '"Datum" ist relevant für die Anzeige der Verfügbarkeiten. Es wird immer 7 Tage in Zukunft geblickt.',
                                         'change': function() {
                                             // aktualisierung verfügbarkeiten
