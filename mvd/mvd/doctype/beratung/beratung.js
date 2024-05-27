@@ -663,7 +663,7 @@ function termin_quick_entry(frm) {
                                                     frappe.model.set_value(child.doctype, child.name, 'berater_in', d.get_value('kontaktperson'));
                                                     frappe.model.set_value(child.doctype, child.name, 'telefonnummer', d.get_value('telefonnummer'));
                                                     frappe.model.set_value(child.doctype, child.name, 'abp_referenz', `${entry['referenz']}`);
-                                                    if (d.get_value('notiz')) {
+                                                    if ((d.get_value('notiz'))&&(d.get_value('notiz') != '')&&(d.get_value('notiz') != '<div></div>')&&(d.get_value('notiz')!= '<div><br></div>')) {
                                                         frappe.model.set_value(child.doctype, child.name, 'notiz', d.get_value('notiz'));
                                                     }
                                                     cur_frm.refresh_field('termin');
@@ -672,7 +672,7 @@ function termin_quick_entry(frm) {
                                                     bises.push(`${entry['date']} ${entry['bis']}`)
                                                 })
                                                 
-                                                if (d.get_value('notiz')) {
+                                                if ((d.get_value('notiz'))&&(d.get_value('notiz') != '')&&(d.get_value('notiz') != '<div></div>')&&(d.get_value('notiz')!= '<div><br></div>')) {
                                                     var sammel_notiz = `Terminnotiz:<br>${d.get_value('notiz')}<br><br>${cur_frm.doc.notiz}`;
                                                     cur_frm.set_value("notiz", sammel_notiz);
                                                 }
