@@ -698,7 +698,8 @@ function termin_quick_entry(frm) {
                                                                 'bis': bises,
                                                                 'art': d.get_value('art')||'',
                                                                 'ort': d.get_value('ort')||'',
-                                                                'telefonnummer': d.get_value('telefonnummer')||''
+                                                                'telefonnummer': d.get_value('telefonnummer')||'',
+                                                                'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft
                                                             },
                                                             callback: function(r) {
                                                                 if (r.message) {
