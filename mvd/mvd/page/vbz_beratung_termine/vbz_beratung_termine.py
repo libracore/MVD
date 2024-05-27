@@ -8,6 +8,8 @@ from PyPDF2 import PdfFileWriter
 from frappe.utils.data import add_days, getdate, now, today, now_datetime, get_datetime
 from frappe.boot import get_bootinfo
 
+no_cache=1
+
 @frappe.whitelist()
 def get_open_data():
     alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user)
@@ -67,6 +69,8 @@ def get_alle_beratungs_termine(user):
             alle.append(termin_data)
         if termin.berater_in in kontaktperson_multi_user:
             meine.append(termin_data)
+    if len(meine) < 1:
+        meine.append({'show_placeholder': 1})
     return alle, meine
 
 def get_kontaktperson_multi_user(user):
