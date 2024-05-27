@@ -1,4 +1,5 @@
 <h1>{{ berater_in }}</h1>
+<h3>{% if von and bis %}({{ von }} - {{ bis }}){% else %}{% if von %}(ab {{ von }}){% endif %}{% if bis %}(bis {{ bis }}){% endif %}{% endif %}</h3>
 {% for termin in termine %}
 <div style="border: 1px dotted black; margin-bottom: 5px; padding: 5px; page-break-inside: avoid;">
     <table style="width: 100%;">
@@ -27,6 +28,7 @@
         <tr>
             <td>{{ termin.mitglied_nr }}<br>{{ termin.adressblock }}</td>
             <td>
+                ____ ____ ____ ____<br><br>
                 Eintritt: {% if termin.eintrittsdatum %}{{ termin.eintrittsdatum }}{% else %}---{% endif %}<br>
                 Bez. Jahr: {{ termin.bezahltes_mitgliedschaftsjahr }}<br>
                 Termin vereinbart am: {{ termin.creation }}
@@ -35,7 +37,7 @@
     </table>
     <div>
         <p>
-            Unterlagen > .....................................................................................................................................
+            Unterlagen > {% if termin.hat_attachement == 1 %}&#9745; Ja &#9744; Nein{% else %}&#9744; Ja &#9745; Nein{% endif %}......................................................................................................................
         </p>
         <p>
             Beratung : &#9744; wurde durchgeführt &#9744; Person nicht erschienen

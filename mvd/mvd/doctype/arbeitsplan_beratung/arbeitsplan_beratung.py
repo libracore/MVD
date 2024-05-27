@@ -217,7 +217,14 @@ def verwendete_einteilungen(arbeitsplan_beratung):
     }
 
 @frappe.whitelist()
-def get_termin_uebersicht(berater_in):
+def get_termin_uebersicht(berater_in, von=None, bis=None):
+    von_filter = ''
+    bis_filter = ''
+    if von:
+        von_filter = """AND `bt`.`von` >= '{0}'""".format(von)
+    if bis:
+        bis_filter = """AND `bt`.`bis` <= '{0}'""".format(bis)
+    # frappe.throw("{0} --- {1}".format(von, bis))
     termine = frappe.db.sql("""
         SELECT
             `bt`.`von`,
@@ -232,29 +239,54 @@ def get_termin_uebersicht(berater_in):
             `mitgl`.`bezahltes_mitgliedschaftsjahr`,
             `bt`.`creation`,
             `bt`.`notiz`,
-            '' AS `von_zeit`
+            '' AS `von_zeit`,
+            `ber`.`name` AS `beratung_name`
         FROM `tabBeratung Termin` AS `bt`
         LEFT JOIN `tabBeratung` AS `ber` ON `bt`.`parent` = `ber`.`name`
         LEFT JOIN `tabMitgliedschaft` AS `mitgl` ON `ber`.`mv_mitgliedschaft` = `mitgl`.`name`
         WHERE `berater_in` = '{berater_in}'
+        {von_filter}
+        {bis_filter}
         ORDER BY `von` ASC
-    """.format(berater_in=berater_in), as_dict=True)
+    """.format(berater_in=berater_in, von_filter=von_filter, bis_filter=bis_filter), as_dict=True)
     return termine
 
 @frappe.whitelist()
-def get_arbeitsplan_pdf(berater_in):
-    # berater_in = 'Stefanie Zillig (MVBE)'
-    termine = get_termin_uebersicht(berater_in)
+def get_arbeitsplan_pdf(berater_in, von=None, bis=None):
+    termine = get_termin_uebersicht(berater_in, von, bis)
     for termin in termine:
         termin.von_zeit = frappe.utils.getdate(termin.von).strftime("%H:%M")
         termin.von = frappe.utils.getdate(termin.von).strftime("%d.%m.%Y")
         termin.bis = frappe.utils.getdate(termin.bis).strftime("%H:%M")
         termin.eintrittsdatum = frappe.utils.getdate(termin.eintrittsdatum).strftime("%d.%m.%Y")
         termin.creation = frappe.utils.getdate(termin.creation).strftime("%d.%m.%Y")
+        termin.hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.beratung_name), as_dict=True)[0].qty > 0 else 0
 
-    html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'termine': termine})
+    html_von = frappe.utils.getdate(von).strftime("%d.%m.%Y") if von else ''
+    html_bis = frappe.utils.getdate(bis).strftime("%d.%m.%Y") if bis else ''
+    html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'termine': termine, 'von': html_von, 'bis': html_bis})
     from frappe.utils.pdf import get_pdf
     pdf = get_pdf(html)
     frappe.local.response.filename = "{name}.pdf".format(name=berater_in.replace(" ", "-").replace("/", "-"))
     frappe.local.response.filecontent = pdf
+    frappe.local.response.type = "download"
+
+
+@frappe.whitelist()
+def get_arbeitsplan_word(berater_in, von=None, bis=None):
+    termine = get_termin_uebersicht(berater_in, von, bis)
+    for termin in termine:
+        termin.von_zeit = frappe.utils.getdate(termin.von).strftime("%H:%M")
+        termin.von = frappe.utils.getdate(termin.von).strftime("%d.%m.%Y")
+        termin.bis = frappe.utils.getdate(termin.bis).strftime("%H:%M")
+        termin.eintrittsdatum = frappe.utils.getdate(termin.eintrittsdatum).strftime("%d.%m.%Y")
+        termin.creation = frappe.utils.getdate(termin.creation).strftime("%d.%m.%Y")
+        termin.hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.beratung_name), as_dict=True)[0].qty > 0 else 0
+
+    html_von = frappe.utils.getdate(von).strftime("%d.%m.%Y") if von else ''
+    html_bis = frappe.utils.getdate(bis).strftime("%d.%m.%Y") if bis else ''
+    html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'termine': termine, 'von': html_von, 'bis': html_bis})
+    html = '<html><body>{0}</body></html>'.format(html)
+    frappe.local.response.filename = "{name}.docx".format(name=berater_in.replace(" ", "-").replace("/", "-"))
+    frappe.local.response.filecontent = html
     frappe.local.response.type = "download"
