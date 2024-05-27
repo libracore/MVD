@@ -791,24 +791,42 @@ def erstelle_todo(owner, beratung, description=False, datum=False, notify=0, mit
     return
 
 @frappe.whitelist()
-def get_termin_mail_txt(von, bis, art, ort, telefonnummer):
-    mail_txt = ''
+def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
     index = 0
     von = json.loads(von)
     bis = json.loads(bis)
+    anrede = ''
+    sektion = ''
+    if mitgliedschaft:
+        anrede = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "briefanrede")
+        sektion = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "sektion_id")
+    mail_txt = '<p>{0}</p>'.format(anrede)
     
     for entry in von:
         von_datum = getdate(entry)
-        ort_info = frappe.db.get_value("Beratungsort", ort, "infofeld") or 'Keine ortsspezifische Angaben'
-        mail_txt += """
-            <div>
-                Termin vom {wochentag}, {datum}, {von} bis {bis}<br>
-                {ort_info}<br>
-                {telefonnummer}
-            </div>
-        """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
-                von=":".join(von[index].split(" ")[1].split(":")[:2]), bis=":".join(bis[index].split(" ")[1].split(":")[:2]), \
-                ort_info=ort_info, telefonnummer="Telefonnummer: {0}".format(telefonnummer or 'Keine Angaben' if art == 'telefonisch' else ''))
+        ort_info = frappe.db.get_value("Beratungsort", ort, "infofeld") or ''
+        if art == 'telefonisch':
+            mail_txt += """
+                <div>
+                    Wir melden uns am {wochentag}, {datum} {von} unter folgender Telefonnummer {telefonnummer} bei Ihnen.<br><br>
+                    Falls Sie den Termin nicht wahrnehmen können, melden Sie dies bitte frühzeitig unserem Sekretariat.<br><br>
+                    Mit freundlichen Grüssen
+                </div>
+            """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+                    von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                    telefonnummer=telefonnummer)
+        else:
+            mail_txt += """
+                <div>
+                    Wir bestätigen Ihnen gerne folgenden Termin:<br>
+                    {wochentag}, {datum} {von} - {bis} in {ort}.
+                    {ort_info}
+                    <br><br>Falls Sie den Termin nicht wahrnehmen können, melden Sie dies bitte frühzeitig unserem Sekretariat.<br><br>
+                    Mit freundlichen Grüssen
+                </div>
+            """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+                    von=":".join(von[index].split(" ")[1].split(":")[:2]), bis=":".join(bis[index].split(" ")[1].split(":")[:2]), \
+                    ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""))
         index += 1
 
     return mail_txt
