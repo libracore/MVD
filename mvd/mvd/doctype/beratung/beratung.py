@@ -815,14 +815,14 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
                 mail_txt += """
                     <div>
                         Nous avons réservé pour vous le rendez-vous téléphonique suivant:<br>
-                        {wochentag}, {datum} um {von}<br>
+                        {wochentag}, {datum} à {von}<br>
                         Notre conseiller/notre conseillère Monsieur/Madame vous appellera au numéro suivant:<br>
                         {telefonnummer}<br><br>
                         Veuillez noter que nos consultants* juridiques ne consultent pas les documents avant le rendez-vous.<br><br>
                         En cas d'empêchement, nous vous prions d'annoncer votre absence le plus rapidement possible.<br><br>
                         Avec nos meilleures salutations
                     </div>
-                """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+                """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
                         telefonnummer=telefonnummer)
             else:
@@ -833,14 +833,14 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
                 mail_txt += """
                     <div>
                         Nous avons réservé pour vous le rendez-vous suivant:<br>
-                        {wochentag}, {datum} um {von}<br>
+                        {wochentag}, {datum} à {von}<br>
                         Notre consultant* Müller Klaus vous attend à<br>
                         {ort}, {ort_info}.<br><br>
                         Veuillez noter que nos consultants* juridiques ne consultent pas les documents avant le rendez-vous.<br><br>
                         En cas d'empêchement, nous vous prions d'annoncer votre absence le plus rapidement possible.<br><br>
                         Avec nos meilleures salutations
                     </div>
-                """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+                """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
                         ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""))
         else:
@@ -860,7 +860,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
                         Wir bitten Sie im Verhinderungsfall so rasch wie möglich abzumelden.<br><br>
                         Mit freundlichen Grüssen
                     </div>
-                """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+                """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
                         telefonnummer=telefonnummer)
             else:
@@ -879,7 +879,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
                         Wir bitten Sie im Verhinderungsfall so rasch wie möglich abzumelden.<br><br>
                         Mit freundlichen Grüssen
                     </div>
-                """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+                """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
                         ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""))
         index += 1
