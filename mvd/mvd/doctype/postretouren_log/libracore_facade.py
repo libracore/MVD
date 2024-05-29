@@ -10,6 +10,8 @@ from mvd.mvd.service_plattform.api import send_postnotiz_to_sp
 import requests
 import zipfile
 import os
+import pysftp
+
 
 class PostNotizForServicePlatform:
     mitgliedId = ''
@@ -59,6 +61,49 @@ class LibraCoreFacade:
             _file.save()
             csv_files.append("/home/frappe/frappe-bench/sites/{0}/private/files/{1}".format(frappe.utils.get_host_name(), csv_file).replace(":8000", ""))
         return csv_files
+    
+    def get_csv_files_from_post(self, postretouren_log):
+        settings = frappe.get_doc("Postretouren Einstellungen", "Postretouren Einstellungen")
+        csv_files = []
+        try:
+            with self.connect_sftp(settings) as sftp:
+                for file_name in sftp.listdir(settings.target_path):
+                    # fetch the file
+                    local_file = os.path.join("/home/frappe/frappe-bench/sites/{0}/private/files/".format(frappe.utils.get_host_name()).replace(":8000", ""), file_name)
+                    remote_file = os.path.join(settings.target_path, file_name)
+                    sftp.get(remote_file, local_file)
+
+                    # save file as attachment
+                    _file = frappe.get_doc({
+                        "doctype": "File",
+                        "file_url": "/private/files/{0}".format(file_name),
+                        "file_name": "{0}".format(file_name),
+                        "attached_to_name": postretouren_log,
+                        "attached_to_doctype": 'Postretouren Log',
+                        "folder": "Home/Attachments"})
+                    _file.save()
+                    csv_files.append("/home/frappe/frappe-bench/sites/{0}/private/files/{1}".format(frappe.utils.get_host_name(), file_name).replace(":8000", ""))
+                    
+        except Exception as err:
+           frappe.log_error( err, "get_csv_files_from_post Failed")
+
+        return csv_files
+    
+    def connect_sftp(self, settings):
+        cnopts = pysftp.CnOpts()
+        cnopts.hostkeys = None
+        key_file = "/home/frappe/frappe-bench/sites/{0}{1}".format(frappe.utils.get_host_name(), settings.key_file).replace(":8000", "")
+        
+        connection = pysftp.Connection(
+                settings.host, 
+                port=int(settings.port),
+                username=settings.user, 
+                private_key=key_file,
+                cnopts=cnopts
+            )
+        
+        return connection
+
 
     def post_retour_exists(self, auftrags_nummer, sendungs_nummer, postretouren_log):
         # Return true if PostRetour already exists, false otherwise

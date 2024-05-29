@@ -31,10 +31,13 @@ def process_post_retouren(postretouren_log):
     libracore = LibraCoreFacade()
 
     # get zip File
-    libracore.get_zipfile_from_post_connector(postretouren_log.name)
+    # libracore.get_zipfile_from_post_connector(postretouren_log.name)
     
     # extract csv from zip file
-    csv_files = libracore.get_csv_files_from_zip(postretouren_log.name)
+    # csv_files = libracore.get_csv_files_from_zip(postretouren_log.name)
+
+    # get csv files
+    csv_files = libracore.get_csv_files_from_post(postretouren_log.name)
 
     for csv_file in csv_files:
         file = open(csv_file, 'r', encoding="utf-16-le")
