@@ -236,9 +236,9 @@ def get_termin_uebersicht(berater_in, von=None, bis=None):
     von_filter = ''
     bis_filter = ''
     if von:
-        von_filter = """AND `bt`.`von` >= '{0}'""".format(von)
+        von_filter = """AND `bt`.`von` >= '{0} 00:00:00'""".format(von)
     if bis:
-        bis_filter = """AND `bt`.`bis` <= '{0}'""".format(bis)
+        bis_filter = """AND `bt`.`bis` <= '{0} 23:59:59'""".format(bis)
 
     berater_in = get_berater_in_from_hash(berater_in)
 
