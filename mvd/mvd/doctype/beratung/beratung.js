@@ -520,7 +520,8 @@ function termin_quick_entry(frm) {
                                                     'datum': d.get_value('von'),
                                                     'beraterin': d.get_value('kontaktperson')||'',
                                                     'ort': d.get_value('ort')||'',
-                                                    'marked': localStorage.getItem('selected_termine')
+                                                    'marked': localStorage.getItem('selected_termine'),
+                                                    'short_results': d.get_value('short_results')
                                                 },
                                                 callback: function(r) {
                                                     if (r.message) {
@@ -544,7 +545,7 @@ function termin_quick_entry(frm) {
                                         }
                                     },
                                     {'fieldname': 'telefonnummer', 'fieldtype': 'Data', 'label': __('Telefonnummer'), 'default': tel, 'reqd': 1},
-                                    {'fieldname': 'von', 'fieldtype': 'Date', 'label': __('Datum'), 'reqd': 1, 'default': default_von, 'description': '"Datum" ist relevant für die Anzeige der Verfügbarkeiten. Es wird immer 7 Tage in Zukunft geblickt.',
+                                    {'fieldname': 'von', 'fieldtype': 'Date', 'label': __('Datum'), 'reqd': 1, 'default': default_von, 'description': '"Datum" ist relevant für die Anzeige der Verfügbarkeiten. Es wird immer in dessen Zukunft geblickt.',
                                         'change': function() {
                                             // aktualisierung verfügbarkeiten
                                             frappe.call({
@@ -554,7 +555,33 @@ function termin_quick_entry(frm) {
                                                     'datum': d.get_value('von'),
                                                     'beraterin': d.get_value('kontaktperson')||'',
                                                     'ort': d.get_value('ort')||'',
-                                                    'marked': localStorage.getItem('selected_termine')
+                                                    'marked': localStorage.getItem('selected_termine'),
+                                                    'short_results': d.get_value('short_results')
+                                                },
+                                                callback: function(r) {
+                                                    if (r.message) {
+                                                        // anzeigen der Verfügbarkeiten
+                                                        d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                                                    } else {
+                                                        // keine freien Beratungspersonen
+                                                        d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    },
+                                    {'fieldname': 'short_results', 'fieldtype': 'Check', 'label': __('Zeige 14 Tage'), 'default': 1,
+                                        'change': function() {
+                                            // aktualisierung verfügbarkeiten
+                                            frappe.call({
+                                                method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
+                                                args:{
+                                                    'sektion': cur_frm.doc.sektion_id,
+                                                    'datum': d.get_value('von'),
+                                                    'beraterin': d.get_value('kontaktperson')||'',
+                                                    'ort': d.get_value('ort')||'',
+                                                    'marked': localStorage.getItem('selected_termine'),
+                                                    'short_results': d.get_value('short_results')
                                                 },
                                                 callback: function(r) {
                                                     if (r.message) {
@@ -606,7 +633,8 @@ function termin_quick_entry(frm) {
                                                                 'datum': d.get_value('von'),
                                                                 'beraterin': d.get_value('kontaktperson')||'',
                                                                 'ort': d.get_value('ort')||'',
-                                                                'marked': localStorage.getItem('selected_termine')
+                                                                'marked': localStorage.getItem('selected_termine'),
+                                                                'short_results': d.get_value('short_results')
                                                             },
                                                             callback: function(r) {
                                                                 if (r.message) {
@@ -630,7 +658,8 @@ function termin_quick_entry(frm) {
                                                         'sektion': cur_frm.doc.sektion_id,
                                                         'datum': d.get_value('von'),
                                                         'ort': d.get_value('ort')||'',
-                                                        'marked': localStorage.getItem('selected_termine')
+                                                        'marked': localStorage.getItem('selected_termine'),
+                                                        'short_results': d.get_value('short_results')
                                                     },
                                                     callback: function(r) {
                                                         if (r.message) {

@@ -113,10 +113,13 @@ class ArbeitsplanBeratung(Document):
         self.save()
 
 @frappe.whitelist()
-def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None):
+def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None, short_results=1):
     von_datum = getdate(datum)
     delta = timedelta(days=1)
-    bis_datum = von_datum + timedelta(days=7)
+    if int(short_results) == 1:
+        bis_datum = von_datum + timedelta(days=14)
+    else:
+        bis_datum = von_datum + timedelta(days=365)
     if marked:
         marked = marked.split("-")
     beraterin_filter = ''

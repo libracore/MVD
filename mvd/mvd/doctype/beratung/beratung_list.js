@@ -1,8 +1,10 @@
 frappe.listview_settings['Beratung'] = {
     onload: function(listview) {
-        listview.page.add_menu_item( __("Erstelle Beratungs Termin"), function() {
-            termin_quick_entry();
-        });
+        // vorübergehend deaktiviert
+        // vor der reaktivierung muss das ganze Popup an jenes in der Beratung angepasst werden!
+        // listview.page.add_menu_item( __("Erstelle Beratungs Termin"), function() {
+        //     termin_quick_entry();
+        // });
     }
 }
 
