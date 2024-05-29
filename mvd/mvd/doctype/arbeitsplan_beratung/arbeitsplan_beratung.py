@@ -143,10 +143,16 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
                                                         {beraterin_filter}
                                                         {ort_filter}
                                                     """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter, ort_filter=ort_filter), as_dict=True)
+        if int(short_results) == 1:
+            verfuegbarkeiten_html += """
+                <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>
+            """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'))
+        else:
+            if len(zugeteilte_beratungspersonen) > 0:
+                verfuegbarkeiten_html += """
+                <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>
+            """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'))
         
-        verfuegbarkeiten_html += """
-            <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>
-        """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'))
         if len(zugeteilte_beratungspersonen) > 0:
             zugeteilte_beratungspersonen_liste = []
             for zugeteilte_beratungsperson in zugeteilte_beratungspersonen:
@@ -180,7 +186,8 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
                             abpzuweisung=entry['name'], ort_mit_sektion=entry['ort_mit_sektion'], \
                             checked=checked, beratungsperson_mit_sektion=entry['beratungsperson_mit_sektion'])
         else:
-            verfuegbarkeiten_html += """<pstyle="margin-top: 0px !important;">Kein(e) Berater*in verfügbar</p>"""
+            if int(short_results) == 1:
+                verfuegbarkeiten_html += """<pstyle="margin-top: 0px !important;">Kein(e) Berater*in verfügbar</p>"""
         von_datum += delta
     
     return verfuegbarkeiten_html
