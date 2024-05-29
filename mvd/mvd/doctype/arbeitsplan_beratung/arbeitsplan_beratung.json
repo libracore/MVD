@@ -6,11 +6,11 @@
  "engine": "InnoDB",
  "field_order": [
   "from_date",
-  "sektion_id",
+  "description",
   "cb_1",
   "to_date",
-  "description",
-  "amended_from",
+  "sektion_id",
+  "titel",
   "section_einteilung",
   "dispositions_hinweis",
   "einteilung"
@@ -32,15 +32,6 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Beschreibung"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Arbeitsplan Beratung",
-   "print_hide": 1,
-   "read_only": 1
   },
   {
    "default": "Today",
@@ -73,9 +64,16 @@
    "fieldname": "dispositions_hinweis",
    "fieldtype": "Small Text",
    "label": "Dispositions Hinweis"
+  },
+  {
+   "description": "Kann leer gelassen werden.<br>Default wenn leer: Von - Bis (Sektion)",
+   "fieldname": "titel",
+   "fieldtype": "Data",
+   "label": "Titel",
+   "unique": 1
   }
  ],
- "modified": "2024-05-24 09:35:43.150392",
+ "modified": "2024-05-29 11:01:56.408458",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Arbeitsplan Beratung",
@@ -96,5 +94,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "titel",
  "track_changes": 1
 }

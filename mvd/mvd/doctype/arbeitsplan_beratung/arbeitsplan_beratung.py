@@ -10,6 +10,11 @@ from frappe.utils.data import getdate
 from frappe import _
 
 class ArbeitsplanBeratung(Document):
+    def before_save(self):
+        if not self.titel or self.titel == '':
+            self.titel = "{0} - {1} ({2})".format(frappe.utils.get_datetime(self.from_date).strftime('%d.%m.%Y'), \
+            frappe.utils.get_datetime(self.to_date).strftime('%d.%m.%Y'), self.sektion_id)
+    
     def validate(self):
         self.validate_date()
         self.validate_overlapping()
