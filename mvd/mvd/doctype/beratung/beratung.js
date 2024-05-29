@@ -732,7 +732,7 @@ function termin_quick_entry(frm) {
                                                             },
                                                             callback: function(r) {
                                                                 if (r.message) {
-                                                                    frappe.mvd.new_mail(cur_frm, "", false, r.message);
+                                                                    frappe.mvd.new_mail(cur_frm, "", false, r.message.mail_txt, r.message.subject);
                                                                 } else {
                                                                     frappe.mvd.new_mail(cur_frm);
                                                                 }
