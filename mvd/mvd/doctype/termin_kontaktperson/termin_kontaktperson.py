@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+import hashlib
 
 class TerminKontaktperson(Document):
     def validate(self):
@@ -33,3 +34,10 @@ class TerminKontaktperson(Document):
                                                             """.format(user=user, itself=self.name), as_dict=True)
                 if len(vorhandene_einzel_verknuepfung) > 0:
                     frappe.throw("""{0} ist bereits mit <a href="https://libracore.mieterverband.ch/desk#Form/Termin Kontaktperson/{1}">{1}</a> verknüpft.<br>Es dürfen keine doppel Einzelverknüpfungen existieren.""".format(user, vorhandene_einzel_verknuepfung[0].parent))
+        
+        if not self.md_hash:
+            if self.name:
+                self.md_hash = hashlib.md5(str(self.name).encode()).hexdigest()
+            else:
+                new_name = "{0} ({1})".format(self.kontakt, self.sektion_id)
+                self.md_hash = hashlib.md5(new_name.encode()).hexdigest()

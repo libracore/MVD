@@ -13,7 +13,8 @@
   "cb_1",
   "dispositions_hinweis",
   "section_default_einteilung",
-  "arbeitsplan_standardzeit"
+  "arbeitsplan_standardzeit",
+  "md_hash"
  ],
  "fields": [
   {
@@ -61,9 +62,14 @@
    "fieldname": "dispositions_hinweis",
    "fieldtype": "Data",
    "label": "Dispositions Hinweis"
+  },
+  {
+   "fieldname": "md_hash",
+   "fieldtype": "Data",
+   "label": "MD-Hash"
   }
  ],
- "modified": "2024-05-17 09:31:02.014941",
+ "modified": "2024-05-29 10:02:43.827878",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin Kontaktperson",

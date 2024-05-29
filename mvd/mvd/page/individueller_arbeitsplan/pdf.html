@@ -28,7 +28,7 @@
         <tr>
             <td>{{ termin.mitglied_nr }}<br>{{ termin.adressblock }}</td>
             <td>
-                ____ ____ ____ ____<br><br>
+                {% if termin.beratungskategorie %}{{ termin.beratungskategorie }}{% if termin.beratungskategorie_2 %}{{ termin.beratungskategorie_2 }}{% if termin.beratungskategorie_3 %}{{ termin.beratungskategorie_3 }}{% endif %}{% endif %}{% else %}____ ____ ____ ____{% endif %}<br><br>
                 Eintritt: {% if termin.eintrittsdatum %}{{ termin.eintrittsdatum }}{% else %}---{% endif %}<br>
                 Bez. Jahr: {{ termin.bezahltes_mitgliedschaftsjahr }}<br>
                 Termin vereinbart am: {{ termin.creation }}
