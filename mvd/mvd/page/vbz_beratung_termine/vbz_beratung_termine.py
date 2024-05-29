@@ -7,6 +7,7 @@ import frappe
 from PyPDF2 import PdfFileWriter
 from frappe.utils.data import add_days, getdate, now, today, now_datetime, get_datetime
 from frappe.boot import get_bootinfo
+from frappe import _
 
 no_cache=1
 
@@ -46,7 +47,11 @@ def get_alle_beratungs_termine(user):
                                         `berTer`.`parent`,
                                         `berTer`.`berater_in`,
                                         `berTer`.`telefonnummer`,
-                                        `beratung`.`sektion_id`
+                                        `beratung`.`sektion_id`,
+                                        `beratung`.`beratungskategorie`,
+                                        `beratung`.`beratungskategorie_2`,
+                                        `beratung`.`beratungskategorie_3`,
+                                        `beratung`.`mv_mitgliedschaft`
                                     FROM `tabBeratung Termin` AS `berTer`
                                     LEFT JOIN `tabBeratung` AS `beratung` ON `berTer`.`parent` = `beratung`.`name`
                                     WHERE `berTer`.`von` >= '{datum_von} 00:00:00'
@@ -57,14 +62,19 @@ def get_alle_beratungs_termine(user):
             hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.parent), as_dict=True)[0].qty > 0 else 0
             termin_data = {
                 'von_date': get_datetime(termin.von).strftime('%d.%m.%Y'),
-                'von_time': get_datetime(termin.von).strftime('%H:%M:%S'),
-                'bis_time': get_datetime(termin.bis).strftime('%H:%M:%S'),
+                'von_time': get_datetime(termin.von).strftime('%H:%M'),
+                'bis_time': get_datetime(termin.bis).strftime('%H:%M'),
                 'art': termin.art,
                 'ort': termin.ort,
                 'beratung': termin.parent,
                 'beraterinn': termin.berater_in,
                 'hat_attachement': hat_attachement,
-                'telefonnummer': termin.telefonnummer
+                'telefonnummer': termin.telefonnummer,
+                'wochentag': _(get_datetime(termin.von).strftime('%A'))[:2],
+                'beratungskategorie': termin.beratungskategorie.split(" - ")[0] if termin.beratungskategorie else '',
+                'beratungskategorie_2': termin.beratungskategorie_2.split(" - ")[0] if termin.beratungskategorie_2 else '',
+                'beratungskategorie_3': termin.beratungskategorie_3.split(" - ")[0] if termin.beratungskategorie_3 else '',
+                'name_mitglied': "{0} {1}".format(frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'vorname_1'), frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'nachname_1'))
             }
             alle.append(termin_data)
         if termin.berater_in in kontaktperson_multi_user:
