@@ -304,11 +304,11 @@ function set_timestamps(){
 }
 
 frappe.provide('frappe.mvd.new_mail');
-frappe.mvd.new_mail = function(cur_frm, last_email='', kuendigungsmail=false, default_txt=false) {
+frappe.mvd.new_mail = function(cur_frm, last_email='', kuendigungsmail=false, default_txt=false, default_subject=false) {
     $(".modal.fade").remove();
     var recpts;
     var default_sender;
-    var subject = __(cur_frm.meta.name) + ': ' + cur_frm.docname;
+    var subject = default_subject || __(cur_frm.meta.name) + ': ' + cur_frm.docname;
     var txt_string = '';
     
     if (cur_frm.doctype == 'Beratung') {

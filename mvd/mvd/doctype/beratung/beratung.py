@@ -800,11 +800,16 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
         anrede = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "briefanrede")
         sektion = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "sektion_id")
     mail_txt = '<p>{0}</p>'.format(anrede)
+    subject = 'Termin '
     
     for entry in von:
         von_datum = getdate(entry)
         ort_info = frappe.db.get_value("Beratungsort", ort, "infofeld") or ''
         if art == 'telefonisch':
+            subject += '(telefonische) Beratung am {wochentag}., {datum} um {von} (in {ort})'.format(wochentag=_(von_datum.strftime('%A'))[:2], \
+                                                                                                    datum=von_datum.strftime('%d.%m.%y'), \
+                                                                                                    von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                                                                                                    ort=ort.replace("({0})".format(sektion), ""))
             mail_txt += """
                 <div>
                     Wir melden uns am {wochentag}, {datum} {von} unter folgender Telefonnummer {telefonnummer} bei Ihnen.<br><br>
@@ -815,6 +820,10 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
                     von=":".join(von[index].split(" ")[1].split(":")[:2]), \
                     telefonnummer=telefonnummer)
         else:
+            subject += '(telefonische) Beratung am {wochentag}., {datum} um {von} (in {ort})'.format(wochentag=_(von_datum.strftime('%A'))[:2], \
+                                                                                                    datum=von_datum.strftime('%d.%m.%y'), \
+                                                                                                    von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                                                                                                    ort=ort.replace("({0})".format(sektion), ""))
             mail_txt += """
                 <div>
                     Wir bestätigen Ihnen gerne folgenden Termin:<br>
@@ -828,7 +837,10 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
                     ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""))
         index += 1
 
-    return mail_txt
+    return {
+        'mail_txt': mail_txt,
+        'subject': subject
+    }
 
 @frappe.whitelist()
 def get_termin_block_data(abp_zuweisungen):
