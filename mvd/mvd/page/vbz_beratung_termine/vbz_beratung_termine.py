@@ -8,6 +8,8 @@ from PyPDF2 import PdfFileWriter
 from frappe.utils.data import add_days, getdate, now, today, now_datetime, get_datetime
 from frappe.boot import get_bootinfo
 
+no_cache=1
+
 @frappe.whitelist()
 def get_open_data():
     alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user)
@@ -43,6 +45,7 @@ def get_alle_beratungs_termine(user):
                                         `berTer`.`ort`,
                                         `berTer`.`parent`,
                                         `berTer`.`berater_in`,
+                                        `berTer`.`telefonnummer`,
                                         `beratung`.`sektion_id`
                                     FROM `tabBeratung Termin` AS `berTer`
                                     LEFT JOIN `tabBeratung` AS `beratung` ON `berTer`.`parent` = `beratung`.`name`
@@ -51,6 +54,7 @@ def get_alle_beratungs_termine(user):
                                  """.format(datum_von=today()), as_dict=True)
     for termin in alle_termine:
         if not erlaubte_sektionen or termin.sektion_id in erlaubte_sektionen:
+            hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.parent), as_dict=True)[0].qty > 0 else 0
             termin_data = {
                 'von_date': get_datetime(termin.von).strftime('%d.%m.%Y'),
                 'von_time': get_datetime(termin.von).strftime('%H:%M:%S'),
@@ -58,11 +62,15 @@ def get_alle_beratungs_termine(user):
                 'art': termin.art,
                 'ort': termin.ort,
                 'beratung': termin.parent,
-                'beraterinn': termin.berater_in
+                'beraterinn': termin.berater_in,
+                'hat_attachement': hat_attachement,
+                'telefonnummer': termin.telefonnummer
             }
             alle.append(termin_data)
         if termin.berater_in in kontaktperson_multi_user:
             meine.append(termin_data)
+    if len(meine) < 1:
+        meine.append({'show_placeholder': 1})
     return alle, meine
 
 def get_kontaktperson_multi_user(user):

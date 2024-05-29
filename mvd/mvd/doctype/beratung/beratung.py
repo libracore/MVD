@@ -5,10 +5,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils.data import today, now, getdate
+from frappe.utils.data import today, now, getdate, get_datetime
 import json
 from bs4 import BeautifulSoup
 from frappe.utils import cint
+from frappe import _
 
 class Beratung(Document):
     def validate(self):
@@ -110,6 +111,18 @@ class Beratung(Document):
         
         # Handling des Status
         self.status_handler()
+
+        # Keine Beratung ohne Sektion
+        if not self.sektion_id:
+            self.set_sektion()
+    
+    def set_sektion(self):
+        # check if default Sektion = MVBE
+        default_sektion = frappe.db.sql("""SELECT `for_value` FROM `tabUser Permission` WHERE `allow` = 'Sektion' AND `user` = '{user}' AND `is_default` = 1""".format(user=frappe.session.user), as_dict=True)
+        if len(default_sektion) > 0:
+            self.sektion_id = default_sektion[0].for_value
+        else:
+            frappe.throw("Es wurde keine Standard Sektion für den User {user} gefunden.<br>Ohne Sektion kann keine Beratung angelegt werden.".format(user=frappe.session.user))
     
     def status_handler(self):
         # Prüfung ob Beratung gerade angelegt wird
@@ -573,7 +586,7 @@ def get_beratungsorte(sektion, kontakt=None):
     if not kontakt:
         orte = frappe.db.sql("""SELECT `name` AS `ort_def` FROM `tabBeratungsort` WHERE `sektion_id` = '{sektion}' ORDER BY `ort` ASC""".format(sektion=sektion), as_dict=True)
     else:
-        orte = frappe.db.sql("""SELECT `ort` AS `ort_def` FROM `tabBeratungsort Multiselect` WHERE `parent` = '{kontakt}' ORDER BY `ort` ASC""".format(kontakt=kontakt), as_dict=True)
+        orte = frappe.db.sql("""SELECT DISTINCT `ort` AS `ort_def` FROM `tabArbeitsplan Standardzeit` WHERE `parent` = '{kontakt}' ORDER BY `ort` ASC""".format(kontakt=kontakt), as_dict=True)
     
     ort_list = []
     for ort in orte:
@@ -589,41 +602,44 @@ def get_beratungsorte(sektion, kontakt=None):
 def anz_beratungen_ohne_termine(mv_mitgliedschaft):
     return int(frappe.db.count('Beratung', {'mv_mitgliedschaft': mv_mitgliedschaft, 'hat_termine': 0}))
 
+# die nachfolgende Methode erstellt ggf. eine Beratung und n zugehörige Termin(e) aus einer Mitgliedschaft heraus
 @frappe.whitelist()
-def create_neue_beratung(von, bis, art, ort, berater_in, notiz=None, beratungskategorie=None, beratung=None, sektion_id=None, mv_mitgliedschaft=None):
+def create_neue_beratung(mitgliedschaft, termin_block_data, art, ort, berater_in, telefonnummer, notiz, beratung=None):
+    termin_block_data = json.loads(termin_block_data)
     if not beratung:
         # erstelle neue Beratung
         beratung = frappe.get_doc({
             "doctype": "Beratung",
-            "sektion_id": sektion_id,
-            "beratungskategorie": beratungskategorie,
-            "mv_mitgliedschaft": mv_mitgliedschaft,
-            "termin": [
-                {
-                    "von": von,
-                    "bis": bis,
-                    "art": art,
-                    'ort': ort,
-                    'berater_in': berater_in
-                }
-            ],
+            "sektion_id": frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id'),
+            "mv_mitgliedschaft": mitgliedschaft,
             "kontaktperson": berater_in,
-            "notiz": notiz
+            "notiz": "Terminnotiz:<br>{0}".format(notiz)
         })
         beratung.insert()
+        for termin in termin_block_data:
+            row = beratung.append('termin', {})
+            row.von = "{0} {1}".format(termin['date'], termin['von'])
+            row.bis = "{0} {1}".format(termin['date'], termin['bis'])
+            row.art = art
+            row.ort = ort
+            row.berater_in = berater_in
+            row.telefonnummer = telefonnummer
+            row.abp_referenz = termin['referenz']
+            row.notiz = notiz
+        beratung.save()
     else:
         # füge Termin zu bestehenden Beratung hinzu
         beratung = frappe.get_doc("Beratung", beratung)
-        row = beratung.append('termin', {})
-        row.von = von
-        row.bis = bis
-        row.art = art
-        row.ort = ort
-        row.berater_in = berater_in
-        beratung.kontaktperson = berater_in
-        beratung.notiz = notiz
-        if mv_mitgliedschaft:
-            beratung.mv_mitgliedschaft = mv_mitgliedschaft
+        for termin in termin_block_data:
+            row = beratung.append('termin', {})
+            row.von = "{0} {1}".format(termin['date'], termin['von'])
+            row.bis = "{0} {1}".format(termin['date'], termin['bis'])
+            row.art = art
+            row.ort = ort
+            row.berater_in = berater_in
+            row.telefonnummer = telefonnummer
+            row.abp_referenz = termin['referenz']
+            row.notiz = notiz
         beratung.save()
     
     return beratung.name
@@ -772,3 +788,75 @@ def erstelle_todo(owner, beratung, description=False, datum=False, notify=0, mit
         notify_assignment(todo.assigned_by, todo.owner, todo.reference_type, todo.reference_name, action='ASSIGN',\
                  description=todo.description, notify=notify)
     return
+
+@frappe.whitelist()
+def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
+    index = 0
+    von = json.loads(von)
+    bis = json.loads(bis)
+    anrede = ''
+    sektion = ''
+    if mitgliedschaft:
+        anrede = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "briefanrede")
+        sektion = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "sektion_id")
+    mail_txt = '<p>{0}</p>'.format(anrede)
+    
+    for entry in von:
+        von_datum = getdate(entry)
+        ort_info = frappe.db.get_value("Beratungsort", ort, "infofeld") or ''
+        if art == 'telefonisch':
+            mail_txt += """
+                <div>
+                    Wir melden uns am {wochentag}, {datum} {von} unter folgender Telefonnummer {telefonnummer} bei Ihnen.<br><br>
+                    Falls Sie den Termin nicht wahrnehmen können, melden Sie dies bitte frühzeitig unserem Sekretariat.<br><br>
+                    Mit freundlichen Grüssen
+                </div>
+            """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+                    von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                    telefonnummer=telefonnummer)
+        else:
+            mail_txt += """
+                <div>
+                    Wir bestätigen Ihnen gerne folgenden Termin:<br>
+                    {wochentag}, {datum} {von} - {bis} in {ort}.
+                    {ort_info}
+                    <br><br>Falls Sie den Termin nicht wahrnehmen können, melden Sie dies bitte frühzeitig unserem Sekretariat.<br><br>
+                    Mit freundlichen Grüssen
+                </div>
+            """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+                    von=":".join(von[index].split(" ")[1].split(":")[:2]), bis=":".join(bis[index].split(" ")[1].split(":")[:2]), \
+                    ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""))
+        index += 1
+
+    return mail_txt
+
+@frappe.whitelist()
+def get_termin_block_data(abp_zuweisungen):
+    if abp_zuweisungen.startswith("-"):
+        abp_zuweisungen = abp_zuweisungen.replace("-", "", 1)
+    return_data = []
+    for abp_zuweisung in abp_zuweisungen.split("-"):
+        return_data.append({
+            'referenz': abp_zuweisung,
+            'von': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'from_time'),
+            'bis': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'to_time'),
+            'date': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'date')
+        })
+    return return_data
+
+@frappe.whitelist()
+def get_tel_for_termin(mitgliedschaft=None):
+    if not mitgliedschaft:
+        return ''
+    
+    tel = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'tel_m_1')
+    if tel:
+        return tel
+    tel = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'tel_p_1')
+    if tel:
+        return tel
+    tel = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'tel_g_1')
+    if tel:
+        return tel
+    
+    return ''

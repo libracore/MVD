@@ -1,0 +1,42 @@
+<h1>{{ berater_in }}</h1>
+{% for termin in termine %}
+<div style="border: 1px dotted black; margin-bottom: 5px; padding: 5px;">
+    <table style="width: 100%;">
+        <tr>
+            <th style="width: 10%;">Wann</th>
+            <th style="width: 10%;">Wo</th>
+            <th style="width: 10%;">Wie</th>
+            <th style="width: 15%;">Telefonnummer</th>
+            <th style="width: 20%;">Mitglied</th>
+            <th style="width: 35%;">Details</th>
+        </tr>
+        <tr>
+            <td>
+                {{ termin.von.split(" ")[0].split("-")[2] }}.{{ termin.von.split(" ")[0].split("-")[1] }}.{{ termin.von.split(" ")[0].split("-")[0] }}<br>
+                {{ termin.von.split(" ")[1].split(":")[0] }}:{{ termin.von.split(" ")[1].split(":")[1] }} -
+                {{ termin.bis.split(" ")[1].split(":")[0] }}:{{ termin.bis.split(" ")[1].split(":")[1] }}
+            </td>
+            <td>{{ termin.ort.replace("(" + termin.sektion_id + ")", "") }}</td>
+            <td>{{ termin.art }}</td>
+            <td>{{ termin.telefonnummer }}</td>
+            <td>{{ termin.mitglied_nr }}<br>{{ termin.adressblock }}</td>
+            <td>
+                Eintritt: {% if termin.eintrittsdatum %}{{ termin.eintrittsdatum.split("-")[2] }}.{{ termin.eintrittsdatum.split("-")[1] }}.{{ termin.eintrittsdatum.split("-")[0] }}{% else %}---{% endif %}<br>
+                Bez. Jahr: {{ termin.bezahltes_mitgliedschaftsjahr }}<br>
+                Termin vereinbart am: {{ termin.creation.split(" ")[0].split("-")[2] }}.{{ termin.creation.split(" ")[0].split("-")[1] }}.{{ termin.creation.split(" ")[0].split("-")[0] }}
+            </td>
+        </tr>
+    </table>
+    <div>
+        <p>
+            Unterlagen > .........................................................................................................................................................................................................................................................
+        </p>
+        <p>
+            Beratung : &#9744; wurde durchgeführt &#9744; Person nicht erschienen
+        </p>
+        <p>
+            Notiz: {{ termin.notiz }}
+        </p>
+    </div>
+</div>
+{% endfor %}
