@@ -1,50 +1,88 @@
 <h1>{{ berater_in }}</h1>
 <h3>{% if von and bis %}({{ von }} - {{ bis }}){% else %}{% if von %}(ab {{ von }}){% endif %}{% if bis %}(bis {{ bis }}){% endif %}{% endif %}</h3>
 {% for termin in termine %}
-<div style="border: 1px dotted black; margin-bottom: 5px; padding: 5px; page-break-inside: avoid;">
-    <table style="width: 100%;">
-        <tr>
-            <th style="width: 25%; text-align: left;">Wann</th>
-            <th style="width: 25%; text-align: left;">Wo</th>
-            <th style="width: 25%; text-align: left;">Wie</th>
-            <th style="width: 25%; text-align: left;">Telefonnummer</th>
-        </tr>
-        <tr>
-            <td>
-                {{ termin.von }}<br>
-                {{ termin.von_zeit }} -
-                {{ termin.bis }}
-            </td>
-            <td>{{ termin.ort.replace("(" + termin.sektion_id + ")", "") }}</td>
-            <td>{{ termin.art }}</td>
-            <td>{{ termin.telefonnummer or "---" }}</td>
-        </tr>
-    </table>
-    <table style="width: 100%; margin-top: 5px;">
-        <tr>
-            <th style="width: 50%; text-align: left;">Mitglied</th>
-            <th style="width: 50%; text-align: left;">Details</th>
-        </tr>
-        <tr>
-            <td>{{ termin.mitglied_nr }}<br>{{ termin.adressblock }}</td>
-            <td>
-                ____ ____ ____ ____<br><br>
-                Eintritt: {% if termin.eintrittsdatum %}{{ termin.eintrittsdatum }}{% else %}---{% endif %}<br>
-                Bez. Jahr: {{ termin.bezahltes_mitgliedschaftsjahr }}<br>
-                Termin vereinbart am: {{ termin.creation }}
-            </td>
-        </tr>
-    </table>
-    <div>
-        <p>
-            Unterlagen > {% if termin.hat_attachement == 1 %}&#9745; Ja &#9744; Nein{% else %}&#9744; Ja &#9745; Nein{% endif %}......................................................................................................................
-        </p>
-        <p>
-            Beratung : &#9744; wurde durchgeführt &#9744; Person nicht erschienen
-        </p>
-        <p>
-            Notiz: {{ termin.notiz or "---" }}
-        </p>
-    </div>
-</div>
+    {% if "abp_referenz" in termin %}
+        <div style="border: 1px dotted black; margin-bottom: 5px; padding: 5px; page-break-inside: avoid;">
+            <table style="width: 100%;">
+                <tr>
+                    <th style="width: 25%; text-align: left;">Wann</th>
+                    <th style="width: 25%; text-align: left;">Wo</th>
+                    <th style="width: 25%; text-align: left;">Wie</th>
+                    <th style="width: 25%; text-align: left;">Telefonnummer</th>
+                </tr>
+                <tr>
+                    <td>
+                        {{ termin.von }}<br>
+                        {{ termin.von_zeit }} -
+                        {{ termin.bis }}
+                    </td>
+                    <td>{{ termin.ort.replace("(" + termin.sektion_id + ")", "") }}</td>
+                    <td>{{ termin.art }}</td>
+                    <td>{{ termin.telefonnummer or "---" }}</td>
+                </tr>
+            </table>
+            <table style="width: 100%; margin-top: 5px;">
+                <tr>
+                    <th style="width: 50%; text-align: left;">Mitglied</th>
+                    <th style="width: 50%; text-align: left;">Details</th>
+                </tr>
+                <tr>
+                    <td>{{ termin.mitglied_nr }}<br>{{ termin.adressblock }}</td>
+                    <td>
+                        {% if termin.beratungskategorie %}{{ termin.beratungskategorie.split(" - ")[0] }}{% else %} ____{% endif %}{% if termin.beratungskategorie_2 %} {{ termin.beratungskategorie_2.split(" - ")[0] }}{% else %} ____{% endif %}{% if termin.beratungskategorie_3 %} {{ termin.beratungskategorie_3.split(" - ")[0] }}{% else %} ____{% endif %} ____<br><br>
+                        Eintritt: {% if termin.eintrittsdatum %}{{ termin.eintrittsdatum }}{% else %}---{% endif %}<br>
+                        Bez. Jahr: {{ termin.bezahltes_mitgliedschaftsjahr }}<br>
+                        Termin vereinbart am: {{ termin.creation }}
+                    </td>
+                </tr>
+            </table>
+            <div>
+                <p>
+                    Unterlagen > {% if termin.hat_attachement == 1 %}&#9745; Ja &#9744; Nein{% else %}&#9744; Ja &#9745; Nein{% endif %}......................................................................................................................
+                </p>
+                <p>
+                    Beratung : &#9744; wurde durchgeführt &#9744; Person nicht erschienen
+                </p>
+                <p>
+                    Notiz: {{ termin.notiz or "---" }}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <div style="border: 1px dotted black; margin-bottom: 5px; padding: 5px;">
+            <table style="width: 100%;">
+                <tr>
+                    <th style="width: 10%;">Wann</th>
+                    <th style="width: 10%;">Wo</th>
+                    <th style="width: 10%;">Wie</th>
+                    <th style="width: 15%;">Telefonnummer</th>
+                    <th style="width: 20%;">Mitglied</th>
+                    <th style="width: 35%;">Details</th>
+                </tr>
+                <tr>
+                    <td>
+                        {{ termin.von }}<br>
+                        {{ termin.von_zeit }} -
+                        {{ termin.bis }}
+                    </td>
+                    <td>{{ termin.ort.split("(")[0] }}</td>
+                    <td>---</td>
+                    <td>---</td>
+                    <td>---<br>---</td>
+                    <td>---</td>
+                </tr>
+            </table>
+            <div>
+                <p>
+                    Unterlagen > .........................................................................................................................................................................................................................................................
+                </p>
+                <p>
+                    Beratung : &#9744; wurde durchgeführt &#9744; Person nicht erschienen
+                </p>
+                <p>
+                    Notiz: ---
+                </p>
+            </div>
+        </div>
+    {% endif %}
 {% endfor %}

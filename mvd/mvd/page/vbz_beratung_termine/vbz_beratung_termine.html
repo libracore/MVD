@@ -12,7 +12,8 @@
             <th>Telefonnummer</th>
             <th>Ort</th>
             <th>Dokumente</th>
-            <th>Beratung</th>
+            <th>Mitglied</th>
+            <th>Beratungskategorien</th>
         </tr>
         {% for termin in meine_termine %}
             {% if "show_placeholder" in termin %}
@@ -26,13 +27,14 @@
             {% else %}
                 <tr class="termin-tr" data-beratung="{{ termin.beratung }}">
                     <td>{{ termin.beraterinn }}</td>
-                    <td>{{ termin.von_date }}</td>
+                    <td>{{ termin.wochentag }}., {{ termin.von_date }}</td>
                     <td>{{ termin.von_time }} - {{ termin.bis_time }}</td>
                     <td>{{ termin.art }}</td>
                     <td>{% if termin.art == "telefonisch" %}<a href="tel:{{ termin.telefonnummer }}">{{ termin.telefonnummer }}</a>{% else %}---{% endif %}</td>
                     <td>{{ termin.ort }}</td>
                     <td><center>{% if termin.hat_attachement == 1 %}<i class="fa fa-folder-open"></i>{% else %}&nbsp;{% endif %}</center></td>
-                    <td>{{ termin.beratung }}</td>
+                    <td>{{ termin.name_mitglied }}</td>
+                    <td>{{ termin.beratungskategorie }} {{ termin.beratungskategorie_2 }} {{ termin.beratungskategorie_3 }}</td>
                 </tr>
             {% endif %}
         {% endfor %}
@@ -52,18 +54,20 @@
             <th>Telefonnummer</th>
             <th>Ort</th>
             <th>Dokumente</th>
-            <th>Beratung</th>
+            <th>Mitglied</th>
+            <th>Beratungskategorien</th>
         </tr>
         {% for termin in alle_termine %}
             <tr class="termin-tr" data-beratung="{{ termin.beratung }}">
                 <td>{{ termin.beraterinn }}</td>
-                <td>{{ termin.von_date }}</td>
+                <td>{{ termin.wochentag }}., {{ termin.von_date }}</td>
                 <td>{{ termin.von_time }} - {{ termin.bis_time }}</td>
                 <td>{{ termin.art }}</td>
                 <td>{% if termin.art == "telefonisch" %}<a href="tel:{{ termin.telefonnummer }}">{{ termin.telefonnummer }}</a>{% else %}---{% endif %}</td>
                 <td>{{ termin.ort }}</td>
                 <td><center>{% if termin.hat_attachement == 1 %}<i class="fa fa-folder-open"></i>{% else %}&nbsp;{% endif %}</center></td>
-                <td>{{ termin.beratung }}</td>
+                <td>{{ termin.name_mitglied }}</td>
+                <td>{{ termin.beratungskategorie }} {{ termin.beratungskategorie_2 }} {{ termin.beratungskategorie_3 }}</td>
             </tr>
         {% endfor %}
     </table>
