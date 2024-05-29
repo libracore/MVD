@@ -799,42 +799,89 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
     if mitgliedschaft:
         anrede = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "briefanrede")
         sektion = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "sektion_id")
+        sprache = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "language")
     mail_txt = '<p>{0}</p>'.format(anrede)
     subject = 'Termin '
     
     for entry in von:
         von_datum = getdate(entry)
         ort_info = frappe.db.get_value("Beratungsort", ort, "infofeld") or ''
-        if art == 'telefonisch':
-            subject += '(telefonische) Beratung am {wochentag}., {datum} um {von} (in {ort})'.format(wochentag=_(von_datum.strftime('%A'))[:2], \
-                                                                                                    datum=von_datum.strftime('%d.%m.%y'), \
-                                                                                                    von=":".join(von[index].split(" ")[1].split(":")[:2]), \
-                                                                                                    ort=ort.replace("({0})".format(sektion), ""))
-            mail_txt += """
-                <div>
-                    Wir melden uns am {wochentag}, {datum} {von} unter folgender Telefonnummer {telefonnummer} bei Ihnen.<br><br>
-                    Falls Sie den Termin nicht wahrnehmen können, melden Sie dies bitte frühzeitig unserem Sekretariat.<br><br>
-                    Mit freundlichen Grüssen
-                </div>
-            """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
-                    von=":".join(von[index].split(" ")[1].split(":")[:2]), \
-                    telefonnummer=telefonnummer)
+        if sprache == 'fr':
+            if art == 'telefonisch':
+                subject += '(telefonische) Beratung am {wochentag}., {datum} um {von} (in {ort})'.format(wochentag=_(von_datum.strftime('%A'))[:2], \
+                                                                                                        datum=von_datum.strftime('%d.%m.%y'), \
+                                                                                                        von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                                                                                                        ort=ort.replace("({0})".format(sektion), ""))
+                mail_txt += """
+                    <div>
+                        Nous avons réservé pour vous le rendez-vous téléphonique suivant:<br>
+                        {wochentag}, {datum} um {von}<br>
+                        Notre conseiller/notre conseillère Monsieur/Madame vous appellera au numéro suivant:<br>
+                        {telefonnummer}<br><br>
+                        Veuillez noter que nos consultants* juridiques ne consultent pas les documents avant le rendez-vous.<br><br>
+                        En cas d'empêchement, nous vous prions d'annoncer votre absence le plus rapidement possible.<br><br>
+                        Avec nos meilleures salutations
+                    </div>
+                """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+                        von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                        telefonnummer=telefonnummer)
+            else:
+                subject += 'Beratung am {wochentag}., {datum} um {von} (in {ort})'.format(wochentag=_(von_datum.strftime('%A'))[:2], \
+                                                                                                        datum=von_datum.strftime('%d.%m.%y'), \
+                                                                                                        von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                                                                                                        ort=ort.replace("({0})".format(sektion), ""))
+                mail_txt += """
+                    <div>
+                        Nous avons réservé pour vous le rendez-vous suivant:<br>
+                        {wochentag}, {datum} um {von}<br>
+                        Notre consultant* Müller Klaus vous attend à<br>
+                        {ort}, {ort_info}.<br><br>
+                        Veuillez noter que nos consultants* juridiques ne consultent pas les documents avant le rendez-vous.<br><br>
+                        En cas d'empêchement, nous vous prions d'annoncer votre absence le plus rapidement possible.<br><br>
+                        Avec nos meilleures salutations
+                    </div>
+                """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+                        von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                        ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""))
         else:
-            subject += '(telefonische) Beratung am {wochentag}., {datum} um {von} (in {ort})'.format(wochentag=_(von_datum.strftime('%A'))[:2], \
-                                                                                                    datum=von_datum.strftime('%d.%m.%y'), \
-                                                                                                    von=":".join(von[index].split(" ")[1].split(":")[:2]), \
-                                                                                                    ort=ort.replace("({0})".format(sektion), ""))
-            mail_txt += """
-                <div>
-                    Wir bestätigen Ihnen gerne folgenden Termin:<br>
-                    {wochentag}, {datum} {von} - {bis} in {ort}.
-                    {ort_info}
-                    <br><br>Falls Sie den Termin nicht wahrnehmen können, melden Sie dies bitte frühzeitig unserem Sekretariat.<br><br>
-                    Mit freundlichen Grüssen
-                </div>
-            """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
-                    von=":".join(von[index].split(" ")[1].split(":")[:2]), bis=":".join(bis[index].split(" ")[1].split(":")[:2]), \
-                    ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""))
+            if art == 'telefonisch':
+                subject += '(telefonische) Beratung am {wochentag}., {datum} um {von} (in {ort})'.format(wochentag=_(von_datum.strftime('%A'))[:2], \
+                                                                                                        datum=von_datum.strftime('%d.%m.%y'), \
+                                                                                                        von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                                                                                                        ort=ort.replace("({0})".format(sektion), ""))
+                mail_txt += """
+                    <div>
+                        Wir haben für Sie folgenden Termin reserviert:<br>
+                        Telefonische Beratung<br>
+                        {wochentag}, {datum} um {von}<br>
+                        Unsere Berater*in Müller Klaus wird Sie unter dieser Nummer anrufen:<br>
+                        {telefonnummer}<br><br>
+                        Bitte beachten Sie, dass unsere Rechtsberater*innen die Unterlagen vor dem Beratungstermin nicht sichten. Sie werden bei Bedarf während des Beratungstermin konsultiert.<br><br>
+                        Wir bitten Sie im Verhinderungsfall so rasch wie möglich abzumelden.<br><br>
+                        Mit freundlichen Grüssen
+                    </div>
+                """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+                        von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                        telefonnummer=telefonnummer)
+            else:
+                subject += 'Beratung am {wochentag}., {datum} um {von} (in {ort})'.format(wochentag=_(von_datum.strftime('%A'))[:2], \
+                                                                                                        datum=von_datum.strftime('%d.%m.%y'), \
+                                                                                                        von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                                                                                                        ort=ort.replace("({0})".format(sektion), ""))
+                mail_txt += """
+                    <div>
+                        Wir haben für Sie folgenden Termin reserviert:<br>
+                        Persönliche Beratung<br>
+                        {wochentag}, {datum} um {von}<br>
+                        Unsere Berater*in Müller Klaus erwartet Sie in:<br>
+                        {ort}, {ort_info}.<br><br>
+                        Bitte beachten Sie, dass unsere Rechtsberater*innen die Unterlagen vor dem Beratungstermin nicht sichten. Sie werden bei Bedarf während des Beratungstermin konsultiert.<br><br>
+                        Wir bitten Sie im Verhinderungsfall so rasch wie möglich abzumelden.<br><br>
+                        Mit freundlichen Grüssen
+                    </div>
+                """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'), \
+                        von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                        ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""))
         index += 1
 
     return {
