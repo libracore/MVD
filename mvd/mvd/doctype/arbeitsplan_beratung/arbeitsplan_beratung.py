@@ -242,7 +242,10 @@ def get_termin_uebersicht(berater_in, von=None, bis=None):
             `bt`.`creation`,
             `bt`.`notiz`,
             '' AS `von_zeit`,
-            `ber`.`name` AS `beratung_name`
+            `ber`.`name` AS `beratung_name`,
+            `ber`.`beratungskategorie` AS `beratungskategorie`,
+            `ber`.`beratungskategorie_2` AS `beratungskategorie_2`,
+            `ber`.`beratungskategorie_3` AS `beratungskategorie_3`
         FROM `tabBeratung Termin` AS `bt`
         LEFT JOIN `tabBeratung` AS `ber` ON `bt`.`parent` = `ber`.`name`
         LEFT JOIN `tabMitgliedschaft` AS `mitgl` ON `ber`.`mv_mitgliedschaft` = `mitgl`.`name`
