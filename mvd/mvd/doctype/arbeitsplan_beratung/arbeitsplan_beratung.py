@@ -224,7 +224,9 @@ def get_termin_uebersicht(berater_in, von=None, bis=None):
         von_filter = """AND `bt`.`von` >= '{0}'""".format(von)
     if bis:
         bis_filter = """AND `bt`.`bis` <= '{0}'""".format(bis)
-    # frappe.throw("{0} --- {1}".format(von, bis))
+
+    berater_in = get_berater_in_from_hash(berater_in)
+
     termine = frappe.db.sql("""
         SELECT
             `bt`.`von`,
@@ -262,6 +264,7 @@ def get_arbeitsplan_pdf(berater_in, von=None, bis=None):
         termin.creation = frappe.utils.getdate(termin.creation).strftime("%d.%m.%Y")
         termin.hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.beratung_name), as_dict=True)[0].qty > 0 else 0
 
+    berater_in = get_berater_in_from_hash(berater_in)
     html_von = frappe.utils.getdate(von).strftime("%d.%m.%Y") if von else ''
     html_bis = frappe.utils.getdate(bis).strftime("%d.%m.%Y") if bis else ''
     html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'termine': termine, 'von': html_von, 'bis': html_bis})
@@ -283,6 +286,7 @@ def get_arbeitsplan_word(berater_in, von=None, bis=None):
         termin.creation = frappe.utils.getdate(termin.creation).strftime("%d.%m.%Y")
         termin.hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.beratung_name), as_dict=True)[0].qty > 0 else 0
 
+    berater_in = get_berater_in_from_hash(berater_in)
     html_von = frappe.utils.getdate(von).strftime("%d.%m.%Y") if von else ''
     html_bis = frappe.utils.getdate(bis).strftime("%d.%m.%Y") if bis else ''
     html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'termine': termine, 'von': html_von, 'bis': html_bis})
@@ -290,3 +294,10 @@ def get_arbeitsplan_word(berater_in, von=None, bis=None):
     frappe.local.response.filename = "{name}.docx".format(name=berater_in.replace(" ", "-").replace("/", "-"))
     frappe.local.response.filecontent = html
     frappe.local.response.type = "download"
+
+def get_berater_in_from_hash(hash):
+    berater_in = frappe.db.sql("""SELECT `name` FROM `tabTermin Kontaktperson` WHERE `md_hash` = '{0}'""".format(hash), as_dict=True)
+    if len(berater_in) > 0:
+        return berater_in[0].name
+    else:
+        return None
