@@ -189,7 +189,7 @@ def send_postnotiz_to_sp(postnotiz_for_sp):
             try:
                 sp_connection = requests.post(url, json = postnotiz_for_sp, headers = headers)
                 if sp_connection.status_code != 204:
-                    frappe.log_error("{0}".format(str(postnotiz_for_sp)), 'send_postnotiz_to_sp failed ({0})'.format(sp_connection.status_code))
+                    frappe.log_error("{0}\n\n{1}".format(sp_connection.status_code, str(postnotiz_for_sp)), 'send_postnotiz_to_sp failed')
                 return
             except Exception as err:
                 frappe.log_error("{0}".format(err), 'send_postnotiz_to_sp failed')
