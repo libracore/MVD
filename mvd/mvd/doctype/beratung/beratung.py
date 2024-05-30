@@ -117,12 +117,21 @@ class Beratung(Document):
             self.set_sektion()
     
     def set_sektion(self):
-        # check if default Sektion = MVBE
-        default_sektion = frappe.db.sql("""SELECT `for_value` FROM `tabUser Permission` WHERE `allow` = 'Sektion' AND `user` = '{user}' AND `is_default` = 1""".format(user=frappe.session.user), as_dict=True)
-        if len(default_sektion) > 0:
-            self.sektion_id = default_sektion[0].for_value
-        else:
-            frappe.throw("Es wurde keine Standard Sektion für den User {user} gefunden.<br>Ohne Sektion kann keine Beratung angelegt werden.".format(user=frappe.session.user))
+        '''
+        Diese Methode setzt bei Beratungen ohne Sektion die Standardsektion gem. User welcher die Beratung anlegen möchte.
+        Besitzt der User keine Standardsektion, wird die Anlage unterbunden.
+
+        Sollte der User "Administrator" sein, so wird die Anlage der Beratung ohne Sektion explizit erlaubt,
+        weil ansonsten keine Beratungen via E-Mail-Eingang angelegt werden können.
+        In diesem Fall wird die Sektion nachträglich (nach dem erstellen der zugehörigen Kommunikation) der Beratung hinzugefügt.
+        Siehe Hook https://git.libracore.io/libracore/MVD/-/blob/master/mvd/hooks.py?ref_type=heads#L127
+        '''
+        if frappe.session.user != 'Administrator':
+            default_sektion = frappe.db.sql("""SELECT `for_value` FROM `tabUser Permission` WHERE `allow` = 'Sektion' AND `user` = '{user}' AND `is_default` = 1""".format(user=frappe.session.user), as_dict=True)
+            if len(default_sektion) > 0:
+                self.sektion_id = default_sektion[0].for_value
+            else:
+                frappe.throw("Es wurde keine Standard Sektion für den User {user} gefunden.<br>Ohne Sektion kann keine Beratung angelegt werden.".format(user=frappe.session.user))
     
     def status_handler(self):
         # Prüfung ob Beratung gerade angelegt wird
