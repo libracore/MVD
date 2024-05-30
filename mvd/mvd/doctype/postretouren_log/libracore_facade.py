@@ -160,7 +160,7 @@ class LibraCoreFacade:
             postnotiz.notiz += (" // Zwei aufeinander folgende M+W konnten nicht zugestellt werden. "
                                 "Die Anzahl Zeitungen sollte auf 0 gesetzt werden")
         
-        create_postnotiz_job = create_postnotiz(postnotiz, postretouren_log.name)
+        create_postnotiz_job = create_postnotiz(postnotiz, postretour, postretouren_log.name)
         if create_postnotiz_job != 1:
             self.log("{0}: \n{1}".format(str(create_postnotiz_job), frappe.utils.get_traceback()), postretouren_log, "Error")
 
