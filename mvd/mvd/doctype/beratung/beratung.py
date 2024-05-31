@@ -810,17 +810,16 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
         sektion = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "sektion_id")
         sprache = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "language")
     mail_txt = '<p>{0}</p>'.format(anrede)
-    subject = 'Termin '
+    subject = ''
     
     for entry in von:
         von_datum = getdate(entry)
         ort_info = frappe.db.get_value("Beratungsort", ort, "infofeld") or ''
         if sprache == 'fr':
+            subject += "Rendez-vous ASLOCA: {wochentag}, {datum} à {von}".format(wochentag=_(von_datum.strftime('%A'), sprache), \
+                                                                        datum=von_datum.strftime('%d.%m.%y'), \
+                                                                        von=":".join(von[index].split(" ")[1].split(":")[:2]))
             if art == 'telefonisch':
-                subject += '(telefonische) Beratung am {wochentag}., {datum} um {von} (in {ort})'.format(wochentag=_(von_datum.strftime('%A'))[:2], \
-                                                                                                        datum=von_datum.strftime('%d.%m.%y'), \
-                                                                                                        von=":".join(von[index].split(" ")[1].split(":")[:2]), \
-                                                                                                        ort=ort.replace("({0})".format(sektion), ""))
                 mail_txt += """
                     <div>
                         Nous avons réservé pour vous le rendez-vous téléphonique suivant:<br>
@@ -835,10 +834,6 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
                         telefonnummer=telefonnummer)
             else:
-                subject += 'Beratung am {wochentag}., {datum} um {von} (in {ort})'.format(wochentag=_(von_datum.strftime('%A'))[:2], \
-                                                                                                        datum=von_datum.strftime('%d.%m.%y'), \
-                                                                                                        von=":".join(von[index].split(" ")[1].split(":")[:2]), \
-                                                                                                        ort=ort.replace("({0})".format(sektion), ""))
                 mail_txt += """
                     <div>
                         Nous avons réservé pour vous le rendez-vous suivant:<br>
@@ -853,11 +848,10 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
                         ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""))
         else:
+            subject += "Ihr Beratungstermin MV: {wochentag}., {datum} um {von}".format(wochentag=_(von_datum.strftime('%A'))[:2], \
+                                                                            datum=von_datum.strftime('%d.%m.%y'), \
+                                                                            von=":".join(von[index].split(" ")[1].split(":")[:2]))
             if art == 'telefonisch':
-                subject += '(telefonische) Beratung am {wochentag}., {datum} um {von} (in {ort})'.format(wochentag=_(von_datum.strftime('%A'))[:2], \
-                                                                                                        datum=von_datum.strftime('%d.%m.%y'), \
-                                                                                                        von=":".join(von[index].split(" ")[1].split(":")[:2]), \
-                                                                                                        ort=ort.replace("({0})".format(sektion), ""))
                 mail_txt += """
                     <div>
                         Wir haben für Sie folgenden Termin reserviert:<br>
@@ -873,10 +867,6 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
                         telefonnummer=telefonnummer)
             else:
-                subject += 'Beratung am {wochentag}., {datum} um {von} (in {ort})'.format(wochentag=_(von_datum.strftime('%A'))[:2], \
-                                                                                                        datum=von_datum.strftime('%d.%m.%y'), \
-                                                                                                        von=":".join(von[index].split(" ")[1].split(":")[:2]), \
-                                                                                                        ort=ort.replace("({0})".format(sektion), ""))
                 mail_txt += """
                     <div>
                         Wir haben für Sie folgenden Termin reserviert:<br>
