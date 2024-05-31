@@ -334,7 +334,9 @@ def get_arbeitsplan_pdf(berater_in, von=None, bis=None):
     html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'termine': termine, 'von': html_von, 'bis': html_bis})
     from frappe.utils.pdf import get_pdf
     pdf = get_pdf(html)
-    frappe.local.response.filename = "{name}.pdf".format(name=berater_in.replace(" ", "-").replace("/", "-"))
+    datum = frappe.utils.getdate(von or None).strftime("%Y-%m-%d")
+    wochentag = frappe.utils.getdate(von or None).strftime("%A")[:2].upper()
+    frappe.local.response.filename = "{datum}_{wochentag}_{name}.pdf".format(datum=datum, wochentag=wochentag, name=berater_in.split(" ")[0])
     frappe.local.response.filecontent = pdf
     frappe.local.response.type = "download"
 
@@ -360,7 +362,9 @@ def get_arbeitsplan_word(berater_in, von=None, bis=None):
     html_bis = frappe.utils.getdate(bis).strftime("%d.%m.%Y") if bis else ''
     html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'termine': termine, 'von': html_von, 'bis': html_bis})
     html = '<html><body>{0}</body></html>'.format(html)
-    frappe.local.response.filename = "{name}.doc".format(name=berater_in.replace(" ", "-").replace("/", "-"))
+    datum = frappe.utils.getdate(von or None).strftime("%Y-%m-%d")
+    wochentag = frappe.utils.getdate(von or None).strftime("%A")[:2].upper()
+    frappe.local.response.filename = "{datum}_{wochentag}_{name}.doc".format(datum=datum, wochentag=wochentag, name=berater_in.split(" ")[0])
     frappe.local.response.filecontent = html
     frappe.local.response.type = "download"
 

@@ -4,12 +4,10 @@
         <div style="border: 1px dotted black; margin-bottom: 5px; padding: 5px;">
             <table style="width: 100%;">
                 <tr>
-                    <th style="width: 10%;">Wann</th>
-                    <th style="width: 10%;">Wo</th>
-                    <th style="width: 10%;">Wie</th>
-                    <th style="width: 15%;">Telefonnummer</th>
-                    <th style="width: 20%;">Mitglied</th>
-                    <th style="width: 35%;">Details</th>
+                    <th style="width: 25%;  text-align: left;">Wann</th>
+                    <th style="width: 25%;  text-align: left;">Wo</th>
+                    <th style="width: 25%;  text-align: left;">Wie</th>
+                    <th style="width: 25%;  text-align: left;">Telefonnummer</th>
                 </tr>
                 <tr>
                     <td>
@@ -20,6 +18,14 @@
                     <td>{{ termin.ort.replace("(" + termin.sektion_id + ")", "") }}</td>
                     <td>{{ termin.art }}</td>
                     <td>{{ termin.telefonnummer }}</td>
+                </tr>
+            </table>
+            <table style="width: 100%; margin-top: 5px;">
+                <tr>
+                    <th style="width: 50%; text-align: left;">Mitglied</th>
+                    <th style="width: 50%; text-align: left;">Details</th>
+                </tr>
+                <tr>
                     <td>{{ termin.mitglied_nr }}<br>{{ termin.adressblock }}</td>
                     <td>
                         {% if termin.beratungskategorie %}{{ termin.beratungskategorie.split(" - ")[0] }}{% else %} ____{% endif %}{% if termin.beratungskategorie_2 %} {{ termin.beratungskategorie_2.split(" - ")[0] }}{% else %} ____{% endif %}{% if termin.beratungskategorie_3 %} {{ termin.beratungskategorie_3.split(" - ")[0] }}{% else %} ____{% endif %} ____<br><br>
@@ -31,13 +37,13 @@
             </table>
             <div>
                 <p>
-                    Unterlagen > .........................................................................................................................................................................................................................................................
+                    Unterlagen > {% if termin.hat_attachement == 1 %}Ja{% else %}Nein{% endif %}
                 </p>
                 <p>
                     Beratung : &#9744; wurde durchgeführt &#9744; Person nicht erschienen
                 </p>
                 <p>
-                    Notiz: {{ termin.notiz }}
+                    Notiz/Bemerkungen: {% if termin.notiz %}{{ termin.notiz }}{% else %}---{% endif %}
                 </p>
             </div>
         </div>
@@ -45,12 +51,10 @@
         <div style="border: 1px dotted black; margin-bottom: 5px; padding: 5px;">
             <table style="width: 100%;">
                 <tr>
-                    <th style="width: 10%;">Wann</th>
-                    <th style="width: 10%;">Wo</th>
-                    <th style="width: 10%;">Wie</th>
-                    <th style="width: 15%;">Telefonnummer</th>
-                    <th style="width: 20%;">Mitglied</th>
-                    <th style="width: 35%;">Details</th>
+                    <th style="width: 25%;  text-align: left;">Wann</th>
+                    <th style="width: 25%;  text-align: left;">Wo</th>
+                    <th style="width: 25%;  text-align: left;">Wie</th>
+                    <th style="width: 25%;  text-align: left;">Telefonnummer</th>
                 </tr>
                 <tr>
                     <td>
@@ -61,19 +65,27 @@
                     <td>{{ termin.ort.split("(")[0] }}</td>
                     <td>---</td>
                     <td>---</td>
-                    <td>---<br>---</td>
+                </tr>
+            </table>
+            <table style="width: 100%; margin-top: 5px;">
+                <tr>
+                    <th style="width: 50%; text-align: left;">Mitglied</th>
+                    <th style="width: 50%; text-align: left;">Details</th>
+                </tr>
+                <tr>
+                    <td>---</td>
                     <td>---</td>
                 </tr>
             </table>
             <div>
                 <p>
-                    Unterlagen > .........................................................................................................................................................................................................................................................
+                    Unterlagen > 
                 </p>
                 <p>
                     Beratung : &#9744; wurde durchgeführt &#9744; Person nicht erschienen
                 </p>
                 <p>
-                    Notiz: ---
+                    Notiz/Bemerkungen: ---
                 </p>
             </div>
         </div>
