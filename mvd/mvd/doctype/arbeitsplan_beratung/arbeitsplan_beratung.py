@@ -276,14 +276,21 @@ def get_termin_uebersicht(berater_in, von=None, bis=None):
         if termin.abp_referenz:
             vergebene_termin_liste.append(termin.abp_referenz)
     
-    freie_termine = get_freie_termine(vergebene_termin_liste)
+    freie_termine = get_freie_termine(vergebene_termin_liste, von, bis)
     for freier_termin in freie_termine:
         termine.append(freier_termin)
     
     sortierte_termine = sorted(termine, key=lambda d: d['von'])
     return sortierte_termine
 
-def get_freie_termine(vergebene_termin_liste):
+def get_freie_termine(vergebene_termin_liste, von, bis):
+    von_filter = ''
+    bis_filter = ''
+    if von:
+        von_filter = """AND `date` >= '{0}'""".format(von)
+    if bis:
+        bis_filter = """AND `date` <= '{0}'""".format(bis)
+    
     freie_termine = frappe.db.sql("""
                                   SELECT
                                     CONCAT(`date`, ' ', `from_time`) AS `von`,
@@ -292,7 +299,9 @@ def get_freie_termine(vergebene_termin_liste):
                                     `beratungsperson` AS `berater_in`
                                   FROM `tabAPB Zuweisung`
                                   WHERE `name` NOT IN ('{0}')
-                                  """.format("', '".join(vergebene_termin_liste)), as_dict=True)
+                                  {1}
+                                  {2}
+                                  """.format("', '".join(vergebene_termin_liste), von_filter, bis_filter), as_dict=True)
     for freier_termin in freie_termine:
         freier_termin.von = frappe.utils.get_datetime(freier_termin.von)
         freier_termin.bis = frappe.utils.get_datetime(freier_termin.bis)
