@@ -2643,7 +2643,8 @@ function termin_quick_entry(frm) {
                                             'beraterin': d.get_value('kontaktperson')||'',
                                             'ort': d.get_value('ort')||'',
                                             'marked': localStorage.getItem('selected_termine'),
-                                            'short_results': d.get_value('short_results')
+                                            'short_results': d.get_value('short_results'),
+                                            'art': d.get_value('art')||''
                                         },
                                         callback: function(r) {
                                             if (r.message) {
@@ -2664,6 +2665,28 @@ function termin_quick_entry(frm) {
                                     } else {
                                         d.set_df_property('telefonnummer', 'reqd', 0);
                                     }
+                                    // aktualisierung verfügbarkeiten
+                                    frappe.call({
+                                        method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
+                                        args:{
+                                            'sektion': cur_frm.doc.sektion_id,
+                                            'datum': d.get_value('von'),
+                                            'beraterin': d.get_value('kontaktperson')||'',
+                                            'ort': d.get_value('ort')||'',
+                                            'marked': localStorage.getItem('selected_termine'),
+                                            'short_results': d.get_value('short_results'),
+                                            'art': d.get_value('art')||''
+                                        },
+                                        callback: function(r) {
+                                            if (r.message) {
+                                                // anzeigen der Verfügbarkeiten
+                                                d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                                            } else {
+                                                // keine freien Beratungspersonen
+                                                d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
+                                            }
+                                        }
+                                    });
                                 }
                             },
                             {'fieldname': 'telefonnummer', 'fieldtype': 'Data', 'label': __('Telefonnummer'), 'default': tel, 'reqd': 1},
@@ -2678,7 +2701,8 @@ function termin_quick_entry(frm) {
                                             'beraterin': d.get_value('kontaktperson')||'',
                                             'ort': d.get_value('ort')||'',
                                             'marked': localStorage.getItem('selected_termine'),
-                                            'short_results': d.get_value('short_results')
+                                            'short_results': d.get_value('short_results'),
+                                            'art': d.get_value('art')||''
                                         },
                                         callback: function(r) {
                                             if (r.message) {
@@ -2703,7 +2727,8 @@ function termin_quick_entry(frm) {
                                             'beraterin': d.get_value('kontaktperson')||'',
                                             'ort': d.get_value('ort')||'',
                                             'marked': localStorage.getItem('selected_termine'),
-                                            'short_results': d.get_value('short_results')
+                                            'short_results': d.get_value('short_results'),
+                                            'art': d.get_value('art')||''
                                         },
                                         callback: function(r) {
                                             if (r.message) {
@@ -2756,7 +2781,8 @@ function termin_quick_entry(frm) {
                                                         'beraterin': d.get_value('kontaktperson')||'',
                                                         'ort': d.get_value('ort')||'',
                                                         'marked': localStorage.getItem('selected_termine'),
-                                                        'short_results': d.get_value('short_results')
+                                                        'short_results': d.get_value('short_results'),
+                                                        'art': d.get_value('art')||''
                                                     },
                                                     callback: function(r) {
                                                         if (r.message) {
@@ -2781,7 +2807,8 @@ function termin_quick_entry(frm) {
                                                 'datum': d.get_value('von'),
                                                 'ort': d.get_value('ort')||'',
                                                 'marked': localStorage.getItem('selected_termine'),
-                                                'short_results': d.get_value('short_results')
+                                                'short_results': d.get_value('short_results'),
+                                                'art': d.get_value('art')||''
                                             },
                                             callback: function(r) {
                                                 if (r.message) {
