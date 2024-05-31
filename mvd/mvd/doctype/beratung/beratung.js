@@ -302,6 +302,51 @@ frappe.ui.form.on('Beratung', {
             if (cur_frm.doc.status == 'Zusammengeführt') {
                 setze_read_only(frm);
             }
+
+            // trigger Termin-Bestätigungs-Mail wenn neuer Termin über Mitgliedschaft erstellt
+            if (localStorage.getItem("trigger_termin_mail")) {
+                if (localStorage.getItem("trigger_termin_mail") == '1') {
+                    localStorage.setItem("trigger_termin_mail", "");
+                    var termin_block_data = JSON.parse(localStorage.getItem("termin_block_data"));
+                    var termin_block_art = localStorage.getItem("termin_block_art");
+                    var termin_block_ort = localStorage.getItem("termin_block_ort");
+                    var termin_block_tel = localStorage.getItem("termin_block_tel");
+                    var vons = [];
+                    var bises = [];
+                    
+                    termin_block_data.forEach(function(entry) {
+                        vons.push(`${entry['date']} ${entry['von']}`)
+                        bises.push(`${entry['date']} ${entry['bis']}`)
+                    })
+
+                    frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_terminbestaetigung_email_template').then(function(value){
+                        if (value.message.default_terminbestaetigung_email_template) {
+                            cur_frm['default_terminbestaetigung_email_template'] = value.message.default_terminbestaetigung_email_template;
+                            frappe.mvd.new_mail(cur_frm);
+                            cur_frm['default_terminbestaetigung_email_template'] = false;
+                        } else {
+                            frappe.call({
+                                method: "mvd.mvd.doctype.beratung.beratung.get_termin_mail_txt",
+                                args:{
+                                    'von': vons,
+                                    'bis': bises,
+                                    'art': termin_block_art,
+                                    'ort': termin_block_ort,
+                                    'telefonnummer': termin_block_tel,
+                                    'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft
+                                },
+                                callback: function(r) {
+                                    if (r.message) {
+                                        frappe.mvd.new_mail(cur_frm, "", false, r.message.mail_txt, r.message.subject);
+                                    } else {
+                                        frappe.mvd.new_mail(cur_frm);
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            }
         }
         
         if (cur_frm.doc.ungelesen == 1) {

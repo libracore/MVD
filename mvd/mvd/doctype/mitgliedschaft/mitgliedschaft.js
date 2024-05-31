@@ -2612,7 +2612,7 @@ function termin_quick_entry(frm) {
                     var d = new frappe.ui.Dialog({
                         'title': __('Termin erstellen'),
                         'fields': [
-                            {'fieldname': 'beratung', 'fieldtype': 'Link', 'label': __('Für Beratung'), 'options': 'Beratung', 'reqd': 1, 'hidden': 0,
+                            {'fieldname': 'beratung', 'fieldtype': 'Link', 'label': __('Für Beratung'), 'options': 'Beratung', 'reqd': 0, 'hidden': 1,
                                 'get_query': function() {
                                     return {
                                         filters: {
@@ -2621,7 +2621,7 @@ function termin_quick_entry(frm) {
                                     }
                                 }
                             },
-                            {'fieldname': 'neue_beratung', 'fieldtype': 'Check', 'label': __('Erstelle neue Beratung'), 'default': 0,
+                            {'fieldname': 'neue_beratung', 'fieldtype': 'Check', 'label': __('Erstelle neue Beratung'), 'default': 1,
                                 'change': function() {
                                     if (d.get_value('neue_beratung') == 1) {
                                         d.set_df_property('beratung', 'reqd', 0);
@@ -2843,6 +2843,12 @@ function termin_quick_entry(frm) {
                                             callback: function(r)
                                             {
                                                 if (r.message) {
+                                                    localStorage.setItem("trigger_termin_mail", "1");
+                                                    localStorage.setItem("termin_block_data", JSON.stringify(termin_block_data));
+                                                    localStorage.setItem("termin_block_art", d.get_value('art'));
+                                                    localStorage.setItem("termin_block_ort", d.get_value('ort'));
+                                                    localStorage.setItem("termin_block_tel", d.get_value('telefonnummer')||'');
+                                                    
                                                     frappe.set_route("Form", "Beratung", r.message);
                                                 }
                                             }
