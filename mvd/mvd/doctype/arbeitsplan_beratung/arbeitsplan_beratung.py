@@ -113,7 +113,7 @@ class ArbeitsplanBeratung(Document):
         self.save()
 
 @frappe.whitelist()
-def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None, short_results=1):
+def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None, short_results=1, art=None):
     von_datum = getdate(datum)
     delta = timedelta(days=1)
     if int(short_results) == 1:
@@ -124,11 +124,15 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
         marked = marked.split("-")
     beraterin_filter = ''
     ort_filter = ''
+    art_filter = ''
     verfuegbarkeiten_html = ""
     if beraterin and beraterin != '':
         beraterin_filter = '''AND `beratungsperson` = '{0}' '''.format(beraterin)
     if ort and ort != '' and ort != ' ':
         ort_filter = '''AND `art_ort` = '{0}' '''.format(ort)
+    if art and art == 'telefonisch':
+        art_filter = """AND `art_ort` NOT LIKE 'Telefon%'"""
+
     
     while von_datum <= bis_datum:
         zugeteilte_beratungspersonen = frappe.db.sql("""
@@ -142,7 +146,8 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
                                                         )
                                                         {beraterin_filter}
                                                         {ort_filter}
-                                                    """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter, ort_filter=ort_filter), as_dict=True)
+                                                        {art_filter}
+                                                    """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter, ort_filter=ort_filter, art_filter=art_filter), as_dict=True)
         if int(short_results) == 1:
             verfuegbarkeiten_html += """
                 <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>
