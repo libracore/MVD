@@ -336,7 +336,7 @@ def get_arbeitsplan_pdf(berater_in, von=None, bis=None):
     pdf = get_pdf(html)
     datum = frappe.utils.getdate(von or None).strftime("%Y-%m-%d")
     wochentag = frappe.utils.getdate(von or None).strftime("%A")[:2].upper()
-    frappe.local.response.filename = "{datum}_{wochentag}_{name}.pdf".format(datum=datum, wochentag=wochentag, name=berater_in.split(" ")[0])
+    frappe.local.response.filename = "{datum}_{wochentag}_{name}.pdf".format(datum=datum, wochentag=wochentag, name=berater_in.split(" ")[0] if berater_in else "unbekannt")
     frappe.local.response.filecontent = pdf
     frappe.local.response.type = "download"
 
@@ -364,7 +364,7 @@ def get_arbeitsplan_word(berater_in, von=None, bis=None):
     html = '<html><body>{0}</body></html>'.format(html)
     datum = frappe.utils.getdate(von or None).strftime("%Y-%m-%d")
     wochentag = frappe.utils.getdate(von or None).strftime("%A")[:2].upper()
-    frappe.local.response.filename = "{datum}_{wochentag}_{name}.doc".format(datum=datum, wochentag=wochentag, name=berater_in.split(" ")[0])
+    frappe.local.response.filename = "{datum}_{wochentag}_{name}.doc".format(datum=datum, wochentag=wochentag, name=berater_in.split(" ")[0] if berater_in else "unbekannt")
     frappe.local.response.filecontent = html
     frappe.local.response.type = "download"
 
