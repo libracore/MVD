@@ -130,7 +130,7 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
         beraterin_filter = '''AND `beratungsperson` = '{0}' '''.format(beraterin)
     if ort and ort != '' and ort != ' ':
         ort_filter = '''AND `art_ort` = '{0}' '''.format(ort)
-    if art and art == 'telefonisch':
+    if art and art != 'telefonisch':
         art_filter = """AND `art_ort` NOT LIKE 'Telefon%'"""
 
     
