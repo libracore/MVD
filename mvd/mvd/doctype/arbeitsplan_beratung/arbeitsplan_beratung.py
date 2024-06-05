@@ -281,14 +281,14 @@ def get_termin_uebersicht(berater_in, von=None, bis=None):
         if termin.abp_referenz:
             vergebene_termin_liste.append(termin.abp_referenz)
     
-    freie_termine = get_freie_termine(vergebene_termin_liste, von, bis)
+    freie_termine = get_freie_termine(vergebene_termin_liste, von, bis, berater_in)
     for freier_termin in freie_termine:
         termine.append(freier_termin)
     
     sortierte_termine = sorted(termine, key=lambda d: d['von'])
     return sortierte_termine
 
-def get_freie_termine(vergebene_termin_liste, von, bis):
+def get_freie_termine(vergebene_termin_liste, von, bis, berater_in):
     von_filter = ''
     bis_filter = ''
     if von:
@@ -304,9 +304,10 @@ def get_freie_termine(vergebene_termin_liste, von, bis):
                                     `beratungsperson` AS `berater_in`
                                   FROM `tabAPB Zuweisung`
                                   WHERE `name` NOT IN ('{0}')
-                                  {1}
+                                  AND `beratungsperson` = '{1}'
                                   {2}
-                                  """.format("', '".join(vergebene_termin_liste), von_filter, bis_filter), as_dict=True)
+                                  {3}
+                                  """.format("', '".join(vergebene_termin_liste), berater_in, von_filter, bis_filter), as_dict=True)
     for freier_termin in freie_termine:
         freier_termin.von = frappe.utils.get_datetime(freier_termin.von)
         freier_termin.bis = frappe.utils.get_datetime(freier_termin.bis)
@@ -316,9 +317,12 @@ def get_freie_termine(vergebene_termin_liste, von, bis):
 def get_arbeitsplan_pdf(berater_in, von=None, bis=None):
     termine = get_termin_uebersicht(berater_in, von, bis)
     for termin in termine:
-        termin.von_zeit = frappe.utils.getdate(termin.von).strftime("%H:%M")
-        termin.von = frappe.utils.getdate(termin.von).strftime("%d.%m.%Y")
-        termin.bis = frappe.utils.getdate(termin.bis).strftime("%H:%M")
+        new_von_zeit = frappe.utils.getdate(termin.von).strftime("%H:%M")
+        new_von = frappe.utils.getdate(termin.von).strftime("%d.%m.%Y")
+        new_bis = frappe.utils.getdate(termin.bis).strftime("%H:%M")
+        termin.von_zeit = new_von_zeit
+        termin.von = new_von
+        termin.bis = new_bis
         if termin.abp_referenz:
             termin.eintrittsdatum = frappe.utils.getdate(termin.eintrittsdatum).strftime("%d.%m.%Y")
             termin.creation = frappe.utils.getdate(termin.creation).strftime("%d.%m.%Y")
@@ -345,9 +349,12 @@ def get_arbeitsplan_pdf(berater_in, von=None, bis=None):
 def get_arbeitsplan_word(berater_in, von=None, bis=None):
     termine = get_termin_uebersicht(berater_in, von, bis)
     for termin in termine:
-        termin.von_zeit = frappe.utils.getdate(termin.von).strftime("%H:%M")
-        termin.von = frappe.utils.getdate(termin.von).strftime("%d.%m.%Y")
-        termin.bis = frappe.utils.getdate(termin.bis).strftime("%H:%M")
+        new_von_zeit = frappe.utils.getdate(termin.von).strftime("%H:%M")
+        new_von = frappe.utils.getdate(termin.von).strftime("%d.%m.%Y")
+        new_bis = frappe.utils.getdate(termin.bis).strftime("%H:%M")
+        termin.von_zeit = new_von_zeit
+        termin.von = new_von
+        termin.bis = new_bis
         if termin.abp_referenz:
             termin.eintrittsdatum = frappe.utils.getdate(termin.eintrittsdatum).strftime("%d.%m.%Y")
             termin.creation = frappe.utils.getdate(termin.creation).strftime("%d.%m.%Y")
