@@ -266,7 +266,8 @@ def get_termin_uebersicht(berater_in, von=None, bis=None):
             `ber`.`beratungskategorie` AS `beratungskategorie`,
             `ber`.`beratungskategorie_2` AS `beratungskategorie_2`,
             `ber`.`beratungskategorie_3` AS `beratungskategorie_3`,
-            `bt`.`abp_referenz` AS `abp_referenz`
+            `bt`.`abp_referenz` AS `abp_referenz`,
+            NULL AS `von_bis_str`
         FROM `tabBeratung Termin` AS `bt`
         LEFT JOIN `tabBeratung` AS `ber` ON `bt`.`parent` = `ber`.`name`
         LEFT JOIN `tabMitgliedschaft` AS `mitgl` ON `ber`.`mv_mitgliedschaft` = `mitgl`.`name`
@@ -301,7 +302,8 @@ def get_freie_termine(vergebene_termin_liste, von, bis, berater_in):
                                     CONCAT(`date`, ' ', `from_time`) AS `von`,
                                     CONCAT(`date`, ' ', `to_time`) AS `bis`,
                                     `art_ort` AS `ort`,
-                                    `beratungsperson` AS `berater_in`
+                                    `beratungsperson` AS `berater_in`,
+                                    NULL AS `von_bis_str`
                                   FROM `tabAPB Zuweisung`
                                   WHERE `name` NOT IN ('{0}')
                                   AND `beratungsperson` = '{1}'
@@ -317,9 +319,9 @@ def get_freie_termine(vergebene_termin_liste, von, bis, berater_in):
 def get_arbeitsplan_pdf(berater_in, von=None, bis=None):
     termine = get_termin_uebersicht(berater_in, von, bis)
     for termin in termine:
-        new_von_zeit = frappe.utils.getdate(termin.von).strftime("%H:%M")
-        new_von = frappe.utils.getdate(termin.von).strftime("%d.%m.%Y")
-        new_bis = frappe.utils.getdate(termin.bis).strftime("%H:%M")
+        new_von_zeit = "{0}:{1}".format(termin.von.split(" ")[1].split(":")[0], termin.von.split(" ")[1].split(":")[1])
+        new_von = "{0}.{1}.{2}".format(termin.von.split(" ")[0].split("-")[2], termin.von.split(" ")[0].split("-")[1], termin.von.split(" ")[0].split("-")[0])
+        new_bis = "{0}:{1}".format(termin.bis.split(" ")[1].split(":")[0], termin.bis.split(" ")[1].split(":")[1])
         termin.von_zeit = new_von_zeit
         termin.von = new_von
         termin.bis = new_bis
@@ -339,7 +341,7 @@ def get_arbeitsplan_pdf(berater_in, von=None, bis=None):
     from frappe.utils.pdf import get_pdf
     pdf = get_pdf(html)
     datum = frappe.utils.getdate(von or None).strftime("%Y-%m-%d")
-    wochentag = frappe.utils.getdate(von or None).strftime("%A")[:2].upper()
+    wochentag = _(frappe.utils.getdate(von or None).strftime("%A"), "de")[:2].upper()
     frappe.local.response.filename = "{datum}_{wochentag}_{name}.pdf".format(datum=datum, wochentag=wochentag, name=berater_in.split(" ")[0] if berater_in else "unbekannt")
     frappe.local.response.filecontent = pdf
     frappe.local.response.type = "download"
@@ -349,9 +351,9 @@ def get_arbeitsplan_pdf(berater_in, von=None, bis=None):
 def get_arbeitsplan_word(berater_in, von=None, bis=None):
     termine = get_termin_uebersicht(berater_in, von, bis)
     for termin in termine:
-        new_von_zeit = frappe.utils.getdate(termin.von).strftime("%H:%M")
-        new_von = frappe.utils.getdate(termin.von).strftime("%d.%m.%Y")
-        new_bis = frappe.utils.getdate(termin.bis).strftime("%H:%M")
+        new_von_zeit = "{0}:{1}".format(termin.von.split(" ")[1].split(":")[0], termin.von.split(" ")[1].split(":")[1])
+        new_von = "{0}.{1}.{2}".format(termin.von.split(" ")[0].split("-")[2], termin.von.split(" ")[0].split("-")[1], termin.von.split(" ")[0].split("-")[0])
+        new_bis = "{0}:{1}".format(termin.bis.split(" ")[1].split(":")[0], termin.bis.split(" ")[1].split(":")[1])
         termin.von_zeit = new_von_zeit
         termin.von = new_von
         termin.bis = new_bis
@@ -370,7 +372,7 @@ def get_arbeitsplan_word(berater_in, von=None, bis=None):
     html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'termine': termine, 'von': html_von, 'bis': html_bis})
     html = '<html><body>{0}</body></html>'.format(html)
     datum = frappe.utils.getdate(von or None).strftime("%Y-%m-%d")
-    wochentag = frappe.utils.getdate(von or None).strftime("%A")[:2].upper()
+    wochentag = _(frappe.utils.getdate(von or None).strftime("%A"), "de")[:2].upper()
     frappe.local.response.filename = "{datum}_{wochentag}_{name}.doc".format(datum=datum, wochentag=wochentag, name=berater_in.split(" ")[0] if berater_in else "unbekannt")
     frappe.local.response.filecontent = html
     frappe.local.response.type = "download"
