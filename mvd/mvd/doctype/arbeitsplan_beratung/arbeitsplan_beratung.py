@@ -319,9 +319,9 @@ def get_freie_termine(vergebene_termin_liste, von, bis, berater_in):
 def get_arbeitsplan_pdf(berater_in, von=None, bis=None):
     termine = get_termin_uebersicht(berater_in, von, bis)
     for termin in termine:
-        new_von_zeit = "{0}:{1}".format(termin.von.split(" ")[1].split(":")[0], termin.von.split(" ")[1].split(":")[1])
-        new_von = "{0}.{1}.{2}".format(termin.von.split(" ")[0].split("-")[2], termin.von.split(" ")[0].split("-")[1], termin.von.split(" ")[0].split("-")[0])
-        new_bis = "{0}:{1}".format(termin.bis.split(" ")[1].split(":")[0], termin.bis.split(" ")[1].split(":")[1])
+        new_von_zeit = "{0}:{1}".format("{0}".format(termin.von).split(" ")[1].split(":")[0], "{0}".format(termin.von).split(" ")[1].split(":")[1])
+        new_von = "{0}.{1}.{2}".format("{0}".format(termin.von).split(" ")[0].split("-")[2], "{0}".format(termin.von).split(" ")[0].split("-")[1], "{0}".format(termin.von).split(" ")[0].split("-")[0])
+        new_bis = "{0}:{1}".format("{0}".format(termin.bis).split(" ")[1].split(":")[0], "{0}".format(termin.bis).split(" ")[1].split(":")[1])
         termin.von_zeit = new_von_zeit
         termin.von = new_von
         termin.bis = new_bis
@@ -351,9 +351,9 @@ def get_arbeitsplan_pdf(berater_in, von=None, bis=None):
 def get_arbeitsplan_word(berater_in, von=None, bis=None):
     termine = get_termin_uebersicht(berater_in, von, bis)
     for termin in termine:
-        new_von_zeit = "{0}:{1}".format(termin.von.split(" ")[1].split(":")[0], termin.von.split(" ")[1].split(":")[1])
-        new_von = "{0}.{1}.{2}".format(termin.von.split(" ")[0].split("-")[2], termin.von.split(" ")[0].split("-")[1], termin.von.split(" ")[0].split("-")[0])
-        new_bis = "{0}:{1}".format(termin.bis.split(" ")[1].split(":")[0], termin.bis.split(" ")[1].split(":")[1])
+        new_von_zeit = "{0}:{1}".format("{0}".format(termin.von).split(" ")[1].split(":")[0], "{0}".format(termin.von).split(" ")[1].split(":")[1])
+        new_von = "{0}.{1}.{2}".format("{0}".format(termin.von).split(" ")[0].split("-")[2], "{0}".format(termin.von).split(" ")[0].split("-")[1], "{0}".format(termin.von).split(" ")[0].split("-")[0])
+        new_bis = "{0}:{1}".format("{0}".format(termin.bis).split(" ")[1].split(":")[0], "{0}".format(termin.bis).split(" ")[1].split(":")[1])
         termin.von_zeit = new_von_zeit
         termin.von = new_von
         termin.bis = new_bis
