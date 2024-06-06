@@ -799,7 +799,8 @@ def erstelle_todo(owner, beratung, description=False, datum=False, notify=0, mit
     return
 
 @frappe.whitelist()
-def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
+def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berater_in=None):
+    berater_in_name = frappe.get_doc("Termin Kontaktperson", berater_in).kontakt if berater_in else ''
     index = 0
     von = json.loads(von)
     bis = json.loads(bis)
@@ -857,7 +858,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
                         Wir haben für Sie folgenden Termin reserviert:<br>
                         Telefonische Beratung<br>
                         {wochentag}, {datum} um {von}<br>
-                        Unsere Berater*in Müller Klaus wird Sie unter dieser Nummer anrufen:<br>
+                        Unsere Berater*in {berater_in}wird Sie unter dieser Nummer anrufen:<br>
                         {telefonnummer}<br><br>
                         Bitte beachten Sie, dass unsere Rechtsberater*innen die Unterlagen vor dem Beratungstermin nicht sichten. Sie werden bei Bedarf während des Beratungstermin konsultiert.<br><br>
                         Wir bitten Sie im Verhinderungsfall so rasch wie möglich abzumelden.<br><br>
@@ -865,14 +866,14 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
                     </div>
                 """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
-                        telefonnummer=telefonnummer)
+                        telefonnummer=telefonnummer, berater_in=berater_in_name)
             else:
                 mail_txt += """
                     <div>
                         Wir haben für Sie folgenden Termin reserviert:<br>
                         Persönliche Beratung<br>
                         {wochentag}, {datum} um {von}<br>
-                        Unsere Berater*in Müller Klaus erwartet Sie in:<br>
+                        Unsere Berater*in {berater_in}erwartet Sie in:<br>
                         {ort}, {ort_info}.<br><br>
                         Bitte beachten Sie, dass unsere Rechtsberater*innen die Unterlagen vor dem Beratungstermin nicht sichten. Sie werden bei Bedarf während des Beratungstermin konsultiert.<br><br>
                         Wir bitten Sie im Verhinderungsfall so rasch wie möglich abzumelden.<br><br>
@@ -880,7 +881,8 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft):
                     </div>
                 """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
-                        ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""))
+                        ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""), \
+                        berater_in=berater_in_name)
         index += 1
 
     return {

@@ -2875,6 +2875,7 @@ function termin_quick_entry(frm) {
                                                     localStorage.setItem("termin_block_art", d.get_value('art'));
                                                     localStorage.setItem("termin_block_ort", d.get_value('ort'));
                                                     localStorage.setItem("termin_block_tel", d.get_value('telefonnummer')||'');
+                                                    localStorage.setItem("termin_block_berater_in", d.get_value('kontaktperson')||'');
                                                     
                                                     frappe.set_route("Form", "Beratung", r.message);
                                                 }
