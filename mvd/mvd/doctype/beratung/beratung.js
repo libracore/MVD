@@ -311,6 +311,7 @@ frappe.ui.form.on('Beratung', {
                     var termin_block_art = localStorage.getItem("termin_block_art");
                     var termin_block_ort = localStorage.getItem("termin_block_ort");
                     var termin_block_tel = localStorage.getItem("termin_block_tel");
+                    var termin_block_berater_in = localStorage.getItem("termin_block_berater_in");
                     var vons = [];
                     var bises = [];
                     
@@ -333,7 +334,8 @@ frappe.ui.form.on('Beratung', {
                                     'art': termin_block_art,
                                     'ort': termin_block_ort,
                                     'telefonnummer': termin_block_tel,
-                                    'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft
+                                    'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft,
+                                    'berater_in': termin_block_berater_in || ''
                                 },
                                 callback: function(r) {
                                     if (r.message) {
@@ -800,7 +802,8 @@ function termin_quick_entry(frm) {
                                                                 'art': d.get_value('art')||'',
                                                                 'ort': d.get_value('ort')||'',
                                                                 'telefonnummer': d.get_value('telefonnummer')||'',
-                                                                'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft
+                                                                'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft,
+                                                                'berater_in': d.get_value('kontaktperson')||''
                                                             },
                                                             callback: function(r) {
                                                                 if (r.message) {
