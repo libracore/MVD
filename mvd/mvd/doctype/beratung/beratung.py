@@ -800,6 +800,7 @@ def erstelle_todo(owner, beratung, description=False, datum=False, notify=0, mit
 
 @frappe.whitelist()
 def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berater_in=None):
+    berater_in_name = frappe.get_doc("Termin Kontaktperson", berater_in).kontakt if berater_in else ''
     index = 0
     von = json.loads(von)
     bis = json.loads(bis)
@@ -865,7 +866,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
                     </div>
                 """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
-                        telefonnummer=telefonnummer, berater_in=berater_in if berater_in else '')
+                        telefonnummer=telefonnummer, berater_in=berater_in_name)
             else:
                 mail_txt += """
                     <div>
@@ -881,7 +882,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
                 """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
                         ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""), \
-                        berater_in=berater_in if berater_in else '')
+                        berater_in=berater_in_name)
         index += 1
 
     return {
