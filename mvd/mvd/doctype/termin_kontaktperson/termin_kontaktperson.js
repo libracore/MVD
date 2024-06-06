@@ -38,3 +38,39 @@ frappe.ui.form.on('Termin Kontaktperson', {
         }
     }
 });
+
+frappe.ui.form.on('Arbeitsplan Standardzeit', {
+    form_render: function(frm, cdt, cdn) {
+        var open_row = cur_frm.get_field("arbeitsplan_standardzeit").grid.grid_rows[locals[cdt][cdn].idx - 1].get_open_form();
+        $(open_row.wrapper.find(".grid-duplicate-row")).off("click");
+        open_row.wrapper.find(".grid-duplicate-row")
+        .on('click', function() {
+            var idx = open_row.doc.idx;
+            var copy_doc = open_row.doc;
+            idx ++;
+
+            var d = frappe.model.add_child(open_row.grid.frm.doc, open_row.grid.df.options, open_row.grid.df.fieldname, idx);
+            d = open_row.grid.duplicate_row(d, copy_doc);
+            d.__unedited = true;
+            if (d.from) {
+                // set to_time = old from_time + default sektion duration
+                d.from = d.to;
+                frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, "default_termindauer").then(function(r){
+                    var new_to_time = moment(`2000-01-01 ${d.to}`);
+                    new_to_time.add(r.message.default_termindauer, 'minutes')
+                    d.to = `${new_to_time.get('hour')}:${new_to_time.get('minute')}:${new_to_time.get('second')}`;
+
+                    // show new row
+                    open_row.frm.script_manager.trigger(open_row.grid.df.fieldname + "_add", d.doctype, d.name);
+                    cur_frm.get_field("arbeitsplan_standardzeit").refresh();
+                    open_row.grid.grid_rows[idx - 1].toggle_view(true, null);
+                })
+            } else {
+                // show new row
+                open_row.frm.script_manager.trigger(open_row.grid.df.fieldname + "_add", d.doctype, d.name);
+                cur_frm.get_field("arbeitsplan_standardzeit").refresh();
+                open_row.grid.grid_rows[idx - 1].toggle_view(true, null);
+            }
+        });
+    }
+});
