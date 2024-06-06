@@ -135,64 +135,65 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
 
     
     while von_datum <= bis_datum:
-        zugeteilte_beratungspersonen = frappe.db.sql("""
-                                                        SELECT *
-                                                        FROM `tabAPB Zuweisung`
-                                                        WHERE `date` = '{von_datum}'
-                                                        AND `name` NOT IN (
-                                                            SELECT `abp_referenz`
-                                                            FROM `tabBeratung Termin`
-                                                            WHERE `abp_referenz` IS NOT NULL
-                                                        )
-                                                        {beraterin_filter}
-                                                        {ort_filter}
-                                                        {art_filter}
-                                                    """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter, ort_filter=ort_filter, art_filter=art_filter), as_dict=True)
-        if int(short_results) == 1:
-            verfuegbarkeiten_html += """
-                <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>
-            """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'))
-        else:
-            if len(zugeteilte_beratungspersonen) > 0:
-                verfuegbarkeiten_html += """
-                <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>
-            """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'))
-        
-        if len(zugeteilte_beratungspersonen) > 0:
-            zugeteilte_beratungspersonen_liste = []
-            for zugeteilte_beratungsperson in zugeteilte_beratungspersonen:
-                x = {
-                    'ort': zugeteilte_beratungsperson.art_ort.replace("({sektion})".format(sektion=sektion), ""),
-                    'ort_mit_sektion': zugeteilte_beratungsperson.art_ort,
-                    'from_time': zugeteilte_beratungsperson.from_time,
-                    'to_time': zugeteilte_beratungsperson.to_time,
-                    'beratungsperson': zugeteilte_beratungsperson.beratungsperson.replace("({sektion})".format(sektion=sektion), ""),
-                    'beratungsperson_mit_sektion': zugeteilte_beratungsperson.beratungsperson,
-                    'name': zugeteilte_beratungsperson.name
-                }
-                zugeteilte_beratungspersonen_liste.append(x)
-            sorted_list = sorted(zugeteilte_beratungspersonen_liste, key = lambda x: (x['ort'], x['from_time'], x['beratungsperson']))
-            for entry in sorted_list:
-                checked = ''
-                if entry['name'] in marked:
-                    checked = 'checked'
-                verfuegbarkeiten_html += """
-                    <div class="form-group frappe-control input-max-width" style="margin-bottom: 0px !important;" data-fieldtype="Check">
-                        <div class="checkbox" style="margin-bottom: 0px !important; margin-top: 0px !important;">
-                            <label>
-                                <span class="input-area"><input type="checkbox" {checked} autocomplete="off" class="input-with-feedback" data-fieldtype="Check" data-abpzuweisung="{abpzuweisung}" data-ort="{ort_mit_sektion}" data-beratungsperson="{beratungsperson_mit_sektion}" onclick="cur_dialog.checkbox_clicked(this);"></span>
-                                <span class="label-area small">{from_time} - {to_time} / {ort} / {beratungsperson}</span>
-                            </label>
-                        </div>
-                    </div>
-                """.format(from_time=':'.join(str(entry['from_time']).split(':')[:2]), \
-                           to_time=':'.join(str(entry['to_time']).split(':')[:2]), \
-                            ort=entry['ort'], beratungsperson=entry['beratungsperson'], \
-                            abpzuweisung=entry['name'], ort_mit_sektion=entry['ort_mit_sektion'], \
-                            checked=checked, beratungsperson_mit_sektion=entry['beratungsperson_mit_sektion'])
-        else:
+        if von_datum.strftime('%A') not in ['Saturday', 'Sunday']:
+            zugeteilte_beratungspersonen = frappe.db.sql("""
+                                                            SELECT *
+                                                            FROM `tabAPB Zuweisung`
+                                                            WHERE `date` = '{von_datum}'
+                                                            AND `name` NOT IN (
+                                                                SELECT `abp_referenz`
+                                                                FROM `tabBeratung Termin`
+                                                                WHERE `abp_referenz` IS NOT NULL
+                                                            )
+                                                            {beraterin_filter}
+                                                            {ort_filter}
+                                                            {art_filter}
+                                                        """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter, ort_filter=ort_filter, art_filter=art_filter), as_dict=True)
             if int(short_results) == 1:
-                verfuegbarkeiten_html += """<pstyle="margin-top: 0px !important;">Kein(e) Berater*in verfügbar</p>"""
+                verfuegbarkeiten_html += """
+                    <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>
+                """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'))
+            else:
+                if len(zugeteilte_beratungspersonen) > 0:
+                    verfuegbarkeiten_html += """
+                    <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>
+                """.format(wochentag=_(von_datum.strftime('%A')), datum=von_datum.strftime('%d.%m.%y'))
+            
+            if len(zugeteilte_beratungspersonen) > 0:
+                zugeteilte_beratungspersonen_liste = []
+                for zugeteilte_beratungsperson in zugeteilte_beratungspersonen:
+                    x = {
+                        'ort': zugeteilte_beratungsperson.art_ort.replace("({sektion})".format(sektion=sektion), ""),
+                        'ort_mit_sektion': zugeteilte_beratungsperson.art_ort,
+                        'from_time': zugeteilte_beratungsperson.from_time,
+                        'to_time': zugeteilte_beratungsperson.to_time,
+                        'beratungsperson': zugeteilte_beratungsperson.beratungsperson.replace("({sektion})".format(sektion=sektion), ""),
+                        'beratungsperson_mit_sektion': zugeteilte_beratungsperson.beratungsperson,
+                        'name': zugeteilte_beratungsperson.name
+                    }
+                    zugeteilte_beratungspersonen_liste.append(x)
+                sorted_list = sorted(zugeteilte_beratungspersonen_liste, key = lambda x: (x['ort'], x['from_time'], x['beratungsperson']))
+                for entry in sorted_list:
+                    checked = ''
+                    if entry['name'] in marked:
+                        checked = 'checked'
+                    verfuegbarkeiten_html += """
+                        <div class="form-group frappe-control input-max-width" style="margin-bottom: 0px !important;" data-fieldtype="Check">
+                            <div class="checkbox" style="margin-bottom: 0px !important; margin-top: 0px !important;">
+                                <label>
+                                    <span class="input-area"><input type="checkbox" {checked} autocomplete="off" class="input-with-feedback" data-fieldtype="Check" data-abpzuweisung="{abpzuweisung}" data-ort="{ort_mit_sektion}" data-beratungsperson="{beratungsperson_mit_sektion}" onclick="cur_dialog.checkbox_clicked(this);"></span>
+                                    <span class="label-area small">{from_time} - {to_time} / {ort} / {beratungsperson}</span>
+                                </label>
+                            </div>
+                        </div>
+                    """.format(from_time=':'.join(str(entry['from_time']).split(':')[:2]), \
+                            to_time=':'.join(str(entry['to_time']).split(':')[:2]), \
+                                ort=entry['ort'], beratungsperson=entry['beratungsperson'], \
+                                abpzuweisung=entry['name'], ort_mit_sektion=entry['ort_mit_sektion'], \
+                                checked=checked, beratungsperson_mit_sektion=entry['beratungsperson_mit_sektion'])
+            else:
+                if int(short_results) == 1:
+                    verfuegbarkeiten_html += """<pstyle="margin-top: 0px !important;">Kein(e) Berater*in verfügbar</p>"""
         von_datum += delta
     
     return verfuegbarkeiten_html
