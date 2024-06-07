@@ -1,6 +1,16 @@
 // Copyright (c) 2023, libracore and contributors
 // For license information, please see license.txt
 
+var get_beratungs_link = function(cd_name) {
+    return new Promise(function (resolve) {
+        resolve(
+            frappe.db.get_value("Beratung Termin", {'abp_referenz': cd_name}, 'parent', null, 'Beratung').then(function(r){
+                return r.message.parent;
+            })
+        );
+    });
+}
+
 frappe.ui.form.on('Arbeitsplan Beratung', {
     refresh: function(frm) {
         if (cur_frm.doc.einteilung.length < 1) {
@@ -31,7 +41,10 @@ frappe.ui.form.on('Arbeitsplan Beratung', {
 frappe.ui.form.on('APB Zuweisung', {
     before_einteilung_remove: function(frm, cdt, cdn) {
         if (localStorage.getItem('einteilung_verwendet').includes(`-${cdn}`)) {
-            frappe.throw("Dieser Terminblock wird verwendet und kann nicht gelöscht werden.");
+            get_beratungs_link(cdn).then(function (beratung) {
+                cur_frm.reload_doc();
+                frappe.throw(`Dieser Terminblock wird <a href="/desk#Form/Beratung/${beratung}">in dieser Beratung</a> verwendet und kann nicht gelöscht werden.`);
+            });
         }
     },
     art_ort: function(frm, cdt, cdn) {
@@ -40,7 +53,9 @@ frappe.ui.form.on('APB Zuweisung', {
             if (last_value != locals[cdt][cdn].art_ort) {
                 locals[cdt][cdn].art_ort = last_value;
                 cur_frm.refresh_field('einteilung');
-                frappe.throw("Dieser Terminblock wird verwendet und kann nicht verändert werden.");
+                get_beratungs_link(cdn).then(function (beratung) {
+                    frappe.throw(`Dieser Terminblock wird <a href="/desk#Form/Beratung/${beratung}">in dieser Beratung</a> verwendet und kann nicht gelöscht werden.`);
+                });
             }
         }
     },
@@ -50,7 +65,9 @@ frappe.ui.form.on('APB Zuweisung', {
             if (last_value != locals[cdt][cdn].date) {
                 locals[cdt][cdn].date = last_value;
                 cur_frm.refresh_field('einteilung');
-                frappe.throw("Dieser Terminblock wird verwendet und kann nicht verändert werden.");
+                get_beratungs_link(cdn).then(function (beratung) {
+                    frappe.throw(`Dieser Terminblock wird <a href="/desk#Form/Beratung/${beratung}">in dieser Beratung</a> verwendet und kann nicht gelöscht werden.`);
+                });
             }
         }
     },
@@ -60,7 +77,9 @@ frappe.ui.form.on('APB Zuweisung', {
             if (last_value != locals[cdt][cdn].from_time) {
                 locals[cdt][cdn].from_time = last_value;
                 cur_frm.refresh_field('einteilung');
-                frappe.throw("Dieser Terminblock wird verwendet und kann nicht verändert werden.");
+                get_beratungs_link(cdn).then(function (beratung) {
+                    frappe.throw(`Dieser Terminblock wird <a href="/desk#Form/Beratung/${beratung}">in dieser Beratung</a> verwendet und kann nicht gelöscht werden.`);
+                });
             }
         }
     },
@@ -70,7 +89,9 @@ frappe.ui.form.on('APB Zuweisung', {
             if (last_value != locals[cdt][cdn].to_time) {
                 locals[cdt][cdn].to_time = last_value;
                 cur_frm.refresh_field('einteilung');
-                frappe.throw("Dieser Terminblock wird verwendet und kann nicht verändert werden.");
+                get_beratungs_link(cdn).then(function (beratung) {
+                    frappe.throw(`Dieser Terminblock wird <a href="/desk#Form/Beratung/${beratung}">in dieser Beratung</a> verwendet und kann nicht gelöscht werden.`);
+                });
             }
         }
     },
@@ -80,7 +101,9 @@ frappe.ui.form.on('APB Zuweisung', {
             if (last_value != locals[cdt][cdn].beratungsperson) {
                 locals[cdt][cdn].beratungsperson = last_value;
                 cur_frm.refresh_field('einteilung');
-                frappe.throw("Dieser Terminblock wird verwendet und kann nicht verändert werden.");
+                get_beratungs_link(cdn).then(function (beratung) {
+                    frappe.throw(`Dieser Terminblock wird <a href="/desk#Form/Beratung/${beratung}">in dieser Beratung</a> verwendet und kann nicht gelöscht werden.`);
+                });
             }
         }
     },
@@ -115,6 +138,14 @@ frappe.ui.form.on('APB Zuweisung', {
                 cur_frm.get_field("einteilung").refresh();
                 open_row.grid.grid_rows[idx - 1].toggle_view(true, null);
             }
+        });
+
+        // set link zur Beratung
+        var child = locals[cdt][cdn];
+        var field_wrapper = frm.fields_dict[child.parentfield].grid.grid_rows_by_docname[cdn].grid_form.fields_dict['link_zur_beratung'].wrapper
+        $(field_wrapper).empty();
+        frappe.db.get_value("Beratung Termin", {'abp_referenz': cdn}, 'parent', null, 'Beratung').then(function(r){
+            $(`<br><a href="/desk#Form/Beratung/${r.message.parent}">Link zur Beratung</a>`).appendTo(field_wrapper);
         });
     }
 });
