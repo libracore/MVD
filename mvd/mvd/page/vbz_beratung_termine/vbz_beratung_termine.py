@@ -13,17 +13,19 @@ no_cache=1
 
 @frappe.whitelist()
 def get_open_data():
-    alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user)
+    alle_termine, meine_termine, freie_termine = get_alle_beratungs_termine(frappe.session.user)
     datasets = {
         'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'alle_termine': alle_termine,
-        'meine_termine': meine_termine
+        'meine_termine': meine_termine,
+        'freie_termine': freie_termine
     }
     return datasets
 
 def get_alle_beratungs_termine(user):
     alle = []
     meine = []
+    vergebene_termin_liste = []
     kontaktperson_multi_user = get_kontaktperson_multi_user(user)
     sektionen = frappe.db.sql("""
                                 SELECT `for_value`
@@ -51,7 +53,8 @@ def get_alle_beratungs_termine(user):
                                         `beratung`.`beratungskategorie`,
                                         `beratung`.`beratungskategorie_2`,
                                         `beratung`.`beratungskategorie_3`,
-                                        `beratung`.`mv_mitgliedschaft`
+                                        `beratung`.`mv_mitgliedschaft`,
+                                        `berTer`.`abp_referenz`
                                     FROM `tabBeratung Termin` AS `berTer`
                                     LEFT JOIN `tabBeratung` AS `beratung` ON `berTer`.`parent` = `beratung`.`name`
                                     WHERE `berTer`.`von` >= '{datum_von} 00:00:00'
@@ -79,9 +82,42 @@ def get_alle_beratungs_termine(user):
             alle.append(termin_data)
         if termin.berater_in in kontaktperson_multi_user:
             meine.append(termin_data)
+        if termin.abp_referenz:
+            vergebene_termin_liste.append(termin.abp_referenz)
     if len(meine) < 1:
         meine.append({'show_placeholder': 1})
-    return alle, meine
+    
+    freie_termine = frappe.db.sql("""
+                                  SELECT
+                                    CONCAT(`date`, ' ', `from_time`) AS `von`,
+                                    CONCAT(`date`, ' ', `to_time`) AS `bis`,
+                                    `art_ort` AS `ort`,
+                                    `beratungsperson` AS `beraterinn`,
+                                    NULL AS `von_date`,
+                                    NULL AS `von_time`,
+                                    NULL AS `bis_time`,
+                                    '---' AS `art`,
+                                    '---' AS `beratung`,
+                                    0 AS `hat_attachement`,
+                                    '---' AS `telefonnummer`,
+                                    NULL AS `wochentag`,
+                                    '---' AS `beratungskategorie`,
+                                    '---' AS `beratungskategorie_2`,
+                                    '---' AS `beratungskategorie_3`,
+                                    '---' AS `name_mitglied`
+                                  FROM `tabAPB Zuweisung`
+                                  WHERE `name` NOT IN ('{vergebene_termine}')
+                                  AND `date` >= '{datum_von}'
+                                  """.format(vergebene_termine="', '".join(vergebene_termin_liste), datum_von=today()), as_dict=True)
+    for freier_termin in freie_termine:
+        freier_termin.von = frappe.utils.get_datetime(freier_termin.von)
+        freier_termin.bis = frappe.utils.get_datetime(freier_termin.bis)
+        freier_termin.von_date = get_datetime(termin.von).strftime('%d.%m.%Y')
+        freier_termin.von_time = get_datetime(termin.von).strftime('%H:%M')
+        freier_termin.bis_time = get_datetime(termin.bis).strftime('%H:%M')
+        freier_termin.wochentag = _(get_datetime(termin.von).strftime('%A'))[:2]
+    
+    return alle, meine, freie_termine
 
 def get_kontaktperson_multi_user(user):
     kontaktperson_multi_user = frappe.db.sql("""SELECT `parent`

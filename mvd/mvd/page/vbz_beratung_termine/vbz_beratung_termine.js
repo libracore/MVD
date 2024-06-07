@@ -40,7 +40,11 @@ frappe.vbz_beratung_termine = {
         $(".termin-tr").each(function() {
             if ($(this).attr('data-beratung')) {
                 $(this).click(function(){
-                    frappe.set_route("Form", "Beratung", $(this).attr('data-beratung'));
+                    if ($(this).attr('data-beratung') != '---') {
+                        frappe.set_route("Form", "Beratung", $(this).attr('data-beratung'));
+                    } else {
+                        frappe.msgprint("Kein Absprung zur Beratung möglich, da dieser Termin noch frei ist.");
+                    }
                 })
             }
         });
