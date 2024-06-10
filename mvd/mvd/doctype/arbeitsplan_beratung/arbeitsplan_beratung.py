@@ -145,10 +145,17 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
                                                                 FROM `tabBeratung Termin`
                                                                 WHERE `abp_referenz` IS NOT NULL
                                                             )
+                                                            AND `parent` IN (
+                                                                SELECT `name`
+                                                                FROM `tabArbeitsplan Beratung`
+                                                                WHERE `sektion_id` = '{sektion}'
+                                                            )
                                                             {beraterin_filter}
                                                             {ort_filter}
                                                             {art_filter}
-                                                        """.format(von_datum=von_datum.strftime("%Y-%m-%d"), beraterin_filter=beraterin_filter, ort_filter=ort_filter, art_filter=art_filter), as_dict=True)
+                                                        """.format(von_datum=von_datum.strftime("%Y-%m-%d"), \
+                                                                   beraterin_filter=beraterin_filter, ort_filter=ort_filter, \
+                                                                    art_filter=art_filter, sektion=sektion), as_dict=True)
             if int(short_results) == 1:
                 verfuegbarkeiten_html += """
                     <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>
