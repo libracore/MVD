@@ -23,7 +23,7 @@ function create_gitlab_issue(frm) {
             "method": "erpnextswiss.erpnextswiss.doctype.gitlab_settings.gitlab_settings.create_new_issue",
             "args": {
                 "title": cur_frm.doc.subject,
-                "description": cur_frm.doc.description
+                "description": `[siehe Ticket ${cur_frm.doc.name}](https://libracore.mieterverband.ch/desk#Form/Issue/${cur_frm.doc.name})<br><br>${cur_frm.doc.description}`
             },
             "callback": function(r) {
                 if (r.message.iid) {
