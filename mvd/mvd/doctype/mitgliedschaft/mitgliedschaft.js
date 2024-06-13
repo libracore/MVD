@@ -422,7 +422,6 @@ frappe.ui.form.on('Mitgliedschaft', {
                 }
             });
         } else {
-            frm.call("email_validierung", {}, (r) => {});
             locals.dont_check_email = false;
         }
         
@@ -1086,6 +1085,8 @@ function daten_validiert(frm) {
                     cur_frm.refresh_field('status_change');
                     cur_frm.set_value("status_c", 'Regulär');
                     cur_frm.timeline.insert_comment("Validierung durchgeführt.");
+                    // verhinderung der E-Mailprüfung (ISS-2024-00127/#1016)
+                    locals.dont_check_email = true;
                     cur_frm.save().then(function(){
                         erstelle_begruessungs_korrespondenz(frm);
                     });
