@@ -153,12 +153,19 @@ class DatatransZahlungsfile(Document):
         delete_datatrans_entries = frappe.db.sql("""DELETE FROM `tabDatatrans Entry` WHERE `name` IN ({to_delete})""".format(to_delete="'{0}'".format("', '".join(to_delete))), as_list=True)
     
     def create_single_report(self):
+        self.validate_verarbeitung()
         create_mitgliedschaften_pro_file(self)
     
     def create_reports(self):
+        self.validate_verarbeitung()
         create_mitgliedschaften_pro_file(self)
         sektions_list = create_monatsreport_mvd(self)
         create_monatsreport_sektionen(self, sektions_list)
+    
+    def validate_verarbeitung(self):
+        for entry in self.datatrans_entries:
+            if entry.status == 'Open':
+                frappe.throw("Bitte zuerst die Daten verarbeiten.")
 
 def create_monatsreport_mvd(datatrans_zahlungsfile):
     def get_sektions_values(sektion):
