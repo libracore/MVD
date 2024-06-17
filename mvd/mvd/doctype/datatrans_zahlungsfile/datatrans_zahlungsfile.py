@@ -252,8 +252,8 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                     AND `refnumber` LIKE '{sektion_short}_MH%'
                                 """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
                                             last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=sektion.replace("MV", "")), as_dict=True)[0].qty
-            priv = priv - (hv * 12)
-            hv = hv * 12
+            priv = priv - (hv * 10)
+            hv = hv * 10
             mitgliedschaften = frappe.db.sql("""
                                         SELECT DISTINCT
                                             `mitglied_nr`,
