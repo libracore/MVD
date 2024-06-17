@@ -230,6 +230,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                 WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
                                 AND {sektion_short}
                                 AND `mitgliedtyp_c` = 'Privat'
+                                AND `status` NOT LIKE '%Doppelimport%'
                             """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
                                         last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion)), as_dict=True)[0].qty
         
@@ -240,6 +241,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                 WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
                                 AND `refnumber` LIKE '{sektion_short}_%'
                                 AND `mitgliedtyp_c` = 'Geschäft'
+                                AND `status` NOT LIKE '%Doppelimport%'
                             """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
                                         last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=sektion.replace("MV", "")), as_dict=True)[0].qty
         
@@ -250,6 +252,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                     FROM `tabDatatrans Entry`
                                     WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
                                     AND `refnumber` LIKE '{sektion_short}_MH%'
+                                AND `status` NOT LIKE '%Doppelimport%'
                                 """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
                                             last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=sektion.replace("MV", "")), as_dict=True)[0].qty
             priv = priv - (hv * 10)
@@ -265,6 +268,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                         FROM `tabDatatrans Entry`
                                         WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
                                         AND `refnumber` LIKE '{sektion_short}_%'
+                                        AND `status` NOT LIKE '%Doppelimport%'
                                         ORDER BY `mitgliedtyp_c` ASC, `mitglied_nr` ASC
                                     """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
                                                 last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=sektion.replace("MV", "")), as_dict=True)
