@@ -153,12 +153,19 @@ class DatatransZahlungsfile(Document):
         delete_datatrans_entries = frappe.db.sql("""DELETE FROM `tabDatatrans Entry` WHERE `name` IN ({to_delete})""".format(to_delete="'{0}'".format("', '".join(to_delete))), as_list=True)
     
     def create_single_report(self):
+        self.validate_verarbeitung()
         create_mitgliedschaften_pro_file(self)
     
     def create_reports(self):
+        self.validate_verarbeitung()
         create_mitgliedschaften_pro_file(self)
         sektions_list = create_monatsreport_mvd(self)
         create_monatsreport_sektionen(self, sektions_list)
+    
+    def validate_verarbeitung(self):
+        for entry in self.datatrans_entries:
+            if entry.status == 'Open':
+                frappe.throw("Bitte zuerst die Daten verarbeiten.")
 
 def create_monatsreport_mvd(datatrans_zahlungsfile):
     def get_sektions_values(sektion):
@@ -230,6 +237,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                 WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
                                 AND {sektion_short}
                                 AND `mitgliedtyp_c` = 'Privat'
+                                AND `status` NOT LIKE '%Doppelimport%'
                             """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
                                         last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion)), as_dict=True)[0].qty
         
@@ -240,6 +248,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                 WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
                                 AND `refnumber` LIKE '{sektion_short}_%'
                                 AND `mitgliedtyp_c` = 'Geschäft'
+                                AND `status` NOT LIKE '%Doppelimport%'
                             """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
                                         last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=sektion.replace("MV", "")), as_dict=True)[0].qty
         
@@ -250,10 +259,11 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                     FROM `tabDatatrans Entry`
                                     WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
                                     AND `refnumber` LIKE '{sektion_short}_MH%'
+                                AND `status` NOT LIKE '%Doppelimport%'
                                 """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
                                             last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=sektion.replace("MV", "")), as_dict=True)[0].qty
-            priv = priv - (hv * 12)
-            hv = hv * 12
+            priv = priv - (hv * 10)
+            hv = hv * 10
             mitgliedschaften = frappe.db.sql("""
                                         SELECT DISTINCT
                                             `mitglied_nr`,
@@ -265,6 +275,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                         FROM `tabDatatrans Entry`
                                         WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
                                         AND `refnumber` LIKE '{sektion_short}_%'
+                                        AND `status` NOT LIKE '%Doppelimport%'
                                         ORDER BY `mitgliedtyp_c` ASC, `mitglied_nr` ASC
                                     """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
                                                 last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=sektion.replace("MV", "")), as_dict=True)
