@@ -13,12 +13,11 @@ no_cache=1
 
 @frappe.whitelist()
 def get_open_data():
-    alle_termine, meine_termine, freie_termine = get_alle_beratungs_termine(frappe.session.user)
+    alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user)
     datasets = {
         'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'alle_termine': alle_termine,
-        'meine_termine': meine_termine,
-        'freie_termine': freie_termine
+        'meine_termine': meine_termine
     }
     return datasets
 
@@ -77,7 +76,8 @@ def get_alle_beratungs_termine(user):
                 'beratungskategorie': termin.beratungskategorie.split(" - ")[0] if termin.beratungskategorie else '',
                 'beratungskategorie_2': termin.beratungskategorie_2.split(" - ")[0] if termin.beratungskategorie_2 else '',
                 'beratungskategorie_3': termin.beratungskategorie_3.split(" - ")[0] if termin.beratungskategorie_3 else '',
-                'name_mitglied': "{0} {1}".format(frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'vorname_1'), frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'nachname_1'))
+                'name_mitglied': "{0} {1}".format(frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'vorname_1'), frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'nachname_1')),
+                'sort_date': frappe.utils.getdate(termin.von)
             }
             alle.append(termin_data)
         if termin.berater_in in kontaktperson_multi_user:
@@ -104,7 +104,8 @@ def get_alle_beratungs_termine(user):
                                     '---' AS `beratungskategorie`,
                                     '---' AS `beratungskategorie_2`,
                                     '---' AS `beratungskategorie_3`,
-                                    '---' AS `name_mitglied`
+                                    '---' AS `name_mitglied`,
+                                  NULL AS `sort_date`
                                   FROM `tabAPB Zuweisung`
                                   WHERE `name` NOT IN ('{vergebene_termine}')
                                   AND `date` >= '{datum_von}'
@@ -116,8 +117,14 @@ def get_alle_beratungs_termine(user):
         freier_termin.von_time = get_datetime(termin.von).strftime('%H:%M')
         freier_termin.bis_time = get_datetime(termin.bis).strftime('%H:%M')
         freier_termin.wochentag = _(get_datetime(termin.von).strftime('%A'))[:2]
+        freier_termin.sort_date = frappe.utils.getdate(freier_termin.von)
     
-    return alle, meine, freie_termine
+    for freier_termin in freie_termine:
+        alle.append(freier_termin)
+    
+    alle_sortiert = sorted(alle, key = lambda x: (x['sort_date'], x['beraterinn'] or 'ZZZ', x['von_time']))
+
+    return alle_sortiert, meine
 
 def get_kontaktperson_multi_user(user):
     kontaktperson_multi_user = frappe.db.sql("""SELECT `parent`
