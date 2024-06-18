@@ -13,13 +13,31 @@ var get_beratungs_link = function(cd_name) {
 
 frappe.ui.form.on('Arbeitsplan Beratung', {
     refresh: function(frm) {
-        if (cur_frm.doc.einteilung.length < 1) {
-            frm.add_custom_button(__("Hole Berater*innen"), function() {
-                frm.call("get_personen", {}, (r) => {
-                    frm.reload_doc();
-                });
-            });
-        } else {
+        frm.add_custom_button(__("Hole Berater*innen"), function() {
+            if (cur_frm.is_dirty()) {
+                frappe.throw("Bitte speichern Sie den Arbeitsplan zuerst.")
+            } else {
+                frappe.prompt([
+                    {'fieldname': 'einzel', 'fieldtype': 'Check', 'label': 'Import von einzelnen Berater*innen', 'default': 0},
+                    {'fieldname': 'person', 'fieldtype': 'Link', 'label': 'Berater*in für Import', 'options': 'Termin Kontaktperson', 'depends_on': 'eval:doc.einzel==1'}
+                ],
+                function(values){
+                    console.log(cint(values.einzel))
+                    if ((cur_frm.doc.einteilung.length > 0)&&(cint(values.einzel) != 1)) {
+                        frappe.throw("Es wurden bereits Berater*innen hinzugefügt, Sie können nur noch einzelne Berater*innen hinzufügen.")
+                    } else {
+                        frm.call("get_personen", {'einzel': values.einzel, 'person': values.person || false}, (r) => {
+                            frm.reload_doc();
+                        });
+                    }
+                },
+                'Age verification',
+                'Subscribe me'
+                )
+            }
+        });
+        
+        if (cur_frm.doc.einteilung.length > 0) {
             // holen der bereits verwendeten Termin-Blocks (um zu verhindern dass diese gelöscht/geändert werden)
             frappe.call({
                 "method": "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.verwendete_einteilungen",

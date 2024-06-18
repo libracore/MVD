@@ -45,8 +45,19 @@ class ArbeitsplanBeratung(Document):
                 overlaps += overlap[0] + "<br>"
             frappe.throw("Der Datumsbereich dieses Arbeitsplan überschneited sich mit:<br>{0}".format(overlaps))
 
-    def get_personen(self):
+    def get_personen(self, einzel, person):
         def get_beratungspersonen(weekday, sektion):
+            person_query = ''
+            if einzel:
+                bereits_erfasst = False
+                for beratungsperson in self.einteilung:
+                    if beratungsperson.beratungsperson == person:
+                        frappe.throw("""Die Einteilungen für {0} wurden dem Arbeitsplan bereits hinzugefügt.""".format(person))
+                
+                person_query = """AND `as`.`parent` = '{0}'""".format(person)
+                if not person:
+                    frappe.throw("Bitte wählen Sie ein*e Berater*in aus")
+            
             weekday_query = [
                 "Montag",
                 "Dienstag",
@@ -66,8 +77,9 @@ class ArbeitsplanBeratung(Document):
                                                 LEFT JOIN `tabTermin Kontaktperson` AS `tk` ON `as`.`parent` = `tk`.`name`
                                                 WHERE `tk`.`sektion_id` = '{sektion}'
                                                 AND `tk`.`disabled` != 1
-                                                AND `as`.`day` = '{weekday}'""".format(weekday=weekday_query[weekday], \
-                                                                    sektion=sektion,), as_dict=True)
+                                                AND `as`.`day` = '{weekday}'
+                                                {person_query}""".format(weekday=weekday_query[weekday], \
+                                                                    sektion=sektion, person_query=person_query), as_dict=True)
             if len(beratungspersonen) > 0:
                 return beratungspersonen
             else:
