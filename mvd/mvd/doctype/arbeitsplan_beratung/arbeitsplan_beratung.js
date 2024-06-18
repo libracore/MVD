@@ -53,8 +53,162 @@ frappe.ui.form.on('Arbeitsplan Beratung', {
                 }
             });
         }
+        
+        // #1012
+        configure_einteilung_order(frm);
     }
 });
+
+// #1012
+function configure_einteilung_order(frm) {
+    var table = $("[data-fieldname='einteilung']")[0];
+    var heading_row = $(table).find(".grid-heading-row")[0];
+
+    // Ort / Art
+    var art_ort = $(heading_row).find("[data-fieldname='art_ort']")[0];
+    var art_ort_static = $(art_ort).find(".static-area")[0];
+    $(art_ort_static).css("cursor", "ns-resize");
+    $(art_ort).off('click');
+    $(art_ort).click(function(){
+        if ($(art_ort_static).html() == 'Ort / Art') {
+            $(art_ort_static).html('Ort / Art <i class="fa fa-arrow-up"></i>');
+            order_einteilung(frm, 'art_ort', 'up');
+        } else if ($(art_ort_static).html() == 'Ort / Art <i class="fa fa-arrow-up"></i>') {
+            $(art_ort_static).html('Ort / Art <i class="fa fa-arrow-down"></i>');
+            order_einteilung(frm, 'art_ort', 'down');
+        } else if ($(art_ort_static).html() == 'Ort / Art <i class="fa fa-arrow-down"></i>') {
+            $(art_ort_static).html('Ort / Art <i class="fa fa-arrow-up"></i>');
+            order_einteilung(frm, 'art_ort', 'up');
+        }
+        reset_others('art_ort', heading_row);
+    });
+
+    // Datum
+    var date = $(heading_row).find("[data-fieldname='date']")[0];
+    var date_static = $(date).find(".static-area")[0];
+    $(date_static).css("cursor", "ns-resize");
+    $(date).off('click');
+    $(date).click(function(){
+        if ($(date_static).html() == 'Datum') {
+            $(date_static).html('Datum <i class="fa fa-arrow-up"></i>');
+            order_einteilung(frm, 'date', 'up');
+        } else if ($(date_static).html() == 'Datum <i class="fa fa-arrow-up"></i>') {
+            $(date_static).html('Datum <i class="fa fa-arrow-down"></i>');
+            order_einteilung(frm, 'date', 'down');
+        } else if ($(date_static).html() == 'Datum <i class="fa fa-arrow-down"></i>') {
+            $(date_static).html('Datum <i class="fa fa-arrow-up"></i>');
+            order_einteilung(frm, 'date', 'up');
+        }
+        reset_others('date', heading_row);
+    });
+
+    // Von
+    var from_time = $(heading_row).find("[data-fieldname='from_time']")[0];
+    var from_time_static = $(from_time).find(".static-area")[0];
+    $(from_time_static).css("cursor", "ns-resize");
+    $(from_time).off('click');
+    $(from_time).click(function(){
+        if ($(from_time_static).html() == 'Von') {
+            $(from_time_static).html('Von <i class="fa fa-arrow-up"></i>');
+            order_einteilung(frm, 'from_time', 'up');
+        } else if ($(from_time_static).html() == 'Von <i class="fa fa-arrow-up"></i>') {
+            $(from_time_static).html('Von <i class="fa fa-arrow-down"></i>');
+            order_einteilung(frm, 'from_time', 'down');
+        } else if ($(from_time_static).html() == 'Von <i class="fa fa-arrow-down"></i>') {
+            $(from_time_static).html('Von <i class="fa fa-arrow-up"></i>');
+            order_einteilung(frm, 'from_time', 'up');
+        }
+        reset_others('from_time', heading_row);
+    });
+
+    // Bis
+    var to_time = $(heading_row).find("[data-fieldname='to_time']")[0];
+    var to_time_static = $(to_time).find(".static-area")[0];
+    $(to_time_static).css("cursor", "ns-resize");
+    $(to_time).off('click');
+    $(to_time).click(function(){
+        if ($(to_time_static).html() == 'Bis') {
+            $(to_time_static).html('Bis <i class="fa fa-arrow-up"></i>');
+            order_einteilung(frm, 'to_time', 'up');
+        } else if ($(to_time_static).html() == 'Bis <i class="fa fa-arrow-up"></i>') {
+            $(to_time_static).html('Bis <i class="fa fa-arrow-down"></i>');
+            order_einteilung(frm, 'to_time', 'down');
+        } else if ($(to_time_static).html() == 'Bis <i class="fa fa-arrow-down"></i>') {
+            $(to_time_static).html('Bis <i class="fa fa-arrow-up"></i>');
+            order_einteilung(frm, 'to_time', 'up');
+        }
+        reset_others('to_time', heading_row);
+    });
+
+    // Berater*in
+    var beratungsperson = $(heading_row).find("[data-fieldname='beratungsperson']")[0];
+    var beratungsperson_static = $(beratungsperson).find(".static-area")[0];
+    $(beratungsperson_static).css("cursor", "ns-resize");
+    $(beratungsperson).off('click');
+    $(beratungsperson).click(function(){
+        if ($(beratungsperson_static).html() == 'Berater*in') {
+            $(beratungsperson_static).html('Berater*in <i class="fa fa-arrow-up"></i>');
+            order_einteilung(frm, 'beratungsperson', 'up');
+        } else if ($(beratungsperson_static).html() == 'Berater*in <i class="fa fa-arrow-up"></i>') {
+            $(beratungsperson_static).html('Berater*in <i class="fa fa-arrow-down"></i>');
+            order_einteilung(frm, 'beratungsperson', 'down');
+        } else if ($(beratungsperson_static).html() == 'Berater*in <i class="fa fa-arrow-down"></i>') {
+            $(beratungsperson_static).html('Berater*in <i class="fa fa-arrow-up"></i>');
+            order_einteilung(frm, 'beratungsperson', 'up');
+        }
+        reset_others('beratungsperson', heading_row);
+    });
+}
+
+// #1012
+function reset_others(exclude, heading_row) {
+    if (exclude == 'art_ort') {
+        var to_change = [['date', 'Datum'], ['from_time', 'Von'], ['to_time', 'Bis'], ['beratungsperson', 'Berater*in']];
+        to_change.forEach(element => {
+            var change = $(heading_row).find(`[data-fieldname='${element[0]}']`)[0];
+            var change_static = $(change).find(".static-area")[0];
+            $(change_static).html(`${element[1]}`);
+        });
+    }
+    if (exclude == 'date') {
+        var to_change = [['art_ort', 'Ort / Art'], ['from_time', 'Von'], ['to_time', 'Bis'], ['beratungsperson', 'Berater*in']];
+        to_change.forEach(element => {
+            var change = $(heading_row).find(`[data-fieldname='${element[0]}']`)[0];
+            var change_static = $(change).find(".static-area")[0];
+            $(change_static).html(`${element[1]}`);
+        });
+    }
+    if (exclude == 'from_time') {
+        var to_change = [['art_ort', 'Ort / Art'], ['date', 'Datum'], ['to_time', 'Bis'], ['beratungsperson', 'Berater*in']];
+        to_change.forEach(element => {
+            var change = $(heading_row).find(`[data-fieldname='${element[0]}']`)[0];
+            var change_static = $(change).find(".static-area")[0];
+            $(change_static).html(`${element[1]}`);
+        });
+    }
+    if (exclude == 'to_time') {
+        var to_change = [['art_ort', 'Ort / Art'], ['date', 'Datum'], ['from_time', 'Von'], ['beratungsperson', 'Berater*in']];
+        to_change.forEach(element => {
+            var change = $(heading_row).find(`[data-fieldname='${element[0]}']`)[0];
+            var change_static = $(change).find(".static-area")[0];
+            $(change_static).html(`${element[1]}`);
+        });
+    }
+    if (exclude == 'beratungsperson') {
+        var to_change = [['art_ort', 'Ort / Art'], ['date', 'Datum'], ['from_time', 'Von'], ['to_time', 'Bis']];
+        to_change.forEach(element => {
+            var change = $(heading_row).find(`[data-fieldname='${element[0]}']`)[0];
+            var change_static = $(change).find(".static-area")[0];
+            $(change_static).html(`${element[1]}`);
+        });
+    }
+}
+
+function order_einteilung(frm, column, order) {
+    frm.call("order_einteilung", {'column': column, 'order': order}, (r) => {
+        frm.reload_doc();
+    });
+}
 
 frappe.ui.form.on('APB Zuweisung', {
     before_einteilung_remove: function(frm, cdt, cdn) {

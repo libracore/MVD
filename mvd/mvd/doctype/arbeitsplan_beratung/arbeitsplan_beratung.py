@@ -123,6 +123,19 @@ class ArbeitsplanBeratung(Document):
         self.dispositions_hinweis = dispositions_hinweise_txt
         
         self.save()
+    
+    def order_einteilung(self, column, order):
+        einteilung_list = self.einteilung
+        sorted_einteilung_list = sorted(einteilung_list, key = lambda x: x.get(column), reverse=False if order == 'down' else True)
+
+        loop = 1
+        for entry in sorted_einteilung_list:
+            entry.idx = loop
+            loop += 1
+        
+        self.einteilung = sorted_einteilung_list
+        self.save()
+        return
 
 @frappe.whitelist()
 def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None, short_results=1, art=None):
