@@ -393,8 +393,8 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                         abzug=sektions_dict['abzug'], total=sektions_dict['total'], gesch=sektions_dict['gesch'])
             sektions_list.append(sektions_dict)
             html += sektion_html
-            gesammt_total_exkl_komm += float(sektions_dict['total'])
-            gesammt_total_inkl_komm += float(sektions_dict['zwi_tot'])
+            gesammt_total_exkl_komm += float(sektions_dict['total'].replace("'", ""))
+            gesammt_total_inkl_komm += float(sektions_dict['zwi_tot'].replace("'", ""))
     
     html += '''
         <h3>Gesamttotal exkl. Kommision {0}</h3>
