@@ -4,11 +4,28 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_kunde",
+  "mitgliedschaft_nr",
+  "anrede",
+  "vorname",
+  "nachname",
+  "firma",
+  "tel_m",
+  "tel_p",
+  "email",
+  "cb_1",
+  "strasse",
+  "strassen_nr",
+  "postfach",
+  "plz",
+  "ort",
   "section_api_data",
   "request",
   "section_datatrans",
   "online_payment_id",
-  "online_payment_zahlungsfile"
+  "online_payment_zahlungsfile",
+  "section_artikel",
+  "artikel_json"
  ],
  "fields": [
   {
@@ -38,9 +55,94 @@
    "fieldtype": "Link",
    "label": "onlinePaymentZahlungsfile",
    "options": "Datatrans Zahlungsfile"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_artikel",
+   "fieldtype": "Section Break",
+   "label": "Artikel"
+  },
+  {
+   "fieldname": "artikel_json",
+   "fieldtype": "Code",
+   "label": "Artikel JSON"
+  },
+  {
+   "fieldname": "section_kunde",
+   "fieldtype": "Section Break",
+   "label": "Kunde"
+  },
+  {
+   "fieldname": "mitgliedschaft_nr",
+   "fieldtype": "Data",
+   "label": "Mitgliedschaft Nr."
+  },
+  {
+   "fieldname": "anrede",
+   "fieldtype": "Data",
+   "label": "Anrede"
+  },
+  {
+   "fieldname": "vorname",
+   "fieldtype": "Data",
+   "label": "Vorname"
+  },
+  {
+   "fieldname": "nachname",
+   "fieldtype": "Data",
+   "label": "Nachname"
+  },
+  {
+   "fieldname": "firma",
+   "fieldtype": "Data",
+   "label": "Firma"
+  },
+  {
+   "fieldname": "tel_m",
+   "fieldtype": "Data",
+   "label": "Tel. M"
+  },
+  {
+   "fieldname": "tel_p",
+   "fieldtype": "Data",
+   "label": "Tel. P"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "E-mail"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "strasse",
+   "fieldtype": "Data",
+   "label": "Strasse"
+  },
+  {
+   "fieldname": "strassen_nr",
+   "fieldtype": "Data",
+   "label": "Nr."
+  },
+  {
+   "fieldname": "postfach",
+   "fieldtype": "Data",
+   "label": "Postfach"
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "label": "PLZ"
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "label": "Ort"
   }
  ],
- "modified": "2023-09-29 08:28:50.940569",
+ "modified": "2024-06-20 08:47:53.697616",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Webshop Order",
