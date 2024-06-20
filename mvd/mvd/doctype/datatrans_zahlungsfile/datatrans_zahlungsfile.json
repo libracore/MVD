@@ -25,7 +25,9 @@
   "total_settlement_amount",
   "report_year",
   "report_month",
-  "kommissions_prozent"
+  "kommissions_prozent",
+  "ignore_missing_files",
+  "missing_files"
  ],
  "fields": [
   {
@@ -149,9 +151,24 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Titel"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_missing_files",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "ignore_missing_files",
+   "read_only": 1
+  },
+  {
+   "fieldname": "missing_files",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "missing_files",
+   "read_only": 1
   }
  ],
- "modified": "2024-03-21 10:43:41.215705",
+ "modified": "2024-06-20 10:40:29.504414",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Datatrans Zahlungsfile",
