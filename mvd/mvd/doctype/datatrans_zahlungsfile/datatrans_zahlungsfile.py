@@ -7,6 +7,23 @@ import frappe
 from frappe.model.document import Document
 import csv
 from mvd.mvd.doctype.datatrans_report.datatrans_report import create_mitgliedschaften_pro_file
+from frappe.utils import cint
+from frappe.utils.data import get_datetime, get_last_day
+
+month_wrapper = {
+    'Januar': '01',
+    'Februar': '02',
+    'März': '03',
+    'April': '04',
+    'Mai': '05',
+    'Juni': '06',
+    'Juli': '07',
+    'August': '08',
+    'September': '09',
+    'Oktober': '10',
+    'November': '11',
+    'Dezember': '12'
+}
 
 class DatatransZahlungsfile(Document):
     def validate(self):
@@ -157,15 +174,41 @@ class DatatransZahlungsfile(Document):
         create_mitgliedschaften_pro_file(self)
     
     def create_reports(self):
-        self.validate_verarbeitung()
-        create_mitgliedschaften_pro_file(self)
-        sektions_list = create_monatsreport_mvd(self)
-        create_monatsreport_sektionen(self, sektions_list)
+        go = self.validate_verarbeitung()
+        if go:
+            create_mitgliedschaften_pro_file(self)
+            sektions_list = create_monatsreport_mvd(self)
+            create_monatsreport_sektionen(self, sektions_list)
+            return 1
+        else:
+            return 'missing_files'
     
     def validate_verarbeitung(self):
+        # alle Daten müssen verarbeitet sein
         for entry in self.datatrans_entries:
             if entry.status == 'Open':
                 frappe.throw("Bitte zuerst die Daten verarbeiten.")
+        
+        # Prüfung ob fehlende Zahlungsfiles vorhanden (#1020)
+        if not cint(self.ignore_missing_files) == 1:
+            month = month_wrapper[self.report_month]
+            year = self.report_year
+            last_day = int(get_last_day(get_datetime("{0}-{1}-01 00:00:00".format(year, month))).strftime("%d"))
+            not_found = []
+            for day in range(1, last_day + 1):
+                if day < 10:
+                    day = '0{0}'.format(day)
+                else:
+                    day = '{0}'.format(day)
+                found = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabDatatrans Zahlungsfile` WHERE `title` = '{0}'""".format('{0}/{1}/{2}'.format(year, month, day)), as_dict=True)[0].qty
+                if found < 1:
+                    not_found.append('{0}/{1}/{2}'.format(year, month, day))
+            if len(not_found) > 0:
+                self.missing_files = "<br>".join(not_found)
+                self.save()
+                return False
+        
+        return True
 
 def create_monatsreport_mvd(datatrans_zahlungsfile):
     def get_sektions_values(sektion):
