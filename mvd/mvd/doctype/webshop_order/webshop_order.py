@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import json
+from frappe.utils import cint
+from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr, get_adressblock, get_rg_adressblock
 
 class WebshopOrder(Document):
     def validate(self):
@@ -48,21 +50,125 @@ class WebshopOrder(Document):
                 json_formatted_data_dict = json.dumps(data_dict, indent=2)
                 self.artikel_json = json_formatted_data_dict
             
-            self.strassen_nr = order_data['strassen_nr']
-            self.tel_m = order_data['tel_m']
-            self.email = order_data['email']
-            self.tel_p = order_data['tel_p']
-            self.strasse = order_data['strasse']
-            self.vorname = order_data['vorname']
-            self.postfach = order_data['postfach']
-            self.anrede = order_data['anrede']
-            self.firma = order_data['firma']
-            self.mitgliedschaft_nr = order_data['mitgliedschaft_nr']
-            self.ort = order_data['ort']
-            self.nachname = order_data['nachname']
-            self.plz = order_data['plz']
+            if cint(not self.kundendaten_geladen) == 1:
+                # Kundendaten
+                self.strassen_nr = order_data['strassen_nr']
+                self.tel_m = order_data['tel_m']
+                self.email = order_data['email']
+                self.tel_p = order_data['tel_p']
+                self.strasse = order_data['strasse']
+                self.vorname = order_data['vorname']
+                self.postfach = order_data['postfach']
+                self.anrede = order_data['anrede']
+                self.firma = order_data['firma']
+                self.ort = order_data['ort']
+                self.nachname = order_data['nachname']
+                self.plz = order_data['plz']
+
+                # Mitgliedschaft
+                self.mv_mitgliedschaft = get_mitglied_id_from_nr(order_data['mitgliedschaft_nr'])
+
+                # Faktura Kunde
+                if self.mv_mitgliedschaft:
+                    faktura_kunden = frappe.db.sql("""SELECT `name` FROM `tabKunden` WHERE `mv_mitgliedschaft` = '{0}'""".format(self.mv_mitgliedschaft), as_dict=True)
+                    if len(faktura_kunden) == 1:
+                        self.faktura_kunde = faktura_kunden[0].name
+
+                    mitgl = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
+                    # Adressblock
+                    self.adressblock = get_adressblock(mitgl)
+                    # Rechnungs Adressblock
+                    self.rg_adressblock = get_rg_adressblock(mitgl)
+
+                self.kundendaten_geladen = 1
         except Exception as err:
             frappe.log_error("{0}\n{1}".format(err, frappe.utils.get_traceback()), 'Webshop Order; Validation Failed')
+    
+    def create_faktura_kunde(self):
+        kunde = frappe.get_doc({
+            "doctype":"Kunden",
+            "mv_mitgliedschaft": self.mv_mitgliedschaft,
+            "sektion_id": "MVD",
+            'language': 'de',
+            'kundentyp': 'Einzelperson',
+            'anrede': self.anrede,
+            'vorname': self.vorname,
+            'nachname': self.nachname,
+            'firma': self.firma,
+            'zusatz_firma': None,
+            'tel_p': self.tel_p,
+            'tel_m': self.tel_m,
+            'tel_g': None,
+            'e_mail': self.email,
+            'strasse': self.strasse,
+            'zusatz_adresse':None,
+            'nummer': self.strassen_nr,
+            'nummer_zu': None,
+            'plz': self.plz,
+            'ort': self.ort,
+            'postfach': 1 if self.postfach else 0,
+            'land': 'Schweiz',
+            'postfach_nummer': self.postfach if self.postfach else None,
+            'abweichende_rechnungsadresse': 0,
+            'rg_zusatz_adresse': None,
+            'rg_strasse': None,
+            'rg_nummer': None,
+            'rg_nummer_zu': None,
+            'rg_postfach': None,
+            'rg_postfach_nummer': None,
+            'rg_plz': None,
+            'rg_ort': None,
+            'rg_land': None,
+            'daten_aus_mitgliedschaft': 0
+        }).insert(ignore_permissions=True)
+        
+        self.faktura_kunde = kunde.name
+        self.faktura_kunde_aktuell = 1
+        
+        self.save()
+        return
+    
+    def update_faktura_kunde(self):
+        kunde = frappe.get_doc("Kunden", self.faktura_kunde)
+        kunde.mv_mitgliedschaft = self.mv_mitgliedschaft
+        kunde.sektion_id = "MVD"
+        kunde.language = 'de'
+        kunde.kundentyp = 'Einzelperson'
+        kunde.anrede = self.anrede
+        kunde.vorname = self.vorname
+        kunde.nachname = self.nachname
+        kunde.firma = self.firma
+        kunde.zusatz_firma = None
+        kunde.tel_p = self.tel_p
+        kunde.tel_m = self.tel_m
+        kunde.tel_g = None
+        kunde.e_mail = self.email
+        kunde.strasse = self.strasse
+        kunde.zusatz_adresse = None
+        kunde.nummer = self.strassen_nr
+        kunde.nummer_zu = None
+        kunde.plz = self.plz
+        kunde.ort = self.ort
+        kunde.postfach = 1 if self.postfach else 0
+        kunde.land = 'Schweiz'
+        kunde.postfach_nummer = self.postfach if self.postfach else None
+        kunde.abweichende_rechnungsadresse = 0
+        kunde.rg_zusatz_adresse = None
+        kunde.rg_strasse = None
+        kunde.rg_nummer = None
+        kunde.rg_nummer_zu = None
+        kunde.rg_postfach = None
+        kunde.rg_postfach_nummer = None
+        kunde.rg_plz = None
+        kunde.rg_ort = None
+        kunde.rg_land = None
+        kunde.daten_aus_mitgliedschaft = 0
+        kunde.save()
+
+        self.faktura_kunde_aktuell = 1
+        self.save()
+        return
+
 
 
 def create_order_from_api(kwargs=None):
