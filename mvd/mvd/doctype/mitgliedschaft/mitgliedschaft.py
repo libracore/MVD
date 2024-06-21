@@ -58,7 +58,7 @@ class Mitgliedschaft(Document):
         if self.zuzug:
             zuzugsdatum = self.zuzug
 
-        if not self.validierung_notwendig or str(self.validierung_notwendig) == '0':
+        if cint(self.validierung_notwendig) != 1:
             # entferne Telefonnummern mit vergessenen Leerschlägen
             self.remove_unnecessary_blanks()
             
