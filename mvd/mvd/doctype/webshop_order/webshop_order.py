@@ -8,6 +8,7 @@ from frappe.model.document import Document
 import json
 from frappe.utils import cint
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr, get_adressblock, get_rg_adressblock
+from mvd.mvd.utils.qrr_reference import get_qrr_reference
 
 class WebshopOrder(Document):
     def validate(self):
@@ -168,6 +169,46 @@ class WebshopOrder(Document):
         self.faktura_kunde_aktuell = 1
         self.save()
         return
+    
+    def create_sinv(self):
+        item_json = json.loads(self.artikel_json)
+        items_list = []
+        for item in item_json['items']:
+            if not frappe.db.exists("Item", item['item']):
+                frappe.throw("Der Artikel {0} existiert nicht".format(item['item']))
+            else:
+                items_list.append({
+                    'item_code': item['item'],
+                    'qty': item['qty']
+                })
+        sinv = frappe.get_doc({
+            'doctype': 'Sales Invoice',
+            'company': 'MVD',
+            'customer': frappe.db.get_value("Kunden", self.faktura_kunde, "kunde_kunde"),
+            'sektion_id': 'MVD',
+            'ist_sonstige_rechnung': 1,
+            'mv_kunde': self.faktura_kunde,
+            'customer_adress': frappe.db.get_value("Kunden", self.faktura_kunde, "adresse_kunde"),
+            'contact_person': frappe.db.get_value("Kunden", self.faktura_kunde, "kontakt_kunde"),
+            'items': items_list,
+            'taxes_and_charges': 'MVD Gemischt - MVD',
+            'druckvorlage': 'MVD Rechnung-MVD' if not self.online_payment_id else 'MVD Lieferschein-MVD'
+        }).insert(ignore_permissions=True)
+
+        if self.online_payment_id:
+            sinv.is_pos = 1
+            sinv.pos_profile = 'MVD'
+            row = sinv.append('payments', {})
+            row.mode_of_payment = 'Credit Card'
+            row.amount = sinv.outstanding_amount
+        
+        sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
+        sinv.save(ignore_permissions=True)
+        
+        self.sinv = sinv.name
+        self.save()
+
+        return sinv.name
 
 
 
