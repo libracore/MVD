@@ -681,13 +681,6 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         mitgliedschaft.geschenkunterlagen_an_schenker = geschenkunterlagen_an_schenker
         mitgliedschaft.datum_hv_zahlung = datum_hv_zahlung
         mitgliedschaft.letzte_bearbeitung_von = 'SP'
-        mitgliedschaft.online_haftpflicht = online_haftpflicht
-        mitgliedschaft.online_gutschrift = online_gutschrift
-        mitgliedschaft.online_betrag = online_betrag
-        mitgliedschaft.datum_online_verbucht = datum_online_verbucht
-        mitgliedschaft.datum_online_gutschrift = datum_online_gutschrift
-        mitgliedschaft.online_payment_method = online_payment_method
-        mitgliedschaft.online_payment_id = online_payment_id
         mitgliedschaft.mvb_typ = mvb_typ
         
 
