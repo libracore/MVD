@@ -77,7 +77,9 @@
   "default_rueckfragen_email_template",
   "default_termindauer",
   "default_terminbestaetigung_email_template",
-  "hinweis_mietzinsrechner"
+  "hinweis_mietzinsrechner",
+  "default_terminbest_hinweis_de",
+  "default_terminbest_hinweis_fr"
  ],
  "fields": [
   {
@@ -509,9 +511,19 @@
    "fieldname": "serien_email_footer",
    "fieldtype": "HTML Editor",
    "label": "E-Mail Footer"
+  },
+  {
+   "fieldname": "default_terminbest_hinweis_de",
+   "fieldtype": "Text",
+   "label": "Default E-Mail Terminbest\u00e4tigung Hinweis (de)"
+  },
+  {
+   "fieldname": "default_terminbest_hinweis_fr",
+   "fieldtype": "Text",
+   "label": "Default E-Mail Terminbest\u00e4tigung Hinweis (fr)"
   }
  ],
- "modified": "2023-09-19 14:30:08.269976",
+ "modified": "2024-06-21 10:26:54.940773",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
