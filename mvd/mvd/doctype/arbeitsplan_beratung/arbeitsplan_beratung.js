@@ -31,8 +31,8 @@ frappe.ui.form.on('Arbeitsplan Beratung', {
                         });
                     }
                 },
-                'Age verification',
-                'Subscribe me'
+                'Hole Berater*innen',
+                'Einfügen'
                 )
             }
         });
