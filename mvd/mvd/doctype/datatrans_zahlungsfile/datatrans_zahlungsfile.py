@@ -289,11 +289,11 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                     IFNULL(SUM(`amount`), 0) AS `qty`
                                 FROM `tabDatatrans Entry`
                                 WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
-                                AND `refnumber` LIKE '{sektion_short}_%'
+                                AND {sektion_short}
                                 AND `mitgliedtyp_c` = 'Geschäft'
                                 AND `status` NOT LIKE '%Doppelimport%'
                             """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
-                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=sektion.replace("MV", "")), as_dict=True)[0].qty
+                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("MV", "")), as_dict=True)[0].qty
         
         if priv:
             hv = frappe.db.sql("""
@@ -301,10 +301,10 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                         COUNT(`name`) AS `qty`
                                     FROM `tabDatatrans Entry`
                                     WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
-                                    AND `refnumber` LIKE '{sektion_short}_MH%'
+                                    AND {sektion_short}
                                 AND `status` NOT LIKE '%Doppelimport%'
                                 """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
-                                            last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=sektion.replace("MV", "")), as_dict=True)[0].qty
+                                            last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("_%", "_MH%")), as_dict=True)[0].qty
             priv = priv - (hv * 10)
             hv = hv * 10
             mitgliedschaften = frappe.db.sql("""
@@ -317,16 +317,27 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                              `mitgliedtyp_c`
                                         FROM `tabDatatrans Entry`
                                         WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
-                                        AND `refnumber` LIKE '{sektion_short}_%'
+                                        AND {sektion_short}
                                         AND `status` NOT LIKE '%Doppelimport%'
                                         ORDER BY `mitgliedtyp_c` ASC, `mitglied_nr` ASC
                                     """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
-                                                last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=sektion.replace("MV", "")), as_dict=True)
+                                                last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion)), as_dict=True)
         else:
             hv = 0
             priv = 0
             mitgliedschaften = []
-        return priv, gesch, hv, mitgliedschaften
+        
+        unbekannt = frappe.db.sql("""
+                                SELECT
+                                    IFNULL(SUM(`amount`), 0) AS `qty`
+                                FROM `tabDatatrans Entry`
+                                WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
+                                AND {sektion_short}
+                                AND `mitgliedtyp_c` IS NULL
+                                AND `status` NOT LIKE '%Doppelimport%'
+                            """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
+                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("MV", "")), as_dict=True)[0].qty
+        return priv, gesch, hv, mitgliedschaften, unbekannt
     
     main_html = '''
         <h1>Monatsreport alle Sektionen für MVD</h1>
@@ -341,16 +352,17 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
     sektionen = frappe.db.sql("""SELECT `name` FROM `tabSektion` ORDER BY `name` ASC""", as_dict=True)
     for sektion in sektionen:
         if sektion.name not in ('MVD', 'M+W-Abo', 'ASI', 'ASLOCA'):
-            priv, gesch, hv, mitgliedschaften = get_sektions_values(sektion.name)
+            priv, gesch, hv, mitgliedschaften, unbekannt = get_sektions_values(sektion.name)
             abzug = ((priv + hv) / 100) * datatrans_zahlungsfile.kommissions_prozent
             sektions_dict = {}
             sektions_dict['name'] = sektion.name
             sektions_dict['priv'] = frappe.utils.fmt_money(priv)
             sektions_dict['gesch'] = frappe.utils.fmt_money(gesch)
             sektions_dict['hv'] = hv
-            sektions_dict['zwi_tot'] = frappe.utils.fmt_money(priv + gesch + hv)
+            sektions_dict['unbekannt'] = frappe.utils.fmt_money(unbekannt)
+            sektions_dict['zwi_tot'] = frappe.utils.fmt_money(priv + gesch + hv + unbekannt)
             sektions_dict['abzug'] = "-" + str(frappe.utils.fmt_money(abzug))
-            sektions_dict['total'] = frappe.utils.fmt_money((priv + gesch + hv) - abzug)
+            sektions_dict['total'] = frappe.utils.fmt_money((priv + gesch + hv + unbekannt) - abzug)
             sektions_dict['mitgliedschaften'] = mitgliedschaften
             
             sektion_html = '''
@@ -375,6 +387,10 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                             <td>{hv}</td>
                         </tr>
                         <tr>
+                            <td>Unbekannt</td>
+                            <td>{unbekannt}</td>
+                        </tr>
+                        <tr>
                             <td>Zwischentotal</td>
                             <td>{zwi_tot}</td>
                         </tr>
@@ -390,7 +406,8 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                 </table><br><br>
             '''.format(sektion=sektion.name, kommissions_prozent=datatrans_zahlungsfile.kommissions_prozent, \
                         priv=sektions_dict['priv'], hv=sektions_dict['hv'], zwi_tot=sektions_dict['zwi_tot'], \
-                        abzug=sektions_dict['abzug'], total=sektions_dict['total'], gesch=sektions_dict['gesch'])
+                        abzug=sektions_dict['abzug'], total=sektions_dict['total'], gesch=sektions_dict['gesch'], \
+                        unbekannt=sektions_dict['unbekannt'])
             sektions_list.append(sektions_dict)
             html += sektion_html
             gesammt_total_exkl_komm += float(sektions_dict['total'].replace("'", ""))
@@ -439,6 +456,10 @@ def create_monatsreport_sektionen(datatrans_zahlungsfile, sektions_list):
                         <td>{hv}</td>
                     </tr>
                     <tr>
+                        <td>Unbekannt</td>
+                        <td>{unbekannt}</td>
+                    </tr>
+                    <tr>
                         <td>Zwischentotal</td>
                         <td>{zwi_tot}</td>
                     </tr>
@@ -454,7 +475,8 @@ def create_monatsreport_sektionen(datatrans_zahlungsfile, sektions_list):
             </table><br><br>
         '''.format(sektion=sektions_dict['name'], kommissions_prozent=datatrans_zahlungsfile.kommissions_prozent, \
                     priv=sektions_dict['priv'], hv=sektions_dict['hv'], zwi_tot=sektions_dict['zwi_tot'], \
-                    abzug=sektions_dict['abzug'], total=sektions_dict['total'], gesch=sektions_dict['gesch'])
+                    abzug=sektions_dict['abzug'], total=sektions_dict['total'], gesch=sektions_dict['gesch'], \
+                    unbekannt=sektions_dict['unbekannt'])
         
         if len(sektions_dict['mitgliedschaften']) > 0:
             mitgl_html = '''
@@ -464,14 +486,14 @@ def create_monatsreport_sektionen(datatrans_zahlungsfile, sektions_list):
                 mitgl_html += '''
                     <tr>
                         <td>{mitglied_nr}</td>
-                        <td>{adressblock}</td>
+                        <td>{adressblock}<br>{mitgliedtyp_c}</td>
                         <td>{transdatetime}</td>
                         <td>{refnumber}</td>
                         <td style="text-align: right;">{amount}</td>
                     </tr>
                 '''.format(mitglied_nr=mitgliedschaft.mitglied_nr, adressblock=mitgliedschaft.adressblock, \
                             transdatetime=mitgliedschaft.transdatetime, refnumber=mitgliedschaft.refnumber, \
-                            amount=mitgliedschaft.amount)
+                            amount=mitgliedschaft.amount, mitgliedtyp_c=mitgliedschaft.mitgliedtyp_c)
             mitgl_html += '''</table>'''
             html += mitgl_html
     
