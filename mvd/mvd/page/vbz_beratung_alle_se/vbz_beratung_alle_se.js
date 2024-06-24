@@ -81,11 +81,11 @@ frappe.vbz_beratung_alle_se = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r2_as").click(function(){
-            frappe.route_options = {'status': 'Open', 'kontaktperson': 'Rechtsberatung Pool (MVBE)', 'beratung_prio': ['!=', 'Hoch']}
+            frappe.route_options = {'status': 'Open', 'kontaktperson': ['like','Rechtsberatung Pool%'], 'beratung_prio': ['!=', 'Hoch']}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r3_as").click(function(){
-            frappe.route_options = {'status': 'Open', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)']}
+            frappe.route_options = {'status': 'Open', 'kontaktperson': ['not like', 'Rechtsberatung Pool%']}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r4_as").click(function(){
@@ -97,7 +97,7 @@ frappe.vbz_beratung_alle_se = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r6_as").click(function(){
-            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['!=', 'Rechtsberatung Pool (MVBE)'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1}
+            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r7_as").click(function(){
