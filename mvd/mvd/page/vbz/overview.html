@@ -25,7 +25,16 @@
     <div class="control-card blue-card" id="beratung" {% if frappe.boot.default_sektion != "MVBE" %} style="display: none;"{% endif %}>
         <center>
             <i class="fa fa-calendar-check-o blue-icon"></i>
-            <p>Beratung</p>
+            <p>Beratung (MVBE)</p>
+        </center>
+    </div>
+    <!-- end hidden -->
+
+    <!-- hidden ausser bei MVLU -->
+    <div class="control-card blue-card" id="beratung_lu" {% if frappe.boot.default_sektion != "MVLU" %} style="display: none;"{% endif %}>
+        <center>
+            <i class="fa fa-calendar-check-o blue-icon"></i>
+            <p>Beratung (MVLU)</p>
         </center>
     </div>
     <!-- end hidden -->
