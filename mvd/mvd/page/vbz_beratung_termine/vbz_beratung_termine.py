@@ -88,7 +88,7 @@ def get_alle_beratungs_termine(user):
         meine.append({'show_placeholder': 1})
     
     freie_termine = frappe.db.sql("""
-                                  SELECT
+                                  SELECT DISTINCT
                                     CONCAT(`date`, ' ', `from_time`) AS `von`,
                                     CONCAT(`date`, ' ', `to_time`) AS `bis`,
                                     `art_ort` AS `ort`,
