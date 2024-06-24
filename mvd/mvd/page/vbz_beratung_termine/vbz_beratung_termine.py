@@ -118,9 +118,11 @@ def get_alle_beratungs_termine(user):
         freier_termin.bis_time = get_datetime(termin.bis).strftime('%H:%M')
         freier_termin.wochentag = _(get_datetime(termin.von).strftime('%A'))[:2]
         freier_termin.sort_date = frappe.utils.getdate(freier_termin.von)
+        freier_termin.sektion_id = frappe.db.get_value("Termin Kontaktperson", termin.beraterinn, "sektion_id")
     
     for freier_termin in freie_termine:
-        alle.append(freier_termin)
+        if not erlaubte_sektionen or freier_termin.sektion_id in erlaubte_sektionen:
+            alle.append(freier_termin)
     
     alle_sortiert = sorted(alle, key = lambda x: (x['sort_date'], x['beraterinn'] or 'ZZZ', x['von_time']))
 
