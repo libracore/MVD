@@ -1,3 +1,12 @@
+<style>
+    h1, th, td, p {
+        font-size: smaller;
+    }
+    p, th {
+        padding:0;
+        margin:0;
+    }
+</style>
 <h1>{{ berater_in }}</h1>
 <h3>{% if von and bis %}({{ von }} - {{ bis }}){% else %}{% if von %}(ab {{ von }}){% endif %}{% if bis %}(bis {{ bis }}){% endif %}{% endif %}</h3>
 {% for termin in termine %}
@@ -21,7 +30,7 @@
                     <td>{{ termin.telefonnummer or "---" }}</td>
                 </tr>
             </table>
-            <table style="width: 100%; margin-top: 5px;">
+            <table style="width: 100%; margin-top: 0.2em;">
                 <tr>
                     <th style="width: 50%; text-align: left;">Mitglied</th>
                     <th style="width: 50%; text-align: left;">Details</th>
