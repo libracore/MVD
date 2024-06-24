@@ -39,7 +39,7 @@ frappe.vbz_beratung = {
     add_click_handlers: function(open_datas) {
         //~ frappe.vbz_beratung.remove_click_handlers();
 
-        sektion = frappe.boot.default_sektion || "MVBE";
+        var sektion = frappe.boot.default_sektion || "MVBE";
         
         $("#s").click(function(){
             frappe.route_options = {"status": 'Eingang', "sektion_id": sektion}
