@@ -353,7 +353,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
     for sektion in sektionen:
         if sektion.name not in ('MVD', 'M+W-Abo', 'ASI', 'ASLOCA'):
             priv, gesch, hv, mitgliedschaften, unbekannt = get_sektions_values(sektion.name)
-            abzug = ((priv + hv) / 100) * datatrans_zahlungsfile.kommissions_prozent
+            abzug = ((priv + hv + gesch) / 100) * datatrans_zahlungsfile.kommissions_prozent
             sektions_dict = {}
             sektions_dict['name'] = sektion.name
             sektions_dict['priv'] = frappe.utils.fmt_money(priv)
