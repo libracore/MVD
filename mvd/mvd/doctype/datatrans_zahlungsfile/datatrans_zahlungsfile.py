@@ -336,7 +336,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                 AND `mitgliedtyp_c` IS NULL
                                 AND `status` NOT LIKE '%Doppelimport%'
                             """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
-                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("MV", "")), as_dict=True)[0].qty
+                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("MV", "")), as_dict=True)[0].qty or 0
         return priv, gesch, hv, mitgliedschaften, unbekannt
     
     main_html = '''
@@ -353,7 +353,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
     for sektion in sektionen:
         if sektion.name not in ('MVD', 'M+W-Abo', 'ASI', 'ASLOCA'):
             priv, gesch, hv, mitgliedschaften, unbekannt = get_sektions_values(sektion.name)
-            abzug = ((priv + hv + gesch) / 100) * datatrans_zahlungsfile.kommissions_prozent
+            abzug = ((priv + hv + gesch + unbekannt) / 100) * datatrans_zahlungsfile.kommissions_prozent
             sektions_dict = {}
             sektions_dict['name'] = sektion.name
             sektions_dict['priv'] = frappe.utils.fmt_money(priv)
