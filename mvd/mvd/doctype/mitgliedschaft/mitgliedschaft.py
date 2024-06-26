@@ -162,6 +162,10 @@ class Mitgliedschaft(Document):
             # Hotfix ISS-2024-60 / #942
             if not self.zuzug and zuzugsdatum:
                 self.zuzug = zuzugsdatum
+            
+            # Hotfix #998
+            if self.language not in ['de', 'fr', 'it']:
+                self.language = 'de'
 
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
             sp_updater(self)
