@@ -95,14 +95,14 @@ def delete_service_plattform_api_connections():
 def create_service_plattform_api(keys):
     connections = keys.service_plattform_api_connections
     for connection in connections:
-        print("{0} Anlage...".format(connection.name))
+        print("{0} Anlage...".format(connection['name']))
         service_plattform_api = frappe.get_doc("Service Plattform API", "Service Plattform API")
         row = service_plattform_api.append('connections', {})
-        row.connection = connection.name
-        row.api_url = connection.api_url
-        row.api_token_url = connection.access_token_url
-        row.client_id = connection.client_id
-        row.api_secret = connection.client_secret
+        row.connection = connection['name']
+        row.api_url = connection['api_url']
+        row.api_token_url = connection['access_token_url']
+        row.client_id = connection['client_id']
+        row.api_secret = connection['client_secret']
         service_plattform_api.save()
         frappe.db.commit()
     
@@ -137,10 +137,6 @@ class keys_object:
     status = 0
     # Service Plattform API
     service_plattform_api_connections = frappe.get_site_config().mvd['service_plattform_api_connections']
-    api_url = frappe.get_site_config().mvd['api_url']
-    access_token_url = frappe.get_site_config().mvd['access_token_url']
-    client_id = frappe.get_site_config().mvd['client_id']
-    client_secret = frappe.get_site_config().mvd['client_secret']
     emailberatung_test_token = frappe.get_site_config().mvd['emailberatung_test_token']
     
     # Postretouren Einstellungen
