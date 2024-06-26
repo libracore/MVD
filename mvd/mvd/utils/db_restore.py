@@ -151,6 +151,12 @@ class keys_object:
     # E-Mail Accounts
     email_accounts = frappe.get_site_config().mvd['email_accounts']
 
+    # Social Login Key
+    social_login_redirect_url = frappe.get_site_config().mvd['social_login_redirect_url']
+
 def set_social_login_redirect_url(keys):
-    social_login = frappe.get_doc("Social Login", "auth0")
-    ...
+    if frappe.db.exists("Social Login Key", "auth0"):
+        social_login = frappe.get_doc("Social Login Key", "auth0")
+        social_login.redirect_url = keys.social_login_redirect_url
+        social_login.save()
+        frappe.db.commit()
