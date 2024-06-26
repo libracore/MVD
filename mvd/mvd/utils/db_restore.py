@@ -8,24 +8,50 @@ import frappe
 '''
 Beispiel für site_config:
 
- "mvd": {
-  "api_url": "https:...",
-  "access_token_url": "https:...",
-  "client_id": "xxx",
-  "client_secret": "xxx",
-  "emailberatung_test_token": "xxx",
-  "post_url": "https:...",
-  "post_username": "xxx",
-  "post_password": "xxx",
-  "post_host": "fdsbc.post.ch",
-  "post_port": "22",
-  "post_target_path": "dfu-inbox",
-  "post_user": "xxx",
-  "service_plattform_api_connections": ["ServicePF", "Auth0", "PostNotiz"],
+Beispiel Config:
+
+"mvd": {
+  "service_plattform_api_connections": [
+    {
+      "name": ServicePF",
+      "access_token_url": "https://...",
+      "api_url": "https://...",
+      "client_id": "xxx",
+      "client_secret": "xxx"
+    },
+    {
+      "name": PostNotiz",
+      "access_token_url": "https://...",
+      "api_url": "https://...",
+      "client_id": "xxx",
+      "client_secret": "xxx"
+    },
+    {
+      "name": Auth0",
+      "access_token_url": "https://...",
+      "api_url": "https://...",
+      "client_id": "xxx",
+      "client_secret": "xxx"
+    }
+  ],
+  "social_login_redirect_url": "https://...",
   "email_accounts": [
-   ["x@y.ch", "Titel", "xxx"]
-  ]
+   [
+    "Mailadresse",
+    "Name",
+    "xxx"
+   ]
+  ],
+  "emailberatung_test_token": "xxx",
+  "post_host": "fdsbc.post.ch",
+  "post_password": "xxx",
+  "post_port": "00",
+  "post_target_path": "xxx",
+  "post_url": "https://...",
+  "post_user": "xxx",
+  "post_username": "xxx"
  }
+
 '''
 
 def run():
@@ -42,6 +68,7 @@ def run():
     create_service_plattform_api(keys)
     create_postretouren_einstellungen(keys)
     create_email_accounts(keys)
+    set_social_login_redirect_url(keys)
 
     print("Der Prozess ist beendet, vergessen Sie nicht das Post Key-File manuell zu prüfen sowie die E-Mail-Account Settings vorzunehmen!")
 
@@ -68,14 +95,14 @@ def delete_service_plattform_api_connections():
 def create_service_plattform_api(keys):
     connections = keys.service_plattform_api_connections
     for connection in connections:
-        print("{0} Anlage...".format(connection))
+        print("{0} Anlage...".format(connection.name))
         service_plattform_api = frappe.get_doc("Service Plattform API", "Service Plattform API")
         row = service_plattform_api.append('connections', {})
-        row.connection = connection
-        row.api_url = keys.api_url
-        row.api_token_url = keys.access_token_url
-        row.client_id = keys.client_id
-        row.api_secret = keys.client_secret
+        row.connection = connection.name
+        row.api_url = connection.api_url
+        row.api_token_url = connection.access_token_url
+        row.client_id = connection.client_id
+        row.api_secret = connection.client_secret
         service_plattform_api.save()
         frappe.db.commit()
     
@@ -127,3 +154,7 @@ class keys_object:
 
     # E-Mail Accounts
     email_accounts = frappe.get_site_config().mvd['email_accounts']
+
+def set_social_login_redirect_url(keys):
+    social_login = frappe.get_doc("Social Login", "auth0")
+    ...
