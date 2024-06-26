@@ -62,8 +62,7 @@
   {
    "fieldname": "key_file",
    "fieldtype": "Attach",
-   "label": "Key-File",
-   "reqd": 1
+   "label": "Key-File"
   },
   {
    "fieldname": "target_path",
@@ -73,7 +72,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2024-05-29 13:20:07.414381",
+ "modified": "2024-06-26 09:50:50.015875",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Postretouren Einstellungen",
