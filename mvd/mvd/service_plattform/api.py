@@ -398,7 +398,7 @@ def get_mitglied_from_mail(**api_request):
     if 'Emailadresse' in api_request:
         email_field = 'e_mail_1'
         if 'mitglied' in api_request:
-            if cint(api_request['mitglied']) == 1:
+            if cint(api_request['mitglied']) == 2:
                 # Solidarmitglied
                 email_field = 'e_mail_2'
         mitgliedschaften = frappe.db.sql("""
