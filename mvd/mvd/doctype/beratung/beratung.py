@@ -880,7 +880,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
                         ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""), \
                         berater_in=berater_in_name, \
-                        default_terminbest_hinweis = default_terminbest_hinweis_fr.replace('\r','<br>').replace('\n','<br>'))
+                        default_terminbest_hinweis = default_terminbest_hinweis_de.replace('\r','<br>').replace('\n','<br>'))
         index += 1
 
     return {
