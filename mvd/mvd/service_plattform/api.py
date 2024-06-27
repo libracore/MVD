@@ -18,6 +18,7 @@ from mvd.mvd.doctype.beratung.beratung import _get_beratungs_dokument
 from mvd.mvd.doctype.webshop_order.webshop_order import create_order_from_api
 from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
 from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new_id, create_new_number
+from frappe.utils import cint
 
 AUTH0_SCOPE = "Auth0"
 SVCPF_SCOPE = "ServicePF"
@@ -395,13 +396,18 @@ def get_mitglied_from_mail(**api_request):
         - 400 ('Bad Request', 'Emailadresse missing'); Wenn der Parameter Emailadresse in der Anfrage fehlt
     '''
     if 'Emailadresse' in api_request:
+        email_field = 'e_mail_1'
+        if 'mitglied' in api_request:
+            if cint(api_request['mitglied']) == 1:
+                # Solidarmitglied
+                email_field = 'e_mail_2'
         mitgliedschaften = frappe.db.sql("""
                                         SELECT
                                             `mitglied_nr`
                                         FROM `tabMitgliedschaft`
-                                        WHERE `e_mail_1` LIKE '%{0}%'
+                                        WHERE `{0}` LIKE '%{1}%'
                                         AND `status_c` != 'Inaktiv'
-                                        """.format(api_request['Emailadresse']), as_dict=True)
+                                        """.format(email_field, api_request['Emailadresse']), as_dict=True)
         if len(mitgliedschaften) >= 1:
             mitgl_list = []
             for mitgl in mitgliedschaften:
