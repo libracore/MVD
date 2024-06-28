@@ -143,14 +143,15 @@ def create_new_number(id=None):
     call to action:
     bench --site [site_name] execute mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming.reset_mitglied_main_naming
 '''
-def reset_mitglied_main_naming():
-    print("lösche Tab Mitglied Main Naming...")
-    safe_update_out = frappe.db.sql("""SET SQL_SAFE_UPDATES = 0""", as_list=True)
-    delete_mitglied_main_naming = frappe.db.sql("""
-                                                DELETE FROM `tabMitglied Main Naming`
-                                                """, as_list=True)
-    safe_update_in = frappe.db.sql("""SET SQL_SAFE_UPDATES = 1""", as_list=True)
-    frappe.db.commit()
+def reset_mitglied_main_naming(delete=True):
+    if delete:
+        print("lösche Tab Mitglied Main Naming...")
+        safe_update_out = frappe.db.sql("""SET SQL_SAFE_UPDATES = 0""", as_list=True)
+        delete_mitglied_main_naming = frappe.db.sql("""
+                                                    DELETE FROM `tabMitglied Main Naming`
+                                                    """, as_list=True)
+        safe_update_in = frappe.db.sql("""SET SQL_SAFE_UPDATES = 1""", as_list=True)
+        frappe.db.commit()
 
     print("Lade Mitgliedschaften...")
     mitgliedschaften = frappe.db.sql("""
@@ -166,33 +167,43 @@ def reset_mitglied_main_naming():
     errors = []
     for mitgliedschaft in mitgliedschaften:
         print("{0} von {1}".format(loop, total))
-        existing_main_naming = frappe.db.sql("""
-                                             SELECT `name` FROM `tabMitglied Main Naming`
-                                             WHERE `mitglied_id` = '{0}'
-                                             """.format(mitgliedschaft.id), as_dict=True)
-        if len(existing_main_naming) > 0:
-            print("Möglicher Fehler bei Mitglied {0}".format(mitgliedschaft.id))
-            errors.append(mitgliedschaft.id)
-            loop += 1
-        else:
-            mitglied_nr_raw = 0
-            mitglied_nr = None
-            if mitgliedschaft.nr and mitgliedschaft.nr != "MV":
-                mitglied_nr = mitgliedschaft.nr
-                mitglied_nr_raw = int(mitgliedschaft.nr.replace("MV0", ""))
+        check_successfull = True
+        if delete:
+            existing_main_naming = frappe.db.sql("""
+                                                SELECT `name` FROM `tabMitglied Main Naming`
+                                                WHERE `mitglied_id` = '{0}'
+                                                """.format(mitgliedschaft.id), as_dict=True)
+            if len(existing_main_naming) > 0:
+                print("Möglicher Fehler bei Mitglied {0}".format(mitgliedschaft.id))
+                errors.append(mitgliedschaft.id)
+                loop += 1
+                check_successfull = False
             
-            new_mitglied_main_naming = frappe.get_doc({
-                'doctype': "Mitglied Main Naming",
-                'mitglied_id': mitgliedschaft.id,
-                'mitglied_nr_raw': mitglied_nr_raw,
-                'mitglied_nr': mitglied_nr
-            })
-            new_mitglied_main_naming.insert(ignore_permissions=True)
-            loop += 1
-            counter += 1
-            if counter == 100:
-                frappe.db.commit()
-                counter = 1
+        if check_successfull:
+            if not delete:
+                if frappe.db.exists("Mitglied Main Naming", {'mitglied_id': mitgliedschaft.id}):
+                    print("Skip Mitglied {0}".format(mitgliedschaft.id))
+                    loop += 1
+                    check_successfull = False
+            if check_successfull:
+                mitglied_nr_raw = 0
+                mitglied_nr = None
+                if mitgliedschaft.nr and mitgliedschaft.nr != "MV":
+                    mitglied_nr = mitgliedschaft.nr
+                    mitglied_nr_raw = int(mitgliedschaft.nr.replace("MV0", ""))
+                
+                new_mitglied_main_naming = frappe.get_doc({
+                    'doctype': "Mitglied Main Naming",
+                    'mitglied_id': mitgliedschaft.id,
+                    'mitglied_nr_raw': mitglied_nr_raw,
+                    'mitglied_nr': mitglied_nr
+                })
+                new_mitglied_main_naming.insert(ignore_permissions=True)
+                loop += 1
+                counter += 1
+                if counter == 100:
+                    frappe.db.commit()
+                    counter = 1
     if len(errors) > 0:
         frappe.log_error("{0}".format(errors), "reset_mitglied_main_naming")
         print("Achtung Error Log beachten!")
