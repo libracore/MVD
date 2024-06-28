@@ -35,7 +35,7 @@ class Beratung(Document):
             self.beratungskategorie_2 = None
         
         # MVBE-HACK
-        if self.status == 'Rückfrage: Termin vereinbaren' and self.sektion_id == 'MVBE':
+        if self.status == 'Rückfrage: Termin vereinbaren' and ( self.sektion_id == 'MVBE' or self.sektion_id == 'MVLU'):
             if self.kontaktperson and len(self.termin) > 0:
                 found_past_termin = False
                 for termin in self.termin:
@@ -172,7 +172,7 @@ class Beratung(Document):
                 '''
                 Achtung MVBE-Hack
                 '''
-                if self.sektion_id == 'MVBE':
+                if self.sektion_id == 'MVBE' or self.sektion_id == 'MVLU':
                     if self.status == 'Eingang':
                         if self.beratungskategorie not in ('202 - MZ-Erhöhung', '300 - Nebenkosten'):
                             self.status = 'Open'

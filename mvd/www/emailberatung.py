@@ -142,7 +142,7 @@ def new_beratung(**kwargs):
             thema = None
             beratungskategorie = None
             termin_vereinbaren = False
-            if sektion == 'MVBE':
+            if sektion == 'MVBE' or sektion == 'MVLU':
                 if args['thema'] != 'anderes':
                     thema = args['thema']
                     if args['thema'] == 'Mietzinserhöhung':
