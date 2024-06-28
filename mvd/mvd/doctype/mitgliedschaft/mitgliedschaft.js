@@ -2610,6 +2610,7 @@ function termin_quick_entry(frm) {
                         verfuegbarkeiten_html = verfuegbarkeiten.message;
                     }
                     var tel = cur_frm.doc.tel_m_1 || cur_frm.doc.tel_p_1 || cur_frm.doc.tel_g_1 || '';
+                    var defaultArt = cur_frm.doc.sektion_id == 'MVBE' ? 'telefonisch' : 'persönlich';
                     var d = new frappe.ui.Dialog({
                         'title': __('Termin erstellen'),
                         'fields': [
@@ -2659,7 +2660,7 @@ function termin_quick_entry(frm) {
                                     });
                                 }
                             },
-                            {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich', 'reqd': 1, 'default': 'telefonisch', 
+                            {'fieldname': 'art', 'fieldtype': 'Select', 'label': __('Art'), 'options': 'telefonisch\npersönlich', 'reqd': 1, 'default': defaultArt, 
                                 'change': function() {
                                     if (d.get_value('art') == 'telefonisch') {
                                         d.set_df_property('telefonnummer', 'reqd', 1);
