@@ -44,10 +44,10 @@ doctype_list_js = {
 
 jenv = {
     "methods": [
-        "get_anredekonvention:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_anredekonvention",
+        "get_anredekonvention:mvd.mvd.doctype.mitgliedschaft.utils.get_anredekonvention",
         "replace_mv_keywords:mvd.mvd.doctype.druckvorlage.druckvorlage.replace_mv_keywords",
         "get_mahnungs_qrrs:mvd.mvd.doctype.mahnung.mahnung.get_mahnungs_qrrs",
-        "get_rg_adressblock:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_rg_adressblock",
+        "get_rg_adressblock:mvd.mvd.doctype.mitgliedschaft.utils.get_rg_adressblock",
         "get_last_open_sinv:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_last_open_sinv"
     ]
 }
@@ -136,6 +136,9 @@ doc_events = {
     },
     "Email Queue": {
         "after_insert": "mvd.mvd.utils.hook_utils.remove_admin_mails"
+    },
+    "Service Plattform Log": {
+        "after_insert": "mvd.mvd.service_plattform.request_worker.check_immediately_executing"
     }
 }
 
@@ -153,7 +156,8 @@ scheduler_events = {
         "mvd.mvd.utils.daily_jobs.mahnlauf_ausschluss",
         "mvd.mvd.utils.daily_jobs.cleanup_beratungen",
         "mvd.mvd.utils.daily_jobs.mark_beratungen_as_s8",
-        "mvd.mvd.doctype.mitgliedschaft.kontakt_handling.initial_rename_contacts"
+        "mvd.mvd.doctype.mitgliedschaft.kontakt_handling.initial_rename_contacts",
+        "mvd.mvd.doctype.postretouren_log.postretouren_log.start_post_retouren_process"
     ],
     "all": [
         "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue",

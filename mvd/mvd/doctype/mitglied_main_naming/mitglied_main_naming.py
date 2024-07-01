@@ -15,6 +15,9 @@ class MitgliedMainNaming(Document):
                                     ORDER BY `mitglied_id` DESC
                                     LIMIT 1
                                     """, as_dict=True)[0].last_id or 999999
+            if last_id < 999999:
+                last_id = 999999
+            
             new_id = last_id + 1
             self.mitglied_id = new_id
 
@@ -30,6 +33,9 @@ class MitgliedMainNaming(Document):
                                     ORDER BY `mitglied_nr_raw` DESC
                                     LIMIT 1
                                     """, as_dict=True)[0].last_nr or 4999999
+            if last_nr < 4999999:
+                last_nr = 4999999
+            
             new_nr = last_nr + 1
             self.mitglied_nr_raw = new_nr
 
@@ -51,16 +57,28 @@ def create_new_id(new_nr=False, existing_nr=False):
             'title': 'Bad Request'
         }
     
-    if "MV" in existing_nr or not existing_nr:
+    if not existing_nr:
         # create new ID
         new_mitglied_main_naming.set_new_id(existing_nr)
     else:
-        return {
-            'error': True,
-            'msg': "Bad Value (existing_nr)",
-            'code': 400,
-            'title': 'Bad Request'
-        }
+        try:
+            if "MV" in existing_nr:
+                # create new ID with existing_nr
+                new_mitglied_main_naming.set_new_id(existing_nr)
+            else:
+                return {
+                    'error': True,
+                    'msg': "Bad Value (existing_nr)",
+                    'code': 400,
+                    'title': 'Bad Request'
+                }
+        except:
+            return {
+                    'error': True,
+                    'msg': "Bad Value (existing_nr)",
+                    'code': 400,
+                    'title': 'Bad Request'
+                }
 
     # create new nr
     if new_nr:

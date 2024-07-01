@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils.data import today, getdate, now
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_ampelfarbe
+from mvd.mvd.doctype.mitgliedschaft.utils import get_ampelfarbe
 from mvd.mvd.doctype.region.region import _regionen_zuteilung
 from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint

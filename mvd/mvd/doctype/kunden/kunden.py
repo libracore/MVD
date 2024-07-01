@@ -822,12 +822,10 @@ def anlage_prozess(anlage_daten, status):
         hv_bar_bezahlt = False
         sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage='', massendruck=False)
     elif status == 'Interessent*in':
-        # erstelle ABL für Interessent*Innenbrief mit EZ
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
         mitgliedschaft.interessent_innenbrief_mit_ez = 1
         mitgliedschaft.save()
     elif status == 'Anmeldung':
-        # erstelle ABL für Anmeldung mit EZ
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
         mitgliedschaft.anmeldung_mit_ez = 1
         mitgliedschaft.save()
