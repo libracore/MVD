@@ -221,9 +221,8 @@ def auth_check(scope=SVCPF_SCOPE):
     except:
         frappe.log_error("{0}".format(response), 'auth_check failed, get new token')
         # get new token and try again
-        get_token(scope)
-        token = config.get_value(scope, 'api_token')
-        headers = {"authorization": "Bearer {token}".format(token=token)}
+        new_token = get_token(scope)
+        headers = {"authorization": "Bearer {token}".format(token=new_token)}
         response = requests.get(url, headers = headers)
         
         try:
@@ -276,9 +275,10 @@ def get_token(scope=SVCPF_SCOPE):
         token = response["access_token"]
         config.set_value(scope, 'api_token', token)
         config.set_value(scope, 'token_date', datetime.now())
+        return token
     except Exception as err:
         frappe.log_error("{0}\n\n{1}".format(err, response), 'get_token failed')
-    return
+    return None
 
 # ---------------------------------------------------
 # ---------------------------------------------------
