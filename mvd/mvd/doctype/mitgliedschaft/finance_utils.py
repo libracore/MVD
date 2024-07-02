@@ -397,9 +397,9 @@ def create_zahlungseingang_change_log_row(mitgliedschaft, status_alt):
     return
 
 def get_and_set_mitgliednr(mitgliedId):
-    from mvd.mvd.service_plattform.api import mitglieder_nummer_update
+    from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new_number
     try:
-        mitgliedNr = mitglieder_nummer_update(mitgliedId)['mitgliedNummer']
+        mitgliedNr = create_new_number(id=mitgliedId)['nr']
         frappe.db.set_value("Mitgliedschaft", mitgliedId, 'mitglied_nr', mitgliedNr)
     except Exception as err:
         frappe.log_error("Mitgliednummer für Mitglied {0} konnte nicht bezogen werden".format(mitgliedId), 'get_and_set_mitgliednr')
