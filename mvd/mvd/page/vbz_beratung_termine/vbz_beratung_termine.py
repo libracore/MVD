@@ -113,12 +113,12 @@ def get_alle_beratungs_termine(user):
     for freier_termin in freie_termine:
         freier_termin.von = frappe.utils.get_datetime(freier_termin.von)
         freier_termin.bis = frappe.utils.get_datetime(freier_termin.bis)
-        freier_termin.von_date = get_datetime(termin.von).strftime('%d.%m.%Y')
-        freier_termin.von_time = get_datetime(termin.von).strftime('%H:%M')
-        freier_termin.bis_time = get_datetime(termin.bis).strftime('%H:%M')
-        freier_termin.wochentag = _(get_datetime(termin.von).strftime('%A'))[:2]
+        freier_termin.von_date = get_datetime(freier_termin.von).strftime('%d.%m.%Y')
+        freier_termin.von_time = get_datetime(freier_termin.von).strftime('%H:%M')
+        freier_termin.bis_time = get_datetime(freier_termin.bis).strftime('%H:%M')
+        freier_termin.wochentag = _(get_datetime(freier_termin.von).strftime('%A'))[:2]
         freier_termin.sort_date = frappe.utils.getdate(freier_termin.von)
-        freier_termin.sektion_id = frappe.db.get_value("Termin Kontaktperson", termin.beraterinn, "sektion_id")
+        freier_termin.sektion_id = frappe.db.get_value("Termin Kontaktperson", freier_termin.beraterinn, "sektion_id")
     
     for freier_termin in freie_termine:
         if not erlaubte_sektionen or freier_termin.sektion_id in erlaubte_sektionen:
