@@ -219,6 +219,8 @@ def execute_sp_log(sp_log, manual_execution=False):
             if existing_failed_log < 1:
                 sp_log.neuanlage = 0
                 sp_log.update = 1
+                if not sp_log.mv_mitgliedschaft:
+                    sp_log.mv_mitgliedschaft = api_kwargs["mitgliedId"]
                 mitgliedschaft = frappe.get_doc("Mitgliedschaft", api_kwargs["mitgliedId"])
                 error_in_execution = mvm_update(mitgliedschaft, api_kwargs)
             else:
@@ -229,6 +231,7 @@ def execute_sp_log(sp_log, manual_execution=False):
     
     if error_in_execution:
         sp_log.status = 'Failed'
+        sp_log.retry_count = cint(sp_log.retry_count) + 1
         sp_log.add_comment('Comment', text='{0}'.format(error_in_execution))
     else:
         sp_log.status = 'Done'
