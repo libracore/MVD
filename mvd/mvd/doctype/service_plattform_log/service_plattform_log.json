@@ -12,6 +12,7 @@
   "immediately_executing",
   "cb_1",
   "mv_mitgliedschaft",
+  "retry_count",
   "section_data",
   "json"
  ],
@@ -80,9 +81,15 @@
    "fieldname": "immediately_executing",
    "fieldtype": "Check",
    "label": "Sofortige Ausf\u00fchrung"
+  },
+  {
+   "fieldname": "retry_count",
+   "fieldtype": "Int",
+   "label": "Error Retry Count",
+   "read_only": 1
   }
  ],
- "modified": "2024-02-20 13:50:25.698481",
+ "modified": "2024-07-03 12:10:18.482069",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform Log",
