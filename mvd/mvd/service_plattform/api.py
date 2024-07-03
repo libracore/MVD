@@ -106,7 +106,7 @@ def update_mvm(mvm, update):
             
             try:
                 if sp_connection.status_code != 204:
-                    frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), 'update_mvm failed')
+                    frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), '{0} > update_mvm'.format(sp_connection.status_code))
                     frappe.db.commit()
                     return 0
                 else:
@@ -148,7 +148,7 @@ def send_beratung(beratungs_data, beratung):
                     'json': "{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, beratungs_data)
                 }).insert(ignore_permissions=True)
 
-                frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, beratungs_data), 'send beratung failed')
+                frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, beratungs_data), '{0} > send_beratung'.format(sp_connection.status_code))
                 frappe.db.commit()
                 return
             else:
@@ -174,7 +174,7 @@ def send_beratung(beratungs_data, beratung):
                     'json': "{0}\n\n{1}".format(err, beratungs_data)
                 }).insert(ignore_permissions=True)
             
-            frappe.log_error("{0}\n\n{1}".format(err, beratungs_data), 'send beratung failed')
+            frappe.log_error("{0}\n\n{1}".format(err, beratungs_data), 'send_beratung failed')
             frappe.db.commit()
 
 def send_postnotiz_to_sp(postnotiz_for_sp):
@@ -190,7 +190,7 @@ def send_postnotiz_to_sp(postnotiz_for_sp):
             try:
                 sp_connection = requests.post(url, json = postnotiz_for_sp, headers = headers)
                 if sp_connection.status_code != 204:
-                    frappe.log_error("{0}\n\n{1}".format(sp_connection.status_code, str(postnotiz_for_sp)), 'send_postnotiz_to_sp failed')
+                    frappe.log_error("{0}\n\n{1}".format(sp_connection.status_code, str(postnotiz_for_sp)), '{0} > send_postnotiz_to_sp'.format(sp_connection.status_code))
                 return
             except Exception as err:
                 frappe.log_error("{0}".format(err), 'send_postnotiz_to_sp failed')
@@ -334,7 +334,7 @@ def sektionswechsel(mvm, sektion_code):
             
             try:
                 if sp_connection.status_code != 204:
-                    frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), 'sektionswechsel failed')
+                    frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), '{0} > sektionswechsel'.format(sp_connection.status_code))
                     frappe.db.commit()
                     return
                 else:
@@ -344,7 +344,7 @@ def sektionswechsel(mvm, sektion_code):
                 frappe.db.commit()
                 return
     else:
-        frappe.log_error("{0}".format(mvm), 'update_mvm deaktiviert')
+        frappe.log_error("{0}".format(mvm), 'sektionswechsel deaktiviert')
         return
 
 '''
@@ -370,15 +370,15 @@ def get_mitglied_data(**api_request):
                 data =  prepare_mvm_for_sp(mitgliedschaft)
                 return data
             else:
-                frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(404, 'Not Found', 'No Activ Mitglied found', frappe.utils.get_traceback(), str(api_request)), 'SP API Error!')
+                frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(404, 'Not Found', 'No Activ Mitglied found', frappe.utils.get_traceback(), str(api_request)), '404 > get_mitglied_data')
                 frappe.local.response.http_status_code = 404
                 frappe.local.response.message = 'No Activ Mitglied found'
         else:
-            frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(400, 'Bad Request', 'MitgliedNummer missing MV', frappe.utils.get_traceback(), str(api_request)), 'SP API Error!')
+            frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(400, 'Bad Request', 'MitgliedNummer missing MV', frappe.utils.get_traceback(), str(api_request)), '400 > get_mitglied_data')
             frappe.local.response.http_status_code = 400
             frappe.local.response.message = 'MitgliedNummer missing MV'
     else:
-        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(400, 'Bad Request', 'MitgliedNummer missing', frappe.utils.get_traceback(), str(api_request)), 'SP API Error!')
+        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(400, 'Bad Request', 'MitgliedNummer missing', frappe.utils.get_traceback(), str(api_request)), '400 > get_mitglied_data')
         frappe.local.response.http_status_code = 400
         frappe.local.response.message = 'MitgliedNummer missing'
 
@@ -414,9 +414,9 @@ def get_mitglied_from_mail(**api_request):
                 mitgl_list.append(mitgl.mitglied_nr)
             return mitgl_list
         else:
-            return raise_xxx(404, 'Not Found', 'No Activ Mitglied found', str(api_request))
+            return raise_xxx(404, 'Not Found', 'No Activ Mitglied found', daten=str(api_request), error_log_title='404 > get_mitglied_from_mail')
     else:
-        return raise_xxx(400, 'Bad Request', 'Emailadresse missing', str(api_request))
+        return raise_xxx(400, 'Bad Request', 'Emailadresse missing', daten=str(api_request), error_log_title='404 > get_mitglied_from_mail')
 
 '''
 Endpunkt für den Bezug einer neuen ID:
@@ -443,7 +443,7 @@ def naming_service_new_id(**api_request):
         frappe.local.response.message = response
         return
     else:
-        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(response['code'], response['title'], response['msg'], frappe.utils.get_traceback(), str(api_request)), 'SP API Error!')
+        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(response['code'], response['title'], response['msg'], frappe.utils.get_traceback(), str(api_request)), '{0} > naming_service_new_id'.format(response['code']))
         frappe.local.response.http_status_code = response['code']
         frappe.local.response.message = response['msg']
         return
@@ -460,12 +460,12 @@ def naming_service_new_number(**api_request):
             frappe.local.response.http_status_code = 200
             frappe.local.response.message = response
         else:
-            frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(response['code'], response['title'], response['msg'], str(api_request), ''), 'SP API Error!')
+            frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(response['code'], response['title'], response['msg'], str(api_request), ''), '{0} > naming_service_new_number'.format(response['code']))
             frappe.local.response.http_status_code = response['code']
             frappe.local.response.message = response['msg']
             return
     else:
-        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(400, 'Bad Request', 'ID missing', str(api_request), ''), 'SP API Error!')
+        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(400, 'Bad Request', 'ID missing', str(api_request), ''), '400 > naming_service_new_number')
         frappe.local.response.http_status_code = 400
         frappe.local.response.message = 'ID missing'
         return
@@ -483,7 +483,7 @@ def naechstes_jahr_geschuldet(**api_request):
         frappe.local.response.message = {"naechstesJahrGeschuldet": njg}
         return
     else:
-        return raise_xxx(400, 'Bad Request', 'ID missing', str(api_request))
+        return raise_xxx(400, 'Bad Request', 'ID missing', daten=str(api_request), error_log_title='400 > naechstes_jahr_geschuldet')
 
 # ---------------------------------------------------
 # ---------------------------------------------------

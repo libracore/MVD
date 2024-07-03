@@ -28,9 +28,9 @@ def api_request_check(kwargs):
             else:
                 return missing_keys
         else:
-            return raise_xxx(400, 'Bad Request', 'mitgliedId == 0', str(kwargs))
+            return raise_xxx(400, 'Bad Request', 'mitgliedId == 0', daten=str(kwargs), error_log_title='400 > api_request_check')
     else:
-        return raise_xxx(400, 'Bad Request', 'mitgliedId missing', str(kwargs))
+        return raise_xxx(400, 'Bad Request', 'mitgliedId missing', daten=str(kwargs), error_log_title='400 > api_request_check')
 
 def check_main_keys(kwargs):
     mandatory_keys = [
@@ -76,9 +76,9 @@ def check_main_keys(kwargs):
     '''
     for key in mandatory_keys:
         if key not in kwargs:
-            return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=key), daten=kwargs)
+            return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=key), daten=kwargs, error_log_title='400 > check_main_keys')
     if 'Geschenkmitgliedschaft' in kwargs:
-        return raise_xxx(400, 'Bad Request', 'Geschenkmitgliedschaft unbekannt', daten=kwargs)
+        return raise_xxx(400, 'Bad Request', 'Geschenkmitgliedschaft unbekannt', daten=kwargs, error_log_title='400 > check_main_keys')
     else:
         return False
 
@@ -95,9 +95,9 @@ def check_missing_address(kwargs):
                 if mitglied["postleitzahl"]:
                     return False
                 else:
-                    return raise_xxx(400, 'Bad Request', 'Postleitzahl in Mitglied Address missing', daten=kwargs)
+                    return raise_xxx(400, 'Bad Request', 'Postleitzahl in Mitglied Address missing', daten=kwargs, error_log_title='400 > check_missing_address')
     
-    return raise_xxx(400, 'Bad Request', 'Mitglied Address missing', daten=kwargs)
+    return raise_xxx(400, 'Bad Request', 'Mitglied Address missing', daten=kwargs, error_log_title='400 > check_missing_address')
 
 '''
 Schritt 2:
@@ -131,8 +131,8 @@ def create_sp_log(kwargs):
 API Returns
 '''
 # Error Return
-def raise_xxx(code, title, message, daten=None):
-    frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(code, title, message, frappe.utils.get_traceback(), daten or ''), 'SP API Error!')
+def raise_xxx(code, title, message, daten=None, error_log_title='SP API Error!'):
+    frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(code, title, message, frappe.utils.get_traceback(), daten or ''), error_log_title)
     frappe.local.response.http_status_code = code
     frappe.local.response.message = message
     return ['{code} {title}'.format(code=code, title=title), {
