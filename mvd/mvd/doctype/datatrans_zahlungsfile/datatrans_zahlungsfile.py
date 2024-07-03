@@ -97,7 +97,7 @@ class DatatransZahlungsfile(Document):
                                 entry.mitglied_id = mitgliedschaft_lookup[0].name
                                 entry.mitglied_nr = mitgliedschaft_lookup[0].mitglied_nr
                                 entry.mitgliedtyp_c = mitgliedschaft_lookup[0].mitgliedtyp_c
-                                entry.adressblock = mitgliedschaft_lookup[0].adressblock.replace("\n", ", ")
+                                entry.adressblock = mitgliedschaft_lookup[0].adressblock.replace("\n", ", ") if mitgliedschaft_lookup[0].adressblock else 'Keine Adresse'
                                 entry.online_haftpflicht = mitgliedschaft_lookup[0].online_haftpflicht
                                 entry.online_gutschrift = mitgliedschaft_lookup[0].online_gutschrift
                                 entry.online_betrag = mitgliedschaft_lookup[0].online_betrag
