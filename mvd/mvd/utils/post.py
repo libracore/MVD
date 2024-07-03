@@ -12,7 +12,7 @@ def _post_retouren(data):
         if data["mitgliedId"] > 0:
             create_sp_log(data["mitgliedId"], True, data)
             if not frappe.db.exists("Mitgliedschaft", data["mitgliedId"]):
-                return raise_xxx(400, 'Bad Request', 'Unknown mitgliedId', data)
+                return raise_xxx(400, 'Bad Request', 'Unknown mitgliedId', data=data, error_log_title='400 > _post_retouren')
             else:
                 missing_keys = check_main_keys(data, 'retouren')
                 if not missing_keys:
@@ -20,13 +20,13 @@ def _post_retouren(data):
                     if job == 1:
                         return raise_200()
                     else:
-                        return raise_xxx(500, 'Internal Server Error', '{error}'.format(error=job), data)
+                        return raise_xxx(500, 'Internal Server Error', '{error}'.format(error=job), data=data, error_log_title='500 > _post_retouren')
                 else:
-                    return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=missing_keys), data)
+                    return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=missing_keys), data=data, error_log_title='400 > _post_retouren')
         else:
-            return raise_xxx(400, 'Bad Request', 'mitgliedId == 0', data)
+            return raise_xxx(400, 'Bad Request', 'mitgliedId == 0', data=data, error_log_title='400 > _post_retouren')
     else:
-        return raise_xxx(400, 'Bad Request', 'mitgliedId missing', data)
+        return raise_xxx(400, 'Bad Request', 'mitgliedId missing', data=data, error_log_title='400 > _post_retouren')
 
 # Post Rückmeldungen
 def _post_responses(data):
@@ -34,18 +34,18 @@ def _post_responses(data):
         if data["mitgliedId"] > 0:
             create_sp_log(data["mitgliedId"], False, data)
             if not frappe.db.exists("Mitgliedschaft", data["mitgliedId"]):
-                return raise_xxx(400, 'Bad Request', 'Unknown mitgliedId', data)
+                return raise_xxx(400, 'Bad Request', 'Unknown mitgliedId', data=data, error_log_title='400 > _post_responses')
             else:
                 missing_keys = check_main_keys(data, 'responses')
                 if not missing_keys:
                     # hier würde ich nun die Meldungen verarbeiten
                     return raise_200()
                 else:
-                    return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=missing_keys), data)
+                    return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=missing_keys), data=data, error_log_title='400 > _post_responses')
         else:
-            return raise_xxx(400, 'Bad Request', 'mitgliedId == 0', data)
+            return raise_xxx(400, 'Bad Request', 'mitgliedId == 0', data=data, error_log_title='400 > _post_responses')
     else:
-        return raise_xxx(400, 'Bad Request', 'mitgliedId missing', data)
+        return raise_xxx(400, 'Bad Request', 'mitgliedId missing', data=data, error_log_title='400 > _post_responses')
 
 # SP Log
 def create_sp_log(mitgliedschaft, retoure, data):
@@ -123,8 +123,8 @@ def check_main_keys(data, typ):
         return False
 
 # Status Returns
-def raise_xxx(code, title, message, data=None):
-    frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(code, title, message, frappe.utils.get_traceback(), data or ''), 'SP (Post) API Error!')
+def raise_xxx(code, title, message, data=None, error_log_title='SP (Post) API Error!'):
+    frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(code, title, message, frappe.utils.get_traceback(), data or ''), error_log_title)
     frappe.local.response.http_status_code = code
     frappe.local.response.message = message
     return ['{code} {title}'.format(code=code, title=title), {

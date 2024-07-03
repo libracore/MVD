@@ -1733,13 +1733,13 @@ def mvm_mitglieder(kwargs):
         if kwargs["mitgliedId"] > 0:
             return check_update_vs_neuanlage(kwargs)
         else:
-            return raise_xxx(400, 'Bad Request', 'mitgliedId == 0', str(kwargs))
+            return raise_xxx(400, 'Bad Request', 'mitgliedId == 0', daten=str(kwargs), error_log_title='400 > mvm_mitglieder')
     else:
-        return raise_xxx(400, 'Bad Request', 'mitgliedId missing', str(kwargs))
+        return raise_xxx(400, 'Bad Request', 'mitgliedId missing', daten=str(kwargs), error_log_title='400 > mvm_mitglieder')
 
 # Status Returns
-def raise_xxx(code, title, message, daten=None):
-    frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(code, title, message, frappe.utils.get_traceback(), daten or ''), 'SP API Error!')
+def raise_xxx(code, title, message, daten=None, error_log_title='SP API Error!'):
+    frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(code, title, message, frappe.utils.get_traceback(), daten or ''), error_log_title)
     frappe.local.response.http_status_code = code
     frappe.local.response.message = message
     return ['{code} {title}'.format(code=code, title=title), {
@@ -1798,9 +1798,9 @@ def check_main_keys(kwargs):
     ]
     for key in mandatory_keys:
         if key not in kwargs:
-            return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=key), daten=kwargs)
+            return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=key), daten=kwargs, error_log_title='400 > check_main_keys')
     if 'Geschenkmitgliedschaft' in kwargs:
-        return raise_xxx(400, 'Bad Request', 'Geschenkmitgliedschaft unbekannt', daten=kwargs)
+        return raise_xxx(400, 'Bad Request', 'Geschenkmitgliedschaft unbekannt', daten=kwargs, error_log_title='400 > check_main_keys')
     else:
         return False
 

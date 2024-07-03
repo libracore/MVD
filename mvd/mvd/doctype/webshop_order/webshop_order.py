@@ -222,7 +222,7 @@ def create_order_from_api(kwargs=None):
             }).insert(ignore_permissions=True)
             return raise_200()
         except Exception as err:
-            return raise_xxx(500, '', err, daten=kwargs)
+            return raise_xxx(500, '', err, daten=kwargs, error_log_title='500 > create_order_from_api')
 
 # Success Return
 def raise_200(answer='Success'):
@@ -231,8 +231,8 @@ def raise_200(answer='Success'):
     return ['200 Success', answer]
 
 # Error Return
-def raise_xxx(code, title, message, daten=None):
-    frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(code, title, message, frappe.utils.get_traceback(), daten or ''), 'SP API Error!')
+def raise_xxx(code, title, message, daten=None, error_log_title='SP API Error!'):
+    frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(code, title, message, frappe.utils.get_traceback(), daten or ''), error_log_title)
     frappe.local.response.http_status_code = code
     frappe.local.response.message = message
     return ['{code} {title}'.format(code=code, title=title), {

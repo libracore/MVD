@@ -464,13 +464,13 @@ def _get_beratungs_dokument(beratungs_dokument):
             }
             
         else:
-            return raise_xxx(400, 'Bad Request', 'file not found')
+            return raise_xxx(400, 'Bad Request', 'file not found', error_log_title='400 > _get_beratungs_dokument')
     else:
-        return raise_xxx(400, 'Bad Request', 'beratungs_dokument missing')
+        return raise_xxx(400, 'Bad Request', 'beratungs_dokument missing', error_log_title='400 > _get_beratungs_dokument')
 
 # Status Returns
-def raise_xxx(code, title, message):
-    frappe.log_error("{0}\n{1}\n{2}\n\n{3}".format(code, title, message, frappe.utils.get_traceback()), 'SP API Error!')
+def raise_xxx(code, title, message, error_log_title='SP API Error!'):
+    frappe.log_error("{0}\n{1}\n{2}\n\n{3}".format(code, title, message, frappe.utils.get_traceback()), error_log_title)
     frappe.local.response.http_status_code = code
     frappe.local.response.message = message
     return ['{code} {title}'.format(code=code, title=title), {
