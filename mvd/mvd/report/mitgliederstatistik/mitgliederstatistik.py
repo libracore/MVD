@@ -6,13 +6,15 @@ import frappe
 from frappe import _
 
 def execute(filters=None):
-    columns = get_columns()
+    columns = get_columns(filters)
     data = get_data(filters)
     return columns, data
 
-def get_columns():
+def get_columns(filters):
+    typ = filters.mitgliedschafts_typ
+    labelMitglieder = "Mitglieder (" + typ + ")"
     return[
-        {"label": _("Mitglieder"), "fieldname": "mitglieder", "fieldtype": "Data", "width": 270},
+        {"label": _(labelMitglieder), "fieldname": "mitglieder", "fieldtype": "Data", "width": 270},
         {"label": _("Berechnung"), "fieldname": "berechnung", "fieldtype": "Data", "width": 580},
         {"label": _("Anzahl"), "fieldname": "anzahl", "fieldtype": "Data"},
         {"label": _("Total"), "fieldname": "total", "fieldtype": "Data"},
