@@ -83,6 +83,10 @@ def create_mitgliedschaften_pro_file(datatrans_zahlungsfile):
     valuta_date = getdate(datatrans_zahlungsfile.datatrans_entries[0].transdatetime)
     file_date = add_to_date(valuta_date, days=1)
     
+    # Rundung aufgrund Python Float Issue
+    verbuchbare_zahlungen['betrag'] = "{:.2f}".format(round(verbuchbare_zahlungen['betrag'], 2))
+    nicht_verbuchbare_zahlungen['betrag'] = "{:.2f}".format(round(nicht_verbuchbare_zahlungen['betrag'], 2))
+
     main_html = '''
         <h1>Zahlungsreport Datatrans  (Valuta bis {valuta})</h1>
         <h2>Zahlungsdatei</h2>
