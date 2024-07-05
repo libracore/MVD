@@ -5,6 +5,7 @@
 from datetime import datetime
 from mvd.mvd.doctype.postretouren_log.libracore_facade import LibraCoreFacade
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
+from frappe.utils.data import getdate
 
 class PostNotiz:
     mitgliedNummer = ''
@@ -123,8 +124,8 @@ class PostRetourHandler:
         pr.retoureSendungsbild = columns[16]
         pr.datumErfasstPost = datetime.strptime(columns[0], '%d.%m.%Y').date()
         pr.neueAdresse = PostRetourAdresse()
-        pr.neueAdresse.validFrom = datetime.fromisoformat(columns[29]).date() if len(columns[29]) > 0 else None
-        pr.neueAdresse.validTo = datetime.fromisoformat(columns[30]).date() if len(columns[30]) > 0 else None
+        pr.neueAdresse.validFrom = getdate(columns[29]) if len(columns[29]) > 0 else None
+        pr.neueAdresse.validTo = getdate(columns[30]) if len(columns[30]) > 0 else None
         pr.neueAdresse.strasse = columns[42]
         pr.neueAdresse.hausnummer = columns[43]
         pr.neueAdresse.hausnummerZusatz = columns[44]
