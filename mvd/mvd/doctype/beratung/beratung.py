@@ -613,45 +613,55 @@ def anz_beratungen_ohne_termine(mv_mitgliedschaft):
 
 # die nachfolgende Methode erstellt ggf. eine Beratung und n zugehörige Termin(e) aus einer Mitgliedschaft heraus
 @frappe.whitelist()
-def create_neue_beratung(mitgliedschaft, termin_block_data, art, ort, berater_in, telefonnummer, notiz, beratung=None):
-    termin_block_data = json.loads(termin_block_data)
-    if not beratung:
+def create_neue_beratung(mitgliedschaft, termin_block_data, art, ort, berater_in, telefonnummer, notiz, beratung=None, beratung_only=False):
+    if cint(beratung_only) !=1:
+        termin_block_data = json.loads(termin_block_data)
+        if not beratung:
+            # erstelle neue Beratung
+            beratung = frappe.get_doc({
+                "doctype": "Beratung",
+                "sektion_id": frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id'),
+                "mv_mitgliedschaft": mitgliedschaft,
+                "kontaktperson": berater_in,
+                "notiz": "Terminnotiz:<br>{0}".format(notiz)
+            })
+            beratung.insert()
+            for termin in termin_block_data:
+                row = beratung.append('termin', {})
+                row.von = "{0} {1}".format(termin['date'], termin['von'])
+                row.bis = "{0} {1}".format(termin['date'], termin['bis'])
+                row.art = art
+                row.ort = ort
+                row.berater_in = berater_in
+                row.telefonnummer = telefonnummer
+                row.abp_referenz = termin['referenz']
+                row.notiz = notiz
+            beratung.save()
+        else:
+            # füge Termin zu bestehenden Beratung hinzu
+            beratung = frappe.get_doc("Beratung", beratung)
+            for termin in termin_block_data:
+                row = beratung.append('termin', {})
+                row.von = "{0} {1}".format(termin['date'], termin['von'])
+                row.bis = "{0} {1}".format(termin['date'], termin['bis'])
+                row.art = art
+                row.ort = ort
+                row.berater_in = berater_in
+                row.telefonnummer = telefonnummer
+                row.abp_referenz = termin['referenz']
+                row.notiz = notiz
+            beratung.save()
+        
+        return beratung.name
+    else:
         # erstelle neue Beratung
         beratung = frappe.get_doc({
             "doctype": "Beratung",
             "sektion_id": frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id'),
-            "mv_mitgliedschaft": mitgliedschaft,
-            "kontaktperson": berater_in,
-            "notiz": "Terminnotiz:<br>{0}".format(notiz)
+            "mv_mitgliedschaft": mitgliedschaft
         })
         beratung.insert()
-        for termin in termin_block_data:
-            row = beratung.append('termin', {})
-            row.von = "{0} {1}".format(termin['date'], termin['von'])
-            row.bis = "{0} {1}".format(termin['date'], termin['bis'])
-            row.art = art
-            row.ort = ort
-            row.berater_in = berater_in
-            row.telefonnummer = telefonnummer
-            row.abp_referenz = termin['referenz']
-            row.notiz = notiz
-        beratung.save()
-    else:
-        # füge Termin zu bestehenden Beratung hinzu
-        beratung = frappe.get_doc("Beratung", beratung)
-        for termin in termin_block_data:
-            row = beratung.append('termin', {})
-            row.von = "{0} {1}".format(termin['date'], termin['von'])
-            row.bis = "{0} {1}".format(termin['date'], termin['bis'])
-            row.art = art
-            row.ort = ort
-            row.berater_in = berater_in
-            row.telefonnummer = telefonnummer
-            row.abp_referenz = termin['referenz']
-            row.notiz = notiz
-        beratung.save()
-    
-    return beratung.name
+        return beratung.name
 
 @frappe.whitelist()
 def remove_comments(comments):

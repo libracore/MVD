@@ -51,6 +51,10 @@ frappe.ui.form.on('Mitgliedschaft', {
             
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
                 
+                frm.add_custom_button(__("Beratung"),  function() {
+                    erstelle_beratung_only(frm);
+                }, __("Erstelle"));
+
                 frm.add_custom_button(__("Beratungs Termin"),  function() {
                     erstelle_beratung(frm);
                 }, __("Erstelle"));
@@ -2585,6 +2589,31 @@ function erstellung_faktura_kunde(frm) {
 
 function erstelle_beratung(frm) {
     termin_quick_entry(frm);
+}
+
+function erstelle_beratung_only(frm) {
+    var kwargs = {
+        'beratung_only': 1,
+        'termin_block_data': '',
+        'art': '',
+        'ort':'',
+        'berater_in': '',
+        'telefonnummer': '',
+        'notiz': '',
+        'mitgliedschaft': cur_frm.doc.name
+    }
+    frappe.call({
+        method: "mvd.mvd.doctype.beratung.beratung.create_neue_beratung",
+        args: kwargs,
+        freeze: true,
+        freeze_message: 'Erstelle Beratung...',
+        callback: function(r)
+        {
+            if (r.message) {
+                frappe.set_route("Form", "Beratung", r.message);
+            }
+        }
+    });
 }
 
 function termin_quick_entry(frm) {
