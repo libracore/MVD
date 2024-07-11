@@ -71,14 +71,19 @@ def relink_fr(sinv, event):
             frappe.db.commit()
             sinv.zugehoerige_fr = None
 
-def remove_admin_mails(self, event):
+def remove_admin_and_guest_mails(self, event):
     if self.recipients:
+        removed_row = False
         for recipient in self.recipients:
             if recipient.recipient == 'Administrator ' or \
-            'admin@example.com' in recipient.recipient:
-                if len(self.recipients) > 1:
-                    # entferne Admin Zeile
-                    self.remove(recipient)
-                    self.save()
-                else:
-                    self.delete()
+            'admin@example.com' in recipient.recipient or \
+            recipient.recipient == 'Guest ' or \
+            'guest@example.com' in recipient.recipient:
+                # entferne Admin/Guest Zeile
+                self.remove(recipient)
+                removed_row = True
+        if removed_row:
+            if len(self.recipients) > 0:
+                self.save()
+            else:
+                self.delete()
