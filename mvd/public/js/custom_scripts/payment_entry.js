@@ -94,7 +94,8 @@ function mitgliedschaft_zuweisen(frm) {
                 frappe.call({
                     method: "mvd.mvd.doctype.camt_import.utils.mitgliedschaft_zuweisen",
                     args:{
-                            'mitgliedschaft': values.mitgliedschaft
+                            'mitgliedschaft': values.mitgliedschaft,
+                            'pe_sektion': cur_frm.doc.sektion_id
                     },
                     freeze: true,
                     freeze_message: 'Weise Mitgliedschaft zu...',

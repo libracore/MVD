@@ -282,6 +282,7 @@ def verbuche_matches(camt_import):
 def suche_mitgliedschaft_aus_pe(payment_entry):
     data = []
     pe = frappe.get_doc("Payment Entry", payment_entry)
+    pe_sektion = pe.sektion_id
     try:
         # suche alte Zahlungen anhand IBAN
         remarks = pe.remarks_clone.split("IBAN: ")[1]
@@ -295,26 +296,27 @@ def suche_mitgliedschaft_aus_pe(payment_entry):
             if len(other_pes) > 0:
                 for entry in other_pes:
                     unabhaengiger_debitor = frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'unabhaengiger_debitor')
-                    if int(unabhaengiger_debitor) == 1:
-                        data.append({
-                            'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_vorname') or '',
-                            'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_nachname') or '',
-                            'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_firma') or '',
-                            'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
-                            'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
-                            'mitgliedschaft': entry.mitgliedschaft,
-                            'quelle': 'IBAN'
-                        })
-                    else:
-                        data.append({
-                            'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'vorname_1') or '',
-                            'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'nachname_1') or '',
-                            'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'firma') or '',
-                            'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
-                            'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
-                            'mitgliedschaft': entry.mitgliedschaft,
-                            'quelle': 'IBAN'
-                        })
+                    if pe_sektion == frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id'):
+                        if int(unabhaengiger_debitor) == 1:
+                            data.append({
+                                'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_vorname') or '',
+                                'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_nachname') or '',
+                                'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_firma') or '',
+                                'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
+                                'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
+                                'mitgliedschaft': entry.mitgliedschaft,
+                                'quelle': 'IBAN'
+                            })
+                        else:
+                            data.append({
+                                'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'vorname_1') or '',
+                                'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'nachname_1') or '',
+                                'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'firma') or '',
+                                'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
+                                'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
+                                'mitgliedschaft': entry.mitgliedschaft,
+                                'quelle': 'IBAN'
+                            })
     except:
         pass
     
@@ -327,26 +329,27 @@ def suche_mitgliedschaft_aus_pe(payment_entry):
     if len(alte_rechnungen) > 0:
         for entry in alte_rechnungen:
             unabhaengiger_debitor = frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'unabhaengiger_debitor')
-            if int(unabhaengiger_debitor) == 1:
-                data.append({
-                    'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_vorname') or '',
-                    'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_nachname') or '',
-                    'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_firma') or '',
-                    'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
-                    'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
-                    'mitgliedschaft': entry.mitgliedschaft,
-                        'quelle': 'Rechnung'
-                })
-            else:
-                data.append({
-                    'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'vorname_1') or '',
-                    'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'nachname_1') or '',
-                    'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'firma') or '',
-                    'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
-                    'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
-                    'mitgliedschaft': entry.mitgliedschaft,
-                        'quelle': 'Rechnung'
-                })
+            if pe_sektion == frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id'):
+                if int(unabhaengiger_debitor) == 1:
+                    data.append({
+                        'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_vorname') or '',
+                        'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_nachname') or '',
+                        'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_firma') or '',
+                        'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
+                        'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
+                        'mitgliedschaft': entry.mitgliedschaft,
+                            'quelle': 'Rechnung'
+                    })
+                else:
+                    data.append({
+                        'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'vorname_1') or '',
+                        'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'nachname_1') or '',
+                        'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'firma') or '',
+                        'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
+                        'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
+                        'mitgliedschaft': entry.mitgliedschaft,
+                            'quelle': 'Rechnung'
+                    })
     
     # suche Fakultative Rechnungen anhand QRR-Referenz
     alte_rechnungen = frappe.db.sql("""SELECT
@@ -357,33 +360,36 @@ def suche_mitgliedschaft_aus_pe(payment_entry):
     if len(alte_rechnungen) > 0:
         for entry in alte_rechnungen:
             unabhaengiger_debitor = frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'unabhaengiger_debitor')
-            if int(unabhaengiger_debitor) == 1:
-                data.append({
-                    'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_vorname') or '',
-                    'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_nachname') or '',
-                    'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_firma') or '',
-                    'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
-                    'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
-                    'mitgliedschaft': entry.mitgliedschaft,
-                        'quelle': 'Fakultative Rechnung'
-                })
-            else:
-                data.append({
-                    'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'vorname_1') or '',
-                    'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'nachname_1') or '',
-                    'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'firma') or '',
-                    'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
-                    'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
-                    'mitgliedschaft': entry.mitgliedschaft,
-                        'quelle': 'Fakultative Rechnung'
-                })
+            if pe_sektion == frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id'):
+                if int(unabhaengiger_debitor) == 1:
+                    data.append({
+                        'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_vorname') or '',
+                        'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_nachname') or '',
+                        'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'rg_firma') or '',
+                        'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
+                        'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
+                        'mitgliedschaft': entry.mitgliedschaft,
+                            'quelle': 'Fakultative Rechnung'
+                    })
+                else:
+                    data.append({
+                        'vorname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'vorname_1') or '',
+                        'nachname': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'nachname_1') or '',
+                        'firma': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'firma') or '',
+                        'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
+                        'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
+                        'mitgliedschaft': entry.mitgliedschaft,
+                            'quelle': 'Fakultative Rechnung'
+                    })
     
     return data
 
 @frappe.whitelist()
-def mitgliedschaft_zuweisen(mitgliedschaft, faktura=False):
+def mitgliedschaft_zuweisen(mitgliedschaft, faktura=False, pe_sektion=None):
     if not faktura:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+        if pe_sektion and pe_sektion != mitgliedschaft.sektion_id:
+            frappe.throw("Die Sektion der Mitgliedschaft stimmt nicht mit der Sektion der Zahlung überein!")
         if mitgliedschaft.rg_kunde:
             return {
                 'mitgliedschaft': mitgliedschaft.name,
@@ -396,6 +402,8 @@ def mitgliedschaft_zuweisen(mitgliedschaft, faktura=False):
             }
     else:
         faktura = frappe.get_doc("Kunden", mitgliedschaft)
+        if pe_sektion and pe_sektion != faktura.sektion_id:
+            frappe.throw("Die Sektion des Faktura-Kunden stimmt nicht mit der Sektion der Zahlung überein!")
         if faktura.mv_mitgliedschaft:
             mitgliedschaft = frappe.get_doc("Mitgliedschaft", faktura.mv_mitgliedschaft)
             if mitgliedschaft.rg_kunde:
