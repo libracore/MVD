@@ -7,14 +7,15 @@ import frappe
 from frappe.model.document import Document
 import json
 from mvd.mvd.service_plattform.api import send_postnotiz_to_sp
+from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
 
 class Postnotiz(Document):
     def send_to_sp(self):
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mitgliedid)
         json_to_send = {
-            "mitgliedId": self.mitgliedid,
-            "mitgliedNummer": self.mitgliednummer,
             "kategorie": self.kategorie,
-            "notiz": self.notiz
+            "notiz": self.notiz,
+            "mitglied": prepare_mvm_for_sp(mitgliedschaft)
         }
         send_postnotiz_to_sp(json_to_send)
         return
