@@ -21,6 +21,7 @@ class Postnotiz(Document):
         return
 
 def create_postnotiz(postnotiz, postretour, postretouren_log):
+    job_status = None
     try:
         new_postnotiz = frappe.get_doc({
             'doctype': 'Postnotiz',
@@ -35,7 +36,10 @@ def create_postnotiz(postnotiz, postretour, postretouren_log):
         new_postnotiz.insert(ignore_permissions=True)
         frappe.db.commit()
         
-        return 1
+        job_status = 1
         
     except Exception as err:
-        return err
+        job_status = err
+        pass
+
+    return job_status
