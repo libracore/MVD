@@ -139,7 +139,7 @@ class LibraCoreFacade:
     def set_postretouren_status(self, postretouren_log):
         has_warnings_or_errors = False
         for log in postretouren_log.logs:
-            if log.type in ("Warning", "Error"):
+            if log.type == "Error":
                 has_warnings_or_errors = True
         
         if has_warnings_or_errors:
@@ -163,15 +163,15 @@ class LibraCoreFacade:
         create_postnotiz_job = create_postnotiz(postnotiz, postretour, postretouren_log.name)
         if create_postnotiz_job != 1:
             self.log("{0}: \n{1}".format(str(create_postnotiz_job), frappe.utils.get_traceback()), postretouren_log, "Error")
-
-        # If section is Zurich, create PostNotizForServicePlatform object and send to SP4
-        if frappe.db.get_value("Mitgliedschaft", postretour.mitgliedId, "sektion_id") == 'MVZH':
-            postnotiz_for_sp = PostNotizForServicePlatform()
-            postnotiz_for_sp.mitgliedId = postretour.mitgliedId
-            postnotiz_for_sp.mitgliedNummer = postnotiz.mitgliedNummer
-            postnotiz_for_sp.kategorie = postnotiz.kategorie
-            postnotiz_for_sp.notiz = postnotiz.notiz
-            self.send_to_sp4(postnotiz_for_sp)
+        else:
+            # If section is Zurich, create PostNotizForServicePlatform object and send to SP4
+            if frappe.db.get_value("Mitgliedschaft", postretour.mitgliedId, "sektion_id") == 'MVZH':
+                postnotiz_for_sp = PostNotizForServicePlatform()
+                postnotiz_for_sp.mitgliedId = postretour.mitgliedId
+                postnotiz_for_sp.mitgliedNummer = postnotiz.mitgliedNummer
+                postnotiz_for_sp.kategorie = postnotiz.kategorie
+                postnotiz_for_sp.notiz = postnotiz.notiz
+                self.send_to_sp4(postnotiz_for_sp)
         return
 
     def send_to_sp4(self, postnotiz_for_sp):
