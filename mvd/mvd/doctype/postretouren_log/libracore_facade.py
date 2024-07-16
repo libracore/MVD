@@ -175,11 +175,12 @@ class LibraCoreFacade:
         return
 
     def send_to_sp4(self, postnotiz_for_sp):
+        from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", postnotiz_for_sp.mitgliedId)
         json_to_send = {
-            "mitgliedId": postnotiz_for_sp.mitgliedId,
-            "mitgliedNummer": postnotiz_for_sp.mitgliedNummer if str(postnotiz_for_sp.mitgliedNummer).startswith("MV") else "MV{0}".format(postnotiz_for_sp.mitgliedNummer),
             "kategorie": postnotiz_for_sp.kategorie,
-            "notiz": postnotiz_for_sp.notiz
+            "notiz": postnotiz_for_sp.notiz,
+            "mitglied": prepare_mvm_for_sp(mitgliedschaft)
         }
         send_postnotiz_to_sp(json_to_send)
         return
