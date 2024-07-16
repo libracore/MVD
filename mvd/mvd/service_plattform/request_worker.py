@@ -608,7 +608,7 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
                 else:
                     kuendigung = mitgliedschaft.kuendigung
             else:
-                if sektion_id == 'MVZH':
+                if sektion_id == 'MVZH' and status_c != 'Wegzug':
                     kuendigung = kwargs['kuendigungPer'].split("T")[0]
                 else:
                     kuendigung = mitgliedschaft.kuendigung
