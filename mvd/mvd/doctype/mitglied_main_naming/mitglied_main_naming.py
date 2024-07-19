@@ -19,7 +19,7 @@ class MitgliedMainNaming(Document):
                                     AND `creation` BETWEEN '{1} 00:00:00' AND '{1} 23:59:59'
                                     ORDER BY `creation` DESC
                                     LIMIT 2
-                                    """.format(existing_nr, '2024-07-01'), as_dict=True)
+                                    """.format(existing_nr, today()), as_dict=True)
             if len(same_day_requests) > 0:
                 same_day_request_data = frappe.db.sql("""SELECT `status_c`, `sektion_id` FROM `tabMitgliedschaft` WHERE `name` = '{0}'""".format(same_day_requests[0].mitglied_id), as_dict=True)
                 if same_day_request_data[0].status_c == 'Zuzug':
