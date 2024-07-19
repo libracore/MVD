@@ -251,7 +251,6 @@ def execute_sp_log(sp_log, manual_execution=False):
                         mitgliedschaft = frappe.get_doc("Mitgliedschaft", sp_log.mv_mitgliedschaft)
                         api_kwargs['mitgliedId'] = sp_log.mv_mitgliedschaft
                         error_in_execution = mvm_update(mitgliedschaft, api_kwargs)
-                        mitglied_main_naming = frappe.get_doc("Mitglied Main Naming", )
             # END: MVZH Sepcial Case (#1089; Doppelte Zuzüge)
 
             if not mvzh_affected:
