@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils.data import today
 
 class MitgliedMainNaming(Document):
     def set_new_id(self, existing_nr):
@@ -43,12 +44,6 @@ class MitgliedMainNaming(Document):
             self.mitglied_nr = mitglied_nr
 
 def create_new_id(new_nr=False, existing_nr=False):
-    # create record
-    new_mitglied_main_naming = frappe.get_doc({
-        'doctype': "Mitglied Main Naming"
-    })
-    new_mitglied_main_naming.insert(ignore_permissions=True)
-
     if new_nr and existing_nr:
         return {
             'error': True,
@@ -56,6 +51,12 @@ def create_new_id(new_nr=False, existing_nr=False):
             'code': 400,
             'title': 'Bad Request'
         }
+    
+    # create record
+    new_mitglied_main_naming = frappe.get_doc({
+        'doctype': "Mitglied Main Naming"
+    })
+    new_mitglied_main_naming.insert(ignore_permissions=True)
     
     if not existing_nr:
         # create new ID
