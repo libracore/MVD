@@ -5,23 +5,50 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils.data import today
 
 class MitgliedMainNaming(Document):
     def set_new_id(self, existing_nr):
-        if not self.mitglied_id:
-            last_id = frappe.db.sql("""
-                                    SELECT `mitglied_id` AS `last_id`
+        # MVZH Sepcial Case (#1089; Doppelte Zuzüge)
+        affected = False
+        if existing_nr:
+            same_day_requests = frappe.db.sql("""
+                                    SELECT `mitglied_id`
                                     FROM `tabMitglied Main Naming`
-                                    ORDER BY `mitglied_id` DESC
-                                    LIMIT 1
-                                    """, as_dict=True)[0].last_id or 999999
-            if last_id < 999999:
-                last_id = 999999
-            
-            new_id = last_id + 1
-            self.mitglied_id = new_id
+                                    WHERE `mitglied_nr` = '{0}'
+                                    AND `creation` BETWEEN '{1} 00:00:00' AND '{1} 23:59:59'
+                                    ORDER BY `creation` DESC
+                                    LIMIT 2
+                                    """.format(existing_nr, '2024-07-01'), as_dict=True)
+            if len(same_day_requests) > 0:
+                same_day_request_data = frappe.db.sql("""SELECT `status_c`, `sektion_id` FROM `tabMitgliedschaft` WHERE `name` = '{0}'""".format(same_day_requests[0].mitglied_id), as_dict=True)
+                if same_day_request_data[0].status_c == 'Zuzug':
+                    affected = same_day_requests[0].mitglied_id
+                if not affected and len(same_day_requests) > 1:
+                    same_day_request_data = frappe.db.sql("""SELECT `status_c`, `sektion_id` FROM `tabMitgliedschaft` WHERE `name` = '{0}'""".format(same_day_requests[1].mitglied_id), as_dict=True)
+                    if same_day_request_data[1].sektion_id == 'MVZH':
+                        affected = same_day_requests[1].mitglied_id
+        # END: MVZH Sepcial Case (#1089; Doppelte Zuzüge)
 
-            if existing_nr:
+        if not self.mitglied_id:
+            if not affected:
+                last_id = frappe.db.sql("""
+                                        SELECT `mitglied_id` AS `last_id`
+                                        FROM `tabMitglied Main Naming`
+                                        ORDER BY `mitglied_id` DESC
+                                        LIMIT 1
+                                        """, as_dict=True)[0].last_id or 999999
+                if last_id < 999999:
+                    last_id = 999999
+                
+                new_id = last_id + 1
+                self.mitglied_id = new_id
+
+                if existing_nr:
+                    self.mitglied_nr = existing_nr
+                    self.mitglied_nr_raw = int(existing_nr.replace("MV", ""))
+            else:
+                self.mitglied_id = affected
                 self.mitglied_nr = existing_nr
                 self.mitglied_nr_raw = int(existing_nr.replace("MV", ""))
 
@@ -43,12 +70,6 @@ class MitgliedMainNaming(Document):
             self.mitglied_nr = mitglied_nr
 
 def create_new_id(new_nr=False, existing_nr=False):
-    # create record
-    new_mitglied_main_naming = frappe.get_doc({
-        'doctype': "Mitglied Main Naming"
-    })
-    new_mitglied_main_naming.insert(ignore_permissions=True)
-
     if new_nr and existing_nr:
         return {
             'error': True,
@@ -56,6 +77,12 @@ def create_new_id(new_nr=False, existing_nr=False):
             'code': 400,
             'title': 'Bad Request'
         }
+    
+    # create record
+    new_mitglied_main_naming = frappe.get_doc({
+        'doctype': "Mitglied Main Naming"
+    })
+    new_mitglied_main_naming.insert(ignore_permissions=True)
     
     if not existing_nr:
         # create new ID
