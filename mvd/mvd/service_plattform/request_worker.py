@@ -232,11 +232,12 @@ def execute_sp_log(sp_log, manual_execution=False):
             mvzh_affected = False
             if api_kwargs["status"] == 'Zuzug':
                 if api_kwargs["alteSektionCode"] == 'ZH':
+                    look_up_json = sp_log.json.replace(sp_log.mv_mitgliedschaft, "%")
                     duplikat = frappe.db.sql("""
                                              SELECT `name` FROM `tabService Plattform Log`
-                                             WHERE `json` = '{0}'
+                                             WHERE `json` LIKE '{0}'
                                              AND `name` != '{1}'
-                                             """.format(sp_log.json, sp_log.name), as_dict=True)
+                                             """.format(look_up_json, sp_log.name), as_dict=True)
                     if len(duplikat) > 0:
                         mvzh_affected = True
                         sp_log.add_comment('Comment', text='{0}'.format("MVZH Doppel-Zuzugs-Request!"))
@@ -244,6 +245,7 @@ def execute_sp_log(sp_log, manual_execution=False):
                         sp_log.update = 1
                         sp_log.mv_mitgliedschaft = frappe.db.get_value("Service Plattform Log", duplikat[0].name, 'mv_mitgliedschaft')
                         mitgliedschaft = frappe.get_doc("Mitgliedschaft", sp_log.mv_mitgliedschaft)
+                        api_kwargs['mitglied_id'] = sp_log.mv_mitgliedschaft
                         error_in_execution = mvm_update(mitgliedschaft, api_kwargs)
             # END: MVZH Sepcial Case (#1089; Doppelte Zuzüge)
 
