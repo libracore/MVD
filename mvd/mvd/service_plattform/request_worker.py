@@ -109,7 +109,7 @@ def create_sp_log(kwargs):
         existing = True
     else:
         existing = False
-    import json
+    
     json_formatted_str = json.dumps(kwargs, indent=2)
 
     # Prüfung ob die Queue aktiv ist, oder der Request sofort ausgeführt werden soll
@@ -232,7 +232,7 @@ def execute_sp_log(sp_log, manual_execution=False):
             mvzh_affected = False
             if api_kwargs["status"] == 'Zuzug':
                 if api_kwargs["alteSektionCode"] == 'ZH':
-                    look_up_json = sp_log.json.replace(sp_log.mv_mitgliedschaft, "%")
+                    look_up_json = "{0}%{1}".format(sp_log.json.split('"mitgliedId": {0}'.format(int(api_kwargs['mitgliedId']) - 1))[0], sp_log.json.split('"mitgliedId": {0}'.format(int(api_kwargs['mitgliedId']) - 1))[1])
                     duplikat = frappe.db.sql("""
                                              SELECT `name` FROM `tabService Plattform Log`
                                              WHERE `json` LIKE '{0}'
@@ -245,7 +245,7 @@ def execute_sp_log(sp_log, manual_execution=False):
                         sp_log.update = 1
                         sp_log.mv_mitgliedschaft = frappe.db.get_value("Service Plattform Log", duplikat[0].name, 'mv_mitgliedschaft')
                         mitgliedschaft = frappe.get_doc("Mitgliedschaft", sp_log.mv_mitgliedschaft)
-                        api_kwargs['mitglied_id'] = sp_log.mv_mitgliedschaft
+                        api_kwargs['mitgliedId'] = sp_log.mv_mitgliedschaft
                         error_in_execution = mvm_update(mitgliedschaft, api_kwargs)
             # END: MVZH Sepcial Case (#1089; Doppelte Zuzüge)
 
