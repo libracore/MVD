@@ -10,47 +10,47 @@ from frappe.utils.data import today
 class MitgliedMainNaming(Document):
     def set_new_id(self, existing_nr):
         # MVZH Sepcial Case (#1089; Doppelte Zuzüge)
-        affected = False
-        if existing_nr:
-            same_day_requests = frappe.db.sql("""
-                                    SELECT `mitglied_id`
-                                    FROM `tabMitglied Main Naming`
-                                    WHERE `mitglied_nr` = '{0}'
-                                    AND `creation` BETWEEN '{1} 00:00:00' AND '{1} 23:59:59'
-                                    ORDER BY `creation` DESC
-                                    LIMIT 2
-                                    """.format(existing_nr, today()), as_dict=True)
-            if len(same_day_requests) > 0:
-                same_day_request_data = frappe.db.sql("""SELECT `status_c`, `sektion_id` FROM `tabMitgliedschaft` WHERE `name` = '{0}'""".format(same_day_requests[0].mitglied_id), as_dict=True)
-                if same_day_request_data[0].status_c == 'Zuzug':
-                    affected = same_day_requests[0].mitglied_id
-                if not affected and len(same_day_requests) > 1:
-                    same_day_request_data = frappe.db.sql("""SELECT `status_c`, `sektion_id` FROM `tabMitgliedschaft` WHERE `name` = '{0}'""".format(same_day_requests[1].mitglied_id), as_dict=True)
-                    if same_day_request_data[1].sektion_id == 'MVZH':
-                        affected = same_day_requests[1].mitglied_id
+        # affected = False
+        # if existing_nr:
+        #     same_day_requests = frappe.db.sql("""
+        #                             SELECT `mitglied_id`
+        #                             FROM `tabMitglied Main Naming`
+        #                             WHERE `mitglied_nr` = '{0}'
+        #                             AND `creation` BETWEEN '{1} 00:00:00' AND '{1} 23:59:59'
+        #                             ORDER BY `creation` DESC
+        #                             LIMIT 2
+        #                             """.format(existing_nr, today()), as_dict=True)
+        #     if len(same_day_requests) > 0:
+        #         same_day_request_data = frappe.db.sql("""SELECT `status_c`, `sektion_id` FROM `tabMitgliedschaft` WHERE `name` = '{0}'""".format(same_day_requests[0].mitglied_id), as_dict=True)
+        #         if same_day_request_data[0].status_c == 'Zuzug':
+        #             affected = same_day_requests[0].mitglied_id
+        #         if not affected and len(same_day_requests) > 1:
+        #             same_day_request_data = frappe.db.sql("""SELECT `status_c`, `sektion_id` FROM `tabMitgliedschaft` WHERE `name` = '{0}'""".format(same_day_requests[1].mitglied_id), as_dict=True)
+        #             if same_day_request_data[1].sektion_id == 'MVZH':
+        #                 affected = same_day_requests[1].mitglied_id
         # END: MVZH Sepcial Case (#1089; Doppelte Zuzüge)
 
         if not self.mitglied_id:
-            if not affected:
-                last_id = frappe.db.sql("""
-                                        SELECT `mitglied_id` AS `last_id`
-                                        FROM `tabMitglied Main Naming`
-                                        ORDER BY `mitglied_id` DESC
-                                        LIMIT 1
-                                        """, as_dict=True)[0].last_id or 999999
-                if last_id < 999999:
-                    last_id = 999999
-                
-                new_id = last_id + 1
-                self.mitglied_id = new_id
+            # if not affected:
+            last_id = frappe.db.sql("""
+                                    SELECT `mitglied_id` AS `last_id`
+                                    FROM `tabMitglied Main Naming`
+                                    ORDER BY `mitglied_id` DESC
+                                    LIMIT 1
+                                    """, as_dict=True)[0].last_id or 999999
+            if last_id < 999999:
+                last_id = 999999
+            
+            new_id = last_id + 1
+            self.mitglied_id = new_id
 
-                if existing_nr:
-                    self.mitglied_nr = existing_nr
-                    self.mitglied_nr_raw = int(existing_nr.replace("MV", ""))
-            else:
-                self.mitglied_id = affected
+            if existing_nr:
                 self.mitglied_nr = existing_nr
                 self.mitglied_nr_raw = int(existing_nr.replace("MV", ""))
+            # else:
+            #     self.mitglied_id = affected
+            #     self.mitglied_nr = existing_nr
+            #     self.mitglied_nr_raw = int(existing_nr.replace("MV", ""))
 
     def set_new_number(self):
         if not self.mitglied_nr_raw:
