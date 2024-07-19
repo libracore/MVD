@@ -493,6 +493,9 @@ def mvm_neuanlage(kwargs):
                 new_mitgliedschaft.zuzug = today()
             new_mitgliedschaft.zuzug_durch_sp = 1
         
+        # setzen Region der Sektion
+        new_mitgliedschaft.region = new_mitgliedschaft.get_region()
+
         new_mitgliedschaft.insert()
         frappe.db.commit()
         
@@ -756,6 +759,10 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
                 mitgliedschaft.zuzug = today()
         
         mitgliedschaft.flags.ignore_links=True
+
+        # setzen Region der Sektion
+        mitgliedschaft.region = mitgliedschaft.get_region()
+
         try:
             mitgliedschaft.save()
             frappe.db.commit()
