@@ -232,7 +232,7 @@ def execute_sp_log(sp_log, manual_execution=False):
             mvzh_affected = False
             if api_kwargs["status"] == 'Zuzug':
                 if api_kwargs["alteSektionCode"] == 'ZH':
-                    look_up_json = "{0}%{1}".format(sp_log.json.split('"mitgliedId": {0}'.format(int(api_kwargs['mitgliedId']) - 1))[0], sp_log.json.split('"mitgliedId": {0}'.format(int(api_kwargs['mitgliedId']) - 1))[1])
+                    look_up_json = "{0}%{1}".format(sp_log.json.split('"mitgliedId": {0}'.format(api_kwargs['mitgliedId']))[0], sp_log.json.split('"mitgliedId": {0}'.format(api_kwargs['mitgliedId']))[1])
                     duplikat = frappe.db.sql("""
                                              SELECT `name` FROM `tabService Plattform Log`
                                              WHERE `json` LIKE '{0}'
