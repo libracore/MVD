@@ -557,6 +557,7 @@ def get_ampelfarbe(mitgliedschaft):
     return ampelfarbe
 
 def get_naechstes_jahr_geschuldet(mitglied_id, live_data=False):
+    # naechstes_jahr_geschuldet bezieht sich immer auf die Basis=Bezahltes_Mitgliedschaftsjahr!
     if not live_data:
         bezahltes_mitgliedschafsjahr = cint(frappe.db.get_value("Mitgliedschaft", mitglied_id, 'bezahltes_mitgliedschaftsjahr'))
     else:
@@ -565,6 +566,8 @@ def get_naechstes_jahr_geschuldet(mitglied_id, live_data=False):
 
     if current_year > bezahltes_mitgliedschafsjahr:
         return True
+    elif current_year < bezahltes_mitgliedschafsjahr:
+        return False
     else:
         if not live_data:
             sektion = frappe.db.get_value("Mitgliedschaft", mitglied_id, 'sektion_id')
