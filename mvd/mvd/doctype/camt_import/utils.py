@@ -71,7 +71,9 @@ def create_unpaid_sinv(fak, betrag):
                 'customer': sinv.customer,
                 'mv_mitgliedschaft': sinv.mv_mitgliedschaft,
                 'mv_kunde': sinv.mv_kunde,
-                'outstanding_amount': sinv.outstanding_amount
+                'outstanding_amount': sinv.outstanding_amount,
+                'sektion': sinv.sektion_id,
+                'company': sinv.company
             }
     else:
         # Fakultative Rechnung wurde bereits beglichen -> erzeuge ungebuchte, aber zugewiesene Zahlung
@@ -230,6 +232,14 @@ def zahlungen_matchen(camt_import):
 
                     pe.camt_status = 'Überbezahlt'
                     row.allocated_amount = sinv_lookup_data.get('outstanding_amount')
+                
+                # see #1101
+                if pe.sektion_id != sinv_lookup_data.get('sektion'):
+                    pe.sektion_id = sinv_lookup_data.get('sektion')
+                    pe.company = sinv_lookup_data.get('company')
+                    pe.paid_to = frappe.db.get_value('Sektion', pe.sektion_id, 'account')
+                    pe.paid_from = frappe.db.get_value('Company', pe.company, 'default_receivable_account')
+                
                 pe.save()
                 erfasse_rg_match(camt_import)
         if commit_counter == 100:

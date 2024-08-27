@@ -97,7 +97,9 @@ def sinv_lookup(qrr_ref, betrag):
                                 `customer`,
                                 `mv_mitgliedschaft`,
                                 `mv_kunde`,
-                                `outstanding_amount`
+                                `outstanding_amount`,
+                                `sektion_id` AS `sektion`,
+                                `company`
                             FROM `tabSales Invoice`
                             WHERE `docstatus` = 1
                             AND REPLACE(`esr_reference`, ' ', '') = '{qrr_ref}'
