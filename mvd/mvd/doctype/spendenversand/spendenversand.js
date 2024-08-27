@@ -2,7 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Spendenversand', {
-	// refresh: function(frm) {
+    show_own_sql_data: function(frm) {
+        frappe.call({
+            method: 'show_own_sql_data',
+            doc: frm.doc,
+            callback: function(r) {
+                console.log(r.message.list);
+                frappe.msgprint(r.message.string);
+            }
+        });
 
-	// }
+    }
 });

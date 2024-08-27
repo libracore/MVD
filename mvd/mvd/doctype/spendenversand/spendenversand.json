@@ -18,6 +18,10 @@
   "cb_3",
   "regionsspezifisch",
   "region",
+  "section_expert",
+  "own_sql_enabled",
+  "own_sql",
+  "show_own_sql_data",
   "section_bg_job",
   "status",
   "amended_from"
@@ -129,10 +133,38 @@
    "fieldname": "keine_kuendigungen",
    "fieldtype": "Check",
    "label": "K\u00fcndigungen nicht ber\u00fccksichtigen"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_expert",
+   "fieldtype": "Section Break",
+   "label": "Experten Modus"
+  },
+  {
+   "default": "0",
+   "fieldname": "own_sql_enabled",
+   "fieldtype": "Check",
+   "label": "Eigene SQL Abfrage",
+   "permlevel": 1
+  },
+  {
+   "depends_on": "eval:doc.own_sql_enabled",
+   "description": "Achtung: Die Abfrage muss zwingend den Datenbank-Schl\u00fcssel (`name`) der Mitgliedschaft beinhalten!",
+   "fieldname": "own_sql",
+   "fieldtype": "Code",
+   "label": "SQL",
+   "permlevel": 1
+  },
+  {
+   "depends_on": "eval:doc.own_sql_enabled",
+   "fieldname": "show_own_sql_data",
+   "fieldtype": "Button",
+   "label": "Daten aus Query einsehen",
+   "permlevel": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2023-12-13 10:10:10.174380",
+ "modified": "2024-08-27 09:08:37.966981",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Spendenversand",
