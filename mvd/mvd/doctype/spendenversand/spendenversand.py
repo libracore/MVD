@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils import cint
 from frappe.utils.data import add_days, today, now
 from frappe.utils.csvutils import to_csv as make_csv
 
@@ -22,40 +23,53 @@ class Spendenversand(Document):
     def before_submit(self):
         if self.status == 'Neu':
             self.status = 'Vorgemerkt'
+    
+    def show_own_sql_data(self):
+        if cint(self.own_sql_enabled) == 1 and self.own_sql:
+            data = frappe.db.sql("""{0}""".format(self.own_sql), as_dict=True)
+            return {
+                'string': str(data),
+                'list': data
+            }
+        else:
+            return "Die SQL Abfrage muss aktiviert sein sowie auch eine entsprechende hinterlegt."
 
 def spenden_versand(doc):
     fr_list = []
     try:
-        sektion = ''
-        sprache = ''
-        mitgliedtyp = ''
-        region = ''
-        keine_gesperrten_adressen = """ AND `adressen_gesperrt` != 1"""
-        keine_kuendigungen = ''
-        if int(doc.sektionsspezifisch) == 1:
-            sektion = """ AND `sektion_id` = '{sektion_id}'""".format(sektion_id=doc.sektion_id)
-        if int(doc.sprachspezifisch) == 1:
-            sprache = """ AND `language` = '{sprache}'""".format(sprache=doc.sprache)
-        if int(doc.mitgliedtypspezifisch) == 1:
-            mitgliedtyp = """ AND `mitgliedtyp_c` = '{mitgliedtyp}'""".format(mitgliedtyp=doc.mitgliedtyp)
-        if int(doc.regionsspezifisch) == 1:
-            region = """ AND `region` = '{region}'""".format(region=doc.region)
-        if int(doc.inkl_gesperrt) == 1:
-            keine_gesperrten_adressen = "" # alle Mitgliedschaften werden berücksichtigt, unhabhängig ob die Adressen gesperrt sind
-        if int(doc.keine_kuendigungen) == 1:
-            keine_kuendigungen = """ AND (`kuendigung` < '2000-01-01' OR `kuendigung` IS NULL)"""
-        
-        mitgliedschaften = frappe.db.sql("""SELECT
-                                                `name`
-                                            FROM `tabMitgliedschaft`
-                                            WHERE `status_c` = 'Regulär'
-                                            {sektion}{sprache}{mitgliedtyp}{region}{keine_gesperrten_adressen}{keine_kuendigungen}""".format(sektion=sektion, \
-                                                                                                                                            sprache=sprache, \
-                                                                                                                                            mitgliedtyp=mitgliedtyp, \
-                                                                                                                                            region=region, \
-                                                                                                                                            keine_gesperrten_adressen=keine_gesperrten_adressen, \
-                                                                                                                                            keine_kuendigungen=keine_kuendigungen), as_dict=True)
-        
+        if cint(doc.own_sql_enabled) == 1 and doc.own_sql:
+            mitgliedschaften = frappe.db.sql("""{0}""".format(doc.own_sql), as_dict=True)
+        else:
+            sektion = ''
+            sprache = ''
+            mitgliedtyp = ''
+            region = ''
+            keine_gesperrten_adressen = """ AND `adressen_gesperrt` != 1"""
+            keine_kuendigungen = ''
+            if int(doc.sektionsspezifisch) == 1:
+                sektion = """ AND `sektion_id` = '{sektion_id}'""".format(sektion_id=doc.sektion_id)
+            if int(doc.sprachspezifisch) == 1:
+                sprache = """ AND `language` = '{sprache}'""".format(sprache=doc.sprache)
+            if int(doc.mitgliedtypspezifisch) == 1:
+                mitgliedtyp = """ AND `mitgliedtyp_c` = '{mitgliedtyp}'""".format(mitgliedtyp=doc.mitgliedtyp)
+            if int(doc.regionsspezifisch) == 1:
+                region = """ AND `region` = '{region}'""".format(region=doc.region)
+            if int(doc.inkl_gesperrt) == 1:
+                keine_gesperrten_adressen = "" # alle Mitgliedschaften werden berücksichtigt, unhabhängig ob die Adressen gesperrt sind
+            if int(doc.keine_kuendigungen) == 1:
+                keine_kuendigungen = """ AND (`kuendigung` < '2000-01-01' OR `kuendigung` IS NULL)"""
+            
+            mitgliedschaften = frappe.db.sql("""SELECT
+                                                    `name`
+                                                FROM `tabMitgliedschaft`
+                                                WHERE `status_c` = 'Regulär'
+                                                {sektion}{sprache}{mitgliedtyp}{region}{keine_gesperrten_adressen}{keine_kuendigungen}""".format(sektion=sektion, \
+                                                                                                                                                sprache=sprache, \
+                                                                                                                                                mitgliedtyp=mitgliedtyp, \
+                                                                                                                                                region=region, \
+                                                                                                                                                keine_gesperrten_adressen=keine_gesperrten_adressen, \
+                                                                                                                                                keine_kuendigungen=keine_kuendigungen), as_dict=True)
+            
         for mitgliedschaft_name in mitgliedschaften:
             mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft_name.name)
             sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
