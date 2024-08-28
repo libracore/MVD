@@ -364,7 +364,7 @@ def get_mitglied_data(**api_request):
     from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
     if 'MitgliedNummer' in api_request:
         if "MV" in api_request["MitgliedNummer"]:
-            mitglied_nummer = get_mitglied_id_from_nr(mitglied_nr=api_request["MitgliedNummer"])
+            mitglied_nummer = get_mitglied_id_from_nr(mitglied_nr=api_request["MitgliedNummer"], ignore_inaktiv=True)
             if frappe.db.exists("Mitgliedschaft", mitglied_nummer):
                 mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_nummer)
                 data =  prepare_mvm_for_sp(mitgliedschaft)
