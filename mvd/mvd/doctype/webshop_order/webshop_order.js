@@ -46,7 +46,7 @@ frappe.ui.form.on('Webshop Order', {
                                 callback: function(r) {
                                     cur_frm.reload_doc();
                                     frappe.confirm(
-                                        'Der Lieferschein wurde erstellt.<br>Möchten Sie diesen öffnen?',
+                                        'Die Rechnung wurde erstellt.<br>Möchten Sie diesen öffnen?',
                                         function(){
                                             // on yes
                                             frappe.set_route("Form", "Sales Invoice", r.message);
