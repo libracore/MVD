@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 import json
 from frappe.utils import cint
+from frappe.utils.data import today, add_days
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr, get_adressblock, get_rg_adressblock
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 
@@ -201,6 +202,8 @@ class WebshopOrder(Document):
             row = sinv.append('payments', {})
             row.mode_of_payment = 'Credit Card'
             row.amount = sinv.outstanding_amount
+        else:
+            sinv.due_date = add_days(today(), 30)
         
         sinv.append_taxes_from_master()
         sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
