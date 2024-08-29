@@ -2362,9 +2362,7 @@ def erstellung_faktura_kunde(mitgliedschaft):
 
 def get_mitglied_id_from_nr(mitglied_nr=None, ignore_inaktiv=False):
     if mitglied_nr:
-        inaktiv_clause=''
-        if not ignore_inaktiv:
-            inaktiv_clause = "AND `status_c` != 'Inaktiv'"
+        inaktiv_clause = "AND `status_c` != 'Inaktiv'"
         mitgliedschaften = frappe.db.sql("""SELECT
                                                 `name`
                                             FROM `tabMitgliedschaft`
@@ -2374,7 +2372,24 @@ def get_mitglied_id_from_nr(mitglied_nr=None, ignore_inaktiv=False):
         if len(mitgliedschaften) > 0:
             return mitgliedschaften[0].name
         else:
-            return None
+            if ignore_inaktiv:
+                '''
+                Da die Website (Quatico) den Inaktiven-Mitgliedschafts-Datensatz benötigt, wird nach einem solchen gesucht falls es keinen aktiven Datensatz gibt.
+                Siehe auch Ticket #1104
+                '''
+                inaktiv_clause=''
+                mitgliedschaften = frappe.db.sql("""SELECT
+                                                    `name`
+                                                FROM `tabMitgliedschaft`
+                                                WHERE `mitglied_nr` LIKE '%{0}'
+                                                {1}
+                                                ORDER BY `creation` DESC LIMIT 1""".format(mitglied_nr, inaktiv_clause), as_dict=True)
+                if len(mitgliedschaften) > 0:
+                    return mitgliedschaften[0].name
+                else:
+                    return None
+            else:
+                return None
     else:
         return None
 

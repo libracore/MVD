@@ -235,7 +235,9 @@ def execute_sp_log(sp_log, manual_execution=False):
 
                     duplikat = frappe.db.sql("""
                                              SELECT `name` FROM `tabService Plattform Log`
-                                             WHERE `json` LIKE '%mitgliedNummer%{0}%mitgliedId%{1}%{2}%'
+                                             WHERE `json` LIKE '%mitgliedNummer%{0}%'
+                                             AND `json` LIKE '%mitgliedId%{1}%'
+                                             AND `json` LIKE '%{2}%'
                                              AND `name` != '{3}'
                                              """.format(api_kwargs['mitgliedNummer'], int(api_kwargs['mitgliedId']) - 1, '"alteSektionCode": "ZH"', sp_log.name), as_dict=True)
                     
