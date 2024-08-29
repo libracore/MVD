@@ -556,7 +556,7 @@ def get_ampelfarbe(mitgliedschaft):
     
     return ampelfarbe
 
-def get_naechstes_jahr_geschuldet(mitglied_id, live_data=False):
+def get_naechstes_jahr_geschuldet(mitglied_id, live_data=False, datum_via_api=False):
     # naechstes_jahr_geschuldet bezieht sich immer auf die Basis=Bezahltes_Mitgliedschaftsjahr!
     if not live_data:
         bezahltes_mitgliedschafsjahr = cint(frappe.db.get_value("Mitgliedschaft", mitglied_id, 'bezahltes_mitgliedschaftsjahr'))
@@ -565,9 +565,15 @@ def get_naechstes_jahr_geschuldet(mitglied_id, live_data=False):
     current_year = cint(now().split("-")[0])
 
     if current_year > bezahltes_mitgliedschafsjahr:
-        return True
+        if not datum_via_api:
+            return True
+        else:
+            return "{0}-{1}".format(current_year, "12-31")
     elif current_year < bezahltes_mitgliedschafsjahr:
-        return False
+        if not datum_via_api:
+            return False
+        else:
+            return "{0}-{1}".format(bezahltes_mitgliedschafsjahr, "12-31")
     else:
         if not live_data:
             sektion = frappe.db.get_value("Mitgliedschaft", mitglied_id, 'sektion_id')
@@ -577,9 +583,15 @@ def get_naechstes_jahr_geschuldet(mitglied_id, live_data=False):
         stichtag = frappe.db.get_value("Sektion", sektion, 'kuendigungs_stichtag')
         stichtag_datum = getdate("{0}-{1}-{2}".format(current_year, stichtag.strftime("%Y-%m-%d").split("-")[1], stichtag.strftime("%Y-%m-%d").split("-")[2]))
         if getdate(today()) > stichtag_datum:
-            return True
+            if not datum_via_api:
+                return True
+            else:
+                return "{0}-{1}".format(current_year + 1, "12-31")
         else:
-            return False
+            if not datum_via_api:
+                return False
+            else:
+                return "{0}-{1}".format(current_year, "12-31")
 
 def mahnstopp(mitgliedschaft, mahnstopp):
     SQL_SAFE_UPDATES_false = frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
