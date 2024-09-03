@@ -372,6 +372,7 @@ frappe.ui.form.on('Mitgliedschaft', {
             cur_frm.set_df_property('rg_strasse', 'reqd', 0);
             cur_frm.set_df_property('rg_plz', 'reqd', 0);
             cur_frm.set_df_property('rg_ort', 'reqd', 0);
+            cur_frm.set_value("unabhaengiger_debitor", 0);
         } else {
             cur_frm.set_df_property('rg_strasse', 'reqd', 1);
             cur_frm.set_df_property('rg_plz', 'reqd', 1);
