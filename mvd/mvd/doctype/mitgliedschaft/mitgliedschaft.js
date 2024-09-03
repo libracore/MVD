@@ -1015,9 +1015,10 @@ function sektionswechsel(frm) {
                         freeze_message: 'Führe Sektionswechsel durch...',
                         callback: function(r)
                         {
-                            if (r.message == 1) {
+                            if (r.message.status == 200) {
                                 cur_frm.set_value("wegzug", frappe.datetime.get_today());
                                 cur_frm.set_value("wegzug_zu", values.sektion_neu);
+                                cur_frm.set_value("zuzug_id", r.message.new_id);
                                 var status_change_log = cur_frm.add_child('status_change');
                                 frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
                                 frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
@@ -1030,7 +1031,11 @@ function sektionswechsel(frm) {
                                     frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
                                 });
                             } else {
-                                frappe.msgprint("oops, da ist etwas schiefgelaufen!");
+                                if (r.message.status == 200) {
+                                    frappe.msgprint(`oops, da ist etwas schiefgelaufen!<br>${r.message.error}`);
+                                } else {
+                                    frappe.msgprint("oops, da ist etwas schiefgelaufen!<br>Unbekannter Fehler");
+                                }
                             }
                         }
                     });
