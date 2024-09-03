@@ -9,5 +9,8 @@ frappe.ui.form.on('Service Platform Queue', {
                 frappe.set_route("List", "Error Log", "List");
             });
         }
+    },
+    open_mitglied: function(frm) {
+        location.href = `/desk#Form/Mitgliedschaft/${cur_frm.doc.mv_mitgliedschaft}`
     }
 });

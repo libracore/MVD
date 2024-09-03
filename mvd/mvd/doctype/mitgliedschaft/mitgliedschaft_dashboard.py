@@ -27,10 +27,6 @@ def get_data():
                 'items': ['Arbeits Backlog']
             },
             {
-                'label': _('Service Plattform'),
-                'items': ['Service Platform Queue', 'Service Plattform Log']
-            },
-            {
                 'label': _('Adresspflege'),
                 'items': ['Retouren']
             }

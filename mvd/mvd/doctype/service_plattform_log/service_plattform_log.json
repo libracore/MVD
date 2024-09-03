@@ -12,6 +12,7 @@
   "immediately_executing",
   "cb_1",
   "mv_mitgliedschaft",
+  "open_mitglied",
   "retry_count",
   "section_data",
   "json"
@@ -19,10 +20,9 @@
  "fields": [
   {
    "fieldname": "mv_mitgliedschaft",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Mitgliedschaft",
-   "options": "Mitgliedschaft"
+   "label": "Mitgliedschaft"
   },
   {
    "fieldname": "json",
@@ -87,9 +87,15 @@
    "fieldtype": "Int",
    "label": "Error Retry Count",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.mv_mitgliedschaft",
+   "fieldname": "open_mitglied",
+   "fieldtype": "Button",
+   "label": "\u00d6ffne Mitgliedschaft"
   }
  ],
- "modified": "2024-07-03 12:10:18.482069",
+ "modified": "2024-09-03 15:01:16.339879",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform Log",

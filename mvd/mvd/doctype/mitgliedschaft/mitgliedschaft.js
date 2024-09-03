@@ -47,6 +47,12 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frm.add_custom_button(__("Status Historie ergänzen"), function() {
                     status_historie_ergaenzen(frm);
                 }).addClass("btn-warning")
+                frm.add_custom_button(__("SP > ERPNext"), function() {
+                    frappe.set_route("List", "Service Plattform Log", {'mv_mitgliedschaft': cur_frm.doc.name});
+                }, __("Öffne SP Queue"))
+                frm.add_custom_button(__("ERPNext > SP"), function() {
+                    frappe.set_route("List", "Service Platform Queue", {'mv_mitgliedschaft': cur_frm.doc.name});
+                }, __("Öffne SP Queue"))
             }
             
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
