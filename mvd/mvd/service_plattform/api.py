@@ -405,7 +405,7 @@ def get_mitglied_from_mail(**api_request):
                                         SELECT
                                             `mitglied_nr`
                                         FROM `tabMitgliedschaft`
-                                        WHERE `{0}` LIKE '%{1}%'
+                                        WHERE `{0}` = '{1}'
                                         AND `status_c` != 'Inaktiv'
                                         """.format(email_field, api_request['Emailadresse']), as_dict=True)
         if len(mitgliedschaften) >= 1:
