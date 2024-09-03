@@ -146,6 +146,7 @@ doc_events = {
 # ---------------
 scheduler_events = {
     "daily": [
+        "mvd.mvd.utils.daily_jobs.create_daily_snap",
         "mvd.mvd.utils.daily_jobs.reset_geschenk_mitgliedschaften",
         "mvd.mvd.utils.daily_jobs.set_inaktiv",
         "mvd.mvd.utils.daily_jobs.entferne_alte_reduzierungen",
