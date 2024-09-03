@@ -10,6 +10,10 @@ from mvd.mvd.doctype.region.region import _regionen_zuteilung
 from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
 
+def create_daily_snap():
+    new_daily_snap = frappe.get_doc({'doctype': 'Daily Snap'})
+    new_daily_snap.insert()
+
 def set_inaktiv():
     mitgliedschaften = frappe.db.sql("""
                                     SELECT

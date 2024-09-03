@@ -6,6 +6,7 @@
  "field_order": [
   "status",
   "mv_mitgliedschaft",
+  "open_mitglied",
   "update",
   "objekt",
   "sektion_id"
@@ -21,10 +22,9 @@
   },
   {
    "fieldname": "mv_mitgliedschaft",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Mitgliedschaft",
-   "options": "Mitgliedschaft"
+   "label": "Mitgliedschaft"
   },
   {
    "default": "0",
@@ -43,9 +43,15 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Sektion"
+  },
+  {
+   "depends_on": "eval:doc.mv_mitgliedschaft",
+   "fieldname": "open_mitglied",
+   "fieldtype": "Button",
+   "label": "\u00d6ffne Mitgliedschaft"
   }
  ],
- "modified": "2023-11-07 10:40:58.574247",
+ "modified": "2024-09-03 15:06:11.570190",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Platform Queue",

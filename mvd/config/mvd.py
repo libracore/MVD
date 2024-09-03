@@ -26,6 +26,12 @@ def get_data():
                     "description": _("Mitgliederstatistik"),
                     "doctype": "Mitgliedschaft",
                     "is_query_report": True
+                },
+               {
+                    "type": "doctype",
+                    "name": "Daily Snap",
+                    "label": _("Täglicher Mitgliedschaften Snap"),
+                    "description": _("Daily Snap")
                 }
             ]
         },

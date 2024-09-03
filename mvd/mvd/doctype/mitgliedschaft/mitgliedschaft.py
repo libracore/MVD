@@ -1430,6 +1430,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             new_mitgliedschaft.zuzug = zuzug_per
             new_mitgliedschaft.wegzug = ''
             new_mitgliedschaft.wegzug_zu = ''
+            new_mitgliedschaft.wegzug_id = mitgliedschaft.name
             new_mitgliedschaft.kunde_mitglied = ''
             new_mitgliedschaft.kontakt_mitglied = ''
             new_mitgliedschaft.adresse_mitglied = ''
@@ -1516,14 +1517,20 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             
             new_mitgliedschaft.save(ignore_permissions=True)
             
-            return 1
+            return {
+                'status': 200,
+                'new_id': new_mitgliedschaft.name
+            }
             
         except Exception as err:
             frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), new_mitgliedschaft.as_dict()), 'Sektionswechsel')
-            return 0
+            return {
+                'status': 500,
+                'error': str(err)
+            }
     else:
-        # Sektionswechsel nach ZH, und SO --> kein neues Mtiglied in ERPNext, Meldung Sektionswechsel erfolgt vie validate Trigger von Mitgliedschaft
-        # Sobald ZH oder SO neues Mitglied verarbeitet erhält ERPNext via SP eine Neuanlage von/für ZH oder SO und ist mittels Freizügigkeitsabfrage wieder verfügbar
+        # Sektionswechsel nach ZH --> kein neues Mtiglied in ERPNext, Meldung Sektionswechsel erfolgt vie validate Trigger von Mitgliedschaft
+        # Sobald ZH neues Mitglied verarbeitet erhält ERPNext via SP eine Neuanlage von/für ZH und ist mittels Freizügigkeitsabfrage wieder verfügbar
         return 1
 
 @frappe.whitelist()

@@ -47,6 +47,12 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frm.add_custom_button(__("Status Historie ergänzen"), function() {
                     status_historie_ergaenzen(frm);
                 }).addClass("btn-warning")
+                frm.add_custom_button(__("SP > ERPNext"), function() {
+                    frappe.set_route("List", "Service Plattform Log", {'mv_mitgliedschaft': cur_frm.doc.name});
+                }, __("Öffne SP Queue"))
+                frm.add_custom_button(__("ERPNext > SP"), function() {
+                    frappe.set_route("List", "Service Platform Queue", {'mv_mitgliedschaft': cur_frm.doc.name});
+                }, __("Öffne SP Queue"))
             }
             
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
@@ -366,6 +372,7 @@ frappe.ui.form.on('Mitgliedschaft', {
             cur_frm.set_df_property('rg_strasse', 'reqd', 0);
             cur_frm.set_df_property('rg_plz', 'reqd', 0);
             cur_frm.set_df_property('rg_ort', 'reqd', 0);
+            cur_frm.set_value("unabhaengiger_debitor", 0);
         } else {
             cur_frm.set_df_property('rg_strasse', 'reqd', 1);
             cur_frm.set_df_property('rg_plz', 'reqd', 1);
@@ -1008,9 +1015,10 @@ function sektionswechsel(frm) {
                         freeze_message: 'Führe Sektionswechsel durch...',
                         callback: function(r)
                         {
-                            if (r.message == 1) {
+                            if (r.message.status == 200) {
                                 cur_frm.set_value("wegzug", frappe.datetime.get_today());
                                 cur_frm.set_value("wegzug_zu", values.sektion_neu);
+                                cur_frm.set_value("zuzug_id", r.message.new_id);
                                 var status_change_log = cur_frm.add_child('status_change');
                                 frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
                                 frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
@@ -1023,7 +1031,11 @@ function sektionswechsel(frm) {
                                     frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
                                 });
                             } else {
-                                frappe.msgprint("oops, da ist etwas schiefgelaufen!");
+                                if (r.message.status == 200) {
+                                    frappe.msgprint(`oops, da ist etwas schiefgelaufen!<br>${r.message.error}`);
+                                } else {
+                                    frappe.msgprint("oops, da ist etwas schiefgelaufen!<br>Unbekannter Fehler");
+                                }
                             }
                         }
                     });

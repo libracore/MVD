@@ -8,6 +8,9 @@ frappe.ui.form.on('Service Plattform Log', {
                 execute_request(frm);
             });
         }
+    },
+    open_mitglied: function(frm) {
+        location.href = `/desk#Form/Mitgliedschaft/${cur_frm.doc.mv_mitgliedschaft}`
     }
 });
 
