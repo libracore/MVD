@@ -27,8 +27,9 @@ function create_gitlab_issue(frm) {
             },
             "callback": function(r) {
                 if (r.message.iid) {
-                    frappe.db.set_value("Issue", cur_frm.doc.name, "gitlab_issue", r.message.iid);
-                    cur_frm.reload_doc();
+                    frappe.db.set_value("Issue", cur_frm.doc.name, "gitlab_issue", r.message.iid).then(() => {
+                        cur_frm.reload_doc();
+                    });
                 } else {
                     frappe.msgprint("Es ist etwas schief gelaufen.<br>Bitte im Error-Log nachsehen.")
                 }
