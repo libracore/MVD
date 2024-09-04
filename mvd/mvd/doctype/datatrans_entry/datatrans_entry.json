@@ -21,6 +21,7 @@
   "mitglied_id",
   "mitglied_nr",
   "mitgliedtyp_c",
+  "mvb_typ",
   "adressblock",
   "online_haftpflicht",
   "online_gutschrift",
@@ -207,10 +208,16 @@
    "fieldtype": "Data",
    "label": "Mitgliedtyp",
    "read_only": 1
+  },
+  {
+   "fieldname": "mvb_typ",
+   "fieldtype": "Data",
+   "label": "MVB Typ",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2024-04-11 09:00:04.242413",
+ "modified": "2024-09-04 10:01:49.183265",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Datatrans Entry",
