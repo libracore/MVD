@@ -193,7 +193,8 @@ class WebshopOrder(Document):
             'contact_person': frappe.db.get_value("Kunden", self.faktura_kunde, "kontakt_kunde"),
             'items': items_list,
             'taxes_and_charges': 'MVD Gemischt - MVD',
-            'druckvorlage': 'MVD Rechnung-MVD' if not self.online_payment_id else 'MVD Lieferschein-MVD'
+            'druckvorlage': 'MVD Rechnung-MVD' if not self.online_payment_id else 'MVD Lieferschein-MVD',
+            'due_date': add_days(today(), 30)
         }).insert(ignore_permissions=True)
 
         if self.online_payment_id:
@@ -202,8 +203,6 @@ class WebshopOrder(Document):
             row = sinv.append('payments', {})
             row.mode_of_payment = 'Credit Card'
             row.amount = sinv.outstanding_amount
-        else:
-            sinv.due_date = add_days(today(), 30)
         
         sinv.append_taxes_from_master()
         sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
