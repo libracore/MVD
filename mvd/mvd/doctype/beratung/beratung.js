@@ -558,7 +558,7 @@ function termin_quick_entry(frm) {
                             var d = new frappe.ui.Dialog({
                                 'title': __('Termin erstellen'),
                                 'fields': [
-                                    {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 1, 'default': '',
+                                    {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 0, 'default': '', 'description': 'Der Ort wird durch die Auswahl eines Termins autom. gesetzt.',
                                         'change': function() {
                                             // aktualisierung verfügbarkeiten
                                             frappe.call({
