@@ -49,7 +49,6 @@ def check_main_keys(kwargs):
         'kuendigungPer',
         'jahrBezahltMitgliedschaft',
         'jahrBezahltHaftpflicht',
-        'naechstesJahrGeschuldet',
         'bemerkungen',
         'anzahlZeitungen',
         'zeitungAlsPdf',
@@ -73,6 +72,7 @@ def check_main_keys(kwargs):
         - datumOnlineGutschrift
         - isKollektiv
         - istTemporaeresMitglied
+        - naechstesJahrGeschuldet
     '''
     for key in mandatory_keys:
         if key not in kwargs:
