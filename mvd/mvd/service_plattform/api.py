@@ -474,16 +474,16 @@ def naming_service_new_number(**api_request):
     Endpunkt zum Abfragen ob bei einer Kündigung das nächste Jahr geschuldet ist
 '''
 @frappe.whitelist()
-def get_naechstes_kuendigungs_datum(**api_request):
+def get_kuendigung_info(**api_request):
     '''ISS-2024-00080 & #1096'''
     from mvd.mvd.doctype.mitgliedschaft.utils import get_naechstes_jahr_geschuldet
     if 'id' in api_request:
-        nkd = get_naechstes_jahr_geschuldet(api_request['id'], datum_via_api=True)
+        nkd, kuendigungsfrist_verpasst = get_naechstes_jahr_geschuldet(api_request['id'], datum_via_api=True)
         frappe.local.response.http_status_code = 200
-        frappe.local.response.message = {"naechstesKuendigungsDatum": nkd}
+        frappe.local.response.message = {"naechster_kuendigungstermin": nkd, "kuendigungsfrist_verpasst": kuendigungsfrist_verpasst}
         return
     else:
-        return raise_xxx(400, 'Bad Request', 'ID missing', daten=str(api_request), error_log_title='400 > naechstes_jahr_geschuldet')
+        return raise_xxx(400, 'Bad Request', 'ID missing', daten=str(api_request), error_log_title='400 > get_kuendigung_info')
 
 # ---------------------------------------------------
 # ---------------------------------------------------
