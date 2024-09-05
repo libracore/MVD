@@ -480,7 +480,7 @@ def get_kuendigung_info(**api_request):
     if 'id' in api_request:
         nkd, kuendigungsfrist_verpasst = get_naechstes_jahr_geschuldet(api_request['id'], datum_via_api=True)
         frappe.local.response.http_status_code = 200
-        frappe.local.response.message = {"naechster_kuendigungstermin": nkd, "kuendigungsfrist_verpasst": kuendigungsfrist_verpasst}
+        frappe.local.response.message = {"naechsterKuendigungstermin": nkd, "kuendigungsfristVerpasst": kuendigungsfrist_verpasst}
         return
     else:
         return raise_xxx(400, 'Bad Request', 'ID missing', daten=str(api_request), error_log_title='400 > get_kuendigung_info')
