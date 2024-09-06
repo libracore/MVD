@@ -876,7 +876,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
                 """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
                         telefonnummer=telefonnummer, berater_in=berater_in_name, \
-                        default_terminbest_hinweis = default_terminbest_hinweis_de.replace('\r','<br>').replace('\n','<br>'))
+                        default_terminbest_hinweis = default_terminbest_hinweis_de.replace('\r','<br>').replace('\n','<br>') if default_terminbest_hinweis_de else '')
             else:
                 mail_txt += """
                     <div>Wir haben für Sie folgenden Termin reserviert:

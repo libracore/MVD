@@ -1031,7 +1031,7 @@ function sektionswechsel(frm) {
                                     frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
                                 });
                             } else {
-                                if (r.message.status == 200) {
+                                if (r.message.status == 500) {
                                     frappe.msgprint(`oops, da ist etwas schiefgelaufen!<br>${r.message.error}`);
                                 } else {
                                     frappe.msgprint("oops, da ist etwas schiefgelaufen!<br>Unbekannter Fehler");
