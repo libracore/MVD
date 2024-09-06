@@ -1531,7 +1531,10 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
     else:
         # Sektionswechsel nach ZH --> kein neues Mtiglied in ERPNext, Meldung Sektionswechsel erfolgt vie validate Trigger von Mitgliedschaft
         # Sobald ZH neues Mitglied verarbeitet erhält ERPNext via SP eine Neuanlage von/für ZH und ist mittels Freizügigkeitsabfrage wieder verfügbar
-        return 1
+        return {
+                'status': 200,
+                'new_id': 'MVZH'
+            }
 
 @frappe.whitelist()
 def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None, geschenk_reset=False):
