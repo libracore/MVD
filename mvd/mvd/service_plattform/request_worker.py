@@ -49,7 +49,6 @@ def check_main_keys(kwargs):
         'kuendigungPer',
         'jahrBezahltMitgliedschaft',
         'jahrBezahltHaftpflicht',
-        'naechstesJahrGeschuldet',
         'bemerkungen',
         'anzahlZeitungen',
         'zeitungAlsPdf',
@@ -73,6 +72,7 @@ def check_main_keys(kwargs):
         - datumOnlineGutschrift
         - isKollektiv
         - istTemporaeresMitglied
+        - naechstesJahrGeschuldet
     '''
     for key in mandatory_keys:
         if key not in kwargs:
@@ -389,7 +389,7 @@ def mvm_neuanlage(kwargs):
         
         bezahltes_mitgliedschaftsjahr = int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0
         
-        naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
+        naechstes_jahr_geschuldet = 0
         
         if kwargs['datumBezahltHaftpflicht']:
             datum_hv_zahlung = kwargs['datumBezahltHaftpflicht'].split("T")[0]
@@ -697,7 +697,7 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         
         bezahltes_mitgliedschaftsjahr = int(kwargs['jahrBezahltMitgliedschaft']) if kwargs['jahrBezahltMitgliedschaft'] else 0
         
-        naechstes_jahr_geschuldet = 1 if kwargs['naechstesJahrGeschuldet'] else '0'
+        naechstes_jahr_geschuldet = 0
 
         # MVB Standard und MVB Mini
         mvb_typ = None
