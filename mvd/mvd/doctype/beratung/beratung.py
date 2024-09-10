@@ -837,7 +837,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
             if art == 'telefonisch':
                 mail_txt += """
                     <div>Nous avons réservé pour vous le rendez-vous téléphonique suivant:
-                        <br>{wochentag}, {datum} à {von}
+                        <br>{wochentag}, {datum} à {von} heures
                         <br>Notre consultant* {berater_in} vous appellera au numéro suivant:
                         <br>{telefonnummer}
                         <br><br>{default_terminbest_hinweis}
@@ -849,7 +849,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
             else:
                 mail_txt += """
                     <div>Nous avons réservé pour vous le rendez-vous suivant:
-                        <br>{wochentag}, {datum} à {von}
+                        <br>{wochentag}, {datum} à {von} heures
                         <br>Notre consultant* {berater_in} vous attend à
                         <br>{ort}, {ort_info}.
                         <br><br>{default_terminbest_hinweis}
@@ -868,7 +868,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
                 mail_txt += """
                     <div>Wir haben für Sie folgenden Termin reserviert:
                         <br>Telefonische Beratung
-                        <br>{wochentag}, {datum} um {von}
+                        <br>{wochentag}, {datum} um {von} Uhr
                         <br>Unsere Berater*in {berater_in} wird Sie unter dieser Nummer anrufen:
                         <br>{telefonnummer}
                         <br><br>{default_terminbest_hinweis}
@@ -881,8 +881,8 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
                 mail_txt += """
                     <div>Wir haben für Sie folgenden Termin reserviert:
                         <br>Persönliche Beratung
-                        <br>{wochentag}, {datum} um {von}
-                        <br>Unsere Berater*in {berater_in} erwartet Sie in:
+                        <br>{wochentag}, {datum} um {von} Uhr
+                        <br>Unser*e Berater*in {berater_in} erwartet Sie in:
                         <br>{ort}, {ort_info}.
                         <br><br>{default_terminbest_hinweis}
                     </div>
