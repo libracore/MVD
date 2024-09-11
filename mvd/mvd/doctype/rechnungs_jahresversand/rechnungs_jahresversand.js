@@ -20,11 +20,7 @@ frappe.ui.form.on('Rechnungs Jahresversand', {
             'freeze': true,
             'freeze_message': 'Erstelle Entwurfs CSV...',
             'callback': function(response) {
-                var csv = response.message;
-
-                if (csv == 'done') {
-                    cur_frm.reload_doc();
-                }
+                frappe.msgprint("Das CSV wird im Hintergrund erzeugt, bitte warten...")
             }
         });
     },

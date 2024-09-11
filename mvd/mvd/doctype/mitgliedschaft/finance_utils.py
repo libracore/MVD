@@ -356,6 +356,9 @@ def check_folgejahr_regelung(mitgliedschaft, db_direct=False):
     return
 
 def sinv_update(sinv, event):
+    if cint(sinv.fast_mode) == 1:
+        return
+
     if sinv.mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
         check_zahlung_mitgliedschaft(mitgliedschaft, db_direct=True)

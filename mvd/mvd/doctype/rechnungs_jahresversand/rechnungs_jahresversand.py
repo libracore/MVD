@@ -6,10 +6,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils.csvutils import to_csv as make_csv
-from frappe.utils.data import now, getdate
+from frappe.utils.data import now, getdate, add_days, today
 from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price
-from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung
+# from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung
 from frappe.utils.background_jobs import enqueue
+# from frappe.utils import cint
+from mvd.mvd.utils.qrr_reference import get_qrr_reference
 
 class RechnungsJahresversand(Document):
     def validate(self):
@@ -19,6 +21,12 @@ class RechnungsJahresversand(Document):
 
 @frappe.whitelist()
 def get_draft_csv(jahresversand=None):
+    args = {
+        'jahresversand': jahresversand
+    }
+    enqueue("mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand._get_draft_csv", queue='long', job_name='get_draft_csv {0}'.format(jahresversand), timeout=6000, **args)
+
+def _get_draft_csv(jahresversand=None):
     jahresversand = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
     sektion = frappe.get_doc("Sektion", jahresversand.sektion_id)
     data = []
@@ -368,7 +376,7 @@ def get_draft_csv(jahresversand=None):
     
     _file.insert()
     
-    return 'done'
+    return
 
 def get_invcoice_amount(mitgliedschaft, sektion):
     if int(mitgliedschaft.reduzierte_mitgliedschaft) != 1:
@@ -440,6 +448,7 @@ def create_invoices(jahresversand):
     else:
         # calc 500er batches
         qty = int(len(mitgliedschaften)/500) + 1
+        qty = 1
         jahresversand_doc.add_comment('Comment', text='Rechnungserstellung erfolgt Batchweise ({0}) (Menge > 500)...'.format(qty))
         frappe.db.commit()
         
@@ -469,6 +478,8 @@ def create_invoices_one_batch(jahresversand, limit=False, loop=False, last=False
             limit = ' LIMIT {0}'.format(limit)
         
         sektion = frappe.get_doc("Sektion", jahresversand_doc.sektion_id)
+        company = frappe.get_doc("Company", sektion.company)
+        due_date = add_days(today(), 30)
         filters = ''
         if int(jahresversand_doc.sprach_spezifisch) == 1:
             filters += """ AND `language` = '{language}'""".format(language=jahresversand_doc.language)
@@ -481,7 +492,15 @@ def create_invoices_one_batch(jahresversand, limit=False, loop=False, last=False
                                                 `name`,
                                                 `ist_geschenkmitgliedschaft`,
                                                 `reduzierte_mitgliedschaft`,
-                                                `reduzierter_betrag`
+                                                `reduzierter_betrag`,
+                                                `rg_kunde`,
+                                                `kunde_mitglied`,
+                                                `kontakt_mitglied`,
+                                                `rg_adresse`,
+                                                `adresse_mitglied`,
+                                                `rg_kontakt`,
+                                                `bezahltes_mitgliedschaftsjahr`,
+                                                `mitgliedtyp_c`
                                             FROM `tabMitgliedschaft`
                                             WHERE `sektion_id` = '{sektion_id}'
                                             AND `status_c` = 'Regulär'
@@ -520,7 +539,50 @@ def create_invoices_one_batch(jahresversand, limit=False, loop=False, last=False
                 # ------------------------------------------------------------------------------------
                 
                 if not skip:
-                    sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name, jahr=jahresversand_doc.jahr, druckvorlage=jahresversand_doc.druckvorlage, submit=True, ignore_stichtage=True, rechnungs_jahresversand=jahresversand_doc.name)
+                    if not mitgliedschaft.rg_kunde:
+                        customer = mitgliedschaft.kunde_mitglied
+                        contact = mitgliedschaft.kontakt_mitglied
+                        if not mitgliedschaft.rg_adresse:
+                            address = mitgliedschaft.adresse_mitglied
+                        else:
+                            address = mitgliedschaft.rg_adresse
+                    else:
+                        customer = mitgliedschaft.rg_kunde
+                        address = mitgliedschaft.rg_adresse
+                        contact = mitgliedschaft.rg_kontakt
+                    item = []
+                    if mitgliedschaft.mitgliedtyp_c == 'Privat':
+                        item = [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center}]
+                    elif mitgliedschaft.mitgliedtyp_c == 'Geschäft':
+                        item = [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center}]
+                    
+                    sinv = frappe.get_doc({
+                        "doctype": "Sales Invoice",
+                        "ist_mitgliedschaftsrechnung": 1,
+                        "mv_mitgliedschaft": mitgliedschaft.name,
+                        "company": sektion.company,
+                        "cost_center": company.cost_center,
+                        "customer": customer,
+                        "customer_address": address,
+                        "contact_person": contact,
+                        'mitgliedschafts_jahr': jahresversand_doc.jahr,
+                        'due_date': due_date,
+                        'debit_to': company.default_receivable_account,
+                        'sektions_code': str(sektion.sektion_id) or '00',
+                        'sektion_id': jahresversand_doc.sektion_id,
+                        "items": item,
+                        "druckvorlage": jahresversand_doc.druckvorlage if jahresversand_doc.druckvorlage else '',
+                        "exclude_from_payment_reminder_until": '',
+                        "rechnungs_jahresversand": jahresversand_doc.name,
+                        "allocate_advances_automatically": 1,
+                        "fast_mode": 1
+                    })
+                    sinv.insert(ignore_permissions=True)
+                    sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
+                    sinv.save(ignore_permissions=True)
+                    sinv.docstatus = 1
+                    sinv.save(ignore_permissions=True)
+
                 if rg_loop == 10:
                     frappe.db.commit()
                     rg_loop = 1
@@ -538,6 +600,9 @@ def create_invoices_one_batch(jahresversand, limit=False, loop=False, last=False
                 jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
                 jahresversand_doc.status = 'Abgeschlossen'
                 jahresversand_doc.save()
+                frappe.db.sql("""SET SQL_SAFE_UPDATES = 0;""", as_list=True)
+                frappe.db.sql("""UPDATE `tabSales Invoice` SET `fast_mode` = 0 WHERE `rechnungs_jahresversand` = '{0}'""".format(jahresversand_doc.name), as_list=True)
+                frappe.db.sql("""SET SQL_SAFE_UPDATES = 1;""", as_list=True)
             
         except Exception as err:
             jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
@@ -962,3 +1027,4 @@ def get_info(jobname):
             found_job = True
 
     return found_job
+
