@@ -9,7 +9,12 @@ from mvd.mvd.doctype.postretouren_log.postretourhandler import PostRetourHandler
 from mvd.mvd.doctype.postretouren_log.libracore_facade import LibraCoreFacade
 
 class PostretourenLog(Document):
-    pass
+    def manual_start(self):
+        csv_files = []
+        _csv_files = frappe.db.sql("""SELECT `file_url` FROM `tabFile` WHERE `attached_to_doctype` = 'Postretouren Log' AND `attached_to_name` = '{0}'""".format(self.name), as_dict=True)
+        for csv_file in _csv_files:
+            csv_files.append("/home/frappe/frappe-bench/sites/{0}{1}".format(frappe.utils.get_host_name(), csv_file.file_url).replace(":8000", ""))
+        process_post_retouren(self, csv_files=csv_files)
 
 def start_post_retouren_process():
     new_postretouren_log = frappe.get_doc({
@@ -26,7 +31,7 @@ def start_post_retouren_process():
 
     process_post_retouren(new_postretouren_log)
 
-def process_post_retouren(postretouren_log):
+def process_post_retouren(postretouren_log, csv_files=None):
     pr_handler = PostRetourHandler()
     libracore = LibraCoreFacade()
 
@@ -37,7 +42,8 @@ def process_post_retouren(postretouren_log):
     # csv_files = libracore.get_csv_files_from_zip(postretouren_log.name)
 
     # get csv files
-    csv_files = libracore.get_csv_files_from_post(postretouren_log.name)
+    if not csv_files:
+        csv_files = libracore.get_csv_files_from_post(postretouren_log.name)
 
     for csv_file in csv_files:
         file = open(csv_file, 'r', encoding="utf-16-le")

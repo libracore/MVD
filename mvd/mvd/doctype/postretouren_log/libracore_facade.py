@@ -80,6 +80,7 @@ class LibraCoreFacade:
                         "file_name": "{0}".format(file_name),
                         "attached_to_name": postretouren_log,
                         "attached_to_doctype": 'Postretouren Log',
+                        "is_private": 1,
                         "folder": "Home/Attachments"})
                     _file.save()
                     csv_files.append("/home/frappe/frappe-bench/sites/{0}/private/files/{1}".format(frappe.utils.get_host_name(), file_name).replace(":8000", ""))
