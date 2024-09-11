@@ -560,38 +560,34 @@ def get_naechstes_jahr_geschuldet(mitglied_id, live_data=False, datum_via_api=Fa
     # naechstes_jahr_geschuldet bezieht sich immer auf die Basis=Bezahltes_Mitgliedschaftsjahr!
     if not live_data:
         bezahltes_mitgliedschafsjahr = cint(frappe.db.get_value("Mitgliedschaft", mitglied_id, 'bezahltes_mitgliedschaftsjahr'))
+        sektion = frappe.db.get_value("Mitgliedschaft", mitglied_id, 'sektion_id')
     else:
         bezahltes_mitgliedschafsjahr = cint(live_data.bezahltes_mitgliedschaftsjahr)
+        sektion = live_data.sektion_id
+
     current_year = cint(now().split("-")[0])
+    stichtag = frappe.db.get_value("Sektion", sektion, 'kuendigungs_stichtag')
+    stichtag_datum = getdate("{0}-{1}-{2}".format(current_year, stichtag.strftime("%Y-%m-%d").split("-")[1], stichtag.strftime("%Y-%m-%d").split("-")[2]))
+
+    kuendigungsfrist_verpasst = False
+    if getdate(today()) > stichtag_datum:
+        kuendigungsfrist_verpasst = True
+    
+    if datum_via_api:
+        if kuendigungsfrist_verpasst:
+            return "{0}-{1}".format(current_year + 1, "12-31"), kuendigungsfrist_verpasst
+        else:
+            return "{0}-{1}".format(current_year, "12-31"), kuendigungsfrist_verpasst
 
     if current_year > bezahltes_mitgliedschafsjahr:
-        if not datum_via_api:
+        return True
+    elif current_year < bezahltes_mitgliedschafsjahr:
+        return False
+    else:
+        if kuendigungsfrist_verpasst:
             return True
         else:
-            return "{0}-{1}".format(current_year, "12-31")
-    elif current_year < bezahltes_mitgliedschafsjahr:
-        if not datum_via_api:
             return False
-        else:
-            return "{0}-{1}".format(bezahltes_mitgliedschafsjahr, "12-31")
-    else:
-        if not live_data:
-            sektion = frappe.db.get_value("Mitgliedschaft", mitglied_id, 'sektion_id')
-        else:
-            sektion = live_data.sektion_id
-        
-        stichtag = frappe.db.get_value("Sektion", sektion, 'kuendigungs_stichtag')
-        stichtag_datum = getdate("{0}-{1}-{2}".format(current_year, stichtag.strftime("%Y-%m-%d").split("-")[1], stichtag.strftime("%Y-%m-%d").split("-")[2]))
-        if getdate(today()) > stichtag_datum:
-            if not datum_via_api:
-                return True
-            else:
-                return "{0}-{1}".format(current_year + 1, "12-31")
-        else:
-            if not datum_via_api:
-                return False
-            else:
-                return "{0}-{1}".format(current_year, "12-31")
 
 def mahnstopp(mitgliedschaft, mahnstopp):
     SQL_SAFE_UPDATES_false = frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
@@ -691,7 +687,7 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "typ": str(typ_mapper[mitgliedschaft.mitgliedtyp_c]),
         "status": str(status_mapper[mitgliedschaft.status_c]) if mitgliedschaft.status_c != 'Online-Mutation' else str(status_mapper[mitgliedschaft.status_vor_onl_mutation]),
         "sprache": get_sprache(language=mitgliedschaft.language) if mitgliedschaft.language else 'Deutsch',
-        "istTemporaeresMitglied": False, # ???
+        "istTemporaeresMitglied": False,
         "fuerBewirtschaftungGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
         "erfassungsdatum": str(mitgliedschaft.creation).replace(" ", "T"),
         "eintrittsdatum": str(mitgliedschaft.eintrittsdatum).replace(" ", "T") + "T00:00:00" if mitgliedschaft.eintrittsdatum else None,
@@ -702,10 +698,9 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "wegzugsdatum": str(mitgliedschaft.wegzug).replace(" ", "T") + "T00:00:00" if mitgliedschaft.wegzug else None,
         "kuendigungPer": str(mitgliedschaft.kuendigung).replace(" ", "T") + "T00:00:00" if mitgliedschaft.kuendigung else None,
         "jahrBezahltMitgliedschaft": mitgliedschaft.bezahltes_mitgliedschaftsjahr or 0,
-        "betragBezahltMitgliedschaft": None, # ???
-        "jahrBezahltHaftpflicht": mitgliedschaft.zahlung_hv, # TBD
-        "betragBezahltHaftpflicht": None, # ???
-        "naechstesJahrGeschuldet": True if mitgliedschaft.naechstes_jahr_geschuldet == 1 else False,
+        "betragBezahltMitgliedschaft": None,
+        "jahrBezahltHaftpflicht": mitgliedschaft.zahlung_hv,
+        "betragBezahltHaftpflicht": None,
         "bemerkungen": str(mitgliedschaft.wichtig) if mitgliedschaft.wichtig else None,
         "anzahlZeitungen": cint(mitgliedschaft.m_und_w),
         "zeitungAlsPdf": True if mitgliedschaft.m_und_w_pdf else False,
