@@ -30,6 +30,7 @@ def create_invoices_as_json(jahresversand):
             'Privat': [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel).get("price")}],
             'Geschäft': [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel).get("price")}]
         }
+        current_series_index = frappe.db.get_value("Series", "RJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") + 1
 
         filters = ''
         if int(jahresversand_doc.sprach_spezifisch) == 1:
@@ -70,7 +71,7 @@ def create_invoices_as_json(jahresversand):
                                                 AND `docstatus` = 1)
                                             AND (`kuendigung` IS NULL or `kuendigung` > '{mitgliedschafts_jahr}-12-31')
                                             AND `bezahltes_mitgliedschaftsjahr` < {mitgliedschafts_jahr}
-                                            {filters} LIMIT 500""".format(sektion_id=jahresversand_doc.sektion_id, jahresversand=jahresversand, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters), as_dict=True)
+                                            {filters} LIMIT 3""".format(sektion_id=jahresversand_doc.sektion_id, jahresversand=jahresversand, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters), as_dict=True)
         
         try:
             rg_loop = 1
@@ -129,10 +130,15 @@ def create_invoices_as_json(jahresversand):
                         "rechnungs_jahresversand": jahresversand_doc.name,
                         "allocate_advances_automatically": 1,
                         "fast_mode": 1,
-                        "esr_reference": ''
+                        "esr_reference": '',
+                        "outstanding_amount": item[0].get("rate"),
+                        "naming_series": "RJ-.{sektions_code}.#####",
+                        "renaming_series": "RJ-{0}{1}".format(str(sektion.sektion_id) or '00', str(current_series_index).rjust(5, "0"))
                     })
                     sinv.esr_reference = get_qrr_reference(fake_sinv=sinv)
                     sinv_list.append(sinv.as_json())
+                    
+                    current_series_index += 1
                     # frappe.throw(str(sinv.as_json()))
                     # sinv.insert(ignore_permissions=True)
                     # sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
@@ -140,15 +146,16 @@ def create_invoices_as_json(jahresversand):
                     # sinv.docstatus = 1
                     # sinv.save(ignore_permissions=True)
 
-                if rg_loop == 10:
-                    frappe.db.commit()
-                    rg_loop = 1
-                else:
-                    rg_loop += 1
+            #     if rg_loop == 10:
+            #         frappe.db.commit()
+            #         rg_loop = 1
+            #     else:
+            #         rg_loop += 1
             
-            frappe.db.commit()
+            # frappe.db.commit()
             
             # if last:
+            frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'RJ-{1}'""".format(current_series_index - 1, str(sektion.sektion_id) or '00'))
             json_data = json.dumps(sinv_list, indent=2)
             jahresversand_doc.rechnungsdaten_json = json_data
             jahresversand_doc.status = 'Rechnungsdaten erstellt'
@@ -167,20 +174,24 @@ def create_invoices_as_json(jahresversand):
             jahresversand_doc.save()
             jahresversand_doc.add_comment('Comment', text='{0}'.format(str(err)))
 
-def create_csv_from_json(jahresversand):
-    return
-
 def create_invoices_from_json(jahresversand):
     jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+    sektion = frappe.get_doc("Sektion", jahresversand_doc.sektion_id)
+    current_series_index = frappe.db.get_value("Series", "RJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name")
     if jahresversand_doc.status == 'Rechnungsdaten erstellt':
         try:
             invoices = json.loads(jahresversand_doc.rechnungsdaten_json)
+            sinv_counter = 0
             for invoice in invoices:
                 sinv = frappe.get_doc(json.loads(invoice))
                 sinv.insert(ignore_permissions=True)
+                
                 sinv.docstatus = 1
                 sinv.save(ignore_permissions=True)
+                frappe.rename_doc("Sales Invoice", sinv.name, sinv.renaming_series, force=True)
+                sinv_counter += 1
             
+            frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'RJ-{1}'""".format(current_series_index - sinv_counter, str(sektion.sektion_id) or '00'))
             jahresversand_doc.status = 'Abgeschlossen'
             jahresversand_doc.save()
             frappe.db.sql("""SET SQL_SAFE_UPDATES = 0;""", as_list=True)
@@ -191,3 +202,360 @@ def create_invoices_from_json(jahresversand):
             jahresversand_doc.status = 'Fehlgeschlagen'
             jahresversand_doc.save()
             jahresversand_doc.add_comment('Comment', text='{0}'.format(str(err)))
+
+def create_csv_from_json(jahresversand):
+    jahresversand = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+    try:
+        data = []
+        header = [
+            'firma',
+            'zusatz_firma',
+            'anrede',
+            'briefanrede',
+            'vorname_1',
+            'nachname_1',
+            'vorname_2',
+            'nachname_2',
+            'zusatz_adresse',
+            'strasse',
+            'postfach',
+            'postfach_plz',
+            'postfach_ort',
+            'plz',
+            'ort',
+            'betrag_1',
+            'ref_nr_1',
+            'kz_1',
+            'betrag_2',
+            'ref_nr_2',
+            'kz_2',
+            'faktura_nr',
+            'mitglied_nr',
+            'jahr_ausweis',
+            'mitgliedtyp_c',
+            'sektion_c',
+            'region_c',
+            'hat_email',
+            'e_mail_1',
+            'e_mail_2',
+            'zeilen_art',
+            'ausweis_vorname_1',
+            'ausweis_nachname_1',
+            'ausweis_vorname_2',
+            'ausweis_nachname_2',
+            'bezahlt_fuer_firma',
+            'bezahlt_fuer_name',
+            'bezahlt_von_firma',
+            'bezahlt_von_name',
+            'spezielles'
+        ]
+        data.append(header)
+        
+        # rechnungen = frappe.db.sql("""SELECT
+        #                                     `name`,
+        #                                     `mv_mitgliedschaft`
+        #                                 FROM `tabSales Invoice`
+        #                                 WHERE `docstatus` = 1
+        #                                 AND `rechnungs_jahresversand` = '{rechnungs_jahresversand}'""".format(rechnungs_jahresversand=jahresversand.name), as_dict=True)
+        rechnungen = json.loads(jahresversand.rechnungsdaten_json)
+        for _rechnung in rechnungen:
+            rechnung = json.loads(_rechnung)
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", rechnung.get("mv_mitgliedschaft"))
+            
+            # ------------------------------------------------------------------------------------
+            # ------------------------------------------------------------------------------------
+            '''
+                Geschenkmitgliedschaften sowie Gratis Mitgliedschaften werden NICHT berücksichtigt
+            '''
+            # ------------------------------------------------------------------------------------
+            skip = False
+            if mitgliedschaft.ist_geschenkmitgliedschaft:
+                skip = True
+            if mitgliedschaft.reduzierte_mitgliedschaft and not mitgliedschaft.reduzierter_betrag > 0:
+                skip = True
+            # ------------------------------------------------------------------------------------
+            # ------------------------------------------------------------------------------------
+            
+            if not skip:
+                row_data = []
+                pseudo_zeile = False
+                
+                if mitgliedschaft.unabhaengiger_debitor and mitgliedschaft.abweichende_rechnungsadresse:
+                    # fremdzahler
+                    if mitgliedschaft.rg_kundentyp == 'Unternehmen':
+                        row_data.append(mitgliedschaft.rg_firma or '')
+                        row_data.append(mitgliedschaft.rg_zusatz_firma or '')
+                    else:
+                        row_data.append("")
+                        row_data.append("")
+                    row_data.append(mitgliedschaft.rg_anrede or '')
+                    row_data.append(mitgliedschaft.rg_briefanrede or '')
+                    row_data.append(mitgliedschaft.rg_vorname or '')
+                    row_data.append(mitgliedschaft.rg_nachname or '')
+                    row_data.append("")
+                    row_data.append("")
+                else:
+                    # selbstzahler
+                    if mitgliedschaft.kundentyp == 'Unternehmen':
+                        row_data.append(mitgliedschaft.firma or '')
+                        row_data.append(mitgliedschaft.zusatz_firma or '')
+                    else:
+                        row_data.append("")
+                        row_data.append("")
+                    row_data.append(mitgliedschaft.anrede_c or '')
+                    row_data.append(mitgliedschaft.rg_briefanrede or '')
+                    row_data.append(mitgliedschaft.vorname_1 or '')
+                    row_data.append(mitgliedschaft.nachname_1 or '')
+                    if mitgliedschaft.hat_solidarmitglied:
+                        row_data.append(mitgliedschaft.vorname_2 or '')
+                        row_data.append(mitgliedschaft.nachname_2 or '')
+                    else:
+                        row_data.append("")
+                        row_data.append("")
+                
+                if mitgliedschaft.abweichende_rechnungsadresse:
+                    row_data.append(mitgliedschaft.rg_zusatz_adresse or '')
+                    strasse = ''
+                    strasse += mitgliedschaft.rg_strasse or ''
+                    strasse += " " + str(mitgliedschaft.rg_nummer or '')
+                    strasse += mitgliedschaft.rg_nummer_zu or ''
+                    row_data.append(strasse)
+                    if mitgliedschaft.rg_postfach:
+                        row_data.append("Postfach {0}".format(mitgliedschaft.rg_postfach_nummer or ''))
+                        row_data.append("")
+                        row_data.append("")
+                    else:
+                        row_data.append("")
+                        row_data.append("")
+                        row_data.append("")
+                    row_data.append(mitgliedschaft.rg_plz or '')
+                    row_data.append(mitgliedschaft.rg_ort or '')
+                else:
+                    row_data.append(mitgliedschaft.zusatz_adresse or '')
+                    strasse = ''
+                    strasse += mitgliedschaft.strasse or ''
+                    strasse += " " + str(mitgliedschaft.nummer or '')
+                    strasse += mitgliedschaft.nummer_zu or ''
+                    row_data.append(strasse)
+                    if mitgliedschaft.postfach:
+                        row_data.append("Postfach {0}".format(mitgliedschaft.postfach_nummer or ''))
+                        row_data.append("")
+                        row_data.append("")
+                    else:
+                        row_data.append("")
+                        row_data.append("")
+                        row_data.append("")
+                    row_data.append(mitgliedschaft.plz or '')
+                    row_data.append(mitgliedschaft.ort or '')
+                
+                # sinv = frappe.get_doc("Sales Invoice", rechnung.name)
+                # hv_rechnungen = frappe.db.sql("""SELECT
+                #                                     `name`
+                #                                 FROM `tabFakultative Rechnung`
+                #                                 WHERE `sales_invoice` = '{sinv}'
+                #                                 AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
+                hv = False
+                # if len(hv_rechnungen) > 0:
+                #     hv = frappe.get_doc("Fakultative Rechnung", hv_rechnungen[0].name)
+                
+                # row_data.append(sinv.outstanding_amount or 0.00)
+                # row_data.append(sinv.esr_reference or '')
+                row_data.append(rechnung.get("outstanding_amount") or 0.00)
+                row_data.append(rechnung.get("esr_reference") or '')
+                row_data.append('')
+                row_data.append(hv.betrag if hv else '')
+                row_data.append(hv.qrr_referenz if hv else '')
+                row_data.append('')
+                # row_data.append(sinv.name or '')
+                row_data.append(rechnung.get("renaming_series") or '')
+                
+                row_data.append(mitgliedschaft.mitglied_nr or '')
+                row_data.append(jahresversand.jahr or '')
+                row_data.append(mitgliedschaft.mitgliedtyp_c or '')
+                row_data.append(mitgliedschaft.sektion_id or '')
+                row_data.append('')
+                row_data.append('')
+                row_data.append(mitgliedschaft.e_mail_1 or '')
+                row_data.append(mitgliedschaft.e_mail_2 or '')
+                row_data.append('')
+                row_data.append(mitgliedschaft.vorname_1 or '')
+                row_data.append(mitgliedschaft.nachname_1 or '')
+                
+                if mitgliedschaft.hat_solidarmitglied:
+                    row_data.append(mitgliedschaft.vorname_2 or '')
+                    row_data.append(mitgliedschaft.nachname_2 or '')
+                else:
+                    row_data.append("")
+                    row_data.append("")
+                
+                if mitgliedschaft.unabhaengiger_debitor:
+                    pseudo_zeile = True
+                    if mitgliedschaft.kundentyp == 'Unternehmen':
+                        # bezahlt_fuer_firma
+                        bezahlt_fuer_firma = mitgliedschaft.firma or ''
+                        bezahlt_fuer_firma += ' ' if mitgliedschaft.firma else ''
+                        bezahlt_fuer_firma += mitgliedschaft.zusatz_firma or ''
+                        row_data.append(bezahlt_fuer_firma)
+                        # bezahlt_fuer_name
+                        bezahlt_fuer_name = mitgliedschaft.anrede_c or ''
+                        bezahlt_fuer_name += ' ' if mitgliedschaft.anrede_c else ''
+                        bezahlt_fuer_name += mitgliedschaft.vorname_1 or ''
+                        bezahlt_fuer_name += ' ' if mitgliedschaft.vorname_1 else ''
+                        bezahlt_fuer_name += mitgliedschaft.nachname_1 or ''
+                        row_data.append(bezahlt_fuer_name)
+                    else:
+                        # bezahlt_fuer_name
+                        row_data.append('')
+                        bezahlt_fuer_name = mitgliedschaft.anrede_c or ''
+                        bezahlt_fuer_name += ' ' if mitgliedschaft.anrede_c else ''
+                        bezahlt_fuer_name += mitgliedschaft.vorname_1 or ''
+                        bezahlt_fuer_name += ' ' if mitgliedschaft.vorname_1 else ''
+                        bezahlt_fuer_name += mitgliedschaft.nachname_1 or ''
+                        row_data.append(bezahlt_fuer_name)
+                else:
+                    # bezahlt_fuer_firma
+                    row_data.append('')
+                    # bezahlt_fuer_name
+                    row_data.append('')
+                
+                # bezahlt_von_firma
+                row_data.append('')
+                # bezahlt_von_name
+                row_data.append('')
+                
+                if pseudo_zeile:
+                    if mitgliedschaft.ist_geschenkmitgliedschaft:
+                        row_data.append('Geschenkmitgliedschaft')
+                    else:
+                        row_data.append('Unabhängiger Debitor')
+                else:
+                    if mitgliedschaft.reduzierte_mitgliedschaft:
+                        row_data.append('Reduzierte Mitgliedschaft')
+                    else:
+                        row_data.append('')
+                
+                data.append(row_data)
+                
+                if pseudo_zeile:
+                    row_data = []
+                    if mitgliedschaft.kundentyp == 'Unternehmen':
+                        row_data.append(mitgliedschaft.firma or '')
+                        row_data.append(mitgliedschaft.zusatz_firma or '')
+                    else:
+                        row_data.append("")
+                        row_data.append("")
+                    row_data.append(mitgliedschaft.anrede_c or '')
+                    row_data.append(mitgliedschaft.briefanrede or '')
+                    row_data.append(mitgliedschaft.vorname_1 or '')
+                    row_data.append(mitgliedschaft.nachname_1 or '')
+                    if mitgliedschaft.hat_solidarmitglied:
+                        row_data.append(mitgliedschaft.vorname_2 or '')
+                        row_data.append(mitgliedschaft.nachname_2 or '')
+                    else:
+                        row_data.append("")
+                        row_data.append("")
+                
+                    row_data.append(mitgliedschaft.zusatz_adresse or '')
+                    strasse = ''
+                    strasse += mitgliedschaft.strasse or ''
+                    strasse += " " + str(mitgliedschaft.nummer or '')
+                    strasse += mitgliedschaft.nummer_zu or ''
+                    row_data.append(strasse)
+                    if mitgliedschaft.postfach:
+                        row_data.append("Postfach {0}".format(mitgliedschaft.postfach_nummer or ''))
+                        row_data.append("")
+                        row_data.append("")
+                    else:
+                        row_data.append("")
+                        row_data.append("")
+                        row_data.append("")
+                    row_data.append(mitgliedschaft.plz or '')
+                    row_data.append(mitgliedschaft.ort or '')
+                    
+                    row_data.append('--')
+                    row_data.append('--')
+                    row_data.append('--')
+                    row_data.append('--')
+                    row_data.append('--')
+                    row_data.append('--')
+                    row_data.append('--')
+                    row_data.append(mitgliedschaft.mitglied_nr or '')
+                    row_data.append(jahresversand.jahr or '')
+                    row_data.append(mitgliedschaft.mitgliedtyp_c or '')
+                    row_data.append(mitgliedschaft.sektion_id or '')
+                    row_data.append('')
+                    row_data.append('')
+                    row_data.append(mitgliedschaft.e_mail_1 or '')
+                    row_data.append(mitgliedschaft.e_mail_2 or '')
+                    row_data.append('')
+                    row_data.append(mitgliedschaft.vorname_1 or '')
+                    row_data.append(mitgliedschaft.nachname_1 or '')
+                    if mitgliedschaft.hat_solidarmitglied:
+                        row_data.append(mitgliedschaft.vorname_2 or '')
+                        row_data.append(mitgliedschaft.nachname_2 or '')
+                    else:
+                        row_data.append("")
+                        row_data.append("")
+                    
+                    # bezahlt_fuer_firma
+                    row_data.append('')
+                    # bezahlt_fuer_name
+                    row_data.append('')
+                    
+                    if mitgliedschaft.rg_kundentyp == 'Unternehmen':
+                        # bezahlt_von_firma
+                        bezahlt_von_firma = mitgliedschaft.rg_firma or ''
+                        bezahlt_von_firma += ' ' if mitgliedschaft.rg_firma else ''
+                        bezahlt_von_firma += mitgliedschaft.rg_zusatz_firma or ''
+                        row_data.append(bezahlt_von_firma)
+                        # bezahlt_von_name
+                        bezahlt_von_name = mitgliedschaft.rg_anrede or ''
+                        bezahlt_von_name += ' ' if mitgliedschaft.rg_anrede else ''
+                        bezahlt_von_name += mitgliedschaft.rg_vorname or ''
+                        bezahlt_von_name += ' ' if mitgliedschaft.rg_vorname else ''
+                        bezahlt_von_name += mitgliedschaft.rg_nachname or ''
+                        row_data.append(bezahlt_von_name)
+                    else:
+                        # bezahlt_von_name
+                        row_data.append('')
+                        bezahlt_von_name = mitgliedschaft.rg_anrede or ''
+                        bezahlt_von_name += ' ' if mitgliedschaft.rg_anrede else ''
+                        bezahlt_von_name += mitgliedschaft.rg_vorname or ''
+                        bezahlt_von_name += ' ' if mitgliedschaft.rg_vorname else ''
+                        bezahlt_von_name += mitgliedschaft.rg_nachname or ''
+                        row_data.append(bezahlt_von_name)
+                    
+                    if mitgliedschaft.ist_geschenkmitgliedschaft:
+                        row_data.append('Geschenkmitgliedschaft')
+                    else:
+                        if mitgliedschaft.reduzierte_mitgliedschaft:
+                            row_data.append('Reduzierte Mitgliedschaft / Unabhängiger Debitor')
+                        else:
+                            row_data.append('Unabhängiger Debitor')
+                    
+                    data.append(row_data)
+        
+        csv_file = make_csv(data)
+        file_name = "{titel}_{datetime}.csv".format(titel='Jahresversand-{sektion_id}-{jahr}'.format(sektion_id=jahresversand.sektion_id, jahr=jahresversand.jahr), datetime=now().replace(" ", "_"))
+        
+        _file = frappe.get_doc({
+            "doctype": "File",
+            "file_name": file_name,
+            "folder": "Home/Attachments",
+            "is_private": 1,
+            "content": csv_file,
+            "attached_to_doctype": 'Rechnungs Jahresversand',
+            "attached_to_name": jahresversand.name
+        })
+        
+        _file.save()
+        
+        jahresversand.add_comment('Comment', text='CSV erstellt.')
+        frappe.db.commit()
+        
+        return
+    except frappe.DuplicateEntryError:
+        jahresversand.add_comment('Comment', text='Identisches CSV existiert bereits.')
+        frappe.db.commit()
+        
+        return
