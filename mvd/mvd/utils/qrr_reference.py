@@ -7,9 +7,12 @@ import frappe
 import re
 
 @frappe.whitelist()
-def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000 00000 00000 0000'):
-    if sales_invoice:
-        sinv = frappe.get_doc("Sales Invoice", sales_invoice)
+def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000 00000 00000 0000', fake_sinv=False):
+    if sales_invoice or fake_sinv:
+        if sales_invoice:
+            sinv = frappe.get_doc("Sales Invoice", sales_invoice)
+        if fake_sinv:
+            sinv = fake_sinv
         reference_raw = '00 00000 '
         if sinv.mv_mitgliedschaft:
             mvm = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
@@ -21,8 +24,12 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
         else:
             new_customer = sinv.customer.replace("K-", "").rjust(8, "0")
             reference_raw += "{0} {1}".format(new_customer[:5], new_customer[5:8])
-        new_invoice_nr = re.sub("-[0-9]+", "", sales_invoice.replace("R-", "")).rjust(10, "0")
-        reference_raw += "0{0} {1} {2}".format(new_invoice_nr[:1], new_invoice_nr[1:6], new_invoice_nr[6:10])
+        if fake_sinv:
+            new_invoice_nr = re.sub("-[0-9]+", "", fake_sinv.rechnungs_jahresversand.replace("Jahresversand-", "")).rjust(10, "0")
+            reference_raw += "0{0} {1} {2}".format(new_invoice_nr[:1], new_invoice_nr[1:6], new_invoice_nr[6:10])
+        else:
+            new_invoice_nr = re.sub("-[0-9]+", "", sales_invoice.replace("R-", "")).rjust(10, "0")
+            reference_raw += "0{0} {1} {2}".format(new_invoice_nr[:1], new_invoice_nr[1:6], new_invoice_nr[6:10])
     
     if fr:
         fr_sinv = frappe.get_doc("Fakultative Rechnung", fr)

@@ -24,7 +24,9 @@
   "mitgliedtyp",
   "cb_3",
   "region_spezifisch",
-  "region"
+  "region",
+  "section_rechnungsdaten",
+  "rechnungsdaten_json"
  ],
  "fields": [
   {
@@ -66,7 +68,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Vorgemerkt\nIn Arbeit\nAbgeschlossen\nFehlgeschlagen\nStorniert",
+   "options": "Vorgemerkt\nIn Arbeit\nRechnungsdaten erstellt\nAbgeschlossen\nFehlgeschlagen\nStorniert",
    "read_only": 1
   },
   {
@@ -145,10 +147,21 @@
    "fieldtype": "Link",
    "label": "Druckvorlage",
    "options": "Druckvorlage"
+  },
+  {
+   "fieldname": "section_rechnungsdaten",
+   "fieldtype": "Section Break",
+   "label": "Rechnungsdaten"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "rechnungsdaten_json",
+   "fieldtype": "Code",
+   "label": "Rechnungsdaten JSON"
   }
  ],
  "is_submittable": 1,
- "modified": "2023-11-15 10:06:24.185816",
+ "modified": "2024-09-12 11:10:05.972766",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Rechnungs Jahresversand",
