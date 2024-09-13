@@ -106,7 +106,7 @@ def create_invoices_as_json(jahresversand):
                     
                     item = item_defaults.get(mitgliedschaft.mitgliedtyp_c)
                     if cint(mitgliedschaft.reduzierte_mitgliedschaft) == 1 and mitgliedschaft.reduzierter_betrag > 0:
-                        item[0].set("rate", mitgliedschaft.reduzierter_betrag) 
+                        item[0]["rate"] = mitgliedschaft.reduzierter_betrag
                     
                     sinv = frappe.get_doc({
                         "doctype": "Sales Invoice",
