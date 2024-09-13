@@ -174,6 +174,7 @@ def create_invoices_as_json(jahresversand):
 
 def create_invoices_from_json(jahresversand):
     jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+    retry = True if cint(jahresversand_doc.is_retry) == 1 else False
     sektion = frappe.get_doc("Sektion", jahresversand_doc.sektion_id)
     current_series_index = frappe.db.get_value("Series", "RJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0
     current_fr_series_index = frappe.db.get_value("Series", "FRJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0
@@ -188,28 +189,36 @@ def create_invoices_from_json(jahresversand):
             fr_counter = 0
             commit_counter = 0
             for invoice in invoices:
-                sinv = frappe.get_doc(json.loads(invoice[0]))
-                sinv.insert(ignore_permissions=True)
-                
-                sinv.docstatus = 1
-                sinv.save(ignore_permissions=True)
-                if sinv.name != sinv.renaming_series:
-                    frappe.rename_doc("Sales Invoice", sinv.name, sinv.renaming_series, force=True)
+                skip = False
+                sinv_doc = json.loads(invoice[0])
+                if retry:
+                    if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabSales Invoice` WHERE `esr_reference` = '{0}'""".format(sinv_doc.get("esr_reference")), as_dict=True)[0].qty > 0:
+                        skip = True
+                if not skip:
+                    sinv = frappe.get_doc(sinv_doc)
+                    sinv.insert(ignore_permissions=True)
+                    
+                    sinv.docstatus = 1
+                    sinv.save(ignore_permissions=True)
+                    if sinv.name != sinv.renaming_series:
+                        frappe.rename_doc("Sales Invoice", sinv.name, sinv.renaming_series, force=True)
+                    
+
+                    fr = frappe.get_doc(json.loads(invoice[1]))
+                    fr.insert(ignore_permissions=True)
+                    
+                    fr.docstatus = 1
+                    fr.save(ignore_permissions=True)
+                    if fr.name != fr.renaming_series:
+                        frappe.rename_doc("Fakultative Rechnung", fr.name, fr.renaming_series, force=True)
+                    
+
+                    commit_counter += 1
+                    if commit_counter == 100:
+                        frappe.db.commit()
+                        commit_counter = 0
                 sinv_counter += 1
-
-                fr = frappe.get_doc(json.loads(invoice[1]))
-                fr.insert(ignore_permissions=True)
-                
-                fr.docstatus = 1
-                fr.save(ignore_permissions=True)
-                if fr.name != fr.renaming_series:
-                    frappe.rename_doc("Fakultative Rechnung", fr.name, fr.renaming_series, force=True)
                 fr_counter += 1
-
-                commit_counter += 1
-                if commit_counter == 100:
-                    frappe.db.commit()
-                    commit_counter = 0
             
             frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'RJ-{1}'""".format(current_series_index + sinv_counter, str(sektion.sektion_id) or '00'))
             frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'FRJ-{1}'""".format(current_fr_series_index + fr_counter, str(sektion.sektion_id) or '00'))

@@ -32,6 +32,18 @@ frappe.ui.form.on('Rechnungs Jahresversand', {
             }
         });
     },
+    retry: function(frm) {
+        frappe.call({
+            'method': "mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.start_rechnungsverbuchung",
+            'args': {
+                'jahresversand': cur_frm.doc.name,
+                'retry': 1
+            },
+            'callback': function(response) {
+                cur_frm.reload_doc();
+            }
+        });
+    },
     rechnungen_stornieren: function(frm) {
         frappe.msgprint("Diese Funktion steht im Moment nicht zur Verfügung");
     },

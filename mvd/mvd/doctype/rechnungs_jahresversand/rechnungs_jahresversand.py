@@ -30,12 +30,14 @@ def run_jahresversand_verbuchung():
 
 
 @frappe.whitelist()
-def start_rechnungsverbuchung(jahresversand):
+def start_rechnungsverbuchung(jahresversand, retry=False):
     jahresversand = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
     jahresversand.status = 'Vorgemerkt für Rechnungsverbuchung'
     bereits_geplant = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabRechnungs Jahresversand` WHERE `status` = 'Vorgemerkt für Rechnungsverbuchung' AND `docstatus` = 1""", as_dict=True)[0].qty + 1
     geplant_fuer = getdate(add_days(today(), bereits_geplant)).strftime('%Y-%m-%d') + " 01:00:00"
     jahresversand.geplant_am = geplant_fuer
+    if retry:
+        jahresversand.retry = 1
     jahresversand.save()
     return
 
