@@ -12,8 +12,10 @@
   "druckvorlage",
   "cb_1",
   "status",
-  "download_draft",
+  "geplant_am",
+  "start_csv_and_invoices",
   "download_new_csv",
+  "start_rechnungsverbuchung",
   "rechnungen_stornieren",
   "amended_from",
   "section_selektionskriterien",
@@ -49,12 +51,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.docstatus==0&&!doc.__islocal",
-   "fieldname": "download_draft",
-   "fieldtype": "Button",
-   "label": "Download Entwurfsdaten"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -65,10 +61,12 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "eval:doc.docstatus==1",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Vorgemerkt\nIn Arbeit\nRechnungsdaten erstellt\nAbgeschlossen\nFehlgeschlagen\nStorniert",
+   "no_copy": 1,
+   "options": "Bereit zur Ausf\u00fchrung\nRechnungsdaten in Arbeit\nCSV in Arbeit\nRechnungsdaten und CSV erstellt\nVorgemerkt f\u00fcr Rechnungsverbuchung\nRechnungsverbuchung in Arbeit\nAbgeschlossen\nFehlgeschlagen\nStorniert",
    "read_only": 1
   },
   {
@@ -149,6 +147,7 @@
    "options": "Druckvorlage"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_rechnungsdaten",
    "fieldtype": "Section Break",
    "label": "Rechnungsdaten"
@@ -157,11 +156,32 @@
    "allow_on_submit": 1,
    "fieldname": "rechnungsdaten_json",
    "fieldtype": "Code",
-   "label": "Rechnungsdaten JSON"
+   "label": "Rechnungsdaten JSON",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1&&in_list([\"Bereit zur Ausf\u00fchrung\", \"Rechnungsdaten und CSV erstellt\"], doc.status)",
+   "fieldname": "start_csv_and_invoices",
+   "fieldtype": "Button",
+   "label": "Erstelle Rechnungsdaten & CSV"
+  },
+  {
+   "depends_on": "eval:doc.status == 'Rechnungsdaten und CSV erstellt'",
+   "fieldname": "start_rechnungsverbuchung",
+   "fieldtype": "Button",
+   "label": "Starte Rechnungsverbuchung"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.status=='Vorgemerkt f\u00fcr Rechnungsverbuchung'",
+   "fieldname": "geplant_am",
+   "fieldtype": "Datetime",
+   "label": "Voraussichtlich Ausf\u00fchrung",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2024-09-12 11:10:05.972766",
+ "modified": "2024-09-13 10:58:32.141302",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Rechnungs Jahresversand",

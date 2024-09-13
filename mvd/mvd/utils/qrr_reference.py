@@ -7,7 +7,7 @@ import frappe
 import re
 
 @frappe.whitelist()
-def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000 00000 00000 0000', fake_sinv=False):
+def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000 00000 00000 0000', fake_sinv=False, fake_fr=False):
     if sales_invoice or fake_sinv:
         if sales_invoice:
             sinv = frappe.get_doc("Sales Invoice", sales_invoice)
@@ -26,13 +26,15 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
             reference_raw += "{0} {1}".format(new_customer[:5], new_customer[5:8])
         if fake_sinv:
             new_invoice_nr = re.sub("-[0-9]+", "", fake_sinv.rechnungs_jahresversand.replace("Jahresversand-", "")).rjust(10, "0")
-            reference_raw += "0{0} {1} {2}".format(new_invoice_nr[:1], new_invoice_nr[1:6], new_invoice_nr[6:10])
         else:
             new_invoice_nr = re.sub("-[0-9]+", "", sales_invoice.replace("R-", "")).rjust(10, "0")
-            reference_raw += "0{0} {1} {2}".format(new_invoice_nr[:1], new_invoice_nr[1:6], new_invoice_nr[6:10])
+        reference_raw += "0{0} {1} {2}".format(new_invoice_nr[:1], new_invoice_nr[1:6], new_invoice_nr[6:10])
     
-    if fr:
-        fr_sinv = frappe.get_doc("Fakultative Rechnung", fr)
+    if fr or fake_fr:
+        if fr:
+            fr_sinv = frappe.get_doc("Fakultative Rechnung", fr)
+        if fake_fr:
+            fr_sinv = fake_fr
         mvm = frappe.get_doc("Mitgliedschaft", fr_sinv.mv_mitgliedschaft)
         if fr_sinv.typ == 'HV':
             reference_raw = '11 00000 '
@@ -49,7 +51,10 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
                 customer = mvm.kunde_mitglied
             new_customer = customer.replace("K-", "").rjust(8, "0")
             reference_raw += "{0} {1}".format(new_customer[:5], new_customer[5:8])
-        new_invoice_nr = re.sub("-[0-9]+", "", fr.replace("FR-", "")).rjust(10, "0")
+        if fake_fr:
+            new_invoice_nr = re.sub("-[0-9]+", "", fr_sinv.renaming_series.replace("FRJ-", "")).rjust(10, "0")
+        else:
+            new_invoice_nr = re.sub("-[0-9]+", "", fr_sinv.name.replace("FR-", "").replace("FRJ-", "")).rjust(10, "0")
         reference_raw += "0{0} {1} {2}".format(new_invoice_nr[:1], new_invoice_nr[1:6], new_invoice_nr[6:10])
     
     check_digit_matrix = {

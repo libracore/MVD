@@ -6,18 +6,18 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils.csvutils import to_csv as make_csv
-from frappe.utils.data import now, getdate, add_days, today
+from frappe.utils.data import now, add_days, today
 from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price
-# from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung
 from frappe.utils.background_jobs import enqueue
-# from frappe.utils import cint
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
+from frappe.utils import cint
 import json
 
 def create_invoices_as_json(jahresversand):
     jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
-    if jahresversand_doc.status == 'Vorgemerkt':
-        jahresversand_doc.status = 'In Arbeit'
+    if jahresversand_doc.status not in ['Abgeschlossen', 'Fehlgeschlagen', 'Storniert']:
+        jahresversand_doc.status = 'Rechnungsdaten in Arbeit'
+        jahresversand_doc.rechnungsdaten_json = ''
         jahresversand_doc.add_comment('Comment', text='Beginne mit Rechnungsdaten Erzeugung...')
         jahresversand_doc.save()
         frappe.db.commit()
@@ -30,7 +30,8 @@ def create_invoices_as_json(jahresversand):
             'Privat': [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel).get("price")}],
             'Geschäft': [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel).get("price")}]
         }
-        current_series_index = frappe.db.get_value("Series", "RJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") + 1
+        current_series_index = (frappe.db.get_value("Series", "RJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0) + 1
+        current_fr_series_index = (frappe.db.get_value("Series", "FRJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0) + 1
 
         filters = ''
         if int(jahresversand_doc.sprach_spezifisch) == 1:
@@ -71,7 +72,7 @@ def create_invoices_as_json(jahresversand):
                                                 AND `docstatus` = 1)
                                             AND (`kuendigung` IS NULL or `kuendigung` > '{mitgliedschafts_jahr}-12-31')
                                             AND `bezahltes_mitgliedschaftsjahr` < {mitgliedschafts_jahr}
-                                            {filters} LIMIT 3""".format(sektion_id=jahresversand_doc.sektion_id, jahresversand=jahresversand, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters), as_dict=True)
+                                            {filters} LIMIT 500""".format(sektion_id=jahresversand_doc.sektion_id, jahresversand=jahresversand, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters), as_dict=True)
         
         try:
             rg_loop = 1
@@ -104,11 +105,8 @@ def create_invoices_as_json(jahresversand):
                         contact = mitgliedschaft.rg_kontakt
                     
                     item = item_defaults.get(mitgliedschaft.mitgliedtyp_c)
-
-                    # if mitgliedschaft.mitgliedtyp_c == 'Privat':
-                    #     item = [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center}]
-                    # elif mitgliedschaft.mitgliedtyp_c == 'Geschäft':
-                    #     item = [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center}]
+                    if cint(mitgliedschaft.reduzierte_mitgliedschaft) == 1 and mitgliedschaft.reduzierter_betrag > 0:
+                        item[0].set("rate") = mitgliedschaft.reduzierter_betrag
                     
                     sinv = frappe.get_doc({
                         "doctype": "Sales Invoice",
@@ -136,37 +134,37 @@ def create_invoices_as_json(jahresversand):
                         "renaming_series": "RJ-{0}{1}".format(str(sektion.sektion_id) or '00', str(current_series_index).rjust(5, "0"))
                     })
                     sinv.esr_reference = get_qrr_reference(fake_sinv=sinv)
-                    sinv_list.append(sinv.as_json())
-                    
-                    current_series_index += 1
-                    # frappe.throw(str(sinv.as_json()))
-                    # sinv.insert(ignore_permissions=True)
-                    # sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
-                    # sinv.save(ignore_permissions=True)
-                    # sinv.docstatus = 1
-                    # sinv.save(ignore_permissions=True)
 
-            #     if rg_loop == 10:
-            #         frappe.db.commit()
-            #         rg_loop = 1
-            #     else:
-            #         rg_loop += 1
+                    fr = frappe.get_doc({
+                        "doctype": "Fakultative Rechnung",
+                        "mv_mitgliedschaft": mitgliedschaft.name,
+                        'due_date': due_date,
+                        'sektion_id': jahresversand_doc.sektion_id,
+                        'sektions_code': str(sektion.sektion_id) or '00',
+                        'sales_invoice': "RJ-{0}{1}".format(str(sektion.sektion_id) or '00', str(current_series_index).rjust(5, "0")),
+                        'typ': 'HV',
+                        'betrag': sektion.betrag_hv,
+                        'posting_date': today(),
+                        'company': sektion.company,
+                        'druckvorlage': '',
+                        'bezugsjahr': jahresversand_doc.jahr,
+                        'spenden_versand': '',
+                        "naming_series": "FRJ-.{sektions_code}.#####",
+                        "renaming_series": "FRJ-{0}{1}".format(str(sektion.sektion_id) or '00', str(current_fr_series_index).rjust(5, "0"))
+                    })
+                    fr.qrr_referenz = get_qrr_reference(fake_fr=fr)
+
+                    sinv_list.append([sinv.as_json(), fr.as_json()])
+                    current_series_index += 1
+                    current_fr_series_index += 1
             
-            # frappe.db.commit()
-            
-            # if last:
-            frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'RJ-{1}'""".format(current_series_index - 1, str(sektion.sektion_id) or '00'))
             json_data = json.dumps(sinv_list, indent=2)
             jahresversand_doc.rechnungsdaten_json = json_data
-            jahresversand_doc.status = 'Rechnungsdaten erstellt'
             jahresversand_doc.save()
-            jahresversand_doc.add_comment('Comment', text='Rechnungsdaten erstellt. Beginne mit CSV...')
+            jahresversand_doc.add_comment('Comment', text='Rechnungsdaten erstellt.')
             frappe.db.commit()
-        
-            # get_csv(jahresversand)
-            create_csv_from_json(jahresversand_doc.name)
 
-            create_invoices_from_json(jahresversand_doc.name)
+            create_csv_from_json(jahresversand_doc.name)
             
         except Exception as err:
             jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
@@ -177,21 +175,44 @@ def create_invoices_as_json(jahresversand):
 def create_invoices_from_json(jahresversand):
     jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
     sektion = frappe.get_doc("Sektion", jahresversand_doc.sektion_id)
-    current_series_index = frappe.db.get_value("Series", "RJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name")
-    if jahresversand_doc.status == 'Rechnungsdaten erstellt':
+    current_series_index = frappe.db.get_value("Series", "RJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0
+    current_fr_series_index = frappe.db.get_value("Series", "FRJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0
+    if jahresversand_doc.status == 'Vorgemerkt für Rechnungsverbuchung':
+        jahresversand_doc.status = 'Rechnungsverbuchung in Arbeit'
+        jahresversand_doc.add_comment('Comment', text='Beginne mit der Rechnungsverbuchung...')
+        jahresversand_doc.save()
+        frappe.db.commit()
         try:
             invoices = json.loads(jahresversand_doc.rechnungsdaten_json)
             sinv_counter = 0
+            fr_counter = 0
+            commit_counter = 0
             for invoice in invoices:
-                sinv = frappe.get_doc(json.loads(invoice))
+                sinv = frappe.get_doc(json.loads(invoice[0]))
                 sinv.insert(ignore_permissions=True)
                 
                 sinv.docstatus = 1
                 sinv.save(ignore_permissions=True)
-                frappe.rename_doc("Sales Invoice", sinv.name, sinv.renaming_series, force=True)
+                if sinv.name != sinv.renaming_series:
+                    frappe.rename_doc("Sales Invoice", sinv.name, sinv.renaming_series, force=True)
                 sinv_counter += 1
+
+                fr = frappe.get_doc(json.loads(invoice[1]))
+                fr.insert(ignore_permissions=True)
+                
+                fr.docstatus = 1
+                fr.save(ignore_permissions=True)
+                if fr.name != fr.renaming_series:
+                    frappe.rename_doc("Fakultative Rechnung", fr.name, fr.renaming_series, force=True)
+                fr_counter += 1
+
+                commit_counter += 1
+                if commit_counter == 100:
+                    frappe.db.commit()
+                    commit_counter = 0
             
-            frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'RJ-{1}'""".format(current_series_index - sinv_counter, str(sektion.sektion_id) or '00'))
+            frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'RJ-{1}'""".format(current_series_index + sinv_counter, str(sektion.sektion_id) or '00'))
+            frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'FRJ-{1}'""".format(current_fr_series_index + fr_counter, str(sektion.sektion_id) or '00'))
             jahresversand_doc.status = 'Abgeschlossen'
             jahresversand_doc.save()
             frappe.db.sql("""SET SQL_SAFE_UPDATES = 0;""", as_list=True)
@@ -205,6 +226,10 @@ def create_invoices_from_json(jahresversand):
 
 def create_csv_from_json(jahresversand):
     jahresversand = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+    jahresversand.status = 'CSV in Arbeit'
+    jahresversand.add_comment('Comment', text='Beginne mit CSV Erzeugung...')
+    jahresversand.save()
+    frappe.db.commit()
     try:
         data = []
         header = [
@@ -251,15 +276,10 @@ def create_csv_from_json(jahresversand):
         ]
         data.append(header)
         
-        # rechnungen = frappe.db.sql("""SELECT
-        #                                     `name`,
-        #                                     `mv_mitgliedschaft`
-        #                                 FROM `tabSales Invoice`
-        #                                 WHERE `docstatus` = 1
-        #                                 AND `rechnungs_jahresversand` = '{rechnungs_jahresversand}'""".format(rechnungs_jahresversand=jahresversand.name), as_dict=True)
         rechnungen = json.loads(jahresversand.rechnungsdaten_json)
         for _rechnung in rechnungen:
-            rechnung = json.loads(_rechnung)
+            rechnung = json.loads(_rechnung[0])
+            hv = json.loads(_rechnung[1])
             mitgliedschaft = frappe.get_doc("Mitgliedschaft", rechnung.get("mv_mitgliedschaft"))
             
             # ------------------------------------------------------------------------------------
@@ -347,26 +367,12 @@ def create_csv_from_json(jahresversand):
                         row_data.append("")
                     row_data.append(mitgliedschaft.plz or '')
                     row_data.append(mitgliedschaft.ort or '')
-                
-                # sinv = frappe.get_doc("Sales Invoice", rechnung.name)
-                # hv_rechnungen = frappe.db.sql("""SELECT
-                #                                     `name`
-                #                                 FROM `tabFakultative Rechnung`
-                #                                 WHERE `sales_invoice` = '{sinv}'
-                #                                 AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
-                hv = False
-                # if len(hv_rechnungen) > 0:
-                #     hv = frappe.get_doc("Fakultative Rechnung", hv_rechnungen[0].name)
-                
-                # row_data.append(sinv.outstanding_amount or 0.00)
-                # row_data.append(sinv.esr_reference or '')
                 row_data.append(rechnung.get("outstanding_amount") or 0.00)
                 row_data.append(rechnung.get("esr_reference") or '')
                 row_data.append('')
-                row_data.append(hv.betrag if hv else '')
-                row_data.append(hv.qrr_referenz if hv else '')
+                row_data.append(hv.get("betrag") or 0.00)
+                row_data.append(hv.get("qrr_referenz") or '')
                 row_data.append('')
-                # row_data.append(sinv.name or '')
                 row_data.append(rechnung.get("renaming_series") or '')
                 
                 row_data.append(mitgliedschaft.mitglied_nr or '')
@@ -549,13 +555,17 @@ def create_csv_from_json(jahresversand):
         })
         
         _file.save()
-        
+
+        jahresversand.status = 'Rechnungsdaten und CSV erstellt'
         jahresversand.add_comment('Comment', text='CSV erstellt.')
+        jahresversand.save()
         frappe.db.commit()
         
         return
     except frappe.DuplicateEntryError:
+        jahresversand.status = 'Rechnungsdaten und CSV erstellt'
         jahresversand.add_comment('Comment', text='Identisches CSV existiert bereits.')
+        jahresversand.save()
         frappe.db.commit()
         
         return

@@ -11,16 +11,22 @@ frappe.ui.form.on('Rechnungs Jahresversand', {
             cur_frm.set_df_property('status', 'read_only', 1);
         }
     },
-    download_draft: function(frm) {
+    start_csv_and_invoices: function(frm) {
         frappe.call({
-            'method': "mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.get_draft_csv",
-            'args': {
-                'jahresversand': cur_frm.doc.name
-            },
-            'freeze': true,
-            'freeze_message': 'Erstelle Entwurfs CSV...',
+            'method': "start_csv_and_invoices",
+            'doc': frm.doc,
             'callback': function(response) {
-                frappe.msgprint("Das CSV wird im Hintergrund erzeugt, bitte warten...")
+                frappe.msgprint("Der Prozess wurde gestartet. Sie können den Fortschritt <a href='/desk#background_jobs'>hier</a> einsehen.");
+                setTimeout(function(){cur_frm.reload_doc();}, 1000);
+            }
+        });
+    },
+    start_rechnungsverbuchung: function(frm) {
+        frappe.call({
+            'method': "start_rechnungsverbuchung",
+            'doc': frm.doc,
+            'callback': function(response) {
+                cur_frm.reload_doc();
             }
         });
     },
