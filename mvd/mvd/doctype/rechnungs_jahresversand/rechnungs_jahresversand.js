@@ -23,8 +23,10 @@ frappe.ui.form.on('Rechnungs Jahresversand', {
     },
     start_rechnungsverbuchung: function(frm) {
         frappe.call({
-            'method': "start_rechnungsverbuchung",
-            'doc': frm.doc,
+            'method': "mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.start_rechnungsverbuchung",
+            'args': {
+                'jahresversand': cur_frm.doc.name
+            },
             'callback': function(response) {
                 cur_frm.reload_doc();
             }

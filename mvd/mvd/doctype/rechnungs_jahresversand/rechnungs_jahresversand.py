@@ -21,14 +21,23 @@ class RechnungsJahresversand(Document):
         }
         enqueue("mvd.mvd.doctype.rechnungs_jahresversand.utils.create_invoices_as_json", queue='long', job_name='Erstellung Rechnungsdaten & CSV {0}'.format(self.name), timeout=6000, **args)
         return
-    
-    def start_rechnungsverbuchung(self):
-        self.status = 'Vorgemerkt für Rechnungsverbuchung'
-        bereits_geplant = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabRechnungs Jahresversand` WHERE `status` = 'Vorgemerkt für Rechnungsverbuchung'""", as_dict=True)[0].qty + 1
-        geplant_fuer = getdate(add_days(today(), bereits_geplant)).strftime('%Y-%m-%d') + " 01:00:00"
-        self.geplant_am = geplant_fuer
-        self.save()
-        return
+
+def run_jahresversand_verbuchung():
+    from mvd.mvd.doctype.rechnungs_jahresversand.utils import create_invoices_from_json
+    ready_to_run = frappe.db.sql("""SELECT `name` FROM `tabRechnungs Jahresversand` WHERE `status` = 'Vorgemerkt für Rechnungsverbuchung' AND `docstatus` = 1 ORDER BY `geplant_am` ASC""", as_dict=True)
+    if len(ready_to_run) > 0:
+        create_invoices_from_json(ready_to_run[0].name)
+
+
+@frappe.whitelist()
+def start_rechnungsverbuchung(jahresversand):
+    jahresversand = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+    jahresversand.status = 'Vorgemerkt für Rechnungsverbuchung'
+    bereits_geplant = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabRechnungs Jahresversand` WHERE `status` = 'Vorgemerkt für Rechnungsverbuchung' AND `docstatus` = 1""", as_dict=True)[0].qty + 1
+    geplant_fuer = getdate(add_days(today(), bereits_geplant)).strftime('%Y-%m-%d') + " 01:00:00"
+    jahresversand.geplant_am = geplant_fuer
+    jahresversand.save()
+    return
 
 @frappe.whitelist()
 def get_csv(jahresversand, bg_job=False):
