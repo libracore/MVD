@@ -64,6 +64,13 @@ def create_kontakt(mitgliedschaft, primary):
     link.link_doctype = 'Customer'
     link.link_name = mitgliedschaft.kunde_mitglied
 
+    new_name = mitgliedschaft.kunde_mitglied.strip()
+    if primary:
+        new_name += "-Mitglied"
+    else:
+        new_name += "-Solidarmitglied"
+    new_contact.mvd_name = new_name
+
     new_contact.insert(ignore_permissions=True)
     
     if primary:
@@ -123,19 +130,8 @@ def create_kontakt(mitgliedschaft, primary):
     
     new_contact.save(ignore_permissions=True)
     frappe.db.commit()
-
-    new_name = ""
-    for link in new_contact.links:
-        new_name = link.link_name.strip()
-        break
-    if primary:
-        new_name += "-Mitglied"
-    else:
-        new_name += "-Solidarmitglied"
-    frappe.rename_doc('Contact', new_contact.name, new_name)
-    frappe.db.commit()
     
-    return new_name
+    return new_contact.name
 
 def update_kontakt(mitgliedschaft, primary):
     if primary:
