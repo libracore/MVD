@@ -183,6 +183,9 @@ def create_invoices_from_json(jahresversand):
         jahresversand_doc.add_comment('Comment', text='Beginne mit der Rechnungsverbuchung...')
         jahresversand_doc.save()
         frappe.db.commit()
+        if retry:
+            _already_created = frappe.db.sql("""SELECT `esr_reference` FROM `tabSales Invoice` WHERE `rechnungs_jahresversand` = '{0}'""".format(jahresversand), as_dict=True)
+            already_created = [ac.esr_reference for ac in _already_created]
         try:
             invoices = json.loads(jahresversand_doc.rechnungsdaten_json)
             sinv_counter = 0
@@ -192,7 +195,9 @@ def create_invoices_from_json(jahresversand):
                 skip = False
                 sinv_doc = json.loads(invoice[0])
                 if retry:
-                    if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabSales Invoice` WHERE `esr_reference` = '{0}'""".format(sinv_doc.get("esr_reference")), as_dict=True)[0].qty > 0:
+                    # if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabSales Invoice` WHERE `esr_reference` = '{0}'""".format(sinv_doc.get("esr_reference")), as_dict=True)[0].qty > 0:
+                    #     skip = True
+                    if sinv_doc.get("esr_reference") in already_created:
                         skip = True
                 if not skip:
                     sinv = frappe.get_doc(sinv_doc)
