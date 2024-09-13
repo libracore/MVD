@@ -37,7 +37,7 @@ def start_rechnungsverbuchung(jahresversand, retry=False):
     geplant_fuer = getdate(add_days(today(), bereits_geplant)).strftime('%Y-%m-%d') + " 01:00:00"
     jahresversand.geplant_am = geplant_fuer
     if retry:
-        jahresversand.retry = 1
+        jahresversand.is_retry = 1
     jahresversand.save()
     return
 

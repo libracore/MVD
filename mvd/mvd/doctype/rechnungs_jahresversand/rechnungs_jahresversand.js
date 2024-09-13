@@ -27,6 +27,8 @@ frappe.ui.form.on('Rechnungs Jahresversand', {
             'args': {
                 'jahresversand': cur_frm.doc.name
             },
+            'freeze': true,
+			'freeze_message': __("Starte Rechnungsverbuchung..."),
             'callback': function(response) {
                 cur_frm.reload_doc();
             }
@@ -39,6 +41,8 @@ frappe.ui.form.on('Rechnungs Jahresversand', {
                 'jahresversand': cur_frm.doc.name,
                 'retry': 1
             },
+            'freeze': true,
+			'freeze_message': __("Starte Rechnungsverbuchung neu..."),
             'callback': function(response) {
                 cur_frm.reload_doc();
             }
