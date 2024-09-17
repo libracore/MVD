@@ -8,6 +8,16 @@ frappe.ui.form.on('Beratung', {
             reset_timeline(frm);
         }
     },
+    sektion_id: function(frm) {
+        if ((cur_frm.doc.sektion_id == 'MVAG')&&(!cur_frm.doc.antwort)) {
+            cur_frm.set_value("antwort", `
+                <div>
+                    <div>Erfolglose Kontaktaufnahme:<br><br></div>
+                    <div>Erfolgreiche Kontaktaufnahme:<br><br></div>
+                    <div>Notizen Rechtsberatung zum Fall:<br><br></div>
+                </div>`);
+        }
+    },
     refresh: function(frm) {
         // Handler für gesperrte Ansicht
         if (!cur_frm.doc.gesperrt_am) {

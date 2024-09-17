@@ -61,6 +61,7 @@
   "section_anfrage",
   "replace_table_as_p",
   "notiz",
+  "vorlage_einfuegen",
   "antwort",
   "section_dokumente",
   "dokumente"
@@ -426,9 +427,15 @@
    "fieldname": "replace_table_as_p",
    "fieldtype": "Button",
    "label": "Tabellen durch Paragraphen ersetzen"
+  },
+  {
+   "depends_on": "eval:doc.sektion_id=='MVAG'",
+   "fieldname": "vorlage_einfuegen",
+   "fieldtype": "Button",
+   "label": "Vorlage einf\u00fcgen"
   }
  ],
- "modified": "2024-01-18 20:51:22.981585",
+ "modified": "2024-09-17 16:00:55.159404",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

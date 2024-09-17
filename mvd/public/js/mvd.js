@@ -332,7 +332,7 @@ frappe.mvd.new_mail = function(cur_frm, last_email='', kuendigungsmail=false, de
     }
     
     if (!recpts) {
-        recpts = cur_frm.doc.email || cur_frm.doc.email_id || cur_frm.doc.contact_email
+        recpts = cur_frm.doc.email || cur_frm.doc.email_id || cur_frm.doc.contact_email || cur_frm.doc.e_mail_1
     }
     var temp_email_template = false;
     if (cur_frm.default_rueckfragen_email_template) {
