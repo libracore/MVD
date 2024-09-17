@@ -115,6 +115,10 @@ class Beratung(Document):
         # Keine Beratung ohne Sektion
         if not self.sektion_id:
             self.set_sektion()
+        
+        # MVAG Default Text (Antwort)
+        if self.sektion_id == 'MVAG':
+            self.set_mvag_default_text()
     
     def set_sektion(self):
         '''
@@ -300,6 +304,16 @@ class Beratung(Document):
         self.save()
         
         return
+    
+    def set_mvag_default_text(self):
+        if not self.antwort:
+            self.antwort = """
+                <div>
+                    <div>Erfolglose Kontaktaufnahme:<br><br></div>
+                    <div>Erfolgreiche Kontaktaufnahme:<br><br></div>
+                    <div>Notizen Rechtsberatung zum Fall:<br><br></div>
+                </div>
+            """
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):

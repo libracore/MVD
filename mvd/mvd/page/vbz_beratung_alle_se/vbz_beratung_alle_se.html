@@ -45,6 +45,33 @@
                 <td style="text-align: right;"><b>{{ s3_as }}</b></td>
             {% endif %}
         </tr>
+        <tr id="s4_as">
+            <td>S4</td>
+            <td>Offene Rückfragen</td>
+            {% if s4_as > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ s4_as }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="s5_as">
+            <td>S5</td>
+            <td>Beantwortete Rückfragen (Posteingang)</td>
+            {% if s5_as > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ s5_as }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="a1_as">
+            <td>A1</td>
+            <td>Administration</td>
+            {% if a1_as > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ a1_as }}</b></td>
+            {% endif %}
+        </tr>
         <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
         <tr id="r_as">
             <td>R</td>
