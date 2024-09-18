@@ -64,12 +64,14 @@ class LibraCoreFacade:
     
     def get_csv_files_from_post(self, postretouren_log):
         settings = frappe.get_doc("Postretouren Einstellungen", "Postretouren Einstellungen")
+        sitename = frappe.utils.get_host_name() if frappe.utils.get_host_name() not in ['mvd:8000', 'dev.msmr.ch:8000'] else 'mvd'
+        benchname = 'frappe-bench' if frappe.utils.get_host_name() not in ['mvd:8000', 'dev.msmr.ch:8000'] else 'mvd-bench'
         csv_files = []
         try:
             with self.connect_sftp(settings) as sftp:
                 for file_name in sftp.listdir(settings.target_path):
                     # fetch the file
-                    local_file = os.path.join("/home/frappe/frappe-bench/sites/{0}/private/files/".format(frappe.utils.get_host_name()).replace(":8000", ""), file_name)
+                    local_file = os.path.join("/home/frappe/{0}/sites/{1}/private/files/".format(benchname, sitename), file_name)
                     remote_file = os.path.join(settings.target_path, file_name)
                     sftp.get(remote_file, local_file)
 
@@ -83,7 +85,7 @@ class LibraCoreFacade:
                         "is_private": 1,
                         "folder": "Home/Attachments"})
                     _file.save()
-                    csv_files.append("/home/frappe/frappe-bench/sites/{0}/private/files/{1}".format(frappe.utils.get_host_name(), file_name).replace(":8000", ""))
+                    csv_files.append("/home/frappe/{0}/sites/{1}/private/files/{2}".format(benchname, sitename, file_name))
                     
         except Exception as err:
            frappe.log_error( err, "get_csv_files_from_post Failed")
@@ -93,7 +95,9 @@ class LibraCoreFacade:
     def connect_sftp(self, settings):
         cnopts = pysftp.CnOpts()
         cnopts.hostkeys = None
-        key_file = "/home/frappe/frappe-bench/sites/{0}{1}".format(frappe.utils.get_host_name(), settings.key_file).replace(":8000", "")
+        sitename = frappe.utils.get_host_name() if frappe.utils.get_host_name() not in ['mvd:8000', 'dev.msmr.ch:8000'] else 'mvd'
+        benchname = 'frappe-bench' if frappe.utils.get_host_name() not in ['mvd:8000', 'dev.msmr.ch:8000'] else 'mvd-bench'
+        key_file = "/home/frappe/{0}/sites/{1}{2}".format(benchname, sitename, settings.key_file)
         
         connection = pysftp.Connection(
                 settings.host, 

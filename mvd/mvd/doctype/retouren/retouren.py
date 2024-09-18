@@ -186,7 +186,7 @@ def create_post_retouren(data):
         return 1, cint(post_retoure.retoure_in_folge)
         
     except Exception as err:
-        return err, 0
+        return "{0}\n\n{1}".format(err, data.rawData), 0
 
 @frappe.whitelist()
 def close_open_retouren(mitgliedschaft):

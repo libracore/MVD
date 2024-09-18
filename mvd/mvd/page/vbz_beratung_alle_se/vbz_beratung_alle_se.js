@@ -55,14 +55,18 @@ frappe.vbz_beratung_alle_se = {
             frappe.route_options = {"status": 'Zusammengeführt', "ungelesen": 1}
             frappe.set_route("List", "Beratung", "List");
         });
-        // $("#s4_as").click(function(){
-        //     frappe.route_options = {"status": "Rückfragen", "kontaktperson": ['is', 'not set']}
-        //     frappe.set_route("List", "Beratung", "List");
-        // });
-        // $("#s5_as").click(function(){
-        //     frappe.route_options = {"status": "Rückfragen", "kontaktperson": ['is', 'not set'], "ungelesen": 1}
-        //     frappe.set_route("List", "Beratung", "List");
-        // });
+        $("#s4_as").click(function(){
+            frappe.route_options = {"status": "Rückfragen", "kontaktperson": ['is', 'not set'], "ungelesen": 0}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#s5_as").click(function(){
+            frappe.route_options = {"status": "Rückfragen", "kontaktperson": ['is', 'not set'], "ungelesen": 1}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#a1_as").click(function(){
+            frappe.route_options = {"status": "Open", "kontaktperson": ['like', 'Administration%']}
+            frappe.set_route("List", "Beratung", "List");
+        });
         // $("#s6_as").click(function(){
         //     frappe.route_options = {"status": ["not in", ["Rückfragen", "Rückfrage: Termin vereinbaren", "Eingang", "Open", "Zusammengeführt"]], "ungelesen": 1, "kontaktperson": ['is', 'not set']}
         //     frappe.set_route("List", "Beratung", "List");

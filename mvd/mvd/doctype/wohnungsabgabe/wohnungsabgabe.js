@@ -2,22 +2,34 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Wohnungsabgabe', {
-         refresh: function(frm) {
-         	  	//frm.add_custom_button(__("Mitgliedschaftsdaten übernehmen"),  function() {
-         			//mitgliedschaftsdatenUebernehmen(frm);
-              //  		});
-         },
-	 validate: function(frm) {
-	 		totalRechner(frm);
-	},
-	//total: function(frm) {
-	// 		totalRechner(frm);
-	//},
-  mitgliederdaten_uebernehmen: function(frm) {
+    refresh: function(frm) {
+        override_default_email_dialog(frm);
+    },
+    validate: function(frm) {
+        totalRechner(frm);
+    },
+    //total: function(frm) {
+    // 		totalRechner(frm);
+    //},
+    mitgliederdaten_uebernehmen: function(frm) {
     mitgliedschaftsdatenUebernehmen(frm);
-  }
-
+    }
 });
+
+function override_default_email_dialog(frm) {
+    // overwrite E-Mail BTN
+    $("[data-label='Email']").parent().off("click");
+    $("[data-label='Email']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
+    $("[data-label='E-Mail']").parent().off("click");
+    $("[data-label='E-Mail']").parent().click(function(){frappe.mvd.new_mail(cur_frm);});
+    $(".btn.btn-default.btn-new-email.btn-xs").off("click");
+    $(".btn.btn-default.btn-new-email.btn-xs").click(function(){frappe.mvd.new_mail(cur_frm);});
+    $("[data-communication-type='Communication']").off("click");
+    $(".reply-link").off("click");
+    $(".reply-link").click(function(e){prepare_mvd_mail_composer(e);}); 
+    $(".reply-link-all").click(function(e){prepare_mvd_mail_composer(e);});
+    frappe.ui.keys.off('ctrl+e', cur_frm.page);
+}
 
 function mitgliedschaftsdatenUebernehmen(frm) {
     frappe.call({
