@@ -7,14 +7,23 @@ import frappe
 from frappe.model.document import Document
 from mvd.mvd.doctype.postretouren_log.postretourhandler import PostRetourHandler
 from mvd.mvd.doctype.postretouren_log.libracore_facade import LibraCoreFacade
+from frappe.utils.background_jobs import enqueue
 
 class PostretourenLog(Document):
     def manual_start(self):
+        sitename = frappe.utils.get_host_name() if frappe.utils.get_host_name() not in ['mvd:8000', 'dev.msmr.ch:8000'] else 'mvd'
+        benchname = 'frappe-bench' if frappe.utils.get_host_name() not in ['mvd:8000', 'dev.msmr.ch:8000'] else 'mvd-bench'
         csv_files = []
         _csv_files = frappe.db.sql("""SELECT `file_url` FROM `tabFile` WHERE `attached_to_doctype` = 'Postretouren Log' AND `attached_to_name` = '{0}'""".format(self.name), as_dict=True)
         for csv_file in _csv_files:
-            csv_files.append("/home/frappe/frappe-bench/sites/{0}{1}".format(frappe.utils.get_host_name(), csv_file.file_url).replace(":8000", ""))
-        process_post_retouren(self, csv_files=csv_files)
+            csv_files.append("/home/frappe/{0}/sites/{1}{2}".format(benchname, sitename, csv_file.file_url))
+        
+        args = {
+            'postretouren_log': self,
+            'csv_files': csv_files if len(csv_files) > 0 else None
+        }
+        enqueue("mvd.mvd.doctype.postretouren_log.postretouren_log.process_post_retouren", queue='long', job_name='Verarbeitung Postretouren Log', timeout=5000, **args)
+        return
 
 def start_post_retouren_process():
     new_postretouren_log = frappe.get_doc({
@@ -28,8 +37,11 @@ def start_post_retouren_process():
     new_postretouren_log.status = 'WiP'
     new_postretouren_log.save()
     frappe.db.commit()
-
-    process_post_retouren(new_postretouren_log)
+    args = {
+        'postretouren_log': new_postretouren_log
+    }
+    enqueue("mvd.mvd.doctype.postretouren_log.postretouren_log.process_post_retouren", queue='long', job_name='Verarbeitung Postretouren Log', timeout=5000, **args)
+    return
 
 def process_post_retouren(postretouren_log, csv_files=None):
     pr_handler = PostRetourHandler()
@@ -76,5 +88,4 @@ def process_post_retouren(postretouren_log, csv_files=None):
     
     libracore.set_postretouren_status(postretouren_log)
     postretouren_log.save(ignore_permissions=True)
-
     return
