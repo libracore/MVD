@@ -46,6 +46,7 @@ def get_p1(user):
                                                 FROM `tabTermin Kontaktperson Multi User`
                                                 WHERE `user` = '{user}'  
                                                 AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
+                                                AND `parent` NOT LIKE 'Administration (%)'
                                             )
                                             AND `status` = 'Open'""".format(user=user), as_dict=True)[0].qty
     return p1_qty or 0
@@ -57,6 +58,7 @@ def get_p2(user):
                                                 FROM `tabTermin Kontaktperson Multi User`
                                                 WHERE `user` = '{user}'  
                                                 AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
+                                                AND `parent` NOT LIKE 'Administration (%)'
                                             )
                                             AND `status` = 'Rückfragen'
                                             AND `ungelesen` = 0""".format(user=user), as_dict=True)[0].qty
@@ -68,6 +70,7 @@ def get_p3(user):
                                                 SELECT `parent`
                                                 FROM `tabTermin Kontaktperson Multi User`
                                                 WHERE `user` = '{user}'  AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
+                                                AND `parent` NOT LIKE 'Administration (%)'
                                             )
                                             AND `status` = 'Rückfragen'
                                             AND `ungelesen` = 1""".format(user=user), as_dict=True)[0].qty
@@ -80,6 +83,7 @@ def get_p4(user):
                                                 FROM `tabTermin Kontaktperson Multi User`
                                                 WHERE `user` = '{user}'  
                                                 AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
+                                                AND `parent` NOT LIKE 'Administration (%)'
                                             )
                                             AND `status` = 'Termin vereinbart'""".format(user=user), as_dict=True)[0].qty
     return p4_qty or 0
@@ -89,7 +93,8 @@ def get_user_kontaktperson(only_session_user=False):
     user_kontaktperson = frappe.db.sql("""SELECT `parent`
                                         FROM `tabTermin Kontaktperson Multi User`
                                         WHERE `user` = '{user}' 
-                                        AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'""".format(user=frappe.session.user), as_dict=True)
+                                        AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
+                                        AND `parent` NOT LIKE 'Administration (%)'""".format(user=frappe.session.user), as_dict=True)
     user_kontaktpersonen = []
     for uk in user_kontaktperson:
         if not only_session_user:
