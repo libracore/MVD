@@ -157,7 +157,7 @@ scheduler_events = {
         "mvd.mvd.utils.daily_jobs.mahnlauf_ausschluss",
         "mvd.mvd.utils.daily_jobs.cleanup_beratungen",
         "mvd.mvd.utils.daily_jobs.mark_beratungen_as_s8",
-        # "mvd.mvd.doctype.mitgliedschaft.kontakt_handling.initial_rename_contacts",
+        #"mvd.mvd.doctype.mitgliedschaft.kontakt_handling.initial_rename_contacts",
         "mvd.mvd.doctype.postretouren_log.postretouren_log.start_post_retouren_process"
     ],
     "all": [

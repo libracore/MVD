@@ -11,20 +11,40 @@ frappe.ui.form.on('Rechnungs Jahresversand', {
             cur_frm.set_df_property('status', 'read_only', 1);
         }
     },
-    download_draft: function(frm) {
+    start_csv_and_invoices: function(frm) {
         frappe.call({
-            'method': "mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.get_draft_csv",
+            'method': "start_csv_and_invoices",
+            'doc': frm.doc,
+            'callback': function(response) {
+                frappe.msgprint("Der Prozess wurde gestartet. Sie können den Fortschritt <a href='/desk#background_jobs'>hier</a> einsehen.");
+                setTimeout(function(){cur_frm.reload_doc();}, 1000);
+            }
+        });
+    },
+    start_rechnungsverbuchung: function(frm) {
+        frappe.call({
+            'method': "mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.start_rechnungsverbuchung",
             'args': {
                 'jahresversand': cur_frm.doc.name
             },
             'freeze': true,
-            'freeze_message': 'Erstelle Entwurfs CSV...',
+			'freeze_message': __("Starte Rechnungsverbuchung..."),
             'callback': function(response) {
-                var csv = response.message;
-
-                if (csv == 'done') {
-                    cur_frm.reload_doc();
-                }
+                cur_frm.reload_doc();
+            }
+        });
+    },
+    retry: function(frm) {
+        frappe.call({
+            'method': "mvd.mvd.doctype.rechnungs_jahresversand.rechnungs_jahresversand.start_rechnungsverbuchung",
+            'args': {
+                'jahresversand': cur_frm.doc.name,
+                'retry': 1
+            },
+            'freeze': true,
+			'freeze_message': __("Starte Rechnungsverbuchung neu..."),
+            'callback': function(response) {
+                cur_frm.reload_doc();
             }
         });
     },
