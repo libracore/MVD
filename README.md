@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 13.19.2
+#1139
 #### 13.19.1
 Korrekturen VBZ Beratung alle-sek MVAG
 #### 13.19.0
