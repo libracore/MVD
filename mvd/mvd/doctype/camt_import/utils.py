@@ -210,6 +210,7 @@ def zahlungen_matchen(camt_import):
                                     AND (`mv_mitgliedschaft` IS NULL OR `mv_mitgliedschaft` = '')
                                     AND (`mv_kunde` IS NULL OR `mv_kunde` = '')""".format(camt_import=camt_import), as_dict=True)
     commit_counter = 1
+    double_payment_control = {}
     for payment_entry in payment_entries:
         transaction_reference = payment_entry.remarks.split(", ")[0].replace("QRR: ", "")
         received_amount = payment_entry.received_amount
@@ -224,14 +225,30 @@ def zahlungen_matchen(camt_import):
                 row = pe.append('references', {})
                 row.reference_doctype = 'Sales Invoice'
                 row.reference_name = sinv_lookup_data.get('sinv')
-                    
-                if received_amount <= sinv_lookup_data.get('outstanding_amount'):
+                
+                if sinv_lookup_data.get('sinv') not in double_payment_control:
+                    double_payment_control[sinv_lookup_data.get('sinv')] = received_amount
+                    double_payment = False
+                else:
+                    if (double_payment_control[sinv_lookup_data.get('sinv')] + received_amount) <= sinv_lookup_data.get('outstanding_amount'):
+                        double_payment_control[sinv_lookup_data.get('sinv')] = double_payment_control[sinv_lookup_data.get('sinv')] + received_amount
+                        double_payment = False
+                    else:
+                        double_payment = True
+
+                if (received_amount <= sinv_lookup_data.get('outstanding_amount')) and not double_payment:
                     pe.camt_status = 'Rechnungs Match'
                     row.allocated_amount = pe.paid_amount
                 else:
-
-                    pe.camt_status = 'Überbezahlt'
-                    row.allocated_amount = sinv_lookup_data.get('outstanding_amount')
+                    if not double_payment:
+                        pe.camt_status = 'Überbezahlt'
+                        row.allocated_amount = sinv_lookup_data.get('outstanding_amount')
+                    else:
+                        pe.camt_status = 'Überbezahlt'
+                        bereits_erfasste_zahlungen = double_payment_control[sinv_lookup_data.get('sinv')]
+                        sinv_outstanding = sinv_lookup_data.get('outstanding_amount')
+                        diff = sinv_outstanding - bereits_erfasste_zahlungen
+                        row.allocated_amount = diff if diff > 0 else 0
                 
                 # see #1101
                 if pe.sektion_id != sinv_lookup_data.get('sektion'):
