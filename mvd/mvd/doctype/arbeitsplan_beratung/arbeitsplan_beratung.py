@@ -293,6 +293,7 @@ def get_termin_uebersicht(berater_in, von=None, bis=None):
             `mitgl`.`eintrittsdatum`,
             `mitgl`.`bezahltes_mitgliedschaftsjahr`,
             `bt`.`creation`,
+            `bt`.`owner`,
             `bt`.`notiz`,
             '' AS `von_zeit`,
             `ber`.`name` AS `beratung_name`,
@@ -300,7 +301,9 @@ def get_termin_uebersicht(berater_in, von=None, bis=None):
             `ber`.`beratungskategorie_2` AS `beratungskategorie_2`,
             `ber`.`beratungskategorie_3` AS `beratungskategorie_3`,
             `bt`.`abp_referenz` AS `abp_referenz`,
-            NULL AS `von_bis_str`
+            NULL AS `von_bis_str`,
+            NULL AS `hat_attachement`,
+            NULL AS `created_by`
         FROM `tabBeratung Termin` AS `bt`
         LEFT JOIN `tabBeratung` AS `ber` ON `bt`.`parent` = `ber`.`name`
         LEFT JOIN `tabMitgliedschaft` AS `mitgl` ON `ber`.`mv_mitgliedschaft` = `mitgl`.`name`
@@ -313,6 +316,8 @@ def get_termin_uebersicht(berater_in, von=None, bis=None):
     vergebene_termin_liste = []
     for termin in termine:
         if termin.abp_referenz:
+            termin.hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.beratung_name), as_dict=True)[0].qty > 0 else 0
+            termin.created_by = get_created_by(termin.owner)
             vergebene_termin_liste.append(termin.abp_referenz)
     
     freie_termine = get_freie_termine(vergebene_termin_liste, von, bis, berater_in)
@@ -416,3 +421,11 @@ def get_berater_in_from_hash(hash):
         return berater_in[0].name
     else:
         return None
+
+def get_created_by(owner):
+    vor_nachname = frappe.db.sql("""SELECT `first_name`, `last_name` FROM `tabUser` WHERE `name` = '{0}'""".format(owner), as_dict=True)
+    if len(vor_nachname) < 1:
+        return '/??'
+    
+    kuerzel = '/{0}{1}'.format(vor_nachname[0].first_name[0] if vor_nachname[0].first_name else '?', vor_nachname[0].last_name[0] if vor_nachname[0].last_name else '?')
+    return kuerzel
