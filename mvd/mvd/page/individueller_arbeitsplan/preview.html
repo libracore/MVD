@@ -31,7 +31,7 @@
                         {% if termin.beratungskategorie %}{{ termin.beratungskategorie.split(" - ")[0] }}{% else %} ____{% endif %}{% if termin.beratungskategorie_2 %} {{ termin.beratungskategorie_2.split(" - ")[0] }}{% else %} ____{% endif %}{% if termin.beratungskategorie_3 %} {{ termin.beratungskategorie_3.split(" - ")[0] }}{% else %} ____{% endif %} ____<br><br>
                         Eintritt: {% if termin.eintrittsdatum %}{{ termin.eintrittsdatum.split("-")[2] }}.{{ termin.eintrittsdatum.split("-")[1] }}.{{ termin.eintrittsdatum.split("-")[0] }}{% else %}---{% endif %}<br>
                         Bez. Jahr: {{ termin.bezahltes_mitgliedschaftsjahr }}<br>
-                        Termin vereinbart am: {{ termin.creation.split(" ")[0].split("-")[2] }}.{{ termin.creation.split(" ")[0].split("-")[1] }}.{{ termin.creation.split(" ")[0].split("-")[0] }}
+                        Termin vereinbart am: {{ termin.creation.split(" ")[0].split("-")[2] }}.{{ termin.creation.split(" ")[0].split("-")[1] }}.{{ termin.creation.split(" ")[0].split("-")[0] }} {{ termin.created_by}}
                     </td>
                 </tr>
             </table>
