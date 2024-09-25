@@ -123,7 +123,7 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r9").click(function(){
-            frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt"]], "ungelesen": 1, "kontaktperson": ['is', 'set'], "sektion_id": sektion}
+            frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt", "Termin vereinbart"]], "ungelesen": 1, "kontaktperson": ['is', 'set'], "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
         
