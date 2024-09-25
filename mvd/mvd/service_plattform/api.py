@@ -86,7 +86,7 @@ Dieser Code ist mit SP4 obsolet da ERPNext die ID/Nr Vergabe selbständig durchf
     Wenn es sich um eine Neuanlage handelt:
         update = False (oder weglassen) --> es wird ein POST Request gesendet
 '''
-def update_mvm(mvm, update):
+def update_mvm(mvm, update, return_error=False):
     if not int(frappe.db.get_single_value('Service Plattform API', 'no_sp_update')) == 1:
         if auth_check(SVCPF_SCOPE):
             config = frappe.get_doc("Service Plattform API", "Service Plattform API")
@@ -108,16 +108,28 @@ def update_mvm(mvm, update):
                 if sp_connection.status_code != 204:
                     frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), '{0} > update_mvm'.format(sp_connection.status_code))
                     frappe.db.commit()
-                    return 0
+                    if return_error:
+                        return 0, "{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), sp_connection.status_code
+                    else:
+                        return 0
                 else:
-                    return 1
+                    if return_error:
+                        return 1, False, 200
+                    else:
+                        return 1
             except Exception as err:
                 frappe.log_error("{0}\n\n{1}".format(err, mvm), 'update_mvm failed')
                 frappe.db.commit()
-                return 0
+                if return_error:
+                    return 0, "{0}\n\n{1}".format(err, mvm), 999
+                else:
+                    return 0
     else:
         frappe.log_error("{0}".format(mvm), 'update_mvm deaktiviert')
-        return 0
+        if return_error:
+            return 0, 'update_mvm deaktiviert', 999
+        else:
+            return 0
 
 '''
     Mit dieser Methode können Beratungen an die SP gesendet werden.
