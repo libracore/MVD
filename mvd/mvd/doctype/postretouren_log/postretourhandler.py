@@ -122,10 +122,10 @@ class PostRetourHandler:
         pr.retoureMuWSequenceNumber = sequence_nr
         pr.retoureDMC = columns[17]
         pr.retoureSendungsbild = columns[16]
-        pr.datumErfasstPost = datetime.strptime(columns[0], '%d.%m.%Y').date()
+        pr.datumErfasstPost = getdate(datetime.strptime(columns[0], '%d.%m.%Y').date()).strftime("%Y-%m-%d")
         pr.neueAdresse = PostRetourAdresse()
-        pr.neueAdresse.validFrom = getdate(columns[29]) if len(columns[29]) > 0 else None
-        pr.neueAdresse.validTo = getdate(columns[30]) if len(columns[30]) > 0 else None
+        pr.neueAdresse.validFrom = getdate(columns[29]).strftime("%d.%m.%Y") if len(columns[29]) > 0 else None
+        pr.neueAdresse.validTo = getdate(columns[30]).strftime("%d.%m.%Y") if len(columns[30]) > 0 else None
         pr.neueAdresse.strasse = columns[42]
         pr.neueAdresse.hausnummer = columns[43]
         pr.neueAdresse.hausnummerZusatz = columns[44]
