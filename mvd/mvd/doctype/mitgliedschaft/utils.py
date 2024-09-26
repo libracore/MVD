@@ -309,10 +309,9 @@ def get_adressblock(mitgliedschaft):
         if mitgliedschaft.kundentyp == 'Unternehmen':
             if mitgliedschaft.firma:
                 adressblock += mitgliedschaft.firma or ''
-                adressblock += ' '
+                adressblock += '\n'
             if mitgliedschaft.zusatz_firma:
                 adressblock += mitgliedschaft.zusatz_firma or ''
-            if mitgliedschaft.firma or mitgliedschaft.zusatz_firma:
                 adressblock += '\n'
         
         if mitgliedschaft.vorname:
