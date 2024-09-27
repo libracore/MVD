@@ -5,21 +5,15 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils.data import today
+from frappe.utils.data import now
+import random
 
 class MitgliedMainNaming(Document):
     def set_new_id(self, existing_nr):
         if not self.mitglied_id:
-            last_id = frappe.db.sql("""
-                                    SELECT `mitglied_id` AS `last_id`
-                                    FROM `tabMitglied Main Naming`
-                                    ORDER BY `mitglied_id` DESC
-                                    LIMIT 1
-                                    """, as_dict=True)[0].last_id or 999999
-            if last_id < 999999:
-                last_id = 999999
-            
-            new_id = last_id + 1
+            randome_hash = "{0} {1}".format(str(hash(now())), str(random.random()))
+            create_new_id = frappe.db.sql("""INSERT INTO `MitgliedMainId` (`id`,`name`) VALUES(0,'{0}');""".format(randome_hash))
+            new_id = frappe.db.sql("""SELECT `id` FROM `MitgliedMainId` WHERE `name` = '{0}';""".format(randome_hash))[0][0]
             self.mitglied_id = new_id
 
             if existing_nr:
@@ -28,16 +22,9 @@ class MitgliedMainNaming(Document):
 
     def set_new_number(self):
         if not self.mitglied_nr_raw:
-            last_nr = frappe.db.sql("""
-                                    SELECT `mitglied_nr_raw` AS `last_nr`
-                                    FROM `tabMitglied Main Naming`
-                                    ORDER BY `mitglied_nr_raw` DESC
-                                    LIMIT 1
-                                    """, as_dict=True)[0].last_nr or 4999999
-            if last_nr < 4999999:
-                last_nr = 4999999
-            
-            new_nr = last_nr + 1
+            randome_hash = "{0} {1}".format(str(hash(now())), str(random.random()))
+            create_new_nr = frappe.db.sql("""INSERT INTO `MitgliedMainNumber` (`id`,`name`) VALUES(0,'{0}');""".format(randome_hash))
+            new_nr = frappe.db.sql("""SELECT `id` FROM `MitgliedMainNumber` WHERE `name` = '{0}';""".format(randome_hash))[0][0]
             self.mitglied_nr_raw = new_nr
 
             mitglied_nr = "MV{0}".format(str(new_nr).zfill(8))
