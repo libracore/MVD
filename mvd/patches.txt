@@ -25,3 +25,4 @@ mvd.patches.interessent_typ.neuanlage
 mvd.patches.default_interessent_typ.anlage
 mvd.patches.v11_25_0.change_mwst_accounts
 mvd.patches.set_berater_hash.set_hash
+mvd.patches.iss1143.create_tables
