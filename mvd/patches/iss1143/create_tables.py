@@ -14,7 +14,7 @@ def execute():
                                 FROM `tabMitglied Main Naming`
                                 ORDER BY `mitglied_nr_raw` DESC
                                 LIMIT 1
-                                """, as_dict=True)[0].last_nr or 5100000
+                                """, as_dict=True)[0].last_nr
         new_nr = last_nr + 1
         frappe.db.sql("""ALTER TABLE MitgliedMainNumber AUTO_INCREMENT = {0};""".format(new_nr))
         frappe.db.commit()
@@ -31,7 +31,7 @@ def execute():
                                 FROM `tabMitglied Main Naming`
                                 ORDER BY `mitglied_id` DESC
                                 LIMIT 1
-                                """, as_dict=True)[0].last_id or 1100000
+                                """, as_dict=True)[0].last_id
         new_id = last_id + 1
         frappe.db.sql("""ALTER TABLE MitgliedMainId AUTO_INCREMENT = {0};""".format(new_id))
         frappe.db.commit()
