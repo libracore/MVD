@@ -969,14 +969,18 @@ function sektionswechsel_pseudo_sektion(frm) {
                         freeze_message: 'Führe Sektionswechsel durch...',
                         callback: function(r)
                         {
-                            if (r.message == 1) {
+                            if (r.message.status == 200) {
                                 if (values.mitgliedschaft_bezahlt != String(frappe.datetime.get_today()).split("-")[0]) {
                                     frappe.msgprint("Die Rechnung wurde erstellt, bitte ausdrucken und zustellen.");
                                 } else {
                                     frappe.msgprint("Die Begrüssungs Korrespondenz wurde erstellt, bitte ausdrucken und zustellen.");
                                 }
                             } else {
-                                frappe.msgprint("oops, da ist etwas schiefgelaufen!");
+                                if (r.message.status == 500) {
+                                    frappe.msgprint(`oops, da ist etwas schiefgelaufen!<br>${r.message.error}`);
+                                } else {
+                                    frappe.msgprint("oops, da ist etwas schiefgelaufen!<br>Unbekannter Fehler");
+                                }
                             }
                             cur_frm.reload_doc();
                         }
