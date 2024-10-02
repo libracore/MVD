@@ -30,7 +30,7 @@
   "region_spezifisch",
   "region",
   "section_rechnungsdaten",
-  "rechnungsdaten_json"
+  "rechnungsdaten_json_link"
  ],
  "fields": [
   {
@@ -155,13 +155,6 @@
    "label": "Rechnungsdaten"
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "rechnungsdaten_json",
-   "fieldtype": "Code",
-   "label": "Rechnungsdaten JSON",
-   "read_only": 1
-  },
-  {
    "depends_on": "eval:doc.docstatus==1&&in_list([\"Bereit zur Ausf\u00fchrung\", \"Rechnungsdaten und CSV erstellt\"], doc.status)",
    "fieldname": "start_csv_and_invoices",
    "fieldtype": "Button",
@@ -194,10 +187,18 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "is retry"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "rechnungsdaten_json_link",
+   "fieldtype": "Link",
+   "label": "Rechnungsdaten JSON",
+   "options": "RJV JSON",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2024-09-13 15:43:22.283617",
+ "modified": "2024-10-02 11:39:00.677006",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Rechnungs Jahresversand",

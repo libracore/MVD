@@ -1,0 +1,38 @@
+{
+ "creation": "2024-10-02 11:22:24.337918",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "rechnungsdaten_json"
+ ],
+ "fields": [
+  {
+   "fieldname": "rechnungsdaten_json",
+   "fieldtype": "Code",
+   "label": "Rechnungsdaten JSON"
+  }
+ ],
+ "modified": "2024-10-02 11:22:24.337918",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "RJV JSON",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

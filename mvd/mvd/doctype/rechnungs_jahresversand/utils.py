@@ -15,9 +15,10 @@ import json
 
 def create_invoices_as_json(jahresversand):
     jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+    rjv_json = frappe.get_doc({'doctype': "RJV JSON"}).insert()
     if jahresversand_doc.status not in ['Abgeschlossen', 'Fehlgeschlagen', 'Storniert']:
         jahresversand_doc.status = 'Rechnungsdaten in Arbeit'
-        jahresversand_doc.rechnungsdaten_json = ''
+        jahresversand_doc.rechnungsdaten_json_link = rjv_json.name
         jahresversand_doc.add_comment('Comment', text='Beginne mit Rechnungsdaten Erzeugung...')
         jahresversand_doc.save()
         frappe.db.commit()
@@ -159,8 +160,8 @@ def create_invoices_as_json(jahresversand):
                     current_fr_series_index += 1
             
             json_data = json.dumps(sinv_list, indent=2)
-            jahresversand_doc.rechnungsdaten_json = json_data
-            jahresversand_doc.save()
+            rjv_json.rechnungsdaten_json = json_data
+            rjv_json.save()
             jahresversand_doc.add_comment('Comment', text='Rechnungsdaten erstellt.')
             frappe.db.commit()
 
@@ -174,6 +175,7 @@ def create_invoices_as_json(jahresversand):
 
 def create_invoices_from_json(jahresversand):
     jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+    rjv_json = frappe.get_doc("RJV JSON", jahresversand_doc.rechnungsdaten_json_link)
     retry = True if cint(jahresversand_doc.is_retry) == 1 else False
     sektion = frappe.get_doc("Sektion", jahresversand_doc.sektion_id)
     current_series_index = frappe.db.get_value("Series", "RJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0
@@ -187,7 +189,7 @@ def create_invoices_from_json(jahresversand):
             _already_created = frappe.db.sql("""SELECT `esr_reference` FROM `tabSales Invoice` WHERE `rechnungs_jahresversand` = '{0}'""".format(jahresversand), as_dict=True)
             already_created = [ac.esr_reference for ac in _already_created]
         try:
-            invoices = json.loads(jahresversand_doc.rechnungsdaten_json)
+            invoices = json.loads(rjv_json.rechnungsdaten_json)
             sinv_counter = 0
             fr_counter = 0
             commit_counter = 0
@@ -240,6 +242,7 @@ def create_invoices_from_json(jahresversand):
 
 def create_csv_from_json(jahresversand):
     jahresversand = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
+    rjv_json = frappe.get_doc("RJV JSON", jahresversand.rechnungsdaten_json_link)
     jahresversand.status = 'CSV in Arbeit'
     jahresversand.add_comment('Comment', text='Beginne mit CSV Erzeugung...')
     jahresversand.save()
@@ -290,7 +293,7 @@ def create_csv_from_json(jahresversand):
         ]
         data.append(header)
         
-        rechnungen = json.loads(jahresversand.rechnungsdaten_json)
+        rechnungen = json.loads(rjv_json.rechnungsdaten_json)
         for _rechnung in rechnungen:
             rechnung = json.loads(_rechnung[0])
             hv = json.loads(_rechnung[1])
