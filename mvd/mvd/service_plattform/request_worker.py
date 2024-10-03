@@ -239,6 +239,7 @@ def execute_sp_log(sp_log, manual_execution=False):
                                              AND `json` LIKE '%mitgliedId%{1}%'
                                              AND `json` LIKE '%{2}%'
                                              AND `name` != '{3}'
+                                             AND `mv_mitgliedschaft` IS NOT NULL
                                              """.format(api_kwargs['mitgliedNummer'], int(api_kwargs['mitgliedId']) - 1, '"alteSektionCode": "ZH"', sp_log.name), as_dict=True)
                     
                     if len(duplikat) > 0:
