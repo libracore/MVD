@@ -96,7 +96,7 @@ def zahlungen_einlesen(camt_file, camt_import):
     
     for entry in transaction_entries:
         entry_soup = BeautifulSoup(six.text_type(entry), 'lxml')
-        date = entry_soup.bookgdt.dt.get_text()
+        date = entry_soup.bookgdt.dt.get_text().split("+")[0]
         transactions = entry_soup.find_all('txdtls')
         # fetch entry amount as fallback
         entry_amount = float(entry_soup.amt.get_text())

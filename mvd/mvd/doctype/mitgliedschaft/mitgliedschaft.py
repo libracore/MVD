@@ -1417,7 +1417,10 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
     if str(get_sektion_code(neue_sektion)) not in ('ZH'):
         # Pseudo Sektion handling
         if cint(frappe.db.get_value("Sektion", neue_sektion, "pseudo_sektion")) == 1:
-            return 1
+            return {
+                    'status': 200,
+                    'new_id': 'pseudo_sektion'
+                }
         
         try:
             # erstelle Mitgliedschaft in Zuzugs-Sektion
@@ -2012,11 +2015,17 @@ def sektionswechsel_pseudo_sektion(mitgliedschaft, eintrittsdatum, bezahltes_mit
         mitgliedschaft.zuzug = zuzug
         mitgliedschaft.status_c = 'Regulär'
         mitgliedschaft.save(ignore_permissions=True)
-                
-        return 1
+        
+        return {
+                    'status': 200,
+                    'new_id': 'pseudo_sektion'
+                }
     except Exception as err:
         frappe.log_error("{0}\n---\n{1}".format(err, mitgliedschaft.as_json()), 'sektionswechsel_pseudo_sektion')
-        return err
+        return {
+            'status': 500,
+            'error': str(err)
+        }
 
 @frappe.whitelist()
 def create_geschenk_korrespondenz(mitgliedschaft, druckvorlage_inhaber=False, druckvorlage_zahler=False, massenlauf=False):

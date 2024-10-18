@@ -15,6 +15,10 @@ def create_daily_snap():
     new_daily_snap.insert()
 
 def set_inaktiv():
+    args = {}
+    enqueue("mvd.mvd.utils.daily_jobs._set_inaktiv", queue='long', job_name='Nächtliche Inaktivierungen', timeout=5000, **args)
+
+def _set_inaktiv():
     mitgliedschaften = frappe.db.sql("""
                                     SELECT
                                         `name`
@@ -117,7 +121,6 @@ def ampel_neuberechnung():
 def regionen_zuteilung():
     args = {}
     enqueue("mvd.mvd.doctype.region.region._regionen_zuteilung", queue='long', job_name='Regionen Zuteilung', timeout=5000, **args)
-    # ~ _regionen_zuteilung()
 
 def spenden_versand():
         spenden_jahresversand = frappe.db.sql("""SELECT `name` FROM `tabSpendenversand` WHERE `status` = 'Vorgemerkt' AND `docstatus` = 1""", as_dict=True)

@@ -105,7 +105,7 @@ class PostRetourHandler:
 
     def get_post_objects(self, columns):
         mitglied_nr = columns[12][-9:-1]
-        mitglied_id = get_mitglied_id_from_nr(mitglied_nr)
+        mitglied_id = get_mitglied_id_from_nr(mitglied_nr, ignore_inaktiv=True)
         sequence_nr = int(columns[12][-17:-9])
 
         (kategorie, message) = self.determine_category_and_message(columns)
