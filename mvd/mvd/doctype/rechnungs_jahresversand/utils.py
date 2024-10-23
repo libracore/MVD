@@ -12,6 +12,7 @@ from frappe.utils.background_jobs import enqueue
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 from frappe.utils import cint
 import json
+import copy
 
 def create_invoices_as_json(jahresversand):
     jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
@@ -105,7 +106,7 @@ def create_invoices_as_json(jahresversand):
                         address = mitgliedschaft.rg_adresse
                         contact = mitgliedschaft.rg_kontakt
                     
-                    item = item_defaults.get(mitgliedschaft.mitgliedtyp_c)
+                    item = copy.deepcopy(item_defaults.get(mitgliedschaft.mitgliedtyp_c))
                     if cint(mitgliedschaft.reduzierte_mitgliedschaft) == 1 and mitgliedschaft.reduzierter_betrag > 0:
                         item[0]["rate"] = mitgliedschaft.reduzierter_betrag
                     
