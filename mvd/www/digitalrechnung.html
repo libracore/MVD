@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="generator" content="frappe">
+
+        {% block meta_block %}
+            {% include "templates/includes/meta_block.html" %}
+        {% endblock %}
+
+        <title>{% block title %} {{ title | striptags }} {% endblock %}</title>
+
+        {% block favicon %}
+        <link
+            rel="shortcut icon"
+            href="{{ (favicon or "/assets/frappe/images/favicon.png") | abs_url }}"
+            type="image/x-icon"
+        >
+        {% endblock %}
+        <script>
+            window.frappe = {};
+            frappe.ready_events = [];
+            frappe.ready = function(fn) {
+                frappe.ready_events.push(fn);
+            }
+            window.dev_server = {{ dev_server }};
+            window.socketio_port = {{ frappe.socketio_port }};
+        </script>
+    </head>
+    <body frappe-session-status="{{ 'logged-in' if frappe.session.user != 'Guest' else 'logged-out'}}" data-path="{{ path | e }}" id="home" class="smvForm smvEmailBeratungForm isCookieRequired process-page">
+        <div class="content-wrapper" id="content">
+            <header class="header" role="heading">
+                <div class="branding">
+                    <div class="container-inner" role="banner">
+                        <ul class="skip">
+                            <li><a href="/mv.html" accesskey="0" title="[ALT + 0]">Startseite</a></li>
+                            <li><a href="#nav-global" accesskey="1" title="[ALT + 1]">Hauptmenü</a></li>
+                            <li><a href="#main" accesskey="2" title="[ALT + 2]">Hauptinhalt</a></li>
+                            <li><a href="/mv/mitgliedschaft-verband/kontakt.html" accesskey="3" title="[ALT + 3]">Kontakt</a></li>
+                            <li><a href="#section" accesskey="3" title="[ALT + 4]">Sektionswahl</a></li>
+                            <li><a href="/mv/searchresults.html#newsearch" accesskey="5" title="[ALT + 5]">Suche</a></li>
+                            <li><a href="#extras" accesskey="6" title="[ALT + 6]">Extrainhalte</a></li>
+                            <li><a href="#nav" accesskey="7" title="[ALT + 7]">Untermenü</a></li>
+                            <li><a href="#site-info-box" accesskey="8" title="[ALT + 8]">Fusszeile</a></li>
+                        </ul>
+                        <div class="row">
+                            <div class="col-sm-9 col-md-4 col-lg-3">
+                                <div class="logo">
+                                    <a class="link-home" href="https://mieterverband.ch/mv.html" title="Startseite">
+                                        <img class="h-flex" src="/assets/mvd/img/mvs_nationales_logo_klein.png" alt="MV Mieterinnen- und Mieterverband">
+                                        <strong class="h-vh">MV</strong>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 col-md-8 col-lg-6">
+                                <nav class="nav-main " role="navigation">
+                                    <h6 class="h-vh">Navigation</h6>
+                                    <a href="#" class="nav-handle" aria-hidden="true" title="Navigation Anzeigen"><span></span></a>
+                                    <ul class="nav-list h-cf">
+                                        <li class="nav-item " data-url="https://mieterverband.ch/mv/mietrecht-beratung.html">
+                                            <a class="nav-link" href="https://mieterverband.ch/mv/mietrecht-beratung.html">
+                                                <span>Mietrecht &amp;<br>Beratung</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item " data-url="https://mieterverband.ch/mv/mitgliedschaft-verband.html">
+                                            <a class="nav-link" href="https://mieterverband.ch/mv/mitgliedschaft-verband.html">
+                                                <span>Mitgliedschaft &amp;<br>Verband</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item " data-url="https://mieterverband.ch/mv/politik-positionen.html">
+                                            <a class="nav-link" href="https://mieterverband.ch/mv/politik-positionen.html">
+                                                <span>Politik &amp;<br>Positionen</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                            <div class="col-sm-12 col-md-8 col-lg-3">
+                                <nav class="nav-meta h-cf">
+                                    <div class="top-row h-cf">
+                                        <a href="https://mieterverband.ch/mv.html" class="link-home" title="Home">
+                                            <i class="fa fa-home"></i><span class="h-th">Home</span>
+                                        </a>
+                                        <a href="https://mieterverband.ch/mv/mitgliedschaft-verband/kontakt.html" class="link-contact">Kontakt</a>
+                                        <form id="smv-search-form" class="search-form js-search-form" action="https://mieterverband.ch/mv/searchresults.html">
+                                            <input required="required" id="searchbar" class="search-field" name="queryStr" placeholder="Suche im Ratgeber Mietrecht" type="text" value="">
+                                            <span id="smv-search-span" class="fa fa-search"></span>
+                                        </form>
+                                        <span class="selected-language">
+                                            DE 
+                                        </span>
+                                    </div>
+                                    <div class="bottom-row">
+                                        
+                                        <!-- end nav-meta -->
+                                    </div>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="branding-2">
+                    <div class="container-inner">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-12 col-lg-12">
+                                <div class="logo-section">
+                                    <a class="section-title" href="https://mieterverband.ch/{{ sektion }}.html" title="Startseite">
+                                       Digitalrechnung
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div class="print-header" aria-hidden="true">
+                <div class="row">
+                    <div class="col-sm-12 col-md-12 col-lg-12">
+                        <div class="logo">
+                            <img class="h-flex" src="/assets/mvd/img/mvs_nationales_logo_klein.png" alt="MV">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="background-wrapper section">
+                <div class="container-inner">
+                    <div class="breadcrumb"></div>
+                </div>
+                <section class="stage"></section>
+                <div class="content container-inner">
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12 col-lg-8">
+                            <main role="main" class="">
+                                <div class="form js-form">
+                                    <!--<div class="form-intro">
+                                        <h1 class="e-h1 form-title">Digitalrechnung</h1>
+                                    </div>-->
+                                    <!-- Hinweis Beratungsformular und Adressänderungen -->
+                                    {% if hash_check == 'bestätigung' %}
+                                    <div class="text-image text-image-mv rich-text highlight no-img">
+                                        <p>Vielen Dank!<br>Sie haben erfolgreich auf Digitalrechnung umgestellt.</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if hash_check == 'show opt out bestätigung' %}
+                                    <div class="text-image text-image-mv rich-text highlight no-img">
+                                        <p>Sie haben die Digitalrechnung erfolgreich abbestellt.</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if hash_check == 'add mail' %}
+                                    <div class="text-image text-image-mv rich-text highlight no-img">
+                                        <p>Wir besitzen leider keine E-Mail Adresse von Ihnen.<br>Für die Umstellung auf Digitalrechnung erfassen Sie bitte unten Ihre E-Mail Adresse.</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if hash_check == 'show opt out' %}
+                                    <div class="text-image text-image-mv rich-text highlight no-img">
+                                        <p>Ihre Digitalrechnung wurde bereits am {{ opt_in }} aktiviert.</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if hash_check == 'unknown_error' %}
+                                    <div class="text-image text-image-mv rich-text highlight no-img">
+                                        <p>Ein unbekannter Fehler ist aufgetreten. Bitte kontaktieren Sie den MVD.</p>
+                                    </div>
+                                    {% endif %}
+                                    <div class="form-wrapper">
+                                        <form id="form0" method="post" action="" onsubmit=";" enctype="multipart/form-data">
+                                            <fieldset class="fieldset">
+                                                {% if hash_check != 'unknown_error' %}
+                                                <span class="e-copy-small required-hint position-right"><span>*</span> Pflichtfeld</span>
+                                                <h2 class="e-h3 fieldset-title">Ihre Digitalrechnungsdaten</h2>
+                                                <div class="form-row">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="email" class="label email required">
+                                                                E-Mail-Adresse&nbsp;*
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <input type="text" name="email" id="email" value="{{ email }}" maxlength="50">
+                                                            <span class="hint">Bitte ändern, wenn die Rechnungen an eine andere E-Mail-Adresse geschickt werden sollen.</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="row readonly">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="aktiviertam" class="label mitgliedschaft_nr">
+                                                                Aktiviert am
+                                                            </label>
+                                                            <label for="deaktiviertam" class="label mitgliedschaft_nr">
+                                                                Deaktiviert am
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <p class="value-read-only">{{ opt_in }}</p>
+                                                            <p class="value-read-only">{{ opt_out }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% if hash_check == 'bestätigung' %}
+                                                <div class="button-wrapper">
+                                                    <input type="button" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');">
+                                                    <input type="button" value="Digitalrechnung abestellen" onclick="opt_out('{{ digitalrechnung }}');">
+                                                </div>
+                                                {% endif %}
+                                                {% if hash_check == 'add mail' %}
+                                                <div class="button-wrapper">
+                                                    <input type="button" value="E-Mail-Adresse hinzufügen" onclick="change_email('{{ digitalrechnung }}');">
+                                                </div>
+                                                {% endif %}
+                                                {% if hash_check == 'show opt out' %}
+                                                <div class="button-wrapper">
+                                                    <input type="button" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');">
+                                                    <input type="button" value="Digitalrechnung abestellen" onclick="opt_out('{{ digitalrechnung }}');">
+                                                </div>
+                                                {% endif %}
+                                                {% if hash_check == 'show opt out bestätigung' %}
+                                                <div class="button-wrapper">
+                                                    <input type="button" value="Digitalrechnung aktivieren" onclick="location.reload();">
+                                                </div>
+                                                {% endif %}
+                                                {% endif %}
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="content-info e-copy-small" role="contentinfo">
+                                    <a class="link-top e-link-default" href="#content" title="Zum Seitenanfang">
+                                        <i id="SeitenanfangChevron" class="fa fa-chevron-up"></i>Zum Seitenanfang
+                                    </a>
+                                    <a class="fa fa-print fa-pull-right" href="#" onclick="javascript:window.print();event.preventDefault();"></a>
+                                </div>
+                            </main>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="footer" role="footer">
+                <section class="footer-top">
+                    <div class="container-inner">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6 col-lg-4 box-facebook">
+                                <h3 class="channel-title">
+                                    <a href="https://www.facebook.com/Mieterverband/" target="_blank">
+                                        <i class="fa fa-facebook-official"></i><span>Facebook</span>
+                                    </a>
+                                </h3>
+                                <h3 class="channel-title">
+                                    <a href="https://twitter.com/Mieterverband" target="_blank">
+                                        <i class="fa fa-twitter"></i><span>Twitter</span>
+                                    </a>
+                                </h3>
+                            </div>
+                            <div class="col-sm-12 col-md-6 col-lg-8 box-newsletter">
+                                <h3 class="channel-title">
+                                    <i class="fa fa-envelope-o"></i><span>Newsletter</span>
+                                </h3>
+                                <p class="newsletter-description">Abonnieren Sie unseren Newsletter und erfahren Sie immer das Neuste zu Mietrecht und Wohnpolitik in Ihrer Region sowie hilfreiche Tipps zu Mieten und Wohnen aus erster Hand.</p>
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12 col-lg-6">
+                                        <a href="https://mieterverband.ch/mv/prozesse/newsletter.html" class="newsletter-link">Newsletter abonnieren</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="footer-bottom">
+                    <div class="container-inner">
+                        <span class="copyright">© 2023 Mieterinnen- und Mieterverband</span>
+                        <ul>
+                            <li>
+                                <a href="https://mieterverband.ch/mv/mitgliedschaft-verband/impressum.html">Impressum</a>
+                            </li>
+                            <li>
+                                <a href="https://mieterverband.ch/mv/mitgliedschaft-verband/datenschutz.html">Datenschutz</a>
+                            </li>
+                            <li>
+                                <a href="https://mieterverband.ch/mv/politik-positionen/medien.html">Medien</a>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+            </footer>
+        </div>
+        {% block base_scripts %}
+        <!-- js should be loaded in body! -->
+        <script type="text/javascript" src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
+        <script type="text/javascript" src="/assets/js/frappe-web.min.js"></script>
+        <script type="text/javascript" src="/assets/js/bootstrap-4-web.min.js"></script>
+        {% endblock %}
+        <!-- csrf_token -->
+    </body>
+</html>

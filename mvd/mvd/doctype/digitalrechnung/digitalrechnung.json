@@ -1,0 +1,121 @@
+{
+ "creation": "2024-10-24 10:16:47.379598",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "status",
+  "hash",
+  "cb_1",
+  "mitglied_nr",
+  "mitglied_id",
+  "email",
+  "email_changed",
+  "section_auswahl",
+  "opt_in",
+  "no_auto_opt_in",
+  "cb_2",
+  "opt_out"
+ ],
+ "fields": [
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Offen\nVerarbeitet\nFehler"
+  },
+  {
+   "fieldname": "hash",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "URL Hash",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mitglied_nr",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "MitgliedNummer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mitglied_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "MitgliedID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "E-Mail"
+  },
+  {
+   "fieldname": "section_auswahl",
+   "fieldtype": "Section Break",
+   "label": "Auswahl"
+  },
+  {
+   "fieldname": "opt_in",
+   "fieldtype": "Date",
+   "label": "Opt-In"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "opt_out",
+   "fieldtype": "Date",
+   "label": "Opt-Out"
+  },
+  {
+   "default": "0",
+   "fieldname": "no_auto_opt_in",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "no_auto_opt_in"
+  },
+  {
+   "default": "0",
+   "fieldname": "email_changed",
+   "fieldtype": "Check",
+   "label": "E-Mail ge\u00e4ndert",
+   "read_only": 1
+  }
+ ],
+ "modified": "2024-10-24 13:59:03.255381",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Digitalrechnung",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MV_MA"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

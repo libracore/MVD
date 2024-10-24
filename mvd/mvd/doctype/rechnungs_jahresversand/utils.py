@@ -12,6 +12,7 @@ from frappe.utils.background_jobs import enqueue
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 from frappe.utils import cint
 import json
+import copy
 
 def create_invoices_as_json(jahresversand):
     jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
@@ -105,7 +106,7 @@ def create_invoices_as_json(jahresversand):
                         address = mitgliedschaft.rg_adresse
                         contact = mitgliedschaft.rg_kontakt
                     
-                    item = item_defaults.get(mitgliedschaft.mitgliedtyp_c)
+                    item = copy.deepcopy(item_defaults.get(mitgliedschaft.mitgliedtyp_c))
                     if cint(mitgliedschaft.reduzierte_mitgliedschaft) == 1 and mitgliedschaft.reduzierter_betrag > 0:
                         item[0]["rate"] = mitgliedschaft.reduzierter_betrag
                     
@@ -289,7 +290,8 @@ def create_csv_from_json(jahresversand):
             'bezahlt_fuer_name',
             'bezahlt_von_firma',
             'bezahlt_von_name',
-            'spezielles'
+            'spezielles',
+            'digitalrechnung_url'
         ]
         data.append(header)
         
@@ -457,6 +459,12 @@ def create_csv_from_json(jahresversand):
                     else:
                         row_data.append('')
                 
+                # Digitalrechnung URL
+                if mitgliedschaft.digitalrechnung_hash:
+                    row_data.append('https://libracore.mieterverband.ch/digitalrechnung?hash={0}'.format(mitgliedschaft.digitalrechnung_hash))
+                else:
+                    row_data.append('')
+                
                 data.append(row_data)
                 
                 if pseudo_zeile:
@@ -556,6 +564,12 @@ def create_csv_from_json(jahresversand):
                         else:
                             row_data.append('Unabhängiger Debitor')
                     
+                    # Digitalrechnung URL
+                    if mitgliedschaft.digitalrechnung_hash:
+                        row_data.append('https://libracore.mieterverband.ch/digitalrechnung?hash={0}'.format(mitgliedschaft.digitalrechnung_hash))
+                    else:
+                        row_data.append('')
+
                     data.append(row_data)
         
         csv_file = make_csv(data)
