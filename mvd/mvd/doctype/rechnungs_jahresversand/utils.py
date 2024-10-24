@@ -30,7 +30,7 @@ def create_invoices_as_json(jahresversand):
         due_date = add_days(today(), 30)
         item_defaults = {
             'Privat': [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel).get("price")}],
-            'Geschäft': [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel).get("price")}]
+            'Geschäft': [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel_geschaeft).get("price")}]
         }
         current_series_index = (frappe.db.get_value("Series", "RJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0) + 1
         current_fr_series_index = (frappe.db.get_value("Series", "FRJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0) + 1
