@@ -47,6 +47,7 @@ def initial_setup():
         SELECT
             `name` AS `mitglied_id`,
             `mitglied_nr`,
+            `sektion_id`,
             `e_mail_1` AS `mitgl_email`,
             `abweichende_rechnungsadresse` AS `abw_rg_adr`,
             `unabhaengiger_debitor` AS `unabh_deb`,
@@ -68,6 +69,7 @@ def initial_setup():
                 'doctype': "Digitalrechnung",
                 'mitglied_nr': mitgliedschaft.mitglied_nr,
                 'mitglied_id': mitgliedschaft.mitglied_id,
+                'sektion_id': mitgliedschaft.sektion_id,
                 'email': mitgliedschaft.mitgl_email
             })
 
