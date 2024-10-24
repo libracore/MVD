@@ -55,7 +55,6 @@ def initial_setup():
             `digitalrechnung_hash`
         FROM `tabMitgliedschaft`
         WHERE `status_c` NOT IN ('Inaktiv', 'Anmeldung', 'Online-Anmeldung', 'Gestorben', 'Wegzug', 'Ausschluss', 'Interessent*in')
-        LIMIT 10
     """, as_dict=True)
 
     total = len(mitgliedschaften)
