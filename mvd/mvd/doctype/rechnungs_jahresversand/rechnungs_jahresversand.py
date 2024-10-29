@@ -13,6 +13,13 @@ class RechnungsJahresversand(Document):
     def validate(self):
         if not self.jahr:
             self.jahr = int(getdate(now()).strftime("%Y")) + 1
+        if not self.counter or self.counter == 0:
+            highest_counter = frappe.db.sql("""SELECT `counter` FROM `tabRechnungs Jahresversand` WHERE `sektion_id` = '{0}' ORDER BY `counter` DESC LIMIT 1""".format(self.sektion_id), as_dict=True)
+            if len(highest_counter) > 0:
+                self.counter = highest_counter[0].counter + 1
+            else:
+                self.counter = 1
+        
         self.title = 'Jahresversand-{sektion_id}-{jahr}'.format(sektion_id=self.sektion_id, jahr=self.jahr)
     
     def start_csv_and_invoices(self):

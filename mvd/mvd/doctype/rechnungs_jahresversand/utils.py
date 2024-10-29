@@ -32,8 +32,8 @@ def create_invoices_as_json(jahresversand):
             'Privat': [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel).get("price")}],
             'Geschäft': [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel_geschaeft).get("price")}]
         }
-        current_series_index = (frappe.db.get_value("Series", "RJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0) + 1
-        current_fr_series_index = (frappe.db.get_value("Series", "FRJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0) + 1
+        current_series_index = (frappe.db.get_value("Series", "RJ-{0}{1}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter), "current", order_by = "name") or 0) + 1
+        current_fr_series_index = (frappe.db.get_value("Series", "FRJ-{0}{1}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter), "current", order_by = "name") or 0) + 1
 
         filters = ''
         if int(jahresversand_doc.sprach_spezifisch) == 1:
@@ -132,8 +132,8 @@ def create_invoices_as_json(jahresversand):
                         "fast_mode": 1,
                         "esr_reference": '',
                         "outstanding_amount": item[0].get("rate"),
-                        "naming_series": "RJ-.{sektions_code}.#####",
-                        "renaming_series": "RJ-{0}{1}".format(str(sektion.sektion_id) or '00', str(current_series_index).rjust(5, "0"))
+                        "naming_series": "RJ-.{sektions_code}{1}.#####",
+                        "renaming_series": "RJ-{0}{1}{2}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter, str(current_series_index).rjust(5, "0"))
                     })
                     sinv.esr_reference = get_qrr_reference(fake_sinv=sinv)
 
@@ -151,8 +151,8 @@ def create_invoices_as_json(jahresversand):
                         'druckvorlage': '',
                         'bezugsjahr': jahresversand_doc.jahr,
                         'spenden_versand': '',
-                        "naming_series": "FRJ-.{sektions_code}.#####",
-                        "renaming_series": "FRJ-{0}{1}".format(str(sektion.sektion_id) or '00', str(current_fr_series_index).rjust(5, "0"))
+                        "naming_series": "FRJ-.{sektions_code}{1}.#####",
+                        "renaming_series": "FRJ-{0}{1}{2}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter, str(current_fr_series_index).rjust(5, "0"))
                     })
                     fr.qrr_referenz = get_qrr_reference(fake_fr=fr)
 
