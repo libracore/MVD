@@ -164,6 +164,7 @@ def create_invoices_as_json(jahresversand):
             rjv_json.rechnungsdaten_json = json_data
             rjv_json.save(ignore_permissions=True)
             jahresversand_doc.add_comment('Comment', text='Rechnungsdaten erstellt.')
+            frappe.db.set_value("Rechnungs Jahresversand", jahresversand_doc.name, 'anz_rechnungen', len(sinv_list))
             frappe.db.commit()
 
             create_csv_from_json(jahresversand_doc.name)
@@ -563,12 +564,6 @@ def create_csv_from_json(jahresversand):
                             row_data.append('Reduzierte Mitgliedschaft / Unabhängiger Debitor')
                         else:
                             row_data.append('Unabhängiger Debitor')
-                    
-                    # Digitalrechnung URL
-                    if mitgliedschaft.digitalrechnung_hash:
-                        row_data.append('https://libracore.mieterverband.ch/digitalrechnung?hash={0}'.format(mitgliedschaft.digitalrechnung_hash))
-                    else:
-                        row_data.append('')
 
                     data.append(row_data)
         
