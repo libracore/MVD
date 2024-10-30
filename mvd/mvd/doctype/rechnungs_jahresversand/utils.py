@@ -226,7 +226,7 @@ def create_invoices_from_json(jahresversand):
                     
 
                     commit_counter += 1
-                    if commit_counter == 100:
+                    if commit_counter == 50:
                         frappe.db.commit()
                         commit_counter = 0
                 sinv_counter += 1
