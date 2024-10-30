@@ -176,6 +176,9 @@ def create_invoices_as_json(jahresversand):
             jahresversand_doc.add_comment('Comment', text='{0}'.format(str(err)))
 
 def create_invoices_from_json(jahresversand):
+    from datetime import datetime, time
+    stop_time = time(6, 0)
+    breaked_loop = False
     jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
     rjv_json = frappe.get_doc("RJV JSON", jahresversand_doc.rechnungsdaten_json_link)
     retry = True if cint(jahresversand_doc.is_retry) == 1 else False
@@ -228,14 +231,26 @@ def create_invoices_from_json(jahresversand):
                         commit_counter = 0
                 sinv_counter += 1
                 fr_counter += 1
-            
+
+                aktuelle_uhrzeit = datetime.now().time()
+                if aktuelle_uhrzeit > stop_time:
+                    frappe.db.commit()
+                    breaked_loop = True
+                    break
+                    
+
             frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'RJ-{1}{2}'""".format(current_series_index + sinv_counter, str(sektion.sektion_id) or '00', jahresversand_doc.counter))
             frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'FRJ-{1}{2}'""".format(current_fr_series_index + fr_counter, str(sektion.sektion_id) or '00', jahresversand_doc.counter))
-            jahresversand_doc.status = 'Abgeschlossen'
-            jahresversand_doc.save()
-            frappe.db.sql("""SET SQL_SAFE_UPDATES = 0;""", as_list=True)
-            frappe.db.sql("""UPDATE `tabSales Invoice` SET `fast_mode` = 0 WHERE `rechnungs_jahresversand` = '{0}'""".format(jahresversand_doc.name), as_list=True)
-            frappe.db.sql("""SET SQL_SAFE_UPDATES = 1;""", as_list=True)
+                
+            if not breaked_loop:
+                jahresversand_doc.status = 'Abgeschlossen'
+                jahresversand_doc.save()
+                frappe.db.sql("""SET SQL_SAFE_UPDATES = 0;""", as_list=True)
+                frappe.db.sql("""UPDATE `tabSales Invoice` SET `fast_mode` = 0 WHERE `rechnungs_jahresversand` = '{0}'""".format(jahresversand_doc.name), as_list=True)
+                frappe.db.sql("""SET SQL_SAFE_UPDATES = 1;""", as_list=True)
+            else:
+                jahresversand_doc.is_retry = 1
+                jahresversand_doc.save()
         
         except Exception as err:
             jahresversand_doc.status = 'Fehlgeschlagen'
