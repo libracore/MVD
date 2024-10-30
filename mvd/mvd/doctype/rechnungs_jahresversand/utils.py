@@ -180,8 +180,8 @@ def create_invoices_from_json(jahresversand):
     rjv_json = frappe.get_doc("RJV JSON", jahresversand_doc.rechnungsdaten_json_link)
     retry = True if cint(jahresversand_doc.is_retry) == 1 else False
     sektion = frappe.get_doc("Sektion", jahresversand_doc.sektion_id)
-    current_series_index = frappe.db.get_value("Series", "RJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0
-    current_fr_series_index = frappe.db.get_value("Series", "FRJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0
+    current_series_index = frappe.db.get_value("Series", "RJ-{0}{1}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter), "current", order_by = "name") or 0
+    current_fr_series_index = frappe.db.get_value("Series", "FRJ-{0}{1}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter), "current", order_by = "name") or 0
     if jahresversand_doc.status == 'Vorgemerkt für Rechnungsverbuchung':
         jahresversand_doc.status = 'Rechnungsverbuchung in Arbeit'
         jahresversand_doc.add_comment('Comment', text='Beginne mit der Rechnungsverbuchung...')
@@ -229,8 +229,8 @@ def create_invoices_from_json(jahresversand):
                 sinv_counter += 1
                 fr_counter += 1
             
-            frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'RJ-{1}'""".format(current_series_index + sinv_counter, str(sektion.sektion_id) or '00'))
-            frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'FRJ-{1}'""".format(current_fr_series_index + fr_counter, str(sektion.sektion_id) or '00'))
+            frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'RJ-{1}{2}'""".format(current_series_index + sinv_counter, str(sektion.sektion_id) or '00', jahresversand_doc.counter))
+            frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'FRJ-{1}{2}'""".format(current_fr_series_index + fr_counter, str(sektion.sektion_id) or '00', jahresversand_doc.counter))
             jahresversand_doc.status = 'Abgeschlossen'
             jahresversand_doc.save()
             frappe.db.sql("""SET SQL_SAFE_UPDATES = 0;""", as_list=True)
