@@ -107,7 +107,7 @@
                             <div class="col-sm-12 col-md-12 col-lg-12">
                                 <div class="logo-section">
                                     <a class="section-title" href="https://mieterverband.ch/{{ sektion }}.html" title="Startseite">
-                                       Digitalrechnung
+                                       Digitale Rechnung, kein Papier (mehr)
                                     </a>
                                 </div>
                             </div>
@@ -140,27 +140,30 @@
                                     <!-- Hinweis Beratungsformular und Adressänderungen -->
                                     {% if hash_check == 'bestätigung' %}
                                     <div class="text-image text-image-mv rich-text highlight no-img">
-                                        <p>Vielen Dank!<br>Sie haben erfolgreich auf Digitalrechnung umgestellt.</p>
+                                        <p>Vielen Dank!<br>Sie haben erfolgreich auf die digitale Rechnung (PDF per E-Mail) umgestellt:</p>
+                                        <p>Wir senden Ihnen <em>nächstes Jahr</em> Ihre Mitgliedschaftsrechnung per E-Mails als PDF.
+                                        </p>
                                     </div>
                                     {% endif %}
                                     {% if hash_check == 'show opt out bestätigung' %}
                                     <div class="text-image text-image-mv rich-text highlight no-img">
-                                        <p>Sie haben die Digitalrechnung erfolgreich abbestellt.</p>
+                                        <p>Sie haben sich für die Rechnung auf Papier per Post entschieden.</p>
                                     </div>
                                     {% endif %}
                                     {% if hash_check == 'add mail' %}
                                     <div class="text-image text-image-mv rich-text highlight no-img">
-                                        <p>Wir besitzen leider keine E-Mail Adresse von Ihnen.<br>Für die Umstellung auf Digitalrechnung erfassen Sie bitte unten Ihre E-Mail Adresse.</p>
+                                        <p>Wir haben leider keine E-Mail Adresse von Ihnen.<br>Für die Umstellung auf die digitale Rechnung erfassen Sie bitte unten Ihre E-Mail-Adresse.</p>
                                     </div>
                                     {% endif %}
                                     {% if hash_check == 'show opt out' %}
                                     <div class="text-image text-image-mv rich-text highlight no-img">
-                                        <p>Ihre Digitalrechnung wurde bereits am {{ opt_in }} aktiviert.</p>
+                                        <p>Wir senden Ihnen die Rechnung 2026 als PDF per E-Mail. <br>
+                                            Option aktiviert am {{ opt_in }}.</p>
                                     </div>
                                     {% endif %}
                                     {% if hash_check == 'unknown_error' %}
                                     <div class="text-image text-image-mv rich-text highlight no-img">
-                                        <p>Ein unbekannter Fehler ist aufgetreten. Bitte kontaktieren Sie den MVD.</p>
+                                        <p>Ein unbekannter Fehler ist aufgetreten. Bitte kontaktieren Sie den Mieterinnen- und Mieterverband: <a href="mailto:info@mieterverband.ch?subject=Fehler Digitale Rechnung&body=Guten%20Tag%0A%0ADie%20Umstellung%20von%20Papierrechnung%20zu%20PDF%20per%20E-Mail%20war%20%C3%BCber%20die%20Website%20nicht%20m%C3%B6glich.%20Bitte%20%C3%A4ndern%20Sie%20dies%20f%C3%BCr%20folgende%20Mitgliedschaft%3A%0A%0AMitgliedernummer%3A%20MV%0AName%20und%20Vorname%3A%0A%0A">info@mieterverband.ch</a></a></p>
                                     </div>
                                     {% endif %}
                                     <div class="form-wrapper">
@@ -168,7 +171,7 @@
                                             <fieldset class="fieldset">
                                                 {% if hash_check != 'unknown_error' %}
                                                 <span class="e-copy-small required-hint position-right"><span>*</span> Pflichtfeld</span>
-                                                <h2 class="e-h3 fieldset-title">Ihre Digitalrechnungsdaten</h2>
+                                                <h2 class="e-h3 fieldset-title">Ihre Angaben</h2>
                                                 <div class="form-row">
                                                     <div class="row">
                                                         <div class="col-sm-12 col-md-4 col-lg-4">
@@ -178,7 +181,7 @@
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
                                                             <input type="text" name="email" id="email" value="{{ email }}" maxlength="50">
-                                                            <span class="hint">Bitte ändern, wenn die Rechnungen an eine andere E-Mail-Adresse geschickt werden sollen.</span>
+                                                            <!--<span class="hint">Bitte ändern, wenn die Rechnungen an eine andere E-Mail-Adresse geschickt werden sollen.</span>-->
                                                         </div>
                                                     </div>
                                                 </div>
@@ -201,7 +204,7 @@
                                                 {% if hash_check == 'bestätigung' %}
                                                 <div class="button-wrapper">
                                                     <input type="button" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');">
-                                                    <input type="button" value="Digitalrechnung abestellen" onclick="opt_out('{{ digitalrechnung }}');">
+                                                    <input type="button" value="Zurück, Rechnung per Post" onclick="opt_out('{{ digitalrechnung }}');">
                                                 </div>
                                                 {% endif %}
                                                 {% if hash_check == 'add mail' %}
@@ -212,12 +215,12 @@
                                                 {% if hash_check == 'show opt out' %}
                                                 <div class="button-wrapper">
                                                     <input type="button" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');">
-                                                    <input type="button" value="Digitalrechnung abestellen" onclick="opt_out('{{ digitalrechnung }}');">
+                                                    <input type="button" value="Zurück, Rechnung per Post" onclick="opt_out('{{ digitalrechnung }}');">
                                                 </div>
                                                 {% endif %}
                                                 {% if hash_check == 'show opt out bestätigung' %}
                                                 <div class="button-wrapper">
-                                                    <input type="button" value="Digitalrechnung aktivieren" onclick="location.reload();">
+                                                    <input type="button" value="Digitale Rechnung (PDF per E-Mail) aktivieren" onclick="location.reload();">
                                                 </div>
                                                 {% endif %}
                                                 {% endif %}
@@ -268,7 +271,7 @@
                 </section>
                 <section class="footer-bottom">
                     <div class="container-inner">
-                        <span class="copyright">© 2023 Mieterinnen- und Mieterverband</span>
+                        <span class="copyright">© 2024 Mieterinnen- und Mieterverband</span>
                         <ul>
                             <li>
                                 <a href="https://mieterverband.ch/mv/mitgliedschaft-verband/impressum.html">Impressum</a>
