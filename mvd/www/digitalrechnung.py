@@ -13,7 +13,7 @@ def get_context(context):
         parsed_url = urlparse(url)
         hash = parse_qs(parsed_url.query)['hash'][0]
         hash_check = check_hash(hash)
-        print(hash_check)
+        context['language'] = 'de'
         if hash_check:
             if hash_check['stage'] == 'opt_in':
                 context['hash_check'] = 'bestätigung'
