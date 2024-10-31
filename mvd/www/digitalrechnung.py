@@ -104,7 +104,7 @@ def handle_digitalrechnung_onload(digitalrechnung):
                 'digitalrechnung': digitalrechnung
             }
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def handle_digitalrechnung_optout(digitalrechnung):
     dr = frappe.get_doc("Digitalrechnung", digitalrechnung)
     dr.set_opt_out()
@@ -112,7 +112,7 @@ def handle_digitalrechnung_optout(digitalrechnung):
     frappe.db.commit()
     return
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def handle_digitalrechnung_email(digitalrechnung, email):
     dr = frappe.get_doc("Digitalrechnung", digitalrechnung)
     dr.email = email
