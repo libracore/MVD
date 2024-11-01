@@ -31,9 +31,13 @@ class RechnungsJahresversand(Document):
 
 def run_jahresversand_verbuchung():
     from mvd.mvd.doctype.rechnungs_jahresversand.utils import create_invoices_from_json
-    ready_to_run = frappe.db.sql("""SELECT `name` FROM `tabRechnungs Jahresversand` WHERE `status` = 'Vorgemerkt für Rechnungsverbuchung' AND `docstatus` = 1 ORDER BY `geplant_am` ASC""", as_dict=True)
-    if len(ready_to_run) > 0:
-        create_invoices_from_json(ready_to_run[0].name)
+    pausiert = frappe.db.sql("""SELECT `name` FROM `tabRechnungs Jahresversand` WHERE `status` = 'Pausiert' AND `docstatus` = 1 ORDER BY `geplant_am` ASC""", as_dict=True)
+    if len(pausiert) > 0:
+        create_invoices_from_json(pausiert[0].name)
+    else:
+        ready_to_run = frappe.db.sql("""SELECT `name` FROM `tabRechnungs Jahresversand` WHERE `status` = 'Vorgemerkt für Rechnungsverbuchung' AND `docstatus` = 1 ORDER BY `geplant_am` ASC""", as_dict=True)
+        if len(ready_to_run) > 0:
+            create_invoices_from_json(ready_to_run[0].name)
 
 
 @frappe.whitelist()

@@ -70,7 +70,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Bereit zur Ausf\u00fchrung\nRechnungsdaten in Arbeit\nCSV in Arbeit\nRechnungsdaten und CSV erstellt\nVorgemerkt f\u00fcr Rechnungsverbuchung\nRechnungsverbuchung in Arbeit\nAbgeschlossen\nFehlgeschlagen\nStorniert",
+   "options": "Bereit zur Ausf\u00fchrung\nRechnungsdaten in Arbeit\nCSV in Arbeit\nRechnungsdaten und CSV erstellt\nVorgemerkt f\u00fcr Rechnungsverbuchung\nRechnungsverbuchung in Arbeit\nPausiert\nAbgeschlossen\nFehlgeschlagen\nStorniert",
    "read_only": 1
   },
   {
@@ -212,7 +212,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2024-10-29 21:31:09.181405",
+ "modified": "2024-11-01 14:15:56.736467",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Rechnungs Jahresversand",

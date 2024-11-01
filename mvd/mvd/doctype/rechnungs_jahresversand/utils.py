@@ -132,7 +132,7 @@ def create_invoices_as_json(jahresversand):
                         "fast_mode": 1,
                         "esr_reference": '',
                         "outstanding_amount": item[0].get("rate"),
-                        "naming_series": "RJ-.{sektions_code}" + str(jahresversand_doc.counter) + ".#####",
+                        "naming_series": "RJ-.{sektions_code}.{1}.#####",
                         "renaming_series": "RJ-{0}{1}{2}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter, str(current_series_index).rjust(5, "0"))
                     })
                     sinv.esr_reference = get_qrr_reference(fake_sinv=sinv)
@@ -151,7 +151,7 @@ def create_invoices_as_json(jahresversand):
                         'druckvorlage': '',
                         'bezugsjahr': jahresversand_doc.jahr,
                         'spenden_versand': '',
-                        "naming_series": "FRJ-.{sektions_code}" + str(jahresversand_doc.counter) + ".#####",
+                        "naming_series": "FRJ-.{sektions_code}.{1}.#####",
                         "renaming_series": "FRJ-{0}{1}{2}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter, str(current_fr_series_index).rjust(5, "0"))
                     })
                     fr.qrr_referenz = get_qrr_reference(fake_fr=fr)
@@ -177,15 +177,15 @@ def create_invoices_as_json(jahresversand):
 
 def create_invoices_from_json(jahresversand):
     from datetime import datetime, time
-    stop_time = time(6, 0)
+    stop_time = time(6, 30)
     breaked_loop = False
     jahresversand_doc = frappe.get_doc("Rechnungs Jahresversand", jahresversand)
     rjv_json = frappe.get_doc("RJV JSON", jahresversand_doc.rechnungsdaten_json_link)
     retry = True if cint(jahresversand_doc.is_retry) == 1 else False
     sektion = frappe.get_doc("Sektion", jahresversand_doc.sektion_id)
-    current_series_index = frappe.db.get_value("Series", "RJ-{0}{1}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter), "current", order_by = "name") or 0
-    current_fr_series_index = frappe.db.get_value("Series", "FRJ-{0}{1}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter), "current", order_by = "name") or 0
-    if jahresversand_doc.status == 'Vorgemerkt für Rechnungsverbuchung':
+    # current_series_index = frappe.db.get_value("Series", "RJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0
+    # current_fr_series_index = frappe.db.get_value("Series", "FRJ-{0}".format(str(sektion.sektion_id) or '00'), "current", order_by = "name") or 0
+    if jahresversand_doc.status == 'Vorgemerkt für Rechnungsverbuchung' or jahresversand_doc.status == 'Pausiert':
         jahresversand_doc.status = 'Rechnungsverbuchung in Arbeit'
         jahresversand_doc.add_comment('Comment', text='Beginne mit der Rechnungsverbuchung...')
         jahresversand_doc.save()
@@ -224,24 +224,20 @@ def create_invoices_from_json(jahresversand):
                     if fr.name != fr.renaming_series:
                         frappe.rename_doc("Fakultative Rechnung", fr.name, fr.renaming_series, force=True)
                     
-
-                    commit_counter += 1
-                    if commit_counter == 50:
-                        frappe.db.commit()
-                        commit_counter = 0
-                sinv_counter += 1
-                fr_counter += 1
-
+                    frappe.db.commit()
+                #     commit_counter += 1
+                #     if commit_counter == 100:
+                #         frappe.db.commit()
+                #         commit_counter = 0
+                # sinv_counter += 1
+                # fr_counter += 1
                 aktuelle_uhrzeit = datetime.now().time()
                 if aktuelle_uhrzeit > stop_time:
-                    frappe.db.commit()
                     breaked_loop = True
                     break
-                    
-
-            frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'RJ-{1}{2}'""".format(current_series_index + sinv_counter, str(sektion.sektion_id) or '00', jahresversand_doc.counter))
-            frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'FRJ-{1}{2}'""".format(current_fr_series_index + fr_counter, str(sektion.sektion_id) or '00', jahresversand_doc.counter))
-                
+            
+            # frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'RJ-{1}'""".format(current_series_index + sinv_counter, str(sektion.sektion_id) or '00'))
+            # frappe.db.sql("""UPDATE `tabSeries` SET `current` = {0} WHERE `name` = 'FRJ-{1}'""".format(current_fr_series_index + fr_counter, str(sektion.sektion_id) or '00'))
             if not breaked_loop:
                 jahresversand_doc.status = 'Abgeschlossen'
                 jahresversand_doc.save()
@@ -250,6 +246,7 @@ def create_invoices_from_json(jahresversand):
                 frappe.db.sql("""SET SQL_SAFE_UPDATES = 1;""", as_list=True)
             else:
                 jahresversand_doc.is_retry = 1
+                jahresversand_doc.status = 'Pausiert'
                 jahresversand_doc.save()
         
         except Exception as err:
