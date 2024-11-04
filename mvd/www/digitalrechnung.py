@@ -7,13 +7,30 @@ from frappe.utils import cint
 
 no_cache = 1
 
+def sektion_web(sektion_id):
+    section_to_url = {
+        'MVLU': 'mv-lu',
+        'MVZG': 'mv-zg',
+        'MVBS': 'mv-bs',
+        'MVSZ': 'mv-sz',
+        'MVSH': 'mv-sh',
+        'MVDF': 'mv-fr', # das ist die Ausnahme
+        'MVSO': 'mv-so',
+        'MVOS': 'mv-os',
+        'MVGR': 'mv-gr',
+        'MVBE': 'mv-be',
+        'MVAG': 'mv-ag',
+        'MVZH': 'mv-zh',
+        'MVBL': 'mv-bl'
+    }
+    return section_to_url.get(sektion_id)
+
 def get_context(context):
     try:
         url = frappe.request.url
         parsed_url = urlparse(url)
         hash = parse_qs(parsed_url.query)['hash'][0]
         hash_check = check_hash(hash)
-        context['language'] = 'de'
         if hash_check:
             if hash_check['stage'] == 'opt_in':
                 context['hash_check'] = 'bestätigung'
@@ -21,24 +38,32 @@ def get_context(context):
                 context['opt_in'] = hash_check['opt_in']
                 context['opt_out'] = hash_check['opt_out']
                 context['digitalrechnung'] = hash_check['digitalrechnung']
+                context['sektion_web'] = sektion_web(hash_check['sektion_id'])
+                context['language'] = hash_check['language'] or 'de'
             elif hash_check['stage'] == 'no_mail':
                 context['hash_check'] =  'add mail'
                 context['email'] = hash_check['email']
                 context['opt_in'] = hash_check['opt_in']
                 context['opt_out'] = hash_check['opt_out']
                 context['digitalrechnung'] = hash_check['digitalrechnung']
+                context['sektion_web'] = sektion_web(hash_check['sektion_id'])
+                context['language'] = hash_check['language'] or 'de'
             elif hash_check['stage'] == 'opt_out':
                 context['hash_check'] =  'show opt out'
                 context['email'] = hash_check['email']
                 context['opt_in'] = hash_check['opt_in']
                 context['opt_out'] = hash_check['opt_out']
                 context['digitalrechnung'] = hash_check['digitalrechnung']
+                context['sektion_web'] = sektion_web(hash_check['sektion_id'])
+                context['language'] = hash_check['language'] or 'de'
             elif hash_check['stage'] == 'opt_out_reload':
                 context['hash_check'] =  'show opt out bestätigung'
                 context['email'] = hash_check['email']
                 context['opt_in'] = hash_check['opt_in']
                 context['opt_out'] = hash_check['opt_out']
                 context['digitalrechnung'] = hash_check['digitalrechnung']
+                context['sektion_web'] = sektion_web(hash_check['sektion_id'])
+                context['language'] = hash_check['language'] or 'de'
             else:
                 context['hash_check'] = "unknown_error"
         else:
@@ -74,7 +99,9 @@ def handle_digitalrechnung_onload(digitalrechnung):
                     'email': dr.email,
                     'opt_in': frappe.utils.get_datetime(today()).strftime('%d.%m.%Y'),
                     'opt_out': '-',
-                    'digitalrechnung': digitalrechnung
+                    'sektion_id': dr.sektion_id,
+                    'language' : dr.language,
+                    'digitalrechnung': digitalrechnung,
                 }
             else:
                 dr.no_auto_opt_in = 0
@@ -85,6 +112,8 @@ def handle_digitalrechnung_onload(digitalrechnung):
                     'email': dr.email,
                     'opt_in': '-',
                     'opt_out': frappe.utils.get_datetime(dr.opt_out).strftime('%d.%m.%Y'),
+                    'sektion_id': dr.sektion_id,
+                    'language' : dr.language,
                     'digitalrechnung': digitalrechnung
                 }
         else:
@@ -93,6 +122,8 @@ def handle_digitalrechnung_onload(digitalrechnung):
                 'email': '',
                 'opt_in': '-',
                 'opt_out': '-',
+                'sektion_id': dr.sektion_id,
+                'language' : dr.language,
                 'digitalrechnung': digitalrechnung
             }
     else:
@@ -101,10 +132,12 @@ def handle_digitalrechnung_onload(digitalrechnung):
                 'email': dr.email,
                 'opt_in': frappe.utils.get_datetime(dr.opt_in).strftime('%d.%m.%Y'),
                 'opt_out': '-',
+                'sektion_id': dr.sektion_id,
+                'language' : dr.language,
                 'digitalrechnung': digitalrechnung
             }
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def handle_digitalrechnung_optout(digitalrechnung):
     dr = frappe.get_doc("Digitalrechnung", digitalrechnung)
     dr.set_opt_out()
@@ -112,7 +145,7 @@ def handle_digitalrechnung_optout(digitalrechnung):
     frappe.db.commit()
     return
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def handle_digitalrechnung_email(digitalrechnung, email):
     dr = frappe.get_doc("Digitalrechnung", digitalrechnung)
     dr.email = email
