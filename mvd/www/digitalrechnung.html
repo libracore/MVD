@@ -106,8 +106,8 @@
                         <div class="row">
                             <div class="col-sm-12 col-md-12 col-lg-12">
                                 <div class="logo-section">
-                                    <a class="section-title" href="https://mieterverband.ch/{{ sektion }}.html" title="Startseite">
-                                       Digitale Rechnung, kein Papier (mehr)
+                                    <a class="section-title" href="https://mieterverband.ch/{{ sektion_web }}.html" title="Startseite">
+                                       {{ _("Ihre digitale Rechnung", language) }}
                                     </a>
                                 </div>
                             </div>
@@ -140,9 +140,15 @@
                                     <!-- Hinweis Beratungsformular und Adressänderungen -->
                                     {% if hash_check == 'bestätigung' %}
                                     <div class="text-image text-image-mv rich-text highlight no-img">
-                                        <p>Vielen Dank!<br>Sie haben erfolgreich auf die digitale Rechnung (PDF per E-Mail) umgestellt:</p>
-                                        <p>Wir senden Ihnen <em>nächstes Jahr</em> Ihre Mitgliedschaftsrechnung per E-Mails als PDF.
-                                        </p>
+                                        <h2>
+                                           {{ _("Besten Dank für Ihre Anmeldung zur digitalen Jahresrechnung", language) }}</h2>
+                                        <p>{{ _("Die Umstellung gilt ab nächstem Jahr. Bitte begleichen Sie den aktuellen Jahresbeitrag mit der Ihnen vorliegenden Rechnung.", language) }}</p>
+                                        <p>Danke, dass Sie helfen Ressourcen zu schonen.</p>
+
+                                        
+                                        <p>Anmeldung unabsichtlich? klicken Sie unten <a href="#" onclick="opt_out('{{ digitalrechnung }}');">«Abbrechen: Rechnung per Post».</a></a></p>
+
+                                            
                                     </div>
                                     {% endif %}
                                     {% if hash_check == 'show opt out bestätigung' %}
@@ -153,12 +159,12 @@
                                     {% if hash_check == 'add mail' %}
                                     <div class="text-image text-image-mv rich-text highlight no-img">
                                         <p>Wir haben leider keine E-Mail Adresse von Ihnen.<br>Für die Umstellung auf die digitale Rechnung erfassen Sie bitte unten Ihre E-Mail-Adresse.</p>
+                                        <p>Mit der Angabe Ihrer E-Mail-Adresse erklären Sie sich einverstanden, dass wir diese für die Korrespondenz gemäss den <a href="https://www.mieterverband.ch/{{ sektion_web}}/mitgliedschaft/statuten-reglemente.html"  target="_blank">Statuten</a> und der <a href="https://www.mieterverband.ch/mv/mitgliedschaft-verband/datenschutz.html" target="_blank">Datenschutzerklärung</a> verwenden.</p>
                                     </div>
                                     {% endif %}
                                     {% if hash_check == 'show opt out' %}
                                     <div class="text-image text-image-mv rich-text highlight no-img">
-                                        <p>Wir senden Ihnen die Rechnung 2026 als PDF per E-Mail. <br>
-                                            Option aktiviert am {{ opt_in }}.</p>
+                                        <p>{{ _("Wir senden Ihnen die Rechnung 2026 per E-Mail an:", language) }} <br> {{ email }} </p>
                                     </div>
                                     {% endif %}
                                     {% if hash_check == 'unknown_error' %}
@@ -172,7 +178,7 @@
                                                 {% if hash_check != 'unknown_error' %}
                                                 <span class="e-copy-small required-hint position-right"><span>*</span> Pflichtfeld</span>
                                                 <h2 class="e-h3 fieldset-title">Ihre Angaben</h2>
-                                                <div class="form-row">
+                                                <div class="form-row" {% if hash_check == 'show opt out bestätigung' %} style="display: none;" {% endif%}>
                                                     <div class="row">
                                                         <div class="col-sm-12 col-md-4 col-lg-4">
                                                             <label for="email" class="label email required">
@@ -180,8 +186,8 @@
                                                             </label>
                                                         </div>
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <input type="text" name="email" id="email" value="{{ email }}" maxlength="50">
-                                                            <!--<span class="hint">Bitte ändern, wenn die Rechnungen an eine andere E-Mail-Adresse geschickt werden sollen.</span>-->
+                                                            <input type="email" name="email" id="email" value="{{ email }}" maxlength="50" required>
+                                                            <span class="hint" id="emailHint">Bitte ändern, falls nicht mehr aktuell.</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -203,8 +209,10 @@
                                                 </div>
                                                 {% if hash_check == 'bestätigung' %}
                                                 <div class="button-wrapper">
-                                                    <input type="button" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');">
-                                                    <input type="button" value="Zurück, Rechnung per Post" onclick="opt_out('{{ digitalrechnung }}');">
+                                                    <input type="button" style="background-color: #6689a1;" value="Zurück, Rechnung per Post" onclick="opt_out('{{ digitalrechnung }}');">
+                                                    <input type="button" id="changeEmailButton" style="background-color: #003a62; ;display:none;" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');" disabled>
+                                                    <input type="button" value="OK"  onclick="location.reload();">
+
                                                 </div>
                                                 {% endif %}
                                                 {% if hash_check == 'add mail' %}
@@ -214,13 +222,15 @@
                                                 {% endif %}
                                                 {% if hash_check == 'show opt out' %}
                                                 <div class="button-wrapper">
-                                                    <input type="button" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');">
-                                                    <input type="button" value="Zurück, Rechnung per Post" onclick="opt_out('{{ digitalrechnung }}');">
+                                                    <input type="button" style="background-color: #6689a1;" value="Abbrechen: Rechnung per Post" onclick="opt_out('{{ digitalrechnung }}');">
+                                                    <input type="button" id="changeEmailButton" style="background-color: #6689a1;display:none;" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');" disabled>
+                                                    <input type="button" id="okButton" value="OK"  onclick="location.reload();">
                                                 </div>
                                                 {% endif %}
                                                 {% if hash_check == 'show opt out bestätigung' %}
                                                 <div class="button-wrapper">
-                                                    <input type="button" value="Digitale Rechnung (PDF per E-Mail) aktivieren" onclick="location.reload();">
+                                                    <input type="button"  style="background-color: #6689a1;"  value="Digitale Rechnung aktivieren" onclick="location.reload();">
+                                                    <input type="button" value="OK"  onclick="alert('Ihre Wunsch (Papierrechnung) ist festgehalten.')">
                                                 </div>
                                                 {% endif %}
                                                 {% endif %}
@@ -294,5 +304,55 @@
         <script type="text/javascript" src="/assets/js/bootstrap-4-web.min.js"></script>
         {% endblock %}
         <!-- csrf_token -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var emailInput = document.getElementById('email');
+                var emailHint = document.getElementById('emailHint');
+                var changeEmailButton = document.getElementById('changeEmailButton');
+                var okButton = document.getElementById('okButton');
+                var originalEmail = emailInput.value;
+        
+                emailInput.addEventListener('input', function() {
+                    var email = emailInput.value;
+                    var isValid = isValidEmail(email);
+                    var isChanged = email !== originalEmail;
+        
+                    if (email && isValid && isChanged) {
+                        emailHint.textContent = ' ';
+                        emailHint.style.color = '';
+                        changeEmailButton.disabled = false;
+                        changeEmailButton.style.backgroundColor = '#003A62'; // Original color when enabled
+                        changeEmailButton.style.display = 'inline';
+                        okButton.disabled = true;
+                        okButton.style.display = 'none';
+                        okButton.style.backgroundColor = '#ccd8e0'; // Disabled color
+                    } else {
+                        if (!isValid) {
+                            emailHint.textContent = 'Bitte geben Sie eine gültige E-Mail-Adresse ein.';
+                            emailHint.style.color = 'red';
+                            changeEmailButton.disabled = true;
+                            changeEmailButton.style.backgroundColor = '#ccd8e0'; // Disabled color  
+                            okButton.disabled = true;
+                            okButton.style.display = 'none';
+                        } else {
+                            emailHint.textContent = ' ';
+                            emailHint.style.color = '';
+                        }
+                        changeEmailButton.disabled = true;
+                        changeEmailButton.style.display = 'none';
+                        changeEmailButton.style.backgroundColor = '#ccd8e0'; // Disabled color
+                        okButton.disabled = false;
+                        okButton.style.display = 'inline';
+                        okButton.style.backgroundColor = '#6689a1'; // Original color when enabled
+                    }
+                });
+            });
+        
+            function isValidEmail(email) {
+                // Comprehensive email validation regex pattern
+                var emailPattern = /^(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/;
+                return emailPattern.test(email);
+            }
+        </script>
     </body>
 </html>
