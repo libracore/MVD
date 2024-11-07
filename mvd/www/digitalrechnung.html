@@ -28,6 +28,9 @@
             window.dev_server = {{ dev_server }};
             window.socketio_port = {{ frappe.socketio_port }};
         </script>
+        <style>
+            .button-wrapper input {margin-bottom: 21px !important;}
+        </style>
     </head>
     <body frappe-session-status="{{ 'logged-in' if frappe.session.user != 'Guest' else 'logged-out'}}" data-path="{{ path | e }}" id="home" class="smvForm smvEmailBeratungForm isCookieRequired process-page">
         <div class="content-wrapper" id="content">
@@ -139,26 +142,27 @@
                                     </div>-->
                                     <!-- Hinweis Beratungsformular und Adressänderungen -->
                                     {% if hash_check == 'bestätigung' %}
-                                    <div class="text-image text-image-mv rich-text highlight no-img">
+                                    <div class="text-image text-image-mv rich-text  no-img">
                                         <h2>
-                                           {{ _("Besten Dank für Ihre Anmeldung zur digitalen Jahresrechnung", language) }}</h2>
+                                           {{ _("Sie haben sich entschieden Ihre Jahresrechnung in Zukunft digital zu erhalten. Besten Dank!", language) }}</h2>
                                         <p>{{ _("Die Umstellung gilt ab nächstem Jahr. Bitte begleichen Sie den aktuellen Jahresbeitrag mit der Ihnen vorliegenden Rechnung.", language) }}</p>
-                                        <p>{{ _("Danke, dass Sie helfen Ressourcen zu schonen.", language) }}</p>
+                                        <p>{{ _("Danke, dass Sie helfen, Ressourcen zu schonen.", language) }}</p>
 
-                                        
-                                        <p>{{ _("Anmeldung unabsichtlich? klicken Sie unten", language) }} <a href="#" onclick="opt_out('{{ digitalrechnung }}');">«{{ _("Abbrechen: Rechnung per Post", language) }}».</a></a></p>
-
-                                            
                                     </div>
+                                    <div  class="text-image text-image-mv rich-text highlight no-img">
+                                        <p>{{ _("Haben Sie sich unabsichtlich angemeldet? Klicken Sie unten auf", language) }} <a href="#" onclick="opt_out('{{ digitalrechnung }}');">«{{ _("Abbrechen: Rechnung weiterhin per Post", language) }}»</a> {{ _("und sie bekommen Ihre Jahresrechnung weiterhin per Post zugeschickt.", language) }}</p>
+                                    </div>
+                                            
+                                   
                                     {% endif %}
                                     {% if hash_check == 'show opt out bestätigung' %}
-                                    <div class="text-image text-image-mv rich-text highlight no-img">
+                                    <div class="text-image text-image-mv rich-text  no-img">
                                         <p>{{ _("Sie haben sich für die Rechnung auf Papier per Post entschieden.", language) }}</p>
                                     </div>
                                     {% endif %}
                                     {% if hash_check == 'add mail' %}
-                                    <div class="text-image text-image-mv rich-text highlight no-img">
-                                        <p>{{ _("Wir haben leider keine E-Mail Adresse von Ihnen.", language) }}<br>{{ _("Für die Umstellung auf die digitale Rechnung erfassen Sie bitte unten Ihre E-Mail-Adresse.", language) }}</p>
+                                    <div class="text-image text-image-mv rich-text  no-img">
+                                        <p>{{ _("Sie möchten Ihre Rechnung in Zukunft digital erhalten.", language) }} {{ _("Wir haben leider keine E-Mail Adresse von Ihnen.", language) }}<br>{{ _("Für die Umstellung auf die digitale Rechnung erfassen Sie bitte unten Ihre E-Mail-Adresse.", language) }}</p>
                                         {%if language == 'fr' %}
                                         <p>En indiquant votre adresse e-mail, vous acceptez que nous l'utilisions pour la correspondance conformément aux  <a href="https://www.mieterverband.ch/dam/jcr:63a2ae49-4875-4cd3-b3b7-55158f8c1856/Statuten%202019%20f.pdf"  target="_blank">statuts de l'association</a> et à la <a href="https://www.mieterverband.ch/mv/mitgliedschaft-verband/datenschutz.html" target="_blank">déclaration de protection des données</a>.</p>
                                         {% else %}
@@ -167,8 +171,8 @@
                                     </div>
                                     {% endif %}
                                     {% if hash_check == 'show opt out' %}
-                                    <div class="text-image text-image-mv rich-text highlight no-img">
-                                        <p>{{ _("Wir senden Ihnen die Rechnung 2026 per E-Mail an:", language) }} <br> {{ email }} </p>
+                                    <div class="text-image text-image-mv rich-text  no-img">
+                                        <h2>{{ _("Besten Dank für Ihre Rückmeldung", language) }}</h2> <p> {{ _("Ab 2025 senden wir Ihnen Ihre Rechnung digital zu an die E-Mail-Adresse:", language) }} <br> {{ email }} </p>
                                     </div>
                                     {% endif %}
                                     {% if hash_check == 'unknown_error' %}
@@ -180,55 +184,60 @@
                                         <form id="form0" method="post" action="" onsubmit=";" enctype="multipart/form-data">
                                             <fieldset class="fieldset">
                                                 {% if hash_check != 'unknown_error' %}
-                                                <span class="e-copy-small required-hint position-right"><span>*</span> {{ _("Pflichtfeld", language) }}</span>
-                                                <h2 class="e-h3 fieldset-title">{{ _("Ihre Angaben", language) }}</h2>
-                                                <div class="form-row" {% if hash_check == 'show opt out bestätigung' %} style="display: none;" {% endif%}>
-                                                    <div class="row">
-                                                        <div class="col-sm-12 col-md-4 col-lg-4">
-                                                            <label for="email" class="label email required">
-                                                                {{ _("E-Mail-Adresse", language) }}&nbsp;*
-                                                            </label>
-                                                        </div>
-                                                        <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <input type="email" name="email" id="email" value="{{ email }}" maxlength="50" required>
-                                                            <span class="hint" id="emailHint">{{ _("Bitte ändern, falls nicht mehr aktuell.", language) }}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="form-row">
-                                                    <div class="row readonly">
-                                                        <div class="col-sm-12 col-md-4 col-lg-4">
-                                                            <label for="aktiviertam" class="label mitgliedschaft_nr">
-                                                                {{ _("Aktiviert am", language) }}
-                                                            </label>
-                                                            <label for="deaktiviertam" class="label mitgliedschaft_nr">
-                                                                {{ _("Deaktiviert am", language) }}
-                                                            </label>
-                                                        </div>
-                                                        <div class="col-sm-12 col-md-8 col-lg-8">
-                                                            <p class="value-read-only">{{ opt_in }}</p>
-                                                            <p class="value-read-only">{{ opt_out }}</p>
+                                                <div {% if hash_check == 'show opt out bestätigung' %} style="display: none;" {% endif %}>
+                                                    <span class="e-copy-small required-hint position-right"><span>*</span> {{ _("Pflichtfeld", language) }}</span>
+                                                    <h2 class="e-h3 fieldset-title">{{ _("Ihre Angaben", language) }}</h2>
+                                                    <div class="form-row">
+                                                        <div class="row">
+                                                            <div class="col-sm-12 col-md-4 col-lg-4">
+                                                                <label for="email" class="label email required">
+                                                                    {{ _("E-Mail-Adresse", language) }}&nbsp;*
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-sm-12 col-md-8 col-lg-8">
+                                                                <input type="email" name="email" id="email" value="{{ email }}" maxlength="50" required>
+                                                                <span class="hint" id="emailHint"> </span>
+                                                            </div>
                                                         </div>
                                                     </div>
+                                                    <!--
+                                                    <div class="form-row">
+                                                        <div class="row readonly">
+                                                            <div class="col-sm-12 col-md-4 col-lg-4">
+                                                                <label for="aktiviertam" class="label mitgliedschaft_nr">
+                                                                    {{ _("Aktiviert am", language) }}
+                                                                </label>
+                                                                <label for="deaktiviertam" class="label mitgliedschaft_nr">
+                                                                    {{ _("Deaktiviert am", language) }}
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-sm-12 col-md-8 col-lg-8">
+                                                                <p class="value-read-only">{{ opt_in }}</p>
+                                                                <p class="value-read-only">{{ opt_out }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    -->
                                                 </div>
                                                 {% if hash_check == 'bestätigung' %}
                                                 <div class="button-wrapper">
-                                                    <input type="button" style="background-color: #6689a1;" value="{{ _("Abbrechen: Rechnung per Post", language) }}" onclick="opt_out('{{ digitalrechnung }}');">
+                                                    <input type="button" style="background-color: #6689a1;" value="{{ _("Abbrechen: Rechnung weiterhin per Post", language) }}" onclick="opt_out('{{ digitalrechnung }}');">
                                                     <input type="button" id="changeEmailButton" style="background-color: #003a62; ;display:none;" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');" disabled>
-                                                    <input type="button" value="OK"  onclick="location.reload();">
+                                                    <input type="button" id="okButton" value="OK"  onclick="location.reload();">
 
                                                 </div>
                                                 {% endif %}
                                                 {% if hash_check == 'add mail' %}
                                                 <div class="button-wrapper">
-                                                    <input type="button" id="addEmailButton" style="background-color: #6689a1;display" value="{{ _("E-Mail-Adresse hinzufügen", language) }}" onclick="change_email('{{ digitalrechnung }}');" disabled>
+                                                    <input type="button" id="addEmailButton" style="background-color: #6689a1;" value="{{ _("E-Mail-Adresse hinzufügen", language) }}" onclick="change_email('{{ digitalrechnung }}');" disabled>
                                                 </div>
                                                 {% endif %}
                                                 {% if hash_check == 'show opt out' %}
                                                 <div class="button-wrapper">
-                                                    <input type="button" style="background-color: #6689a1;" value="{{ _("Abbrechen: Rechnung per Post", language) }}" onclick="opt_out('{{ digitalrechnung }}');">
+                                                    <input type="button" style="background-color: #6689a1;" value="{{ _("Abbrechen: Rechnung weiterhin per Post", language) }}" onclick="opt_out('{{ digitalrechnung }}');">
                                                     <input type="button" id="changeEmailButton" style="background-color: #6689a1;display:none;" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');" disabled>
-                                                    <input type="button" id="okButton" value="OK"  onclick="location.reload();">
+                                                    <!--<input type="button" id="okButton" style="display: inline;" value="OK"  onclick="location.reload();">-->
+                                                    <input type="button" id="okButton" value="OK"  onclick="alert('{{ _("Ihr Wunsch (digitale Rechnung) ist festgehalten.", language) }}')">
                                                 </div>
                                                 {% endif %}
                                                 {% if hash_check == 'show opt out bestätigung' %}
@@ -330,7 +339,8 @@
                             changeEmailButton.style.backgroundColor = '#003A62'; // Original color when enabled
                             changeEmailButton.style.display = 'inline';
                         }
-                        if (okButton) {
+                        if (okButton && okButton.checkVisibility()) {
+                            console.log('ein ok button wird angezeigt')
                             okButton.disabled = true;
                             okButton.style.display = 'none';
                             okButton.style.backgroundColor = '#ccd8e0'; // Disabled color
@@ -344,30 +354,37 @@
                         if (!isValid) {
                             emailHint.textContent = '{{ _("Bitte geben Sie eine gültige E-Mail-Adresse ein.", language) }}';
                             emailHint.style.color = 'red';
-                            if (changeEmailButton) {
+                            if (changeEmailButton && changeEmailButton.checkVisibility()) {
                                 changeEmailButton.disabled = true;
                                 changeEmailButton.style.backgroundColor = '#ccd8e0'; // Disabled color  
                             }
-                            if (okButton) {
-                            okButton.disabled = true;
-                            okButton.style.display = 'none';
+                            if (okButton && okButton.checkVisibility()) {
+                                okButton.disabled = true;
+                                okButton.style.display = 'none';
                             }
-                        } else {
-                            emailHint.textContent = ' ';
+                        } else { // wird das je aufgerufen?
+                            emailHint.textContent = '  ';
                             emailHint.style.color = '';
                         }
-                        if (changeEmailButton) {
-                            changeEmailButton.disabled = true;
-                            changeEmailButton.style.display = 'none';
-                            changeEmailButton.style.backgroundColor = '#ccd8e0'; // Disabled color
-                        }
-                        if (okButton) {
-                        okButton.disabled = false;
-                        okButton.style.display = 'inline';
-                        okButton.style.backgroundColor = '#6689a1'; // Original color when enabled
+
+                    }
+                });
+
+                 // Add event listener for "Enter" key
+                emailInput.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault(); // Prevent form submission
+                        var email = emailInput.value;
+                        var isValid = isValidEmail(email);
+                        var isChanged = email !== originalEmail;
+
+                        if (email && isValid && isChanged) {
+                            // Call the function to save the email address
+                            change_email('{{ digitalrechnung }}');
                         }
                     }
                 });
+
             });
         
             function isValidEmail(email) {
