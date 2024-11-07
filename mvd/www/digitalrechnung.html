@@ -144,13 +144,14 @@
                                     {% if hash_check == 'bestätigung' %}
                                     <div class="text-image text-image-mv rich-text  no-img">
                                         <h2>
-                                           {{ _("Sie haben sich entschieden Ihre Jahresrechnung in Zukunft digital zu erhalten. Besten Dank!", language) }}</h2>
+                                           {{ _("Geschafft!", language) }}</h2>
+                                           <p> {{ _("Ab 2025 senden wir Ihnen Ihre Rechnung digital zu an die E-Mail-Adresse:", language) }}<br> {{ email }}</p>
                                         <p>{{ _("Die Umstellung gilt ab nächstem Jahr. Bitte begleichen Sie den aktuellen Jahresbeitrag mit der Ihnen vorliegenden Rechnung.", language) }}</p>
                                         <p>{{ _("Danke, dass Sie helfen, Ressourcen zu schonen.", language) }}</p>
 
                                     </div>
                                     <div  class="text-image text-image-mv rich-text highlight no-img">
-                                        <p>{{ _("Haben Sie sich unabsichtlich angemeldet? Klicken Sie unten auf", language) }} <a href="#" onclick="opt_out('{{ digitalrechnung }}');">«{{ _("Abbrechen: Rechnung weiterhin per Post", language) }}»</a> {{ _("und sie bekommen Ihre Jahresrechnung weiterhin per Post zugeschickt.", language) }}</p>
+                                        <p>{{ _("Haben Sie sich unabsichtlich angemeldet? Klicken Sie unten auf", language) }} <a href="#" onclick="opt_out('{{ digitalrechnung }}');">«{{ _("Abbrechen: Rechnung weiterhin per Post", language) }}»</a> {{ _("und Sie bekommen Ihre Jahresrechnung weiterhin per Post zugeschickt.", language) }}</p>
                                     </div>
                                             
                                    
@@ -162,7 +163,7 @@
                                     {% endif %}
                                     {% if hash_check == 'add mail' %}
                                     <div class="text-image text-image-mv rich-text  no-img">
-                                        <p>{{ _("Sie möchten Ihre Rechnung in Zukunft digital erhalten.", language) }} {{ _("Wir haben leider keine E-Mail Adresse von Ihnen.", language) }}<br>{{ _("Für die Umstellung auf die digitale Rechnung erfassen Sie bitte unten Ihre E-Mail-Adresse.", language) }}</p>
+                                        <p>{{ _("Sie möchten Ihre Rechnung in Zukunft digital erhalten.", language) }} {{ _("Wir haben leider keine E-Mail-Adresse von Ihnen.", language) }}<br>{{ _("Für die Umstellung auf die digitale Rechnung erfassen Sie bitte unten Ihre E-Mail-Adresse.", language) }}</p>
                                         {%if language == 'fr' %}
                                         <p>En indiquant votre adresse e-mail, vous acceptez que nous l'utilisions pour la correspondance conformément aux  <a href="https://www.mieterverband.ch/dam/jcr:63a2ae49-4875-4cd3-b3b7-55158f8c1856/Statuten%202019%20f.pdf"  target="_blank">statuts de l'association</a> et à la <a href="https://www.mieterverband.ch/mv/mitgliedschaft-verband/datenschutz.html" target="_blank">déclaration de protection des données</a>.</p>
                                         {% else %}
@@ -375,9 +376,10 @@
                             }
 
                         }
-                        console.log('geändfert');
                     } else {
                         console.log('nicht geändert!!!!');
+                        emailHint.textContent = '  ';
+                        emailHint.style.color = '';
                         if (changeEmailButton && changeEmailButton.checkVisibility()) {
                             changeEmailButton.disabled = true;
                             changeEmailButton.style.display = 'none'; // Disabled color  
