@@ -249,6 +249,7 @@ def zahlungen_matchen(camt_import):
                         sinv_outstanding = sinv_lookup_data.get('outstanding_amount')
                         diff = sinv_outstanding - bereits_erfasste_zahlungen
                         row.allocated_amount = diff if diff > 0 else 0
+                    camt_ueberzahlung_update(camt_import)
                 
                 # see #1101
                 if pe.sektion_id != sinv_lookup_data.get('sektion'):
