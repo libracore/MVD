@@ -25,7 +25,7 @@ def get_qrr_reference(sales_invoice=None, fr=None, reference_raw='00 00000 00000
             new_customer = sinv.customer.replace("K-", "").rjust(8, "0")
             reference_raw += "{0} {1}".format(new_customer[:5], new_customer[5:8])
         if fake_sinv:
-            new_invoice_nr = re.sub("-[0-9]+", "", fake_sinv.rechnungs_jahresversand.replace("Jahresversand-", "")).rjust(10, "0")
+            new_invoice_nr = re.sub("-[0-9]+", "", fake_sinv.renaming_series.replace("RJ-", "")).rjust(10, "0")
         else:
             new_invoice_nr = re.sub("-[0-9]+", "", sales_invoice.replace("R-", "")).rjust(10, "0")
         reference_raw += "0{0} {1} {2}".format(new_invoice_nr[:1], new_invoice_nr[1:6], new_invoice_nr[6:10])

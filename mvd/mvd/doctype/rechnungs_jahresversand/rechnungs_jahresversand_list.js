@@ -7,6 +7,10 @@ frappe.listview_settings['Rechnungs Jahresversand'] = {
         if (doc.status == "Bereit zur Ausführung") {
             return [__("Bereit zur Ausführung"), "orange", "status,=," + "Bereit zur Ausführung"]
         }
+
+        if (doc.status == "Pausiert") {
+            return [__("Pausiert"), "blue", "status,=," + "Pausiert"]
+        }
         
         if (doc.status == "Rechnungsdaten in Arbeit") {
             return [__("Rechnungsdaten in Arbeit"), "blue", "status,=," + "Rechnungsdaten in Arbeit"]

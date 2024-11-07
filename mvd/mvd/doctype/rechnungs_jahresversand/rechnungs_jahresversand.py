@@ -13,6 +13,13 @@ class RechnungsJahresversand(Document):
     def validate(self):
         if not self.jahr:
             self.jahr = int(getdate(now()).strftime("%Y")) + 1
+        if not self.counter or self.counter == 0:
+            highest_counter = frappe.db.sql("""SELECT `counter` FROM `tabRechnungs Jahresversand` WHERE `sektion_id` = '{0}' ORDER BY `counter` DESC LIMIT 1""".format(self.sektion_id), as_dict=True)
+            if len(highest_counter) > 0:
+                self.counter = highest_counter[0].counter + 1
+            else:
+                self.counter = 1
+        
         self.title = 'Jahresversand-{sektion_id}-{jahr}'.format(sektion_id=self.sektion_id, jahr=self.jahr)
     
     def start_csv_and_invoices(self):
@@ -24,9 +31,19 @@ class RechnungsJahresversand(Document):
 
 def run_jahresversand_verbuchung():
     from mvd.mvd.doctype.rechnungs_jahresversand.utils import create_invoices_from_json
-    ready_to_run = frappe.db.sql("""SELECT `name` FROM `tabRechnungs Jahresversand` WHERE `status` = 'Vorgemerkt für Rechnungsverbuchung' AND `docstatus` = 1 ORDER BY `geplant_am` ASC""", as_dict=True)
-    if len(ready_to_run) > 0:
-        create_invoices_from_json(ready_to_run[0].name)
+    pausiert = frappe.db.sql("""SELECT `name` FROM `tabRechnungs Jahresversand` WHERE `status` = 'Pausiert' AND `docstatus` = 1 ORDER BY `geplant_am` ASC""", as_dict=True)
+    if len(pausiert) > 0:
+        args = {
+            'jahresversand': pausiert[0].name
+        }
+        enqueue("mvd.mvd.doctype.rechnungs_jahresversand.utils.create_invoices_from_json", queue='long', job_name='Erstellung Rechnungen {0}'.format(pausiert[0].name), timeout=23500, **args)
+    else:
+        ready_to_run = frappe.db.sql("""SELECT `name` FROM `tabRechnungs Jahresversand` WHERE `status` = 'Vorgemerkt für Rechnungsverbuchung' AND `docstatus` = 1 ORDER BY `geplant_am` ASC""", as_dict=True)
+        if len(ready_to_run) > 0:
+            args = {
+                'jahresversand': ready_to_run[0].name
+            }
+            enqueue("mvd.mvd.doctype.rechnungs_jahresversand.utils.create_invoices_from_json", queue='long', job_name='Erstellung Rechnungen {0}'.format(ready_to_run[0].name), timeout=23500, **args)
 
 
 @frappe.whitelist()

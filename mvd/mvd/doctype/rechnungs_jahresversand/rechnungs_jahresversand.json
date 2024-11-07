@@ -10,6 +10,7 @@
   "sektion_id",
   "jahr",
   "druckvorlage",
+  "anz_rechnungen",
   "cb_1",
   "status",
   "geplant_am",
@@ -30,7 +31,8 @@
   "region_spezifisch",
   "region",
   "section_rechnungsdaten",
-  "rechnungsdaten_json_link"
+  "rechnungsdaten_json_link",
+  "counter"
  ],
  "fields": [
   {
@@ -68,7 +70,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Bereit zur Ausf\u00fchrung\nRechnungsdaten in Arbeit\nCSV in Arbeit\nRechnungsdaten und CSV erstellt\nVorgemerkt f\u00fcr Rechnungsverbuchung\nRechnungsverbuchung in Arbeit\nAbgeschlossen\nFehlgeschlagen\nStorniert",
+   "options": "Bereit zur Ausf\u00fchrung\nRechnungsdaten in Arbeit\nCSV in Arbeit\nRechnungsdaten und CSV erstellt\nVorgemerkt f\u00fcr Rechnungsverbuchung\nRechnungsverbuchung in Arbeit\nPausiert\nAbgeschlossen\nFehlgeschlagen\nStorniert",
    "read_only": 1
   },
   {
@@ -195,10 +197,22 @@
    "label": "Rechnungsdaten JSON",
    "options": "RJV JSON",
    "read_only": 1
+  },
+  {
+   "fieldname": "counter",
+   "fieldtype": "Int",
+   "label": "Jahresversand Z\u00e4hler",
+   "read_only": 1
+  },
+  {
+   "fieldname": "anz_rechnungen",
+   "fieldtype": "Int",
+   "label": "Anzahl Rechnungen",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2024-10-02 11:39:00.677006",
+ "modified": "2024-11-01 14:15:56.736467",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Rechnungs Jahresversand",

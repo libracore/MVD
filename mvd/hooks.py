@@ -153,12 +153,12 @@ scheduler_events = {
         "mvd.mvd.utils.daily_jobs.ampel_neuberechnung",
         "mvd.mvd.utils.daily_jobs.regionen_zuteilung",
         "mvd.mvd.utils.daily_jobs.spenden_versand",
-        "mvd.mvd.utils.daily_jobs.rechnungs_jahresversand",
         "mvd.mvd.utils.daily_jobs.mahnlauf_ausschluss",
         "mvd.mvd.utils.daily_jobs.cleanup_beratungen",
         "mvd.mvd.utils.daily_jobs.mark_beratungen_as_s8",
         #"mvd.mvd.doctype.mitgliedschaft.kontakt_handling.initial_rename_contacts",
-        "mvd.mvd.doctype.postretouren_log.postretouren_log.start_post_retouren_process"
+        "mvd.mvd.doctype.postretouren_log.postretouren_log.start_post_retouren_process",
+        "mvd.mvd.utils.daily_jobs.rechnungs_jahresversand"
     ],
     "all": [
         "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue",
