@@ -144,13 +144,14 @@
                                     {% if hash_check == 'bestätigung' %}
                                     <div class="text-image text-image-mv rich-text  no-img">
                                         <h2>
-                                           {{ _("Sie haben sich entschieden Ihre Jahresrechnung in Zukunft digital zu erhalten. Besten Dank!", language) }}</h2>
+                                           {{ _("Geschafft!", language) }}</h2>
+                                           <p> {{ _("Ab 2025 senden wir Ihnen Ihre Rechnung digital zu an die E-Mail-Adresse:", language) }}<br> {{ email }}</p>
                                         <p>{{ _("Die Umstellung gilt ab nächstem Jahr. Bitte begleichen Sie den aktuellen Jahresbeitrag mit der Ihnen vorliegenden Rechnung.", language) }}</p>
                                         <p>{{ _("Danke, dass Sie helfen, Ressourcen zu schonen.", language) }}</p>
 
                                     </div>
                                     <div  class="text-image text-image-mv rich-text highlight no-img">
-                                        <p>{{ _("Haben Sie sich unabsichtlich angemeldet? Klicken Sie unten auf", language) }} <a href="#" onclick="opt_out('{{ digitalrechnung }}');">«{{ _("Abbrechen: Rechnung weiterhin per Post", language) }}»</a> {{ _("und sie bekommen Ihre Jahresrechnung weiterhin per Post zugeschickt.", language) }}</p>
+                                        <p>{{ _("Haben Sie sich unabsichtlich angemeldet? Klicken Sie unten auf", language) }} <a href="#" onclick="opt_out('{{ digitalrechnung }}');">«{{ _("Abbrechen: Rechnung weiterhin per Post", language) }}»</a> {{ _("und Sie bekommen Ihre Jahresrechnung weiterhin per Post zugeschickt.", language) }}</p>
                                     </div>
                                             
                                    
@@ -162,7 +163,7 @@
                                     {% endif %}
                                     {% if hash_check == 'add mail' %}
                                     <div class="text-image text-image-mv rich-text  no-img">
-                                        <p>{{ _("Sie möchten Ihre Rechnung in Zukunft digital erhalten.", language) }} {{ _("Wir haben leider keine E-Mail Adresse von Ihnen.", language) }}<br>{{ _("Für die Umstellung auf die digitale Rechnung erfassen Sie bitte unten Ihre E-Mail-Adresse.", language) }}</p>
+                                        <p>{{ _("Sie möchten Ihre Rechnung in Zukunft digital erhalten.", language) }} {{ _("Wir haben leider keine E-Mail-Adresse von Ihnen.", language) }}<br>{{ _("Für die Umstellung auf die digitale Rechnung erfassen Sie bitte unten Ihre E-Mail-Adresse.", language) }}</p>
                                         {%if language == 'fr' %}
                                         <p>En indiquant votre adresse e-mail, vous acceptez que nous l'utilisions pour la correspondance conformément aux  <a href="https://www.mieterverband.ch/dam/jcr:63a2ae49-4875-4cd3-b3b7-55158f8c1856/Statuten%202019%20f.pdf"  target="_blank">statuts de l'association</a> et à la <a href="https://www.mieterverband.ch/mv/mitgliedschaft-verband/datenschutz.html" target="_blank">déclaration de protection des données</a>.</p>
                                         {% else %}
@@ -222,28 +223,28 @@
                                                 {% if hash_check == 'bestätigung' %}
                                                 <div class="button-wrapper">
                                                     <input type="button" style="background-color: #6689a1;" value="{{ _("Abbrechen: Rechnung weiterhin per Post", language) }}" onclick="opt_out('{{ digitalrechnung }}');">
+                                                    <input type="button" id="closeButton" value="Schliessen" onclick="backhome();">
                                                     <input type="button" id="changeEmailButton" style="background-color: #003a62; ;display:none;" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');" disabled>
-                                                    <input type="button" id="okButton" value="OK"  onclick="location.reload();">
-
                                                 </div>
                                                 {% endif %}
                                                 {% if hash_check == 'add mail' %}
                                                 <div class="button-wrapper">
+                                                    <input type="button" id="closeButton" value="Abbrechen" onclick="backhome();">
                                                     <input type="button" id="addEmailButton" style="background-color: #6689a1;" value="{{ _("E-Mail-Adresse hinzufügen", language) }}" onclick="change_email('{{ digitalrechnung }}');" disabled>
                                                 </div>
                                                 {% endif %}
                                                 {% if hash_check == 'show opt out' %}
                                                 <div class="button-wrapper">
                                                     <input type="button" style="background-color: #6689a1;" value="{{ _("Abbrechen: Rechnung weiterhin per Post", language) }}" onclick="opt_out('{{ digitalrechnung }}');">
+                                                    <input type="button" id="closeButton" value="Schliessen" onclick="backhome();">
                                                     <input type="button" id="changeEmailButton" style="background-color: #6689a1;display:none;" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');" disabled>
-                                                    <!--<input type="button" id="okButton" style="display: inline;" value="OK"  onclick="location.reload();">-->
-                                                    <input type="button" id="okButton" value="OK"  onclick="alert('{{ _("Ihr Wunsch (digitale Rechnung) ist festgehalten.", language) }}')">
                                                 </div>
                                                 {% endif %}
                                                 {% if hash_check == 'show opt out bestätigung' %}
                                                 <div class="button-wrapper">
                                                     <input type="button"  style="background-color: #6689a1;"  value="{{ _("Digitale Rechnung aktivieren", language) }}" onclick="location.reload();">
-                                                    <input type="button" value="OK"  onclick="alert('{{ _("Ihr Wunsch (Papierrechnung) ist festgehalten.", language) }}')">
+                                                    <input type="button" id="closeButton" value="Schliessen" onclick="backhome();">
+                                                    <!--<input type="button" value="OK"  onclick="alert('{{ _("Ihr Wunsch (Papierrechnung) ist festgehalten.", language) }}')">-->
                                                 </div>
                                                 {% endif %}
                                                 {% endif %}
@@ -318,56 +319,78 @@
         {% endblock %}
         <!-- csrf_token -->
         <script>
+            function backhome() {
+                window.location.href = "https://www.mieterverband.ch";
+            }
             document.addEventListener('DOMContentLoaded', function() {
                 var emailInput = document.getElementById('email');
                 var emailHint = document.getElementById('emailHint');
                 var changeEmailButton = document.getElementById('changeEmailButton');
-                var okButton = document.getElementById('okButton');
                 var addEmailButton = document.getElementById('addEmailButton');
+                var closeButton = document.getElementById('closeButton');
                 var originalEmail = emailInput.value;
         
                 emailInput.addEventListener('input', function() {
                     var email = emailInput.value;
                     var isValid = isValidEmail(email);
-                    var isChanged = email !== originalEmail;
-        
-                    if (email && isValid && isChanged) {
-                        emailHint.textContent = ' ';
-                        emailHint.style.color = '';
-                        if (changeEmailButton) {
-                            changeEmailButton.disabled = false;
-                            changeEmailButton.style.backgroundColor = '#003A62'; // Original color when enabled
-                            changeEmailButton.style.display = 'inline';
-                        }
-                        if (okButton && okButton.checkVisibility()) {
-                            console.log('ein ok button wird angezeigt')
-                            okButton.disabled = true;
-                            okButton.style.display = 'none';
-                            okButton.style.backgroundColor = '#ccd8e0'; // Disabled color
-                            }
-                        if (addEmailButton) {
-                            addEmailButton.style.backgroundColor =  '#003A62';
-                            addEmailButton.disabled = false;
-                        }
+                    var isChanged = (email !== originalEmail && (email !== ''));
+                    
+                    //if (isChanged) {
+                    //    if (closeButton) {
+                    //        closeButton.disabled = true;
+                    //        closeButton.style.backgroundColor = '#6689a1    '; // Disabled color
+                    //    }
+                    //}
 
-                    } else {
-                        if (!isValid) {
-                            emailHint.textContent = '{{ _("Bitte geben Sie eine gültige E-Mail-Adresse ein.", language) }}';
-                            emailHint.style.color = 'red';
-                            if (changeEmailButton && changeEmailButton.checkVisibility()) {
-                                changeEmailButton.disabled = true;
-                                changeEmailButton.style.backgroundColor = '#ccd8e0'; // Disabled color  
-                            }
-                            if (okButton && okButton.checkVisibility()) {
-                                okButton.disabled = true;
-                                okButton.style.display = 'none';
-                            }
-                        } else { // wird das je aufgerufen?
-                            emailHint.textContent = '  ';
+                    if (isChanged) {
+                        if (email && isValid) {
+                            emailHint.textContent = ' ';
                             emailHint.style.color = '';
-                        }
+                            if (changeEmailButton) {
+                                changeEmailButton.disabled = false;
+                                changeEmailButton.style.backgroundColor = '#003A62'; // Original color when enabled
+                                changeEmailButton.style.display = 'inline';
+                                closeButton.style.backgroundColor = '#6689a1';
+                            }
+                            if (addEmailButton) {
+                                addEmailButton.style.backgroundColor =  '#003A62';
+                                addEmailButton.disabled = false;
+                            }
 
+                        } else {
+                            if (!isValid) {
+                                emailHint.textContent = '{{ _("Bitte geben Sie eine gültige E-Mail-Adresse ein.", language) }}';
+                                emailHint.style.color = 'red';
+                                if (changeEmailButton && changeEmailButton.checkVisibility()) {
+                                    changeEmailButton.disabled = true;
+                                    changeEmailButton.style.backgroundColor = '#ccd8e0'; // Disabled color  
+                                    closeButton.style.backgroundColor = '#6689a1';  //somewhat Disabled color
+                                }
+                                if (addEmailButton && addEmailButton.checkVisibility()) {
+                                    addEmailButton.disabled = true;
+                                    addEmailButton.style.backgroundColor = '#ccd8e0'; // Disabled color  
+                                }
+                            } else { // wird das je aufgerufen?
+                                emailHint.textContent = '  ';
+                                emailHint.style.color = '';
+                            }
+
+                        }
+                    } else {
+                        console.log('nicht geändert!!!!');
+                        emailHint.textContent = '  ';
+                        emailHint.style.color = '';
+                        if (changeEmailButton && changeEmailButton.checkVisibility()) {
+                            changeEmailButton.disabled = true;
+                            changeEmailButton.style.display = 'none'; // Disabled color  
+                            closeButton.style.backgroundColor = '#003A62'; 
+
+                        if (addEmailButton && addEmailButton.checkVisibility()) {
+                            addEmailButton.disabled = true;
+                            addEmailButton.style.backgroundColor = '#ccd8e0'; // Disabled color  
+                        }
                     }
+                }
                 });
 
                  // Add event listener for "Enter" key
