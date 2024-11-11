@@ -837,7 +837,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
     default_terminbest_hinweis_de = frappe.db.get_value("Sektion", sektion, "default_terminbest_hinweis_de")
     default_terminbest_hinweis_fr = frappe.db.get_value("Sektion", sektion, "default_terminbest_hinweis_fr")
     #mail_txt = ''
-    mail_txt = '<div>{0}<br></div>'.format(anrede)
+    mail_txt = '<div>{0}<br><br></div>'.format(anrede)
     subject = ''
     
     for entry in von:
@@ -851,7 +851,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
             if art == 'telefonisch':
                 mail_txt += """
                     <div>Nous avons réservé pour vous le rendez-vous téléphonique suivant:
-                        <br>{wochentag}, {datum} à {von} heures
+                        <br><b>{wochentag}, {datum} à {von} heures</b>
                         <br>Notre consultant* {berater_in} vous appellera au numéro suivant:
                         <br>{telefonnummer}
                         <br><br>{default_terminbest_hinweis}
@@ -863,14 +863,15 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
             else:
                 mail_txt += """
                     <div>Nous avons réservé pour vous le rendez-vous suivant:
-                        <br>{wochentag}, {datum} à {von} heures
-                        <br>Notre consultant* {berater_in} vous attend à
-                        <br>{ort}, {ort_info}.
+                        <br><b>{wochentag}, {datum} à {von} heures</b>
+                        <br>Notre consultant* {berater_in} vous attend à {ort} :
+                        <br>{ort_info}
                         <br><br>{default_terminbest_hinweis}
                     </div>
                 """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
-                        ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""), \
+                        ort_info="{0}".format(ort_info) if ort_info else '', \
+                        ort=ort.replace("({0})".format(sektion), "").strip(), \
                         berater_in=berater_in_name, \
                         default_terminbest_hinweis = default_terminbest_hinweis_fr.replace('\r','<br>').replace('\n','<br>'))
         else:
@@ -880,9 +881,8 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
             # mail_txt += '<p>Guten Tag</p>'
             if art == 'telefonisch':
                 mail_txt += """
-                    <div>Wir haben für Sie folgenden Termin reserviert:
-                        <br>Telefonische Beratung
-                        <br>{wochentag}, {datum} um {von} Uhr
+                    <div>Wir haben für Sie folgenden <b>Termin für eine telefonische Beratung</b> reserviert:
+                        <br><b>{wochentag}, {datum} um {von} Uhr</b>
                         <br>Unsere Berater*in {berater_in} wird Sie unter dieser Nummer anrufen:
                         <br>{telefonnummer}
                         <br><br>{default_terminbest_hinweis}
@@ -893,16 +893,16 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
                         default_terminbest_hinweis = default_terminbest_hinweis_de.replace('\r','<br>').replace('\n','<br>') if default_terminbest_hinweis_de else '')
             else:
                 mail_txt += """
-                    <div>Wir haben für Sie folgenden Termin reserviert:
-                        <br>Persönliche Beratung
-                        <br>{wochentag}, {datum} um {von} Uhr
-                        <br>Unser*e Berater*in {berater_in} erwartet Sie in:
-                        <br>{ort}, {ort_info}.
+                    <div>Wir haben für Sie folgenden <b>Termin für eine persönliche Beratung</b> reserviert:
+                        <br><b>{wochentag}, {datum} um {von} Uhr</b>
+                        <br>Unser*e Berater*in {berater_in} erwartet Sie in {ort}:
+                        <br>{ort_info}
                         <br><br>{default_terminbest_hinweis}
                     </div>
                 """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
-                        ort_info="<br>{0}".format(ort_info) if ort_info else '', ort=ort.replace("({0})".format(sektion), ""), \
+                        ort_info="{0}".format(ort_info).replace(', ','<br>') if ort_info else '', \
+                        ort=ort.replace("({0})".format(sektion), "").strip(), \
                         berater_in=berater_in_name, \
                         default_terminbest_hinweis = default_terminbest_hinweis_de.replace('\r','<br>').replace('\n','<br>'))
         index += 1
