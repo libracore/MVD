@@ -223,7 +223,7 @@
                                                 {% if hash_check == 'bestätigung' %}
                                                 <div class="button-wrapper">
                                                     <input type="button" style="background-color: #6689a1;" value="{{ _("Abbrechen: Rechnung weiterhin per Post", language) }}" onclick="opt_out('{{ digitalrechnung }}');">
-                                                    <input type="button" id="closeButton" value="Schliessen" onclick="backhome();">
+                                                    <input type="button" id="closeButton" value="{{ _("Schliessen", language) }}" onclick="backhome();">
                                                     <input type="button" id="changeEmailButton" style="background-color: #003a62; ;display:none;" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');" disabled>
                                                 </div>
                                                 {% endif %}
@@ -236,14 +236,14 @@
                                                 {% if hash_check == 'show opt out' %}
                                                 <div class="button-wrapper">
                                                     <input type="button" style="background-color: #6689a1;" value="{{ _("Abbrechen: Rechnung weiterhin per Post", language) }}" onclick="opt_out('{{ digitalrechnung }}');">
-                                                    <input type="button" id="closeButton" value="Schliessen" onclick="backhome();">
+                                                    <input type="button" id="closeButton" value="{{ _("Schliessen", language) }}" onclick="backhome();">
                                                     <input type="button" id="changeEmailButton" style="background-color: #6689a1;display:none;" value="E-Mail-Adresse anpassen" onclick="change_email('{{ digitalrechnung }}');" disabled>
                                                 </div>
                                                 {% endif %}
                                                 {% if hash_check == 'show opt out bestätigung' %}
                                                 <div class="button-wrapper">
                                                     <input type="button"  style="background-color: #6689a1;"  value="{{ _("Digitale Rechnung aktivieren", language) }}" onclick="location.reload();">
-                                                    <input type="button" id="closeButton" value="Schliessen" onclick="backhome();">
+                                                    <input type="button" id="closeButton" value="{{ _("Schliessen", language) }}" onclick="backhome();">
                                                     <!--<input type="button" value="OK"  onclick="alert('{{ _("Ihr Wunsch (Papierrechnung) ist festgehalten.", language) }}')">-->
                                                 </div>
                                                 {% endif %}
