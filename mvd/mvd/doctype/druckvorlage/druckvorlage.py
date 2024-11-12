@@ -320,6 +320,9 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
             key_words.append({
                 'key_word': '%%ARTIKELTABELLE%%', 'value': get_item_table(sinv)
             })
+            key_words.append({
+                'key_word': '%%WEBSHOPDATUM%%', 'value': get_webshop_datum(sinv)
+            })
         if fr:
             fr = frappe.get_doc("Fakultative Rechnung", fr)
             amount = fr.betrag
@@ -431,3 +434,10 @@ def get_item_table(sinv):
                 </table>"""
     
     return table
+
+def get_webshop_datum(sinv):
+    webshop_orders = frappe.db.sql("""SELECT `creation` FROM `tabWebshop Order` WHERE `sinv` = '{0}' ORDER BY `creation` DESC""".format(sinv.name), as_dict=True)
+    if len(webshop_orders) > 0:
+        return frappe.utils.get_datetime(webshop_orders[0].creation).strftime('%d.%m.%Y')
+    else:
+        return ''
