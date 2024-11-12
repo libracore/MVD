@@ -864,7 +864,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
                 mail_txt += """
                     <div>Nous avons réservé pour vous le rendez-vous suivant:
                         <br><b>{wochentag}, {datum} à {von} heures</b>
-                        <br>Notre consultant* {berater_in} vous attend à {ort} :
+                        <br>Notre consultant* {berater_in} vous attend à <b>{ort}</b> :
                         <br>{ort_info}
                         <br><br>{default_terminbest_hinweis}
                     </div>
@@ -895,7 +895,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
                 mail_txt += """
                     <div>Wir haben für Sie folgenden <b>Termin für eine persönliche Beratung</b> reserviert:
                         <br><b>{wochentag}, {datum} um {von} Uhr</b>
-                        <br>Unser*e Berater*in {berater_in} erwartet Sie in {ort}:
+                        <br>Unser*e Berater*in {berater_in} erwartet Sie in <b>{ort}</b>:
                         <br>{ort_info}
                         <br><br>{default_terminbest_hinweis}
                     </div>
