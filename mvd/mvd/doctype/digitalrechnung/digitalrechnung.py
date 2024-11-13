@@ -86,4 +86,41 @@ def initial_setup():
             submit_count = 1
     frappe.db.commit()
 
+def reset():
+    digitalrechnungen = frappe.db.sql("""SELECT * FROM `tabDigitalrechnung`""", as_dict=True)
+    loop = 1
+    total = len(digitalrechnungen)
+    submit_count = 0
+    for digitalrechnung in digitalrechnungen:
+        if digitalrechnung.mitglied_id:
+            digitalrechnung.email_changed = 0
+            digitalrechnung.opt_in = None
+            digitalrechnung.opt_out = None
+            mitgliedschaft = frappe.db.sql("""
+                SELECT
+                    `sektion_id`,
+                    `e_mail_1` AS `mitgl_email`,
+                    `abweichende_rechnungsadresse` AS `abw_rg_adr`,
+                    `unabhaengiger_debitor` AS `unabh_deb`,
+                    `rg_e_mail` AS `rg_email`,
+                    `language`
+                FROM `tabMitgliedschaft`
+                WHERE `name` = '{0}'
+            """.format(digitalrechnung.mitglied_id), as_dict=True)
+            if len(mitgliedschaft) > 0:
+                m = mitgliedschaft[0]
+                digitalrechnung.email = m.mitgl_email
+                digitalrechnung.language = m.language
+                if cint(m.abw_rg_adr) == 1 and cint(m.unabh_deb) == 1:
+                    digitalrechnung.email = None
+                    if m.rg_email:
+                        digitalrechnung.email = m.rg_email
+            digitalrechnung.save()
+            submit_count += 1
+            if submit_count == 100:
+                frappe.db.commit()
+                submit_count = 0
+            print("{0} von {1}".format(loop, total))
+            loop += 1
+    frappe.db.commit()
 
