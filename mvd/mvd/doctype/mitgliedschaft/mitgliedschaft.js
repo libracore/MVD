@@ -35,6 +35,15 @@ frappe.ui.form.on('Mitgliedschaft', {
                 erstellung_faktura_kunde(frm);
             }).addClass("btn-warning")
         }
+
+        if (frappe.user.has_role("System Manager")) {
+            frm.add_custom_button(__("SP > ERPNext"), function() {
+                frappe.set_route("List", "Service Plattform Log", {'mv_mitgliedschaft': cur_frm.doc.name});
+            }, __("Öffne SP Queue"))
+            frm.add_custom_button(__("ERPNext > SP"), function() {
+                frappe.set_route("List", "Service Platform Queue", {'mv_mitgliedschaft': cur_frm.doc.name});
+            }, __("Öffne SP Queue"))
+        }
         
        if (!frm.doc.__islocal&&cur_frm.doc.status_c != 'Inaktiv') {
             if (((cur_frm.doc.status_c != 'Inaktiv')&&(frappe.user.has_role("System Manager")))||(['Online-Anmeldung', 'Anmeldung', 'Interessent*in'].includes(cur_frm.doc.status_c))) {
@@ -47,12 +56,6 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frm.add_custom_button(__("Status Historie ergänzen"), function() {
                     status_historie_ergaenzen(frm);
                 }).addClass("btn-warning")
-                frm.add_custom_button(__("SP > ERPNext"), function() {
-                    frappe.set_route("List", "Service Plattform Log", {'mv_mitgliedschaft': cur_frm.doc.name});
-                }, __("Öffne SP Queue"))
-                frm.add_custom_button(__("ERPNext > SP"), function() {
-                    frappe.set_route("List", "Service Platform Queue", {'mv_mitgliedschaft': cur_frm.doc.name});
-                }, __("Öffne SP Queue"))
             }
             
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
@@ -587,6 +590,10 @@ frappe.ui.form.on('Mitgliedschaft', {
         } else {
             cur_frm.set_df_property('region', 'read_only', 1);
         }
+    },
+    digitalrechnung_button: function(frm) {
+        frappe.route_options = {'mitglied_id' : cur_frm.doc.name};
+        frappe.set_route("List", "Digitalrechnung");
     }
 });
 
