@@ -883,7 +883,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
                 mail_txt += """
                     <div>Wir haben für Sie folgenden <b>Termin für eine telefonische Beratung</b> reserviert:
                         <br><b>{wochentag}, {datum} um {von} Uhr</b>
-                        <br>Unsere Berater*in {berater_in} wird Sie unter dieser Nummer anrufen:
+                        <br>Unser*e Berater*in {berater_in} wird Sie unter dieser Nummer anrufen:
                         <br>{telefonnummer}
                         <br><br>{default_terminbest_hinweis}
                     </div>
