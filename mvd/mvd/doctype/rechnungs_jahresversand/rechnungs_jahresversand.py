@@ -30,7 +30,6 @@ class RechnungsJahresversand(Document):
         return
 
 def run_jahresversand_verbuchung():
-    from mvd.mvd.doctype.rechnungs_jahresversand.utils import create_invoices_from_json
     pausiert = frappe.db.sql("""SELECT `name` FROM `tabRechnungs Jahresversand` WHERE `status` = 'Pausiert' AND `docstatus` = 1 ORDER BY `geplant_am` ASC""", as_dict=True)
     if len(pausiert) > 0:
         args = {
