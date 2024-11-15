@@ -79,7 +79,19 @@
   "default_terminbestaetigung_email_template",
   "hinweis_mietzinsrechner",
   "default_terminbest_hinweis_de",
-  "default_terminbest_hinweis_fr"
+  "default_terminbest_hinweis_fr",
+  "section_mzr",
+  "mzr_email",
+  "mzr_strasse",
+  "mzr_beratung",
+  "column_break_78",
+  "mzr_website",
+  "mzr_plz",
+  "mzr_neutral",
+  "column_break_83",
+  "mzr_telefon",
+  "mzr_ort",
+  "mzr_unsure_special"
  ],
  "fields": [
   {
@@ -521,9 +533,71 @@
    "fieldname": "default_terminbest_hinweis_fr",
    "fieldtype": "Text",
    "label": "Default E-Mail Terminbest\u00e4tigung Hinweis (fr)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_mzr",
+   "fieldtype": "Section Break",
+   "label": "Mietzinsrechner (MZR)"
+  },
+  {
+   "fieldname": "mzr_email",
+   "fieldtype": "Data",
+   "label": "MZR E-Mail"
+  },
+  {
+   "fieldname": "mzr_strasse",
+   "fieldtype": "Data",
+   "label": "MZR Strasse"
+  },
+  {
+   "fieldname": "mzr_plz",
+   "fieldtype": "Data",
+   "label": "MZR PLZ"
+  },
+  {
+   "fieldname": "mzr_ort",
+   "fieldtype": "Data",
+   "label": "MZR Ort"
+  },
+  {
+   "fieldname": "mzr_telefon",
+   "fieldtype": "Data",
+   "label": "MZR Telefon"
+  },
+  {
+   "fieldname": "mzr_website",
+   "fieldtype": "Data",
+   "label": "MZR Website"
+  },
+  {
+   "default": "0",
+   "fieldname": "mzr_beratung",
+   "fieldtype": "Check",
+   "label": "MZR Beratung"
+  },
+  {
+   "default": "0",
+   "fieldname": "mzr_neutral",
+   "fieldtype": "Check",
+   "label": "MZR Neutral"
+  },
+  {
+   "default": "0",
+   "fieldname": "mzr_unsure_special",
+   "fieldtype": "Check",
+   "label": "MZR Alter unsicher speziell"
+  },
+  {
+   "fieldname": "column_break_78",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_83",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2024-06-21 10:26:54.940773",
+ "modified": "2024-11-15 10:50:46.821359",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
