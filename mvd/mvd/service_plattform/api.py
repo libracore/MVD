@@ -419,6 +419,12 @@ def get_mitglied_from_mail(**api_request):
                                         FROM `tabMitgliedschaft`
                                         WHERE `{0}` = '{1}'
                                         AND `status_c` != 'Inaktiv'
+                                        ORDER BY
+                                        CASE
+                                            WHEN `status_c` = 'Regulär' THEN 1
+                                            ELSE 2
+                                        END,
+                                        `status_c`
                                         """.format(email_field, api_request['Emailadresse']), as_dict=True)
         if len(mitgliedschaften) >= 1:
             mitgl_list = []
