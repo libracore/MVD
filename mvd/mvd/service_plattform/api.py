@@ -422,7 +422,11 @@ def get_mitglied_from_mail(**api_request):
                                         ORDER BY
                                         CASE
                                             WHEN `status_c` = 'Regulär' THEN 1
-                                            ELSE 2
+                                            WHEN `status_c` = 'Online-Beitritt' THEN 2
+                                            WHEN `status_c` = 'Zuzug' THEN 3
+                                            WHEN `status_c` = 'Online-Mutation' THEN 4
+                                            WHEN `status_c` = 'Online-Kündigung' THEN 5
+                                            ELSE 6
                                         END,
                                         `status_c`
                                         """.format(email_field, api_request['Emailadresse']), as_dict=True)
