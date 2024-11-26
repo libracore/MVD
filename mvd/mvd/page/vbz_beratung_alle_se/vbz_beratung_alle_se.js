@@ -38,7 +38,24 @@ frappe.vbz_beratung_alle_se = {
     },
     add_click_handlers: function(open_datas) {
         //~ frappe.vbz_beratung_alle_se.remove_click_handlers();
-        
+
+        // Define the function to hide elements based on the section
+        function hideElementsBasedOnSection() {
+            let ausgeblendete_elemente = {'MVSH': ['s2','a1','r7','r8','p4']};
+            let sektion = frappe.boot.default_sektion;
+
+            if (sektion in ausgeblendete_elemente) {
+                ausgeblendete_elemente[sektion].forEach(element => {
+                    let elementId = `${element}_as`;
+                    document.getElementById(elementId).style.display = 'none';
+                    console.log(`Element ${elementId} hidden`);
+                });
+            }
+        }
+
+        // Call the function where needed, for example, in the add_views function
+        hideElementsBasedOnSection();
+                
         $("#s_as").click(function(){
             frappe.route_options = {"status": 'Eingang'}
             frappe.set_route("List", "Beratung", "List");
