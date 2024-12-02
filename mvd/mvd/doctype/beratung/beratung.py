@@ -853,7 +853,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
                     <div>Nous avons réservé pour vous le rendez-vous téléphonique suivant:
                         <br><b>{wochentag}, {datum} à {von} heures</b>
                         <br>Notre consultant* {berater_in} vous appellera au numéro suivant:
-                        <br>{telefonnummer}
+                        <br><b>{telefonnummer}</b>
                         <br><br>{default_terminbest_hinweis}
                     </div>
                 """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
@@ -884,7 +884,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
                     <div>Wir haben für Sie folgenden <b>Termin für eine telefonische Beratung</b> reserviert:
                         <br><b>{wochentag}, {datum} um {von} Uhr</b>
                         <br>Unser*e Berater*in {berater_in} wird Sie unter dieser Nummer anrufen:
-                        <br>{telefonnummer}
+                        <br><b>{telefonnummer}</b>
                         <br><br>{default_terminbest_hinweis}
                     </div>
                 """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
