@@ -71,6 +71,13 @@ class Digitalrechnung(Document):
         self.set_opt_in()
 
 def digitalrechnung_mapper(mitglied):
+    def check_if_latest(mitglied):
+        latest_mitglied = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `mitglied_nr` = '{0}' ORDER BY `creation` DESC""".format(mitglied.mitglied_nr), as_dict=True)
+        if latest_mitglied[0].name == mitglied.name:
+            return True
+        else:
+            return False
+    
     def check_existing(hash=None, mitglied_nr=None):
         if hash:
             existing_digitalrechnung = frappe.db.sql("""SELECT `name` FROM `tabDigitalrechnung` WHERE `hash` = '{0}'""".format(hash), as_dict=True)
@@ -121,18 +128,19 @@ def digitalrechnung_mapper(mitglied):
             dr_doc.set_opt_in()
             dr_doc.save(ignore_permissions=True)
     
-    if mitglied.digitalrechnung_hash:
-        digitalrechnung = check_existing(hash=mitglied.digitalrechnung_hash)
-        if digitalrechnung:
-            update_digitalrechnung(digitalrechnung, mitglied)
+    if check_if_latest(mitglied):
+        if mitglied.digitalrechnung_hash:
+            digitalrechnung = check_existing(hash=mitglied.digitalrechnung_hash)
+            if digitalrechnung:
+                update_digitalrechnung(digitalrechnung, mitglied)
+            else:
+                create_digitalrechnung(mitglied)
         else:
-            create_digitalrechnung(mitglied)
-    else:
-        digitalrechnung = check_existing(mitglied_nr=mitglied.mitglied_nr)
-        if digitalrechnung:
-            update_digitalrechnung(digitalrechnung, mitglied)
-        else:
-            create_digitalrechnung(mitglied)
+            digitalrechnung = check_existing(mitglied_nr=mitglied.mitglied_nr)
+            if digitalrechnung:
+                update_digitalrechnung(digitalrechnung, mitglied)
+            else:
+                create_digitalrechnung(mitglied)
 
 def create_mitglied_change_log(mitglied, txt):
     comment = frappe.get_doc({
@@ -225,4 +233,75 @@ def reset():
             print("{0} von {1}".format(loop, total))
             loop += 1
     frappe.db.commit()
+
+def go_life_reset():
+    def check_if_latest(mitglied):
+        latest_mitglied = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `mitglied_nr` = '{0}' ORDER BY `creation` DESC""".format(mitglied.mitglied_nr), as_dict=True)
+        if latest_mitglied[0].name == mitglied.mitglied_id:
+            return True
+        else:
+            return False
+    
+    print("Create Digitalrechnungen")
+    mitgliedschaften = frappe.db.sql("""
+        SELECT
+            `name` AS `mitglied_id`,
+            `mitglied_nr`,
+            `sektion_id`,
+            `e_mail_1` AS `mitgl_email`,
+            `abweichende_rechnungsadresse` AS `abw_rg_adr`,
+            `unabhaengiger_debitor` AS `unabh_deb`,
+            `rg_e_mail` AS `rg_email`,
+            `digitalrechnung_hash`,
+            `language`
+        FROM `tabMitgliedschaft`
+        WHERE `status_c` NOT IN ('Inaktiv', 'Anmeldung', 'Online-Anmeldung', 'Gestorben', 'Wegzug', 'Ausschluss', 'Interessent*in')
+        LIMIT 10
+    """, as_dict=True)
+
+    total = len(mitgliedschaften)
+    loop = 1
+    submit_count = 1
+
+    for mitgliedschaft in mitgliedschaften:
+        print("Create: {0} von {1}".format(loop, total))
+        if check_if_latest(mitgliedschaft):
+            if not mitgliedschaft.digitalrechnung_hash:
+                new_digitalrechnung = frappe.get_doc({
+                    'doctype': "Digitalrechnung",
+                    'mitglied_nr': mitgliedschaft.mitglied_nr,
+                    'mitglied_id': mitgliedschaft.mitglied_id,
+                    'sektion_id': mitgliedschaft.sektion_id,
+                    'email': mitgliedschaft.mitgl_email,
+                    'language': mitgliedschaft.language
+                })
+
+                if cint(mitgliedschaft.abw_rg_adr) == 1 and cint(mitgliedschaft.unabh_deb) == 1:
+                    new_digitalrechnung.email = None
+                    if mitgliedschaft.rg_email:
+                        new_digitalrechnung.email = mitgliedschaft.rg_email
+                
+                new_digitalrechnung.insert()
+        else:
+            print("Skip, not latest")
+        
+        loop += 1
+        submit_count += 1
+        if submit_count == 100:
+            frappe.db.commit()
+            submit_count = 1
+    frappe.db.commit()
+
+    print("Check Digitalrechnungen")
+    digitalrechnungen = frappe.db.sql("""SELECT `name`, `mitglied_nr`, `mitglied_id` FROM `tabDigitalrechnung`""", as_dict=True)
+    loop = 1
+    total = len(digitalrechnungen)
+    for digitalrechnung in digitalrechnungen:
+        print("Check {0} von {1}".format(loop, total))
+        latest_mitglied = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `mitglied_nr` = '{0}' ORDER BY `creation` DESC""".format(digitalrechnung.mitglied_nr), as_dict=True)
+        if latest_mitglied[0].name != digitalrechnung.mitglied_id:
+            frappe.db.set_value("Digitalrechnung", digitalrechnung.name, 'mitglied_id', latest_mitglied.name)
+            print("Updated {0}".format(loop))
+            frappe.db.commit()
+        loop += 1
 
