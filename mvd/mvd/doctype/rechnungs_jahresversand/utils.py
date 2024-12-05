@@ -335,7 +335,7 @@ def create_csv_from_json(jahresversand):
                 row_data = []
                 pseudo_zeile = False
                 
-                if mitgliedschaft.unabhaengiger_debitor and mitgliedschaft.abweichende_rechnungsadresse:
+                if cint(mitgliedschaft.unabhaengiger_debitor) == 1 and cint(mitgliedschaft.abweichende_rechnungsadresse) == 1:
                     # fremdzahler
                     if mitgliedschaft.rg_kundentyp == 'Unternehmen':
                         row_data.append(mitgliedschaft.rg_firma or '')
@@ -361,21 +361,23 @@ def create_csv_from_json(jahresversand):
                     row_data.append(mitgliedschaft.rg_briefanrede or '')
                     row_data.append(mitgliedschaft.vorname_1 or '')
                     row_data.append(mitgliedschaft.nachname_1 or '')
-                    if mitgliedschaft.hat_solidarmitglied:
+
+                    if cint(mitgliedschaft.hat_solidarmitglied) == 1:
                         row_data.append(mitgliedschaft.vorname_2 or '')
                         row_data.append(mitgliedschaft.nachname_2 or '')
                     else:
                         row_data.append("")
                         row_data.append("")
                 
-                if mitgliedschaft.abweichende_rechnungsadresse:
+                if cint(mitgliedschaft.abweichende_rechnungsadresse) == 1:
                     row_data.append(mitgliedschaft.rg_zusatz_adresse or '')
                     strasse = ''
                     strasse += mitgliedschaft.rg_strasse or ''
                     strasse += " " + str(mitgliedschaft.rg_nummer or '')
                     strasse += mitgliedschaft.rg_nummer_zu or ''
                     row_data.append(strasse)
-                    if mitgliedschaft.rg_postfach:
+
+                    if cint(mitgliedschaft.rg_postfach) == 1:
                         row_data.append("Postfach {0}".format(mitgliedschaft.rg_postfach_nummer or ''))
                         row_data.append("")
                         row_data.append("")
@@ -392,7 +394,8 @@ def create_csv_from_json(jahresversand):
                     strasse += " " + str(mitgliedschaft.nummer or '')
                     strasse += mitgliedschaft.nummer_zu or ''
                     row_data.append(strasse)
-                    if mitgliedschaft.postfach:
+
+                    if cint(mitgliedschaft.postfach) == 1:
                         row_data.append("Postfach {0}".format(mitgliedschaft.postfach_nummer or ''))
                         row_data.append("")
                         row_data.append("")
@@ -422,14 +425,14 @@ def create_csv_from_json(jahresversand):
                 row_data.append(mitgliedschaft.vorname_1 or '')
                 row_data.append(mitgliedschaft.nachname_1 or '')
                 
-                if mitgliedschaft.hat_solidarmitglied:
+                if cint(mitgliedschaft.hat_solidarmitglied) == 1:
                     row_data.append(mitgliedschaft.vorname_2 or '')
                     row_data.append(mitgliedschaft.nachname_2 or '')
                 else:
                     row_data.append("")
                     row_data.append("")
                 
-                if mitgliedschaft.unabhaengiger_debitor:
+                if cint(mitgliedschaft.unabhaengiger_debitor) == 1 and cint(mitgliedschaft.abweichende_rechnungsadresse) == 1:
                     pseudo_zeile = True
                     if mitgliedschaft.kundentyp == 'Unternehmen':
                         # bezahlt_fuer_firma
@@ -465,12 +468,12 @@ def create_csv_from_json(jahresversand):
                 row_data.append('')
                 
                 if pseudo_zeile:
-                    if mitgliedschaft.ist_geschenkmitgliedschaft:
+                    if cint(mitgliedschaft.ist_geschenkmitgliedschaft) == 1:
                         row_data.append('Geschenkmitgliedschaft')
                     else:
                         row_data.append('Unabhängiger Debitor')
                 else:
-                    if mitgliedschaft.reduzierte_mitgliedschaft:
+                    if cint(mitgliedschaft.reduzierte_mitgliedschaft) == 1:
                         row_data.append('Reduzierte Mitgliedschaft')
                     else:
                         row_data.append('')
@@ -495,7 +498,8 @@ def create_csv_from_json(jahresversand):
                     row_data.append(mitgliedschaft.briefanrede or '')
                     row_data.append(mitgliedschaft.vorname_1 or '')
                     row_data.append(mitgliedschaft.nachname_1 or '')
-                    if mitgliedschaft.hat_solidarmitglied:
+
+                    if cint(mitgliedschaft.hat_solidarmitglied) == 1:
                         row_data.append(mitgliedschaft.vorname_2 or '')
                         row_data.append(mitgliedschaft.nachname_2 or '')
                     else:
@@ -508,7 +512,8 @@ def create_csv_from_json(jahresversand):
                     strasse += " " + str(mitgliedschaft.nummer or '')
                     strasse += mitgliedschaft.nummer_zu or ''
                     row_data.append(strasse)
-                    if mitgliedschaft.postfach:
+
+                    if cint(mitgliedschaft.postfach) == 1:
                         row_data.append("Postfach {0}".format(mitgliedschaft.postfach_nummer or ''))
                         row_data.append("")
                         row_data.append("")
@@ -537,7 +542,8 @@ def create_csv_from_json(jahresversand):
                     row_data.append('')
                     row_data.append(mitgliedschaft.vorname_1 or '')
                     row_data.append(mitgliedschaft.nachname_1 or '')
-                    if mitgliedschaft.hat_solidarmitglied:
+
+                    if cint(mitgliedschaft.hat_solidarmitglied) == 1:
                         row_data.append(mitgliedschaft.vorname_2 or '')
                         row_data.append(mitgliedschaft.nachname_2 or '')
                     else:
@@ -572,10 +578,10 @@ def create_csv_from_json(jahresversand):
                         bezahlt_von_name += mitgliedschaft.rg_nachname or ''
                         row_data.append(bezahlt_von_name)
                     
-                    if mitgliedschaft.ist_geschenkmitgliedschaft:
+                    if cint(mitgliedschaft.ist_geschenkmitgliedschaft) == 1:
                         row_data.append('Geschenkmitgliedschaft')
                     else:
-                        if mitgliedschaft.reduzierte_mitgliedschaft:
+                        if cint(mitgliedschaft.reduzierte_mitgliedschaft) == 1:
                             row_data.append('Reduzierte Mitgliedschaft / Unabhängiger Debitor')
                         else:
                             row_data.append('Unabhängiger Debitor')
