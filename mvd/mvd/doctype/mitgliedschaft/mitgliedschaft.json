@@ -16,7 +16,7 @@
   "region",
   "region_manuell",
   "m_und_w",
-  "digitalrechnung_button",
+  "digitalrechnung",
   "briefanrede",
   "adressblock",
   "rg_briefanrede",
@@ -1323,13 +1323,14 @@
    "label": "Digitalrechnung Hash"
   },
   {
-   "fieldname": "digitalrechnung_button",
-   "fieldtype": "Button",
+   "default": "0",
+   "fieldname": "digitalrechnung",
+   "fieldtype": "Check",
    "label": "digitale Rechnung"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2024-11-14 10:00:29.521673",
+ "modified": "2024-12-05 15:00:04.613111",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

@@ -173,6 +173,11 @@ class Mitgliedschaft(Document):
         # Hotfix ISS-2024-60 / #942
         if not self.zuzug and zuzugsdatum:
             self.zuzug = zuzugsdatum
+        
+        # #1179
+        if self.mitglied_nr != "MV":
+            from mvd.mvd.doctype.digitalrechnung.digitalrechnung import digitalrechnung_mapper
+            digitalrechnung_mapper(mitglied=self)
     
     def email_validierung(self, check=False):
         import re

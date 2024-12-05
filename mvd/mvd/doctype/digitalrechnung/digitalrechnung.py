@@ -11,8 +11,36 @@ import hashlib
 
 class Digitalrechnung(Document):
     def validate(self):
+        self.status = 'Verarbeitet'
         if not self.hash:
             self.generate_hash()
+        else:
+            if cint(self.changed_by_sektion) != 1:
+                old_opt = frappe.db.get_value("Mitgliedschaft", self.mitglied_id, "digitalrechnung")
+                if self.opt_in:
+                    if cint(old_opt) != 1:
+                        frappe.db.set_value("Mitgliedschaft", self.mitglied_id, "digitalrechnung", 1)
+                        create_mitglied_change_log(self.mitglied_id, "hat die digitale Rechnung <b>aktiviert</b>")
+                else:
+                    if cint(old_opt) == 1:
+                        frappe.db.set_value("Mitgliedschaft", self.mitglied_id, "digitalrechnung", 0)
+                        create_mitglied_change_log(self.mitglied_id, "hat die digitale Rechnung <b>deaktiviert</b>")
+
+                if cint(self.email_changed) == 1:
+                    abweichende_rechnungsadresse = cint(frappe.db.get_value("Mitgliedschaft", self.mitglied_id, "abweichende_rechnungsadresse"))
+                    unabhaengiger_debitor = cint(frappe.db.get_value("Mitgliedschaft", self.mitglied_id, "unabhaengiger_debitor"))
+                    if abweichende_rechnungsadresse == 1 and unabhaengiger_debitor == 1:
+                        rg_e_mail = frappe.db.get_value("Mitgliedschaft", self.mitglied_id, "rg_e_mail")
+                        if rg_e_mail != self.email:
+                            frappe.db.set_value("Mitgliedschaft", self.mitglied_id, "rg_e_mail", self.email)
+                            create_mitglied_change_log(self.mitglied_id, "hat die E-Mail-Adresse von {0} auf {1} geändert".format(rg_e_mail, self.email))
+                    else:
+                        e_mail_1 = frappe.db.get_value("Mitgliedschaft", self.mitglied_id, "e_mail_1")
+                        if e_mail_1 != self.email:
+                            frappe.db.set_value("Mitgliedschaft", self.mitglied_id, "e_mail_1", self.email)
+                            create_mitglied_change_log(self.mitglied_id, "hat die E-Mail-Adresse von {0} auf {1} geändert".format(e_mail_1, self.email))
+            else:
+                self.changed_by_sektion = 0
     
     def after_insert(self):
         frappe.db.set_value("Mitgliedschaft", self.mitglied_id, "digitalrechnung_hash", self.hash)
@@ -41,6 +69,80 @@ class Digitalrechnung(Document):
     def set_email(self, email):
         self.email = email
         self.set_opt_in()
+
+def digitalrechnung_mapper(mitglied):
+    def check_existing(hash=None, mitglied_nr=None):
+        if hash:
+            existing_digitalrechnung = frappe.db.sql("""SELECT `name` FROM `tabDigitalrechnung` WHERE `hash` = '{0}'""".format(hash), as_dict=True)
+        if mitglied_nr:
+            existing_digitalrechnung = frappe.db.sql("""SELECT `name` FROM `tabDigitalrechnung` WHERE `mitglied_nr` = '{0}'""".format(mitglied_nr), as_dict=True)
+        if len(existing_digitalrechnung) > 0:
+            return existing_digitalrechnung[0].name
+        else:
+            return False
+    
+    def update_digitalrechnung(dr, mitglied):
+        dr_doc = frappe.get_doc("Digitalrechnung", dr)
+        if dr_doc.mitglied_id != mitglied.name:
+            dr_doc.mitglied_id = mitglied.name
+        if dr_doc.language != mitglied.language:
+            dr_doc.language = mitglied.language
+
+        if cint(mitglied.abweichende_rechnungsadresse) == 1 and cint(mitglied.unabhaengiger_debitor) == 1:
+            if dr_doc.email != mitglied.rg_e_mail:
+                dr_doc.email = mitglied.rg_e_mail
+        else:
+            if dr_doc.email != mitglied.e_mail_1:
+                dr_doc.email = mitglied.e_mail_1
+        
+        if dr_doc.sektion_id != mitglied.sektion_id:
+            dr_doc.sektion_id = mitglied.sektion_id
+        
+        if cint(mitglied.digitalrechnung) == 1:
+            dr_doc.set_opt_in()
+        else:
+            dr_doc.set_opt_out()
+        
+        dr_doc.changed_by_sektion = 1
+        
+        dr_doc.save(ignore_permissions=True)
+    
+    def create_digitalrechnung(mitglied):
+        dr_doc = frappe.get_doc({
+            "doctype": "Digitalrechnung",
+            "mitglied_id": mitglied.name,
+            "mitglied_nr": mitglied.mitglied_nr,
+            "language": mitglied.language,
+            "email": mitglied.rg_e_mail if cint(mitglied.abweichende_rechnungsadresse) == 1 and cint(mitglied.unabhaengiger_debitor) == 1 else mitglied.e_mail_1,
+            "sektion_id": mitglied.sektion_id
+        }).insert(ignore_permissions=True)
+
+        if cint(mitglied.digitalrechnung) == 1:
+            dr_doc.set_opt_in()
+            dr_doc.save(ignore_permissions=True)
+    
+    if mitglied.digitalrechnung_hash:
+        digitalrechnung = check_existing(hash=mitglied.digitalrechnung_hash)
+        if digitalrechnung:
+            update_digitalrechnung(digitalrechnung, mitglied)
+        else:
+            create_digitalrechnung(mitglied)
+    else:
+        digitalrechnung = check_existing(mitglied_nr=mitglied.mitglied_nr)
+        if digitalrechnung:
+            update_digitalrechnung(digitalrechnung, mitglied)
+        else:
+            create_digitalrechnung(mitglied)
+
+def create_mitglied_change_log(mitglied, txt):
+    comment = frappe.get_doc({
+        "doctype": "Comment",
+        "comment_type": "Workflow",
+        "comment_email": "Das Mitglied",
+        "reference_doctype": "Mitgliedschaft",
+        "reference_name": mitglied,
+        "content": txt
+    }).insert(ignore_permissions=True)
 
 def initial_setup():
     mitgliedschaften = frappe.db.sql("""
