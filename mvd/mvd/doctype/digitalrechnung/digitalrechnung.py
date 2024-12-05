@@ -256,7 +256,6 @@ def go_life_reset():
             `language`
         FROM `tabMitgliedschaft`
         WHERE `status_c` NOT IN ('Inaktiv', 'Anmeldung', 'Online-Anmeldung', 'Gestorben', 'Wegzug', 'Ausschluss', 'Interessent*in')
-        LIMIT 10
     """, as_dict=True)
 
     total = len(mitgliedschaften)
@@ -300,7 +299,7 @@ def go_life_reset():
         print("Check {0} von {1}".format(loop, total))
         latest_mitglied = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `mitglied_nr` = '{0}' ORDER BY `creation` DESC""".format(digitalrechnung.mitglied_nr), as_dict=True)
         if latest_mitglied[0].name != digitalrechnung.mitglied_id:
-            frappe.db.set_value("Digitalrechnung", digitalrechnung.name, 'mitglied_id', latest_mitglied.name)
+            frappe.db.set_value("Digitalrechnung", digitalrechnung.name, 'mitglied_id', latest_mitglied[0].name)
             print("Updated {0}".format(loop))
             frappe.db.commit()
         loop += 1
