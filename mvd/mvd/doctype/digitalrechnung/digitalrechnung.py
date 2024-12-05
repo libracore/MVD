@@ -256,6 +256,7 @@ def go_life_reset():
             `language`
         FROM `tabMitgliedschaft`
         WHERE `status_c` NOT IN ('Inaktiv', 'Anmeldung', 'Online-Anmeldung', 'Gestorben', 'Wegzug', 'Ausschluss', 'Interessent*in')
+        AND `digitalrechnung_hash` IS NULL
     """, as_dict=True)
 
     total = len(mitgliedschaften)
