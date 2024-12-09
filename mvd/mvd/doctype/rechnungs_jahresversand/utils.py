@@ -72,7 +72,7 @@ def create_invoices_as_json(jahresversand):
                                                 FROM `tabSales Invoice`
                                                 WHERE `rechnungs_jahresversand` = '{jahresversand}'
                                                 AND `docstatus` = 1)
-                                            AND (`kuendigung` IS NULL or `kuendigung` > '{mitgliedschafts_jahr}-12-31')
+                                            AND (`kuendigung` IS NULL or `kuendigung` >= '{mitgliedschafts_jahr}-12-31')
                                             AND `bezahltes_mitgliedschaftsjahr` < {mitgliedschafts_jahr}
                                             {filters}""".format(sektion_id=jahresversand_doc.sektion_id, jahresversand=jahresversand, mitgliedschafts_jahr=jahresversand_doc.jahr, filters=filters), as_dict=True)
         
