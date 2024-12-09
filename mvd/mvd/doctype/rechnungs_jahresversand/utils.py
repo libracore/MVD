@@ -132,7 +132,7 @@ def create_invoices_as_json(jahresversand):
                         "fast_mode": 1,
                         "esr_reference": '',
                         "outstanding_amount": item[0].get("rate"),
-                        "naming_series": "RJ-.{sektions_code}.{0}.#####".format(jahresversand_doc.counter),
+                        "naming_series": "RJ-.{sektions_code}.{counter}.#####".format(sektions_code="{sektions_code}", counter=jahresversand_doc.counter),
                         "renaming_series": "RJ-{0}{1}{2}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter, str(current_series_index).rjust(5, "0"))
                     })
                     sinv.esr_reference = get_qrr_reference(fake_sinv=sinv)
@@ -151,7 +151,7 @@ def create_invoices_as_json(jahresversand):
                         'druckvorlage': '',
                         'bezugsjahr': jahresversand_doc.jahr,
                         'spenden_versand': '',
-                        "naming_series": "FRJ-.{sektions_code}.{0}.#####".format(jahresversand_doc.counter),
+                        "naming_series": "FRJ-.{sektions_code}.{counter}.#####".format(sektions_code="{sektions_code}", counter=jahresversand_doc.counter),
                         "renaming_series": "FRJ-{0}{1}{2}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter, str(current_fr_series_index).rjust(5, "0"))
                     })
                     fr.qrr_referenz = get_qrr_reference(fake_fr=fr)
