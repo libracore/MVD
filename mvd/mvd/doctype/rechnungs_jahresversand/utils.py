@@ -177,7 +177,7 @@ def create_invoices_as_json(jahresversand):
 
 def create_invoices_from_json(jahresversand):
     from datetime import datetime, time
-    current_day = datetime.today()
+    current_day = datetime.today().weekday()
     if current_day >= 5:
         # Wochenende
         stop_time = time(22, 0)
