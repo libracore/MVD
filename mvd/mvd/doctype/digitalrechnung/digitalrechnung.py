@@ -73,6 +73,8 @@ class Digitalrechnung(Document):
 def digitalrechnung_mapper(mitglied):
     def check_if_latest(mitglied):
         latest_mitglied = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `mitglied_nr` = '{0}' ORDER BY `creation` DESC""".format(mitglied.mitglied_nr), as_dict=True)
+        if len(latest_mitglied) < 1:
+            return False
         if latest_mitglied[0].name == mitglied.name:
             return True
         else:
@@ -237,6 +239,8 @@ def reset():
 def go_life_reset():
     def check_if_latest(mitglied):
         latest_mitglied = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `mitglied_nr` = '{0}' ORDER BY `creation` DESC""".format(mitglied.mitglied_nr), as_dict=True)
+        if len(latest_mitglied) < 1:
+            return False
         if latest_mitglied[0].name == mitglied.mitglied_id:
             return True
         else:

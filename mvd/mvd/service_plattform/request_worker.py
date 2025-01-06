@@ -533,6 +533,7 @@ def mvm_neuanlage(kwargs):
         return False
         
     except Exception as err:
+        frappe.log_error("{0}\n\n\n{1}".format(frappe.get_traceback(), err), "mvm_neuanlage")
         return 'Internal Server Error: {0}'.format(err)
 
 '''
@@ -809,6 +810,7 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         return False
         
     except Exception as err:
+        frappe.log_error("{0}\n\n\n{1}".format(frappe.get_traceback(), err), "mvm_update")
         return 'Internal Server Error {0}'.format(err)
 
 '''
