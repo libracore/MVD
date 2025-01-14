@@ -2388,13 +2388,18 @@ def erstellung_faktura_kunde(mitgliedschaft):
 
 def get_mitglied_id_from_nr(mitglied_nr=None, ignore_inaktiv=False):
     if mitglied_nr:
+        if 'MV' in mitglied_nr:
+            mitglied_nr_clause = "= '{0}'".format(mitglied_nr)
+        else:
+            mitglied_nr_clause = "LIKE '%{0}'".format(mitglied_nr)
+        
         inaktiv_clause = "AND `status_c` != 'Inaktiv'"
         mitgliedschaften = frappe.db.sql("""SELECT
                                                 `name`
                                             FROM `tabMitgliedschaft`
-                                            WHERE `mitglied_nr` LIKE '%{0}'
+                                            WHERE `mitglied_nr` {0}
                                             {1}
-                                            ORDER BY `creation` DESC LIMIT 1""".format(mitglied_nr, inaktiv_clause), as_dict=True)
+                                            ORDER BY `creation` DESC LIMIT 1""".format(mitglied_nr_clause, inaktiv_clause), as_dict=True)
         if len(mitgliedschaften) > 0:
             return mitgliedschaften[0].name
         else:
