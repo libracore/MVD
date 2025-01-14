@@ -1,0 +1,49 @@
+{
+ "autoname": "field:mitglied_nr",
+ "creation": "2025-01-14 12:12:03.391868",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "mitglied_nr",
+  "json"
+ ],
+ "fields": [
+  {
+   "fieldname": "mitglied_nr",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mitglied Nr",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "json",
+   "fieldtype": "Code",
+   "in_list_view": 1,
+   "label": "JSON",
+   "reqd": 1
+  }
+ ],
+ "modified": "2025-01-14 15:09:12.326968",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "SP Mitglied Data",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

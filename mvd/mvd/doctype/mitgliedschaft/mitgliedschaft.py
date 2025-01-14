@@ -174,10 +174,14 @@ class Mitgliedschaft(Document):
         if not self.zuzug and zuzugsdatum:
             self.zuzug = zuzugsdatum
         
-        # #1179
         if self.mitglied_nr != "MV":
+            # #1179
             from mvd.mvd.doctype.digitalrechnung.digitalrechnung import digitalrechnung_mapper
             digitalrechnung_mapper(mitglied=self)
+
+            # #1203
+            from mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data import create_or_update_sp_mitglied_data
+            create_or_update_sp_mitglied_data(self.mitglied_nr, self)
     
     def email_validierung(self, check=False):
         import re
@@ -2393,13 +2397,12 @@ def get_mitglied_id_from_nr(mitglied_nr=None, ignore_inaktiv=False):
         else:
             mitglied_nr_clause = "LIKE '%{0}'".format(mitglied_nr)
         
-        inaktiv_clause = "AND `status_c` != 'Inaktiv'"
         mitgliedschaften = frappe.db.sql("""SELECT
                                                 `name`
                                             FROM `tabMitgliedschaft`
                                             WHERE `mitglied_nr` {0}
-                                            {1}
-                                            ORDER BY `creation` DESC LIMIT 1""".format(mitglied_nr_clause, inaktiv_clause), as_dict=True)
+                                            AND `status_c` != 'Inaktiv'
+                                            ORDER BY `creation` DESC LIMIT 1""".format(mitglied_nr_clause), as_dict=True)
         if len(mitgliedschaften) > 0:
             return mitgliedschaften[0].name
         else:
@@ -2408,13 +2411,11 @@ def get_mitglied_id_from_nr(mitglied_nr=None, ignore_inaktiv=False):
                 Da die Website (Quatico) den Inaktiven-Mitgliedschafts-Datensatz benötigt, wird nach einem solchen gesucht falls es keinen aktiven Datensatz gibt.
                 Siehe auch Ticket #1104
                 '''
-                inaktiv_clause=''
                 mitgliedschaften = frappe.db.sql("""SELECT
                                                     `name`
                                                 FROM `tabMitgliedschaft`
-                                                WHERE `mitglied_nr` LIKE '%{0}'
-                                                {1}
-                                                ORDER BY `creation` DESC LIMIT 1""".format(mitglied_nr, inaktiv_clause), as_dict=True)
+                                                WHERE `mitglied_nr` {0}
+                                                ORDER BY `creation` DESC LIMIT 1""".format(mitglied_nr_clause), as_dict=True)
                 if len(mitgliedschaften) > 0:
                     return mitgliedschaften[0].name
                 else:
