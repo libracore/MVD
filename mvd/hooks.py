@@ -166,6 +166,9 @@ scheduler_events = {
         "mvd.www.emailberatung.send_to_sp",
         "mvd.mvd.service_plattform.request_worker.service_plattform_log_worker",
         "mvd.mvd.doctype.serien_email.serien_email.send_mails"
+    ],
+    "hourly": [
+        "mvd.mvd.doctype.wohnungsabgabe.wohnungsabgabe.qa_mail"
     ]
 }
 # scheduler_events = {

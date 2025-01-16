@@ -28,6 +28,9 @@
   "rechnungsadresse",
   "section_koordinaten",
   "termin",
+  "disabled_qa_mail",
+  "qa_mail_druckvorlage",
+  "qa_mail_sended",
   "expert_in",
   "vermieter_in",
   "section_auftrag",
@@ -327,9 +330,29 @@
    "fieldtype": "Link",
    "label": "Sprache",
    "options": "Language"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled_qa_mail",
+   "fieldtype": "Check",
+   "label": "Deaktivierung des QA-Mail Versand"
+  },
+  {
+   "default": "0",
+   "fieldname": "qa_mail_sended",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "QA Mail Sended"
+  },
+  {
+   "depends_on": "eval:doc.disabled_qa_mail!=1",
+   "fieldname": "qa_mail_druckvorlage",
+   "fieldtype": "Link",
+   "label": "QA-Mail Druckvorlage",
+   "options": "Druckvorlage"
   }
  ],
- "modified": "2024-04-16 15:44:03.700516",
+ "modified": "2025-01-16 15:54:01.551320",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
