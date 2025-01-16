@@ -212,16 +212,6 @@ def execute_sp_log(sp_log, manual_execution=False):
         error_in_execution = mvm_update(mitgliedschaft, api_kwargs)
     
     if sp_log.neuanlage == 1:
-        # ACHTUNG ISSUE #1201
-        if api_kwargs["status"] == 'Zuzug':
-            if api_kwargs["alteSektionCode"] == 'ZH':
-                sp_log.status = 'Ignore'
-                sp_log.add_comment('Comment', text='Siehe GitLab Issue #1201 - muss nachträglich bereinigt werden.')
-                sp_log.save()
-                frappe.db.commit()
-                return
-        # -----------------------------------------------------------------------------------------------------------
-
         # check ob wirklich neuanlage, oder in zwischenzeit bereits angelegt
         if frappe.db.exists("Mitgliedschaft", api_kwargs["mitgliedId"]):
             # wurde in der Zwischenzeit angelegt, sp_log wird als Update verarbeitet
