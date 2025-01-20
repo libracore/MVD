@@ -341,8 +341,8 @@
    "default": "0",
    "fieldname": "qa_mail_sended",
    "fieldtype": "Check",
-   "hidden": 1,
-   "label": "QA Mail Sended"
+   "label": "QA-Mail versendet",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.disabled_qa_mail!=1",
@@ -352,7 +352,7 @@
    "options": "Druckvorlage"
   }
  ],
- "modified": "2025-01-16 15:54:01.551320",
+ "modified": "2025-01-20 19:40:45.758375",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
