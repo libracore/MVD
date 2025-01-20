@@ -40,7 +40,11 @@ $(document).ready(function() {
     
     // redirect from desk to vbz
     if(frappe._cur_route==""||frappe._cur_route=="#") {
-        window.location.href = "#vbz";
+        if (frappe.user.has_role('MV_ERB')&&!frappe.user.has_role('System Manager')) {
+            window.location.href = "#vbz_beratung_termine";
+        } else {
+            window.location.href = "#vbz";
+        }
     }
     
     
@@ -52,7 +56,11 @@ $(document).on('click','#navbar-breadcrumbs a, a.navbar-home',function(event){
     var navURL = event.currentTarget.href;
     if(navURL.endsWith("#")) {
         if (frappe._cur_route != "#vbz") {
-            navURL += "vbz";
+            if (frappe.user.has_role('MV_ERB')&&!frappe.user.has_role('System Manager')) {
+                navURL += "vbz_beratung_termine";
+            } else {
+                navURL += "vbz";
+            }
         } else {
             navURL = frappe._cur_route
         }

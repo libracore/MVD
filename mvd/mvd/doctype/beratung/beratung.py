@@ -119,6 +119,10 @@ class Beratung(Document):
         # MVAG Default Text (Antwort)
         if self.sektion_id == 'MVAG':
             self.set_mvag_default_text()
+        
+        # Setzen von User-Permission auf Basis der Rolle MV_ERB
+        if self.kontaktperson and self.mv_mitgliedschaft:
+            self.set_mverb_user_permission()
     
     def set_sektion(self):
         '''
@@ -314,6 +318,21 @@ class Beratung(Document):
                     <div>Notizen Rechtsberatung zum Fall:<br><br></div>
                 </div>
             """
+    
+    def set_mverb_user_permission(self):
+        kontaktperson = frappe.get_doc("Termin Kontaktperson", self.kontaktperson)
+        for _user in kontaktperson.user:
+            user = _user.user
+            user_roles = frappe.get_roles(user)
+            if "MV_ERB" in user_roles and "System Manager" not in user_roles:
+                # Create User-Permission for Mitglied
+                new_permission = frappe.get_doc({
+                    'doctype': 'User Permission',
+                    'user': user,
+                    'apply_to_all_doctypes': 1,
+                    'for_value': self.mv_mitgliedschaft,
+                    'allow': 'Mitgliedschaft'
+                }).insert(ignore_permissions=True)
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
