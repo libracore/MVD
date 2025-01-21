@@ -23,7 +23,7 @@ class Wohnungsabgabe(Document):
                 message = frappe.render_template(druckvorlage.e_mail_text, {"doc": self})
                 comm = make(
                     recipients=[recipient],
-                    sender=frappe.get_value("Sektion", self.sektion_id, "legacy_mail_absender_mail"),
+                    sender=frappe.get_value("Sektion", self.sektion_id, "serien_email_absender_adresse"),
                     subject=subject, 
                     content=message,
                     doctype='Wohnungsabgabe',

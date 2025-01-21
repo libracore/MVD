@@ -345,6 +345,7 @@
    "read_only": 1
   },
   {
+   "default": "Wohnungsabgabe-MVBE",
    "depends_on": "eval:doc.disabled_qa_mail!=1",
    "fieldname": "qa_mail_druckvorlage",
    "fieldtype": "Link",
@@ -352,7 +353,7 @@
    "options": "Druckvorlage"
   }
  ],
- "modified": "2025-01-20 19:40:45.758375",
+ "modified": "2025-01-20 23:45:23.335173",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
