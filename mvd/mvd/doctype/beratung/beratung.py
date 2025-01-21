@@ -326,13 +326,14 @@ class Beratung(Document):
             user_roles = frappe.get_roles(user)
             if "MV_ERB" in user_roles and "System Manager" not in user_roles:
                 # Create User-Permission for Mitglied
-                new_permission = frappe.get_doc({
-                    'doctype': 'User Permission',
-                    'user': user,
-                    'apply_to_all_doctypes': 1,
-                    'for_value': self.mv_mitgliedschaft,
-                    'allow': 'Mitgliedschaft'
-                }).insert(ignore_permissions=True)
+                if not frappe.db.exists("User Permission", {"user": user, "for_value": self.mv_mitgliedschaft}):
+                    new_permission = frappe.get_doc({
+                        'doctype': 'User Permission',
+                        'user': user,
+                        'apply_to_all_doctypes': 1,
+                        'for_value': self.mv_mitgliedschaft,
+                        'allow': 'Mitgliedschaft'
+                    }).insert(ignore_permissions=True)
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
