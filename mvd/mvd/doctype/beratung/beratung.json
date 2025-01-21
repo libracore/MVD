@@ -43,6 +43,7 @@
   "cb_1",
   "subject",
   "mv_mitgliedschaft",
+  "besitzt_mitgliedschaft",
   "sektion_id",
   "status",
   "zusatzinfo_status",
@@ -433,9 +434,16 @@
    "fieldname": "vorlage_einfuegen",
    "fieldtype": "Button",
    "label": "Vorlage einf\u00fcgen"
+  },
+  {
+   "default": "0",
+   "fieldname": "besitzt_mitgliedschaft",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Besitzt Mitgliedschaft"
   }
  ],
- "modified": "2024-09-17 16:00:55.159404",
+ "modified": "2025-01-21 19:59:44.445244",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

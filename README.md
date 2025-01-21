@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 14.4.0
+#1206 besitzt_mitgliedschaft
 #### 14.3.2
 #1206 Bugfix
 #### 14.3.1

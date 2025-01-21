@@ -123,6 +123,12 @@ class Beratung(Document):
         # Setzen von User-Permission auf Basis der Rolle MV_ERB
         if self.kontaktperson and self.mv_mitgliedschaft:
             self.set_mverb_user_permission()
+        
+        # Markieren wenn mit Mitgliedschaft verknüpft, wird für Berechtigung von MV_ERB benötigt
+        if self.mv_mitgliedschaft:
+            self.besitzt_mitgliedschaft = 1
+        else:
+            self.besitzt_mitgliedschaft = 0
     
     def set_sektion(self):
         '''
