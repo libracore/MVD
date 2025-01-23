@@ -126,9 +126,9 @@ class Beratung(Document):
         
         # Markieren wenn mit Mitgliedschaft verknüpft, wird für Berechtigung von MV_ERB benötigt
         if self.mv_mitgliedschaft:
-            self.besitzt_mitgliedschaft = 1
+            self.mv_erb_permission = "Write"
         else:
-            self.besitzt_mitgliedschaft = 0
+            self.mv_erb_permission = "None"
     
     def set_sektion(self):
         '''

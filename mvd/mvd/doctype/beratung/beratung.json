@@ -43,7 +43,7 @@
   "cb_1",
   "subject",
   "mv_mitgliedschaft",
-  "besitzt_mitgliedschaft",
+  "mv_erb_permission",
   "sektion_id",
   "status",
   "zusatzinfo_status",
@@ -436,14 +436,14 @@
    "label": "Vorlage einf\u00fcgen"
   },
   {
-   "default": "0",
-   "fieldname": "besitzt_mitgliedschaft",
-   "fieldtype": "Check",
+   "fieldname": "mv_erb_permission",
+   "fieldtype": "Link",
    "hidden": 1,
-   "label": "Besitzt Mitgliedschaft"
+   "label": "MV_ERB Permission",
+   "options": "MV_ERB Permission"
   }
  ],
- "modified": "2025-01-21 19:59:44.445244",
+ "modified": "2025-01-23 14:44:48.616044",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
