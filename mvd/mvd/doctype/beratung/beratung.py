@@ -663,7 +663,8 @@ def create_neue_beratung(mitgliedschaft, termin_block_data, art, ort, berater_in
                 "sektion_id": frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id'),
                 "mv_mitgliedschaft": mitgliedschaft,
                 "kontaktperson": berater_in,
-                "notiz": "Terminnotiz:<br>{0}".format(notiz)
+                "notiz": "Terminnotiz:<br>{0}".format(notiz),
+                "beratungskanal": "Telefon" if art == 'telefonisch' else art
             })
             beratung.insert()
             for termin in termin_block_data:
@@ -676,6 +677,7 @@ def create_neue_beratung(mitgliedschaft, termin_block_data, art, ort, berater_in
                 row.telefonnummer = telefonnummer
                 row.abp_referenz = termin['referenz']
                 row.notiz = notiz
+            beratung.beratungskanal = "Telefon" if art == 'telefonisch' else art
             beratung.save()
         else:
             # füge Termin zu bestehenden Beratung hinzu
