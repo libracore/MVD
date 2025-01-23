@@ -127,7 +127,8 @@ def get_alle_beratungs_termine(user):
     
     for freier_termin in freie_termine:
         if not erlaubte_sektionen or freier_termin.sektion_id in erlaubte_sektionen:
-            alle.append(freier_termin)
+            if not erb_block or termin.beraterinn in kontaktperson_multi_user:
+                alle.append(freier_termin)
     
     alle_sortiert = sorted(alle, key = lambda x: (x['sort_date'], x['beraterinn'] or 'ZZZ', x['von_time']))
 
