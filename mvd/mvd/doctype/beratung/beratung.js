@@ -798,6 +798,12 @@ function termin_quick_entry(frm) {
                                                     var sammel_notiz = `Terminnotiz:<br>${d.get_value('notiz')}<br><br>${cur_frm.doc.notiz}`;
                                                     cur_frm.set_value("notiz", sammel_notiz);
                                                 }
+
+                                                if (d.get_value('art') == 'telefonisch') {
+                                                    cur_frm.set_value("beratungskanal", "Telefon");
+                                                } else {
+                                                    cur_frm.set_value("beratungskanal", d.get_value('art'));
+                                                }
                                                 cur_frm.save();
                                                 frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_terminbestaetigung_email_template').then(function(value){
                                                     if (value.message.default_terminbestaetigung_email_template) {

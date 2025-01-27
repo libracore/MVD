@@ -677,7 +677,7 @@ def create_neue_beratung(mitgliedschaft, termin_block_data, art, ort, berater_in
                 row.telefonnummer = telefonnummer
                 row.abp_referenz = termin['referenz']
                 row.notiz = notiz
-            beratung.beratungskanal = "Telefon" if art == 'telefonisch' else art
+            
             beratung.save()
         else:
             # füge Termin zu bestehenden Beratung hinzu
@@ -692,6 +692,7 @@ def create_neue_beratung(mitgliedschaft, termin_block_data, art, ort, berater_in
                 row.telefonnummer = telefonnummer
                 row.abp_referenz = termin['referenz']
                 row.notiz = notiz
+            beratung.beratungskanal = "Telefon" if art == 'telefonisch' else art
             beratung.save()
         
         return beratung.name
