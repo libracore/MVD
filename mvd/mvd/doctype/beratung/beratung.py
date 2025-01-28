@@ -545,6 +545,10 @@ def check_communication(self, event):
             else:
                 beratung.ungelesen = 1
                 beratung.save()
+        elif communication.reference_doctype == 'Issue':
+            #1212
+            issue = frappe.get_doc("Issue", communication.reference_name)
+            issue.ungelesene_email = 1
 
 @frappe.whitelist()
 def uebernahme(beratung, user):
