@@ -28,4 +28,4 @@ def get_default_beratungs_sender(default_sektion=None):
 
 def login_check(login_manager):
     if not login_manager.oauth:
-        frappe.log_error(str(login_manager.user), "Login ohne 2FA: {0}".format(str(login_manager.user)))
+        frappe.log_error("Login ohne 2FA: {0}".format(str(login_manager.user)), "Login ohne 2FA")
