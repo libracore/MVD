@@ -13,6 +13,9 @@ frappe.ui.form.on('Wohnungsabgabe', {
     //},
     mitgliederdaten_uebernehmen: function(frm) {
     mitgliedschaftsdatenUebernehmen(frm);
+    },
+    language: function(frm) {
+        update_qa_mail_druckvorlage(frm);
     }
 });
 
@@ -130,4 +133,14 @@ function prepare_mvd_mail_composer(e, forward=false) {
 
     // make the composer
     new frappe.mvd.MailComposer(opts);
+}
+
+function update_qa_mail_druckvorlage(frm) {
+    if (cur_frm.doc.language === 'de') {
+        frm.set_value('qa_mail_druckvorlage', 'Wohnungsabgabe-MVBE');
+    } else if (cur_frm.doc.language === 'fr') {
+        frm.set_value('qa_mail_druckvorlage', 'Wohnungsabgabe, FR-MVBE');
+    } else {
+        frm.set_value('qa_mail_druckvorlage', null);
+    }
 }
