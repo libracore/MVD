@@ -50,6 +50,7 @@ def get_data(**api_request):
                                     `name`,
                                     `mitgliedschafts_artikel` AS `mitgliedschaft_privat`
                                 FROM `tabSektion`
+                                WHERE `pseudo_sektion` != 1 AND `name` != 'M+W-Abo'
                               """, as_dict=True)
     for sektion in sektionen:
         item_details = get_item_details(sektion)
