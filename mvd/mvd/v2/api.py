@@ -32,7 +32,7 @@ class sektion_object:
         self.doctype_sektion=None
         self.all_items=None
     
-    def set_values(self, sektion, items, all_items):
+    def set_values(self, sektion, all_items):
         self.sektion = sektion.name
         self.all_items = all_items
         # insert whole classe i.e. doctype sektion
@@ -55,10 +55,9 @@ def get_data_sektionen(**api_request):
                                 WHERE `pseudo_sektion` != 1 AND `name` != 'M+W-Abo'
                               """, as_dict=True)
     for sektion in sektionen:
-        item_details = get_item_details(sektion)
         sektion_obj = sektion_object()
         all_items = get_all_item_details(sektion)
-        sektion_obj.set_values(sektion, item_details, all_items)
+        sektion_obj.set_values(sektion, all_items)
         return_obj.add_sektion(sektion_obj.asDict())
 
     frappe.local.response.http_status_code = 200
@@ -87,7 +86,7 @@ def get_all_item_details(sektion):
     '''
     Holt und gibt alle Item-Details aus dem Doctype Sektion zurück mit Artielnummer, Beschreibung und Preis
     '''
-    
+
     #all_items = get_item_names_of_doctype("Sektion")
     all_items = ["mitgliedschafts_artikel", "mitgliedschafts_artikel_geschaeft", "mitgliedschafts_artikel_beitritt", "mitgliedschafts_artikel_beitritt_geschaeft", "mitgliedschafts_artikel_reduziert", "mitgliedschafts_artikel_gratis", "hv_artikel", "spenden_artikel"]
     
