@@ -12,6 +12,19 @@ frappe.ui.form.on('Issue', {
                 create_gitlab_issue(frm);
             }).addClass("btn-warning");
         }
+
+        // #1212
+        if (cur_frm.doc.ungelesene_email == 1) {
+            frm.add_custom_button(__("E-Mail(s) als gelesen markieren"), function() {
+                cur_frm.set_value('ungelesene_email', 0);
+                cur_frm.save();
+            }).addClass("btn-success");
+        } else {
+            frm.add_custom_button(__("E-Mail(s) als ungelesen markieren"), function() {
+                cur_frm.set_value('ungelesene_email', 1);
+                cur_frm.save();
+            }).addClass("btn-warning");
+        }
     }
 });
 

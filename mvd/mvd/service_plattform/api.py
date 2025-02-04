@@ -373,18 +373,24 @@ def get_mitglied_data(**api_request):
         - 400 ('Bad Request', 'MitgliedNummer missing'); Wenn der Parameter MitgliedNummer in der Anfrage fehlt
     Sollte es mehrere aktive Mitgliedschaften zu einer Mitgliednummer geben, werden jene zurückgegeben, welche als letztes in ERPNext angelegt wurden.
     '''
-    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
     if 'MitgliedNummer' in api_request:
         if "MV" in api_request["MitgliedNummer"]:
-            mitglied_nummer = get_mitglied_id_from_nr(mitglied_nr=api_request["MitgliedNummer"], ignore_inaktiv=True)
-            if frappe.db.exists("Mitgliedschaft", mitglied_nummer):
-                mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_nummer)
-                data =  prepare_mvm_for_sp(mitgliedschaft)
+            # Performance Optimierung (#1203):
+            if frappe.db.exists("SP Mitglied Data", api_request["MitgliedNummer"]):
+                data = json.loads(frappe.get_doc("SP Mitglied Data", api_request["MitgliedNummer"]).json)
                 return data
             else:
-                frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(404, 'Not Found', 'No Activ Mitglied found', frappe.utils.get_traceback(), str(api_request)), '404 > get_mitglied_data')
-                frappe.local.response.http_status_code = 404
-                frappe.local.response.message = 'No Activ Mitglied found'
+                # Alter Workflow VOR Performance Optimierung (als Fallback)
+                from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
+                mitglied_nummer = get_mitglied_id_from_nr(mitglied_nr=api_request["MitgliedNummer"], ignore_inaktiv=True)
+                if frappe.db.exists("Mitgliedschaft", mitglied_nummer):
+                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_nummer)
+                    data =  prepare_mvm_for_sp(mitgliedschaft)
+                    return data
+                else:
+                    frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(404, 'Not Found', 'No Activ Mitglied found', frappe.utils.get_traceback(), str(api_request)), '404 > get_mitglied_data')
+                    frappe.local.response.http_status_code = 404
+                    frappe.local.response.message = 'No Activ Mitglied found'
         else:
             frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(400, 'Bad Request', 'MitgliedNummer missing MV', frappe.utils.get_traceback(), str(api_request)), '400 > get_mitglied_data')
             frappe.local.response.http_status_code = 400

@@ -9,6 +9,7 @@
   "reaktivierung_von_inaktiven",
   "manuelle_artikelauswahl",
   "rechnungstext_anpassungen",
+  "qa_mailversand",
   "section_zahlungserinnerung",
   "email_queue",
   "emails_per_flush",
@@ -19,7 +20,10 @@
   "upload_key",
   "upload_secret",
   "durchlassquote",
-  "redirect_url_ablehnung"
+  "redirect_url_ablehnung",
+  "section_wohnungsabgabe",
+  "qa_mail_an_testadresse",
+  "qa_mail_testadresse"
  ],
  "fields": [
   {
@@ -109,10 +113,33 @@
    "fieldname": "serien_email_per_flush",
    "fieldtype": "Int",
    "label": "Anzahl Emails pro Flush"
+  },
+  {
+   "fieldname": "section_wohnungsabgabe",
+   "fieldtype": "Section Break",
+   "label": "Wohnungsabgabe QA-Mail"
+  },
+  {
+   "default": "0",
+   "fieldname": "qa_mail_an_testadresse",
+   "fieldtype": "Check",
+   "label": "QA-Mail an Testadresse senden"
+  },
+  {
+   "depends_on": "eval:doc.qa_mail_an_testadresse",
+   "fieldname": "qa_mail_testadresse",
+   "fieldtype": "Data",
+   "label": "QA-Mail Testadresse"
+  },
+  {
+   "default": "0",
+   "fieldname": "qa_mailversand",
+   "fieldtype": "Check",
+   "label": "QA-Mailversand"
   }
  ],
  "issingle": 1,
- "modified": "2023-09-19 13:52:18.122218",
+ "modified": "2025-01-16 15:58:10.162344",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Settings",

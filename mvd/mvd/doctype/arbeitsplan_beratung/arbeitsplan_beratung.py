@@ -414,7 +414,10 @@ def get_arbeitsplan_word(berater_in, von=None, bis=None):
     html = '<html><body>{0}</body></html>'.format(html)
     datum = frappe.utils.getdate(von or None).strftime("%Y-%m-%d")
     wochentag = _(frappe.utils.getdate(von or None).strftime("%A"), "de")[:2].upper()
-    frappe.local.response.filename = "{datum}_{wochentag}_{name}.doc".format(datum=datum, wochentag=wochentag, name=berater_in.split(" ")[0] if berater_in else "unbekannt")
+    clean_berater_name = "unbekannt"
+    if berater_in:
+        clean_berater_name = berater_in.split(" ")[0].replace("ä", "ae").replace("ö", "oe").replace("ü", "ue")
+    frappe.local.response.filename = "{datum}_{wochentag}_{name}.doc".format(datum=datum, wochentag=wochentag, name=clean_berater_name)
     frappe.local.response.filecontent = html
     frappe.local.response.type = "download"
 

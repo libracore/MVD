@@ -98,7 +98,7 @@ def start_massenlauf_inaktivierung(doc):
                 ms.status_c = 'Ausschluss'
                 alte_infos = ms.wichtig
                 neue_infos = "Ausschluss:\n" + doc.grund + "\n\n"
-                neue_infos = neue_infos + alte_infos or ''
+                neue_infos = neue_infos + (alte_infos or '')
                 ms.wichtig = neue_infos
                 ms.adressen_gesperrt = 1
                 ms.validierung_notwendig = None
@@ -167,13 +167,13 @@ def start_massenlauf_inaktivierung(doc):
                                 fr_doc.cancel()
                                 fr_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
             except Exception as error:
-                errors.append([mitgliedschaft.mv_mitgliedschaft, str(error)])
+                errors.append([mitgliedschaft.mv_mitgliedschaft, str(error), frappe.get_traceback()])
         
         doc.reload()
         doc.db_set('status', 'Abgeschlossen', commit=True)
         if len(errors) > 0:
             for e in errors:
-                doc.add_comment('Comment', text='Fehlgeschlagen: {0} // {1}'.format(e[0], e[1]))
+                doc.add_comment('Comment', text='Fehlgeschlagen: {0} // {1}\n\n{2}'.format(e[0], e[1], e[2]))
     except Exception as err:
         failed = True
         doc.reload()

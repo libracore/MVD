@@ -7,6 +7,7 @@
   "status",
   "hash",
   "sektion_id",
+  "changed_by_sektion",
   "cb_1",
   "mitglied_nr",
   "mitglied_id",
@@ -104,9 +105,16 @@
    "fieldname": "language",
    "fieldtype": "Data",
    "label": "Sprache"
+  },
+  {
+   "default": "0",
+   "fieldname": "changed_by_sektion",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "changed_by_sektion"
   }
  ],
- "modified": "2024-11-04 15:45:22.234837",
+ "modified": "2024-12-05 15:24:50.884262",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Digitalrechnung",

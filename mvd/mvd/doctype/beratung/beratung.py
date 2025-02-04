@@ -119,6 +119,16 @@ class Beratung(Document):
         # MVAG Default Text (Antwort)
         if self.sektion_id == 'MVAG':
             self.set_mvag_default_text()
+        
+        # Setzen von User-Permission auf Basis der Rolle MV_ERB
+        if self.kontaktperson and self.mv_mitgliedschaft:
+            self.set_mverb_user_permission()
+        
+        # Markieren wenn mit Mitgliedschaft verknüpft, wird für Berechtigung von MV_ERB benötigt
+        if self.mv_mitgliedschaft:
+            self.mv_erb_permission = "Write"
+        else:
+            self.mv_erb_permission = "None"
     
     def set_sektion(self):
         '''
@@ -314,6 +324,22 @@ class Beratung(Document):
                     <div>Notizen Rechtsberatung zum Fall:<br><br></div>
                 </div>
             """
+    
+    def set_mverb_user_permission(self):
+        kontaktperson = frappe.get_doc("Termin Kontaktperson", self.kontaktperson)
+        for _user in kontaktperson.user:
+            user = _user.user
+            user_roles = frappe.get_roles(user)
+            if "MV_ERB" in user_roles and "System Manager" not in user_roles:
+                # Create User-Permission for Mitglied
+                if not frappe.db.exists("User Permission", {"user": user, "for_value": self.mv_mitgliedschaft}):
+                    new_permission = frappe.get_doc({
+                        'doctype': 'User Permission',
+                        'user': user,
+                        'apply_to_all_doctypes': 1,
+                        'for_value': self.mv_mitgliedschaft,
+                        'allow': 'Mitgliedschaft'
+                    }).insert(ignore_permissions=True)
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
@@ -519,6 +545,10 @@ def check_communication(self, event):
             else:
                 beratung.ungelesen = 1
                 beratung.save()
+        elif communication.reference_doctype == 'Issue':
+            #1212
+            issue = frappe.get_doc("Issue", communication.reference_name)
+            issue.ungelesene_email = 1
 
 @frappe.whitelist()
 def uebernahme(beratung, user):
@@ -637,7 +667,8 @@ def create_neue_beratung(mitgliedschaft, termin_block_data, art, ort, berater_in
                 "sektion_id": frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id'),
                 "mv_mitgliedschaft": mitgliedschaft,
                 "kontaktperson": berater_in,
-                "notiz": "Terminnotiz:<br>{0}".format(notiz)
+                "notiz": "Terminnotiz:<br>{0}".format(notiz),
+                "beratungskanal": "Telefon" if art == 'telefonisch' else art
             })
             beratung.insert()
             for termin in termin_block_data:
@@ -650,6 +681,7 @@ def create_neue_beratung(mitgliedschaft, termin_block_data, art, ort, berater_in
                 row.telefonnummer = telefonnummer
                 row.abp_referenz = termin['referenz']
                 row.notiz = notiz
+            
             beratung.save()
         else:
             # füge Termin zu bestehenden Beratung hinzu
@@ -664,6 +696,7 @@ def create_neue_beratung(mitgliedschaft, termin_block_data, art, ort, berater_in
                 row.telefonnummer = telefonnummer
                 row.abp_referenz = termin['referenz']
                 row.notiz = notiz
+            beratung.beratungskanal = "Telefon" if art == 'telefonisch' else art
             beratung.save()
         
         return beratung.name

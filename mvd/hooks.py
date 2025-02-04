@@ -98,6 +98,8 @@ notification_config = "mvd.mvd.utils.notifications.get_notification_config"
 
 extend_bootinfo = "mvd.mvd.utils.mvd_bootinfo.boot_session"
 
+on_login = "mvd.mvd.utils.mvd_bootinfo.login_check"
+
 # Permissions
 # -----------
 # Permissions evaluated in scripted ways
@@ -166,6 +168,9 @@ scheduler_events = {
         "mvd.www.emailberatung.send_to_sp",
         "mvd.mvd.service_plattform.request_worker.service_plattform_log_worker",
         "mvd.mvd.doctype.serien_email.serien_email.send_mails"
+    ],
+    "hourly": [
+        "mvd.mvd.doctype.wohnungsabgabe.wohnungsabgabe.qa_mail"
     ]
 }
 # scheduler_events = {

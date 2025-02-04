@@ -88,7 +88,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Dokument",
-   "options": "Anmeldung mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ\nMahnung\nGeschenkmitgliedschaft\nRechnung (Sonstiges)\nJahresrechnung",
+   "options": "Anmeldung mit EZ\nInteressent*Innenbrief mit EZ\nBegr\u00fcssung mit Ausweis\nHV mit EZ\nSpende mit EZ\nKorrespondenz\nK\u00fcndigung\nZuzug ohne EZ\nZuzug mit EZ\nMahnung\nGeschenkmitgliedschaft\nRechnung (Sonstiges)\nJahresrechnung\nWohnungsabgabe",
    "reqd": 1
   },
   {
@@ -471,7 +471,7 @@
    "label": "test_dn"
   }
  ],
- "modified": "2024-11-12 11:28:53.542689",
+ "modified": "2025-01-16 15:14:51.973084",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

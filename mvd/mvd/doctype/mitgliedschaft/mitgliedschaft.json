@@ -16,7 +16,7 @@
   "region",
   "region_manuell",
   "m_und_w",
-  "digitalrechnung_button",
+  "digitalrechnung",
   "briefanrede",
   "adressblock",
   "rg_briefanrede",
@@ -200,7 +200,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Mitglied Nr.",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "mitglied_id",
@@ -233,7 +234,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Regul\u00e4r\nAnmeldung\nOnline-Anmeldung\nOnline-Beitritt\nOnline-K\u00fcndigung\nOnline-Mutation\nZuzug\nGestorben\nK\u00fcndigung\nWegzug\nAusschluss\nInaktiv\nInteressent*in",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "mitgliedtyp_c",
@@ -1323,13 +1325,14 @@
    "label": "Digitalrechnung Hash"
   },
   {
-   "fieldname": "digitalrechnung_button",
-   "fieldtype": "Button",
+   "default": "0",
+   "fieldname": "digitalrechnung",
+   "fieldtype": "Check",
    "label": "digitale Rechnung"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2024-11-14 10:00:29.521673",
+ "modified": "2025-01-14 08:36:51.676739",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

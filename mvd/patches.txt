@@ -26,3 +26,4 @@ mvd.patches.default_interessent_typ.anlage
 mvd.patches.v11_25_0.change_mwst_accounts
 mvd.patches.set_berater_hash.set_hash
 mvd.patches.iss1143.create_tables
+mvd.patches.v13_35_0.go_life_reset

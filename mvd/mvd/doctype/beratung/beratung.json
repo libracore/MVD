@@ -43,6 +43,7 @@
   "cb_1",
   "subject",
   "mv_mitgliedschaft",
+  "mv_erb_permission",
   "sektion_id",
   "status",
   "zusatzinfo_status",
@@ -433,9 +434,16 @@
    "fieldname": "vorlage_einfuegen",
    "fieldtype": "Button",
    "label": "Vorlage einf\u00fcgen"
+  },
+  {
+   "fieldname": "mv_erb_permission",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "MV_ERB Permission",
+   "options": "MV_ERB Permission"
   }
  ],
- "modified": "2024-09-17 16:00:55.159404",
+ "modified": "2025-01-23 14:44:48.616044",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

@@ -26,6 +26,10 @@ def get_alle_beratungs_termine(user):
     meine = []
     vergebene_termin_liste = []
     kontaktperson_multi_user = get_kontaktperson_multi_user(user)
+    erb_block = True if "MV_ERB" in frappe.get_roles() else False
+    if erb_block:
+        erb_block = False if "System Manager" in frappe.get_roles() else True
+
     sektionen = frappe.db.sql("""
                                 SELECT `for_value`
                                 FROM `tabUser Permission`
@@ -61,25 +65,26 @@ def get_alle_beratungs_termine(user):
                                  """.format(datum_von=today()), as_dict=True)
     for termin in alle_termine:
         if not erlaubte_sektionen or termin.sektion_id in erlaubte_sektionen:
-            hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.parent), as_dict=True)[0].qty > 0 else 0
-            termin_data = {
-                'von_date': get_datetime(termin.von).strftime('%d.%m.%Y'),
-                'von_time': get_datetime(termin.von).strftime('%H:%M'),
-                'bis_time': get_datetime(termin.bis).strftime('%H:%M'),
-                'art': termin.art,
-                'ort': termin.ort,
-                'beratung': termin.parent,
-                'beraterinn': termin.berater_in,
-                'hat_attachement': hat_attachement,
-                'telefonnummer': termin.telefonnummer,
-                'wochentag': _(get_datetime(termin.von).strftime('%A'))[:2],
-                'beratungskategorie': termin.beratungskategorie.split(" - ")[0] if termin.beratungskategorie else '',
-                'beratungskategorie_2': termin.beratungskategorie_2.split(" - ")[0] if termin.beratungskategorie_2 else '',
-                'beratungskategorie_3': termin.beratungskategorie_3.split(" - ")[0] if termin.beratungskategorie_3 else '',
-                'name_mitglied': "{0} {1}".format(frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'vorname_1'), frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'nachname_1')),
-                'sort_date': frappe.utils.getdate(termin.von)
-            }
-            alle.append(termin_data)
+            if not erb_block or termin.berater_in in kontaktperson_multi_user:
+                hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.parent), as_dict=True)[0].qty > 0 else 0
+                termin_data = {
+                    'von_date': get_datetime(termin.von).strftime('%d.%m.%Y'),
+                    'von_time': get_datetime(termin.von).strftime('%H:%M'),
+                    'bis_time': get_datetime(termin.bis).strftime('%H:%M'),
+                    'art': termin.art,
+                    'ort': termin.ort,
+                    'beratung': termin.parent,
+                    'beraterinn': termin.berater_in,
+                    'hat_attachement': hat_attachement,
+                    'telefonnummer': termin.telefonnummer,
+                    'wochentag': _(get_datetime(termin.von).strftime('%A'))[:2],
+                    'beratungskategorie': termin.beratungskategorie.split(" - ")[0] if termin.beratungskategorie else '',
+                    'beratungskategorie_2': termin.beratungskategorie_2.split(" - ")[0] if termin.beratungskategorie_2 else '',
+                    'beratungskategorie_3': termin.beratungskategorie_3.split(" - ")[0] if termin.beratungskategorie_3 else '',
+                    'name_mitglied': "{0} {1}".format(frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'vorname_1'), frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'nachname_1')),
+                    'sort_date': frappe.utils.getdate(termin.von)
+                }
+                alle.append(termin_data)
         if termin.berater_in in kontaktperson_multi_user:
             meine.append(termin_data)
         if termin.abp_referenz:
@@ -122,7 +127,8 @@ def get_alle_beratungs_termine(user):
     
     for freier_termin in freie_termine:
         if not erlaubte_sektionen or freier_termin.sektion_id in erlaubte_sektionen:
-            alle.append(freier_termin)
+            if not erb_block or freier_termin.beraterinn in kontaktperson_multi_user:
+                alle.append(freier_termin)
     
     alle_sortiert = sorted(alle, key = lambda x: (x['sort_date'], x['beraterinn'] or 'ZZZ', x['von_time']))
 
