@@ -29,12 +29,14 @@ class return_object:
 class sektion_object:
     def __init__(self):
         self.sektion=None
-        self.items=None
+        self.doctype_sektion=None
+        self.all_items=None
     
-    def set_values(self, sektion, items):
+    def set_values(self, sektion, all_items):
         self.sektion = sektion.name
-        self.items = items
-    
+        self.all_items = all_items
+        # insert whole classe i.e. doctype sektion
+        self.doctype_sektion = frappe.get_doc("Sektion", sektion.name)
     def asDict(self):
         return self.__dict__
 
@@ -43,20 +45,21 @@ class sektion_object:
 '''
 # @frappe.whitelist(allow_guest=True)
 @frappe.whitelist()
-def get_data(**api_request):
+def get_data_sektionen(**api_request):
     return_obj = return_object()
     sektionen = frappe.db.sql("""
                                 SELECT
                                     `name`,
                                     `mitgliedschafts_artikel` AS `mitgliedschaft_privat`
                                 FROM `tabSektion`
+                                WHERE `pseudo_sektion` != 1 AND `name` != 'M+W-Abo'
                               """, as_dict=True)
     for sektion in sektionen:
-        item_details = get_item_details(sektion)
         sektion_obj = sektion_object()
-        sektion_obj.set_values(sektion, item_details)
+        all_items = get_all_item_details(sektion)
+        sektion_obj.set_values(sektion, all_items)
         return_obj.add_sektion(sektion_obj.asDict())
-    
+
     frappe.local.response.http_status_code = 200
     frappe.local.response.message = return_obj.asDict()
     return
@@ -64,9 +67,36 @@ def get_data(**api_request):
 '''
     Hilfs-Methoden
 '''
-def get_item_details(sektion):
+def get_item_names_of_doctype(doctype_name):
+    '''
+    Holt und gibt alle Item-Namen aus dem Doctype Sektion als Liste zurück
+    '''
+    meta = frappe.get_meta(doctype_name)
+
+    link_fields = []
+    
+    for field in meta.fields:
+        if field.fieldtype == 'Link' and field.options == 'Item':
+            link_fields.append(field.fieldname)
+    
+    return link_fields
+
+
+def get_all_item_details(sektion):
+    '''
+    Holt und gibt alle Item-Details aus dem Doctype Sektion zurück mit Artielnummer, Beschreibung und Preis
+    '''
+
+    #all_items = get_item_names_of_doctype("Sektion")
+    all_items = ["mitgliedschafts_artikel", "mitgliedschafts_artikel_geschaeft", "mitgliedschafts_artikel_beitritt", "mitgliedschafts_artikel_beitritt_geschaeft", "mitgliedschafts_artikel_reduziert", "mitgliedschafts_artikel_gratis", "hv_artikel", "spenden_artikel"]
+    
+    # das ist nicht schön so
+    doctype_sektion = frappe.get_doc("Sektion", sektion.name)
+    
     items = []
-    if sektion.mitgliedschaft_privat:
+    for item_field_name in all_items:
+        if doctype_sektion.get(item_field_name):
+            item_name = doctype_sektion.get(item_field_name)
         item_details = frappe.db.sql("""
                                         SELECT
                                             `name`,
@@ -74,10 +104,12 @@ def get_item_details(sektion):
                                             NULL AS `rate`
                                         FROM `tabItem`
                                         WHERE `name` = '{0}'
-                                     """.format(sektion.mitgliedschaft_privat), as_dict=True)
+                                     """.format(item_name), as_dict=True)
         if len(item_details) > 0:
             item_details[0].rate = get_item_rate(item_details[0].name)
-            items.append(item_details[0])
+            items.append(item_details[0])   
+        items[-1]['field_name'] = item_field_name          
+    
     return items
 
 def get_item_rate(item):
