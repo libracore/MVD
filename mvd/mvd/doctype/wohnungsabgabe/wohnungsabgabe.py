@@ -29,12 +29,12 @@ class Wohnungsabgabe(Document):
                     doctype='Wohnungsabgabe',
                     name=self.name,
                     send_email=False,
-                    sender_full_name=frappe.get_value("Sektion", self.sektion_id, "legacy_mail_absende_name")
+                    sender_full_name=frappe.get_value("Sektion", self.sektion_id, "serien_email_absender_name")
                 )["name"]
                 
                 sendmail(
                     recipients=[recipient],
-                    sender="{0} <{1}>".format(frappe.get_value("Sektion", self.sektion_id, "legacy_mail_absende_name"), frappe.get_value("Sektion", self.sektion_id, "legacy_mail_absender_mail")),
+                    sender="{0} <{1}>".format(frappe.get_value("Sektion", self.sektion_id, "serien_email_absender_name"), frappe.get_value("Sektion", self.sektion_id, "serien_email_absender_adresse")),
                     subject=subject, 
                     message=message,
                     as_markdown=False,
@@ -48,7 +48,7 @@ class Wohnungsabgabe(Document):
                     content=None,
                     doctype='Wohnungsabgabe',
                     name=self.name,
-                    reply_to=frappe.get_value("Sektion", self.sektion_id, "legacy_mail_absender_mail"),
+                    reply_to=frappe.get_value("Sektion", self.sektion_id, "serien_email_absender_adresse"),
                     cc=[],
                     bcc=[],
                     message_id=frappe.get_value("Communication", comm, "message_id"),
