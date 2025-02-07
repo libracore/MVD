@@ -192,7 +192,8 @@
   "zuzug_durch_sp",
   "m_und_w_export",
   "geschenk_reset_rechnung",
-  "digitalrechnung_hash"
+  "digitalrechnung_hash",
+  "deleted_by_admin"
  ],
  "fields": [
   {
@@ -1329,10 +1330,16 @@
    "fieldname": "digitalrechnung",
    "fieldtype": "Check",
    "label": "digitale Rechnung"
+  },
+  {
+   "default": "0",
+   "fieldname": "deleted_by_admin",
+   "fieldtype": "Check",
+   "label": "deleted_by_admin"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2025-01-14 08:36:51.676739",
+ "modified": "2025-02-07 10:39:05.226964",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

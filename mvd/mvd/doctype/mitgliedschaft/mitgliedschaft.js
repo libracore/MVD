@@ -310,6 +310,11 @@ frappe.ui.form.on('Mitgliedschaft', {
                 sende_k_best_email(frm);
             });
         }
+
+        // deleted_by_admin hint
+        if (cur_frm.doc.deleted_by_admin) {
+            frm.set_intro("Dieser Eintrag wurde von einem Administrator inaktiviert/«gelöscht».");
+        }
     },
     m_und_w: function(frm) {
         if (![0, 1].includes(cur_frm.doc.m_und_w)) {
