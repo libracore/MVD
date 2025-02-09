@@ -77,9 +77,8 @@
   "default_rueckfragen_email_template",
   "default_termindauer",
   "default_terminbestaetigung_email_template",
-  "hinweis_mietzinsrechner",
-  "hinweis_mietzingsrechner_senkung",
-  "hinweis_mietzinsrechnung_erhoehung",
+  "hinweis_mietzinssrechner_senkung",
+  "hinweis_mietzinsrechner_erhoehung",
   "default_terminbest_hinweis_de",
   "default_terminbest_hinweis_fr",
   "section_mzr",
@@ -486,12 +485,6 @@
    "label": "Referenzblock"
   },
   {
-   "fieldname": "hinweis_mietzinsrechner",
-   "fieldtype": "Code",
-   "label": "Hinweis Mietzinsrechner",
-   "permlevel": 1
-  },
-  {
    "default": "0",
    "fieldname": "mwst_faktura_ausblenden",
    "fieldtype": "Check",
@@ -599,17 +592,17 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "hinweis_mietzingsrechner_senkung",
+   "fieldname": "hinweis_mietzinsrechner_erhoehung",
    "fieldtype": "Code",
-   "label": "Hinweis Mietzinsrechner Senkung"
+   "label": "Hinweis Mietzinsrechner Erhoehung"
   },
   {
-   "fieldname": "hinweis_mietzinsrechnung_erhoehung",
+   "fieldname": "hinweis_mietzinssrechner_senkung",
    "fieldtype": "Code",
-   "label": "Hiinweis Mietzinsrechnung Erhoehung"
+   "label": "Hinweis Mietzinsrechner Senkung"
   }
  ],
- "modified": "2025-02-09 20:30:29.199221",
+ "modified": "2025-02-09 21:24:31.710252",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
