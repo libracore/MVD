@@ -307,9 +307,27 @@ function hide_mz() {
     });
 }
 
-function check_mietzinserhoehung() {
-    show_mz();
-    $("#themen_wahl").val("Mietzinserhöhung");
+function check_mietzinsaenderung() {
+    document.getElementById('mietzinsaenderung_options').style.display = 'block';
+    document.getElementById('aenderung-error').style.display = 'none';
+}
+
+function check_heiz_und_nebenkosten() {
+    document.getElementById('mietzinsaenderung_options').style.display = 'none';
+}
+
+function check_anderes() {
+    document.getElementById('mietzinsaenderung_options').style.display = 'none';
+}
+
+function validateForm() {
+    if (document.getElementById('thema_0').checked) {
+        if (!document.querySelector('input[name="aenderung_art"]:checked')) {
+            document.getElementById('aenderung-error').style.display = 'block';
+            return false;
+        }
+    }
+    return true;
 }
 function check_heiz_und_nebenkosten() {
     hide_mz();

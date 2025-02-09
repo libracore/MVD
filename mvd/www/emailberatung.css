@@ -5517,6 +5517,12 @@ div.modal-footer.hidden {
 }
 /*# sourceMappingURL=awesomplete.css.map */
 
+.sub-options {
+    margin-top: 10px;
+    padding-left: 20px;
+    border-left: 2px solid #eee;
+}
+
 .awesomplete-delete {
 position: absolute;
 top: 6px;
