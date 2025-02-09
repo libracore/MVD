@@ -202,9 +202,26 @@
                                                         <div id="themen_wahl_box" class="col-sm-12 col-md-8 col-lg-8">
                                                             <fieldset>
                                                                 <div class="form-item">
-                                                                    <input type="radio" id="thema_0" name="thema" value="Mietzinserhöhung" onclick="check_mietzinserhoehung();">
-                                                                    <label for="thema_0">Mietzinserhöhung</label>
+                                                                    <input type="radio" id="thema_0" name="thema" value="Mietzinsänderung" onclick="check_mietzinsaenderung();">
+                                                                    <label for="thema_0">Mietzinsänderung</label>
+                                                                    
+                                                                    <div id="mietzinsaenderung_options" class="sub-options" style="display:none; margin-left: 20px;">
+                                                                        <div class="form-item">
+                                                                            <input type="radio" id="aenderung_art_0" name="aenderung_art" value="Mietzinserhöhung">
+                                                                            <label for="aenderung_art_0">Mietzinserhöhung</label>
+                                                                        </div>
+                                                                        <div class="form-item">
+                                                                            <input type="radio" id="aenderung_art_1" name="aenderung_art" value="Mietzinssenkung">
+                                                                            <label for="aenderung_art_1">Mietzinssenkung</label>
+                                                                        </div>
+                                                                        <div id="aenderung-error" class="text error" style="display:none">
+                                                                            <ul>
+                                                                                <li>Bitte wählen Sie eine Art der Mietzinsänderung aus.</li>
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
+                                                                <!-- Keep existing Heiz- und Nebenkosten and anderes options -->
                                                                 <!-- end form-item -->
                                                                 <div class="form-item">
                                                                     <input type="radio" id="thema_1" name="thema" value="Heiz- und Nebenkosten" onclick="check_heiz_und_nebenkosten();">
