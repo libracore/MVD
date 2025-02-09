@@ -149,6 +149,8 @@ def context_erweiterung(context, mitgliedschaft):
         # Hinweis Mietzinsrechnererhoehung
         context.hinweis_mietzinsrechner_erhoehung = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'hinweis_mietzinsrechner_erhoehung') or ''
 
+        # Hinweis Mietzinsrechnersenkung
+        #context.hinweis_mietzinsrechner_senkung = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'hinweis_mietzinsrechner_senkung') or ''
         
         
         return context
@@ -170,7 +172,7 @@ def new_beratung(**kwargs):
             if sektion == 'MVBE' or sektion == 'MVLU':
                 if args['thema'] != 'anderes':
                     thema = args['thema']
-                    if args['thema'] == 'Mietzinserhöhung':
+                    if args['thema'] == 'Mietzinsänderung':
                         beratungskategorie = '202 - MZ-Erhöhung'
                     elif args['thema'] == 'Heiz- und Nebenkosten':
                         beratungskategorie = '300 - Nebenkosten'

@@ -501,6 +501,38 @@
                                                 </div>
                                             </fieldset>
                                             <fieldset class="fieldset">
+                                                <span class="e-copy-small required-hint position-right"><span>*</span> Pflichtfeld</span>
+                                                <h2 class="e-h3 fieldset-title" id="tab_title">Beratungsanfrage</h2>
+                                                {{ hinweis_mietzinsrechner_senkung }}
+                                                <div class="form-row">
+                                                    <div class="row">
+                                                        <div class="col-sm-12 col-md-4 col-lg-4">
+                                                            <label for="frage" class="label frage required">
+                                                                Frage&nbsp;*
+                                                            </label>
+                                                        </div>
+                                                        <div class="col-sm-12 col-md-8 col-lg-8">
+                                                            <textarea id="frage" name="frage" rows="10"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Mietzinsfelder -->
+                                                <div class="mz" id="mz" style="display:none;">
+                                                    <div class="form-row">
+                                                        <div class="row">
+                                                            <div class="col-sm-12 col-md-4 col-lg-4">
+                                                                <label for="datum_mietzinsanzeige" class="label mietzins required">
+                                                                    Briefdatum der Mietzinserhöhungsanzeige&nbsp;*
+                                                                </label>
+                                                            </div>
+                                                            <div class="col-sm-12 col-md-8 col-lg-8" style="padding-top: 10px;">
+                                                                <input type="date" id="datum_mietzinsanzeige" name="datum_mietzinsanzeige">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                            <fieldset class="fieldset">
                                                 <span class="e-copy-small required-hint position-right" style="display: none;"><span>*</span> Pflichtfeld</span>
                                                 <h2 class="e-h3 fieldset-title">Dokumente hochladen</h2>
                                                 <div class="text-image text-image-mv rich-text no-img">
