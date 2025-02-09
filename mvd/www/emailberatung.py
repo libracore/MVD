@@ -146,8 +146,8 @@ def context_erweiterung(context, mitgliedschaft):
 
         context.sektionsname = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'company') or 'MV'
         
-        # Hinweis Mietzinsrechner
-        context.hinweis_mietzinsrechner = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'hinweis_mietzinsrechner') or ''
+        # Hinweis Mietzinsrechnererhoehung
+        context.hinweis_mietzinsrechner_erhoehung = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'hinweis_mietzinsrechner_erhoehung') or ''
 
         
         
