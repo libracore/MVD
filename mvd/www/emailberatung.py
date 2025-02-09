@@ -143,15 +143,10 @@ def context_erweiterung(context, mitgliedschaft):
             context.legacy_mode = False
         
         # Sektionsangaben
-
         context.sektionsname = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'company') or 'MV'
         
         # Hinweis Mietzinsrechnererhoehung
         context.hinweis_mietzinsrechner_erhoehung = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'hinweis_mietzinsrechner_erhoehung') or ''
-
-        # Hinweis Mietzinsrechnersenkung
-        #context.hinweis_mietzinsrechner_senkung = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'hinweis_mietzinsrechner_senkung') or ''
-        
         
         return context
     except Exception as err:
