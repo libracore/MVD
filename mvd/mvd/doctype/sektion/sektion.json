@@ -77,7 +77,7 @@
   "default_rueckfragen_email_template",
   "default_termindauer",
   "default_terminbestaetigung_email_template",
-  "hinweis_mietzinssrechner_senkung",
+  "hinweis_mietzinsrechner_senkung",
   "hinweis_mietzinsrechner_erhoehung",
   "default_terminbest_hinweis_de",
   "default_terminbest_hinweis_fr",
@@ -597,12 +597,12 @@
    "label": "Hinweis Mietzinsrechner Erhoehung"
   },
   {
-   "fieldname": "hinweis_mietzinssrechner_senkung",
+   "fieldname": "hinweis_mietzinsrechner_senkung",
    "fieldtype": "Code",
    "label": "Hinweis Mietzinsrechner Senkung"
   }
  ],
- "modified": "2025-02-10 19:54:15.574463",
+ "modified": "2025-02-10 20:34:02.523188",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
