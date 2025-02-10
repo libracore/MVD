@@ -10,7 +10,6 @@ function new_onlineberatung() {
                 'email': document.getElementById("email").value,
                 'anderes_mietobjekt': document.getElementById("anderes_mietobjekt").value,
                 'frage': document.getElementById("frage").value,
-                'datum_mietzinsanzeige': document.getElementById("datum_mietzinsanzeige").value,
                 'thema': (sektion_id == 'MVBE' || sektion_id == 'MVLU') ? document.getElementById("themen_wahl").value:'',
                 'termin_vereinbaren': (sektion_id == 'MVBE' || sektion_id == 'MVLU') ? document.getElementById("termin_vereinbaren_cb").checked:'',
                 'mz': localStorage.getItem('mz_anfrage')
@@ -45,10 +44,6 @@ function check_mandatory(sektion_id) {
     
     if (sektion_id == 'MVBE') {
         mandatory_fields.push('themen_wahl');
-    }
-    
-    if (localStorage.getItem('mz_anfrage') == '1') {
-        mandatory_fields.push('datum_mietzinsanzeige');
     }
     
     failed_validations = []
@@ -234,12 +229,15 @@ function upload_files(beratung, key, secret, loop=1) {
     }
 }
 
-function show_mz() {
+function show_mz_erhoehung() {
     localStorage.setItem('mz_anfrage', '1');
     $("#tab_title").text("Mietzinserhöhung");
     $(".mz").css("display", 'inline');
-    $("#mz_item").addClass("selected");
+    $("#mz_erhoehung_item").addClass("selected");
     $("#allgmein_item").removeClass("selected");
+    $("#mz_senkung_item").removeClass("selected");
+    $("#hinweis_mietzinsrechner_erhoehung").show();
+    $("#hinweis_mietzinsrechner_senkung").hide();
     
     // remove upload rows
     $(".file-upload-row").each(function(){
@@ -267,16 +265,55 @@ function show_mz() {
             $(this).text("Falls vorhanden: weitere Vertragsänderung (Mietzinsherabsetzungen, Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
         }
     });
+}
+
+function show_mz_senkung() {
+    localStorage.setItem('mz_anfrage', '1');
+    $("#tab_title").text("Mietzinssenkung");
+    $(".mz").css("display", 'inline');
+    $("#mz_senkung_item").addClass("selected");
+    $("#allgmein_item").removeClass("selected");
+    $("#mz_erhoehung_item").removeClass("selected");
+    $("#hinweis_mietzinsrechner_erhoehung").hide();
+    $("#hinweis_mietzinsrechner_senkung").show();
     
+    // remove upload rows
+    $(".file-upload-row").each(function(){
+        if ($(this).attr('id') != 'default_file_row') {
+            $(this).remove();
+        }
+    });
+    
+    // clear first upload file
+    $("#upload_files_1").val('');
+    
+    // set first 3 upload rows
+    add_new_file_row();
+    add_new_file_row();
+    $("#upload_files_auswahl_1").val('Mietvertrag');
+    $("#upload_files_auswahl_2").val('Mietzinssenkung');
+    $("#upload_files_auswahl_1").attr('readonly', true);
+    $("#upload_files_auswahl_2").attr('readonly', true);
+    $("label[for='upload_files']").each(function(index,element){
+        if (index == 0) {
+            $(this).text("1. Mietvertrag");
+        } else if (index == 1) {
+            $(this).text("2. Mietzinssenkung");
+        } else if (index == 2) {
+            $(this).text("Falls vorhanden: weitere Vertragsänderung (Mietzinsherabsetzungen, Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
+        }
+    });
 }
 
 function hide_mz() {
     localStorage.setItem('mz_anfrage', '0');
-    $("#datum_mietzinsanzeige").val('');
     $("#tab_title").text("Beratungsanfrage");
     $(".mz").css("display", 'none');
     $("#allgmein_item").addClass("selected");
-    $("#mz_item").removeClass("selected");
+    $("#mz_erhoehung_item").removeClass("selected");
+    $("#mz_senkung_item").removeClass("selected");
+    $("#hinweis_mietzinsrechner_erhoehung").hide();
+    $("#hinweis_mietzinsrechner_senkung").hide();
     
     // remove upload rows
     $(".file-upload-row").each(function(){
