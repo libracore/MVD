@@ -364,7 +364,10 @@ function check_mietzinsaenderung() {
 
 function check_heiz_und_nebenkosten() {
     document.getElementById('mietzinsaenderung_options').style.display = 'none';
-    // Uncheck other options
+    // Uncheck mietzinsänderung options
+    document.getElementById('aenderung_art_0').checked = false;
+    document.getElementById('aenderung_art_1').checked = false;
+    // Uncheck other main options
     document.getElementById('thema_0').checked = false;
     document.getElementById('thema_2').checked = false;
     hide_mz();
@@ -373,7 +376,10 @@ function check_heiz_und_nebenkosten() {
 
 function check_anderes() {
     document.getElementById('mietzinsaenderung_options').style.display = 'none';
-    // Uncheck other options
+    // Uncheck mietzinsänderung options
+    document.getElementById('aenderung_art_0').checked = false;
+    document.getElementById('aenderung_art_1').checked = false;
+    // Uncheck other main options
     document.getElementById('thema_0').checked = false;
     document.getElementById('thema_1').checked = false;
     hide_mz();
@@ -389,18 +395,9 @@ function validateForm() {
     }
     return true;
 }
-function check_heiz_und_nebenkosten() {
-    hide_mz();
-    $("#themen_wahl").val("Heiz- und Nebenkosten");
-}
-function check_anderes() {
-    hide_mz();
-    $("#themen_wahl").val("anderes");
-}
 
-// Add this new function to handle radio button behavior
+// Add click handlers for radio buttons
 document.addEventListener('DOMContentLoaded', function() {
-    // Add click handlers for radio buttons
     var radioButtons = document.querySelectorAll('input[name="thema"]');
     radioButtons.forEach(function(radio) {
         radio.addEventListener('click', function() {
@@ -409,6 +406,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.checked = false;
                 this.setAttribute('data-was-checked', 'false');
                 document.getElementById('mietzinsaenderung_options').style.display = 'none';
+                // Also uncheck any sub-options
+                document.getElementById('aenderung_art_0').checked = false;
+                document.getElementById('aenderung_art_1').checked = false;
                 hide_mz();
             } else {
                 // Mark this as checked and unmark others
