@@ -347,7 +347,7 @@ function hide_mz() {
 function check_mietzinsaenderung() {
     document.getElementById('mietzinsaenderung_options').style.display = 'block';
     document.getElementById('aenderung-error').style.display = 'none';
-
+    
     // Add event listeners to the radio buttons
     document.getElementById('aenderung_art_0').addEventListener('change', function() {
         if (this.checked) {
@@ -364,10 +364,20 @@ function check_mietzinsaenderung() {
 
 function check_heiz_und_nebenkosten() {
     document.getElementById('mietzinsaenderung_options').style.display = 'none';
+    // Uncheck other options
+    document.getElementById('thema_0').checked = false;
+    document.getElementById('thema_2').checked = false;
+    hide_mz();
+    $("#themen_wahl").val("Heiz- und Nebenkosten");
 }
 
 function check_anderes() {
     document.getElementById('mietzinsaenderung_options').style.display = 'none';
+    // Uncheck other options
+    document.getElementById('thema_0').checked = false;
+    document.getElementById('thema_1').checked = false;
+    hide_mz();
+    $("#themen_wahl").val("anderes");
 }
 
 function validateForm() {
@@ -387,6 +397,29 @@ function check_anderes() {
     hide_mz();
     $("#themen_wahl").val("anderes");
 }
+
+// Add this new function to handle radio button behavior
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers for radio buttons
+    var radioButtons = document.querySelectorAll('input[name="thema"]');
+    radioButtons.forEach(function(radio) {
+        radio.addEventListener('click', function() {
+            // If this was already checked, uncheck it
+            if (this.getAttribute('data-was-checked') === 'true') {
+                this.checked = false;
+                this.setAttribute('data-was-checked', 'false');
+                document.getElementById('mietzinsaenderung_options').style.display = 'none';
+                hide_mz();
+            } else {
+                // Mark this as checked and unmark others
+                radioButtons.forEach(function(r) {
+                    r.setAttribute('data-was-checked', 'false');
+                });
+                this.setAttribute('data-was-checked', 'true');
+            }
+        });
+    });
+});
 
 // AWESOMPLETE
 // ----------------------------------------------------------------------------------------------------
