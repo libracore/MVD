@@ -148,6 +148,9 @@ def context_erweiterung(context, mitgliedschaft):
         # Hinweis Mietzinsrechnererhoehung
         context.hinweis_mietzinsrechner_erhoehung = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'hinweis_mietzinsrechner_erhoehung') or ''
         
+        # Hinweis Mietzinsrechnersenkung
+        context.hinweis_mietzinssrechner_senkung = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'hinweis_mietzinssrechner_senkung') or ''
+        
         return context
     except Exception as err:
         # allgemeiner Fehler

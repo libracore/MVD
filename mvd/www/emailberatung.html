@@ -452,26 +452,28 @@
                                             </fieldset>
                                             <!-- kat-anfang -->
                                             <nav class="nav-tab nav-tab-emailberatung">
-                                                                <ul class="h-cf">
-
-                                                                            <li id="allgmein_item" class="nav-item selected">
-                                                                                <a class="nav-link" href="#/" onclick="hide_mz();"><span>Allgemeine Anfrage</span></a>
-                                                                            </li>
-
-                                                                            <li id="mz_item" class="nav-item">
-                                                                                <a class="nav-link" href="#/" onclick="show_mz();"><span>Mietzinserhöhung</span></a>
-                                                                            </li>
-
-                                                                            <li id="mz_item" class="nav-item">
-                                                                                <a class="nav-link" href="#/" onclick="show_mz();"><span>Mietzinssenkung</span></a>
-                                                                            </li>
-                                                                </ul>
-                                                        </nav>
+                                                <ul class="h-cf">
+                                                    <li id="allgmein_item" class="nav-item selected">
+                                                        <a class="nav-link" href="#/" onclick="hide_mz();"><span>Allgemeine Anfrage</span></a>
+                                                    </li>
+                                                    <li id="mz_erhoehung_item" class="nav-item">
+                                                        <a class="nav-link" href="#/" onclick="show_mz_erhoehung();"><span>Mietzinserhöhung</span></a>
+                                                    </li>
+                                                    <li id="mz_senkung_item" class="nav-item">
+                                                        <a class="nav-link" href="#/" onclick="show_mz_senkung();"><span>Mietzinssenkung</span></a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
                                             <!-- kat-ende -->
                                             <fieldset class="fieldset">
                                                 <span class="e-copy-small required-hint position-right"><span>*</span> Pflichtfeld</span>
                                                 <h2 class="e-h3 fieldset-title" id="tab_title">Beratungsanfrage</h2>
-                                                {{ hinweis_mietzinsrechner_erhoehung }}
+                                                <div id="hinweis_mietzinsrechner_erhoehung" style="display:none;">
+                                                    {{ hinweis_mietzinsrechner_erhoehung }}
+                                                </div>
+                                                <div id="hinweis_mietzinsrechner_senkung" style="display:none;">
+                                                    {{ hinweis_mietzinsrechner_senkung }}
+                                                </div>
                                                 <div class="form-row">
                                                     <div class="row">
                                                         <div class="col-sm-12 col-md-4 col-lg-4">
@@ -489,12 +491,10 @@
                                                     <div class="form-row">
                                                         <div class="row">
                                                             <div class="col-sm-12 col-md-4 col-lg-4">
-                                                                <label for="datum_mietzinsanzeige" class="label mietzins required">
-                                                                    Briefdatum der Mietzinserhöhungsanzeige&nbsp;*
-                                                                </label>
+                                                                <!-- Removed labels for datum_mietzinsanzeige and datum_mietzinssenkunganzeige -->
                                                             </div>
                                                             <div class="col-sm-12 col-md-8 col-lg-8" style="padding-top: 10px;">
-                                                                <input type="date" id="datum_mietzinsanzeige" name="datum_mietzinsanzeige">
+                                                                <!-- Removed input fields for datum_mietzinsanzeige and datum_mietzinssenkunganzeige -->
                                                             </div>
                                                         </div>
                                                     </div>
