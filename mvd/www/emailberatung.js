@@ -347,6 +347,19 @@ function hide_mz() {
 function check_mietzinsaenderung() {
     document.getElementById('mietzinsaenderung_options').style.display = 'block';
     document.getElementById('aenderung-error').style.display = 'none';
+
+    // Add event listeners to the radio buttons
+    document.getElementById('aenderung_art_0').addEventListener('change', function() {
+        if (this.checked) {
+            show_mz_erhoehung();
+        }
+    });
+
+    document.getElementById('aenderung_art_1').addEventListener('change', function() {
+        if (this.checked) {
+            show_mz_senkung();
+        }
+    });
 }
 
 function check_heiz_und_nebenkosten() {
