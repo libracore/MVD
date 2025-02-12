@@ -507,6 +507,10 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frappe.validated=false;
             }
         }
+        if (cur_frm.doc.status_c == 'Regulär'&&!cur_frm.doc.eintrittsdatum) {
+            frappe.msgprint("Der Status Regulär ist nur in Kombination mit einem gesetzten Eintrittsdatum erlaubt.", __("Validation") );
+            frappe.validated=false;
+        }
     },
     after_save: function(frm) {
         // Abfrage ob M+W Retouren geschlossen werden sollen
