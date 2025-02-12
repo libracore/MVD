@@ -67,6 +67,7 @@
   "ist_kollektiv",
   "wegzug_id",
   "zuzug_id",
+  "sektionswechsel_beantragt",
   "section_personen_daten",
   "heading_hauptmitglied",
   "kundentyp",
@@ -192,8 +193,7 @@
   "zuzug_durch_sp",
   "m_und_w_export",
   "geschenk_reset_rechnung",
-  "digitalrechnung_hash",
-  "deleted_by_admin"
+  "digitalrechnung_hash"
  ],
  "fields": [
   {
@@ -1333,13 +1333,14 @@
   },
   {
    "default": "0",
-   "fieldname": "deleted_by_admin",
+   "fieldname": "sektionswechsel_beantragt",
    "fieldtype": "Check",
-   "label": "deleted_by_admin"
+   "hidden": 1,
+   "label": "Sektionswechsel beantragt"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2025-02-07 10:39:05.226964",
+ "modified": "2025-02-12 11:45:37.038904",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
