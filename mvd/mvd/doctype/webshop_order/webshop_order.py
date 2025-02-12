@@ -29,17 +29,17 @@ class WebshopOrder(Document):
                             'typ': None,
                             'qty': 0,
                             'amount': 0,
-                            'mwst': 0
+                            'mwst': 0,
+                            'item_index': str(key).replace("artikel_nr", "")
                         }
                         items.append(item)
                 
-                item_loop = 1
                 for item in items:
-                    item['typ'] = order_data['artikeltyp_{0}'.format(item_loop)]
-                    item['qty'] = order_data['anzahl_{0}'.format(item_loop)]
-                    item['amount'] = order_data['betrag_{0}'.format(item_loop)]
-                    item['mwst'] = order_data['mwst_satz_{0}'.format(item_loop)]
-                    item_loop += 1
+                    item_index = item['item_index']
+                    item['typ'] = order_data['artikeltyp_{0}'.format(item_index)]
+                    item['qty'] = order_data['anzahl_{0}'.format(item_index)]
+                    item['amount'] = order_data['betrag_{0}'.format(item_index)]
+                    item['mwst'] = order_data['mwst_satz_{0}'.format(item_index)]
                 
                 data_dict = {
                     'items': items,
