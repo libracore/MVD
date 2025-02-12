@@ -438,10 +438,8 @@ def aktualisiere_camt_uebersicht(camt_import):
     alter_status = frappe.db.get_value('CAMT Import', camt_import, 'status')
     if alter_status != 'Failed':
         if alter_status != 'Zahlungen eingelesen':
-            if (frappe.db.get_value('CAMT Import', camt_import, 'verbuchte_zahlung_qty') - frappe.db.get_value('CAMT Import', camt_import, 'ueberzahlung_qty')) == frappe.db.get_value('CAMT Import', camt_import, 'eingelesene_zahlungen_qty'):
-                if (frappe.db.get_value('CAMT Import', camt_import, 'zugewiesen_unverbucht_qty')) > 0:
-                    frappe.db.set_value('CAMT Import', camt_import, 'status', 'Verarbeitet')
-                else:
-                    frappe.db.set_value('CAMT Import', camt_import, 'status', 'Closed')
-            else:
+            draft_pe_qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabPayment Entry` WHERE `docstatus` = 0 AND `camt_import` = '{camt_import}'""".format(camt_import=camt_import), as_dict=True)[0].qty
+            if draft_pe_qty > 0:
                 frappe.db.set_value('CAMT Import', camt_import, 'status', 'Verarbeitet')
+            else:
+                frappe.db.set_value('CAMT Import', camt_import, 'status', 'Closed')
