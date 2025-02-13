@@ -374,26 +374,25 @@ function check_mietzinsaenderung() {
     });
 }
 
+function check_mietzinserhoehung() {
+    $("#themen_wahl").val("Mietzinserhöhung");
+    // Switch to Mietzinserhöhung tab
+    show_mz_erhoehung();
+}
+
+function check_mietzinssenkung() {
+    $("#themen_wahl").val("Mietzinssenkung");
+    // Switch to Mietzinssenkung tab
+    show_mz_senkung();
+}
+
+// Make sure other check functions clear the tab selection
 function check_heiz_und_nebenkosten() {
-    document.getElementById('mietzinsaenderung_options').style.display = 'none';
-    // Uncheck mietzinsänderung options
-    document.getElementById('aenderung_art_0').checked = false;
-    document.getElementById('aenderung_art_1').checked = false;
-    // Uncheck other main options
-    document.getElementById('thema_0').checked = false;
-    document.getElementById('thema_2').checked = false;
     hide_mz();
     $("#themen_wahl").val("Heiz- und Nebenkosten");
 }
 
 function check_anderes() {
-    document.getElementById('mietzinsaenderung_options').style.display = 'none';
-    // Uncheck mietzinsänderung options
-    document.getElementById('aenderung_art_0').checked = false;
-    document.getElementById('aenderung_art_1').checked = false;
-    // Uncheck other main options
-    document.getElementById('thema_0').checked = false;
-    document.getElementById('thema_1').checked = false;
     hide_mz();
     $("#themen_wahl").val("anderes");
 }
