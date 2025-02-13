@@ -287,20 +287,32 @@ function show_mz_senkung() {
     // clear first upload file
     $("#upload_files_1").val('');
     
-    // set first 3 upload rows
+    // set first 4 upload rows
     add_new_file_row();
     add_new_file_row();
+    add_new_file_row();
+
+    // Set values and make readonly
     $("#upload_files_auswahl_1").val('Mietvertrag');
-    $("#upload_files_auswahl_2").val('Mietzinssenkung');
+    $("#upload_files_auswahl_2").val('weitere Vertragsänderung');
+    $("#upload_files_auswahl_3").val('Herabsetzungsgesuch');
+    $("#upload_files_auswahl_4").val('Antwort Vermieter');
+    
     $("#upload_files_auswahl_1").attr('readonly', true);
     $("#upload_files_auswahl_2").attr('readonly', true);
+    $("#upload_files_auswahl_3").attr('readonly', true);
+    $("#upload_files_auswahl_4").attr('readonly', true);
+
+    // Update labels
     $("label[for='upload_files']").each(function(index,element){
         if (index == 0) {
             $(this).text("1. Mietvertrag");
         } else if (index == 1) {
-            $(this).text("2. Mietzinssenkung");
+            $(this).text("2. Falls vorhanden: weitere Vertragsänderung (Mietzinsherabsetzungen, Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
         } else if (index == 2) {
-            $(this).text("Falls vorhanden: weitere Vertragsänderung (Mietzinsherabsetzungen, Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
+            $(this).text("3. Herabsetzungsgesuch an Vermieterin");
+        } else if (index == 3) {
+            $(this).text("4. Antwort Vermieter*in");
         }
     });
 }
