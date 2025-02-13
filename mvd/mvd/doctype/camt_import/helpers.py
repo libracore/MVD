@@ -74,7 +74,7 @@ def erfasse_fehlgeschlagenes_auslesen(transaction, err, camt_import):
     frappe.db.set_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen', fehlgeschlagenes_auslesen)
     frappe.db.set_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen_qty', qty)
 
-def sinv_lookup(qrr_ref, betrag):
+def sinv_lookup(qrr_ref, betrag, QRR_SINVS):
     """
     Diese Funktion sucht nach gebuchten Sales Invoices anhand der QRR-Referenznummer aus der CAMT-Zahlung
     
@@ -92,27 +92,9 @@ def sinv_lookup(qrr_ref, betrag):
     - Check: False & info: Paid Fak
         -> Zugewiesene, aber unverbuchte Zahlung wird erstellt
     """
-    sinvs = frappe.db.sql("""SELECT
-                                `name` AS `sinv`,
-                                `customer`,
-                                `mv_mitgliedschaft`,
-                                `mv_kunde`,
-                                `outstanding_amount`,
-                                `sektion_id` AS `sektion`,
-                                `company`
-                            FROM `tabSales Invoice`
-                            WHERE `docstatus` = 1
-                            AND REPLACE(`esr_reference`, ' ', '') = '{qrr_ref}'
-                            AND `outstanding_amount` > 0""".format(qrr_ref=qrr_ref), as_dict=True)
-    
-    if len(sinvs) > 0:
-        # Sinv gefunden
-        if len(sinvs) > 1:
-            # mehere Sinvs gefunden -> erzeuge unzugewiesene Zahlung
-            return False
-        else:
-            # unique match -> erzeuge Zahlung
-            return sinvs[0]
+
+    if qrr_ref in QRR_SINVS:
+        return QRR_SINVS[qrr_ref]
     else:
         # sinv nicht gefunden, starte suche nach Fakultativer Rechnung
         return fak_lookup(qrr_ref, betrag)

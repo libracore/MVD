@@ -9,6 +9,8 @@ from frappe.utils.data import add_days, getdate, now
 import datetime
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
 from mvd.mvd.doctype.mitgliedschaft.utils import create_korrespondenz, sp_updater
+from frappe.utils.background_jobs import enqueue
+from mvd.mvd.utils import check_for_running_job
 
 def check_zahlung_mitgliedschaft(mitgliedschaft, db_direct=False):
     '''
@@ -356,19 +358,23 @@ def check_folgejahr_regelung(mitgliedschaft, db_direct=False):
     return
 
 def sinv_update(sinv, event):
-    if cint(sinv.fast_mode) == 1:
-        return
-
     if sinv.mv_mitgliedschaft:
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
-        check_zahlung_mitgliedschaft(mitgliedschaft, db_direct=True)
-        check_zahlung_hv(mitgliedschaft, db_direct=True)
-        check_folgejahr_regelung(mitgliedschaft, db_direct=True)
-        set_max_reminder_level(mitgliedschaft, db_direct=True)
-        get_ampelfarbe(mitgliedschaft, db_direct=True)
-        sp_updater(mitgliedschaft)
-    
+        already_running = check_for_running_job('Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft))
+        args = {
+            'mv_mitgliedschaft': sinv.mv_mitgliedschaft
+        }
+        if not already_running:
+            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft), timeout=5000, **args)
     return
+
+def _sinv_update(mv_mitgliedschaft):
+    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    check_zahlung_mitgliedschaft(mitgliedschaft, db_direct=True)
+    check_zahlung_hv(mitgliedschaft, db_direct=True)
+    check_folgejahr_regelung(mitgliedschaft, db_direct=True)
+    set_max_reminder_level(mitgliedschaft, db_direct=True)
+    get_ampelfarbe(mitgliedschaft, db_direct=True)
+    sp_updater(mitgliedschaft)
 
 def check_mitgliedschaft_in_pe(pe, event):
     if not pe.mv_mitgliedschaft:
