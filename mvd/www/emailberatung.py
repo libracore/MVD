@@ -171,8 +171,10 @@ def new_beratung(**kwargs):
             if sektion == 'MVBE' or sektion == 'MVLU':
                 if args['thema'] != 'anderes':
                     thema = args['thema']
-                    if args['thema'] == 'Mietzinsänderung':
+                    if args['thema'] == 'Mietzinserhöhung':
                         beratungskategorie = '202 - MZ-Erhöhung'
+                    elif args['thema'] == 'Mietzinssenkung':
+                        beratungskategorie = '203 - MZ-Senkung'
                     elif args['thema'] == 'Heiz- und Nebenkosten':
                         beratungskategorie = '300 - Nebenkosten'
                 if args['termin_vereinbaren']:
