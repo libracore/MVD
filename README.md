@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 16.0.1
+Wiederhrstellung "feat: administratives löschen"
 #### 16.0.0
 #1189
 #### 15.5.1
