@@ -300,15 +300,21 @@ function show_mz_erhoehung() {
     
     // Add required attribute
     $("#upload_files_1").attr('required', true);
+    $("#upload_files_2").attr('required', true);  // Make second upload field mandatory
     
     $("label[for='upload_files']").each(function(index,element){
         if (index == 0) {
             $(this).text("1. Mietvertrag *"); // Add asterisk to indicate required field
         } else if (index == 1) {
-            $(this).text("2. Mietzinserhöhung");
+            $(this).text("2. Mietzinserhöhung *"); // Add asterisk to indicate required field
         } else if (index == 2) {
             $(this).text("Falls vorhanden: weitere Vertragsänderung (Mietzinsherabsetzungen, Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
         }
+    });
+
+    // Remove required attribute when switching tabs
+    $("#mz_senkung_item, #allgmein_item").click(function() {
+        $("#upload_files_2").removeAttr('required');
     });
 }
 
