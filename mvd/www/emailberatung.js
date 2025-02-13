@@ -307,16 +307,19 @@ function show_mz_senkung() {
     add_new_file_row();
     add_new_file_row();
 
-    // Set values and make readonly
+    // Set values and make only Mietvertrag readonly
     $("#upload_files_auswahl_1").val('Mietvertrag');
     $("#upload_files_auswahl_2").val('weitere Vertragsänderung');
     $("#upload_files_auswahl_3").val('Herabsetzungsgesuch');
     $("#upload_files_auswahl_4").val('Antwort Vermieter');
     
+    // Only make Mietvertrag readonly, leave others editable
     $("#upload_files_auswahl_1").attr('readonly', true);
-    $("#upload_files_auswahl_2").attr('readonly', true);
-    $("#upload_files_auswahl_3").attr('readonly', true);
-    $("#upload_files_auswahl_4").attr('readonly', true);
+    
+    // Remove readonly from other fields (in case they were set)
+    $("#upload_files_auswahl_2").removeAttr('readonly');
+    $("#upload_files_auswahl_3").removeAttr('readonly');
+    $("#upload_files_auswahl_4").removeAttr('readonly');
 
     // Add required attribute
     $("#upload_files_1").attr('required', true);
