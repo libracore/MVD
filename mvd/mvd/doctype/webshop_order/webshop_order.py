@@ -30,7 +30,7 @@ class WebshopOrder(Document):
                             'qty': 0,
                             'amount': 0,
                             'mwst': 0,
-                            'item_index': str(key).replace("artikel_nr", "")
+                            'item_index': str(key).replace("artikel_nr_", "")
                         }
                         items.append(item)
                 
