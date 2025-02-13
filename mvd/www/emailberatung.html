@@ -28,6 +28,7 @@
             window.dev_server = {{ dev_server }};
             window.socketio_port = {{ frappe.socketio_port }};
         </script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
     <body frappe-session-status="{{ 'logged-in' if frappe.session.user != 'Guest' else 'logged-out'}}" data-path="{{ path | e }}" id="home" class="smvForm smvEmailBeratungForm isCookieRequired process-page">
         <div class="content-wrapper" id="content">
@@ -203,12 +204,12 @@
                                                             <fieldset>
                                                                 <div class="form-item">
                                                                     <input type="radio" id="thema_0" name="thema" value="Mietzinserhöhung" onclick="check_mietzinserhoehung();">
-                                                                    <label for="thema_0">Mietzinserhöhung</label>
+                                                                    <label for="thema_0">Mietzinserhöhung <i class="fa fa-arrow-up"></i></label>
                                                                 </div>
                                                                 <!-- end form-item -->
                                                                 <div class="form-item">
                                                                     <input type="radio" id="thema_1" name="thema" value="Mietzinssenkung" onclick="check_mietzinssenkung();">
-                                                                    <label for="thema_1">Mietzinssenkung</label>
+                                                                    <label for="thema_1">Mietzinssenkung <i class="fa fa-arrow-down"></i></label>
                                                                 </div>
                                                                 <!-- end form-item -->
                                                                 <div class="form-item">
@@ -445,10 +446,10 @@
                                                         <a class="nav-link" href="#/" onclick="hide_mz();"><span>Allgemeine Anfrage</span></a>
                                                     </li>
                                                     <li id="mz_erhoehung_item" class="nav-item">
-                                                        <a class="nav-link" href="#/" onclick="show_mz_erhoehung();"><span>Mietzinserhöhung</span></a>
+                                                        <a class="nav-link" href="#/" onclick="show_mz_erhoehung();"><span>Mietzinserhöhung <i class="fa fa-arrow-up"></i></span></a>
                                                     </li>
                                                     <li id="mz_senkung_item" class="nav-item">
-                                                        <a class="nav-link" href="#/" onclick="show_mz_senkung();"><span>Mietzinssenkung</span></a>
+                                                        <a class="nav-link" href="#/" onclick="show_mz_senkung();"><span>Mietzinssenkung <i class="fa fa-arrow-down"></i></span></a>
                                                     </li>
                                                 </ul>
                                             </nav>
