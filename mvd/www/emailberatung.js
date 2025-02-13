@@ -2,6 +2,15 @@ function new_onlineberatung() {
     if (localStorage.getItem('anfage_gesendet') == '0') {
         var sektion_id = document.getElementById("sektion_id").value;
         var failed_validations = check_mandatory(sektion_id);
+        
+        // Add check for mandatory Mietvertrag upload
+        if (localStorage.getItem('mz_anfrage') == '1' && !$("#upload_files_1")[0].files[0]) {
+            failed_validations.push('mietvertrag');
+            $("#upload_files_1").css("border", "1px solid red");
+        } else {
+            $("#upload_files_1").css("border", "1px solid #ccc");
+        }
+        
         if (failed_validations.length < 1) {
             localStorage.setItem('anfage_gesendet', '1');
             var kwargs = {
@@ -256,9 +265,13 @@ function show_mz_erhoehung() {
     $("#upload_files_auswahl_2").val('Mietzinserhöhung');
     $("#upload_files_auswahl_1").attr('readonly', true);
     $("#upload_files_auswahl_2").attr('readonly', true);
+    
+    // Add required attribute
+    $("#upload_files_1").attr('required', true);
+    
     $("label[for='upload_files']").each(function(index,element){
         if (index == 0) {
-            $(this).text("1. Mietvertrag");
+            $(this).text("1. Mietvertrag *"); // Add asterisk to indicate required field
         } else if (index == 1) {
             $(this).text("2. Mietzinserhöhung");
         } else if (index == 2) {
@@ -303,14 +316,17 @@ function show_mz_senkung() {
     $("#upload_files_auswahl_3").attr('readonly', true);
     $("#upload_files_auswahl_4").attr('readonly', true);
 
+    // Add required attribute
+    $("#upload_files_1").attr('required', true);
+    
     // Update labels
     $("label[for='upload_files']").each(function(index,element){
         if (index == 0) {
-            $(this).text("1. Mietvertrag");
+            $(this).text("1. Mietvertrag *"); // Add asterisk to indicate required field
         } else if (index == 1) {
             $(this).text("2. Falls vorhanden: weitere Vertragsänderung (Mietzinsherabsetzungen, Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
         } else if (index == 2) {
-            $(this).text("3. Herabsetzungsgesuch an Vermieterin");
+            $(this).text("3. Herabsetzungsgesuch an Vermieter*in");
         } else if (index == 3) {
             $(this).text("4. Antwort Vermieter*in");
         }
@@ -341,6 +357,9 @@ function hide_mz() {
     $("label[for='upload_files']").each(function(){
         $(this).text("Datei");
     });
+    
+    // Remove required attribute when hiding
+    $("#upload_files_1").removeAttr('required');
     
     $(".awesomplete-delete").each(function(){
         $(this).off('click');
