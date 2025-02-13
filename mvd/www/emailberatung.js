@@ -347,7 +347,7 @@ function show_mz_senkung() {
     // Set values and make only Mietvertrag readonly
     $("#upload_files_auswahl_1").val('Mietvertrag');
     $("#upload_files_auswahl_2").val('weitere Vertragsänderung');
-    $("#upload_files_auswahl_3").val('Herabsetzungsgesuch');
+    $("#upload_files_auswahl_3").val('Herabsetzungsgesuch');  // Changed back from 'Mietzinsherabsetzung'
     $("#upload_files_auswahl_4").val('Antwort Vermieter');
     
     // Only make Mietvertrag readonly, leave others editable
@@ -368,7 +368,7 @@ function show_mz_senkung() {
         } else if (index == 1) {
             $(this).text("2. Falls vorhanden: weitere Vertragsänderung (Mietzinsherabsetzungen, Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
         } else if (index == 2) {
-            $(this).text("3. Herabsetzungsgesuch an Vermieter*in");
+            $(this).text("3. Herabsetzungsgesuch an Vermieter*in");  // Label stays the same
         } else if (index == 3) {
             $(this).text("4. Antwort Vermieter*in");
         }
