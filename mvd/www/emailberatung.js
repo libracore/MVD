@@ -2,14 +2,34 @@ function new_onlineberatung() {
     if (localStorage.getItem('anfage_gesendet') == '0') {
         var sektion_id = document.getElementById("sektion_id").value;
         var failed_validations = check_mandatory(sektion_id);
+        var errorMessages = [];
         
-        // Add check for mandatory Mietvertrag upload
+        // Check for mandatory Mietvertrag upload in MZ tabs
         if (localStorage.getItem('mz_anfrage') == '1' && !$("#upload_files_1")[0].files[0]) {
             failed_validations.push('mietvertrag');
             $("#upload_files_1").css("border", "1px solid red");
+            errorMessages.push("Bitte laden Sie den Mietvertrag hoch (Pflichtfeld)");
         } else {
             $("#upload_files_1").css("border", "1px solid #ccc");
         }
+        
+        // Build error message for other mandatory fields
+        failed_validations.forEach(function(field) {
+            switch(field) {
+                case 'telefon':
+                    errorMessages.push("Bitte geben Sie Ihre Telefonnummer ein");
+                    break;
+                case 'email':
+                    errorMessages.push("Bitte geben Sie Ihre E-Mail-Adresse ein");
+                    break;
+                case 'frage':
+                    errorMessages.push("Bitte beschreiben Sie Ihr Anliegen");
+                    break;
+                case 'themen_wahl':
+                    errorMessages.push("Bitte wählen Sie ein Thema aus");
+                    break;
+            }
+        });
         
         if (failed_validations.length < 1) {
             localStorage.setItem('anfage_gesendet', '1');
@@ -37,7 +57,18 @@ function new_onlineberatung() {
                 }
             });
         } else {
-            alert("Bitte füllen Sie alle Pflichtfelder aus.");
+            // Show all error messages in an alert
+            alert("Bitte korrigieren Sie folgende Fehler:\n\n" + errorMessages.join("\n"));
+            
+            // Scroll to first error field
+            if (failed_validations.length > 0) {
+                var firstErrorField = $("#" + failed_validations[0]);
+                if (firstErrorField.length) {
+                    $('html, body').animate({
+                        scrollTop: firstErrorField.offset().top - 100
+                    }, 500);
+                }
+            }
         }
     } else {
         alert("Bitte warten, Ihre Anfrage wird bereits verarbeitet.");
