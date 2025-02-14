@@ -1,6 +1,8 @@
 // Copyright (c) 2022, libracore AG and contributors
 // For license information, please see license.txt
 
+let clicked = false;
+
 frappe.ui.form.on('CAMT Import', {
     refresh: function(frm) {
         // hidding Version 1 of CAMT Importer
@@ -66,6 +68,11 @@ frappe.ui.form.on('CAMT Import', {
         cur_frm.save();
     },
     import: function(frm) {
+        // Verhinderung von Doppelklicks
+        if (clicked) return;
+        clicked = true;
+        setTimeout(() => { clicked = false; }, 2000);
+
         if (cur_frm.doc.account) {
             if (cur_frm.is_dirty()) {
                 cur_frm.save();
@@ -78,6 +85,11 @@ frappe.ui.form.on('CAMT Import', {
         }
     },
     nur_zahlungen_einlesen: function(frm) {
+        // Verhinderung von Doppelklicks
+        if (clicked) return;
+        clicked = true;
+        setTimeout(() => { clicked = false; }, 2000);
+
         if (cur_frm.doc.account) {
             if (cur_frm.is_dirty()) {
                 cur_frm.save();
@@ -90,6 +102,11 @@ frappe.ui.form.on('CAMT Import', {
         }
     },
     zahlungen_matchen: function(frm) {
+        // Verhinderung von Doppelklicks
+        if (clicked) return;
+        clicked = true;
+        setTimeout(() => { clicked = false; }, 2000);
+
         if (cur_frm.doc.account) {
             if (cur_frm.is_dirty()) {
                 cur_frm.save();
@@ -102,6 +119,11 @@ frappe.ui.form.on('CAMT Import', {
         }
     },
     zahlungen_verbuchen: function(frm) {
+        // Verhinderung von Doppelklicks
+        if (clicked) return;
+        clicked = true;
+        setTimeout(() => { clicked = false; }, 2000);
+        
         if (cur_frm.doc.account) {
             if (cur_frm.is_dirty()) {
                 cur_frm.save();
