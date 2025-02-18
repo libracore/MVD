@@ -407,19 +407,109 @@ def get_arbeitsplan_word(berater_in, von=None, bis=None):
             termin.creation = None
             termin.hat_attachement = None
     
+    
     berater_in = get_berater_in_from_hash(berater_in)
     html_von = frappe.utils.getdate(von).strftime("%d.%m.%Y") if von else ''
     html_bis = frappe.utils.getdate(bis).strftime("%d.%m.%Y") if bis else ''
-    html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'termine': termine, 'von': html_von, 'bis': html_bis})
-    html = '<html><body>{0}</body></html>'.format(html)
     datum = frappe.utils.getdate(von or None).strftime("%Y-%m-%d")
     wochentag = _(frappe.utils.getdate(von or None).strftime("%A"), "de")[:2].upper()
     clean_berater_name = "unbekannt"
     if berater_in:
         clean_berater_name = berater_in.split(" ")[0].replace("ä", "ae").replace("ö", "oe").replace("ü", "ue")
-    frappe.local.response.filename = "{datum}_{wochentag}_{name}.docx".format(datum=datum, wochentag=wochentag, name=clean_berater_name)
-    frappe.local.response.filecontent = html
-    frappe.local.response.type = "download"
+
+    word_dict = {
+        'berater_in': berater_in,
+        'von': html_von,
+        'bis': html_bis,
+        'termine': termine,
+        'file_name': "{datum}_{wochentag}_{name}.docx".format(datum=datum, wochentag=wochentag, name=clean_berater_name)
+    }
+
+    create_word_doc(word_dict)
+
+    return "/files/{0}".format(word_dict['file_name'])
+
+def create_word_doc(word_dict):
+    from docx import Document
+    word_doc = Document()
+    word_doc.add_heading(word_dict['berater_in'], level=1)
+    if word_dict['von'] and word_dict['bis']:
+        word_doc.add_paragraph("({0} - {1})".format(word_dict['von'], word_dict['bis']))
+    
+    termin_loop = 1
+    for termin in word_dict['termine']:
+        if "abp_referenz" in termin:
+            # Create Table
+            table = word_doc.add_table(rows=4, cols=4)
+
+            # Table Header 1
+            cell = table.cell(0, 0)
+            cell.text = ""
+            p = cell.add_paragraph()
+            run = p.add_run("Wann")
+            run.bold = True
+            cell = table.cell(0, 1)
+            cell.text = ""
+            p = cell.add_paragraph()
+            run = p.add_run("Wo")
+            run.bold = True
+            cell = table.cell(0, 2)
+            cell.text = ""
+            p = cell.add_paragraph()
+            run = p.add_run("Wie")
+            run.bold = True
+            cell = table.cell(0, 3)
+            cell.text = ""
+            p = cell.add_paragraph()
+            run = p.add_run("Telefonnummer")
+            run.bold = True
+
+            # Table Content 1
+            table.cell(1, 0).text = "{0}\n{1} - {2}".format(termin['von'], termin['von_zeit'], termin['bis'])
+            table.cell(1, 1).text = termin['ort'].replace("(" + termin['sektion_id'] + ")", "")
+            table.cell(1, 2).text = termin['art']
+            table.cell(1, 3).text = "{0}".format(termin['telefonnummer'] or "---")
+
+            # Table Header 2
+            cell1 = table.cell(2, 0)
+            cell2 = table.cell(2, 1)
+            merged_cell = cell1.merge(cell2)
+            merged_cell.text = ""
+            p = merged_cell.add_paragraph()
+            run = p.add_run("Mitglied")
+            run.bold = True
+            cell1 = table.cell(2, 2)
+            cell2 = table.cell(2, 3)
+            merged_cell = cell1.merge(cell2)
+            merged_cell.text = ""
+            p = merged_cell.add_paragraph()
+            run = p.add_run("Details")
+            run.bold = True
+
+            # Table Content 2
+            cell1 = table.cell(3, 0)
+            cell2 = table.cell(3, 1)
+            merged_cell = cell1.merge(cell2)
+            merged_cell.text = "{0}\n{1}".format(termin['mitglied_nr'], termin['adressblock'].replace("<br>", "\n"))
+            cell1 = table.cell(3, 2)
+            cell2 = table.cell(3, 3)
+            merged_cell = cell1.merge(cell2)
+            merged_cell.text = "{0} {1} {2}\n\nEintritt: {3}\nBez. Jahr: {4}\nTermin vereinbart am: {5} {6}".format(termin.beratungskategorie.split(" - ")[0] if termin.beratungskategorie else '____', \
+                                                termin.beratungskategorie_2.split(" - ")[0] if termin.beratungskategorie_2 else '____', \
+                                                termin.beratungskategorie_3.split(" - ")[0] if termin.beratungskategorie_3 else '____', \
+                                                termin.eintrittsdatum if termin.eintrittsdatum else '---', \
+                                                termin.bezahltes_mitgliedschaftsjahr, termin.creation, termin.created_by)
+            
+            word_doc.add_paragraph("\nUnterlagen > {0}\nBeratung : ☐ wurde durchgeführt ☐ Person nicht erschienen\nNotiz/Bemerkungen: {1}".format("Ja" if termin.hat_attachement == 1 else "Nein", \
+                                                                                                                                                  termin.notiz or "---"))
+            
+            if termin_loop == 2:
+                word_doc.add_page_break()
+                termin_loop = 1
+            else:
+                termin_loop += 1
+    physical_path = "/home/frappe/frappe-bench/sites/{0}/public/files/{1}".format(frappe.local.site_path.replace("./", ""), word_dict['file_name'])
+    word_doc.save(physical_path)
 
 def get_berater_in_from_hash(hash):
     berater_in = frappe.db.sql("""SELECT `name` FROM `tabTermin Kontaktperson` WHERE `md_hash` = '{0}'""".format(hash), as_dict=True)
