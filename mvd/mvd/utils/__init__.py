@@ -8,6 +8,7 @@ from rq import Queue, Worker
 from frappe.utils.background_jobs import get_redis_conn
 from frappe.utils import format_datetime, cint, convert_utc_to_user_timezone
 
+@frappe.whitelist()
 def check_for_running_job(jobname):
     colors = {
         'queued': 'orange',
