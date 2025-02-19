@@ -279,6 +279,11 @@ function show_mz_erhoehung() {
     $("#mz_senkung_item").removeClass("selected");
     $("#hinweis_mietzinsrechner_erhoehung").show();
     $("#hinweis_mietzinsrechner_senkung").hide();
+    // if div with id themen_wahl_box exists, select input thema_0 
+    if ($("#themen_wahl_box").length) {
+        $("#thema_0").prop("checked", true);
+    }
+
     
     // remove upload rows
     $(".file-upload-row").each(function(){
@@ -329,6 +334,11 @@ function show_mz_senkung() {
     $("#hinweis_mietzinsrechner_erhoehung").hide();
     $("#hinweis_mietzinsrechner_senkung").show();
     
+    // if div with id themen_wahl_box exists, select input thema_1
+    if ($("#themen_wahl_box").length) {
+        $("#thema_1").prop("checked", true);
+    }
+
     // remove upload rows
     $(".file-upload-row").each(function(){
         if ($(this).attr('id') != 'default_file_row') {
@@ -384,6 +394,15 @@ function hide_mz() {
     $("#mz_senkung_item").removeClass("selected");
     $("#hinweis_mietzinsrechner_erhoehung").hide();
     $("#hinweis_mietzinsrechner_senkung").hide();
+
+    // if div with id themen_wahl_box exists, select input thema_3 or let it be thema_2 if selected
+    if ($("#themen_wahl_box").length) {
+        if ($("#thema_2").prop("checked")) {
+            $("#thema_2").prop("checked", true);
+        } else {
+            $("#thema_3").prop("checked", true);
+        }
+    }
     
     // remove upload rows
     $(".file-upload-row").each(function(){
