@@ -93,7 +93,7 @@ def get_all_item_details(sektion):
     # das ist nicht schön so
     doctype_sektion = frappe.get_doc("Sektion", sektion.name)
     
-    items = []
+    items = {}
     for item_field_name in all_items:
         if doctype_sektion.get(item_field_name):
             item_name = doctype_sektion.get(item_field_name)
@@ -107,10 +107,99 @@ def get_all_item_details(sektion):
                                      """.format(item_name), as_dict=True)
         if len(item_details) > 0:
             item_details[0].rate = get_item_rate(item_details[0].name)
-            items.append(item_details[0])   
-        items[-1]['field_name'] = item_field_name          
+            #items.append(item_details[0])   
+            items[item_details[0].name] = item_details[0]   
+        items[item_details[0].name]['field_name'] = item_field_name          
     
     return items
 
 def get_item_rate(item):
     return get_item_price(item)['price']
+
+@frappe.whitelist()
+def get_md_shop_all_items():
+    """
+    Retrieves a list of all enabled items from the 'tabItem' table along with their associated pricing and member rates.
+
+    This function performs the following steps:
+    1. Retrieves all items from the 'tabItem' table that are not marked as 'disabled' (disabled = 0).
+    2. For each item, it sets default values for `rate` and `member_rate` to `NULL` (as placeholders).
+    3. Retrieves the latest item rates from the `tabItem Price` table using the `get_md_rates()` function.
+    4. Retrieves member-specific pricing for items from the `tabPricing Rule` table using the `get_md_member_rates()` function.
+    5. Returns a list of items with the necessary data, which can include `rate` and `member_rate` if they exist.
+
+    Returns:
+        list: A list of dictionaries containing item details, including:
+              - `item_code`: Unique identifier for the item.
+              - `sektion_id`: Section ID of the item.
+              - `item_name`: Name of the item.
+              - `item_group`: Item group to which the item belongs.
+              - `show_in_website`: Boolean (0 or 1)
+              - `description`: Web long description of the item.
+              - `rate`: Price list rate (optional, populated later).
+              - `member_rate`: Member-specific rate (optional, populated later).
+              - `image`: URL or path to the item's image.
+    """
+    items = frappe.db.sql("""SELECT `item_code` AS `item_code`,
+                                `sektion_id` AS `sektion_id`,
+                                `item_name` AS `item_name`,
+                                `item_group` AS `item_group`,
+                                `web_long_description` AS `description`,
+                                `show_in_website` AS `show_in_website`,
+                                NULL AS `rate`,
+                                NULL AS `member_rate`,
+                                `website_image` AS `image`
+                                FROM `tabItem` 
+                                WHERE `disabled` = 0 -- später brauchen wir noch webEnabled
+                            ORDER BY `sektion_id`, `weightage` ASC;""", as_dict=True)
+    item_rates = get_md_rates()
+    item_member_rates = get_md_member_rates()
+
+    for item in items:
+        if item.item_code in item_rates:  # Update rate if available
+            item.rate = item_rates[item.item_code].get('price_list_rate')
+        if item.item_code in item_member_rates:  # Update member_rate if available
+            item.member_rate = item_member_rates[item.item_code].get('rate')
+
+    return items
+
+def get_md_rates():
+    """
+    Fetches the latest valid price list rates for each item from the 'tabItem Price' table. For this 
+    the function retrieves the most recent `price_list_rate` for each `item_code`.
+
+    Returns:
+        dict: A dictionary where the keys are `item_code` and the values are dictionaries containing
+              item details such as `price_list_rate`.   
+    """
+    item_rates = frappe.db.sql("""SELECT *
+                                FROM `tabItem Price` tip1
+                                WHERE tip1.valid_from <= CURDATE()
+                                AND tip1.valid_from = (
+                                    SELECT MAX(valid_from)
+                                    FROM `tabItem Price` tip2 
+                                    WHERE tip1.item_code = tip2.item_code
+                                    AND tip2.valid_from <= CURDATE()
+                                );""", as_dict=True)
+    return {item['item_code']: item for item in item_rates}
+
+def get_md_member_rates():
+    """
+    Fetches the member-specific pricing rates for each `item_code` from the 'tabPricing Rule' table.
+
+    The pricing rule has either no end date (`valid_upto` is NULL) or has a `valid_upto`
+    date that has not yet passed. 
+    
+    The function performs a SQL query that joins the `tabPricing Rule Item Code` table with the `tabPricing Rule`
+    table to retrieve the `rate` for each `item_code`.
+    Returns:
+        dict: A dictionary where the keys are `item_code` and the values are dictionaries containing
+              the item pricing rule details, including the `rate`.
+    """
+    item_member_rates = frappe.db.sql("""SELECT tpric.*, tpr.rate, tpr.applicable_for 
+                                FROM `tabPricing Rule Item Code` tpric
+                                JOIN `tabPricing Rule` tpr 
+                                    ON tpric.parent = tpr.name
+                                WHERE tpr.applicable_for = 'Customer Group'
+                                AND (tpr.valid_upto IS NULL OR NOT tpr.valid_upto <= CURDATE());""", as_dict=True)
+    return {item['item_code']: item for item in item_member_rates}
