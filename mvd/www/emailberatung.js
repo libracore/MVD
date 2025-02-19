@@ -272,7 +272,7 @@ function upload_files(beratung, key, secret, loop=1) {
 function show_mz_erhoehung() {
     localStorage.setItem('mz_anfrage', '1');
     $("#tab_title").text("Mietzinserhöhung ");
-    $("#tab_title").append('<i class="fa fa-arrow-up"></i>');
+    $("#tab_title").append('<i class="fa fa-arrow-up r45"></i>');
     $(".mz").css("display", 'inline');
     $("#mz_erhoehung_item").addClass("selected");
     $("#allgmein_item").removeClass("selected");
@@ -321,7 +321,7 @@ function show_mz_erhoehung() {
 function show_mz_senkung() {
     localStorage.setItem('mz_anfrage', '1');
     $("#tab_title").text("Mietzinssenkung ");
-    $("#tab_title").append('<i class="fa fa-arrow-down"></i>');
+    $("#tab_title").append('<i class="fa fa-arrow-down r-45"></i>');
     $(".mz").css("display", 'inline');
     $("#mz_senkung_item").addClass("selected");
     $("#allgmein_item").removeClass("selected");
