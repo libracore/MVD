@@ -1148,7 +1148,7 @@
    "fieldname": "section_datatrans",
    "fieldtype": "Section Break",
    "label": "Datatrans",
-   "permlevel": 2
+   "permlevel": 1
   },
   {
    "fieldname": "online_haftpflicht",
@@ -1346,7 +1346,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2025-02-19 11:36:55.384901",
+ "modified": "2025-02-19 15:52:37.154258",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
