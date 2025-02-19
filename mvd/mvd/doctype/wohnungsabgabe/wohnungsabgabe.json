@@ -45,6 +45,7 @@
   "tarif_06",
   "tarif_06_beschreibung",
   "tarif_07",
+  "geschaefstraum_nach_aufwand",
   "section_wegspesen",
   "weg_01",
   "weg_02",
@@ -351,9 +352,15 @@
    "fieldtype": "Link",
    "label": "QA-Mail Druckvorlage",
    "options": "Druckvorlage"
+  },
+  {
+   "default": "0",
+   "fieldname": "geschaefstraum_nach_aufwand",
+   "fieldtype": "Check",
+   "label": "Geschaeftsraum nach Aufwand"
   }
  ],
- "modified": "2025-01-20 23:45:23.335173",
+ "modified": "2025-02-19 10:50:13.408190",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
