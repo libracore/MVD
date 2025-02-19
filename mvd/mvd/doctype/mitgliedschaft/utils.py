@@ -678,9 +678,9 @@ def prepare_mvm_for_sp(mitgliedschaft):
         alteSektionCode = str(get_sektion_code(mitgliedschaft.zuzug_von)) if mitgliedschaft.zuzug_von else None
     
     prepared_mvm = {
-        "mitgliedNummer": str(mitgliedschaft.mitglied_nr) if str(mitgliedschaft.mitglied_nr) != 'MV' else None,
+        "mitgliedNummer": str(mitgliedschaft.mitglied_nr).strip() if str(mitgliedschaft.mitglied_nr) != 'MV' else None,
         "mitgliedId": cint(mitgliedschaft.mitglied_id),
-        "sektionCode": str(get_sektion_code(mitgliedschaft.sektion_id)),
+        "sektionCode": str(get_sektion_code(mitgliedschaft.sektion_id)).strip(),
         "regionCode": frappe.get_value("Region", mitgliedschaft.region, "region_c") if mitgliedschaft.region else None,
         "regionManuell": True if mitgliedschaft.region_manuell else False,
         "typ": str(typ_mapper[mitgliedschaft.mitgliedtyp_c]),
@@ -744,27 +744,27 @@ def get_adressen_for_sp(mitgliedschaft):
     adressen = []
     mitglied = {
         "typ": "Mitglied",
-        "strasse": str(mitgliedschaft.strasse) if mitgliedschaft.strasse else None,
-        "hausnummer": str(mitgliedschaft.nummer) if mitgliedschaft.nummer else None,
-        "hausnummerZusatz": str(mitgliedschaft.nummer_zu) if mitgliedschaft.nummer_zu else None,
-        "postleitzahl": str(mitgliedschaft.plz) if mitgliedschaft.plz else None,
-        "ort": str(mitgliedschaft.ort) if mitgliedschaft.ort else None,
-        "adresszusatz": str(mitgliedschaft.zusatz_adresse) if mitgliedschaft.zusatz_adresse else None,
+        "strasse": str(mitgliedschaft.strasse).strip() if mitgliedschaft.strasse else None,
+        "hausnummer": str(mitgliedschaft.nummer).strip() if mitgliedschaft.nummer else None,
+        "hausnummerZusatz": str(mitgliedschaft.nummer_zu).strip() if mitgliedschaft.nummer_zu else None,
+        "postleitzahl": str(mitgliedschaft.plz).strip() if mitgliedschaft.plz else None,
+        "ort": str(mitgliedschaft.ort).strip() if mitgliedschaft.ort else None,
+        "adresszusatz": str(mitgliedschaft.zusatz_adresse).strip() if mitgliedschaft.zusatz_adresse else None,
         "postfach": True if mitgliedschaft.postfach else False,
-        "postfachNummer": str(mitgliedschaft.postfach_nummer) if mitgliedschaft.postfach_nummer and mitgliedschaft.postfach else None,
+        "postfachNummer": str(mitgliedschaft.postfach_nummer).strip() if mitgliedschaft.postfach_nummer and mitgliedschaft.postfach else None,
         "fuerKorrespondenzGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
         "kontakte": [
             {
                 "anrede": str(mitgliedschaft.anrede_c) if mitgliedschaft.anrede_c else "Unbekannt",
                 "istHauptkontakt": True,
-                "vorname": str(mitgliedschaft.vorname_1) if mitgliedschaft.vorname_1 else None,
-                "nachname": str(mitgliedschaft.nachname_1) if mitgliedschaft.nachname_1 else None,
-                "email": str(mitgliedschaft.e_mail_1) if mitgliedschaft.e_mail_1 and mitgliedschaft.e_mail_1 != "None" else None,
-                "telefon": str(mitgliedschaft.tel_p_1) if mitgliedschaft.tel_p_1 else None,
-                "mobile": str(mitgliedschaft.tel_m_1) if mitgliedschaft.tel_m_1 else None,
-                "telefonGeschaeft": str(mitgliedschaft.tel_g_1) if mitgliedschaft.tel_g_1 else None,
-                "firma": str(mitgliedschaft.firma) if mitgliedschaft.kundentyp == 'Unternehmen' else None,
-                "firmaZusatz": str(mitgliedschaft.zusatz_firma) if mitgliedschaft.kundentyp == 'Unternehmen' else None
+                "vorname": str(mitgliedschaft.vorname_1).strip() if mitgliedschaft.vorname_1 else None,
+                "nachname": str(mitgliedschaft.nachname_1).strip() if mitgliedschaft.nachname_1 else None,
+                "email": str(mitgliedschaft.e_mail_1).strip() if mitgliedschaft.e_mail_1 and mitgliedschaft.e_mail_1 != "None" else None,
+                "telefon": str(mitgliedschaft.tel_p_1).strip() if mitgliedschaft.tel_p_1 else None,
+                "mobile": str(mitgliedschaft.tel_m_1).strip() if mitgliedschaft.tel_m_1 else None,
+                "telefonGeschaeft": str(mitgliedschaft.tel_g_1).strip() if mitgliedschaft.tel_g_1 else None,
+                "firma": str(mitgliedschaft.firma).strip() if mitgliedschaft.kundentyp == 'Unternehmen' else None,
+                "firmaZusatz": str(mitgliedschaft.zusatz_firma).strip() if mitgliedschaft.kundentyp == 'Unternehmen' else None
             }
         ]
     }
@@ -773,12 +773,12 @@ def get_adressen_for_sp(mitgliedschaft):
         solidarmitglied = {
             "anrede": str(mitgliedschaft.anrede_2) if mitgliedschaft.anrede_2 else "Unbekannt",
             "istHauptkontakt": False,
-            "vorname": str(mitgliedschaft.vorname_2) if mitgliedschaft.vorname_2 else None,
-            "nachname": str(mitgliedschaft.nachname_2) if mitgliedschaft.nachname_2 else None,
-            "email": str(mitgliedschaft.e_mail_2) if mitgliedschaft.e_mail_2 and mitgliedschaft.e_mail_2 != "None" else None,
-            "telefon": str(mitgliedschaft.tel_p_2) if mitgliedschaft.tel_p_2 else None,
-            "mobile": str(mitgliedschaft.tel_m_2) if mitgliedschaft.tel_m_2 else None,
-            "telefonGeschaeft": str(mitgliedschaft.tel_g_2) if mitgliedschaft.tel_g_2 else None,
+            "vorname": str(mitgliedschaft.vorname_2).strip() if mitgliedschaft.vorname_2 else None,
+            "nachname": str(mitgliedschaft.nachname_2).strip() if mitgliedschaft.nachname_2 else None,
+            "email": str(mitgliedschaft.e_mail_2).strip() if mitgliedschaft.e_mail_2 and mitgliedschaft.e_mail_2 != "None" else None,
+            "telefon": str(mitgliedschaft.tel_p_2).strip() if mitgliedschaft.tel_p_2 else None,
+            "mobile": str(mitgliedschaft.tel_m_2).strip() if mitgliedschaft.tel_m_2 else None,
+            "telefonGeschaeft": str(mitgliedschaft.tel_g_2).strip() if mitgliedschaft.tel_g_2 else None,
             "firma": '',
             "firmaZusatz": ''
         }
@@ -789,12 +789,12 @@ def get_adressen_for_sp(mitgliedschaft):
     if cint(mitgliedschaft.abweichende_objektadresse) == 1:
         objekt = {
             "typ": "Objekt",
-            "strasse": str(mitgliedschaft.objekt_strasse) if mitgliedschaft.objekt_strasse else None,
-            "hausnummer": str(mitgliedschaft.objekt_hausnummer) if mitgliedschaft.objekt_hausnummer else None,
-            "hausnummerZusatz": str(mitgliedschaft.objekt_nummer_zu) if mitgliedschaft.objekt_nummer_zu else None,
-            "postleitzahl": str(mitgliedschaft.objekt_plz) if mitgliedschaft.objekt_plz else None,
-            "ort": str(mitgliedschaft.objekt_ort) if mitgliedschaft.objekt_ort else None,
-            "adresszusatz": str(mitgliedschaft.objekt_zusatz_adresse) if mitgliedschaft.objekt_zusatz_adresse else None,
+            "strasse": str(mitgliedschaft.objekt_strasse).strip() if mitgliedschaft.objekt_strasse else None,
+            "hausnummer": str(mitgliedschaft.objekt_hausnummer).strip() if mitgliedschaft.objekt_hausnummer else None,
+            "hausnummerZusatz": str(mitgliedschaft.objekt_nummer_zu).strip() if mitgliedschaft.objekt_nummer_zu else None,
+            "postleitzahl": str(mitgliedschaft.objekt_plz).strip() if mitgliedschaft.objekt_plz else None,
+            "ort": str(mitgliedschaft.objekt_ort).strip() if mitgliedschaft.objekt_ort else None,
+            "adresszusatz": str(mitgliedschaft.objekt_zusatz_adresse).strip() if mitgliedschaft.objekt_zusatz_adresse else None,
             "postfach": False,
             "postfachNummer": "",
             "fuerKorrespondenzGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
@@ -805,14 +805,14 @@ def get_adressen_for_sp(mitgliedschaft):
     if cint(mitgliedschaft.abweichende_rechnungsadresse) == 1:
         rechnung = {
             "typ": "Rechnung",
-            "strasse": str(mitgliedschaft.rg_strasse) if mitgliedschaft.rg_strasse else None,
-            "hausnummer": str(mitgliedschaft.rg_nummer) if mitgliedschaft.rg_nummer else None,
-            "hausnummerZusatz": str(mitgliedschaft.rg_nummer_zu) if mitgliedschaft.rg_nummer_zu else None,
-            "postleitzahl": str(mitgliedschaft.rg_plz) if mitgliedschaft.rg_plz else None,
-            "ort": str(mitgliedschaft.rg_ort) if mitgliedschaft.rg_ort else None,
-            "adresszusatz": str(mitgliedschaft.rg_zusatz_adresse) if mitgliedschaft.rg_zusatz_adresse else None,
+            "strasse": str(mitgliedschaft.rg_strasse).strip() if mitgliedschaft.rg_strasse else None,
+            "hausnummer": str(mitgliedschaft.rg_nummer).strip() if mitgliedschaft.rg_nummer else None,
+            "hausnummerZusatz": str(mitgliedschaft.rg_nummer_zu).strip() if mitgliedschaft.rg_nummer_zu else None,
+            "postleitzahl": str(mitgliedschaft.rg_plz).strip() if mitgliedschaft.rg_plz else None,
+            "ort": str(mitgliedschaft.rg_ort).strip() if mitgliedschaft.rg_ort else None,
+            "adresszusatz": str(mitgliedschaft.rg_zusatz_adresse).strip() if mitgliedschaft.rg_zusatz_adresse else None,
             "postfach": True if mitgliedschaft.rg_postfach else False,
-            "postfachNummer": str(mitgliedschaft.rg_postfach_nummer) if mitgliedschaft.rg_postfach_nummer else None,
+            "postfachNummer": str(mitgliedschaft.rg_postfach_nummer).strip() if mitgliedschaft.rg_postfach_nummer else None,
             "fuerKorrespondenzGesperrt": True if mitgliedschaft.adressen_gesperrt else False,
             "kontakte": []
         }
@@ -821,28 +821,28 @@ def get_adressen_for_sp(mitgliedschaft):
             rechnungskontakt = {
                 "anrede": str(mitgliedschaft.rg_anrede) if mitgliedschaft.rg_anrede else "Unbekannt",
                 "istHauptkontakt": True,
-                "vorname": str(mitgliedschaft.rg_vorname) if mitgliedschaft.rg_vorname else None,
-                "nachname": str(mitgliedschaft.rg_nachname) if mitgliedschaft.rg_nachname else None,
-                "email": str(mitgliedschaft.rg_e_mail) if mitgliedschaft.rg_e_mail and mitgliedschaft.rg_e_mail != "None" else None,
-                "telefon": str(mitgliedschaft.rg_tel_p) if mitgliedschaft.rg_tel_p else None,
-                "mobile": str(mitgliedschaft.rg_tel_m) if mitgliedschaft.rg_tel_m else None,
-                "telefonGeschaeft": str(mitgliedschaft.rg_tel_g) if mitgliedschaft.rg_tel_g else None,
-                "firma": str(mitgliedschaft.rg_firma) if mitgliedschaft.rg_firma else None,
-                "firmaZusatz": str(mitgliedschaft.rg_zusatz_firma) if mitgliedschaft.rg_zusatz_firma else None,
+                "vorname": str(mitgliedschaft.rg_vorname).strip() if mitgliedschaft.rg_vorname else None,
+                "nachname": str(mitgliedschaft.rg_nachname).strip() if mitgliedschaft.rg_nachname else None,
+                "email": str(mitgliedschaft.rg_e_mail).strip() if mitgliedschaft.rg_e_mail and mitgliedschaft.rg_e_mail != "None" else None,
+                "telefon": str(mitgliedschaft.rg_tel_p).strip() if mitgliedschaft.rg_tel_p else None,
+                "mobile": str(mitgliedschaft.rg_tel_m).strip() if mitgliedschaft.rg_tel_m else None,
+                "telefonGeschaeft": str(mitgliedschaft.rg_tel_g).strip() if mitgliedschaft.rg_tel_g else None,
+                "firma": str(mitgliedschaft.rg_firma).strip() if mitgliedschaft.rg_firma else None,
+                "firmaZusatz": str(mitgliedschaft.rg_zusatz_firma).strip() if mitgliedschaft.rg_zusatz_firma else None,
             }
             rechnung['kontakte'].append(rechnungskontakt)
         else:
             rechnungskontakt = {
                 "anrede": str(mitgliedschaft.anrede_c) if mitgliedschaft.anrede_c else "Unbekannt",
                 "istHauptkontakt": True,
-                "vorname": str(mitgliedschaft.vorname_1) if mitgliedschaft.vorname_1 else None,
-                "nachname": str(mitgliedschaft.nachname_1) if mitgliedschaft.nachname_1 else None,
-                "email": str(mitgliedschaft.e_mail_1) if mitgliedschaft.e_mail_1 and mitgliedschaft.e_mail_1 != "None" else None,
-                "telefon": str(mitgliedschaft.tel_p_1) if mitgliedschaft.tel_p_1 else None,
-                "mobile": str(mitgliedschaft.tel_m_1) if mitgliedschaft.tel_m_1 else None,
-                "telefonGeschaeft": str(mitgliedschaft.tel_g_1) if mitgliedschaft.tel_g_1 else None,
-                "firma": str(mitgliedschaft.firma) if mitgliedschaft.kundentyp == 'Unternehmen' else None,
-                "firmaZusatz": str(mitgliedschaft.zusatz_firma) if mitgliedschaft.kundentyp == 'Unternehmen' else None
+                "vorname": str(mitgliedschaft.vorname_1).strip() if mitgliedschaft.vorname_1 else None,
+                "nachname": str(mitgliedschaft.nachname_1).strip() if mitgliedschaft.nachname_1 else None,
+                "email": str(mitgliedschaft.e_mail_1).strip() if mitgliedschaft.e_mail_1 and mitgliedschaft.e_mail_1 != "None" else None,
+                "telefon": str(mitgliedschaft.tel_p_1).strip() if mitgliedschaft.tel_p_1 else None,
+                "mobile": str(mitgliedschaft.tel_m_1).strip() if mitgliedschaft.tel_m_1 else None,
+                "telefonGeschaeft": str(mitgliedschaft.tel_g_1).strip() if mitgliedschaft.tel_g_1 else None,
+                "firma": str(mitgliedschaft.firma).strip() if mitgliedschaft.kundentyp == 'Unternehmen' else None,
+                "firmaZusatz": str(mitgliedschaft.zusatz_firma).strip() if mitgliedschaft.kundentyp == 'Unternehmen' else None
             }
             rechnung['kontakte'].append(rechnungskontakt)
         

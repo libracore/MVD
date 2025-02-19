@@ -47,7 +47,8 @@ def lese_camt_file(camt_import, file_path, einlesen, matchen, verbuchen, all_in_
         'verbuchen': verbuchen,
         'all_in_one': all_in_one
     }
-    enqueue("mvd.mvd.doctype.camt_import.camt_import.verarbeite_camt_file", queue='long', job_name='Verarbeite CAMT Import {0} ({1})'.format(camt_import, get_camt_step(einlesen, matchen, verbuchen, all_in_one)), timeout=5000, **args)
+    sektion = frappe.db.get_value("CAMT Import", camt_import, "sektion_id")
+    enqueue("mvd.mvd.doctype.camt_import.camt_import.verarbeite_camt_file", queue='long', job_name='Verarbeite {0} CAMT Import {1} ({2})'.format(sektion, camt_import, get_camt_step(einlesen, matchen, verbuchen, all_in_one)), timeout=5000, **args)
 
 def verarbeite_camt_file(camt_file, camt_import, einlesen, matchen, verbuchen, all_in_one):
     def get_next_step(einlesen, matchen, verbuchen):

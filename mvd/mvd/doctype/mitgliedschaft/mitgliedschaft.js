@@ -11,6 +11,9 @@ frappe.ui.form.on('Mitgliedschaft', {
        
        // orange Navbar wenn form dirty
        dirty_observer(frm);
+
+       // check for running_update_job
+       check_for_running_job(frm);
        
        if (!frm.doc.__islocal&&cur_frm.doc.status_c == 'Inaktiv'&&!cur_frm.doc.wegzug_zu) {
            frappe.call({
@@ -310,6 +313,11 @@ frappe.ui.form.on('Mitgliedschaft', {
                 sende_k_best_email(frm);
             });
         }
+
+        // deleted_by_admin hint
+        if (cur_frm.doc.deleted_by_admin) {
+            frm.set_intro("Dieser Eintrag wurde von einem Administrator inaktiviert/«gelöscht».");
+        }
     },
     m_und_w: function(frm) {
         if (![0, 1].includes(cur_frm.doc.m_und_w)) {
@@ -501,6 +509,10 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frappe.msgprint( "Die Serviceplatform lässt nur Firmennamen bis zu einer Zeichenlänge von <b>36</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.rg_firma.length + ":</b><br>" + cur_frm.doc.rg_firma, __("Validation") );
                 frappe.validated=false;
             }
+        }
+        if (cur_frm.doc.status_c == 'Regulär'&&!cur_frm.doc.eintrittsdatum) {
+            frappe.msgprint("Der Status Regulär ist nur in Kombination mit einem gesetzten Eintrittsdatum erlaubt.", __("Validation") );
+            frappe.validated=false;
         }
     },
     after_save: function(frm) {
@@ -1005,57 +1017,73 @@ function sektionswechsel_pseudo_sektion(frm) {
 
 function sektionswechsel(frm) {
     if (frappe.user.has_role("MV_MA")) {
-        frappe.call({
-            method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_sektionen_zur_auswahl",
-            args:{},
-            callback: function(r)
-            {
-                var sektionen_zur_auswahl = r.message;
-                frappe.prompt([
-                    {'fieldname': 'sektion_neu', 'fieldtype': 'Select', 'label': 'Neue Sektion', 'reqd': 1, 'options': sektionen_zur_auswahl}  
-                ],
-                function(values){
+        if (cur_frm.doc.zuzug_id||cint(cur_frm.doc.sektionswechsel_beantragt)==1) {
+            if (cur_frm.doc.zuzug_id) {
+                frappe.msgprint("Für dieses Mitglied wurde bereits ein Sektionswechsel vollzogen.");
+            } else {
+                frappe.msgprint("Für dieses Mitglied wurde bereits ein Sektionswechsel beantragt, welcher fehlgeschlagen ist.<br>Bitte kontaktieren Sie einen Administrator.");
+            }
+        } else {
+            frappe.db.get_value("Mitgliedschaft", cur_frm.doc.name, "sektionswechsel_beantragt").then(function(sektionswechsel_beantragt) {
+                if(cint(sektionswechsel_beantragt.message.sektionswechsel_beantragt)==1) {
+                    frappe.msgprint("Für dieses Mitglied wurde bereits ein Sektionswechsel beantragt, welcher fehlgeschlagen ist.<br>Bitte kontaktieren Sie einen Administrator.");
+                } else {
                     frappe.call({
-                        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.sektionswechsel",
-                        args:{
-                                'mitgliedschaft': cur_frm.doc.name,
-                                'neue_sektion': values.sektion_neu,
-                                'zuzug_per': frappe.datetime.get_today()
-                        },
-                        freeze: true,
-                        freeze_message: 'Führe Sektionswechsel durch...',
+                        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_sektionen_zur_auswahl",
+                        args:{},
                         callback: function(r)
                         {
-                            if (r.message.status == 200) {
-                                cur_frm.set_value("wegzug", frappe.datetime.get_today());
-                                cur_frm.set_value("wegzug_zu", values.sektion_neu);
-                                cur_frm.set_value("zuzug_id", r.message.new_id);
-                                var status_change_log = cur_frm.add_child('status_change');
-                                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
-                                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
-                                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Wegzug');
-                                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Sektionswechsel zu " + values.sektion_neu);
-                                cur_frm.refresh_field('status_change');
-                                cur_frm.set_value("status_c", 'Wegzug');
-                                cur_frm.save().then(function(){
-                                    cur_frm.timeline.insert_comment("Sektionswechsel zu " + values.sektion_neu + " vollzogen.");
-                                    frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
+                            var sektionen_zur_auswahl = r.message;
+                            frappe.prompt([
+                                {'fieldname': 'sektion_neu', 'fieldtype': 'Select', 'label': 'Neue Sektion', 'reqd': 1, 'options': sektionen_zur_auswahl}  
+                            ],
+                            function(values){
+                                frappe.call({
+                                    method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.sektionswechsel",
+                                    args:{
+                                            'mitgliedschaft': cur_frm.doc.name,
+                                            'neue_sektion': values.sektion_neu,
+                                            'zuzug_per': frappe.datetime.get_today()
+                                    },
+                                    freeze: true,
+                                    freeze_message: 'Führe Sektionswechsel durch...',
+                                    callback: function(r)
+                                    {
+                                        if (r.message.status == 200) {
+                                            cur_frm.set_value("wegzug", frappe.datetime.get_today());
+                                            cur_frm.set_value("wegzug_zu", values.sektion_neu);
+                                            cur_frm.set_value("zuzug_id", r.message.new_id);
+                                            var status_change_log = cur_frm.add_child('status_change');
+                                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
+                                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+                                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Wegzug');
+                                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Sektionswechsel zu " + values.sektion_neu);
+                                            cur_frm.refresh_field('status_change');
+                                            cur_frm.set_value("status_c", 'Wegzug');
+                                            cur_frm.save().then(function(){
+                                                cur_frm.timeline.insert_comment("Sektionswechsel zu " + values.sektion_neu + " vollzogen.");
+                                                frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
+                                                frappe.db.set_value("Mitgliedschaft", cur_frm.doc.name, "sektionswechsel_beantragt", 1);
+                                            });
+                                        } else {
+                                            if (r.message.status == 500) {
+                                                frappe.msgprint(`oops, da ist etwas schiefgelaufen!<br>${r.message.error}`);
+                                            } else {
+                                                frappe.msgprint("oops, da ist etwas schiefgelaufen!<br>Unbekannter Fehler");
+                                            }
+                                            frappe.db.set_value("Mitgliedschaft", cur_frm.doc.name, "sektionswechsel_beantragt", 1);
+                                        }
+                                    }
                                 });
-                            } else {
-                                if (r.message.status == 500) {
-                                    frappe.msgprint(`oops, da ist etwas schiefgelaufen!<br>${r.message.error}`);
-                                } else {
-                                    frappe.msgprint("oops, da ist etwas schiefgelaufen!<br>Unbekannter Fehler");
-                                }
-                            }
+                            },
+                            'Sektionswechsel',
+                            'Übertragen'
+                            )
                         }
                     });
-                },
-                'Sektionswechsel',
-                'Übertragen'
-                )
-            }
-        });
+                }
+            });
+        }
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
     }
@@ -3028,4 +3056,19 @@ function prepare_mvd_mail_composer(e, forward=false) {
 
     // make the composer
     new frappe.mvd.MailComposer(opts);
+}
+
+function check_for_running_job(frm) {
+    frappe.call({
+        method: "mvd.mvd.utils.check_for_running_job",
+        args: {
+            'jobname': `Aktualisiere Mitgliedschaft ${cur_frm.doc.name}`
+        },
+        callback: function(r)
+        {
+            if (r.message) {
+                cur_frm.dashboard.add_comment(__('Bitte warten Sie einen Moment, es steht noch ein Update für dieses Mitglied an.<br>Aktualisieren Sie diese Seite in ein paar Minuten.'), 'red', true);
+            }
+        }
+    });
 }

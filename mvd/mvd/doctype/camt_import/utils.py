@@ -10,6 +10,23 @@ import six
 from frappe.utils.data import add_days, today, getdate
 from mvd.mvd.doctype.camt_import.helpers import *
 
+QRR_SINVS = {}
+def preload_qrr_sinvs():
+    sinvs = frappe.db.sql("""SELECT
+                                `name` AS `sinv`,
+                                `customer`,
+                                `mv_mitgliedschaft`,
+                                `mv_kunde`,
+                                `outstanding_amount`,
+                                `sektion_id` AS `sektion`,
+                                `company`,
+                                REPLACE(`esr_reference`, ' ', '') AS `esr_reference`
+                            FROM `tabSales Invoice`
+                            WHERE `docstatus` = 1
+                            AND `outstanding_amount` > 0""", as_dict=True)
+    for sinv in sinvs:
+        QRR_SINVS[sinv.esr_reference] = sinv
+
 def create_unpaid_sinv(fak, betrag):
     """
     Diese Funktion wandelt durch den Zahlungsdatensatz gefundene Fakultative Rechnungen in Sales Invoices um
@@ -200,6 +217,7 @@ def zahlungen_einlesen(camt_file, camt_import):
     return
 
 def zahlungen_matchen(camt_import):
+    preload_qrr_sinvs()
     payment_entries = frappe.db.sql("""
                                     SELECT `name`,
                                     `remarks`,
@@ -215,7 +233,7 @@ def zahlungen_matchen(camt_import):
         transaction_reference = payment_entry.remarks.split(", ")[0].replace("QRR: ", "")
         received_amount = payment_entry.received_amount
         if len(transaction_reference) > 26:
-            sinv_lookup_data = sinv_lookup(transaction_reference, received_amount)
+            sinv_lookup_data = sinv_lookup(transaction_reference, received_amount, QRR_SINVS)
             if sinv_lookup_data:
                 pe = frappe.get_doc("Payment Entry", payment_entry.name)
                 pe.party = sinv_lookup_data.get('customer')
@@ -270,7 +288,7 @@ def zahlungen_matchen(camt_import):
 
 def verbuche_matches(camt_import):
     """
-    Diese Funktion verbucht (und ggf. splittet (bei Überzahlungen)) alle Payment Entries welche einer Sales Invoice zugeordnet werden konnten
+    Diese Funktion verbucht alle Payment Entries mit dem Status 'Rechnungs Match' welche einer Sales Invoice zugeordnet werden konnten
     """
     pes = frappe.db.sql("""SELECT
                                 `name`

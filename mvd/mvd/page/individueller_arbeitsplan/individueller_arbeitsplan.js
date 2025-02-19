@@ -122,14 +122,36 @@ frappe.mvd_individueller_arbeitsplan_client = {
                     var bis = cur_page.page.mvd_fields.bis_field.get_value()||'';
                     if (berater_in) {
                         var berater_in_hash = frappe.mvd_individueller_arbeitsplan_client.MD5(berater_in);
-                        var url = "/api/method/mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.get_arbeitsplan_word"
-                                + "?berater_in=" + encodeURIComponent(berater_in_hash) + "&von=" + encodeURIComponent(von) + "&bis=" + encodeURIComponent(bis);
-                        var w = window.open(
-                            frappe.urllib.get_full_url(url)
-                        );
-                        if (!w) {
-                            frappe.msgprint(__("Please enable pop-ups")); return;
-                        }
+                        // var url = "/api/method/mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.get_arbeitsplan_word"
+                        //         + "?berater_in=" + encodeURIComponent(berater_in_hash) + "&von=" + encodeURIComponent(von) + "&bis=" + encodeURIComponent(bis);
+                        // var w = window.open(
+                        //     frappe.urllib.get_full_url(url)
+                        // );
+                        // if (!w) {
+                        //     frappe.msgprint(__("Please enable pop-ups")); return;
+                        // }
+
+                        frappe.call({
+                            method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.get_arbeitsplan_word",
+                            args:{
+                                    'berater_in': berater_in_hash,
+                                    'von': von,
+                                    'bis': bis
+                            },
+                            freeze: true,
+                            freeze_message: 'Erstelle Word...',
+                            callback: function(r)
+                            {
+                                if (r.message) {
+                                    var w = window.open(r.message);
+                                    if (!w) {
+                                        frappe.msgprint(__("Please enable pop-ups")); return;
+                                    }
+                                }
+                            }
+                        });
+
+                        
                     } else {
                         frappe.msgprint("Bitte zuerst ein*e Berater*in auswählen");
                     }

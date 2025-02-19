@@ -549,6 +549,7 @@ def check_communication(self, event):
             #1212
             issue = frappe.get_doc("Issue", communication.reference_name)
             issue.ungelesene_email = 1
+            issue.save()
 
 @frappe.whitelist()
 def uebernahme(beratung, user):
