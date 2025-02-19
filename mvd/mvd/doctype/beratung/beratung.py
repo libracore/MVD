@@ -952,6 +952,9 @@ def get_termin_block_data(abp_zuweisungen):
         abp_zuweisungen = abp_zuweisungen.replace("-", "", 1)
     return_data = []
     for abp_zuweisung in abp_zuweisungen.split("-"):
+        if check_doppelbuchung(abp_zuweisung) > 0:
+            frappe.throw("Der gewählte Termin wurde in der Zwischenzeit leider bereits gebucht.")
+        
         return_data.append({
             'referenz': abp_zuweisung,
             'von': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'from_time'),
@@ -959,6 +962,13 @@ def get_termin_block_data(abp_zuweisungen):
             'date': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'date')
         })
     return return_data
+
+def check_doppelbuchung(abp_zuweisung):
+    return frappe.db.sql("""
+        SELECT COUNT(`name`) AS `qty`
+        FROM `tabBeratung Termin`
+        WHERE `abp_referenz` = '{abp_zuweisung}'
+    """.format(abp_zuweisung=abp_zuweisung), as_dict=True)[0].qty
 
 @frappe.whitelist()
 def get_tel_for_termin(mitgliedschaft=None):
