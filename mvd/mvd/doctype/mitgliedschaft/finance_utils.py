@@ -374,7 +374,8 @@ def _sinv_update(mv_mitgliedschaft):
     check_folgejahr_regelung(mitgliedschaft, db_direct=True)
     set_max_reminder_level(mitgliedschaft, db_direct=True)
     get_ampelfarbe(mitgliedschaft, db_direct=True)
-    sp_updater(mitgliedschaft)
+    if mitgliedschaft.status_c != 'Wegzug':
+        sp_updater(mitgliedschaft)
 
 def check_mitgliedschaft_in_pe(pe, event):
     if not pe.mv_mitgliedschaft:
