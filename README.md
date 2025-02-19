@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 16.7.0
+#1235
 #### 16.6.0
 Keine Info bei Anmeldung von Administrator ohne 2FA
 #### 16.5.1

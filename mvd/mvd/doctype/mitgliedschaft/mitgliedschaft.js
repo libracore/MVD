@@ -293,7 +293,6 @@ frappe.ui.form.on('Mitgliedschaft', {
         // freigabe Felder der Sektion "Daten" sowie Feld "status_c" für entsprechende Rolle
         if (frappe.user.has_role("System Manager")) {
             cur_frm.set_df_property('status_c', 'read_only', 0);
-            cur_frm.set_df_property('eintrittsdatum', 'read_only', 0);
             cur_frm.set_df_property('zuzug', 'read_only', 0);
             cur_frm.set_df_property('wegzug', 'read_only', 0);
             cur_frm.set_df_property('zahlung_hv', 'read_only', 0);
