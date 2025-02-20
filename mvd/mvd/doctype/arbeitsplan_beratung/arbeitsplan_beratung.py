@@ -373,9 +373,10 @@ def get_arbeitsplan_pdf(berater_in, von=None, bis=None):
             termin.hat_attachement = None
     
     berater_in = get_berater_in_from_hash(berater_in)
+    email = get_email_from_berater_in(berater_in)
     html_von = frappe.utils.getdate(von).strftime("%d.%m.%Y") if von else ''
     html_bis = frappe.utils.getdate(bis).strftime("%d.%m.%Y") if bis else ''
-    html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'termine': termine, 'von': html_von, 'bis': html_bis})
+    html = frappe.render_template("mvd/mvd/page/individueller_arbeitsplan/pdf.html", {'berater_in': berater_in, 'email': email, 'termine': termine, 'von': html_von, 'bis': html_bis})
     from frappe.utils.pdf import get_pdf
     pdf = get_pdf(html)
     datum = frappe.utils.getdate(von or None).strftime("%Y-%m-%d")
@@ -409,6 +410,7 @@ def get_arbeitsplan_word(berater_in, von=None, bis=None):
     
     
     berater_in = get_berater_in_from_hash(berater_in)
+    email = get_email_from_berater_in(berater_in)
     html_von = frappe.utils.getdate(von).strftime("%d.%m.%Y") if von else ''
     html_bis = frappe.utils.getdate(bis).strftime("%d.%m.%Y") if bis else ''
     datum = frappe.utils.getdate(von or None).strftime("%Y-%m-%d")
@@ -419,6 +421,7 @@ def get_arbeitsplan_word(berater_in, von=None, bis=None):
 
     word_dict = {
         'berater_in': berater_in,
+        'email': email,
         'von': html_von,
         'bis': html_bis,
         'termine': termine,
@@ -432,7 +435,7 @@ def get_arbeitsplan_word(berater_in, von=None, bis=None):
 def create_word_doc(word_dict):
     from docx import Document
     word_doc = Document()
-    word_doc.add_heading(word_dict['berater_in'], level=1)
+    word_doc.add_heading(f"{word_dict['berater_in']} - {word_dict['email']}", level=1)
     if word_dict['von'] and word_dict['bis']:
         word_doc.add_paragraph("({0} - {1})".format(word_dict['von'], word_dict['bis']))
     
@@ -517,6 +520,16 @@ def get_berater_in_from_hash(hash):
         return berater_in[0].name
     else:
         return None
+    
+def get_email_from_berater_in(berater_in):
+    """
+    Returns the email address of the first berater_in as str
+    """
+    email = frappe.db.sql("""SELECT `user` 
+                    FROM `tabTermin Kontaktperson Multi User` 
+                    WHERE `parent` = '{berater_in}';"""
+                                            .format(berater_in=berater_in), as_dict=True)
+    return email[0].user
 
 def get_created_by(owner):
     vor_nachname = frappe.db.sql("""SELECT `first_name`, `last_name` FROM `tabUser` WHERE `name` = '{0}'""".format(owner), as_dict=True)
