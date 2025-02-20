@@ -41,19 +41,19 @@ function gewaehltes_thema() {
         failed_validations.forEach(function(field) {
             switch(field) {
                 case 'telefon':
-                    errorMessages.push("Bitte geben Sie Ihre Telefonnummer ein");
+                    errorMessages.push("Bitte geben Sie Ihre Telefonnummer ein.");
                     break;
                 case 'email':
-                    errorMessages.push("Bitte geben Sie Ihre E-Mail-Adresse ein");
+                    errorMessages.push("Bitte geben Sie Ihre E-Mail-Adresse ein.");
                     break;
                 case 'frage':
-                    errorMessages.push("Bitte beschreiben Sie Ihr Anliegen");
+                    errorMessages.push("Bitte beschreiben Sie Ihr Anliegen.");
                     break;
                 case 'themen_wahl':
-                    errorMessages.push("Bitte wählen Sie ein Thema aus");
+                    errorMessages.push("Bitte wählen Sie ein Thema aus.");
                     break;
-                case 'mz_erhoehung_datum_mietzinsanzeige':
-                    errorMessages.push("Bitte geben Sie das Datum der Mietzinsanzeige ein");
+                case 'datum_mietzinsanzeige':
+                    errorMessages.push("Bitte geben Sie das Datum der Mietzinsanzeige ein.");
                     break;
                     break;
             }
@@ -117,7 +117,7 @@ function check_mandatory(sektion_id) {
 
     // if  id="mz_erhoehung_item" class="nav-item selected" exists, add 'datum_mietzinsanzeige' to mandatory_fields
     if (gewaehltes_thema() == 'mz_erhoehung') {
-        mandatory_fields.push('mz_erhoehung_datum_mietzinsanzeige');
+        mandatory_fields.push('datum_mietzinsanzeige');
     } else {
     }
     
@@ -482,7 +482,7 @@ function hide_mz() {
         }
     });
 }
-/*
+
 function check_mietzinsaenderung() {
     document.getElementById('mietzinsaenderung_options').style.display = 'block';
     document.getElementById('aenderung-error').style.display = 'none';
@@ -523,7 +523,7 @@ function check_anderes() {
     hide_mz();
     $("#themen_wahl").val("anderes");
 }
-
+/*
 function validateForm() {
     if (document.getElementById('thema_0').checked) {
         if (!document.querySelector('input[name="aenderung_art"]:checked')) {
