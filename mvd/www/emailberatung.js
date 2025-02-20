@@ -67,7 +67,7 @@ function gewaehltes_thema() {
                 'email': document.getElementById("email").value,
                 'anderes_mietobjekt': document.getElementById("anderes_mietobjekt").value,
                 'frage': document.getElementById("frage").value,
-                'datum_mietzinsanzeige': document.getElementById("mz_erhoehung_datum_mietzinsanzeige").value,
+                'datum_mietzinsanzeige': document.getElementById("datum_mietzinsanzeige").value,
                 'thema': (sektion_id == 'MVBE' || sektion_id == 'MVLU') ? document.getElementById("themen_wahl").value:'',
                 'termin_vereinbaren': (sektion_id == 'MVBE' || sektion_id == 'MVLU') ? document.getElementById("termin_vereinbaren_cb").checked:'',
                 'mz': (gewaehltes_thema().substring(0, 2) == 'mz') ? 1 : 0
