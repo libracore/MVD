@@ -82,7 +82,7 @@ function check_mandatory(sektion_id) {
         'frage'
     ]
     
-    if (sektion_id == 'MVBE') {
+    if (sektion_id == 'MVBE' || sektion_id == 'MVLU') {
         mandatory_fields.push('themen_wahl');
     }
     
