@@ -1,17 +1,41 @@
-function new_onlineberatung() {
+function gewaehltes_thema() {
+    // entscheide anhand des offenen tabs was das thema ist
+    /* <nav class="nav-tab nav-tab-emailberatung">
+                                                <ul class="h-cf">
+                                                    <li id="allgmein_item" class="nav-item">
+                                                        <a class="nav-link" href="#/" onclick="hide_mz();"><span>Allgemeine Anfrage</span></a>
+                                                    </li>
+                                                    <li id="mz_erhoehung_item" class="nav-item selected">
+                                                        <a class="nav-link" href="#/" onclick="show_mz_erhoehung();"><span>Mietzinserhöhung <i class="fa fa-arrow-up r45"></i></span></a>
+                                                    </li>
+                                                    <li id="mz_senkung_item" class="nav-item">
+                                                        <a class="nav-link" href="#/" onclick="show_mz_senkung();"><span>Mietzinssenkung <i class="fa fa-arrow-down r-45"></i></span></a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+    */
+   // gib die id ohne _item zurück vom eintrag zurück der selected ist
+   
+    var selection = document.querySelector('.nav-tab-emailberatung .nav-item.selected').id;
+    var thema = selection.replace('_item', '');
+    return thema;
+}
+ 
+
+   function new_onlineberatung() {
     if (localStorage.getItem('anfage_gesendet') == '0') {
         var sektion_id = document.getElementById("sektion_id").value;
         var failed_validations = check_mandatory(sektion_id);
         var errorMessages = [];
         
         // Check for mandatory Mietvertrag upload in MZ tabs
-        if (localStorage.getItem('mz_anfrage') == '1' && !$("#upload_files_1")[0].files[0]) {
+        /*if ((gewaehltes_thema().substring(0, 2) == 'mz') && !$("#upload_files_1")[0].files[0]) {
             failed_validations.push('mietvertrag');
             $("#upload_files_1").css("border", "1px solid red");
             errorMessages.push("Bitte laden Sie den Mietvertrag hoch (Pflichtfeld)");
         } else {
             $("#upload_files_1").css("border", "1px solid #ccc");
-        }
+        }*/
         
         // Build error message for other mandatory fields
         failed_validations.forEach(function(field) {
@@ -28,6 +52,10 @@ function new_onlineberatung() {
                 case 'themen_wahl':
                     errorMessages.push("Bitte wählen Sie ein Thema aus");
                     break;
+                case 'mz_erhoehung_datum_mietzinsanzeige':
+                    errorMessages.push("Bitte geben Sie das Datum der Mietzinsanzeige ein");
+                    break;
+                    break;
             }
         });
         
@@ -39,9 +67,10 @@ function new_onlineberatung() {
                 'email': document.getElementById("email").value,
                 'anderes_mietobjekt': document.getElementById("anderes_mietobjekt").value,
                 'frage': document.getElementById("frage").value,
+                'datum_mietzinsanzeige': document.getElementById("mz_erhoehung_datum_mietzinsanzeige").value,
                 'thema': (sektion_id == 'MVBE' || sektion_id == 'MVLU') ? document.getElementById("themen_wahl").value:'',
                 'termin_vereinbaren': (sektion_id == 'MVBE' || sektion_id == 'MVLU') ? document.getElementById("termin_vereinbaren_cb").checked:'',
-                'mz': localStorage.getItem('mz_anfrage')
+                'mz': (gewaehltes_thema().substring(0, 2) == 'mz') ? 1 : 0
             }
             frappe.call({
                 'method': 'mvd.www.emailberatung.new_beratung',
@@ -85,6 +114,12 @@ function check_mandatory(sektion_id) {
     if (sektion_id == 'MVBE' || sektion_id == 'MVLU') {
         mandatory_fields.push('themen_wahl');
     }
+
+    // if  id="mz_erhoehung_item" class="nav-item selected" exists, add 'datum_mietzinsanzeige' to mandatory_fields
+    if (gewaehltes_thema() == 'mz_erhoehung') {
+        mandatory_fields.push('mz_erhoehung_datum_mietzinsanzeige');
+    } else {
+    }
     
     failed_validations = []
     
@@ -92,6 +127,8 @@ function check_mandatory(sektion_id) {
         if (!$("#" + mandatory_fields[i]).val()) {
             failed_validations.push(mandatory_fields[i]);
             $("#" + mandatory_fields[i]).css("border", "1px solid red");
+            // add to the <div class="form-row error"> the class "error"
+            $("#" + mandatory_fields[i]).closest('.form-row').addClass("error");
             if (mandatory_fields[i] == 'themen_wahl') {
                 $("#themen_wahl_box").css("border", "1px solid red");
             }
@@ -270,7 +307,7 @@ function upload_files(beratung, key, secret, loop=1) {
 }
 
 function show_mz_erhoehung() {
-    localStorage.setItem('mz_anfrage', '1');
+    // localStorage.setItem('mz_anfrage', '1'); brauchen wir nicht mehr, weil es über geaehltes_thema() abgefragt wird
     $("#tab_title").text("Mietzinserhöhung ");
     $("#tab_title").append('<i class="fa fa-arrow-up r45"></i>');
     //$(".mz").css("display", 'inline');
@@ -305,27 +342,27 @@ function show_mz_erhoehung() {
     $("#upload_files_auswahl_2").attr('readonly', true);
     
     // Add required attribute
-    $("#upload_files_1").attr('required', true);
-    $("#upload_files_2").attr('required', true);  // Make second upload field mandatory
+    //$("#upload_files_1").attr('required', true);
+    //$("#upload_files_2").attr('required', true);  // Make second upload field mandatory
     
     $("label[for='upload_files']").each(function(index,element){
         if (index == 0) {
-            $(this).text("1. Mietvertrag *"); // Add asterisk to indicate required field
+            $(this).text("1. Mietvertrag");
         } else if (index == 1) {
-            $(this).text("2. Mietzinserhöhung *"); // Add asterisk to indicate required field
+            $(this).text("2. Mietzinserhöhung"); 
         } else if (index == 2) {
             $(this).text("Falls vorhanden: weitere Vertragsänderung (Mietzinsherabsetzungen, Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
         }
     });
 
     // Remove required attribute when switching tabs
-    $("#mz_senkung_item, #allgemein_item").click(function() {
-        $("#upload_files_2").removeAttr('required');
-    });
+    //$("#mz_senkung_item, #allgemein_item").click(function() {
+    //    $("#upload_files_2").removeAttr('required');
+    //});
 }
 
 function show_mz_senkung() {
-    localStorage.setItem('mz_anfrage', '1');
+    //localStorage.setItem('mz_anfrage', '1');
     $("#tab_title").text("Mietzinssenkung ");
     $("#tab_title").append('<i class="fa fa-arrow-down r-45"></i>');
     $("#mz_erhoehung_datum_mietzinsanzeige").css("display", 'none');
@@ -370,12 +407,12 @@ function show_mz_senkung() {
     $("#upload_files_auswahl_4").removeAttr('readonly');
 
     // Add required attribute
-    $("#upload_files_1").attr('required', true);
+    //$("#upload_files_1").attr('required', true);
     
     // Update labels
     $("label[for='upload_files']").each(function(index,element){
         if (index == 0) {
-            $(this).text("1. Mietvertrag *"); // Add asterisk to indicate required field
+            $(this).text("1. Mietvertrag");
         } else if (index == 1) {
             $(this).text("2. Falls vorhanden: weitere Vertragsänderung (Mietzinsherabsetzungen, Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
         } else if (index == 2) {
@@ -387,7 +424,7 @@ function show_mz_senkung() {
 }
 
 function hide_mz() {
-    localStorage.setItem('mz_anfrage', '0');
+    //localStorage.setItem('mz_anfrage', '0');
     $("#tab_title").text("Beratungsanfrage");
     //$(".mz").css("display", 'none');
     $("#mz_erhoehung_datum_mietzinsanzeige").css("display", 'none');
@@ -422,7 +459,7 @@ function hide_mz() {
     });
     
     // Remove required attribute when hiding
-    $("#upload_files_1").removeAttr('required');
+    //$("#upload_files_1").removeAttr('required');
     
     $(".awesomplete-delete").each(function(){
         $(this).off('click');
@@ -479,6 +516,7 @@ function check_anderes() {
     $("#themen_wahl").val("anderes");
 }
 
+/* 
 function validateForm() {
     if (document.getElementById('thema_0').checked) {
         if (!document.querySelector('input[name="aenderung_art"]:checked')) {
@@ -490,6 +528,7 @@ function validateForm() {
 }
 
 // Add click handlers for radio buttons
+
 document.addEventListener('DOMContentLoaded', function() {
     var radioButtons = document.querySelectorAll('input[name="thema"]');
     radioButtons.forEach(function(radio) {
@@ -513,6 +552,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+*/
 
 // AWESOMPLETE
 // ----------------------------------------------------------------------------------------------------
@@ -944,7 +984,7 @@ setTimeout(function(){
     });
 }, 1000);
 localStorage.setItem('anfage_gesendet', '0');
-localStorage.setItem('mz_anfrage', '0');
+//localStorage.setItem('mz_anfrage', '0');
 
 // AWESOMPLETE END
 // ----------------------------------------------------------------------------------------------------
