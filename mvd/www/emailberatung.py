@@ -162,6 +162,7 @@ def context_erweiterung(context, mitgliedschaft):
 def new_beratung(**kwargs):
     try:
         args = json.loads(kwargs['kwargs'])
+        # print("====================================================================","Debug: args =", args,"====================================================================")  # Add debug print
         create_beratungs_log(error=0, info=1, beratung=None, method='new_beratung', title='Neue Beratung wird angelegt', json="{0}".format(str(args)))
         if frappe.db.exists("Mitgliedschaft", args['mv_mitgliedschaft']):
             sektion = frappe.db.get_value("Mitgliedschaft", args['mv_mitgliedschaft'], "sektion_id")
@@ -171,15 +172,17 @@ def new_beratung(**kwargs):
             if sektion == 'MVBE' or sektion == 'MVLU':
                 if args['thema'] != 'anderes':
                     thema = args['thema']
-                    if args['thema'] == 'Mietzinsänderung':
-                        beratungskategorie = '202 - MZ-Erhöhung'
+                    if args['thema'] == 'Mietzinserhöhung':
+                        beratungskategorie = '202 - Mietzinserhöhung'
+                    if args['thema'] == 'Mietzinssenkung':
+                        beratungskategorie = '203 - Mietzinssenkung'
                     elif args['thema'] == 'Heiz- und Nebenkosten':
                         beratungskategorie = '300 - Nebenkosten'
                 if args['termin_vereinbaren']:
                     termin_vereinbaren = True
             else:
                 if args['mz'] == '1':
-                    beratungskategorie = '202 - MZ-Erhöhung'
+                    beratungskategorie = '202 - Mietzinserhöhung'
             if args['telefon']:
                 telefon = """<b>Telefon:</b> {0}<br>""".format(args['telefon'])
             else:
