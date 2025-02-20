@@ -276,7 +276,7 @@ function show_mz_erhoehung() {
     //$(".mz").css("display", 'inline');
     $("#mz_erhoehung_datum_mietzinsanzeige").css("display", 'inline');
     $("#mz_erhoehung_item").addClass("selected");
-    $("#allgmein_item").removeClass("selected");
+    $("#allgemein_item").removeClass("selected");
     $("#mz_senkung_item").removeClass("selected");
     $("#hinweis_mietzinsrechner_erhoehung").show();
     $("#hinweis_mietzinsrechner_senkung").hide();
@@ -319,7 +319,7 @@ function show_mz_erhoehung() {
     });
 
     // Remove required attribute when switching tabs
-    $("#mz_senkung_item, #allgmein_item").click(function() {
+    $("#mz_senkung_item, #allgemein_item").click(function() {
         $("#upload_files_2").removeAttr('required');
     });
 }
@@ -330,7 +330,7 @@ function show_mz_senkung() {
     $("#tab_title").append('<i class="fa fa-arrow-down r-45"></i>');
     $("#mz_erhoehung_datum_mietzinsanzeige").css("display", 'none');
     $("#mz_senkung_item").addClass("selected");
-    $("#allgmein_item").removeClass("selected");
+    $("#allgemein_item").removeClass("selected");
     $("#mz_erhoehung_item").removeClass("selected");
     $("#hinweis_mietzinsrechner_erhoehung").hide();
     $("#hinweis_mietzinsrechner_senkung").show();
@@ -391,7 +391,7 @@ function hide_mz() {
     $("#tab_title").text("Beratungsanfrage");
     //$(".mz").css("display", 'none');
     $("#mz_erhoehung_datum_mietzinsanzeige").css("display", 'none');
-    $("#allgmein_item").addClass("selected");
+    $("#allgemein_item").addClass("selected");
     $("#mz_erhoehung_item").removeClass("selected");
     $("#mz_senkung_item").removeClass("selected");
     $("#hinweis_mietzinsrechner_erhoehung").hide();
