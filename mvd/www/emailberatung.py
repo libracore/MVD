@@ -196,8 +196,8 @@ def new_beratung(**kwargs):
                 frage = """<b>Frage:</b><br>{0}<br><br>""".format(sanitize_html(args['frage']).replace("\n", "<br>"))
             else:
                 frage = ''
-            if args['datum_mietzinsanzeige']:
-                datum_mietzinsanzeige = """<b>Briefdatum der Mietzinserhöhungsanzeige:</b> {0}""".format(args['datum_mietzinsanzeige'])
+            if 'datum_mietzinsanzeige' in args and args['datum_mietzinsanzeige']:
+                datum_mietzinsanzeige = """<b>Briefdatum der Mietzinserhöhungsanzeige:</b> {0}""".format(args['datum_mietzinsanzeige'])
             else:
                 datum_mietzinsanzeige = ''
             
@@ -214,7 +214,7 @@ def new_beratung(**kwargs):
                 'telefon_privat_mobil': args['telefon'] if args['telefon'] else None,
                 'anderes_mietobjekt': args['anderes_mietobjekt'] if args['anderes_mietobjekt'] else None,
                 'frage': args['frage'] if args['frage'] else None,
-                'datum_mietzinsanzeige': args['datum_mietzinsanzeige'] if args['datum_mietzinsanzeige'] else None,
+                'datum_mietzinsanzeige': args.get('datum_mietzinsanzeige', None),
                 'anlage_durch_web_formular': 1,
                 'sektion_id': sektion
             })
