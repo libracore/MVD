@@ -127,13 +127,15 @@ function check_mandatory(sektion_id) {
         if (!$("#" + mandatory_fields[i]).val()) {
             failed_validations.push(mandatory_fields[i]);
             $("#" + mandatory_fields[i]).css("border", "1px solid red");
-            // add to the <div class="form-row error"> the class "error"
+            // add to the <div class="form-row error"> the class "error". a bit more like the design of the website
             $("#" + mandatory_fields[i]).closest('.form-row').addClass("error");
             if (mandatory_fields[i] == 'themen_wahl') {
                 $("#themen_wahl_box").css("border", "1px solid red");
             }
             
         } else {
+            console.log(mandatory_fields[i]+" is valid");
+            $("#" + mandatory_fields[i]).closest('.form-row').removeClass("error");
             $("#" + mandatory_fields[i]).css("border", "1px solid #ccc");
             if (mandatory_fields[i] == 'themen_wahl') {
                 $("#themen_wahl_box").css("border", "1px solid #e7f1f2");
@@ -320,6 +322,7 @@ function show_mz_erhoehung() {
     // if div with id themen_wahl_box exists, select input thema_0 
     if ($("#themen_wahl_box").length) {
         $("#thema_0").prop("checked", true);
+        $("#themen_wahl").val("Mietzinserhöhung"); // make also the mandatory field evaluation work
     }
 
     
@@ -375,6 +378,8 @@ function show_mz_senkung() {
     // if div with id themen_wahl_box exists, select input thema_1
     if ($("#themen_wahl_box").length) {
         $("#thema_1").prop("checked", true);
+        $("#themen_wahl").val("Mietzinssenkung"); // make also the mandatory field evaluation work
+
     }
 
     // remove upload rows
@@ -438,8 +443,11 @@ function hide_mz() {
     if ($("#themen_wahl_box").length) {
         if ($("#thema_2").prop("checked")) {
             $("#thema_2").prop("checked", true);
+            $("#themen_wahl").val("Heiz- und Nebenkosten"); // make also the mandatory field evaluation work
         } else {
             $("#thema_3").prop("checked", true);
+            $("#themen_wahl").val("anderes"); // make also the mandatory field evaluation work
+
         }
     }
     
@@ -474,7 +482,7 @@ function hide_mz() {
         }
     });
 }
-
+/*
 function check_mietzinsaenderung() {
     document.getElementById('mietzinsaenderung_options').style.display = 'block';
     document.getElementById('aenderung-error').style.display = 'none';
@@ -516,7 +524,6 @@ function check_anderes() {
     $("#themen_wahl").val("anderes");
 }
 
-/* 
 function validateForm() {
     if (document.getElementById('thema_0').checked) {
         if (!document.querySelector('input[name="aenderung_art"]:checked')) {
