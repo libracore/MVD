@@ -273,7 +273,8 @@ function show_mz_erhoehung() {
     localStorage.setItem('mz_anfrage', '1');
     $("#tab_title").text("Mietzinserhöhung ");
     $("#tab_title").append('<i class="fa fa-arrow-up r45"></i>');
-    $(".mz").css("display", 'inline');
+    //$(".mz").css("display", 'inline');
+    $("#mz_erhoehung_datum_mietzinsanzeige").css("display", 'inline');
     $("#mz_erhoehung_item").addClass("selected");
     $("#allgmein_item").removeClass("selected");
     $("#mz_senkung_item").removeClass("selected");
@@ -327,7 +328,7 @@ function show_mz_senkung() {
     localStorage.setItem('mz_anfrage', '1');
     $("#tab_title").text("Mietzinssenkung ");
     $("#tab_title").append('<i class="fa fa-arrow-down r-45"></i>');
-    $(".mz").css("display", 'inline');
+    $("#mz_erhoehung_datum_mietzinsanzeige").css("display", 'none');
     $("#mz_senkung_item").addClass("selected");
     $("#allgmein_item").removeClass("selected");
     $("#mz_erhoehung_item").removeClass("selected");
@@ -388,7 +389,8 @@ function show_mz_senkung() {
 function hide_mz() {
     localStorage.setItem('mz_anfrage', '0');
     $("#tab_title").text("Beratungsanfrage");
-    $(".mz").css("display", 'none');
+    //$(".mz").css("display", 'none');
+    $("#mz_erhoehung_datum_mietzinsanzeige").css("display", 'none');
     $("#allgmein_item").addClass("selected");
     $("#mz_erhoehung_item").removeClass("selected");
     $("#mz_senkung_item").removeClass("selected");
