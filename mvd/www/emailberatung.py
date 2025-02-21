@@ -169,11 +169,10 @@ def new_beratung(**kwargs):
             thema = None
             beratungskategorie = None
             termin_vereinbaren = False
-            
             if args['thema'] != 'anderes':
-                if args['thema'] == 'Mietzinserhöhung':
+                if args['thema'] == 'Mietzinserhöhung' or args['thema'] == 'mz_erhoehung':
                     beratungskategorie = '202 - Mietzinserhöhung'
-                if args['thema'] == 'Mietzinssenkung':
+                if args['thema'] == 'Mietzinssenkung' or args['thema'] == 'mz_senkung':
                     beratungskategorie = '203 - Mietzinssenkung'
                 elif args['thema'] == 'Heiz- und Nebenkosten':
                     beratungskategorie = '300 - Nebenkosten'

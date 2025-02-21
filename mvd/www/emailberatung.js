@@ -55,7 +55,6 @@ function gewaehltes_thema() {
                 case 'datum_mietzinsanzeige':
                     errorMessages.push("Bitte geben Sie das Datum der Mietzinsanzeige ein.");
                     break;
-                    break;
             }
         });
         
