@@ -50,7 +50,7 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s2").click(function(){
-            frappe.route_options = {"status": 'Eingang', "beratungskategorie": ['in', ['202 - MZ-Erhöhung', '300 - Nebenkosten']], "sektion_id": sektion}
+            frappe.route_options = {"status": 'Eingang', "beratungskategorie": ['in', ['202 - MZ-Erhöhung', '300 - Nebenkosten', '202 - Mietzinserhöhung', '203 - Mietzinssenkung']], "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s3").click(function(){

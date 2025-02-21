@@ -162,7 +162,7 @@ def context_erweiterung(context, mitgliedschaft):
 def new_beratung(**kwargs):
     try:
         args = json.loads(kwargs['kwargs'])
-        print("====================================================================","Debug: args =", args,"====================================================================")  # Add debug print
+        # print("====================================================================","Debug: args =", args,"====================================================================")  # Add debug print
         create_beratungs_log(error=0, info=1, beratung=None, method='new_beratung', title='Neue Beratung wird angelegt', json="{0}".format(str(args)))
         if frappe.db.exists("Mitgliedschaft", args['mv_mitgliedschaft']):
             sektion = frappe.db.get_value("Mitgliedschaft", args['mv_mitgliedschaft'], "sektion_id")

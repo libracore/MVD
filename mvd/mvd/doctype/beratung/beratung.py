@@ -82,7 +82,7 @@ class Beratung(Document):
                     if self.sektion_id:
                         if self.sektion_id == mitgliedschaften[0].sektion_id:
                             self.mv_mitgliedschaft = mitgliedschaften[0].name
-                            if self.beratungskategorie not in ('202 - MZ-Erhöhung', '300 - Nebenkosten'):
+                            if self.beratungskategorie not in ('202 - Mietzinserhöhung', '203 - Mietzinssenkung', '300 - Nebenkosten'):
                                 self.kontaktperson = frappe.db.get_value("Sektion", self.sektion_id, "default_emailberatung_todo_gruppe")
         
         # Titel aktualisierung
@@ -188,7 +188,7 @@ class Beratung(Document):
                 '''
                 if self.sektion_id == 'MVBE' or self.sektion_id == 'MVLU':
                     if self.status == 'Eingang':
-                        if self.beratungskategorie not in ('202 - MZ-Erhöhung', '300 - Nebenkosten'):
+                        if self.beratungskategorie not in ('202 - Mietzinserhöhung', '203 - Mietzinssenkung', '300 - Nebenkosten'):
                             self.status = 'Open'
                             # Zuweisung Defaultberater*in
                             self.zuweisung_default_berater_in()
