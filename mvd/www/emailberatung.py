@@ -169,20 +169,18 @@ def new_beratung(**kwargs):
             thema = None
             beratungskategorie = None
             termin_vereinbaren = False
-            if sektion == 'MVBE' or sektion == 'MVLU':
-                if args['thema'] != 'anderes':
-                    thema = args['thema']
-                    if args['thema'] == 'Mietzinserhöhung':
-                        beratungskategorie = '202 - Mietzinserhöhung'
-                    if args['thema'] == 'Mietzinssenkung':
-                        beratungskategorie = '203 - Mietzinssenkung'
-                    elif args['thema'] == 'Heiz- und Nebenkosten':
-                        beratungskategorie = '300 - Nebenkosten'
-                if args['termin_vereinbaren']:
-                    termin_vereinbaren = True
-            else:
-                if args['mz'] == '1':
+            
+            if args['thema'] != 'anderes':
+                if args['thema'] == 'Mietzinserhöhung':
                     beratungskategorie = '202 - Mietzinserhöhung'
+                if args['thema'] == 'Mietzinssenkung':
+                    beratungskategorie = '203 - Mietzinssenkung'
+                elif args['thema'] == 'Heiz- und Nebenkosten':
+                    beratungskategorie = '300 - Nebenkosten'
+
+            if args['termin_vereinbaren']:
+                termin_vereinbaren = True
+            
             if args['telefon']:
                 telefon = """<b>Telefon:</b> {0}<br>""".format(args['telefon'])
             else:
