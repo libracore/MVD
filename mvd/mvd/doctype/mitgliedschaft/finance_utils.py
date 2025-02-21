@@ -359,12 +359,10 @@ def check_folgejahr_regelung(mitgliedschaft, db_direct=False):
 
 def sinv_update(sinv, event):
     if sinv.mv_mitgliedschaft:
-        already_running = check_for_running_job('Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft))
         args = {
             'mv_mitgliedschaft': sinv.mv_mitgliedschaft
         }
-        if not already_running:
-            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft), timeout=5000, **args)
+        enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft), timeout=5000, **args)
     return
 
 def _sinv_update(mv_mitgliedschaft):
@@ -374,7 +372,8 @@ def _sinv_update(mv_mitgliedschaft):
     check_folgejahr_regelung(mitgliedschaft, db_direct=True)
     set_max_reminder_level(mitgliedschaft, db_direct=True)
     get_ampelfarbe(mitgliedschaft, db_direct=True)
-    sp_updater(mitgliedschaft)
+    if mitgliedschaft.status_c != 'Wegzug':
+        sp_updater(mitgliedschaft)
 
 def check_mitgliedschaft_in_pe(pe, event):
     if not pe.mv_mitgliedschaft:

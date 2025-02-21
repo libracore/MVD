@@ -261,7 +261,17 @@ def execute_sp_log(sp_log, manual_execution=False):
             # END: MVZH Sepcial Case (#1089; Doppelte Zuzüge)
 
             if not mvzh_affected:
-                error_in_execution = mvm_neuanlage(api_kwargs)
+                # Allgemeine Doppel-Zuzugs-Prüfung (#1239)
+                previous_mitglied_nr = frappe.db.get_value("Mitgliedschaft", str(cint(api_kwargs['mitgliedId']) - 1), "mitglied_nr")
+                if previous_mitglied_nr == api_kwargs['mitgliedNummer']:
+                    sp_log.status = 'Failed'
+                    sp_log.retry_count = cint(sp_log.retry_count) + 1
+                    sp_log.add_comment('Comment', text='Doppel-Zuzug Issue #1239')
+                    sp_log.save()
+                    frappe.db.commit()
+                    return
+                else:
+                    error_in_execution = mvm_neuanlage(api_kwargs)
     
     if error_in_execution:
         sp_log.status = 'Failed'

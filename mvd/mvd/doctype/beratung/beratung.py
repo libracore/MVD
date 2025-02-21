@@ -10,6 +10,7 @@ import json
 from bs4 import BeautifulSoup
 from frappe.utils import cint
 from frappe import _
+from datetime import datetime
 
 class Beratung(Document):
     def validate(self):
@@ -875,6 +876,11 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
     subject = ''
     
     for entry in von:
+        # Berechne die Dauer des Beratungstermins
+        von_datetime = datetime.strptime(von[index], "%Y-%m-%d %H:%M:%S")
+        bis_datetime = datetime.strptime(bis[index], "%Y-%m-%d %H:%M:%S")
+        dauer_termin = str(int((bis_datetime - von_datetime).total_seconds() / 60))
+
         von_datum = getdate(entry)
         ort_info = frappe.db.get_value("Beratungsort", ort, "infofeld") or ''
         if sprache == 'fr':
@@ -885,25 +891,29 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
             if art == 'telefonisch':
                 mail_txt += """
                     <div>Nous avons réservé pour vous le rendez-vous téléphonique suivant:
-                        <br><b>{wochentag}, {datum} à {von} heures</b>
+                        <br><b>{wochentag}, {datum} de {von} à {bis} heures (durée: {dauer_termin} min)</b>
                         <br>Notre consultant* {berater_in} vous appellera au numéro suivant:
                         <br><b>{telefonnummer}</b>
                         <br><br>{default_terminbest_hinweis}
                     </div>
                 """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                        bis=":".join(bis[index].split(" ")[1].split(":")[:2]), \
+                        dauer_termin=dauer_termin, \
                         telefonnummer=telefonnummer, berater_in=berater_in_name, \
                         default_terminbest_hinweis = default_terminbest_hinweis_fr.replace('\r','<br>').replace('\n','<br>'))
             else:
                 mail_txt += """
                     <div>Nous avons réservé pour vous le rendez-vous suivant:
-                        <br><b>{wochentag}, {datum} à {von} heures</b>
+                        <br><b>{wochentag}, {datum} de {von} à {bis} heures (durée: {dauer_termin} min)</b>
                         <br>Notre consultant* {berater_in} vous attend à <b>{ort}</b> :
                         <br>{ort_info}
                         <br><br>{default_terminbest_hinweis}
                     </div>
                 """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                        bis=":".join(bis[index].split(" ")[1].split(":")[:2]), \
+                        dauer_termin=dauer_termin, \
                         ort_info="{0}".format(ort_info) if ort_info else '', \
                         ort=ort.replace("({0})".format(sektion), "").strip(), \
                         berater_in=berater_in_name, \
@@ -916,25 +926,29 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
             if art == 'telefonisch':
                 mail_txt += """
                     <div>Wir haben für Sie folgenden <b>Termin für eine telefonische Beratung</b> reserviert:
-                        <br><b>{wochentag}, {datum} um {von} Uhr</b>
+                        <br><b>{wochentag}, {datum} von {von} bis {bis} Uhr (Dauer: {dauer_termin} Min)</b>
                         <br>Unser*e Berater*in {berater_in} wird Sie unter dieser Nummer anrufen:
                         <br><b>{telefonnummer}</b>
                         <br><br>{default_terminbest_hinweis}
                     </div>
                 """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                        bis=":".join(bis[index].split(" ")[1].split(":")[:2]), \
+                        dauer_termin=dauer_termin, \
                         telefonnummer=telefonnummer, berater_in=berater_in_name, \
                         default_terminbest_hinweis = default_terminbest_hinweis_de.replace('\r','<br>').replace('\n','<br>') if default_terminbest_hinweis_de else '')
             else:
                 mail_txt += """
                     <div>Wir haben für Sie folgenden <b>Termin für eine persönliche Beratung</b> reserviert:
-                        <br><b>{wochentag}, {datum} um {von} Uhr</b>
+                        <br><b>{wochentag}, {datum} von {von} bis {bis} Uhr (Dauer: {dauer_termin} Min)</b>
                         <br>Unser*e Berater*in {berater_in} erwartet Sie in <b>{ort}</b>:
                         <br>{ort_info}
                         <br><br>{default_terminbest_hinweis}
                     </div>
                 """.format(wochentag=_(von_datum.strftime('%A'), sprache), datum=von_datum.strftime('%d.%m.%y'), \
                         von=":".join(von[index].split(" ")[1].split(":")[:2]), \
+                        bis=":".join(bis[index].split(" ")[1].split(":")[:2]), \
+                        dauer_termin=dauer_termin, \
                         ort_info="{0}".format(ort_info).replace(', ','<br>') if ort_info else '', \
                         ort=ort.replace("({0})".format(sektion), "").strip(), \
                         berater_in=berater_in_name, \
@@ -952,6 +966,9 @@ def get_termin_block_data(abp_zuweisungen):
         abp_zuweisungen = abp_zuweisungen.replace("-", "", 1)
     return_data = []
     for abp_zuweisung in abp_zuweisungen.split("-"):
+        if check_doppelbuchung(abp_zuweisung) > 0:
+            frappe.throw("Der gewählte Termin wurde in der Zwischenzeit leider bereits gebucht.")
+        
         return_data.append({
             'referenz': abp_zuweisung,
             'von': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'from_time'),
@@ -959,6 +976,13 @@ def get_termin_block_data(abp_zuweisungen):
             'date': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'date')
         })
     return return_data
+
+def check_doppelbuchung(abp_zuweisung):
+    return frappe.db.sql("""
+        SELECT COUNT(`name`) AS `qty`
+        FROM `tabBeratung Termin`
+        WHERE `abp_referenz` = '{abp_zuweisung}'
+    """.format(abp_zuweisung=abp_zuweisung), as_dict=True)[0].qty
 
 @frappe.whitelist()
 def get_tel_for_termin(mitgliedschaft=None):
