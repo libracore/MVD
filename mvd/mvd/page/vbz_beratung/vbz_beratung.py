@@ -15,7 +15,7 @@ def get_open_data():
             'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
             's': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
-            's2': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'beratungskategorie': ['in', ['202 - MZ-Erhöhung', '300 - Nebenkosten']], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            's2': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'beratungskategorie': ['in', ['202 - MZ-Erhöhung', '300 - Nebenkosten', '202 - Mietzinserhöhung', '203 - Mietzinssenkung']], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's3': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfrage: Termin vereinbaren', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 0, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
