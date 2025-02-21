@@ -298,12 +298,12 @@
                                                         <div class="col-sm-12 col-md-8 col-lg-8">
                                                             <fieldset>
                                                                 <div class="form-item">
-                                                                    <input type="radio" id="anrede_0" name="anrede" value="Frau" {% if anrede == 'Frau' %}checked="checked"{% endif %}>
+                                                                    <input type="radio" id="anrede_0" name="anrede" value="Frau" {% if anrede == 'Frau' %} checked="checked" {% else %}disabled="disabled" {% endif %}>
                                                                     <label for="anrede_0">Frau</label>
                                                                 </div>
                                                                 <!-- end form-item -->
                                                                 <div class="form-item">
-                                                                    <input type="radio" id="anrede_1" name="anrede" value="Herr" {% if anrede == 'Herr' %}checked="checked"{% endif %}>
+                                                                    <input type="radio" id="anrede_1" name="anrede" value="Herr" {% if anrede == 'Herr' %}checked="checked" {% else %}disabled="disabled" {% endif %}>
                                                                     <label for="anrede_1">Herr</label>
                                                                 </div>
                                                                 <!-- end form-item -->
