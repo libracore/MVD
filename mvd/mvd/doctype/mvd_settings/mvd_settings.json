@@ -23,7 +23,13 @@
   "redirect_url_ablehnung",
   "section_wohnungsabgabe",
   "qa_mail_an_testadresse",
-  "qa_mail_testadresse"
+  "qa_mail_testadresse",
+  "section_website",
+  "pwd_reset_an_testadresse",
+  "pwd_reset_testadresse",
+  "pwd_reset_subject",
+  "pwd_reset_template",
+  "pwd_reset_sender"
  ],
  "fields": [
   {
@@ -136,10 +142,43 @@
    "fieldname": "qa_mailversand",
    "fieldtype": "Check",
    "label": "QA-Mailversand"
+  },
+  {
+   "fieldname": "section_website",
+   "fieldtype": "Section Break",
+   "label": "Website API"
+  },
+  {
+   "default": "0",
+   "fieldname": "pwd_reset_an_testadresse",
+   "fieldtype": "Check",
+   "label": "PWD-Reset-Mail an Testadresse"
+  },
+  {
+   "depends_on": "eval:doc.pwd_reset_an_testadresse",
+   "fieldname": "pwd_reset_testadresse",
+   "fieldtype": "Data",
+   "label": "PWD-Reset-Mail Testadresse"
+  },
+  {
+   "fieldname": "pwd_reset_subject",
+   "fieldtype": "Data",
+   "label": "PWD-Reset Betreff"
+  },
+  {
+   "default": "website_pwd_reset",
+   "fieldname": "pwd_reset_template",
+   "fieldtype": "Data",
+   "label": "PWD-Reset Template"
+  },
+  {
+   "fieldname": "pwd_reset_sender",
+   "fieldtype": "Data",
+   "label": "PWD-Reset Absender"
   }
  ],
  "issingle": 1,
- "modified": "2025-01-16 15:58:10.162344",
+ "modified": "2025-02-21 09:57:32.831650",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Settings",

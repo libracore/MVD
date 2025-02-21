@@ -4,8 +4,10 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils import cint
 
 '''
+------------------------------------------------------------------------------------------------------------
 LOGIN
 ------------------------------------------------------------------------------------------------------------
 curl --location --request POST 'https://libracore.mieterverband.ch/api/method/mvd.mvd.v2.web_auth.login' \
@@ -16,7 +18,7 @@ curl --location --request POST 'https://libracore.mieterverband.ch/api/method/mv
 }'
 
 Optionaler Parameter "clear" --> PWD im Klartext, default = PWD als Hash
-
+------------------------------------------------------------------------------------------------------------
 RESET
 ------------------------------------------------------------------------------------------------------------
 Anfrage eines Reset Hash per Mail
@@ -36,6 +38,9 @@ curl --location --request POST 'https://libracore.mieterverband.ch/api/method/mv
     "reset_hash": "HIERFOLGTDERRESETHASH",
     "pwd": "$HASHMETHODE$PWDHASH"
 }'
+
+Optionaler Parameter "clear" --> PWD im Klartext, default = PWD als Hash
+------------------------------------------------------------------------------------------------------------
 '''
 
 '''
@@ -64,9 +69,11 @@ def login(**api_request):
 
 @frappe.whitelist(allow_guest=True)
 def reset(**api_request):
+    email = None
     # Check/Get Mitgliedernummer
     if '@' in api_request['user']:
         mitglied = get_mitglied_nummer(api_request['user'])
+        email = api_request['user']
     elif 'MV0' in api_request['user']:
         mitglied = "{0}@login.ch".format(api_request['user'])
     elif 'MV' not in api_request['user']:
@@ -76,9 +83,12 @@ def reset(**api_request):
     
     if mitglied:
         if 'reset_hash' in api_request and 'pwd' in api_request:
-            return update_pwd(mitglied, api_request['reset_hash'], api_request['pwd'])
+            clear = False
+            if "clear" in api_request:
+                clear = True
+            return update_pwd(mitglied, api_request['reset_hash'], api_request['pwd'], clear)
         else:
-            return generate_reset_hash(mitglied)
+            return generate_reset_hash(mitglied, email)
     
     return multi_mail()
 
@@ -135,31 +145,60 @@ def check_credentials(user, pwd, clear=False):
         else:
             return success_data(auth[0].name)
 
-def update_pwd(user, reset_hash, pwd):
+def update_pwd(user, reset_hash, pwd, clear):
     user_doc = frappe.get_doc("User", user)
     if user_doc.reset_password_key == reset_hash:
-        frappe.db.sql("""
-                        UPDATE
-                        `__Auth`
-                        SET `password` = '{pwd}'
-                        WHERE `doctype` = 'User'
-                        AND `name` = '{user}'
-                        AND `fieldname` = 'password'
-                        AND `encrypted` = 0""".format(user=user, pwd=pwd))
-        user_doc.reset_password_key = ''
-        user_doc.save(ignore_permissions=True)
-        return success_data(user)
+        if clear:
+            from frappe.utils.password import update_password
+            update_password(user, pwd)
+            return success_data(user)
+        else:
+            frappe.db.sql("""
+                            UPDATE
+                            `__Auth`
+                            SET `password` = '{pwd}'
+                            WHERE `doctype` = 'User'
+                            AND `name` = '{user}'
+                            AND `fieldname` = 'password'
+                            AND `encrypted` = 0""".format(user=user, pwd=pwd))
+            user_doc.reset_password_key = ''
+            user_doc.save(ignore_permissions=True)
+            return success_data(user)
     else:
          return failed_login()
 
-def generate_reset_hash(user):
+def generate_reset_hash(user, email):
     from frappe.utils import random_string
     key = random_string(32)
     user_doc = frappe.get_doc("User", user)
     user_doc.reset_password_key = key
     user_doc.save(ignore_permissions=True)
-    # TBD
-    # hier erfolgt dann noch der Mailversand
+    
+    if cint(frappe.db.get_value("MVD Settings", "MVD Settings", "pwd_reset_an_testadresse")) == 1:
+        email = frappe.db.get_value("MVD Settings", "MVD Settings", "pwd_reset_testadresse")
+    else:
+        if not email:
+            from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
+            mitglied_id = get_mitglied_id_from_nr(mitglied_nr=user.replace("@login.ch", ""))
+            email = frappe.db.get_value("Mitgliedschaft", mitglied_id, "e_mail_1")
+    if not email:
+        return server_error()
+
+    sender = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_sender')
+    subject = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_subject')
+    template = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_template') or 'website_pwd_reset'
+    args = {
+        'link': "https://xxx.ch/?reset_hash={0}".format(key)
+    }
+    if not sender or not subject or not template:
+        return server_error()
+    
+    try:
+        frappe.sendmail(recipients=[email], sender=sender, subject=subject,
+            template=template, args=args, header=[subject, "green"], retry=3)
+    except:
+        return server_error()
+    
     return success_info()
 
 '''
