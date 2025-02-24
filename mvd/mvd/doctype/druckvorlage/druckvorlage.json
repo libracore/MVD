@@ -279,7 +279,7 @@
    "depends_on": "eval:doc.dokument!='Mahnung'&&doc.dokument!='Geschenkmitgliedschaft'",
    "fieldname": "tipps",
    "fieldtype": "HTML",
-   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Rechnungsbetrag (Nur wenn mit EZ) -&gt; <b>%%RECHNUNGSBETRAG%%</b></li>\n<li>Rechnungsnummer -&gt; <b>%%RECHNUNGSNUMMER%%</b></li>\n<li>Datum der Webshop Order -&gt;  <b>%%WEBSHOPDATUM%%</b></li>\n<li>Briefanrede Beschenkte*r -&gt; <b>%%ANREDE BESCHENKTE%%</b></li>\n<li>Briefanrede Schenkende*r -&gt; <b>%%ANREDE SCHENKENDE%%</b></li>\n<li>Vor- Nachname Beschenkte*r -&gt; <b>%%VOR- NACHNAME BESCHENKTE%%</b></li>\n<li>Vor- Nachname Schenkende*r -&gt; <b>%%VOR- NACHNAME SCHENKENDE%%</b></li>\n</ul>"
+   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Rechnungsbetrag (Nur wenn mit EZ) -&gt; <b>%%RECHNUNGSBETRAG%%</b></li>\n<li>Rechnungsnummer -&gt; <b>%%RECHNUNGSNUMMER%%</b></li>\n<li>Datum der Webshop Order -&gt;  <b>%%WEBSHOPDATUM%%</b></li>\n<li>Briefanrede Beschenkte*r -&gt; <b>%%ANREDE BESCHENKTE%%</b></li>\n<li>Briefanrede Schenkende*r -&gt; <b>%%ANREDE SCHENKENDE%%</b></li>\n<li>Vor- Nachname Beschenkte*r -&gt; <b>%%VOR- NACHNAME BESCHENKTE%%</b></li>\n<li>Vor- Nachname Schenkende*r -&gt; <b>%%VOR- NACHNAME SCHENKENDE%%</b></li>\n<li>Link zur Anmeldung digitale Rechnung -&gt; <b>%%DIGITALERECHNUNGLINK%%</b></li>\n</ul>"
   },
   {
    "default": "0",
@@ -378,13 +378,13 @@
    "depends_on": "eval:doc.dokument=='Mahnung'",
    "fieldname": "tipps_mahnung",
    "fieldtype": "HTML",
-   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Gesamtbetrag der gemahnten Rechnung(en) -&gt; <b>%%Gesamtbetrag_gemahnte_Rechnungen%%</b></li>\n<li>Jahr der gemahnten Jahresrechnung auf Seite 1 -&gt; <b>%%Jahresrechnung_Jahr%%</b></li>\n<li>Rechnungsdatum der gemahnten Rechnung -&gt; <b>%%RECHNUNGSDATUM%%</b></li>\n<li>Artikeltabelle der gemahnten Rechnung -&gt; <b>%%ARTIKELTABELLE%%</b></li>\n</ul>"
+   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Gesamtbetrag der gemahnten Rechnung(en) -&gt; <b>%%Gesamtbetrag_gemahnte_Rechnungen%%</b></li>\n<li>Jahr der gemahnten Jahresrechnung auf Seite 1 -&gt; <b>%%Jahresrechnung_Jahr%%</b></li>\n<li>Rechnungsdatum der gemahnten Rechnung -&gt; <b>%%RECHNUNGSDATUM%%</b></li>\n<li>Artikeltabelle der gemahnten Rechnung -&gt; <b>%%ARTIKELTABELLE%%</b></li>\n<li>Link zur Anmeldung digitale Rechnung -&gt; <b>%%DIGITALERECHNUNGLINK%%</b></li>\n</ul>"
   },
   {
    "depends_on": "eval:doc.dokument=='Geschenkmitgliedschaft'",
    "fieldname": "tipps_geschenkmitgliedschaft",
    "fieldtype": "HTML",
-   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede Beschenkte*r -&gt; <b>%%ANREDE BESCHENKTE%%</b></li>\n<li>Briefanrede Schenkende*r -&gt; <b>%%ANREDE SCHENKENDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Vor- Nachname Beschenkte*r -&gt; <b>%%VOR- NACHNAME BESCHENKTE%%</b></li>\n<li>Vor- Nachname Schenkende*r -&gt; <b>%%VOR- NACHNAME SCHENKENDE%%</b></li>\n</ul>"
+   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede Beschenkte*r -&gt; <b>%%ANREDE BESCHENKTE%%</b></li>\n<li>Briefanrede Schenkende*r -&gt; <b>%%ANREDE SCHENKENDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Vor- Nachname Beschenkte*r -&gt; <b>%%VOR- NACHNAME BESCHENKTE%%</b></li>\n<li>Vor- Nachname Schenkende*r -&gt; <b>%%VOR- NACHNAME SCHENKENDE%%</b></li>\n<li>Link zur Anmeldung digitale Rechnung -&gt; <b>%%DIGITALERECHNUNGLINK%%</b></li>\n</ul>"
   },
   {
    "default": "Beschenkte*r",
@@ -471,7 +471,7 @@
    "label": "test_dn"
   }
  ],
- "modified": "2025-01-16 15:14:51.973084",
+ "modified": "2025-02-24 21:40:26.918771",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",
