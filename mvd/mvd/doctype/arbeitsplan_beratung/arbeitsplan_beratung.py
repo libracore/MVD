@@ -435,7 +435,7 @@ def get_arbeitsplan_word(berater_in, von=None, bis=None):
 def create_word_doc(word_dict):
     from docx import Document
     word_doc = Document()
-    word_doc.add_heading(f"{word_dict['berater_in']} - {word_dict['email']}", level=1)
+    word_doc.add_heading("{0} - {1}".format(word_dict['berater_in'], word_dict['email']), level=1)
     if word_dict['von'] and word_dict['bis']:
         word_doc.add_paragraph("({0} - {1})".format(word_dict['von'], word_dict['bis']))
     

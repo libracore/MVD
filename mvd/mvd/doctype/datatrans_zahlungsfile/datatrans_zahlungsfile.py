@@ -271,9 +271,25 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                         `refnumber` LIKE 'CH_%'
                     )
                 '''
+            if sektion == "WebshopOrders":
+                return '''
+                    `refnumber` LIKE 'MVD_DR_%'
+                '''
             return '''
                     `refnumber` LIKE '{sektion_short}_%'
                 '''.format(sektion_short=sektion.replace("MV", ""))
+        
+        if sektion == 'WebshopOrders':
+            webshop_data = frappe.db.sql("""
+                                    SELECT DISTINCT
+                                       `webshop_order`
+                                    FROM `tabDatatrans Entry`
+                                    WHERE `transdatetime` BETWEEN '{year}/{month}/01 00:00:00' AND '{year}/{month}/{last_day} 23:59:59'
+                                    AND {sektion_short}
+                                AND `status` NOT LIKE '%Doppelimport%'
+                                """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
+                                            last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("_%", "_MH%")), as_dict=True)
+            return webshop_data
         
         priv = frappe.db.sql("""
                                 SELECT
@@ -449,7 +465,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                             <th style="width: 30%; text-align: right;"></th>
                         </tr>
                     </thead>
-                    <tbody
+                    <tbody>
                         <tr>
                             <td>PRIV</td>
                             <td style="text-align: right;">{priv}</td>
@@ -497,6 +513,112 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
         "content_code": html
     }).insert()
     
+    # Create WebshopOrderReport
+    webshop_data = get_sektions_values('WebshopOrders')
+    webshop_html = '''
+        <h1>Monatsreport Bestellungen</h1>
+    '''
+    webshop_items = {}
+    webshop_ertragskonten = {}
+    no_invoices = []
+    webshop_total = 0
+    for webshop_order in webshop_data:
+        webshop_sinv = frappe.db.get_value("Webshop Order", webshop_order.webshop_order, "sinv")
+        if not webshop_sinv:
+            no_invoices.append(webshop_order.webshop_order)
+        else:
+            sinv = frappe.get_doc("Sales Invoice", webshop_sinv)
+            for item in sinv.items:
+                if item.item_code not in webshop_items:
+                    webshop_items[item.item_code] = {
+                        'item': item.item_name,
+                        'amount': 0
+                    }
+                webshop_items[item.item_code]['amount'] += item.amount
+
+                if item.income_account not in webshop_ertragskonten:
+                    webshop_ertragskonten[item.income_account] = {
+                        'account': item.income_account,
+                        'amount': 0
+                    }
+                webshop_ertragskonten[item.income_account]['amount'] += item.amount
+
+                webshop_total += item.amount
+    webshop_html += '''
+        <table style="width: 100%;">
+            <thead>
+                <tr>
+                    <th style="width: 70%;">Aufschlüsselung nach Artikel</th>
+                    <th style="width: 30%; text-align: right;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><b>Artikel</b></td>
+                    <td style="text-align: right;"><b>Betrag</b></td>
+                </tr>
+    '''
+    for item in webshop_items:
+         webshop_html += '''
+            <tr>
+                <td>{0}</td>
+                <td style="text-align: right;">{1}</td>
+            </tr>
+        '''.format(item['item'], frappe.utils.fmt_money(item['amount']))
+    
+    webshop_html += '''
+        <tr>
+            <td><b>Total</b></td>
+            <td style="text-align: right;"><b>{0}</b></td>
+        </tr>
+        </body>
+        </table><br><br>
+        <table style="width: 100%;">
+            <thead>
+                <tr>
+                    <th style="width: 70%;">Aufschlüsselung nach Ertragskonten</th>
+                    <th style="width: 30%; text-align: right;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><b>Ertragskonto</b></td>
+                    <td style="text-align: right;"><b>Betrag</b></td>
+                </tr>
+    '''.format(frappe.utils.fmt_money(webshop_total))
+
+    for konto in webshop_ertragskonten:
+         webshop_html += '''
+            <tr>
+                <td>{0}</td>
+                <td style="text-align: right;">{1}</td>
+            </tr>
+        '''.format(konto['account'], frappe.utils.fmt_money(konto['amount']))
+    
+    webshop_html += '''
+        <tr>
+            <td><b>Total</b></td>
+            <td style="text-align: right;"><b>{0}</b></td>
+        </tr>
+        </body>
+        </table>
+    '''.format(frappe.utils.fmt_money(webshop_total))
+
+    if len(no_invoices) > 0:
+        webshop_html += '''
+            <br><br><h2>Nicht erfasste Rechnungen</h2>
+            <p>{0}</p>
+        '''.format(str(no_invoices))
+    
+    webshop_report = frappe.get_doc({
+        "doctype": "Datatrans Report",
+        "report_typ": "Drucksachen",
+        "sektion": "MVD",
+        "datatrans_zahlungsfile": datatrans_zahlungsfile.name,
+        "datum_zahlungsfile": datatrans_zahlungsfile.title,
+        "content_code": webshop_html
+    }).insert()
+
     return sektions_list
 
 
