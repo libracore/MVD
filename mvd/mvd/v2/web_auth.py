@@ -151,6 +151,8 @@ def update_pwd(user, reset_hash, pwd, clear):
         if clear:
             from frappe.utils.password import update_password
             update_password(user, pwd)
+            user_doc.reset_password_key = ''
+            user_doc.save(ignore_permissions=True)
             frappe.db.commit()
             return success_data(user)
         else:
