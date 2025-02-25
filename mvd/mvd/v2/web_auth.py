@@ -151,6 +151,7 @@ def update_pwd(user, reset_hash, pwd, clear):
         if clear:
             from frappe.utils.password import update_password
             update_password(user, pwd)
+            frappe.db.commit()
             return success_data(user)
         else:
             frappe.db.sql("""
@@ -163,6 +164,7 @@ def update_pwd(user, reset_hash, pwd, clear):
                             AND `encrypted` = 0""".format(user=user, pwd=pwd))
             user_doc.reset_password_key = ''
             user_doc.save(ignore_permissions=True)
+            frappe.db.commit()
             return success_data(user)
     else:
          return failed_login()
@@ -187,10 +189,11 @@ def generate_reset_hash(user, email):
     sender = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_sender')
     subject = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_subject')
     template = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_template') or 'website_pwd_reset'
+    reset_url = frappe.db.get_value("MVD Settings", "MVD Settings", 'reset_url')
     args = {
-        'link': "https://xxx.ch/?reset_hash={0}".format(key)
+        'link': "{0}/?reset_hash={1}".format(reset_url, key)
     }
-    if not sender or not subject or not template:
+    if not sender or not subject or not template or not reset_url:
         return server_error()
     
     try:
