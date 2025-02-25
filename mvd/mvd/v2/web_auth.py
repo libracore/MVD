@@ -149,12 +149,15 @@ def update_pwd(user, reset_hash, pwd, clear):
     user_doc = frappe.get_doc("User", user)
     if user_doc.reset_password_key == reset_hash:
         if clear:
-            from frappe.utils.password import update_password
-            update_password(user, pwd)
-            user_doc.reset_password_key = ''
-            user_doc.save(ignore_permissions=True)
-            frappe.db.commit()
-            return success_data(user)
+            if is_password_strength(user_doc, pwd):
+                from frappe.utils.password import update_password
+                update_password(user, pwd)
+                user_doc.reset_password_key = ''
+                user_doc.save(ignore_permissions=True)
+                frappe.db.commit()
+                return success_data(user)
+            else:
+                return weak_pwd()
         else:
             frappe.db.sql("""
                             UPDATE
@@ -169,7 +172,18 @@ def update_pwd(user, reset_hash, pwd, clear):
             frappe.db.commit()
             return success_data(user)
     else:
-         return failed_login()
+         return invalid_reset_hash()
+
+def is_password_strength(user_doc, pwd):
+    from frappe.core.doctype.user.user import test_password_strength
+    user_data = (user_doc.first_name, user_doc.middle_name, user_doc.last_name, user_doc.email, user_doc.birth_date)
+    result = test_password_strength(pwd, '', None, user_data)
+    feedback = result.get("feedback", None)
+
+    if feedback and not feedback.get('password_policy_validation_passed', False):
+        return False
+
+    return True
 
 def generate_reset_hash(user, email):
     from frappe.utils import random_string
@@ -257,4 +271,18 @@ def server_error():
     return {
         "code": code,
         "message": "{message}".format(message=message)
+    }
+
+def weak_pwd():
+    code = 422
+    return {
+        "code": code,
+        "message": "Password requirements"
+    }
+
+def invalid_reset_hash():
+    code = 498
+    return {
+        "code": code,
+        "message": "Invalid reset hash"
     }
