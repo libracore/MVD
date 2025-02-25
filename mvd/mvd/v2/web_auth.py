@@ -47,7 +47,7 @@ Optionaler Parameter "clear" --> PWD im Klartext, default = PWD als Hash
 ENDPOINTS
 '''
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def login(**api_request):
     # Check/Get Mitgliedernummer
     if '@' in api_request['user']:
@@ -67,7 +67,7 @@ def login(**api_request):
     
     return multi_mail()
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def reset(**api_request):
     email = None
     # Check/Get Mitgliedernummer
