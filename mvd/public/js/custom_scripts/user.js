@@ -3,7 +3,9 @@
 
 frappe.ui.form.on('User', {
     validate: function(frm) {
-        deploy_user(frm);
+        if (frm.doc.user_type == 'System User') {
+            deploy_user(frm);
+        }
     }
 });
 
