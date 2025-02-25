@@ -1,0 +1,88 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: MVD API
+  description: API for member authentication and password reset.
+host: test-libracore.mieterverband.ch
+basePath: /api/method
+schemes:
+  - https
+paths:
+  /mvd.mvd.v2.web_auth.login:
+    get:
+      summary: Login
+      description: Authenticate members using their member number or email and password.
+      parameters:
+        - name: user
+          in: query
+          description: Member number or email address
+          required: true
+          type: string
+          x-example: MV00000085
+        - name: pwd
+          in: query
+          description: Password as hash or plaintext (urlencoded) if 'clear' is used
+          required: true
+          type: string
+          x-example: '%C3%BCbles_Passowrt%3F'
+        - name: clear
+          in: query
+          description: If present, password is expected in plaintext
+          required: false
+          type: string
+          x-example: true
+      responses:
+        '200':
+          description: Erfolg
+        '401':
+          description: Passwort falsch
+        '409':
+          description: E-Mail mehrfach vorhanden
+        '500':
+          description: Internal Server Error
+  /mvd.mvd.v2.web_auth.reset:
+    get:
+      summary: Password Reset
+      description: Request a password reset link or perform a password reset.
+      parameters:
+        - name: user
+          in: query
+          description: Member number or email address
+          required: true
+          type: string
+          x-example: MV00000085
+        - name: reset_hash
+          in: query
+          description: Reset hash for password reset
+          required: false
+          type: string
+          x-example: 0i7Ma0EjpVgKy4gmTra1Usagbg59MDV2
+        - name: pwd
+          in: query
+          description: New password as hash or plaintext if 'clear' is used
+          required: false
+          type: string
+          x-example: hi(ngua9ieR5
+        - name: clear
+          in: query
+          description: If present, password is expected in plaintext
+          required: false
+          type: string
+          x-example: true
+      responses:
+        '200':
+          description: Erfolg
+        '422':
+          description: Schwaches Passwort
+        '498':
+          description: Invalid reset hash
+        '500':
+          description: Internal Server Error
+securityDefinitions:
+  tokenAuth:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: Enter your token in the format **token {api_key}:{api_secret}**
+security:
+  - tokenAuth: []
