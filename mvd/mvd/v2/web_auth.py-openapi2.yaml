@@ -72,6 +72,8 @@ paths:
       responses:
         '200':
           description: Erfolg
+        '404':
+          description: User not found
         '422':
           description: Schwaches Passwort
         '498':

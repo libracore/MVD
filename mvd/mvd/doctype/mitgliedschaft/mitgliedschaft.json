@@ -194,7 +194,8 @@
   "m_und_w_export",
   "geschenk_reset_rechnung",
   "digitalrechnung_hash",
-  "deleted_by_admin"
+  "deleted_by_admin",
+  "web_login_user_created"
  ],
  "fields": [
   {
@@ -1343,10 +1344,16 @@
    "fieldname": "deleted_by_admin",
    "fieldtype": "Check",
    "label": "deleted_by_admin"
+  },
+  {
+   "default": "0",
+   "fieldname": "web_login_user_created",
+   "fieldtype": "Check",
+   "label": "WebLoginUser erstellt"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2025-02-19 15:52:37.154258",
+ "modified": "2025-02-26 15:38:08.067521",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

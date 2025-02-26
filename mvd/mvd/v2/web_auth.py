@@ -146,7 +146,11 @@ def check_credentials(user, pwd, clear=False):
             return success_data(auth[0].name)
 
 def update_pwd(user, reset_hash, pwd, clear):
-    user_doc = frappe.get_doc("User", user)
+    try:
+        user_doc = frappe.get_doc("User", user)
+    except:
+        return unknown_user()
+
     if user_doc.reset_password_key == reset_hash:
         if clear:
             if is_password_strength(user_doc, pwd):
@@ -188,7 +192,11 @@ def is_password_strength(user_doc, pwd):
 def generate_reset_hash(user, email):
     from frappe.utils import random_string
     key = random_string(32)
-    user_doc = frappe.get_doc("User", user)
+    try:
+        user_doc = frappe.get_doc("User", user)
+    except:
+        return unknown_user()
+    
     user_doc.reset_password_key = key
     user_doc.save(ignore_permissions=True)
     
@@ -285,4 +293,11 @@ def invalid_reset_hash():
     return {
         "code": code,
         "message": "Invalid reset hash"
+    }
+
+def unknown_user():
+    code = 404
+    return {
+        "code": code,
+        "message": "User not found"
     }
