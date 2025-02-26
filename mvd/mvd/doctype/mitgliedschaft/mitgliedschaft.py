@@ -20,7 +20,7 @@ from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new
 from mvd.mvd.doctype.arbeits_backlog.arbeits_backlog import close_open_validations
 from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention, get_adressblock, get_rg_adressblock, \
                                                 get_naechstes_jahr_geschuldet, mahnstopp, create_korrespondenz, \
-                                                sp_updater, get_sektion_code
+                                                sp_updater, get_sektion_code, create_web_login_user
 from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, update_kontakt
 from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_zahlung_mitgliedschaft, check_zahlung_hv, get_ampelfarbe, \
                                                         set_max_reminder_level, check_folgejahr_regelung
@@ -182,6 +182,11 @@ class Mitgliedschaft(Document):
             # #1203
             from mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data import create_or_update_sp_mitglied_data
             create_or_update_sp_mitglied_data(self.mitglied_nr, self)
+
+            # #1259
+            if cint(self.web_login_user_created) != 1:
+                create_web_login_user(self.mitglied_nr)
+                self.web_login_user_created = 1
     
     def email_validierung(self, check=False):
         import re
