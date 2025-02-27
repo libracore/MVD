@@ -181,7 +181,7 @@ def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
     
     if mitgliedschaft.hat_solidarmitglied and not rg:
         # mit Solidarmitglied
-        if mitgliedschaft.anrede_c not in ('Herr', 'Frau') and mitgliedschaft.anrede_2 not in ('Herr', 'Frau'):
+        if mitgliedschaft.anrede_c not in ('Herr', 'Frau') or mitgliedschaft.anrede_2 not in ('Herr', 'Frau'):
             # enthält neutrale Anrede
             if mitgliedschaft.nachname_1 == mitgliedschaft.nachname_2 and mitgliedschaft.vorname_1 == mitgliedschaft.vorname_2:
                 # gleiche Namen Fallback
@@ -860,21 +860,17 @@ def get_sprache(language='de'):
 
 def create_web_login_user(mitglied_nr):
     if "MV" in mitglied_nr and len(mitglied_nr) > 2:
-        args = {
-            'user_id': "{0}@login.ch".format(mitglied_nr)
-        }
-        enqueue("mvd.mvd.doctype.mitgliedschaft.utils._create_web_login_user", queue='short', job_name='Neuanlage Mitglied-Web-Login {0}'.format(mitglied_nr), timeout=5000, **args)
+        user_id = "{0}@login.ch".format(mitglied_nr)
+        if not frappe.db.exists("User", user_id):
+            try:
+                web_login_user = frappe.get_doc({
+                    "doctype": "User",
+                    "email": user_id,
+                    "first_name": user_id.replace("@login.ch", ""),
+                    "last_name": "WebLogin",
+                    "send_welcome_email": 0
+                })
+                web_login_user.insert(ignore_permissions=True)
+            except Exception as err:
+                frappe.log_error("{0}\n\n{1}".format(user_id.replace("@login.ch", ""), str(err)), 'create_web_login_user')
     return
-
-def _create_web_login_user(user_id):
-    try:
-        web_login_user = frappe.get_doc({
-            "doctype": "User",
-            "email": user_id,
-            "first_name": user_id.replace("@login.ch", ""),
-            "last_name": "WebLogin",
-            "send_welcome_email": 0
-        })
-        web_login_user.insert(ignore_permissions=True)
-    except Exception as err:
-        frappe.log_error("{0}\n\n{1}".format(user_id.replace("@login.ch", ""), str(err)), 'create_web_login_user')
