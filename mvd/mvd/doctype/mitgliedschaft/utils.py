@@ -181,7 +181,7 @@ def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
     
     if mitgliedschaft.hat_solidarmitglied and not rg:
         # mit Solidarmitglied
-        if mitgliedschaft.anrede_c not in ('Herr', 'Frau') and mitgliedschaft.anrede_2 not in ('Herr', 'Frau'):
+        if mitgliedschaft.anrede_c not in ('Herr', 'Frau') or mitgliedschaft.anrede_2 not in ('Herr', 'Frau'):
             # enthält neutrale Anrede
             if mitgliedschaft.nachname_1 == mitgliedschaft.nachname_2 and mitgliedschaft.vorname_1 == mitgliedschaft.vorname_2:
                 # gleiche Namen Fallback
