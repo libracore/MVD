@@ -1476,6 +1476,9 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             new_mitgliedschaft.zuzug_massendruck = 0
             new_mitgliedschaft.zuzugs_rechnung = None
             new_mitgliedschaft.zuzug_korrespondenz = None
+            new_mitgliedschaft.reduzierter_betrag = 0
+            new_mitgliedschaft.reduzierung_bis = None
+            new_mitgliedschaft.reduzierte_mitgliedschaft = 0
             new_mitgliedschaft.insert(ignore_permissions=True)
             
             frappe.db.commit()
