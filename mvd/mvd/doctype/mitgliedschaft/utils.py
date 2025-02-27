@@ -625,6 +625,7 @@ def send_mvm_sektionswechsel(mitgliedschaft):
     if mitgliedschaft.wegzug_zu == 'MVZH':
         neue_sektion = 'ZH'
     sektionswechsel(prepared_mvm, neue_sektion)
+    frappe.log_error(str(prepared_mvm), "MVZH Sektionswechsel an SP gesendet")
 
 def get_sektion_code(sektion):
     sektionen = frappe.db.sql("""SELECT `sektion_c` FROM `tabSektion` WHERE `name` = '{sektion}'""".format(sektion=sektion), as_dict=True)
