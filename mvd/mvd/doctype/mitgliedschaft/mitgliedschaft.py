@@ -1289,6 +1289,12 @@ def get_uebersicht_html(name):
         objektadresse = False
         rechnungsempfaenger = False
         rechnungsadresse = False
+        if mitgliedschaft.zuzug:
+            zuzug = mitgliedschaft.zuzug
+            zuzug_von = mitgliedschaft.zuzug_von
+        else:
+            zuzug = False
+            zuzug_von = False
         
         if mitgliedschaft.status_c not in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
             eintritt = mitgliedschaft.eintrittsdatum
@@ -1304,7 +1310,10 @@ def get_uebersicht_html(name):
             'language': mitgliedschaft.language or 'de',
             'sektion': mitgliedschaft.sektion_id,
             'region': '({0})'.format(mitgliedschaft.region) if mitgliedschaft.region else '',
-            'mitglied_nr': mitgliedschaft.mitglied_nr
+            'mitglied_nr': mitgliedschaft.mitglied_nr,
+            'wichtig': mitgliedschaft.wichtig,
+            'zuzug': zuzug,
+            'zuzug_von': zuzug_von
         }
         
         # Hauptmitglied
