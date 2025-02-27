@@ -1481,6 +1481,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             new_mitgliedschaft.reduzierte_mitgliedschaft = 0
             new_mitgliedschaft.m_w_retouren_offen = 0
             new_mitgliedschaft.m_w_anzahl = 0
+            new_mitgliedschaft.austritt = None
             new_mitgliedschaft.insert(ignore_permissions=True)
             
             frappe.db.commit()
