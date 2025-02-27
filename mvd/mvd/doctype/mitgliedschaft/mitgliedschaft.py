@@ -1289,6 +1289,12 @@ def get_uebersicht_html(name):
         objektadresse = False
         rechnungsempfaenger = False
         rechnungsadresse = False
+        if mitgliedschaft.zuzug:
+            zuzug = mitgliedschaft.zuzug
+            zuzug_von = mitgliedschaft.zuzug_von
+        else:
+            zuzug = False
+            zuzug_von = False
         
         if mitgliedschaft.status_c not in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
             eintritt = mitgliedschaft.eintrittsdatum
@@ -1304,7 +1310,10 @@ def get_uebersicht_html(name):
             'language': mitgliedschaft.language or 'de',
             'sektion': mitgliedschaft.sektion_id,
             'region': '({0})'.format(mitgliedschaft.region) if mitgliedschaft.region else '',
-            'mitglied_nr': mitgliedschaft.mitglied_nr
+            'mitglied_nr': mitgliedschaft.mitglied_nr,
+            'wichtig': mitgliedschaft.wichtig,
+            'zuzug': zuzug,
+            'zuzug_von': zuzug_von
         }
         
         # Hauptmitglied
@@ -1476,6 +1485,12 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             new_mitgliedschaft.zuzug_massendruck = 0
             new_mitgliedschaft.zuzugs_rechnung = None
             new_mitgliedschaft.zuzug_korrespondenz = None
+            new_mitgliedschaft.reduzierter_betrag = 0
+            new_mitgliedschaft.reduzierung_bis = None
+            new_mitgliedschaft.reduzierte_mitgliedschaft = 0
+            new_mitgliedschaft.m_w_retouren_offen = 0
+            new_mitgliedschaft.m_w_anzahl = 0
+            new_mitgliedschaft.austritt = None
             new_mitgliedschaft.insert(ignore_permissions=True)
             
             frappe.db.commit()
