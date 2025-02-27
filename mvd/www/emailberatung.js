@@ -418,11 +418,11 @@ function show_mz_senkung() {
         if (index == 0) {
             $(this).text("1. Mietvertrag");
         } else if (index == 1) {
-            $(this).text("2. Falls vorhanden: weitere Vertragsänderung (Mietzinsherabsetzungen, Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
+            $(this).text("2. Falls vorhanden: weitere Vertragsänderung (letzte Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
         } else if (index == 2) {
-            $(this).text("3. Herabsetzungsgesuch an Vermieter*in");  // Label stays the same
+            $(this).text("3. Falls vorhanden: Herabsetzungsgesuch an Vermieter*in");  // Label stays the same
         } else if (index == 3) {
-            $(this).text("4. Antwort Vermieter*in");
+            $(this).text("4. Falls vorhanden: Antwort Vermieter*in");
         }
     });
 }
