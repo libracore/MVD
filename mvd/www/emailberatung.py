@@ -143,13 +143,14 @@ def context_erweiterung(context, mitgliedschaft):
             context.legacy_mode = False
         
         # Sektionsangaben
-
         context.sektionsname = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'company') or 'MV'
         
-        # Hinweis Mietzinsrechner
-        context.hinweis_mietzinsrechner = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'hinweis_mietzinsrechner') or ''
-
+        # Hinweis Mietzinsrechnererhoehung
+        context.hinweis_mietzinsrechner_erhoehung = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'hinweis_mietzinsrechner_erhoehung') or ''
         
+        # Hinweis Mietzinsrechner_senkung
+        context.hinweis_mietzinsrechner_senkung = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, 'hinweis_mietzinsrechner_senkung') or ''
+        # print("Debug: hinweis_mietzinsrechner_senkung =", context.hinweis_mietzinsrechner_senkung)  # Add debug print
         
         return context
     except Exception as err:
@@ -161,24 +162,24 @@ def context_erweiterung(context, mitgliedschaft):
 def new_beratung(**kwargs):
     try:
         args = json.loads(kwargs['kwargs'])
+        # print("====================================================================","Debug: args =", args,"====================================================================")  # Add debug print
         create_beratungs_log(error=0, info=1, beratung=None, method='new_beratung', title='Neue Beratung wird angelegt', json="{0}".format(str(args)))
         if frappe.db.exists("Mitgliedschaft", args['mv_mitgliedschaft']):
             sektion = frappe.db.get_value("Mitgliedschaft", args['mv_mitgliedschaft'], "sektion_id")
             thema = None
             beratungskategorie = None
             termin_vereinbaren = False
-            if sektion == 'MVBE' or sektion == 'MVLU':
-                if args['thema'] != 'anderes':
-                    thema = args['thema']
-                    if args['thema'] == 'Mietzinserhöhung':
-                        beratungskategorie = '202 - MZ-Erhöhung'
-                    elif args['thema'] == 'Heiz- und Nebenkosten':
-                        beratungskategorie = '300 - Nebenkosten'
-                if args['termin_vereinbaren']:
-                    termin_vereinbaren = True
-            else:
-                if args['mz'] == '1':
-                    beratungskategorie = '202 - MZ-Erhöhung'
+            if args['thema'] != 'anderes':
+                if args['thema'] == 'Mietzinserhöhung' or args['thema'] == 'mz_erhoehung':
+                    beratungskategorie = '202 - Mietzinserhöhung'
+                if args['thema'] == 'Mietzinssenkung' or args['thema'] == 'mz_senkung':
+                    beratungskategorie = '203 - Mietzinssenkung'
+                elif args['thema'] == 'Heiz- und Nebenkosten':
+                    beratungskategorie = '300 - Nebenkosten'
+
+            if args['termin_vereinbaren']:
+                termin_vereinbaren = True
+            
             if args['telefon']:
                 telefon = """<b>Telefon:</b> {0}<br>""".format(args['telefon'])
             else:
@@ -195,8 +196,8 @@ def new_beratung(**kwargs):
                 frage = """<b>Frage:</b><br>{0}<br><br>""".format(sanitize_html(args['frage']).replace("\n", "<br>"))
             else:
                 frage = ''
-            if args['datum_mietzinsanzeige']:
-                datum_mietzinsanzeige = """<b>Briefdatum der Mietzinserhöhungsanzeige:</b> {0}""".format(args['datum_mietzinsanzeige'])
+            if 'datum_mietzinsanzeige' in args and args['datum_mietzinsanzeige']:
+                datum_mietzinsanzeige = """<b>Briefdatum der Mietzinserhöhungsanzeige:</b> {0}""".format(args['datum_mietzinsanzeige'])
             else:
                 datum_mietzinsanzeige = ''
             
@@ -213,7 +214,7 @@ def new_beratung(**kwargs):
                 'telefon_privat_mobil': args['telefon'] if args['telefon'] else None,
                 'anderes_mietobjekt': args['anderes_mietobjekt'] if args['anderes_mietobjekt'] else None,
                 'frage': args['frage'] if args['frage'] else None,
-                'datum_mietzinsanzeige': args['datum_mietzinsanzeige'] if args['datum_mietzinsanzeige'] else None,
+                'datum_mietzinsanzeige': args.get('datum_mietzinsanzeige', None),
                 'anlage_durch_web_formular': 1,
                 'sektion_id': sektion
             })

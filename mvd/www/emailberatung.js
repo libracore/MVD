@@ -1,7 +1,63 @@
-function new_onlineberatung() {
+function gewaehltes_thema() {
+    // entscheide anhand des offenen tabs was das thema ist
+    /* <nav class="nav-tab nav-tab-emailberatung">
+                                                <ul class="h-cf">
+                                                    <li id="allgmein_item" class="nav-item">
+                                                        <a class="nav-link" href="#/" onclick="hide_mz();"><span>Allgemeine Anfrage</span></a>
+                                                    </li>
+                                                    <li id="mz_erhoehung_item" class="nav-item selected">
+                                                        <a class="nav-link" href="#/" onclick="show_mz_erhoehung();"><span>Mietzinserhöhung <i class="fa fa-arrow-up r45"></i></span></a>
+                                                    </li>
+                                                    <li id="mz_senkung_item" class="nav-item">
+                                                        <a class="nav-link" href="#/" onclick="show_mz_senkung();"><span>Mietzinssenkung <i class="fa fa-arrow-down r-45"></i></span></a>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+    */
+   // gib die id ohne _item zurück vom eintrag zurück der selected ist
+   
+    var selection = document.querySelector('.nav-tab-emailberatung .nav-item.selected').id;
+    var thema = selection.replace('_item', '');
+    return thema;
+}
+ 
+
+   function new_onlineberatung() {
     if (localStorage.getItem('anfage_gesendet') == '0') {
         var sektion_id = document.getElementById("sektion_id").value;
         var failed_validations = check_mandatory(sektion_id);
+        var errorMessages = [];
+        
+        // Check for mandatory Mietvertrag upload in MZ tabs
+        /*if ((gewaehltes_thema().substring(0, 2) == 'mz') && !$("#upload_files_1")[0].files[0]) {
+            failed_validations.push('mietvertrag');
+            $("#upload_files_1").css("border", "1px solid red");
+            errorMessages.push("Bitte laden Sie den Mietvertrag hoch (Pflichtfeld)");
+        } else {
+            $("#upload_files_1").css("border", "1px solid #ccc");
+        }*/
+        
+        // Build error message for other mandatory fields
+        failed_validations.forEach(function(field) {
+            switch(field) {
+                case 'telefon':
+                    errorMessages.push("Bitte geben Sie Ihre Telefonnummer ein.");
+                    break;
+                case 'email':
+                    errorMessages.push("Bitte geben Sie Ihre E-Mail-Adresse ein.");
+                    break;
+                case 'frage':
+                    errorMessages.push("Bitte beschreiben Sie Ihr Anliegen.");
+                    break;
+                case 'themen_wahl':
+                    errorMessages.push("Bitte wählen Sie ein Thema aus.");
+                    break;
+                case 'datum_mietzinsanzeige':
+                    errorMessages.push("Bitte geben Sie das Datum der Mietzinsanzeige ein.");
+                    break;
+            }
+        });
+        
         if (failed_validations.length < 1) {
             localStorage.setItem('anfage_gesendet', '1');
             var kwargs = {
@@ -11,9 +67,9 @@ function new_onlineberatung() {
                 'anderes_mietobjekt': document.getElementById("anderes_mietobjekt").value,
                 'frage': document.getElementById("frage").value,
                 'datum_mietzinsanzeige': document.getElementById("datum_mietzinsanzeige").value,
-                'thema': (sektion_id == 'MVBE' || sektion_id == 'MVLU') ? document.getElementById("themen_wahl").value:'',
+                'thema': (sektion_id == 'MVBE' || sektion_id == 'MVLU') ? document.getElementById("themen_wahl").value : gewaehltes_thema(),
                 'termin_vereinbaren': (sektion_id == 'MVBE' || sektion_id == 'MVLU') ? document.getElementById("termin_vereinbaren_cb").checked:'',
-                'mz': localStorage.getItem('mz_anfrage')
+                'mz': (gewaehltes_thema().substring(0, 2) == 'mz') ? 1 : 0
             }
             frappe.call({
                 'method': 'mvd.www.emailberatung.new_beratung',
@@ -29,7 +85,18 @@ function new_onlineberatung() {
                 }
             });
         } else {
-            alert("Bitte füllen Sie alle Pflichtfelder aus.");
+            // Show all error messages in an alert
+            alert("Bitte korrigieren Sie folgende Fehler:\n\n" + errorMessages.join("\n"));
+            
+            // Scroll to first error field
+            if (failed_validations.length > 0) {
+                var firstErrorField = $("#" + failed_validations[0]);
+                if (firstErrorField.length) {
+                    $('html, body').animate({
+                        scrollTop: firstErrorField.offset().top - 100
+                    }, 500);
+                }
+            }
         }
     } else {
         alert("Bitte warten, Ihre Anfrage wird bereits verarbeitet.");
@@ -43,12 +110,14 @@ function check_mandatory(sektion_id) {
         'frage'
     ]
     
-    if (sektion_id == 'MVBE') {
+    if (sektion_id == 'MVBE' || sektion_id == 'MVLU') {
         mandatory_fields.push('themen_wahl');
     }
-    
-    if (localStorage.getItem('mz_anfrage') == '1') {
+
+    // if  id="mz_erhoehung_item" class="nav-item selected" exists, add 'datum_mietzinsanzeige' to mandatory_fields
+    if (gewaehltes_thema() == 'mz_erhoehung') {
         mandatory_fields.push('datum_mietzinsanzeige');
+    } else {
     }
     
     failed_validations = []
@@ -57,11 +126,15 @@ function check_mandatory(sektion_id) {
         if (!$("#" + mandatory_fields[i]).val()) {
             failed_validations.push(mandatory_fields[i]);
             $("#" + mandatory_fields[i]).css("border", "1px solid red");
+            // add to the <div class="form-row error"> the class "error". a bit more like the design of the website
+            $("#" + mandatory_fields[i]).closest('.form-row').addClass("error");
             if (mandatory_fields[i] == 'themen_wahl') {
                 $("#themen_wahl_box").css("border", "1px solid red");
             }
             
         } else {
+            console.log(mandatory_fields[i]+" is valid");
+            $("#" + mandatory_fields[i]).closest('.form-row').removeClass("error");
             $("#" + mandatory_fields[i]).css("border", "1px solid #ccc");
             if (mandatory_fields[i] == 'themen_wahl') {
                 $("#themen_wahl_box").css("border", "1px solid #e7f1f2");
@@ -234,12 +307,23 @@ function upload_files(beratung, key, secret, loop=1) {
     }
 }
 
-function show_mz() {
-    localStorage.setItem('mz_anfrage', '1');
-    $("#tab_title").text("Mietzinserhöhung");
-    $(".mz").css("display", 'inline');
-    $("#mz_item").addClass("selected");
-    $("#allgmein_item").removeClass("selected");
+function show_mz_erhoehung() {
+    // localStorage.setItem('mz_anfrage', '1'); brauchen wir nicht mehr, weil es über geaehltes_thema() abgefragt wird
+    $("#tab_title").text("Mietzinserhöhung ");
+    $("#tab_title").append('<i class="fa fa-arrow-up r45"></i>');
+    //$(".mz").css("display", 'inline');
+    $("#mz_erhoehung_datum_mietzinsanzeige").css("display", 'inline');
+    $("#mz_erhoehung_item").addClass("selected");
+    $("#allgemein_item").removeClass("selected");
+    $("#mz_senkung_item").removeClass("selected");
+    $("#hinweis_mietzinsrechner_erhoehung").show();
+    $("#hinweis_mietzinsrechner_senkung").hide();
+    // if div with id themen_wahl_box exists, select input thema_0 
+    if ($("#themen_wahl_box").length) {
+        $("#thema_0").prop("checked", true);
+        $("#themen_wahl").val("Mietzinserhöhung"); // make also the mandatory field evaluation work
+    }
+
     
     // remove upload rows
     $(".file-upload-row").each(function(){
@@ -258,25 +342,113 @@ function show_mz() {
     $("#upload_files_auswahl_2").val('Mietzinserhöhung');
     $("#upload_files_auswahl_1").attr('readonly', true);
     $("#upload_files_auswahl_2").attr('readonly', true);
+    
+    // Add required attribute
+    //$("#upload_files_1").attr('required', true);
+    //$("#upload_files_2").attr('required', true);  // Make second upload field mandatory
+    
     $("label[for='upload_files']").each(function(index,element){
         if (index == 0) {
             $(this).text("1. Mietvertrag");
         } else if (index == 1) {
-            $(this).text("2. Mietzinserhöhung");
+            $(this).text("2. Mietzinserhöhung"); 
         } else if (index == 2) {
             $(this).text("Falls vorhanden: weitere Vertragsänderung (Mietzinsherabsetzungen, Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
         }
     });
+
+    // Remove required attribute when switching tabs
+    //$("#mz_senkung_item, #allgemein_item").click(function() {
+    //    $("#upload_files_2").removeAttr('required');
+    //});
+}
+
+function show_mz_senkung() {
+    //localStorage.setItem('mz_anfrage', '1');
+    $("#tab_title").text("Mietzinssenkung ");
+    $("#tab_title").append('<i class="fa fa-arrow-down r-45"></i>');
+    $("#mz_erhoehung_datum_mietzinsanzeige").css("display", 'none');
+    $("#mz_senkung_item").addClass("selected");
+    $("#allgemein_item").removeClass("selected");
+    $("#mz_erhoehung_item").removeClass("selected");
+    $("#hinweis_mietzinsrechner_erhoehung").hide();
+    $("#hinweis_mietzinsrechner_senkung").show();
     
+    // if div with id themen_wahl_box exists, select input thema_1
+    if ($("#themen_wahl_box").length) {
+        $("#thema_1").prop("checked", true);
+        $("#themen_wahl").val("Mietzinssenkung"); // make also the mandatory field evaluation work
+
+    }
+
+    // remove upload rows
+    $(".file-upload-row").each(function(){
+        if ($(this).attr('id') != 'default_file_row') {
+            $(this).remove();
+        }
+    });
+    
+    // clear first upload file
+    $("#upload_files_1").val('');
+    
+    // set first 4 upload rows
+    add_new_file_row();
+    add_new_file_row();
+    add_new_file_row();
+
+    // Set values and make only Mietvertrag readonly
+    $("#upload_files_auswahl_1").val('Mietvertrag');
+    $("#upload_files_auswahl_2").val('weitere Vertragsänderung');
+    $("#upload_files_auswahl_3").val('Herabsetzungsgesuch');  // Changed back from 'Mietzinsherabsetzung'
+    $("#upload_files_auswahl_4").val('Antwort Vermieter');
+    
+    // Only make Mietvertrag readonly, leave others editable
+    $("#upload_files_auswahl_1").attr('readonly', true);
+    
+    // Remove readonly from other fields (in case they were set)
+    $("#upload_files_auswahl_2").removeAttr('readonly');
+    $("#upload_files_auswahl_3").removeAttr('readonly');
+    $("#upload_files_auswahl_4").removeAttr('readonly');
+
+    // Add required attribute
+    //$("#upload_files_1").attr('required', true);
+    
+    // Update labels
+    $("label[for='upload_files']").each(function(index,element){
+        if (index == 0) {
+            $(this).text("1. Mietvertrag");
+        } else if (index == 1) {
+            $(this).text("2. Falls vorhanden: weitere Vertragsänderung (letzte Mietzinserhöhung, Vergleich, Urteil, Vereinbarung oder einseitige Vertragsänderung)");
+        } else if (index == 2) {
+            $(this).text("3. Falls vorhanden: Herabsetzungsgesuch an Vermieter*in");  // Label stays the same
+        } else if (index == 3) {
+            $(this).text("4. Falls vorhanden: Antwort Vermieter*in");
+        }
+    });
 }
 
 function hide_mz() {
-    localStorage.setItem('mz_anfrage', '0');
-    $("#datum_mietzinsanzeige").val('');
+    //localStorage.setItem('mz_anfrage', '0');
     $("#tab_title").text("Beratungsanfrage");
-    $(".mz").css("display", 'none');
-    $("#allgmein_item").addClass("selected");
-    $("#mz_item").removeClass("selected");
+    //$(".mz").css("display", 'none');
+    $("#mz_erhoehung_datum_mietzinsanzeige").css("display", 'none');
+    $("#allgemein_item").addClass("selected");
+    $("#mz_erhoehung_item").removeClass("selected");
+    $("#mz_senkung_item").removeClass("selected");
+    $("#hinweis_mietzinsrechner_erhoehung").hide();
+    $("#hinweis_mietzinsrechner_senkung").hide();
+
+    // if div with id themen_wahl_box exists, select input thema_3 or let it be thema_2 if selected
+    if ($("#themen_wahl_box").length) {
+        if ($("#thema_2").prop("checked")) {
+            $("#thema_2").prop("checked", true);
+            $("#themen_wahl").val("Heiz- und Nebenkosten"); // make also the mandatory field evaluation work
+        } else {
+            $("#thema_3").prop("checked", true);
+            $("#themen_wahl").val("anderes"); // make also the mandatory field evaluation work
+
+        }
+    }
     
     // remove upload rows
     $(".file-upload-row").each(function(){
@@ -293,6 +465,9 @@ function hide_mz() {
         $(this).text("Datei");
     });
     
+    // Remove required attribute when hiding
+    //$("#upload_files_1").removeAttr('required');
+    
     $(".awesomplete-delete").each(function(){
         $(this).off('click');
         $(this).empty();
@@ -307,18 +482,83 @@ function hide_mz() {
     });
 }
 
-function check_mietzinserhoehung() {
-    show_mz();
-    $("#themen_wahl").val("Mietzinserhöhung");
+function check_mietzinsaenderung() {
+    document.getElementById('mietzinsaenderung_options').style.display = 'block';
+    document.getElementById('aenderung-error').style.display = 'none';
+    
+    // Add event listeners to the radio buttons
+    document.getElementById('aenderung_art_0').addEventListener('change', function() {
+        if (this.checked) {
+            show_mz_erhoehung();
+        }
+    });
+
+    document.getElementById('aenderung_art_1').addEventListener('change', function() {
+        if (this.checked) {
+            show_mz_senkung();
+        }
+    });
 }
+
+function check_mietzinserhoehung() {
+    $("#themen_wahl").val("Mietzinserhöhung");
+    // Switch to Mietzinserhöhung tab
+    show_mz_erhoehung();
+}
+
+function check_mietzinssenkung() {
+    $("#themen_wahl").val("Mietzinssenkung");
+    // Switch to Mietzinssenkung tab
+    show_mz_senkung();
+}
+
+// Make sure other check functions clear the tab selection
 function check_heiz_und_nebenkosten() {
     hide_mz();
     $("#themen_wahl").val("Heiz- und Nebenkosten");
 }
+
 function check_anderes() {
     hide_mz();
     $("#themen_wahl").val("anderes");
 }
+/*
+function validateForm() {
+    if (document.getElementById('thema_0').checked) {
+        if (!document.querySelector('input[name="aenderung_art"]:checked')) {
+            document.getElementById('aenderung-error').style.display = 'block';
+            return false;
+        }
+    }
+    return true;
+}
+
+// Add click handlers for radio buttons
+
+document.addEventListener('DOMContentLoaded', function() {
+    var radioButtons = document.querySelectorAll('input[name="thema"]');
+    radioButtons.forEach(function(radio) {
+        radio.addEventListener('click', function() {
+            // If this was already checked, uncheck it
+            if (this.getAttribute('data-was-checked') === 'true') {
+                this.checked = false;
+                this.setAttribute('data-was-checked', 'false');
+                document.getElementById('mietzinsaenderung_options').style.display = 'none';
+                // Also uncheck any sub-options
+                document.getElementById('aenderung_art_0').checked = false;
+                document.getElementById('aenderung_art_1').checked = false;
+                hide_mz();
+            } else {
+                // Mark this as checked and unmark others
+                radioButtons.forEach(function(r) {
+                    r.setAttribute('data-was-checked', 'false');
+                });
+                this.setAttribute('data-was-checked', 'true');
+            }
+        });
+    });
+});
+*/
 
 // AWESOMPLETE
 // ----------------------------------------------------------------------------------------------------
@@ -750,7 +990,7 @@ setTimeout(function(){
     });
 }, 1000);
 localStorage.setItem('anfage_gesendet', '0');
-localStorage.setItem('mz_anfrage', '0');
+//localStorage.setItem('mz_anfrage', '0');
 
 // AWESOMPLETE END
 // ----------------------------------------------------------------------------------------------------
