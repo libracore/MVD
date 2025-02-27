@@ -84,6 +84,8 @@ def remove_admin_and_guest_mails(self, event):
                 removed_row = True
         if removed_row:
             if len(self.recipients) > 0:
+                # check for CC's
+                self.show_as_cc = self.show_as_cc.replace("Administrator &lt;admin@example.com&gt;", "").replace("Guest &lt;guest@example.com&gt;", "")
                 self.save()
             else:
                 self.delete()
