@@ -358,11 +358,13 @@ def check_folgejahr_regelung(mitgliedschaft, db_direct=False):
     return
 
 def sinv_update(sinv, event):
-    if sinv.mv_mitgliedschaft:
-        args = {
-            'mv_mitgliedschaft': sinv.mv_mitgliedschaft
-        }
-        enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft), timeout=5000, **args)
+    old_sinv = sinv.get_doc_before_save()
+    if old_sinv.status != sinv.status:
+        if sinv.mv_mitgliedschaft:
+            args = {
+                'mv_mitgliedschaft': sinv.mv_mitgliedschaft
+            }
+            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft), timeout=5000, **args)
     return
 
 def _sinv_update(mv_mitgliedschaft):
