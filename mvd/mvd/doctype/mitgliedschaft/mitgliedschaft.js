@@ -1059,10 +1059,10 @@ function sektionswechsel(frm) {
                                             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Sektionswechsel zu " + values.sektion_neu);
                                             cur_frm.refresh_field('status_change');
                                             cur_frm.set_value("status_c", 'Wegzug');
+                                            cur_frm.set_value("sektionswechsel_beantragt", 1);
                                             cur_frm.save().then(function(){
                                                 cur_frm.timeline.insert_comment("Sektionswechsel zu " + values.sektion_neu + " vollzogen.");
                                                 frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
-                                                frappe.db.set_value("Mitgliedschaft", cur_frm.doc.name, "sektionswechsel_beantragt", 1);
                                             });
                                         } else {
                                             if (r.message.status == 500) {
@@ -1070,7 +1070,8 @@ function sektionswechsel(frm) {
                                             } else {
                                                 frappe.msgprint("oops, da ist etwas schiefgelaufen!<br>Unbekannter Fehler");
                                             }
-                                            frappe.db.set_value("Mitgliedschaft", cur_frm.doc.name, "sektionswechsel_beantragt", 1);
+                                            cur_frm.set_value("sektionswechsel_beantragt", 1);
+                                            cur_frm.save()
                                         }
                                     }
                                 });
