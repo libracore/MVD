@@ -360,9 +360,10 @@ def check_folgejahr_regelung(mitgliedschaft, db_direct=False):
 def sinv_update(sinv, event):
     update_blocked = False
     old_sinv = sinv.get_doc_before_save()
-    if 'status' in old_sinv:
-        if old_sinv.status == sinv.status:
-            update_blocked = True
+    if old_sinv:
+        if old_sinv.status:
+            if old_sinv.status == sinv.status:
+                update_blocked = True
     
     if not update_blocked:
         if sinv.mv_mitgliedschaft:
