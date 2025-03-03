@@ -358,8 +358,13 @@ def check_folgejahr_regelung(mitgliedschaft, db_direct=False):
     return
 
 def sinv_update(sinv, event):
+    update_blocked = False
     old_sinv = sinv.get_doc_before_save()
-    if old_sinv.status != sinv.status:
+    if old_sinv.status:
+        if old_sinv.status == sinv.status:
+            update_blocked = True
+    
+    if not update_blocked:
         if sinv.mv_mitgliedschaft:
             args = {
                 'mv_mitgliedschaft': sinv.mv_mitgliedschaft
