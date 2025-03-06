@@ -37,7 +37,7 @@ def nachsenden():
                     "beratungId": beratung.name,
                     "mitglied": prepared_mvm,
                     "datumEingang": get_datetime_str(beratung.start_date).replace(" ", "T"),
-                    "beratungskategorie": 'Mietzinserhöhung' if beratung.datum_mietzinsanzeige else 'Allgemeine Anfrage',
+                    "beratungskategorie": 'Mietzinserhöhung' if beratung.beratungskategorie == '202 - Mietzinserhöhung' else 'Mietzinssenkung' if beratung.beratungskategorie == '203 - Mietzinssenkung' else 'Allgemeine Anfrage',
                     "telefonPrivatMobil": beratung.telefon_privat_mobil,
                     "email": beratung.raised_by,
                     "anderesMietobjekt": beratung.anderes_mietobjekt,
