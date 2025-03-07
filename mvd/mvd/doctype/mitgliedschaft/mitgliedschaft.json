@@ -1154,37 +1154,44 @@
   {
    "fieldname": "online_haftpflicht",
    "fieldtype": "Data",
-   "label": "onlineHaftpflicht"
+   "label": "onlineHaftpflicht",
+   "permlevel": 1
   },
   {
    "fieldname": "online_gutschrift",
    "fieldtype": "Data",
-   "label": "onlineGutschrift"
+   "label": "onlineGutschrift",
+   "permlevel": 1
   },
   {
    "fieldname": "online_betrag",
    "fieldtype": "Data",
-   "label": "onlineBetrag"
+   "label": "onlineBetrag",
+   "permlevel": 1
   },
   {
    "fieldname": "datum_online_verbucht",
    "fieldtype": "Data",
-   "label": "datumOnlineVerbucht"
+   "label": "datumOnlineVerbucht",
+   "permlevel": 1
   },
   {
    "fieldname": "datum_online_gutschrift",
    "fieldtype": "Data",
-   "label": "datumOnlineGutschrift"
+   "label": "datumOnlineGutschrift",
+   "permlevel": 1
   },
   {
    "fieldname": "online_payment_method",
    "fieldtype": "Data",
-   "label": "onlinePaymentMethod"
+   "label": "onlinePaymentMethod",
+   "permlevel": 1
   },
   {
    "fieldname": "online_payment_id",
    "fieldtype": "Data",
-   "label": "onlinePaymentId"
+   "label": "onlinePaymentId",
+   "permlevel": 1
   },
   {
    "default": "Schweiz",
@@ -1299,7 +1306,8 @@
    "fieldname": "online_payment_zahlungsfile",
    "fieldtype": "Link",
    "label": "onlinePaymentZahlungsfile",
-   "options": "Datatrans Zahlungsfile"
+   "options": "Datatrans Zahlungsfile",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.sektion_id=='MVZH'",
@@ -1353,7 +1361,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2025-02-26 15:38:08.067521",
+ "modified": "2025-02-28 14:36:50.963129",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
