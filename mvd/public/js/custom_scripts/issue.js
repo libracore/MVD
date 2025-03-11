@@ -6,11 +6,11 @@ frappe.ui.form.on('Issue', {
         if (cur_frm.doc.gitlab_issue) {
             frm.add_custom_button(__("GitLab Issue öffnen"), function() {
                 window.open(`https://git.libracore.io/libracore/MVD/-/issues/${cur_frm.doc.gitlab_issue}`, '_blank').focus();
-            }).addClass("btn-success");
+            }).addClass("btn-default");
         } else {
             frm.add_custom_button(__("GitLab Issue anlegen"), function() {
                 create_gitlab_issue(frm);
-            }).addClass("btn-warning");
+            }).addClass("btn-default");
         }
 
         // #1212
@@ -18,12 +18,12 @@ frappe.ui.form.on('Issue', {
             frm.add_custom_button(__("E-Mail(s) als gelesen markieren"), function() {
                 cur_frm.set_value('ungelesene_email', 0);
                 cur_frm.save();
-            }).addClass("btn-success");
+            }).addClass("btn-warning");
         } else {
             frm.add_custom_button(__("E-Mail(s) als ungelesen markieren"), function() {
                 cur_frm.set_value('ungelesene_email', 1);
                 cur_frm.save();
-            }).addClass("btn-warning");
+            }).addClass("btn-default");
         }
     }
 });
