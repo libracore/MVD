@@ -70,7 +70,7 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s7").click(function(){
-            frappe.route_options = {"status": 'Open', "kontaktperson": ['is', 'not set'], "sektion_id": sektion}
+            frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], "kontaktperson": ['is', 'not set'], "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s8").click(function(){
@@ -87,19 +87,19 @@ frappe.vbz_beratung = {
         });
         
         $("#r").click(function(){
-            frappe.route_options = {"status": 'Open', "sektion_id": sektion}
+            frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r1").click(function(){
-            frappe.route_options = {"status": 'Open', 'beratung_prio': 'Hoch', "sektion_id": sektion}
+            frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], 'beratung_prio': 'Hoch', "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r2").click(function(){
-            frappe.route_options = {'status': 'Open', 'kontaktperson': ['like', 'Rechtsberatung Pool%'], 'beratung_prio': ['!=', 'Hoch'], "sektion_id": sektion}
+             frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['like', 'Rechtsberatung Pool%'], 'beratung_prio': ['!=', 'Hoch'], "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r3").click(function(){
-            frappe.route_options = {'status': 'Open', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], "sektion_id": sektion}
+            frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r4").click(function(){
@@ -134,7 +134,7 @@ frappe.vbz_beratung = {
                 'async': false,
                 'callback': function(r)
                 {
-                    frappe.route_options = {'status': 'Open', 'kontaktperson': ['in', r.message], "sektion_id": sektion}
+                    frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['in', r.message], "sektion_id": sektion}
                     frappe.set_route("List", "Beratung", "List");
                 }
             });
