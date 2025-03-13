@@ -6,8 +6,8 @@ import frappe
 def get_notification_config():
     return {
         "for_doctype": {
-            "Arbeits Backlog": "mvd.mvd.utils.notifications.get_zero_to_hide",
-            "Sales Invoice": "mvd.mvd.utils.notifications.get_zero_to_hide",
+            "Arbeits Backlog": {"status": 'Open'},
+            "Sales Invoice": {"posting_date": "1900-01-01"}
         },
         "for_other": {
             "Email": "mvd.mvd.utils.notifications.get_zero_to_hide"
