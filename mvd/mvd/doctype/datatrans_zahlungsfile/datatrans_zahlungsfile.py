@@ -522,8 +522,10 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
     webshop_ertragskonten = {}
     no_invoices = []
     webshop_total = 0
+    datatrans_ids = []
     for webshop_order in webshop_data:
         webshop_sinv = frappe.db.get_value("Webshop Order", webshop_order.webshop_order, "sinv")
+        datatrans_ids.append(frappe.db.get_value("Webshop Order", webshop_order.webshop_order, "online_payment_id"))
         if not webshop_sinv:
             no_invoices.append(webshop_order.webshop_order)
         else:
@@ -609,6 +611,11 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
             <br><br><h2>Nicht erfasste Rechnungen</h2>
             <p>{0}</p>
         '''.format(str(no_invoices))
+    
+    webshop_html += '''
+        <br><br><h2>Verwendete Datatrans Payment-IDs</h2>
+        <p>{0}</p>
+    '''.format(", ".join(datatrans_ids))
     
     webshop_report = frappe.get_doc({
         "doctype": "Datatrans Report",
