@@ -612,10 +612,11 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
             <p>{0}</p>
         '''.format(str(no_invoices))
     
-    webshop_html += '''
-        <br><br><h2>Verwendete Datatrans Payment-IDs</h2>
-        <p>{0}</p>
-    '''.format(", ".join(datatrans_ids))
+    if len(datatrans_ids) > 0:
+        webshop_html += '''
+            <br><br><h2>Verwendete Datatrans Payment-IDs</h2>
+            <p>{0}</p>
+        '''.format(", ".join(datatrans_ids))
     
     webshop_report = frappe.get_doc({
         "doctype": "Datatrans Report",
