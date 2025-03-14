@@ -288,7 +288,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                     AND {sektion_short}
                                 AND `status` NOT LIKE '%Doppelimport%'
                                 """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
-                                            last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("_%", "_MH%")), as_dict=True)
+                                            last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion)), as_dict=True)
             return webshop_data
         
         priv = frappe.db.sql("""
@@ -300,7 +300,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                 AND `mitgliedtyp_c` = 'Privat'
                                 AND `status` NOT LIKE '%Doppelimport%'
                             """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
-                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion)), as_dict=True)[0].qty
+                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion)), as_dict=True)[0].qty or 0
         gesch = {}
         gesch['total'] = frappe.db.sql("""
                                 SELECT
@@ -311,7 +311,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                 AND `mitgliedtyp_c` = 'Geschäft'
                                 AND `status` NOT LIKE '%Doppelimport%'
                             """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
-                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("MV", "")), as_dict=True)[0].qty
+                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("MV", "")), as_dict=True)[0].qty or 0
         
         gesch['mini'] = frappe.db.sql("""
                                 SELECT
@@ -323,7 +323,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                 AND `mvb_typ` LIKE '%Mini%'
                                 AND `status` NOT LIKE '%Doppelimport%'
                             """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
-                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("MV", "")), as_dict=True)[0].qty
+                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("MV", "")), as_dict=True)[0].qty or 0
 
         gesch['standard'] = frappe.db.sql("""
                                 SELECT
@@ -335,7 +335,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                 AND `mvb_typ` LIKE '%Standard%'
                                 AND `status` NOT LIKE '%Doppelimport%'
                             """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
-                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("MV", "")), as_dict=True)[0].qty
+                                        last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("MV", "")), as_dict=True)[0].qty or 0
 
         if priv:
             hv = frappe.db.sql("""
@@ -346,7 +346,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                                     AND {sektion_short}
                                 AND `status` NOT LIKE '%Doppelimport%'
                                 """.format(year=datatrans_zahlungsfile.report_year, month=get_month(datatrans_zahlungsfile.report_month), \
-                                            last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("_%", "_MH%")), as_dict=True)[0].qty
+                                            last_day=get_last_day(datatrans_zahlungsfile.report_month), sektion_short=get_sektion_short(sektion).replace("_%", "_MH%")), as_dict=True)[0].qty or 0
             priv = priv - (hv * 10)
             hv = hv * 10
             mitgliedschaften = frappe.db.sql("""
@@ -395,7 +395,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
     for sektion in sektionen:
         if sektion.name not in ('MVD', 'M+W-Abo', 'ASI', 'ASLOCA'):
             priv, gesch, hv, mitgliedschaften, unbekannt = get_sektions_values(sektion.name)
-            abzug = ((priv + hv + gesch['total'] + unbekannt) / 100) * datatrans_zahlungsfile.kommissions_prozent
+            abzug = float(float(priv + hv + gesch['total'] + unbekannt) / 100) * float(datatrans_zahlungsfile.kommissions_prozent or 1)
             sektions_dict = {}
             sektions_dict['name'] = sektion.name
             sektions_dict['priv'] = frappe.utils.fmt_money(priv)
@@ -426,8 +426,8 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                         mini=frappe.utils.fmt_money(sektions_dict['gesch_dict']['mini']), \
                         standard=frappe.utils.fmt_money(sektions_dict['gesch_dict']['standard']))
                 
-                sektions_dict['abzug_mini'] = frappe.utils.fmt_money(((sektions_dict['gesch_dict']['mini']) / 100) * datatrans_zahlungsfile.kommissions_prozent)
-                sektions_dict['abzug_standard'] = frappe.utils.fmt_money(((sektions_dict['gesch_dict']['standard']) / 100) * datatrans_zahlungsfile.kommissions_prozent)
+                sektions_dict['abzug_mini'] = frappe.utils.fmt_money(float(float(sektions_dict['gesch_dict']['mini']) / 100) * float(datatrans_zahlungsfile.kommissions_prozent))
+                sektions_dict['abzug_standard'] = frappe.utils.fmt_money(float(float(sektions_dict['gesch_dict']['standard']) / 100) * float(datatrans_zahlungsfile.kommissions_prozent))
                 abzug_html = """
                     <tr>
                         <td>abzüglich {kommissions_prozent}% Kommision</td>
@@ -564,7 +564,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                 <td>{0}</td>
                 <td style="text-align: right;">{1}</td>
             </tr>
-        '''.format(item['item'], frappe.utils.fmt_money(item['amount']))
+        '''.format(webshop_items[item]['item'], frappe.utils.fmt_money(webshop_items[item]['amount']))
     
     webshop_html += '''
         <tr>
@@ -593,7 +593,7 @@ def create_monatsreport_mvd(datatrans_zahlungsfile):
                 <td>{0}</td>
                 <td style="text-align: right;">{1}</td>
             </tr>
-        '''.format(konto['account'], frappe.utils.fmt_money(konto['amount']))
+        '''.format(webshop_ertragskonten[konto]['account'], frappe.utils.fmt_money(webshop_ertragskonten[konto]['amount']))
     
     webshop_html += '''
         <tr>
@@ -643,8 +643,8 @@ def create_monatsreport_sektionen(datatrans_zahlungsfile, sektions_list):
                        mini=frappe.utils.fmt_money(sektions_dict['gesch_dict']['mini']), \
                        standard=frappe.utils.fmt_money(sektions_dict['gesch_dict']['standard']))
             
-            sektions_dict['abzug_mini'] = frappe.utils.fmt_money(((sektions_dict['gesch_dict']['mini']) / 100) * datatrans_zahlungsfile.kommissions_prozent)
-            sektions_dict['abzug_standard'] = frappe.utils.fmt_money(((sektions_dict['gesch_dict']['standard']) / 100) * datatrans_zahlungsfile.kommissions_prozent)
+            sektions_dict['abzug_mini'] = frappe.utils.fmt_money(float(float(sektions_dict['gesch_dict']['mini']) / 100) * float(datatrans_zahlungsfile.kommissions_prozent))
+            sektions_dict['abzug_standard'] = frappe.utils.fmt_money(float(float(sektions_dict['gesch_dict']['standard']) / 100) * float(datatrans_zahlungsfile.kommissions_prozent))
             abzug_html = """
                 <tr>
                     <td>abzüglich {kommissions_prozent}% Kommision</td>
