@@ -719,7 +719,8 @@ def prepare_mvm_for_sp(mitgliedschaft):
         "onlinePaymentMethod": mitgliedschaft.online_payment_method if mitgliedschaft.online_payment_method and mitgliedschaft.online_payment_method != '' else None,
         "onlinePaymentId": mitgliedschaft.online_payment_id if mitgliedschaft.online_payment_id and mitgliedschaft.online_payment_id != '' else None,
         "kuendigungsgrund": kuendigungsgrund,
-        "mvbTyp":  mitgliedschaft.mvb_typ if mitgliedschaft.mvb_typ and mitgliedschaft.mvb_typ != '' else None
+        "mvbTyp":  mitgliedschaft.mvb_typ if mitgliedschaft.mvb_typ and mitgliedschaft.mvb_typ != '' else None,
+        "MitgliedHash": mitgliedschaft.digitalrechnung_hash if mitgliedschaft.digitalrechnung_hash else None
     }
     
     return prepared_mvm
