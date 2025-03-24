@@ -147,6 +147,8 @@ def digitalrechnung_mapper(mitglied):
                 return update_digitalrechnung(digitalrechnung, mitglied)
             else:
                 return create_digitalrechnung(mitglied)
+    else:
+        return mitglied.digitalrechnung_hash
 
 def create_mitglied_change_log(mitglied, txt):
     comment = frappe.get_doc({
