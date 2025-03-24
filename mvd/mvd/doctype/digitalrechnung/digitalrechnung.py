@@ -90,7 +90,7 @@ def digitalrechnung_mapper(mitglied):
         else:
             return False
     
-    def update_digitalrechnung(dr, mitglied, add_to_mitglied=False):
+    def update_digitalrechnung(dr, mitglied):
         dr_doc = frappe.get_doc("Digitalrechnung", dr)
         if dr_doc.mitglied_id != mitglied.name:
             dr_doc.mitglied_id = mitglied.name
@@ -116,8 +116,7 @@ def digitalrechnung_mapper(mitglied):
         
         dr_doc.save(ignore_permissions=True)
 
-        if add_to_mitglied:
-            frappe.db.set_value("Mitgliedschaft", mitglied.mitglied_id, "digitalrechnung_hash", dr_doc.hash)
+        return dr_doc.hash
     
     def create_digitalrechnung(mitglied):
         dr_doc = frappe.get_doc({
@@ -132,21 +131,22 @@ def digitalrechnung_mapper(mitglied):
         if cint(mitglied.digitalrechnung) == 1:
             dr_doc.set_opt_in()
             dr_doc.save(ignore_permissions=True)
+        
+        return dr_doc.hash
     
     if check_if_latest(mitglied):
         if mitglied.digitalrechnung_hash:
             digitalrechnung = check_existing(hash=mitglied.digitalrechnung_hash)
             if digitalrechnung:
-                update_digitalrechnung(digitalrechnung, mitglied)
+                return update_digitalrechnung(digitalrechnung, mitglied)
             else:
-                create_digitalrechnung(mitglied)
+                return create_digitalrechnung(mitglied)
         else:
             digitalrechnung = check_existing(mitglied_nr=mitglied.mitglied_nr)
             if digitalrechnung:
-                # Update & add Hash to Mitglied
-                update_digitalrechnung(digitalrechnung, mitglied, True)
+                return update_digitalrechnung(digitalrechnung, mitglied)
             else:
-                create_digitalrechnung(mitglied)
+                return create_digitalrechnung(mitglied)
 
 def create_mitglied_change_log(mitglied, txt):
     comment = frappe.get_doc({
