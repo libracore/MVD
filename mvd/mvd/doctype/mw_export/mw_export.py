@@ -263,6 +263,7 @@ def get_csv_data(mw_export, query=False):
                 anrede = entry.anrede_c
             
             if entry.kundentyp == 'Unternehmen':
+                anrede = ''
                 name_1 = entry.firma or ''
                 name_2 = entry.zusatz_firma or ''
                 name_3 = " ".join([entry.vorname_1 or '', entry.nachname_1 or ''])
