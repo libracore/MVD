@@ -177,7 +177,7 @@ class Mitgliedschaft(Document):
         if self.mitglied_nr != "MV":
             # #1179
             from mvd.mvd.doctype.digitalrechnung.digitalrechnung import digitalrechnung_mapper
-            self.digitalrechnung_hash = digitalrechnung_mapper(mitglied=self)
+            self.mitglied_hash = digitalrechnung_mapper(mitglied=self)
 
             # #1203
             from mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data import create_or_update_sp_mitglied_data

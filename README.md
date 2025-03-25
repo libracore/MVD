@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 16.17.0
+#1282 Renaming digitalrechnung_hash > mitglied_hash
 #### 16.16.0
 #1282
 #### 16.15.12
