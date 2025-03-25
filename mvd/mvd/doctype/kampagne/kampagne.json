@@ -1,0 +1,130 @@
+{
+ "creation": "2025-03-25 10:28:20.303985",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "email",
+  "newsletter_name",
+  "campaign_trigger_code",
+  "subscribed_over_pledge",
+  "zip_code",
+  "last_name",
+  "first_name",
+  "anrede",
+  "lang_code",
+  "nl_abo",
+  "quelle",
+  "ip",
+  "mitglied"
+ ],
+ "fields": [
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email",
+   "reqd": 1
+  },
+  {
+   "fieldname": "newsletter_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "NewsletterName",
+   "reqd": 1
+  },
+  {
+   "fieldname": "campaign_trigger_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "CampaignTriggerCode",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "subscribed_over_pledge",
+   "fieldtype": "Check",
+   "label": "SubscribedOverPledge"
+  },
+  {
+   "fieldname": "zip_code",
+   "fieldtype": "Int",
+   "label": "Zip_code"
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last_name"
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First_name"
+  },
+  {
+   "fieldname": "anrede",
+   "fieldtype": "Data",
+   "label": "Anrede"
+  },
+  {
+   "fieldname": "lang_code",
+   "fieldtype": "Select",
+   "label": "LangCode",
+   "options": "de\nfr\nit"
+  },
+  {
+   "default": "0",
+   "fieldname": "nl_abo",
+   "fieldtype": "Check",
+   "label": "Nl_abo"
+  },
+  {
+   "fieldname": "quelle",
+   "fieldtype": "Data",
+   "label": "Quelle"
+  },
+  {
+   "fieldname": "ip",
+   "fieldtype": "Data",
+   "label": "IP"
+  },
+  {
+   "fieldname": "mitglied",
+   "fieldtype": "Data",
+   "label": "Mitglied"
+  }
+ ],
+ "modified": "2025-03-25 10:28:55.398886",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Kampagne",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "API User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
