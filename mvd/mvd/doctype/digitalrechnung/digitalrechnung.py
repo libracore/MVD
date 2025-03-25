@@ -46,7 +46,8 @@ class Digitalrechnung(Document):
         frappe.db.set_value("Mitgliedschaft", self.mitglied_id, "mitglied_hash", self.hash)
     
     def generate_hash(self):
-        txt = "{0}{1}".format(self.mitglied_id, self.mitglied_nr)
+        salt = frappe.get_doc("MVD Settings", "MVD Settings").hash_salt or ''
+        txt = "{0}{1}{2}".format(self.mitglied_id, salt, self.mitglied_nr)
         
         # Create a SHA-256 hash
         hash_object = hashlib.sha256(txt.encode())
