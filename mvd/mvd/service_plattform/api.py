@@ -211,6 +211,28 @@ def send_postnotiz_to_sp(postnotiz_for_sp):
         frappe.log_error("{0}".format(str(postnotiz_for_sp)), 'send_postnotiz_to_sp deaktiviert')
         return
 
+def send_kampagne_to_sp(kampagne):
+    if not int(frappe.db.get_single_value('Service Plattform API', 'no_kampagne_to_sp')) == 1:
+        if auth_check(POST_SCOPE):
+            config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+            sub_url = config.get_value(POST_SCOPE, "api_url").replace("/erpnext", "/mvs")
+            endpoint = str(config.get('kampagne'))
+            url = sub_url + endpoint
+            token = config.get_value(POST_SCOPE, 'api_token')
+            headers = {"authorization": "Bearer {token}".format(token=token)}
+            
+            try:
+                sp_connection = requests.post(url, json = kampagne, headers = headers)
+                if sp_connection.status_code != 204:
+                    frappe.log_error("{0}\n\n{1}".format(sp_connection.status_code, str(kampagne)), '{0} > send_kampagne_to_sp'.format(sp_connection.status_code))
+                return
+            except Exception as err:
+                frappe.log_error("{0}".format(err), 'send_kampagne_to_sp failed')
+                frappe.db.commit()
+    else:
+        frappe.log_error("{0}".format(str(kampagne)), 'send_kampagne_to_sp deaktiviert')
+        return
+
 '''
     Damit Requests an die SP gesendet werden können, wird ein API Token benötigt, welcher i.d.R. nach 24h abläuft.
     Mit dieser Methode kann der aktuell hinterlegte API Token auf seine Gültigkeit geprüft werden.

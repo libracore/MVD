@@ -11,11 +11,13 @@
   "beratung",
   "neue_mitglieder_nummer",
   "retouren_mvz",
+  "kampagne",
   "section_danger",
   "not_get_number_and_id",
   "no_sp_update",
   "send_beratung_to_sp_unterbrechen",
   "no_postnotiz_to_sp",
+  "no_kampagne_to_sp",
   "json_error_log",
   "queue",
   "flush_queue",
@@ -145,10 +147,22 @@
    "fieldname": "emailberatung_testtoken",
    "fieldtype": "Data",
    "label": "E-Mailberatung Test Token"
+  },
+  {
+   "fieldname": "kampagne",
+   "fieldtype": "Data",
+   "label": "Kampagne",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "no_kampagne_to_sp",
+   "fieldtype": "Check",
+   "label": "Senden von Kampagnen deaktivieren"
   }
  ],
  "issingle": 1,
- "modified": "2024-05-17 14:17:49.756463",
+ "modified": "2025-03-25 11:40:53.568074",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",
