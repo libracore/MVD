@@ -43,7 +43,7 @@ class Digitalrechnung(Document):
                 self.changed_by_sektion = 0
     
     def after_insert(self):
-        frappe.db.set_value("Mitgliedschaft", self.mitglied_id, "digitalrechnung_hash", self.hash)
+        frappe.db.set_value("Mitgliedschaft", self.mitglied_id, "mitglied_hash", self.hash)
     
     def generate_hash(self):
         txt = "{0}{1}".format(self.mitglied_id, self.mitglied_nr)
@@ -135,8 +135,8 @@ def digitalrechnung_mapper(mitglied):
         return dr_doc.hash
     
     if check_if_latest(mitglied):
-        if mitglied.digitalrechnung_hash:
-            digitalrechnung = check_existing(hash=mitglied.digitalrechnung_hash)
+        if mitglied.mitglied_hash:
+            digitalrechnung = check_existing(hash=mitglied.mitglied_hash)
             if digitalrechnung:
                 return update_digitalrechnung(digitalrechnung, mitglied)
             else:
@@ -148,7 +148,7 @@ def digitalrechnung_mapper(mitglied):
             else:
                 return create_digitalrechnung(mitglied)
     else:
-        return mitglied.digitalrechnung_hash
+        return mitglied.mitglied_hash
 
 def create_mitglied_change_log(mitglied, txt):
     comment = frappe.get_doc({
@@ -170,7 +170,7 @@ def initial_setup():
             `abweichende_rechnungsadresse` AS `abw_rg_adr`,
             `unabhaengiger_debitor` AS `unabh_deb`,
             `rg_e_mail` AS `rg_email`,
-            `digitalrechnung_hash`
+            `mitglied_hash`
         FROM `tabMitgliedschaft`
         WHERE `status_c` NOT IN ('Inaktiv', 'Anmeldung', 'Online-Anmeldung', 'Gestorben', 'Wegzug', 'Ausschluss', 'Interessent*in')
     """, as_dict=True)
@@ -181,7 +181,7 @@ def initial_setup():
 
     for mitgliedschaft in mitgliedschaften:
         print("{0} von {1}".format(loop, total))
-        if not mitgliedschaft.digitalrechnung_hash:
+        if not mitgliedschaft.mitglied_hash:
             new_digitalrechnung = frappe.get_doc({
                 'doctype': "Digitalrechnung",
                 'mitglied_nr': mitgliedschaft.mitglied_nr,
@@ -262,11 +262,11 @@ def go_life_reset():
             `abweichende_rechnungsadresse` AS `abw_rg_adr`,
             `unabhaengiger_debitor` AS `unabh_deb`,
             `rg_e_mail` AS `rg_email`,
-            `digitalrechnung_hash`,
+            `mitglied_hash`,
             `language`
         FROM `tabMitgliedschaft`
         WHERE `status_c` NOT IN ('Inaktiv', 'Anmeldung', 'Online-Anmeldung', 'Gestorben', 'Wegzug', 'Ausschluss', 'Interessent*in')
-        AND `digitalrechnung_hash` IS NULL
+        AND `mitglied_hash` IS NULL
     """, as_dict=True)
 
     total = len(mitgliedschaften)
@@ -276,7 +276,7 @@ def go_life_reset():
     for mitgliedschaft in mitgliedschaften:
         print("Create: {0} von {1}".format(loop, total))
         if check_if_latest(mitgliedschaft):
-            if not mitgliedschaft.digitalrechnung_hash:
+            if not mitgliedschaft.mitglied_hash:
                 new_digitalrechnung = frappe.get_doc({
                     'doctype': "Digitalrechnung",
                     'mitglied_nr': mitgliedschaft.mitglied_nr,

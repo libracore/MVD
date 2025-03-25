@@ -479,8 +479,8 @@ def create_csv_from_json(jahresversand):
                         row_data.append('')
                 
                 # Digitalrechnung URL
-                if mitgliedschaft.digitalrechnung_hash:
-                    row_data.append('https://libracore.mieterverband.ch/digitalrechnung?hash={0}'.format(mitgliedschaft.digitalrechnung_hash))
+                if mitgliedschaft.mitglied_hash:
+                    row_data.append('https://libracore.mieterverband.ch/digitalrechnung?hash={0}'.format(mitgliedschaft.mitglied_hash))
                 else:
                     row_data.append('')
                 

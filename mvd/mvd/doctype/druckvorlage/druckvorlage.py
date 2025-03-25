@@ -305,7 +305,7 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
             {'key_word': '%%ANREDE SCHENKENDE%%', 'value': mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)},
             {'key_word': '%%VOR- NACHNAME BESCHENKTE%%', 'value': " ".join((mitgliedschaft.vorname_1 or '', mitgliedschaft.nachname_1 or ''))},
             {'key_word': '%%VOR- NACHNAME SCHENKENDE%%', 'value': " ".join((mitgliedschaft.rg_vorname or '', mitgliedschaft.rg_nachname or ''))},
-            {'key_word': '%%DIGITALERECHNUNGLINK%%', 'value': "https://libracore.mieterverband.ch/digitalrechnung?hash={0}".format(mitgliedschaft.digitalrechnung_hash) if mitgliedschaft.digitalrechnung_hash else '(URL nicht verfügbar)'}
+            {'key_word': '%%DIGITALERECHNUNGLINK%%', 'value': "https://libracore.mieterverband.ch/digitalrechnung?hash={0}".format(mitgliedschaft.mitglied_hash) if mitgliedschaft.mitglied_hash else '(URL nicht verfügbar)'}
         ]
     else:
         key_words = [
