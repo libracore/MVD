@@ -23,6 +23,7 @@ from frappe.utils import cint
 AUTH0_SCOPE = "Auth0"
 SVCPF_SCOPE = "ServicePF"
 POST_SCOPE = "PostNotiz"
+SVCPFMVS_SCOPE = "ServicePFmvs"
 
 # ---------------------------------------------------
 # ---------------------------------------------------
@@ -213,18 +214,18 @@ def send_postnotiz_to_sp(postnotiz_for_sp):
 
 def send_kampagne_to_sp(kampagne):
     if not int(frappe.db.get_single_value('Service Plattform API', 'no_kampagne_to_sp')) == 1:
-        if auth_check(POST_SCOPE):
+        if auth_check(SVCPFMVS_SCOPE):
             config = frappe.get_doc("Service Plattform API", "Service Plattform API")
-            sub_url = config.get_value(POST_SCOPE, "api_url").replace("/erpnext", "/mvs")
+            sub_url = config.get_value(SVCPFMVS_SCOPE, "api_url")
             endpoint = str(config.get('kampagne'))
             url = sub_url + endpoint
-            token = config.get_value(POST_SCOPE, 'api_token')
+            token = config.get_value(SVCPFMVS_SCOPE, 'api_token')
             headers = {"authorization": "Bearer {token}".format(token=token)}
             
             try:
                 sp_connection = requests.post(url, json = kampagne, headers = headers)
                 if sp_connection.status_code != 204:
-                    frappe.log_error("{0}\n\n{1}".format(sp_connection.status_code, str(kampagne)), '{0} > send_kampagne_to_sp'.format(sp_connection.status_code))
+                    frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, str(kampagne)), '{0} > send_kampagne_to_sp'.format(sp_connection.status_code))
                 return
             except Exception as err:
                 frappe.log_error("{0}".format(err), 'send_kampagne_to_sp failed')
