@@ -30,7 +30,9 @@
   "pwd_reset_testadresse",
   "pwd_reset_subject",
   "pwd_reset_template",
-  "pwd_reset_sender"
+  "pwd_reset_sender",
+  "section_mitglieder_hash",
+  "hash_salt"
  ],
  "fields": [
   {
@@ -181,10 +183,20 @@
    "fieldname": "reset_url",
    "fieldtype": "Data",
    "label": "PWD Reset URL"
+  },
+  {
+   "fieldname": "section_mitglieder_hash",
+   "fieldtype": "Section Break",
+   "label": "Mitglieder Hash"
+  },
+  {
+   "fieldname": "hash_salt",
+   "fieldtype": "Data",
+   "label": "Hash Salt"
   }
  ],
  "issingle": 1,
- "modified": "2025-02-25 10:59:27.953021",
+ "modified": "2025-03-25 13:35:35.105976",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Settings",
