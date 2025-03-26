@@ -364,7 +364,6 @@ def sinv_update(sinv, event):
         if old_sinv.status:
             if old_sinv.status == sinv.status:
                 update_blocked = True
-    
     if not update_blocked:
         if sinv.mv_mitgliedschaft:
             args = {
@@ -374,14 +373,9 @@ def sinv_update(sinv, event):
     return
 
 def _sinv_update(mv_mitgliedschaft):
+    # Speichern der Mitgliedschaft zum triggern der validate() Funktion, diese aktualisiert alle relevanten Informationen rund um das Mitglied
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
-    check_zahlung_mitgliedschaft(mitgliedschaft, db_direct=True)
-    check_zahlung_hv(mitgliedschaft, db_direct=True)
-    check_folgejahr_regelung(mitgliedschaft, db_direct=True)
-    set_max_reminder_level(mitgliedschaft, db_direct=True)
-    get_ampelfarbe(mitgliedschaft, db_direct=True)
-    if mitgliedschaft.status_c != 'Wegzug':
-        sp_updater(mitgliedschaft)
+    mitgliedschaft.save()
 
 def check_mitgliedschaft_in_pe(pe, event):
     if not pe.mv_mitgliedschaft:
