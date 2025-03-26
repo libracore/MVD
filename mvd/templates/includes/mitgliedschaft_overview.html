@@ -197,9 +197,9 @@
             {% if kontakt_mitglied %}
                 <p>
                     {% if kontakt_mitglied.email_id %}{{ kontakt_mitglied.email_id }}<br>{% endif %}
-                    {% if kontakt_mitglied.phone %}{{ kontakt_mitglied.phone }}<br>{% endif %}
-                    {% if kontakt_mitglied.mobile_no %}{{ kontakt_mitglied.mobile_no }}<br>{% endif %}
-                    {{ allgemein.tel_g_1 }}
+                    {% if kontakt_mitglied.phone %}<a href="tel:{{ kontakt_mitglied.phone }}">{{ kontakt_mitglied.phone }}</a><br>{% endif %}
+                    {% if kontakt_mitglied.mobile_no %}<a href="tel:{{ kontakt_mitglied.mobile_no }}">{{ kontakt_mitglied.mobile_no }}</a><br>{% endif %}
+                    {% if allgemein.tel_g_1 %}<a href="tel:{{ allgemein.tel_g_1 }}">{{ allgemein.tel_g_1 }}</a>{% endif %}
                 </p>
             {% endif %}
         </div>
@@ -251,9 +251,9 @@
             {% if kontakt_mitglied %}
                 <p>
                     {% if kontakt_solidarmitglied.email_id %}{{ kontakt_solidarmitglied.email_id }}<br>{% endif %}
-                    {% if kontakt_solidarmitglied.phone %}{{ kontakt_solidarmitglied.phone }}<br>{% endif %}
-                    {% if kontakt_solidarmitglied.mobile_no %}{{ kontakt_solidarmitglied.mobile_no }}<br>{% endif %}
-                    {{ allgemein.tel_g_2 }}
+                    {% if kontakt_solidarmitglied.phone %}<a href="tel:{{ kontakt_solidarmitglied.phone }}">{{ kontakt_solidarmitglied.phone }}</a><br>{% endif %}
+                    {% if kontakt_solidarmitglied.mobile_no %}<a href="tel:{{ kontakt_solidarmitglied.mobile_no }}">{{ kontakt_solidarmitglied.mobile_no }}</a><br>{% endif %}
+                    {% if allgemein.tel_g_2 %}<a href="tel:{{ allgemein.tel_g_2 }}">{{ allgemein.tel_g_2 }}</a>{% endif %}
                 </p>
             {% endif %}
         </div>
@@ -322,9 +322,9 @@
             {% if rg_kontakt %}
                 <p>
                     {% if rg_kontakt.email_id %}{{ rg_kontakt.email_id }}<br>{% endif %}
-                    {% if rg_kontakt.phone %}{{ rg_kontakt.phone }}<br>{% endif %}
-                    {% if rg_kontakt.mobile_no %}{{ rg_kontakt.mobile_no }}<br>{% endif %}
-                    {{ allgemein.rg_tel_g }}
+                    {% if rg_kontakt.phone %}<a href="tel:{{ rg_kontakt.phone }}">{{ rg_kontakt.phone }}</a><br>{% endif %}
+                    {% if rg_kontakt.mobile_no %}<a href="tel:{{ rg_kontakt.mobile_no }}">{{ rg_kontakt.mobile_no }}</a><br>{% endif %}
+                    {% if allgemein.rg_tel_g %}<a href="tel:{{ allgemein.rg_tel_g }}">{{ allgemein.rg_tel_g }}</a>{% endif %}
                 </p>
             {% endif %}
         </div>
