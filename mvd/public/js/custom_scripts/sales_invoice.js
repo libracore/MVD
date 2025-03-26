@@ -3,6 +3,8 @@
 
 frappe.ui.form.on('Sales Invoice', {
     refresh: function(frm) {
+        add_dashboard_overview(frm);
+
         if ((cur_frm.doc.outstanding_amount > 0)&&(cur_frm.doc.docstatus==1)) {
             check_for_hv(frm);
         }
@@ -319,5 +321,37 @@ function manueller_rechnungstext(frm) {
         'Auswahl Druckvorlage',
         'Texte laden'
         )
+    }
+}
+
+function add_dashboard_overview(frm) {
+    if (cur_frm.doc.ist_mitgliedschaftsrechnung == 1) {
+        cur_frm.dashboard.add_section(`
+            <p>Mitgliedschaftsrechnung für ${cur_frm.doc.mitgliedschafts_jahr}</p>
+            <p><a href="/desk#Form/Mitgliedschaft/${cur_frm.doc.mv_mitgliedschaft}">Öffne die Mitgliedschaft</a></p>
+        `);
+    } else if (cur_frm.doc.ist_hv_rechnung == 1) {
+        cur_frm.dashboard.add_section(`
+            <p>HV Rechnung</p>
+            <p><a href="/desk#Form/Mitgliedschaft/${cur_frm.doc.mv_mitgliedschaft}">Öffne die Mitgliedschaft</a></p>
+        `);
+    } else if (cur_frm.doc.ist_spenden_rechnung == 1) {
+        cur_frm.dashboard.add_section(`
+            <p>Spenden Rechnung</p>
+            <p><a href="/desk#Form/Mitgliedschaft/${cur_frm.doc.mv_mitgliedschaft}">Öffne die Mitgliedschaft</a></p>
+        `);
+    } else if (cur_frm.doc.ist_sonstige_rechnung == 1) {
+        cur_frm.dashboard.add_section(`
+            <p>Sonstige Rechnung</p>
+            <p><a href="/desk#Form/Mitgliedschaft/${cur_frm.doc.mv_mitgliedschaft}">Öffne die Mitgliedschaft</a></p>
+        `);
+    } else if (cur_frm.doc.mv_mitgliedschaft) {
+        cur_frm.dashboard.add_section(`
+            <p><a href="/desk#Form/Mitgliedschaft/${cur_frm.doc.mv_mitgliedschaft}">Öffne die Mitgliedschaft</a></p>
+        `);
+    } else if (cur_frm.doc.mv_kunde) {
+        cur_frm.dashboard.add_section(`
+            <p><a href="/desk#Form/Kunden/${cur_frm.doc.mv_kunde}">Öffne den MV-Kunde</a></p>
+        `);
     }
 }
