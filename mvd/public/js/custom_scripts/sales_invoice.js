@@ -349,5 +349,9 @@ function add_dashboard_overview(frm) {
         cur_frm.dashboard.add_section(`
             <p><a href="/desk#Form/Mitgliedschaft/${cur_frm.doc.mv_mitgliedschaft}">Öffne die Mitgliedschaft</a></p>
         `);
+    } else if (cur_frm.doc.mv_kunde) {
+        cur_frm.dashboard.add_section(`
+            <p><a href="/desk#Form/Kunden/${cur_frm.doc.mv_kunde}">Öffne den MV-Kunde</a></p>
+        `);
     }
 }
