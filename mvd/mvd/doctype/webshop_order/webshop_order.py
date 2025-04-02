@@ -92,7 +92,7 @@ class WebshopOrder(Document):
             "mv_mitgliedschaft": self.mv_mitgliedschaft,
             "sektion_id": "MVD",
             'language': 'de',
-            'kundentyp': 'Einzelperson',
+            'kundentyp': 'Unternehmen' if self.firma else 'Einzelperson',
             'anrede': self.anrede,
             'vorname': self.vorname,
             'nachname': self.nachname,
@@ -135,7 +135,7 @@ class WebshopOrder(Document):
         kunde.mv_mitgliedschaft = self.mv_mitgliedschaft
         kunde.sektion_id = "MVD"
         kunde.language = 'de'
-        kunde.kundentyp = 'Einzelperson'
+        kunde.kundentyp = 'Unternehmen' if self.firma else 'Einzelperson'
         kunde.anrede = self.anrede
         kunde.vorname = self.vorname
         kunde.nachname = self.nachname
