@@ -418,16 +418,17 @@ def get_item_table(sinv):
                         <td colspan="2" style="text-align: left; font-size: 8px;">Unsere MWST-Nr: CHE-100.822.971 MWST</td>
                         <td colspan="3" style="text-align: right;"><table style="width: 100%;">"""
         for tax in sinv.taxes:
-            table += """<tr style="line-height: 1;">
-                            <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Satz:</td>
-                            <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{satz}</td>
-                            <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Betrag:</td>
-                            <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{betrag}</td>
-                            <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Steuer:</td>
-                            <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{steuer}</td>
-                        </tr>""".format(satz=tax.description, \
-                                        betrag="{:,.2f}".format(taxes[tax.description]).replace(",", "'"), \
-                                        steuer="{:,.2f}".format(tax.tax_amount).replace(",", "'"))
+            if tax.tax_amount > 0:
+                table += """<tr style="line-height: 1;">
+                                <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Satz:</td>
+                                <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{satz}</td>
+                                <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Betrag:</td>
+                                <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{betrag}</td>
+                                <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Steuer:</td>
+                                <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{steuer}</td>
+                            </tr>""".format(satz=tax.description, \
+                                            betrag="{:,.2f}".format(taxes[tax.description]).replace(",", "'"), \
+                                            steuer="{:,.2f}".format(tax.tax_amount).replace(",", "'"))
         table += """</table></td></tr>"""
     
     table += """
