@@ -74,9 +74,27 @@
                     <td>{{ mitgliedschaft.strasse or '' }}</td>
                     <td>{% if mitgliedschaft.postfach %}{{ mitgliedschaft.postfach_nummer or '' }}{% else %}{{ mitgliedschaft.nummer or '' }}{{ mitgliedschaft.nummer_zu or '' }}{% endif %}</td>
                     <td>{{ mitgliedschaft.plz or '' }} {{ mitgliedschaft.ort or '' }}</td>
-                    <td>{{ mitgliedschaft.tel_p_1 or '' }}</td>
-                    <td>{{ mitgliedschaft.tel_m_1 or '' }}</td>
-                    <td>{{ mitgliedschaft.tel_g_1 or '' }}</td>
+                    <td>
+                        {% if mitgliedschaft.tel_p_1 %}
+                            <a href="tel:{{ mitgliedschaft.tel_p_1 }}">{{ mitgliedschaft.tel_p_1 }}</a>
+                        {% else %}
+                            {{ mitgliedschaft.tel_p_1 or '' }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if mitgliedschaft.tel_m_1 %}
+                            <a href="tel:{{ mitgliedschaft.tel_m_1 }}">{{ mitgliedschaft.tel_m_1 }}</a>
+                        {% else %}
+                            {{ mitgliedschaft.tel_m_1 or '' }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if mitgliedschaft.tel_g_1 %}
+                            <a href="tel:{{ mitgliedschaft.tel_g_1 }}">{{ mitgliedschaft.tel_g_1 }}</a>
+                        {% else %}
+                            {{ mitgliedschaft.tel_g_1 or '' }}
+                        {% endif %}
+                    </td>
                     <td>{{ mitgliedschaft.mitgliedtyp_c or '' }}</td>
                 </tr>
                 {% if mitgliedschaft.hat_solidarmitglied %}
@@ -108,9 +126,27 @@
                         <td>{{ mitgliedschaft.strasse or '' }}</td>
                         <td>{% if mitgliedschaft.postfach %}{{ mitgliedschaft.postfach_nummer or '' }}{% else %}{{ mitgliedschaft.nummer or '' }}{{ mitgliedschaft.nummer_zu or '' }}{% endif %}</td>
                         <td>{{ mitgliedschaft.plz or '' }} {{ mitgliedschaft.ort or '' }}</td>
-                        <td>{{ mitgliedschaft.tel_p_2 or '' }}</td>
-                        <td>{{ mitgliedschaft.tel_m_2 or '' }}</td>
-                        <td>{{ mitgliedschaft.tel_g_2 or '' }}</td>
+                        <td>
+                            {% if mitgliedschaft.tel_p_2 %}
+                                <a href="tel:{{ mitgliedschaft.tel_p_2 }}">{{ mitgliedschaft.tel_p_2 }}</a>
+                            {% else %}
+                                {{ mitgliedschaft.tel_p_2 or '' }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if mitgliedschaft.tel_m_2 %}
+                                <a href="tel:{{ mitgliedschaft.tel_m_2 }}">{{ mitgliedschaft.tel_m_2 }}</a>
+                            {% else %}
+                                {{ mitgliedschaft.tel_m_2 or '' }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if mitgliedschaft.tel_g_2 %}
+                                <a href="tel:{{ mitgliedschaft.tel_g_2 }}">{{ mitgliedschaft.tel_g_2 }}</a>
+                            {% else %}
+                                {{ mitgliedschaft.tel_g_2 or '' }}
+                            {% endif %}
+                        </td>
                         <td>{{ mitgliedschaft.mitgliedtyp_c or '' }}</td>
                     </tr>
                 {% endif %}
@@ -132,9 +168,27 @@
                     <td>{{ faktura_kunde.strasse or '' }}</td>
                     <td>{% if faktura_kunde.postfach %}{{ faktura_kunde.postfach_nummer or '' }}{% else %}{{ faktura_kunde.nummer or '' }}{{ faktura_kunde.nummer_zu or '' }}{% endif %}</td>
                     <td>{{ faktura_kunde.plz or '' }} {{ faktura_kunde.ort or '' }}</td>
-                    <td>{{ faktura_kunde.tel_p or '' }}</td>
-                    <td>{{ faktura_kunde.tel_m or '' }}</td>
-                    <td>{{ faktura_kunde.tel_g or '' }}</td>
+                    <td>
+                        {% if faktura_kunde.tel_p %}
+                            <a href="tel:{{ faktura_kunde.tel_p }}">{{ faktura_kunde.tel_p }}</a>
+                        {% else %}
+                            {{ faktura_kunde.tel_p or '' }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if faktura_kunde.tel_m %}
+                            <a href="tel:{{ faktura_kunde.tel_m }}">{{ faktura_kunde.tel_m }}</a>
+                        {% else %}
+                            {{ faktura_kunde.tel_m or '' }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if faktura_kunde.tel_g %}
+                            <a href="tel:{{ faktura_kunde.tel_g }}">{{ faktura_kunde.tel_g }}</a>
+                        {% else %}
+                            {{ faktura_kunde.tel_g or '' }}
+                        {% endif %}
+                    </td>
                     <td>Faktura Kunde</td>
                 </tr>
             {% endfor %}
