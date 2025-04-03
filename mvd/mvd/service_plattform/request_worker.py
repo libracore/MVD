@@ -280,7 +280,7 @@ def execute_sp_log(sp_log, manual_execution=False):
                                                                          FROM `tabMitgliedschaft`
                                                                          WHERE `mitglied_nr` = '{0}'
                                                                          AND `status_c` NOT IN ('Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')
-                                                                         """.format(), as_dict=True)[0].qty
+                                                                         """.format(api_kwargs['mitgliedNummer']), as_dict=True)[0].qty
                     if aktive_mitglieder_mit_identischer_nr > 0:
                         sp_log.status = 'Failed'
                         sp_log.retry_count = cint(sp_log.retry_count) + 1
