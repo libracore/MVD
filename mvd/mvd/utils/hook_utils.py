@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils import cint
 
 def resave_mitgliedschaft(sinv, event):
     if sinv.mv_mitgliedschaft:
@@ -89,3 +90,8 @@ def remove_admin_and_guest_mails(self, event):
                 self.save()
             else:
                 self.delete()
+
+def check_manual_address(sinv, event):
+    if cint(sinv.manuelle_adresseingabe) == 1:
+        sinv.manuelle_adresse = '{0}\n{1} {2}\n{3}-{4} {5}'.format(sinv.ma_name, sinv.ma_strasse, sinv.ma_nummer, sinv.ma_laendercode, sinv.ma_plz, sinv.ma_ort)
+

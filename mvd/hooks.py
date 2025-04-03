@@ -115,7 +115,8 @@ doc_events = {
     "Sales Invoice": {
         "before_cancel": "mvd.mvd.utils.hook_utils.unlink_fr",
         "after_insert": "mvd.mvd.utils.hook_utils.relink_fr",
-        "on_change": "mvd.mvd.doctype.mitgliedschaft.finance_utils.sinv_update"
+        "on_change": "mvd.mvd.doctype.mitgliedschaft.finance_utils.sinv_update",
+        "validate": "mvd.mvd.utils.hook_utils.check_manual_address"
     },
     "Payment Entry": {
         "on_submit": "mvd.mvd.doctype.mitgliedschaft.finance_utils.check_mitgliedschaft_in_pe"
