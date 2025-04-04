@@ -267,8 +267,10 @@ def get_adressblock(mitgliedschaft):
         if mitgliedschaft.vorname_1:
             adressblock += mitgliedschaft.vorname_1 or ''
             adressblock += ' '
-        adressblock += mitgliedschaft.nachname_1 or ''
-        adressblock += '\n'
+        if mitgliedschaft.nachname_1:
+            adressblock += mitgliedschaft.nachname_1 or ''
+        if mitgliedschaft.vorname_1 or mitgliedschaft.nachname_1:
+            adressblock += '\n'
         
         if mitgliedschaft.hat_solidarmitglied:
             if mitgliedschaft.vorname_2:
@@ -318,8 +320,10 @@ def get_adressblock(mitgliedschaft):
         if mitgliedschaft.vorname:
             adressblock += mitgliedschaft.vorname or ''
             adressblock += ' '
-        adressblock += mitgliedschaft.nachname or ''
-        adressblock += '\n'
+        if mitgliedschaft.nachname:
+            adressblock += mitgliedschaft.nachname or ''
+        if mitgliedschaft.vorname or mitgliedschaft.nachname:
+            adressblock += '\n'
         
         if mitgliedschaft.zusatz_adresse:
             adressblock += mitgliedschaft.zusatz_adresse or ''
@@ -368,8 +372,10 @@ def get_rg_adressblock(mitgliedschaft):
             if mitgliedschaft.vorname_1:
                 adressblock += mitgliedschaft.vorname_1 or ''
                 adressblock += ' '
-            adressblock += mitgliedschaft.nachname_1 or ''
-            adressblock += '\n'
+            if mitgliedschaft.nachname_1:
+                adressblock += mitgliedschaft.nachname_1 or ''
+            if mitgliedschaft.vorname_1 or mitgliedschaft.nachname_1:
+                adressblock += '\n'
             
             if mitgliedschaft.hat_solidarmitglied:
                 if mitgliedschaft.vorname_2:
@@ -392,8 +398,10 @@ def get_rg_adressblock(mitgliedschaft):
             if mitgliedschaft.rg_vorname:
                 adressblock += mitgliedschaft.rg_vorname or ''
                 adressblock += ' '
-            adressblock += mitgliedschaft.rg_nachname or ''
-            adressblock += '\n'
+            if mitgliedschaft.rg_nachname:
+                adressblock += mitgliedschaft.rg_nachname or ''
+            if mitgliedschaft.rg_vorname or mitgliedschaft.rg_nachname:
+                adressblock += '\n'
         
         if mitgliedschaft.rg_zusatz_adresse:
             adressblock += mitgliedschaft.rg_zusatz_adresse or ''
@@ -438,8 +446,10 @@ def get_rg_adressblock(mitgliedschaft):
             if mitgliedschaft.vorname:
                 adressblock += mitgliedschaft.vorname or ''
                 adressblock += ' '
-            adressblock += mitgliedschaft.nachname or ''
-            adressblock += '\n'
+            if mitgliedschaft.nachname:
+                adressblock += mitgliedschaft.nachname or ''
+            if mitgliedschaft.vorname or mitgliedschaft.nachname:
+                adressblock += '\n'
         else:
             if mitgliedschaft.rg_kundentyp == 'Unternehmen':
                 if mitgliedschaft.rg_firma:
@@ -449,12 +459,14 @@ def get_rg_adressblock(mitgliedschaft):
                     adressblock += mitgliedschaft.rg_zusatz_firma or ''
                 if mitgliedschaft.rg_firma or mitgliedschaft.rg_zusatz_firma:
                     adressblock += '\n'
-            
+
             if mitgliedschaft.rg_vorname:
                 adressblock += mitgliedschaft.rg_vorname or ''
                 adressblock += ' '
-            adressblock += mitgliedschaft.rg_nachname or ''
-            adressblock += '\n'
+            if mitgliedschaft.rg_nachname:
+                adressblock += mitgliedschaft.rg_nachname or ''
+            if mitgliedschaft.rg_vorname or mitgliedschaft.rg_nachname:
+                adressblock += '\n'
         
         if mitgliedschaft.rg_zusatz_adresse:
             adressblock += mitgliedschaft.rg_zusatz_adresse or ''
@@ -472,7 +484,7 @@ def get_rg_adressblock(mitgliedschaft):
             adressblock += 'Postfach '
             adressblock += str(mitgliedschaft.rg_postfach_nummer) or ''
             adressblock += '\n'
-        
+
         if mitgliedschaft.rg_land != 'Schweiz':
             laender_code = frappe.get_value("Country", mitgliedschaft.rg_land, "code").upper() + "-"
         else:

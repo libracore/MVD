@@ -54,12 +54,20 @@
                 {% endif %}
                 {% set mitglied_nr = mitgliedschaft.mitglied_nr %}
                 {% set anrede = mitgliedschaft.rg_briefanrede %}
-                {% set adressblock = mitgliedschaft.rg_adressblock or get_rg_adressblock(mitgliedschaft) %}
+                {% if doc.manuelle_adresseingabe == 1 and doc.manuelle_adresse %}
+                    {% set adressblock = doc.manuelle_adresse %}
+                {% else %}
+                    {% set adressblock = mitgliedschaft.rg_adressblock or get_rg_adressblock(mitgliedschaft) %}
+                {% endif %}
             {% else %}
                 {% set bezahltes_mitgliedschaftsjahr = '' %}
                 {% set mitglied_nr = '' %}
                 {% set anrede = '' %}
-                {% set adressblock = get_rg_adressblock(mitgliedschaft) %}
+                {% if doc.manuelle_adresseingabe == 1 and doc.manuelle_adresse %}
+                    {% set adressblock = doc.manuelle_adresse %}
+                {% else %}
+                    {% set adressblock = get_rg_adressblock(mitgliedschaft) %}
+                {% endif %}
             {% endif %}
         {% endif %}
         
@@ -67,58 +75,68 @@
         <!-- QRR Daten für Mitgliedschafts QRR -->
         <!-- ---------------------------------------------------------------------------------------- -->
         <!-- payer details -->
-        {% if doc.customer_address %}
-            {% set pay_addr = frappe.get_doc("Address", doc.customer_address) %}
-            {% if pay_addr %}
-                <!-- get values -->
-                {% if pay_addr.postfach %}
-                    <!-- postfach -->
-                    {% set pay_country = frappe.get_doc("Country", pay_addr.country) %}
-                    {% set pay_country_code = pay_country.code | upper %}
-                    {% if pay_addr.postfach_nummer %}
-                        {% set postfach_nummer = pay_addr.postfach_nummer %}
-                    {% else %}
-                        {% set postfach_nummer = ' ' %}
-                    {% endif %}
-                    {% set pay_address_line_detail = {'name': doc.customer, 'street': 'Postfach', 'number': postfach_nummer, 'pin': pay_addr.pincode, 'city': pay_addr.city, 'country': pay_country_code } %}
-                {% else %}
-                    <!-- street -->
-                    {% set pay_address_trimed = pay_addr.address_line1 | trim %}
-                    {% set pay_address_array = pay_address_trimed.split(" ") %}
-                    {% set pay_address_line_item_count = pay_address_array | count %}
-                    {% set pay_country = frappe.get_doc("Country", pay_addr.country) %}
-                    {% set pay_country_code = pay_country.code | upper %}
-                    {% set pay_address_line_detail = {'name': doc.customer, 'street': '', 'number': '', 'pin': pay_addr.pincode, 'city': pay_addr.city, 'country': pay_country_code } %}
-                    {% for i in range(0, (pay_address_line_item_count - 1)) %}
-                        {% if pay_address_line_detail.update({'street': pay_address_line_detail.street + " " + pay_address_array[i] }) %}{% endif %}
-                    {% endfor %}
-                    {% if pay_address_line_detail.update({'number': pay_address_array[pay_address_line_item_count - 1]}) %}{% endif %}
-                {% endif %}
-                
-                <!-- set values -->
-                {% set payer_name = doc.customer_name %}
-                {% set payer_street = pay_address_line_detail.street %}
-                {% set payer_number = pay_address_line_detail.number %}
-                {% set payer_pincode = pay_address_line_detail.pin %}
-                {% set payer_town = pay_address_line_detail.city %}
-                {% set payer_country = pay_address_line_detail.country %}
-                
-                <!-- check street vs number -->
-                {% if not payer_street %}
-                    {% if payer_number %}
-                        {% set payer_street = payer_number %}
-                        {% set payer_number = ' ' %}
-                    {% endif %}
-                {% endif %}
-            {% endif %}
+        {% if doc.manuelle_adresseingabe == 1 and doc.manuelle_adresse %}
+            {% set payer_name = doc.ma_name %}
+            {% set payer_street = doc.ma_strasse %}
+            {% set payer_number = doc.ma_nummer %}
+            {% set payer_pincode = doc.ma_plz %}
+            {% set payer_town = doc.ma_ort %}
+            {% set payer_country = doc.ma_laendercode %}
             {% set bankkonto = frappe.get_doc("Account", sektion.account) %}
         {% else %}
-            {% set payer_name = False %}
-            {% set payer_street = False %}
-            {% set payer_number = False %}
-            {% set payer_pincode = False %}
-            {% set payer_town = False %}
-            {% set payer_country = False %}
+            {% if doc.customer_address %}
+                {% set pay_addr = frappe.get_doc("Address", doc.customer_address) %}
+                {% if pay_addr %}
+                    <!-- get values -->
+                    {% if pay_addr.postfach %}
+                        <!-- postfach -->
+                        {% set pay_country = frappe.get_doc("Country", pay_addr.country) %}
+                        {% set pay_country_code = pay_country.code | upper %}
+                        {% if pay_addr.postfach_nummer %}
+                            {% set postfach_nummer = pay_addr.postfach_nummer %}
+                        {% else %}
+                            {% set postfach_nummer = ' ' %}
+                        {% endif %}
+                        {% set pay_address_line_detail = {'name': doc.customer, 'street': 'Postfach', 'number': postfach_nummer, 'pin': pay_addr.pincode, 'city': pay_addr.city, 'country': pay_country_code } %}
+                    {% else %}
+                        <!-- street -->
+                        {% set pay_address_trimed = pay_addr.address_line1 | trim %}
+                        {% set pay_address_array = pay_address_trimed.split(" ") %}
+                        {% set pay_address_line_item_count = pay_address_array | count %}
+                        {% set pay_country = frappe.get_doc("Country", pay_addr.country) %}
+                        {% set pay_country_code = pay_country.code | upper %}
+                        {% set pay_address_line_detail = {'name': doc.customer, 'street': '', 'number': '', 'pin': pay_addr.pincode, 'city': pay_addr.city, 'country': pay_country_code } %}
+                        {% for i in range(0, (pay_address_line_item_count - 1)) %}
+                            {% if pay_address_line_detail.update({'street': pay_address_line_detail.street + " " + pay_address_array[i] }) %}{% endif %}
+                        {% endfor %}
+                        {% if pay_address_line_detail.update({'number': pay_address_array[pay_address_line_item_count - 1]}) %}{% endif %}
+                    {% endif %}
+                    
+                    <!-- set values -->
+                    {% set payer_name = doc.customer_name %}
+                    {% set payer_street = pay_address_line_detail.street %}
+                    {% set payer_number = pay_address_line_detail.number %}
+                    {% set payer_pincode = pay_address_line_detail.pin %}
+                    {% set payer_town = pay_address_line_detail.city %}
+                    {% set payer_country = pay_address_line_detail.country %}
+                    
+                    <!-- check street vs number -->
+                    {% if not payer_street %}
+                        {% if payer_number %}
+                            {% set payer_street = payer_number %}
+                            {% set payer_number = ' ' %}
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+                {% set bankkonto = frappe.get_doc("Account", sektion.account) %}
+            {% else %}
+                {% set payer_name = False %}
+                {% set payer_street = False %}
+                {% set payer_number = False %}
+                {% set payer_pincode = False %}
+                {% set payer_town = False %}
+                {% set payer_country = False %}
+            {% endif %}
         {% endif %}
 
         <!-- receiver details -->
