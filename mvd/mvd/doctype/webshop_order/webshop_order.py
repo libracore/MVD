@@ -187,7 +187,7 @@ class WebshopOrder(Document):
             'doctype': 'Sales Invoice',
             'company': 'MVD',
             'customer': frappe.db.get_value("Kunden", self.faktura_kunde, "kunde_kunde"),
-            'customer_group': frappe.db.get_value("Customer", self.faktura_kunde, "customer_group"),
+            'customer_group': frappe.db.get_value("Customer", frappe.db.get_value("Kunden", self.faktura_kunde, "kunde_kunde"), "customer_group"),
             'sektion_id': 'MVD',
             'ist_sonstige_rechnung': 1,
             'mv_kunde': self.faktura_kunde,
