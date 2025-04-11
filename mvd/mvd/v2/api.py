@@ -203,3 +203,30 @@ def get_md_member_rates():
                                 WHERE tpr.applicable_for = 'Customer Group'
                                 AND (tpr.valid_upto IS NULL OR NOT tpr.valid_upto <= CURDATE());""", as_dict=True)
     return {item['item_code']: item for item in item_member_rates}
+
+
+@frappe.whitelist()
+def get_member_annual_invoice(mv_mitgliedschaft):
+    # test: http://localhost:8001/api/method/mvd.mvd.v2.api.get_member_annual_invoice?mv_mitgliedschaft=435090
+    invoices = frappe.get_all(
+    "Sales Invoice",
+    filters={
+        "mv_mitgliedschaft": mv_mitgliedschaft,
+        "ist_mitgliedschaftsrechnung": 1},
+    fields=['name', 'mitgliedschafts_jahr', 'grand_total', 'due_date', 'status', 'payment_reminder_level', 'outstanding_amount', 'druckvorlage']
+)
+    for sinv in invoices:
+        # this is very slow
+        signature = frappe.get_doc("Sales Invoice", sinv.name).get_signature()
+        sinv['signature'] = signature
+    return invoices
+
+@frappe.whitelist(allow_guest=True)
+def get_annual_invoice_pdf(invoice_name=None, signature=False):
+    # check if printformat exists?
+    try:
+        from erpnextswiss.erpnextswiss.guest_print import get_pdf_as_guest
+        printformat = frappe.db.get_value("Sales Invoice", invoice_name, "druckvorlage")
+        return get_pdf_as_guest(doctype="Sales Invoice", name=invoice_name, format=printformat, key=signature)
+    except Exception as err:
+        return ['500 Internal Server Error', str(err)]
