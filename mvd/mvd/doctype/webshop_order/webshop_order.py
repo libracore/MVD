@@ -170,7 +170,7 @@ class WebshopOrder(Document):
         self.faktura_kunde_aktuell = 1
         self.save()
         return
-    
+
     def create_sinv(self):
         item_json = json.loads(self.artikel_json)
         items_list = []
@@ -182,10 +182,12 @@ class WebshopOrder(Document):
                     'item_code': item['item'],
                     'qty': item['qty']
                 })
+        
         sinv = frappe.get_doc({
             'doctype': 'Sales Invoice',
             'company': 'MVD',
             'customer': frappe.db.get_value("Kunden", self.faktura_kunde, "kunde_kunde"),
+            'customer_group': frappe.db.get_value("Customer", frappe.db.get_value("Kunden", self.faktura_kunde, "kunde_kunde"), "customer_group"),
             'sektion_id': 'MVD',
             'ist_sonstige_rechnung': 1,
             'mv_kunde': self.faktura_kunde,
@@ -194,9 +196,10 @@ class WebshopOrder(Document):
             'items': items_list,
             'taxes_and_charges': 'MVD Gemischt - MVD',
             'druckvorlage': 'MVD Rechnung-MVD' if not self.online_payment_id else 'MVD Lieferschein-MVD',
+            'mv_mitgliedschaft': self.mv_mitgliedschaft,
             'due_date': add_days(today(), 30)
         }).insert(ignore_permissions=True)
-
+ 
         if self.online_payment_id:
             sinv.is_pos = 1
             sinv.pos_profile = 'MVD'
@@ -210,7 +213,6 @@ class WebshopOrder(Document):
         
         self.sinv = sinv.name
         self.save()
-
         return sinv.name
 
 
