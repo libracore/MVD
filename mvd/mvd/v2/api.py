@@ -206,27 +206,30 @@ def get_md_member_rates():
 
 
 @frappe.whitelist()
-def get_member_annual_invoice(mv_mitgliedschaft):
-    # test: http://localhost:8001/api/method/mvd.mvd.v2.api.get_member_annual_invoice?mv_mitgliedschaft=435090
+def get_member_annual_invoice(id):
     invoices = frappe.get_all(
     "Sales Invoice",
     filters={
-        "mv_mitgliedschaft": mv_mitgliedschaft,
+        "mv_mitgliedschaft": id,
         "ist_mitgliedschaftsrechnung": 1},
-    fields=['name', 'mitgliedschafts_jahr', 'grand_total', 'due_date', 'status', 'payment_reminder_level', 'outstanding_amount', 'druckvorlage']
+    fields=['name', 'mitgliedschafts_jahr', 'grand_total', 'due_date', 'status', 'payment_reminder_level', 'outstanding_amount']
 )
+
+    # Determine base URL from request
+    host = frappe.request.host or ""
+    scheme = frappe.request.scheme or "https"
+    base_url = f"{scheme}://{host}"
+
     for sinv in invoices:
-        # this is very slow
         signature = frappe.get_doc("Sales Invoice", sinv.name).get_signature()
-        sinv['signature'] = signature
+        sinv['pdf_link'] = f"{base_url}/api/method/mvd.mvd.v2.api.get_annual_invoice_pdf?invoice_name={sinv['name']}&signature={signature}"
+        sinv.pop('name', None)
     return invoices
 
 @frappe.whitelist(allow_guest=True)
 def get_annual_invoice_pdf(invoice_name=None, signature=False):
-    # check if printformat exists?
     try:
         from erpnextswiss.erpnextswiss.guest_print import get_pdf_as_guest
-        printformat = frappe.db.get_value("Sales Invoice", invoice_name, "druckvorlage")
-        return get_pdf_as_guest(doctype="Sales Invoice", name=invoice_name, format=printformat, key=signature)
+        return get_pdf_as_guest(doctype="Sales Invoice", name=invoice_name, format="Automatisierte Mitgliedschaftsrechnung", key=signature)
     except Exception as err:
         return ['500 Internal Server Error', str(err)]
