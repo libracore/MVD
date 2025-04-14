@@ -218,11 +218,11 @@ def get_member_annual_invoice(id):
     # Determine base URL from request
     host = frappe.request.host or ""
     scheme = frappe.request.scheme or "https"
-    base_url = "{}://{}".format(scheme, host)
+    base_url = "{0}://{1}".format(scheme, host)
 
     for sinv in invoices:
         signature = frappe.get_doc("Sales Invoice", sinv.name).get_signature()
-        sinv['pdf_link'] = "{}/api/method/mvd.mvd.v2.api.get_annual_invoice_pdf?invoice_name={}&signature={}".format(
+        sinv['pdf_link'] = "{0}/api/method/mvd.mvd.v2.api.get_annual_invoice_pdf?invoice_name={1}&signature={2}".format(
             base_url, sinv['name'], signature
         )
         sinv.pop('name', None)
