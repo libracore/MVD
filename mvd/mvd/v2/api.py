@@ -117,7 +117,7 @@ def get_item_rate(item):
     return get_item_price(item)['price']
 
 @frappe.whitelist()
-def get_md_shop_all_items():
+def get_mvd_shop_all_items():
     """
     Retrieves a list of all enabled items from the 'tabItem' table along with their associated pricing and member rates.
 
