@@ -6,7 +6,8 @@
  "field_order": [
   "mitglied_id",
   "mitglied_nr",
-  "mitglied_nr_raw"
+  "mitglied_nr_raw",
+  "mitglied_hash"
  ],
  "fields": [
   {
@@ -28,9 +29,15 @@
    "fieldtype": "Int",
    "label": "Mitglied Nummer Raw",
    "read_only": 1
+  },
+  {
+   "fieldname": "mitglied_hash",
+   "fieldtype": "Data",
+   "label": "Mitglied Hash",
+   "read_only": 1
   }
  ],
- "modified": "2024-02-15 09:26:45.490577",
+ "modified": "2025-04-14 14:27:10.868745",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitglied Main Naming",
