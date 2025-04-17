@@ -47,7 +47,8 @@ def read_csv(site_name, file_name, limit=False, bench='frappe'):
                 error_in_creation = create_mitgliedschaft(row)
                 if error_in_creation:
                     error_list.append(error_in_creation)
-            # else:
+            else:
+                print("Skip")
             #     update_mitgliedschaft(row)
             print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
             count += 1

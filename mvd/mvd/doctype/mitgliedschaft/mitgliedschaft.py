@@ -182,7 +182,8 @@ class Mitgliedschaft(Document):
                 self.language = 'de'
 
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
-            sp_updater(self)
+            if not self.asloca_id:
+                sp_updater(self)
         
         # Hotfix ISS-2024-60 / #942
         if not self.zuzug and zuzugsdatum:
