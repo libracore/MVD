@@ -26,10 +26,12 @@ def flush_queue(limit=100):
     for _queue in queues:
         queue = frappe.get_doc("Service Platform Queue", _queue.name)
         if queue.mv_mitgliedschaft in block_list:
-            queue.add_comment('Comment', text='Update ist durch fehlgeschlagenes Update {0} blockiert.'.format(block_list[queue.mv_mitgliedschaft]))
+            if queue.error_count < 3:
+                queue.add_comment('Comment', text='Update ist durch fehlgeschlagenes Update {0} blockiert.'.format(block_list[queue.mv_mitgliedschaft]))
         else:
             if queue.status == 'Failed' and queue.bad_request >= 1:
-                queue.add_comment('Comment', text='Update wird ignoriert. Vorgängiger BadRequest')
+                if queue.error_count < 3:
+                    queue.add_comment('Comment', text='Update wird ignoriert. Vorgängiger BadRequest')
                 if queue.mv_mitgliedschaft not in block_list:
                     block_list[queue.mv_mitgliedschaft] = queue.name
             else:
