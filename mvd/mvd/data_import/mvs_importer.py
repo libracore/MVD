@@ -21,7 +21,13 @@ hm = {
     'strasse': 'strasse',
     'plz': 'plz',
     'ort': 'ort',
-    'language': 'language'
+    'language': 'language',
+    'zusatz_adresse': 'zusatz',
+    'zusatz_firma': 'zusatz_firma',
+    'nachname_2': 'nachname_2',
+    'anrede_2': 'anrede_2',
+    'vorname_2': 'vorname_2',
+    'nachname_2': 'nachname_2'
 }
 
 def read_csv(site_name, file_name, limit=False, bench='frappe'):
@@ -73,6 +79,12 @@ def create_mitgliedschaft(data):
         str_list = get_value(data, 'strasse').split(" ")
         return str_list[len(str_list) - 1]
     
+    def check_solidarmitglied(data):
+        if get_value(data, 'nachname_2') and get_value(data, 'nachname_2') != '':
+            return 1
+        else:
+            return 0
+    
     try:
         mitgliedschaft = frappe.get_doc({
             "doctype": "Mitgliedschaft",
@@ -83,7 +95,7 @@ def create_mitgliedschaft(data):
             "eintrittsdatum": "1900-01-01",
             "kundentyp": get_kundentyp(data),
             "firma": get_value(data, 'firmenname'),
-            "zusatz_firma": '',
+            "zusatz_firma": get_value(data, 'zusatz_firma'),
             "anrede_c": get_value(data, 'anrede_c'),
             "nachname_1": get_value(data, 'nachname_1'),
             "vorname_1": get_value(data, 'vorname_1'),
@@ -91,7 +103,7 @@ def create_mitgliedschaft(data):
             "tel_m_1": '',
             "tel_g_1": '',
             "e_mail_1": '',
-            "zusatz_adresse": '',
+            "zusatz_adresse": get_value(data, 'zusatz_adresse'),
             "strasse": get_strasse(data),
             "nummer": get_nummer(data),
             "nummer_zu": '',
@@ -100,7 +112,11 @@ def create_mitgliedschaft(data):
             "plz": get_value(data, 'plz'),
             "ort": get_value(data, 'ort'),
             "asloca_id": get_value(data, 'asloca_id'),
-            "region_manuell": 1
+            "region_manuell": 1,
+            'hat_solidarmitglied': check_solidarmitglied(data),
+            'anrede_2': get_value(data, 'anrede_2'),
+            'vorname_2': get_value(data, 'vorname_2'),
+            'nachname_2': get_value(data, 'nachname_2'),
         })
         mitgliedschaft.insert(ignore_permissions=True)
 
