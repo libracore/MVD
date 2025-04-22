@@ -69,30 +69,32 @@ def spenden_versand(doc):
                                                                                                                                                 region=region, \
                                                                                                                                                 keine_gesperrten_adressen=keine_gesperrten_adressen, \
                                                                                                                                                 keine_kuendigungen=keine_kuendigungen), as_dict=True)
+        if int(doc.data_only) != 1:
+            for mitgliedschaft_name in mitgliedschaften:
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft_name.name)
+                sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+                fr = frappe.get_doc({
+                    "doctype": "Fakultative Rechnung",
+                    "mv_mitgliedschaft": mitgliedschaft.name,
+                    'due_date': add_days(today(), 30),
+                    'sektion_id': str(sektion.name),
+                    'sektions_code': str(sektion.sektion_id) or '00',
+                    'sales_invoice': '',
+                    'typ': 'Spende (Spendenversand)',
+                    'betrag': 0.00,
+                    'posting_date': today(),
+                    'company': sektion.company,
+                    'druckvorlage': '',
+                    'spenden_versand': doc.name
+                })
+                fr.insert(ignore_permissions=True)
+                
+                fr.submit()
+                fr_list.append(fr.name)
             
-        for mitgliedschaft_name in mitgliedschaften:
-            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft_name.name)
-            sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
-            fr = frappe.get_doc({
-                "doctype": "Fakultative Rechnung",
-                "mv_mitgliedschaft": mitgliedschaft.name,
-                'due_date': add_days(today(), 30),
-                'sektion_id': str(sektion.name),
-                'sektions_code': str(sektion.sektion_id) or '00',
-                'sales_invoice': '',
-                'typ': 'Spende (Spendenversand)',
-                'betrag': 0.00,
-                'posting_date': today(),
-                'company': sektion.company,
-                'druckvorlage': '',
-                'spenden_versand': doc.name
-            })
-            fr.insert(ignore_permissions=True)
-            
-            fr.submit()
-            fr_list.append(fr.name)
-        
-        create_sammel_csv(fr_list, doc)
+            create_sammel_csv(fr_list, doc)
+        else:
+            create_sammel_csv(mitgliedschaften, doc, data_only=True)
         
         doc.status = 'Abgeschlossen'
         doc.save()
@@ -107,8 +109,8 @@ def spenden_versand(doc):
                 fr.cancel()
                 fr.delete()
 
-def create_sammel_csv(fr_list, spenden_versand):
-    csv_data = get_csv_data(fr_list)
+def create_sammel_csv(fr_list, spenden_versand, data_only=False):
+    csv_data = get_csv_data(fr_list, data_only)
 
     csv_file = make_csv(csv_data)
 
@@ -125,7 +127,7 @@ def create_sammel_csv(fr_list, spenden_versand):
 
     return
 
-def get_csv_data(fr_list):
+def get_csv_data(fr_list, data_only):
     data = []
     titel = [
         'firma',
@@ -162,8 +164,11 @@ def get_csv_data(fr_list):
     data.append(titel)
 
     for fr_doc in fr_list:
-        fr = frappe.get_doc("Fakultative Rechnung", fr_doc)
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", fr.mv_mitgliedschaft)
+        if not data_only:
+            fr = frappe.get_doc("Fakultative Rechnung", fr_doc)
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", fr.mv_mitgliedschaft)
+        else:
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", fr_doc.name)
         
         # adressdaten
         strasse = mitgliedschaft.strasse or ''
@@ -210,9 +215,9 @@ def get_csv_data(fr_list):
         betrag_1 = 0.00
         mahnung = 0
         zeilen_art = 'R'
-        ref_nr_1 = fr.qrr_referenz
-        kz_1 = fr.qrr_referenz
-        faktura_nr = fr.name
+        ref_nr_1 = fr.qrr_referenz if not data_only else '---'
+        kz_1 = fr.qrr_referenz if not data_only else '---'
+        faktura_nr = fr.name if not data_only else '---'
             
         _data = [
             firma,
