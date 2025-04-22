@@ -32,7 +32,9 @@
   "pwd_reset_template",
   "pwd_reset_sender",
   "section_mitglieder_hash",
-  "hash_salt"
+  "hash_salt",
+  "section_payrexx",
+  "webhooks_token"
  ],
  "fields": [
   {
@@ -193,10 +195,20 @@
    "fieldname": "hash_salt",
    "fieldtype": "Data",
    "label": "Hash Salt"
+  },
+  {
+   "fieldname": "section_payrexx",
+   "fieldtype": "Section Break",
+   "label": "Payrexx"
+  },
+  {
+   "fieldname": "webhooks_token",
+   "fieldtype": "Data",
+   "label": "Webhooks Token"
   }
  ],
  "issingle": 1,
- "modified": "2025-03-25 13:35:35.105976",
+ "modified": "2025-04-22 15:19:02.443404",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Settings",

@@ -203,3 +203,8 @@ def get_md_member_rates():
                                 WHERE tpr.applicable_for = 'Customer Group'
                                 AND (tpr.valid_upto IS NULL OR NOT tpr.valid_upto <= CURDATE());""", as_dict=True)
     return {item['item_code']: item for item in item_member_rates}
+
+@frappe.whitelist(allow_guest=True)
+def payrexx_webhook(**kwargs):
+    from mvd.mvd.doctype.payrexxwebhooks.payrexxwebhooks import process_webhook
+    process_webhook(kwargs)
