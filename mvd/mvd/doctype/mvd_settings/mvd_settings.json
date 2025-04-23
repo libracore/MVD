@@ -34,7 +34,9 @@
   "section_mitglieder_hash",
   "hash_salt",
   "section_payrexx",
-  "webhooks_token"
+  "webhooks_token",
+  "check_payrexx_ip",
+  "payrexx_ip"
  ],
  "fields": [
   {
@@ -205,10 +207,23 @@
    "fieldname": "webhooks_token",
    "fieldtype": "Data",
    "label": "Webhooks Token"
+  },
+  {
+   "default": "0",
+   "fieldname": "check_payrexx_ip",
+   "fieldtype": "Check",
+   "label": "Check Payrexx IPs"
+  },
+  {
+   "depends_on": "eval_doc.check_payrexx_ip",
+   "fieldname": "payrexx_ip",
+   "fieldtype": "Table",
+   "label": "Allowed IPs",
+   "options": "Payrexx IP"
   }
  ],
  "issingle": 1,
- "modified": "2025-04-22 15:19:02.443404",
+ "modified": "2025-04-23 12:29:35.695256",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Settings",
