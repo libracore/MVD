@@ -32,7 +32,11 @@
   "pwd_reset_template",
   "pwd_reset_sender",
   "section_mitglieder_hash",
-  "hash_salt"
+  "hash_salt",
+  "section_payrexx",
+  "webhooks_token",
+  "check_payrexx_ip",
+  "payrexx_ip"
  ],
  "fields": [
   {
@@ -193,10 +197,33 @@
    "fieldname": "hash_salt",
    "fieldtype": "Data",
    "label": "Hash Salt"
+  },
+  {
+   "fieldname": "section_payrexx",
+   "fieldtype": "Section Break",
+   "label": "Payrexx"
+  },
+  {
+   "fieldname": "webhooks_token",
+   "fieldtype": "Data",
+   "label": "Webhooks Token"
+  },
+  {
+   "default": "0",
+   "fieldname": "check_payrexx_ip",
+   "fieldtype": "Check",
+   "label": "Check Payrexx IPs"
+  },
+  {
+   "depends_on": "eval_doc.check_payrexx_ip",
+   "fieldname": "payrexx_ip",
+   "fieldtype": "Table",
+   "label": "Allowed IPs",
+   "options": "Payrexx IP"
   }
  ],
  "issingle": 1,
- "modified": "2025-03-25 13:35:35.105976",
+ "modified": "2025-04-23 12:29:35.695256",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Settings",

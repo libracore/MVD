@@ -204,7 +204,6 @@ def get_mvd_member_rates():
                                 AND (tpr.valid_upto IS NULL OR NOT tpr.valid_upto <= CURDATE());""", as_dict=True)
     return {item['item_code']: item for item in item_member_rates}
 
-
 @frappe.whitelist()
 def get_member_annual_invoice(id):
     invoices = frappe.get_all(
@@ -238,3 +237,9 @@ def get_annual_invoice_pdf(invoice_name=None, signature=False):
         return get_pdf_as_guest(doctype="Sales Invoice", name=invoice_name, format="Automatisierte Mitgliedschaftsrechnung", key=signature)
     except Exception as err:
         return ['500 Internal Server Error', str(err)]
+
+@frappe.whitelist(allow_guest=True)
+def payrexx_webhook(**kwargs):
+    from mvd.mvd.doctype.payrexxwebhooks.payrexxwebhooks import process_webhook
+    process_webhook(kwargs)
+

@@ -7,9 +7,10 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.data import now
 import random
+import hashlib
 
 class MitgliedMainNaming(Document):
-    def set_new_id(self, existing_nr):
+    def set_new_id(self, existing_nr, mitglied_hash=None):
         if not self.mitglied_id:
             randome_hash = "{0} {1}".format(str(hash(now())), str(random.random()))
             create_new_id = frappe.db.sql("""INSERT INTO `MitgliedMainId` (`id`,`name`) VALUES(0,'{0}');""".format(randome_hash))
@@ -19,6 +20,22 @@ class MitgliedMainNaming(Document):
             if existing_nr:
                 self.mitglied_nr = existing_nr
                 self.mitglied_nr_raw = int(existing_nr.replace("MV", ""))
+            
+            if mitglied_hash:
+                self.mitglied_hash = mitglied_hash
+            
+            if not self.mitglied_hash:
+                salt = frappe.get_doc("MVD Settings", "MVD Settings").hash_salt or ''
+                txt = "{0}{1}".format(self.mitglied_id, salt)
+                
+                # Create a SHA-256 hash
+                hash_object = hashlib.sha256(txt.encode())
+                full_hash = hash_object.hexdigest()
+                
+                # Truncate to the last 10 characters
+                truncated_hash = full_hash[:10]
+                
+                self.mitglied_hash = truncated_hash
 
     def set_new_number(self):
         if not self.mitglied_nr_raw:
@@ -30,7 +47,7 @@ class MitgliedMainNaming(Document):
             mitglied_nr = "MV{0}".format(str(new_nr).zfill(8))
             self.mitglied_nr = mitglied_nr
 
-def create_new_id(new_nr=False, existing_nr=False):
+def create_new_id(new_nr=False, existing_nr=False, mitglied_hash=None):
     if new_nr and existing_nr:
         return {
             'error': True,
@@ -47,12 +64,12 @@ def create_new_id(new_nr=False, existing_nr=False):
     
     if not existing_nr:
         # create new ID
-        new_mitglied_main_naming.set_new_id(existing_nr)
+        new_mitglied_main_naming.set_new_id(existing_nr, mitglied_hash)
     else:
         try:
             if "MV" in existing_nr:
                 # create new ID with existing_nr
-                new_mitglied_main_naming.set_new_id(existing_nr)
+                new_mitglied_main_naming.set_new_id(existing_nr, mitglied_hash)
             else:
                 return {
                     'error': True,
@@ -77,7 +94,8 @@ def create_new_id(new_nr=False, existing_nr=False):
 
     return {
         'id': new_mitglied_main_naming.mitglied_id,
-        'nr': new_mitglied_main_naming.mitglied_nr
+        'nr': new_mitglied_main_naming.mitglied_nr,
+        'mitglied_hash': new_mitglied_main_naming.mitglied_hash
     }
 
 def create_new_number(id=None):
@@ -122,7 +140,8 @@ def create_new_number(id=None):
 
         return {
             'id': mmn.mitglied_id,
-            'nr': mmn.mitglied_nr
+            'nr': mmn.mitglied_nr,
+            'mitglied_hash': mmn.mitglied_hash
         }
 
 '''
@@ -196,3 +215,64 @@ def reset_mitglied_main_naming(delete=True):
         frappe.log_error("{0}".format(errors), "reset_mitglied_main_naming")
         print("Achtung Error Log beachten!")
     print("Done")
+
+
+def initial_hash_calc():
+    # mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming.initial_hash_calc
+    
+    salt = frappe.get_doc("MVD Settings", "MVD Settings").hash_salt or ''
+    # alle ausser interessenten
+    # nur den neuesten Datensatz pro Mitglied-Nr
+    print("Mitglieder")
+    mmns = frappe.db.sql("""SELECT *
+                            FROM (
+                                SELECT *,
+                                    ROW_NUMBER() OVER (PARTITION BY `mitglied_nr` ORDER BY `creation` DESC) AS `rn`
+                                FROM `tabMitglied Main Naming`
+                                WHERE `mitglied_nr_raw` != 0
+                            ) AS `sub`
+                            WHERE `rn` = 1
+                            ORDER BY `creation` DESC;
+                         """, as_dict=True)
+    total = len(mmns)
+    loop = 1
+    for mmn in mmns:
+        if not mmn.mitglied_hash:
+            txt = "{0}{1}".format(mmn.mitglied_id, salt)
+            # Create a SHA-256 hash
+            hash_object = hashlib.sha256(txt.encode())
+            full_hash = hash_object.hexdigest()
+            
+            # Truncate to the last 10 characters
+            truncated_hash = full_hash[:10]
+            
+            frappe.db.sql("""UPDATE `tabMitglied Main Naming` SET `mitglied_hash` = '{0}' WHERE `name` = '{1}'""".format(truncated_hash, mmn.name))
+            frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `mitglied_hash` = '{0}' WHERE `mitglied_nr` = '{1}'""".format(truncated_hash, mmn.mitglied_nr))
+            frappe.db.commit()
+        print("M: {0} von {1}".format(loop, total))
+        loop += 1
+    
+    # nur interessenten
+    print("Interessenten")
+    mmns = frappe.db.sql("""SELECT *
+                            FROM `tabMitglied Main Naming`
+                            WHERE `mitglied_nr_raw` = 0
+                            ORDER BY `creation` DESC;
+                         """, as_dict=True)
+    total = len(mmns)
+    loop = 1
+    for mmn in mmns:
+        if not mmn.mitglied_hash:
+            txt = "{0}{1}".format(mmn.mitglied_id, salt)
+            # Create a SHA-256 hash
+            hash_object = hashlib.sha256(txt.encode())
+            full_hash = hash_object.hexdigest()
+            
+            # Truncate to the last 10 characters
+            truncated_hash = full_hash[:10]
+            
+            frappe.db.sql("""UPDATE `tabMitglied Main Naming` SET `mitglied_hash` = '{0}' WHERE `name` = '{1}'""".format(truncated_hash, mmn.name))
+            frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `mitglied_hash` = '{0}' WHERE `name` = '{1}'""".format(truncated_hash, mmn.mitglied_id))
+            frappe.db.commit()
+        print("I: {0} von {1}".format(loop, total))
+        loop += 1
