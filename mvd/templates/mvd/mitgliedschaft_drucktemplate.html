@@ -235,6 +235,7 @@
             {% if seite.ausweis_beidseitig == 'beidseitig' %}
                 <div class="page-break"></div>
                 <div id='ausweis-rueckseite'>{{ sektion.ausweis_rueckseite }}</div>
+                <br>
                 <div id="ausweis-rueckseite-zusatz">Karte an der Perforation herauslösen</div>
                 {% if seite.inhalt_rueckseite and seite.inhalt_rueckseite != '<div><br></div>' %}
                     <br><br><div id="content-{{seite.idx }}">{{ replace_mv_keywords(seite.inhalt_rueckseite, mitgliedschaft, sinv=sales_invoice) }}</div>
