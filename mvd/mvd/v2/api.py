@@ -124,8 +124,8 @@ def get_mvd_shop_all_items():
     This function performs the following steps:
     1. Retrieves all items from the 'tabItem' table that are not marked as 'disabled' (disabled = 0).
     2. For each item, it sets default values for `rate` and `member_rate` to `NULL` (as placeholders).
-    3. Retrieves the latest item rates from the `tabItem Price` table using the `get_md_rates()` function.
-    4. Retrieves member-specific pricing for items from the `tabPricing Rule` table using the `get_md_member_rates()` function.
+    3. Retrieves the latest item rates from the `tabItem Price` table using the `get_mvd_rates()` function.
+    4. Retrieves member-specific pricing for items from the `tabPricing Rule` table using the `get_mvd_member_rates()` function.
     5. Returns a list of items with the necessary data, which can include `rate` and `member_rate` if they exist.
 
     Returns:
@@ -152,8 +152,8 @@ def get_mvd_shop_all_items():
                                 FROM `tabItem` 
                                 WHERE `disabled` = 0 -- später brauchen wir noch webEnabled
                             ORDER BY `sektion_id`, `weightage` ASC;""", as_dict=True)
-    item_rates = get_md_rates()
-    item_member_rates = get_md_member_rates()
+    item_rates = get_mvd_rates()
+    item_member_rates = get_mvd_member_rates()
 
     for item in items:
         if item.item_code in item_rates:  # Update rate if available
@@ -163,7 +163,7 @@ def get_mvd_shop_all_items():
 
     return items
 
-def get_md_rates():
+def get_mvd_rates():
     """
     Fetches the latest valid price list rates for each item from the 'tabItem Price' table. For this 
     the function retrieves the most recent `price_list_rate` for each `item_code`.
@@ -183,7 +183,7 @@ def get_md_rates():
                                 );""", as_dict=True)
     return {item['item_code']: item for item in item_rates}
 
-def get_md_member_rates():
+def get_mvd_member_rates():
     """
     Fetches the member-specific pricing rates for each `item_code` from the 'tabPricing Rule' table.
 
