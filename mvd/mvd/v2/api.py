@@ -221,11 +221,14 @@ def get_member_annual_invoice(id):
     base_url = "{0}://{1}".format(scheme, host)
 
     for sinv in invoices:
-        signature = frappe.get_doc("Sales Invoice", sinv.name).get_signature()
-        sinv['pdf_link'] = "{0}/api/method/mvd.mvd.v2.api.get_annual_invoice_pdf?invoice_name={1}&signature={2}".format(
-            base_url, sinv['name'], signature
-        )
-        sinv.pop('name', None)
+        if sinv['status'] != 'Paid':
+            signature = frappe.get_doc("Sales Invoice", sinv.name).get_signature()
+            sinv['pdf_link'] = "{0}/api/method/mvd.mvd.v2.api.get_annual_invoice_pdf?invoice_name={1}&signature={2}".format(
+                base_url, sinv['name'], signature
+            )
+            sinv.pop('name', None)
+        else:
+            sinv['pdf_link'] = None
     return invoices
 
 @frappe.whitelist(allow_guest=True)

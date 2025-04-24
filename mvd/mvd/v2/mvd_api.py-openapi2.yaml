@@ -116,6 +116,7 @@ paths:
                   format: float
                 pdf_link:
                   type: string
+                  description: PDF link to the invoice (null if status is'Paid')
         '404':
           description: Membership not found or no invoices
         '500':
