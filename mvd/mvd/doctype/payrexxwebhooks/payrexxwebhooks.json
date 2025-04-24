@@ -1,9 +1,25 @@
 {
+ "autoname": "field:transaction_id",
  "creation": "2025-04-22 14:22:00.149658",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "transaction_id",
+  "status",
+  "amount",
+  "currency",
+  "transaction_datetime",
+  "title",
+  "first_name",
+  "last_name",
+  "company",
+  "street",
+  "plz",
+  "place",
+  "country",
+  "phone",
+  "email",
   "json"
  ],
  "fields": [
@@ -11,9 +27,88 @@
    "fieldname": "json",
    "fieldtype": "Code",
    "label": "JSON"
+  },
+  {
+   "fieldname": "transaction_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Transaction ID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "precision": "2"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Data",
+   "label": "Currency"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title"
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name"
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "label": "Company"
+  },
+  {
+   "fieldname": "street",
+   "fieldtype": "Data",
+   "label": "Street"
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "label": "PLZ"
+  },
+  {
+   "fieldname": "place",
+   "fieldtype": "Data",
+   "label": "Place"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Data",
+   "label": "Country"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "transaction_datetime",
+   "fieldtype": "Data",
+   "label": "Transaction Datetime"
   }
  ],
- "modified": "2025-04-22 14:22:00.149658",
+ "modified": "2025-04-24 14:22:51.536354",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "PayrexxWebhooks",
