@@ -50,9 +50,9 @@ class PayrexxWebhooks(Document):
 
             if missing_fields: #log error
                 log_message = (
-                    f"Missing or invalid fields in PayrexxWebhook\n"
-                    f"Transaction ID: {transaction_id}\n"
-                    f"Missing Fields: {', '.join(missing_fields)}"
+                    "Missing or invalid fields in PayrexxWebhook\n"
+                    "Transaction ID: {0}\n"
+                    "Missing Fields: {1}".format(transaction_id, ', '.join(missing_fields))
                 )
                 frappe.log_error("PayrexxWebhook Missing Fields", log_message)
 
