@@ -447,7 +447,7 @@ def get_mitglied_from_mail(**api_request):
                                             `mitglied_nr`
                                         FROM `tabMitgliedschaft`
                                         WHERE `{0}` = '{1}'
-                                        AND `status_c` != 'Inaktiv'
+                                        AND `status_c` NOT IN ('Inaktiv', 'Interessent*in')
                                         ORDER BY
                                         CASE
                                             WHEN `status_c` = 'Regulär' THEN 1
