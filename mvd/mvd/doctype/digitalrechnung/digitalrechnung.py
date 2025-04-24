@@ -90,16 +90,21 @@ def digitalrechnung_mapper(mitglied):
             dr_doc.sektion_id = mitglied.sektion_id
         
         if cint(mitglied.digitalrechnung) == 1:
-            dr_doc.set_opt_in()
+            if dr_doc.opt_out:
+                dr_doc.set_opt_in()
         else:
-            dr_doc.set_opt_out()
+            if dr_doc.opt_in:
+                dr_doc.set_opt_out()
         
         if dr_doc.hash != mitglied.mitglied_hash:
             dr_doc.hash = mitglied.mitglied_hash
         
         dr_doc.changed_by_sektion = 1
         
-        dr_doc.save(ignore_permissions=True)
+        try:
+            dr_doc.save(ignore_permissions=True)
+        except Exception as err:
+            frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}".format(mitglied.name, dr_doc.name), 'Digitalrechnung Update')
 
         return dr_doc.hash
     
