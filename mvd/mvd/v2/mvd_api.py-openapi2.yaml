@@ -80,6 +80,84 @@ paths:
           description: Invalid reset hash
         '500':
           description: Internal Server Error
+  /mvd.mvd.v2.api.get_member_annual_invoice:
+    get:
+      summary: Get Member Annual Invoice
+      description: Returns a list of annual membership invoices for a given membership ID.
+      parameters:
+        - name: id
+          in: query
+          description: ID of the membership (mv_mitgliedschaft)
+          required: true
+          type: string
+          x-example: 435090
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                mitgliedschafts_jahr:
+                  type: integer
+                grand_total:
+                  type: number
+                  format: float
+                due_date:
+                  type: string
+                  format: date
+                status:
+                  type: string
+                payment_reminder_level:
+                  type: integer
+                outstanding_amount:
+                  type: number
+                  format: float
+                pdf_link:
+                  type: string
+                  description: PDF link to the invoice (null if status is'Paid')
+        '404':
+          description: Membership not found or no invoices
+        '500':
+          description: Internal Server Error
+  /mvd.mvd.v2.api.get_mvd_shop_all_items:
+    get:
+      summary: Get All Shop Items
+      description: |
+        Retrieves a list of all enabled shop items, including item metadata, prices, and member-specific rates (if available).
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                item_code:
+                  type: string
+                sektion_id:
+                  type: string
+                item_name:
+                  type: string
+                item_group:
+                  type: string
+                description:
+                  type: string
+                show_in_website:
+                  type: boolean
+                  description: 0 or 1
+                rate:
+                  type: number
+                  format: float
+                member_rate:
+                  type: number
+                  format: float
+                image:
+                  type: string
+        '500':
+          description: Internal Server Error
+  
 securityDefinitions:
   tokenAuth:
     type: apiKey
