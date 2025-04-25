@@ -72,32 +72,34 @@ def spenden_versand(doc):
         if int(doc.data_only) != 1:
             commit_count = 1
             for mitgliedschaft_name in mitgliedschaften:
-                mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft_name.name)
-                sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
-                fr = frappe.get_doc({
-                    "doctype": "Fakultative Rechnung",
-                    "mv_mitgliedschaft": mitgliedschaft.name,
-                    'due_date': add_days(today(), 30),
-                    'sektion_id': str(sektion.name),
-                    'sektions_code': str(sektion.sektion_id) or '00',
-                    'sales_invoice': '',
-                    'typ': 'Spende (Spendenversand)',
-                    'betrag': 0.00,
-                    'posting_date': today(),
-                    'company': sektion.company,
-                    'druckvorlage': '',
-                    'spenden_versand': doc.name
-                })
-                fr.insert(ignore_permissions=True)
-                
-                fr.submit()
-                fr_list.append(fr.name)
+                already_exists = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabFakultative Rechnung` WHERE `spenden_versand` = '{0}' AND `mv_mitgliedschaft` = '{1}'""".format(doc.name, mitgliedschaft_name.name), as_dict=True)[0].qty
+                if already_exists < 1:
+                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft_name.name)
+                    sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+                    fr = frappe.get_doc({
+                        "doctype": "Fakultative Rechnung",
+                        "mv_mitgliedschaft": mitgliedschaft.name,
+                        'due_date': add_days(today(), 30),
+                        'sektion_id': str(sektion.name),
+                        'sektions_code': str(sektion.sektion_id) or '00',
+                        'sales_invoice': '',
+                        'typ': 'Spende (Spendenversand)',
+                        'betrag': 0.00,
+                        'posting_date': today(),
+                        'company': sektion.company,
+                        'druckvorlage': '',
+                        'spenden_versand': doc.name
+                    })
+                    fr.insert(ignore_permissions=True)
+                    
+                    fr.submit()
+                    fr_list.append(fr.name)
 
-                if commit_count == 50:
-                    frappe.db.commit()
-                    commit_count = 1
-                else:
-                    commit_count += 1
+                    if commit_count == 50:
+                        frappe.db.commit()
+                        commit_count = 1
+                    else:
+                        commit_count += 1
             
             frappe.db.commit()
             create_sammel_csv(fr_list, doc)
@@ -111,18 +113,6 @@ def spenden_versand(doc):
         doc.save()
         doc.add_comment('Comment', text='Fehler:<br>{0}'.format(err))
         frappe.db.commit()
-
-        if len(fr_list) > 0:
-            commit_count = 1
-            for fr_doc in fr_list:
-                fr = frappe.get_doc("Fakultative Rechnung", fr_doc)
-                fr.cancel()
-                fr.delete()
-                if commit_count == 50:
-                    frappe.db.commit()
-                    commit_count = 1
-                else:
-                    commit_count += 1
 
 def create_sammel_csv(fr_list, spenden_versand, data_only=False):
     csv_data = get_csv_data(fr_list, data_only)
