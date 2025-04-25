@@ -70,6 +70,7 @@ def spenden_versand(doc):
                                                                                                                                                 keine_gesperrten_adressen=keine_gesperrten_adressen, \
                                                                                                                                                 keine_kuendigungen=keine_kuendigungen), as_dict=True)
         if int(doc.data_only) != 1:
+            commit_count = 1
             for mitgliedschaft_name in mitgliedschaften:
                 mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft_name.name)
                 sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
@@ -91,7 +92,14 @@ def spenden_versand(doc):
                 
                 fr.submit()
                 fr_list.append(fr.name)
+
+                if commit_count == 50:
+                    frappe.db.commit()
+                    commit_count = 1
+                else:
+                    commit_count += 1
             
+            frappe.db.commit()
             create_sammel_csv(fr_list, doc)
         else:
             create_sammel_csv(mitgliedschaften, doc, data_only=True)
@@ -102,12 +110,19 @@ def spenden_versand(doc):
         doc.status = 'Fehlgeschlagen'
         doc.save()
         doc.add_comment('Comment', text='Fehler:<br>{0}'.format(err))
-        
+        frappe.db.commit()
+
         if len(fr_list) > 0:
+            commit_count = 1
             for fr_doc in fr_list:
                 fr = frappe.get_doc("Fakultative Rechnung", fr_doc)
                 fr.cancel()
                 fr.delete()
+                if commit_count == 50:
+                    frappe.db.commit()
+                    commit_count = 1
+                else:
+                    commit_count += 1
 
 def create_sammel_csv(fr_list, spenden_versand, data_only=False):
     csv_data = get_csv_data(fr_list, data_only)
