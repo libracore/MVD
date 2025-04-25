@@ -104,7 +104,7 @@ def digitalrechnung_mapper(mitglied):
         try:
             dr_doc.save(ignore_permissions=True)
         except Exception as err:
-            frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}".format(mitglied.name, dr_doc.name), 'Digitalrechnung Update')
+            frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}\nFehler: {2}".format(mitglied.name, dr_doc.name, str(err)), 'Digitalrechnung Update Failed')
 
         return dr_doc.hash
     

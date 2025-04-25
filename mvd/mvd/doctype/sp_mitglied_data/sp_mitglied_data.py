@@ -13,10 +13,13 @@ class SPMitgliedData(Document):
     pass
 
 def create_or_update_sp_mitglied_data(mitglied_nr, mitgliedschaft=None):
-    if frappe.db.exists("SP Mitglied Data", mitglied_nr):
-        update(mitglied_nr, mitgliedschaft)
-    else:
-        create(mitglied_nr, mitgliedschaft)
+    try:
+        if frappe.db.exists("SP Mitglied Data", mitglied_nr):
+            update(mitglied_nr, mitgliedschaft)
+        else:
+            create(mitglied_nr, mitgliedschaft)
+    except Exception as err:
+        frappe.log_error("Mitglied: {0}\n\nFehler: {1}".format(mitglied_nr, str(err)), 'create_or_update_sp_mitglied_data Failed')
 
 def create(mitglied_nr, mitgliedschaft):
     if not mitgliedschaft:
