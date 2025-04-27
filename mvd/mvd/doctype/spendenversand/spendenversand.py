@@ -109,6 +109,7 @@ def spenden_versand(doc, debug=False):
                 else:
                     if debug:
                         print("Skip {0}".format(mitgliedschaft_name.name))
+                        loop += 1
             
             frappe.db.commit()
             create_sammel_csv(fr_list, doc)
