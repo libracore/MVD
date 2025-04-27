@@ -34,7 +34,7 @@ class Spendenversand(Document):
         else:
             return "Die SQL Abfrage muss aktiviert sein sowie auch eine entsprechende hinterlegt."
 
-def spenden_versand(doc):
+def spenden_versand(doc, debug=False):
     fr_list = []
     try:
         if cint(doc.own_sql_enabled) == 1 and doc.own_sql:
@@ -71,6 +71,8 @@ def spenden_versand(doc):
                                                                                                                                                 keine_kuendigungen=keine_kuendigungen), as_dict=True)
         if int(doc.data_only) != 1:
             commit_count = 1
+            loop = 1
+            total = len(mitgliedschaften)
             already_exists = frappe.db.sql("""SELECT `mv_mitgliedschaft` FROM `tabFakultative Rechnung` WHERE `spenden_versand` = '{0}' AND `docstatus` = 1""".format(doc.name), as_list=True)
             for mitgliedschaft_name in mitgliedschaften:
                 if [mitgliedschaft_name.name] not in already_exists:
@@ -100,8 +102,13 @@ def spenden_versand(doc):
                         commit_count = 1
                     else:
                         commit_count += 1
+                    
+                    if debug:
+                        print("{0} of {1}".format(loop, total))
+                        loop += 1
                 else:
-                    print("Skip {0}".format(mitgliedschaft_name.name))
+                    if debug:
+                        print("Skip {0}".format(mitgliedschaft_name.name))
             
             frappe.db.commit()
             create_sammel_csv(fr_list, doc)
