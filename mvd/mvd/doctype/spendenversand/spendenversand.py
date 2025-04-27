@@ -71,9 +71,9 @@ def spenden_versand(doc):
                                                                                                                                                 keine_kuendigungen=keine_kuendigungen), as_dict=True)
         if int(doc.data_only) != 1:
             commit_count = 1
+            already_exists = frappe.db.sql("""SELECT `mv_mitgliedschaft` FROM `tabFakultative Rechnung` WHERE `spenden_versand` = '{0}' AND `docstatus` = 1""".format(doc.name), as_list=True)
             for mitgliedschaft_name in mitgliedschaften:
-                already_exists = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabFakultative Rechnung` WHERE `spenden_versand` = '{0}' AND `mv_mitgliedschaft` = '{1}'""".format(doc.name, mitgliedschaft_name.name), as_dict=True)[0].qty
-                if already_exists < 1:
+                if [mitgliedschaft_name.name] not in already_exists:
                     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft_name.name)
                     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
                     fr = frappe.get_doc({
@@ -100,6 +100,8 @@ def spenden_versand(doc):
                         commit_count = 1
                     else:
                         commit_count += 1
+                else:
+                    print("Skip {0}".format(mitgliedschaft_name.name))
             
             frappe.db.commit()
             create_sammel_csv(fr_list, doc)
