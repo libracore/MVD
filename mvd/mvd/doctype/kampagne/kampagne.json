@@ -14,13 +14,15 @@
   "anrede",
   "lang_code",
   "nl_abo",
-  "quelle",
-  "ip",
-  "mitglied",
   "strasse",
   "strasse_nummer",
   "pledge_anz",
-  "per_post"
+  "per_post",
+  "section_references",
+  "mitglied",
+  "section_technical_stuff",
+  "quelle",
+  "ip"
  ],
  "fields": [
   {
@@ -117,9 +119,19 @@
    "fieldname": "per_post",
    "fieldtype": "Check",
    "label": "Bogen per Post"
+  },
+  {
+   "fieldname": "section_references",
+   "fieldtype": "Section Break",
+   "label": "Verkn\u00fcpfungen"
+  },
+  {
+   "fieldname": "section_technical_stuff",
+   "fieldtype": "Section Break",
+   "label": "Technisches"
   }
  ],
- "modified": "2025-05-05 16:45:56.985191",
+ "modified": "2025-05-05 16:49:12.395163",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",
