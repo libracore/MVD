@@ -16,7 +16,11 @@
   "nl_abo",
   "quelle",
   "ip",
-  "mitglied"
+  "mitglied",
+  "strasse",
+  "strasse_nummer",
+  "pledge_anz",
+  "per_post"
  ],
  "fields": [
   {
@@ -92,9 +96,30 @@
    "fieldname": "mitglied",
    "fieldtype": "Data",
    "label": "Mitglied"
+  },
+  {
+   "fieldname": "strasse",
+   "fieldtype": "Data",
+   "label": "Strasse"
+  },
+  {
+   "fieldname": "strasse_nummer",
+   "fieldtype": "Data",
+   "label": "Strasse Hausnummer"
+  },
+  {
+   "fieldname": "pledge_anz",
+   "fieldtype": "Int",
+   "label": "Pledge Anz."
+  },
+  {
+   "default": "0",
+   "fieldname": "per_post",
+   "fieldtype": "Check",
+   "label": "Bogen per Post"
   }
  ],
- "modified": "2025-03-25 10:28:55.398886",
+ "modified": "2025-05-05 16:45:56.985191",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",
