@@ -128,6 +128,12 @@ def get_data():
                     "description": _("Guthabenübersicht"),
                     "doctype": "Mitgliedschaft",
                     "is_query_report": True
+                },
+                {
+                    "type": "doctype",
+                    "name": "PayrexxWebhooks",
+                    "label": _("PayrexxWebhooks"),
+                    "description": _("PayrexxWebhooks")
                 }
             ]
         },
@@ -234,6 +240,24 @@ def get_data():
                     "name": "MW Export",
                     "label": _("M+W Export"),
                     "description": _("M+W Export")
+                }
+            ]
+        },
+                {
+            "label": _("Kampagnen-Sites"),
+            "icon": "fa fa-cog",
+            "items": [
+                {
+                    "type": "doctype",
+                    "name": "Kampagne",
+                    "label": _("Kampagne"),
+                    "description": _("Kampagne")
+                },
+                {
+                    "type": "doctype",
+                    "name": "PayrexxWebhooks",
+                    "label": _("PayrexxWebhooks"),
+                    "description": _("PayrexxWebhooks")
                 }
             ]
         },
