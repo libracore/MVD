@@ -196,7 +196,8 @@
   "digitalrechnung_hash",
   "mitglied_hash",
   "deleted_by_admin",
-  "web_login_user_created"
+  "web_login_user_created",
+  "asloca_id"
  ],
  "fields": [
   {
@@ -1365,10 +1366,15 @@
    "fieldname": "mitglied_hash",
    "fieldtype": "Data",
    "label": "MitgliedHash"
+  },
+  {
+   "fieldname": "asloca_id",
+   "fieldtype": "Data",
+   "label": "ASLOCA-ID"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2025-03-25 09:45:38.315182",
+ "modified": "2025-04-16 12:47:37.483777",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

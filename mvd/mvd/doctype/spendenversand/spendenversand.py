@@ -34,7 +34,7 @@ class Spendenversand(Document):
         else:
             return "Die SQL Abfrage muss aktiviert sein sowie auch eine entsprechende hinterlegt."
 
-def spenden_versand(doc):
+def spenden_versand(doc, debug=False):
     fr_list = []
     try:
         if cint(doc.own_sql_enabled) == 1 and doc.own_sql:
@@ -69,30 +69,52 @@ def spenden_versand(doc):
                                                                                                                                                 region=region, \
                                                                                                                                                 keine_gesperrten_adressen=keine_gesperrten_adressen, \
                                                                                                                                                 keine_kuendigungen=keine_kuendigungen), as_dict=True)
+        if int(doc.data_only) != 1:
+            commit_count = 1
+            loop = 1
+            total = len(mitgliedschaften)
+            already_exists = frappe.db.sql("""SELECT `mv_mitgliedschaft` FROM `tabFakultative Rechnung` WHERE `spenden_versand` = '{0}' AND `docstatus` = 1""".format(doc.name), as_list=True)
+            for mitgliedschaft_name in mitgliedschaften:
+                if [mitgliedschaft_name.name] not in already_exists:
+                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft_name.name)
+                    sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+                    fr = frappe.get_doc({
+                        "doctype": "Fakultative Rechnung",
+                        "mv_mitgliedschaft": mitgliedschaft.name,
+                        'due_date': add_days(today(), 30),
+                        'sektion_id': str(sektion.name),
+                        'sektions_code': str(sektion.sektion_id) or '00',
+                        'sales_invoice': '',
+                        'typ': 'Spende (Spendenversand)',
+                        'betrag': 0.00,
+                        'posting_date': today(),
+                        'company': sektion.company,
+                        'druckvorlage': '',
+                        'spenden_versand': doc.name
+                    })
+                    fr.insert(ignore_permissions=True)
+                    
+                    fr.submit()
+                    fr_list.append(fr.name)
+
+                    if commit_count == 50:
+                        frappe.db.commit()
+                        commit_count = 1
+                    else:
+                        commit_count += 1
+                    
+                    if debug:
+                        print("{0} of {1}".format(loop, total))
+                        loop += 1
+                else:
+                    if debug:
+                        print("Skip {0}".format(mitgliedschaft_name.name))
+                        loop += 1
             
-        for mitgliedschaft_name in mitgliedschaften:
-            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft_name.name)
-            sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
-            fr = frappe.get_doc({
-                "doctype": "Fakultative Rechnung",
-                "mv_mitgliedschaft": mitgliedschaft.name,
-                'due_date': add_days(today(), 30),
-                'sektion_id': str(sektion.name),
-                'sektions_code': str(sektion.sektion_id) or '00',
-                'sales_invoice': '',
-                'typ': 'Spende (Spendenversand)',
-                'betrag': 0.00,
-                'posting_date': today(),
-                'company': sektion.company,
-                'druckvorlage': '',
-                'spenden_versand': doc.name
-            })
-            fr.insert(ignore_permissions=True)
-            
-            fr.submit()
-            fr_list.append(fr.name)
-        
-        create_sammel_csv(fr_list, doc)
+            frappe.db.commit()
+            create_sammel_csv(fr_list, doc)
+        else:
+            create_sammel_csv(mitgliedschaften, doc, data_only=True)
         
         doc.status = 'Abgeschlossen'
         doc.save()
@@ -100,15 +122,10 @@ def spenden_versand(doc):
         doc.status = 'Fehlgeschlagen'
         doc.save()
         doc.add_comment('Comment', text='Fehler:<br>{0}'.format(err))
-        
-        if len(fr_list) > 0:
-            for fr_doc in fr_list:
-                fr = frappe.get_doc("Fakultative Rechnung", fr_doc)
-                fr.cancel()
-                fr.delete()
+        frappe.db.commit()
 
-def create_sammel_csv(fr_list, spenden_versand):
-    csv_data = get_csv_data(fr_list)
+def create_sammel_csv(fr_list, spenden_versand, data_only=False):
+    csv_data = get_csv_data(fr_list, data_only)
 
     csv_file = make_csv(csv_data)
 
@@ -125,7 +142,7 @@ def create_sammel_csv(fr_list, spenden_versand):
 
     return
 
-def get_csv_data(fr_list):
+def get_csv_data(fr_list, data_only):
     data = []
     titel = [
         'firma',
@@ -162,8 +179,11 @@ def get_csv_data(fr_list):
     data.append(titel)
 
     for fr_doc in fr_list:
-        fr = frappe.get_doc("Fakultative Rechnung", fr_doc)
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", fr.mv_mitgliedschaft)
+        if not data_only:
+            fr = frappe.get_doc("Fakultative Rechnung", fr_doc)
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", fr.mv_mitgliedschaft)
+        else:
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", fr_doc.name)
         
         # adressdaten
         strasse = mitgliedschaft.strasse or ''
@@ -210,9 +230,9 @@ def get_csv_data(fr_list):
         betrag_1 = 0.00
         mahnung = 0
         zeilen_art = 'R'
-        ref_nr_1 = fr.qrr_referenz
-        kz_1 = fr.qrr_referenz
-        faktura_nr = fr.name
+        ref_nr_1 = fr.qrr_referenz if not data_only else '---'
+        kz_1 = fr.qrr_referenz if not data_only else '---'
+        faktura_nr = fr.name if not data_only else '---'
             
         _data = [
             firma,

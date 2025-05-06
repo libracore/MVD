@@ -255,6 +255,7 @@ def get_csv_data(mw_export, query=False):
                                 AND IFNULL(`m_und_w`, 0) > 0
                                 {query}""".format(mw_export=mw_export, query=query_filter), as_dict=True, debug=True)
     if len(query_data) > 0:
+        commit_loop = 1
         for entry in query_data:
             mitglied_nr = entry.mitglied_nr
             
@@ -318,5 +319,9 @@ def get_csv_data(mw_export, query=False):
             data.append(_data)
             
             frappe.db.set_value("Mitgliedschaft", entry.name, "m_und_w_export", mw_export, update_modified=False)
+            if commit_loop == 30:
+                frappe.db.commit()
+                commit_loop = 1
+        frappe.db.commit()
 
     return data

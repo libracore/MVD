@@ -40,9 +40,10 @@ class Mitgliedschaft(Document):
             else:
                 existing_nr = False
             
-            mitglied_nummer_obj = create_new_id(new_nr=new_nr, existing_nr=existing_nr)
+            mitglied_nummer_obj = create_new_id(new_nr=new_nr, existing_nr=existing_nr, mitglied_hash=self.mitglied_hash or None)
             if mitglied_nummer_obj:
                 self.mitglied_id = mitglied_nummer_obj["id"]
+                self.mitglied_hash = mitglied_nummer_obj["mitglied_hash"]
                 if not self.mitglied_nr or self.mitglied_nr == 'MV':
                     if mitglied_nummer_obj["nr"]:
                         self.mitglied_nr = mitglied_nummer_obj["nr"]
@@ -50,6 +51,19 @@ class Mitgliedschaft(Document):
                         self.mitglied_nr = 'MV'
             else:
                 frappe.throw("Die gewünschte Mitgliedschaft konnte nicht erstellt werden.")
+        else:
+            if not self.mitglied_hash:
+                mitglied_main_naming = frappe.db.sql("""
+                                                    SELECT `mitglied_hash`
+                                                    FROM `tabMitglied Main Naming`
+                                                    WHERE `mitglied_id` = {0}
+                                                    LIMIT 1
+                                                    """.format(self.mitglied_id), as_dict=True)[0].mitglied_hash or None
+                if mitglied_main_naming:
+                    self.mitglied_hash = mitglied_main_naming
+                else:
+                    frappe.log_error("Mitglied: {0}".format(self.mitglied_id), 'Missing Mitglied-Hash')
+
         return
     
     def validate(self):
@@ -168,7 +182,8 @@ class Mitgliedschaft(Document):
                 self.language = 'de'
 
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
-            sp_updater(self)
+            if not self.asloca_id:
+                sp_updater(self)
         
         # Hotfix ISS-2024-60 / #942
         if not self.zuzug and zuzugsdatum:
@@ -177,7 +192,9 @@ class Mitgliedschaft(Document):
         if self.mitglied_nr != "MV":
             # #1179
             from mvd.mvd.doctype.digitalrechnung.digitalrechnung import digitalrechnung_mapper
-            self.mitglied_hash = digitalrechnung_mapper(mitglied=self)
+            mitglied_hash = digitalrechnung_mapper(mitglied=self)
+            if self.mitglied_hash != mitglied_hash:
+                frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}".format(self.mitglied_hash, mitglied_hash), 'Unmatching Mitglied-Hash')
 
             # #1203
             from mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data import create_or_update_sp_mitglied_data

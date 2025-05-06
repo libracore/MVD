@@ -117,15 +117,15 @@ def get_item_rate(item):
     return get_item_price(item)['price']
 
 @frappe.whitelist()
-def get_md_shop_all_items():
+def get_mvd_shop_all_items():
     """
     Retrieves a list of all enabled items from the 'tabItem' table along with their associated pricing and member rates.
 
     This function performs the following steps:
     1. Retrieves all items from the 'tabItem' table that are not marked as 'disabled' (disabled = 0).
     2. For each item, it sets default values for `rate` and `member_rate` to `NULL` (as placeholders).
-    3. Retrieves the latest item rates from the `tabItem Price` table using the `get_md_rates()` function.
-    4. Retrieves member-specific pricing for items from the `tabPricing Rule` table using the `get_md_member_rates()` function.
+    3. Retrieves the latest item rates from the `tabItem Price` table using the `get_mvd_rates()` function.
+    4. Retrieves member-specific pricing for items from the `tabPricing Rule` table using the `get_mvd_member_rates()` function.
     5. Returns a list of items with the necessary data, which can include `rate` and `member_rate` if they exist.
 
     Returns:
@@ -152,8 +152,8 @@ def get_md_shop_all_items():
                                 FROM `tabItem` 
                                 WHERE `disabled` = 0 -- später brauchen wir noch webEnabled
                             ORDER BY `sektion_id`, `weightage` ASC;""", as_dict=True)
-    item_rates = get_md_rates()
-    item_member_rates = get_md_member_rates()
+    item_rates = get_mvd_rates()
+    item_member_rates = get_mvd_member_rates()
 
     for item in items:
         if item.item_code in item_rates:  # Update rate if available
@@ -163,7 +163,7 @@ def get_md_shop_all_items():
 
     return items
 
-def get_md_rates():
+def get_mvd_rates():
     """
     Fetches the latest valid price list rates for each item from the 'tabItem Price' table. For this 
     the function retrieves the most recent `price_list_rate` for each `item_code`.
@@ -183,7 +183,7 @@ def get_md_rates():
                                 );""", as_dict=True)
     return {item['item_code']: item for item in item_rates}
 
-def get_md_member_rates():
+def get_mvd_member_rates():
     """
     Fetches the member-specific pricing rates for each `item_code` from the 'tabPricing Rule' table.
 
@@ -203,3 +203,43 @@ def get_md_member_rates():
                                 WHERE tpr.applicable_for = 'Customer Group'
                                 AND (tpr.valid_upto IS NULL OR NOT tpr.valid_upto <= CURDATE());""", as_dict=True)
     return {item['item_code']: item for item in item_member_rates}
+
+@frappe.whitelist()
+def get_member_annual_invoice(id):
+    invoices = frappe.get_all(
+    "Sales Invoice",
+    filters={
+        "mv_mitgliedschaft": id,
+        "ist_mitgliedschaftsrechnung": 1},
+    fields=['name', 'mitgliedschafts_jahr', 'grand_total', 'due_date', 'status', 'payment_reminder_level', 'outstanding_amount']
+)
+
+    # Determine base URL from request
+    host = frappe.request.host or ""
+    scheme = frappe.request.scheme or "https"
+    base_url = "{0}://{1}".format(scheme, host)
+
+    for sinv in invoices:
+        if sinv['status'] != 'Paid':
+            signature = frappe.get_doc("Sales Invoice", sinv.name).get_signature()
+            sinv['pdf_link'] = "{0}/api/method/mvd.mvd.v2.api.get_annual_invoice_pdf?invoice_name={1}&signature={2}".format(
+                base_url, sinv['name'], signature
+            )
+            sinv.pop('name', None)
+        else:
+            sinv['pdf_link'] = None
+    return invoices
+
+@frappe.whitelist(allow_guest=True)
+def get_annual_invoice_pdf(invoice_name=None, signature=False):
+    try:
+        from erpnextswiss.erpnextswiss.guest_print import get_pdf_as_guest
+        return get_pdf_as_guest(doctype="Sales Invoice", name=invoice_name, format="Automatisierte Mitgliedschaftsrechnung", key=signature)
+    except Exception as err:
+        return ['500 Internal Server Error', str(err)]
+
+@frappe.whitelist(allow_guest=True)
+def payrexx_webhook(**kwargs):
+    from mvd.mvd.doctype.payrexxwebhooks.payrexxwebhooks import process_webhook
+    process_webhook(kwargs)
+

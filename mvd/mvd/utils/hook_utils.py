@@ -93,5 +93,4 @@ def remove_admin_and_guest_mails(self, event):
 
 def check_manual_address(sinv, event):
     if cint(sinv.manuelle_adresseingabe) == 1:
-        sinv.manuelle_adresse = '{0}\n{1} {2}\n{3}-{4} {5}'.format(sinv.ma_name, sinv.ma_strasse, sinv.ma_nummer, sinv.ma_laendercode, sinv.ma_plz, sinv.ma_ort)
-
+        sinv.manuelle_adresse = '{0}\n{1}{2} {3}\n{4}-{5} {6}'.format(sinv.ma_name, "{0}\n".format(sinv.ma_adressen_zusatzzeile) if sinv.ma_adressen_zusatzzeile else '', sinv.ma_strasse, sinv.ma_nummer, sinv.ma_laendercode, sinv.ma_plz, sinv.ma_ort)
