@@ -18,6 +18,7 @@
   "strasse_nummer",
   "pledge_anz",
   "per_post",
+  "mitglied_hash",
   "section_references",
   "mitglied",
   "section_technical_stuff",
@@ -129,9 +130,14 @@
    "fieldname": "section_technical_stuff",
    "fieldtype": "Section Break",
    "label": "Technisches"
+  },
+  {
+   "fieldname": "mitglied_hash",
+   "fieldtype": "Data",
+   "label": "MitgliedHash"
   }
  ],
- "modified": "2025-05-05 16:49:12.395163",
+ "modified": "2025-05-06 13:18:51.114610",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",
