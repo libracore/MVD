@@ -10,6 +10,7 @@
   "create_todo",
   "auto_todo_log",
   "geschlossen_am",
+  "geschlossen_durch",
   "trigger_api",
   "telefon_privat_mobil",
   "anderes_mietobjekt",
@@ -441,9 +442,15 @@
    "hidden": 1,
    "label": "MV_ERB Permission",
    "options": "MV_ERB Permission"
+  },
+  {
+   "fieldname": "geschlossen_durch",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "geschlossen_durch"
   }
  ],
- "modified": "2025-01-23 14:44:48.616044",
+ "modified": "2025-05-09 09:13:18.641823",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
