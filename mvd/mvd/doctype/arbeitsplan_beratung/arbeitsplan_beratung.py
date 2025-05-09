@@ -529,7 +529,10 @@ def get_email_from_berater_in(berater_in):
                     FROM `tabTermin Kontaktperson Multi User` 
                     WHERE `parent` = '{berater_in}';"""
                                             .format(berater_in=berater_in), as_dict=True)
-    return email[0].user
+    if len(email) > 0:
+        return email[0].user
+    else:
+        return "keine E-Mail"
 
 def get_created_by(owner):
     vor_nachname = frappe.db.sql("""SELECT `first_name`, `last_name` FROM `tabUser` WHERE `name` = '{0}'""".format(owner), as_dict=True)
