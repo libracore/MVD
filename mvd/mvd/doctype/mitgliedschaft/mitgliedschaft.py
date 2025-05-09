@@ -2477,3 +2477,25 @@ def get_last_open_sinv(mitgliedschaft):
         return sinvs[0].name
     else:
         return None
+
+def mitgliedschaft_zuweisen(email):
+    '''
+    Prüft, ob eine E-Mail-Adresse einem Mitglied (Feld e_mail_1) eindeutig zugeordnet ist.
+
+    Input:
+        email (str): Die zu prüfende E-Mail-Adresse.
+
+    Output:
+        str: Der Name des zugehörigen Mitgliedschaft-Dokuments, wenn genau eine Übereinstimmung gefunden wird.
+        str: Die Sektion ID des Mitglieds.
+        False: Wenn keine oder mehrere Übereinstimmungen gefunden werden.
+    '''
+    results = frappe.get_all("Mitgliedschaft", 
+        filters={"e_mail_1": email},
+        fields=["name", "sektion_id"]
+    )
+
+    if len(results) == 1:
+        return results[0]["name"], results[0]["sektion_id"]
+    return False
+
