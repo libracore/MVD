@@ -18,12 +18,17 @@ class PayrexxWebhooks(Document):
     def after_insert(self):
         email = self.email 
         mitglied_hash = self.mitglied_hash
-        mitglied_info = mitgliedschaft_zuweisen(email=email, mitglied_hash=mitglied_hash)
+        plz = self.plz
+        mitglied_info = mitgliedschaft_zuweisen(email=email, mitglied_hash=mitglied_hash, plz=plz)
 
         if mitglied_info:
-            mitglied_id, sektion_id = mitglied_info
-            frappe.db.set_value(self.doctype, self.name, "mitglied", mitglied_id)
-            frappe.db.set_value(self.doctype, self.name, "sektion", sektion_id)
+            if isinstance(mitglied_info, tuple):
+                mitglied_id, sektion_id = mitglied_info
+                frappe.db.set_value(self.doctype, self.name, "mitglied", mitglied_id)
+                frappe.db.set_value(self.doctype, self.name, "sektion", sektion_id)
+            elif isinstance(mitglied_info, str):
+                frappe.db.set_value(self.doctype, self.name, "sektion", mitglied_info)
+                
         return
     
 
