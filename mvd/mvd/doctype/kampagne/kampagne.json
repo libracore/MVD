@@ -1,4 +1,5 @@
 {
+ "autoname": "field:id",
  "creation": "2025-03-25 10:28:20.303985",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -22,10 +23,11 @@
   "mitglied_hash",
   "section_references",
   "mitglied",
-  "sektion",
   "section_technical_stuff",
   "quelle",
-  "ip"
+  "ip",
+  "id",
+  "send_to_sp"
  ],
  "fields": [
   {
@@ -99,9 +101,8 @@
   },
   {
    "fieldname": "mitglied",
-   "fieldtype": "Link",
-   "label": "Mitglied",
-   "options": "Mitgliedschaft"
+   "fieldtype": "Data",
+   "label": "Mitglied"
   },
   {
    "fieldname": "strasse",
@@ -145,13 +146,19 @@
    "label": "Ort"
   },
   {
-   "fieldname": "sektion",
-   "fieldtype": "Link",
-   "label": "Sektion",
-   "options": "Sektion"
+   "fieldname": "id",
+   "fieldtype": "Data",
+   "label": "ID",
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_to_sp",
+   "fieldtype": "Check",
+   "label": "Send to SP"
   }
  ],
- "modified": "2025-05-12 10:34:40.634639",
+ "modified": "2025-05-12 16:01:06.031768",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",

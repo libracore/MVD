@@ -243,3 +243,26 @@ def payrexx_webhook(**kwargs):
     from mvd.mvd.doctype.payrexxwebhooks.payrexxwebhooks import process_webhook
     process_webhook(kwargs)
 
+@frappe.whitelist()
+def kampagne(**kwargs):
+    if kwargs.get("id", None):
+        if frappe.db.exists("Kampagne", kwargs.get("id", None)):
+            kwargs['doctype'] = "Kampagne"
+            if "cmd" in kwargs:
+                del kwargs["cmd"]
+            kampagne_doc = frappe.get_doc("Kampagne", kwargs.get("id", None))
+            kampagne_doc.update(kwargs)
+            frappe.local.response.update({
+                "data": kampagne_doc.save().as_dict()
+            })
+            frappe.db.commit()
+        else:
+            if "cmd" in kwargs:
+                del kwargs["cmd"]
+            kwargs['doctype'] = "Kampagne"
+            frappe.local.response.update({
+                "data": frappe.get_doc(kwargs).insert().as_dict()
+            })
+            frappe.db.commit()
+    else:
+        raise frappe.NameError
