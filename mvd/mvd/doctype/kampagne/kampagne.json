@@ -99,8 +99,9 @@
   },
   {
    "fieldname": "mitglied",
-   "fieldtype": "Data",
-   "label": "Mitglied"
+   "fieldtype": "Link",
+   "label": "Mitglied",
+   "options": "Mitgliedschaft"
   },
   {
    "fieldname": "strasse",
@@ -145,11 +146,12 @@
   },
   {
    "fieldname": "sektion",
-   "fieldtype": "Data",
-   "label": "Sektion"
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
   }
  ],
- "modified": "2025-05-12 09:34:27.860697",
+ "modified": "2025-05-12 10:34:40.634639",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",
