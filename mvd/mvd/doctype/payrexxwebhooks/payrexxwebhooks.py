@@ -17,7 +17,8 @@ class PayrexxWebhooks(Document):
 
     def after_insert(self):
         email = self.email 
-        mitglied_info = mitgliedschaft_zuweisen(email)
+        mitglied_hash = self.mitglied_hash
+        mitglied_info = mitgliedschaft_zuweisen(email=email, mitglied_hash=mitglied_hash)
 
         if mitglied_info:
             mitglied_id, sektion_id = mitglied_info
@@ -53,12 +54,26 @@ class PayrexxWebhooks(Document):
                 "transaction_datetime": lambda t: t.get("time"),
             }
 
+            # Custom logic to extract mitglied_hash because it's in a list
             missing_fields = [] # to log error
             for field, getter in field_map.items():
                 value = getter(transaction)
                 setattr(self, field, value)
                 if value is None:
                     missing_fields.append(field)
+
+            mitglied_hash = None
+            custom_fields = transaction.get("invoice", {}).get("custom_fields", [])
+            for field in custom_fields:
+                if "mitglied_hash" in field:
+                    mitglied_hash = field.get("mitglied_hash")
+                    break
+
+            self.mitglied_hash = mitglied_hash
+
+            # Error logging
+            if mitglied_hash is None:
+                missing_fields.append("mitglied_hash")
 
             if missing_fields: #log error
                 log_message = (
