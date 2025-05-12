@@ -2478,24 +2478,37 @@ def get_last_open_sinv(mitgliedschaft):
     else:
         return None
 
-def mitgliedschaft_zuweisen(email):
+def mitgliedschaft_zuweisen(**kwargs):
     '''
-    Prüft, ob eine E-Mail-Adresse einem Mitglied (Feld e_mail_1) eindeutig zugeordnet ist.
+    Versucht, ein Mitglied eindeutig zuzuordnen, indem nacheinander verschiedene Filter angewendet werden.
+    Die Reihenfolge der Versuche basiert auf einer vordefinierten Priorität.
 
-    Input:
-        email (str): Die zu prüfende E-Mail-Adresse.
+    Input (alle optional, aber mindestens einer erforderlich):
+        mitglied_hash (str): Der eindeutige Hash des Mitglieds.
+        email (str): Die E-Mail-Adresse des Mitglieds.
+        (zukünftig weitere Felder)
 
     Output:
-        str: Der Name des zugehörigen Mitgliedschaft-Dokuments, wenn genau eine Übereinstimmung gefunden wird.
-        str: Die Sektion ID des Mitglieds.
+        tuple(str, str): Der Name des zugehörigen Mitgliedschaft-Dokuments und die Sektion ID, wenn genau eine Übereinstimmung gefunden wird.
         False: Wenn keine oder mehrere Übereinstimmungen gefunden werden.
     '''
-    results = frappe.get_all("Mitgliedschaft", 
-        filters={"e_mail_1": email},
-        fields=["name", "sektion_id"]
-    )
+    # Reihenfolge der Filterversuche
+    priority_fields = ["mitglied_hash", "email"]  # weitere Felder können hier ergänzt werden
+    field_map = {
+        "email": "e_mail_1"  # Mapping von Funktionsargument zu Datenbankfeld
+    }
 
-    if len(results) == 1:
-        return results[0]["name"], results[0]["sektion_id"]
+    for field in priority_fields:
+        value = kwargs.get(field)
+        if value:          
+            db_field = field_map.get(field, field)
+            results = frappe.get_all("Mitgliedschaft",
+                filters={db_field: value},
+                fields=["name", "sektion_id"]
+            )
+            if len(results) == 1:
+                return results[0]["name"], results[0]["sektion_id"]
+
     return False
+
 

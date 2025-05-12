@@ -9,6 +9,10 @@ def get_data():
         'heatmap': True,
         'heatmap_message': _('Diese Heatmap zeigt alle Interaktionen mit dieser Mitgliedschaft im vergangenen Jahr'),
         'fieldname': 'mv_mitgliedschaft',
+        "non_standard_fieldnames": {
+			'Kampagne': 'mitglied',
+            'PayrexxWebhooks': 'mitglied',
+		},
         'transactions': [
             {
                 'label': _('Termine / Beratungen'),
@@ -20,7 +24,12 @@ def get_data():
             },
             {
                 'label': _('Rechnungswesen'),
-                'items': ['Sales Invoice', 'Fakultative Rechnung', 'Mahnung', 'Payment Entry']
+                'items': ['Sales Invoice', 
+                          'Fakultative Rechnung', 
+                          'Mahnung', 
+                          'Payment Entry', 
+                          'PayrexxWebhooks'
+                          ]
             },
             {
                 'label': _('Zu erledigen'),
@@ -29,6 +38,10 @@ def get_data():
             {
                 'label': _('Adresspflege'),
                 'items': ['Retouren']
-            }
+            },
+            {
+                'label': _('Kampagnen'),
+                'items': ['Kampagne']
+            },
         ]
     }
