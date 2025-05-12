@@ -75,7 +75,7 @@ def prepare_data():
 def upload_data():
 	# Delete all existing records in the Doctype
 	df = prepare_data()
-	frappe.db.sql("DELETE FROM `tabSektion PLZ Zuordnung`")  # Deletes all records in Sektion PLZ Zuordnung Doctype
+	frappe.db.sql("DELETE FROM `tabSektion PLZ Zuordnung`")  # Deletes all records in Sektion PLZ Zuordnung
 	frappe.db.commit()  # Commit the transaction to the database
 	
 	# Insert the new records into the Doctype (Sektion PLZ Zuordnung)
