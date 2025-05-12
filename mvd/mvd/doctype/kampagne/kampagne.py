@@ -7,13 +7,25 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import cint
 from mvd.mvd.service_plattform.api import send_kampagne_to_sp
+from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import mitgliedschaft_zuweisen
 
 class Kampagne(Document):
     def after_insert(self):
+        # Mitglied zuordnen
+        email = self.email 
+        mitglied_hash = self.mitglied_hash
+        mitglied_info = mitgliedschaft_zuweisen(email=email, mitglied_hash=mitglied_hash)
+
+        if mitglied_info:
+            mitglied_id, sektion_id = mitglied_info
+            frappe.db.set_value(self.doctype, self.name, "mitglied", mitglied_id)
+            frappe.db.set_value(self.doctype, self.name, "sektion", sektion_id)
+
+        # Send to emarsis
         sp_data = {
             "Email": self.email or None,
             "NewsletterName": self.newsletter_name or None,
-            "CampaignTriggerCode": self.campaign_trigger_code or None,
+            "CampaignTriggerCode": cint(self.campaign_trigger_code) if self.campaign_trigger_code else None,
             "SubscribedOverPledge": False if cint(self.subscribed_over_pledge) != 1 else True,
             "Zip_code": self.zip_code or 0,
             "Last_name": self.last_name or None,

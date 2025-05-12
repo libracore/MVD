@@ -227,6 +227,7 @@ frappe.ui.form.on('Mitgliedschaft', {
             $(":button[data-doctype='Sales Invoice']").remove();
             $(":button[data-doctype='Fakultative Rechnung']").remove();
             $(":button[data-doctype='Payment Entry']").remove();
+            $(":button[data-doctype='PayrexxWebhooks']").remove();
             $(":button[data-doctype='Beratung']").remove();
             $(":button[data-doctype='Termin']").remove();
             $(":button[data-doctype='Mahnung']").remove();
@@ -234,6 +235,7 @@ frappe.ui.form.on('Mitgliedschaft', {
             $(":button[data-doctype='Korrespondenz']").remove();
             $(":button[data-doctype='Arbeits Backlog']").remove();
             $(":button[data-doctype='Retouren']").remove();
+            $(":button[data-doctype='Kampagne']").remove();
             
             // button für Rechnung Sonstiges
             frm.add_custom_button(__("Rechnung (Sonstiges)"),  function() {

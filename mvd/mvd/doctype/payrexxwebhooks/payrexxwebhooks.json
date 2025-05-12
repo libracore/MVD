@@ -1,9 +1,32 @@
 {
+ "autoname": "field:uuid",
  "creation": "2025-04-22 14:22:00.149658",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "uuid",
+  "zahlungsdaten_section",
+  "status",
+  "amount",
+  "currency",
+  "transaction_datetime",
+  "personendaten_section",
+  "title",
+  "first_name",
+  "last_name",
+  "company",
+  "street",
+  "plz",
+  "place",
+  "country",
+  "phone",
+  "email",
+  "verkn\u00fcpfungen_section",
+  "mitglied",
+  "sektion",
+  "mitglied_hash",
+  "rohdaten_section",
   "json"
  ],
  "fields": [
@@ -11,9 +34,125 @@
    "fieldname": "json",
    "fieldtype": "Code",
    "label": "JSON"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "precision": "2"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Data",
+   "label": "Currency"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title"
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name"
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "label": "Company"
+  },
+  {
+   "fieldname": "street",
+   "fieldtype": "Data",
+   "label": "Street"
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "label": "PLZ"
+  },
+  {
+   "fieldname": "place",
+   "fieldtype": "Data",
+   "label": "Place"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Data",
+   "label": "Country"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "transaction_datetime",
+   "fieldtype": "Data",
+   "label": "Transaction Datetime"
+  },
+  {
+   "fieldname": "uuid",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "uuid",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "verkn\u00fcpfungen_section",
+   "fieldtype": "Section Break",
+   "label": "Verkn\u00fcpfungen"
+  },
+  {
+   "fieldname": "mitglied",
+   "fieldtype": "Link",
+   "label": "Mitglied",
+   "options": "Mitgliedschaft"
+  },
+  {
+   "fieldname": "rohdaten_section",
+   "fieldtype": "Section Break",
+   "label": "Rohdaten"
+  },
+  {
+   "fieldname": "zahlungsdaten_section",
+   "fieldtype": "Section Break",
+   "label": "Zahlungsdaten"
+  },
+  {
+   "fieldname": "personendaten_section",
+   "fieldtype": "Section Break",
+   "label": "Personendaten"
+  },
+  {
+   "fieldname": "sektion",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
+  },
+  {
+   "fieldname": "mitglied_hash",
+   "fieldtype": "Data",
+   "label": "Mitglied Hash"
   }
  ],
- "modified": "2025-04-22 14:22:00.149658",
+ "modified": "2025-05-12 09:02:29.513103",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "PayrexxWebhooks",

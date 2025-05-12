@@ -15,12 +15,14 @@
   "lang_code",
   "nl_abo",
   "strasse",
+  "ort",
   "strasse_nummer",
   "pledge_anz",
   "per_post",
   "mitglied_hash",
   "section_references",
   "mitglied",
+  "sektion",
   "section_technical_stuff",
   "quelle",
   "ip"
@@ -97,8 +99,9 @@
   },
   {
    "fieldname": "mitglied",
-   "fieldtype": "Data",
-   "label": "Mitglied"
+   "fieldtype": "Link",
+   "label": "Mitglied",
+   "options": "Mitgliedschaft"
   },
   {
    "fieldname": "strasse",
@@ -135,9 +138,20 @@
    "fieldname": "mitglied_hash",
    "fieldtype": "Data",
    "label": "MitgliedHash"
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "label": "Ort"
+  },
+  {
+   "fieldname": "sektion",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
   }
  ],
- "modified": "2025-05-06 13:18:51.114610",
+ "modified": "2025-05-12 10:34:40.634639",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",

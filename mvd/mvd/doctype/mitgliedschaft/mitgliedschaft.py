@@ -2477,3 +2477,38 @@ def get_last_open_sinv(mitgliedschaft):
         return sinvs[0].name
     else:
         return None
+
+def mitgliedschaft_zuweisen(**kwargs):
+    '''
+    Versucht, ein Mitglied eindeutig zuzuordnen, indem nacheinander verschiedene Filter angewendet werden.
+    Die Reihenfolge der Versuche basiert auf einer vordefinierten Priorität.
+
+    Input (alle optional, aber mindestens einer erforderlich):
+        mitglied_hash (str): Der eindeutige Hash des Mitglieds.
+        email (str): Die E-Mail-Adresse des Mitglieds.
+        (zukünftig weitere Felder)
+
+    Output:
+        tuple(str, str): Der Name des zugehörigen Mitgliedschaft-Dokuments und die Sektion ID, wenn genau eine Übereinstimmung gefunden wird.
+        False: Wenn keine oder mehrere Übereinstimmungen gefunden werden.
+    '''
+    # Reihenfolge der Filterversuche
+    priority_fields = ["mitglied_hash", "email"]  # weitere Felder können hier ergänzt werden
+    field_map = {
+        "email": "e_mail_1"  # Mapping von Funktionsargument zu Datenbankfeld
+    }
+
+    for field in priority_fields:
+        value = kwargs.get(field)
+        if value:          
+            db_field = field_map.get(field, field)
+            results = frappe.get_all("Mitgliedschaft",
+                filters={db_field: value},
+                fields=["name", "sektion_id"]
+            )
+            if len(results) == 1:
+                return results[0]["name"], results[0]["sektion_id"]
+
+    return False
+
+

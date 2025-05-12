@@ -60,9 +60,11 @@ class Beratung(Document):
         if self.status == 'Closed':
             if not self.geschlossen_am:
                 self.geschlossen_am = today()
+                self.geschlossen_durch = frappe.session.user
         else:
             if self.geschlossen_am:
                 self.geschlossen_am = None
+                self.geschlossen_durch = None
         
         # bei "Menü > E-Mail" gewährleisten, dass Empfänger von 'raised_by' übernommen wird
         if self.raised_by:
