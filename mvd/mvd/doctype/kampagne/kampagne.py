@@ -35,4 +35,4 @@ class Kampagne(Document):
             "Nl_abo": False if cint(self.nl_abo) != 1 else True,
             "Quelle": self.quelle or None
         }
-        #send_kampagne_to_sp(sp_data)
+        send_kampagne_to_sp(sp_data)
