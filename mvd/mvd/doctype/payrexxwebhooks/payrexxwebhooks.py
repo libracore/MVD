@@ -54,7 +54,6 @@ class PayrexxWebhooks(Document):
                 "transaction_datetime": lambda t: t.get("time"),
             }
 
-            # Custom logic to extract mitglied_hash because it's in a list
             missing_fields = [] # to log error
             for field, getter in field_map.items():
                 value = getter(transaction)
@@ -62,6 +61,7 @@ class PayrexxWebhooks(Document):
                 if value is None:
                     missing_fields.append(field)
 
+            # Custom logic to extract mitglied_hash because it's in a list
             mitglied_hash = None
             custom_fields = transaction.get("invoice", {}).get("custom_fields", [])
             for field in custom_fields:
