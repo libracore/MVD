@@ -22,6 +22,7 @@
   "mitglied_hash",
   "section_references",
   "mitglied",
+  "sektion",
   "section_technical_stuff",
   "quelle",
   "ip"
@@ -141,9 +142,14 @@
    "fieldname": "ort",
    "fieldtype": "Data",
    "label": "Ort"
+  },
+  {
+   "fieldname": "sektion",
+   "fieldtype": "Data",
+   "label": "Sektion"
   }
  ],
- "modified": "2025-05-08 15:35:43.234678",
+ "modified": "2025-05-12 09:34:27.860697",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",
