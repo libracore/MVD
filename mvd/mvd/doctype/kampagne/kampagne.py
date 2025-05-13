@@ -23,7 +23,7 @@ class Kampagne(Document):
         if mitglied_info:
             mitglied_id, sektion_id = mitglied_info
             frappe.db.set_value(self.doctype, self.name, "mitglied", mitglied_id)
-            frappe.db.set_value(self.doctype, self.name, "sektion", sektion_id)
+            frappe.db.set_value(self.doctype, self.name, "sektion_id", sektion_id)
 
         # Send to emarsis
         sp_data = {
