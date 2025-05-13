@@ -23,6 +23,7 @@
   "mitglied_hash",
   "section_references",
   "mitglied",
+  "sektion_id",
   "section_technical_stuff",
   "quelle",
   "ip",
@@ -156,9 +157,15 @@
    "fieldname": "send_to_sp",
    "fieldtype": "Check",
    "label": "Send to SP"
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
   }
  ],
- "modified": "2025-05-12 16:01:06.031768",
+ "modified": "2025-05-13 10:51:32.109773",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",

@@ -29,7 +29,7 @@ class Kampagne(Document):
         sp_data = {
             "Email": self.email or None,
             "NewsletterName": self.newsletter_name or None,
-            "CampaignTriggerCode": cint(self.campaign_trigger_code) if self.campaign_trigger_code else None,
+            "CampaignTriggerCode": str(self.campaign_trigger_code) if self.campaign_trigger_code else None,
             "SubscribedOverPledge": False if cint(self.subscribed_over_pledge) != 1 else True,
             "Zip_code": self.zip_code or 0,
             "Last_name": self.last_name or None,

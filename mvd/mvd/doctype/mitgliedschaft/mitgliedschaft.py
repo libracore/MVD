@@ -2498,16 +2498,20 @@ def mitgliedschaft_zuweisen(**kwargs):
         "email": "e_mail_1"  # Mapping von Funktionsargument zu Datenbankfeld
     }
 
-    for field in priority_fields:
-        value = kwargs.get(field)
-        if value:          
-            db_field = field_map.get(field, field)
-            results = frappe.get_all("Mitgliedschaft",
-                filters={db_field: value},
-                fields=["name", "sektion_id"]
-            )
-            if len(results) == 1:
-                return results[0]["name"], results[0]["sektion_id"]
+    try:
+        for field in priority_fields:
+            value = kwargs.get(field)
+            if value:          
+                db_field = field_map.get(field, field)
+                results = frappe.get_all("Mitgliedschaft",
+                    filters={db_field: value},
+                    fields=["name", "sektion_id"]
+                )
+                if len(results) == 1:
+                    return results[0]["name"], results[0]["sektion_id"]
+    except Exception as err:
+        frappe.log_error("{0}".format(err), 'mitgliedschaft_zuweisen failed')
+        pass
 
     return False
 
