@@ -212,7 +212,7 @@ def send_postnotiz_to_sp(postnotiz_for_sp):
         frappe.log_error("{0}".format(str(postnotiz_for_sp)), 'send_postnotiz_to_sp deaktiviert')
         return
 
-def send_kampagne_to_sp(kampagne):
+def send_kampagne_to_sp(kampagne, id=None):
     if not int(frappe.db.get_single_value('Service Plattform API', 'no_kampagne_to_sp')) == 1:
         if auth_check(SVCPFMVS_SCOPE):
             config = frappe.get_doc("Service Plattform API", "Service Plattform API")
@@ -226,6 +226,9 @@ def send_kampagne_to_sp(kampagne):
                 sp_connection = requests.post(url, json = kampagne, headers = headers)
                 if sp_connection.status_code != 204:
                     frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, str(kampagne)), '{0} > send_kampagne_to_sp'.format(sp_connection.status_code))
+                else:
+                    if id:
+                        frappe.db.set_value("Kampagne", id, "send_to_sp", 1)
                 return
             except Exception as err:
                 frappe.log_error("{0}".format(err), 'send_kampagne_to_sp failed')
