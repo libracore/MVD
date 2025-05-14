@@ -60,7 +60,8 @@ def get_alle_beratungs_termine(user):
                                         `berTer`.`abp_referenz`
                                     FROM `tabBeratung Termin` AS `berTer`
                                     LEFT JOIN `tabBeratung` AS `beratung` ON `berTer`.`parent` = `beratung`.`name`
-                                    WHERE `berTer`.`von` >= '{datum_von} 00:00:00'
+                                    WHERE (`berTer`.`von` >= '{datum_von} 00:00:00') OR 
+                                          (`beratung`.`status` = 'Termin vereinbart' AND `berTer`.`von` < '{datum_von} 00:00:00')
                                     ORDER BY `berTer`.`von` DESC
                                  """.format(datum_von=today()), as_dict=True)
     for termin in alle_termine:
