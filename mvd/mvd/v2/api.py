@@ -246,7 +246,7 @@ def payrexx_webhook(**kwargs):
 
 @frappe.whitelist()
 def kampagne(**kwargs):
-    kwargs = json.loads(frappe.local.request.get_data())
+    #kwargs = json.loads(frappe.local.request.get_data())
     if kwargs.get("id", None):
         if frappe.db.exists("Kampagne", kwargs.get("id", None)):
             kwargs['doctype'] = "Kampagne"
