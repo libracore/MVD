@@ -24,7 +24,7 @@
   "email",
   "verkn\u00fcpfungen_section",
   "mitglied",
-  "sektion",
+  "sektion_id",
   "mitglied_hash",
   "rohdaten_section",
   "json"
@@ -141,18 +141,18 @@
    "label": "Personendaten"
   },
   {
-   "fieldname": "sektion",
-   "fieldtype": "Link",
-   "label": "Sektion",
-   "options": "Sektion"
-  },
-  {
    "fieldname": "mitglied_hash",
    "fieldtype": "Data",
    "label": "Mitglied Hash"
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
   }
  ],
- "modified": "2025-05-12 09:02:29.513103",
+ "modified": "2025-05-16 08:24:36.986363",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "PayrexxWebhooks",
