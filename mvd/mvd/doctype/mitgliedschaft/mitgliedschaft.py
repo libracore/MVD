@@ -2499,6 +2499,7 @@ def mitgliedschaft_zuweisen(**kwargs):
     field_map = {
         "email": "e_mail_1"  # Mapping von Funktionsargument zu Datenbankfeld
     }
+
     try:
         for field in priority_fields:
             value = kwargs.get(field)

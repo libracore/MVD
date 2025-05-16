@@ -10,6 +10,10 @@ from mvd.mvd.service_plattform.api import send_kampagne_to_sp
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import mitgliedschaft_zuweisen
 
 class Kampagne(Document):
+    def before_insert(self):
+        if not self.id:
+            self.id = frappe.generate_hash(txt="", length=10)
+
     def after_insert(self):
         # Mitglied zuordnen
         email = self.email 
@@ -29,7 +33,7 @@ class Kampagne(Document):
         sp_data = {
             "Email": self.email or None,
             "NewsletterName": self.newsletter_name or None,
-            "CampaignTriggerCode": cint(self.campaign_trigger_code) if self.campaign_trigger_code else None,
+            "CampaignTriggerCode": str(self.campaign_trigger_code) if self.campaign_trigger_code else None,
             "SubscribedOverPledge": False if cint(self.subscribed_over_pledge) != 1 else True,
             "Zip_code": self.zip_code or 0,
             "Last_name": self.last_name or None,
@@ -39,4 +43,6 @@ class Kampagne(Document):
             "Nl_abo": False if cint(self.nl_abo) != 1 else True,
             "Quelle": self.quelle or None
         }
-        send_kampagne_to_sp(sp_data)
+        
+        if cint(frappe.db.get_value("MVD Settings", "MVD Settings", "suspend_kampagne_to_sp")) != 1:
+            send_kampagne_to_sp(sp_data, id=self.name)
