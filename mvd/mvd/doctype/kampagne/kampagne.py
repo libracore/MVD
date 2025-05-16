@@ -21,9 +21,9 @@ class Kampagne(Document):
             if isinstance(mitglied_info, tuple):
                 mitglied_id, sektion_id = mitglied_info
                 frappe.db.set_value(self.doctype, self.name, "mitglied", mitglied_id)
-                frappe.db.set_value(self.doctype, self.name, "sektion", sektion_id)
+                frappe.db.set_value(self.doctype, self.name, "sektion_id", sektion_id)
             elif isinstance(mitglied_info, str):
-                frappe.db.set_value(self.doctype, self.name, "sektion", mitglied_info)
+                frappe.db.set_value(self.doctype, self.name, "sektion_id", mitglied_info)
 
         # Send to emarsis
         sp_data = {
