@@ -165,7 +165,7 @@
    "options": "Sektion"
   }
  ],
- "modified": "2025-05-13 10:51:32.109773",
+ "modified": "2025-05-20 22:00:08.382397",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",
@@ -197,5 +197,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }
