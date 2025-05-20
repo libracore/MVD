@@ -2486,10 +2486,12 @@ def mitgliedschaft_zuweisen(**kwargs):
     Input (alle optional, aber mindestens einer erforderlich):
         mitglied_hash (str): Der eindeutige Hash des Mitglieds.
         email (str): Die E-Mail-Adresse des Mitglieds.
+        plz (str): Postleitzahl zur Zuordnung über "Sektion PLZ Zuordnung".
         (zukünftig weitere Felder)
 
     Output:
         tuple(str, str): Der Name des zugehörigen Mitgliedschaft-Dokuments und die Sektion ID, wenn genau eine Übereinstimmung gefunden wird.
+        str: Nur die Sektion ID, wenn nur die PLZ verwendet wird.
         False: Wenn keine oder mehrere Übereinstimmungen gefunden werden.
     '''
     # Reihenfolge der Filterversuche
@@ -2509,6 +2511,17 @@ def mitgliedschaft_zuweisen(**kwargs):
                 )
                 if len(results) == 1:
                     return results[0]["name"], results[0]["sektion_id"]
+                
+        # Wenn keine eindeutige Mitgliedschaft gefunden wurde, versuche über PLZ
+        plz = kwargs.get("plz")
+        if plz:
+            sektion_entry = frappe.get_all("Sektion PLZ Zuordnung",
+                filters={"name": plz},
+                fields=["sektion"]
+            )
+            if sektion_entry:
+                return sektion_entry[0]["sektion"]
+            
     except Exception as err:
         frappe.log_error("{0}".format(err), 'mitgliedschaft_zuweisen failed')
         pass
