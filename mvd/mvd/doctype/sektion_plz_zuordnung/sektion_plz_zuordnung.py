@@ -28,13 +28,7 @@ def prepare_data():
 	df = df[["Ortschaftsname", "PLZ", "Kantonskürzel"]]
 	# Drop duplicates
 	df = df.drop_duplicates(subset=['PLZ', 'Kantonskürzel'])
-	# Identify duplicated PLZs (excluding the first occurrence)
-	plz_duplicates = df[df.duplicated(subset=['PLZ'], keep='first')]
-
-	# Drop duplicates based on PLZ, keep the first
-	df_unique_plz = df.drop_duplicates(subset=['PLZ'], keep='first')
-
-	df_unique_plz = df_unique_plz[["PLZ", "Kantonskürzel"]]
+	df = df[["PLZ", "Kantonskürzel"]]
 
 	# Map of Kantons to Sektion
 	kanton_to_sektion = {
@@ -68,7 +62,27 @@ def prepare_data():
 			return 'MVBL'
 		return kanton_to_sektion.get(kanton, 'Unknown')
 
-	df_unique_plz['Sektion'] = df_unique_plz.apply(assign_section, axis=1)
+	df['Sektion'] = df.apply(assign_section, axis=1)
+
+	# Keep the duplicated PLZ based on the most occuring Sektion per PLZ
+	duplicated_plz_list = df[df.duplicated(subset=['PLZ'], keep=False)]['PLZ'].astype(str).unique().tolist()
+	plz_to_sektion = get_most_occured_sektion_per_plz(duplicated_plz_list)
+	def filter_duplicated_row(row):
+		plz = row['PLZ']
+		sektion = row['Sektion']
+		if plz in plz_to_sektion:
+			sektion_to_keep = plz_to_sektion[plz]
+			sektion_exists = ((df['PLZ'] == plz) & (df['Sektion'] == sektion_to_keep)).any()
+			if sektion_exists:
+				return sektion == sektion_to_keep
+			else:
+				return True
+		else:
+			return True
+	df = df[df.apply(filter_duplicated_row, axis=1)]
+
+	# Drop duplicates based on PLZ, keep the first - just to make sure that it is deduplicated
+	df_unique_plz = df.drop_duplicates(subset=['PLZ'], keep='first')
 	return df_unique_plz
 
 @frappe.whitelist()
@@ -90,3 +104,25 @@ def upload_data():
 
 	frappe.db.commit()
 	return True 
+
+
+def get_most_occured_sektion_per_plz(plz_list):
+	results = frappe.get_all(
+		"Mitgliedschaft",
+		filters={"plz": ["in", plz_list]},
+		fields=["plz", "sektion_id", "COUNT(*) as count"],
+		group_by="plz, sektion_id"
+	)
+	grouped = {}
+
+	for row in results:
+		plz = row['plz']
+		if plz not in grouped:
+			grouped[plz] = row
+		else:
+			if row['count'] > grouped[plz]['count']:
+				grouped[plz] = row
+
+	final_selection = list(grouped.values())
+	plz_to_sektion = {int(item['plz']): item['sektion_id'] for item in final_selection}
+	return plz_to_sektion
