@@ -19,31 +19,6 @@ frappe.ui.form.on('Retouren', {
         }
     },
 
-    ausgabe: function(frm) {
-        if (frm.doc.ausgabe) {
-            console.log('its set')
-            frappe.call({
-                method: 'frappe.client.get_list',
-                args: {
-                    doctype: 'MW',
-                    filters: {
-                        ausgabe_kurz: frm.doc.ausgabe
-                    },
-                    fields: ['laufnummer'],
-                    limit_page_length: 1
-                },
-                callback: function(r) {
-                    if (r.message && r.message.length > 0) {
-                        frm.set_value('retoure_mw_sequence_number', r.message[0].laufnummer);
-                    } else {
-                        frm.set_value('retoure_mw_sequence_number', '');
-                        frappe.msgprint(__('Kein passender MW-Datensatz gefunden.'));
-                    }
-                }
-            });
-        }
-    },
-
     refresh: function(frm) {
         cur_frm.page.add_action_icon(__("fa fa-envelope-o"), function() {
             send_mail(frm);
@@ -88,7 +63,6 @@ frappe.ui.form.on('Retouren', {
         });
     }
 });
-
 
 function send_mail(frm) {
     frappe.call({
