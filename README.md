@@ -1,5 +1,9 @@
 ## MVD
 ### Version Log
+#### 16.21.12
+#1338
+* Prüfung Mitgliedschafts- und HV-Bezahlung auch bei unvalidierten Mitgliedern
+* Retry-Mechanismus für fehlgeschlagene Updates der Mitgliedschaften bei Sinv-Updates (ausgelöst z.B. durch CAMT Verarbeitung)
 #### 16.20.12
 #1299
 #### 16.20.11

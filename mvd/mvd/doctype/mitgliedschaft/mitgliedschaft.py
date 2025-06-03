@@ -71,6 +71,22 @@ class Mitgliedschaft(Document):
         zuzugsdatum = None
         if self.zuzug:
             zuzugsdatum = self.zuzug
+        
+        # update Zahlung Mitgliedschaft
+        check_zahlung_mitgliedschaft(self)
+        
+        # update Zahlung HV
+        check_zahlung_hv(self)
+
+        # Update max Reminder Level
+        set_max_reminder_level(self)
+        
+        # ampelfarbe
+        get_ampelfarbe(self)
+        
+        # Prüfe Jahr Bezahlt (Mitgliedschaft & HV) bezgl. Folgejahr Regelung
+        if self.status_c != 'Inaktiv':
+            check_folgejahr_regelung(self)
 
         if cint(self.validierung_notwendig) != 1:
             # entferne Telefonnummern mit vergessenen Leerschlägen
@@ -95,25 +111,9 @@ class Mitgliedschaft(Document):
             # Rechnungs Adressblock
             self.rg_adressblock = get_rg_adressblock(self)
             
-            # update Zahlung Mitgliedschaft
-            check_zahlung_mitgliedschaft(self)
-            
-            # update Zahlung HV
-            check_zahlung_hv(self)
-
-            # Update max Reminder Level
-            set_max_reminder_level(self)
-            
-            # Prüfe Jahr Bezahlt (Mitgliedschaft & HV) bezgl. Folgejahr Regelung
-            if self.status_c != 'Inaktiv':
-                check_folgejahr_regelung(self)
-            
             # preisregel
             self.check_preisregel()
             
-            # ampelfarbe
-            get_ampelfarbe(self)
-
             # prüfen und setzen des Wertes naechstes_jahr_geschuldet
             self.naechstes_jahr_geschuldet = cint(get_naechstes_jahr_geschuldet(self.name, live_data=self))
             
