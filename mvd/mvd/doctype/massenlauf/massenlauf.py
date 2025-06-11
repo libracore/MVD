@@ -210,7 +210,8 @@ def zuzug(massenlauf, sektion):
             for mitgliedschaft in mitgliedschaften:
                 err_mitgl = mitgliedschaft['name']
                 if mitgliedschaft['zuzugs_rechnung']:
-                    output = frappe.get_print("Sales Invoice", mitgliedschaft['zuzugs_rechnung'], 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)
+                    if int(frappe.db.get_value("Sales Invoice", mitgliedschaft['zuzugs_rechnung'], "docstatus") or 0) != 2:
+                        output = frappe.get_print("Sales Invoice", mitgliedschaft['zuzugs_rechnung'], 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)
                 elif mitgliedschaft['zuzug_korrespondenz']:
                     output = frappe.get_print("Korrespondenz", mitgliedschaft['zuzug_korrespondenz'], 'Korrespondenz', as_pdf = True, output = output, ignore_zugferd=True)
                 else:
