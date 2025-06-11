@@ -855,6 +855,7 @@ def update_faktura_kunde(mitgliedschaft=None, kunde=None):
     faktura_kunde.anrede = mitgliedschaft.anrede_c
     faktura_kunde.vorname = mitgliedschaft.vorname_1
     faktura_kunde.nachname = mitgliedschaft.nachname_1
+    faktura_kunde.firma = mitgliedschaft.firma
     faktura_kunde.tel_p = mitgliedschaft.tel_p_1
     faktura_kunde.tel_m = mitgliedschaft.tel_m_1
     faktura_kunde.tel_g = mitgliedschaft.tel_g_1
