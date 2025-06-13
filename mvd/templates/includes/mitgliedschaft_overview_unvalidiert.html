@@ -84,14 +84,6 @@
                 {% endif %}
                 {{ solidarmitglied.vorname or '' }} {{ solidarmitglied.nachname or '' }}
             </p>
-            <!-- Objekadresse -->
-            <p>
-                {% if objektadresse.zusatz %}
-                    {{ objektadresse.zusatz }}<br>
-                {% endif %}
-                {{ objektadresse.strasse or '' }} {{ objektadresse.nummer or '' }}{{ objektadresse.nummer_zu or '' }}<br>
-                {{ objektadresse.plz }} {{ objektadresse.ort }}
-            </p>
             <!-- Mail/Telefon -->
             <p>
                 {% if solidarmitglied.mail %}{{ solidarmitglied.mail }}<br>{% endif %}

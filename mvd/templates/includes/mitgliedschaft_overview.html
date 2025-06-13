@@ -218,35 +218,6 @@
                 {% endif %}
                 {{ kontakt_solidarmitglied.first_name or '' }} {{ kontakt_solidarmitglied.last_name or '' }}
             </p>
-            <!-- Adresse (von Objekt) -->
-            {% if objekt_adresse %}
-                <p>
-                    {% if objekt_adresse.address_line2 %}
-                        {{ objekt_adresse.address_line2 }}<br>
-                    {% endif %}
-                    {% if not objekt_adresse.postfach %}
-                        {{ objekt_adresse.strasse }}<br>
-                    {% else %}
-                        Postfach {% if objekt_adresse.postfach_nummer %}{{ objekt_adresse.postfach_nummer }}{% endif %}<br>
-                    {% endif %}
-                    {{ objekt_adresse.plz }} {{ objekt_adresse.city }}
-                </p>
-            {% else %}
-            <!-- Adresse (von Mitglied) -->
-                {% if adresse_mitglied %}
-                    <p>
-                        {% if adresse_mitglied.address_line2 %}
-                            {{ adresse_mitglied.address_line2 }}<br>
-                        {% endif %}
-                        {% if not adresse_mitglied.postfach %}
-                            {{ adresse_mitglied.strasse }}<br>
-                        {% else %}
-                            Postfach {% if adresse_mitglied.postfach_nummer %}{{ adresse_mitglied.postfach_nummer }}{% endif %}<br>
-                        {% endif %}
-                        {{ adresse_mitglied.plz }} {{ adresse_mitglied.city }}
-                    </p>
-                {% endif %}
-            {% endif %}
             <!-- Mail/Telefon -->
             {% if kontakt_mitglied %}
                 <p>
