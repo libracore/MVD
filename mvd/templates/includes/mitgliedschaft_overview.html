@@ -50,6 +50,9 @@
                             <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
                         {% endif %}
                         <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
+                        {% if allgemein.bezahltes_mitgliedschaftsjahr %}
+                            <br><b>Bezahltes Mitgliedschaftsjahr:</b> {{ allgemein.bezahltes_mitgliedschaftsjahr }}
+                        {% endif %}
                         {% if allgemein.hv_status %}
                             <br>{{ allgemein.hv_status }}
                         {% endif %}
@@ -119,6 +122,9 @@
                             <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
                         {% endif %}
                         <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
+                        {% if allgemein.bezahltes_mitgliedschaftsjahr %}
+                            <br><b>Bezahltes Mitgliedschaftsjahr:</b> {{ allgemein.bezahltes_mitgliedschaftsjahr }}
+                        {% endif %}
                         {% if allgemein.hv_status %}
                             <br>{{ allgemein.hv_status }}
                         {% endif %}
