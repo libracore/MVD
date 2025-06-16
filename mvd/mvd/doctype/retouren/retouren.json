@@ -63,10 +63,9 @@
   },
   {
    "fieldname": "ausgabe",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Ausgabe",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -80,7 +79,6 @@
    "in_list_view": 1,
    "label": "Mitgliedschaft",
    "options": "Mitgliedschaft",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -121,9 +119,8 @@
   },
   {
    "fieldname": "grund_bezeichnung",
-   "fieldtype": "Data",
-   "label": "grundBezeichnung",
-   "read_only": 1
+   "fieldtype": "Select",
+   "label": "grundBezeichnung"
   },
   {
    "fieldname": "legacy_notiz",
@@ -202,7 +199,7 @@
    "label": "RawData"
   }
  ],
- "modified": "2024-05-17 13:33:20.920652",
+ "modified": "2025-06-02 10:55:10.649031",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren",

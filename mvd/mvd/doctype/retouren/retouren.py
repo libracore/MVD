@@ -16,6 +16,8 @@ class Retouren(Document):
             self.adressblock = mitgliedschaft.adressblock
     
     def validate(self):
+        process_manual_entry(self) # runs only if entered manually
+
         if self.status == 'Offen':
             mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
             mitgliedschaft.m_w_retouren_offen = 1
@@ -307,3 +309,34 @@ def check_retoure_in_folge(retoure_mw_sequence_number, mv_mitgliedschaft):
         return 1
     else:
         return 0
+
+def process_manual_entry(self):
+    # If none of the auto-import identifiers are present, assume it's a manual entry
+    if not self.raw_data and not self.retoure_dmc and not self.retoure_sendungsbild:
+
+        # Set retoure_mw_sequence_number from ausgabe
+        if self.ausgabe:
+            laufnummer_data = frappe.db.get_value("MW", {"ausgabe_kurz": self.ausgabe}, "laufnummer")
+            self.retoure_mw_sequence_number = laufnummer_data
+
+        # Set retoure_in_folge using internal logic
+        if self.retoure_mw_sequence_number and self.mv_mitgliedschaft:
+            self.retoure_in_folge = check_retoure_in_folge(
+                retoure_mw_sequence_number=self.retoure_mw_sequence_number,
+                mv_mitgliedschaft=self.mv_mitgliedschaft
+            )
+
+        # Set adresse_geaendert
+        if self.mv_mitgliedschaft:
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
+
+            if mitgliedschaft.adresse_mitglied and mitgliedschaft.adresse_mitglied != 'None':
+                datum_adressexport = frappe.get_value("MW", {"laufnummer": self.retoure_mw_sequence_number}, "datum_adressexport")
+                adresse_geaendert = adresse_geaendert_check(
+                    adr=mitgliedschaft.adresse_mitglied,
+                    datum_adressexport=datum_adressexport
+                )
+            else:
+                adresse_geaendert = 0
+
+            self.adresse_geaendert = adresse_geaendert
