@@ -1203,7 +1203,12 @@ def get_uebersicht_html(name):
             kuendigung = mitgliedschaft.kuendigung
         else:
             kuendigung = False
-        
+
+        if mitgliedschaft.bezahltes_mitgliedschaftsjahr:
+            bezahltes_mitgliedschaftsjahr = mitgliedschaft.bezahltes_mitgliedschaftsjahr
+        else:
+            bezahltes_mitgliedschaftsjahr = False
+
         if mitgliedschaft.mitgliedtyp_c == 'Privat':
             if mitgliedschaft.zahlung_hv:
                 hv_status = 'HV bezahlt im {0}'.format(mitgliedschaft.zahlung_hv)
@@ -1278,6 +1283,7 @@ def get_uebersicht_html(name):
                 'zuzug_von': zuzug_von,
                 'wegzug_zu': wegzug_zu,
                 'mitgliedtyp_c': mitgliedschaft.mitgliedtyp_c,
+                'bezahltes_mitgliedschaftsjahr': bezahltes_mitgliedschaftsjahr,
                 'hv_status': hv_status,
                 'wichtig': mitgliedschaft.wichtig,
                 'kuendigung': kuendigung,
@@ -1317,11 +1323,17 @@ def get_uebersicht_html(name):
             eintritt = mitgliedschaft.eintrittsdatum
         else:
             eintritt = mitgliedschaft.eintritt if mitgliedschaft.eintritt else mitgliedschaft.creation
+            
+        if mitgliedschaft.bezahltes_mitgliedschaftsjahr:
+            bezahltes_mitgliedschaftsjahr = mitgliedschaft.bezahltes_mitgliedschaftsjahr
+        else:
+            bezahltes_mitgliedschaftsjahr = False
         
         allgemein = {
             'status': mitgliedschaft.status_c,
             'mitgliedtyp': mitgliedschaft.mitgliedtyp_c,
             'eintritt': eintritt,
+            'bezahltes_mitgliedschaftsjahr': bezahltes_mitgliedschaftsjahr,
             'kuendigung': mitgliedschaft.kuendigung or False,
             'ist_geschenkmitgliedschaft': mitgliedschaft.ist_geschenkmitgliedschaft,
             'language': mitgliedschaft.language or 'de',

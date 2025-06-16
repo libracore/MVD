@@ -17,6 +17,9 @@
                 {% else %}
                     <b>Eintritt:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}
                 {% endif %}
+                {% if allgemein.bezahltes_mitgliedschaftsjahr %}
+                    <br><b>Bezahltes Mitgliedschaftsjahr:</b> {{ allgemein.bezahltes_mitgliedschaftsjahr }}
+                {% endif %}
                 <br><b>Sprache:</b> {{ allgemein.language }}<br>
             </p>
             <p>
@@ -83,14 +86,6 @@
                     {{ solidarmitglied.anrede }}<br>
                 {% endif %}
                 {{ solidarmitglied.vorname or '' }} {{ solidarmitglied.nachname or '' }}
-            </p>
-            <!-- Objekadresse -->
-            <p>
-                {% if objektadresse.zusatz %}
-                    {{ objektadresse.zusatz }}<br>
-                {% endif %}
-                {{ objektadresse.strasse or '' }} {{ objektadresse.nummer or '' }}{{ objektadresse.nummer_zu or '' }}<br>
-                {{ objektadresse.plz }} {{ objektadresse.ort }}
             </p>
             <!-- Mail/Telefon -->
             <p>
