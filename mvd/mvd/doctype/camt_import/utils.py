@@ -53,7 +53,16 @@ def create_unpaid_sinv(fak, betrag):
             betrag = sektion.betrag_hv
             item = [{"item_code": sektion.hv_artikel, "qty": 1, "rate": fak_doc.betrag}]
         else:
-            item = [{"item_code": sektion.spenden_artikel, "qty": 1, "rate": betrag}]
+            spenden_artikel_details = frappe.get_doc("Item", sektion.spenden_artikel)
+            item = [{
+                "item_code": sektion.spenden_artikel,
+                "qty": 1, "rate": betrag,
+                "conversion_factor": 1,
+                "description": spenden_artikel_details.description,
+                "uom": spenden_artikel_details.stock_uom,
+                "income_account": spenden_artikel_details.item_defaults[0].income_account,
+                "cost_center": spenden_artikel_details.item_defaults[0].selling_cost_center
+            }]
         sinv = frappe.get_doc({
             "doctype": "Sales Invoice",
             "ist_mitgliedschaftsrechnung": 0,
