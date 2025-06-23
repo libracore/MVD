@@ -56,7 +56,7 @@ def get_data(filters):
 
     # Step 3: Concatenate names
     for m in mitglieder:
-        m["mitglied_name"] = f"{m.get('vorname_1', '')} {m.get('nachname_1', '')}".strip()
+        m["mitglied_name"] = f"{0} {1}".format(m.get('vorname_1', ''), m.get('nachname_1', '')).strip()
         # Trim milliseconds from modified
         if m.get("modified"):
             m["modified"] = m["modified"].strftime("%Y-%m-%d %H:%M:%S")
