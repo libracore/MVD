@@ -1,121 +1,128 @@
 <div class="row">
-    <h1 class="vbz">Shortcuts<span id="goto_klassisch" class="pull-right"><i class="fa fa-chevron-right"></i> zur klassischen Ansicht</span><br><span id="datenstand" class="pull-right">Datenstand: {{ datenstand }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
+    <h1 class="vbz">
+        {{ __("Shortcuts") }}
+        <span id="goto_klassisch" class="pull-right">
+            <i class="fa fa-chevron-right"></i> {{ __("zur klassischen Ansicht") }}
+        </span><br>
+        <span id="datenstand" class="pull-right">{{ __("Datenstand:") }} {{ datenstand }}</span><br>
+        <span id="reload_info" class="pull-right">{{ __("Zum Aktualisieren Webbrowser neuladen") }}</span>
+    </h1>
 </div>
+
 <div class="row">
     <div class="control-card blue-card" id="suchmaske">
         <center>
             <i class="fa fa-search blue-icon"></i>
-            <p>Suchmaske</p>
+            <p>{{ __("Suchmaske") }}</p>
         </center>
     </div>
     <div class="control-card blue-card" id="mitglieder">
         <center>
             <i class="fa fa-users blue-icon"></i>
-            <p>Mitglieder</p>
+            <p>{{ __("Mitglieder") }}</p>
         </center>
     </div>
     <div class="control-card blue-card" id="todo">
         <center>
             <i class="fa fa-tasks blue-icon"></i>
-            <p>ToDo</p>
+            <p>{{ __("ToDo") }}</p>
         </center>
     </div>
-    
+
     <!-- hidden ausser bei MVBE -->
     <div class="control-card blue-card" id="beratung" {% if frappe.boot.default_sektion != "MVBE" %} style="display: none;"{% endif %}>
         <center>
             <i class="fa fa-calendar-check-o blue-icon"></i>
-            <p>Beratung (MVBE)</p>
+            <p>{{ __("Beratung (MVBE)") }}</p>
         </center>
     </div>
-    <!-- end hidden -->
 
     <!-- hidden ausser bei MVLU -->
     <div class="control-card blue-card" id="beratung_lu" {% if frappe.boot.default_sektion != "MVLU" %} style="display: none;"{% endif %}>
         <center>
             <i class="fa fa-calendar-check-o blue-icon"></i>
-            <p>Beratung (MVLU)</p>
+            <p>{{ __("Beratung (MVLU)") }}</p>
         </center>
     </div>
-    <!-- end hidden -->
-    
+
     <!-- hidden nur bei MVBE -->
     <div class="control-card blue-card" id="beratung_alle_sektionen" {% if frappe.boot.default_sektion == "MVBE" %} style="display: none;"{% endif %}>
         <center>
             <i class="fa fa-calendar-check-o blue-icon"></i>
-            <p>Beratung</p>
+            <p>{{ __("Beratung") }}</p>
         </center>
     </div>
-    <!-- end hidden -->
-    
+
     <div class="control-card blue-card" id="termin">
         <center>
             <i class="fa fa-calendar-check-o blue-icon"></i>
-            <p>Termine</p>
+            <p>{{ __("Termine") }}</p>
         </center>
     </div>
-    
+
     <div class="control-card blue-card" id="handbuch">
         <center>
             <i class="fa fa-book blue-icon"></i>
-            <p>Handbuch</p>
+            <p>{{ __("Handbuch") }}</p>
         </center>
     </div>
     <div class="control-card blue-card" id="info_blog">
         <center>
             <i class="fa fa-bullhorn blue-icon"></i>
-            <p>Was ist neu in Libracore?</p>
+            <p>{{ __("Was ist neu in Libracore?") }}</p>
         </center>
     </div>
 </div>
+
 <div class="row">
-    <h1 class="vbz">Aktionen</h1>
+    <h1 class="vbz">{{ __("Aktionen") }}</h1>
 </div>
+
 <div class="row">
     <div class="control-card green-card" id="neuanlage">
         <center>
             <i class="fa fa-user-plus green-icon"></i>
-            <p>Neuanlage</p>
+            <p>{{ __("Neuanlage") }}</p>
         </center>
     </div>
     <div class="control-card green-card" id="validieren">
         <center>
             <i class="fa fa-check-square green-icon"></i>
-            <p>Validieren</p>
+            <p>{{ __("Validieren") }}</p>
         </center>
     </div>
     <div class="control-card green-card" id="arbeitsbacklog">
         <center>
             <i class="fa fa-list-ol green-icon"></i>
-            <p>Arbeits Backlog</p>
+            <p>{{ __("Arbeits Backlog") }}</p>
         </center>
     </div>
     <div class="control-card green-card" id="massenlauf">
         <center>
             <i class="fa fa-print green-icon"></i>
-            <p>Massenlauf</p>
+            <p>{{ __("Massenlauf") }}</p>
         </center>
-
     </div>
     <div class="control-card green-card" id="adresspflege">
         <center>
             <i class="fa fa-address-book green-icon"></i>
-            <p>Adresspflege</p>
+            <p>{{ __("Adresspflege") }}</p>
         </center>
     </div>
     <div class="control-card green-card" id="serienbrief">
         <center>
             <i class="fa fa-envelope-open green-icon"></i>
-            <p>Serienbrief</p>
+            <p>{{ __("Serienbrief") }}</p>
         </center>
     </div>
 </div>
+
 <div class="row">
     <div class="control-card green-card" id="camt">
         <center>
             <i class="fa fa-university green-icon"></i>
             <p>
-                CAMT einlesen<br>
+                {{ __("CAMT einlesen") }}<br>
                 {{ last_camt_import }}
             </p>
         </center>
@@ -123,15 +130,13 @@
     <div class="control-card green-card" id="mahnung">
         <center>
             <i class="fa fa-dollar green-icon"></i>
-            <p>
-                Mahnungen
-            </p>
+            <p>{{ __("Mahnungen") }}</p>
         </center>
     </div>
     <div class="control-card green-card" id="serienmail">
         <center>
             <i class="fa fa-at green-icon"></i>
-            <p>Serien E-Mail</p>
+            <p>{{ __("Serien E-Mail") }}</p>
         </center>
     </div>
 </div>

@@ -1,7 +1,7 @@
 frappe.pages['vbz'].on_page_load = function(wrapper) {
     var page = frappe.ui.make_app_page({
         parent: wrapper,
-        title: 'Verarbeitungszentrale',
+        title: (frappe.boot.lang === "fr") ? 'Centre de traitement' : 'Verarbeitungszentrale',
         single_column: true
     });
     frappe.vbz.add_views(page);
