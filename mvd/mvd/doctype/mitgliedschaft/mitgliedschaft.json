@@ -783,6 +783,7 @@
   },
   {
    "default": "0",
+   "description": "Verwendung nur f\u00fcr administrative Zwecke zul\u00e4ssig.",
    "fieldname": "adressen_gesperrt",
    "fieldtype": "Check",
    "label": "Adressen gesperrt"
@@ -1374,7 +1375,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2025-04-16 12:47:37.483777",
+ "modified": "2025-06-23 11:56:23.836886",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
