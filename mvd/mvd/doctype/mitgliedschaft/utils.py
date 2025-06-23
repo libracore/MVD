@@ -257,99 +257,107 @@ def get_adressblock(mitgliedschaft):
     if mitgliedschaft.doctype == 'Mitgliedschaft':
         if mitgliedschaft.kundentyp == 'Unternehmen':
             if mitgliedschaft.firma:
-                adressblock += mitgliedschaft.firma or ''
+                adressblock += mitgliedschaft.firma
                 adressblock += ' '
             if mitgliedschaft.zusatz_firma:
-                adressblock += mitgliedschaft.zusatz_firma or ''
+                adressblock += mitgliedschaft.zusatz_firma
             if mitgliedschaft.firma or mitgliedschaft.zusatz_firma:
                 adressblock += '\n'
         
         if mitgliedschaft.vorname_1:
-            adressblock += mitgliedschaft.vorname_1 or ''
+            adressblock += mitgliedschaft.vorname_1
             adressblock += ' '
         if mitgliedschaft.nachname_1:
-            adressblock += mitgliedschaft.nachname_1 or ''
+            adressblock += mitgliedschaft.nachname_1
         if mitgliedschaft.vorname_1 or mitgliedschaft.nachname_1:
             adressblock += '\n'
         
         if mitgliedschaft.hat_solidarmitglied:
             if mitgliedschaft.vorname_2:
-                adressblock += mitgliedschaft.vorname_2 or ''
+                adressblock += mitgliedschaft.vorname_2
                 adressblock += ' '
             if mitgliedschaft.nachname_2:
-                adressblock += mitgliedschaft.nachname_2 or ''
+                adressblock += mitgliedschaft.nachname_2
             if  mitgliedschaft.vorname_2 or mitgliedschaft.nachname_2:
                 adressblock += '\n'
         
         if mitgliedschaft.zusatz_adresse:
-            adressblock += mitgliedschaft.zusatz_adresse or ''
+            adressblock += mitgliedschaft.zusatz_adresse
             adressblock += '\n'
         
         if mitgliedschaft.strasse and mitgliedschaft.strasse != '':
             adressblock += mitgliedschaft.strasse
             if mitgliedschaft.nummer:
                 adressblock += ' '
-                adressblock += str(mitgliedschaft.nummer) or ''
+                adressblock += str(mitgliedschaft.nummer)
                 if mitgliedschaft.nummer_zu:
-                    adressblock += str(mitgliedschaft.nummer_zu) or ''
+                    adressblock += str(mitgliedschaft.nummer_zu)
             adressblock += '\n'
         
         if cint(mitgliedschaft.postfach) == 1:
             adressblock += 'Postfach '
-            adressblock += str(mitgliedschaft.postfach_nummer) or ''
+            if mitgliedschaft.postfach_nummer:
+                adressblock += str(mitgliedschaft.postfach_nummer)
             adressblock += '\n'
         
         if mitgliedschaft.land and mitgliedschaft.land != 'Schweiz':
             laender_code = frappe.get_value("Country", mitgliedschaft.land, "code").upper() + "-"
         else:
             laender_code = ''
-        adressblock += laender_code + str(mitgliedschaft.plz) or ''
-        adressblock += ' '
-        adressblock += mitgliedschaft.ort or ''
+        if mitgliedschaft.plz:
+            plz = str(mitgliedschaft.plz)
+        else:
+            plz = ''
+        ort = mitgliedschaft.ort or ''
+        adressblock += laender_code + plz + ' ' + ort
         
         return adressblock
     else:
         if mitgliedschaft.kundentyp == 'Unternehmen':
             if mitgliedschaft.firma:
-                adressblock += mitgliedschaft.firma or ''
+                adressblock += mitgliedschaft.firma
                 adressblock += '\n'
             if mitgliedschaft.zusatz_firma:
-                adressblock += mitgliedschaft.zusatz_firma or ''
+                adressblock += mitgliedschaft.zusatz_firma
                 adressblock += '\n'
         
         if mitgliedschaft.vorname:
-            adressblock += mitgliedschaft.vorname or ''
+            adressblock += mitgliedschaft.vorname
             adressblock += ' '
         if mitgliedschaft.nachname:
-            adressblock += mitgliedschaft.nachname or ''
+            adressblock += mitgliedschaft.nachname
         if mitgliedschaft.vorname or mitgliedschaft.nachname:
             adressblock += '\n'
         
         if mitgliedschaft.zusatz_adresse:
-            adressblock += mitgliedschaft.zusatz_adresse or ''
+            adressblock += mitgliedschaft.zusatz_adresse
             adressblock += '\n'
         
-        if mitgliedschaft.strasse and mitgliedschaft.strasse != '':
+        if mitgliedschaft.strasse:
             adressblock += mitgliedschaft.strasse
             if mitgliedschaft.nummer:
                 adressblock += ' '
-                adressblock += str(mitgliedschaft.nummer) or ''
+                adressblock += str(mitgliedschaft.nummer)
                 if mitgliedschaft.nummer_zu:
-                    adressblock += str(mitgliedschaft.nummer_zu) or ''
+                    adressblock += str(mitgliedschaft.nummer_zu)
             adressblock += '\n'
         
         if cint(mitgliedschaft.postfach) == 1:
             adressblock += 'Postfach '
-            adressblock += str(mitgliedschaft.postfach_nummer) or ''
+            if mitgliedschaft.postfach_nummer:
+                adressblock += str(mitgliedschaft.postfach_nummer)
             adressblock += '\n'
         
         if mitgliedschaft.land and mitgliedschaft.land != 'Schweiz':
             laender_code = frappe.get_value("Country", mitgliedschaft.land, "code").upper() + "-"
         else:
             laender_code = ''
-        adressblock += laender_code + str(mitgliedschaft.plz) or ''
-        adressblock += ' '
-        adressblock += mitgliedschaft.ort or ''
+        if mitgliedschaft.plz:
+            plz = str(mitgliedschaft.plz)
+        else:
+            plz = ''
+        ort = mitgliedschaft.ort or ''
+        adressblock += laender_code + plz + ' ' + ort
         
         return adressblock
 
@@ -362,72 +370,76 @@ def get_rg_adressblock(mitgliedschaft):
         if cint(mitgliedschaft.unabhaengiger_debitor) != 1:
             if mitgliedschaft.kundentyp == 'Unternehmen':
                 if mitgliedschaft.firma:
-                    adressblock += mitgliedschaft.firma or ''
+                    adressblock += mitgliedschaft.firma
                     adressblock += ' '
                 if mitgliedschaft.zusatz_firma:
-                    adressblock += mitgliedschaft.zusatz_firma or ''
+                    adressblock += mitgliedschaft.zusatz_firma
                 if mitgliedschaft.firma or mitgliedschaft.zusatz_firma:
                     adressblock += '\n'
             
             if mitgliedschaft.vorname_1:
-                adressblock += mitgliedschaft.vorname_1 or ''
+                adressblock += mitgliedschaft.vorname_1
                 adressblock += ' '
             if mitgliedschaft.nachname_1:
-                adressblock += mitgliedschaft.nachname_1 or ''
+                adressblock += mitgliedschaft.nachname_1
             if mitgliedschaft.vorname_1 or mitgliedschaft.nachname_1:
                 adressblock += '\n'
             
             if mitgliedschaft.hat_solidarmitglied:
                 if mitgliedschaft.vorname_2:
-                    adressblock += mitgliedschaft.vorname_2 or ''
+                    adressblock += mitgliedschaft.vorname_2
                     adressblock += ' '
                 if mitgliedschaft.nachname_2:
-                    adressblock += mitgliedschaft.nachname_2 or ''
+                    adressblock += mitgliedschaft.nachname_2
                 if  mitgliedschaft.vorname_2 or mitgliedschaft.nachname_2:
                     adressblock += '\n'
         else:
             if mitgliedschaft.rg_kundentyp == 'Unternehmen':
                 if mitgliedschaft.rg_firma:
-                    adressblock += mitgliedschaft.rg_firma or ''
+                    adressblock += mitgliedschaft.rg_firma
                     adressblock += ' '
                 if mitgliedschaft.rg_zusatz_firma:
-                    adressblock += mitgliedschaft.rg_zusatz_firma or ''
+                    adressblock += mitgliedschaft.rg_zusatz_firma
                 if mitgliedschaft.rg_firma or mitgliedschaft.rg_zusatz_firma:
                     adressblock += '\n'
             
             if mitgliedschaft.rg_vorname:
-                adressblock += mitgliedschaft.rg_vorname or ''
+                adressblock += mitgliedschaft.rg_vorname
                 adressblock += ' '
             if mitgliedschaft.rg_nachname:
-                adressblock += mitgliedschaft.rg_nachname or ''
+                adressblock += mitgliedschaft.rg_nachname
             if mitgliedschaft.rg_vorname or mitgliedschaft.rg_nachname:
                 adressblock += '\n'
         
         if mitgliedschaft.rg_zusatz_adresse:
-            adressblock += mitgliedschaft.rg_zusatz_adresse or ''
+            adressblock += mitgliedschaft.rg_zusatz_adresse
             adressblock += '\n'
         
         adressblock += mitgliedschaft.rg_strasse or ''
         if mitgliedschaft.rg_nummer:
             adressblock += ' '
-            adressblock += str(mitgliedschaft.rg_nummer) or ''
+            adressblock += str(mitgliedschaft.rg_nummer)
             if mitgliedschaft.rg_nummer_zu:
-                adressblock += str(mitgliedschaft.rg_nummer_zu) or ''
+                adressblock += str(mitgliedschaft.rg_nummer_zu)
         adressblock += '\n'
         
         if cint(mitgliedschaft.rg_postfach) == 1:
             adressblock += 'Postfach '
-            adressblock += str(mitgliedschaft.rg_postfach_nummer) or ''
+            if mitgliedschaft.rg_postfach_nummer:
+                adressblock += str(mitgliedschaft.rg_postfach_nummer)
             adressblock += '\n'
-        
-        if mitgliedschaft.rg_land != 'Schweiz':
+
+        if mitgliedschaft.rg_land and mitgliedschaft.rg_land != 'Schweiz':
             laender_code = frappe.get_value("Country", mitgliedschaft.rg_land, "code").upper() + "-"
         else:
             laender_code = ''
-        adressblock += laender_code + str(mitgliedschaft.rg_plz) or ''
-        adressblock += ' '
-        adressblock += mitgliedschaft.rg_ort or ''
-        
+        if mitgliedschaft.rg_plz:
+            plz = str(mitgliedschaft.rg_plz)
+        else:
+            plz = ''
+        ort = mitgliedschaft.rg_ort or ''
+        adressblock += laender_code + plz + ' ' + ort
+
         return adressblock
     elif mitgliedschaft.doctype == 'Kunden':
         if cint(mitgliedschaft.abweichende_rechnungsadresse) != 1:
@@ -436,62 +448,67 @@ def get_rg_adressblock(mitgliedschaft):
         if cint(mitgliedschaft.unabhaengiger_debitor) != 1:
             if mitgliedschaft.kundentyp == 'Unternehmen':
                 if mitgliedschaft.firma:
-                    adressblock += mitgliedschaft.firma or ''
+                    adressblock += mitgliedschaft.firma
                     adressblock += ' '
                 if mitgliedschaft.zusatz_firma:
-                    adressblock += mitgliedschaft.zusatz_firma or ''
+                    adressblock += mitgliedschaft.zusatz_firma
                 if mitgliedschaft.firma or mitgliedschaft.zusatz_firma:
                     adressblock += '\n'
             
             if mitgliedschaft.vorname:
-                adressblock += mitgliedschaft.vorname or ''
+                adressblock += mitgliedschaft.vorname
                 adressblock += ' '
             if mitgliedschaft.nachname:
-                adressblock += mitgliedschaft.nachname or ''
+                adressblock += mitgliedschaft.nachname
             if mitgliedschaft.vorname or mitgliedschaft.nachname:
                 adressblock += '\n'
         else:
             if mitgliedschaft.rg_kundentyp == 'Unternehmen':
                 if mitgliedschaft.rg_firma:
-                    adressblock += mitgliedschaft.rg_firma or ''
+                    adressblock += mitgliedschaft.rg_firma
                     adressblock += ' '
                 if mitgliedschaft.rg_zusatz_firma:
-                    adressblock += mitgliedschaft.rg_zusatz_firma or ''
+                    adressblock += mitgliedschaft.rg_zusatz_firma
                 if mitgliedschaft.rg_firma or mitgliedschaft.rg_zusatz_firma:
                     adressblock += '\n'
 
             if mitgliedschaft.rg_vorname:
-                adressblock += mitgliedschaft.rg_vorname or ''
+                adressblock += mitgliedschaft.rg_vorname
                 adressblock += ' '
             if mitgliedschaft.rg_nachname:
-                adressblock += mitgliedschaft.rg_nachname or ''
+                adressblock += mitgliedschaft.rg_nachname
             if mitgliedschaft.rg_vorname or mitgliedschaft.rg_nachname:
                 adressblock += '\n'
         
         if mitgliedschaft.rg_zusatz_adresse:
-            adressblock += mitgliedschaft.rg_zusatz_adresse or ''
+            adressblock += mitgliedschaft.rg_zusatz_adresse
             adressblock += '\n'
         
         adressblock += mitgliedschaft.rg_strasse or ''
         if mitgliedschaft.rg_nummer:
             adressblock += ' '
-            adressblock += str(mitgliedschaft.rg_nummer) or ''
+            adressblock += str(mitgliedschaft.rg_nummer)
             if mitgliedschaft.rg_nummer_zu:
-                adressblock += str(mitgliedschaft.rg_nummer_zu) or ''
+                adressblock += str(mitgliedschaft.rg_nummer_zu)
         adressblock += '\n'
         
         if cint(mitgliedschaft.rg_postfach) == 1:
             adressblock += 'Postfach '
-            adressblock += str(mitgliedschaft.rg_postfach_nummer) or ''
+            if mitgliedschaft.rg_postfach_nummer:
+                adressblock += str(mitgliedschaft.rg_postfach_nummer)
             adressblock += '\n'
 
-        if mitgliedschaft.rg_land != 'Schweiz':
+        if mitgliedschaft.rg_land and mitgliedschaft.rg_land != 'Schweiz':
             laender_code = frappe.get_value("Country", mitgliedschaft.rg_land, "code").upper() + "-"
         else:
             laender_code = ''
-        adressblock += laender_code + str(mitgliedschaft.rg_plz) or ''
-        adressblock += ' '
-        adressblock += mitgliedschaft.rg_ort or ''
+        if mitgliedschaft.rg_plz:
+            plz = str(mitgliedschaft.rg_plz)
+        else:
+            plz = ''
+        ort = mitgliedschaft.rg_ort or ''
+        adressblock += laender_code + plz + ' ' + ort
+
         return adressblock
     else:
         return 'Fehler!<br>Weder Mitgliedschaft noch Kunde'
