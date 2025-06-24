@@ -231,8 +231,24 @@ def aktualisiere_camt_uebersicht(camt_import):
                                                                 WHERE `camt_import` = '{camt_import}'
                                                                 AND `docstatus` = 1
                                                             )
+                                                            AND `total_amount` = `allocated_amount`
                                                         )
                                                         GROUP BY `item_code`""".format(camt_import=camt_import), as_dict=True)
+    
+    verbuchte_teilzahlungen_gegen_rechnung = frappe.db.sql("""SELECT
+                                                                `reference_name`,
+                                                                SUM(`allocated_amount`) AS `teilzahlungsbetrag`
+                                                            FROM `tabPayment Entry Reference`
+                                                            WHERE `parent` IN (
+                                                                SELECT
+                                                                    `name`
+                                                                FROM `tabPayment Entry`
+                                                                WHERE `camt_import` = '{camt_import}'
+                                                                AND `docstatus` = 1
+                                                            )
+                                                            AND `total_amount` != `allocated_amount`
+                                                            GROUP BY `reference_name`
+                                                        """.format(camt_import=camt_import), as_dict=True)
     
     verbuchte_guthaben = frappe.db.sql("""SELECT
                                                 SUM(`unallocated_amount`) AS `amount`,
@@ -265,11 +281,58 @@ def aktualisiere_camt_uebersicht(camt_import):
     # nicht eingelesene Zahlungen
     if int(frappe.db.get_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen_qty')) > 0:
         report_data += """<p style="color: red;"><br>Achtung; {0} Zahlung(en) konnte(n) <u>nicht</u> eingelesen werden!</p>""".format(frappe.db.get_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen_qty'))
+    
+    
     # Artikel und Ertragskonten Aufschlüsselung
     ertragskonten = {}
+    artikel_betraege = {}
+
+    # Teilzahlungen
+    if len(verbuchte_teilzahlungen_gegen_rechnung) > 0:
+        for teilzahlung in verbuchte_teilzahlungen_gegen_rechnung:
+            teilzahlungsbetrag = teilzahlung.teilzahlungsbetrag
+            teilzahlungs_invoice = frappe.get_doc("Sales Invoice", teilzahlung.reference_name)
+            teilzahlungs_ertragskonten = {}
+            teilzahlungs_artikel_betraege = {}
+            maximal_werte = []
+
+            for item in teilzahlungs_invoice.items:
+                maximal_werte.append(item.amount)
+            
+            list_teilzahlungs_verteilung = teilzahlungs_verteilung(teilzahlungsbetrag, maximal_werte)
+            loop_index = 0
+
+            for item in teilzahlungs_invoice.items:
+                if item.item_code in teilzahlungs_artikel_betraege:
+                    teilzahlungs_artikel_betraege[item.item_code] += list_teilzahlungs_verteilung[loop_index]
+                else:
+                    teilzahlungs_artikel_betraege[item.item_code] = list_teilzahlungs_verteilung[loop_index]
+                
+                if item.income_account in teilzahlungs_ertragskonten:
+                    teilzahlungs_ertragskonten[item.income_account] += list_teilzahlungs_verteilung[loop_index]
+                else:
+                    teilzahlungs_ertragskonten[item.income_account] = list_teilzahlungs_verteilung[loop_index]
+                loop_index += 1
+            
+            for teilzahlungs_artikel_betrag in teilzahlungs_artikel_betraege:
+                if teilzahlungs_artikel_betrag in artikel_betraege:
+                    artikel_betraege[teilzahlungs_artikel_betrag] += teilzahlungs_artikel_betraege[teilzahlungs_artikel_betrag]
+                else:
+                    artikel_betraege[teilzahlungs_artikel_betrag] = teilzahlungs_artikel_betraege[teilzahlungs_artikel_betrag]
+            
+            for teilzahlungs_ertragskonto in teilzahlungs_ertragskonten:
+                if teilzahlungs_ertragskonto in ertragskonten:
+                    ertragskonten[teilzahlungs_ertragskonto] += teilzahlungs_ertragskonten[teilzahlungs_ertragskonto]
+                else:
+                    ertragskonten[teilzahlungs_ertragskonto] = teilzahlungs_ertragskonten[teilzahlungs_ertragskonto]
+
+
+
+
+    # "Voll"-Zahlungen
     if len(verbuchte_zahlungen_gegen_rechnung) > 0:
         # Artikel Aufschlüsselung
-        totalbetrag = 0
+        artikel_totalbetrag = 0
         report_data += """<h3>Aufschlüsselung nach Artikel</h3>
                         <table style="width: 100%;">
                             <tbody>
@@ -282,22 +345,29 @@ def aktualisiere_camt_uebersicht(camt_import):
                 ertragskonten[entry.income_account] += entry.amount
             else:
                 ertragskonten[entry.income_account] = entry.amount
+            
+            if entry.item_code in artikel_betraege:
+                artikel_betraege[entry.item_code] += entry.amount
+            else:
+                artikel_betraege[entry.item_code] = entry.amount
+        
+        for artikel_betrag in artikel_betraege:
             report_data += """
                             <tr>
                                 <td style="text-align: left;">{0} ({1})</td>
                                 <td style="text-align: right;">{2}</td>
-                            </tr>""".format(frappe.get_value("Item", entry.item_code, "item_name"), frappe.get_value("Item", entry.item_code, "sektion_id"), "{:,.2f}".format(entry.amount).replace(",", "'"))
-            totalbetrag += entry.amount
+                            </tr>""".format(frappe.get_value("Item", artikel_betrag, "item_name"), frappe.get_value("Item", artikel_betrag, "sektion_id"), "{:,.2f}".format(artikel_betraege[artikel_betrag]).replace(",", "'"))
+            artikel_totalbetrag += artikel_betraege[artikel_betrag]
         report_data += """
                         <tr>
                             <td style="text-align: left;"><b>Total</b></td>
                             <td style="text-align: right;"><b>{0}</b></td>
-                        </tr>""".format("{:,.2f}".format(totalbetrag).replace(",", "'"))
+                        </tr>""".format("{:,.2f}".format(artikel_totalbetrag).replace(",", "'"))
         
         report_data += """</tbody></table>"""
         
         # Ertragskonten Aufschlüsselung
-        totalbetrag = 0
+        ertragskonten_totalbetrag = 0
         report_data += """<h3>Aufschlüsselung nach Ertragskonten</h3>
                         <table style="width: 100%;">
                             <tbody>
@@ -311,12 +381,12 @@ def aktualisiere_camt_uebersicht(camt_import):
                                 <td style="text-align: left;">{0}</td>
                                 <td style="text-align: right;">{1}</td>
                             </tr>""".format(key, "{:,.2f}".format(value).replace(",", "'"))
-            totalbetrag += value
+            ertragskonten_totalbetrag += value
         report_data += """
                         <tr>
                             <td style="text-align: left;"><b>Total</b></td>
                             <td style="text-align: right;"><b>{0}</b></td>
-                        </tr>""".format("{:,.2f}".format(totalbetrag).replace(",", "'"))
+                        </tr>""".format("{:,.2f}".format(ertragskonten_totalbetrag).replace(",", "'"))
         
         report_data += """</tbody></table>"""
     
@@ -425,3 +495,43 @@ def aktualisiere_camt_uebersicht(camt_import):
                 frappe.db.set_value('CAMT Import', camt_import, 'status', 'Verarbeitet')
             else:
                 frappe.db.set_value('CAMT Import', camt_import, 'status', 'Closed')
+
+# Hilfsmethoden für die faire Verteilung von Teilzahlungen auf die Artikel und entsprechenden Ertragskonten
+def teilzahlungs_verteilung(betrag, maximalwerte):
+    n = len(maximalwerte)
+    roh_anteil = betrag / n
+
+    # Initialverteilung (minimal von Anteil und Maximalwert)
+    anteile = [min(roh_anteil, m) for m in maximalwerte]
+    skaliert_summe = sum(anteile)
+
+    # Wenn Gesamtbetrag nicht erreicht, skaliere proportional runter
+    if skaliert_summe != betrag:
+        faktor = betrag / skaliert_summe
+        anteile = [min(round(a * faktor, 10), m) for a, m in zip(anteile, maximalwerte)]
+
+    # Runde auf 0.01
+    gerundet = [round(a, 2) for a in anteile]
+    diff = round(betrag - sum(gerundet), 2)
+
+    # Korrektur in 0.01-Schritten
+    step = 0.01 if diff > 0 else -0.01
+    steps = int(round(abs(diff) / 0.01))
+
+    # Fair verteilen der Korrektur
+    indices = sorted(range(n), key=lambda i: (gerundet[i], -maximalwerte[i]), reverse=(step < 0))
+
+    for i in range(steps):
+        idx = indices[i % n]
+        neuer_wert = round(gerundet[idx] + step, 2)
+        if 0 <= neuer_wert <= maximalwerte[idx]:
+            gerundet[idx] = neuer_wert
+        else:
+            # Suche nächstbeste Position
+            for j in indices:
+                kandidat = round(gerundet[j] + step, 2)
+                if 0 <= kandidat <= maximalwerte[j]:
+                    gerundet[j] = kandidat
+                    break
+
+    return gerundet
