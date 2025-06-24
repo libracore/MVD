@@ -326,20 +326,8 @@ def aktualisiere_camt_uebersicht(camt_import):
                 else:
                     ertragskonten[teilzahlungs_ertragskonto] = teilzahlungs_ertragskonten[teilzahlungs_ertragskonto]
 
-
-
-
     # "Voll"-Zahlungen
     if len(verbuchte_zahlungen_gegen_rechnung) > 0:
-        # Artikel Aufschlüsselung
-        artikel_totalbetrag = 0
-        report_data += """<h3>Aufschlüsselung nach Artikel</h3>
-                        <table style="width: 100%;">
-                            <tbody>
-                                <tr>
-                                    <td style="text-align: left;"><b>Artikel</b></td>
-                                    <td style="text-align: right;"><b>Betrag</b></td>
-                                </tr>"""
         for entry in verbuchte_zahlungen_gegen_rechnung:
             if entry.income_account in ertragskonten:
                 ertragskonten[entry.income_account] += entry.amount
@@ -351,44 +339,54 @@ def aktualisiere_camt_uebersicht(camt_import):
             else:
                 artikel_betraege[entry.item_code] = entry.amount
         
-        for artikel_betrag in artikel_betraege:
-            report_data += """
-                            <tr>
-                                <td style="text-align: left;">{0} ({1})</td>
-                                <td style="text-align: right;">{2}</td>
-                            </tr>""".format(frappe.get_value("Item", artikel_betrag, "item_name"), frappe.get_value("Item", artikel_betrag, "sektion_id"), "{:,.2f}".format(artikel_betraege[artikel_betrag]).replace(",", "'"))
-            artikel_totalbetrag += artikel_betraege[artikel_betrag]
-        report_data += """
-                        <tr>
-                            <td style="text-align: left;"><b>Total</b></td>
-                            <td style="text-align: right;"><b>{0}</b></td>
-                        </tr>""".format("{:,.2f}".format(artikel_totalbetrag).replace(",", "'"))
-        
-        report_data += """</tbody></table>"""
-        
-        # Ertragskonten Aufschlüsselung
-        ertragskonten_totalbetrag = 0
-        report_data += """<h3>Aufschlüsselung nach Ertragskonten</h3>
+    # Artikel Aufschlüsselung
+    artikel_totalbetrag = 0
+    report_data += """<h3>Aufschlüsselung nach Artikel</h3>
                         <table style="width: 100%;">
                             <tbody>
                                 <tr>
-                                    <td style="text-align: left;"><b>Ertragskonto</b></td>
+                                    <td style="text-align: left;"><b>Artikel</b></td>
                                     <td style="text-align: right;"><b>Betrag</b></td>
                                 </tr>"""
-        for key, value in ertragskonten.items():
-            report_data += """
-                            <tr>
-                                <td style="text-align: left;">{0}</td>
-                                <td style="text-align: right;">{1}</td>
-                            </tr>""".format(key, "{:,.2f}".format(value).replace(",", "'"))
-            ertragskonten_totalbetrag += value
+
+    for artikel_betrag in artikel_betraege:
         report_data += """
                         <tr>
-                            <td style="text-align: left;"><b>Total</b></td>
-                            <td style="text-align: right;"><b>{0}</b></td>
-                        </tr>""".format("{:,.2f}".format(ertragskonten_totalbetrag).replace(",", "'"))
-        
-        report_data += """</tbody></table>"""
+                            <td style="text-align: left;">{0} ({1})</td>
+                            <td style="text-align: right;">{2}</td>
+                        </tr>""".format(frappe.get_value("Item", artikel_betrag, "item_name"), frappe.get_value("Item", artikel_betrag, "sektion_id"), "{:,.2f}".format(artikel_betraege[artikel_betrag]).replace(",", "'"))
+        artikel_totalbetrag += artikel_betraege[artikel_betrag]
+    report_data += """
+                    <tr>
+                        <td style="text-align: left;"><b>Total</b></td>
+                        <td style="text-align: right;"><b>{0}</b></td>
+                    </tr>""".format("{:,.2f}".format(artikel_totalbetrag).replace(",", "'"))
+    
+    report_data += """</tbody></table>"""
+    
+    # Ertragskonten Aufschlüsselung
+    ertragskonten_totalbetrag = 0
+    report_data += """<h3>Aufschlüsselung nach Ertragskonten</h3>
+                    <table style="width: 100%;">
+                        <tbody>
+                            <tr>
+                                <td style="text-align: left;"><b>Ertragskonto</b></td>
+                                <td style="text-align: right;"><b>Betrag</b></td>
+                            </tr>"""
+    for key, value in ertragskonten.items():
+        report_data += """
+                        <tr>
+                            <td style="text-align: left;">{0}</td>
+                            <td style="text-align: right;">{1}</td>
+                        </tr>""".format(key, "{:,.2f}".format(value).replace(",", "'"))
+        ertragskonten_totalbetrag += value
+    report_data += """
+                    <tr>
+                        <td style="text-align: left;"><b>Total</b></td>
+                        <td style="text-align: right;"><b>{0}</b></td>
+                    </tr>""".format("{:,.2f}".format(ertragskonten_totalbetrag).replace(",", "'"))
+    
+    report_data += """</tbody></table>"""
     
     # Verbuchte Guthaben
     if len(verbuchte_guthaben) > 0:
