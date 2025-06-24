@@ -106,7 +106,8 @@ frappe.vbz_beratung_alle_se = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r3_as").click(function(){
-            frappe.route_options = {'status': 'Open', 'kontaktperson': ['not like', 'Rechtsberatung Pool%']}
+            // Wie kann ich machen, dass zwei filter für kontaktperson gleichzeitig funktionieren?
+            frappe.route_options = {'status': 'Open', 'kontaktperson': ['not like','Rechtsberatung Pool%'], 'kontaktperson': ['is', 'set']}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r4_as").click(function(){
@@ -132,6 +133,18 @@ frappe.vbz_beratung_alle_se = {
         $("#r9_as").click(function(){
             frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt"]], "ungelesen": 1, "kontaktperson": ['is', 'set']}
             frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r10_bs").click(function(){
+            frappe.route_options = {'status': ['!=', 'Closed'], '_user_tags': ['like', '%MNE-MVBS%']};
+            frappe.set_route("List", "Beratung");
+        });
+        $("#r11_bs").click(function(){
+            frappe.route_options = {'status': ['!=', 'Closed'], '_user_tags': ['like', '%Mandat-MVBS%']};
+            frappe.set_route("List", "Beratung");
+        });
+        $("#r12_bs").click(function(){
+            frappe.route_options = {'status': ['!=', 'Closed'], '_user_tags': ['like', '%PHF-MVBS%']};
+            frappe.set_route("List", "Beratung");
         });
         
         $("#p1_as").click(function(){

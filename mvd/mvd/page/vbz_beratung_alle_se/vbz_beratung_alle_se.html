@@ -27,6 +27,7 @@
                 <td style="text-align: right;"><b>{{ s1_as }}</b></td>
             {% endif %}
         </tr>
+        {% if frappe.boot.default_sektion != "MVBS" %}
         <tr id="s2_as">
             <td>S2</td>
             <td>Termin abgelaufen, Beratung noch offen</td>
@@ -36,6 +37,7 @@
                 <td style="text-align: right;"><b>{{ s2_as }}</b></td>
             {% endif %}
         </tr>
+        {% endif %}
         <tr id="s3_as">
             <td>S3</td>
             <td>Fehler 1: Zusammengeführte Beratung mit neuem Input</td>
@@ -136,6 +138,7 @@
                 <td style="text-align: right;"><b>{{ r6_as }}</b></td>
             {% endif %}
         </tr>
+        {% if frappe.boot.default_sektion != "MVBS" %}
         <tr id="r7_as">
             <td>R7</td>
             <td>Alle vereinbarten Termine</td>
@@ -154,6 +157,7 @@
                 <td style="text-align: right;"><b>{{ r8_as }}</b></td>
             {% endif %}
         </tr>
+        {% endif %}
         <tr id="r9_as">
             <td>R9</td>
             <td>Weitere Korrespondenz</td>
@@ -163,6 +167,35 @@
                 <td style="text-align: right;"><b>{{ r9_as }}</b></td>
             {% endif %}
         </tr>
+        {% if frappe.boot.default_sektion == "MVBS" %}
+        <tr id="r10_bs">
+            <td>10</td>
+            <td>Mehrfach nicht erreicht (MNE)</td>
+            {% if r10_bs > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r10_bs }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r11_bs">
+            <td>11</td>
+            <td>Mandate</td>
+            {% if r11_bs > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r11_bs }}</b></td>
+            {% endif %}
+        </tr>
+        <tr id="r12_bs">
+            <td>12</td>
+            <td>PHF</td>
+            {% if r12_bs > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r12_bs }}</b></td>
+            {% endif %}
+        </tr>
+        {% endif %}
         <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
         <tr>
             <td></td>
