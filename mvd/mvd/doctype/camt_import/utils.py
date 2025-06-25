@@ -118,8 +118,11 @@ def zahlungen_einlesen(camt_file, camt_import):
     
     transaction_entries = camt_file.find_all('ntry')
     
+    # Set/Reset CAMT Base Data
     frappe.db.set_value('CAMT Import', camt_import.name, 'camt_file_datum', frappe.utils.get_datetime(camt_file.document.bktocstmrdbtcdtntfctn.grphdr.credttm.get_text().split("T")[0]).strftime('%Y-%m-%d'))
-    
+    frappe.db.set_value('CAMT Import', camt_import.name, 'camt_taxen', 0)
+    frappe.db.set_value('CAMT Import', camt_import.name, 'camt_amount', 0)
+
     for entry in transaction_entries:
         entry_soup = BeautifulSoup(six.text_type(entry), 'lxml')
         date = entry_soup.bookgdt.dt.get_text().split("+")[0]
@@ -888,3 +891,34 @@ def erstelle_zahlung(date, to_account, received_amount, transaction_id, remarks,
         # erfasse nicht eingelesene Zahlung in CAMT-Import
         erfasse_nicht_eingelesene_zahlungen(qrr, transaction_id, date, received_amount, camt_import)
         return
+
+def reset_camt_amount_from_camt_file(camt_import):
+    """
+    Diese Funktion list das CAMT-File aus und setzt den CAMT Amount neu
+    (Muss manuell ausgeführt werden, z.B.: bench execute mvd.mvd.doctype.camt_import.utils.reset_camt_amount_from_camt_file --kwargs "{'camt_import': 'CAMT-25-02-05-04'}")
+    """
+    camt_file = get_camt_file(frappe.db.get_value('CAMT Import', camt_import, 'camt_file'))
+    if not camt_file:
+        frappe.throw("CAMT File not found")
+    
+    transaction_entries = camt_file.find_all('ntry')
+    
+    # Reset CAMT Base Data
+    frappe.db.set_value('CAMT Import', camt_import, 'camt_amount', 0)
+    camt_amount = 0
+    
+    for entry in transaction_entries:
+        entry_soup = BeautifulSoup(six.text_type(entry), 'lxml')
+        transactions = entry_soup.find_all('txdtls')
+        for transaction in transactions:
+            transaction_soup = BeautifulSoup(six.text_type(transaction), 'lxml')
+            try:
+                amount = float(transaction_soup.amt.get_text())
+                try:
+                    camt_amount += amount
+                except:
+                    pass
+            except:
+                pass
+    
+    frappe.db.set_value('CAMT Import', camt_import, 'camt_amount', camt_amount)
