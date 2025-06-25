@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from bs4 import BeautifulSoup
+import six
 
 def get_camt_file(file_path, test=False):
     try:
@@ -152,6 +153,9 @@ def camt_zugewiesen_nicht_verbucht_update(camt_import):
 
 @frappe.whitelist()
 def aktualisiere_camt_uebersicht(camt_import):
+    # Reset Gesamtsumme
+    reset_camt_amount_from_camt_file(camt_import)
+
     # verbuchte Zahlungen
     verbuchte_zahlungen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty`
                                             FROM `tabPayment Entry`
@@ -533,3 +537,33 @@ def teilzahlungs_verteilung(betrag, maximalwerte):
                     break
 
     return gerundet
+
+
+
+def reset_camt_amount_from_camt_file(camt_import):
+    """
+    Diese Funktion list das CAMT-File aus und setzt den CAMT Amount neu
+    Manuelle ausgeführung: bench execute mvd.mvd.doctype.camt_import.helpers.reset_camt_amount_from_camt_file --kwargs "{'camt_import': 'CAMT-25-02-05-04'}"
+    """
+    camt_file = get_camt_file(frappe.db.get_value('CAMT Import', camt_import, 'camt_file'))
+
+    if camt_file:
+        # Reset CAMT Base Data
+        frappe.db.set_value('CAMT Import', camt_import, 'camt_amount', 0)
+        camt_amount = 0
+        transaction_entries = camt_file.find_all('ntry')
+        for entry in transaction_entries:
+            entry_soup = BeautifulSoup(six.text_type(entry), 'lxml')
+            transactions = entry_soup.find_all('txdtls')
+            for transaction in transactions:
+                transaction_soup = BeautifulSoup(six.text_type(transaction), 'lxml')
+                try:
+                    amount = float(transaction_soup.amt.get_text())
+                    try:
+                        camt_amount += amount
+                    except:
+                        pass
+                except:
+                    pass
+        
+        frappe.db.set_value('CAMT Import', camt_import, 'camt_amount', camt_amount)
