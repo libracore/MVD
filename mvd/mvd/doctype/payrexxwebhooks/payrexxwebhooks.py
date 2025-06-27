@@ -20,7 +20,6 @@ class PayrexxWebhooks(Document):
         mitglied_hash = self.mitglied_hash
         plz = self.plz
         mitglied_info = mitgliedschaft_zuweisen(email=email, mitglied_hash=mitglied_hash, plz=plz)
-
         if mitglied_info:
             if isinstance(mitglied_info, tuple):
                 mitglied_id, sektion_id = mitglied_info
@@ -28,10 +27,19 @@ class PayrexxWebhooks(Document):
                 frappe.db.set_value(self.doctype, self.name, "sektion_id", sektion_id)
             elif isinstance(mitglied_info, str):
                 frappe.db.set_value(self.doctype, self.name, "sektion_id", mitglied_info)
-                
+        elif self.payrexx_instance_uuid:
+            results = frappe.get_all("Sektion",
+                filters={"payrexx_instance_uuid": self.payrexx_instance_uuid},
+                fields=["title"]
+            )
+            if len(results) == 1:
+                frappe.db.set_value(self.doctype, self.name, "sektion_id", results[0]["title"])
+            else: # Fallback
+                frappe.db.set_value(self.doctype, self.name, "sektion_id", "MVD")
+        else: # Fallback
+            frappe.db.set_value(self.doctype, self.name, "sektion_id", "MVD")
         return
     
-
     def set_transaction_fields(self):
         try:
             if not self.json:
@@ -57,6 +65,8 @@ class PayrexxWebhooks(Document):
                 "phone": lambda t: t.get("contact", {}).get("phone"),
                 "email": lambda t: t.get("contact", {}).get("email"),
                 "transaction_datetime": lambda t: t.get("time"),
+                "payrexx_instance_name": lambda t: t.get("instance", {}).get("name"),
+                "payrexx_instance_uuid": lambda t: t.get("instance", {}).get("uuid"),
             }
 
             missing_fields = [] # to log error
