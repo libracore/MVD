@@ -27,6 +27,9 @@
   "sektion_id",
   "mitglied_hash",
   "rohdaten_section",
+  "payrexx_instance_section",
+  "payrexx_instance_name",
+  "payrexx_instance_uuid",
   "json"
  ],
  "fields": [
@@ -150,9 +153,24 @@
    "fieldtype": "Link",
    "label": "Sektion",
    "options": "Sektion"
+  },
+  {
+   "fieldname": "payrexx_instance_section",
+   "fieldtype": "Section Break",
+   "label": "Payrexx Instance"
+  },
+  {
+   "fieldname": "payrexx_instance_name",
+   "fieldtype": "Data",
+   "label": "payrexx_instance_name"
+  },
+  {
+   "fieldname": "payrexx_instance_uuid",
+   "fieldtype": "Data",
+   "label": "payrexx_instance_uuid"
   }
  ],
- "modified": "2025-05-16 08:24:36.986363",
+ "modified": "2025-06-27 09:59:12.249761",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "PayrexxWebhooks",
