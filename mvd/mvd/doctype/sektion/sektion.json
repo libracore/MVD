@@ -92,7 +92,10 @@
   "column_break_83",
   "mzr_telefon",
   "mzr_ort",
-  "mzr_unsure_special"
+  "mzr_unsure_special",
+  "payrexx_section",
+  "payrexx_instance_name",
+  "payrexx_instance_uuid"
  ],
  "fields": [
   {
@@ -600,9 +603,25 @@
    "fieldname": "hinweis_mietzinsrechner_senkung",
    "fieldtype": "Code",
    "label": "Hinweis Mietzinsrechner Senkung"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "payrexx_section",
+   "fieldtype": "Section Break",
+   "label": "Payrexx Instance"
+  },
+  {
+   "fieldname": "payrexx_instance_name",
+   "fieldtype": "Data",
+   "label": "payrexx_instance_name"
+  },
+  {
+   "fieldname": "payrexx_instance_uuid",
+   "fieldtype": "Data",
+   "label": "payrexx_instance_uuid"
   }
  ],
- "modified": "2025-02-10 20:38:45.769846",
+ "modified": "2025-06-27 09:58:20.353153",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
