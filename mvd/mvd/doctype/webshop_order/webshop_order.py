@@ -57,7 +57,7 @@ class WebshopOrder(Document):
                 self.strassen_nr = order_data['strassen_nr']
                 self.tel_m = order_data['tel_m']
                 self.email = order_data['email']
-                self.tel_p = order_data['tel_p']
+                self.tel_p = order_data['tel_p'] if order_data['tel_p'] != self.tel_m else None
                 self.strasse = order_data['strasse']
                 self.vorname = order_data['vorname']
                 self.postfach = order_data['postfach']
