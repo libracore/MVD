@@ -42,6 +42,9 @@ frappe.ui.form.on('Sales Invoice', {
         if (!frm.doc.__islocal) {
             get_qrr_reference(frm);
         }
+    },
+    after_save: function(frm) {
+        location.reload();
     }
 });
 
