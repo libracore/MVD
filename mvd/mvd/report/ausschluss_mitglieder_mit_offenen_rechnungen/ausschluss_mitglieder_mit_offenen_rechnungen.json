@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2025-06-23 16:28:17.921252",
+ "modified": "2025-06-30 11:17:00.212787",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Ausschluss Mitglieder mit offenen Rechnungen",
@@ -21,25 +21,10 @@
    "role": "System Manager"
   },
   {
-   "role": "MV Sektionsmitarbeiter*in"
+   "role": "MV_GL"
   },
   {
-   "role": "API User"
-  },
-  {
-   "role": "MV Sektionsmitarbeiter*in RO"
-  },
-  {
-   "role": "MV_RB"
-  },
-  {
-   "role": "MV_MA"
-  },
-  {
-   "role": "MVZH_Bericht"
-  },
-  {
-   "role": "MV_ERB"
+   "role": "MV_MVD"
   }
  ]
 }
