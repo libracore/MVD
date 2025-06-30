@@ -144,6 +144,7 @@
   },
   {
    "depends_on": "eval:doc.emailberatung_test",
+   "description": "http://localhost:8001/emailberatung?test=TOKEN&mitglied_id=MITGLIED_ID",
    "fieldname": "emailberatung_testtoken",
    "fieldtype": "Data",
    "label": "E-Mailberatung Test Token"
@@ -162,7 +163,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2025-03-25 11:40:53.568074",
+ "modified": "2025-06-30 11:48:21.033499",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",
