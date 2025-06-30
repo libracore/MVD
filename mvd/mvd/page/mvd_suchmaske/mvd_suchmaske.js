@@ -300,7 +300,8 @@ frappe.mvd_such_client = {
                             frappe.call({
                                 method:"frappe.client.get_list",
                                 args:{
-                                    doctype: "Sektion"
+                                    doctype: "Sektion",
+                                    limit_page_length: 100
                                 },
                                 callback: function(r) {
                                     if (r.message.length > 0) {
