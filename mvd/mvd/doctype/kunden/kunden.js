@@ -33,6 +33,10 @@ frappe.ui.form.on('Kunden', {
                     daten_aus_mitgl_bez(frm);
                 });
             }
+
+            frm.add_custom_button(__("Faktura Kunden zusammenführen"), function() {
+                merge_faktura_kunden(frm);
+            });
         }
         
         // set strasse ggf. mandatory
@@ -391,4 +395,77 @@ function daten_aus_mitgl_bez(frm, status) {
             cur_frm.reload_doc();
         }
     });
+}
+
+
+function merge_faktura_kunden(frm) {
+    frappe.prompt([
+        {'fieldname': 'master', 'fieldtype': 'Link', 'options': 'Kunden', 'label': 'Zusammenführen mit (Master)', 'reqd': 1}  
+    ],
+    function(values){
+        frappe.call({
+            'method': "mvd.mvd.doctype.kunden.kunden.check_merge_faktura_kunden",
+            'args':{
+                    'master': values.master,
+                    'slave': cur_frm.doc.name
+            },
+            'freeze': true,
+            'freeze_message': 'Vergleiche Master mit Slave',
+            'callback': function(r)
+            {
+                console.log(r.message)
+                var d = new frappe.ui.Dialog({
+                    'fields': [
+                        {'fieldname': 'master', 'fieldtype': 'Link', 'options': 'Kunden', 'label': 'Faktura Kunde', 'default': r.message.master.doc_name, 'read_only': 1},
+                        {'fieldname': 'master_contact', 'fieldtype': 'Link', 'options': 'Contact', 'label': 'Kontakt', 'default': r.message.master.contact, 'read_only': 1},
+                        {'fieldname': 'master_address', 'fieldtype': 'Link', 'options': 'Address', 'label': 'Adresse', 'default': r.message.master.address, 'read_only': 1},
+                        {'fieldname': 'master_customer', 'fieldtype': 'Link', 'options': 'Customer', 'label': 'Kundenstamm', 'default': r.message.master.customer, 'read_only': 1},
+                        {'fieldname': 'cb_1', 'fieldtype': 'Column Break'},
+                        {'fieldname': 'arrow_1', 'fieldtype': 'HTML', 'options': '<br><center><i class="fa fa-arrow-right"></i></center>'},
+                        {'fieldname': 'cb_2', 'fieldtype': 'Column Break'},
+                        {'fieldname': 'slave', 'fieldtype': 'Link', 'options': 'Kunden', 'label': 'Faktura Kunde', 'default': r.message.slave.doc_name, 'read_only': 1},
+                        {'fieldname': 'slave_contact', 'fieldtype': 'Link', 'options': 'Contact', 'label': 'Kontakt', 'default': r.message.slave.contact, 'read_only': 1},
+                        {'fieldname': 'slave_address', 'fieldtype': 'Link', 'options': 'Address', 'label': 'Adresse', 'default': r.message.slave.address, 'read_only': 1},
+                        {'fieldname': 'slave_customer', 'fieldtype': 'Link', 'options': 'Customer', 'label': 'Kundenstamm', 'default': r.message.slave.customer, 'read_only': 1},
+                    ],
+                    primary_action: function(){
+                        d.hide();
+                        frappe.dom.freeze('Bitte warten, merge Master mit Slave...');
+                        frappe.call({
+                            'method': "mvd.mvd.doctype.kunden.kunden.merge_faktura_kunden",
+                            'args':{
+                                    'master': values.master,
+                                    'slave': cur_frm.doc.name
+                            },
+                            'callback': function(r)
+                            {
+                                var jobname = r.message;
+                                let merge_refresher = setInterval(merge_refresher_handler, 3000, jobname);
+                                function merge_refresher_handler(jobname) {
+                                    frappe.call({
+                                    'method': "mvd.mvd.doctype.kunden.kunden.is_merge_job_running",
+                                        'args': {
+                                            'jobname': jobname
+                                        },
+                                        'callback': function(res) {
+                                            if (res.message == 'refresh') {
+                                                clearInterval(merge_refresher);
+                                                frappe.dom.unfreeze();
+                                                cur_frm.reload_doc();
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    },
+                    primary_action_label: __('Zusammenführung starten')
+                });
+                d.show();
+            }
+        });
+    },
+    'Auswahl Master Faktura Kunde',
+    'Zusammenführen'
+    );
 }

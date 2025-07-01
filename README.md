@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 16.21.13
+#1353 Merge-Funktion für Faktura Kunden
 #### 16.21.12
 #1338
 * Prüfung Mitgliedschafts- und HV-Bezahlung auch bei unvalidierten Mitgliedern

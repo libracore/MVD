@@ -10,6 +10,7 @@ from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils import nowdate, flt, now
 import json
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung
+from frappe.utils.background_jobs import enqueue
 
 class Kunden(Document):
     def onload(self):
@@ -880,3 +881,134 @@ def update_faktura_kunde(mitgliedschaft=None, kunde=None):
     faktura_kunde.rg_ort = mitgliedschaft.rg_ort
     faktura_kunde.rg_land = mitgliedschaft.rg_land
     faktura_kunde.save(ignore_permissions=True)
+
+
+@frappe.whitelist()
+def check_merge_faktura_kunden(master, slave):
+    master_doc = frappe.get_doc("Kunden", master)
+    slave_doc = frappe.get_doc("Kunden", slave)
+
+    data = {
+        'master': {
+            'doc_name': master,
+            'contact': master_doc.kontakt_kunde,
+            'address': master_doc.adresse_kunde,
+            'customer': master_doc.kunde_kunde
+        },
+        'slave': {
+            'doc_name': slave,
+            'contact': slave_doc.kontakt_kunde,
+            'address': slave_doc.adresse_kunde,
+            'customer': slave_doc.kunde_kunde
+        }
+    }
+
+    return data
+
+@frappe.whitelist()
+def merge_faktura_kunden(master, slave):
+    args = {
+        'master': master,
+        'slave': slave
+    }
+    enqueue("mvd.mvd.doctype.kunden.kunden._merge_faktura_kunden", queue='long', job_name='Merge {0} into {1}'.format(slave, master), timeout=5000, **args)
+    return 'Merge {0} into {1}'.format(slave, master)
+
+def _merge_faktura_kunden(master, slave):
+    def merge_address(master, slave):
+        master_doc = frappe.get_doc("Kunden", master)
+        slave_doc = frappe.get_doc("Kunden", slave)
+        # Address
+        frappe.rename_doc("Address", slave_doc.adresse_kunde, master_doc.adresse_kunde, ignore_permissions=True, merge=True)
+        frappe.db.commit()
+    
+    def merge_contact(master, slave):
+        master_doc = frappe.get_doc("Kunden", master)
+        slave_doc = frappe.get_doc("Kunden", slave)
+        # Contact
+        frappe.rename_doc("Contact", slave_doc.kontakt_kunde, master_doc.kontakt_kunde, ignore_permissions=True, merge=True)
+        frappe.db.commit()
+    
+    def merge_customer(master, slave):
+        master_doc = frappe.get_doc("Kunden", master)
+        slave_doc = frappe.get_doc("Kunden", slave)
+        # Customer
+        frappe.rename_doc("Customer", slave_doc.kunde_kunde, master_doc.kunde_kunde, ignore_permissions=True, merge=True)
+        frappe.db.commit()
+    
+    def merge_faktura_kunde(master, slave):
+        master_doc = frappe.get_doc("Kunden", master)
+        slave_doc = frappe.get_doc("Kunden", slave)
+        meta = frappe.get_meta("Kunden")
+        to_be_safed = False
+        for field in meta.get("fields"):
+            if slave_doc.get(field.get("fieldname")) and not master_doc.get(field.get("fieldname")):
+                master_doc.set(field.get("fieldname"), slave_doc.get(field.get("fieldname")))
+                to_be_safed = True
+        if to_be_safed:
+            master_doc.save(ignore_permissions=True)
+            frappe.db.commit()
+
+        # Faktura Kunde
+        frappe.rename_doc("Kunden", slave, master, ignore_permissions=True, merge=True)
+        frappe.db.commit()
+    
+    merge_address(master, slave)
+    merge_contact(master, slave)
+    merge_customer(master, slave)
+    merge_faktura_kunde(master, slave)
+
+@frappe.whitelist()
+def is_merge_job_running(jobname):
+    from frappe.utils.background_jobs import get_jobs
+    running = get_info(jobname)
+    return running
+
+def get_info(jobname):
+    from rq import Queue, Worker
+    from frappe.utils.background_jobs import get_redis_conn
+    from frappe.utils import format_datetime, cint, convert_utc_to_user_timezone
+    colors = {
+        'queued': 'orange',
+        'failed': 'red',
+        'started': 'blue',
+        'finished': 'green'
+    }
+    conn = get_redis_conn()
+    queues = Queue.all(conn)
+    workers = Worker.all(conn)
+    jobs = []
+    show_failed=False
+
+    def add_job(j, name):
+        if j.kwargs.get('site')==frappe.local.site:
+            jobs.append({
+                'job_name': j.kwargs.get('kwargs', {}).get('playbook_method') \
+                    or str(j.kwargs.get('job_name')),
+                'status': j.status, 'queue': name,
+                'creation': format_datetime(convert_utc_to_user_timezone(j.created_at)),
+                'color': colors[j.status]
+            })
+            if j.exc_info:
+                jobs[-1]['exc_info'] = j.exc_info
+
+    for w in workers:
+        j = w.get_current_job()
+        if j:
+            add_job(j, w.name)
+
+    for q in queues:
+        if q.name != 'failed':
+            for j in q.get_jobs(): add_job(j, q.name)
+
+    if cint(show_failed):
+        for q in queues:
+            if q.name == 'failed':
+                for j in q.get_jobs()[:10]: add_job(j, q.name)
+    
+    found_job = 'refresh'
+    for job in jobs:
+        if job['job_name'] == jobname:
+            found_job = True
+
+    return found_job
