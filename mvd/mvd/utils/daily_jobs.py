@@ -9,6 +9,7 @@ from mvd.mvd.doctype.mitgliedschaft.utils import get_ampelfarbe
 from mvd.mvd.doctype.region.region import _regionen_zuteilung
 from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
+from datetime import datetime
 
 def create_daily_snap():
     new_daily_snap = frappe.get_doc({'doctype': 'Daily Snap'})
@@ -262,3 +263,47 @@ def mark_beratungen_as_s8():
         
         if affected:
             frappe.db.set_value("Beratung", b.name, 's8', 1)
+
+def daily_ampel_korrektur():
+    aktuelles_jahr = datetime.now().year
+    
+    # Potentiell falsch Rot
+    mitgliedschaften = frappe.db.sql("""
+        SELECT 
+            `sinv`.`mv_mitgliedschaft` AS `mitgliedschaft`
+        FROM `tabSales Invoice` AS `sinv`
+        JOIN `tabMitgliedschaft` AS `mitgl` ON `sinv`.`mv_mitgliedschaft` = `mitgl`.`name`
+        WHERE `sinv`.`mitgliedschafts_jahr` = '{aktuelles_jahr}'
+        AND `sinv`.`status` = 'Paid'
+        AND `sinv`.`ist_mitgliedschaftsrechnung` = 1
+        AND `sinv`.`docstatus` = 1
+        AND `mitgl`.`ampel_farbe` =  'ampelrot'
+        AND `mitgl`.`status_c` != 'Inaktiv'
+        LIMIT 100
+    """.format(aktuelles_jahr=aktuelles_jahr), as_dict=True)
+    for mitgliedschaft in mitgliedschaften:
+        args = {
+            'mv_mitgliedschaft': mitgliedschaft.mitgliedschaft
+        }
+        enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
+    
+    # Potentiell falsch Grün
+    mitgliedschaften = frappe.db.sql("""
+        SELECT 
+            `sinv`.`mv_mitgliedschaft` AS `mitgliedschaft`
+        FROM `tabSales Invoice` AS `sinv`
+        JOIN `tabMitgliedschaft` AS `mitgl` ON `sinv`.`mv_mitgliedschaft` = `mitgl`.`name`
+        WHERE `sinv`.`mitgliedschafts_jahr` = '{aktuelles_jahr}'
+        AND `sinv`.`status` = 'Overdue'
+        AND `sinv`.`ist_mitgliedschaftsrechnung` = 1
+        AND `sinv`.`docstatus` = 1
+        AND `mitgl`.`ampel_farbe` =  'ampelgruen'
+        AND `mitgl`.`status_c` != 'Inaktiv'
+        LIMIT 100
+    """.format(aktuelles_jahr=aktuelles_jahr), as_dict=True)
+    for mitgliedschaft in mitgliedschaften:
+        args = {
+            'mv_mitgliedschaft': mitgliedschaft.mitgliedschaft
+        }
+        enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
+    
