@@ -185,7 +185,7 @@ def new_beratung(**kwargs):
             else:
                 telefon = ''
             if args['email']:
-                email = """<b>E-Mail:</b> {0}<br>""".format(args['email'])
+                email = """<b>E-Mail:</b> <a href="mailto:{0}">{0}</a><br>""".format(args['email'])
             else:
                 email = ''
             if args['anderes_mietobjekt']:
@@ -306,6 +306,12 @@ def get_upload_keys():
 
 def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, legacy_mail=False, sektion=None):
     try:
+        mitglied_nr = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr")
+        link_zur_mitgliedschaft = '<a href="https://libracore.mieterverband.ch/desk#Form/Mitgliedschaft/{0}">{1}</a>'.format(mitgliedschaft, mitglied_nr)
+        link_zur_beratung = '<a href="https://libracore.mieterverband.ch/desk#Form/Beratung/{0}">{0}</a>'.format(beratung)
+        beratung_email = "mv+Beratung+{0}@libracore.io".format(beratung)
+        email_to_mitglied = "mv+Mitgliedschaft+{0}@libracore.io".format(mitgliedschaft)
+
         if not legacy_mail:
             message = """Guten Tag"""
             if frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1"):
@@ -317,8 +323,8 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                 einleitung = frappe.get_value("Sektion", sektion, "emailberatung_email_text")
             else:
                 einleitung = """Die untenstehende Frage ist bei uns eingetroffen."""
-            
-            message += """<br><br>{0}<br><br><b>Mitgliedernummer</b>: {1}<br>{2}""".format(einleitung, frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+
+            message += """<br><br>{0}<br><br><b>Mitgliedernummer:</b> {1}<br>{2}""".format(einleitung, mitglied_nr, notiz)
             message += """<br><br>Freundliche Grüsse<br>
                         Ihr Mieterinnen- und Mieterverband"""
             
@@ -370,11 +376,17 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
             try:
                 message = False
                 attachments = None
+                vorname = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1")
+                nachname = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1")
                 if legacy_mail == '1':
                     # legacy mail mit links
                     message = """Guten Tag {0}""".format(sektion)
                     message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
-                            <br><br><b>Mitglied</b>: {0} {1}<br><b>Mitgliedernummer</b>: {2}<br>{3}<br><br>Anhänge:<br>""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1"), frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"), frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+                            <br><br><b>Mitglied:</b> {0} {1}
+                            <br><b>Mitgliedernummer:</b> {2} (<a href="mailto:{3}">{3}</a>)
+                            <br><b>Beratung:</b> {4} (<a href="mailto:{5}">{5}</a>)
+                            <br>{6}
+                            <br><br>Anhänge:<br>""".format(vorname, nachname, link_zur_mitgliedschaft, email_to_mitglied, link_zur_beratung, beratung_email, notiz)
                     for file_data in frappe.get_doc("Beratung", beratung).dokumente:
                         message += """<a href="{0}">{1}</a><br>""".format(get_url(file_data.file), file_data.filename)
                 
@@ -382,7 +394,10 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                     # legacy mail mit anhängen
                     message = """Guten Tag {0}""".format(sektion)
                     message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
-                            <br><br><b>Mitglied</b>: {0} {1}<br><b>Mitgliedernummer</b>: {2}<br>{3}""".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1"), frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"), frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr"), notiz)
+                            <br><br><b>Mitglied:</b> {0} {1}
+                            <br><b>Mitgliedernummer:</b> {2} (<a href="mailto:{3}">{3}</a>)
+                            <br><b>Beratung:</b> {4} (<a href="mailto:{5}">{5}</a>)
+                            <br>{6}""".format(vorname, nachname, link_zur_mitgliedschaft, email_to_mitglied, link_zur_beratung, beratung_email, notiz)
                     
                     attachments = []
                     all_attachments = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{0}'""".format(beratung), as_dict=True)
