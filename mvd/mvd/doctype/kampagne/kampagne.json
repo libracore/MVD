@@ -6,7 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "email",
-  "newsletter_name",
+  "cb_0",
+  "newsletter_names",
+  "sb_0",
   "campaign_trigger_code",
   "subscribed_over_pledge",
   "zip_code",
@@ -28,7 +30,8 @@
   "quelle",
   "ip",
   "id",
-  "send_to_sp"
+  "send_to_sp",
+  "column_break_26"
  ],
  "fields": [
   {
@@ -36,13 +39,6 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Email",
-   "reqd": 1
-  },
-  {
-   "fieldname": "newsletter_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "NewsletterName",
    "reqd": 1
   },
   {
@@ -163,9 +159,30 @@
    "fieldtype": "Link",
    "label": "Sektion",
    "options": "Sektion"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sb_0",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "newsletter_names",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "NewsletterNames",
+   "options": "rows: 2",
+   "reqd": 1,
+   "width": "2"
   }
  ],
- "modified": "2025-05-20 22:00:08.382397",
+ "modified": "2025-07-07 11:27:18.750594",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",
