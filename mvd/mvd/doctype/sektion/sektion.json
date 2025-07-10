@@ -2,6 +2,7 @@
  "allow_rename": 1,
  "autoname": "field:title",
  "creation": "2021-08-26 13:39:03.647754",
+ "description": "<h1>Hinweise f\u00fcr die Verwendung dieser Variablen in der Website</h1>\n<ul>\n<li>erster Punkt</li>\n</ul>",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -95,7 +96,30 @@
   "mzr_unsure_special",
   "payrexx_section",
   "payrexx_instance_name",
-  "payrexx_instance_uuid"
+  "payrexx_instance_uuid",
+  "pw_section",
+  "pw_tipps",
+  "pw_sektion_name",
+  "pw_adresse_zusatz",
+  "pw_adresse_pf",
+  "pw_adresse_str_nr",
+  "pw_adresse_plz_ort",
+  "pw_tel",
+  "pw_email",
+  "pw_section_2",
+  "pw_oeff_mo_vm",
+  "pw_oeff_di_vm",
+  "pw_oeff_mi_vm",
+  "pw_oeff_do_vm",
+  "pw_oeff_fr_vm",
+  "pw_oeff_sa_vm",
+  "pw_colb2",
+  "pw_oeff_mo_nm",
+  "pw_oeff_di_nm",
+  "pw_oeff_mi_nm",
+  "pw_oeff_do_nm",
+  "pw_oeff_fr_nm",
+  "pw_oeff_sa_nm"
  ],
  "fields": [
   {
@@ -619,9 +643,126 @@
    "fieldname": "payrexx_instance_uuid",
    "fieldtype": "Data",
    "label": "payrexx_instance_uuid"
+  },
+  {
+   "fieldname": "pw_sektion_name",
+   "fieldtype": "Data",
+   "label": "pw_sektion_name"
+  },
+  {
+   "fieldname": "pw_adresse_zusatz",
+   "fieldtype": "Data",
+   "label": "pw_adresse_zusatz"
+  },
+  {
+   "fieldname": "pw_adresse_pf",
+   "fieldtype": "Data",
+   "label": "pw_adresse_pf"
+  },
+  {
+   "fieldname": "pw_adresse_str_nr",
+   "fieldtype": "Data",
+   "label": "pw_adresse_str_nr"
+  },
+  {
+   "fieldname": "pw_adresse_plz_ort",
+   "fieldtype": "Data",
+   "label": "pw_adresse_plz_ort"
+  },
+  {
+   "fieldname": "pw_tel",
+   "fieldtype": "Data",
+   "label": "pw_tel"
+  },
+  {
+   "fieldname": "pw_email",
+   "fieldtype": "Data",
+   "label": "pw_email"
+  },
+  {
+   "fieldname": "pw_oeff_mo_vm",
+   "fieldtype": "Data",
+   "label": "pw_oeff_mo_vm"
+  },
+  {
+   "fieldname": "pw_oeff_mo_nm",
+   "fieldtype": "Data",
+   "label": "pw_oeff_mo_nm"
+  },
+  {
+   "fieldname": "pw_oeff_di_vm",
+   "fieldtype": "Data",
+   "label": "pw_oeff_di_vm"
+  },
+  {
+   "fieldname": "pw_oeff_di_nm",
+   "fieldtype": "Data",
+   "label": "pw_oeff_di_nm"
+  },
+  {
+   "fieldname": "pw_oeff_mi_vm",
+   "fieldtype": "Data",
+   "label": "pw_oeff_mi_vm"
+  },
+  {
+   "fieldname": "pw_oeff_mi_nm",
+   "fieldtype": "Data",
+   "label": "pw_oeff_mi_nm"
+  },
+  {
+   "fieldname": "pw_oeff_do_vm",
+   "fieldtype": "Data",
+   "label": "pw_oeff_do_vm"
+  },
+  {
+   "fieldname": "pw_oeff_do_nm",
+   "fieldtype": "Data",
+   "label": "pw_oeff_do_nm"
+  },
+  {
+   "fieldname": "pw_oeff_fr_vm",
+   "fieldtype": "Data",
+   "label": "pw_oeff_fr_vm"
+  },
+  {
+   "fieldname": "pw_oeff_fr_nm",
+   "fieldtype": "Data",
+   "label": "pw_oeff_fr_nm"
+  },
+  {
+   "fieldname": "pw_oeff_sa_vm",
+   "fieldtype": "Data",
+   "label": "pw_oeff_sa_vm"
+  },
+  {
+   "fieldname": "pw_oeff_sa_nm",
+   "fieldtype": "Data",
+   "label": "pw_oeff_sa_nm"
+  },
+  {
+   "fieldname": "pw_colb2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "pw_section",
+   "fieldtype": "Section Break",
+   "label": "Website / ProcessWire"
+  },
+  {
+   "fieldname": "pw_tipps",
+   "fieldtype": "HTML",
+   "label": "ProcessWire Info",
+   "options": "<h1>Hinweise</h1>\n<p>Hier folgen Hinweise f\u00fcr die Verwendung dieser Variablen.</p>"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "pw_section_2",
+   "fieldtype": "Section Break",
+   "label": "Website / ProcessWire (\u00d6ffnungszeiten)"
   }
  ],
- "modified": "2025-06-27 09:58:20.353153",
+ "modified": "2025-07-10 21:05:19.083903",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
