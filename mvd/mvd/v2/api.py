@@ -98,19 +98,19 @@ def get_all_item_details(sektion):
     for item_field_name in all_items:
         if doctype_sektion.get(item_field_name):
             item_name = doctype_sektion.get(item_field_name)
-        item_details = frappe.db.sql("""
-                                        SELECT
-                                            `name`,
-                                            `description`,
-                                            NULL AS `rate`
-                                        FROM `tabItem`
-                                        WHERE `name` = '{0}'
-                                     """.format(item_name), as_dict=True)
-        if len(item_details) > 0:
-            item_details[0].rate = get_item_rate(item_details[0].name)
-            #items.append(item_details[0])   
-            items[item_details[0].name] = item_details[0]   
-        items[item_details[0].name]['field_name'] = item_field_name          
+            item_details = frappe.db.sql("""
+                                            SELECT
+                                                `name`,
+                                                `description`,
+                                                NULL AS `rate`
+                                            FROM `tabItem`
+                                            WHERE `name` = '{0}'
+                                        """.format(item_name), as_dict=True)
+            if len(item_details) > 0:
+                item_details[0].rate = get_item_rate(item_details[0].name)
+                #items.append(item_details[0])   
+                items[item_details[0].name] = item_details[0]   
+                items[item_details[0].name]['field_name'] = item_field_name          
     
     return items
 
