@@ -152,7 +152,7 @@
   },
   {
    "fieldname": "retoure_sendungsbild",
-   "fieldtype": "Code",
+   "fieldtype": "Data",
    "label": "retoureSendungsbild",
    "read_only": 1
   },
@@ -199,7 +199,7 @@
    "label": "RawData"
   }
  ],
- "modified": "2025-06-02 10:55:10.649031",
+ "modified": "2025-07-07 15:35:03.250198",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren",

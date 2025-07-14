@@ -172,7 +172,7 @@ def create_post_retouren(data):
             'grund_bezeichnung': data.grundBezeichnung,
             'retoure_mw_sequence_number': data.retoureMuWSequenceNumber,
             'retoure_dmc': data.retoureDMC,
-            'retoureSendungsbild': data.retoureSendungsbild,
+            'retoure_sendungsbild': data.retoureSendungsbild,
             'datum_erfasst_post': data.datumErfasstPost,
             'adresse_geaendert': adresse_geaendert,
             'retoure_in_folge': check_retoure_in_folge(data.retoureMuWSequenceNumber, data.mitgliedId),
