@@ -361,9 +361,26 @@ def sinv_update(sinv, event):
     update_blocked = False
     old_sinv = sinv.get_doc_before_save()
     if old_sinv:
-        if old_sinv.status:
-            if old_sinv.status == sinv.status:
-                update_blocked = True
+        if old_sinv.status and old_sinv.status == sinv.status:
+            update_blocked = True
+            if old_sinv.outstanding_amount == 0.0:
+                items = frappe.get_all(
+                    "Sales Invoice Item",
+                    filters={"parent": sinv.name},
+                    fields=["name", "amount"]
+                )
+                total_amount = sum(item["amount"] for item in items)
+                payments = frappe.get_all(
+                    "Sales Invoice Payment",
+                    filters={"parent": sinv.name},
+                    fields=["name"]
+                )
+                # Only update if exactly one payment row exists
+                if len(payments) == 1:
+                    frappe.db.set_value("Sales Invoice Payment", payments[0]["name"], "amount", total_amount)
+                    frappe.db.set_value("Sales Invoice Payment", payments[0]["name"], "base_amount", total_amount)
+                    frappe.db.set_value("Sales Invoice", sinv.name, "outstanding_amount", 0.0)
+
     if not update_blocked:
         if sinv.mv_mitgliedschaft:
             args = {
