@@ -10,7 +10,6 @@ from frappe import _
 from frappe.utils import cint
 from frappe.utils.pdf import get_file_data_from_writer
 from frappe.utils.data import getdate, add_days, now, today
-from frappe.utils.background_jobs import enqueue
 
 @frappe.whitelist()
 def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=False, attach_as_pdf=False, sinv_mitgliedschaftsjahr=False):
@@ -905,3 +904,14 @@ def create_web_login_user(mitglied_nr):
             except Exception as err:
                 frappe.log_error("{0}\n\n{1}".format(user_id.replace("@login.ch", ""), str(err)), 'create_web_login_user')
     return
+
+def mark_for_massenlauf(sinv=None, mitgliedschaft=None):
+    if not sinv or not mitgliedschaft:
+        return
+    frappe.db.sql("""
+                  UPDATE `tabMitgliedschaft`
+                  SET
+                    `rg_massendruck` = '{sinv}',
+                    `rg_massendruck_vormerkung` = 1
+                  WHERE `name` = '{mitgliedschaft}'""".format(sinv=sinv, mitgliedschaft=mitgliedschaft), as_list=True)
+    frappe.db.commit()

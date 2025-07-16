@@ -24,6 +24,7 @@ from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention, get_adres
 from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, update_kontakt
 from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_zahlung_mitgliedschaft, check_zahlung_hv, get_ampelfarbe, \
                                                         set_max_reminder_level, check_folgejahr_regelung
+from frappe.utils.background_jobs import enqueue
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
@@ -1702,9 +1703,11 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         sinv.save(ignore_permissions=True)
     
     if massendruck:
-        frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `rg_massendruck` = '{sinv}', `rg_massendruck_vormerkung` = 1 WHERE `name` = '{mitgliedschaft}'""".format(sinv=sinv.name, mitgliedschaft=mitgliedschaft.name), as_list=True)
-    else:
-        frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `rg_massendruck` = '', `rg_massendruck_vormerkung` = 0 WHERE `name` = '{mitgliedschaft}'""".format(mitgliedschaft=mitgliedschaft.name), as_list=True)
+        args = {
+                'mitgliedschaft': mitgliedschaft.name,
+                'sinv': sinv.name
+            }
+        enqueue("mvd.mvd.doctype.mitgliedschaft.utils.mark_for_massenlauf", queue='short', job_name='Markiere {0} für Massenlauf'.format(sinv.name), timeout=5000, **args)
     
     if submit:
         # submit workaround weil submit ignore_permissions=True nicht kennt
