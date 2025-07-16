@@ -252,8 +252,8 @@ class Beratung(Document):
                     self.kontaktperson = self.termin[len(self.termin) - 1].berater_in
     
     def split_beratung(self, split_type, communication_id):
+        from copy import deepcopy
         if split_type == '1:1 Kopie':
-            from copy import deepcopy
             replicated_beratung = deepcopy(self)
         elif split_type == 'Neuanlage':
             replicated_beratung = {
@@ -278,6 +278,15 @@ class Beratung(Document):
             doc = frappe.get_doc("Communication", communication.name)
             doc.reference_name = replicated_beratung.name
             doc.save(ignore_permissions=True)
+
+        # replicate linked attachements
+        file_attachments = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{docname}'""".format(\
+                            docname=self.name), as_dict=True)
+        for attachment in file_attachments:
+            attachment_copy = deepcopy(frappe.get_doc("File", attachment.name))
+            attachment_copy.attached_to_name = replicated_beratung.name
+            frappe.get_doc(attachment_copy).insert()
+            
 
         frappe.get_doc({
             "doctype": "Comment",
