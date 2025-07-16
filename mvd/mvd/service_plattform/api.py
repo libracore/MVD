@@ -598,8 +598,11 @@ def create_user(email, first_name, last_name, debug=False):
             if debug:
                 print("{0}".format(payload))
             response_reset_pw = requests.post(url, headers=headers, data=payload)
-
-            
+        else:
+            if debug:
+                print("{0}".format(response.status_code))
+                print("{0}".format(response.json()))
+            frappe.log_error("{0}".format(response.json()), 'update user to auth0 Code {0}'.format(response.status_code))
         return
     except Exception as err:
         if debug:
