@@ -31,6 +31,7 @@
   "ip",
   "id",
   "send_to_sp",
+  "ub_sent",
   "column_break_26"
  ],
  "fields": [
@@ -180,9 +181,14 @@
    "options": "rows: 2",
    "reqd": 1,
    "width": "2"
+  },
+  {
+   "fieldname": "ub_sent",
+   "fieldtype": "Datetime",
+   "label": "ub_sent"
   }
  ],
- "modified": "2025-07-07 11:27:18.750594",
+ "modified": "2025-07-17 15:08:03.490386",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",
