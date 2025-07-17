@@ -31,6 +31,7 @@
   "retoure_mw_sequence_number",
   "retoure_dmc",
   "retoure_sendungsbild",
+  "open_retoure_sendungsbild",
   "ignore_validation",
   "section_raw_data",
   "raw_data"
@@ -152,7 +153,7 @@
   },
   {
    "fieldname": "retoure_sendungsbild",
-   "fieldtype": "Data",
+   "fieldtype": "Code",
    "label": "retoureSendungsbild",
    "read_only": 1
   },
@@ -197,9 +198,15 @@
    "fieldname": "raw_data",
    "fieldtype": "Code",
    "label": "RawData"
+  },
+  {
+   "depends_on": "eval:doc.retoure_sendungsbild",
+   "fieldname": "open_retoure_sendungsbild",
+   "fieldtype": "Button",
+   "label": "\u00d6ffneSendungsbild-Link"
   }
  ],
- "modified": "2025-07-07 15:35:03.250198",
+ "modified": "2025-07-17 08:48:38.233932",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Retouren",

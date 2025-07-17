@@ -18,23 +18,20 @@ frappe.ui.form.on('Retouren', {
             });
         }
     },
-
-    refresh: function(frm) {
-        cur_frm.page.add_action_icon(__("fa fa-envelope-o"), function() {
-            send_mail(frm);
-        });
-
+    open_retoure_sendungsbild: function(frm) {
         let field = frm.fields_dict.retoure_sendungsbild;
 
         if (field && frm.doc.retoure_sendungsbild) {
             const url = frm.doc.retoure_sendungsbild;
-
-            // Override the field input display with clickable link
-            field.set_input(`<a href="${url}" target="_blank">${url}</a>`);
+            window.open(url, '_blank');
         } else if (field) {
-            // Reset to normal input
-            field.set_input(frm.doc.retoure_sendungsbild || '');
+            frappe.msgprint("Es ist kein Sendungsbild hinterlegt.")
         }
+    },
+    refresh: function(frm) {
+        cur_frm.page.add_action_icon(__("fa fa-envelope-o"), function() {
+            send_mail(frm);
+        });
     },
     onload: function(frm) {
         // Load `ausgabe` options from MW
