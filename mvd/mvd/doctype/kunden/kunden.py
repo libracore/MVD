@@ -11,6 +11,8 @@ from frappe.utils import nowdate, flt, now
 import json
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung
 from frappe.utils.background_jobs import enqueue
+from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
+from mvd.mvd.doctype.mitgliedschaft.utils import create_korrespondenz
 
 class Kunden(Document):
     def onload(self):
@@ -819,6 +821,24 @@ def anlage_prozess(anlage_daten, status):
     mitgliedschaft.insert(ignore_permissions=True)
     
     if status == 'Regulär':
+        # Erstelle bezahlte Mitgliedschaftsrechnung und Begrüssungs-Korrespondenz
+        # Begrüssungs-Korrespondenz
+        druckvorlage = get_druckvorlagen(sektion=mitgliedschaft.sektion_id, \
+                                            dokument='Begrüssung mit Ausweis', \
+                                            mitgliedtyp=mitgliedschaft.mitgliedtyp_c, \
+                                            language=mitgliedschaft.language)['default_druckvorlage']
+            
+        begruessung_massendruck_dokument = create_korrespondenz(mitgliedschaft=mitgliedschaft.name, \
+                                                                            druckvorlage=druckvorlage, \
+                                                                            titel='Begrüssung (Autom.)')
+        
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+        mitgliedschaft.begruessung_massendruck = 1
+        mitgliedschaft.begruessung_via_zahlung = 1
+        mitgliedschaft.begruessung_massendruck_dokument = begruessung_massendruck_dokument
+        mitgliedschaft.save()
+
+        # Rechnung
         bezahlt = True
         hv_bar_bezahlt = False
         sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage='', massendruck=False)
