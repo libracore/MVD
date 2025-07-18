@@ -10,6 +10,9 @@ frappe.pages['mvd-suchmaske'].on_page_load = function(wrapper) {
     me.$user_search_button = me.page.set_primary_action('Suche starten<span class="text-muted pull-right" style="padding-left: 5px;">Ctrl+S</span>', () => {
         frappe.mvd_such_client.suche(page);
     });
+    me.$user_history_search_button = me.page.add_menu_item('Historische Suche starten', () => {
+        frappe.mvd_such_client.start_history_suche(page);
+    });
     me.$listenansicht_button = me.page.add_menu_item('Listenansicht zeigen<span class="text-muted pull-right">Ctrl+L</span>', () => {
         frappe.mvd_such_client.goto_list(page);
     });
@@ -188,7 +191,7 @@ frappe.mvd_such_client = {
                 search_data[key] = false;
             }
         }
-        console.log(search_data);
+        
         frappe.call({
             method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.suche",
             args:{
@@ -212,6 +215,31 @@ frappe.mvd_such_client = {
                     cur_page.page.search_fields.neuanlage.refresh();
                     frappe.show_alert({message:"Keine Suchresultate vorhanden.", indicator:'orange'}, 5);
                 }
+            }
+        });
+    },
+    start_history_suche: function(page) {
+        frappe.show_alert("Die Durchsuchung der Historie wurde gestartet, bitte warten...", 5);
+        var search_data = {};
+        for (const [ key, value ] of Object.entries(cur_page.page.search_fields)) {
+            if (value.get_value()) {
+                search_data[key] = value.get_value();
+            } else {
+                search_data[key] = false;
+            }
+        }
+        
+        frappe.call({
+            method: "mvd.mvd.page.mvd_suchmaske.mvd_suchmaske.history_search",
+            args:{
+                    'suchparameter': search_data
+            },
+            freeze: true,
+            freeze_message: 'Suche nach Historischen Daten...',
+            callback: function(r)
+            {
+                cur_page.page.search_fields.suchresultate.set_value(r.message);
+                frappe.show_alert({message:"Die Suchresultate werden angezeigt.", indicator:'green'}, 5);
             }
         });
     },

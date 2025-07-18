@@ -1,0 +1,76 @@
+<style>
+    table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #f5f7fa;
+        padding-right: 5px;
+        padding-left: 5px;
+        max-width: 100px;
+        cursor: pointer;
+    }
+    td {
+        padding-right: 5px;
+        padding-left: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 90px;
+    }
+    tr {
+        border-bottom: 1px solid silver;
+    }
+</style>
+<div style='width: 100%; height: 50vH; overflow: auto;'>
+    <table style="width: 100%;" id="resultate_table">
+        <thead>
+            <tr>
+                <th style="padding-left: 0px !important;">&nbsp;</th>
+                <th>Mitglied</th>
+                <th>Strasse</th>
+                <th>Nummer</th>
+                <th>PLZ</th>
+                <th>Ort</th>
+                <th>Neue Adresse</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mitgliedschaft in mitgliedschaften %}
+                <tr>
+                    {% if mitgliedschaften[mitgliedschaft]['ampel_farbe'] == 'ampelgruen' %}
+                        <td style="padding-left: 0px !important; background: limegreen;">&nbsp;</td>
+                    {% else %}
+                        {% if mitgliedschaften[mitgliedschaft]['ampel_farbe'] == 'ampelgelb' %}
+                            <td style="padding-left: 0px !important; background: yellow;">&nbsp;</td>
+                        {% else %}
+                            <td style="padding-left: 0px !important; background: red;">&nbsp;</td>
+                        {% endif %}
+                    {% endif %}
+                    <td>
+                        <a href="/desk#Form/Mitgliedschaft/{{ mitgliedschaften[mitgliedschaft]['mitglied_id'] }}">{{ mitgliedschaften[mitgliedschaft]['mitglied_nr'] }}</a>
+                    </td>
+                    <td>
+                        {% for strassen_change in mitgliedschaften[mitgliedschaft]['strasse'] %}
+                            {{ strassen_change[0] }}<br>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for nummer_change in mitgliedschaften[mitgliedschaft]['nummer'] %}
+                            {{ nummer_change[0] }}<br>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for plz_change in mitgliedschaften[mitgliedschaft]['plz'] %}
+                            {{ plz_change[0] }}<br>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for ort_change in mitgliedschaften[mitgliedschaft]['ort'] %}
+                            {{ ort_change[0] }}<br>
+                        {% endfor %}
+                    </td>
+                    <td>{{ mitgliedschaften[mitgliedschaft]['neue_adresse'].replace("\n", "<br>") }}</td>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

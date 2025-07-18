@@ -429,3 +429,88 @@ def create_serien_email(search_hash=None, mitglied_selektion=None):
     
     serien_email.insert(ignore_permissions=True)
     return serien_email.name
+
+@frappe.whitelist()
+def history_search(suchparameter):
+    if isinstance(suchparameter, six.string_types):
+        suchparameter = json.loads(suchparameter)
+    
+    query_string = ''
+    
+    if suchparameter["sektion_id"]:
+        query_string += """
+            AND `docname` IN (
+                SELECT `name` FROM `tabMitgliedschaft`
+                WHERE `sektion_id` = '{sektion_id}'
+            )
+        """.format(sektion_id=suchparameter["sektion_id"])
+    if suchparameter["strasse"]:
+        query_string += """
+            AND `data` LIKE '%"strasse",%"{strasse}",%'
+        """.format(strasse=suchparameter["strasse"])
+    if suchparameter["nummer"]:
+        query_string += """
+            AND `data` LIKE '%"nummer",%"{nummer}",%'
+        """.format(nummer=suchparameter["nummer"])
+    if suchparameter["plz"]:
+        query_string += """
+            AND `data` LIKE '%"plz",%"{plz}",%'
+        """.format(plz=suchparameter["plz"])
+    if suchparameter["ort"]:
+        query_string += """
+            AND `data` LIKE '%"ort",%"{ort}",%'
+        """.format(ort=suchparameter["ort"])
+    
+    sql_query = """
+        SELECT `data`, `docname` FROM `tabVersion`
+        WHERE `ref_doctype` = 'Mitgliedschaft'
+        {query_string}
+    """.format(query_string=query_string)
+
+    found_histories = frappe.db.sql(sql_query, as_dict=True)
+
+    if len(found_histories) < 1:
+        frappe.throw("Es wurde keine entsprechende Historie gefunden.")
+    
+    results = {}
+    for found_history in found_histories:
+        if found_history.docname not in results:
+            results[found_history.docname] = {
+                'mitglied_nr': frappe.db.get_value("Mitgliedschaft", found_history.docname, "mitglied_nr"),
+                'mitglied_id': found_history.docname,
+                'ampel_farbe': frappe.db.get_value("Mitgliedschaft", found_history.docname, "ampel_farbe"),
+                'strasse': [],
+                'nummer': [],
+                'plz': [],
+                'ort': [],
+                'neue_adresse': frappe.db.get_value("Mitgliedschaft", found_history.docname, "adressblock"),
+            }
+        
+        json_data = json.loads(found_history.data)
+        for changed in json_data['changed']:
+            if changed[0] == "strasse":
+                results[found_history.docname]['strasse'].append([
+                    changed[1],
+                    changed[2]
+                ])
+            if changed[0] == "nummer":
+                results[found_history.docname]['nummer'].append([
+                    changed[1],
+                    changed[2]
+                ])
+            if changed[0] == "plz":
+                results[found_history.docname]['plz'].append([
+                    changed[1],
+                    changed[2]
+                ])
+            if changed[0] == "ort":
+                results[found_history.docname]['ort'].append([
+                    changed[1],
+                    changed[2]
+                ])
+
+    data = {
+        'mitgliedschaften': results
+    }
+    
+    return frappe.render_template('templates/includes/mvd_suchresultate_history_search.html', data)
