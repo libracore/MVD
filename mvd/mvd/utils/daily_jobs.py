@@ -307,3 +307,22 @@ def daily_ampel_korrektur():
         }
         enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
     
+    # Mitgliedschaften die bezahlt haben, aber noch auf dem Status Anmeldung oder Online-Anmeldung stecken bleiben
+    mitgliedschaften = frappe.db.sql("""
+        SELECT 
+            `sinv`.`mv_mitgliedschaft` AS `mitgliedschaft`,
+            `mitgl`.`status_c`
+        FROM `tabSales Invoice` AS `sinv`
+        JOIN `tabMitgliedschaft` AS `mitgl` ON `sinv`.`mv_mitgliedschaft` = `mitgl`.`name`
+        WHERE `sinv`.`mitgliedschafts_jahr` = '{aktuelles_jahr}'
+        AND `sinv`.`status` = 'Paid'
+        AND `sinv`.`ist_mitgliedschaftsrechnung` = 1
+        AND `sinv`.`docstatus` = 1
+        AND `mitgl`.`status_c` IN ('Anmeldung', 'Online-Anmeldung')
+        LIMIT 100
+    """.format(aktuelles_jahr=aktuelles_jahr), as_dict=True)
+    for mitgliedschaft in mitgliedschaften:
+        args = {
+            'mv_mitgliedschaft': mitgliedschaft.mitgliedschaft
+        }
+        enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
