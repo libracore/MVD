@@ -326,3 +326,37 @@ def daily_ampel_korrektur():
             'mv_mitgliedschaft': mitgliedschaft.mitgliedschaft
         }
         enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
+
+def sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft(show_progress=False):
+    from mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data import update
+
+    mitgliedschaften = frappe.db.sql("""
+        SELECT
+            `name` AS `mitglied_id`,
+            `mitglied_nr`
+        FROM `tabMitgliedschaft`
+        WHERE `bezahltes_mitgliedschaftsjahr` = YEAR(CURDATE())
+        AND `status_c` = 'Regulär'
+        AND `mitglied_nr` IN (
+            SELECT `name`
+            FROM `tabSP Mitglied Data`
+            WHERE `json` LIKE CONCAT('%"jahrBezahltMitgliedschaft": ', YEAR(CURDATE()) - 1, '%')
+        )
+    """, as_dict=True)
+
+    if show_progress:
+        loop = 1
+        total = len(mitgliedschaften)
+    
+    for mitgliedschaft in mitgliedschaften:
+        if show_progress:
+            print("{0} of {1}".format(loop, total))
+        
+        try:
+            mitgl = frappe.get_doc("Mitgliedschaft", mitgliedschaft.mitglied_id)
+            update(mitgliedschaft.mitglied_nr, mitgl)
+        except Exception as err:
+            frappe.log_error(str(err), "sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft Failed: {0} / {1}".format(mitgliedschaft.mitglied_nr, mitgliedschaft.mitglied_id))
+        
+        if show_progress:
+            loop += 1

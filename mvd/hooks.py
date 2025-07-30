@@ -162,7 +162,8 @@ scheduler_events = {
         #"mvd.mvd.doctype.mitgliedschaft.kontakt_handling.initial_rename_contacts",
         "mvd.mvd.doctype.postretouren_log.postretouren_log.start_post_retouren_process",
         "mvd.mvd.utils.daily_jobs.rechnungs_jahresversand",
-        "mvd.mvd.utils.daily_jobs.daily_ampel_korrektur"
+        "mvd.mvd.utils.daily_jobs.daily_ampel_korrektur",
+        "mvd.mvd.utils.daily_jobs.sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft"
     ],
     "all": [
         "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue",
