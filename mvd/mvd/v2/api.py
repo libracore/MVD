@@ -206,7 +206,7 @@ def get_mvd_member_rates():
     return {item['item_code']: item for item in item_member_rates}
 
 @frappe.whitelist()
-def get_member_annual_invoice(id):
+def get_member_annual_invoices(id):
     invoices = frappe.get_all(
     "Sales Invoice",
     filters={

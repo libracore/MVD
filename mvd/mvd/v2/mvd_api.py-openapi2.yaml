@@ -80,7 +80,7 @@ paths:
           description: Invalid reset hash
         '500':
           description: Internal Server Error
-  /mvd.mvd.v2.api.get_member_annual_invoice:
+  /mvd.mvd.v2.api.get_member_annual_invoices:
     get:
       summary: Get Member Annual Invoice
       description: Returns a list of annual membership invoices for a given membership ID.
