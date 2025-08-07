@@ -345,10 +345,9 @@ paths:
                 example: "Herr"
               lang_code:
                 type: string
-                description: "Language code"
+                description: "Language code: either de, fr or it"
                 default: "de"
                 example: "de"
-                description: Must be de, fr or it
               nl_abo:
                 type: integer
                 enum: [0, 1]
