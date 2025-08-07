@@ -205,25 +205,36 @@ paths:
               properties:
                 item_code:
                   type: string
+                  example: MVAG-MG
                 sektion_id:
                   type: string
+                  example: MVAG
                 item_name:
                   type: string
+                  example: Mitgliedschaft Geschäft
                 item_group:
                   type: string
+                  example: Vereinsmitgliedschaft
                 description:
                   type: string
+                  nullable: true
+                  example: null
                 show_in_website:
                   type: boolean
                   description: 0 or 1
                 rate:
                   type: number
                   format: float
+                  example: 70.50
                 member_rate:
                   type: number
                   format: float
+                  nullable: true
+                  example: null
                 image:
                   type: string
+                  nullable: true
+                  example: null
         '500':
           description: Internal Server Error
   /mvd.mvd.v2.webhook.payrexx_webhook:
