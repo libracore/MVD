@@ -80,6 +80,50 @@ paths:
           description: Invalid reset hash
         '500':
           description: Internal Server Error
+  /mvd.mvd.v2.api.get_data_sektionen:
+    get:
+      summary: Get Data Sektionen
+      description: |
+        Returns a list of all valid "Sektionen" (sections) and their associated membership items.
+        Excludes pseudo sections and the 'M+W-Abo' section.
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              sektionen:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: Name of the Sektion
+                    mitgliedschaft_privat:
+                      type: string
+                      description: Membership article for private members
+                    items:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          item_code:
+                            type: string
+                          item_name:
+                            type: string
+                          rate:
+                            type: number
+                            format: float
+                          member_rate:
+                            type: number
+                            format: float
+                          description:
+                            type: string
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal Server Error
   /mvd.mvd.v2.api.get_member_annual_invoices:
     get:
       summary: Get Member Annual Invoice
