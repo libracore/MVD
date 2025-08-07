@@ -261,7 +261,44 @@ paths:
           description: Invalid request or payload
         '500':
           description: Internal Server Error
- 
+  /mvd.mvd.v2.api.kampagne:
+    post:
+      summary: Create or Update Kampagne
+      description: |
+        Creates or updates a `Kampagne` document.
+
+        - If `id` is provided and matches an existing document, that document is updated.
+        - If `id` is not provided or doesn't exist, a new document is created.
+        
+        All other fields are treated as dynamic input and are passed directly to the document.
+      consumes:
+        - application/json
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: ID of an existing Kampagne to update
+                example: 45792353d2
+            additionalProperties: true
+      responses:
+        '200':
+          description: Kampagne created or updated successfully
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                description: The created or updated Kampagne document
+        '400':
+          description: Missing or invalid parameters
+        '500':
+          description: Internal Server Error
 securityDefinitions:
   tokenAuth:
     type: apiKey
