@@ -84,8 +84,9 @@ paths:
     get:
       summary: Get Data Sektionen
       description: |
-        Returns a list of all valid "Sektionen" (sections) and their associated membership items.
+        Returns a list of all valid "Sektionen" (sections), all values of DocType Sektion (incl. variables for ProcessWire, prefixed with pw_) and their associated membership items (in all_items).
         Excludes pseudo sections and the 'M+W-Abo' section.
+        Return also ASLOCA sections. These start with AS. MVD Sections start with MV.
       responses:
         '200':
           description: Success
@@ -105,6 +106,7 @@ paths:
                       description: All fields from the DocType Sektion
                     all_items:
                       type: object
+                      description: Alle Item-Details aus dem Doctype Sektion mit Artielnummer (name), Beschreibung (description) und Preis (rate). Der `field_name` die Bezeichnung im DocType Sektion.
                       properties:
                         name:
                           type: string
