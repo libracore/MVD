@@ -121,6 +121,34 @@ paths:
           description: Membership not found or no invoices
         '500':
           description: Internal Server Error
+  /mvd.mvd.v2.api.get_annual_invoice_pdf:
+    get:
+      summary: Get Annual Invoice PDF
+      description: Returns a PDF of the specified annual invoice.
+      produces:
+        - application/pdf
+      parameters:
+        - name: invoice_name
+          in: query
+          description: Invoice name (e.g., R-1234567)
+          required: true
+          type: string
+          x-example: R-1234567
+        - name: signature
+          in: query
+          description: Signature hash used for validation
+          required: false
+          type: string
+          x-example: a9e0f81e1c9f486a9cc3e3b8fa6bc0a7
+      responses:
+        '200':
+          description: PDF file returned successfully
+          schema:
+            type: file
+        '400':
+          description: Missing or invalid parameters
+        '500':
+          description: Internal Server Error
   /mvd.mvd.v2.api.get_mvd_shop_all_items:
     get:
       summary: Get All Shop Items
