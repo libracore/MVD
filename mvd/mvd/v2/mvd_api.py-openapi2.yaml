@@ -193,8 +193,7 @@ paths:
   /mvd.mvd.v2.api.get_mvd_shop_all_items:
     get:
       summary: Get All Shop Items
-      description: |
-        Retrieves a list of all enabled shop items, including item metadata, prices, and member-specific rates (if available).
+      description: Retrieves a list of all enabled shop items, including item metadata, prices, and member-specific rates (if available).
       responses:
         '200':
           description: Success
@@ -278,8 +277,10 @@ paths:
     post:
       summary: Create or Update Kampagne
       description: |
-        Creates or updates a `Kampagne` document.
-
+        Dieser Endpunkt ist für Formulare in Kampagnenseiten, insb. für Emarsys Newsletter-Anmeldungen und Trigger.
+        
+        Bei der Neuanlage wird über die Service-Plattform ein Emarsys Update gemacht!
+        
         - If `id` is provided and matches an existing document, that document is updated.
         - If `id` is not provided or doesn't exist, a new document is created.
         
@@ -290,15 +291,81 @@ paths:
       parameters:
         - name: body
           in: body
-          required: true
           schema:
             type: object
             properties:
               id:
                 type: string
-                description: ID of an existing Kampagne to update
-                example: 45792353d2
-            additionalProperties: true
+                description: "Unique 10-character hash identifier, auto-generated if not provided"
+                example: "a1b2c3d4e5"
+              email:
+                type: string
+                format: email
+                description: "Email address of the campaign subscriber"
+                example: "user@example.com"
+              newsletter_names:
+                type: string
+                description: |
+                  Comma-separated list of newsletter names the user is subscribing to.
+                  Input can be provided as:
+                  - JSON array string: '["newsletter1", "newsletter2"]'
+                  - Comma-separated string: "newsletter1, newsletter2"
+                  - List object (internally converted to comma-separated)
+                  Automatically normalized to remove spaces and clean formatting.
+                example: "weekly_digest,monthly_updates,special_offers"
+              
+              mitglied_hash:
+                type: string
+                description: "Hash identifier for existing members, used for member association"
+                example: "xyz789abc"
+              zip_code:
+                type: string
+                description: "Postal/ZIP code of the subscriber, used for member matching and segmentation"
+                example: "1234"
+              campaign_trigger_code:
+                type: string
+                description: "Code that triggered this campaign subscription (e.g., source campaign, form ID)"
+                example: "SUMMER2024"
+              subscribed_over_pledge:
+                type: integer
+                enum: [0, 1]
+                description: "Flag indicating if subscription was made through a pledge/commitment (0=No, 1=Yes)"
+                default: 0
+              last_name:
+                type: string
+                description: "Subscriber's last name"
+                example: "Doe"
+              first_name:
+                type: string
+                description: "Subscriber's first name"
+                example: "John"
+              anrede:
+                type: string
+                description: "Salutation/form of address (Herr, Frau, Keines von beiden)"
+                example: "Herr"
+              lang_code:
+                type: string
+                description: "Language code"
+                default: "de"
+                example: "de"
+                description: Must be de, fr or it
+              nl_abo:
+                type: integer
+                enum: [0, 1]
+                description: "Newsletter subscription status (0=Not subscribed, 1=Subscribed)"
+                default: 0  
+              quelle:
+                type: string
+                description: "Source/origin of the subscription (tracking where the user came from)"
+                example: "https://kampagenseite1.mieterverband.ch/formular1"
+              mitglied:
+                type: string
+                description: "Member ID assigned after successful member association (heuristically populated: e-mail)"
+                readOnly: true
+              sektion_id:
+                type: string
+                description: "Section/division ID assigned based on member location or organization structure (heuristically populated, mitglied_id above, plz)"
+                readOnly: true
       responses:
         '200':
           description: Kampagne created or updated successfully
