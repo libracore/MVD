@@ -97,29 +97,24 @@ paths:
                 items:
                   type: object
                   properties:
-                    name:
+                    sektion:
                       type: string
                       description: Name of the Sektion
-                    mitgliedschaft_privat:
-                      type: string
-                      description: Membership article for private members
-                    items:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          item_code:
-                            type: string
-                          item_name:
-                            type: string
-                          rate:
-                            type: number
-                            format: float
-                          member_rate:
-                            type: number
-                            format: float
-                          description:
-                            type: string
+                    doctype_sektion:
+                      type: object
+                      description: All fields from the DocType Sektion
+                    all_items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        rate:
+                          type: number
+                          format: float
+                        field_name:
+                          type: string
         '401':
           description: Unauthorized
         '500':
