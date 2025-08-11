@@ -80,7 +80,48 @@ paths:
           description: Invalid reset hash
         '500':
           description: Internal Server Error
-  /mvd.mvd.v2.api.get_member_annual_invoice:
+  /mvd.mvd.v2.api.get_data_sektionen:
+    get:
+      summary: Get Data Sektionen
+      description: |
+        Returns a list of all valid "Sektionen" (sections), all values of DocType Sektion (incl. variables for ProcessWire, prefixed with pw_) and their associated membership items (in all_items).
+        Excludes pseudo sections and the 'M+W-Abo' section.
+        Return also ASLOCA sections. These start with AS. MVD Sections start with MV.
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: object
+            properties:
+              sektionen:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    sektion:
+                      type: string
+                      description: Name of the Sektion
+                    doctype_sektion:
+                      type: object
+                      description: All fields from the DocType Sektion
+                    all_items:
+                      type: object
+                      description: Alle Item-Details aus dem Doctype Sektion mit Artielnummer (name), Beschreibung (description) und Preis (rate). Der `field_name` die Bezeichnung im DocType Sektion.
+                      properties:
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        rate:
+                          type: number
+                          format: float
+                        field_name:
+                          type: string
+        '403':
+          description: Unauthorized
+        '500':
+          description: Internal Server Error
+  /mvd.mvd.v2.api.get_member_annual_invoices:
     get:
       summary: Get Member Annual Invoice
       description: Returns a list of annual membership invoices for a given membership ID.
@@ -121,11 +162,38 @@ paths:
           description: Membership not found or no invoices
         '500':
           description: Internal Server Error
+  /mvd.mvd.v2.api.get_annual_invoice_pdf:
+    get:
+      summary: Get Annual Invoice PDF
+      description: Returns a PDF of the specified annual invoice.
+      produces:
+        - application/pdf
+      parameters:
+        - name: invoice_name
+          in: query
+          description: Invoice name (e.g., R-1234567)
+          required: true
+          type: string
+          x-example: R-1234567
+        - name: signature
+          in: query
+          description: Signature hash used for validation
+          required: false
+          type: string
+          x-example: a9e0f81e1c9f486a9cc3e3b8fa6bc0a7
+      responses:
+        '200':
+          description: PDF file returned successfully
+          schema:
+            type: file
+        '400':
+          description: Missing or invalid parameters
+        '500':
+          description: Internal Server Error
   /mvd.mvd.v2.api.get_mvd_shop_all_items:
     get:
       summary: Get All Shop Items
-      description: |
-        Retrieves a list of all enabled shop items, including item metadata, prices, and member-specific rates (if available).
+      description: Retrieves a list of all enabled shop items, including item metadata, prices, and member-specific rates (if available).
       responses:
         '200':
           description: Success
@@ -136,28 +204,180 @@ paths:
               properties:
                 item_code:
                   type: string
+                  example: MVAG-MG
                 sektion_id:
                   type: string
+                  example: MVAG
                 item_name:
                   type: string
+                  example: Mitgliedschaft Geschäft
                 item_group:
                   type: string
+                  example: Vereinsmitgliedschaft
                 description:
                   type: string
+                  nullable: true
+                  example: null
                 show_in_website:
                   type: boolean
                   description: 0 or 1
                 rate:
                   type: number
                   format: float
+                  example: 70.50
                 member_rate:
                   type: number
                   format: float
+                  nullable: true
+                  example: null
                 image:
                   type: string
+                  nullable: true
+                  example: null
         '500':
           description: Internal Server Error
-  
+  /mvd.mvd.v2.webhook.payrexx_webhook:
+    post:
+      summary: Payrexx Webhook
+      description: |
+        Webhook endpoint to receive and process payment notifications from Payrexx.
+        This endpoint is public but requires:
+        
+        - A valid `token` in the **query string**
+        - A request coming from an IP address listed in the `Payrexx IP` table
+        
+        The payload is forwarded internally for processing.
+      consumes:
+        - application/json
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: token
+          in: query
+          description: Webhook token (must match value in "MVD Settings")
+          required: true
+          type: string
+          x-example: abc123securetoken
+        - name: payload
+          in: body
+          description: Payload from Payrexx (arbitrary key-value structure)
+          required: true
+          schema:
+            type: object
+            additionalProperties: true
+      responses:
+        '200':
+          description: Webhook processed successfully
+        '401':
+          description: Unauthorized (invalid token or IP address)
+        '400':
+          description: Invalid request or payload
+        '500':
+          description: Internal Server Error
+  /mvd.mvd.v2.api.kampagne:
+    post:
+      summary: Create or Update Kampagne
+      description: |
+        Dieser Endpunkt ist für Formulare in Kampagnenseiten, insb. für Emarsys Newsletter-Anmeldungen und Trigger.
+        
+        Bei der Neuanlage wird über die Service-Plattform ein Emarsys Update gemacht!
+        
+        - If `id` is provided and matches an existing document, that document is updated.
+        - If `id` is not provided or doesn't exist, a new document is created.
+        
+        All other fields are treated as dynamic input and are passed directly to the document.
+      consumes:
+        - application/json
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: "Unique 10-character hash identifier, auto-generated if not provided"
+                example: "a1b2c3d4e5"
+              email:
+                type: string
+                format: email
+                description: "Email address of the campaign subscriber"
+                example: "user@example.com"
+              newsletter_names:
+                type: string
+                description: |
+                  Comma-separated list of newsletter names the user is subscribing to.
+                  Input can be provided as:
+                  - JSON array string: '["newsletter1", "newsletter2"]'
+                  - Comma-separated string: "newsletter1, newsletter2"
+                  - List object (internally converted to comma-separated)
+                  Automatically normalized to remove spaces and clean formatting.
+                example: "weekly_digest,monthly_updates,special_offers"
+              
+              mitglied_hash:
+                type: string
+                description: "Hash identifier for existing members, used for member association"
+                example: "xyz789abc"
+              zip_code:
+                type: string
+                description: "Postal/ZIP code of the subscriber, used for member matching and segmentation"
+                example: "1234"
+              campaign_trigger_code:
+                type: string
+                description: "Code that triggered this campaign subscription (e.g., source campaign, form ID)"
+                example: "SUMMER2024"
+              subscribed_over_pledge:
+                type: integer
+                enum: [0, 1]
+                description: "Flag indicating if subscription was made through a pledge/commitment (0=No, 1=Yes)"
+                default: 0
+              last_name:
+                type: string
+                description: "Subscriber's last name"
+                example: "Doe"
+              first_name:
+                type: string
+                description: "Subscriber's first name"
+                example: "John"
+              anrede:
+                type: string
+                description: "Salutation/form of address (Herr, Frau, Keines von beiden)"
+                example: "Herr"
+              lang_code:
+                type: string
+                description: "Language code: either de, fr or it"
+                default: "de"
+                example: "de"
+              nl_abo:
+                type: integer
+                enum: [0, 1]
+                description: "Newsletter subscription status (0=Not subscribed, 1=Subscribed)"
+                default: 0  
+              quelle:
+                type: string
+                description: "Source/origin of the subscription (tracking where the user came from)"
+                example: "https://kampagenseite1.mieterverband.ch/formular1"
+              mitglied:
+                type: string
+                description: "Member ID assigned after successful member association (heuristically populated: e-mail)"
+                readOnly: true
+              sektion_id:
+                type: string
+                description: "Section/division ID assigned based on member location or organization structure (heuristically populated, mitglied_id above, plz)"
+                readOnly: true
+      responses:
+        '200':
+          description: Kampagne created or updated successfully
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                description: The created or updated Kampagne document
+        '400':
+          description: Missing or invalid parameters
+        '500':
+          description: Internal Server Error
 securityDefinitions:
   tokenAuth:
     type: apiKey
