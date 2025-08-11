@@ -27,7 +27,7 @@ def get_open_data():
             'r': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': 'Hoch', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r2': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': ['!=', 'Hoch'], 'kontaktperson': ['like','Rechtsberatung Pool%'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
-            'r3': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r3': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'r3': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 0, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r6': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),

@@ -99,7 +99,7 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r3").click(function(){
-            frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], "sektion_id": sektion}
+            frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'r3': 1, "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r4").click(function(){

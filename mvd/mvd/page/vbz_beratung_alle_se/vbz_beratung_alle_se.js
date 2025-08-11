@@ -106,8 +106,7 @@ frappe.vbz_beratung_alle_se = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r3_as").click(function(){
-            // Wie kann ich machen, dass zwei filter für kontaktperson gleichzeitig funktionieren?
-            frappe.route_options = {'status': 'Open', 'kontaktperson': ['not like','Rechtsberatung Pool%']}
+            frappe.route_options = {'status': 'Open', 'r3': 1}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r4_as").click(function(){
