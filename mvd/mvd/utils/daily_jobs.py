@@ -201,43 +201,45 @@ def mahnlauf_ausschluss():
     for rg in rgs_mit_mitgl_ohne:
         frappe.db.set_value("Sales Invoice", rg.name, 'exclude_from_payment_reminder_until', None)
 
-def cleanup_beratungen():
-    beratungen = frappe.db.sql("""
-                                SELECT `name`
-                                FROM `tabBeratung`
-                                WHERE `status` != 'Closed'
-                                AND `beratungskategorie` IS NOT NULL
-                                AND `beratungskategorie` != ''
-                                AND `name` IN (
-                                    SELECT `parent` FROM `tabBeratung Termin`
-                                    WHERE `bis` < CURDATE()
-                                )""", as_dict=True)
-    for beratung in beratungen:
-        # prüfung ob es einen zweiten Termin gibt, welcher noch nicht in Vergangenheit liegt
-        free_to_close = True
-        b = frappe.get_doc("Beratung", beratung.name)
-        if len(b.termin) > 1:
-            for termin in b.termin:
-                if getdate(termin.bis) >= getdate():
-                    free_to_close = False
+# cleanup_beratungen wurde aufgrund Ticket libracore/MVD#1407 entfernt. Kann in einem kommenden Commit gelöscht werden (hook nicht vergessen).
+
+# def cleanup_beratungen():
+#     beratungen = frappe.db.sql("""
+#                                 SELECT `name`
+#                                 FROM `tabBeratung`
+#                                 WHERE `status` != 'Closed'
+#                                 AND `beratungskategorie` IS NOT NULL
+#                                 AND `beratungskategorie` != ''
+#                                 AND `name` IN (
+#                                     SELECT `parent` FROM `tabBeratung Termin`
+#                                     WHERE `bis` < CURDATE()
+#                                 )""", as_dict=True)
+#     for beratung in beratungen:
+#         # prüfung ob es einen zweiten Termin gibt, welcher noch nicht in Vergangenheit liegt
+#         free_to_close = True
+#         b = frappe.get_doc("Beratung", beratung.name)
+#         if len(b.termin) > 1:
+#             for termin in b.termin:
+#                 if getdate(termin.bis) >= getdate():
+#                     free_to_close = False
         
-        if free_to_close:
-            # bestehende ToDos entfernen
-            todos_to_remove = frappe.db.sql("""
-                                                SELECT
-                                                    `name`
-                                                FROM `tabToDo`
-                                                WHERE `status` = 'Open'
-                                                AND `reference_type` = 'Beratung'
-                                                AND `reference_name` = '{0}'""".format(beratung.name), as_dict=True)
-            for todo in todos_to_remove:
-                t = frappe.get_doc("ToDo", todo.name)
-                t.status = 'Cancelled'
-                t.save(ignore_permissions=True)
+#         if free_to_close:
+#             # bestehende ToDos entfernen
+#             todos_to_remove = frappe.db.sql("""
+#                                                 SELECT
+#                                                     `name`
+#                                                 FROM `tabToDo`
+#                                                 WHERE `status` = 'Open'
+#                                                 AND `reference_type` = 'Beratung'
+#                                                 AND `reference_name` = '{0}'""".format(beratung.name), as_dict=True)
+#             for todo in todos_to_remove:
+#                 t = frappe.get_doc("ToDo", todo.name)
+#                 t.status = 'Cancelled'
+#                 t.save(ignore_permissions=True)
             
-            # Beratungs-Status auf Geschlossen setzen
-            b.status = 'Closed'
-            b.save()
+#             # Beratungs-Status auf Geschlossen setzen
+#             b.status = 'Closed'
+#             b.save()
 
 def mark_beratungen_as_s8():
     beratungen = frappe.db.sql("""
