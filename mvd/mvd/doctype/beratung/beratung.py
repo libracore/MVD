@@ -132,6 +132,10 @@ class Beratung(Document):
             self.mv_erb_permission = "Write"
         else:
             self.mv_erb_permission = "None"
+
+        # Flag "R3", siehe auch libracore/MVD#1406
+        if self.kontaktperson and 'Rechtsberatung Pool' not in self.kontaktperson:
+            self.r3 = 1
     
     def set_sektion(self):
         '''

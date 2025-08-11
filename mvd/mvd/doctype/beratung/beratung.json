@@ -7,6 +7,7 @@
  "field_order": [
   "titel",
   "s8",
+  "r3",
   "create_todo",
   "auto_todo_log",
   "geschlossen_am",
@@ -448,9 +449,16 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "geschlossen_durch"
+  },
+  {
+   "default": "0",
+   "fieldname": "r3",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "r3"
   }
  ],
- "modified": "2025-05-09 09:13:18.641823",
+ "modified": "2025-08-11 14:49:01.691520",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
