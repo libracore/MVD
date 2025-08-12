@@ -8,6 +8,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "uebersicht_html",
   "section_allgemein",
   "sektion_id",
   "mv_mitgliedschaft",
@@ -443,10 +444,14 @@
    "fieldtype": "Data",
    "label": "Mitglied Nr.",
    "read_only": 1
+  },
+  {
+   "fieldname": "uebersicht_html",
+   "fieldtype": "HTML"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2024-02-11 11:47:18.999941",
+ "modified": "2025-08-12 12:33:03.748496",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kunden",

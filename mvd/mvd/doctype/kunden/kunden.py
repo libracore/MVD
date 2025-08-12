@@ -7,7 +7,7 @@ import frappe
 from frappe import _, scrub
 from frappe.model.document import Document
 from erpnext.accounts.utils import get_fiscal_year
-from frappe.utils import nowdate, flt, now
+from frappe.utils import nowdate, flt, now, cint
 import json
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung
 from frappe.utils.background_jobs import enqueue
@@ -852,6 +852,7 @@ def anlage_prozess(anlage_daten, status):
         mitgliedschaft.save()
     
     verknuepfe_kunde_mitglied(anlage_daten['name'], mitgliedschaft.name)
+    verknuepfe_beratungen_mit_mitglied(anlage_daten['name'], mitgliedschaft.name)
     add_comment_to_kunde(anlage_daten['name'], mitgliedschaft)
     
     return mitgliedschaft.name
@@ -860,6 +861,11 @@ def verknuepfe_kunde_mitglied(kunde, mitgliedschaft):
     safe_mode_off = frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
     sales_invoice = frappe.db.sql("""UPDATE `tabSales Invoice` SET `mv_mitgliedschaft` = '{mitgliedschaft}' WHERE `mv_kunde` = '{kunde}'""".format(mitgliedschaft=mitgliedschaft, kunde=kunde), as_list=True)
     payment_entry = frappe.db.sql("""UPDATE `tabPayment Entry` SET `mv_mitgliedschaft` = '{mitgliedschaft}' WHERE `mv_kunde` = '{kunde}'""".format(mitgliedschaft=mitgliedschaft, kunde=kunde), as_list=True)
+    safe_mode_on = frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)
+
+def verknuepfe_beratungen_mit_mitglied(kunde, mitgliedschaft):
+    safe_mode_off = frappe.db.sql("""SET SQL_SAFE_UPDATES=0""", as_list=True)
+    sales_invoice = frappe.db.sql("""UPDATE `tabBeratung` SET `mv_mitgliedschaft` = '{mitgliedschaft}' WHERE `mv_kunde` = '{kunde}'""".format(mitgliedschaft=mitgliedschaft, kunde=kunde), as_list=True)
     safe_mode_on = frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)
 
 def add_comment_to_kunde(kunde, mitgliedschaft):
@@ -1032,3 +1038,71 @@ def get_info(jobname):
             found_job = True
 
     return found_job
+
+@frappe.whitelist()
+def get_uebersicht_html(name):
+    faktura_kunde = frappe.get_doc("Kunden", name)
+
+    col_qty = 1
+    
+    kunde_mitglied = False
+    if faktura_kunde.kunde_kunde:
+        kunde_mitglied = frappe.get_doc("Customer", faktura_kunde.kunde_kunde).as_dict()
+    
+    kontakt_mitglied = False
+    if faktura_kunde.kontakt_kunde:
+        kontakt_mitglied = frappe.get_doc("Contact", faktura_kunde.kontakt_kunde).as_dict()
+    
+    adresse_mitglied = False
+    if faktura_kunde.adresse_kunde:
+        adresse_mitglied = frappe.get_doc("Address", faktura_kunde.adresse_kunde).as_dict()
+    
+    objekt_adresse = False
+    
+    kontakt_solidarmitglied = False
+    
+    rg_kunde = False
+    if faktura_kunde.rg_kunde:
+        rg_kunde = frappe.get_doc("Customer", faktura_kunde.rg_kunde).as_dict()
+    
+    rg_kontakt = False
+    if faktura_kunde.rg_kontakt:
+        rg_kontakt = frappe.get_doc("Contact", faktura_kunde.rg_kontakt).as_dict()
+    
+    rg_adresse = False
+    if faktura_kunde.rg_adresse:
+        rg_adresse = frappe.get_doc("Address", faktura_kunde.rg_adresse).as_dict()
+    
+    rg_sep = False
+    if faktura_kunde.abweichende_rechnungsadresse:
+        rg_sep = True
+        col_qty += 1
+    
+    eintritt = faktura_kunde.creation
+    status = "Faktura Kunde"
+    
+    data = {
+        'kunde_mitglied': kunde_mitglied,
+        'kontakt_mitglied': kontakt_mitglied,
+        'adresse_mitglied': adresse_mitglied,
+        'objekt_adresse': objekt_adresse,
+        'kontakt_solidarmitglied': kontakt_solidarmitglied,
+        'rg_kunde': rg_kunde,
+        'rg_kontakt': rg_kontakt,
+        'rg_adresse': rg_adresse,
+        'rg_sep': rg_sep,
+        'col_qty': cint(12 / col_qty),
+        'allgemein': {
+            'status': status,
+            'eintritt': eintritt,
+            'austritt': '',
+            'mitgliedtyp_c': "Faktura Kunde",
+            'tel_g_1': faktura_kunde.tel_g or '',
+            'rg_tel_g': faktura_kunde.rg_tel_g or '',
+            'language': faktura_kunde.language or 'de',
+            'sektion': faktura_kunde.sektion_id,
+            'region': ''
+        }
+    }
+    
+    return frappe.render_template('templates/includes/mitgliedschaft_overview.html', data)

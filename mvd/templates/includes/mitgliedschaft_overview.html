@@ -1,7 +1,7 @@
 <!-- Server Funktion "get_uebersicht_html" in mitgliedschaft.py, aufgerufen via mitgliedschaft.js -->
 <!-- Achtung; siehe auch frappe-bench/apps/mvd/mvd/templates/includes/mitgliedschaft_overview_unvalidiert.html -->
 <div class="clearfix"></div>
-{% if allgemein.status == 'Interessent*in' %}
+{% if allgemein.status in ['Interessent*in', 'Faktura Kunde'] %}
     <div class="row">
         <!-- Card Allgemein -->
         <div class="col-sm-12">
@@ -13,12 +13,14 @@
                         <b>Erfassung:</b> {{ frappe.utils.get_datetime(allgemein.eintritt).strftime('%d.%m.%Y') }}
                     {% endif %}
                 </p>
-                <p>
-                    <b>Wichtig:</b><br>
-                    {% if allgemein.wichtig %}
-                        {{ allgemein.wichtig|replace("\n", "<br>") }}
-                    {% endif %}
-                </p>
+                {% if allgemein.status != 'Faktura Kunde' %}
+                    <p>
+                        <b>Wichtig:</b><br>
+                        {% if allgemein.wichtig %}
+                            {{ allgemein.wichtig|replace("\n", "<br>") }}
+                        {% endif %}
+                    </p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -164,7 +166,7 @@
 {% if kunde_mitglied %}
     <div class="col-sm-{{ col_qty }}">
         <div class="address-box">
-            <p><b>Mitglied</b></p>
+            <p><b>{% if allgemein.status != 'Faktura Kunde' %}Mitglied{% else %}Faktura Kunde{% endif %}</b></p>
             <!-- Unternehmen -->
             {% if kunde_mitglied.customer_type == 'Company' %}
                 <p>

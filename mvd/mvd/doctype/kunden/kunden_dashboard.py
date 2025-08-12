@@ -12,6 +12,10 @@ def get_data():
             {
                 'label': _('Rechnungswesen'),
                 'items': ['Sales Invoice', 'Mahnung', 'Payment Entry']
+            },
+            {
+                'label': _('Beratungen'),
+                'items': ['Beratung']
             }
         ]
     }

@@ -65,10 +65,8 @@ frappe.ui.form.on('Beratung', {
         }
         
         if (!frm.doc.__islocal) {
-            if (cur_frm.doc.mv_mitgliedschaft) {
-                // load html overview
-                load_html_overview(frm);
-            }
+            // load html overview
+            load_html_overview(frm);
             
             // load html verknüpfungen
             load_html_verknuepfungen(frm);
@@ -345,6 +343,7 @@ frappe.ui.form.on('Beratung', {
                                     'ort': termin_block_ort,
                                     'telefonnummer': termin_block_tel,
                                     'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft,
+                                    'faktura_kunde': cur_frm.doc.faktura_kunde,
                                     'berater_in': termin_block_berater_in || ''
                                 },
                                 callback: function(r) {
@@ -444,16 +443,32 @@ frappe.ui.form.on('Beratung', {
 });
 
 function load_html_overview(frm) {
-    frappe.call({
-        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_uebersicht_html",
-        args:{
-                'name': cur_frm.doc.mv_mitgliedschaft
-        },
-        callback: function(r)
-        {
-            cur_frm.set_df_property('uebersicht_html','options', r.message);
-        }
-    });
+    if (cur_frm.doc.mv_mitgliedschaft) {
+        // Lade Übersicht für Mitglied
+        frappe.call({
+            method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_uebersicht_html",
+            args:{
+                    'name': cur_frm.doc.mv_mitgliedschaft
+            },
+            callback: function(r)
+            {
+                cur_frm.set_df_property('uebersicht_html','options', r.message);
+            }
+        });
+    } else if (cur_frm.doc.faktura_kunde) {
+        // Lade Übersicht für Faktura Kunde
+        frappe.call({
+            method: "mvd.mvd.doctype.kunden.kunden.get_uebersicht_html",
+            args:{
+                    'name': cur_frm.doc.faktura_kunde
+            },
+            callback: function(r)
+            {
+                console.log(r.message)
+                cur_frm.set_df_property('uebersicht_html','options', r.message);
+            }
+        });
+    }
 }
 
 function load_html_verknuepfungen(frm) {
@@ -525,6 +540,12 @@ function add_route_to_list_view_event_handler(frm) {
         }
         frappe.set_route("List", "Beratung", "List");
     });
+    $("#route_to_list_view_fak").bind( "click", function() {
+        frappe.route_options = {
+            'faktura_kunde': cur_frm.doc.faktura_kunde
+        }
+        frappe.set_route("List", "Beratung", "List");
+    });
 }
 
 function setze_read_only(frm) {
@@ -560,7 +581,8 @@ function termin_quick_entry(frm) {
                     frappe.call({
                         'method': "mvd.mvd.doctype.beratung.beratung.get_tel_for_termin",
                         'args': {
-                            'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft
+                            'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft,
+                            'faktura_kunde': cur_frm.doc.faktura_kunde
                         },
                         'callback': function(telefon) {
                             var tel = telefon.message;
@@ -820,6 +842,7 @@ function termin_quick_entry(frm) {
                                                                 'ort': d.get_value('ort')||'',
                                                                 'telefonnummer': d.get_value('telefonnummer')||'',
                                                                 'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft,
+                                                                'faktura_kunde': cur_frm.doc.faktura_kunde,
                                                                 'berater_in': d.get_value('kontaktperson')||''
                                                             },
                                                             callback: function(r) {

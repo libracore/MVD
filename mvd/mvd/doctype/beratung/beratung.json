@@ -45,6 +45,8 @@
   "cb_1",
   "subject",
   "mv_mitgliedschaft",
+  "faktura_kunde",
+  "mv_kunde",
   "mv_erb_permission",
   "sektion_id",
   "status",
@@ -125,7 +127,7 @@
    "options": "Beratung Prio"
   },
   {
-   "depends_on": "eval:doc.mv_mitgliedschaft",
+   "depends_on": "eval:doc.mv_mitgliedschaft||doc.faktura_kunde",
    "fieldname": "section_uebersicht",
    "fieldtype": "Section Break",
    "label": "\u00dcbersicht"
@@ -456,9 +458,23 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "r3"
+  },
+  {
+   "fieldname": "faktura_kunde",
+   "fieldtype": "Link",
+   "label": "Faktura Kunde",
+   "options": "Kunden"
+  },
+  {
+   "description": "Achtung, dieses Feld wird nur f\u00fcr die Darstellung der Beratungs-Verkn\u00fcpfung im Dashboard der Faktura Kunden ben\u00f6tigt. Wird vom Code immer synchron mit dem Feld faktura_kunden gehalten. Soll nicht andersweitig verwendet werden.",
+   "fieldname": "mv_kunde",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "mv_kunde",
+   "options": "Kunden"
   }
  ],
- "modified": "2025-08-11 14:49:01.691520",
+ "modified": "2025-08-12 13:05:36.836760",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

@@ -14,10 +14,10 @@ from datetime import datetime
 
 class Beratung(Document):
     def validate(self):
-        # keine Termine für nicht Mitglieder
+        # keine Termine wenn weder Mitglied noch Faktura-Kunde, oder wenn Status = 'Nicht-Mitglied-Abgewiesen'
         if len(self.termin) > 0:
-            if not self.mv_mitgliedschaft or self.status == 'Nicht-Mitglied-Abgewiesen':
-                frappe.throw("Nicht-Mitglieder dürfen keine Termine besitzen.")
+            if (not self.mv_mitgliedschaft and not self.faktura_kunde) or self.status == 'Nicht-Mitglied-Abgewiesen':
+                frappe.throw("Beratungen, Welche weder für ein Mitglied noch ein Faktura-Kunde erstellt wurden, dürfen keine Termine besitzen.")
         
         # Termin Filter handling
         if len(self.termin) > 0:
@@ -71,7 +71,7 @@ class Beratung(Document):
             self.email_id = self.raised_by
         
         # verknüpfung von mitgliedschaft auf basis email (wenn eingangsmailaccount-sektion == mitgliedschafts sektion)
-        if self.raised_by and not self.mv_mitgliedschaft:
+        if self.raised_by and (not self.mv_mitgliedschaft and not self.faktura_kunde):
                 mitgliedschaften = frappe.db.sql("""
                                                     SELECT
                                                         `name`,
@@ -92,6 +92,8 @@ class Beratung(Document):
         titel = '{0}'.format(self.start_date)
         if self.mv_mitgliedschaft:
             titel += ' {0} {1}'.format(frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1"), frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "nachname_1"))
+        elif self.faktura_kunde:
+            titel += ' {0} {1}'.format(frappe.db.get_value("Kunden", self.faktura_kunde, "vorname"), frappe.db.get_value("Kunden", self.faktura_kunde, "nachname"))
         elif self.raised_by_name:
             titel += ' {0}'.format(self.raised_by_name)
         elif self.raised_by:
@@ -102,6 +104,8 @@ class Beratung(Document):
         
         if self.mv_mitgliedschaft:
             self.mitgliedname = " ".join((frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1") or '', frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "nachname_1") or ''))
+        elif self.faktura_kunde:
+            self.mitgliedname = " ".join((frappe.db.get_value("Kunden", self.faktura_kunde, "vorname") or '', frappe.db.get_value("Kunden", self.faktura_kunde, "nachname") or ''))
         
         # check for default_rueckfragen_email_template
         self.check_default_rueckfragen_email_template()
@@ -136,6 +140,9 @@ class Beratung(Document):
         # Flag "R3", siehe auch libracore/MVD#1406
         if self.kontaktperson and 'Rechtsberatung Pool' not in self.kontaktperson:
             self.r3 = 1
+        
+        # Synchronisierung der Felder faktura_kunde und mv_kunde
+        self.mv_kunde = self.faktura_kunde
     
     def set_sektion(self):
         '''
@@ -171,9 +178,9 @@ class Beratung(Document):
                 if self.status not in ('Rückfragen', 'Rückfrage: Termin vereinbaren', 'Closed', 'Nicht-Mitglied-Abgewiesen'):
                     alter_status = frappe.db.get_value("Beratung", self.name, 'status')
                     if alter_status == 'Eingang':
-                        if self.kontaktperson and self.mv_mitgliedschaft:
+                        if self.kontaktperson and (self.mv_mitgliedschaft or self.faktura_kunde):
                             self.status = 'Open'
-                        elif self.beratungskategorie and self.mv_mitgliedschaft:
+                        elif self.beratungskategorie and (self.mv_mitgliedschaft or self.faktura_kunde):
                             self.status = 'Open'
                             # Zuweisung Defaultberater*in
                             self.zuweisung_default_berater_in()
@@ -205,13 +212,13 @@ class Beratung(Document):
             else:
                 if self.raised_by:
                     # Anlage via Mail
-                    if self.mv_mitgliedschaft:
-                        # Konnte einem Mitglied zugewiesen werden
+                    if self.mv_mitgliedschaft or self.faktura_kunde:
+                        # Konnte einem Mitglied / Faktura Kunden zugewiesen werden
                         self.status = 'Open'
                         # Zuweisung Defaultberater*in
                         self.zuweisung_default_berater_in()
                     else:
-                        # Konnte nicht einem Mitglied zugewiesen werden
+                        # Konnte nicht einem Mitglied / Faktura Kunden zugewiesen werden
                         self.status = 'Eingang'
                     # flag für sync Mail attachements
                     self.anlage_durch_mail_check_attachments = 1
@@ -263,6 +270,7 @@ class Beratung(Document):
             replicated_beratung = {
                 "doctype": "Beratung",
                 "mv_mitgliedschaft": self.mv_mitgliedschaft,
+                "faktura_kunde": self.faktura_kunde,
                 "sektion_id": self.sektion_id,
                 "start_date": today()
             }
@@ -342,20 +350,21 @@ class Beratung(Document):
             """
     
     def set_mverb_user_permission(self):
-        kontaktperson = frappe.get_doc("Termin Kontaktperson", self.kontaktperson)
-        for _user in kontaktperson.user:
-            user = _user.user
-            user_roles = frappe.get_roles(user)
-            if "MV_ERB" in user_roles and "System Manager" not in user_roles:
-                # Create User-Permission for Mitglied
-                if not frappe.db.exists("User Permission", {"user": user, "for_value": self.mv_mitgliedschaft}):
-                    new_permission = frappe.get_doc({
-                        'doctype': 'User Permission',
-                        'user': user,
-                        'apply_to_all_doctypes': 1,
-                        'for_value': self.mv_mitgliedschaft,
-                        'allow': 'Mitgliedschaft'
-                    }).insert(ignore_permissions=True)
+        if self.mv_mitgliedschaft:
+            kontaktperson = frappe.get_doc("Termin Kontaktperson", self.kontaktperson)
+            for _user in kontaktperson.user:
+                user = _user.user
+                user_roles = frappe.get_roles(user)
+                if "MV_ERB" in user_roles and "System Manager" not in user_roles:
+                    # Create User-Permission for Mitglied, but not for Faktura Kunde
+                    if not frappe.db.exists("User Permission", {"user": user, "for_value": self.mv_mitgliedschaft}):
+                        new_permission = frappe.get_doc({
+                            'doctype': 'User Permission',
+                            'user': user,
+                            'apply_to_all_doctypes': 1,
+                            'for_value': self.mv_mitgliedschaft,
+                            'allow': 'Mitgliedschaft'
+                        }).insert(ignore_permissions=True)
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
@@ -487,6 +496,10 @@ def get_verknuepfungsuebersicht(beratung):
     if frappe.db.get_value("Beratung", beratung, 'mv_mitgliedschaft'):
         anzahl_beratungen_zu_mitglied = frappe.db.count('Beratung', {'mv_mitgliedschaft': frappe.db.get_value("Beratung", beratung, 'mv_mitgliedschaft')}) or 0
         table += """<br><p id="route_to_list_view" style="cursor: pointer;"><b>Anzahl Beratungen dieser Mitgliedschaft: {0}</b></p>""".format(anzahl_beratungen_zu_mitglied)
+
+    if frappe.db.get_value("Beratung", beratung, 'faktura_kunde'):
+        anzahl_beratungen_zu_faktura_kunde = frappe.db.count('Beratung', {'faktura_kunde': frappe.db.get_value("Beratung", beratung, 'faktura_kunde')}) or 0
+        table += """<br><p id="route_to_list_view_fak" style="cursor: pointer;"><b>Anzahl Beratungen dieses Faktura Kunden: {0}</b></p>""".format(anzahl_beratungen_zu_faktura_kunde)
     
     return table
 
@@ -674,8 +687,10 @@ def anz_beratungen_ohne_termine(mv_mitgliedschaft):
 
 # die nachfolgende Methode erstellt ggf. eine Beratung und n zugehörige Termin(e) aus einer Mitgliedschaft heraus
 @frappe.whitelist()
-def create_neue_beratung(mitgliedschaft, termin_block_data, art, ort, berater_in, telefonnummer, notiz, beratung=None, beratung_only=False):
+def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer, notiz, mitgliedschaft=None, faktura_kunde=None, beratung=None, beratung_only=False):
     if cint(beratung_only) !=1:
+        if not mitgliedschaft:
+            frappe.throw("Key Mitgliedschaft missing.")
         termin_block_data = json.loads(termin_block_data)
         if not beratung:
             # erstelle neue Beratung
@@ -722,7 +737,8 @@ def create_neue_beratung(mitgliedschaft, termin_block_data, art, ort, berater_in
         beratung = frappe.get_doc({
             "doctype": "Beratung",
             "sektion_id": frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id'),
-            "mv_mitgliedschaft": mitgliedschaft
+            "mv_mitgliedschaft": mitgliedschaft,
+            "faktura_kunde": faktura_kunde
         })
         beratung.insert()
         return beratung.name
@@ -873,7 +889,7 @@ def erstelle_todo(owner, beratung, description=False, datum=False, notify=0, mit
     return
 
 @frappe.whitelist()
-def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berater_in=None):
+def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berater_in=None, faktura_kunde=None):
     berater_in_name = frappe.get_doc("Termin Kontaktperson", berater_in).kontakt if berater_in else ''
     index = 0
     von = json.loads(von)
@@ -884,6 +900,11 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
         anrede = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "briefanrede")
         sektion = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "sektion_id")
         sprache = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "language")
+    else:
+        if faktura_kunde:
+            anrede = frappe.db.get_value("Kunden", faktura_kunde, "briefanrede")
+            sektion = frappe.db.get_value("Kunden", faktura_kunde, "sektion_id")
+            sprache = frappe.db.get_value("Kunden", faktura_kunde, "language")
     default_terminbest_hinweis_de = frappe.db.get_value("Sektion", sektion, "default_terminbest_hinweis_de")
     default_terminbest_hinweis_fr = frappe.db.get_value("Sektion", sektion, "default_terminbest_hinweis_fr")
     #mail_txt = ''
@@ -1000,18 +1021,30 @@ def check_doppelbuchung(abp_zuweisung):
     """.format(abp_zuweisung=abp_zuweisung), as_dict=True)[0].qty
 
 @frappe.whitelist()
-def get_tel_for_termin(mitgliedschaft=None):
-    if not mitgliedschaft:
+def get_tel_for_termin(mitgliedschaft=None, faktura_kunde=None):
+    if not mitgliedschaft and not faktura_kunde:
         return ''
     
-    tel = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'tel_m_1')
-    if tel:
-        return tel
-    tel = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'tel_p_1')
-    if tel:
-        return tel
-    tel = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'tel_g_1')
-    if tel:
-        return tel
+    if mitgliedschaft:
+        tel = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'tel_m_1')
+        if tel:
+            return tel
+        tel = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'tel_p_1')
+        if tel:
+            return tel
+        tel = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'tel_g_1')
+        if tel:
+            return tel
+    
+    if faktura_kunde:
+        tel = frappe.db.get_value("Kunden", faktura_kunde, 'tel_m')
+        if tel:
+            return tel
+        tel = frappe.db.get_value("Kunden", faktura_kunde, 'tel_p')
+        if tel:
+            return tel
+        tel = frappe.db.get_value("Kunden", faktura_kunde, 'tel_g')
+        if tel:
+            return tel
     
     return ''

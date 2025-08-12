@@ -13,6 +13,9 @@ frappe.ui.form.on('Kunden', {
             frm.add_custom_button(__("Rechnung"), function() {
                 erstelle_rechnung_sonstiges(frm);
             }, __("Erstelle"));
+            frm.add_custom_button(__("Beratung"), function() {
+                erstelle_beratung(frm);
+            }, __("Erstelle"));
             
             if (!cur_frm.doc.mv_mitgliedschaft) {
                 frm.add_custom_button(__("Interessent*in"), function() {
@@ -52,6 +55,17 @@ frappe.ui.form.on('Kunden', {
         
         // erstelle Debitorenübersicht in Dashboard
         set_party_dashboard_indicators(frm);
+
+        // hack to remove "+" in dashboard
+        $(":button[data-doctype='Sales Invoice']").remove();
+        $(":button[data-doctype='Payment Entry']").remove();
+        $(":button[data-doctype='Beratung']").remove();
+        $(":button[data-doctype='Mahnung']").remove();
+
+        if (!frm.doc.__islocal) {
+            // load html overview
+            load_html_overview(frm);
+        }
     },
     postfach: function(frm){
         strasse_mandatory(frm);
@@ -468,4 +482,42 @@ function merge_faktura_kunden(frm) {
     'Auswahl Master Faktura Kunde',
     'Zusammenführen'
     );
+}
+
+function erstelle_beratung(frm) {
+    var kwargs = {
+        'beratung_only': 1,
+        'termin_block_data': '',
+        'art': '',
+        'ort':'',
+        'berater_in': '',
+        'telefonnummer': '',
+        'notiz': '',
+        'faktura_kunde': cur_frm.doc.name
+    }
+    frappe.call({
+        method: "mvd.mvd.doctype.beratung.beratung.create_neue_beratung",
+        args: kwargs,
+        freeze: true,
+        freeze_message: 'Erstelle Beratung...',
+        callback: function(r)
+        {
+            if (r.message) {
+                frappe.set_route("Form", "Beratung", r.message);
+            }
+        }
+    });
+}
+
+function load_html_overview(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.kunden.kunden.get_uebersicht_html",
+        args:{
+                'name': cur_frm.doc.name
+        },
+        callback: function(r)
+        {
+            cur_frm.set_df_property('uebersicht_html','options', r.message);
+        }
+    });
 }
