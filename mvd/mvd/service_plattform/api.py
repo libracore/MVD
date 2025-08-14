@@ -228,7 +228,7 @@ def send_kampagne_to_sp(kampagne, id=None):
                     frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, str(kampagne)), '{0} > send_kampagne_to_sp'.format(sp_connection.status_code))
                 else:
                     if id:
-                        frappe.db.set_value("Kampagne", id, "send_to_sp", 1)
+                        frappe.db.set_value("Kampagne", id, "sent_to_sp", 1)
                 return
             except Exception as err:
                 frappe.log_error("{0}".format(err), 'send_kampagne_to_sp failed')
