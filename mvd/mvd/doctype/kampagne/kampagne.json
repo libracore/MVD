@@ -30,7 +30,7 @@
   "quelle",
   "ip",
   "id",
-  "send_to_sp",
+  "sent_to_sp",
   "ub_sent",
   "column_break_26"
  ],
@@ -99,8 +99,9 @@
   },
   {
    "fieldname": "mitglied",
-   "fieldtype": "Data",
-   "label": "Mitglied"
+   "fieldtype": "Link",
+   "label": "Mitglied",
+   "options": "Mitgliedschaft"
   },
   {
    "fieldname": "strasse",
@@ -150,12 +151,6 @@
    "unique": 1
   },
   {
-   "default": "0",
-   "fieldname": "send_to_sp",
-   "fieldtype": "Check",
-   "label": "Send to SP"
-  },
-  {
    "fieldname": "sektion_id",
    "fieldtype": "Link",
    "label": "Sektion",
@@ -186,9 +181,15 @@
    "fieldname": "ub_sent",
    "fieldtype": "Datetime",
    "label": "ub_sent"
+  },
+  {
+   "default": "0",
+   "fieldname": "sent_to_sp",
+   "fieldtype": "Check",
+   "label": "Sent to SP"
   }
  ],
- "modified": "2025-07-17 15:08:03.490386",
+ "modified": "2025-08-14 11:41:00.452404",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",
