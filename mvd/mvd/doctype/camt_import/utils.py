@@ -741,6 +741,9 @@ def mit_folgejahr_ausgleichen(pe):
         sinv.set_posting_time = 1
         sinv.posting_date = today()
         sinv.payment_schedule = []
+        sinv.naming_series = 'R-.{sektions_code}.#####'
+        sinv.rechnungs_jahresversand = None
+        sinv.renaming_series = None
         sinv.insert()
         
         sinv.submit()
