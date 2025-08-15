@@ -390,7 +390,7 @@ def create_beratungs_log(error=0, info=0, beratung=None, method=None, title=None
     }).insert(ignore_permissions=True)
     frappe.db.commit()
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def upload_file_to_beratung():
     '''
         Muss als multipart/form-data curl gesendet werden
