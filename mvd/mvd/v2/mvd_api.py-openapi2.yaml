@@ -479,7 +479,8 @@ paths:
         curl https://[URL]/api/method/mvd.mvd.v2.api.upload_file_to_beratung \
         --header 'Authorization: token [API-Key]:[API-Secret]' \
         -F "file=@testbild.png" \
-        -F "beratung=25-08-12-446182"
+        -F "beratung=25-08-12-446182" \
+        -F "last_file=1"
         ```
       consumes:
         - multipart/form-data
