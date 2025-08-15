@@ -279,13 +279,12 @@ def kampagne(**kwargs):
     API endpoints for creating consultations and uploading files related to consultations via the website
 '''
 @frappe.whitelist()
-def create_beratung(**kwargs):
+def create_beratung(**args):
     '''
         API endpoint for creating a new consultation.
         Returns consultation ID in case of success.
     '''
     try:
-        args = json.loads(kwargs['kwargs'])
         create_beratungs_log(error=0, info=1, beratung=None, method='create_beratung', title='Neue Beratung wird duch Website angelegt', json="{0}".format(str(args)))
 
         if frappe.db.exists("Mitgliedschaft", args['mitglied_id']):
