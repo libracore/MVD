@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 import frappe
 from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price
 import json
+from frappe.utils import cint
+from frappe.utils import sanitize_html
 
 '''
 Beispiel CURL Request
@@ -272,3 +274,196 @@ def kampagne(**kwargs):
             frappe.db.commit()
     else:
         raise frappe.NameError
+
+'''
+    API endpoints for creating consultations and uploading files related to consultations via the website
+'''
+@frappe.whitelist()
+def create_beratung(**kwargs):
+    '''
+        API endpoint for creating a new consultation.
+        Returns consultation ID in case of success.
+    '''
+    try:
+        args = json.loads(kwargs['kwargs'])
+        create_beratungs_log(error=0, info=1, beratung=None, method='create_beratung', title='Neue Beratung wird duch Website angelegt', json="{0}".format(str(args)))
+
+        if frappe.db.exists("Mitgliedschaft", args['mitglied_id']):
+            sektion = frappe.db.get_value("Mitgliedschaft", args['mitglied_id'], "sektion_id")
+            topic = None
+            beratungskategorie = None
+            if args['topic'] != 'anderes':
+                if args['topic'] == 'Mietzinserhöhung' or args['topic'] == 'mz_erhoehung':
+                    beratungskategorie = '202 - Mietzinserhöhung'
+                if args['topic'] == 'Mietzinssenkung' or args['topic'] == 'mz_senkung':
+                    beratungskategorie = '203 - Mietzinssenkung'
+                elif args['topic'] == 'Heiz- und Nebenkosten':
+                    beratungskategorie = '300 - Nebenkosten'
+
+            make_appointment = False
+            if 'make_appointment' in args and cint(args['make_appointment']) == 1:
+                make_appointment = True
+            
+            if 'phone' in args and args['phone']:
+                phone = """<b>Telefon:</b> {0}<br>""".format(args['phone'])
+            else:
+                phone = ''
+            if 'email' in args and args['email']:
+                email = """<b>E-Mail:</b> <a href="mailto:{0}">{0}</a><br>""".format(args['email'])
+            else:
+                email = ''
+            if 'other_rental_property' in args and args['other_rental_property']:
+                other_rental_property = """<b>Anderes Mietobjekt:</b><br>{0}<br><br>""".format(sanitize_html(args['other_rental_property']).replace("\n", "<br>"))
+            else:
+                other_rental_property = ''
+            if args['question']:
+                question = """<b>Frage:</b><br>{0}<br><br>""".format(sanitize_html(args['question']).replace("\n", "<br>"))
+            else:
+                question = ''
+            if 'date_rent_notification' in args and args['date_rent_notification']:
+                date_rent_notification = """<b>Briefdatum der Mietzinserhöhungsanzeige:</b> {0}""".format(args['date_rent_notification'])
+            else:
+                date_rent_notification = ''
+            
+            notiz = """{0}{1}{2}{3}{4}""".format(phone, email, other_rental_property, question, date_rent_notification)
+            
+            new_ber = frappe.get_doc({
+                'doctype': 'Beratung',
+                'status': 'Rückfrage: Termin vereinbaren' if make_appointment else 'Eingang',
+                'subject': topic,
+                'beratungskategorie': beratungskategorie,
+                'mv_mitgliedschaft': args['mitglied_id'],
+                'notiz': notiz,
+                'raised_by': args['email'] if 'email' in args and args['email'] else None,
+                'telefon_privat_mobil': args['phone'] if 'phone' in args and args['phone'] else None,
+                'anderes_mietobjekt': args['other_rental_property'] if 'other_rental_property' in args and args['other_rental_property'] else None,
+                'frage': args['question'] if args['question'] else None,
+                'datum_mietzinsanzeige': args.get('date_rent_notification', None),
+                'anlage_durch_web_formular': 1,
+                'sektion_id': sektion
+            })
+            new_ber.insert(ignore_permissions=True)
+            frappe.db.commit()
+            
+            # MVBE Spezial-Hack
+            if new_ber.create_be_admin_todo == 1:
+                frappe.get_doc({
+                    'doctype': 'ToDo',
+                    'description': 'Vorprüfung {0}<br>Zuweisung für Beratung {0}'.format(new_ber.beratungskategorie, new_ber.name),
+                    'reference_type': 'Beratung',
+                    'reference_name': new_ber.name,
+                    'assigned_by': 'Administrator',
+                    'owner': 'libracore@be.mieterverband.ch'
+                }).insert(ignore_permissions=True)
+            
+            # Mail wird (glaube ich) durch die Website versendet...
+            # if args['email']:
+            #     send_confirmation_mail(args['mitglied_id'], new_ber.name, notiz, raised_by=args['email'], sektion=sektion)
+            
+            frappe.local.response.http_status_code = 200
+            frappe.local.response.message = new_ber.name
+            return
+        
+        else:
+            frappe.local.response.http_status_code = 404
+            frappe.local.response.message = 'Mitglied not found'
+            return
+    
+    except Exception as err:
+        # allgemeiner Fehler
+        create_beratungs_log(error=1, info=0, beratung=None, method='new_beratung', title='Exception', json="{0}".format(str(err)))
+        frappe.local.response.http_status_code = 500
+        frappe.local.response.message = str(err)
+
+def create_beratungs_log(error=0, info=0, beratung=None, method=None, title=None, json=None):
+    '''
+        Hilfsmethode für create_beratung()
+    '''
+    frappe.get_doc({
+        'doctype': 'Beratungs Log',
+        'error': error,
+        'info': info,
+        'beratung': beratung,
+        'method': method,
+        'title': title,
+        'json': json
+    }).insert(ignore_permissions=True)
+    frappe.db.commit()
+
+@frappe.whitelist(allow_guest=True)
+def upload_file_to_beratung():
+    '''
+        Muss als multipart/form-data curl gesendet werden
+
+        Beispiel CURL Request:
+        curl https://[URL]/api/method/mvd.mvd.v2.api.upload_file_to_beratung \
+        --header 'Authorization: token [API-Key]:[API-Secret]' \
+        -F "file=@testbild.png" \
+        -F "beratung=25-08-12-446182"
+
+    '''
+    files = frappe.request.files
+    is_private = 1 #frappe.form_dict.is_private
+    doctype = "Beratung" #frappe.form_dict.doctype
+    docname = frappe.form_dict.beratung #frappe.form_dict.docname
+    fieldname = None #frappe.form_dict.fieldname
+    file_url = None #frappe.form_dict.file_url
+    folder = 'Home/Attachments' #frappe.form_dict.folder or 'Home'
+    method = None #frappe.form_dict.method
+    last_file = cint(frappe.form_dict.last_file)
+    content = None
+    filename = None
+
+    if 'file' in files:
+        file = files['file']
+        content = file.stream.read()
+        filename = file.filename
+
+    frappe.local.uploaded_file = content
+    frappe.local.uploaded_filename = filename
+
+    # if frappe.session.user == 'Guest':
+    import mimetypes
+    filetype = mimetypes.guess_type(filename)[0]
+    if filetype not in ['image/png', 'image/jpeg', 'application/pdf']:
+        frappe.local.response.http_status_code = 403
+        frappe.local.response.message = "File none of JPG, PNG or PDF"
+        return
+
+    # if method:
+    #     method = frappe.get_attr(method)
+    #     is_whitelisted(method)
+    #     return method()
+    # else:
+    file_doc = frappe.get_doc({
+        "doctype": "File",
+        "attached_to_doctype": doctype,
+        "attached_to_name": docname,
+        "attached_to_field": fieldname,
+        "folder": folder,
+        "file_name": filename,
+        "file_url": file_url,
+        "is_private": cint(is_private),
+        "content": content
+    })
+    try:
+        file_doc.insert(ignore_permissions=True)
+
+        if last_file == 1:
+            # mark for SP API
+            frappe.db.set_value("Beratung", docname, 'trigger_api', 1, update_modified=False)
+        
+    except (frappe.DuplicateEntryError, frappe.UniqueValidationError):
+        pass
+        frappe.clear_messages()
+        frappe.local.response.http_status_code = 409
+        frappe.local.response.message = "Same file has already been attached to the record"
+        return
+    except Exception as err:
+        frappe.local.response.http_status_code = 500
+        frappe.local.response.message = str(frappe.get_traceback())
+        return
+    
+    frappe.local.response.http_status_code = 200
+    frappe.local.response.message = "File saved"
+    return

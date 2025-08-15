@@ -378,6 +378,157 @@ paths:
           description: Missing or invalid parameters
         '500':
           description: Internal Server Error
+  /mvd.mvd.v2.api.create_beratung:
+    post:
+      summary: Create Beratung
+      description: |
+        Dieser Endpunkt dient der Website zur Anlage einer neuen Beratung.
+        
+        Zur Beratung zugehörige Files müssen nachgelagert einzeln an den entsprechenden Endpunkt `upload_file_to_beratung` gesendet werden.
+
+        Example CURL Request:
+        ```
+        curl --location --request POST 'https://[URL]/api/method/mvd.mvd.v2.api.create_beratung' \
+        --header 'Authorization: token [API-Key]:[API-Secret]' \
+        --header 'Content-Type: application/json' \
+        --data-raw '{
+            "mitglied_id": 1234567,
+            "topic": "Mietzinssenkung",
+            "question": "Hallo zusammen<br>meine Frage ist ...."
+        }'
+        ```
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            required:
+              - mitglied_id
+              - topic
+              - question
+            properties:
+              mitglied_id:
+                type: string
+                description: "Unique member identifier (not MVXXXXXXX)"
+                example: "1234567"
+              topic:
+                type: string
+                description: "One of `anderes`, `Mietzinserhöhung`, `Mietzinssenkung`, `Heiz- und Nebenkosten`"
+                example: "Mietzinssenkung"
+                default: anderes
+              question:
+                type: string
+                description: "HTML as string"
+                example: "Hallo zusammen<br>meine Frage ist ...."
+              make_appointment:
+                type: integer
+                description: "Has an impact on the status of the consultation. If this flag is set, the consultation status becomes 'Follow-up: Schedule appointment'; otherwise, the consultation status is 'Received.'"
+                example: 0
+                default: 0
+              phone:
+                type: string
+                description: "Phonenumber"
+                example: "055 246 49 36"
+              email:
+                type: string
+                description: "E-Mail-Address"
+                example: "example@mail.ch"
+              other_rental_property:
+                type: string
+                description: "HTML as string, e.g. `Musterstrasse 10<br>1234 Musterhausen`"
+                example: "Musterstrasse 10<br>1234 Musterhausen"
+              date_rent_notification:
+                type: string
+                description: "Date as string in dd.mm.YYYY"
+                example: "01.08.2025"
+      responses:
+        '200':
+          description: Beratung created successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "25-08-12-446182"
+        '404':
+          description: Mitglied nicht gefunden
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Mitglied not found"
+        '500':
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Error Traceback"
+  /mvd.mvd.v2.api.upload_file_to_beratung:
+    post:
+      summary: Upload file to Beratung
+      description: |
+        Dieser Endpunkt dient der Website zum upload eines Files zu einer Beratung.
+
+        Example CURL Request:
+        ```
+        curl https://[URL]/api/method/mvd.mvd.v2.api.upload_file_to_beratung \
+        --header 'Authorization: token [API-Key]:[API-Secret]' \
+        -F "file=@testbild.png" \
+        -F "beratung=25-08-12-446182"
+        ```
+      consumes:
+        - multipart/form-data
+      parameters:
+      - name: file
+        in: formData
+        type: file
+        description: "The file to upload (allowed types: 'image/png', 'image/jpeg', 'application/pdf')"
+        required: true
+      - name: beratung
+        in: formData
+        type: string
+        x-example: 25-08-12-446182
+        description: "Unique Beratung identifier"
+        required: true
+      - name: last_file
+        in: formData
+        type: integer
+        enum: [0, 1]
+        description: |
+          Trigger for sending to the ServicePlatform (1 = send to SP)
+
+          It is important to `mark the last file with 1` so that the consultation, including all files, can be sent to the SP.
+        required: true
+      responses:
+        '200':
+          description: File saved successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "File saved"
+        '409':
+          description: Duplicate Entry Error
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Same file has already been attached to the record"
+        '500':
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Error Traceback"
 securityDefinitions:
   tokenAuth:
     type: apiKey
