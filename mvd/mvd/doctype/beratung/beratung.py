@@ -784,7 +784,7 @@ def sync_mail_attachements(file_record, event):
                 row.file = file_record.file_url
                 row.document_type = 'Sonstiges'
                 row.filename = file_record.file_name
-                b.save()
+                b.save(ignore_permissions=True)
 
 def sync_attachments_and_beratungs_table(doc, event):
     if doc.doctype == "Beratung":
