@@ -441,8 +441,8 @@ paths:
                 example: "Musterstrasse 10<br>1234 Musterhausen"
               date_rent_notification:
                 type: string
-                description: "Date as string in dd.mm.YYYY"
-                example: "01.08.2025"
+                description: "Date as string in YYYY-mm-dd"
+                example: "2025-08-01"
       responses:
         '200':
           description: Beratung created successfully
@@ -505,6 +505,16 @@ paths:
 
           It is important to `mark the last file with 1` so that the consultation, including all files, can be sent to the SP.
         required: true
+      - name: beratung_file_type
+        in: formData
+        type: string
+        x-example: Mietvertrag
+        description: "Content-Type of Beratung Attachment"
+      - name: beratung_file_date
+        in: formData
+        type: string
+        x-example: "2025-08-01"
+        description: "Date of Beratung Attachment"
       responses:
         '200':
           description: File saved successfully

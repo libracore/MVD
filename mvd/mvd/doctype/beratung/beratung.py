@@ -782,8 +782,15 @@ def sync_mail_attachements(file_record, event):
                 b = frappe.get_doc("Beratung", file_record.attached_to_name)
                 row = b.append('dokumente', {})
                 row.file = file_record.file_url
-                row.document_type = 'Sonstiges'
                 row.filename = file_record.file_name
+                row.document_date = file_record.beratung_datei_datum or None
+                if file_record.beratung_datei_typ in ['Mietvertrag', 'Mietzinserhöhung', 'Mietzinsherabsetzung', 'Vergleich/Urteil', 'Vereinbarung', 'sonstige Vertragsänderung', 'Sonstiges']:
+                    row.document_type = file_record.beratung_datei_typ
+                elif file_record.beratung_datei_typ:
+                    row.document_type = 'Sonstiges'
+                    row.man_document_type =file_record.beratung_datei_typ
+                else:
+                    row.document_type = 'Sonstiges'
                 b.save(ignore_permissions=True)
 
 def sync_attachments_and_beratungs_table(doc, event):
@@ -845,8 +852,15 @@ def sync_attachments_and_beratungs_table(doc, event):
                     if not file_found:
                         row = doc.append('dokumente', {})
                         row.file = file_attachment.file_url
-                        row.document_type = 'Sonstiges'
                         row.filename = file_attachment.file_name
+                        row.document_date = file_attachment.beratung_datei_datum or None
+                        if file_attachment.beratung_datei_typ in ['Mietvertrag', 'Mietzinserhöhung', 'Mietzinsherabsetzung', 'Vergleich/Urteil', 'Vereinbarung', 'sonstige Vertragsänderung', 'Sonstiges']:
+                            row.document_type = file_attachment.beratung_datei_typ
+                        elif file_attachment.beratung_datei_typ:
+                            row.document_type = 'Sonstiges'
+                            row.man_document_type =file_attachment.beratung_datei_typ
+                        else:
+                            row.document_type = 'Sonstiges'
                         new_row_added = True
                 if new_row_added:
                     doc.save()

@@ -410,6 +410,8 @@ def upload_file_to_beratung():
     folder = 'Home/Attachments' #frappe.form_dict.folder or 'Home'
     method = None #frappe.form_dict.method
     last_file = cint(frappe.form_dict.last_file)
+    beratung_file_type = frappe.form_dict.file_type or None
+    beratung_file_date = frappe.form_dict.file_date or None
     content = None
     filename = None
 
@@ -443,7 +445,9 @@ def upload_file_to_beratung():
         "file_name": filename,
         "file_url": file_url,
         "is_private": cint(is_private),
-        "content": content
+        "content": content,
+        "beratung_datei_typ": beratung_file_type,
+        "beratung_datei_datum": beratung_file_date
     })
     try:
         file_doc.insert(ignore_permissions=True)
