@@ -34,10 +34,14 @@ def import_or_update_web_auth(site_name, file_name, limit=False, bench='frappe')
     # for index, row in df.iterrows():
     for index, row in tqdm(df.iterrows(), desc="Creating/Updating Web-Login and Password-Hashes", unit=" PWD Datasets", total=max_loop):
         if count <= max_loop:
-            mitglied_nr = "MV0{0}".format(str(int(get_value(row, 'user_id'))))
-            from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
-            mitglied_id = get_mitglied_id_from_nr(mitglied_nr=mitglied_nr, ignore_inaktiv=True)
-
+            try:
+                mitglied_nr = "MV0{0}".format(str(int(get_value(row, 'user_id'))))
+                from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
+                mitglied_id = get_mitglied_id_from_nr(mitglied_nr=mitglied_nr, ignore_inaktiv=True)
+            except Exception as err:
+                error_list.append([get_value(row, 'user_id'), str(err)])
+                continue
+            
             if frappe.db.exists("Mitgliedschaft", mitglied_id):
                 user_id = "{0}@login.ch".format(mitglied_nr)
                 if not frappe.db.exists("User", user_id):
