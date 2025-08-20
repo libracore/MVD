@@ -1,0 +1,45 @@
+{
+ "creation": "2025-08-20 12:52:53.436912",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "json"
+ ],
+ "fields": [
+  {
+   "fieldname": "json",
+   "fieldtype": "Code",
+   "label": "JSON"
+  }
+ ],
+ "modified": "2025-08-20 12:52:53.436912",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "WebFormular",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "export": 1,
+   "read": 1,
+   "role": "API User",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
