@@ -2,3 +2,4 @@ frappe
 pysftp
 icalendar
 python-docx
+tqdm
