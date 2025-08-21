@@ -83,8 +83,10 @@ def erweiterte_zuordnung():
     kampagnen = frappe.get_all(
         "Kampagne",
         filters={"mitglied": ["is", "not set"]},
-        fields=["name", "email", "mitglied_hash", "zip_code",
-                "last_name", "first_name", "strasse", "ort", "strasse_nummer"]
+        fields=[
+            "name", "email", "mitglied_hash", "zip_code",
+            "last_name", "first_name", "strasse", "ort", "strasse_nummer"
+        ]
     )
     total = len(kampagnen)
     for k in kampagnen:
