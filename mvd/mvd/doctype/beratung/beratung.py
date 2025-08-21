@@ -140,6 +140,8 @@ class Beratung(Document):
         # Flag "R3", siehe auch libracore/MVD#1406
         if self.kontaktperson and 'Rechtsberatung Pool' not in self.kontaktperson:
             self.r3 = 1
+        else:
+            self.r3 = 0
         
         # Synchronisierung der Felder faktura_kunde und mv_kunde
         self.mv_kunde = self.faktura_kunde
