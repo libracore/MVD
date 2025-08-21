@@ -2537,23 +2537,27 @@ def mitgliedschaft_zuweisen(**kwargs):
     Output:
         tuple(Name, Sektion-ID), str(Sektion-ID) oder False bei keiner/mehreren Übereinstimmungen.  
     '''
-    # Reihenfolge der Filterversuche
-    priority_fields = ["mitglied_hash", "email"]  # weitere Felder können hier ergänzt werden
-    field_map = {
-        "email": "e_mail_1"  # Mapping von Funktionsargument zu Datenbankfeld
-    }
-
     try:
-        for field in priority_fields:
-            value = kwargs.get(field)
-            if value:          
-                db_field = field_map.get(field, field)
-                results = frappe.get_all("Mitgliedschaft",
-                    filters={db_field: value},
-                    fields=["name", "sektion_id"]
-                )
-                if len(results) == 1:
-                    return results[0]["name"], results[0]["sektion_id"]
+        mitglied_hash = kwargs.get("mitglied_hash")
+        if mitglied_hash:
+            results = frappe.get_all(
+                "Mitgliedschaft",
+                filters={"mitglied_hash": mitglied_hash},
+                fields=["name", "sektion_id"]
+            )
+            if len(results) == 1:
+                return results[0]["name"], results[0]["sektion_id"]
+        
+        email = kwargs.get("email")
+        if email:
+            email_lower = email.strip().lower()
+            results = frappe.db.sql("""
+                SELECT name, sektion_id
+                FROM `tabMitgliedschaft`
+                WHERE LOWER(e_mail_1) = %s
+            """, email_lower, as_dict=True)
+            if len(results) == 1:
+                return results[0]["name"], results[0]["sektion_id"]
 
         last_name = kwargs.get("last_name")
         first_name = kwargs.get("first_name")
@@ -2561,7 +2565,6 @@ def mitgliedschaft_zuweisen(**kwargs):
         zip_code = str(kwargs.get("zip_code")) if kwargs.get("zip_code") else None
 
         if last_name and first_name and strasse and zip_code:
-            zip_code = str(zip_code)
             strasse_norm = normalize_street(strasse)
             candidates = frappe.get_all(
                 "Mitgliedschaft",
