@@ -39,8 +39,8 @@ class Kampagne(Document):
         # Mitglied zuordnen
         email = self.email 
         mitglied_hash = self.mitglied_hash
-        plz = self.zip_code
-        mitglied_info = mitgliedschaft_zuweisen(email=email, mitglied_hash=mitglied_hash, plz=plz)
+        zip_code = self.zip_code
+        mitglied_info = mitgliedschaft_zuweisen(email=email, mitglied_hash=mitglied_hash, zip_code=zip_code)
 
         if mitglied_info:
             if isinstance(mitglied_info, tuple):
@@ -69,3 +69,45 @@ class Kampagne(Document):
 
         if cint(frappe.db.get_value("MVD Settings", "MVD Settings", "suspend_kampagne_to_sp")) != 1:
             send_kampagne_to_sp(sp_data, id=self.name)
+
+@frappe.whitelist()
+def erweiterte_zuordnung():
+    """
+    Versucht, alle Kampagnen ohne zugeordnetes Mitglied anhand des Falls
+    (Vorname, Nachname, Strasse, PLZ) automatisch einer Mitgliedschaft zuzuordnen.
+    Das wird nicht beim insert gemacht, weil es rechenintensiv ist!
+    Aktualisiert die Felder 'mitglied' und 'sektion_id', falls ein eindeutiges Match gefunden wird.
+    """
+    assigned = 0
+    # Nur Kampagnen ohne Mitglied abrufen
+    kampagnen = frappe.get_all(
+        "Kampagne",
+        filters={"mitglied": ["is", "not set"]},
+        fields=[
+            "name", "email", "mitglied_hash", "zip_code",
+            "last_name", "first_name", "strasse", "ort", "strasse_nummer"
+        ]
+    )
+    total = len(kampagnen)
+    for k in kampagnen:
+        # Nur der neue Fall: Name + PLZ + Strasse
+        if k.first_name and k.last_name and k.strasse and k.zip_code:
+            mitglied_info = mitgliedschaft_zuweisen(
+                zip_code=k.zip_code,
+                last_name=k.last_name,
+                first_name=k.first_name,
+                strasse=k.strasse
+            )
+
+            if mitglied_info:
+                if isinstance(mitglied_info, tuple):
+                    mitglied_id, sektion_id = mitglied_info
+                    frappe.db.set_value("Kampagne", k.name, "mitglied", mitglied_id)
+                    frappe.db.set_value("Kampagne", k.name, "sektion_id", sektion_id)
+                    assigned += 1
+
+    frappe.db.commit()
+    return {
+        "total": total,
+        "assigned": assigned
+    }
