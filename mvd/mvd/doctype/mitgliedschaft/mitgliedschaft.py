@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import json
 import datetime
 from PyPDF2 import PdfFileWriter
+import re
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -207,7 +208,6 @@ class Mitgliedschaft(Document):
                 self.web_login_user_created = 1
     
     def email_validierung(self, check=False):
-        import re
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         email_felder = ['e_mail_1', 'e_mail_2', 'rg_e_mail']
         failed_mails = []
@@ -2492,22 +2492,50 @@ def get_last_open_sinv(mitgliedschaft):
         return sinvs[0].name
     else:
         return None
+    
+
+def normalize_street(s):
+    """
+    Normalisiert die Strassennamen. Ist eine Hilfsfunktion von mitgliedschaft_zuweisen.
+    """
+    if not isinstance(s, str):
+        return ""
+    s = s.lower().strip()
+    # Replace common abbreviations
+    replacements = {
+        r'\bstr\b': 'strasse', r'\bstr\.\b': 'strasse',
+        r'\bch\b': 'chemin', r'\bch\.\b': 'chemin',
+        r'\brte\b': 'route', r'\br\.\b': 'route',
+        r'\bav\b': 'avenue', r'\bav\.\b': 'avenue',
+        r'\bimp\.\b': 'impasse', r'\bbd\b': 'boulevard', r'\bbd\.\b': 'boulevard',
+        r'\bpl\b': 'place'
+    }
+    for pattern, repl in replacements.items():
+        s = re.sub(pattern, repl, s)
+    # Remove str. in the end
+    s = re.sub(r'str\.?(?=\s|$)', 'strasse', s)
+    # Remove numbers
+    s = re.sub(r'\d+', '', s)
+    s = re.sub(r'\s+', ' ', s).strip()
+    return s
+
 
 def mitgliedschaft_zuweisen(**kwargs):
     '''
-    Versucht, ein Mitglied eindeutig zuzuordnen, indem nacheinander verschiedene Filter angewendet werden.
-    Die Reihenfolge der Versuche basiert auf einer vordefinierten Priorität.
+    Versucht, ein Mitglied einer Mitgliedschaft zuzuordnen, basierend auf den übergebenen Informationen. 
+    Die Zuordnung erfolgt stufenweise:  
 
-    Input (alle optional, aber mindestens einer erforderlich):
-        mitglied_hash (str): Der eindeutige Hash des Mitglieds.
-        email (str): Die E-Mail-Adresse des Mitglieds.
-        plz (str): Postleitzahl zur Zuordnung über "Sektion PLZ Zuordnung".
-        (zukünftig weitere Felder)
+    1. **Mitglieds-Hash**: eindeutige Identifikation.  
+    2. **E-Mail**: exakte Übereinstimmung.  
+    3. **Name + PLZ + Strasse**: prüft beide Namenskombinationen und normalisierte Straße.  
+       Liefert Name und Sektion-ID, wenn genau eine Übereinstimmung gefunden wird.  
+    4. **PLZ allein**: liefert Sektion-ID, wenn nur Postleitzahl vorhanden ist.  
+
+    Input:
+        mitglied_hash, email, last_name, first_name, strasse, zip_code (alle optional).  
 
     Output:
-        tuple(str, str): Der Name des zugehörigen Mitgliedschaft-Dokuments und die Sektion ID, wenn genau eine Übereinstimmung gefunden wird.
-        str: Nur die Sektion ID, wenn nur die PLZ verwendet wird.
-        False: Wenn keine oder mehrere Übereinstimmungen gefunden werden.
+        tuple(Name, Sektion-ID), str(Sektion-ID) oder False bei keiner/mehreren Übereinstimmungen.  
     '''
     # Reihenfolge der Filterversuche
     priority_fields = ["mitglied_hash", "email"]  # weitere Felder können hier ergänzt werden
@@ -2526,12 +2554,39 @@ def mitgliedschaft_zuweisen(**kwargs):
                 )
                 if len(results) == 1:
                     return results[0]["name"], results[0]["sektion_id"]
-                
+
+        last_name = kwargs.get("last_name")
+        first_name = kwargs.get("first_name")
+        strasse = kwargs.get("strasse")
+        zip_code = str(kwargs.get("zip_code")) if kwargs.get("zip_code") else None
+
+        if last_name and first_name and strasse and zip_code:
+            zip_code = str(zip_code)
+            strasse_norm = normalize_street(strasse)
+            candidates = frappe.get_all(
+                "Mitgliedschaft",
+                filters={
+                    "plz": zip_code
+                },
+                or_filters=[
+                    {"nachname_1": last_name, "vorname_1": first_name},
+                    {"nachname_2": last_name, "vorname_2": first_name}
+                ],
+                fields=["name", "sektion_id", "strasse", 
+                        "nachname_1", "vorname_1"]
+            )
+            matches = []
+            for candidate in candidates:
+                candidate_str_norm = normalize_street(candidate.get("strasse"))
+                if candidate_str_norm == strasse_norm:
+                    matches.append((candidate["name"], candidate["sektion_id"]))
+            if len(matches) == 1:
+                return matches[0]
+            
         # Wenn keine eindeutige Mitgliedschaft gefunden wurde, versuche über PLZ
-        plz = kwargs.get("plz")
-        if plz:
+        if zip_code and not first_name and not last_name and not strasse:
             sektion_entry = frappe.get_all("Sektion PLZ Zuordnung",
-                filters={"name": plz},
+                filters={"name": zip_code},
                 fields=["sektion"]
             )
             if sektion_entry:
@@ -2542,5 +2597,3 @@ def mitgliedschaft_zuweisen(**kwargs):
         pass
 
     return False
-
-
