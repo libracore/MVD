@@ -914,7 +914,6 @@ frappe.mvd.MailComposer = Class.extend({
             return;
         }
 
-
         return frappe.call({
             method:"frappe.core.doctype.communication.email.make",
             args: {
@@ -929,7 +928,7 @@ frappe.mvd.MailComposer = Class.extend({
                 print_html: print_html,
                 send_me_a_copy: form_values.send_me_a_copy,
                 print_format: print_format,
-                sender: form_values.sender,
+                sender: form_values.sender||me.sender,
                 sender_full_name: form_values.sender?frappe.user.full_name():undefined,
                 email_template: form_values.email_template,
                 attachments: selected_attachments,
