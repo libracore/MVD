@@ -17,6 +17,11 @@ frappe.query_reports["Mitgliederbeitraege"] = {
             'fieldtype': "Select",
             'options': 'Offen\nBeglichen\nAlle',
             'default': 'Alle'
+        },
+        {
+            'fieldname': "jahr",
+            'label': __("Mitgliedschaftsjahr"),
+            'fieldtype': "Data"
         }
     ]
 };

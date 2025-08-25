@@ -15,6 +15,9 @@ def get_columns():
         {"label": _("Mitglied"), "fieldname": "mitglied_id", "fieldtype": "Link", "options": "Mitgliedschaft"},
         {"label": _("Mitglied Nr"), "fieldname": "mitglied_nr", "fieldtype": "Data"},
         {"label": _("Mitglied Name"), "fieldname": "mitglied_name", "fieldtype": "Data"},
+        {"label": _("E-Mail"), "fieldname": "e_mail_1", "fieldtype": "Data"},
+        {"label": _("Tel. Mobil"), "fieldname": "tel_m_1", "fieldtype": "Data"},
+        {"label": _("Tel. Privat"), "fieldname": "tel_p_1", "fieldtype": "Data"},
         {"label": _("Mitglied Status"), "fieldname": "mitglied_status", "fieldtype": "Data"},
         {"label": _("Mitgliedtyp"), "fieldname": "mitgliedtyp_c", "fieldtype": "Data"},
         {"label": _("Rechnung"), "fieldname": "rechnung", "fieldtype": "Link", "options": "Sales Invoice"},
@@ -33,6 +36,7 @@ def get_data(filters):
 def get_nicht_bezahlt(filters, data):
     # Mitglieder
     status_filter = get_status_filter(filters)
+    jahr_filter = get_jahr_filter(filters)
     nicht_bezahlt_per_se = frappe.db.sql("""SELECT
                                                 `sinv`.`name` AS `rechnung`,
                                                 `sinv`.`grand_total` AS `betrag`,
@@ -44,13 +48,17 @@ def get_nicht_bezahlt(filters, data):
                                                 `mvm`.`mitglied_nr` AS `mitglied_nr`,
                                                 `mvm`.`mitglied_id` AS `mitglied_id`,
                                                 `mvm`.`status_c` AS `mitglied_status`,
-                                                `mvm`.`mitgliedtyp_c` AS `mitgliedtyp_c`
+                                                `mvm`.`mitgliedtyp_c` AS `mitgliedtyp_c`,
+                                                `mvm`.`e_mail_1` AS `e_mail_1`,
+                                                `mvm`.`tel_m_1` AS `tel_m_1`,
+                                                `mvm`.`tel_p_1` AS `tel_p_1`
                                             FROM `tabSales Invoice` AS `sinv`
                                             LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `sinv`.`mv_mitgliedschaft` = `mvm`.`name`
                                             WHERE `sinv`.`sektion_id` = '{sektion_id}'
                                             AND `sinv`.`docstatus` = 1
                                             AND `sinv`.`ist_mitgliedschaftsrechnung` = 1
-                                            {status_filter}""".format(sektion_id=filters.sektion_id, status_filter=status_filter), as_dict=True)
+                                            {status_filter}
+                                            {jahr_filter}""".format(sektion_id=filters.sektion_id, status_filter=status_filter, jahr_filter=jahr_filter), as_dict=True)
     for record in nicht_bezahlt_per_se:
         data.append(record)
     
@@ -63,3 +71,9 @@ def get_status_filter(filters):
     elif filters.zahlstatus == 'Beglichen':
         status_filter = """AND `sinv`.`status` = 'Paid'"""
     return status_filter
+
+def get_jahr_filter(filters):
+    jahr_filter = ''
+    if filters.jahr and filters.jahr != '':
+        jahr_filter = """AND `sinv`.`mitgliedschafts_jahr` = '{0}'""".format(filters.jahr)
+    return jahr_filter
