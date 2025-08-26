@@ -211,6 +211,7 @@ def generate_reset_hash(user, email, hash_only=False):
     
     user_doc.reset_password_key = key
     user_doc.save(ignore_permissions=True)
+    frappe.db.commit()
     
     if not hash_only:
         if cint(frappe.db.get_value("MVD Settings", "MVD Settings", "pwd_reset_an_testadresse")) == 1:
