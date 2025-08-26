@@ -267,59 +267,34 @@ def success_data(mitglied_nr):
         return server_error()
 
 def success_info():
-    code = 200
-    return {
-        "code": code
-    }
+    frappe.response['http_status_code'] = 200
 
 def hash_only_success_info(reset_hash):
-    code = 201
-    return {
-        "code": code,
+    frappe.response['http_status_code'] = 201
+    frappe.response['message'] = {
         "reset_hash": reset_hash
     }
 
 def multi_mail():
-    code = 409
-    message = 'E-Mail mehrfach vorhanden'
-    return {
-        "code": code,
-        "message": "{message}".format(message=message)
-    }
+    frappe.response['http_status_code'] = 409
+    frappe.response['message'] = "E-Mail mehrfach vorhanden"
 
 def failed_login():
-    code = 401
-    message = 'Passwort falsch'
-    return {
-        "code": code,
-        "message": "{message}".format(message=message)
-    }
+    frappe.response['http_status_code'] = 401
+    frappe.response['message'] = "Passwort falsch"
 
 def server_error():
-    code = 500
-    message = 'Internal Server Error'
-    return {
-        "code": code,
-        "message": "{message}".format(message=message)
-    }
+    frappe.response['http_status_code'] = 500
+    frappe.response['message'] = "Internal Server Error"
 
 def weak_pwd():
-    code = 422
-    return {
-        "code": code,
-        "message": "Password requirements"
-    }
+    frappe.response['http_status_code'] = 422
+    frappe.response['message'] = "Password requirements"
 
 def invalid_reset_hash():
-    code = 498
-    return {
-        "code": code,
-        "message": "Invalid reset hash"
-    }
+    frappe.response['http_status_code'] = 498
+    frappe.response['message'] = "Invalid reset hash"
 
 def unknown_user():
-    code = 404
-    return {
-        "code": code,
-        "message": "User not found"
-    }
+    frappe.response['http_status_code'] = 404
+    frappe.response['message'] = "User not found"
