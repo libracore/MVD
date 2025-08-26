@@ -43,7 +43,7 @@ paths:
   /mvd.mvd.v2.web_auth.reset:
     get:
       summary: Password Reset
-      description: Request a password reset link or perform a password reset.
+      description: Request a password reset link or a password reset hash or perform a password reset.
       parameters:
         - name: user
           in: query
@@ -69,9 +69,17 @@ paths:
           required: false
           type: string
           x-example: true
+        - name: get_hash
+          in: query
+          description: If present, password hash will returned and no email will be sending
+          required: false
+          type: string
+          x-example: false
       responses:
         '200':
           description: Erfolg
+        '201':
+          description: Success, reset_hash will be returned
         '404':
           description: User not found
         '422':

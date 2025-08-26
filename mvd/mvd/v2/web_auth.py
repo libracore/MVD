@@ -29,6 +29,15 @@ curl --location --request POST 'https://libracore.mieterverband.ch/api/method/mv
     "user": "MV11111111"
 }'
 
+Anfrage eines Reset Hash OHNE Mail
+----------------------------------
+curl --location --request POST 'https://libracore.mieterverband.ch/api/method/mvd.mvd.v2.web_auth.reset' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "user": "MV11111111",
+    "get_hash": true
+}'
+
 Reset PWD mit Reset-Hash
 --------------------------
 curl --location --request POST 'https://libracore.mieterverband.ch/api/method/mvd.mvd.v2.web_auth.reset' \
@@ -88,7 +97,10 @@ def reset(**api_request):
                 clear = True
             return update_pwd(mitglied, api_request['reset_hash'], api_request['pwd'], clear)
         else:
-            return generate_reset_hash(mitglied, email)
+            hash_only = False
+            if 'get_hash' in api_request and api_request['get_hash']:
+                hash_only = True
+            return generate_reset_hash(mitglied, email, hash_only)
     
     return multi_mail()
 
@@ -189,7 +201,7 @@ def is_password_strength(user_doc, pwd):
 
     return True
 
-def generate_reset_hash(user, email):
+def generate_reset_hash(user, email, hash_only=False):
     from frappe.utils import random_string
     key = random_string(32)
     try:
@@ -200,34 +212,37 @@ def generate_reset_hash(user, email):
     user_doc.reset_password_key = key
     user_doc.save(ignore_permissions=True)
     
-    if cint(frappe.db.get_value("MVD Settings", "MVD Settings", "pwd_reset_an_testadresse")) == 1:
-        email = frappe.db.get_value("MVD Settings", "MVD Settings", "pwd_reset_testadresse")
-    else:
+    if not hash_only:
+        if cint(frappe.db.get_value("MVD Settings", "MVD Settings", "pwd_reset_an_testadresse")) == 1:
+            email = frappe.db.get_value("MVD Settings", "MVD Settings", "pwd_reset_testadresse")
+        else:
+            if not email:
+                from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
+                mitglied_id = get_mitglied_id_from_nr(mitglied_nr=user.replace("@login.ch", ""))
+                email = frappe.db.get_value("Mitgliedschaft", mitglied_id, "e_mail_1")
         if not email:
-            from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
-            mitglied_id = get_mitglied_id_from_nr(mitglied_nr=user.replace("@login.ch", ""))
-            email = frappe.db.get_value("Mitgliedschaft", mitglied_id, "e_mail_1")
-    if not email:
-        return server_error()
+            return server_error()
 
-    sender = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_sender')
-    subject = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_subject')
-    template = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_template') or 'website_pwd_reset'
-    reset_url = frappe.db.get_value("MVD Settings", "MVD Settings", 'reset_url')
-    args = {
-        'link': "{0}/?reset_hash={1}".format(reset_url, key)
-    }
-    if not sender or not subject or not template or not reset_url:
-        return server_error()
-    
-    try:
-        frappe.sendmail(recipients=[email], sender=sender, subject=subject,
-            template=template, args=args, header=[subject, "green"], retry=3)
-        frappe.db.commit()
-    except:
-        return server_error()
-    
-    return success_info()
+        sender = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_sender')
+        subject = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_subject')
+        template = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_template') or 'website_pwd_reset'
+        reset_url = frappe.db.get_value("MVD Settings", "MVD Settings", 'reset_url')
+        args = {
+            'link': "{0}/?reset_hash={1}".format(reset_url, key)
+        }
+        if not sender or not subject or not template or not reset_url:
+            return server_error()
+        
+        try:
+            frappe.sendmail(recipients=[email], sender=sender, subject=subject,
+                template=template, args=args, header=[subject, "green"], retry=3)
+            frappe.db.commit()
+        except:
+            return server_error()
+        
+        return success_info()
+    else:
+        hash_only_success_info(key)
 
 '''
 RETURNS
@@ -255,6 +270,13 @@ def success_info():
     code = 200
     return {
         "code": code
+    }
+
+def hash_only_success_info(reset_hash):
+    code = 201
+    return {
+        "code": code,
+        "reset_hash": reset_hash
     }
 
 def multi_mail():
