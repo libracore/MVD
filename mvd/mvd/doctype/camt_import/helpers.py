@@ -151,6 +151,10 @@ def camt_zugewiesen_nicht_verbucht_update(camt_import):
     qty = frappe.db.get_value('CAMT Import', camt_import, 'zugewiesen_unverbucht_qty') + 1
     frappe.db.set_value('CAMT Import', camt_import, 'zugewiesen_unverbucht_qty', qty)
 
+def camt_rueckzahlung_update(camt_import):
+    qty = frappe.db.get_value('CAMT Import', camt_import, 'rueckzahlung_qty') + 1
+    frappe.db.set_value('CAMT Import', camt_import, 'rueckzahlung_qty', qty)
+
 @frappe.whitelist()
 def aktualisiere_camt_uebersicht(camt_import):
     # Reset Gesamtsumme
@@ -204,6 +208,9 @@ def aktualisiere_camt_uebersicht(camt_import):
     frappe.db.set_value('CAMT Import', camt_import, 'hv_qty', 0)
     frappe.db.set_value('CAMT Import', camt_import, 'spenden_qty', 0)
     frappe.db.set_value('CAMT Import', camt_import, 'produkte_qty', 0)
+    frappe.db.set_value('CAMT Import', camt_import, 'rueckzahlung_qty', 0)
+
+    summe_rueckzahlungen = 0
     
     # set new values
     for pe in gebuchte_pes:
@@ -218,6 +225,11 @@ def aktualisiere_camt_uebersicht(camt_import):
                     camt_spenden_update(camt_import)
                 elif int(frappe.db.get_value('Sales Invoice', reference.reference_name, 'ist_sonstige_rechnung')) == 1:
                     camt_produkte_update(camt_import)
+        else:
+            # Verbuchte Rückzahlungen
+            if pe_doc.unallocated_amount == 0:
+                camt_rueckzahlung_update(camt_import)
+                summe_rueckzahlungen += pe_doc.paid_amount
     
     # update report data
     verbuchte_zahlungen_gegen_rechnung = frappe.db.sql("""SELECT
@@ -391,6 +403,36 @@ def aktualisiere_camt_uebersicht(camt_import):
                     </tr>""".format("{:,.2f}".format(ertragskonten_totalbetrag).replace(",", "'"))
     
     report_data += """</tbody></table>"""
+
+    # Besonderes (Rückzahlungen)
+    if summe_rueckzahlungen > 0 or len(nicht_gebuchte_pes) > 0:
+        besonderes_total = summe_rueckzahlungen
+        report_data += """<h3>Besonderes</h3>
+                            <table style="width: 100%;">
+                                <tbody>"""
+        if summe_rueckzahlungen > 0:
+            report_data += """<tr>
+                                <td style="text-align: left;">Rückzahlungen</td>
+                                <td style="text-align: right;">{summe_rueckzahlungen}</td>
+                            </tr>""".format(summe_rueckzahlungen="{:,.2f}".format(summe_rueckzahlungen).replace(",", "'"))
+        if len(nicht_gebuchte_pes) > 0:
+            summe_stornos = 0
+            for pe in nicht_gebuchte_pes:
+                pe_doc = frappe.get_doc("Payment Entry", pe.name)
+                if pe_doc.docstatus == 2:
+                    summe_stornos += pe_doc.paid_amount
+            besonderes_total += summe_stornos
+            if summe_stornos > 0:
+                report_data += """<tr>
+                                    <td style="text-align: left;">Stornierungen</td>
+                                    <td style="text-align: right;">{summe_stornos}</td>
+                                </tr>""".format(summe_stornos="{:,.2f}".format(summe_stornos).replace(",", "'"))
+            report_data += """<tr>
+                                <td style="text-align: left;"><b>Total</b></td>
+                                <td style="text-align: right;"><b>{besonderes_total}</b></td>
+                            </tr>""".format(besonderes_total="{:,.2f}".format(besonderes_total).replace(",", "'"))
+        
+        report_data += """</tbody></table>"""
     
     # Verbuchte Guthaben
     if len(verbuchte_guthaben) > 0:
