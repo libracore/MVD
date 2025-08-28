@@ -231,6 +231,23 @@ def get_member_annual_invoices(id):
             sinv.pop('name', None)
         else:
             sinv['pdf_link'] = None
+        
+        if sinv['status'] == 'Paid':
+            payment_entry_ref = frappe.get_all(
+                "Payment Entry Reference",
+                filters={'reference_name': sinv['name']},
+                fields=['parent'],
+                order_by="creation desc",
+                limit=1
+            ) # get all für den Fall, dass es mehrere Zahlungen für eine Rechnung gibt. Nur die letzte Zahlung wird angezeigt.
+            if payment_entry_ref:
+                posting_date = frappe.get_value("Payment Entry", payment_entry_ref[0].parent, 'posting_date')
+                sinv['posting_date'] = posting_date
+            else:
+                sinv['posting_date'] = None
+        else:
+            sinv['posting_date'] = None
+
     return invoices
 
 @frappe.whitelist(allow_guest=True)
