@@ -19,6 +19,10 @@ frappe.ui.form.on('Beratung', {
         }
     },
     refresh: function(frm) {
+        // First, check zuerst ob die Sperrung älter als 5h ist
+        if (!check_if_protection_older_than_5h(frm)) {
+            return; // stop further lock handling if it was cleared
+        }
         // Handler für gesperrte Ansicht
         if (!cur_frm.doc.gesperrt_am) {
             cur_frm.reload_doc();
@@ -28,7 +32,7 @@ frappe.ui.form.on('Beratung', {
             if (cur_frm.doc.gesperrt_von != frappe.session.user) {
                 gesperrt = true;
                 setze_read_only(frm);
-                var confirm_message = "Die Beratung ist seit <b>" + cur_frm.doc.gesperrt_am + "</b> durch <b>" + cur_frm.doc.gesperrt_von + "</b> geöffnet und dadurch die Bearbeitung gesperrt.<br><br>Wollen Sie in der Gesperrten Ansicht weiterfahren?";
+                var confirm_message = "Die Beratung wurde vor weniger als 5 Stinden <b>(" + cur_frm.doc.gesperrt_am + ")</b> durch <b>" + cur_frm.doc.gesperrt_von + "</b> geöffnet. Dadurch ist die Bearbeitung gesperrt.<br><br>Wollen Sie in der Gesperrten Ansicht weiterfahren?";
                 frappe.confirm(confirm_message,
                 () => {
                     // yes -> do nothing
@@ -441,6 +445,30 @@ frappe.ui.form.on('Beratung', {
         }
     }
 });
+
+function check_if_protection_older_than_5h(frm) {
+    if (frm.doc.gesperrt_am) {
+        const lockTime = new Date(frm.doc.gesperrt_am);
+        const now = new Date();
+        const hoursDiff = (now - lockTime) / 1000 / 60 / 60; // difference in hours
+        if (hoursDiff > 5) {
+            // Lock is older than 5 hours → clear protection
+            frappe.call({
+                method: "mvd.mvd.doctype.beratung.beratung.clear_protection",
+                args: {
+                    'beratung': frm.doc.name,
+                    'force': true
+                },
+                async: false,
+                callback: function() {
+                    frm.reload_doc(); // reload to refresh lock fields
+                }
+            });
+            return false; // old lock cleared
+        }
+    }
+    return true; // lock is valid or doesn't exist
+}
 
 function load_html_overview(frm) {
     if (cur_frm.doc.mv_mitgliedschaft) {
