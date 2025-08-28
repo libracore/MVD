@@ -105,6 +105,8 @@
   "pw_adresse_str_nr",
   "pw_adresse_plz_ort",
   "pw_tel",
+  "pw_tb_tel",
+  "pw_tb_oeff_lauftext",
   "pw_email",
   "pw_section_2",
   "pw_oeff_mo_vm",
@@ -119,7 +121,51 @@
   "pw_oeff_mi_nm",
   "pw_oeff_do_nm",
   "pw_oeff_fr_nm",
-  "pw_oeff_sa_nm"
+  "pw_oeff_sa_nm",
+  "pw_section_3",
+  "pw_tb_oeff_mo_vm",
+  "pw_tb_oeff_di_vm",
+  "pw_tb_oeff_mi_vm",
+  "pw_tb_oeff_do_vm",
+  "pw_tb_oeff_fr_vm",
+  "pw_tb_oeff_sa_vm",
+  "column_break_122",
+  "pw_tb_oeff_mo_nm",
+  "pw_tb_oeff_di_nm",
+  "pw_tb_oeff_mi_nm",
+  "pw_tb_oeff_do_nm",
+  "pw_tb_oeff_fr_nm",
+  "pw_tb_oeff_sa_nm",
+  "pw_section_4",
+  "pw_tb_mg_oeff_mo_vm",
+  "pw_tb_mg_oeff_di_vm",
+  "pw_tb_mg_oeff_mi_vm",
+  "pw_tb_mg_oeff_do_vm",
+  "pw_tb_mg_oeff_fr_vm",
+  "pw_tb_mg_oeff_sa_vm",
+  "column_break_136",
+  "pw_tb_mg_oeff_mo_nm",
+  "pw_tb_mg_oeff_di_nm",
+  "pw_tb_mg_oeff_mi_nm",
+  "pw_tb_mg_oeff_do_nm",
+  "pw_tb_mg_oeff_fr_nm",
+  "pw_tb_mg_oeff_sa_nm",
+  "pw_section_5",
+  "pw_tb_nmg_oeff_mo_vm",
+  "pw_tb_nmg_oeff_di_vm",
+  "pw_tb_nmg_oeff_mi_vm",
+  "pw_tb_nmg_oeff_do_vm",
+  "pw_tb_nmg_oeff_fr_vm",
+  "pw_tb_nmg_oeff_sa_vm",
+  "column_break_150",
+  "pw_tb_nmg_oeff_mo_nm",
+  "pw_tb_nmg_oeff_di_nm",
+  "pw_tb_nmg_oeff_mi_nm",
+  "pw_tb_nmg_oeff_do_nm",
+  "pw_tb_nmg_oeff_fr_nm",
+  "pw_tb_nmg_oeff_sa_nm",
+  "pw_section_6",
+  "pw_text_kontaktformular"
  ],
  "fields": [
   {
@@ -760,9 +806,239 @@
    "fieldname": "pw_section_2",
    "fieldtype": "Section Break",
    "label": "Website / ProcessWire (\u00d6ffnungszeiten)"
+  },
+  {
+   "fieldname": "pw_tb_tel",
+   "fieldtype": "Data",
+   "label": "pw_tb_tel"
+  },
+  {
+   "fieldname": "pw_tb_oeff_lauftext",
+   "fieldtype": "Data",
+   "label": "pw_tb_oeff_lauftext"
+  },
+  {
+   "fieldname": "pw_tb_oeff_mo_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_oeff_mo_vm"
+  },
+  {
+   "fieldname": "pw_tb_oeff_di_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_oeff_di_vm"
+  },
+  {
+   "fieldname": "pw_tb_oeff_mi_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_oeff_mi_vm"
+  },
+  {
+   "fieldname": "pw_tb_oeff_do_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_oeff_do_vm"
+  },
+  {
+   "fieldname": "pw_tb_oeff_fr_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_oeff_fr_vm"
+  },
+  {
+   "fieldname": "pw_tb_oeff_sa_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_oeff_sa_vm"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "pw_section_3",
+   "fieldtype": "Section Break",
+   "label": "Webseite / Processwire (Telefonberatung Zeitfenster allgemein)"
+  },
+  {
+   "fieldname": "column_break_122",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pw_tb_oeff_mo_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_oeff_mo_nm"
+  },
+  {
+   "fieldname": "pw_tb_oeff_di_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_oeff_di_nm"
+  },
+  {
+   "fieldname": "pw_tb_oeff_mi_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_oeff_mi_nm"
+  },
+  {
+   "fieldname": "pw_tb_oeff_do_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_oeff_do_nm"
+  },
+  {
+   "fieldname": "pw_tb_oeff_fr_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_oeff_fr_nm"
+  },
+  {
+   "fieldname": "pw_tb_oeff_sa_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_oeff_sa_nm"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "pw_section_4",
+   "fieldtype": "Section Break",
+   "label": "Webseite / Processwire (Telefonberatung Zeitfenster Mitglieder)"
+  },
+  {
+   "fieldname": "pw_tb_mg_oeff_mo_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_mg_oeff_mo_vm"
+  },
+  {
+   "fieldname": "pw_tb_mg_oeff_di_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_mg_oeff_di_vm"
+  },
+  {
+   "fieldname": "pw_tb_mg_oeff_mi_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_mg_oeff_mi_vm"
+  },
+  {
+   "fieldname": "pw_tb_mg_oeff_do_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_mg_oeff_do_vm"
+  },
+  {
+   "fieldname": "pw_tb_mg_oeff_fr_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_mg_oeff_fr_vm"
+  },
+  {
+   "fieldname": "pw_tb_mg_oeff_sa_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_mg_oeff_sa_vm"
+  },
+  {
+   "fieldname": "column_break_136",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pw_tb_mg_oeff_mo_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_mg_oeff_mo_nm"
+  },
+  {
+   "fieldname": "pw_tb_mg_oeff_di_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_mg_oeff_di_nm"
+  },
+  {
+   "fieldname": "pw_tb_mg_oeff_mi_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_mg_oeff_mi_nm"
+  },
+  {
+   "fieldname": "pw_tb_mg_oeff_do_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_mg_oeff_do_nm"
+  },
+  {
+   "fieldname": "pw_tb_mg_oeff_fr_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_mg_oeff_fr_nm"
+  },
+  {
+   "fieldname": "pw_tb_mg_oeff_sa_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_mg_oeff_sa_nm"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "pw_section_5",
+   "fieldtype": "Section Break",
+   "label": "Webseite / Processwire (Telefonberatung Zeitfenster Nicht-Mitglieder)"
+  },
+  {
+   "fieldname": "pw_tb_nmg_oeff_mo_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_nmg_oeff_mo_vm"
+  },
+  {
+   "fieldname": "pw_tb_nmg_oeff_di_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_nmg_oeff_di_vm"
+  },
+  {
+   "fieldname": "pw_tb_nmg_oeff_mi_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_nmg_oeff_mi_vm"
+  },
+  {
+   "fieldname": "pw_tb_nmg_oeff_do_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_nmg_oeff_do_vm"
+  },
+  {
+   "fieldname": "pw_tb_nmg_oeff_fr_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_nmg_oeff_fr_vm"
+  },
+  {
+   "fieldname": "pw_tb_nmg_oeff_sa_vm",
+   "fieldtype": "Data",
+   "label": "pw_tb_nmg_oeff_sa_vm"
+  },
+  {
+   "fieldname": "column_break_150",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pw_tb_nmg_oeff_mo_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_nmg_oeff_mo_nm"
+  },
+  {
+   "fieldname": "pw_tb_nmg_oeff_di_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_nmg_oeff_di_nm"
+  },
+  {
+   "fieldname": "pw_tb_nmg_oeff_mi_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_nmg_oeff_mi_nm"
+  },
+  {
+   "fieldname": "pw_tb_nmg_oeff_do_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_nmg_oeff_do_nm"
+  },
+  {
+   "fieldname": "pw_tb_nmg_oeff_fr_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_nmg_oeff_fr_nm"
+  },
+  {
+   "fieldname": "pw_tb_nmg_oeff_sa_nm",
+   "fieldtype": "Data",
+   "label": "pw_tb_nmg_oeff_sa_nm"
+  },
+  {
+   "fieldname": "pw_section_6",
+   "fieldtype": "Section Break",
+   "label": "pw_section_6"
+  },
+  {
+   "fieldname": "pw_text_kontaktformular",
+   "fieldtype": "Long Text",
+   "label": "pw_text_kontaktformular"
   }
  ],
- "modified": "2025-07-10 21:05:19.083903",
+ "modified": "2025-08-28 16:47:18.998432",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
