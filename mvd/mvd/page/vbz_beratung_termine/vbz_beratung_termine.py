@@ -57,6 +57,7 @@ def get_alle_beratungs_termine(user):
                                         `beratung`.`beratungskategorie_2`,
                                         `beratung`.`beratungskategorie_3`,
                                         `beratung`.`mv_mitgliedschaft`,
+                                        `beratung`.`status`,
                                         `berTer`.`abp_referenz`
                                     FROM `tabBeratung Termin` AS `berTer`
                                     LEFT JOIN `tabBeratung` AS `beratung` ON `berTer`.`parent` = `beratung`.`name`
@@ -74,6 +75,7 @@ def get_alle_beratungs_termine(user):
                     'bis_time': get_datetime(termin.bis).strftime('%H:%M'),
                     'art': termin.art,
                     'ort': termin.ort,
+                    'status': termin.status,
                     'beratung': termin.parent,
                     'beraterinn': termin.berater_in,
                     'hat_attachement': hat_attachement,
@@ -132,7 +134,7 @@ def get_alle_beratungs_termine(user):
                 alle.append(freier_termin)
     
     alle_sortiert = sorted(alle, key = lambda x: (x['sort_date'], x['beraterinn'] or 'ZZZ', x['von_time']))
-
+    
     return alle_sortiert, meine
 
 def get_kontaktperson_multi_user(user):
