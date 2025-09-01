@@ -308,7 +308,7 @@ def verbuche_matches(camt_import):
                             WHERE `docstatus` = 0
                             AND `camt_import` = '{camt_import}'
                             AND `camt_status` = 'Rechnungs Match'""".format(camt_import=camt_import), as_dict=True)
-    commit_counter = 1
+    
     for pe in pes:
         pe_doc = frappe.get_doc("Payment Entry", pe.name)
         if len(pe_doc.references) > 0:
@@ -324,13 +324,8 @@ def verbuche_matches(camt_import):
             pe_doc.camt_status = 'Verbucht'
             pe_doc.save()
             pe_doc.submit()
-            camt_gebuchte_zahlung_update(camt_import)
-        
-        if commit_counter == 100:
             frappe.db.commit()
-            commit_counter = 1
-        else:
-            commit_counter += 1
+            camt_gebuchte_zahlung_update(camt_import)
     
     camt_status_update(camt_import, 'Verarbeitet')
     frappe.db.commit()
