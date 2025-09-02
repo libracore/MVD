@@ -152,11 +152,11 @@ def update_pwd(user, reset_hash, pwd, clear):
         if clear:
             if is_password_strength(user_doc, pwd):
                 from frappe.utils.password import update_password
-                update_password(user, pwd)
+                update_password(user_doc.name, pwd)
                 user_doc.reset_password_key = ''
                 user_doc.save(ignore_permissions=True)
                 frappe.db.commit()
-                return success_data(user)
+                return success_data(user_doc.name)
             else:
                 return weak_pwd()
         else:
@@ -167,11 +167,11 @@ def update_pwd(user, reset_hash, pwd, clear):
                             WHERE `doctype` = 'User'
                             AND `name` = '{user}'
                             AND `fieldname` = 'password'
-                            AND `encrypted` = 0""".format(user=user, pwd=pwd))
+                            AND `encrypted` = 0""".format(user=user_doc.name, pwd=pwd))
             user_doc.reset_password_key = ''
             user_doc.save(ignore_permissions=True)
             frappe.db.commit()
-            return success_data(user)
+            return success_data(user_doc.name)
     else:
          return invalid_reset_hash()
 
