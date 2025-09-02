@@ -32,16 +32,16 @@ def login(**api_request):
 @frappe.whitelist()
 def reset(**api_request):
     email = None
+    mitglied = None
     # Check/Get Mitgliedernummer
-    if '@' in api_request['user']:
-        mitglied = get_mitglied_nummer(api_request['user'])
-        email = api_request['user']
-    elif 'MV0' in api_request['user']:
-        mitglied = "{0}@login.ch".format(api_request['user'])
-    elif 'MV' not in api_request['user']:
-        mitglied = "MV{0}@login.ch".format(api_request['user'])
-    else:
-        mitglied = None
+    if 'user' in api_request:
+        if '@' in api_request['user']:
+            mitglied = get_mitglied_nummer(api_request['user'])
+            email = api_request['user']
+        elif 'MV0' in api_request['user']:
+            mitglied = "{0}@login.ch".format(api_request['user'])
+        elif 'MV' not in api_request['user']:
+            mitglied = "MV{0}@login.ch".format(api_request['user'])
     
     if mitglied:
         if 'reset_hash' in api_request and 'pwd' in api_request:
