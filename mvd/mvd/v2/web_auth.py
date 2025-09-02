@@ -6,56 +6,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint
 
-'''
-------------------------------------------------------------------------------------------------------------
-LOGIN
-------------------------------------------------------------------------------------------------------------
-curl --location --request POST 'https://libracore.mieterverband.ch/api/method/mvd.mvd.v2.web_auth.login' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "user": "MV11111111",
-    "pwd": "$HASHMETHODE$PWDHASH"
-}'
-
-Optionaler Parameter "clear" --> PWD im Klartext, default = PWD als Hash
-------------------------------------------------------------------------------------------------------------
-RESET
-------------------------------------------------------------------------------------------------------------
-Anfrage eines Reset Hash per Mail
-----------------------------------
-curl --location --request POST 'https://libracore.mieterverband.ch/api/method/mvd.mvd.v2.web_auth.reset' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "user": "MV11111111"
-}'
-
-Anfrage eines Reset Hash OHNE Mail
-----------------------------------
-curl --location --request POST 'https://libracore.mieterverband.ch/api/method/mvd.mvd.v2.web_auth.reset' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "user": "MV11111111",
-    "get_hash": true
-}'
-
-Reset PWD mit Reset-Hash
---------------------------
-curl --location --request POST 'https://libracore.mieterverband.ch/api/method/mvd.mvd.v2.web_auth.reset' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "user": "MV11111111",
-    "reset_hash": "HIERFOLGTDERRESETHASH",
-    "pwd": "$HASHMETHODE$PWDHASH"
-}'
-
-Optionaler Parameter "clear" --> PWD im Klartext, default = PWD als Hash
-------------------------------------------------------------------------------------------------------------
-'''
-
-'''
-ENDPOINTS
-'''
-
 @frappe.whitelist()
 def login(**api_request):
     # Check/Get Mitgliedernummer
@@ -73,6 +23,9 @@ def login(**api_request):
         if "clear" in api_request:
             clear = True
         return check_credentials(mitglied, api_request['pwd'], clear)
+    
+    if 'reset_hash' in api_request and api_request['reset_hash']:
+        return check_hash_based_credentials(api_request['reset_hash'])
     
     return multi_mail()
 
@@ -156,6 +109,21 @@ def check_credentials(user, pwd, clear=False):
             return failed_login()
         else:
             return success_data(auth[0].name)
+
+def check_hash_based_credentials(reset_hash):
+    potential_user = frappe.db.sql("""
+                                    SELECT `name`
+                                   FROM `tabUser`
+                                   WHERE `reset_password_key` = "{0}"
+    """.format(reset_hash), as_dict=True)
+    if len(potential_user) == 1:
+        if '@login.ch' in potential_user[0].name:
+            try:
+                return success_data(potential_user[0].name)
+            except:
+                return failed_login()
+    else:
+        return failed_login()
 
 def update_pwd(user, reset_hash, pwd, clear):
     try:

@@ -31,6 +31,12 @@ paths:
           required: false
           type: string
           x-example: true
+        - name: reset_hash
+          in: query
+          description: If present, no user or password needed. Authentication based on password-reset-hash (see also mvd.mvd.v2.web_auth.reset)
+          required: false
+          type: string
+          x-example: LljXCf8WXt6sM2kz73n6SdThtnqO9V1p
       responses:
         '200':
           description: Erfolg
