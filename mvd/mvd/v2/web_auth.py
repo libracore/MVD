@@ -131,6 +131,7 @@ def check_hash_based_credentials(reset_hash):
         return failed_login()
 
 def update_pwd(user, reset_hash, pwd, clear):
+    user_doc = None
     if user:
         try:
             user_doc = frappe.get_doc("User", user)
