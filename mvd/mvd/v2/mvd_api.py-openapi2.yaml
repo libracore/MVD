@@ -53,14 +53,21 @@ paths:
       parameters:
         - name: user
           in: query
-          description: Member number or email address
+          description: |
+            Member number or email address
+            
+            Only required for generating a reset hash.
+            The reset_hash is sufficient for updating the password.
           required: true
           type: string
           x-example: MV00000085
         - name: reset_hash
           in: query
-          description: Reset hash for password reset
-          required: false
+          description: |
+            Reset hash for password reset.
+
+            Only required for updating the password.
+          required: true
           type: string
           x-example: 0i7Ma0EjpVgKy4gmTra1Usagbg59MDV2
         - name: pwd

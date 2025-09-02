@@ -54,6 +54,11 @@ def reset(**api_request):
             if 'get_hash' in api_request and api_request['get_hash']:
                 hash_only = True
             return generate_reset_hash(mitglied, email, hash_only)
+    elif 'reset_hash' in api_request and 'pwd' in api_request:
+            clear = False
+            if "clear" in api_request:
+                clear = True
+            return update_pwd(mitglied, api_request['reset_hash'], api_request['pwd'], clear)
     
     return multi_mail()
 
@@ -126,10 +131,22 @@ def check_hash_based_credentials(reset_hash):
         return failed_login()
 
 def update_pwd(user, reset_hash, pwd, clear):
-    try:
-        user_doc = frappe.get_doc("User", user)
-    except:
-        return unknown_user()
+    if user:
+        try:
+            user_doc = frappe.get_doc("User", user)
+        except:
+            return unknown_user()
+    else:
+        potential_user = frappe.db.sql("""
+                                    SELECT `name`
+                                   FROM `tabUser`
+                                   WHERE `reset_password_key` = "{0}"
+        """.format(reset_hash), as_dict=True)
+        if len(potential_user) == 1:
+            if '@login.ch' in potential_user[0].name:
+                user_doc = frappe.get_doc("User", potential_user[0].name)
+    
+    if not user_doc: return unknown_user()
 
     if user_doc.reset_password_key == reset_hash:
         if clear:
