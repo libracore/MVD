@@ -16,7 +16,6 @@ frappe.ui.form.on('WebFormular', {
 			},
 			callback: function(r) {
 				if (r.message) {
-					// trigger CSV download
 					let blob = new Blob([r.message], { type: "text/csv;charset=utf-8;" });
 					let link = document.createElement("a");
 					link.href = URL.createObjectURL(blob);
