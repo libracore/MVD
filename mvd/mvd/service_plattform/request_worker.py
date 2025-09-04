@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe.utils import cint
 from frappe.utils.data import getdate, now, today
+from frappe.utils.background_jobs import enqueue
 from mvd.mvd.doctype.mitgliedschaft.utils import get_sektion_id, get_status_c, get_mitgliedtyp_c, get_inkl_hv, get_sprache_abk
 
 '''
@@ -1043,5 +1044,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
 
 def check_immediately_executing(self, event):
     if cint(self.immediately_executing) == 1:
-        service_plattform_log_worker()
+        args = {}
+        enqueue("mvd.mvd.service_plattform.request_worker.service_plattform_log_worker", queue='short', job_name='Service Platform Log-Worker', timeout=5000, **args)
+        return
     return
