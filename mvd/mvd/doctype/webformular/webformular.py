@@ -16,8 +16,7 @@ class WebFormular(Document):
         if value:
             try:
                 parsed = json.loads(value)
-                # pretty-print with 2 or 4 spaces
-                setattr(self, fieldname, json.dumps(parsed, indent=4))
+                setattr(self, fieldname, json.dumps(parsed, indent=2))
             except Exception as e:
                 # optional: log invalid JSON
                 frappe.log_error(f"Invalid JSON in {fieldname}: {e}")
