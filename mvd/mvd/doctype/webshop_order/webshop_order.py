@@ -13,78 +13,79 @@ from mvd.mvd.utils.qrr_reference import get_qrr_reference
 
 class WebshopOrder(Document):
     def validate(self):
-        try:
-            order_data = json.loads(self.request)
+        if self.v2 != 1:
+            try:
+                order_data = json.loads(self.request)
 
-            if not self.online_payment_id:
-                if order_data['payment_id']:
-                    self.online_payment_id = order_data['payment_id']
-            
-            if not self.artikel_json:
-                items = []
-                for key in order_data:
-                    if 'artikel_nr' in key:
-                        item = {
-                            'item': order_data[key],
-                            'typ': None,
-                            'qty': 0,
-                            'amount': 0,
-                            'mwst': 0,
-                            'item_index': str(key).replace("artikel_nr_", "")
+                if not self.online_payment_id:
+                    if order_data['payment_id']:
+                        self.online_payment_id = order_data['payment_id']
+                
+                if not self.artikel_json:
+                    items = []
+                    for key in order_data:
+                        if 'artikel_nr' in key:
+                            item = {
+                                'item': order_data[key],
+                                'typ': None,
+                                'qty': 0,
+                                'amount': 0,
+                                'mwst': 0,
+                                'item_index': str(key).replace("artikel_nr_", "")
+                            }
+                            items.append(item)
+                    
+                    for item in items:
+                        item_index = item['item_index']
+                        item['typ'] = order_data['artikeltyp_{0}'.format(item_index)]
+                        item['qty'] = order_data['anzahl_{0}'.format(item_index)]
+                        item['amount'] = order_data['betrag_{0}'.format(item_index)]
+                        item['mwst'] = order_data['mwst_satz_{0}'.format(item_index)]
+                    
+                    data_dict = {
+                        'items': items,
+                        'details': {
+                            'versandkosten': order_data['versandkosten'],
+                            'totalbetrag': order_data['totalbetrag'],
+                            'bestellung_nr': order_data['bestellung_nr']
                         }
-                        items.append(item)
-                
-                for item in items:
-                    item_index = item['item_index']
-                    item['typ'] = order_data['artikeltyp_{0}'.format(item_index)]
-                    item['qty'] = order_data['anzahl_{0}'.format(item_index)]
-                    item['amount'] = order_data['betrag_{0}'.format(item_index)]
-                    item['mwst'] = order_data['mwst_satz_{0}'.format(item_index)]
-                
-                data_dict = {
-                    'items': items,
-                    'details': {
-                        'versandkosten': order_data['versandkosten'],
-                        'totalbetrag': order_data['totalbetrag'],
-                        'bestellung_nr': order_data['bestellung_nr']
                     }
-                }
-                json_formatted_data_dict = json.dumps(data_dict, indent=2)
-                self.artikel_json = json_formatted_data_dict
-            
-            if cint(not self.kundendaten_geladen) == 1:
-                # Kundendaten
-                self.strassen_nr = order_data['strassen_nr']
-                self.tel_m = order_data['tel_m']
-                self.email = order_data['email']
-                self.tel_p = order_data['tel_p'] if order_data['tel_p'] != self.tel_m else None
-                self.strasse = order_data['strasse']
-                self.vorname = order_data['vorname']
-                self.postfach = order_data['postfach']
-                self.anrede = order_data['anrede']
-                self.firma = order_data['firma']
-                self.ort = order_data['ort']
-                self.nachname = order_data['nachname']
-                self.plz = order_data['plz']
+                    json_formatted_data_dict = json.dumps(data_dict, indent=2)
+                    self.artikel_json = json_formatted_data_dict
+                
+                if cint(not self.kundendaten_geladen) == 1:
+                    # Kundendaten
+                    self.strassen_nr = order_data['strassen_nr']
+                    self.tel_m = order_data['tel_m']
+                    self.email = order_data['email']
+                    self.tel_p = order_data['tel_p'] if order_data['tel_p'] != self.tel_m else None
+                    self.strasse = order_data['strasse']
+                    self.vorname = order_data['vorname']
+                    self.postfach = order_data['postfach']
+                    self.anrede = order_data['anrede']
+                    self.firma = order_data['firma']
+                    self.ort = order_data['ort']
+                    self.nachname = order_data['nachname']
+                    self.plz = order_data['plz']
 
-                # Mitgliedschaft
-                self.mv_mitgliedschaft = get_mitglied_id_from_nr(order_data['mitgliedschaft_nr'])
+                    # Mitgliedschaft
+                    self.mv_mitgliedschaft = get_mitglied_id_from_nr(order_data['mitgliedschaft_nr'])
 
-                # Faktura Kunde
-                if self.mv_mitgliedschaft:
-                    faktura_kunden = frappe.db.sql("""SELECT `name` FROM `tabKunden` WHERE `mv_mitgliedschaft` = '{0}'""".format(self.mv_mitgliedschaft), as_dict=True)
-                    if len(faktura_kunden) == 1:
-                        self.faktura_kunde = faktura_kunden[0].name
+                    # Faktura Kunde
+                    if self.mv_mitgliedschaft:
+                        faktura_kunden = frappe.db.sql("""SELECT `name` FROM `tabKunden` WHERE `mv_mitgliedschaft` = '{0}'""".format(self.mv_mitgliedschaft), as_dict=True)
+                        if len(faktura_kunden) == 1:
+                            self.faktura_kunde = faktura_kunden[0].name
 
-                    mitgl = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
-                    # Adressblock
-                    self.adressblock = get_adressblock(mitgl)
-                    # Rechnungs Adressblock
-                    self.rg_adressblock = get_rg_adressblock(mitgl)
+                        mitgl = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
+                        # Adressblock
+                        self.adressblock = get_adressblock(mitgl)
+                        # Rechnungs Adressblock
+                        self.rg_adressblock = get_rg_adressblock(mitgl)
 
-                self.kundendaten_geladen = 1
-        except Exception as err:
-            frappe.log_error("{0}\n{1}".format(err, frappe.utils.get_traceback()), 'Webshop Order; Validation Failed')
+                    self.kundendaten_geladen = 1
+            except Exception as err:
+                frappe.log_error("{0}\n{1}".format(err, frappe.utils.get_traceback()), 'Webshop Order; Validation Failed')
     
     def create_faktura_kunde(self):
         kunde = frappe.get_doc({
@@ -217,13 +218,14 @@ class WebshopOrder(Document):
 
 
 
-def create_order_from_api(kwargs=None):
+def create_order_from_api(kwargs=None, v2=0):
     if (kwargs):
         try:
             json_formatted_str = json.dumps(kwargs, indent=2)
             webshop_order = frappe.get_doc({
                 "doctype": "Webshop Order",
-                "request": json_formatted_str
+                "request": json_formatted_str,
+                "v2": v2
             }).insert(ignore_permissions=True)
             return raise_200()
         except Exception as err:

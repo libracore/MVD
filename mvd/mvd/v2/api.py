@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price
+from mvd.mvd.doctype.webshop_order.webshop_order import create_order_from_api
 import json
 from frappe.utils import cint
 from frappe.utils import sanitize_html
@@ -487,3 +488,7 @@ def upload_file_to_beratung():
     frappe.local.response.http_status_code = 200
     frappe.local.response.message = "File saved"
     return
+
+@frappe.whitelist()
+def create_order(**api_request):
+    return create_order_from_api(api_request, v2=1)

@@ -492,6 +492,138 @@ paths:
               message:
                 type: string
                 example: "Error Traceback"
+  /mvd.mvd.v2.api.create_order:
+    post:
+      summary: Create Bestellung
+      description: |
+        Dieser Endpunkt dient der Website zur Anlage einer neuen Bestellung.
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            required:
+              - order_number
+              - order_date
+              - payment_method
+              - billing_address
+              - shipping_address
+              - total_cart
+              - items
+            properties:
+              order_number:
+                type: string
+                description: "Eindeutige Bestellnummer"
+                example: "20250903-7"
+              order_date:
+                type: string
+                format: date
+                description: "Datum der Bestellung im Format YYYY-MM-DD"
+                example: "2025-09-03"
+              payment_method:
+                type: string
+                description: "Zahlungsmethode (z. B. twint, kreditkarte, rechnung)"
+                example: "twint"
+              billing_address:
+                type: object
+                required:
+                  - firstname
+                  - lastname
+                  - zip
+                  - city
+                  - email
+                properties:
+                  firstname:
+                    type: string
+                    example: "Urs"
+                  lastname:
+                    type: string
+                    example: "Brauchli"
+                  zip:
+                    type: string
+                    example: "8001"
+                  city:
+                    type: string
+                    example: "Zürich"
+                  email:
+                    type: string
+                    format: email
+                    example: "urs.brauchli@update.ch"
+              shipping_address:
+                type: object
+                required:
+                  - firstname
+                  - lastname
+                  - zip
+                  - city
+                properties:
+                  firstname:
+                    type: string
+                    example: "LA-Urs"
+                  lastname:
+                    type: string
+                    example: "LA-Brauchli"
+                  zip:
+                    type: string
+                    example: "8001"
+                  city:
+                    type: string
+                    example: "Zürich"
+              member_id:
+                type: string
+                description: "Optional: Mitglieder-Nummer"
+                example: ""
+              total_cart:
+                type: string
+                description: "Gesamtbetrag des Warenkorbs"
+                example: "25.60"
+              items:
+                type: array
+                description: "Liste der bestellten Artikel"
+                items:
+                  type: object
+                  required:
+                    - quantity
+                    - title
+                    - singlePrice
+                    - itemTotalPrice
+                  properties:
+                    quantity:
+                      type: string
+                      description: "Anzahl des Artikels"
+                      example: "1"
+                    title:
+                      type: string
+                      description: "Artikelbezeichnung"
+                      example: "Broschüre Daten und Adressen zum Mietrecht (BROS-DAM)"
+                    singlePrice:
+                      type: string
+                      description: "Einzelpreis"
+                      example: "12.80"
+                    itemTotalPrice:
+                      type: string
+                      description: "Gesamtpreis dieses Artikels (Menge * Einzelpreis)"
+                      example: "12.80"
+      responses:
+        '200':
+          description: Order created successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Success"
+        '500':
+          description: Internal Server Error
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Error Traceback"
   /mvd.mvd.v2.api.upload_file_to_beratung:
     post:
       summary: Upload file to Beratung

@@ -34,7 +34,8 @@
   "online_payment_id",
   "online_payment_zahlungsfile",
   "section_artikel",
-  "artikel_json"
+  "artikel_json",
+  "v2"
  ],
  "fields": [
   {
@@ -207,9 +208,16 @@
    "fieldtype": "Currency",
    "label": "Rechnungstotal",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "v2",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Webshop API V2"
   }
  ],
- "modified": "2024-06-21 15:11:36.448542",
+ "modified": "2025-09-04 12:24:54.300346",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Webshop Order",
