@@ -477,6 +477,13 @@ frappe.mvd.MailComposer = Class.extend({
                 {label: __("From"), fieldtype: "Select", reqd: 1, fieldname: "sender",
                     options: email_accounts.map(function(e) { return e.email_id; }) }
             ].concat(fields);
+        } else {
+            if (this.sender) {
+                fields = [
+                    {label: __("From"), fieldtype: "Select", reqd: 1, fieldname: "sender",
+                        options: this.sender }
+                ].concat(fields);
+            }
         }
 
         return fields;
