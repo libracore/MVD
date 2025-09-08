@@ -168,6 +168,8 @@
   "mandat",
   "section_status_historie",
   "status_change",
+  "section_kuendigungsstatistik",
+  "kuendigungen",
   "section_workflow_helpers",
   "validierung_notwendig",
   "kuendigung_verarbeiten",
@@ -1372,10 +1374,22 @@
    "fieldname": "asloca_id",
    "fieldtype": "Data",
    "label": "ASLOCA-ID"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_kuendigungsstatistik",
+   "fieldtype": "Section Break",
+   "label": "K\u00fcndigungsstatistik"
+  },
+  {
+   "fieldname": "kuendigungen",
+   "fieldtype": "Table",
+   "label": "Vermieterk\u00fcndigungen",
+   "options": "Kuendigung"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2025-06-23 11:56:23.836886",
+ "modified": "2025-09-08 14:54:48.626062",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

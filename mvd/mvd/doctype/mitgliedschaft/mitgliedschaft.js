@@ -49,6 +49,12 @@ frappe.ui.form.on('Mitgliedschaft', {
         }
         
        if (!frm.doc.__islocal&&cur_frm.doc.status_c != 'Inaktiv') {
+            if (frappe.user.has_role("MV_beta")) {
+                frm.add_custom_button(__("Vermieterkündigung erfassen"), function() {
+                    erfassung_vermieterkuendigung(frm);
+                }, __("Statistik"))
+            }
+
             if (((cur_frm.doc.status_c != 'Inaktiv')&&(frappe.user.has_role("System Manager")))||(['Online-Anmeldung', 'Anmeldung', 'Interessent*in'].includes(cur_frm.doc.status_c))) {
                 frm.add_custom_button(__("Inaktivieren"), function() {
                     mitglied_inaktivieren(frm);
@@ -3073,4 +3079,28 @@ function check_for_running_job(frm) {
             }
         }
     });
+}
+
+function erfassung_vermieterkuendigung(frm) {
+    let mietobjekt = '';
+    if (cur_frm.doc.abweichende_objektadresse) {
+        mietobjekt = `${cur_frm.doc.objekt_strasse || ''}${cur_frm.doc.objekt_hausnummer || ''}${cur_frm.doc.objekt_nummer_zu || ''}, ${cur_frm.doc.objekt_plz || ''} ${cur_frm.doc.objekt_ort || ''}`
+    } else {
+        mietobjekt = `${cur_frm.doc.strasse || ''} ${cur_frm.doc.nummer || ''}${cur_frm.doc.nummer_zu || ''}, ${cur_frm.doc.plz || ''} ${cur_frm.doc.ort || ''}`
+    }
+    frappe.prompt([
+        {'fieldname': 'datum_kuendigung_per', 'fieldtype': 'Date', 'label': 'Kündigung per', 'reqd': 1},
+        {'fieldname': 'mietobjekt', 'fieldtype': 'Data', 'label': 'Mietobjekt', 'reqd': 1, 'default': mietobjekt}
+    ],
+    function(values){
+        let new_row = cur_frm.add_child("kuendigungen");
+        frappe.model.set_value(new_row.doctype, new_row.name, 'datum_erfassung', frappe.datetime.nowdate());
+        frappe.model.set_value(new_row.doctype, new_row.name, 'datum_kuendigung_per', values.datum_kuendigung_per);
+        frappe.model.set_value(new_row.doctype, new_row.name, 'mietobjekt', values.mietobjekt);
+        cur_frm.refresh_field("kuendigungen");
+        cur_frm.save();
+    },
+    'Vermieterkündigung erfassen',
+    'Erfassen'
+    );
 }

@@ -1,0 +1,52 @@
+{
+ "creation": "2025-09-08 14:50:23.837084",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "datum_erfassung",
+  "datum_kuendigung_per",
+  "mietobjekt",
+  "massenkuendigung"
+ ],
+ "fields": [
+  {
+   "fieldname": "datum_erfassung",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Datum Erfassung",
+   "reqd": 1
+  },
+  {
+   "fieldname": "datum_kuendigung_per",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "K\u00fcndigung per",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mietobjekt",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mietobjekt (Strasse, PLZ Ort)",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "massenkuendigung",
+   "fieldtype": "Check",
+   "label": "Massenk\u00fcndigung"
+  }
+ ],
+ "istable": 1,
+ "modified": "2025-09-08 14:50:23.837084",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Kuendigung",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
