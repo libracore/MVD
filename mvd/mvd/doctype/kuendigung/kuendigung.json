@@ -35,11 +35,12 @@
    "default": "0",
    "fieldname": "massenkuendigung",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Massenk\u00fcndigung"
   }
  ],
  "istable": 1,
- "modified": "2025-09-08 14:50:23.837084",
+ "modified": "2025-09-08 15:32:58.243054",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kuendigung",

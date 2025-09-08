@@ -3093,12 +3093,23 @@ function erfassung_vermieterkuendigung(frm) {
         {'fieldname': 'mietobjekt', 'fieldtype': 'Data', 'label': 'Mietobjekt', 'reqd': 1, 'default': mietobjekt}
     ],
     function(values){
-        let new_row = cur_frm.add_child("kuendigungen");
-        frappe.model.set_value(new_row.doctype, new_row.name, 'datum_erfassung', frappe.datetime.nowdate());
-        frappe.model.set_value(new_row.doctype, new_row.name, 'datum_kuendigung_per', values.datum_kuendigung_per);
-        frappe.model.set_value(new_row.doctype, new_row.name, 'mietobjekt', values.mietobjekt);
-        cur_frm.refresh_field("kuendigungen");
-        cur_frm.save();
+        frappe.call({
+            method: "mvd.mvd.doctype.mitgliedschaft.utils.suche_massenkuendigung",
+            args: {
+                'mietobjekt': mietobjekt
+            },
+            callback: function(r)
+            {
+                let new_row = cur_frm.add_child("kuendigungen");
+                frappe.model.set_value(new_row.doctype, new_row.name, 'datum_erfassung', frappe.datetime.nowdate());
+                frappe.model.set_value(new_row.doctype, new_row.name, 'datum_kuendigung_per', values.datum_kuendigung_per);
+                frappe.model.set_value(new_row.doctype, new_row.name, 'mietobjekt', values.mietobjekt);
+                frappe.model.set_value(new_row.doctype, new_row.name, 'massenkuendigung', r.message > 0 ? 1:0);
+                cur_frm.refresh_field("kuendigungen");
+                cur_frm.save();
+                if (r.message > 0) frappe.msgprint(`Mehrere Kündigungen an dieser Adresse:<br>${mietobjekt}`, "Hinweis");
+            }
+        });
     },
     'Vermieterkündigung erfassen',
     'Erfassen'

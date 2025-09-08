@@ -915,3 +915,8 @@ def mark_for_massenlauf(sinv=None, mitgliedschaft=None):
                     `rg_massendruck_vormerkung` = 1
                   WHERE `name` = '{mitgliedschaft}'""".format(sinv=sinv, mitgliedschaft=mitgliedschaft), as_list=True)
     frappe.db.commit()
+
+@frappe.whitelist()
+def suche_massenkuendigung(mietobjekt):
+    matches = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabKuendigung` WHERE `mietobjekt` = '{0}'""".format(mietobjekt), as_dict=True)[0].qty
+    return matches
