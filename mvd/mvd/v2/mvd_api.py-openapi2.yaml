@@ -42,6 +42,8 @@ paths:
           description: Erfolg
         '401':
           description: Passwort falsch
+        '406':
+          description: Login korrekt, Mitgliedschaft aber inaktiv
         '409':
           description: E-Mail mehrfach vorhanden
         '500':

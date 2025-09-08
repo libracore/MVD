@@ -131,6 +131,7 @@ def check_hash_based_credentials(reset_hash):
         return failed_login()
 
 def update_pwd(user, reset_hash, pwd, clear):
+    print("{0}".format(pwd))
     user_doc = None
     if user:
         try:
@@ -239,6 +240,10 @@ def success_data(mitglied_nr):
     mitglied_nr = mitglied_nr.replace("@login.ch", "")
     from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
     mitglied_id = get_mitglied_id_from_nr(mitglied_nr=mitglied_nr)
+
+    if not mitglied_id:
+        return inactive_member()
+
     if frappe.db.exists("Mitgliedschaft", mitglied_id):
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
         code = 200
@@ -285,3 +290,7 @@ def invalid_reset_hash():
 def unknown_user():
     frappe.response['http_status_code'] = 404
     frappe.response['message'] = "User not found"
+
+def inactive_member():
+    frappe.response['http_status_code'] = 406
+    frappe.response['message'] = "No active member found"
