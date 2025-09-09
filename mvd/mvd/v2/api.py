@@ -428,8 +428,8 @@ def upload_file_to_beratung():
     folder = 'Home/Attachments' #frappe.form_dict.folder or 'Home'
     method = None #frappe.form_dict.method
     last_file = cint(frappe.form_dict.last_file)
-    beratung_file_type = frappe.form_dict.file_type or None
-    beratung_file_date = frappe.form_dict.file_date or None
+    beratung_file_type = frappe.form_dict.beratung_file_type or None
+    beratung_file_date = frappe.form_dict.beratung_file_date or None
     content = None
     filename = None
 
