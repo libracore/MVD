@@ -335,6 +335,10 @@ class Mitgliedschaft(Document):
             self.zuzug_korrespondenz =  new_korrespondenz.name
     
     def handling_kontakt_adresse_kunde(self):
+        # Fix für Ticket #1442
+        if self.postfach == 1 and not self.abweichende_objektadresse == 1:
+            self.ensure_objekt_adresse()
+
         # Mitglied
         self.kunde_mitglied = self.validate_kunde_mitglied()
         self.kontakt_mitglied = self.validate_kontakt_mitglied(primary=True)
@@ -362,6 +366,20 @@ class Mitgliedschaft(Document):
             self.rg_kunde = ''
             self.rg_kontakt = ''
             self.rg_adresse = ''
+    
+    def ensure_objekt_adresse(self):
+        '''
+            Sollte eine Mitgliedschaftsadresse ein Postfach besitzen,
+            die Mitgliedschaft aber keine Objektadresse, so wird mit dieser Methode
+            eine Objektadresse anhand der Mitgliedschaftsadresse angelegt.
+        '''
+        self.abweichende_objektadresse = 1
+        self.objekt_zusatz_adresse = self.zusatz_adresse
+        self.objekt_strasse = self.strasse
+        self.objekt_hausnummer = self.nummer
+        self.objekt_nummer_zu = self.nummer_zu
+        self.objekt_plz = self.plz
+        self.objekt_ort = self.ort
     
     def check_preisregel(self):
         if cint(self.reduzierte_mitgliedschaft) == 1:
