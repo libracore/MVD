@@ -5,6 +5,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils.data import now
+from frappe.utils.background_jobs import enqueue
 import json
 import csv
 import io
@@ -22,7 +24,15 @@ class WebFormular(Document):
                 frappe.log_error(f"Invalid JSON in {fieldname}: {e}")
 
 @frappe.whitelist()
-def export_form_data_as_csv(form_id):
+def export_form_data_as_csv(form_id, webformular):
+    args = {
+        'form_id': form_id,
+        'webformular': webformular
+    }
+    enqueue("mvd.mvd.doctype.webformular.webformular._export_form_data_as_csv", queue='long', job_name='Export WebFormular JSON as CSV', timeout=5000, **args)
+    return
+
+def _export_form_data_as_csv(form_id, webformular):
     """Return CSV string of all form_data rows for given form_id."""
     records = frappe.get_all(
         "WebFormular",
@@ -67,7 +77,21 @@ def export_form_data_as_csv(form_id):
     for row in parsed_rows:
         writer.writerow(row)
 
-    return output.getvalue()
+    # 3. Save CSV as File and attach to WebFormual Record
+    file_name = "WebFormular_{datetime}.csv".format(datetime=now().replace(" ", "_"))
+    csv_content = output.getvalue()
+    _file = frappe.get_doc({
+        "doctype": "File",
+        "file_name": file_name,
+        "folder": "Home/Attachments",
+        "is_private": 1,
+        "content": csv_content,
+        "attached_to_doctype": 'Webformular',
+        "attached_to_name": webformular
+
+    })
+    
+    _file.save()
 
 
 def flatten_dict(d, parent_key="", sep="."):
