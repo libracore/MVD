@@ -60,7 +60,8 @@ website_redirects = [
     {"source": "/nologin", "target": "https://www.mieterverband.ch/mv/prozesse/login.html"},
     {"source": "/mvd-500", "target": "https://www.mieterverband.ch/mv/500"},
     {"source": "/mvd-mvso", "target": "https://www.mieterverband.ch/mv-so/hilfe-von-fachleuten/email-beratung"},
-    {"source": "/", "target": "https://www.mieterverband.ch/"}
+    {"source": "/", "target": "https://www.mieterverband.ch/"},
+    {"source": "/me", "target": "https://www.mieterverband.ch/login"}
 ]
 
 # Home Pages
