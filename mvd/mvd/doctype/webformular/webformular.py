@@ -86,7 +86,7 @@ def _export_form_data_as_csv(form_id, webformular):
         "folder": "Home/Attachments",
         "is_private": 1,
         "content": csv_content,
-        "attached_to_doctype": 'Webformular',
+        "attached_to_doctype": 'WebFormular',
         "attached_to_name": webformular
 
     })
