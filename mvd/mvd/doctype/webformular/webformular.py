@@ -68,7 +68,7 @@ def _export_form_data_as_csv(form_id, webformular):
             flat["creation"] = row.creation
             parsed_rows.append(flat)
         except Exception as e:
-            frappe.log_error(f"CSV export failed for entry {row.entry_id}: {e}")
+            frappe.log_error("CSV export failed for entry {0}: {1}".format(row.entry_id, e))
 
     # 2. Create CSV with full header (union of all keys)
     output = io.StringIO()
@@ -98,7 +98,7 @@ def flatten_dict(d, parent_key="", sep="."):
     """Flatten nested dict into dot notation (for CSV)."""
     items = {}
     for k, v in d.items():
-        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        new_key = "{0}{1}{2}".format(parent_key, sep, k) if parent_key else k
         if isinstance(v, dict):
             items.update(flatten_dict(v, new_key, sep=sep))
         elif isinstance(v, list):
