@@ -21,7 +21,7 @@ class WebFormular(Document):
                 setattr(self, fieldname, json.dumps(parsed, indent=2))
             except Exception as e:
                 # optional: log invalid JSON
-                frappe.log_error(f"Invalid JSON in {fieldname}: {e}")
+                frappe.log_error("Invalid JSON in {0}: {1}".format(fieldname, e))
 
 @frappe.whitelist()
 def export_form_data_as_csv(form_id, webformular):
