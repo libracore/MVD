@@ -165,7 +165,9 @@
   "pw_tb_nmg_oeff_fr_nm",
   "pw_tb_nmg_oeff_sa_nm",
   "pw_section_6",
-  "pw_text_kontaktformular"
+  "pw_text_kontaktformular",
+  "pw_rechtsschutz_privat_text",
+  "pw_rechtsschutz_geschaeft_text"
  ],
  "fields": [
   {
@@ -1036,9 +1038,19 @@
    "fieldname": "pw_text_kontaktformular",
    "fieldtype": "Long Text",
    "label": "pw_text_kontaktformular"
+  },
+  {
+   "fieldname": "pw_rechtsschutz_privat_text",
+   "fieldtype": "Long Text",
+   "label": "pw_rechtsschutz_privat_text"
+  },
+  {
+   "fieldname": "pw_rechtsschutz_geschaeft_text",
+   "fieldtype": "Long Text",
+   "label": "pw_rechtsschutz_geschaeft_text"
   }
  ],
- "modified": "2025-08-28 16:47:18.998432",
+ "modified": "2025-09-11 15:02:50.802129",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
