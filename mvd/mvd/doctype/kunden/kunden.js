@@ -228,8 +228,7 @@ function erstelle_rechnung_sonstiges(frm) {
                                         callback: function(r)
                                         {
                                             rate_field.set_value(r.message.price);
-                                            qty_field.set_value(1);
-                                            alert(rate_field.get_value());   // this gives out null, but WHY                                     
+                                            qty_field.set_value(1);                                
                                         }
                                     });
                                 }
