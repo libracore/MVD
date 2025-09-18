@@ -12,6 +12,8 @@ import copy
 from frappe.utils.data import now, add_days, today
 from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
+from PyPDF2 import PdfFileWriter
+from frappe.utils.pdf import get_file_data_from_writer
 
 class MitgliedRGJahreslauf(Document):
     def autoname(self):
@@ -56,6 +58,14 @@ class MitgliedRGJahreslauf(Document):
     def stop_rg(self):
         self.status = "Abgebrochen"
         self.save()
+    
+    def create_pdf(self):
+        self.status = "Erstelle PDFs"
+        self.save()
+    
+    def stop_pdf(self):
+        self.status = "Abgebrochen"
+        self.save()
 
 def mrj_worker():
     pausiert = frappe.db.sql("""SELECT `name` FROM `tabMitglied RG Jahreslauf` WHERE `status` = 'Rechnungserstellung pausiert'""", as_dict=True)
@@ -73,20 +83,28 @@ def mrj_worker():
                     'mrj': ready_to_run[0].name
                 }
                 enqueue("mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.create_invoices", queue='long', job_name='Erstellung Rechnungen {0}'.format(ready_to_run[0].name), timeout=23500, **args)
+        else:
+            ready_for_pdf = frappe.db.sql("""SELECT `name` FROM `tabMitglied RG Jahreslauf` WHERE `status` = 'Erstelle PDFs'""", as_dict=True)
+            if len(ready_for_pdf) > 0:
+                if not is_job_already_running('Erstellung PDF {0}'.format(ready_for_pdf[0].name)):
+                    args = {
+                        'mrj': ready_for_pdf[0].name
+                    }
+                    enqueue("mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.create_pdfs", queue='long', job_name='Erstellung PDF {0}'.format(ready_for_pdf[0].name), timeout=23500, **args)
+        
+def get_start_stop(mrj):
+    return {
+        'start_hour': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "start_hour")),
+        'start_minute': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "start_minute")),
+        'wknd_start_hour': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "wknd_start_hour")),
+        'wknd_start_minute': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "wknd_start_minute")),
+        'stop_hour': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "stop_hour")),
+        'stop_minute': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "stop_minute")),
+        'wknd_stop_hour': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "wknd_stop_hour")),
+        'wknd_stop_minute': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "wknd_stop_minute"))
+    }
 
 def create_invoices(mrj):
-    def get_start_stop(mrj):
-        return {
-            'start_hour': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "start_hour")),
-            'start_minute': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "start_minute")),
-            'wknd_start_hour': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "wknd_start_hour")),
-            'wknd_start_minute': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "wknd_start_minute")),
-            'stop_hour': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "stop_hour")),
-            'stop_minute': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "stop_minute")),
-            'wknd_stop_hour': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "wknd_stop_hour")),
-            'wknd_stop_minute': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "wknd_stop_minute"))
-        }
-    
     # Festlegen der Start-/Stop-Zeiten
     from datetime import datetime, time
     current_day = datetime.today().weekday()
@@ -101,7 +119,6 @@ def create_invoices(mrj):
         start_time = time(start_stop['start_hour'], start_stop['start_minute'])
         stop_time = time(start_stop['stop_hour'], start_stop['stop_minute'])
     
-    frappe.log_error(str(start_stop), "xxx")
     # Prüfung ob der Job gestartet werden darf
     if (aktuelle_uhrzeit < start_time) or (aktuelle_uhrzeit > stop_time):
         return
@@ -345,3 +362,97 @@ def get_info(jobname):
             found_job = True
 
     return found_job
+
+def create_pdfs(mrj):
+    # Festlegen der Start-/Stop-Zeiten
+    from datetime import datetime, time
+    current_day = datetime.today().weekday()
+    aktuelle_uhrzeit = datetime.now().time()
+    start_stop = get_start_stop(mrj)
+    if current_day >= 5:
+        # Wochenende
+        start_time = time(start_stop['wknd_start_hour'], start_stop['wknd_start_minute'])
+        stop_time = time(start_stop['wknd_stop_hour'], start_stop['wknd_stop_minute'])
+    else:
+        # Wochentag
+        start_time = time(start_stop['start_hour'], start_stop['start_minute'])
+        stop_time = time(start_stop['stop_hour'], start_stop['stop_minute'])
+    
+    # Prüfung ob der Job gestartet werden darf
+    if (aktuelle_uhrzeit < start_time) or (aktuelle_uhrzeit > stop_time):
+        return
+    
+    frappe.db.sql("""SET SQL_BIG_SELECTS=1""")
+    sinvs = frappe.db.sql("""
+        SELECT
+            `sinv`.`name` AS `sinv_name`,
+            `sinv`.`druckvorlage` AS `sinv_druckvorlage`,
+            `fak`.`name` AS `fak_name`,
+            `fak`.`druckvorlage` AS `fak_druckvorlage`
+        FROM `tabSales Invoice` AS `sinv`
+        LEFT JOIN `tabFakultative Rechnung` AS `fak` ON `fak`.`sales_invoice` = `sinv`.`name`
+        WHERE `sinv`.`mrj` = '{mrj}'
+        AND `sinv`.`docstatus` = 1
+        AND `sinv`.`status` != 'Paid'
+        AND `sinv`.`druckvorlage` IS NOT NULL
+        AND `fak`.`druckvorlage` IS NOT NULL
+        AND `sinv`.`druckvorlage` != ''
+        AND `fak`.`druckvorlage` != ''
+    """.format(mrj=mrj), as_dict=True)
+    frappe.db.sql("""SET SQL_BIG_SELECTS=0""")
+
+    breaked_loop = False
+    for sinv in sinvs:
+        aktuelle_uhrzeit = datetime.now().time()
+        try:
+            # erstellung Rechnungs PDF
+            sinv_output = PdfFileWriter()
+            sinv_output = frappe.get_print("Sales Invoice", sinv.sinv_name, 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = sinv_output, ignore_zugferd=True)
+            sinv_file_name = "MRJ-{sinv}_{datetime}".format(sinv=sinv.sinv_name, datetime=now().replace(" ", "_"))
+            sinv_file_name = sinv_file_name.split(".")[0]
+            sinv_file_name = sinv_file_name.replace(":", "-")
+            sinv_file_name = sinv_file_name + ".pdf"
+            sinv_filedata = get_file_data_from_writer(sinv_output)
+            sinv_file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": sinv_file_name,
+                "folder": "Home/Attachments",
+                "is_private": 1,
+                "content": sinv_filedata,
+                "attached_to_doctype": 'Sales Invoice',
+                "attached_to_name": sinv.sinv_name
+            })
+            sinv_file.save(ignore_permissions=True)
+
+            # erstellung Fak-Rechnungs PDF
+            fak_output = PdfFileWriter()
+            fak_output = frappe.get_print("Fakultative Rechnung", sinv.fak_name, 'Fakultative Rechnung', as_pdf = True, output = fak_output, ignore_zugferd=True)
+            fak_file_name = "MRJ-{sinv}_{datetime}".format(sinv=sinv.fak_name, datetime=now().replace(" ", "_"))
+            fak_file_name = sinv_file_name.split(".")[0]
+            fak_file_name = sinv_file_name.replace(":", "-")
+            fak_file_name = sinv_file_name + ".pdf"
+            fak_filedata = get_file_data_from_writer(fak_output)
+            fak_file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": fak_file_name,
+                "folder": "Home/Attachments",
+                "is_private": 1,
+                "content": fak_filedata,
+                "attached_to_doctype": 'Fakultative Rechnung',
+                "attached_to_name": sinv.fak_name
+            })
+            fak_file.save(ignore_permissions=True)
+        except frappe.exceptions.DuplicateEntryError:
+            continue
+
+        if aktuelle_uhrzeit > stop_time:
+            # autom. stoppzeit erreicht, prozess unterbrechen
+            breaked_loop = True
+            break
+    
+    if not breaked_loop:
+        # loop durch komplette verarbeitung beendet
+        frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "PDFs erstellt")
+        frappe.db.commit()
+    
+    return

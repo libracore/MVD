@@ -11,6 +11,8 @@
   "status",
   "start_rg",
   "stop_rg",
+  "create_pdf",
+  "stop_pdf",
   "section_bg_job",
   "h1",
   "start_hour",
@@ -75,6 +77,7 @@
    "label": "Backgroundjob Settings"
   },
   {
+   "default": "1",
    "fieldname": "start_hour",
    "fieldtype": "Int",
    "label": "Start Hour",
@@ -115,6 +118,7 @@
    "label": "Weekend"
   },
   {
+   "default": "1",
    "fieldname": "wknd_start_hour",
    "fieldtype": "Int",
    "label": "Start Hour"
@@ -134,9 +138,21 @@
    "fieldname": "wknd_stop_minute",
    "fieldtype": "Int",
    "label": "Stop Minute"
+  },
+  {
+   "depends_on": "eval:doc.status==\"Rechnungen erstellt\"",
+   "fieldname": "create_pdf",
+   "fieldtype": "Button",
+   "label": "Erstelle PDFs"
+  },
+  {
+   "depends_on": "eval:doc.status==\"Erstelle PDFs\"",
+   "fieldname": "stop_pdf",
+   "fieldtype": "Button",
+   "label": "Stoppe PDF Erstellung"
   }
  ],
- "modified": "2025-09-17 11:41:47.912780",
+ "modified": "2025-09-18 15:49:51.667681",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitglied RG Jahreslauf",

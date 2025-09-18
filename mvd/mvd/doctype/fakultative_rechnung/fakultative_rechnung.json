@@ -127,7 +127,8 @@
    "fieldtype": "Link",
    "label": "Rechnung",
    "options": "Sales Invoice",
-   "permlevel": 1
+   "permlevel": 1,
+   "search_index": 1
   },
   {
    "fieldname": "cb_2",
@@ -192,7 +193,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2024-09-13 10:56:07.445740",
+ "modified": "2025-09-18 16:15:56.779307",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Fakultative Rechnung",

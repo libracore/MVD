@@ -51,5 +51,17 @@ frappe.ui.form.on('Mitglied RG Jahreslauf', {
             frappe.msg_print("Der RG Erstellungsprozess wurde abgebrochen")
             cur_frm.reload_doc();
         });
+    },
+    create_pdf: function(frm) {
+        frm.call('create_pdf', {}).then(r => {
+            frappe.msg_print("Der PDF Erstellungsprozess wurde gestartet")
+            cur_frm.reload_doc();
+        });
+    },
+    stop_pdf: function(frm) {
+        frm.call('stop_pdf', {}).then(r => {
+            frappe.msg_print("Der PDF Erstellungsprozess wurde abgebrochen")
+            cur_frm.reload_doc();
+        });
     }
 });

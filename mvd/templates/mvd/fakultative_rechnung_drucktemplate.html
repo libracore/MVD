@@ -10,17 +10,17 @@
 {% if test_druckvorlage %}
     {% set druckvorlage = frappe.get_doc("Druckvorlage", test_druckvorlage) %}
 {% else %}
-    {% if doc.typ == 'HV' %}
-        {% set dokument = "HV mit EZ" %}
-        {% set textkonserven = frappe.get_all('Druckvorlage', filters={'sektion_id': sektion.name, 'dokument': dokument, 'default': 1, 'mitgliedtyp_c': mitgliedschaft.mitgliedtyp_c, 'reduzierte_mitgliedschaft': mitgliedschaft.reduzierte_mitgliedschaft, 'language': mitgliedschaft.language}, fields=['name']) %}
-        {% if textkonserven|length > 0 %}
-            {% set druckvorlage = frappe.get_doc("Druckvorlage", textkonserven[0].name) %}
-        {% else %}
-            {% set druckvorlage = False %}
-        {% endif %}
+    {% if doc.druckvorlage %}
+        {% set druckvorlage = frappe.get_doc("Druckvorlage", doc.druckvorlage) %}
     {% else %}
-        {% if doc.druckvorlage %}
-            {% set druckvorlage = frappe.get_doc("Druckvorlage", doc.druckvorlage) %}
+        {% if doc.typ == 'HV' %}
+            {% set dokument = "HV mit EZ" %}
+            {% set textkonserven = frappe.get_all('Druckvorlage', filters={'sektion_id': sektion.name, 'dokument': dokument, 'default': 1, 'mitgliedtyp_c': mitgliedschaft.mitgliedtyp_c, 'reduzierte_mitgliedschaft': mitgliedschaft.reduzierte_mitgliedschaft, 'language': mitgliedschaft.language}, fields=['name']) %}
+            {% if textkonserven|length > 0 %}
+                {% set druckvorlage = frappe.get_doc("Druckvorlage", textkonserven[0].name) %}
+            {% else %}
+                {% set druckvorlage = False %}
+            {% endif %}
         {% else %}
             {% set druckvorlage = False %}
         {% endif %}
