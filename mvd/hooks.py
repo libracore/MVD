@@ -161,7 +161,7 @@ scheduler_events = {
         # "mvd.mvd.utils.daily_jobs.cleanup_beratungen",
         "mvd.mvd.utils.daily_jobs.mark_beratungen_as_s8",
         "mvd.mvd.doctype.postretouren_log.postretouren_log.start_post_retouren_process",
-        "mvd.mvd.utils.daily_jobs.rechnungs_jahresversand",
+        # "mvd.mvd.utils.daily_jobs.rechnungs_jahresversand",
         "mvd.mvd.utils.daily_jobs.daily_ampel_korrektur",
         "mvd.mvd.utils.daily_jobs.sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft"
     ],
@@ -170,7 +170,8 @@ scheduler_events = {
         "mvd.mvd.doctype.mvd_email_queue.mvd_email_queue.mvd_mail_flush",
         "mvd.www.emailberatung.send_to_sp",
         "mvd.mvd.service_plattform.request_worker.service_plattform_log_worker",
-        "mvd.mvd.doctype.serien_email.serien_email.send_mails"
+        "mvd.mvd.doctype.serien_email.serien_email.send_mails",
+        "mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.mrj_worker"
     ],
     "hourly": [
         "mvd.mvd.doctype.wohnungsabgabe.wohnungsabgabe.qa_mail"

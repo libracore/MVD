@@ -1,5 +1,7 @@
 ## MVD
 ### Version Log
+#### 17.0.0
+Rechnungs Jahresversand Redesign (v3) #1444
 #### 16.22.0
 #1442
 #### 16.21.20

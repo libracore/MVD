@@ -1,0 +1,182 @@
+{
+ "creation": "2025-09-16 12:02:09.159425",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_uebersicht",
+  "mrj",
+  "sektion_id",
+  "druckvorlage",
+  "cb_1",
+  "status",
+  "bezugsjahr",
+  "anz_rechnungen",
+  "amended_from",
+  "section_selektionskriterien",
+  "sprach_spezifisch",
+  "language",
+  "cb_2",
+  "mitgliedtyp_spezifisch",
+  "mitgliedtyp",
+  "cb_3",
+  "region_spezifisch",
+  "region"
+ ],
+ "fields": [
+  {
+   "fieldname": "mrj",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mitglied RG Jahreslauf",
+   "options": "Mitglied RG Jahreslauf",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "MRJ Sektions Selektion",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_uebersicht",
+   "fieldtype": "Section Break",
+   "label": "\u00dcbersicht"
+  },
+  {
+   "fieldname": "druckvorlage",
+   "fieldtype": "Link",
+   "label": "Druckvorlage",
+   "options": "Druckvorlage"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "In Vorbereitung\nBereit zur Ausf\u00fchrung\nRechnungsdaten in Arbeit\nAbgeschlossen\nAbgebrochen",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "anz_rechnungen",
+   "fieldtype": "Int",
+   "label": "Anzahl Rechnungen",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_selektionskriterien",
+   "fieldtype": "Section Break",
+   "label": "Selektionskriterien"
+  },
+  {
+   "default": "0",
+   "fieldname": "sprach_spezifisch",
+   "fieldtype": "Check",
+   "label": "Sprache"
+  },
+  {
+   "depends_on": "eval:doc.sprach_spezifisch",
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Sprache",
+   "options": "Language"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "mitgliedtyp_spezifisch",
+   "fieldtype": "Check",
+   "label": "Mitgliedtyp"
+  },
+  {
+   "depends_on": "eval:doc.mitgliedtyp_spezifisch",
+   "fieldname": "mitgliedtyp",
+   "fieldtype": "Select",
+   "label": "Mitgliedtyp",
+   "options": "Privat\nGesch\u00e4ft"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "region_spezifisch",
+   "fieldtype": "Check",
+   "label": "Region"
+  },
+  {
+   "depends_on": "eval:doc.region_spezifisch",
+   "fieldname": "region",
+   "fieldtype": "Link",
+   "label": "Region",
+   "options": "Region"
+  },
+  {
+   "fetch_from": "mrj.bezugsjahr",
+   "fieldname": "bezugsjahr",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Bezugsjahr",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2025-09-17 13:10:57.187825",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "MRJ Sektions Selektion",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

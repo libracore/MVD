@@ -47,9 +47,15 @@ def get_data():
                 },
                 {
                     "type": "doctype",
-                    "name": "Rechnungs Jahresversand",
+                    "name": "Mitglied RG Jahreslauf",
                     "label": _("Rechnungs Jahresversand"),
                     "description": _("Rechnungs Jahresversand")
+                },
+                {
+                    "type": "doctype",
+                    "name": "MRJ Sektions Selektion",
+                    "label": _("Rechnungs Jahresversand Sektion"),
+                    "description": _("Rechnungs Jahresversand Sektionsselektionen")
                 },
                 {
                     "type": "doctype",
