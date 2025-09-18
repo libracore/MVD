@@ -37,7 +37,12 @@ class MRJSektionsSelektion(Document):
                 FROM `tabMitgliedschaft`
                 WHERE `bezahltes_mitgliedschaftsjahr` < '{jahr}'
                 AND `sektion_id` = '{sektion}'
-                AND `status_c` = 'Regulär'
+                AND `status_c` IN ('Regulär', 'Zuzug', 'Online-Mutation')
+                AND (
+                    `kuendigung` IS NULL
+                    OR
+                    `kuendigung` > '{jahr}-01-01'
+                )
                 {mitgliedtyp_filter}
                 {language_filter}
                 {region_filter}

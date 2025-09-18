@@ -92,9 +92,9 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:!doc.migriert_neues_cd&&!doc.e_mail_vorlage",
    "fieldname": "section_seitenmanagement",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Seitenmanagement"
   },
   {
@@ -206,9 +206,9 @@
    "label": "Fusszeile Blatt 3 ausblenden"
   },
   {
-   "depends_on": "eval:!doc.migriert_neues_cd&&!doc.e_mail_vorlage",
    "fieldname": "section_inhalt_1",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Inhalt"
   },
   {
@@ -471,7 +471,7 @@
    "label": "test_dn"
   }
  ],
- "modified": "2025-02-24 21:40:26.918771",
+ "modified": "2025-09-18 15:33:47.300884",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

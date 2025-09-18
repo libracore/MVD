@@ -9,7 +9,7 @@ from frappe.model.document import Document
 class Druckvorlage(Document):
     def validate(self):
         if not self.deaktiviert:
-            self.validiere_inhalt()
+            # self.validiere_inhalt() --> ist obsolet seit der CD Umstellung!
             self.set_validierungsstring()
             self.check_default()
         else:
@@ -17,7 +17,7 @@ class Druckvorlage(Document):
         self.titel = self.titel.replace("ä", "ae").replace("Ä", "Ae").replace("ö", "oe").replace("Ö", "Oe").replace("ü", "ue").replace("Ü", "Ue")
     
     def validiere_inhalt(self):
-        if self.dokument in ('Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ', 'Jahresrechnung'):
+        if self.dokument in ('Anmeldung mit EZ', 'Interessent*Innenbrief mit EZ', 'Zuzug mit EZ'):
             if self.mitgliedtyp_c == 'Privat':
                 if self.anzahl_seiten == '1':
                     frappe.throw("Es müssen mindestens 2 Seiten aktiviert werden (Mitgliedschaftsrechnung & HV Rechnung)")

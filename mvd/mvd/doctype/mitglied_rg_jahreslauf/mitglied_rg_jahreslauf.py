@@ -166,7 +166,12 @@ def create_invoices(mrj):
         FROM `tabMitgliedschaft`
         WHERE `bezahltes_mitgliedschaftsjahr` < '{jahr}'
         AND `sektion_id` = '{sektion}'
-        AND `status_c` = 'Regulär'
+        AND `status_c` IN ('Regulär', 'Zuzug', 'Online-Mutation')
+        AND (
+            `kuendigung` IS NULL
+            OR
+            `kuendigung` > '{jahr}-01-01'
+        )
         {mitgliedtyp_filter}
         {language_filter}
         {region_filter}
@@ -205,7 +210,7 @@ def create_invoices(mrj):
     for mitglied in mitglieder:
         aktuelle_uhrzeit = datetime.now().time()
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied)
-        create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, sektions_selektion.bezugsjahr, sektions_selektion.druckvorlage, mrj)
+        create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, sektions_selektion.bezugsjahr, sektions_selektion.druckvorlage, sektions_selektion.druckvorlage_hv, mrj)
         # aktuelle_uhrzeit = datetime.now().time()
         if aktuelle_uhrzeit > stop_time:
             # autom. stoppzeit erreicht, prozess unterbrechen
@@ -224,7 +229,7 @@ def create_invoices(mrj):
         frappe.db.commit()
         return
 
-def create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, jahr, druckvorlage, mrj):
+def create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, jahr, druckvorlage_rg, druckvorlage_hv, mrj):
     # ------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------
     '''
@@ -271,7 +276,7 @@ def create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, ja
             'sektions_code': str(sektion.sektion_id) or '00',
             'sektion_id': sektion.name,
             "items": item,
-            "druckvorlage": druckvorlage if druckvorlage else '',
+            "druckvorlage": druckvorlage_rg if druckvorlage_rg else '',
             "exclude_from_payment_reminder_until": '',
             "mrj": mrj,
             "allocate_advances_automatically": 1,
@@ -295,7 +300,7 @@ def create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, ja
             'betrag': sektion.betrag_hv,
             'posting_date': today(),
             'company': sektion.company,
-            'druckvorlage': '',
+            'druckvorlage': druckvorlage_hv if druckvorlage_hv else '',
             'bezugsjahr': jahr,
             'spenden_versand': '',
             "naming_series": "FRJ-.{sektions_code}.#####",

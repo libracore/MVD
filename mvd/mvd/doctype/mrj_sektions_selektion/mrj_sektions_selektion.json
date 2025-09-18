@@ -8,6 +8,7 @@
   "mrj",
   "sektion_id",
   "druckvorlage",
+  "druckvorlage_hv",
   "cb_1",
   "status",
   "bezugsjahr",
@@ -57,7 +58,7 @@
   {
    "fieldname": "druckvorlage",
    "fieldtype": "Link",
-   "label": "Druckvorlage",
+   "label": "Druckvorlage Mitgliedschaftsrechnung",
    "options": "Druckvorlage"
   },
   {
@@ -141,10 +142,16 @@
    "in_standard_filter": 1,
    "label": "Bezugsjahr",
    "read_only": 1
+  },
+  {
+   "fieldname": "druckvorlage_hv",
+   "fieldtype": "Link",
+   "label": "Druckvorlage HV Rechnung",
+   "options": "Druckvorlage"
   }
  ],
  "is_submittable": 1,
- "modified": "2025-09-17 13:10:57.187825",
+ "modified": "2025-09-18 15:35:59.609445",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MRJ Sektions Selektion",
