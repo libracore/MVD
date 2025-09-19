@@ -30,7 +30,7 @@ frappe.ui.form.on('Mitglied RG Jahreslauf', {
                     function(){
                         // on yes
                         frm.call('start_rg', {}).then(r => {
-                            frappe.msg_print("Der RG Erstellungsprozess wurde gestartet")
+                            frappe.msgprint("Der RG Erstellungsprozess wurde gestartet")
                             cur_frm.reload_doc();
                         });
                     },
@@ -40,7 +40,7 @@ frappe.ui.form.on('Mitglied RG Jahreslauf', {
                 )
             } else {
                 frm.call('start_rg', {}).then(r => {
-                    frappe.msg_print("Der RG Erstellungsprozess wurde gestartet")
+                    frappe.msgprint("Der RG Erstellungsprozess wurde gestartet")
                     cur_frm.reload_doc();
                 });
             }
@@ -48,19 +48,82 @@ frappe.ui.form.on('Mitglied RG Jahreslauf', {
     },
     stop_rg: function(frm) {
         frm.call('stop_rg', {}).then(r => {
-            frappe.msg_print("Der RG Erstellungsprozess wurde abgebrochen")
+            frappe.msgprint("Der RG Erstellungsprozess wurde abgebrochen")
             cur_frm.reload_doc();
         });
     },
     create_pdf: function(frm) {
         frm.call('create_pdf', {}).then(r => {
-            frappe.msg_print("Der PDF Erstellungsprozess wurde gestartet")
+            frappe.msgprint("Der PDF Erstellungsprozess wurde gestartet")
             cur_frm.reload_doc();
         });
     },
     stop_pdf: function(frm) {
         frm.call('stop_pdf', {}).then(r => {
-            frappe.msg_print("Der PDF Erstellungsprozess wurde abgebrochen")
+            frappe.msgprint("Der PDF Erstellungsprozess wurde abgebrochen")
+            cur_frm.reload_doc();
+        });
+    },
+    send_test_mails: function(frm) {
+        frm.call('get_mail_accounts', {}).then(mail_accounts => {
+            const mail_accs = mail_accounts.message
+            if (mail_accs.length > 0) {
+                frappe.prompt([
+                    {'fieldname': 'mail_account', 'fieldtype': 'Data', 'label': 'Test E-Mail Empfänger', 'reqd': 1},
+                    {'fieldname': 'sender_mail_account', 'fieldtype': 'Select', 'label': 'Absender E-Mail Account', 'reqd': 1, 'options': mail_accs},
+                    {'fieldname': 'qty', 'fieldtype': 'Int', 'label': 'Anz. Test E-Mails', 'reqd': 1, 'default': 0}
+                ],
+                function(values){
+                    frm.call('send_test_mails', {sender_account: values.sender_mail_account, mail_account: values.mail_account, qty: values.qty}).then(r => {
+                        frappe.msgprint("Der Test E-Mail Versand wurde gestartet")
+                        cur_frm.reload_doc();
+                    });
+                },
+                'Test E-Mail Versand',
+                'Versenden'
+                );
+            } else {
+                frappe.msgprint("Sie verfügen über keinen aktiven, ausgehenden, E-Mail Account");
+            }
+        });
+    },
+    send_mails: function(frm) {
+        frappe.confirm(
+            'Wollen Sie als Absender die Sektionsspezifischen E-Mail Accounts verwenden?',
+            function(){
+                // on yes
+                frm.call('send_mails', {mail_from_sektion: 1}).then(r => {
+                    frappe.msgprint("Der E-Mail Versand wurde gestartet")
+                    cur_frm.reload_doc();
+                });
+            },
+            function(){
+                // on no
+                frm.call('get_mail_accounts', {}).then(mail_accounts => {
+                    const mail_accs = mail_accounts.message
+                    if (mail_accs.length > 0) {
+                        frappe.prompt([
+                            {'fieldname': 'mail_account', 'fieldtype': 'Select', 'label': 'E-Mail Account', 'reqd': 1, 'options': mail_accs}
+                        ],
+                        function(values){
+                            frm.call('send_mails', {mail_from_sektion: 0, mail_account: values.mail_account}).then(r => {
+                                frappe.msgprint("Der E-Mail Versand wurde gestartet")
+                                cur_frm.reload_doc();
+                            });
+                        },
+                        'Auswahl E-Mail Account',
+                        'Versenden'
+                        );
+                    } else {
+                        frappe.msgprint("Sie verfügen über keinen aktiven, ausgehenden, E-Mail Account");
+                    }
+                });
+            }
+        );
+    },
+    stop_mail: function(frm) {
+        frm.call('stop_mail', {}).then(r => {
+            frappe.msgprint("Der E-Mail Versand wurde abgebrochen")
             cur_frm.reload_doc();
         });
     }

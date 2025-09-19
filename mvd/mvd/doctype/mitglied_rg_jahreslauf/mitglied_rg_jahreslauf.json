@@ -13,6 +13,9 @@
   "stop_rg",
   "create_pdf",
   "stop_pdf",
+  "send_test_mails",
+  "send_mails",
+  "stop_mail",
   "section_bg_job",
   "h1",
   "start_hour",
@@ -24,7 +27,15 @@
   "wknd_start_hour",
   "wknd_start_minute",
   "wknd_stop_hour",
-  "wknd_stop_minute"
+  "wknd_stop_minute",
+  "section_email",
+  "mail_subject",
+  "mail_message",
+  "section_admin",
+  "test_email_account",
+  "test_mail_qty",
+  "email_account",
+  "use_sektion_mail_account"
  ],
  "fields": [
   {
@@ -45,7 +56,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Warte auf Sektions Selektionen\nIn Warteschlange\nErstelle Rechnungen\nRechnungserstellung pausiert\nRechnungen erstellt\nErstelle PDFs\nPDFs erstellt\nVersende E-Mails\nE-Mails versendet\nExportiere CSV\nAbgeschlossen\nAbgebrochen",
+   "options": "Warte auf Sektions Selektionen\nIn Warteschlange\nErstelle Rechnungen\nRechnungserstellung pausiert\nRechnungen erstellt\nErstelle PDFs\nPDFs erstellt\nVersende Test E-Mails\nTest E-Mails versendet\nVersende E-Mails\nE-Mails versendet\nExportiere CSV\nAbgeschlossen\nAbgebrochen\nFehlgeschlagen",
    "reqd": 1
   },
   {
@@ -150,9 +161,68 @@
    "fieldname": "stop_pdf",
    "fieldtype": "Button",
    "label": "Stoppe PDF Erstellung"
+  },
+  {
+   "depends_on": "eval:doc.status==\"PDFs erstellt\"",
+   "fieldname": "send_test_mails",
+   "fieldtype": "Button",
+   "label": "Sende Test E-Mails"
+  },
+  {
+   "depends_on": "eval:[\"Test E-Mails versendet\", \"PDFs erstellt\"].includes(doc.status)",
+   "fieldname": "send_mails",
+   "fieldtype": "Button",
+   "label": "Sende E-Mails"
+  },
+  {
+   "depends_on": "eval:[\"Versende E-Mails\", \"Versende Test E-Mails\"].includes(doc.status)",
+   "fieldname": "stop_mail",
+   "fieldtype": "Button",
+   "label": "Stoppe E-Mail Versand"
+  },
+  {
+   "fieldname": "section_admin",
+   "fieldtype": "Section Break",
+   "label": "Admin Area"
+  },
+  {
+   "fieldname": "test_email_account",
+   "fieldtype": "Data",
+   "label": "Test E-Mail Empf\u00e4nger"
+  },
+  {
+   "fieldname": "test_mail_qty",
+   "fieldtype": "Int",
+   "label": "Anzahl Test E-Mails"
+  },
+  {
+   "fieldname": "email_account",
+   "fieldtype": "Data",
+   "label": "E-Mail Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_sektion_mail_account",
+   "fieldtype": "Check",
+   "label": "Sektionsspezifischer E-Mail Account"
+  },
+  {
+   "fieldname": "section_email",
+   "fieldtype": "Section Break",
+   "label": "E-Mail"
+  },
+  {
+   "fieldname": "mail_subject",
+   "fieldtype": "Data",
+   "label": "Subject"
+  },
+  {
+   "fieldname": "mail_message",
+   "fieldtype": "Text Editor",
+   "label": "Message"
   }
  ],
- "modified": "2025-09-18 15:49:51.667681",
+ "modified": "2025-09-19 15:17:54.411922",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitglied RG Jahreslauf",

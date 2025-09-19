@@ -27,7 +27,8 @@ class MitgliedRGJahreslauf(Document):
         sektions_selektionen = frappe.db.sql("""
             SELECT `sektion_id`, `docstatus`
             FROM `tabMRJ Sektions Selektion`
-        """, as_dict=True)
+            WHERE `mrj` = '{0}'
+        """.format(self.name), as_dict=True)
 
         uebersicht = {}
 
@@ -51,6 +52,13 @@ class MitgliedRGJahreslauf(Document):
         """.format(self.name), as_dict=True)[0].qty
         return drafts
     
+    def get_mail_accounts(self):
+        accounts = frappe.get_all("Email Account", filters={ "enable_outgoing": 1 },
+            fields=["email_id"],
+            distinct=True)
+        mail_accounts = "\n".join(acc.get("email_id") for acc in accounts)
+        return mail_accounts
+    
     def start_rg(self):
         self.status = "In Warteschlange"
         self.save()
@@ -64,6 +72,29 @@ class MitgliedRGJahreslauf(Document):
         self.save()
     
     def stop_pdf(self):
+        self.status = "Abgebrochen"
+        self.save()
+    
+    def send_test_mails(self, sender_account, mail_account, qty):
+        if not mail_account:
+            frappe.throw("Die Auswahl des Mailaccounts ist fehlgeschlagen")
+        
+        self.status = "Versende Test E-Mails"
+        self.test_email_account = mail_account
+        self.email_account = sender_account
+        self.test_mail_qty = qty or 0
+        self.save()
+    
+    def send_mails(self, mail_from_sektion, mail_account=None):
+        if mail_from_sektion == 0 and not mail_account:
+            frappe.throw("Die Auswahl des Mailaccounts ist fehlgeschlagen")
+        
+        self.status = "Versende E-Mails"
+        self.use_sektion_mail_account = mail_from_sektion or 0
+        self.email_account = mail_account or None
+        self.save()
+    
+    def stop_mail(self):
         self.status = "Abgebrochen"
         self.save()
 
@@ -91,6 +122,24 @@ def mrj_worker():
                         'mrj': ready_for_pdf[0].name
                     }
                     enqueue("mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.create_pdfs", queue='long', job_name='Erstellung PDF {0}'.format(ready_for_pdf[0].name), timeout=23500, **args)
+            else:
+                ready_for_test_mail = frappe.db.sql("""SELECT `name` FROM `tabMitglied RG Jahreslauf` WHERE `status` = 'Versende Test E-Mails'""", as_dict=True)
+                if len(ready_for_test_mail) > 0:
+                    if not is_job_already_running('Versende Test E-Mails {0}'.format(ready_for_test_mail[0].name)):
+                        args = {
+                            'mrj': ready_for_test_mail[0].name,
+                            'test': True
+                        }
+                        enqueue("mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.send_mails", queue='long', job_name='Versende Test E-Mails {0}'.format(ready_for_test_mail[0].name), timeout=23500, **args)
+                else:
+                    ready_for_mail = frappe.db.sql("""SELECT `name` FROM `tabMitglied RG Jahreslauf` WHERE `status` = 'Versende E-Mails'""", as_dict=True)
+                    if len(ready_for_mail) > 0:
+                        if not is_job_already_running('Versende E-Mails {0}'.format(ready_for_mail[0].name)):
+                            args = {
+                                'mrj': ready_for_mail[0].name,
+                                'test': False
+                            }
+                            enqueue("mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.send_mails", queue='long', job_name='Versende E-Mails {0}'.format(ready_for_mail[0].name), timeout=23500, **args)
         
 def get_start_stop(mrj):
     return {
@@ -139,8 +188,10 @@ def create_invoices(mrj):
                                 `language`,
                                 `region_spezifisch`,
                                 `region`,
-                                `druckvorlage`
-                             FROM `tabMRJ Sektions Selektion` WHERE `status` = 'Rechnungsdaten in Arbeit'""", as_dict=True)
+                                `druckvorlage`,
+                                `druckvorlage_hv`
+                             FROM `tabMRJ Sektions Selektion` WHERE `status` = 'Rechnungsdaten in Arbeit'
+                             AND `mrj` = '{0}'""".format(mrj), as_dict=True)
     if len(pausiert) > 0:
         sektions_selektion = pausiert[0]
     else:
@@ -155,8 +206,10 @@ def create_invoices(mrj):
                                         `language`,
                                         `region_spezifisch`,
                                         `region`,
-                                        `druckvorlage`
-                                    FROM `tabMRJ Sektions Selektion` WHERE `status` = 'Bereit zur Ausführung'""", as_dict=True)
+                                        `druckvorlage`,
+                                        `druckvorlage_hv`
+                                    FROM `tabMRJ Sektions Selektion` WHERE `status` = 'Bereit zur Ausführung'
+                                    AND `mrj` = '{0}'""".format(mrj), as_dict=True)
         if len(ready_to_run) > 0:
             sektions_selektion = ready_to_run[0]
     
@@ -428,9 +481,9 @@ def create_pdfs(mrj):
             fak_output = PdfFileWriter()
             fak_output = frappe.get_print("Fakultative Rechnung", sinv.fak_name, 'Fakultative Rechnung', as_pdf = True, output = fak_output, ignore_zugferd=True)
             fak_file_name = "MRJ-{sinv}_{datetime}".format(sinv=sinv.fak_name, datetime=now().replace(" ", "_"))
-            fak_file_name = sinv_file_name.split(".")[0]
-            fak_file_name = sinv_file_name.replace(":", "-")
-            fak_file_name = sinv_file_name + ".pdf"
+            fak_file_name = fak_file_name.split(".")[0]
+            fak_file_name = fak_file_name.replace(":", "-")
+            fak_file_name = fak_file_name + ".pdf"
             fak_filedata = get_file_data_from_writer(fak_output)
             fak_file = frappe.get_doc({
                 "doctype": "File",
@@ -444,6 +497,12 @@ def create_pdfs(mrj):
             fak_file.save(ignore_permissions=True)
         except frappe.exceptions.DuplicateEntryError:
             continue
+        except Exception as err:
+            frappe.log_error(str(err), "Failed MRJ: Create PDFs")
+            frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "Fehlgeschlagen")
+            frappe.db.commit()
+            breaked_loop = True
+            break
 
         if aktuelle_uhrzeit > stop_time:
             # autom. stoppzeit erreicht, prozess unterbrechen
@@ -453,6 +512,115 @@ def create_pdfs(mrj):
     if not breaked_loop:
         # loop durch komplette verarbeitung beendet
         frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "PDFs erstellt")
+        frappe.db.commit()
+    
+    return
+
+def send_mails(mrj, test=False):
+    def get_sektion_mail_account(sektion):
+        if frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "use_sektion_mail_account") == 1:
+            return frappe.db.get_value("Sektion", sektion, "legacy_mail_absender_mail")
+        
+        return frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "email_account")
+
+    def get_recipient(mitglied):
+        abw_debitor = 0
+        abw_rg_adr = frappe.db.get_value("Mitgliedschaft", mitglied, "abweichende_rechnungsadresse") or 0
+        if abw_rg_adr:
+            abw_debitor = frappe.db.get_value("Mitgliedschaft", mitglied, "unabhaengiger_debitor") or 0
+        if abw_debitor == 1:
+            return frappe.db.get_value("Mitgliedschaft", mitglied, "rg_e_mail") or None
+        
+        return frappe.db.get_value("Mitgliedschaft", mitglied, "e_mail_1") or None
+    
+    # Festlegen der Start-/Stop-Zeiten
+    from datetime import datetime, time
+    current_day = datetime.today().weekday()
+    aktuelle_uhrzeit = datetime.now().time()
+    start_stop = get_start_stop(mrj)
+    if current_day >= 5:
+        # Wochenende
+        start_time = time(start_stop['wknd_start_hour'], start_stop['wknd_start_minute'])
+        stop_time = time(start_stop['wknd_stop_hour'], start_stop['wknd_stop_minute'])
+    else:
+        # Wochentag
+        start_time = time(start_stop['start_hour'], start_stop['start_minute'])
+        stop_time = time(start_stop['stop_hour'], start_stop['stop_minute'])
+    
+    # Prüfung ob der Job gestartet werden darf
+    if (aktuelle_uhrzeit < start_time) or (aktuelle_uhrzeit > stop_time):
+        return
+
+    if test:
+        frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "Versende Test E-Mails")
+        recipient = frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "test_email_account")
+        limit_filter = "LIMIT {0}".format(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "test_mail_qty"))
+    else:
+        frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "Versende E-Mails")
+        limit_filter = ""
+    frappe.db.commit()
+
+    frappe.db.sql("""SET SQL_BIG_SELECTS=1""")
+    sinvs = frappe.db.sql("""
+        SELECT
+            `sinv`.`name` AS `sinv_name`,
+            `sinv`.`sektion_id` AS `sektion`,
+            `sinv`.`mv_mitgliedschaft` AS `mitglied`,
+            `fak`.`name` AS `fak_name`
+        FROM `tabSales Invoice` AS `sinv`
+        LEFT JOIN `tabFakultative Rechnung` AS `fak` ON `fak`.`sales_invoice` = `sinv`.`name`
+        WHERE `sinv`.`mrj` = '{mrj}'
+        AND `sinv`.`docstatus` = 1
+        AND `sinv`.`status` != 'Paid'
+        ORDER BY `sinv`.`sektion_id` ASC
+        {limit_filter}
+    """.format(mrj=mrj, limit_filter=limit_filter), as_dict=True)
+    frappe.db.sql("""SET SQL_BIG_SELECTS=0""")
+
+    subject = frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "mail_subject")
+    message = frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "mail_message")
+    sektion = None
+    sektion_mail_account = None
+    breaked_loop = False
+    for sinv in sinvs:
+        if sinv.sektion != sektion:
+            sektion = sinv.sektion
+            sektion_mail_account = get_sektion_mail_account(sektion)
+    
+        attachments = []
+        sinv_attachment = frappe.get_all("File", fields=["name", "file_name"],
+            filters = {"attached_to_name": sinv.sinv_name, "attached_to_doctype": "Sales Invoice"})
+        for si_att in sinv_attachment:
+            if "MRJ-RJ-" in si_att.get("file_name"):
+                attachments.append({'fid': si_att.get("name")})
+        
+        fak_attachment = frappe.get_all("File", fields=["name", "file_name"],
+            filters = {"attached_to_name": sinv.fak_name, "attached_to_doctype": "Fakultative Rechnung"})
+        for fak_att in fak_attachment:
+            if "MRJ-FRJ-" in fak_att.get("file_name"):
+                attachments.append({'fid': fak_att.get("name")})
+        
+        recipient = get_recipient(sinv.mitglied) if not test else recipient
+        
+        if len(attachments) > 0 and recipient:
+            frappe.sendmail(sender=sektion_mail_account,
+                            recipients=[recipient],
+                            message=message,
+                            subject=subject,
+                            reply_to=sektion_mail_account,
+                            attachments=attachments)
+        
+        if aktuelle_uhrzeit > stop_time:
+            # autom. stoppzeit erreicht, prozess unterbrechen
+            breaked_loop = True
+            break
+    
+    if not breaked_loop:
+        # loop durch komplette verarbeitung beendet
+        if test:
+            frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "Test E-Mails versendet")
+        else:
+            frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "E-Mails versendet")
         frappe.db.commit()
     
     return
