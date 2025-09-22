@@ -148,6 +148,8 @@ def get_csv_data(fr_list, data_only):
         'firma',
         'zusatz_firma',
         'anrede',
+        'briefanrede',
+        'rg_briefanrede',
         'vorname_1',
         'nachname_1',
         'vorname_2',
@@ -217,6 +219,8 @@ def get_csv_data(fr_list, data_only):
         firma = mitgliedschaft.firma or ''
         zusatz_firma = mitgliedschaft.zusatz_firma or ''
         anrede = mitgliedschaft.anrede_c or ''
+        briefanrede = mitgliedschaft.briefanrede or ''
+        rg_briefanrede = mitgliedschaft.rg_briefanrede or ''
         
         # allgemein
         mitglied_nr = mitgliedschaft.mitglied_nr
@@ -238,6 +242,8 @@ def get_csv_data(fr_list, data_only):
             firma,
             zusatz_firma,
             anrede,
+            briefanrede,
+            rg_briefanrede,
             vorname_1,
             nachname_1,
             vorname_2,
