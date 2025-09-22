@@ -222,12 +222,13 @@ function erstelle_rechnung_sonstiges(frm) {
                                     frappe.call({
                                         method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
                                         args:{
-                                                'item': this.get_value()
+                                                'item': this.get_value(),
+                                                'customer_customer': cur_frm.doc.kunde_kunde
                                         },
                                         callback: function(r)
                                         {
                                             rate_field.set_value(r.message.price);
-                                            qty_field.set_value(1);
+                                            qty_field.set_value(1);                                
                                         }
                                     });
                                 }

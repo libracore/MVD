@@ -6,16 +6,28 @@ from __future__ import unicode_literals
 import frappe
 
 @frappe.whitelist()
-def get_item_price(item):
-    price = frappe.db.sql("""SELECT `price_list_rate` FROM `tabItem Price` WHERE `price_list` = 'Standard Selling' AND `item_code` = '{item}' AND `valid_from` <= CURDATE() ORDER BY `valid_from` DESC LIMIT 1""".format(item=item), as_dict=True)
-    description = frappe.db.sql("""SELECT `description` FROM `tabItem` WHERE `name` = '{0}'""".format(item), as_dict=True)[0].description
-    if len(price) > 0:
-        return {
-            'price': price[0].price_list_rate,
-            'description': description
-        }
+def get_item_price(item, customer_customer=None):
+    customer_group = None
+    if customer_customer:
+        customer_group = frappe.db.get_value("Customer", customer_customer, "customer_group")
+    if customer_group == 'Mitglied':
+        parent_rule = frappe.db.get_value("Pricing Rule Item Code", {"item_code": item}, "parent")
+        if parent_rule:
+            price = frappe.db.sql("""
+                SELECT rate
+                FROM `tabPricing Rule`
+                WHERE name = '{parent_rule}'
+                AND valid_from <= CURDATE()
+                ORDER BY valid_from DESC
+                LIMIT 1
+            """.format(parent_rule=parent_rule), as_dict=True)[0].rate
     else:
-        return {
-            'price': 0,
-            'description': description
-        }
+        price = frappe.db.sql("""SELECT `price_list_rate` FROM `tabItem Price` WHERE `price_list` = 'Standard Selling' AND `item_code` = '{item}' AND `valid_from` <= CURDATE() ORDER BY `valid_from` DESC LIMIT 1""".format(item=item), as_dict=True)[0].price_list_rate
+    description = frappe.db.sql("""SELECT `description` FROM `tabItem` WHERE `name` = '{0}'""".format(item), as_dict=True)[0].description
+    if not price:
+        price = 0
+
+    return {
+        "price": price,
+        "description": description,
+    }
