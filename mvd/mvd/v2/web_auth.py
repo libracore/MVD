@@ -201,12 +201,13 @@ def generate_reset_hash(user, email, hash_only=False):
     frappe.db.commit()
     
     if not hash_only:
+        from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
+        mitglied_id = get_mitglied_id_from_nr(mitglied_nr=user.replace("@login.ch", ""))
+        anrede = frappe.db.get_value("Mitgliedschaft", mitglied_id, "briefanrede") or "Guten Tag"
         if cint(frappe.db.get_value("MVD Settings", "MVD Settings", "pwd_reset_an_testadresse")) == 1:
             email = frappe.db.get_value("MVD Settings", "MVD Settings", "pwd_reset_testadresse")
         else:
             if not email:
-                from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
-                mitglied_id = get_mitglied_id_from_nr(mitglied_nr=user.replace("@login.ch", ""))
                 email = frappe.db.get_value("Mitgliedschaft", mitglied_id, "e_mail_1")
         if not email:
             return server_error()
@@ -216,7 +217,9 @@ def generate_reset_hash(user, email, hash_only=False):
         template = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_template') or 'website_pwd_reset'
         reset_url = frappe.db.get_value("MVD Settings", "MVD Settings", 'reset_url')
         args = {
-            'link': "{0}/?reset_hash={1}".format(reset_url, key)
+            'link': "{0}/?reset_hash={1}".format(reset_url, key),
+            'mitglied_nr': user.replace("@login.ch", "").replace("mv", "MV"),
+            'anrede': anrede
         }
         if not sender or not subject or not template or not reset_url:
             return server_error()
