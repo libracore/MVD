@@ -416,25 +416,26 @@ def create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, ja
         sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
         sinv.submit()
 
-        fr = frappe.get_doc({
-            "doctype": "Fakultative Rechnung",
-            "mv_mitgliedschaft": mitgliedschaft.name,
-            'due_date': due_date,
-            'sektion_id': sektion.name,
-            'sektions_code': str(sektion.sektion_id) or '00',
-            'sales_invoice': sinv.name,
-            'typ': 'HV',
-            'betrag': sektion.betrag_hv,
-            'posting_date': today(),
-            'company': sektion.company,
-            'druckvorlage': druckvorlage_hv if druckvorlage_hv else '',
-            'bezugsjahr': jahr,
-            'spenden_versand': '',
-            "naming_series": "FRJ-.{sektions_code}.#####",
-            # "renaming_series": "FRJ-{0}{1}{2}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter, str(current_fr_series_index).rjust(5, "0"))
-        }).insert()
-        fr.qrr_referenz = get_qrr_reference(fr=fr.name)
-        fr.submit()
+        if mitgliedschaft.mitgliedtyp_c == 'Privat':
+            fr = frappe.get_doc({
+                "doctype": "Fakultative Rechnung",
+                "mv_mitgliedschaft": mitgliedschaft.name,
+                'due_date': due_date,
+                'sektion_id': sektion.name,
+                'sektions_code': str(sektion.sektion_id) or '00',
+                'sales_invoice': sinv.name,
+                'typ': 'HV',
+                'betrag': sektion.betrag_hv,
+                'posting_date': today(),
+                'company': sektion.company,
+                'druckvorlage': druckvorlage_hv if druckvorlage_hv else '',
+                'bezugsjahr': jahr,
+                'spenden_versand': '',
+                "naming_series": "FRJ-.{sektions_code}.#####",
+                # "renaming_series": "FRJ-{0}{1}{2}".format(str(sektion.sektion_id) or '00', jahresversand_doc.counter, str(current_fr_series_index).rjust(5, "0"))
+            }).insert()
+            fr.qrr_referenz = get_qrr_reference(fr=fr.name)
+            fr.submit()
 
         frappe.db.commit()
 
