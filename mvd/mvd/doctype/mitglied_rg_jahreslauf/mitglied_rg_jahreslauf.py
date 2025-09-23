@@ -478,10 +478,6 @@ def create_pdfs(mrj):
         WHERE `sinv`.`mrj` = '{mrj}'
         AND `sinv`.`docstatus` = 1
         AND `sinv`.`status` != 'Paid'
-        AND `sinv`.`druckvorlage` IS NOT NULL
-        AND `fak`.`druckvorlage` IS NOT NULL
-        AND `sinv`.`druckvorlage` != ''
-        AND `fak`.`druckvorlage` != ''
     """.format(mrj=mrj), as_dict=True)
     frappe.db.sql("""SET SQL_BIG_SELECTS=0""")
 
@@ -509,23 +505,24 @@ def create_pdfs(mrj):
             sinv_file.save(ignore_permissions=True)
 
             # erstellung Fak-Rechnungs PDF
-            fak_output = PdfFileWriter()
-            fak_output = frappe.get_print("Fakultative Rechnung", sinv.fak_name, 'Fakultative Rechnung', as_pdf = True, output = fak_output, ignore_zugferd=True)
-            fak_file_name = "MRJ-{sinv}_{datetime}".format(sinv=sinv.fak_name, datetime=now().replace(" ", "_"))
-            fak_file_name = fak_file_name.split(".")[0]
-            fak_file_name = fak_file_name.replace(":", "-")
-            fak_file_name = fak_file_name + ".pdf"
-            fak_filedata = get_file_data_from_writer(fak_output)
-            fak_file = frappe.get_doc({
-                "doctype": "File",
-                "file_name": fak_file_name,
-                "folder": "Home/Attachments",
-                "is_private": 1,
-                "content": fak_filedata,
-                "attached_to_doctype": 'Fakultative Rechnung',
-                "attached_to_name": sinv.fak_name
-            })
-            fak_file.save(ignore_permissions=True)
+            if sinv.fak_name:
+                fak_output = PdfFileWriter()
+                fak_output = frappe.get_print("Fakultative Rechnung", sinv.fak_name, 'Fakultative Rechnung', as_pdf = True, output = fak_output, ignore_zugferd=True)
+                fak_file_name = "MRJ-{sinv}_{datetime}".format(sinv=sinv.fak_name, datetime=now().replace(" ", "_"))
+                fak_file_name = fak_file_name.split(".")[0]
+                fak_file_name = fak_file_name.replace(":", "-")
+                fak_file_name = fak_file_name + ".pdf"
+                fak_filedata = get_file_data_from_writer(fak_output)
+                fak_file = frappe.get_doc({
+                    "doctype": "File",
+                    "file_name": fak_file_name,
+                    "folder": "Home/Attachments",
+                    "is_private": 1,
+                    "content": fak_filedata,
+                    "attached_to_doctype": 'Fakultative Rechnung',
+                    "attached_to_name": sinv.fak_name
+                })
+                fak_file.save(ignore_permissions=True)
         except frappe.exceptions.DuplicateEntryError:
             continue
         except Exception as err:
