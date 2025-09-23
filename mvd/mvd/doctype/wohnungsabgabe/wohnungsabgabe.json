@@ -267,7 +267,7 @@
    "fieldname": "expert_in",
    "fieldtype": "Select",
    "label": "Expert*in",
-   "options": "\nBaumeler, Markus\nEgger, Martin\nFretz, Markus\nSuter, Heinz\nHofer, Werner\nWagner, Susanne\nSch\u00e4rer, Kathrin\nKofmel, Urban\nHagi, Martin\nGuldimann, Ursula\nRufer, Lilli\nFuhrer, Peter"
+   "options": "\nBaumeler, Markus\nEgger, Martin\nFretz, Markus\nFuhrer, Peter\nGuldimann, Ursula\nHagi, Martin\nHofer, Werner\nKofmel, Urban\nRufer, Lilli\nSch\u00e4rer, Kathrin\nSuter, Heinz\nTschanz, Roland\nWagner, Susanne"
   },
   {
    "fieldname": "vermieter_in",
@@ -360,7 +360,7 @@
    "label": "Geschaeftsraum nach Aufwand"
   }
  ],
- "modified": "2025-02-19 10:50:13.408190",
+ "modified": "2025-09-23 16:42:18.291505",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
