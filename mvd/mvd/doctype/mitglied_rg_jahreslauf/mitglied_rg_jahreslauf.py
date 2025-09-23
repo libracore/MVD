@@ -241,7 +241,8 @@ def create_invoices(mrj):
                                 `region_spezifisch`,
                                 `region`,
                                 `druckvorlage`,
-                                `druckvorlage_hv`
+                                `druckvorlage_hv`,
+                                `druckvorlage_email`
                              FROM `tabMRJ Sektions Selektion` WHERE `status` = 'Rechnungsdaten in Arbeit'
                              AND `mrj` = '{0}'""".format(mrj), as_dict=True)
     if len(pausiert) > 0:
@@ -259,7 +260,8 @@ def create_invoices(mrj):
                                         `region_spezifisch`,
                                         `region`,
                                         `druckvorlage`,
-                                        `druckvorlage_hv`
+                                        `druckvorlage_hv`,
+                                        `druckvorlage_email`
                                     FROM `tabMRJ Sektions Selektion` WHERE `status` = 'Bereit zur Ausführung'
                                     AND `mrj` = '{0}'""".format(mrj), as_dict=True)
         if len(ready_to_run) > 0:
@@ -333,7 +335,7 @@ def create_invoices(mrj):
     for mitglied in mitglieder:
         aktuelle_uhrzeit = datetime.now().time()
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied)
-        create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, sektions_selektion.bezugsjahr, sektions_selektion.druckvorlage, sektions_selektion.druckvorlage_hv, mrj)
+        create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, sektions_selektion.bezugsjahr, sektions_selektion.druckvorlage, sektions_selektion.druckvorlage_hv, sektions_selektion.druckvorlage_email, mrj)
         # aktuelle_uhrzeit = datetime.now().time()
         if aktuelle_uhrzeit > stop_time:
             # autom. stoppzeit erreicht, prozess unterbrechen
@@ -356,7 +358,7 @@ def create_invoices(mrj):
         add_duchlaufszeit()
         return
 
-def create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, jahr, druckvorlage_rg, druckvorlage_hv, mrj):
+def create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, jahr, druckvorlage_rg, druckvorlage_hv, druckvorlage_email, mrj):
     # ------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------
     '''
@@ -404,6 +406,7 @@ def create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, ja
             'sektion_id': sektion.name,
             "items": item,
             "druckvorlage": druckvorlage_rg if druckvorlage_rg else '',
+            "druckvorlage_email": druckvorlage_email if druckvorlage_email else '',
             "exclude_from_payment_reminder_until": '',
             "mrj": mrj,
             "allocate_advances_automatically": 1,
@@ -603,6 +606,7 @@ def send_mails(mrj, test=False):
         SELECT
             `sinv`.`name` AS `sinv_name`,
             `sinv`.`sektion_id` AS `sektion`,
+            `sinv`.`druckvorlage_email`,
             `sinv`.`mv_mitgliedschaft` AS `mitglied`,
             `fak`.`name` AS `fak_name`
         FROM `tabSales Invoice` AS `sinv`
@@ -615,8 +619,6 @@ def send_mails(mrj, test=False):
     """.format(mrj=mrj, limit_filter=limit_filter), as_dict=True)
     frappe.db.sql("""SET SQL_BIG_SELECTS=0""")
 
-    subject = frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "mail_subject")
-    message = frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "mail_message")
     sektion = None
     sektion_mail_account = None
     breaked_loop = False
@@ -639,7 +641,8 @@ def send_mails(mrj, test=False):
                 attachments.append({'fid': fak_att.get("name")})
         
         recipient = get_recipient(sinv.mitglied) if not test else recipient
-        
+        subject = frappe.db.get_value("Druckvorlage", sinv.druckvorlage_email, "e_mail_betreff")
+        message = frappe.db.get_value("Druckvorlage", sinv.druckvorlage_email, "e_mail_text")
         if len(attachments) > 0 and recipient:
             frappe.sendmail(sender=sektion_mail_account,
                             recipients=[recipient],
