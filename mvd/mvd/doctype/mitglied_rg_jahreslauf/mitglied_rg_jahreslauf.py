@@ -242,7 +242,10 @@ def create_invoices(mrj):
                                 `region`,
                                 `druckvorlage`,
                                 `druckvorlage_hv`,
-                                `druckvorlage_email`
+                                `druckvorlage_email`,
+                                `druckvorlage_digitalrechnung`,
+                                `sinv_date`,
+                                `due_date_days`
                              FROM `tabMRJ Sektions Selektion` WHERE `status` = 'Rechnungsdaten in Arbeit'
                              AND `mrj` = '{0}'""".format(mrj), as_dict=True)
     if len(pausiert) > 0:
@@ -261,7 +264,10 @@ def create_invoices(mrj):
                                         `region`,
                                         `druckvorlage`,
                                         `druckvorlage_hv`,
-                                        `druckvorlage_email`
+                                        `druckvorlage_email`,
+                                        `druckvorlage_digitalrechnung`,
+                                        `sinv_date`,
+                                        `due_date_days`
                                     FROM `tabMRJ Sektions Selektion` WHERE `status` = 'Bereit zur Ausführung'
                                     AND `mrj` = '{0}'""".format(mrj), as_dict=True)
         if len(ready_to_run) > 0:
@@ -327,7 +333,9 @@ def create_invoices(mrj):
 
     sektion = frappe.get_doc("Sektion", sektions_selektion.sektion_id)
     company = frappe.get_doc("Company", sektion.company)
-    due_date = add_days(today(), 30)
+    sinv_date = sektions_selektion.sinv_date
+    due_date_days = cint(sektions_selektion.due_date_days) or 30
+    due_date = add_days(sinv_date, due_date_days)
     item_defaults = {
         'Privat': [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel).get("price")}],
         'Geschäft': [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel_geschaeft).get("price")}]
@@ -335,7 +343,7 @@ def create_invoices(mrj):
     for mitglied in mitglieder:
         aktuelle_uhrzeit = datetime.now().time()
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied)
-        create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, sektions_selektion.bezugsjahr, sektions_selektion.druckvorlage, sektions_selektion.druckvorlage_hv, sektions_selektion.druckvorlage_email, mrj)
+        create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, sektions_selektion.bezugsjahr, sektions_selektion.druckvorlage, sektions_selektion.druckvorlage_hv, sektions_selektion.druckvorlage_email, sektions_selektion.druckvorlage_digitalrechnung, mrj)
         # aktuelle_uhrzeit = datetime.now().time()
         if aktuelle_uhrzeit > stop_time:
             # autom. stoppzeit erreicht, prozess unterbrechen
@@ -358,7 +366,7 @@ def create_invoices(mrj):
         add_duchlaufszeit()
         return
 
-def create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, jahr, druckvorlage_rg, druckvorlage_hv, druckvorlage_email, mrj):
+def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, jahr, druckvorlage_rg, druckvorlage_hv, druckvorlage_email, druckvorlage_digitalrechnung, mrj):
     # ------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------
     '''
@@ -392,6 +400,8 @@ def create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, ja
         
         sinv = frappe.get_doc({
             "doctype": "Sales Invoice",
+            "set_posting_time": 1,
+            "posting_date": sinv_date,
             "ist_mitgliedschaftsrechnung": 1,
             "mv_mitgliedschaft": mitgliedschaft.name,
             "company": sektion.company,
@@ -407,6 +417,7 @@ def create_invoice(mitgliedschaft, sektion, company, due_date, item_defaults, ja
             "items": item,
             "druckvorlage": druckvorlage_rg if druckvorlage_rg else '',
             "druckvorlage_email": druckvorlage_email if druckvorlage_email else '',
+            "druckvorlage_digitalrechnung": druckvorlage_digitalrechnung if druckvorlage_digitalrechnung else '',
             "exclude_from_payment_reminder_until": '',
             "mrj": mrj,
             "allocate_advances_automatically": 1,
@@ -607,6 +618,7 @@ def send_mails(mrj, test=False):
             `sinv`.`name` AS `sinv_name`,
             `sinv`.`sektion_id` AS `sektion`,
             `sinv`.`druckvorlage_email`,
+            `sinv`.`druckvorlage_digitalrechnung`,
             `sinv`.`mv_mitgliedschaft` AS `mitglied`,
             `fak`.`name` AS `fak_name`
         FROM `tabSales Invoice` AS `sinv`
@@ -641,8 +653,11 @@ def send_mails(mrj, test=False):
                 attachments.append({'fid': fak_att.get("name")})
         
         recipient = get_recipient(sinv.mitglied) if not test else recipient
-        subject = frappe.db.get_value("Druckvorlage", sinv.druckvorlage_email, "e_mail_betreff")
-        message = frappe.db.get_value("Druckvorlage", sinv.druckvorlage_email, "e_mail_text")
+        email_vorlage = sinv.druckvorlage_email
+        if cint(frappe.db.get_value("Mitgliedschaft", sinv.mitglied, "digitalrechnung")) == 1:
+            email_vorlage = sinv.druckvorlage_digitalrechnung
+        subject = frappe.db.get_value("Druckvorlage", email_vorlage, "e_mail_betreff")
+        message = frappe.db.get_value("Druckvorlage", email_vorlage, "e_mail_text")
         if len(attachments) > 0 and recipient:
             frappe.sendmail(sender=sektion_mail_account,
                             recipients=[recipient],
