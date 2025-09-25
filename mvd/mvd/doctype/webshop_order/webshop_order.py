@@ -10,6 +10,7 @@ from frappe.utils import cint
 from frappe.utils.data import today, add_days
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr, get_adressblock, get_rg_adressblock
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
+import re
 
 class WebshopOrder(Document):
     def validate(self):
@@ -86,7 +87,98 @@ class WebshopOrder(Document):
                     self.kundendaten_geladen = 1
             except Exception as err:
                 frappe.log_error("{0}\n{1}".format(err, frappe.utils.get_traceback()), 'Webshop Order; Validation Failed')
-    
+
+        elif self.v2 == 1:
+            try:
+                order_data = json.loads(self.request)
+
+                # --- Payment ID ---
+                if not self.online_payment_id:
+                    if "transaction_uuid" in order_data:
+                        self.online_payment_id = order_data["transaction_uuid"]
+
+                # --- Artikel / Items ---
+                if not self.artikel_json and "items" in order_data:
+                    items = []
+                    for idx, it in enumerate(order_data["items"], start=1):
+                        item = {
+                            "item": it.get("item_code"),
+                            "typ": None, # es werden aber andere Infos geschickt ->it.get("title"),
+                            "qty": cint(it.get("quantity", 0)),
+                            "amount": float(it.get("itemTotalPrice", 0)),
+                            "mwst": 0,  # wird auch nicht gesendet v2 payload
+                            "item_index": str(idx),
+                        }
+                        items.append(item)
+
+                    data_dict = {
+                        "items": items,
+                        "details": {
+                            "versandkosten": (
+                                order_data.get("payrexx_data", {})
+                                        .get("invoice", {})
+                                        .get("shippingAmount", 0)
+                                if isinstance(order_data.get("payrexx_data"), dict)
+                                else 0
+                            ), # das kann "null" sein -> gibt das ein Problem?
+                            "totalbetrag": order_data.get("total_cart"),
+                            "bestellung_nr": order_data.get("order_number"),
+                        },
+                    }
+                    self.artikel_json = json.dumps(data_dict, indent=2)
+
+                # --- Kundendaten ---
+                if cint(not self.kundendaten_geladen) == 1:
+                    billing_contact = order_data.get("billing_address") if isinstance(order_data.get("billing_address"), dict) else {} # if empty they come as lists -> [] else as dict
+                    shipping_contact = order_data.get("shipping_address") if isinstance(order_data.get("shipping_address"), dict) else {}
+
+                    payrexx_data = order_data.get("payrexx_data") or {}
+                    payrexx_contact = payrexx_data.get("contact", {}) if isinstance(payrexx_data, dict) else {}
+
+
+                    self.vorname = billing_contact.get("firstname") or None
+                    self.nachname = billing_contact.get("lastname") or None
+                    self.email = billing_contact.get("email")
+                    self.plz = billing_contact.get("zip") or None
+                    self.ort = billing_contact.get("city") or None
+                    self.strasse, self.strassen_nr = split_street_and_number(billing_contact.get("address"))
+                    self.tel_m = payrexx_contact.get("phone") or None
+                    self.tel_p = None
+                    self.postfach = billing_contact.get("po_box") or None
+                    self.anrede = payrexx_contact.get("title") or None  # salutation can only appear in payrexx data
+                    self.firma = billing_contact.get("company") or None
+
+                    # Mitgliedschaft (from new "member_id" or "member_nr")
+                    member_id = order_data.get("member_id")
+                    member_nr = order_data.get("member_nr")
+                    if member_id:
+                        self.mv_mitgliedschaft = member_id
+                    elif member_nr:
+                        self.mv_mitgliedschaft = get_mitglied_id_from_nr(member_nr)
+
+                    # Faktura Kunde
+                    if self.mv_mitgliedschaft:
+                        faktura_kunden = frappe.db.sql(
+                            """SELECT `name` FROM `tabKunden` 
+                            WHERE `mv_mitgliedschaft` = '{0}'"""
+                            .format(self.mv_mitgliedschaft),
+                            as_dict=True,
+                        )
+                        if len(faktura_kunden) == 1:
+                            self.faktura_kunde = faktura_kunden[0].name
+
+                        mitgl = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
+                        self.adressblock = get_adressblock(mitgl)
+                        self.rg_adressblock = get_rg_adressblock(mitgl)
+
+                    self.kundendaten_geladen = 1
+
+            except Exception as err:
+                frappe.log_error(
+                    "{0}\n{1}".format(err, frappe.utils.get_traceback()),
+                    "Webshop Order V2; Validation Failed",
+                )
+
     def create_faktura_kunde(self):
         kunde = frappe.get_doc({
             "doctype":"Kunden",
@@ -248,3 +340,21 @@ def raise_xxx(code, title, message, daten=None, error_log_title='SP API Error!')
             "message": "{message}".format(message=message)
         }
     }]
+
+def split_street_and_number(address: str):
+    """
+    Splits an address string into street name and house number.
+    Example: 'Oberdorfstrasse 15a' -> ('Oberdorfstrasse', '15a')
+    """
+    if not address:
+        return None, None
+
+    # Match "street name" + "house number" at end
+    match = re.match(r'^(.*?)[,\s]+(\d+\s?[a-zA-Z]?)$', address.strip())
+    if match:
+        street = match.group(1).strip()
+        number = match.group(2).strip()
+        return street, number
+
+    # Fallback: whole string as street, no number
+    return address.strip(), None
