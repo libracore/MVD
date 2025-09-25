@@ -18,15 +18,28 @@
   "vorname",
   "nachname",
   "firma",
+  "adress_zusatz",
+  "postfach",
   "tel_m",
   "tel_p",
   "email",
   "cb_2",
   "strasse",
   "strassen_nr",
-  "postfach",
   "plz",
   "ort",
+  "rechnungsadresse_section",
+  "abweichende_rechnungsadresse",
+  "rg_vorname",
+  "rg_nachname",
+  "rg_firma",
+  "rg_adress_zusatz",
+  "rg_postfach",
+  "cb_3_column",
+  "rg_strasse",
+  "rg_strassen_nr",
+  "rg_plz",
+  "rg_ort",
   "kundendaten_geladen",
   "section_api_data",
   "request",
@@ -86,6 +99,7 @@
   {
    "fieldname": "anrede",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Anrede"
   },
   {
@@ -111,6 +125,7 @@
   {
    "fieldname": "tel_p",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Tel. P"
   },
   {
@@ -213,11 +228,77 @@
    "default": "0",
    "fieldname": "v2",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Webshop API V2"
+  },
+  {
+   "fieldname": "adress_zusatz",
+   "fieldtype": "Data",
+   "label": "Adresszusatz"
+  },
+  {
+   "fieldname": "rg_vorname",
+   "fieldtype": "Data",
+   "label": "Vorname (Rechnung)"
+  },
+  {
+   "fieldname": "rg_nachname",
+   "fieldtype": "Data",
+   "label": "Nachname (Rechnung)"
+  },
+  {
+   "fieldname": "rg_firma",
+   "fieldtype": "Data",
+   "label": "Firma (Rechnung)"
+  },
+  {
+   "fieldname": "rg_strasse",
+   "fieldtype": "Data",
+   "label": "Strasse (Rechnung)"
+  },
+  {
+   "fieldname": "rg_strassen_nr",
+   "fieldtype": "Data",
+   "label": "Nr. (Rechnung)"
+  },
+  {
+   "fieldname": "rg_plz",
+   "fieldtype": "Data",
+   "label": "PLZ (Rechnung)"
+  },
+  {
+   "fieldname": "rg_ort",
+   "fieldtype": "Data",
+   "label": "Ort (Rechnung)"
+  },
+  {
+   "fieldname": "rg_postfach",
+   "fieldtype": "Data",
+   "label": "Postfach (Rechnung)"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.abweichende_rechnungsadresse=='1'",
+   "fieldname": "rechnungsadresse_section",
+   "fieldtype": "Section Break",
+   "label": "Rechnungsadresse"
+  },
+  {
+   "fieldname": "cb_3_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rg_adress_zusatz",
+   "fieldtype": "Data",
+   "label": "Adresszusatz (Rechnung)"
+  },
+  {
+   "default": "0",
+   "fieldname": "abweichende_rechnungsadresse",
+   "fieldtype": "Check",
+   "label": "Abweichende Rechnungsadresse"
   }
  ],
- "modified": "2025-09-04 12:24:54.300346",
+ "modified": "2025-09-25 17:02:55.890443",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Webshop Order",

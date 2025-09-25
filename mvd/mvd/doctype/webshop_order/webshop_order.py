@@ -135,18 +135,46 @@ class WebshopOrder(Document):
                     payrexx_data = order_data.get("payrexx_data") or {}
                     payrexx_contact = payrexx_data.get("contact", {}) if isinstance(payrexx_data, dict) else {}
 
+                    # falsche Logik im Webshop weswegen wir bei Übereinstimmung die Rechnungsadresse in unsere Lieferadresse schreiben
+                    if order_data.get("abweichende_lieferadresse") == "false":
+                        self.vorname = billing_contact.get("firstname") or None
+                        self.nachname = billing_contact.get("lastname") or None
+                        self.email = billing_contact.get("email")
+                        self.plz = billing_contact.get("zip") or None
+                        self.ort = billing_contact.get("city") or None
+                        self.strasse, self.strassen_nr = split_street_and_number(billing_contact.get("address") or "")
+                        self.tel_m = payrexx_contact.get("phone") or None
+                        self.tel_p = None # veraltet brauchen wir in Zukunft nicht mehr
+                        self.adress_zusatz = billing_contact.get("addition") or None
+                        self.postfach = billing_contact.get("po_box") or None
+                        self.anrede = None  # salutation can only appear in payrexx data
+                        self.firma = billing_contact.get("company") or None  
+                        self.abweichende_rechnungsadresse = 0
 
-                    self.vorname = billing_contact.get("firstname") or None
-                    self.nachname = billing_contact.get("lastname") or None
-                    self.email = billing_contact.get("email")
-                    self.plz = billing_contact.get("zip") or None
-                    self.ort = billing_contact.get("city") or None
-                    self.strasse, self.strassen_nr = split_street_and_number(billing_contact.get("address"))
-                    self.tel_m = payrexx_contact.get("phone") or None
-                    self.tel_p = None
-                    self.postfach = billing_contact.get("po_box") or None
-                    self.anrede = payrexx_contact.get("title") or None  # salutation can only appear in payrexx data
-                    self.firma = billing_contact.get("company") or None
+                    if order_data.get("abweichende_lieferadresse") == "true":
+                        # Lieferadresse
+                        self.vorname = shipping_contact.get("firstname") or None
+                        self.nachname = shipping_contact.get("lastname") or None
+                        self.email = shipping_contact.get("email")
+                        self.plz = shipping_contact.get("zip") or None
+                        self.ort = shipping_contact.get("city") or None
+                        self.strasse, self.strassen_nr = split_street_and_number(shipping_contact.get("address") or "")
+                        self.tel_m = payrexx_contact.get("phone") or None
+                        self.tel_p = None # veraltet brauchen wir in Zukunft nicht mehr
+                        self.adress_zusatz = shipping_contact.get("addition") or None
+                        self.postfach = shipping_contact.get("po_box") or None
+                        self.anrede = None  # salutation can only appear in payrexx data
+                        self.firma = shipping_contact.get("company") or None
+                        self.abweichende_rechnungsadresse = 1
+                        # Rechnungsadresse falls vorhanden
+                        self.rg_vorname = billing_contact.get("firstname") or None
+                        self.rg_nachname = billing_contact.get("lastname") or None
+                        self.rg_plz = billing_contact.get("zip") or None
+                        self.rg_ort = billing_contact.get("city") or None
+                        self.rg_strasse, self.rg_strassen_nr = split_street_and_number(billing_contact.get("address") or "")
+                        self.rg_adress_zusatz = billing_contact.get("addition") or None
+                        self.rg_postfach = billing_contact.get("po_box") or None
+                        self.rg_firma = billing_contact.get("company") or None
 
                     # Mitgliedschaft (from new "member_id" or "member_nr")
                     member_id = order_data.get("member_id")
@@ -190,13 +218,13 @@ class WebshopOrder(Document):
             'vorname': self.vorname,
             'nachname': self.nachname,
             'firma': self.firma,
-            'zusatz_firma': None,
+            'zusatz_firma': self.rg_firma if self.rg_firma else None,
             'tel_p': self.tel_p,
             'tel_m': self.tel_m,
             'tel_g': None,
             'e_mail': self.email,
             'strasse': self.strasse,
-            'zusatz_adresse':None,
+            'zusatz_adresse': self.adress_zusatz if self.adress_zusatz else None,
             'nummer': self.strassen_nr,
             'nummer_zu': None,
             'plz': self.plz,
@@ -204,15 +232,17 @@ class WebshopOrder(Document):
             'postfach': 1 if self.postfach else 0,
             'land': 'Schweiz',
             'postfach_nummer': self.postfach if self.postfach else None,
-            'abweichende_rechnungsadresse': 0,
-            'rg_zusatz_adresse': None,
-            'rg_strasse': None,
-            'rg_nummer': None,
+            'abweichende_rechnungsadresse': self.abweichende_rechnungsadresse,
+            'rg_vorname': self.rg_vorname if self.rg_vorname else None,
+            'rg_vorname': self.rg_nachname if self.rg_nachname else None,
+            'rg_zusatz_adresse': self.rg_adress_zusatz if self.rg_adress_zusatz else None,
+            'rg_strasse': self.rg_strasse if self.rg_strasse else None,
+            'rg_nummer': self.rg_strassen_nr if self.rg_strassen_nr else None,
             'rg_nummer_zu': None,
             'rg_postfach': None,
-            'rg_postfach_nummer': None,
-            'rg_plz': None,
-            'rg_ort': None,
+            'rg_postfach_nummer': self.rg_postfach if self.rg_postfach else None,
+            'rg_plz': self.plz if self.plz else None,
+            'rg_ort': self.ort if self.ort else None,
             'rg_land': None,
             'daten_aus_mitgliedschaft': 0
         }).insert(ignore_permissions=True)
@@ -233,27 +263,28 @@ class WebshopOrder(Document):
         kunde.vorname = self.vorname
         kunde.nachname = self.nachname
         kunde.firma = self.firma
-        kunde.zusatz_firma = None
+        kunde.zusatz_firma = self.rg_firma if self.rg_firma else None
         kunde.tel_p = self.tel_p
         kunde.tel_m = self.tel_m
         kunde.tel_g = None
         kunde.e_mail = self.email
         kunde.strasse = self.strasse
-        kunde.zusatz_adresse = None
+        kunde.zusatz_adresse = self.adress_zusatz if self.adress_zusatz else None
         kunde.nummer = self.strassen_nr
         kunde.nummer_zu = None
-        kunde.plz = self.plz
-        kunde.ort = self.ort
+        kunde.plz = self.plz if self.plz else None
+        kunde.ort = self.ort if self.ort else None
         kunde.postfach = 1 if self.postfach else 0
         kunde.land = 'Schweiz'
         kunde.postfach_nummer = self.postfach if self.postfach else None
-        kunde.abweichende_rechnungsadresse = 0
-        kunde.rg_zusatz_adresse = None
-        kunde.rg_strasse = None
-        kunde.rg_nummer = None
+        kunde.abweichende_rechnungsadresse = self.abweichende_rechnungsadresse
+        kunde.rg_vorname if self.rg_vorname else None
+        kunde.rg_zusatz_adresse = self.rg_adress_zusatz if self.rg_adress_zusatz else None
+        kunde.rg_strasse = self.rg_strasse if self.rg_strasse else None
+        kunde.rg_nummer = self.rg_strassen_nr if self.rg_strassen_nr else None
         kunde.rg_nummer_zu = None
         kunde.rg_postfach = None
-        kunde.rg_postfach_nummer = None
+        kunde.rg_postfach_nummer = self.rg_postfach if self.rg_postfach else None
         kunde.rg_plz = None
         kunde.rg_ort = None
         kunde.rg_land = None
