@@ -232,7 +232,7 @@ class WebshopOrder(Document):
             'postfach': 1 if self.postfach else 0,
             'land': 'Schweiz',
             'postfach_nummer': self.postfach if self.postfach else None,
-            'abweichende_rechnungsadresse': self.abweichende_rechnungsadresse,
+            'abweichende_rechnungsadresse': self.abweichende_rechnungsadresse if self.abweichende_rechnungsadresse else 0,
             'rg_vorname': self.rg_vorname if self.rg_vorname else None,
             'rg_vorname': self.rg_nachname if self.rg_nachname else None,
             'rg_zusatz_adresse': self.rg_adress_zusatz if self.rg_adress_zusatz else None,
@@ -277,7 +277,7 @@ class WebshopOrder(Document):
         kunde.postfach = 1 if self.postfach else 0
         kunde.land = 'Schweiz'
         kunde.postfach_nummer = self.postfach if self.postfach else None
-        kunde.abweichende_rechnungsadresse = self.abweichende_rechnungsadresse
+        kunde.abweichende_rechnungsadresse = self.abweichende_rechnungsadresse if self.abweichende_rechnungsadresse else 0
         kunde.rg_vorname if self.rg_vorname else None
         kunde.rg_zusatz_adresse = self.rg_adress_zusatz if self.rg_adress_zusatz else None
         kunde.rg_strasse = self.rg_strasse if self.rg_strasse else None
