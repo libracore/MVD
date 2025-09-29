@@ -986,7 +986,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
         new_mitgliedschaft.rg_strasse = str(rechnung["strasse"]) if rechnung["strasse"] else 'Postfach' if rechnung["postfach"] else ''
         new_mitgliedschaft.rg_nummer = str(rechnung["hausnummer"]) if rechnung["hausnummer"] else ''
         new_mitgliedschaft.rg_nummer_zu = str(rechnung["hausnummerZusatz"]) if rechnung["hausnummerZusatz"] else ''
-        new_mitgliedschaft.rg_postfach = 1 if rechnung["postfach"] else '0'
+        new_mitgliedschaft.rg_postfach = 1 if rechnung["postfach"] else 0
         new_mitgliedschaft.rg_postfach_nummer = str(rechnung["postfachNummer"]) if rechnung["postfachNummer"] else ''
         new_mitgliedschaft.rg_plz = str(rechnung["postleitzahl"]) if rechnung["postleitzahl"] else ''
         new_mitgliedschaft.rg_ort = str(rechnung["ort"]) if rechnung["ort"] else ''
