@@ -922,7 +922,7 @@ def adressen_und_kontakt_handling(new_mitgliedschaft, kwargs):
                 new_mitgliedschaft.strasse = str(mitglied["strasse"]) if mitglied["strasse"] else ''
                 new_mitgliedschaft.nummer = str(mitglied["hausnummer"]) if mitglied["hausnummer"] else ''
                 new_mitgliedschaft.nummer_zu = str(mitglied["hausnummerZusatz"]) if mitglied["hausnummerZusatz"] else ''
-                new_mitgliedschaft.postfach = 1 if mitglied["postfach"] else '0'
+                new_mitgliedschaft.postfach = 1 if mitglied["postfach"] else 0
                 new_mitgliedschaft.postfach_nummer = str(mitglied["postfachNummer"]) if mitglied["postfachNummer"] else ''
                 new_mitgliedschaft.plz = str(mitglied["postleitzahl"]) if mitglied["postleitzahl"] else ''
                 new_mitgliedschaft.ort = str(mitglied["ort"]) if mitglied["ort"] else ''
