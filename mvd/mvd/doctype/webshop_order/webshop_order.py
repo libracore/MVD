@@ -10,6 +10,7 @@ from frappe.utils import cint
 from frappe.utils.data import today, add_days
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr, get_adressblock, get_rg_adressblock
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
+import re
 
 class WebshopOrder(Document):
     def validate(self):
@@ -86,7 +87,126 @@ class WebshopOrder(Document):
                     self.kundendaten_geladen = 1
             except Exception as err:
                 frappe.log_error("{0}\n{1}".format(err, frappe.utils.get_traceback()), 'Webshop Order; Validation Failed')
-    
+
+        elif self.v2 == 1:
+            try:
+                order_data = json.loads(self.request)
+
+                # --- Payment ID ---
+                if not self.online_payment_id:
+                    if "transaction_uuid" in order_data:
+                        self.online_payment_id = order_data["transaction_uuid"]
+
+                # --- Artikel / Items ---
+                if not self.artikel_json and "items" in order_data:
+                    items = []
+                    for idx, it in enumerate(order_data["items"], start=1):
+                        item = {
+                            "item": it.get("item_code"),
+                            "typ": None, # es werden aber andere Infos geschickt ->it.get("title"),
+                            "qty": cint(it.get("quantity", 0)),
+                            "amount": float(it.get("itemTotalPrice", 0)),
+                            "mwst": 0,  # wird auch nicht gesendet v2 payload
+                            "item_index": str(idx),
+                        }
+                        items.append(item)
+
+                    data_dict = {
+                        "items": items,
+                        "details": {
+                            "versandkosten": (
+                                order_data.get("payrexx_data", {})
+                                        .get("invoice", {})
+                                        .get("shippingAmount", 0)
+                                if isinstance(order_data.get("payrexx_data"), dict)
+                                else 0
+                            ), # das kann "null" sein -> gibt das ein Problem?
+                            "totalbetrag": order_data.get("total_cart"),
+                            "bestellung_nr": order_data.get("order_number"),
+                        },
+                    }
+                    self.artikel_json = json.dumps(data_dict, indent=2)
+
+                # --- Kundendaten ---
+                if cint(not self.kundendaten_geladen) == 1:
+                    billing_contact = order_data.get("billing_address") if isinstance(order_data.get("billing_address"), dict) else {} # if empty they come as lists -> [] else as dict
+                    shipping_contact = order_data.get("shipping_address") if isinstance(order_data.get("shipping_address"), dict) else {}
+
+                    payrexx_data = order_data.get("payrexx_data") or {}
+                    payrexx_contact = payrexx_data.get("contact", {}) if isinstance(payrexx_data, dict) else {}
+
+                    # falsche Logik im Webshop weswegen wir bei Übereinstimmung die Rechnungsadresse in unsere Lieferadresse schreiben
+                    if order_data.get("abweichende_lieferadresse") == "false":
+                        self.vorname = billing_contact.get("firstname") or None
+                        self.nachname = billing_contact.get("lastname") or None
+                        self.email = billing_contact.get("email")
+                        self.plz = billing_contact.get("zip") or None
+                        self.ort = billing_contact.get("city") or None
+                        self.strasse, self.strassen_nr = split_street_and_number(billing_contact.get("address") or "")
+                        self.tel_m = payrexx_contact.get("phone") or None
+                        self.tel_p = None # veraltet brauchen wir in Zukunft nicht mehr
+                        self.adress_zusatz = billing_contact.get("addition") or None
+                        self.postfach = billing_contact.get("po_box") or None
+                        self.anrede = None  # salutation can only appear in payrexx data
+                        self.firma = billing_contact.get("company") or None  
+                        self.abweichende_rechnungsadresse = 0
+
+                    if order_data.get("abweichende_lieferadresse") == "true":
+                        # Lieferadresse
+                        self.vorname = shipping_contact.get("firstname") or None
+                        self.nachname = shipping_contact.get("lastname") or None
+                        self.email = shipping_contact.get("email")
+                        self.plz = shipping_contact.get("zip") or None
+                        self.ort = shipping_contact.get("city") or None
+                        self.strasse, self.strassen_nr = split_street_and_number(shipping_contact.get("address") or "")
+                        self.tel_m = payrexx_contact.get("phone") or None
+                        self.tel_p = None # veraltet brauchen wir in Zukunft nicht mehr
+                        self.adress_zusatz = shipping_contact.get("addition") or None
+                        self.postfach = shipping_contact.get("po_box") or None
+                        self.anrede = None  # salutation can only appear in payrexx data
+                        self.firma = shipping_contact.get("company") or None
+                        self.abweichende_rechnungsadresse = 1
+                        # Rechnungsadresse falls vorhanden
+                        self.rg_vorname = billing_contact.get("firstname") or None
+                        self.rg_nachname = billing_contact.get("lastname") or None
+                        self.rg_plz = billing_contact.get("zip") or None
+                        self.rg_ort = billing_contact.get("city") or None
+                        self.rg_strasse, self.rg_strassen_nr = split_street_and_number(billing_contact.get("address") or "")
+                        self.rg_adress_zusatz = billing_contact.get("addition") or None
+                        self.rg_postfach = billing_contact.get("po_box") or None
+                        self.rg_firma = billing_contact.get("company") or None
+
+                    # Mitgliedschaft (from new "member_id" or "member_nr")
+                    member_id = order_data.get("member_id")
+                    member_nr = order_data.get("member_nr")
+                    if member_id:
+                        self.mv_mitgliedschaft = member_id
+                    elif member_nr:
+                        self.mv_mitgliedschaft = get_mitglied_id_from_nr(member_nr)
+
+                    # Faktura Kunde
+                    if self.mv_mitgliedschaft:
+                        faktura_kunden = frappe.db.sql(
+                            """SELECT `name` FROM `tabKunden` 
+                            WHERE `mv_mitgliedschaft` = '{0}'"""
+                            .format(self.mv_mitgliedschaft),
+                            as_dict=True,
+                        )
+                        if len(faktura_kunden) == 1:
+                            self.faktura_kunde = faktura_kunden[0].name
+
+                        mitgl = frappe.get_doc("Mitgliedschaft", self.mv_mitgliedschaft)
+                        self.adressblock = get_adressblock(mitgl)
+                        self.rg_adressblock = get_rg_adressblock(mitgl)
+
+                    self.kundendaten_geladen = 1
+
+            except Exception as err:
+                frappe.log_error(
+                    "{0}\n{1}".format(err, frappe.utils.get_traceback()),
+                    "Webshop Order V2; Validation Failed",
+                )
+
     def create_faktura_kunde(self):
         kunde = frappe.get_doc({
             "doctype":"Kunden",
@@ -98,13 +218,13 @@ class WebshopOrder(Document):
             'vorname': self.vorname,
             'nachname': self.nachname,
             'firma': self.firma,
-            'zusatz_firma': None,
+            'zusatz_firma': self.rg_firma if self.rg_firma else None,
             'tel_p': self.tel_p,
             'tel_m': self.tel_m,
             'tel_g': None,
             'e_mail': self.email,
             'strasse': self.strasse,
-            'zusatz_adresse':None,
+            'zusatz_adresse': self.adress_zusatz if self.adress_zusatz else None,
             'nummer': self.strassen_nr,
             'nummer_zu': None,
             'plz': self.plz,
@@ -112,15 +232,17 @@ class WebshopOrder(Document):
             'postfach': 1 if self.postfach else 0,
             'land': 'Schweiz',
             'postfach_nummer': self.postfach if self.postfach else None,
-            'abweichende_rechnungsadresse': 0,
-            'rg_zusatz_adresse': None,
-            'rg_strasse': None,
-            'rg_nummer': None,
+            'abweichende_rechnungsadresse': self.abweichende_rechnungsadresse if self.abweichende_rechnungsadresse else 0,
+            'rg_vorname': self.rg_vorname if self.rg_vorname else None,
+            'rg_vorname': self.rg_nachname if self.rg_nachname else None,
+            'rg_zusatz_adresse': self.rg_adress_zusatz if self.rg_adress_zusatz else None,
+            'rg_strasse': self.rg_strasse if self.rg_strasse else None,
+            'rg_nummer': self.rg_strassen_nr if self.rg_strassen_nr else None,
             'rg_nummer_zu': None,
             'rg_postfach': None,
-            'rg_postfach_nummer': None,
-            'rg_plz': None,
-            'rg_ort': None,
+            'rg_postfach_nummer': self.rg_postfach if self.rg_postfach else None,
+            'rg_plz': self.plz if self.plz else None,
+            'rg_ort': self.ort if self.ort else None,
             'rg_land': None,
             'daten_aus_mitgliedschaft': 0
         }).insert(ignore_permissions=True)
@@ -141,27 +263,28 @@ class WebshopOrder(Document):
         kunde.vorname = self.vorname
         kunde.nachname = self.nachname
         kunde.firma = self.firma
-        kunde.zusatz_firma = None
+        kunde.zusatz_firma = self.rg_firma if self.rg_firma else None
         kunde.tel_p = self.tel_p
         kunde.tel_m = self.tel_m
         kunde.tel_g = None
         kunde.e_mail = self.email
         kunde.strasse = self.strasse
-        kunde.zusatz_adresse = None
+        kunde.zusatz_adresse = self.adress_zusatz if self.adress_zusatz else None
         kunde.nummer = self.strassen_nr
         kunde.nummer_zu = None
-        kunde.plz = self.plz
-        kunde.ort = self.ort
+        kunde.plz = self.plz if self.plz else None
+        kunde.ort = self.ort if self.ort else None
         kunde.postfach = 1 if self.postfach else 0
         kunde.land = 'Schweiz'
         kunde.postfach_nummer = self.postfach if self.postfach else None
-        kunde.abweichende_rechnungsadresse = 0
-        kunde.rg_zusatz_adresse = None
-        kunde.rg_strasse = None
-        kunde.rg_nummer = None
+        kunde.abweichende_rechnungsadresse = self.abweichende_rechnungsadresse if self.abweichende_rechnungsadresse else 0
+        kunde.rg_vorname if self.rg_vorname else None
+        kunde.rg_zusatz_adresse = self.rg_adress_zusatz if self.rg_adress_zusatz else None
+        kunde.rg_strasse = self.rg_strasse if self.rg_strasse else None
+        kunde.rg_nummer = self.rg_strassen_nr if self.rg_strassen_nr else None
         kunde.rg_nummer_zu = None
         kunde.rg_postfach = None
-        kunde.rg_postfach_nummer = None
+        kunde.rg_postfach_nummer = self.rg_postfach if self.rg_postfach else None
         kunde.rg_plz = None
         kunde.rg_ort = None
         kunde.rg_land = None
@@ -248,3 +371,21 @@ def raise_xxx(code, title, message, daten=None, error_log_title='SP API Error!')
             "message": "{message}".format(message=message)
         }
     }]
+
+def split_street_and_number(address: str):
+    """
+    Splits an address string into street name and house number.
+    Example: 'Oberdorfstrasse 15a' -> ('Oberdorfstrasse', '15a')
+    """
+    if not address:
+        return None, None
+
+    # Match "street name" + "house number" at end
+    match = re.match(r'^(.*?)[,\s]+(\d+\s?[a-zA-Z]?)$', address.strip())
+    if match:
+        street = match.group(1).strip()
+        number = match.group(2).strip()
+        return street, number
+
+    # Fallback: whole string as street, no number
+    return address.strip(), None
