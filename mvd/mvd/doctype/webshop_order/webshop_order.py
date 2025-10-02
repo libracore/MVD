@@ -8,6 +8,8 @@ from frappe.model.document import Document
 import json
 from frappe.utils import cint
 from frappe.utils.data import today, add_days
+from frappe import sendmail
+from frappe.core.doctype.communication.email import make
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr, get_adressblock, get_rg_adressblock
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 import re
@@ -337,6 +339,10 @@ class WebshopOrder(Document):
         
         self.sinv = sinv.name
         self.save()
+
+        # --- send confirmation email ---
+        send_invoice_confirmation_email(self.email, sinv.name)
+
         return sinv.name
 
 
@@ -389,3 +395,43 @@ def split_street_and_number(address: str):
 
     # Fallback: whole string as street, no number
     return address.strip(), None
+
+def send_invoice_confirmation_email(email, sinv_name):
+    if not email:
+        return
+
+    try:
+        subject = f"Bestätigung Ihrer Bestellung"
+
+        # Render print format of Sales Invoice
+        message = frappe.get_print(
+            "Sales Invoice", sinv_name, print_format="Webshop Bestätigungs-Email"
+        )
+
+        # Create Communication
+        comm = make(
+            recipients=[email],
+            sender=frappe.get_value("Email Account", {"default_outgoing": 1}, "email_id"),
+            subject=subject,
+            content=message,
+            doctype="Sales Invoice",
+            name=sinv_name,
+            send_email=False
+        )["name"]
+
+        # Queue the email
+        sendmail(
+            recipients=[email],
+            subject=subject,
+            message=message,
+            delayed=True,
+            reference_doctype="Sales Invoice",
+            reference_name=sinv_name,
+            communication=comm
+        )
+
+    except Exception as err:
+        frappe.log_error(
+            "{0}\n\n{1}".format(err, frappe.utils.get_traceback()),
+            f"Sales Invoice Confirmation Email Error ({sinv_name})"
+        )
