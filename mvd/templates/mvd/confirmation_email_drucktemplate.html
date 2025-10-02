@@ -37,7 +37,7 @@
     
     <div style="display: flex; justify-content: space-between; margin-bottom: 1em;">
 
-        <!-- Billing / Customer Address -->
+<!--         
         <div style="width: 48%;">
             <p><b>{% if print_language == 'fr' %}Adresse de facturation{% else %}Rechnungsadresse{% endif %}:</b><br>
                 {{ doc.customer_name }}<br>
@@ -50,7 +50,6 @@
             </p>
         </div>
 
-        <!-- Shipping Address -->
         {% if doc.shipping_address %}
         <div style="width: 48%;">
             <p><b>{% if print_language == 'fr' %}Adresse de livraison{% else %}Lieferadresse{% endif %}:</b><br>
@@ -59,7 +58,7 @@
                 {{ doc.shipping_address.country or '' }}
             </p>
         </div>
-        {% endif %}
+        {% endif %} -->
 
     </div>
     <!-- Items Table -->
