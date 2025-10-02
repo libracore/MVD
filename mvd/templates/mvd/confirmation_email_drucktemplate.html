@@ -1,0 +1,76 @@
+{% if doc.druckvorlage %}
+    {% set druckvorlage = frappe.get_doc("Druckvorlage", doc.druckvorlage) %}
+    {% set print_language = druckvorlage.language or 'de' %}
+
+    {% if doc.mv_mitgliedschaft %}
+        {% set mitgliedschaft = frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft) %}
+    {% else %}
+        {% set mitgliedschaft = None %}
+    {% endif %}
+
+    <!-- Header / Logo -->
+    <div style="text-align:left; margin-bottom:50px;">
+        <img src="/assets/mvd/img/mvs_nationales_logo.png" style="width:250px;">
+    </div>
+
+    <!-- Greeting -->
+    <p> Guten Tag 
+        {% if mitgliedschaft %}
+            {{ mitgliedschaft.rg_briefanrede }},
+        {% else %}
+            {{ doc.customer_name }},
+        {% endif %}
+    </p>
+
+    <!-- Intro -->
+    <p>
+        {% if print_language == 'fr' %}
+            Nous vous confirmons la réception de votre commande.
+        {% else %}
+            Wir bestätigen den Eingang Ihrer Bestellung.
+        {% endif %}
+    </p>
+
+    <!-- Order Details -->
+    <h2>{% if print_language == 'fr' %}Détails de la commande{% else %}Bestelldetails{% endif %}</h2>
+    <p><b>{% if print_language == 'fr' %}Date{% else %}Datum{% endif %}:</b> {{ frappe.utils.get_datetime(doc.creation).strftime('%d.%m.%Y') }}</p>
+    
+    <div style="display: flex; justify-content: space-between; margin-bottom: 1em;">
+
+        <!-- Billing / Customer Address -->
+        <div style="width: 48%;">
+            <p><b>{% if print_language == 'fr' %}Adresse de facturation{% else %}Rechnungsadresse{% endif %}:</b><br>
+                {{ doc.customer_name }}<br>
+                {% if doc.customer_address %}
+                    {% set addr = frappe.get_doc("Address", doc.customer_address) %}
+                    {{ addr.address_line1 }}<br>
+                    {{ addr.plz }} {{ addr.city }}<br>
+                    {{ addr.country }}
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Shipping Address -->
+        {% if doc.shipping_address %}
+        <div style="width: 48%;">
+            <p><b>{% if print_language == 'fr' %}Adresse de livraison{% else %}Lieferadresse{% endif %}:</b><br>
+                {{ doc.shipping_address.address_line1 or doc.shipping_address }}<br>
+                {{ doc.shipping_address.plz or '' }} {{ doc.shipping_address.city or '' }}<br>
+                {{ doc.shipping_address.country or '' }}
+            </p>
+        </div>
+        {% endif %}
+
+    </div>
+    <!-- Items Table -->
+    {{ get_item_table(doc)|safe }}
+
+<!--     {% if doc.druckvorlage == 'MVD Rechnung-MVD'%}
+        <div>Zahlbar innert 30 Tagen. Danke für Ihre Bestellung!</div>
+    {% elif doc.druckvorlage == 'MVD Lieferschein-MVD'%}
+        <div>Bereits bezahlt, vielen Dank für Ihre Bestellung.</div>
+    {% endif %} -->
+
+{% else %}
+    <p>Das Dokument {{ doc.name }} besitzt keine Druckvorlage!</p>
+{% endif %}
