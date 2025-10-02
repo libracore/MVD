@@ -341,7 +341,9 @@ class WebshopOrder(Document):
         self.save()
 
         # --- send confirmation email ---
-        send_invoice_confirmation_email(self.email, sinv.name)
+        # only for new api for the moment
+        if self.v2 == 1:
+            send_invoice_confirmation_email(self.email, sinv.name)
 
         return sinv.name
 
