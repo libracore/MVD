@@ -155,7 +155,7 @@ class WebshopOrder(Document):
                         # Lieferadresse
                         self.vorname = shipping_contact.get("firstname") or None
                         self.nachname = shipping_contact.get("lastname") or None
-                        self.email = shipping_contact.get("email")
+                        self.email = billing_contact.get("email")
                         self.plz = shipping_contact.get("zip") or None
                         self.ort = shipping_contact.get("city") or None
                         self.strasse, self.strassen_nr = split_street_and_number(shipping_contact.get("address") or "")
