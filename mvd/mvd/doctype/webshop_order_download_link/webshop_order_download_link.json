@@ -1,0 +1,67 @@
+{
+ "autoname": "field:item",
+ "creation": "2025-10-06 10:31:10.161204",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "item_code",
+  "download_hash",
+  "download_link",
+  "file"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "unique": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "download_hash",
+   "fieldtype": "Data",
+   "label": "Download Hash"
+  },
+  {
+   "fieldname": "download_link",
+   "fieldtype": "Data",
+   "label": "Download Link"
+  },
+  {
+   "fieldname": "file",
+   "fieldtype": "Link",
+   "label": "File",
+   "options": "File"
+  }
+ ],
+ "modified": "2025-10-06 11:07:24.509349",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Webshop Order Download Link",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
