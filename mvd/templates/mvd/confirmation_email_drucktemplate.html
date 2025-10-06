@@ -23,7 +23,7 @@
     <h2>Bestelldetails</h2>
     <p><b>Datum:</b> {{ frappe.utils.get_datetime(doc.creation).strftime('%d.%m.%Y') }}</p>
     {% if webshop_order %}
-    <div style="display: flex; justify-content: space-between; margin-bottom: 1em;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
 
         {% if webshop_order.abweichende_rechnungsadresse %}
         <div style="width: 48%;">
@@ -81,7 +81,7 @@
     </div>
     {% endif %}
     <!-- Items Table -->
-    {{ get_item_table(doc)|safe }}
+    {{ create_item_table_with_download_link(doc) }}
 
 <!--     {% if doc.druckvorlage == 'MVD Rechnung-MVD'%}
         <div>Zahlbar innert 30 Tagen. Danke für Ihre Bestellung!</div>
@@ -89,6 +89,10 @@
         <div>Bereits bezahlt, vielen Dank für Ihre Bestellung.</div>
     {% endif %} -->
 
+    <p style="margin-top: 50px;">
+        Mieterinnen- und Mieterverband <br>
+        info@mieterverband.ch
+    </p>
 {% else %}
     <p>Das Dokument {{ doc.name }} besitzt keine Druckvorlage!</p>
 {% endif %}

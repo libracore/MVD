@@ -46,7 +46,7 @@ jenv = {
     "methods": [
         "get_anredekonvention:mvd.mvd.doctype.mitgliedschaft.utils.get_anredekonvention",
         "replace_mv_keywords:mvd.mvd.doctype.druckvorlage.druckvorlage.replace_mv_keywords",
-        "get_item_table:mvd.mvd.doctype.druckvorlage.druckvorlage.get_item_table",
+        "create_item_table_with_download_link:mvd.mvd.doctype.webshop_order.webshop_order.create_item_table_with_download_link",
         "get_mahnungs_qrrs:mvd.mvd.doctype.mahnung.mahnung.get_mahnungs_qrrs",
         "get_rg_adressblock:mvd.mvd.doctype.mitgliedschaft.utils.get_rg_adressblock",
         "get_last_open_sinv:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_last_open_sinv"
