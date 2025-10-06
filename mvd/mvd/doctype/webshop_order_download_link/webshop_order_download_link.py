@@ -11,7 +11,6 @@ class WebshopOrderDownloadLink(Document):
 
 @frappe.whitelist()
 def generate_download_links():
-    from frappe.utils import now
     items = frappe.get_all("Item", filters={"item_code": ["like", "%-D"]}, fields=["name", "item_code"])
     for item in items:
         # Skip if already exists
@@ -23,6 +22,6 @@ def generate_download_links():
         doc.item = item.name
         doc.item_code = item.item_code
         doc.download_hash = frappe.generate_hash("", 32)
-        doc.download_link = f"http://localhost:8001/api/method/mvd.mvd.v2.api.webshop_download?token={doc.download_hash}" # needs to be replaced
-        doc.file = "f55722c498" # neeeds to be replaced
+        doc.download_link = "{url}/api/method/mvd.mvd.v2.api.webshop_download?token={hash}".format(url=frappe.utils.get_url(), hash=doc.download_hash)
+        #doc.file = "f55722c498"
         doc.insert(ignore_permissions=True)

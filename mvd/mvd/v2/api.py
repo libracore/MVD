@@ -492,3 +492,30 @@ def upload_file_to_beratung():
 @frappe.whitelist()
 def create_order(**api_request):
     return create_order_from_api(api_request, v2=1)
+
+
+@frappe.whitelist(allow_guest=True)
+def webshop_download(token):
+    """
+    Serve a PDF download for a given token.
+    """
+    # Look up the download link record by hash
+    link = frappe.db.get_value(
+        "Webshop Order Download Link",
+        {"download_hash": token},
+        ["name", "file"],
+        as_dict=True
+    )
+
+    if not link:
+        frappe.local.response.http_status_code = 404
+        frappe.local.response.message = 'Hoppla! Dieser Download-Link ist ungültig. Bitte überprüfen Sie Ihre E-Mail für den richtigen Link oder kontaktieren Sie den Support.'
+        return
+
+    # Get the File document
+    file_doc = frappe.get_doc("File", link.file)
+
+    # Serve the file inline
+    frappe.local.response.filename = file_doc.file_name
+    frappe.local.response.filecontent = file_doc.get_content()  # get the file content
+    frappe.local.response.type = "pdf"
