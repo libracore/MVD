@@ -36,7 +36,12 @@
                     <th style="width: 50%; text-align: left;">Details</th>
                 </tr>
                 <tr>
-                    <td>{{ termin.mitglied_nr }}<br>{{ termin.adressblock }}</td>
+                    <td>{{ termin.mitglied_nr }}<br>{{ termin.adressblock }}
+                        {% if termin.abweichende_objektadresse %}
+                            <br><b>Objektadresse</b><br>{{termin.objekt_strasse}} {{termin.objekt_hausnummer}}
+                            <br>{{termin.objekt_plz}} {{termin.objekt_ort}}
+                        {% endif %}
+                    </td>
                     <td>
                         {% if termin.beratungskategorie %}{{ termin.beratungskategorie.split(" - ")[0] }}{% else %} ____{% endif %}{% if termin.beratungskategorie_2 %} {{ termin.beratungskategorie_2.split(" - ")[0] }}{% else %} ____{% endif %}{% if termin.beratungskategorie_3 %} {{ termin.beratungskategorie_3.split(" - ")[0] }}{% else %} ____{% endif %} ____<br><br>
                         Eintritt: {% if termin.eintrittsdatum %}{{ termin.eintrittsdatum }}{% else %}---{% endif %}<br>
