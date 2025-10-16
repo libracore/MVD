@@ -60,7 +60,7 @@ class WebshopOrder(Document):
                     # Kundendaten
                     self.strassen_nr = order_data['strassen_nr']
                     self.tel_m = order_data['tel_m']
-                    self.email = order_data['email']
+                    self.e_mail = order_data['email']
                     self.tel_p = order_data['tel_p'] if order_data['tel_p'] != self.tel_m else None
                     self.strasse = order_data['strasse']
                     self.vorname = order_data['vorname']
@@ -141,7 +141,7 @@ class WebshopOrder(Document):
                     if order_data.get("abweichende_lieferadresse") == "false":
                         self.vorname = billing_contact.get("firstname") or None
                         self.nachname = billing_contact.get("lastname") or None
-                        self.email = billing_contact.get("email")
+                        self.e_mail = billing_contact.get("email")
                         self.plz = billing_contact.get("zip") or None
                         self.ort = billing_contact.get("city") or None
                         self.strasse, self.strassen_nr = split_street_and_number(billing_contact.get("address") or "")
@@ -157,7 +157,7 @@ class WebshopOrder(Document):
                         # Lieferadresse
                         self.vorname = shipping_contact.get("firstname") or None
                         self.nachname = shipping_contact.get("lastname") or None
-                        self.email = billing_contact.get("email")
+                        self.e_mail = billing_contact.get("email")
                         self.plz = shipping_contact.get("zip") or None
                         self.ort = shipping_contact.get("city") or None
                         self.strasse, self.strassen_nr = split_street_and_number(shipping_contact.get("address") or "")
@@ -214,7 +214,7 @@ class WebshopOrder(Document):
         if self.v2 == 1 and not self.abweichende_rechnungsadresse:
             matching_customer = frappe.get_all(
                 "Kunden",
-                filters={"e_mail": self.email},
+                filters={"e_mail": self.e_mail},
                 fields=["name"],
             )
             if len(matching_customer) == 1:
@@ -241,7 +241,7 @@ class WebshopOrder(Document):
             'tel_p': self.tel_p,
             'tel_m': self.tel_m,
             'tel_g': None,
-            'e_mail': self.email,
+            'e_mail': self.e_mail,
             'strasse': self.strasse,
             'zusatz_adresse': self.adress_zusatz if self.adress_zusatz else None,
             'nummer': self.strassen_nr,
@@ -286,7 +286,7 @@ class WebshopOrder(Document):
         kunde.tel_p = self.tel_p
         kunde.tel_m = self.tel_m
         kunde.tel_g = None
-        kunde.e_mail = self.email
+        kunde.e_mail = self.e_mail
         kunde.strasse = self.strasse
         kunde.zusatz_adresse = self.adress_zusatz if self.adress_zusatz else None
         kunde.nummer = self.strassen_nr
@@ -360,7 +360,7 @@ class WebshopOrder(Document):
         # --- send confirmation email ---
         # only for new api for the moment
         if self.v2 == 1:
-            send_invoice_confirmation_email(self.email, sinv.name)
+            send_invoice_confirmation_email(self.e_mail, sinv.name)
 
         return sinv.name
 
@@ -415,8 +415,8 @@ def split_street_and_number(address: str):
     # Fallback: whole string as street, no number
     return address.strip(), None
 
-def send_invoice_confirmation_email(email, sinv_name):
-    if not email:
+def send_invoice_confirmation_email(e_mail, sinv_name):
+    if not e_mail:
         return
 
     try:
@@ -429,7 +429,7 @@ def send_invoice_confirmation_email(email, sinv_name):
 
         # Create Communication
         comm = make(
-            recipients=[email],
+            recipients=[e_mail],
             sender=frappe.get_value("Email Account", {"default_outgoing": 1}, "email_id"),
             subject=subject,
             content=message,
@@ -440,7 +440,7 @@ def send_invoice_confirmation_email(email, sinv_name):
 
         # Queue the email
         sendmail(
-            recipients=[email],
+            recipients=[e_mail],
             subject=subject,
             message=message,
             delayed=True,
