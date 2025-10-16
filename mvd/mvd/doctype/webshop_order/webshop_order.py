@@ -209,6 +209,23 @@ class WebshopOrder(Document):
                     "Webshop Order V2; Validation Failed",
                 )
 
+    
+    def after_insert(self):
+        if self.v2 == 1 and not self.abweichende_rechnungsadresse:
+            matching_customer = frappe.get_all(
+                "Kunden",
+                filters={"e_mail": self.email},
+                fields=["name"],
+            )
+            if len(matching_customer) == 1:
+                self.faktura_kunde = matching_customer[0].name
+                self.update_faktura_kunde()
+                self.save()
+            else:
+                self.create_faktura_kunde()
+            self.create_sinv()
+            return
+
     def create_faktura_kunde(self):
         kunde = frappe.get_doc({
             "doctype":"Kunden",
