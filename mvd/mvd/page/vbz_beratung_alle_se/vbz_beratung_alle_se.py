@@ -29,7 +29,7 @@ def get_open_data():
             'r6_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1}, limit=100, distinct=True)),
             'r7_as': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 'hat_termine': 1}, limit=100, distinct=True)),
             'r8_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Closed', 'hat_termine': 1}, limit=100, distinct=True)),
-            'r9_as': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Open', 'Zusammengeführt']], 'ungelesen': 1}, limit=100, distinct=True)),
+            'r9_as': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Open', 'Zusammengeführt', 'Termin vereinbart']], 'ungelesen': 1, 'kontaktperson': ['is', 'set']}, limit=100, distinct=True)),
             'r10_bs': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'],'_user_tags': ['like', '%MNE-MVBS%']}, limit=100, distinct=True)),
             'r11_bs': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'],'_user_tags': ['like', '%Mandat-MVBS%']}, limit=100, distinct=True)),
             'r12_bs': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'],'_user_tags': ['like', '%PHF-MVBS%']}, limit=100, distinct=True)),
