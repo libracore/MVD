@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Webshop Order Download Link", {
     refresh(frm) {
-        frm.add_custom_button("Generate Links", function() {
+        frm.add_custom_button("Generate/Update Links", function() {
             frappe.call({
                 method: "mvd.mvd.doctype.webshop_order_download_link.webshop_order_download_link.generate_download_links",
                 callback: function(r) {
