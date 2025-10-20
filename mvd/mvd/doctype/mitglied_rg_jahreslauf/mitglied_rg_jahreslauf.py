@@ -492,6 +492,7 @@ def create_pdfs(mrj):
         WHERE `sinv`.`mrj` = '{mrj}'
         AND `sinv`.`docstatus` = 1
         AND `sinv`.`status` != 'Paid'
+        AND `sinv`.`mrj_pdf_erstellt` != 1
     """.format(mrj=mrj), as_dict=True)
     frappe.db.sql("""SET SQL_BIG_SELECTS=0""")
 
@@ -517,6 +518,7 @@ def create_pdfs(mrj):
                 "attached_to_name": sinv.sinv_name
             })
             sinv_file.save(ignore_permissions=True)
+            frappe.db.set_value("Sales Invoice", sinv.sinv_name, "mrj_pdf_erstellt", 1)
 
             # erstellung Fak-Rechnungs PDF
             if sinv.fak_name:
@@ -537,6 +539,7 @@ def create_pdfs(mrj):
                     "attached_to_name": sinv.fak_name
                 })
                 fak_file.save(ignore_permissions=True)
+            frappe.db.commit()
         except frappe.exceptions.DuplicateEntryError:
             continue
         except Exception as err:
@@ -626,6 +629,7 @@ def send_mails(mrj, test=False):
         WHERE `sinv`.`mrj` = '{mrj}'
         AND `sinv`.`docstatus` = 1
         AND `sinv`.`status` != 'Paid'
+        AND `sinv`.`mrj_email_versendet` != 1
         ORDER BY `sinv`.`sektion_id` ASC
         {limit_filter}
     """.format(mrj=mrj, limit_filter=limit_filter), as_dict=True)
@@ -665,6 +669,8 @@ def send_mails(mrj, test=False):
                             subject=subject,
                             reply_to=sektion_mail_account,
                             attachments=attachments)
+            frappe.db.set_value("Sales Invoice", sinv.sinv_name, "mrj_email_versendet", 1)
+            frappe.db.commit()
         
         if aktuelle_uhrzeit > stop_time:
             # autom. stoppzeit erreicht, prozess unterbrechen
