@@ -669,8 +669,9 @@ def send_mails(mrj, test=False):
                             subject=subject,
                             reply_to=sektion_mail_account,
                             attachments=attachments)
-            frappe.db.set_value("Sales Invoice", sinv.sinv_name, "mrj_email_versendet", 1)
-            frappe.db.commit()
+            if not test:
+                frappe.db.set_value("Sales Invoice", sinv.sinv_name, "mrj_email_versendet", 1)
+                frappe.db.commit()
         
         if aktuelle_uhrzeit > stop_time:
             # autom. stoppzeit erreicht, prozess unterbrechen
