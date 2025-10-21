@@ -14,6 +14,7 @@ from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 from PyPDF2 import PdfFileWriter
 from frappe.utils.pdf import get_file_data_from_writer
+from mvd.mvd.doctype.druckvorlage.druckvorlage import replace_mv_keywords
 
 class MitgliedRGJahreslauf(Document):
     def autoname(self):
@@ -630,6 +631,7 @@ def send_mails(mrj, test=False):
         AND `sinv`.`docstatus` = 1
         AND `sinv`.`status` != 'Paid'
         AND `sinv`.`mrj_email_versendet` != 1
+        AND `sinv`.`mrj_pdf_erstellt` = 1
         ORDER BY `sinv`.`sektion_id` ASC
         {limit_filter}
     """.format(mrj=mrj, limit_filter=limit_filter), as_dict=True)
@@ -660,8 +662,10 @@ def send_mails(mrj, test=False):
         email_vorlage = sinv.druckvorlage_email
         if cint(frappe.db.get_value("Mitgliedschaft", sinv.mitglied, "digitalrechnung")) == 1:
             email_vorlage = sinv.druckvorlage_digitalrechnung
-        subject = frappe.db.get_value("Druckvorlage", email_vorlage, "e_mail_betreff")
-        message = frappe.db.get_value("Druckvorlage", email_vorlage, "e_mail_text")
+        subject_txt = frappe.db.get_value("Druckvorlage", email_vorlage, "e_mail_betreff")
+        message_txt = frappe.db.get_value("Druckvorlage", email_vorlage, "e_mail_text")
+        subject = replace_mv_keywords(subject_txt, sinv.mitglied)
+        message = replace_mv_keywords(message_txt, sinv.mitglied)
         if len(attachments) > 0 and recipient:
             frappe.sendmail(sender=sektion_mail_account,
                             recipients=[recipient],
