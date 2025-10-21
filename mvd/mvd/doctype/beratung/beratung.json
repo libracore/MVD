@@ -475,12 +475,13 @@
    "options": "Kunden"
   },
   {
+   "bold": 1,
    "fieldname": "frist",
    "fieldtype": "Date",
    "label": "Frist"
   }
  ],
- "modified": "2025-10-21 15:14:34.734599",
+ "modified": "2025-10-21 16:47:39.316381",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
