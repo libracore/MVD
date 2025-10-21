@@ -194,9 +194,12 @@
    "label": "Anzahl Test E-Mails"
   },
   {
+   "default": "no-reply@mvd.mieterverband.ch",
+   "description": "Wenn die nachfolgende Checkbox <b>nicht</b> gesetzt ist,<br>wird als Absenderadresse <b>no-reply@mvd.mieterverband.ch</b> verwendet und als Reply-To-Adresse <b>&lt;sektionsk\u00fcrzel&gt;@mvd.mieterverband.ch</b>.<br>\nAnsonsten wird als Absender- wie auch Reply-To-Adresse die Sektions-Serien-Email-Adresse verwendet.",
    "fieldname": "email_account",
    "fieldtype": "Data",
-   "label": "E-Mail Account"
+   "label": "E-Mail Account",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -205,7 +208,7 @@
    "label": "Sektionsspezifischer E-Mail Account"
   }
  ],
- "modified": "2025-09-24 08:34:30.263887",
+ "modified": "2025-10-21 11:32:58.123016",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitglied RG Jahreslauf",

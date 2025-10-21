@@ -572,11 +572,14 @@ def send_mails(mrj, test=False):
         frappe.get_doc("Mitglied RG Jahreslauf", mrj).add_comment('Comment', text='<b>E-Mail Versand</b><br>Gestartet am: {0}<br>Beendet am: {1}<br>Durchlaufszeit: {2}'.format(time_logging_start, time_logging_end, durchlaufszeit))
         return
     
-    def get_sektion_mail_account(sektion):
+    def get_sender_and_reply_to(sektion):
         if frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "use_sektion_mail_account") == 1:
-            return frappe.db.get_value("Sektion", sektion, "legacy_mail_absender_mail")
+            sektion_mail = frappe.db.get_value("Sektion", sektion, "serien_email_absender_adresse")
+            return sektion_mail, sektion_mail
         
-        return frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "email_account")
+        dummy_mail = frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "email_account")
+        reply_to = dummy_mail.replace("no-reply@", "{0}@".format(sektion.lower()))
+        return dummy_mail, reply_to
 
     def get_recipient(mitglied):
         abw_debitor = 0
@@ -638,12 +641,13 @@ def send_mails(mrj, test=False):
     frappe.db.sql("""SET SQL_BIG_SELECTS=0""")
 
     sektion = None
-    sektion_mail_account = None
+    sender = None
+    reply_to = None
     breaked_loop = False
     for sinv in sinvs:
         if sinv.sektion != sektion:
             sektion = sinv.sektion
-            sektion_mail_account = get_sektion_mail_account(sektion)
+            sender, reply_to = get_sender_and_reply_to(sektion)
     
         attachments = []
         sinv_attachment = frappe.get_all("File", fields=["name", "file_name"],
@@ -667,11 +671,11 @@ def send_mails(mrj, test=False):
         subject = replace_mv_keywords(subject_txt, sinv.mitglied)
         message = replace_mv_keywords(message_txt, sinv.mitglied)
         if len(attachments) > 0 and recipient:
-            frappe.sendmail(sender=sektion_mail_account,
+            frappe.sendmail(sender="{0} <{1}>".format(frappe.get_value("Sektion", sektion, "serien_email_absender_name"), sender),
                             recipients=[recipient],
                             message=message,
                             subject=subject,
-                            reply_to=sektion_mail_account,
+                            reply_to=reply_to,
                             attachments=attachments)
             if not test:
                 frappe.db.set_value("Sales Invoice", sinv.sinv_name, "mrj_email_versendet", 1)
