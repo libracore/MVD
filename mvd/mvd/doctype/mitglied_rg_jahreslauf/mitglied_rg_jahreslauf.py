@@ -76,7 +76,7 @@ class MitgliedRGJahreslauf(Document):
         self.status = "Abgebrochen"
         self.save()
     
-    def send_test_mails(self, sender_account, mail_account, qty, test_mail_mitglied):
+    def send_test_mails(self, sender_account=None, mail_account=None, qty=0, test_mail_mitglied=None):
         if not mail_account:
             frappe.throw("Die Auswahl des Mailaccounts ist fehlgeschlagen")
         
@@ -88,7 +88,7 @@ class MitgliedRGJahreslauf(Document):
         self.test_mail_mitglied = test_mail_mitglied
         self.save()
     
-    def send_mails(self, mail_from_sektion, mail_account=None):
+    def send_mails(self, mail_from_sektion=0, mail_account=None):
         if mail_from_sektion == 0 and not mail_account:
             frappe.throw("Die Auswahl des Mailaccounts ist fehlgeschlagen")
         
