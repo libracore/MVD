@@ -76,14 +76,16 @@ class MitgliedRGJahreslauf(Document):
         self.status = "Abgebrochen"
         self.save()
     
-    def send_test_mails(self, sender_account, mail_account, qty):
+    def send_test_mails(self, sender_account, mail_account, qty, test_mail_mitglied):
         if not mail_account:
             frappe.throw("Die Auswahl des Mailaccounts ist fehlgeschlagen")
         
         self.status = "Versende Test E-Mails"
         self.test_email_account = mail_account
         self.email_account = sender_account
+        self.use_sektion_mail_account = 0
         self.test_mail_qty = qty or 0
+        self.test_mail_mitglied = test_mail_mitglied
         self.save()
     
     def send_mails(self, mail_from_sektion, mail_account=None):
@@ -93,6 +95,8 @@ class MitgliedRGJahreslauf(Document):
         self.status = "Versende E-Mails"
         self.use_sektion_mail_account = mail_from_sektion or 0
         self.email_account = mail_account or None
+        self.test_mail_qty = 0
+        self.test_mail_mitglied = None
         self.save()
     
     def stop_mail(self):
@@ -578,7 +582,7 @@ def send_mails(mrj, test=False):
             return sektion_mail, sektion_mail
         
         dummy_mail = frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "email_account")
-        reply_to = dummy_mail.replace("no-reply@", "{0}@".format(sektion.lower()))
+        reply_to = "{0}@{1}".format(sektion.lower(), dummy_mail.split("@")[1])
         return dummy_mail, reply_to
 
     def get_recipient(mitglied):
@@ -613,10 +617,19 @@ def send_mails(mrj, test=False):
     if test:
         frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "Versende Test E-Mails")
         recipient = frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "test_email_account")
-        limit_filter = "LIMIT {0}".format(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "test_mail_qty"))
+        limit = frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "test_mail_qty") or 0
+        limit_filter = ""
+        if limit > 0:
+            limit_filter = "LIMIT {0}".format(limit)
+        test_mail_mitglied = frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "test_mail_mitglied")
+        if test_mail_mitglied:
+            test_mail_mitglied = "AND `sinv`.`mv_mitgliedschaft` = {0}".format(test_mail_mitglied)
+        else:
+            test_mail_mitglied = ""
     else:
         frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "Versende E-Mails")
         limit_filter = ""
+        test_mail_mitglied = ""
     frappe.db.commit()
 
     frappe.db.sql("""SET SQL_BIG_SELECTS=1""")
@@ -635,9 +648,10 @@ def send_mails(mrj, test=False):
         AND `sinv`.`status` != 'Paid'
         AND `sinv`.`mrj_email_versendet` != 1
         AND `sinv`.`mrj_pdf_erstellt` = 1
+        {test_mail_mitglied}
         ORDER BY `sinv`.`sektion_id` ASC
         {limit_filter}
-    """.format(mrj=mrj, limit_filter=limit_filter), as_dict=True)
+    """.format(mrj=mrj, test_mail_mitglied=test_mail_mitglied, limit_filter=limit_filter), as_dict=True)
     frappe.db.sql("""SET SQL_BIG_SELECTS=0""")
 
     sektion = None

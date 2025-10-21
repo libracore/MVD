@@ -67,14 +67,15 @@ frappe.ui.form.on('Mitglied RG Jahreslauf', {
     send_test_mails: function(frm) {
         frm.call('get_mail_accounts', {}).then(mail_accounts => {
             const mail_accs = mail_accounts.message
-            if (mail_accs.length > 0) {
+            if ((mail_accs)&&(mail_accs.length > 0)) {
                 frappe.prompt([
                     {'fieldname': 'mail_account', 'fieldtype': 'Data', 'label': 'Test E-Mail Empfänger', 'reqd': 1},
-                    {'fieldname': 'sender_mail_account', 'fieldtype': 'Select', 'label': 'Absender E-Mail Account', 'reqd': 1, 'options': mail_accs},
-                    {'fieldname': 'qty', 'fieldtype': 'Int', 'label': 'Anz. Test E-Mails', 'reqd': 1, 'default': 0}
+                    {'fieldname': 'sender_mail_account', 'fieldtype': 'Select', 'label': 'Absender E-Mail Account', 'reqd': 1, 'options': mail_accs, 'description': "<b>Achtung</b><br>Als Reply-To Adresse wird bei der oben ausgewählten Absenderadresse alles vor dem @ durch das Sektionskürzel ersetzt."},
+                    {'fieldname': 'qty', 'fieldtype': 'Int', 'label': 'Anz. Test E-Mails', 'default': 1, 'reqd': 1},
+                    {'fieldname': 'einzelmitglied', 'fieldtype': 'Data', 'label': 'Mitglied ID (optional für Einzelversand)', 'default': 0}
                 ],
                 function(values){
-                    frm.call('send_test_mails', {sender_account: values.sender_mail_account, mail_account: values.mail_account, qty: values.qty}).then(r => {
+                    frm.call('send_test_mails', {sender_account: values.sender_mail_account, mail_account: values.mail_account, qty: values.qty, test_mail_mitglied: values.einzelmitglied}).then(r => {
                         frappe.msgprint("Der Test E-Mail Versand wurde gestartet")
                         cur_frm.reload_doc();
                     });
@@ -101,9 +102,9 @@ frappe.ui.form.on('Mitglied RG Jahreslauf', {
                 // on no
                 frm.call('get_mail_accounts', {}).then(mail_accounts => {
                     const mail_accs = mail_accounts.message
-                    if (mail_accs.length > 0) {
+                    if ((mail_accs)&&(mail_accs.length > 0)) {
                         frappe.prompt([
-                            {'fieldname': 'mail_account', 'fieldtype': 'Select', 'label': 'E-Mail Account', 'reqd': 1, 'options': mail_accs}
+                            {'fieldname': 'mail_account', 'fieldtype': 'Select', 'label': 'E-Mail Account', 'reqd': 1, 'options': mail_accs, 'description': "<b>Achtung</b><br>Als Reply-To Adresse wird bei der oben ausgewählten Absenderadresse alles vor dem @ durch das Sektionskürzel ersetzt."}
                         ],
                         function(values){
                             frm.call('send_mails', {mail_from_sektion: 0, mail_account: values.mail_account}).then(r => {

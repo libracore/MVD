@@ -28,11 +28,12 @@
   "wknd_start_minute",
   "wknd_stop_hour",
   "wknd_stop_minute",
-  "section_admin",
+  "section_mail",
+  "email_account",
+  "use_sektion_mail_account",
   "test_email_account",
   "test_mail_qty",
-  "email_account",
-  "use_sektion_mail_account"
+  "test_mail_mitglied"
  ],
  "fields": [
   {
@@ -178,12 +179,6 @@
    "label": "Stoppe E-Mail Versand"
   },
   {
-   "collapsible": 1,
-   "fieldname": "section_admin",
-   "fieldtype": "Section Break",
-   "label": "Admin Area"
-  },
-  {
    "fieldname": "test_email_account",
    "fieldtype": "Data",
    "label": "Test E-Mail Empf\u00e4nger"
@@ -206,9 +201,21 @@
    "fieldname": "use_sektion_mail_account",
    "fieldtype": "Check",
    "label": "Sektionsspezifischer E-Mail Account"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_mail",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Email Settings"
+  },
+  {
+   "fieldname": "test_mail_mitglied",
+   "fieldtype": "Data",
+   "label": "Test Mitglied"
   }
  ],
- "modified": "2025-10-21 11:32:58.123016",
+ "modified": "2025-10-21 13:06:04.032363",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitglied RG Jahreslauf",
