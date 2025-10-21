@@ -52,6 +52,7 @@
   "status",
   "zusatzinfo_status",
   "beratung_prio",
+  "frist",
   "beratungsaufwand",
   "raised_by_name",
   "verknuepfungen",
@@ -472,9 +473,14 @@
    "hidden": 1,
    "label": "mv_kunde",
    "options": "Kunden"
+  },
+  {
+   "fieldname": "frist",
+   "fieldtype": "Date",
+   "label": "Frist"
   }
  ],
- "modified": "2025-08-12 13:05:36.836760",
+ "modified": "2025-10-21 15:14:34.734599",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
