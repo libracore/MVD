@@ -655,6 +655,7 @@ def send_mails(mrj, test=False):
     frappe.db.sql("""SET SQL_BIG_SELECTS=0""")
 
     sektion = None
+    sektion_footer = None
     sender = None
     reply_to = None
     breaked_loop = False
@@ -662,6 +663,7 @@ def send_mails(mrj, test=False):
         if sinv.sektion != sektion:
             sektion = sinv.sektion
             sender, reply_to = get_sender_and_reply_to(sektion)
+            sektion_footer = frappe.get_value("Sektion", sektion, "footer")
     
         attachments = []
         sinv_attachment = frappe.get_all("File", fields=["name", "file_name"],
@@ -681,7 +683,7 @@ def send_mails(mrj, test=False):
         if cint(frappe.db.get_value("Mitgliedschaft", sinv.mitglied, "digitalrechnung")) == 1:
             email_vorlage = sinv.druckvorlage_digitalrechnung
         subject_txt = frappe.db.get_value("Druckvorlage", email_vorlage, "e_mail_betreff")
-        message_txt = frappe.db.get_value("Druckvorlage", email_vorlage, "e_mail_text")
+        message_txt = "{0}<br><br>{1}".format(frappe.db.get_value("Druckvorlage", email_vorlage, "e_mail_text"), sektion_footer)
         subject = replace_mv_keywords(subject_txt, sinv.mitglied)
         message = replace_mv_keywords(message_txt, sinv.mitglied)
         if len(attachments) > 0 and recipient:
