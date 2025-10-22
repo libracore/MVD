@@ -420,7 +420,7 @@ def send_invoice_confirmation_email(e_mail, sinv_name):
         return
 
     try:
-        subject = f"Bestätigung Ihrer Bestellung"
+        subject = "Bestätigung Ihrer Bestellung"
 
         # Render print format of Sales Invoice
         message = frappe.get_print(
@@ -452,7 +452,7 @@ def send_invoice_confirmation_email(e_mail, sinv_name):
     except Exception as err:
         frappe.log_error(
             "{0}\n\n{1}".format(err, frappe.utils.get_traceback()),
-            f"Sales Invoice Confirmation Email Error ({sinv_name})"
+            "Sales Invoice Confirmation Email Error ({0})".format(sinv_name)
         )
 
 
