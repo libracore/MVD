@@ -94,3 +94,38 @@ def remove_admin_and_guest_mails(self, event):
 def check_manual_address(sinv, event):
     if cint(sinv.manuelle_adresseingabe) == 1:
         sinv.manuelle_adresse = '{0}\n{1}{2} {3}\n{4}-{5} {6}'.format(sinv.ma_name, "{0}\n".format(sinv.ma_adressen_zusatzzeile) if sinv.ma_adressen_zusatzzeile else '', sinv.ma_strasse, sinv.ma_nummer, sinv.ma_laendercode, sinv.ma_plz, sinv.ma_ort)
+
+def pe_after_submit_hooks(pe, event):
+    def get_recipient(mitglied):
+        abw_debitor = 0
+        abw_rg_adr = frappe.db.get_value("Mitgliedschaft", mitglied, "abweichende_rechnungsadresse") or 0
+        if abw_rg_adr:
+            abw_debitor = frappe.db.get_value("Mitgliedschaft", mitglied, "unabhaengiger_debitor") or 0
+        if abw_debitor == 1:
+            return frappe.db.get_value("Mitgliedschaft", mitglied, "rg_e_mail") or None
+        
+        return frappe.db.get_value("Mitgliedschaft", mitglied, "e_mail_1") or None
+    
+    
+    from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_mitgliedschaft_in_pe
+    check_mitgliedschaft_in_pe(pe)
+
+    # Bestätigungs Mail wenn Zahlung aus MRJ-2026
+    for sinv in pe.references:
+        if sinv.outstanding_amount == sinv.allocated_amount:
+            if 'MRJ-2026' in frappe.db.get_value("Sales Invoice", sinv.reference_name, "mrj"):
+                mail_txt = """
+                    Guten Tag
+                    Wir haben Ihre Zahlung per {0} erhalten - Danke, dass Sie sich für die digitale Zahlung entschieden haben! Das spart Zeit und schont erst noch die Umwelt. Damit verlängert sich Ihre Mitgliedschaft beim Mieterinnen- und Mieterverband bis zum 31. Dezember 2026. Sollten Sie dennoch eine Papierrechnung erhalten, betrachten Sie bitte diese als gegenstandslos.<br><br>
+                    Als Mitglied erhalten Sie eine umfassende mietrechtliche Beratung durch Ihre Sektion vor Ort und finden auf der Webseite mieterverband.ch hilfreiche Informationen, Merkblätter, Vorlagen und Checklisten zu allen Fragen rund um das Mieten und Wohnen. Zudem stärken Sie mit Ihrer Mitgliedschaft die Interessenvertretung der Mieter*innen in der Schweiz.<br><br>
+                    Besten Dank für Ihr Vertrauen!<br><br>
+                    Mit freundlichen Grüssen Ihr Mieterinnen- und Mieterverband
+                """.format(frappe.utils.get_datetime(pe.posting_date).strftime('%d.%m.%Y'))
+
+                recipient = get_recipient(frappe.db.get_value("Sales Invoice", sinv.reference_name, "mv_mitgliedschaft"))
+                if recipient:
+                    frappe.sendmail(sender="{0} <{1}>".format(frappe.get_value("Sektion", pe.sektion_id, "serien_email_absender_name"), frappe.db.get_value("Sektion", pe.sektion_id, "serien_email_absender_adresse")),
+                        recipients=[recipient],
+                        message=mail_txt,
+                        subject="Zahlungsbestätigung",
+                        reply_to=frappe.db.get_value("Sektion", pe.sektion_id, "serien_email_absender_adresse"))

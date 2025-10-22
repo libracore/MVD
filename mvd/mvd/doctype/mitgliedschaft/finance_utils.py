@@ -414,7 +414,7 @@ def _sinv_update(mv_mitgliedschaft, timestamp_mismatch_retry=False, does_not_exi
             enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='(Retry) Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft), timeout=5000, **args)
             pass
 
-def check_mitgliedschaft_in_pe(pe, event):
+def check_mitgliedschaft_in_pe(pe):
     if not pe.mv_mitgliedschaft:
         mitgliedschaft = suche_nach_mitgliedschaft(pe.party)
         if mitgliedschaft:

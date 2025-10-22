@@ -121,7 +121,7 @@ doc_events = {
         "validate": "mvd.mvd.utils.hook_utils.check_manual_address"
     },
     "Payment Entry": {
-        "on_submit": "mvd.mvd.doctype.mitgliedschaft.finance_utils.check_mitgliedschaft_in_pe"
+        "on_submit": "mvd.mvd.utils.hook_utils.pe_after_submit_hooks"
     },
     "ToDo": {
         "on_update": "mvd.mvd.utils.hook_utils.todo_permissions"
