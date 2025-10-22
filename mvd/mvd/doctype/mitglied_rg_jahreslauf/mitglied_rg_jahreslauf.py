@@ -490,6 +490,7 @@ def create_pdfs(mrj):
         SELECT
             `sinv`.`name` AS `sinv_name`,
             `sinv`.`druckvorlage` AS `sinv_druckvorlage`,
+            `sinv`.`docstatus` AS `docstatus`,
             `fak`.`name` AS `fak_name`,
             `fak`.`druckvorlage` AS `fak_druckvorlage`
         FROM `tabSales Invoice` AS `sinv`
@@ -505,6 +506,10 @@ def create_pdfs(mrj):
     for sinv in sinvs:
         aktuelle_uhrzeit = datetime.now().time()
         try:
+            # Skip wenn die Sinv in der Zwischenzeit storniert wurde
+            if sinv.docstatus != 1:
+                continue
+            
             # erstellung Rechnungs PDF
             sinv_output = PdfFileWriter()
             sinv_output = frappe.get_print("Sales Invoice", sinv.sinv_name, 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = sinv_output, ignore_zugferd=True)
