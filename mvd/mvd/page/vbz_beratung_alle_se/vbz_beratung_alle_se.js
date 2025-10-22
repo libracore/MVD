@@ -130,7 +130,7 @@ frappe.vbz_beratung_alle_se = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r9_as").click(function(){
-            frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt"]], "ungelesen": 1, "kontaktperson": ['is', 'set']}
+            frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt", "Termin vereinbart"]], "ungelesen": 1, "kontaktperson": ['is', 'set']}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r10_bs").click(function(){
