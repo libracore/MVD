@@ -491,6 +491,7 @@ def create_pdfs(mrj):
             `sinv`.`name` AS `sinv_name`,
             `sinv`.`druckvorlage` AS `sinv_druckvorlage`,
             `sinv`.`docstatus` AS `docstatus`,
+            `fak`.`docstatus` AS `fak_docstatus`,
             `fak`.`name` AS `fak_name`,
             `fak`.`druckvorlage` AS `fak_druckvorlage`
         FROM `tabSales Invoice` AS `sinv`
@@ -529,6 +530,10 @@ def create_pdfs(mrj):
             })
             sinv_file.save(ignore_permissions=True)
             frappe.db.set_value("Sales Invoice", sinv.sinv_name, "mrj_pdf_erstellt", 1)
+
+            # Skip wenn die Fak in der Zwischenzeit storniert wurde
+            if sinv.fak_docstatus != 1:
+                continue
 
             # erstellung Fak-Rechnungs PDF
             if sinv.fak_name:
