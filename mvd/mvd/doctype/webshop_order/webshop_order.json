@@ -22,7 +22,7 @@
   "postfach",
   "tel_m",
   "tel_p",
-  "email",
+  "e_mail",
   "cb_2",
   "strasse",
   "strassen_nr",
@@ -127,11 +127,6 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Tel. P"
-  },
-  {
-   "fieldname": "email",
-   "fieldtype": "Data",
-   "label": "E-mail"
   },
   {
    "fieldname": "cb_1",
@@ -296,9 +291,14 @@
    "fieldname": "abweichende_rechnungsadresse",
    "fieldtype": "Check",
    "label": "Abweichende Rechnungsadresse"
+  },
+  {
+   "fieldname": "e_mail",
+   "fieldtype": "Data",
+   "label": "E-Mail"
   }
  ],
- "modified": "2025-09-25 17:02:55.890443",
+ "modified": "2025-10-16 11:27:55.830946",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Webshop Order",

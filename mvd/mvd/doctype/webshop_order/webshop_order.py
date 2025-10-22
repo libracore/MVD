@@ -8,6 +8,8 @@ from frappe.model.document import Document
 import json
 from frappe.utils import cint
 from frappe.utils.data import today, add_days
+from frappe import sendmail
+from frappe.core.doctype.communication.email import make
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr, get_adressblock, get_rg_adressblock
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 import re
@@ -58,7 +60,7 @@ class WebshopOrder(Document):
                     # Kundendaten
                     self.strassen_nr = order_data['strassen_nr']
                     self.tel_m = order_data['tel_m']
-                    self.email = order_data['email']
+                    self.e_mail = order_data['email']
                     self.tel_p = order_data['tel_p'] if order_data['tel_p'] != self.tel_m else None
                     self.strasse = order_data['strasse']
                     self.vorname = order_data['vorname']
@@ -139,7 +141,7 @@ class WebshopOrder(Document):
                     if order_data.get("abweichende_lieferadresse") == "false":
                         self.vorname = billing_contact.get("firstname") or None
                         self.nachname = billing_contact.get("lastname") or None
-                        self.email = billing_contact.get("email")
+                        self.e_mail = billing_contact.get("email")
                         self.plz = billing_contact.get("zip") or None
                         self.ort = billing_contact.get("city") or None
                         self.strasse, self.strassen_nr = split_street_and_number(billing_contact.get("address") or "")
@@ -155,7 +157,7 @@ class WebshopOrder(Document):
                         # Lieferadresse
                         self.vorname = shipping_contact.get("firstname") or None
                         self.nachname = shipping_contact.get("lastname") or None
-                        self.email = shipping_contact.get("email")
+                        self.e_mail = billing_contact.get("email")
                         self.plz = shipping_contact.get("zip") or None
                         self.ort = shipping_contact.get("city") or None
                         self.strasse, self.strassen_nr = split_street_and_number(shipping_contact.get("address") or "")
@@ -207,6 +209,23 @@ class WebshopOrder(Document):
                     "Webshop Order V2; Validation Failed",
                 )
 
+    
+    def after_insert(self):
+        if self.v2 == 1 and not self.abweichende_rechnungsadresse:
+            matching_customer = frappe.get_all(
+                "Kunden",
+                filters={"e_mail": self.e_mail},
+                fields=["name"],
+            )
+            if len(matching_customer) == 1:
+                self.faktura_kunde = matching_customer[0].name
+                self.update_faktura_kunde()
+                self.save()
+            else:
+                self.create_faktura_kunde()
+            self.create_sinv()
+            return
+
     def create_faktura_kunde(self):
         kunde = frappe.get_doc({
             "doctype":"Kunden",
@@ -222,7 +241,7 @@ class WebshopOrder(Document):
             'tel_p': self.tel_p,
             'tel_m': self.tel_m,
             'tel_g': None,
-            'e_mail': self.email,
+            'e_mail': self.e_mail,
             'strasse': self.strasse,
             'zusatz_adresse': self.adress_zusatz if self.adress_zusatz else None,
             'nummer': self.strassen_nr,
@@ -267,7 +286,7 @@ class WebshopOrder(Document):
         kunde.tel_p = self.tel_p
         kunde.tel_m = self.tel_m
         kunde.tel_g = None
-        kunde.e_mail = self.email
+        kunde.e_mail = self.e_mail
         kunde.strasse = self.strasse
         kunde.zusatz_adresse = self.adress_zusatz if self.adress_zusatz else None
         kunde.nummer = self.strassen_nr
@@ -337,6 +356,12 @@ class WebshopOrder(Document):
         
         self.sinv = sinv.name
         self.save()
+
+        # --- send confirmation email ---
+        # only for new api for the moment
+        if self.v2 == 1:
+            send_invoice_confirmation_email(self.e_mail, sinv.name)
+
         return sinv.name
 
 
@@ -389,3 +414,129 @@ def split_street_and_number(address: str):
 
     # Fallback: whole string as street, no number
     return address.strip(), None
+
+def send_invoice_confirmation_email(e_mail, sinv_name):
+    if not e_mail:
+        return
+
+    try:
+        subject = f"Bestätigung Ihrer Bestellung"
+
+        # Render print format of Sales Invoice
+        message = frappe.get_print(
+            "Sales Invoice", sinv_name, print_format="Webshop Bestätigungs-Email"
+        )
+
+        # Create Communication
+        comm = make(
+            recipients=[e_mail],
+            sender=frappe.get_value("Email Account", {"default_outgoing": 1}, "email_id"),
+            subject=subject,
+            content=message,
+            doctype="Sales Invoice",
+            name=sinv_name,
+            send_email=False
+        )["name"]
+
+        # Queue the email
+        sendmail(
+            recipients=[e_mail],
+            subject=subject,
+            message=message,
+            delayed=True,
+            reference_doctype="Sales Invoice",
+            reference_name=sinv_name,
+            communication=comm
+        )
+
+    except Exception as err:
+        frappe.log_error(
+            "{0}\n\n{1}".format(err, frappe.utils.get_traceback()),
+            f"Sales Invoice Confirmation Email Error ({sinv_name})"
+        )
+
+
+def create_item_table_with_download_link(sinv):
+    taxes = {}
+    for tax in sinv.taxes:
+        taxes[tax.description] = 0
+    
+    mwst = 0 if frappe.db.get_value("Sektion", sinv.sektion_id, "mwst_faktura_ausblenden") == 1 else 1
+    
+    table = """
+                <table id="item_table" style="width: 100%;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid black;">
+                            <th style="text-align: left;">Anz.</th>
+                            <th style="text-align: left;">Bezeichnung</th>
+                            <th style="text-align: right;">Einzelpreis</th>
+                            <th style="text-align: right;">Total</th>
+                            <th style="text-align: right;">{mwst}</th>
+                        </tr>
+                    </thead>
+                    <tbody>""".format(mwst="MWST" if mwst == 1 else '')
+    for item in sinv.items:
+        if item.description.replace("<div>", "").replace("</div>", "") == item.item_code:
+            bezeichnung = item.item_name
+        else:
+            bezeichnung = item.description
+
+        # Prüfen, ob ein Download-Link existiert
+        download_doc = frappe.db.get_value(
+            "Webshop Order Download Link",
+            {"item_code": item.item_code},
+            ["download_link"],
+            as_dict=True
+        )
+        download_link = ""
+        if download_doc:
+            download_link = '<br>Download: <a href="{link}" target="_blank">{link}</a>'.format(
+                link=download_doc.download_link
+            )
+        table += """
+                    <tr>
+                        <td style="text-align: left;">{qty}</td>
+                        <td style="text-align: left;">{bez}</td>
+                        <td style="text-align: right;">{einzp}</td>
+                        <td style="text-align: right;">{total}</td>
+                        <td style="text-align: right;">{mwst}</td>
+                    </tr>""".format(qty=int(item.qty), \
+                                    bez=bezeichnung + download_link, \
+                                    einzp="{:,.2f}".format(item.rate).replace(",", "'"), \
+                                    total="{:,.2f}".format(item.amount).replace(",", "'"), \
+                                    mwst=item.item_tax_template or '0%' if mwst == 1 else '')
+        if item.item_tax_template and item.item_tax_template in taxes:
+            taxes[item.item_tax_template] += item.amount
+    
+    table += """
+                <tr style="border-bottom: 1px solid black; border-top: 1px solid black;">
+                    <td colspan="2" style="text-align: left;"><b>Total</b>{mwst}</td>
+                    <td style="text-align: right;">Fr.</td>
+                    <td style="text-align: right;">{grand_total}</td>
+                    <td></td>
+                </tr>""".format(grand_total="{:,.2f}".format(sinv.grand_total).replace(",", "'"), mwst=" (inkl. MWSt.)" if mwst == 1 else '')
+    
+    if mwst == 1:
+        table += """
+                    <tr style="line-height: 1;">
+                        <td colspan="2" style="text-align: left; font-size: 8px;">Unsere MWST-Nr: CHE-100.822.971 MWST</td>
+                        <td colspan="3" style="text-align: right;"><table style="width: 100%;">"""
+        for tax in sinv.taxes:
+            if tax.tax_amount > 0:
+                table += """<tr style="line-height: 1;">
+                                <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Satz:</td>
+                                <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{satz}</td>
+                                <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Betrag:</td>
+                                <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{betrag}</td>
+                                <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">Steuer:</td>
+                                <td style="padding-top: 0px !important; text-align: right; font-size: 8px; padding-top: 0px !important; padding-bottom: 0px !important;">{steuer}</td>
+                            </tr>""".format(satz=tax.description, \
+                                            betrag="{:,.2f}".format(taxes[tax.description]).replace(",", "'"), \
+                                            steuer="{:,.2f}".format(tax.tax_amount).replace(",", "'"))
+        table += """</table></td></tr>"""
+    
+    table += """
+                    </tbody>
+                </table>"""
+    
+    return table
