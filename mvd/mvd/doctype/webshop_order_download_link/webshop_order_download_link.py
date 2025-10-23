@@ -15,7 +15,10 @@ def generate_download_links():
     for item in items:
         latest_file = frappe.get_all(
             "File",
-            filters={"attached_to_name": item.item_code},
+            filters={
+                "attached_to_name": item.item_code,
+                "file_name": ["like", "%.pdf"]
+            },
             fields=["name"],
             order_by="creation desc",
             limit=1
