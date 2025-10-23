@@ -423,11 +423,9 @@ def send_invoice_confirmation_email(e_mail, sinv_name):
         subject = "Bestätigung Ihrer Bestellung"
 
         # Render print format of Sales Invoice
-        message = frappe.get_print(
-            "Sales Invoice", sinv_name, print_format="Webshop Bestätigungs-Email"
-        )
+        message = frappe.render_template('templates/mvd/confirmation_email_drucktemplate.html', {'doc': frappe.get_doc("Sales Invoice", sinv_name)})
 
-        # Create Communication
+        # Create Communication and send Mail
         comm = make(
             recipients=[e_mail],
             sender=frappe.get_value("Email Account", {"default_outgoing": 1}, "email_id"),
@@ -435,19 +433,8 @@ def send_invoice_confirmation_email(e_mail, sinv_name):
             content=message,
             doctype="Sales Invoice",
             name=sinv_name,
-            send_email=False
+            send_email=True
         )["name"]
-
-        # Queue the email
-        sendmail(
-            recipients=[e_mail],
-            subject=subject,
-            message=message,
-            delayed=True,
-            reference_doctype="Sales Invoice",
-            reference_name=sinv_name,
-            communication=comm
-        )
 
     except Exception as err:
         frappe.log_error(
