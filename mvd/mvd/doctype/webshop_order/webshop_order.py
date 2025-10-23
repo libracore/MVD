@@ -422,13 +422,14 @@ def send_invoice_confirmation_email(e_mail, sinv_name):
     try:
         subject = "Bestätigung Ihrer Bestellung"
 
-        # Render print format of Sales Invoice
+        # Render print format of Sales Invoice and define sender
         message = frappe.render_template('templates/mvd/confirmation_email_drucktemplate.html', {'doc': frappe.get_doc("Sales Invoice", sinv_name)})
+        sender = "{0} <{1}>".format("Mieterverband", frappe.get_value("Email Account", {"default_outgoing": 1}, "email_id"))
 
         # Create Communication and send Mail
         comm = make(
             recipients=[e_mail],
-            sender=frappe.get_value("Email Account", {"default_outgoing": 1}, "email_id"),
+            sender=sender,
             subject=subject,
             content=message,
             doctype="Sales Invoice",
