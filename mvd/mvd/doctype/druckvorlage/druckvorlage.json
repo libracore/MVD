@@ -263,7 +263,6 @@
    "label": "QRR EZ"
   },
   {
-   "depends_on": "eval:doc.__islocal",
    "fieldname": "titel",
    "fieldtype": "Data",
    "label": "Titel",
@@ -471,7 +470,7 @@
    "label": "test_dn"
   }
  ],
- "modified": "2025-09-18 15:33:47.300884",
+ "modified": "2025-10-27 16:04:04.503512",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",
