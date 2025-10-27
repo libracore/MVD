@@ -16,6 +16,7 @@
   "send_test_mails",
   "send_mails",
   "stop_mail",
+  "create_csv",
   "section_bg_job",
   "durchlaufszeit",
   "section_mail",
@@ -144,9 +145,14 @@
    "fieldname": "durchlaufszeit",
    "fieldtype": "Int",
    "label": "Durchlaufszeit in Minuten"
+  },
+  {
+   "fieldname": "create_csv",
+   "fieldtype": "Button",
+   "label": "Erstelle CSV"
   }
  ],
- "modified": "2025-10-27 15:05:21.680881",
+ "modified": "2025-10-27 15:17:53.117887",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitglied RG Jahreslauf",

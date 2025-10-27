@@ -127,5 +127,11 @@ frappe.ui.form.on('Mitglied RG Jahreslauf', {
             frappe.msgprint("Der E-Mail Versand wurde abgebrochen")
             cur_frm.reload_doc();
         });
+    },
+    create_csv: function(frm) {
+        frm.call('create_csv', {}).then(r => {
+            frappe.msgprint("Das CSV wird erstellt...")
+            cur_frm.reload_doc();
+        });
     }
 });
