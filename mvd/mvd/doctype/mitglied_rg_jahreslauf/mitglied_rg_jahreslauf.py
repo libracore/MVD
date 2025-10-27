@@ -326,6 +326,7 @@ def create_invoices(mrj):
     if not breaked_loop:
         # loop durch komplette verarbeitung beendet
         frappe.db.set_value("MRJ Sektions Selektion", sektions_selektion.name, "status", "Rechnungen erstellt")
+        frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "Rechnungserstellung pausiert")
         frappe.db.commit()
     else:
         # loop beendet weil autom. stoppzeit erreicht -> pausiert
