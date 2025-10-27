@@ -430,6 +430,7 @@ def create_pdfs(mrj):
             `sinv`.`name` AS `sinv_name`,
             `sinv`.`druckvorlage` AS `sinv_druckvorlage`,
             `sinv`.`docstatus` AS `docstatus`,
+            `sinv`.`mv_mitgliedschaft` AS `mitglied`,
             `fak`.`docstatus` AS `fak_docstatus`,
             `fak`.`name` AS `fak_name`,
             `fak`.`druckvorlage` AS `fak_druckvorlage`
@@ -448,6 +449,10 @@ def create_pdfs(mrj):
         try:
             # Skip wenn die Sinv in der Zwischenzeit storniert wurde
             if sinv.docstatus != 1:
+                continue
+
+            # Skip wenn kein Digitalempfänger
+            if cint(frappe.db.get_value("Mitgliedschaft", sinv.mitglied, "digitalrechnung")) != 1:
                 continue
             
             # erstellung Rechnungs PDF
@@ -586,6 +591,10 @@ def send_mails(mrj, test=False):
         if sinv.sektion != sektion:
             sektion = sinv.sektion
             sender, reply_to = get_sender_and_reply_to(sektion)
+        
+        # Skip wenn kein Digitalempfänger
+        if cint(frappe.db.get_value("Mitgliedschaft", sinv.mitglied, "digitalrechnung")) != 1:
+            continue
     
         attachments = []
         sinv_attachment = frappe.get_all("File", fields=["name", "file_name"],
@@ -707,13 +716,15 @@ def get_csv(mrj=None, bg_job=True):
             # ------------------------------------------------------------------------------------
             # ------------------------------------------------------------------------------------
             '''
-                Geschenkmitgliedschaften sowie Gratis Mitgliedschaften werden NICHT berücksichtigt
+                Geschenkmitgliedschaften, Gratis Mitgliedschaften sowie Digitalrechnungsempfänger werden NICHT berücksichtigt
             '''
             # ------------------------------------------------------------------------------------
             skip = False
             if mitgliedschaft.ist_geschenkmitgliedschaft:
                 skip = True
             if mitgliedschaft.reduzierte_mitgliedschaft and not mitgliedschaft.reduzierter_betrag > 0:
+                skip = True
+            if cint(mitgliedschaft.digitalrechnung) == 1:
                 skip = True
             # ------------------------------------------------------------------------------------
             # ------------------------------------------------------------------------------------
