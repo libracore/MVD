@@ -930,7 +930,7 @@ def get_csv(mrj=None, bg_job=True):
                     row_data.append('--')
                     row_data.append('--')
                     row_data.append(mitgliedschaft.mitglied_nr or '')
-                    row_data.append(jahresversand.bezugsjahrjahr or '')
+                    row_data.append(jahresversand.bezugsjahr or '')
                     row_data.append(mitgliedschaft.mitgliedtyp_c or '')
                     row_data.append(mitgliedschaft.sektion_id or '')
                     row_data.append('')

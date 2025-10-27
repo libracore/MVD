@@ -8,13 +8,6 @@ from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 
 class MRJSektionsSelektion(Document):
-    def autoname(self):
-        self.name = "MRJ-{0}-{1}".format(self.sektion_id, self.bezugsjahr)
-        if frappe.db.exists("MRJ Sektions Selektion", self.name):
-            self.name = make_autoname(
-                "MRJ-{0}-{1}-.#".format(self.sektion_id, self.bezugsjahr)
-            )
-    
     def validate(self):
         if self.docstatus == 0:
             if frappe.db.get_value("Mitglied RG Jahreslauf", self.mrj, "status") != "Warte auf Sektions Selektionen":
