@@ -9,7 +9,7 @@ from frappe.model.naming import make_autoname
 from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
 import copy
-from frappe.utils.data import now, add_days, today
+from frappe.utils.data import now, add_days, today, add_to_date
 from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 from PyPDF2 import PdfFileWriter
@@ -152,17 +152,8 @@ def mrj_worker():
 # ---------------------------------------------------
 # Helper Methods
 # ---------------------------------------------------
-def get_start_stop(mrj):
-    return {
-        'start_hour': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "start_hour")),
-        'start_minute': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "start_minute")),
-        'wknd_start_hour': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "wknd_start_hour")),
-        'wknd_start_minute': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "wknd_start_minute")),
-        'stop_hour': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "stop_hour")),
-        'stop_minute': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "stop_minute")),
-        'wknd_stop_hour': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "wknd_stop_hour")),
-        'wknd_stop_minute': cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "wknd_stop_minute"))
-    }
+def get_stop_time(mrj):
+    return add_to_date(None, minutes=cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "durchlaufszeit")), as_datetime=True)
 
 def is_job_already_running(jobname):
     running = get_info(jobname)
@@ -203,31 +194,8 @@ def get_info(jobname):
 # Create Methods
 # ---------------------------------------------------
 def create_invoices(mrj):
-    def add_duchlaufszeit():
-        # Comment Start- & End-Zeit inkl. Duchrlauszeit
-        time_logging_end = datetime.now()
-        durchlaufszeit = time_logging_end - time_logging_start
-        frappe.get_doc("Mitglied RG Jahreslauf", mrj).add_comment('Comment', text='<b>Rechnungserstellung</b><br>Gestartet am: {0}<br>Beendet am: {1}<br>Durchlaufszeit: {2}'.format(time_logging_start, time_logging_end, durchlaufszeit))
-        return
-    
-    # Festlegen der Start-/Stop-Zeiten
-    from datetime import datetime, time
-    current_day = datetime.today().weekday()
-    aktuelle_uhrzeit = datetime.now().time()
-    time_logging_start = datetime.now()
-    start_stop = get_start_stop(mrj)
-    if current_day >= 5:
-        # Wochenende
-        start_time = time(start_stop['wknd_start_hour'], start_stop['wknd_start_minute'])
-        stop_time = time(start_stop['wknd_stop_hour'], start_stop['wknd_stop_minute'])
-    else:
-        # Wochentag
-        start_time = time(start_stop['start_hour'], start_stop['start_minute'])
-        stop_time = time(start_stop['stop_hour'], start_stop['stop_minute'])
-    
-    # Prüfung ob der Job gestartet werden darf
-    if (aktuelle_uhrzeit < start_time) or (aktuelle_uhrzeit > stop_time):
-        return
+    # Festlegen der Stop-Zeit
+    stop_time = get_stop_time(mrj)
 
     frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "Erstelle Rechnungen")
     frappe.db.commit()
@@ -282,7 +250,6 @@ def create_invoices(mrj):
         # alle sektions selektionen sind verarbeitet -> gesammter lauf ist verarbeitet
         frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "Rechnungen erstellt")
         frappe.db.commit()
-        add_duchlaufszeit()
         return
     
     mitgliedtyp_filter = ''
@@ -326,8 +293,6 @@ def create_invoices(mrj):
         # keine mitglieder zur sektions selektion gefunden -> sektion selektion ist verarbeitet
         frappe.db.set_value("MRJ Sektions Selektion", sektions_selektion.name, "status", "Abgeschlossen")
         frappe.db.commit()
-        # prozess neustart um nächste sektions selektion zu verarbeiten
-        create_invoices(mrj)
     else:
         frappe.db.set_value("MRJ Sektions Selektion", sektions_selektion.name, "status", "Rechnungsdaten in Arbeit")
         frappe.db.commit()
@@ -346,10 +311,9 @@ def create_invoices(mrj):
         'Geschäft': [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel_geschaeft).get("price")}]
     }
     for mitglied in mitglieder:
-        aktuelle_uhrzeit = datetime.now().time()
+        aktuelle_uhrzeit = add_to_date(None, minutes=0, as_datetime=True)
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied)
         create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, sektions_selektion.bezugsjahr, sektions_selektion.druckvorlage, sektions_selektion.druckvorlage_hv, sektions_selektion.druckvorlage_email, sektions_selektion.druckvorlage_digitalrechnung, mrj)
-        # aktuelle_uhrzeit = datetime.now().time()
         if aktuelle_uhrzeit > stop_time:
             # autom. stoppzeit erreicht, prozess unterbrechen
             breaked_loop = True
@@ -359,16 +323,10 @@ def create_invoices(mrj):
         # loop durch komplette verarbeitung beendet
         frappe.db.set_value("MRJ Sektions Selektion", sektions_selektion.name, "status", "Rechnungen erstellt")
         frappe.db.commit()
-        # Comment Start- & End-Zeit inkl. Duchrlauszeit
-        add_duchlaufszeit()
-        # prozess neustart um nächste sektions selektion zu verarbeiten
-        create_invoices(mrj)
     else:
         # loop beendet weil autom. stoppzeit erreicht -> pausiert
         frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "Rechnungserstellung pausiert")
         frappe.db.commit()
-        # Comment Start- & End-Zeit inkl. Duchrlauszeit
-        add_duchlaufszeit()
         return
 
 def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, jahr, druckvorlage_rg, druckvorlage_hv, druckvorlage_email, druckvorlage_digitalrechnung, mrj):
@@ -459,31 +417,8 @@ def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_d
         frappe.db.commit()
 
 def create_pdfs(mrj):
-    def add_duchlaufszeit():
-        # Comment Start- & End-Zeit inkl. Duchrlauszeit
-        time_logging_end = datetime.now()
-        durchlaufszeit = time_logging_end - time_logging_start
-        frappe.get_doc("Mitglied RG Jahreslauf", mrj).add_comment('Comment', text='<b>PDF Erstellung</b><br>Gestartet am: {0}<br>Beendet am: {1}<br>Durchlaufszeit: {2}'.format(time_logging_start, time_logging_end, durchlaufszeit))
-        return
-
-    # Festlegen der Start-/Stop-Zeiten
-    from datetime import datetime, time
-    current_day = datetime.today().weekday()
-    aktuelle_uhrzeit = datetime.now().time()
-    time_logging_start = datetime.now()
-    start_stop = get_start_stop(mrj)
-    if current_day >= 5:
-        # Wochenende
-        start_time = time(start_stop['wknd_start_hour'], start_stop['wknd_start_minute'])
-        stop_time = time(start_stop['wknd_stop_hour'], start_stop['wknd_stop_minute'])
-    else:
-        # Wochentag
-        start_time = time(start_stop['start_hour'], start_stop['start_minute'])
-        stop_time = time(start_stop['stop_hour'], start_stop['stop_minute'])
-    
-    # Prüfung ob der Job gestartet werden darf
-    if (aktuelle_uhrzeit < start_time) or (aktuelle_uhrzeit > stop_time):
-        return
+    # Festlegen der Stop-Zeit
+    stop_time = get_stop_time(mrj)
     
     frappe.db.sql("""SET SQL_BIG_SELECTS=1""")
     sinvs = frappe.db.sql("""
@@ -505,7 +440,7 @@ def create_pdfs(mrj):
 
     breaked_loop = False
     for sinv in sinvs:
-        aktuelle_uhrzeit = datetime.now().time()
+        aktuelle_uhrzeit = add_to_date(None, minutes=0, as_datetime=True)
         try:
             # Skip wenn die Sinv in der Zwischenzeit storniert wurde
             if sinv.docstatus != 1:
@@ -573,19 +508,10 @@ def create_pdfs(mrj):
         # loop durch komplette verarbeitung beendet
         frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "PDFs erstellt")
         frappe.db.commit()
-    
-    add_duchlaufszeit()
 
     return
 
 def send_mails(mrj, test=False):
-    def add_duchlaufszeit():
-        # Comment Start- & End-Zeit inkl. Duchrlauszeit
-        time_logging_end = datetime.now()
-        durchlaufszeit = time_logging_end - time_logging_start
-        frappe.get_doc("Mitglied RG Jahreslauf", mrj).add_comment('Comment', text='<b>E-Mail Versand</b><br>Gestartet am: {0}<br>Beendet am: {1}<br>Durchlaufszeit: {2}'.format(time_logging_start, time_logging_end, durchlaufszeit))
-        return
-    
     def get_sender_and_reply_to(sektion):
         if frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "use_sektion_mail_account") == 1:
             sektion_mail = frappe.db.get_value("Sektion", sektion, "serien_email_absender_adresse")
@@ -605,24 +531,8 @@ def send_mails(mrj, test=False):
         
         return frappe.db.get_value("Mitgliedschaft", mitglied, "e_mail_1") or None
     
-    # Festlegen der Start-/Stop-Zeiten
-    from datetime import datetime, time
-    current_day = datetime.today().weekday()
-    aktuelle_uhrzeit = datetime.now().time()
-    time_logging_start = datetime.now()
-    start_stop = get_start_stop(mrj)
-    if current_day >= 5:
-        # Wochenende
-        start_time = time(start_stop['wknd_start_hour'], start_stop['wknd_start_minute'])
-        stop_time = time(start_stop['wknd_stop_hour'], start_stop['wknd_stop_minute'])
-    else:
-        # Wochentag
-        start_time = time(start_stop['start_hour'], start_stop['start_minute'])
-        stop_time = time(start_stop['stop_hour'], start_stop['stop_minute'])
-    
-    # Prüfung ob der Job gestartet werden darf
-    if (aktuelle_uhrzeit < start_time) or (aktuelle_uhrzeit > stop_time):
-        return
+    # Festlegen der Stop-Zeit
+    stop_time = get_stop_time(mrj)
 
     if test:
         frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "Versende Test E-Mails")
@@ -705,6 +615,7 @@ def send_mails(mrj, test=False):
                 frappe.db.set_value("Sales Invoice", sinv.sinv_name, "mrj_email_versendet", 1)
                 frappe.db.commit()
         
+        aktuelle_uhrzeit = add_to_date(None, minutes=0, as_datetime=True)
         if aktuelle_uhrzeit > stop_time:
             # autom. stoppzeit erreicht, prozess unterbrechen
             breaked_loop = True
@@ -717,7 +628,5 @@ def send_mails(mrj, test=False):
         else:
             frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "E-Mails versendet")
         frappe.db.commit()
-    
-    add_duchlaufszeit()
 
     return

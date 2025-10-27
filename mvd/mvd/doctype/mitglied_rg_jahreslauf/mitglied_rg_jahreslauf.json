@@ -17,17 +17,7 @@
   "send_mails",
   "stop_mail",
   "section_bg_job",
-  "h1",
-  "start_hour",
-  "start_minute",
-  "stop_hour",
-  "stop_minute",
-  "cb_2",
-  "h2",
-  "wknd_start_hour",
-  "wknd_start_minute",
-  "wknd_stop_hour",
-  "wknd_stop_minute",
+  "durchlaufszeit",
   "section_mail",
   "email_account",
   "use_sektion_mail_account",
@@ -80,73 +70,9 @@
    "permlevel": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "section_bg_job",
    "fieldtype": "Section Break",
    "label": "Backgroundjob Settings"
-  },
-  {
-   "default": "1",
-   "fieldname": "start_hour",
-   "fieldtype": "Int",
-   "label": "Start Hour",
-   "permlevel": 1
-  },
-  {
-   "fieldname": "start_minute",
-   "fieldtype": "Int",
-   "label": "Start Minute",
-   "permlevel": 1
-  },
-  {
-   "fieldname": "cb_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "6",
-   "fieldname": "stop_hour",
-   "fieldtype": "Int",
-   "label": "Stop Hour",
-   "permlevel": 1
-  },
-  {
-   "default": "30",
-   "fieldname": "stop_minute",
-   "fieldtype": "Int",
-   "label": "Stop Minute",
-   "permlevel": 1
-  },
-  {
-   "fieldname": "h1",
-   "fieldtype": "Heading",
-   "label": "Weekdays"
-  },
-  {
-   "fieldname": "h2",
-   "fieldtype": "Heading",
-   "label": "Weekend"
-  },
-  {
-   "default": "1",
-   "fieldname": "wknd_start_hour",
-   "fieldtype": "Int",
-   "label": "Start Hour"
-  },
-  {
-   "fieldname": "wknd_start_minute",
-   "fieldtype": "Int",
-   "label": "Start Minute"
-  },
-  {
-   "default": "22",
-   "fieldname": "wknd_stop_hour",
-   "fieldtype": "Int",
-   "label": "Stop Hour"
-  },
-  {
-   "fieldname": "wknd_stop_minute",
-   "fieldtype": "Int",
-   "label": "Stop Minute"
   },
   {
    "depends_on": "eval:doc.status==\"Rechnungen erstellt\"",
@@ -213,9 +139,14 @@
    "fieldname": "test_mail_mitglied",
    "fieldtype": "Data",
    "label": "Test Mitglied"
+  },
+  {
+   "fieldname": "durchlaufszeit",
+   "fieldtype": "Int",
+   "label": "Durchlaufszeit in Minuten"
   }
  ],
- "modified": "2025-10-21 13:06:04.032363",
+ "modified": "2025-10-27 15:05:21.680881",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitglied RG Jahreslauf",
