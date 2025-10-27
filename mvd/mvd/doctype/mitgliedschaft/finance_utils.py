@@ -382,7 +382,7 @@ def sinv_update(sinv, event):
                     frappe.db.set_value("Sales Invoice", sinv.name, "outstanding_amount", 0.0)
 
     if not update_blocked:
-        if sinv.mv_mitgliedschaft:
+        if sinv.mv_mitgliedschaft and not is_job_already_running('Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft)):
             args = {
                 'mv_mitgliedschaft': sinv.mv_mitgliedschaft
             }
@@ -452,3 +452,38 @@ def get_and_set_mitgliednr(mitgliedId):
         frappe.log_error("Mitgliednummer für Mitglied {0} konnte nicht bezogen werden".format(mitgliedId), 'get_and_set_mitgliednr')
         pass
     return
+
+def is_job_already_running(jobname):
+    running = get_info(jobname)
+    return running
+
+def get_info(jobname):
+    from rq import Queue, Worker
+    from frappe.utils.background_jobs import get_redis_conn
+    conn = get_redis_conn()
+    queues = Queue.all(conn)
+    workers = Worker.all(conn)
+    jobs = []
+
+    def add_job(j, name):
+        if j.kwargs.get('site')==frappe.local.site:
+            jobs.append({
+                'job_name': str(j.kwargs.get('job_name')),
+                'queue': name
+            })
+
+    for w in workers:
+        j = w.get_current_job()
+        if j:
+            add_job(j, w.name)
+
+    for q in queues:
+        if q.name != 'failed':
+            for j in q.get_jobs(): add_job(j, q.name)
+    
+    found_job = False
+    for job in jobs:
+        if job['job_name'] == jobname:
+            found_job = True
+
+    return found_job
