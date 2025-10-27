@@ -5,6 +5,7 @@
  "engine": "InnoDB",
  "field_order": [
   "section_uebersicht",
+  "title",
   "mrj",
   "sektion_id",
   "druckvorlage",
@@ -176,10 +177,16 @@
    "fieldname": "due_date_days",
    "fieldtype": "Int",
    "label": "F\u00e4lligkeit in Tagen"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Titel",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2025-09-25 11:35:28.587033",
+ "modified": "2025-10-27 16:29:34.371025",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MRJ Sektions Selektion",
@@ -213,5 +220,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "title_field": "title"
 }

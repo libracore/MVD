@@ -4,7 +4,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "sektions_overview",
+  "description",
   "section_content",
   "bezugsjahr",
   "cb_1",
@@ -34,10 +34,6 @@
    "label": "Bezugsjahr",
    "reqd": 1,
    "set_only_once": 1
-  },
-  {
-   "fieldname": "sektions_overview",
-   "fieldtype": "HTML"
   },
   {
    "fieldname": "status",
@@ -150,9 +146,13 @@
    "fieldname": "create_csv",
    "fieldtype": "Button",
    "label": "Erstelle CSV"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text"
   }
  ],
- "modified": "2025-10-27 15:17:53.117887",
+ "modified": "2025-10-27 16:28:52.798183",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitglied RG Jahreslauf",
