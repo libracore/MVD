@@ -130,7 +130,7 @@ def start_massenlauf_inaktivierung(doc):
                                                     `name`
                                                 FROM `tabSales Invoice`
                                                 WHERE `ist_mitgliedschaftsrechnung` = 1
-                                                AND `mitgliedschafts_jahr` = '{curr_year}'
+                                                AND `mitgliedschafts_jahr` >= '{curr_year}'
                                                 AND `docstatus` = 1
                                                 AND `mv_mitgliedschaft` = '{mv_mitgliedschaft}'
                                                 AND `status` != 'Paid'""".format(curr_year=curr_year, mv_mitgliedschaft=ms.name), as_dict=True)
@@ -157,7 +157,7 @@ def start_massenlauf_inaktivierung(doc):
                         frs = frappe.db.sql("""SELECT
                                                     `name`
                                                 FROM `tabFakultative Rechnung`
-                                                WHERE `bezugsjahr` = '{curr_year}'
+                                                WHERE `bezugsjahr` >= '{curr_year}'
                                                 AND `docstatus` = 1
                                                 AND `mv_mitgliedschaft` = '{mv_mitgliedschaft}'
                                                 AND `status` != 'Paid'""".format(curr_year=curr_year, mv_mitgliedschaft=ms.name), as_dict=True)
