@@ -117,7 +117,7 @@ def pe_after_submit_hooks(pe, event):
                 mail_txt = """
                     Guten Tag
                     Wir haben Ihre Zahlung per {0} erhalten - Danke, dass Sie sich für die digitale Zahlung entschieden haben! Das spart Zeit und schont erst noch die Umwelt. Damit verlängert sich Ihre Mitgliedschaft beim Mieterinnen- und Mieterverband bis zum 31. Dezember 2026. Sollten Sie dennoch eine Papierrechnung erhalten, betrachten Sie bitte diese als gegenstandslos.<br><br>
-                    Als Mitglied erhalten Sie eine umfassende mietrechtliche Beratung durch Ihre Sektion vor Ort und finden auf der Webseite mieterverband.ch hilfreiche Informationen, Merkblätter, Vorlagen und Checklisten zu allen Fragen rund um das Mieten und Wohnen. Zudem stärken Sie mit Ihrer Mitgliedschaft die Interessenvertretung der Mieter*innen in der Schweiz.<br><br>
+                    Als Mitglied erhalten Sie eine umfassende mietrechtliche Beratung durch Ihre Sektion und finden auf der Webseite mieterverband.ch hilfreiche Informationen, Merkblätter, Vorlagen und Checklisten zu allen Fragen rund um das Mieten und Wohnen. Zudem stärken Sie mit Ihrer Mitgliedschaft die Interessenvertretung der Mieter*innen in der Schweiz.<br><br>
                     Besten Dank für Ihr Vertrauen!<br><br>
                     Mit freundlichen Grüssen Ihr Mieterinnen- und Mieterverband
                 """.format(frappe.utils.get_datetime(pe.posting_date).strftime('%d.%m.%Y'))
