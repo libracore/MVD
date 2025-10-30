@@ -109,10 +109,10 @@ def pe_after_submit_hooks(pe, event):
     
     from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_mitgliedschaft_in_pe
     check_mitgliedschaft_in_pe(pe)
-
+    
     # Bestätigungs Mail wenn Zahlung aus MRJ-2026
     for sinv in pe.references:
-        if sinv.outstanding_amount == sinv.allocated_amount:
+        if frappe.db.get_value("Sales Invoice", sinv.reference_name, "status") == "Paid":
             if 'MRJ-2026' in frappe.db.get_value("Sales Invoice", sinv.reference_name, "mrj"):
                 mail_txt = """
                     Guten Tag
@@ -123,6 +123,7 @@ def pe_after_submit_hooks(pe, event):
                 """.format(frappe.utils.get_datetime(pe.posting_date).strftime('%d.%m.%Y'))
 
                 recipient = get_recipient(frappe.db.get_value("Sales Invoice", sinv.reference_name, "mv_mitgliedschaft"))
+                
                 if recipient:
                     frappe.sendmail(sender="{0} <{1}>".format(frappe.get_value("Sektion", pe.sektion_id, "serien_email_absender_name"), frappe.db.get_value("Sektion", pe.sektion_id, "serien_email_absender_adresse")),
                         recipients=[recipient],
