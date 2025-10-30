@@ -276,7 +276,7 @@ def kampagne(**kwargs):
     missing_fields = [f for f in required_fields if not kwargs.get(f)]
     if missing_fields:
         frappe.local.response.http_status_code = 400
-        frappe.local.response.message = f"Missing required fields: {', '.join(missing_fields)}"
+        frappe.local.response.message = "Missing required fields: {0}".format(", ".join(missing_fields))
         return
 
     if kwargs.get("id", None):
