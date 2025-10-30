@@ -24,6 +24,10 @@ def check_zahlung_mitgliedschaft(mitgliedschaft, db_direct=False):
     if not mitgliedschaft.datum_zahlung_mitgliedschaft:
         noch_kein_eintritt = True
     
+    # Muss zwingend vorgängig Commitet werden, damit die aktuellen und benötigten Info's in der DB verfügbar sind
+    # Siehe #1475
+    frappe.db.commit()
+
     sinvs = frappe.db.sql("""SELECT
                                 `name`,
                                 `is_pos`,
@@ -382,11 +386,11 @@ def sinv_update(sinv, event):
                     frappe.db.set_value("Sales Invoice", sinv.name, "outstanding_amount", 0.0)
 
     if not update_blocked:
-        if sinv.mv_mitgliedschaft and not is_job_already_running('Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft)):
+        if sinv.mv_mitgliedschaft and not is_job_already_running('Aktualisiere Mitgliedschaft {0} ({1})'.format(sinv.mv_mitgliedschaft, sinv.name)):
             args = {
                 'mv_mitgliedschaft': sinv.mv_mitgliedschaft
             }
-            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft), timeout=5000, **args)
+            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0} ({1})'.format(sinv.mv_mitgliedschaft, sinv.name), timeout=5000, **args)
     return
 
 def _sinv_update(mv_mitgliedschaft, timestamp_mismatch_retry=False, does_not_exist_counter=0):

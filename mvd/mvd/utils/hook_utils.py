@@ -113,7 +113,8 @@ def pe_after_submit_hooks(pe, event):
     # Bestätigungs Mail wenn Zahlung aus MRJ-2026
     for sinv in pe.references:
         if frappe.db.get_value("Sales Invoice", sinv.reference_name, "status") == "Paid":
-            if 'MRJ-2026' in frappe.db.get_value("Sales Invoice", sinv.reference_name, "mrj"):
+            if frappe.db.get_value("Sales Invoice", sinv.reference_name, "mrj") and \
+            'MRJ-2026' in frappe.db.get_value("Sales Invoice", sinv.reference_name, "mrj"):
                 mail_txt = """
                     Guten Tag
                     Wir haben Ihre Zahlung per {0} erhalten - Danke, dass Sie sich für die digitale Zahlung entschieden haben! Das spart Zeit und schont erst noch die Umwelt. Damit verlängert sich Ihre Mitgliedschaft beim Mieterinnen- und Mieterverband bis zum 31. Dezember 2026. Sollten Sie dennoch eine Papierrechnung erhalten, betrachten Sie bitte diese als gegenstandslos.<br><br>
