@@ -39,15 +39,13 @@
    "fieldname": "email",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Email",
-   "reqd": 1
+   "label": "Email"
   },
   {
    "fieldname": "campaign_trigger_code",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "CampaignTriggerCode",
-   "reqd": 1
+   "label": "CampaignTriggerCode"
   },
   {
    "default": "0",
@@ -174,7 +172,6 @@
    "in_list_view": 1,
    "label": "NewsletterNames",
    "options": "rows: 2",
-   "reqd": 1,
    "width": "2"
   },
   {
@@ -189,7 +186,7 @@
    "label": "Sent to SP"
   }
  ],
- "modified": "2025-08-14 11:41:00.452404",
+ "modified": "2025-10-30 12:34:55.640164",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",

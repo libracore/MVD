@@ -52,22 +52,22 @@ class Kampagne(Document):
                 if not self.sektion_id:
                     frappe.db.set_value(self.doctype, self.name, "sektion_id", mitglied_info)
 
-        # Send to emarsis
-        sp_data = {
-            "Email": self.email or None,
-            "NewsletterNames": self.newsletter_names.split(",") if self.newsletter_names else [],
-            "CampaignTriggerCode": str(self.campaign_trigger_code) if self.campaign_trigger_code else None,
-            "SubscribedOverPledge": False if cint(self.subscribed_over_pledge) != 1 else True,
-            "Zip_code": self.zip_code or 0,
-            "Last_name": self.last_name or None,
-            "First_name": self.first_name or None,
-            "Anrede": self.anrede or None,
-            "LangCode": self.lang_code or "de",
-            "Nl_abo": False if cint(self.nl_abo) != 1 else True,
-            "Quelle": self.quelle or None
-        }
-
-        if cint(frappe.db.get_value("MVD Settings", "MVD Settings", "suspend_kampagne_to_sp")) != 1:
+        if cint(frappe.db.get_value("MVD Settings", "MVD Settings", "suspend_kampagne_to_sp")) != 1 \
+           and self.email and self.campaign_trigger_code and self.newsletter_names:
+                    # Send to emarsis
+            sp_data = {
+                "Email": self.email or None,
+                "NewsletterNames": self.newsletter_names.split(","),
+                "CampaignTriggerCode": str(self.campaign_trigger_code),
+                "SubscribedOverPledge": False if cint(self.subscribed_over_pledge) != 1 else True,
+                "Zip_code": self.zip_code or 0,
+                "Last_name": self.last_name or None,
+                "First_name": self.first_name or None,
+                "Anrede": self.anrede or None,
+                "LangCode": self.lang_code or "de",
+                "Nl_abo": False if cint(self.nl_abo) != 1 else True,
+                "Quelle": self.quelle or None
+            }
             send_kampagne_to_sp(sp_data, id=self.name)
 
 @frappe.whitelist()

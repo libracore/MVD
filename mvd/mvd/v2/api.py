@@ -271,6 +271,14 @@ def kampagne(**kwargs):
     if isinstance(kwargs.get("newsletter_names"), list):
         kwargs["newsletter_names"] = json.dumps(kwargs["newsletter_names"])
 
+    # Validation for required fields
+    required_fields = ["email", "campaign_trigger_code", "newsletter_names"]
+    missing_fields = [f for f in required_fields if not kwargs.get(f)]
+    if missing_fields:
+        frappe.local.response.http_status_code = 400
+        frappe.local.response.message = f"Missing required fields: {', '.join(missing_fields)}"
+        return
+
     if kwargs.get("id", None):
         if frappe.db.exists("Kampagne", kwargs.get("id", None)):
             kwargs['doctype'] = "Kampagne"
