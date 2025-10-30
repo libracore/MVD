@@ -602,10 +602,13 @@ def get_naechstes_jahr_geschuldet(mitglied_id, live_data=False, datum_via_api=Fa
         kuendigungsfrist_verpasst = True
     
     if datum_via_api:
-        if kuendigungsfrist_verpasst:
-            return "{0}-{1}".format(current_year + 1, "12-31"), kuendigungsfrist_verpasst
+        if current_year < bezahltes_mitgliedschafsjahr:
+            return "{0}-{1}".format(bezahltes_mitgliedschafsjahr, "12-31"), False
         else:
-            return "{0}-{1}".format(current_year, "12-31"), kuendigungsfrist_verpasst
+            if kuendigungsfrist_verpasst:
+                return "{0}-{1}".format(current_year + 1, "12-31"), kuendigungsfrist_verpasst
+            else:
+                return "{0}-{1}".format(current_year, "12-31"), kuendigungsfrist_verpasst
 
     if current_year > bezahltes_mitgliedschafsjahr:
         return True
