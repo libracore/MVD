@@ -32,7 +32,13 @@
   "id",
   "sent_to_sp",
   "ub_sent",
-  "column_break_26"
+  "column_break_26",
+  "initiative25_section",
+  "initiative25_unterschrieben",
+  "initiative25_sticker",
+  "initiative25_infos",
+  "initiative25_summe_von_anzahl_unterschriften",
+  "initiative25_anzahl_von_codes"
  ],
  "fields": [
   {
@@ -109,7 +115,7 @@
   {
    "fieldname": "strasse_nummer",
    "fieldtype": "Data",
-   "label": "Strasse Hausnummer"
+   "label": "Hausnummer"
   },
   {
    "fieldname": "pledge_anz",
@@ -184,9 +190,43 @@
    "fieldname": "sent_to_sp",
    "fieldtype": "Check",
    "label": "Sent to SP"
+  },
+  {
+   "default": "0",
+   "fieldname": "initiative25_unterschrieben",
+   "fieldtype": "Check",
+   "label": "Initiative25 Unterschrieben"
+  },
+  {
+   "default": "0",
+   "fieldname": "initiative25_sticker",
+   "fieldtype": "Check",
+   "label": "Initiative25 Sticker"
+  },
+  {
+   "default": "0",
+   "fieldname": "initiative25_infos",
+   "fieldtype": "Check",
+   "label": "Initiative25 Infos"
+  },
+  {
+   "fieldname": "initiative25_summe_von_anzahl_unterschriften",
+   "fieldtype": "Data",
+   "label": "Initiative25 Summe von Anzahl Unterschriften"
+  },
+  {
+   "fieldname": "initiative25_anzahl_von_codes",
+   "fieldtype": "Data",
+   "label": "Initiative25 Anzahl von Codes"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "initiative25_section",
+   "fieldtype": "Section Break",
+   "label": "Initiative25"
   }
  ],
- "modified": "2025-10-30 12:34:55.640164",
+ "modified": "2025-10-30 13:53:19.204917",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",
