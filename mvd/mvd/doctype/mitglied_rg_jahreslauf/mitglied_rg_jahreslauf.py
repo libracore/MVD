@@ -661,7 +661,7 @@ def get_csv(mrj=None, bg_job=True):
         
         mrj_sektions_selektionen = frappe.db.sql(
             """
-                SELECT `name` FROM `tabMRJ Sektions Selektion` WHERE `mrj` = '{0}'
+                SELECT `name` FROM `tabMRJ Sektions Selektion` WHERE `mrj` = '{0}' AND `docstatus` = 1
             """.format(mrj),
             as_dict=True
         )
