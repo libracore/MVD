@@ -90,10 +90,10 @@ def digitalrechnung_mapper(mitglied):
             dr_doc.sektion_id = mitglied.sektion_id
         
         if cint(mitglied.digitalrechnung) == 1:
-            if dr_doc.opt_out:
+            if not dr_doc.opt_in:
                 dr_doc.set_opt_in()
         else:
-            if dr_doc.opt_in:
+            if not dr_doc.opt_out:
                 dr_doc.set_opt_out()
         
         if dr_doc.hash != mitglied.mitglied_hash:
