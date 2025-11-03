@@ -750,7 +750,7 @@ def get_csv(mrj=None, bg_job=True):
                                                     FROM `tabFakultative Rechnung`
                                                     WHERE `sales_invoice` = '{sinv}'
                                                     AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
-                    hv = False
+                    hv = {}
                     if len(hv_rechnungen) > 0:
                         hv = frappe.get_doc("Fakultative Rechnung", hv_rechnungen[0].name)
                     
