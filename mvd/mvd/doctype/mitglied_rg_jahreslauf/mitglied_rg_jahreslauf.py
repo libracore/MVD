@@ -833,7 +833,7 @@ def get_csv(mrj=None, bg_job=True):
                     row_data.append(rechnung.get("renaming_series") or '')
                     
                     row_data.append(mitgliedschaft.mitglied_nr or '')
-                    row_data.append(jahresversand.jahr or '')
+                    row_data.append(jahresversand.bezugsjahr or '')
                     row_data.append(mitgliedschaft.mitgliedtyp_c or '')
                     row_data.append(mitgliedschaft.sektion_id or '')
                     row_data.append('')
@@ -951,7 +951,7 @@ def get_csv(mrj=None, bg_job=True):
                         row_data.append('--')
                         row_data.append('--')
                         row_data.append(mitgliedschaft.mitglied_nr or '')
-                        row_data.append(jahresversand.jahr or '')
+                        row_data.append(jahresversand.bezugsjahr or '')
                         row_data.append(mitgliedschaft.mitgliedtyp_c or '')
                         row_data.append(mitgliedschaft.sektion_id or '')
                         row_data.append('')
