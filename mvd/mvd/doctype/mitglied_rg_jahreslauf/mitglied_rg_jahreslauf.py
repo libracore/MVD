@@ -708,7 +708,8 @@ def get_csv(mrj=None, bg_job=True):
                 'bezahlt_fuer_name',
                 'bezahlt_von_firma',
                 'bezahlt_von_name',
-                'spezielles'
+                'spezielles',
+                'digitalrechung_url'
             ]
             data.append(header)
             
