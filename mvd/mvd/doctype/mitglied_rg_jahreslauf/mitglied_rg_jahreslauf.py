@@ -739,12 +739,22 @@ def get_csv(mrj=None, bg_job=True):
                     skip = True
                 # ------------------------------------------------------------------------------------
                 # ------------------------------------------------------------------------------------
-                
+
                 if not skip:
                     row_data = []
                     pseudo_zeile = False
+
+                    sinv = frappe.get_doc("Sales Invoice", rechnung.name)
+                    hv_rechnungen = frappe.db.sql("""SELECT
+                                                        `name`
+                                                    FROM `tabFakultative Rechnung`
+                                                    WHERE `sales_invoice` = '{sinv}'
+                                                    AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
+                    hv = False
+                    if len(hv_rechnungen) > 0:
+                        hv = frappe.get_doc("Fakultative Rechnung", hv_rechnungen[0].name)
                     
-                    if mitgliedschaft.unabhaengiger_debitor and mitgliedschaft.abweichende_rechnungsadresse:
+                    if cint(mitgliedschaft.unabhaengiger_debitor) == 1 and cint(mitgliedschaft.abweichende_rechnungsadresse) == 1:
                         # fremdzahler
                         if mitgliedschaft.rg_kundentyp == 'Unternehmen':
                             row_data.append(mitgliedschaft.rg_firma or '')
@@ -770,21 +780,23 @@ def get_csv(mrj=None, bg_job=True):
                         row_data.append(mitgliedschaft.rg_briefanrede or '')
                         row_data.append(mitgliedschaft.vorname_1 or '')
                         row_data.append(mitgliedschaft.nachname_1 or '')
-                        if mitgliedschaft.hat_solidarmitglied:
+
+                        if cint(mitgliedschaft.hat_solidarmitglied) == 1:
                             row_data.append(mitgliedschaft.vorname_2 or '')
                             row_data.append(mitgliedschaft.nachname_2 or '')
                         else:
                             row_data.append("")
                             row_data.append("")
                     
-                    if mitgliedschaft.abweichende_rechnungsadresse:
+                    if cint(mitgliedschaft.abweichende_rechnungsadresse) == 1:
                         row_data.append(mitgliedschaft.rg_zusatz_adresse or '')
                         strasse = ''
                         strasse += mitgliedschaft.rg_strasse or ''
                         strasse += " " + str(mitgliedschaft.rg_nummer or '')
                         strasse += mitgliedschaft.rg_nummer_zu or ''
                         row_data.append(strasse)
-                        if mitgliedschaft.rg_postfach:
+
+                        if cint(mitgliedschaft.rg_postfach) == 1:
                             row_data.append("Postfach {0}".format(mitgliedschaft.rg_postfach_nummer or ''))
                             row_data.append("")
                             row_data.append("")
@@ -801,7 +813,8 @@ def get_csv(mrj=None, bg_job=True):
                         strasse += " " + str(mitgliedschaft.nummer or '')
                         strasse += mitgliedschaft.nummer_zu or ''
                         row_data.append(strasse)
-                        if mitgliedschaft.postfach:
+
+                        if cint(mitgliedschaft.postfach) == 1:
                             row_data.append("Postfach {0}".format(mitgliedschaft.postfach_nummer or ''))
                             row_data.append("")
                             row_data.append("")
@@ -811,27 +824,16 @@ def get_csv(mrj=None, bg_job=True):
                             row_data.append("")
                         row_data.append(mitgliedschaft.plz or '')
                         row_data.append(mitgliedschaft.ort or '')
-                    
-                    sinv = frappe.get_doc("Sales Invoice", rechnung.name)
-                    hv_rechnungen = frappe.db.sql("""SELECT
-                                                        `name`
-                                                    FROM `tabFakultative Rechnung`
-                                                    WHERE `sales_invoice` = '{sinv}'
-                                                    AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
-                    hv = False
-                    if len(hv_rechnungen) > 0:
-                        hv = frappe.get_doc("Fakultative Rechnung", hv_rechnungen[0].name)
-                    
-                    row_data.append(sinv.outstanding_amount or 0.00)
-                    row_data.append(sinv.esr_reference or '')
+                    row_data.append(rechnung.get("outstanding_amount") or 0.00)
+                    row_data.append(rechnung.get("esr_reference") or '')
                     row_data.append('')
-                    row_data.append(hv.betrag if hv else '')
-                    row_data.append(hv.qrr_referenz if hv else '')
+                    row_data.append(hv.get("betrag") or 0.00)
+                    row_data.append(hv.get("qrr_referenz") or '')
                     row_data.append('')
-                    row_data.append(sinv.name or '')
+                    row_data.append(rechnung.get("renaming_series") or '')
                     
                     row_data.append(mitgliedschaft.mitglied_nr or '')
-                    row_data.append(jahresversand.bezugsjahr or '')
+                    row_data.append(jahresversand.jahr or '')
                     row_data.append(mitgliedschaft.mitgliedtyp_c or '')
                     row_data.append(mitgliedschaft.sektion_id or '')
                     row_data.append('')
@@ -842,14 +844,14 @@ def get_csv(mrj=None, bg_job=True):
                     row_data.append(mitgliedschaft.vorname_1 or '')
                     row_data.append(mitgliedschaft.nachname_1 or '')
                     
-                    if mitgliedschaft.hat_solidarmitglied:
+                    if cint(mitgliedschaft.hat_solidarmitglied) == 1:
                         row_data.append(mitgliedschaft.vorname_2 or '')
                         row_data.append(mitgliedschaft.nachname_2 or '')
                     else:
                         row_data.append("")
                         row_data.append("")
                     
-                    if mitgliedschaft.unabhaengiger_debitor:
+                    if cint(mitgliedschaft.unabhaengiger_debitor) == 1 and cint(mitgliedschaft.abweichende_rechnungsadresse) == 1:
                         pseudo_zeile = True
                         if mitgliedschaft.kundentyp == 'Unternehmen':
                             # bezahlt_fuer_firma
@@ -885,15 +887,21 @@ def get_csv(mrj=None, bg_job=True):
                     row_data.append('')
                     
                     if pseudo_zeile:
-                        if mitgliedschaft.ist_geschenkmitgliedschaft:
+                        if cint(mitgliedschaft.ist_geschenkmitgliedschaft) == 1:
                             row_data.append('Geschenkmitgliedschaft')
                         else:
                             row_data.append('Unabhängiger Debitor')
                     else:
-                        if mitgliedschaft.reduzierte_mitgliedschaft:
+                        if cint(mitgliedschaft.reduzierte_mitgliedschaft) == 1:
                             row_data.append('Reduzierte Mitgliedschaft')
                         else:
                             row_data.append('')
+                    
+                    # Digitalrechnung URL
+                    if mitgliedschaft.mitglied_hash:
+                        row_data.append('https://service.mieterverband.ch/digitalrechnung?hash={0}'.format(mitgliedschaft.mitglied_hash))
+                    else:
+                        row_data.append('')
                     
                     data.append(row_data)
                     
@@ -909,7 +917,8 @@ def get_csv(mrj=None, bg_job=True):
                         row_data.append(mitgliedschaft.briefanrede or '')
                         row_data.append(mitgliedschaft.vorname_1 or '')
                         row_data.append(mitgliedschaft.nachname_1 or '')
-                        if mitgliedschaft.hat_solidarmitglied:
+
+                        if cint(mitgliedschaft.hat_solidarmitglied) == 1:
                             row_data.append(mitgliedschaft.vorname_2 or '')
                             row_data.append(mitgliedschaft.nachname_2 or '')
                         else:
@@ -922,7 +931,8 @@ def get_csv(mrj=None, bg_job=True):
                         strasse += " " + str(mitgliedschaft.nummer or '')
                         strasse += mitgliedschaft.nummer_zu or ''
                         row_data.append(strasse)
-                        if mitgliedschaft.postfach:
+
+                        if cint(mitgliedschaft.postfach) == 1:
                             row_data.append("Postfach {0}".format(mitgliedschaft.postfach_nummer or ''))
                             row_data.append("")
                             row_data.append("")
@@ -941,7 +951,7 @@ def get_csv(mrj=None, bg_job=True):
                         row_data.append('--')
                         row_data.append('--')
                         row_data.append(mitgliedschaft.mitglied_nr or '')
-                        row_data.append(jahresversand.bezugsjahr or '')
+                        row_data.append(jahresversand.jahr or '')
                         row_data.append(mitgliedschaft.mitgliedtyp_c or '')
                         row_data.append(mitgliedschaft.sektion_id or '')
                         row_data.append('')
@@ -951,7 +961,8 @@ def get_csv(mrj=None, bg_job=True):
                         row_data.append('')
                         row_data.append(mitgliedschaft.vorname_1 or '')
                         row_data.append(mitgliedschaft.nachname_1 or '')
-                        if mitgliedschaft.hat_solidarmitglied:
+
+                        if cint(mitgliedschaft.hat_solidarmitglied) == 1:
                             row_data.append(mitgliedschaft.vorname_2 or '')
                             row_data.append(mitgliedschaft.nachname_2 or '')
                         else:
@@ -986,16 +997,16 @@ def get_csv(mrj=None, bg_job=True):
                             bezahlt_von_name += mitgliedschaft.rg_nachname or ''
                             row_data.append(bezahlt_von_name)
                         
-                        if mitgliedschaft.ist_geschenkmitgliedschaft:
+                        if cint(mitgliedschaft.ist_geschenkmitgliedschaft) == 1:
                             row_data.append('Geschenkmitgliedschaft')
                         else:
-                            if mitgliedschaft.reduzierte_mitgliedschaft:
+                            if cint(mitgliedschaft.reduzierte_mitgliedschaft) == 1:
                                 row_data.append('Reduzierte Mitgliedschaft / Unabhängiger Debitor')
                             else:
                                 row_data.append('Unabhängiger Debitor')
-                        
+
                         data.append(row_data)
-            
+
             csv_file = make_csv(data)
             file_name = "{titel}_{sektions_selektion}_{datetime}.csv".format(titel=mrj, sektions_selektion=mrj_sektions_selektion.name.replace(" ", "-"), datetime=now().replace(" ", "_"))
             
