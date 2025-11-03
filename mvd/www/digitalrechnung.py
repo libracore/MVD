@@ -78,6 +78,19 @@ def check_hash(hash):
             if existing_digitalrechnung:
                 return handle_digitalrechnung_onload(existing_digitalrechnung)
             else:
+                existing_mitglied_based_on_hash = frappe.db.exists("Mitgliedschaft", {'mitglied_hash': hash})
+                if existing_mitglied_based_on_hash:
+                    existing_digital_rg_based_on_mitglied = frappe.db.exists("Digitalrechnung", {'mitglied_id': existing_mitglied_based_on_hash})
+                    if existing_digital_rg_based_on_mitglied:
+                        frappe.db.set_value("Digitalrechnung", existing_digital_rg_based_on_mitglied, 'hash', hash)
+                        return handle_digitalrechnung_onload(existing_digital_rg_based_on_mitglied)
+                    else:
+                        m = frappe.get_doc("Mitgliedschaft", existing_mitglied_based_on_hash)
+                        m.save()
+                        frappe.db.commit()
+                        existing_digitalrechnung = frappe.db.exists("Digitalrechnung", {'hash': hash})
+                        if existing_digitalrechnung:
+                            return handle_digitalrechnung_onload(existing_digitalrechnung)
                 # wrong hash
                 return False
         else:
