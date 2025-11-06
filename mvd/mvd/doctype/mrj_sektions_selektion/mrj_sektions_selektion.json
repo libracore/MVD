@@ -28,7 +28,10 @@
   "mitgliedtyp",
   "cb_3",
   "region_spezifisch",
-  "region"
+  "region",
+  "cb_4",
+  "digitalrechnung_spezifisch",
+  "digitalrechnung"
  ],
  "fields": [
   {
@@ -184,10 +187,27 @@
    "fieldtype": "Data",
    "label": "Titel",
    "reqd": 1
+  },
+  {
+   "fieldname": "cb_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "digitalrechnung_spezifisch",
+   "fieldtype": "Check",
+   "label": "Digitalrechnung"
+  },
+  {
+   "depends_on": "eval:doc.digitalrechnung_spezifisch",
+   "fieldname": "digitalrechnung",
+   "fieldtype": "Select",
+   "label": "Digitalrechnung",
+   "options": "Ja\nNein"
   }
  ],
  "is_submittable": 1,
- "modified": "2025-10-27 16:43:35.373744",
+ "modified": "2025-11-06 08:57:46.980259",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MRJ Sektions Selektion",

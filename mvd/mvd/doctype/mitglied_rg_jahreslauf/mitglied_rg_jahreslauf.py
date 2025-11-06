@@ -217,6 +217,8 @@ def create_invoices(mrj):
                                 `language`,
                                 `region_spezifisch`,
                                 `region`,
+                                `digitalrechnung_spezifisch`,
+                                `digitalrechnung`,
                                 `druckvorlage`,
                                 `druckvorlage_hv`,
                                 `druckvorlage_email`,
@@ -239,6 +241,8 @@ def create_invoices(mrj):
                                         `language`,
                                         `region_spezifisch`,
                                         `region`,
+                                        `digitalrechnung_spezifisch`,
+                                        `digitalrechnung`,
                                         `druckvorlage`,
                                         `druckvorlage_hv`,
                                         `druckvorlage_email`,
@@ -268,6 +272,13 @@ def create_invoices(mrj):
     if cint(sektions_selektion.region_spezifisch):
         region_filter = "AND `region` = '{0}'".format(sektions_selektion.region)
     
+    digitalrechnung_filter = ''
+    if cint(sektions_selektion.digitalrechnung_spezifisch):
+        if sektions_selektion.digitalrechnung == 'Ja':
+            digitalrechnung_filter = "AND `digitalrechnung` = 1"
+        else:
+            digitalrechnung_filter = "AND `digitalrechnung` != 1"
+    
     mitglieder = frappe.db.sql("""
         SELECT `name`
         FROM `tabMitgliedschaft`
@@ -282,6 +293,7 @@ def create_invoices(mrj):
         {mitgliedtyp_filter}
         {language_filter}
         {region_filter}
+        {digitalrechnung_filter}
         AND `name` NOT IN (
             SELECT `mv_mitgliedschaft`
             FROM `tabSales Invoice`
@@ -291,7 +303,7 @@ def create_invoices(mrj):
             AND `ist_mitgliedschaftsrechnung` = 1
         )
     """.format(sektion=sektions_selektion.sektion_id, jahr=sektions_selektion.bezugsjahr, mitgliedtyp_filter=mitgliedtyp_filter, \
-            language_filter=language_filter, region_filter=region_filter), as_dict=True)
+            language_filter=language_filter, region_filter=region_filter, digitalrechnung_filter=digitalrechnung_filter), as_dict=True)
     
     if len(mitglieder) < 1:
         # keine mitglieder zur sektions selektion gefunden -> sektion selektion ist verarbeitet

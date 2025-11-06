@@ -25,6 +25,13 @@ class MRJSektionsSelektion(Document):
             if self.region_spezifisch:
                 region_filter = "AND `region` = '{0}'".format(self.region)
             
+            digitalrechnung_filter = ''
+            if self.digitalrechnung_spezifisch:
+                if self.digitalrechnung == 'Ja':
+                    digitalrechnung_filter = "AND `digitalrechnung` = 1"
+                else:
+                    digitalrechnung_filter = "AND `digitalrechnung` != 1"
+            
             self.anz_rechnungen = frappe.db.sql("""
                 SELECT COUNT(`name`) AS `qty`
                 FROM `tabMitgliedschaft`
@@ -39,6 +46,7 @@ class MRJSektionsSelektion(Document):
                 {mitgliedtyp_filter}
                 {language_filter}
                 {region_filter}
+                {digitalrechnung_filter}
                 AND `name` NOT IN (
                     SELECT `mv_mitgliedschaft`
                     FROM `tabSales Invoice`
@@ -48,7 +56,7 @@ class MRJSektionsSelektion(Document):
                     AND `ist_mitgliedschaftsrechnung` = 1
                 )
             """.format(sektion=self.sektion_id, jahr=self.bezugsjahr, mitgliedtyp_filter=mitgliedtyp_filter, \
-                    language_filter=language_filter, region_filter=region_filter), as_dict=True)[0].qty or 0
+                    language_filter=language_filter, region_filter=region_filter, digitalrechnung_filter=digitalrechnung_filter), as_dict=True)[0].qty or 0
 
             
         return
