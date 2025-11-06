@@ -1057,21 +1057,9 @@ function sektionswechsel(frm) {
                                     callback: function(r)
                                     {
                                         if (r.message.status == 200) {
-                                            cur_frm.set_value("wegzug", frappe.datetime.get_today());
-                                            cur_frm.set_value("wegzug_zu", values.sektion_neu);
-                                            cur_frm.set_value("zuzug_id", r.message.new_id);
-                                            var status_change_log = cur_frm.add_child('status_change');
-                                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
-                                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
-                                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Wegzug');
-                                            frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', "Sektionswechsel zu " + values.sektion_neu);
-                                            cur_frm.refresh_field('status_change');
-                                            cur_frm.set_value("status_c", 'Wegzug');
-                                            cur_frm.set_value("sektionswechsel_beantragt", 1);
-                                            cur_frm.save().then(function(){
-                                                cur_frm.timeline.insert_comment("Sektionswechsel zu " + values.sektion_neu + " vollzogen.");
-                                                frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
-                                            });
+                                            cur_frm.reload_doc();
+                                            cur_frm.timeline.insert_comment("Sektionswechsel zu " + values.sektion_neu + " vollzogen.");
+                                            frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
                                         } else {
                                             if (r.message.status == 500) {
                                                 frappe.msgprint(`oops, da ist etwas schiefgelaufen!<br>${r.message.error}`);

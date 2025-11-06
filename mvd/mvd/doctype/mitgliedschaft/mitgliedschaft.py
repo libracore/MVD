@@ -1485,6 +1485,7 @@ def get_uebersicht_html(name):
 
 @frappe.whitelist()
 def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
+    wegzugs_mitgliedschaft_id = mitgliedschaft
     if str(get_sektion_code(neue_sektion)) not in ('ZH'):
         # Pseudo Sektion handling
         if cint(frappe.db.get_value("Sektion", neue_sektion, "pseudo_sektion")) == 1:
@@ -1596,6 +1597,19 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
                 new_mitgliedschaft.zuzug_korrespondenz = new_korrespondenz.name
             
             new_mitgliedschaft.save(ignore_permissions=True)
+
+            # Update Wegzugs-Mitglied
+            mitgliedschaft.wegzug = today()
+            mitgliedschaft.wegzug_zu = neue_sektion
+            mitgliedschaft.zuzug_id = new_mitgliedschaft.name
+            mitgliedschaft.sektionswechsel_beantragt = 1
+            status_change_log = mitgliedschaft.append("status_change", {})
+            status_change_log.datum = today()
+            status_change_log.status_alt = mitgliedschaft.status_c
+            status_change_log.status_neu = "Wegzug"
+            status_change_log.grund = "Sektionswechsel zu {0}".format(neue_sektion)
+            mitgliedschaft.status_c = "Wegzug"
+            mitgliedschaft.save(ignore_permissions=True)
             
             return {
                 'status': 200,
@@ -1604,6 +1618,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             
         except Exception as err:
             frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), new_mitgliedschaft.as_dict()), 'Sektionswechsel')
+            frappe.db.set_value("Mitgliedschaft", wegzugs_mitgliedschaft_id, "sektionswechsel_beantragt", 1)
             return {
                 'status': 500,
                 'error': str(err)
