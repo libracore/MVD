@@ -211,20 +211,34 @@ class WebshopOrder(Document):
 
     
     def after_insert(self):
-        if self.v2 == 1 and not self.abweichende_rechnungsadresse:
-            matching_customer = frappe.get_all(
-                "Kunden",
-                filters={"e_mail": self.e_mail},
-                fields=["name"],
-            )
-            if len(matching_customer) == 1:
-                self.faktura_kunde = matching_customer[0].name
-                self.update_faktura_kunde()
-                self.save()
-            else:
-                self.create_faktura_kunde()
-            self.create_sinv()
+        # Bei altem Webshop und abweichenden Adressen soll kein Customer / Rechnung angelegt werden
+        if self.v2 != 1 or self.abweichende_rechnungsadresse:
             return
+        # Bei gelösten Mitgliedschaften soll kein Customer / Rechnung angelegt werden
+        if self.artikel_json:
+            try:
+                artikel_data = json.loads(self.artikel_json)
+                items = artikel_data.get("items", [])
+                for item in items:
+                    item_code = (item.get("item") or "").upper().strip()
+                    if item_code.startswith("MV") and (item_code.endswith("-MG") or item_code.endswith("-MP")):
+                        return
+            except Exception:
+                pass
+
+        matching_customer = frappe.get_all(
+            "Kunden",
+            filters={"e_mail": self.e_mail},
+            fields=["name"],
+        )
+        if len(matching_customer) == 1:
+            self.faktura_kunde = matching_customer[0].name
+            self.update_faktura_kunde()
+            self.save()
+        else:
+            self.create_faktura_kunde()
+        self.create_sinv()
+        return
 
     def create_faktura_kunde(self):
         kunde = frappe.get_doc({
