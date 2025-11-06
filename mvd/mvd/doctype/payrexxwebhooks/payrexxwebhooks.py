@@ -69,12 +69,9 @@ class PayrexxWebhooks(Document):
                 "payrexx_instance_uuid": lambda t: t.get("instance", {}).get("uuid"),
             }
 
-            missing_fields = [] # to log error
             for field, getter in field_map.items():
                 value = getter(transaction)
                 setattr(self, field, value)
-                if value is None:
-                    missing_fields.append(field)
 
             # Custom logic to extract mitglied_hash because it's in a list
             mitglied_hash = None
@@ -85,18 +82,6 @@ class PayrexxWebhooks(Document):
                     break
 
             self.mitglied_hash = mitglied_hash
-
-            # Error logging
-            if mitglied_hash is None:
-                missing_fields.append("mitglied_hash")
-
-            if missing_fields: #log error
-                log_message = (
-                    "Missing or invalid fields in PayrexxWebhook\n"
-                    "Transaction uuid: {0}\n"
-                    "Missing Fields: {1}".format(transaction_uuid, ', '.join(missing_fields))
-                )
-                frappe.log_error("PayrexxWebhook Missing Fields", log_message)
 
         except Exception as e:
             frappe.log_error("PayrexxWebhook JSON parse error", str(e))
