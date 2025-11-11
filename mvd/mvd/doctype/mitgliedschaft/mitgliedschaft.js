@@ -1024,6 +1024,10 @@ function sektionswechsel_pseudo_sektion(frm) {
 
 function sektionswechsel(frm) {
     if (frappe.user.has_role("MV_MA")) {
+        if (cur_frm.is_dirty()) {
+            frappe.msgprint("Bitte speichern Sie Ihre Änderungen <b>vor</b> der Durchführung eines Sektionswechsel.")
+            return
+        }
         if (cur_frm.doc.zuzug_id||cint(cur_frm.doc.sektionswechsel_beantragt)==1) {
             if (cur_frm.doc.zuzug_id) {
                 frappe.msgprint("Für dieses Mitglied wurde bereits ein Sektionswechsel vollzogen.");
