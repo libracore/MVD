@@ -255,6 +255,7 @@ def get_member_annual_invoices(id):
 def get_annual_invoice_pdf(invoice_name=None, signature=False):
     try:
         from erpnextswiss.erpnextswiss.guest_print import get_pdf_as_guest
+        frappe.local.form_dict.key = signature
         return get_pdf_as_guest(doctype="Sales Invoice", name=invoice_name, format="Automatisierte Mitgliedschaftsrechnung", key=signature)
     except Exception as err:
         return ['500 Internal Server Error', str(err)]
