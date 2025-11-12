@@ -80,8 +80,8 @@
   "tel_p_1",
   "tel_m_1",
   "tel_g_1",
-  "keine_e_mail_1",
   "e_mail_1",
+  "keine_e_mail_1",
   "cb_3",
   "heading_solidarmitglied",
   "hat_solidarmitglied",
@@ -1405,7 +1405,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2025-11-12 21:19:18.108000",
+ "modified": "2025-11-12 21:36:30.597990",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
