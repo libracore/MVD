@@ -29,6 +29,8 @@
   "tipps_geschenkmitgliedschaft",
   "section_content",
   "seiten",
+  "expert_mode",
+  "html",
   "migriert_neues_cd",
   "section_seitenmanagement",
   "anzahl_seiten",
@@ -445,6 +447,7 @@
    "label": "Inhalt"
   },
   {
+   "depends_on": "eval:!doc.expert_mode",
    "fieldname": "seiten",
    "fieldtype": "Table",
    "label": "Seiten",
@@ -468,9 +471,21 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "test_dn"
+  },
+  {
+   "default": "0",
+   "fieldname": "expert_mode",
+   "fieldtype": "Check",
+   "label": "Enable Expert Mode"
+  },
+  {
+   "depends_on": "eval:doc.expert_mode",
+   "fieldname": "html",
+   "fieldtype": "Code",
+   "label": "HTML"
   }
  ],
- "modified": "2025-10-27 16:04:04.503512",
+ "modified": "2025-11-13 14:21:31.433741",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",

@@ -167,41 +167,68 @@
     {% set test_druckvorlage = False %}
 {% endif %}
 <!-- ---------------------------------------------------------------------------------------- -->
-<!-- DocType Sales Invoice -->
+<!-- Expert-Mode -->
 <!-- ---------------------------------------------------------------------------------------- -->
-{% if doc.doctype == 'Sales Invoice' %}{{ frappe.render_template('templates/mvd/sales_invoice_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
+{% set expert_mode = False %}
+{% if test_druckvorlage %}
+    {% set druckvorlage = frappe.get_doc("Druckvorlage", test_druckvorlage) %}
+    {% if druckvorlage.expert_mode %}
+        {% set expert_mode = True %}
+        {{ frappe.render_template(druckvorlage.html, {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}
+    {% endif %}
+{% else %}
+    {% if doc.druckvorlage %}
+        {% set druckvorlage = frappe.get_doc("Druckvorlage", doc.druckvorlage) %}
+        {% if druckvorlage.expert_mode %}
+            {% set expert_mode = True %}
+            {{ frappe.render_template(druckvorlage.html, {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}
+        {% endif %}
+    {% else %}
+        <div>Das Dokument {{ doc.name }} ({{ doc.doctype }}) besitzt keine Druckvorlage!</div>
+    {% endif %}
+{% endif %}
 <!-- ---------------------------------------------------------------------------------------- -->
-<!-- ENDE: DocType Sales Invoice -->
-<!-- ---------------------------------------------------------------------------------------- -->
-
-<!-- ---------------------------------------------------------------------------------------- -->
-<!-- DocType Mahnung -->
-<!-- ---------------------------------------------------------------------------------------- -->
-{% if doc.doctype == 'Mahnung' %}{{ frappe.render_template('templates/mvd/mahnung_drucktemplate.html', {'mahnung': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
-<!-- ---------------------------------------------------------------------------------------- -->
-<!-- ENDE: DocType Mahnung -->
-<!-- ---------------------------------------------------------------------------------------- -->
-
-<!-- ---------------------------------------------------------------------------------------- -->
-<!-- DocType Fakultative Rechnung -->
-<!-- ---------------------------------------------------------------------------------------- -->
-{% if doc.doctype == 'Fakultative Rechnung' %}{{ frappe.render_template('templates/mvd/fakultative_rechnung_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
-<!-- ---------------------------------------------------------------------------------------- -->
-<!-- ENDE: DocType Fakultative Rechnung -->
-<!-- ---------------------------------------------------------------------------------------- -->
-
-<!-- ---------------------------------------------------------------------------------------- -->
-<!-- DocType Korrespondenz -->
-<!-- ---------------------------------------------------------------------------------------- -->
-{% if doc.doctype == 'Korrespondenz' %}{{ frappe.render_template('templates/mvd/korrespondenz_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
-<!-- ---------------------------------------------------------------------------------------- -->
-<!-- ENDE: DocType Korrespondenz -->
+<!-- ENDE: Expert-Mode -->
 <!-- ---------------------------------------------------------------------------------------- -->
 
-<!-- ---------------------------------------------------------------------------------------- -->
-<!-- DocType Mitgliedschaft -->
-<!-- ---------------------------------------------------------------------------------------- -->
-{% if doc.doctype == 'Mitgliedschaft' %}{{ frappe.render_template('templates/mvd/mitgliedschaft_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
-<!-- ---------------------------------------------------------------------------------------- -->
-<!-- ENDE: DocType Mitgliedschaft -->
-<!-- ---------------------------------------------------------------------------------------- -->
+{% if not expert_mode %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- DocType Sales Invoice -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+    {% if doc.doctype == 'Sales Invoice' %}{{ frappe.render_template('templates/mvd/sales_invoice_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- ENDE: DocType Sales Invoice -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- DocType Mahnung -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+    {% if doc.doctype == 'Mahnung' %}{{ frappe.render_template('templates/mvd/mahnung_drucktemplate.html', {'mahnung': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- ENDE: DocType Mahnung -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- DocType Fakultative Rechnung -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+    {% if doc.doctype == 'Fakultative Rechnung' %}{{ frappe.render_template('templates/mvd/fakultative_rechnung_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- ENDE: DocType Fakultative Rechnung -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- DocType Korrespondenz -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+    {% if doc.doctype == 'Korrespondenz' %}{{ frappe.render_template('templates/mvd/korrespondenz_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- ENDE: DocType Korrespondenz -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- DocType Mitgliedschaft -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+    {% if doc.doctype == 'Mitgliedschaft' %}{{ frappe.render_template('templates/mvd/mitgliedschaft_drucktemplate.html', {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}{% endif %}
+    <!-- ---------------------------------------------------------------------------------------- -->
+    <!-- ENDE: DocType Mitgliedschaft -->
+    <!-- ---------------------------------------------------------------------------------------- -->
+{% endif %}
