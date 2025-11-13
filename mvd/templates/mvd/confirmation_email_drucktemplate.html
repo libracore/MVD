@@ -1,98 +1,92 @@
-{% if doc.druckvorlage %}
-    {% set druckvorlage = frappe.get_doc("Druckvorlage", doc.druckvorlage) %}
+{% set webshop_order = frappe.get_all("Webshop Order", filters={"sinv": doc.name}, limit=1) %}
+{% if webshop_order %}
+    {% set webshop_order = frappe.get_doc("Webshop Order", webshop_order[0].name) %}
+{% endif %}
 
-    {% set webshop_order = frappe.get_all("Webshop Order", filters={"sinv": doc.name}, limit=1) %}
-    {% if webshop_order %}
-        {% set webshop_order = frappe.get_doc("Webshop Order", webshop_order[0].name) %}
-    {% endif %}
+<!-- Header / Logo -->
+<div style="text-align:left; margin-bottom:50px;">
+    <img src="{{ frappe.utils.get_url('/assets/mvd/img/mvs_nationales_logo.png').replace('http', 'https') }}" style="width:250px;">
+</div>
 
-    <!-- Header / Logo -->
-    <div style="text-align:left; margin-bottom:50px;">
-        <img src="/assets/mvd/img/mvs_nationales_logo_klein.png" style="width:250px;">
+<!-- Greeting -->
+<p> Guten Tag</p>
+
+<!-- Intro -->
+<p>
+    Wir bestätigen den Eingang Ihrer Bestellung.
+</p>
+
+<!-- Order Details -->
+<h2>Bestelldetails</h2>
+<p><b>Datum:</b> {{ frappe.utils.get_datetime(doc.creation).strftime('%d.%m.%Y') }}</p>
+{% if webshop_order %}
+<div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+
+    {% if webshop_order.abweichende_rechnungsadresse %}
+    <div style="width: 48%;">
+        <p><b>Rechnungsadresse:</b><br>
+            {{ webshop_order.rg_vorname }} {{ webshop_order.rg_nachname }}<br>
+            {% if webshop_order.rg_firma %}
+                {{ webshop_order.rg_firma }}<br>
+            {% endif %}
+            {{ webshop_order.rg_strasse }}{% if webshop_order.rg_strassen_nr%} {{webshop_order.rg_strassen_nr}}{% endif %}<br>
+            {% if webshop_order.rg_adress_zusatz %}
+                {{ webshop_order.rg_adress_zusatz }}<br>
+            {% endif %}
+            {% if webshop_order.rg_postfach %}
+                Postfach {{ webshop_order.rg_postfach }}<br>
+            {% endif %}
+            {{ webshop_order.rg_plz }} {{ webshop_order.rg_ort }}
+        </p>
     </div>
 
-    <!-- Greeting -->
-    <p> Guten Tag</p>
-
-    <!-- Intro -->
-    <p>
-        Wir bestätigen den Eingang Ihrer Bestellung.
-    </p>
-
-    <!-- Order Details -->
-    <h2>Bestelldetails</h2>
-    <p><b>Datum:</b> {{ frappe.utils.get_datetime(doc.creation).strftime('%d.%m.%Y') }}</p>
-    {% if webshop_order %}
-    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-
-        {% if webshop_order.abweichende_rechnungsadresse %}
-        <div style="width: 48%;">
-            <p><b>Rechnungsadresse:</b><br>
-                {{ webshop_order.rg_vorname }} {{ webshop_order.rg_nachname }}<br>
-                {% if webshop_order.rg_firma %}
-                    {{ webshop_order.rg_firma }}<br>
-                {% endif %}
-                {{ webshop_order.rg_strasse }}{% if webshop_order.rg_strassen_nr%} {{webshop_order.rg_strassen_nr}}{% endif %}<br>
-                {% if webshop_order.rg_adress_zusatz %}
-                    {{ webshop_order.rg_adress_zusatz }}<br>
-                {% endif %}
-                {% if webshop_order.rg_postfach %}
-                    Postfach {{ webshop_order.rg_postfach }}<br>
-                {% endif %}
-                {{ webshop_order.rg_plz }} {{ webshop_order.rg_ort }}
-            </p>
-        </div>
-
-        <div style="width: 48%;">
-            <p><b>Lieferadresse:</b><br>
-                {{ webshop_order.vorname }} {{ webshop_order.nachname }}<br>
-                {% if webshop_order.firma %}
-                    {{ webshop_order.firma }}<br>
-                {% endif %}
-                {{ webshop_order.strasse }}{% if webshop_order.strassen_nr%} {{webshop_order.strassen_nr}}{% endif %}<br>
-                {% if webshop_order.adress_zusatz %}
-                    {{ webshop_order.adress_zusatz }}<br>
-                {% endif %}
-                {% if webshop_order.postfach %}
-                    Postfach {{ webshop_order.postfach }}<br>
-                {% endif %}
-                {{ webshop_order.plz }} {{ webshop_order.ort }}
-            </p>
-        </div>
-        {% else %}
-        <div style="width: 48%;">
-            <p><b>Rechnungs- / Lieferadresse:</b><br>
-                {{ webshop_order.vorname }} {{ webshop_order.nachname }}<br>
-                {% if webshop_order.firma %}
-                    {{ webshop_order.firma }}<br>
-                {% endif %}
-                {{ webshop_order.strasse }}{% if webshop_order.strassen_nr%} {{webshop_order.strassen_nr}}{% endif %}<br>
-                {% if webshop_order.adress_zusatz %}
-                    {{ webshop_order.adress_zusatz }}<br>
-                {% endif %}
-                {% if webshop_order.postfach %}
-                    Postfach {{ webshop_order.postfach }}<br>
-                {% endif %}
-                {{ webshop_order.plz }} {{ webshop_order.ort }}
-            </p>
-        </div>
-        {% endif %}
-
+    <div style="width: 48%;">
+        <p><b>Lieferadresse:</b><br>
+            {{ webshop_order.vorname }} {{ webshop_order.nachname }}<br>
+            {% if webshop_order.firma %}
+                {{ webshop_order.firma }}<br>
+            {% endif %}
+            {{ webshop_order.strasse }}{% if webshop_order.strassen_nr%} {{webshop_order.strassen_nr}}{% endif %}<br>
+            {% if webshop_order.adress_zusatz %}
+                {{ webshop_order.adress_zusatz }}<br>
+            {% endif %}
+            {% if webshop_order.postfach %}
+                Postfach {{ webshop_order.postfach }}<br>
+            {% endif %}
+            {{ webshop_order.plz }} {{ webshop_order.ort }}
+        </p>
+    </div>
+    {% else %}
+    <div style="width: 48%;">
+        <p><b>Rechnungs- / Lieferadresse:</b><br>
+            {{ webshop_order.vorname }} {{ webshop_order.nachname }}<br>
+            {% if webshop_order.firma %}
+                {{ webshop_order.firma }}<br>
+            {% endif %}
+            {{ webshop_order.strasse }}{% if webshop_order.strassen_nr%} {{webshop_order.strassen_nr}}{% endif %}<br>
+            {% if webshop_order.adress_zusatz %}
+                {{ webshop_order.adress_zusatz }}<br>
+            {% endif %}
+            {% if webshop_order.postfach %}
+                Postfach {{ webshop_order.postfach }}<br>
+            {% endif %}
+            {{ webshop_order.plz }} {{ webshop_order.ort }}
+        </p>
     </div>
     {% endif %}
-    <!-- Items Table -->
-    {{ create_item_table_with_download_link(doc) }}
+
+</div>
+{% endif %}
+<!-- Items Table -->
+{{ create_item_table_with_download_link(doc) }}
 
 <!--     {% if doc.druckvorlage == 'MVD Rechnung-MVD'%}
-        <div>Zahlbar innert 30 Tagen. Danke für Ihre Bestellung!</div>
-    {% elif doc.druckvorlage == 'MVD Lieferschein-MVD'%}
-        <div>Bereits bezahlt, vielen Dank für Ihre Bestellung.</div>
-    {% endif %} -->
+    <div>Zahlbar innert 30 Tagen. Danke für Ihre Bestellung!</div>
+{% elif doc.druckvorlage == 'MVD Lieferschein-MVD'%}
+    <div>Bereits bezahlt, vielen Dank für Ihre Bestellung.</div>
+{% endif %} -->
 
-    <p style="margin-top: 50px;">
-        Mieterinnen- und Mieterverband <br>
-        info@mieterverband.ch
-    </p>
-{% else %}
-    <p>Das Dokument {{ doc.name }} besitzt keine Druckvorlage!</p>
-{% endif %}
+<p style="margin-top: 50px;">
+    Mieterinnen- und Mieterverband <br>
+    info@mieterverband.ch
+</p>
