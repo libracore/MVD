@@ -613,6 +613,30 @@ frappe.ui.form.on('Mitgliedschaft', {
     digitalrechnung_button: function(frm) {
         frappe.route_options = {'mitglied_id' : cur_frm.doc.name};
         frappe.set_route("List", "Digitalrechnung");
+    },
+    anrede_c: function(frm) {
+        // Wenn Anrede gesetzt wird, Neutral-Checkbox entfernen
+        if (frm.doc.anrede_c) {
+            frm.set_value('anrede_neutral', 0);
+        }
+    },
+    e_mail_1: function(frm) {
+        // Wenn E-Mail eingegeben wird, Checkbox entfernen
+        if (frm.doc.e_mail_1) {
+            frm.set_value('keine_e_mail_1', 0);
+        }
+    },
+    anrede_neutral: function(frm) {
+        // Wenn Checkbox gesetzt wird, Anrede zurücksetzen
+        if (frm.doc.anrede_neutral) {
+            frm.set_value('anrede_c', '');
+        }
+        },
+    keine_e_mail_1: function(frm) {
+        // Wenn Checkbox gesetzt wird, E-Mail 1 zurücksetzen
+        if (frm.doc.keine_e_mail_1) {
+            frm.set_value('e_mail_1', '');
+        }
     }
 });
 

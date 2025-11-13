@@ -74,12 +74,14 @@
   "firma",
   "zusatz_firma",
   "anrede_c",
+  "anrede_neutral",
   "nachname_1",
   "vorname_1",
   "tel_p_1",
   "tel_m_1",
   "tel_g_1",
   "e_mail_1",
+  "keine_e_mail_1",
   "cb_3",
   "heading_solidarmitglied",
   "hat_solidarmitglied",
@@ -1386,10 +1388,24 @@
    "fieldtype": "Table",
    "label": "Vermieterk\u00fcndigungen",
    "options": "Kuendigung"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.sektion_id=='MVBE'",
+   "fieldname": "anrede_neutral",
+   "fieldtype": "Check",
+   "label": "neutrale Anrede (von Hand gesetzt)"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.sektion_id=='MVBE'",
+   "fieldname": "keine_e_mail_1",
+   "fieldtype": "Check",
+   "label": "keine E-Mail (von Hand gesetzt)"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2025-09-08 14:54:48.626062",
+ "modified": "2025-11-12 21:36:30.597990",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
