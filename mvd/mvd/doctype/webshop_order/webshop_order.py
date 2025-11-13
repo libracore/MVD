@@ -438,8 +438,10 @@ def send_invoice_confirmation_email(e_mail, sinv_name):
 
         # Render print format of Sales Invoice and define sender
         message = frappe.render_template('templates/mvd/confirmation_email_drucktemplate.html', {'doc': frappe.get_doc("Sales Invoice", sinv_name)})
+        # Prüfe ob es eine download bestellung ust
+        if "Download:" in message:
+            subject = "Download-Link und Bestätigung Ihrer Bestellung"
         sender = "{0} <{1}>".format("Mieterverband", frappe.get_value("Email Account", {"default_outgoing": 1}, "email_id"))
-
         # Create Communication and send Mail
         comm = make(
             recipients=[e_mail],
@@ -492,9 +494,19 @@ def create_item_table_with_download_link(sinv):
         )
         download_link = ""
         if download_doc:
-            download_link = '<br>Download: <a href="{link}" target="_blank">{link}</a>'.format(
-                link=download_doc.download_link
-            )
+            download_link = """
+                <br>
+                <a href="{link}" target="_blank" style="
+                    display: inline-block;
+                    padding: 7px 12px;
+                    margin-top: 5px;
+                    margin-bottom: 5px;
+                    background-color: #003a62;
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 4px;
+                ">Download</a>
+            """.format(link=download_doc.download_link)
         table += """
                     <tr>
                         <td style="text-align: left;">{qty}</td>
