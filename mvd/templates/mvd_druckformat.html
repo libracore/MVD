@@ -184,7 +184,9 @@
             {{ frappe.render_template(druckvorlage.html, {'doc': doc, 'test_druckvorlage': test_druckvorlage}) }}
         {% endif %}
     {% else %}
-        <div>Das Dokument {{ doc.name }} ({{ doc.doctype }}) besitzt keine Druckvorlage!</div>
+        {% if doc.doctype != 'Korrespondenz' %}
+            <div>Das Dokument {{ doc.name }} ({{ doc.doctype }}) besitzt keine Druckvorlage!</div>
+        {% endif %}
     {% endif %}
 {% endif %}
 <!-- ---------------------------------------------------------------------------------------- -->
