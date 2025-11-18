@@ -58,6 +58,7 @@
   "mahnstufe_2",
   "mahnstufe_3",
   "mahnstufe_4",
+  "mahnstufe_5",
   "mahnung_absender_adresse",
   "mahnung_absender_name",
   "footer",
@@ -1048,9 +1049,16 @@
    "fieldname": "pw_rechtsschutz_geschaeft_text",
    "fieldtype": "Long Text",
    "label": "pw_rechtsschutz_geschaeft_text"
+  },
+  {
+   "default": "0",
+   "fieldname": "mahnstufe_5",
+   "fieldtype": "Int",
+   "label": "Mahnung 5 nach ... Tagen (ab F\u00e4lligkeitsdatum)",
+   "reqd": 1
   }
  ],
- "modified": "2025-09-11 15:02:50.802129",
+ "modified": "2025-11-18 17:05:51.805708",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
