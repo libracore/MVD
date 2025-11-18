@@ -45,6 +45,9 @@ def read_csv(file_name, site_name='libracore.mieterverband.ch', limit=False, ben
             print(mvzh_rg.mitglied_nr, row["faktnr_MG"])
 
             frappe.db.sql("""UPDATE `tabSales Invoice` SET `docstatus` = 0 WHERE `name` = '{sinv}'""".format(sinv=mvzh_rg.sinv), as_list=True)
+            frappe.db.sql("""SET SQL_SAFE_UPDATES = 0;""")
+            frappe.db.sql("""DELETE FROM `tabGL Entry` WHERE `voucher_no` = '{0}'""".format(mvzh_rg.sinv))
+            frappe.db.sql("""SET SQL_SAFE_UPDATES = 1;""")
             frappe.db.commit()
             sinv = frappe.get_doc("Sales Invoice", mvzh_rg.sinv)
             # sinv.docstatus = 0
