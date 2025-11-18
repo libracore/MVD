@@ -37,7 +37,8 @@ def read_csv(file_name, site_name='libracore.mieterverband.ch', limit=False, ben
         WHERE `sinvtbl`.`mrj_sektions_selektion` IN ('MRJ-MVZH--655192', 'MRJ-MVZH--655195')
     """, as_dict=True)
 
-    for mvzh_rg in tqdm(mvzh_rgs, desc="MVZH MRJ 2025", unit=" Corrections", total=len(mvzh_rgs)):
+    # for mvzh_rg in tqdm(mvzh_rgs, desc="MVZH MRJ 2025", unit=" Corrections", total=len(mvzh_rgs)):
+    for mvzh_rg in mvzh_rgs:
         filtered = df[df["projektcode"] == mvzh_rg.mitglied_nr.replace("MV0", "")]
         for index, row in filtered.iterrows():
             print(mvzh_rg.mitglied_nr, row["faktnr_MG"])
