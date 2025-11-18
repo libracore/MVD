@@ -24,6 +24,7 @@ def read_csv(file_name, site_name='libracore.mieterverband.ch', limit=False, ben
         JOIN `tabMitgliedschaft` AS `mitgl` ON `mitgl`.`name` = `sinvtbl`.`mv_mitgliedschaft`
         LEFT JOIN `tabFakultative Rechnung` AS `fak` ON `fak`.`sales_invoice` = `sinvtbl`.`name`
         WHERE `sinvtbl`.`mrj_sektions_selektion` IN ('MRJ-MVZH--655192', 'MRJ-MVZH--655195')
+        AND `sinvtbl`.`mvzh_sinv_nr` IS NULL
     """, as_dict=True)
 
     for mvzh_rg in tqdm(mvzh_rgs, desc="MVZH MRJ 2025", unit=" Corrections", total=len(mvzh_rgs)):
