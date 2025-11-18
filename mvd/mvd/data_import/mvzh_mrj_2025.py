@@ -70,6 +70,15 @@ def read_csv(file_name, site_name='libracore.mieterverband.ch', limit=False, ben
             sinv.submit()
             frappe.db.commit()
 
+            if mvzh_rg.fakrg:
+                frappe.db.sql("""UPDATE `tabFakultative Rechnung` SET `qrr_referenz` = '{0}', `mvzh_sinv_nr` = '{1}', `mvzh_sinv_iban` = '{2}' WHERE `name` = '{3}'""".format(
+                    row["vESRReferenzNr_HP"],
+                    row["faktnr_HP"],
+                    row["iban_HP"],
+                    mvzh_rg.fakrg
+                ))
+                frappe.db.commit()
+
             count += 1
             # if commit_count == 100:
             #     frappe.db.commit()
