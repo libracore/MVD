@@ -44,12 +44,12 @@ def read_csv(file_name, site_name='libracore.mieterverband.ch', limit=False, ben
         for index, row in filtered.iterrows():
             print(mvzh_rg.mitglied_nr, row["faktnr_MG"])
 
-            frappe.db.sql("""UPDATE `tabSales Invoice` SET `docstatus` = 0 WHERE `name` = '{sinv}'""".format(sinv=mvzh_rg.sinv), as_list=True)
-            frappe.db.commit()
+            # frappe.db.sql("""UPDATE `tabSales Invoice` SET `docstatus` = 0 WHERE `name` = '{sinv}'""".format(sinv=mvzh_rg.sinv), as_list=True)
+            # frappe.db.commit()
             sinv = frappe.get_doc("Sales Invoice", mvzh_rg.sinv)
-            # sinv.docstatus = 0
-            # sinv.save()
-            # sinv.reload()
+            sinv.docstatus = 0
+            sinv.save()
+            sinv.reload()
 
             sinv.esr_reference = row["vESRReferenzNr_MG"]
             sinv.mvzh_sinv_nr = row["faktnr_MG"]
@@ -61,6 +61,7 @@ def read_csv(file_name, site_name='libracore.mieterverband.ch', limit=False, ben
                         item.rate = int(str(row["betrag_mg"]).replace(" 00", ""))
             
             sinv.save()
+            sinv.reload()
             sinv.submit()
             frappe.db.commit()
 
