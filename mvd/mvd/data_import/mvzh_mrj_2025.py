@@ -12,7 +12,7 @@ def read_csv(file_name, site_name='libracore.mieterverband.ch', limit=False, ben
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
     
     # read csv
-    df = pd.read_csv('/home/frappe/{bench}-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name, bench=bench))
+    df = pd.read_csv('/home/frappe/{bench}-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name, bench=bench), sep=";")
     
     # loop through rows
     count = 1
