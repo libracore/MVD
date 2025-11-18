@@ -35,6 +35,7 @@ def read_csv(file_name, site_name='libracore.mieterverband.ch', limit=False, ben
         JOIN `tabMitgliedschaft` AS `mitgl` ON `mitgl`.`name` = `sinvtbl`.`mv_mitgliedschaft`
         LEFT JOIN `tabFakultative Rechnung` AS `fak` ON `fak`.`sales_invoice` = `sinvtbl`.`name`
         WHERE `sinvtbl`.`mrj_sektions_selektion` IN ('MRJ-MVZH--655192', 'MRJ-MVZH--655195')
+        LIMIT 5
     """, as_dict=True)
 
     # for mvzh_rg in tqdm(mvzh_rgs, desc="MVZH MRJ 2025", unit=" Corrections", total=len(mvzh_rgs)):
@@ -42,6 +43,27 @@ def read_csv(file_name, site_name='libracore.mieterverband.ch', limit=False, ben
         filtered = df[df["projektcode"] == int(mvzh_rg.mitglied_nr.replace("MV0", ""))]
         for index, row in filtered.iterrows():
             print(mvzh_rg.mitglied_nr, row["faktnr_MG"])
+
+            frappe.db.sql("""UPDATE `tabSales Invoice` SET `docstatus` = 0 WHERE `name` = '{sinv}'""".format(sinv=mvzh_rg.sinv), as_list=True)
+            frappe.db.commit()
+            sinv = frappe.get_doc("Sales Invoice", mvzh_rg.sinv)
+            # sinv.docstatus = 0
+            # sinv.save()
+            # sinv.reload()
+
+            sinv.esr_reference = row["vESRReferenzNr_MG"]
+            sinv.mvzh_sinv_nr = row["faktnr_MG"]
+            sinv.mvzh_sinv_iban = row["iban_MG"]
+
+            if sinv.total != str(row["betrag_mg"]).replace(" 00", ""):
+                for item in sinv.items:
+                    if item.rate > 0:
+                        item.rate = int(str(row["betrag_mg"]).replace(" 00", ""))
+            
+            sinv.save()
+            sinv.submit()
+            frappe.db.commit()
+
             count += 1
             # if commit_count == 100:
             #     frappe.db.commit()
