@@ -14,17 +14,6 @@ def read_csv(file_name, site_name='libracore.mieterverband.ch', limit=False, ben
     # read csv
     df = pd.read_csv('/home/frappe/{bench}-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name, bench=bench), sep=";")
     
-    # loop through rows
-    count = 1
-    max_loop = limit
-    commit_count = 1
-    
-    if not limit:
-        index = df.index
-        max_loop = len(index)
-    
-    error_list = []
-
     mvzh_rgs = frappe.db.sql("""
         SELECT
             `sinvtbl`.`name` AS `sinv`,
@@ -35,25 +24,19 @@ def read_csv(file_name, site_name='libracore.mieterverband.ch', limit=False, ben
         JOIN `tabMitgliedschaft` AS `mitgl` ON `mitgl`.`name` = `sinvtbl`.`mv_mitgliedschaft`
         LEFT JOIN `tabFakultative Rechnung` AS `fak` ON `fak`.`sales_invoice` = `sinvtbl`.`name`
         WHERE `sinvtbl`.`mrj_sektions_selektion` IN ('MRJ-MVZH--655192', 'MRJ-MVZH--655195')
-        LIMIT 5
     """, as_dict=True)
 
-    # for mvzh_rg in tqdm(mvzh_rgs, desc="MVZH MRJ 2025", unit=" Corrections", total=len(mvzh_rgs)):
-    for mvzh_rg in mvzh_rgs:
+    for mvzh_rg in tqdm(mvzh_rgs, desc="MVZH MRJ 2025", unit=" Corrections", total=len(mvzh_rgs)):
+    # for mvzh_rg in mvzh_rgs:
         filtered = df[df["projektcode"] == int(mvzh_rg.mitglied_nr.replace("MV0", ""))]
         for index, row in filtered.iterrows():
-            print(mvzh_rg.mitglied_nr, row["faktnr_MG"])
-
             frappe.db.sql("""UPDATE `tabSales Invoice` SET `docstatus` = 0 WHERE `name` = '{sinv}'""".format(sinv=mvzh_rg.sinv), as_list=True)
             frappe.db.sql("""SET SQL_SAFE_UPDATES = 0;""")
             frappe.db.sql("""DELETE FROM `tabGL Entry` WHERE `voucher_no` = '{0}'""".format(mvzh_rg.sinv))
             frappe.db.sql("""SET SQL_SAFE_UPDATES = 1;""")
             frappe.db.commit()
-            sinv = frappe.get_doc("Sales Invoice", mvzh_rg.sinv)
-            # sinv.docstatus = 0
-            # sinv.save()
-            # sinv.reload()
 
+            sinv = frappe.get_doc("Sales Invoice", mvzh_rg.sinv)
             sinv.esr_reference = row["vESRReferenzNr_MG"]
             sinv.mvzh_sinv_nr = row["faktnr_MG"]
             sinv.mvzh_sinv_iban = row["iban_MG"]
@@ -78,10 +61,3 @@ def read_csv(file_name, site_name='libracore.mieterverband.ch', limit=False, ben
                     mvzh_rg.fakrg
                 ))
                 frappe.db.commit()
-
-            count += 1
-            # if commit_count == 100:
-            #     frappe.db.commit()
-            #     commit_count = 1
-            # else:
-            #     commit_count += 1
