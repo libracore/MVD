@@ -31,6 +31,10 @@ def read_csv(file_name, site_name='libracore.mieterverband.ch', limit=False, ben
     # for mvzh_rg in mvzh_rgs:
         filtered = df[df["projektcode"] == int(mvzh_rg.mitglied_nr.replace("MV0", ""))]
         for index, row in filtered.iterrows():
+            if "*" in row["betrag_mg"]:
+                # skip
+                continue
+            
             frappe.db.sql("""UPDATE `tabSales Invoice` SET `docstatus` = 0 WHERE `name` = '{sinv}'""".format(sinv=mvzh_rg.sinv), as_list=True)
             frappe.db.sql("""SET SQL_SAFE_UPDATES = 0;""")
             frappe.db.sql("""DELETE FROM `tabGL Entry` WHERE `voucher_no` = '{0}'""".format(mvzh_rg.sinv))
