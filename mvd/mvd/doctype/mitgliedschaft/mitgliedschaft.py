@@ -1045,7 +1045,7 @@ def create_adresse_mitglied(mitgliedschaft):
     
     return new_address.name
 
-def update_kunde_mitglied(mitgliedschaft):
+def update_kunde_mitglied(mitgliedschaft, timestamp_mismatch_retry=False):
     customer = frappe.get_doc("Customer", mitgliedschaft.kunde_mitglied)
     if mitgliedschaft.kundentyp == 'Unternehmen':
         customer.customer_name = mitgliedschaft.firma
@@ -1071,8 +1071,14 @@ def update_kunde_mitglied(mitgliedschaft):
         customer.customer_type = 'Company'
         frappe.log_error("{0}\n---\n{1}".format('fallback: customer_name was " "', mitgliedschaft.as_json()), 'update_kunde_mitglied')
     
-    customer.save(ignore_permissions=True)
-    frappe.db.set_value("Customer", customer.name, "customer_group", customer_group)
+    try:
+        customer.save(ignore_permissions=True)
+        frappe.db.set_value("Customer", customer.name, "customer_group", customer_group)
+    except frappe.TimestampMismatchError as err:
+        if not timestamp_mismatch_retry:
+            frappe.clear_messages()
+            update_kunde_mitglied(mitgliedschaft, timestamp_mismatch_retry=True)
+
     return
     
 def create_kunde_mitglied(mitgliedschaft):
