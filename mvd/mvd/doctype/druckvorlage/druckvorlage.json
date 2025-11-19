@@ -408,7 +408,7 @@
    "fieldname": "mahnstufe",
    "fieldtype": "Select",
    "label": "Mahnstufe",
-   "options": "1\n2\n3\n4"
+   "options": "1\n2\n3\n4\n5"
   },
   {
    "default": "Produkte / Dienstleistungen",
@@ -485,7 +485,7 @@
    "label": "HTML"
   }
  ],
- "modified": "2025-11-13 14:21:31.433741",
+ "modified": "2025-11-19 11:20:48.964597",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",
