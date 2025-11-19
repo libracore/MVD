@@ -1615,6 +1615,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             status_change_log.status_neu = "Wegzug"
             status_change_log.grund = "Sektionswechsel zu {0}".format(neue_sektion)
             mitgliedschaft.status_c = "Wegzug"
+            mitgliedschaft.letzte_bearbeitung_von = 'User'
             mitgliedschaft.save(ignore_permissions=True)
             
             return {
@@ -1645,6 +1646,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         status_change_log.status_neu = "Wegzug"
         status_change_log.grund = "Sektionswechsel zu MVZH"
         mitgliedschaft.status_c = "Wegzug"
+        mitgliedschaft.letzte_bearbeitung_von = 'User'
         mitgliedschaft.save(ignore_permissions=True)
         return {
                 'status': 200,
