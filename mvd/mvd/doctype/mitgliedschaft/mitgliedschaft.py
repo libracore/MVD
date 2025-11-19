@@ -1632,6 +1632,20 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
     else:
         # Sektionswechsel nach ZH --> kein neues Mtiglied in ERPNext, Meldung Sektionswechsel erfolgt vie validate Trigger von Mitgliedschaft
         # Sobald ZH neues Mitglied verarbeitet erhält ERPNext via SP eine Neuanlage von/für ZH und ist mittels Freizügigkeitsabfrage wieder verfügbar
+
+        # Update Wegzugs-Mitglied
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+        mitgliedschaft.wegzug = today()
+        mitgliedschaft.wegzug_zu = "MVZH"
+        mitgliedschaft.zuzug_id = "MVZH"
+        mitgliedschaft.sektionswechsel_beantragt = 1
+        status_change_log = mitgliedschaft.append("status_change", {})
+        status_change_log.datum = today()
+        status_change_log.status_alt = mitgliedschaft.status_c
+        status_change_log.status_neu = "Wegzug"
+        status_change_log.grund = "Sektionswechsel zu MVZH"
+        mitgliedschaft.status_c = "Wegzug"
+        mitgliedschaft.save(ignore_permissions=True)
         return {
                 'status': 200,
                 'new_id': 'MVZH'
