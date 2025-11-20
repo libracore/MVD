@@ -110,7 +110,9 @@ def pe_after_submit_hooks(pe, event):
     from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_mitgliedschaft_in_pe
     check_mitgliedschaft_in_pe(pe)
     
+    return 
     # Bestätigungs Mail wenn Zahlung aus MRJ-2026
+    # Vorübergehend deaktiviert!
     for sinv in pe.references:
         if frappe.db.get_value("Sales Invoice", sinv.reference_name, "status") == "Paid":
             if frappe.db.get_value("Sales Invoice", sinv.reference_name, "mrj") and \
