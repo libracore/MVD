@@ -139,6 +139,6 @@ def email_queue_after_insert_hook(queue, event):
     mrj_mail_utf_replace(queue, event)
 
 def mrj_mail_utf_replace(queue, event):
-    frappe.error_log(queue.message, "mrj_mail_utf_replace")
+    frappe.error_log(str(queue.message), "mrj_mail_utf_replace")
     if "From: =?utf-8?q?MV_Z=C3=BCrich_=3Cno-reply=40mvd=2Emieterverband=2Ech=3E?=" in queue.message:
         queue.message = queue.message.replace("From: =?utf-8?q?MV_Z=C3=BCrich_=3Cno-reply=40mvd=2Emieterverband=2Ech=3E?=", "From: =?utf-8?q?MV_Z=C3=BCrich?= <no-reply@mvd.mieterverband.ch>")
