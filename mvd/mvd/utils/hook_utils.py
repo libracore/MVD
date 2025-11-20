@@ -133,3 +133,11 @@ def pe_after_submit_hooks(pe, event):
                         message=mail_txt,
                         subject="Zahlungsbestätigung",
                         reply_to=frappe.db.get_value("Sektion", pe.sektion_id, "serien_email_absender_adresse"))
+
+def email_queue_after_insert_hook(queue, event):
+    remove_admin_and_guest_mails(queue, event)
+    mrj_mail_utf_replace(queue, event)
+
+def mrj_mail_utf_replace(queue, event):
+    if "From: =?utf-8?q?MV_Z=C3=BCrich_=3Cno-reply=40mvd=2Emieterverband=2Ech=3E?=" in queue.message:
+        queue.message = queue.message.replace("From: =?utf-8?q?MV_Z=C3=BCrich_=3Cno-reply=40mvd=2Emieterverband=2Ech=3E?=", "From: =?utf-8?q?MV_Z=C3=BCrich?= <no-reply@mvd.mieterverband.ch>")

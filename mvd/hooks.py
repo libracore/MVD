@@ -140,7 +140,7 @@ doc_events = {
         "on_update": "mvd.mvd.doctype.beratung.beratung.sync_attachments_and_beratungs_table"
     },
     "Email Queue": {
-        "after_insert": "mvd.mvd.utils.hook_utils.remove_admin_and_guest_mails"
+        "after_insert": "mvd.mvd.utils.hook_utils.email_queue_after_insert_hook"
     },
     "Service Plattform Log": {
         "after_insert": "mvd.mvd.service_plattform.request_worker.check_immediately_executing"
