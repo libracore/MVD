@@ -566,7 +566,7 @@ def send_mails(mrj, test=False):
             limit_filter = "LIMIT {0}".format(limit)
         test_mail_mitglied = frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "test_mail_mitglied")
         if test_mail_mitglied:
-            test_mail_mitglied = "AND `sinv`.`mv_mitgliedschaft` = {0}".format(test_mail_mitglied)
+            test_mail_mitglied = "AND `sinv`.`mv_mitgliedschaft` IN ({0})".format(test_mail_mitglied)
         else:
             test_mail_mitglied = ""
     else:
