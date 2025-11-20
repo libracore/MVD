@@ -52,7 +52,7 @@ frappe.ui.form.on('Mitglied RG Jahreslauf', {
                     {'fieldname': 'mail_account', 'fieldtype': 'Data', 'label': 'Test E-Mail Empfänger', 'reqd': 1},
                     {'fieldname': 'sender_mail_account', 'fieldtype': 'Select', 'label': 'Absender E-Mail Account', 'reqd': 1, 'options': mail_accs, 'description': "<b>Achtung</b><br>Als Reply-To Adresse wird bei der oben ausgewählten Absenderadresse alles vor dem @ durch das Sektionskürzel ersetzt."},
                     {'fieldname': 'qty', 'fieldtype': 'Int', 'label': 'Anz. Test E-Mails', 'default': 1, 'reqd': 1},
-                    {'fieldname': 'einzelmitglied', 'fieldtype': 'Data', 'label': 'Mitglied ID (optional für Einzelversand)', 'default': 0}
+                    {'fieldname': 'einzelmitglied', 'fieldtype': 'Data', 'label': 'Mitglied ID (optional für Einzelversand)', 'default': 0, 'description': "Zwingend folgenden Syntax einhalten:<br>'123456', '654321', '...'"}
                 ],
                 function(values){
                     frm.call('send_test_mails', {sender_account: values.sender_mail_account, mail_account: values.mail_account, qty: values.qty, test_mail_mitglied: values.einzelmitglied}).then(r => {
