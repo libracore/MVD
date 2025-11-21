@@ -226,7 +226,7 @@ def generate_reset_hash(user, email, hash_only=False):
         
         try:
             frappe.sendmail(recipients=[email], sender=sender, subject=subject,
-                template=template, args=args, header=[subject, "green"], retry=3)
+                template=template, args=args, retry=3)
             frappe.db.commit()
         except:
             return server_error()
