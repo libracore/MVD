@@ -31,6 +31,7 @@
   "pwd_reset_subject",
   "pwd_reset_template",
   "pwd_reset_sender",
+  "pwd_reset_sender_name",
   "section_mitglieder_hash",
   "hash_salt",
   "section_payrexx",
@@ -233,10 +234,15 @@
    "fieldname": "suspend_kampagne_to_sp",
    "fieldtype": "Check",
    "label": "Suspend sending to SP"
+  },
+  {
+   "fieldname": "pwd_reset_sender_name",
+   "fieldtype": "Data",
+   "label": "PWD-Reset Absendername"
   }
  ],
  "issingle": 1,
- "modified": "2025-05-12 16:17:46.198598",
+ "modified": "2025-11-21 15:21:31.854166",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Settings",

@@ -213,6 +213,9 @@ def generate_reset_hash(user, email, hash_only=False):
             return server_error()
 
         sender = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_sender')
+        sender_name = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_sender_name')
+        if sender_name:
+            sender = "{0} <{1}>".format(sender_name, sender)
         subject = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_subject')
         template = frappe.db.get_value("MVD Settings", "MVD Settings", 'pwd_reset_template') or 'website_pwd_reset'
         reset_url = frappe.db.get_value("MVD Settings", "MVD Settings", 'reset_url')
