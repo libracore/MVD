@@ -156,7 +156,7 @@ Schritt 3:
 def service_plattform_log_worker():
     flush_limit = int(frappe.db.get_single_value('Service Plattform API', 'flush_limit_eingehend')) or 20
     mvzh_filter = """AND `json` NOT LIKE '%sektionCode%:%ZH%'"""
-
+    neuanlage_flush = True
     # Prio 1: Neuanlagen
     open_creation_logs = frappe.db.sql("""
                                         SELECT `name`
@@ -166,6 +166,7 @@ def service_plattform_log_worker():
                                         ORDER BY `creation` ASC
                                         LIMIT {flush_limit}""".format(flush_limit=flush_limit), as_dict=True)
     if len(open_creation_logs) < 1:
+        neuanlage_flush = False
         # Prio 2: Alle ausser MVZH
         open_creation_logs = frappe.db.sql("""
                                             SELECT `name`
@@ -193,6 +194,10 @@ def service_plattform_log_worker():
                 sp_log_free_to_execute = False
         if sp_log_free_to_execute:
             execute_sp_log(sp_log)
+    
+    if neuanlage_flush:
+        # Falls der Prozess Neuanlagen verarbeitet hat, wird dieser autom. neu gestartet, damit auch die überigen Zeitnah Updates verarbeitet werden.
+        service_plattform_log_worker()
 
 def get_existing_failed_log(mv_mitgliedschaft, sp_log):
     existing_failed_log = frappe.db.sql("""
