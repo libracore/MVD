@@ -156,21 +156,33 @@ Schritt 3:
 def service_plattform_log_worker():
     flush_limit = int(frappe.db.get_single_value('Service Plattform API', 'flush_limit_eingehend')) or 20
     mvzh_filter = """AND `json` NOT LIKE '%sektionCode%:%ZH%'"""
+
+    # Prio 1: Neuanlagen
     open_creation_logs = frappe.db.sql("""
                                         SELECT `name`
                                         FROM `tabService Plattform Log`
                                         WHERE `status` IN ('New', 'Failed')
-                                        {mvzh_filter}
+                                        AND `neuanlage` = 1
                                         ORDER BY `creation` ASC
-                                        LIMIT {flush_limit}""".format(flush_limit=flush_limit, mvzh_filter=mvzh_filter), as_dict=True)
-    
+                                        LIMIT {flush_limit}""".format(flush_limit=flush_limit), as_dict=True)
     if len(open_creation_logs) < 1:
+        # Prio 2: Alle ausser MVZH
         open_creation_logs = frappe.db.sql("""
                                             SELECT `name`
                                             FROM `tabService Plattform Log`
                                             WHERE `status` IN ('New', 'Failed')
+                                            {mvzh_filter}
                                             ORDER BY `creation` ASC
-                                            LIMIT {flush_limit}""".format(flush_limit=flush_limit), as_dict=True)
+                                            LIMIT {flush_limit}""".format(flush_limit=flush_limit, mvzh_filter=mvzh_filter), as_dict=True)
+        
+        if len(open_creation_logs) < 1:
+            # Prio 3: Alle
+            open_creation_logs = frappe.db.sql("""
+                                                SELECT `name`
+                                                FROM `tabService Plattform Log`
+                                                WHERE `status` IN ('New', 'Failed')
+                                                ORDER BY `creation` ASC
+                                                LIMIT {flush_limit}""".format(flush_limit=flush_limit), as_dict=True)
     
     for service_plattform_log in open_creation_logs:
         sp_log = frappe.get_doc("Service Plattform Log", service_plattform_log.name)
