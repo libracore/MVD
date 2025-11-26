@@ -154,6 +154,10 @@ Schritt 3:
     BG-Worker (Abarbeitung API Requests)
 '''
 def service_plattform_log_worker(zh_only=False):
+    '''
+    Der manuelle MVZH Lauf (wenn in den API Settings eingestellt) kann wie folgt gestartet werden:
+    bench --site libracore.mieterverband.ch execute mvd.mvd.service_plattform.request_worker.service_plattform_log_worker --kwargs "{'zh_only': 1}"
+    '''
     if not zh_only:
         flush_limit = int(frappe.db.get_single_value('Service Plattform API', 'flush_limit_eingehend')) or 20
         mvzh_filter = """AND `json` NOT LIKE '%sektionCode%:%ZH%'"""
