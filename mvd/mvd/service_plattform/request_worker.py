@@ -153,51 +153,78 @@ def raise_200(answer='Success'):
 Schritt 3:
     BG-Worker (Abarbeitung API Requests)
 '''
-def service_plattform_log_worker():
-    flush_limit = int(frappe.db.get_single_value('Service Plattform API', 'flush_limit_eingehend')) or 20
-    mvzh_filter = """AND `json` NOT LIKE '%sektionCode%:%ZH%'"""
-    neuanlage_flush = True
-    # Prio 1: Neuanlagen
-    open_creation_logs = frappe.db.sql("""
-                                        SELECT `name`
-                                        FROM `tabService Plattform Log`
-                                        WHERE `status` IN ('New', 'Failed')
-                                        AND `neuanlage` = 1
-                                        ORDER BY `creation` ASC
-                                        LIMIT {flush_limit}""".format(flush_limit=flush_limit), as_dict=True)
-    if len(open_creation_logs) < 1:
-        neuanlage_flush = False
-        # Prio 2: Alle ausser MVZH
+def service_plattform_log_worker(zh_only=False):
+    if not zh_only:
+        flush_limit = int(frappe.db.get_single_value('Service Plattform API', 'flush_limit_eingehend')) or 20
+        mvzh_filter = """AND `json` NOT LIKE '%sektionCode%:%ZH%'"""
+        neuanlage_flush = True
+        # Prio 1: Neuanlagen
         open_creation_logs = frappe.db.sql("""
-                                            SELECT `name`
-                                            FROM `tabService Plattform Log`
-                                            WHERE `status` IN ('New', 'Failed')
-                                            {mvzh_filter}
-                                            ORDER BY `creation` ASC
-                                            LIMIT {flush_limit}""".format(flush_limit=flush_limit, mvzh_filter=mvzh_filter), as_dict=True)
-        
+            SELECT `name`
+            FROM `tabService Plattform Log`
+            WHERE `status` IN ('New', 'Failed')
+            AND `neuanlage` = 1
+            AND `retry_count` < 4
+            ORDER BY `creation` ASC
+            LIMIT {flush_limit}
+        """.format(flush_limit=flush_limit), as_dict=True)
         if len(open_creation_logs) < 1:
-            # Prio 3: Alle
+            neuanlage_flush = False
+            # Prio 2: Alle ausser MVZH
             open_creation_logs = frappe.db.sql("""
-                                                SELECT `name`
-                                                FROM `tabService Plattform Log`
-                                                WHERE `status` IN ('New', 'Failed')
-                                                ORDER BY `creation` ASC
-                                                LIMIT {flush_limit}""".format(flush_limit=flush_limit), as_dict=True)
+                SELECT `name`
+                FROM `tabService Plattform Log`
+                WHERE `status` IN ('New', 'Failed')
+                AND `retry_count` < 4
+                {mvzh_filter}
+                ORDER BY `creation` ASC
+                LIMIT {flush_limit}
+            """.format(flush_limit=flush_limit, mvzh_filter=mvzh_filter), as_dict=True)
+            
+            '''Aktuell auskommentiert da diese via CRON ausgeführt werden'''
+            # if len(open_creation_logs) < 1:
+            #     # Prio 3: Alle
+            #     open_creation_logs = frappe.db.sql("""
+            #         SELECT `name`
+            #         FROM `tabService Plattform Log`
+            #         WHERE `status` IN ('New', 'Failed')
+            #         AND `retry_count` < 4
+            #         ORDER BY `creation` ASC
+            #         LIMIT {flush_limit}
+            #     """.format(flush_limit=flush_limit), as_dict=True)
     
-    for service_plattform_log in open_creation_logs:
-        sp_log = frappe.get_doc("Service Plattform Log", service_plattform_log.name)
-        sp_log_free_to_execute = True
-        if sp_log.status == 'New' and sp_log.mv_mitgliedschaft:
-            existing_failed_log = get_existing_failed_log(sp_log.mv_mitgliedschaft, sp_log.name)
-            if existing_failed_log > 0:
-                sp_log_free_to_execute = False
-        if sp_log_free_to_execute:
-            execute_sp_log(sp_log)
-    
-    if neuanlage_flush:
-        # Falls der Prozess Neuanlagen verarbeitet hat, wird dieser autom. neu gestartet, damit auch die überigen Zeitnah Updates verarbeitet werden.
-        service_plattform_log_worker()
+        for service_plattform_log in open_creation_logs:
+            sp_log = frappe.get_doc("Service Plattform Log", service_plattform_log.name)
+            sp_log_free_to_execute = True
+            if sp_log.status == 'New' and sp_log.mv_mitgliedschaft:
+                existing_failed_log = get_existing_failed_log(sp_log.mv_mitgliedschaft, sp_log.name)
+                if existing_failed_log > 0:
+                    sp_log_free_to_execute = False
+            if sp_log_free_to_execute:
+                execute_sp_log(sp_log)
+        
+        if neuanlage_flush:
+            # Falls der Prozess Neuanlagen verarbeitet hat, wird dieser autom. neu gestartet, damit auch die überigen Zeitnah Updates verarbeitet werden.
+            service_plattform_log_worker()
+    else:
+        from tqdm import tqdm
+        open_creation_logs = frappe.db.sql("""
+            SELECT `name`
+            FROM `tabService Plattform Log`
+            WHERE `status` IN ('New', 'Failed')
+            AND `retry_count` < 4
+            AND `json` LIKE '%"sektionCode": "ZH",%'
+            ORDER BY `creation` ASC
+        """, as_dict=True)
+        for service_plattform_log in tqdm(open_creation_logs, desc="Verarbeite MVZH Queue", unit=" Queue", total=len(open_creation_logs)):
+            sp_log = frappe.get_doc("Service Plattform Log", service_plattform_log.name)
+            sp_log_free_to_execute = True
+            if sp_log.status == 'New' and sp_log.mv_mitgliedschaft:
+                existing_failed_log = get_existing_failed_log(sp_log.mv_mitgliedschaft, sp_log.name)
+                if existing_failed_log > 0:
+                    sp_log_free_to_execute = False
+            if sp_log_free_to_execute:
+                execute_sp_log(sp_log)
 
 def get_existing_failed_log(mv_mitgliedschaft, sp_log):
     existing_failed_log = frappe.db.sql("""
