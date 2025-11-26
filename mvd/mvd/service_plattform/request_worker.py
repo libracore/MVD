@@ -181,17 +181,16 @@ def service_plattform_log_worker(zh_only=False):
                 LIMIT {flush_limit}
             """.format(flush_limit=flush_limit, mvzh_filter=mvzh_filter), as_dict=True)
             
-            '''Aktuell auskommentiert da diese via CRON ausgeführt werden'''
-            # if len(open_creation_logs) < 1:
-            #     # Prio 3: Alle
-            #     open_creation_logs = frappe.db.sql("""
-            #         SELECT `name`
-            #         FROM `tabService Plattform Log`
-            #         WHERE `status` IN ('New', 'Failed')
-            #         AND `retry_count` < 4
-            #         ORDER BY `creation` ASC
-            #         LIMIT {flush_limit}
-            #     """.format(flush_limit=flush_limit), as_dict=True)
+            if cint(frappe.db.get_single_value('Service Plattform API', 'mvzh_sp_queue_manually')) != 1 and len(open_creation_logs) < 1:
+                # Prio 3: Alle
+                open_creation_logs = frappe.db.sql("""
+                    SELECT `name`
+                    FROM `tabService Plattform Log`
+                    WHERE `status` IN ('New', 'Failed')
+                    AND `retry_count` < 4
+                    ORDER BY `creation` ASC
+                    LIMIT {flush_limit}
+                """.format(flush_limit=flush_limit), as_dict=True)
     
         for service_plattform_log in open_creation_logs:
             sp_log = frappe.get_doc("Service Plattform Log", service_plattform_log.name)

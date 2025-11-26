@@ -25,7 +25,8 @@
   "flush_limit_eingehend",
   "sp_incoming_immediately_executing",
   "emailberatung_test",
-  "emailberatung_testtoken"
+  "emailberatung_testtoken",
+  "mvzh_sp_queue_manually"
  ],
  "fields": [
   {
@@ -160,10 +161,16 @@
    "fieldname": "no_kampagne_to_sp",
    "fieldtype": "Check",
    "label": "Senden von Kampagnen deaktivieren"
+  },
+  {
+   "default": "0",
+   "fieldname": "mvzh_sp_queue_manually",
+   "fieldtype": "Check",
+   "label": "Manuelle MVZH SP Queue"
   }
  ],
  "issingle": 1,
- "modified": "2025-06-30 11:48:21.033499",
+ "modified": "2025-11-26 19:11:45.298564",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",
