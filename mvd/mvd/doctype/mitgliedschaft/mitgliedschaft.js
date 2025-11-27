@@ -50,6 +50,42 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frappe.set_route("List", "User", {'username': cur_frm.doc.mitglied_nr});
             }, __("Admin Tools"))
         }
+
+        if (frappe.user.has_role("MV_MA")) {
+            frm.add_custom_button(__("Passwort zurücksetzen"), function () {
+
+                frappe.confirm(
+                    "Möchten Sie wirklich eine Passwort-Reset-E-Mail an dieses Mitglied senden?",
+                    function () {
+                        let user_number = cur_frm.doc.mitglied_nr.substring(2);
+
+                        frappe.call({
+                            type: "GET",
+                            url: "/api/method/mvd.mvd.v2.web_auth.reset",
+                            args: {
+                                user: user_number
+                            },
+                            callback: function (response) {
+                                frappe.msgprint({
+                                    title: __("E-Mail versendet"),
+                                    message: __("Die Passwort-Reset-E-Mail wurde erfolgreich gesendet."),
+                                    indicator: "green"
+                                });
+                            },
+                            error: function (err) {
+                                frappe.msgprint({
+                                    title: __("Fehler"),
+                                    message: __("Die Passwort-Reset-E-Mail konnte nicht gesendet werden."),
+                                    indicator: "red"
+                                });
+                                console.error(err);
+                            }
+                        });
+                    }
+                );
+
+            }, __("Web"));
+        }
         
        if (!frm.doc.__islocal&&cur_frm.doc.status_c != 'Inaktiv') {
             if (frappe.user.has_role("MV_beta")) {
