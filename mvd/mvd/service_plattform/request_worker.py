@@ -222,7 +222,7 @@ def service_plattform_log_worker(zh_only=False, called_by_cron=False):
         
         if neuanlage_flush:
             # Falls der Prozess Neuanlagen verarbeitet hat, wird dieser autom. neu gestartet, damit auch die überigen Zeitnah Updates verarbeitet werden.
-            service_plattform_log_worker()
+            service_plattform_log_worker(called_by_cron=called_by_cron)
     else:
         from tqdm import tqdm
         open_creation_logs = frappe.db.sql("""
