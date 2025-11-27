@@ -11,6 +11,10 @@ class WebshopOrderDownloadLink(Document):
 
 @frappe.whitelist()
 def generate_download_links():
+    # Erzeugt download links für die Downloadbaren Items
+    # die Bedingungs ist ein "-D" im Name
+    # bei bereits bestehenden Download links wird kein neuer erzeugt, man kann also problemlos drauf klicken
+    # falls man neue Links erzeugen will muss man den Eintrag löschen 
     items = frappe.get_all("Item", filters={"item_code": ["like", "%-D"]}, fields=["name", "item_code"])
     for item in items:
         latest_file = frappe.get_all(
