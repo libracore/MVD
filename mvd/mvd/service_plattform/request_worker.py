@@ -158,7 +158,7 @@ def service_plattform_log_worker(zh_only=False, called_by_cron=False):
     Der manuelle MVZH Lauf (wenn in den API Settings eingestellt) kann wie folgt gestartet werden:
     bench --site libracore.mieterverband.ch execute mvd.mvd.service_plattform.request_worker.service_plattform_log_worker --kwargs "{'zh_only': 1}"
 
-    Hinweis: alle 2' ruft ein Cron-Job folgende Methode auf: service_plattform_log_worker_via_cron()
+    Hinweis: jede Minute ruft ein Cron-Job folgende Methode auf: service_plattform_log_worker_via_cron()
     '''
     if not zh_only:
         if cint(frappe.db.get_single_value('Service Plattform API', 'sp_queue_via_cron')) == 1 and not called_by_cron:
@@ -171,7 +171,7 @@ def service_plattform_log_worker(zh_only=False, called_by_cron=False):
         if not called_by_cron:
             flush_limit = int(frappe.db.get_single_value('Service Plattform API', 'flush_limit_eingehend')) or 20
         else:
-            flush_limit = 10
+            flush_limit = int(frappe.db.get_single_value('Service Plattform API', 'cron_flush_limit')) or 5
         
         mvzh_filter = """AND `json` NOT LIKE '%sektionCode%:%ZH%'"""
         neuanlage_flush = True

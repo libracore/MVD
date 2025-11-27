@@ -25,6 +25,7 @@
   "sp_incoming_immediately_executing",
   "mvzh_sp_queue_manually",
   "sp_queue_via_cron",
+  "cron_flush_limit",
   "section_queue_erp_sp",
   "no_sp_update",
   "queue",
@@ -186,10 +187,16 @@
    "fieldname": "section_queue_erp_sp",
    "fieldtype": "Section Break",
    "label": "Queue Settings (ERP &gt; SP)"
+  },
+  {
+   "depends_on": "eval:doc.sp_queue_via_cron",
+   "fieldname": "cron_flush_limit",
+   "fieldtype": "Data",
+   "label": "Cron Flush Limit"
   }
  ],
  "issingle": 1,
- "modified": "2025-11-27 14:50:33.965125",
+ "modified": "2025-11-27 15:39:15.154387",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",
