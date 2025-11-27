@@ -373,6 +373,7 @@ class WebshopOrder(Document):
         sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
         sinv.save(ignore_permissions=True)
         
+        sinv.submit() # die Rechnungen werden auch gleich Gebucht / Submit
         self.sinv = sinv.name
         self.save()
 
