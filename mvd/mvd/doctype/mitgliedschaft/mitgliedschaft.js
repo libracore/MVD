@@ -42,10 +42,13 @@ frappe.ui.form.on('Mitgliedschaft', {
         if (frappe.user.has_role("System Manager")) {
             frm.add_custom_button(__("SP > ERPNext"), function() {
                 frappe.set_route("List", "Service Plattform Log", {'mv_mitgliedschaft': cur_frm.doc.name});
-            }, __("Öffne SP Queue"))
+            }, __("Admin Tools"))
             frm.add_custom_button(__("ERPNext > SP"), function() {
                 frappe.set_route("List", "Service Platform Queue", {'mv_mitgliedschaft': cur_frm.doc.name});
-            }, __("Öffne SP Queue"))
+            }, __("Admin Tools"))
+            frm.add_custom_button(__("User"), function() {
+                frappe.set_route("List", "User", {'username': cur_frm.doc.mitglied_nr});
+            }, __("Admin Tools"))
         }
         
        if (!frm.doc.__islocal&&cur_frm.doc.status_c != 'Inaktiv') {
