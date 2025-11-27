@@ -97,17 +97,22 @@ class WebshopOrder(Document):
                 # --- Payment ID ---
                 if not self.online_payment_id:
                     if "transaction_uuid" in order_data:
-                        self.online_payment_id = order_data["transaction_uuid"]
+                        tx = order_data.get("transaction_uuid")
+                        if tx: # Ignore empty strings or None
+                            self.online_payment_id = tx
 
                 # --- Artikel / Items ---
                 if not self.artikel_json and "items" in order_data:
                     items = []
                     for idx, it in enumerate(order_data["items"], start=1):
+                        amount_raw = it.get("itemTotalPrice", 0)
+                        if isinstance(amount_raw, str):
+                            amount_raw = amount_raw.replace("'", "")  # remove separators e.g. "2'880.00"
                         item = {
                             "item": it.get("item_code"),
                             "typ": None, # es werden aber andere Infos geschickt ->it.get("title"),
                             "qty": cint(it.get("quantity", 0)),
-                            "amount": float(it.get("itemTotalPrice", 0)),
+                            "amount": float(amount_raw),
                             "mwst": 0,  # wird auch nicht gesendet v2 payload
                             "item_index": str(idx),
                         }
