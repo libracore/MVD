@@ -14,19 +14,22 @@
   "kampagne",
   "section_danger",
   "not_get_number_and_id",
-  "no_sp_update",
   "send_beratung_to_sp_unterbrechen",
   "no_postnotiz_to_sp",
   "no_kampagne_to_sp",
   "json_error_log",
-  "queue",
-  "flush_queue",
-  "flush_limit",
-  "flush_limit_eingehend",
-  "sp_incoming_immediately_executing",
   "emailberatung_test",
   "emailberatung_testtoken",
-  "mvzh_sp_queue_manually"
+  "section_queue_sp_erp",
+  "flush_limit_eingehend",
+  "sp_incoming_immediately_executing",
+  "mvzh_sp_queue_manually",
+  "sp_queue_via_cron",
+  "section_queue_erp_sp",
+  "no_sp_update",
+  "queue",
+  "flush_queue",
+  "flush_limit"
  ],
  "fields": [
   {
@@ -167,10 +170,26 @@
    "fieldname": "mvzh_sp_queue_manually",
    "fieldtype": "Check",
    "label": "Manuelle MVZH SP Queue"
+  },
+  {
+   "fieldname": "section_queue_sp_erp",
+   "fieldtype": "Section Break",
+   "label": "Queue Settings (SP &gt; ERP)"
+  },
+  {
+   "default": "0",
+   "fieldname": "sp_queue_via_cron",
+   "fieldtype": "Check",
+   "label": "Queue Verarbeitung via Cron"
+  },
+  {
+   "fieldname": "section_queue_erp_sp",
+   "fieldtype": "Section Break",
+   "label": "Queue Settings (ERP &gt; SP)"
   }
  ],
  "issingle": 1,
- "modified": "2025-11-26 19:11:45.298564",
+ "modified": "2025-11-27 14:50:33.965125",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",

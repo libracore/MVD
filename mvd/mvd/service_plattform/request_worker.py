@@ -153,15 +153,29 @@ def raise_200(answer='Success'):
 Schritt 3:
     BG-Worker (Abarbeitung API Requests)
 '''
-def service_plattform_log_worker(zh_only=False):
+def service_plattform_log_worker(zh_only=False, called_by_cron=False):
     '''
     Der manuelle MVZH Lauf (wenn in den API Settings eingestellt) kann wie folgt gestartet werden:
     bench --site libracore.mieterverband.ch execute mvd.mvd.service_plattform.request_worker.service_plattform_log_worker --kwargs "{'zh_only': 1}"
+
+    Hinweis: alle 2' ruft ein Cron-Job folgende Methode auf: service_plattform_log_worker_via_cron()
     '''
     if not zh_only:
-        flush_limit = int(frappe.db.get_single_value('Service Plattform API', 'flush_limit_eingehend')) or 20
+        if cint(frappe.db.get_single_value('Service Plattform API', 'sp_queue_via_cron')) == 1 and not called_by_cron:
+            # Aufegrufen via BG-Worker aber definiert als Cron -> Beenden
+            return
+        if cint(frappe.db.get_single_value('Service Plattform API', 'sp_queue_via_cron')) != 1 and called_by_cron:
+            # Aufegrufen via Cron aber definiert als BG-Worker -> Beenden
+            return
+        
+        if not called_by_cron:
+            flush_limit = int(frappe.db.get_single_value('Service Plattform API', 'flush_limit_eingehend')) or 20
+        else:
+            flush_limit = 10
+        
         mvzh_filter = """AND `json` NOT LIKE '%sektionCode%:%ZH%'"""
         neuanlage_flush = True
+
         # Prio 1: Neuanlagen
         open_creation_logs = frappe.db.sql("""
             SELECT `name`
@@ -353,6 +367,13 @@ def execute_sp_log(sp_log, manual_execution=False):
     
     if manual_execution:
         return 1
+
+'''
+Schritt 3 kann auch via Cron ausgeführt werden, dies ist die entsprechende Wrapper-Methode
+BG-Worker (Abarbeitung API Requests)
+'''
+def service_plattform_log_worker_via_cron():
+    service_plattform_log_worker(zh_only=False, called_by_cron=True)
 
 '''
 Neuanlage einer Mitgliedschaft
