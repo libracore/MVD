@@ -454,7 +454,7 @@ def send_invoice_confirmation_email(e_mail, sinv_name):
             content=message,
             doctype="Sales Invoice",
             name=sinv_name,
-            bcc=["bestellung@mieterverband.ch"],
+            bcc="bestellung@mieterverband.ch",
             send_email=True
         )["name"]
 
