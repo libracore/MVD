@@ -4,6 +4,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "bestellung_erledigt",
   "section_stammdaten",
   "mv_mitgliedschaft",
   "adressblock",
@@ -296,9 +297,15 @@
    "fieldname": "e_mail",
    "fieldtype": "Data",
    "label": "E-Mail"
+  },
+  {
+   "default": "0",
+   "fieldname": "bestellung_erledigt",
+   "fieldtype": "Check",
+   "label": "Bestellung erledigt"
   }
  ],
- "modified": "2025-10-16 11:27:55.830946",
+ "modified": "2025-11-27 10:05:09.672506",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Webshop Order",

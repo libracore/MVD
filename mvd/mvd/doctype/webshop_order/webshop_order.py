@@ -8,7 +8,6 @@ from frappe.model.document import Document
 import json
 from frappe.utils import cint
 from frappe.utils.data import today, add_days
-from frappe import sendmail
 from frappe.core.doctype.communication.email import make
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr, get_adressblock, get_rg_adressblock
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
@@ -97,17 +96,22 @@ class WebshopOrder(Document):
                 # --- Payment ID ---
                 if not self.online_payment_id:
                     if "transaction_uuid" in order_data:
-                        self.online_payment_id = order_data["transaction_uuid"]
+                        tx = order_data.get("transaction_uuid")
+                        if tx: # Ignore empty strings or None
+                            self.online_payment_id = tx
 
                 # --- Artikel / Items ---
                 if not self.artikel_json and "items" in order_data:
                     items = []
                     for idx, it in enumerate(order_data["items"], start=1):
+                        amount_raw = it.get("itemTotalPrice", 0)
+                        if isinstance(amount_raw, str):
+                            amount_raw = amount_raw.replace("'", "")  # remove separators e.g. "2'880.00"
                         item = {
                             "item": it.get("item_code"),
                             "typ": None, # es werden aber andere Infos geschickt ->it.get("title"),
                             "qty": cint(it.get("quantity", 0)),
-                            "amount": float(it.get("itemTotalPrice", 0)),
+                            "amount": float(amount_raw),
                             "mwst": 0,  # wird auch nicht gesendet v2 payload
                             "item_index": str(idx),
                         }
@@ -368,6 +372,7 @@ class WebshopOrder(Document):
         sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
         sinv.save(ignore_permissions=True)
         
+        sinv.submit() # die Rechnungen werden auch gleich Gebucht / Submit
         self.sinv = sinv.name
         self.save()
 
@@ -442,7 +447,6 @@ def send_invoice_confirmation_email(e_mail, sinv_name):
         if "Download" in message:
             subject = "Download-Link und Bestätigung Ihrer Bestellung"
         sender = "{0} <{1}>".format("Mieterverband", frappe.get_value("Email Account", {"default_outgoing": 1}, "email_id"))
-        # Create Communication and send Mail
         comm = make(
             recipients=[e_mail],
             sender=sender,
@@ -450,6 +454,7 @@ def send_invoice_confirmation_email(e_mail, sinv_name):
             content=message,
             doctype="Sales Invoice",
             name=sinv_name,
+            bcc="bestellung@mieterverband.ch",
             send_email=True
         )["name"]
 

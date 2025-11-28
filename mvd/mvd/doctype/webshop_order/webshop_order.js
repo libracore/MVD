@@ -3,6 +3,14 @@
 
 frappe.ui.form.on('Webshop Order', {
     refresh: function(frm) {
+
+        if (!cur_frm.doc.bestellung_erledigt) {
+            frm.add_custom_button(__('Bestellung erledigt'), function() {
+                frappe.model.set_value(cur_frm.doc.doctype, cur_frm.doc.name, "bestellung_erledigt", 1);
+                frm.save();
+            }).addClass("btn-primary");
+        }
+
         if (cur_frm.doc.faktura_kunde&&cint(cur_frm.doc.faktura_kunde_aktuell)==1) {
             if (!cur_frm.doc.sinv) {
                 if (cur_frm.doc.online_payment_id) {
