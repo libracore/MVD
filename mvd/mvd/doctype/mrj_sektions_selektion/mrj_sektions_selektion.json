@@ -81,7 +81,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "In Vorbereitung\nBereit zur Ausf\u00fchrung\nRechnungsdaten in Arbeit\nAbgeschlossen\nAbgebrochen",
+   "options": "In Vorbereitung\nBereit zur Ausf\u00fchrung\nRechnungsdaten in Arbeit\nRechnungen erstellt\nAbgeschlossen\nAbgebrochen",
    "read_only": 1,
    "reqd": 1
   },
@@ -207,7 +207,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2025-11-06 08:57:46.980259",
+ "modified": "2025-11-28 15:03:50.709069",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MRJ Sektions Selektion",
