@@ -1104,6 +1104,13 @@
    "fieldname": "nc_beratung_base_folder",
    "fieldtype": "Data",
    "label": "Beratungs Basisordner"
+  },
+  {
+   "depends_on": "eval:doc.nc_enabled",
+   "description": "(F\u00fcr Beratungen <b>mit</b> Mitgliedschaften)<br>\nz.B. Beratungen<br>\n(Der Sektions Mitgliederordner/[MitgliedNr] dient als Root)",
+   "fieldname": "nc_mitglied_beratung_base_folder",
+   "fieldtype": "Data",
+   "label": "Mitglied-Beratung Basisordner"
   }
  ],
  "modified": "2026-03-02 13:32:39.400151",
