@@ -168,7 +168,12 @@
   "pw_section_6",
   "pw_text_kontaktformular",
   "pw_rechtsschutz_privat_text",
-  "pw_rechtsschutz_geschaeft_text"
+  "pw_rechtsschutz_geschaeft_text",
+  "section_nextcloud",
+  "nc_enabled",
+  "nc_base_folder",
+  "nc_mitglied_base_folder",
+  "nc_beratung_base_folder"
  ],
  "fields": [
   {
@@ -1031,6 +1036,7 @@
    "label": "pw_tb_nmg_oeff_sa_nm"
   },
   {
+   "collapsible": 1,
    "fieldname": "pw_section_6",
    "fieldtype": "Section Break",
    "label": "pw_section_6"
@@ -1056,9 +1062,42 @@
    "fieldtype": "Int",
    "label": "Mahnung 5 nach ... Tagen (ab F\u00e4lligkeitsdatum)",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_nextcloud",
+   "fieldtype": "Section Break",
+   "label": "NextCloud"
+  },
+  {
+   "default": "0",
+   "fieldname": "nc_enabled",
+   "fieldtype": "Check",
+   "label": "NextCloud aktiv"
+  },
+  {
+   "depends_on": "eval:doc.nc_enabled",
+   "description": "z.B. MVZH",
+   "fieldname": "nc_base_folder",
+   "fieldtype": "Data",
+   "label": "Sektions Basisordner"
+  },
+  {
+   "depends_on": "eval:doc.nc_enabled",
+   "description": "z.B. Mitglieder<br>\n(Der Sektions Basisordner dient als Root)",
+   "fieldname": "nc_mitglied_base_folder",
+   "fieldtype": "Data",
+   "label": "Mitgliedschaften Basisordner"
+  },
+  {
+   "depends_on": "eval:doc.nc_enabled",
+   "description": "(F\u00fcr Beratungen <b>ohne</b> Mitgliedschaften)<br>\nz.B. Beratungen<br>\n(Der Sektions Basisordner dient als Root)",
+   "fieldname": "nc_beratung_base_folder",
+   "fieldtype": "Data",
+   "label": "Beratungs Basisordner"
   }
  ],
- "modified": "2025-11-18 17:05:51.805708",
+ "modified": "2025-12-02 10:08:26.228905",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
