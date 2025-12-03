@@ -637,8 +637,8 @@ def sp_updater(mitgliedschaft):
             # sende update an SP
             send_mvm_to_sp(mitgliedschaft, True)
             # special case sektionswechsel nach ZH
-            if mitgliedschaft.wegzug_zu == 'MVZH' and mitgliedschaft.status_c == 'Wegzug':
-                send_mvm_sektionswechsel(mitgliedschaft)
+            # if mitgliedschaft.wegzug_zu == 'MVZH' and mitgliedschaft.status_c == 'Wegzug':
+            #     send_mvm_sektionswechsel(mitgliedschaft)
 
 def send_mvm_to_sp(mitgliedschaft, update):
     if str(get_sektion_code(mitgliedschaft.sektion_id)) not in ('ZH', 'M+W-Abo'):
@@ -650,14 +650,14 @@ def send_mvm_to_sp(mitgliedschaft, update):
         else:
             create_sp_queue(mitgliedschaft, update)
 
-def send_mvm_sektionswechsel(mitgliedschaft):
-    from mvd.mvd.service_plattform.api import sektionswechsel
-    prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
-    neue_sektion = ''
-    if mitgliedschaft.wegzug_zu == 'MVZH':
-        neue_sektion = 'ZH'
-    sektionswechsel(prepared_mvm, neue_sektion)
-    frappe.log_error(str(prepared_mvm), "MVZH Sektionswechsel an SP gesendet")
+# def send_mvm_sektionswechsel(mitgliedschaft):
+#     from mvd.mvd.service_plattform.api import sektionswechsel
+#     prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
+#     neue_sektion = ''
+#     if mitgliedschaft.wegzug_zu == 'MVZH':
+#         neue_sektion = 'ZH'
+#     sektionswechsel(prepared_mvm, neue_sektion)
+#     frappe.log_error(str(prepared_mvm), "MVZH Sektionswechsel an SP gesendet")
 
 def get_sektion_code(sektion):
     sektionen = frappe.db.sql("""SELECT `sektion_c` FROM `tabSektion` WHERE `name` = '{sektion}'""".format(sektion=sektion), as_dict=True)
