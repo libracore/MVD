@@ -181,7 +181,7 @@ def service_plattform_log_worker(zh_only=False, called_by_cron=False):
         else:
             flush_limit = int(frappe.db.get_single_value('Service Plattform API', 'cron_flush_limit')) or 5
         
-        mvzh_filter = """AND `json` NOT LIKE '%sektionCode%:%ZH%'"""
+        # mvzh_filter = """AND `json` NOT LIKE '%sektionCode%:%ZH%'"""
         neuanlage_flush = True
 
         # Prio 1: Neuanlagen
@@ -196,19 +196,8 @@ def service_plattform_log_worker(zh_only=False, called_by_cron=False):
         """.format(flush_limit=flush_limit), as_dict=True)
         if len(open_creation_logs) < 1:
             neuanlage_flush = False
-            # Prio 2: Alle ausser MVZH
-            open_creation_logs = frappe.db.sql("""
-                SELECT `name`
-                FROM `tabService Plattform Log`
-                WHERE `status` IN ('New', 'Failed')
-                AND `retry_count` < 4
-                {mvzh_filter}
-                ORDER BY `creation` ASC
-                LIMIT {flush_limit}
-            """.format(flush_limit=flush_limit, mvzh_filter=mvzh_filter), as_dict=True)
-            
-            if cint(frappe.db.get_single_value('Service Plattform API', 'mvzh_sp_queue_manually')) != 1 and len(open_creation_logs) < 1:
-                # Prio 3: Alle
+            if cint(frappe.db.get_single_value('Service Plattform API', 'mvzh_sp_queue_manually')) != 1:
+                # Prio 2: Alle
                 open_creation_logs = frappe.db.sql("""
                     SELECT `name`
                     FROM `tabService Plattform Log`
@@ -299,67 +288,67 @@ def execute_sp_log(sp_log, manual_execution=False):
             # effektive neuanlage
             # -------------------
             # MVZH Sepcial Case (#1089; Doppelte Zuzüge)
-            mvzh_affected = False
-            if api_kwargs["status"] == 'Zuzug':
-                if api_kwargs["alteSektionCode"] == 'ZH':
-                    if not api_kwargs["austrittsdatum"] or api_kwargs["austrittsdatum"] == '':
-                        duplikat = frappe.db.sql("""
-                                                SELECT `name` FROM `tabService Plattform Log`
-                                                WHERE `json` LIKE '%mitgliedNummer%{0}%'
-                                                AND `json` LIKE '%mitgliedId%{1}%'
-                                                AND `json` LIKE '%{2}%'
-                                                AND `name` != '{3}'
-                                                AND `mv_mitgliedschaft` IS NOT NULL
-                                                """.format(api_kwargs['mitgliedNummer'], int(api_kwargs['mitgliedId']) - 1, '"alteSektionCode": "ZH"', sp_log.name), as_dict=True)
+            # mvzh_affected = False
+            # if api_kwargs["status"] == 'Zuzug':
+            #     if api_kwargs["alteSektionCode"] == 'ZH':
+            #         if not api_kwargs["austrittsdatum"] or api_kwargs["austrittsdatum"] == '':
+            #             duplikat = frappe.db.sql("""
+            #                                     SELECT `name` FROM `tabService Plattform Log`
+            #                                     WHERE `json` LIKE '%mitgliedNummer%{0}%'
+            #                                     AND `json` LIKE '%mitgliedId%{1}%'
+            #                                     AND `json` LIKE '%{2}%'
+            #                                     AND `name` != '{3}'
+            #                                     AND `mv_mitgliedschaft` IS NOT NULL
+            #                                     """.format(api_kwargs['mitgliedNummer'], int(api_kwargs['mitgliedId']) - 1, '"alteSektionCode": "ZH"', sp_log.name), as_dict=True)
                         
-                        if len(duplikat) > 0:
-                            mvzh_affected = True
-                            sp_log.add_comment('Comment', text='{0}'.format("MVZH Doppel-Zuzugs-Request!"))
-                            mitglied_main_naming = frappe.get_doc("Mitglied Main Naming", {'mitglied_id': api_kwargs['mitgliedId'], 'mitglied_nr': api_kwargs['mitgliedNummer']}) or None
-                            if mitglied_main_naming:
-                                mitglied_main_naming.add_comment('Comment', text='{0}'.format("MVZH Doppel-Zuzugs-Request!<br>Betroffene SP-Logs:<br>{0}<br>{1}".format(sp_log.name, duplikat[0].name)))
-                            sp_log.neuanlage = 0
-                            sp_log.update = 1
-                            sp_log.mv_mitgliedschaft = frappe.db.get_value("Service Plattform Log", duplikat[0].name, 'mv_mitgliedschaft')
-                            mitgliedschaft = frappe.get_doc("Mitgliedschaft", sp_log.mv_mitgliedschaft)
-                            api_kwargs['mitgliedId'] = sp_log.mv_mitgliedschaft
-                            error_in_execution = mvm_update(mitgliedschaft, api_kwargs)
-                    else:
-                        sp_log.status = 'Failed'
-                        sp_log.retry_count = cint(sp_log.retry_count) + 1
-                        sp_log.add_comment('Comment', text='MVZH Update Issue #1205')
-                        sp_log.save()
-                        frappe.db.commit()
-                        return
+            #             if len(duplikat) > 0:
+            #                 mvzh_affected = True
+            #                 sp_log.add_comment('Comment', text='{0}'.format("MVZH Doppel-Zuzugs-Request!"))
+            #                 mitglied_main_naming = frappe.get_doc("Mitglied Main Naming", {'mitglied_id': api_kwargs['mitgliedId'], 'mitglied_nr': api_kwargs['mitgliedNummer']}) or None
+            #                 if mitglied_main_naming:
+            #                     mitglied_main_naming.add_comment('Comment', text='{0}'.format("MVZH Doppel-Zuzugs-Request!<br>Betroffene SP-Logs:<br>{0}<br>{1}".format(sp_log.name, duplikat[0].name)))
+            #                 sp_log.neuanlage = 0
+            #                 sp_log.update = 1
+            #                 sp_log.mv_mitgliedschaft = frappe.db.get_value("Service Plattform Log", duplikat[0].name, 'mv_mitgliedschaft')
+            #                 mitgliedschaft = frappe.get_doc("Mitgliedschaft", sp_log.mv_mitgliedschaft)
+            #                 api_kwargs['mitgliedId'] = sp_log.mv_mitgliedschaft
+            #                 error_in_execution = mvm_update(mitgliedschaft, api_kwargs)
+            #         else:
+            #             sp_log.status = 'Failed'
+            #             sp_log.retry_count = cint(sp_log.retry_count) + 1
+            #             sp_log.add_comment('Comment', text='MVZH Update Issue #1205')
+            #             sp_log.save()
+            #             frappe.db.commit()
+            #             return
             # END: MVZH Sepcial Case (#1089; Doppelte Zuzüge)
 
-            if not mvzh_affected:
-                # Allgemeine Doppel-Zuzugs-Prüfung (#1239)
-                previous_mitglied_nr = frappe.db.get_value("Mitgliedschaft", str(cint(api_kwargs['mitgliedId']) - 1), "mitglied_nr")
-                if previous_mitglied_nr == api_kwargs['mitgliedNummer']:
+            # if not mvzh_affected:
+            # Allgemeine Doppel-Zuzugs-Prüfung (#1239)
+            previous_mitglied_nr = frappe.db.get_value("Mitgliedschaft", str(cint(api_kwargs['mitgliedId']) - 1), "mitglied_nr")
+            if previous_mitglied_nr == api_kwargs['mitgliedNummer']:
+                sp_log.status = 'Failed'
+                sp_log.retry_count = cint(sp_log.retry_count) + 1
+                sp_log.add_comment('Comment', text='Doppel-Zuzug Issue #1239 - Es existiert eine um ein Zähler tiefere MitgliedID mit der selben MitgliedNr. Bitte manuell prüfen.')
+                sp_log.save()
+                frappe.db.commit()
+                return
+            else:
+                # Erweiterte Doppel-Zuzugs-Prüfung (#1287)
+                aktive_mitglieder_mit_identischer_nr = frappe.db.sql("""
+                                                                        SELECT COUNT(`name`) AS `qty`
+                                                                        FROM `tabMitgliedschaft`
+                                                                        WHERE `mitglied_nr` = '{0}'
+                                                                        AND `status_c` NOT IN ('Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')
+                                                                        """.format(api_kwargs['mitgliedNummer']), as_dict=True)[0].qty
+                if aktive_mitglieder_mit_identischer_nr > 0:
                     sp_log.status = 'Failed'
                     sp_log.retry_count = cint(sp_log.retry_count) + 1
-                    sp_log.add_comment('Comment', text='Doppel-Zuzug Issue #1239 - Es existiert eine um ein Zähler tiefere MitgliedID mit der selben MitgliedNr. Bitte manuell prüfen.')
+                    sp_log.add_comment('Comment', text='Doppel-Zuzug Issue #1287 - Es existiert eine andere Mitgliedschaft mit der selben MitgliedNr, welche keinen inaktiven Status besitzt. Bitte manuell prüfen.')
                     sp_log.save()
                     frappe.db.commit()
                     return
                 else:
-                    # Erweiterte Doppel-Zuzugs-Prüfung (#1287)
-                    aktive_mitglieder_mit_identischer_nr = frappe.db.sql("""
-                                                                         SELECT COUNT(`name`) AS `qty`
-                                                                         FROM `tabMitgliedschaft`
-                                                                         WHERE `mitglied_nr` = '{0}'
-                                                                         AND `status_c` NOT IN ('Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')
-                                                                         """.format(api_kwargs['mitgliedNummer']), as_dict=True)[0].qty
-                    if aktive_mitglieder_mit_identischer_nr > 0:
-                        sp_log.status = 'Failed'
-                        sp_log.retry_count = cint(sp_log.retry_count) + 1
-                        sp_log.add_comment('Comment', text='Doppel-Zuzug Issue #1287 - Es existiert eine andere Mitgliedschaft mit der selben MitgliedNr, welche keinen inaktiven Status besitzt. Bitte manuell prüfen.')
-                        sp_log.save()
-                        frappe.db.commit()
-                        return
-                    else:
-                        error_in_execution = mvm_neuanlage(api_kwargs)
+                    error_in_execution = mvm_neuanlage(api_kwargs)
     
     if error_in_execution:
         sp_log.status = 'Failed'
@@ -622,9 +611,9 @@ def mvm_neuanlage(kwargs):
                     new_mitgliedschaft.status_c = 'Online-Mutation'
         
         # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
-        if new_mitgliedschaft.zuzug_von == 'MVZH' and new_mitgliedschaft.status_c == 'Zuzug':
-            if not new_mitgliedschaft.zuzug:
-                new_mitgliedschaft.zuzug = today()
+        # if new_mitgliedschaft.zuzug_von == 'MVZH' and new_mitgliedschaft.status_c == 'Zuzug':
+        #     if not new_mitgliedschaft.zuzug:
+        #         new_mitgliedschaft.zuzug = today()
         
         # Hotfix bei (libracore/libracore) Sektionswechsel gehandelt durch die SP
         if new_mitgliedschaft.status_c == 'Zuzug':
@@ -781,10 +770,10 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
                 else:
                     kuendigung = mitgliedschaft.kuendigung
             else:
-                if sektion_id == 'MVZH' and status_c != 'Wegzug':
-                    kuendigung = kwargs['kuendigungPer'].split("T")[0]
-                else:
-                    kuendigung = mitgliedschaft.kuendigung
+                # if sektion_id == 'MVZH' and status_c != 'Wegzug':
+                #     kuendigung = kwargs['kuendigungPer'].split("T")[0]
+                # else:
+                kuendigung = mitgliedschaft.kuendigung
         else:
             kuendigung = ''
         # -----------------------------------------------------------------
@@ -924,9 +913,9 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
                 
         
         # Zuzugsdatum-Fix bei Sektionswechsel von MVZH
-        if mitgliedschaft.zuzug_von == 'MVZH' and mitgliedschaft.status_c == 'Zuzug':
-            if not mitgliedschaft.zuzug:
-                mitgliedschaft.zuzug = today()
+        # if mitgliedschaft.zuzug_von == 'MVZH' and mitgliedschaft.status_c == 'Zuzug':
+        #     if not mitgliedschaft.zuzug:
+        #         mitgliedschaft.zuzug = today()
         
         mitgliedschaft.flags.ignore_links=True
 

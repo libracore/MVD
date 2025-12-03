@@ -366,33 +366,32 @@ def get_beratungs_dokument(**beratungs_dokument):
         3. Eingang einer Mitgliedschafts-Neuanlage (mit Sektion MVZH) bei ERPNext durch die SP
         4. Verarbeitung der Neuanlage durch ERPNext
 '''
-def sektionswechsel(mvm, sektion_code):
-    if not int(frappe.db.get_single_value('Service Plattform API', 'no_sp_update')) == 1:
-        if auth_check(SVCPF_SCOPE):
-            config = frappe.get_doc("Service Plattform API", "Service Plattform API")
-            sub_url = str(config.get_value(SVCPF_SCOPE, "api_url"))
-            endpoint = '/mitglieder/sektionswechsel/{sektion_code}'.format(sektion_code=sektion_code)
-            url = sub_url + endpoint
-            token = config.get_value(SVCPF_SCOPE, 'api_token')
-            headers = {"authorization": "Bearer {token}".format(token=token)}
+# def sektionswechsel(mvm, sektion_code):
+#     if not int(frappe.db.get_single_value('Service Plattform API', 'no_sp_update')) == 1:
+#         if auth_check(SVCPF_SCOPE):
+#             config = frappe.get_doc("Service Plattform API", "Service Plattform API")
+#             sub_url = str(config.get_value(SVCPF_SCOPE, "api_url"))
+#             endpoint = '/mitglieder/sektionswechsel/{sektion_code}'.format(sektion_code=sektion_code)
+#             url = sub_url + endpoint
+#             token = config.get_value(SVCPF_SCOPE, 'api_token')
+#             headers = {"authorization": "Bearer {token}".format(token=token)}
             
-            sp_connection = requests.post(url, json = mvm, headers = headers)
+#             sp_connection = requests.post(url, json = mvm, headers = headers)
             
-            try:
-                if sp_connection.status_code != 204:
-                    make_api_log(status_code=int(sp_connection.status_code), method='sektionswechsel', request_direction='Outgoing', info_typ='Error', request_body=json.dumps(mvm, indent=4, ensure_ascii=False), error=str(sp_connection.text))
-                    frappe.db.commit()
-                    return
-                else:
-                    make_api_log(status_code=200, method='sektionswechsel', request_direction='Outgoing', info_typ='Info', request_body=json.dumps(mvm, indent=4, ensure_ascii=False))
-                    return
-            except Exception as err:
-                make_api_log(status_code=999, method='sektionswechsel', request_direction='Outgoing', info_typ='Error', request_body=json.dumps(mvm, indent=4, ensure_ascii=False), error=str(err))
-                frappe.db.commit()
-                return
-    else:
-        make_api_log(method='sektionswechsel', request_direction='Outgoing', info_typ='Info', request_body=json.dumps(mvm, indent=4, ensure_ascii=False), error='sektionswechsel deaktiviert')
-        return
+#             try:
+#                 if sp_connection.status_code != 204:
+#                     frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), '{0} > sektionswechsel'.format(sp_connection.status_code))
+#                     frappe.db.commit()
+#                     return
+#                 else:
+#                     return
+#             except Exception as err:
+#                 frappe.log_error("{0}\n\n{1}".format(err, mvm), 'sektionswechsel failed')
+#                 frappe.db.commit()
+#                 return
+#     else:
+#         frappe.log_error("{0}".format(mvm), 'sektionswechsel deaktiviert')
+#         return
 
 '''
     Mit diesem Endpunkt kann die SP Mitgliedschafts-Daten einer Mitgliedschaft bei ERPNext abfragen.
