@@ -1709,110 +1709,101 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
                     'status': 200,
                     'new_id': 'pseudo_sektion'
                 }
+    
+    try:
+        # erstelle Mitgliedschaft in Zuzugs-Sektion
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+        new_mitgliedschaft = frappe.copy_doc(mitgliedschaft)
+        new_mitgliedschaft.mitglied_id = ''
+        new_mitgliedschaft.zuzug_von = new_mitgliedschaft.sektion_id
+        new_mitgliedschaft.sektion_id = neue_sektion
+        new_mitgliedschaft.status_c = 'Zuzug'
+        new_mitgliedschaft.zuzug = zuzug_per
+        new_mitgliedschaft.wegzug = ''
+        new_mitgliedschaft.wegzug_zu = ''
+        new_mitgliedschaft.wegzug_id = mitgliedschaft.name
+        new_mitgliedschaft.kunde_mitglied = ''
+        new_mitgliedschaft.kontakt_mitglied = ''
+        new_mitgliedschaft.adresse_mitglied = ''
+        new_mitgliedschaft.adress_id_mitglied = ''
+        new_mitgliedschaft.kontakt_solidarmitglied = ''
+        new_mitgliedschaft.objekt_adresse = ''
+        new_mitgliedschaft.adress_id_objekt = ''
+        new_mitgliedschaft.rg_kunde = ''
+        new_mitgliedschaft.rg_kontakt = ''
+        new_mitgliedschaft.rg_adresse = ''
+        new_mitgliedschaft.online_haftpflicht = 0
+        new_mitgliedschaft.online_gutschrift = None
+        new_mitgliedschaft.online_betrag = None
+        new_mitgliedschaft.datum_online_verbucht = None
+        new_mitgliedschaft.datum_online_gutschrift = None
+        new_mitgliedschaft.online_payment_method = None
+        new_mitgliedschaft.online_payment_id = None
+        new_mitgliedschaft.adress_id_rg = ''
+        new_mitgliedschaft.validierung_notwendig = 0
+        new_mitgliedschaft.letzte_bearbeitung_von = 'SP'
+        new_mitgliedschaft.region_manuell = 0
+        new_mitgliedschaft.region = None
+        new_mitgliedschaft.status_change = []
+        new_mitgliedschaft.haftpflicht = []
+        new_mitgliedschaft.mandat = []
+        new_mitgliedschaft.zuzug_massendruck = 0
+        new_mitgliedschaft.zuzugs_rechnung = None
+        new_mitgliedschaft.zuzug_korrespondenz = None
+        new_mitgliedschaft.reduzierter_betrag = 0
+        new_mitgliedschaft.reduzierung_bis = None
+        new_mitgliedschaft.reduzierte_mitgliedschaft = 0
+        new_mitgliedschaft.m_w_retouren_offen = 0
+        new_mitgliedschaft.m_w_anzahl = 0
+        new_mitgliedschaft.austritt = None
+        alter_text = new_mitgliedschaft.wichtig or ""
+        new_mitgliedschaft.wichtig = info_text_neu + alter_text # Informationstext übergabe
+        new_mitgliedschaft.insert(ignore_permissions=True)
         
-        try:
-            # erstelle Mitgliedschaft in Zuzugs-Sektion
-            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
-            new_mitgliedschaft = frappe.copy_doc(mitgliedschaft)
-            new_mitgliedschaft.mitglied_id = ''
-            new_mitgliedschaft.zuzug_von = new_mitgliedschaft.sektion_id
-            new_mitgliedschaft.sektion_id = neue_sektion
-            new_mitgliedschaft.status_c = 'Zuzug'
-            new_mitgliedschaft.zuzug = zuzug_per
-            new_mitgliedschaft.wegzug = ''
-            new_mitgliedschaft.wegzug_zu = ''
-            new_mitgliedschaft.wegzug_id = mitgliedschaft.name
-            new_mitgliedschaft.kunde_mitglied = ''
-            new_mitgliedschaft.kontakt_mitglied = ''
-            new_mitgliedschaft.adresse_mitglied = ''
-            new_mitgliedschaft.adress_id_mitglied = ''
-            new_mitgliedschaft.kontakt_solidarmitglied = ''
-            new_mitgliedschaft.objekt_adresse = ''
-            new_mitgliedschaft.adress_id_objekt = ''
-            new_mitgliedschaft.rg_kunde = ''
-            new_mitgliedschaft.rg_kontakt = ''
-            new_mitgliedschaft.rg_adresse = ''
-            new_mitgliedschaft.online_haftpflicht = 0
-            new_mitgliedschaft.online_gutschrift = None
-            new_mitgliedschaft.online_betrag = None
-            new_mitgliedschaft.datum_online_verbucht = None
-            new_mitgliedschaft.datum_online_gutschrift = None
-            new_mitgliedschaft.online_payment_method = None
-            new_mitgliedschaft.online_payment_id = None
-            new_mitgliedschaft.adress_id_rg = ''
-            new_mitgliedschaft.validierung_notwendig = 0
-            new_mitgliedschaft.letzte_bearbeitung_von = 'SP'
-            new_mitgliedschaft.region_manuell = 0
-            new_mitgliedschaft.region = None
-            new_mitgliedschaft.status_change = []
-            new_mitgliedschaft.haftpflicht = []
-            new_mitgliedschaft.mandat = []
-            new_mitgliedschaft.zuzug_massendruck = 0
-            new_mitgliedschaft.zuzugs_rechnung = None
-            new_mitgliedschaft.zuzug_korrespondenz = None
-            new_mitgliedschaft.reduzierter_betrag = 0
-            new_mitgliedschaft.reduzierung_bis = None
-            new_mitgliedschaft.reduzierte_mitgliedschaft = 0
-            new_mitgliedschaft.m_w_retouren_offen = 0
-            new_mitgliedschaft.m_w_anzahl = 0
-            new_mitgliedschaft.austritt = None
-            alter_text = new_mitgliedschaft.wichtig or ""
-            new_mitgliedschaft.wichtig = info_text_neu + alter_text # Informationstext übergabe
-            new_mitgliedschaft.insert(ignore_permissions=True)
-
-            frappe.db.commit()
+        frappe.db.commit()
+        
+        # erstelle ggf. neue Rechnung
+        mit_rechnung = False
+        if new_mitgliedschaft.bezahltes_mitgliedschaftsjahr < cint(now().split("-")[0]):
+            if new_mitgliedschaft.naechstes_jahr_geschuldet == 1:
+                mit_rechnung = create_mitgliedschaftsrechnung(new_mitgliedschaft.name, mitgliedschaft_obj=new_mitgliedschaft, jahr=cint(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug mit EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
+        
+        # markiere neue Mitgliedschaft als zu validieren
+        new_mitgliedschaft = frappe.get_doc("Mitgliedschaft", new_mitgliedschaft.name)
+        new_mitgliedschaft.validierung_notwendig = 1
+        new_mitgliedschaft.letzte_bearbeitung_von = 'User'
+        if mit_rechnung:
+            new_mitgliedschaft.zuzugs_rechnung = mit_rechnung
+        else:
+            druckvorlage = frappe.get_doc("Druckvorlage", get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug ohne EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
+            _new_korrespondenz = frappe.copy_doc(druckvorlage)
+            _new_korrespondenz.doctype = 'Korrespondenz'
+            _new_korrespondenz.sektion_id = new_mitgliedschaft.sektion_id
+            _new_korrespondenz.titel = 'Zuzug ohne EZ'
             
-            # erstelle ggf. neue Rechnung
-            mit_rechnung = False
-            if new_mitgliedschaft.bezahltes_mitgliedschaftsjahr < cint(now().split("-")[0]):
-                if new_mitgliedschaft.naechstes_jahr_geschuldet == 1:
-                    mit_rechnung = create_mitgliedschaftsrechnung(new_mitgliedschaft.name, mitgliedschaft_obj=new_mitgliedschaft, jahr=cint(now().split("-")[0]), submit=True, attach_as_pdf=True, druckvorlage=get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug mit EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
-            
-            # markiere neue Mitgliedschaft als zu validieren
-            new_mitgliedschaft = frappe.get_doc("Mitgliedschaft", new_mitgliedschaft.name)
-            new_mitgliedschaft.validierung_notwendig = 1
-            new_mitgliedschaft.letzte_bearbeitung_von = 'User'
-            if mit_rechnung:
-                new_mitgliedschaft.zuzugs_rechnung = mit_rechnung
-            else:
-                druckvorlage = frappe.get_doc("Druckvorlage", get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug ohne EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
-                _new_korrespondenz = frappe.copy_doc(druckvorlage)
-                _new_korrespondenz.doctype = 'Korrespondenz'
-                _new_korrespondenz.sektion_id = new_mitgliedschaft.sektion_id
-                _new_korrespondenz.titel = 'Zuzug ohne EZ'
-                
-                new_korrespondenz = frappe._dict(_new_korrespondenz.as_dict())
-                keys_to_remove = [
-                    'mitgliedtyp_c',
-                    'validierungsstring',
-                    'language',
-                    'reduzierte_mitgliedschaft',
-                    'dokument',
-                    'default',
-                    'deaktiviert',
-                    'seite_1_qrr',
-                    'seite_1_qrr_spende_hv',
-                    'seite_2_qrr',
-                    'seite_2_qrr_spende_hv',
-                    'seite_3_qrr',
-                    'seite_3_qrr_spende_hv',
-                    'blatt_2_info_mahnung',
-                    'tipps_mahnung'
-                ]
-                for key in keys_to_remove:
-                    try:
-                        new_korrespondenz.pop(key)
-                    except:
-                        pass
-                
-                new_korrespondenz['mv_mitgliedschaft'] = new_mitgliedschaft.name
-                new_korrespondenz['massenlauf'] = 0
-                
-                new_korrespondenz = frappe.get_doc(new_korrespondenz)
-                new_korrespondenz.insert(ignore_permissions=True)
-                frappe.db.commit()
-                
-                new_mitgliedschaft.zuzug_korrespondenz = new_korrespondenz.name
+            new_korrespondenz = frappe._dict(_new_korrespondenz.as_dict())
+            keys_to_remove = [
+                'mitgliedtyp_c',
+                'validierungsstring',
+                'language',
+                'reduzierte_mitgliedschaft',
+                'dokument',
+                'default',
+                'deaktiviert',
+                'seite_1_qrr',
+                'seite_1_qrr_spende_hv',
+                'seite_2_qrr',
+                'seite_2_qrr_spende_hv',
+                'seite_3_qrr',
+                'seite_3_qrr_spende_hv',
+                'blatt_2_info_mahnung',
+                'tipps_mahnung'
+            ]
+            for key in keys_to_remove:
+                try:
+                    new_korrespondenz.pop(key)
+                except:
+                    pass
             
             new_mitgliedschaft.save(ignore_permissions=True)
 
@@ -1832,40 +1823,62 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
             mitgliedschaft.letzte_bearbeitung_von = 'User'
             mitgliedschaft.save(ignore_permissions=True)
             
-            return {
-                'status': 200,
-                'new_id': new_mitgliedschaft.name
-            }
+            new_korrespondenz = frappe.get_doc(new_korrespondenz)
+            new_korrespondenz.insert(ignore_permissions=True)
+            frappe.db.commit()
             
-        except Exception as err:
-            frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), new_mitgliedschaft.as_dict()), 'Sektionswechsel')
-            frappe.db.set_value("Mitgliedschaft", wegzugs_mitgliedschaft_id, "sektionswechsel_beantragt", 1)
-            return {
-                'status': 500,
-                'error': str(err)
-            }
-    else:
-        # Sektionswechsel nach ZH --> kein neues Mtiglied in ERPNext, Meldung Sektionswechsel erfolgt vie validate Trigger von Mitgliedschaft
-        # Sobald ZH neues Mitglied verarbeitet erhält ERPNext via SP eine Neuanlage von/für ZH und ist mittels Freizügigkeitsabfrage wieder verfügbar
+            new_mitgliedschaft.zuzug_korrespondenz = new_korrespondenz.name
+        
+        new_mitgliedschaft.save(ignore_permissions=True)
 
         # Update Wegzugs-Mitglied
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
         mitgliedschaft.wegzug = today()
-        mitgliedschaft.wegzug_zu = "MVZH"
-        mitgliedschaft.zuzug_id = "MVZH"
+        mitgliedschaft.wegzug_zu = neue_sektion
+        mitgliedschaft.zuzug_id = new_mitgliedschaft.name
         mitgliedschaft.sektionswechsel_beantragt = 1
         status_change_log = mitgliedschaft.append("status_change", {})
         status_change_log.datum = today()
         status_change_log.status_alt = mitgliedschaft.status_c
         status_change_log.status_neu = "Wegzug"
-        status_change_log.grund = "Sektionswechsel zu MVZH"
+        status_change_log.grund = "Sektionswechsel zu {0}".format(neue_sektion)
         mitgliedschaft.status_c = "Wegzug"
         mitgliedschaft.letzte_bearbeitung_von = 'User'
         mitgliedschaft.save(ignore_permissions=True)
+        
         return {
-                'status': 200,
-                'new_id': 'MVZH'
-            }
+            'status': 200,
+            'new_id': new_mitgliedschaft.name
+        }
+        
+    except Exception as err:
+        frappe.log_error("{0}\n\n{1}\n\n{2}".format(err, frappe.utils.get_traceback(), new_mitgliedschaft.as_dict()), 'Sektionswechsel')
+        frappe.db.set_value("Mitgliedschaft", wegzugs_mitgliedschaft_id, "sektionswechsel_beantragt", 1)
+        return {
+            'status': 500,
+            'error': str(err)
+        }
+    # else:
+    #     # Sektionswechsel nach ZH --> kein neues Mtiglied in ERPNext, Meldung Sektionswechsel erfolgt vie validate Trigger von Mitgliedschaft
+    #     # Sobald ZH neues Mitglied verarbeitet erhält ERPNext via SP eine Neuanlage von/für ZH und ist mittels Freizügigkeitsabfrage wieder verfügbar
+
+    #     # Update Wegzugs-Mitglied
+    #     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+    #     mitgliedschaft.wegzug = today()
+    #     mitgliedschaft.wegzug_zu = "MVZH"
+    #     mitgliedschaft.zuzug_id = "MVZH"
+    #     mitgliedschaft.sektionswechsel_beantragt = 1
+    #     status_change_log = mitgliedschaft.append("status_change", {})
+    #     status_change_log.datum = today()
+    #     status_change_log.status_alt = mitgliedschaft.status_c
+    #     status_change_log.status_neu = "Wegzug"
+    #     status_change_log.grund = "Sektionswechsel zu MVZH"
+    #     mitgliedschaft.status_c = "Wegzug"
+    #     mitgliedschaft.letzte_bearbeitung_von = 'User'
+    #     mitgliedschaft.save(ignore_permissions=True)
+    #     return {
+    #             'status': 200,
+    #             'new_id': 'MVZH'
+    #         }
 
 @frappe.whitelist()
 def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None, geschenk_reset=False, fast_mode=False, as_bg_job=False):
