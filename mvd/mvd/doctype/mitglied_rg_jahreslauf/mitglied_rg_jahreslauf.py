@@ -458,7 +458,7 @@ def create_pdfs(mrj):
     frappe.db.sql("""SET SQL_BIG_SELECTS=0""")
 
     breaked_loop = False
-    pdf_digital_only = True if cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "pdf_digital_empfaenger_only")) == 1 else False
+    pdf_digital_only = True if cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "pdf_digital_only")) == 1 else False
     for sinv in sinvs:
         aktuelle_uhrzeit = add_to_date(None, minutes=0, as_datetime=True)
         try:
