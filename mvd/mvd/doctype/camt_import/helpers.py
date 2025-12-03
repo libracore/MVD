@@ -405,34 +405,16 @@ def aktualisiere_camt_uebersicht(camt_import):
     report_data += """</tbody></table>"""
 
     # Besonderes (Rückzahlungen)
-    if summe_rueckzahlungen > 0 or len(nicht_gebuchte_pes) > 0:
-        besonderes_total = summe_rueckzahlungen
+    if summe_rueckzahlungen > 0:
         report_data += """<h3>Besonderes</h3>
                             <table style="width: 100%;">
-                                <tbody>"""
-        if summe_rueckzahlungen > 0:
-            report_data += """<tr>
-                                <td style="text-align: left;">Rückzahlungen</td>
-                                <td style="text-align: right;">{summe_rueckzahlungen}</td>
-                            </tr>""".format(summe_rueckzahlungen="{:,.2f}".format(summe_rueckzahlungen).replace(",", "'"))
-        if len(nicht_gebuchte_pes) > 0:
-            summe_stornos = 0
-            for pe in nicht_gebuchte_pes:
-                pe_doc = frappe.get_doc("Payment Entry", pe.name)
-                if pe_doc.docstatus == 2:
-                    summe_stornos += pe_doc.paid_amount
-            besonderes_total += summe_stornos
-            if summe_stornos > 0:
-                report_data += """<tr>
-                                    <td style="text-align: left;">Stornierungen</td>
-                                    <td style="text-align: right;">{summe_stornos}</td>
-                                </tr>""".format(summe_stornos="{:,.2f}".format(summe_stornos).replace(",", "'"))
-            report_data += """<tr>
-                                <td style="text-align: left;"><b>Total</b></td>
-                                <td style="text-align: right;"><b>{besonderes_total}</b></td>
-                            </tr>""".format(besonderes_total="{:,.2f}".format(besonderes_total).replace(",", "'"))
-        
-        report_data += """</tbody></table>"""
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align: left;">Rückzahlungen</td>
+                                        <td style="text-align: right;">{summe_rueckzahlungen}</td>
+                                    </tr>
+                                </tbody>
+                            </table>""".format(summe_rueckzahlungen="{:,.2f}".format(summe_rueckzahlungen).replace(",", "'"))
     
     # Verbuchte Guthaben
     if len(verbuchte_guthaben) > 0:
