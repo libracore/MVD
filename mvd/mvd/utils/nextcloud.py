@@ -22,18 +22,19 @@ class NCSettings():
         if not sektion:
             frappe.throw("Keine Sektion zur Initialisierung von NCSettings", title="NCSettings: __init__")
         
-        mvd_settings    = frappe.get_doc("MVD Settings", "MVD Settings")
-        sektion_settings = frappe.get_doc("Sektion", sektion)
-        self.IS_ENABLED = True if cint(sektion_settings.nc_enabled) == 1 else False
-        self.BASE_SEKTION = sektion_settings.nc_base_folder or sektion_settings.name
-        self.BASE_MITGLIED = "{0}/{1}".format(self.BASE_SEKTION, sektion_settings.nc_mitglied_base_folder or "Mitglieder")
-        self.BASE_BERATUNG = "{0}/{1}".format(self.BASE_SEKTION, sektion_settings.nc_beratung_base_folder or "Beratungen")
+        mvd_settings                = frappe.get_doc("MVD Settings", "MVD Settings")
+        sektion_settings            = frappe.get_doc("Sektion", sektion)
+        self.IS_ENABLED             = True if cint(sektion_settings.nc_enabled) == 1 else False
+        self.BASE_SEKTION           = sektion_settings.nc_base_folder or sektion_settings.name
+        self.BASE_MITGLIED          = "{0}/{1}".format(self.BASE_SEKTION, sektion_settings.nc_mitglied_base_folder or "Mitglieder")
+        self.BASE_MITGLIED_BERATUNG = "{0}/{1}/<platzhalter>/{2}".format(self.BASE_SEKTION, sektion_settings.nc_mitglied_base_folder or "Mitglieder", sektion_settings.nc_mitglied_beratung_base_folder or "Beratungen")
+        self.BASE_BERATUNG          = "{0}/{1}".format(self.BASE_SEKTION, sektion_settings.nc_beratung_base_folder or "Beratungen")
 
-        self.BASE_ORIGIN = mvd_settings.nc_host
-        self.USERNAME    = mvd_settings.nc_user
-        self.WEBDAV_BASE = "{0}/remote.php/dav/files/{1}".format(self.BASE_ORIGIN, urlparse.quote(self.USERNAME))
-        self.APP_PASS    = get_decrypted_password("MVD Settings", "MVD Settings", 'nc_password', False)
-        self.VERIFY_TLS  = True if cint(mvd_settings.nc_verify_ssl) else False
+        self.BASE_ORIGIN            = mvd_settings.nc_host
+        self.USERNAME               = mvd_settings.nc_user
+        self.WEBDAV_BASE            = "{0}/remote.php/dav/files/{1}".format(self.BASE_ORIGIN, urlparse.quote(self.USERNAME))
+        self.APP_PASS               = get_decrypted_password("MVD Settings", "MVD Settings", 'nc_password', False)
+        self.VERIFY_TLS             = True if cint(mvd_settings.nc_verify_ssl) else False
 
 def ensure_folder(folder_path):
     '''
@@ -176,16 +177,18 @@ def new_beratung(beratung):
     
     mitglied_nr = None
     if beratung.mv_mitgliedschaft:
-        mitglied_nr = frappe.db.get_value("Mitgliedschaft", beratung.mv_mitgliedschaf, "mitglied_nr")
+        mitglied_nr = frappe.db.get_value("Mitgliedschaft", beratung.mv_mitgliedschaft, "mitglied_nr")
     
     if mitglied_nr and mitglied_nr != "MV":
-        # Erstelle Sektions-Mitgliedschafts-Beratungs-Oder falls nicht vorhanden
+        # Erstelle Sektions-Mitgliedschafts-Beratungs-Ordner (& Basis Ordner falls nicht vorhanden)
         try:
-            ensure_folder("{0}/{1}/{2}".format(ncs.BASE_MITGLIED, mitglied_nr, beratung.name))
+            base_mitglied_beratung = ncs.BASE_MITGLIED_BERATUNG.replace("<platzhalter>", mitglied_nr)
+            ensure_folder("{0}/{1}".format(base_mitglied_beratung, beratung.name))
+            # ensure_folder("{0}/{1}/{2}".format(ncs.BASE_MITGLIED, mitglied_nr, beratung.name))
         except Exception as err:
             frappe.log_error(str(err), "NextCloud: new_beratung > ensure_folder (mit Mitglied)")
     else:
-        # Erstelle Sektions-Beratungs-Oder falls nicht vorhanden
+        # Erstelle Sektions-Beratungs-Ordner (& Basis Ordner falls nicht vorhanden)
         try:
             ensure_folder("{0}/{1}".format(ncs.BASE_BERATUNG, beratung.name))
         except Exception as err:
@@ -202,10 +205,11 @@ def added_mitglied_to_beratung(beratung):
         return
     
     if beratung.mv_mitgliedschaft:
-        mitglied_nr = frappe.db.get_value("Mitgliedschaft", beratung.mv_mitgliedschaf, "mitglied_nr")
+        mitglied_nr = frappe.db.get_value("Mitgliedschaft", beratung.mv_mitgliedschaft, "mitglied_nr")
         if mitglied_nr and mitglied_nr != "MV":
             # Verschiebe Sektions-Beratungs-Oder zu Sektions-Mitgliedschafts-Beratungs-Oder (wird erstellt wenn nicht vorhanden)
             try:
-                move_folder("{0}/{1}".format(ncs.BASE_BERATUNG, beratung.name), "{0}/{1}/{2}".format(ncs.BASE_MITGLIED, mitglied_nr, beratung.name))
+                base_mitglied_beratung = ncs.BASE_MITGLIED_BERATUNG.replace("<platzhalter>", mitglied_nr)
+                move_folder("{0}/{1}".format(ncs.BASE_BERATUNG, beratung.name), "{0}/{1}".format(base_mitglied_beratung, beratung.name))
             except Exception as err:
                 frappe.log_error(str(err), "NextCloud: added_mitglied_to_beratung > move_folder")
