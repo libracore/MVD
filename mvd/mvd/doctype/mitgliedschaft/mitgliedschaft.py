@@ -1810,23 +1810,8 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
                 except:
                     pass
             
-            new_mitgliedschaft.save(ignore_permissions=True)
-
-            # Update Wegzugs-Mitglied
-            alter_text = mitgliedschaft.wichtig or ""
-            mitgliedschaft.wichtig = info_text_neu + alter_text # Informationstext übergabe
-            mitgliedschaft.wegzug = today()
-            mitgliedschaft.wegzug_zu = neue_sektion
-            mitgliedschaft.zuzug_id = new_mitgliedschaft.name
-            mitgliedschaft.sektionswechsel_beantragt = 1
-            status_change_log = mitgliedschaft.append("status_change", {})
-            status_change_log.datum = today()
-            status_change_log.status_alt = mitgliedschaft.status_c
-            status_change_log.status_neu = "Wegzug"
-            status_change_log.grund = "Sektionswechsel zu {0}".format(neue_sektion)
-            mitgliedschaft.status_c = "Wegzug"
-            mitgliedschaft.letzte_bearbeitung_von = 'User'
-            mitgliedschaft.save(ignore_permissions=True)
+            new_korrespondenz['mv_mitgliedschaft'] = new_mitgliedschaft.name
+            new_korrespondenz['massenlauf'] = 0
             
             new_korrespondenz = frappe.get_doc(new_korrespondenz)
             new_korrespondenz.insert(ignore_permissions=True)
@@ -1837,6 +1822,8 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
         new_mitgliedschaft.save(ignore_permissions=True)
 
         # Update Wegzugs-Mitglied
+        alter_text = mitgliedschaft.wichtig or ""
+        mitgliedschaft.wichtig = info_text_neu + alter_text # Informationstext übergabe
         mitgliedschaft.wegzug = today()
         mitgliedschaft.wegzug_zu = neue_sektion
         mitgliedschaft.zuzug_id = new_mitgliedschaft.name
