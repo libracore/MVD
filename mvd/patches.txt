@@ -29,3 +29,4 @@ mvd.patches.iss1143.create_tables
 mvd.patches.v13_35_0.go_life_reset
 mvd.patches.hinweis_mietzinsrechner.hinweis_mietzinsrechner
 mvd.patches.Issue_1403.cleanup
+mvd.patches.v17_0_0.switch_legacy_mail_selection

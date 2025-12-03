@@ -11,3 +11,5 @@ class Sektion(Document):
         if self.legacy_mode != '0':
             if not self.legacy_email:
                 frappe.throw("Bitte hinterlegen Sie eine Sektionsspezifische E-Mail Adresse für den E-Mail Beratung Legacy Mode")
+            if self.legacy_mode == '2' or self.legacy_mode == '3':
+                frappe.throw("Der Legacy Mode 2 und 3 steht zur Zeit nicht zur Verfügung.")

@@ -9,6 +9,9 @@ from mvd.mvd.doctype.webshop_order.webshop_order import create_order_from_api
 import json
 from frappe.utils import cint
 from frappe.utils import sanitize_html
+from frappe.core.doctype.communication.email import make
+from frappe import sendmail
+from frappe.utils import get_url
 
 '''
 Beispiel CURL Request
@@ -382,9 +385,8 @@ def create_beratung(**args):
                     'owner': 'libracore@be.mieterverband.ch'
                 }).insert(ignore_permissions=True)
             
-            # Mail wird (glaube ich) durch die Website versendet...
-            # if args['email']:
-            #     send_confirmation_mail(args['mitglied_id'], new_ber.name, notiz, raised_by=args['email'], sektion=sektion)
+            if 'email' in args and args['email']:
+                send_confirmation_mail(args['mitglied_id'], new_ber.name, notiz, raised_by=args['email'], sektion=sektion)
             
             frappe.local.response.http_status_code = 200
             frappe.local.response.message = new_ber.name
@@ -528,3 +530,173 @@ def webshop_download(token):
     frappe.local.response.filename = file_doc.file_name
     frappe.local.response.filecontent = file_doc.get_content()  # get the file content
     frappe.local.response.type = "pdf"
+
+def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, legacy_mail=False, sektion=None):
+    try:
+        mitglied_nr = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "mitglied_nr")
+        link_zur_mitgliedschaft = '<a href="https://libracore.mieterverband.ch/desk#Form/Mitgliedschaft/{0}">{1}</a>'.format(mitgliedschaft, mitglied_nr)
+        link_zur_beratung = '<a href="https://libracore.mieterverband.ch/desk#Form/Beratung/{0}">{0}</a>'.format(beratung)
+        beratung_email = "mv+Beratung+{0}@libracore.io".format(beratung)
+
+        if not legacy_mail:
+            message = """Guten Tag"""
+            if frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1"):
+                message += " {0}".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1"))
+            if frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"):
+                message += " {0}".format(frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1"))
+            
+            if frappe.get_value("Sektion", sektion, "emailberatung_email_text"):
+                einleitung = frappe.get_value("Sektion", sektion, "emailberatung_email_text")
+            else:
+                einleitung = """Die untenstehende Frage ist bei uns eingetroffen."""
+
+            message += """<br><br>{0}<br><br><b>Mitgliedernummer:</b> {1}<br>{2}""".format(einleitung, mitglied_nr, notiz)
+            message += """<br><br>Freundliche Grüsse<br>
+                        Ihr Mieterinnen- und Mieterverband"""
+            
+            comm = make(
+                recipients=[raised_by],
+                sender=frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail"),
+                subject='Vielen Dank für Ihre Anfrage', 
+                content=message,
+                doctype='Beratung',
+                name=beratung,
+                send_email=False,
+                sender_full_name=frappe.get_value("Sektion", sektion, "legacy_mail_absende_name")
+            )["name"]
+            
+            sendmail(
+                recipients=[raised_by],
+                sender="{0} <{1}>".format(frappe.get_value("Sektion", sektion, "legacy_mail_absende_name"), frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail")),
+                subject='Vielen Dank für Ihre Anfrage', 
+                message=message,
+                as_markdown=False,
+                delayed=True,
+                reference_doctype='Beratung',
+                reference_name=beratung,
+                unsubscribe_method=None,
+                unsubscribe_params=None,
+                unsubscribe_message=None,
+                attachments=[],
+                content=None,
+                doctype='Beratung',
+                name=beratung,
+                reply_to=frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail"),
+                cc=[],
+                bcc=[],
+                message_id=frappe.get_value("Communication", comm, "message_id"),
+                in_reply_to=None,
+                send_after=None,
+                expose_recipients=None,
+                send_priority=1,
+                communication=comm,
+                retry=1,
+                now=None,
+                read_receipt=None,
+                is_notification=False,
+                inline_images=None,
+                header=None,
+                print_letterhead=False
+            )
+        else:
+            try:
+                message = False
+                attachments = None
+                vorname = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1")
+                nachname = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1")
+                if legacy_mail == '1':
+                    # legacy mail ohne links
+                    message = """Guten Tag {0}""".format(sektion)
+                    message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
+                            <br><br><b>Mitglied:</b> {0} {1}
+                            <br><b>Mitgliedernummer:</b> {2}
+                            <br><b>Beratung:</b> {3}
+                            <br><b>Beratung Mail-Link:</b> <a href="mailto:{4}">{4}</a>
+                            <br>{5}""".format(vorname, nachname, link_zur_mitgliedschaft, link_zur_beratung, beratung_email, notiz)
+                
+                # legacy_mail 2 & 3 können aktuell nicht verwendet werden (Anhänge sind zu diesem Zeitpunkt noch nicht verfügbar!)
+                elif legacy_mail == '2':
+                    # legacy mail mit links
+                    message = """Guten Tag {0}""".format(sektion)
+                    message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
+                            <br><br><b>Mitglied:</b> {0} {1}
+                            <br><b>Mitgliedernummer:</b> {2}
+                            <br><b>Beratung:</b> {3}
+                            <br><b>Beratung Mail-Link:</b> <a href="mailto:{4}">{4}</a>
+                            <br>{5}
+                            <br><br>Anhänge:<br>""".format(vorname, nachname, link_zur_mitgliedschaft, link_zur_beratung, beratung_email, notiz)
+                    for file_data in frappe.get_doc("Beratung", beratung).dokumente:
+                        message += """<a href="{0}">{1}</a><br>""".format(get_url(file_data.file), file_data.filename)
+                
+                elif legacy_mail == '3':
+                    # legacy mail mit anhängen
+                    message = """Guten Tag {0}""".format(sektion)
+                    message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
+                            <br><br><b>Mitglied:</b> {0} {1}
+                            <br><b>Mitgliedernummer:</b> {2}
+                            <br><b>Beratung:</b> {3}
+                            <br><b>Beratung Mail-Link:</b> <a href="mailto:{4}">{4}</a>
+                            <br>{5}""".format(vorname, nachname, link_zur_mitgliedschaft, link_zur_beratung, beratung_email, notiz)
+                    
+                    attachments = []
+                    all_attachments = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{0}'""".format(beratung), as_dict=True)
+                    for f in all_attachments:
+                        attachments.append({'fid': f.name})
+                
+                if message:
+                    recipient = frappe.db.get_value("Sektion", sektion, 'legacy_email')
+                    
+                    comm = make(
+                        recipients=[recipient],
+                        sender=frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail"),
+                        subject='Neue E-Mail Beratung', 
+                        content=message,
+                        doctype='Beratung',
+                        name=beratung,
+                        send_email=False,
+                        sender_full_name=frappe.get_value("Sektion", sektion, "legacy_mail_absende_name"),
+                        attachments=attachments
+                    )["name"]
+                    
+                    sendmail(
+                        recipients=[recipient],
+                        sender="{0} <{1}>".format(frappe.get_value("Sektion", sektion, "legacy_mail_absende_name"), frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail")),
+                        subject='Neue E-Mail Beratung', 
+                        message=message,
+                        as_markdown=False,
+                        delayed=True,
+                        reference_doctype='Beratung',
+                        reference_name=beratung,
+                        unsubscribe_method=None,
+                        unsubscribe_params=None,
+                        unsubscribe_message=None,
+                        attachments=attachments,
+                        content=None,
+                        doctype='Beratung',
+                        name=beratung,
+                        reply_to=raised_by,
+                        cc=[],
+                        bcc=[],
+                        message_id=frappe.get_value("Communication", comm, "message_id"),
+                        in_reply_to=None,
+                        send_after=None,
+                        expose_recipients=None,
+                        send_priority=1,
+                        communication=comm,
+                        retry=1,
+                        now=None,
+                        read_receipt=None,
+                        is_notification=False,
+                        inline_images=None,
+                        header=None,
+                        print_letterhead=False
+                    )
+            except Exception as e:
+                create_beratungs_log(error=1, info=0, beratung=beratung, method='send_confirmation_mail', title='Legacy Mail failed', json="{0}".format(str(e)))
+                pass
+            
+        return
+    except Exception as err:
+        # allgemeiner Fehler
+        create_beratungs_log(error=1, info=0, beratung=beratung, method='send_confirmation_mail', title='Exception', json="{0}".format(str(err)))
+        pass
