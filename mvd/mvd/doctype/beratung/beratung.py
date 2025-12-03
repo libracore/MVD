@@ -1115,3 +1115,18 @@ def send_to_sp():
         except Exception as err:
             # allgemeiner Fehler
             create_beratungs_log(error=1, info=0, beratung=None, method='send_to_sp', title='Exception', json="{0}".format(str(err)))
+
+def mark_beratungen_for_sp_api():
+    frappe.db.sql("""SET SQL_SAFE_UPDATES = 0;""")
+    frappe.db.sql("""
+        UPDATE `tabBeratung`
+        SET `trigger_api` = 1
+        WHERE `name` IN (
+            SELECT `name`
+            FROM `tabBeratung`
+            WHERE `creation` <= NOW() - INTERVAL 5 MINUTE
+            AND `creation` >= NOW() - INTERVAL 1 HOUR
+        )
+    """)
+    frappe.db.sql("""SET SQL_SAFE_UPDATES = 1;""")
+    frappe.db.commit()
