@@ -40,7 +40,12 @@
   "check_payrexx_ip",
   "payrexx_ip",
   "section_kampagne",
-  "suspend_kampagne_to_sp"
+  "suspend_kampagne_to_sp",
+  "section_nextcloud",
+  "nc_host",
+  "nc_user",
+  "nc_password",
+  "nc_verify_ssl"
  ],
  "fields": [
   {
@@ -68,6 +73,7 @@
    "label": "Rechnungstext anpassungen"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_feature",
    "fieldtype": "Section Break",
    "label": "Feature Aktivierung / Deaktivierung"
@@ -95,11 +101,13 @@
    "label": "E-Mail Beratung Upload Secret"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_zahlungserinnerung",
    "fieldtype": "Section Break",
    "label": "Zahlungserinnerungs Mailversand"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_email_beratung",
    "fieldtype": "Section Break",
    "label": "E-Mail Beratung"
@@ -116,6 +124,7 @@
    "label": "Redirect URL bei Ablehnung"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_serien_email",
    "fieldtype": "Section Break",
    "label": "Serien E-Mail Versand"
@@ -132,6 +141,7 @@
    "label": "Anzahl Emails pro Flush"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_wohnungsabgabe",
    "fieldtype": "Section Break",
    "label": "Wohnungsabgabe QA-Mail"
@@ -155,6 +165,7 @@
    "label": "QA-Mailversand"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_website",
    "fieldtype": "Section Break",
    "label": "Website API"
@@ -193,6 +204,7 @@
    "label": "PWD Reset URL"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_mitglieder_hash",
    "fieldtype": "Section Break",
    "label": "Mitglieder Hash"
@@ -203,6 +215,7 @@
    "label": "Hash Salt"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_payrexx",
    "fieldtype": "Section Break",
    "label": "Payrexx"
@@ -226,6 +239,7 @@
    "options": "Payrexx IP"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_kampagne",
    "fieldtype": "Section Break",
    "label": "Kampagne"
@@ -246,6 +260,33 @@
    "fieldname": "reset_hash_hours",
    "fieldtype": "Int",
    "label": "G\u00fcltigkeit Reset-Hash in Stunden"
+  },
+  {
+   "fieldname": "section_nextcloud",
+   "fieldtype": "Section Break",
+   "label": "NextCloud"
+  },
+  {
+   "description": "z.B. https://drive.libracore.mieterverband.ch",
+   "fieldname": "nc_host",
+   "fieldtype": "Data",
+   "label": "Host"
+  },
+  {
+   "fieldname": "nc_user",
+   "fieldtype": "Data",
+   "label": "User"
+  },
+  {
+   "fieldname": "nc_password",
+   "fieldtype": "Password",
+   "label": "Password"
+  },
+  {
+   "default": "0",
+   "fieldname": "nc_verify_ssl",
+   "fieldtype": "Check",
+   "label": "SSL"
   }
  ],
  "issingle": 1,
