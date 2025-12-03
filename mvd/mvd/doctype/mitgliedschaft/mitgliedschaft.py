@@ -1687,34 +1687,33 @@ def get_uebersicht_html(name):
 
 @frappe.whitelist()
 def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
-    wegzugs_mitgliedschaft_id = mitgliedschaft
-    # Informationstext übergabe
     info_text_neu = ""
     if zuzug_info:
-        info_text_neu = "Hinweis von der Wegzugssektion:\n{zuzug_info}\n\n".format(zuzug_info=zuzug_info)
-
-    if str(get_sektion_code(neue_sektion)) not in ('ZH'):
-        # Pseudo Sektion handling
-        if cint(frappe.db.get_value("Sektion", neue_sektion, "pseudo_sektion")) == 1:
-            # Update Wegzugs-Mitglied
-            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
-            mitgliedschaft.wegzug = today()
-            mitgliedschaft.wegzug_zu = neue_sektion
-            mitgliedschaft.zuzug_id = 'pseudo_sektion'
-            mitgliedschaft.sektionswechsel_beantragt = 1
-            status_change_log = mitgliedschaft.append("status_change", {})
-            status_change_log.datum = today()
-            status_change_log.status_alt = mitgliedschaft.status_c
-            status_change_log.status_neu = "Wegzug"
-            status_change_log.grund = "Sektionswechsel zu {0}".format(neue_sektion)
-            mitgliedschaft.status_c = "Wegzug"
-            mitgliedschaft.letzte_bearbeitung_von = 'User'
-            mitgliedschaft.save(ignore_permissions=True)
-            frappe.db.commit()
-            return {
-                    'status': 200,
-                    'new_id': 'pseudo_sektion'
-                }
+        info_text_neu = f"Hinweis von der Wegzugssektion:\n{zuzug_info}\n\n"
+    
+    wegzugs_mitgliedschaft_id = mitgliedschaft
+    # if str(get_sektion_code(neue_sektion)) not in ('ZH'):
+    # Pseudo Sektion handling
+    if cint(frappe.db.get_value("Sektion", neue_sektion, "pseudo_sektion")) == 1:
+        # Update Wegzugs-Mitglied
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+        mitgliedschaft.wegzug = today()
+        mitgliedschaft.wegzug_zu = neue_sektion
+        mitgliedschaft.zuzug_id = 'pseudo_sektion'
+        mitgliedschaft.sektionswechsel_beantragt = 1
+        status_change_log = mitgliedschaft.append("status_change", {})
+        status_change_log.datum = today()
+        status_change_log.status_alt = mitgliedschaft.status_c
+        status_change_log.status_neu = "Wegzug"
+        status_change_log.grund = "Sektionswechsel zu {0}".format(neue_sektion)
+        mitgliedschaft.status_c = "Wegzug"
+        mitgliedschaft.letzte_bearbeitung_von = 'User'
+        mitgliedschaft.save(ignore_permissions=True)
+        frappe.db.commit()
+        return {
+                'status': 200,
+                'new_id': 'pseudo_sektion'
+            }
     
     try:
         # erstelle Mitgliedschaft in Zuzugs-Sektion
