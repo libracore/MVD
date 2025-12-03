@@ -11,6 +11,7 @@
   "status",
   "start_rg",
   "stop_rg",
+  "pdf_digital_only",
   "create_pdf",
   "stop_pdf",
   "send_test_mails",
@@ -150,9 +151,16 @@
   {
    "fieldname": "description",
    "fieldtype": "Small Text"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.status==\"Rechnungen erstellt\"",
+   "fieldname": "pdf_digital_only",
+   "fieldtype": "Check",
+   "label": "PDF nur f\u00fcr Digitalrechnungsempf\u00e4nger"
   }
  ],
- "modified": "2025-10-27 16:28:52.798183",
+ "modified": "2025-12-03 23:32:43.165887",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitglied RG Jahreslauf",

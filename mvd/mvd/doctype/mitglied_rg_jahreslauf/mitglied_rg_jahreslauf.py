@@ -458,6 +458,7 @@ def create_pdfs(mrj):
     frappe.db.sql("""SET SQL_BIG_SELECTS=0""")
 
     breaked_loop = False
+    pdf_digital_only = True if cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "pdf_digital_empfaenger_only")) == 1 else False
     for sinv in sinvs:
         aktuelle_uhrzeit = add_to_date(None, minutes=0, as_datetime=True)
         try:
@@ -465,8 +466,8 @@ def create_pdfs(mrj):
             if sinv.docstatus != 1:
                 continue
 
-            # Skip wenn kein Digitalempfänger
-            if cint(frappe.db.get_value("Mitgliedschaft", sinv.mitglied, "digitalrechnung")) != 1:
+            # Skip ggf. wenn kein Digitalempfänger
+            if pdf_digital_only and cint(frappe.db.get_value("Mitgliedschaft", sinv.mitglied, "digitalrechnung")) != 1:
                 continue
             
             # erstellung Rechnungs PDF
