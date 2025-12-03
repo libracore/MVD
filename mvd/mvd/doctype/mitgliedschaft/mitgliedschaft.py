@@ -1783,11 +1783,8 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
             druckvorlage = frappe.get_doc("Druckvorlage", get_druckvorlagen(sektion=neue_sektion, dokument='Zuzug ohne EZ', mitgliedtyp=new_mitgliedschaft.mitgliedtyp_c, reduzierte_mitgliedschaft=new_mitgliedschaft.reduzierte_mitgliedschaft, language=new_mitgliedschaft.language)['default_druckvorlage'])
             _new_korrespondenz = frappe.copy_doc(druckvorlage)
             _new_korrespondenz.doctype = 'Korrespondenz'
-            _new_korrespondenz.sektion_id = new_mitgliedschaft.sektion_id
             _new_korrespondenz.titel = 'Zuzug ohne EZ'
             
-            new_korrespondenz = frappe._dict(_new_korrespondenz.as_dict())
-            keys_to_remove = [
                 'mitgliedtyp_c',
                 'validierungsstring',
                 'language',
