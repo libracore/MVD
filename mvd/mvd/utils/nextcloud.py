@@ -342,11 +342,7 @@ def list_all_files_tree(sektion=None, mitglied=None):
         {
             'type': 'file',
             'name': 'Example.md',
-            'path': '/Documents/Example.md',
             'size': 1095,
-            'content_type': 'text/markdown',
-            'etag': '"5227f6dd633b415c04b4710bbc1d7f4e"',
-            'last_modified': 'Tue, 02 Dec 2025 12:19:09 GMT',
             'fileid': '315'
         }
     """
