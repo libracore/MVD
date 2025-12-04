@@ -26,6 +26,7 @@ from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, upda
 from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_zahlung_mitgliedschaft, check_zahlung_hv, get_ampelfarbe, \
                                                         set_max_reminder_level, check_folgejahr_regelung
 from frappe.utils.background_jobs import enqueue
+from mvd.mvd.utils.nextcloud import new_mitgliedschaft as create_nextcloud_mitgliedschaft_folder
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
@@ -206,6 +207,11 @@ class Mitgliedschaft(Document):
             if cint(self.web_login_user_created) != 1:
                 create_web_login_user(self.mitglied_nr)
                 self.web_login_user_created = 1
+            
+            # NextCloud Mitgliedschafts-Ordner erstellen
+            old_doc = self.get_doc_before_save()
+            if (old_doc and (not old_doc.mitglied_nr or old_doc.mitglied_nr == "MV") or (not old_doc)):
+                create_nextcloud_mitgliedschaft_folder(self)
     
     def email_validierung(self, check=False):
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
