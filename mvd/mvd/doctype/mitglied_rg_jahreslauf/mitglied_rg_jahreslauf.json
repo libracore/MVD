@@ -14,6 +14,7 @@
   "pdf_digital_only",
   "create_pdf",
   "stop_pdf",
+  "mail_digital_only",
   "send_test_mails",
   "send_mails",
   "stop_mail",
@@ -158,9 +159,16 @@
    "fieldname": "pdf_digital_only",
    "fieldtype": "Check",
    "label": "PDF nur f\u00fcr Digitalrechnungsempf\u00e4nger"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:[\"Test E-Mails versendet\", \"PDFs erstellt\"].includes(doc.status)",
+   "fieldname": "mail_digital_only",
+   "fieldtype": "Check",
+   "label": "E-Mail nur f\u00fcr Digitalrechnungsempf\u00e4nger"
   }
  ],
- "modified": "2025-12-03 23:32:43.165887",
+ "modified": "2025-12-04 16:31:36.549411",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitglied RG Jahreslauf",
