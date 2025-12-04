@@ -9,20 +9,21 @@ from frappe.utils import cint
 @frappe.whitelist()
 def login(**api_request):
     # Check/Get Mitgliedernummer
-    if '@' in api_request['user']:
-        mitglied = get_mitglied_nummer(api_request['user'])
-    elif 'MV0' in api_request['user']:
-        mitglied = "{0}@login.ch".format(api_request['user'])
-    elif 'MV' not in api_request['user']:
-        mitglied = "MV{0}@login.ch".format(api_request['user'])
-    else:
-        mitglied = None
+    mitglied = None
+    if 'user' in api_request:
+        if '@' in api_request['user']:
+            mitglied = get_mitglied_nummer(api_request['user'])
+        elif 'MV0' in api_request['user']:
+            mitglied = "{0}@login.ch".format(api_request['user'])
+        elif 'MV' not in api_request['user']:
+            mitglied = "MV{0}@login.ch".format(api_request['user'])
     
-    if mitglied and api_request['pwd']:
-        clear = False
-        if "clear" in api_request:
-            clear = True
-        return check_credentials(mitglied, api_request['pwd'], clear)
+    if 'pwd' in api_request:
+        if mitglied and api_request['pwd']:
+            clear = False
+            if "clear" in api_request:
+                clear = True
+            return check_credentials(mitglied, api_request['pwd'], clear)
     
     if 'reset_hash' in api_request and api_request['reset_hash']:
         return check_hash_based_credentials(api_request['reset_hash'])
