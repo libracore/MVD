@@ -602,14 +602,16 @@ def send_mails(mrj, test=False):
     sender = None
     reply_to = None
     breaked_loop = False
+    mail_digital_only = True if cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "mail_digital_only")) == 1 else False
     for sinv in sinvs:
         if sinv.sektion != sektion:
             sektion = sinv.sektion
             sender, reply_to = get_sender_and_reply_to(sektion)
         
-        # Skip wenn kein Digitalempfänger
-        if cint(frappe.db.get_value("Mitgliedschaft", sinv.mitglied, "digitalrechnung")) != 1:
-            continue
+        if mail_digital_only:
+            # Skip wenn kein Digitalempfänger
+            if cint(frappe.db.get_value("Mitgliedschaft", sinv.mitglied, "digitalrechnung")) != 1:
+                continue
     
         attachments = []
         sinv_attachment = frappe.get_all("File", fields=["name", "file_name"],
