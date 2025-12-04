@@ -1496,6 +1496,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
         # Pseudo Sektion handling
         if cint(frappe.db.get_value("Sektion", neue_sektion, "pseudo_sektion")) == 1:
             # Update Wegzugs-Mitglied
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
             mitgliedschaft.wegzug = today()
             mitgliedschaft.wegzug_zu = neue_sektion
             mitgliedschaft.zuzug_id = 'pseudo_sektion'
