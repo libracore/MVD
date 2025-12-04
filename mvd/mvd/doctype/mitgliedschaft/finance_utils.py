@@ -397,7 +397,7 @@ def _sinv_update(mv_mitgliedschaft, timestamp_mismatch_retry=False, does_not_exi
     try:
         # Speichern der Mitgliedschaft zum triggern der validate() Funktion, diese aktualisiert alle relevanten Informationen rund um das Mitglied
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
-        mitgliedschaft.save()
+        mitgliedschaft.save(ignore_permissions=True)
     except frappe.TimestampMismatchError as err:
         if not timestamp_mismatch_retry:
             frappe.clear_messages()
