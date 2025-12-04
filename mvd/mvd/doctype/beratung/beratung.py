@@ -149,6 +149,25 @@ class Beratung(Document):
 
         # Touch Mitgliedschaft
         self.touch_mitgliedschaft()
+        
+        # NextCloud Beratuns-Ordner erstellen oder verschieben
+        self.handle_nextcloud_folder()
+
+    def handle_nextcloud_folder(self):
+        from mvd.mvd.utils.nextcloud import new_beratung as create_nextcloud_beratungs_folder
+        from mvd.mvd.utils.nextcloud import added_mitglied_to_beratung as move_folder_from_beratung_to_mitglied
+        from mvd.mvd.utils.nextcloud import changed_mitglied_in_beratung as move_folder_from_mitglied_to_mitglied
+        old_doc = self.get_doc_before_save()
+        if not old_doc:
+            # Neu angelegte Beratung
+            create_nextcloud_beratungs_folder(self)
+        elif (not old_doc.mv_mitgliedschaft) and (self.mv_mitgliedschaft):
+            # Mitgliedschaft wurde hinzugefügt
+            move_folder_from_beratung_to_mitglied(self)
+        elif (old_doc.mv_mitgliedschaft) and (self.mv_mitgliedschaft) and (old_doc.mv_mitgliedschaft != self.mv_mitgliedschaft):
+            # Mitgliedschaft wurde geändert
+            if old_doc.sektion_id == self.sektion_id:
+                move_folder_from_mitglied_to_mitglied(self, old_doc.mv_mitgliedschaft, self.mv_mitgliedschaft)
     
     def set_sektion(self):
         '''
