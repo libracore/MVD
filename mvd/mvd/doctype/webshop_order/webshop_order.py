@@ -226,6 +226,8 @@ class WebshopOrder(Document):
                 for item in items:
                     item_code = (item.get("item") or "").upper().strip()
                     if item_code.startswith("MV") and (item_code.endswith("-MG") or item_code.endswith("-MP")):
+                        self.bestellung_erledigt = 1
+                        self.save()
                         return
             except Exception:
                 pass
