@@ -23,7 +23,7 @@ class PayrexxWebhooks(Document):
         if mitglied_info:
             if isinstance(mitglied_info, tuple):
                 mitglied_id, sektion_id = mitglied_info
-                frappe.db.set_value(self.doctype, self.name, "mitglied", mitglied_id)
+                frappe.db.set_value(self.doctype, self.name, "mitglied_id", mitglied_id)
                 frappe.db.set_value(self.doctype, self.name, "sektion_id", sektion_id)
             elif isinstance(mitglied_info, str):
                 frappe.db.set_value(self.doctype, self.name, "sektion_id", mitglied_info)
@@ -67,6 +67,7 @@ class PayrexxWebhooks(Document):
                 "transaction_datetime": lambda t: t.get("time"),
                 "payrexx_instance_name": lambda t: t.get("instance", {}).get("name"),
                 "payrexx_instance_uuid": lambda t: t.get("instance", {}).get("uuid"),
+                "original_transaction_uuid": lambda t:t.get("originalTransactionUuid"),
             }
 
             for field, getter in field_map.items():

@@ -11,6 +11,7 @@
   "amount",
   "currency",
   "transaction_datetime",
+  "original_transaction_uuid",
   "personendaten_section",
   "title",
   "first_name",
@@ -23,7 +24,7 @@
   "phone",
   "email",
   "verkn\u00fcpfungen_section",
-  "mitglied",
+  "mitglied_id",
   "sektion_id",
   "mitglied_hash",
   "rohdaten_section",
@@ -123,12 +124,6 @@
    "label": "Verkn\u00fcpfungen"
   },
   {
-   "fieldname": "mitglied",
-   "fieldtype": "Link",
-   "label": "Mitglied",
-   "options": "Mitgliedschaft"
-  },
-  {
    "fieldname": "rohdaten_section",
    "fieldtype": "Section Break",
    "label": "Rohdaten"
@@ -168,9 +163,22 @@
    "fieldname": "payrexx_instance_uuid",
    "fieldtype": "Data",
    "label": "payrexx_instance_uuid"
+  },
+  {
+   "fieldname": "mitglied_id",
+   "fieldtype": "Link",
+   "label": "Mitglied ID",
+   "options": "Mitgliedschaft"
+  },
+  {
+   "depends_on": "eval: doc.original_transaction_uuid",
+   "fieldname": "original_transaction_uuid",
+   "fieldtype": "Link",
+   "label": "Original Transaction Uuid",
+   "options": "PayrexxWebhooks"
   }
  ],
- "modified": "2025-06-27 09:59:12.249761",
+ "modified": "2025-12-04 15:46:03.691816",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "PayrexxWebhooks",
