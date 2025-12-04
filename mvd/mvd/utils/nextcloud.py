@@ -20,7 +20,8 @@ class NCSettings():
         Alle Einstellungen rundum die Nextcloud Anbindung als Klassenobjekt
         '''
         if not sektion:
-            frappe.throw("Keine Sektion zur Initialisierung von NCSettings", title="NCSettings: __init__")
+            self.IS_ENABLED = False
+            return
         
         mvd_settings                = frappe.get_doc("MVD Settings", "MVD Settings")
         sektion_settings            = frappe.get_doc("Sektion", sektion)
@@ -213,3 +214,24 @@ def added_mitglied_to_beratung(beratung):
                 move_folder("{0}/{1}".format(ncs.BASE_BERATUNG, beratung.name), "{0}/{1}".format(base_mitglied_beratung, beratung.name))
             except Exception as err:
                 frappe.log_error(str(err), "NextCloud: added_mitglied_to_beratung > move_folder")
+
+def changed_mitglied_in_beratung(beratung, old_id, new_id):
+    # Initialisiere globale Settings-Klasse
+    sektion = beratung.sektion_id
+    global ncs
+    ncs = NCSettings(sektion)
+
+    # DoNothing wenn NextCloud in der Sektion deaktiviert
+    if not ncs.IS_ENABLED:
+        return
+    
+    old_mitglied_nr = frappe.db.get_value("Mitgliedschaft", old_id, "mitglied_nr")
+    new_mitglied_nr = frappe.db.get_value("Mitgliedschaft", new_id, "mitglied_nr")
+    if new_mitglied_nr and new_mitglied_nr != "MV":
+        # Verschiebe Sektions-Beratungs-Oder zu Sektions-Mitgliedschafts-Beratungs-Oder (wird erstellt wenn nicht vorhanden)
+        try:
+            old_base_mitglied_beratung = ncs.BASE_MITGLIED_BERATUNG.replace("<platzhalter>", old_mitglied_nr)
+            new_base_mitglied_beratung = ncs.BASE_MITGLIED_BERATUNG.replace("<platzhalter>", new_mitglied_nr)
+            move_folder("{0}/{1}".format(old_base_mitglied_beratung, beratung.name), "{0}/{1}".format(new_base_mitglied_beratung, beratung.name))
+        except Exception as err:
+            frappe.log_error(str(err), "NextCloud: changed_mitglied_in_beratung > move_folder")
