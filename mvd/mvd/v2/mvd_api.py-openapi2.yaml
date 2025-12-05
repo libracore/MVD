@@ -412,6 +412,8 @@ paths:
         
         Zur Beratung zugehörige Files müssen nachgelagert einzeln an den entsprechenden Endpunkt `upload_file_to_beratung` gesendet werden.
 
+        Wenn es keine Files zum Nachsenden gibt, muss zwingend der Parameter `without_files` auf `true` gesetzt werden.
+
         Example CURL Request:
         ```
         curl --location --request POST 'https://[URL]/api/method/mvd.mvd.v2.api.create_beratung' \
@@ -469,6 +471,10 @@ paths:
                 type: string
                 description: "Date as string in YYYY-mm-dd"
                 example: "2025-08-01"
+              without_files:
+                type: boolean
+                description: "Flag ob Beratung mit oder ohne Files."
+                example: false
       responses:
         '200':
           description: Beratung created successfully

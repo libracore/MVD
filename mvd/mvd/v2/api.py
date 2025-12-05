@@ -356,6 +356,10 @@ def create_beratung(**args):
             
             notiz = """{0}{1}{2}{3}{4}""".format(phone, email, other_rental_property, question, date_rent_notification)
             
+            trigger_api = 0
+            if 'without_files' in args and args['without_files']:
+                trigger_api = 1
+            
             new_ber = frappe.get_doc({
                 'doctype': 'Beratung',
                 'status': 'Rückfrage: Termin vereinbaren' if make_appointment else 'Eingang',
@@ -369,7 +373,8 @@ def create_beratung(**args):
                 'frage': args['question'] if args['question'] else None,
                 'datum_mietzinsanzeige': args.get('date_rent_notification', None),
                 'anlage_durch_web_formular': 1,
-                'sektion_id': sektion
+                'sektion_id': sektion,
+                'trigger_api': trigger_api
             })
             new_ber.insert(ignore_permissions=True)
             frappe.db.commit()
