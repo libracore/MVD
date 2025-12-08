@@ -9,6 +9,7 @@ from frappe.utils.background_jobs import enqueue
 from PyPDF2 import PdfFileWriter
 from frappe.utils.pdf import get_file_data_from_writer
 from frappe.utils.data import now
+from frappe.utils import cint
 
 class Massenlauf(Document):
     pass
@@ -491,7 +492,9 @@ def rechnung(massenlauf, sektion):
             output = PdfFileWriter()
             for mitgliedschaft in mitgliedschaften:
                 if mitgliedschaft['rg_massendruck']:
-                    output = frappe.get_print("Sales Invoice", mitgliedschaft['rg_massendruck'], 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)
+                    sinv_docstatus = cint(frappe.db.get_value("Sales Invoice", mitgliedschaft['rg_massendruck'], "docstatus")) or 0
+                    if sinv_docstatus == 1:
+                        output = frappe.get_print("Sales Invoice", mitgliedschaft['rg_massendruck'], 'Automatisierte Mitgliedschaftsrechnung', as_pdf = True, output = output, ignore_zugferd=True)
                 if counter == 500:
                     file_name = "Mitgliedschaftsrechnungs_Sammel_PDF_{datetime}".format(datetime=now().replace(" ", "_"))
                     file_name = file_name.split(".")[0]
