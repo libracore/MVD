@@ -72,3 +72,13 @@ def make_api_log(status_code=200, method='Unknown', request_direction='Incoming'
         'request_body': request_body,
         'error': error
     }).insert(ignore_permissions=True)
+
+@frappe.whitelist()
+def get_nextcloud_authzero_roles(user):
+    sektionen = frappe.db.sql("""SELECT `for_value` FROM `tabUser Permission` WHERE `allow` = 'Sektion' AND `user` = '{user}'""".format(user=user), as_dict=True)
+    role_list = []
+
+    for sektion in sektionen:
+        role_list.append("SSO_NCLC_{0}".format(sektion.for_value))
+    
+    return role_list
