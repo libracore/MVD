@@ -44,24 +44,26 @@ def reset(**api_request):
         elif 'MV' not in api_request['user']:
             mitglied = "MV{0}@login.ch".format(api_request['user'])
     
-    if mitglied:
-        if 'reset_hash' in api_request and 'pwd' in api_request:
-            clear = False
-            if "clear" in api_request:
-                clear = True
-            return update_pwd(mitglied, api_request['reset_hash'], api_request['pwd'], clear)
+        if mitglied:
+            if 'reset_hash' in api_request and 'pwd' in api_request:
+                clear = False
+                if "clear" in api_request:
+                    clear = True
+                return update_pwd(mitglied, api_request['reset_hash'], api_request['pwd'], clear)
+            else:
+                hash_only = False
+                if 'get_hash' in api_request and api_request['get_hash']:
+                    hash_only = True
+                return generate_reset_hash(mitglied, email, hash_only)
         else:
-            hash_only = False
-            if 'get_hash' in api_request and api_request['get_hash']:
-                hash_only = True
-            return generate_reset_hash(mitglied, email, hash_only)
+            return unknown_user()
     elif 'reset_hash' in api_request and 'pwd' in api_request:
             clear = False
             if "clear" in api_request:
                 clear = True
             return update_pwd(mitglied, api_request['reset_hash'], api_request['pwd'], clear)
     
-    return multi_mail()
+    return server_error()
 
 '''
 HELPERS
