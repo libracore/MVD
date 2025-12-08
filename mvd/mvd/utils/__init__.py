@@ -42,3 +42,13 @@ def get_info(jobname):
             found_job = True
 
     return found_job
+
+@frappe.whitelist()
+def get_nextcloud_authzero_roles(user):
+    sektionen = frappe.db.sql("""SELECT `for_value` FROM `tabUser Permission` WHERE `allow` = 'Sektion' AND `user` = '{user}'""".format(user=user), as_dict=True)
+    role_list = []
+
+    for sektion in sektionen:
+        role_list.append("SSO_NCLC_{0}".format(sektion.for_value))
+    
+    return role_list
