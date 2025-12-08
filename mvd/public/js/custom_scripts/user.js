@@ -21,19 +21,48 @@ function deploy_user(frm) {
         },
         "callback": function(response) {
             // collect roles
-            var roles = [];
+            let roles = [];
+            let found_nextcloud_role = false;
+
             for (var i = 0; i < frm.doc.roles.length; i++) {
-                roles.push(frm.doc.roles[i].role);
-            }
-            console.log("assign roles");
-            console.log(roles);
-            frappe.call({
-                "method": "mvd.mvd.service_plattform.api.assign_roles",
-                "args": {
-                    "user": frm.doc.email,
-                    "roles": roles
+                let user_role = frm.doc.roles[i].role;
+                switch (user_role) {
+                    case 'SSO_NCLC_MVXX':
+                        found_nextcloud_role = true;
+                        break;
+                    default:
+                        roles.push(frm.doc.roles[i].role);
                 }
-            })
+            }
+
+            if (found_nextcloud_role) {
+                frappe.call({
+                    "method": "mvd.mvd.utils.get_nextcloud_authzero_roles",
+                    "args": {
+                        "user": frm.doc.email
+                    },
+                    "callback": function(r) {
+                        for (var i = 0; i < r.message.length; i++) {
+                            roles.push(r.message[i]);
+                        }
+                        frappe.call({
+                            "method": "mvd.mvd.service_plattform.api.assign_roles",
+                            "args": {
+                                "user": frm.doc.email,
+                                "roles": roles
+                            }
+                        })
+                    }
+                });
+            } else {
+                frappe.call({
+                    "method": "mvd.mvd.service_plattform.api.assign_roles",
+                    "args": {
+                        "user": frm.doc.email,
+                        "roles": roles
+                    }
+                })
+            }
         }
     });
 }
