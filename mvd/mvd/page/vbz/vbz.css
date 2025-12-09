@@ -21,6 +21,11 @@ Allgemein
     border: 1px solid #003A62;
 }
 
+.orange-card:hover {
+    box-shadow: 10px 10px 5px #E5702B;
+    border: 1px solid #E5702B;
+}
+
 .control-card .fa {
     font-size: 5em;
 }
@@ -75,6 +80,10 @@ height: 2em;
 
 .blue-icon {
     color: #003A62;
+}
+
+.orange-icon {
+    color: #E5702B;
 }
 
 h1.vbz {

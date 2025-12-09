@@ -41,6 +41,7 @@ frappe.vbz = {
         $("#neuanlage").off("click");
         $("#handbuch").off("click");
         $("#info_blog").off("click");
+        $("#ongoing_issues").off("click");
         $("#massenlauf").off("click");
         $("#adresspflege").off("click");
         $("#serienbrief").off("click");
@@ -142,6 +143,10 @@ frappe.vbz = {
         });
         $("#info_blog").click(function(){
             window.open('https://wiki.mieterverband.ch/pages/viewrecentblogposts.action?key=LIB', '_blank').focus();
+        });
+        $("#ongoing_issues").click(function(){
+            //frappe.set_route('Form', 'Report', 'Störungsmeldungen');
+            frappe.set_route('query-report', 'Störungsmeldungen');
         });
         $("#mitglieder").click(function(){
             frappe.route_options = {"aktive_mitgliedschaft": 1};
