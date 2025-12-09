@@ -269,7 +269,6 @@ def adresse_geaendert_check(adr=None, datum_adressexport=None, adresse_fuer_verg
                 if datum_adressexport:
                     adresse_geaendert = getdate(adresse_geaendert[0].creation)
                     datum_adressexport = getdate(datum_adressexport)
-                    frappe.log_error("adresse_geaendert: {0}\ndatum_adressexport: {1}".format(adresse_geaendert, datum_adressexport), "adresse_geaendert_check: {0}".format(adr))
                     if adresse_geaendert >= datum_adressexport:
                         return 1
                     else:
