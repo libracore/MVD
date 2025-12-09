@@ -6,7 +6,8 @@
  "field_order": [
   "status",
   "logs",
-  "handled_postretouren"
+  "handled_postretouren",
+  "handled_post_files"
  ],
  "fields": [
   {
@@ -28,9 +29,15 @@
    "fieldtype": "Table",
    "label": "Handled Postretouren",
    "options": "Handled Postretouren"
+  },
+  {
+   "fieldname": "handled_post_files",
+   "fieldtype": "Table",
+   "label": "Handled Post Files",
+   "options": "Handled Post Files"
   }
  ],
- "modified": "2024-05-17 11:33:08.793497",
+ "modified": "2025-12-09 14:51:12.065242",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Postretouren Log",

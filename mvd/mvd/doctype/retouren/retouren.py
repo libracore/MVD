@@ -183,7 +183,9 @@ def create_post_retouren(data):
         })
         
         post_retoure.insert(ignore_permissions=True)
-        frappe.db.commit()
+
+        # der DB-Commit wird in den Main-Prozess verschoben aufgrund des Tickets #1531
+        # frappe.db.commit()
         
         return 1, cint(post_retoure.retoure_in_folge)
         

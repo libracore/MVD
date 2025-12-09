@@ -12,17 +12,19 @@
    "fieldname": "auftrags_nummer",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Auftragsnummer"
+   "label": "Auftragsnummer",
+   "search_index": 1
   },
   {
    "fieldname": "sendungs_nummer",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Sendungsnummer"
+   "label": "Sendungsnummer",
+   "search_index": 1
   }
  ],
  "istable": 1,
- "modified": "2024-05-17 11:33:28.827601",
+ "modified": "2025-12-09 15:07:26.793854",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Handled Postretouren",

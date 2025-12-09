@@ -34,7 +34,8 @@ def create_postnotiz(postnotiz, postretour, postretouren_log):
         })
         
         new_postnotiz.insert(ignore_permissions=True)
-        frappe.db.commit()
+        # der DB-Commit wird in den Main-Prozess verschoben aufgrund des Tickets #1531
+        # frappe.db.commit()
         
         job_status = 1
         

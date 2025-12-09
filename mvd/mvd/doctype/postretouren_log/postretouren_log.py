@@ -18,6 +18,11 @@ class PostretourenLog(Document):
         for csv_file in _csv_files:
             csv_files.append("/home/frappe/{0}/sites/{1}{2}".format(benchname, sitename, csv_file.file_url))
         
+        self.status = 'WiP'
+        self.save()
+        frappe.db.commit()
+        self.reload()
+
         args = {
             'postretouren_log': self,
             'csv_files': csv_files if len(csv_files) > 0 else None
@@ -34,9 +39,17 @@ def start_post_retouren_process():
     new_postretouren_log.insert(ignore_permissions=True)
     frappe.db.commit()
 
+    # Prüfung ob alle Vorgängigen Postretouren Log's verarbeitet wurden. Wenn ja, starten...
+    existing_open_postretouren_logs = frappe.db.sql("""SELECT COUNT(`name`) AS `qty FROM `tabPostretouren Log` WHERE `status` IN ('Open', 'WiP')""", as_dict=True)
+    if existing_open_postretouren_logs[0].qty > 0:
+        # Stoppen der autom. Verarbeitung, da nicht alle Vorgängigen Postretouren Log's verarbeitet wurden.
+        return
+    
     new_postretouren_log.status = 'WiP'
     new_postretouren_log.save()
     frappe.db.commit()
+    new_postretouren_log.reload()
+    
     args = {
         'postretouren_log': new_postretouren_log
     }
@@ -56,14 +69,26 @@ def process_post_retouren(postretouren_log, csv_files=None):
     # get csv files
     if not csv_files:
         csv_files = libracore.get_csv_files_from_post(postretouren_log.name)
+    
+    # Aufgrund der Problemathik aus Ticket #1531 wird hier im Main-Prozess der DB-Commit ausgeführt (anstelle in den einzelnen Sub-Prozessen)
+    commit_counter = 0
 
     for csv_file in csv_files:
+        # Prüfung ob das entsprechende CSV bereits verarbeitet wurde. Wenn ja -> Skip
+        skip_file = False
+        for handled_post_file in postretouren_log.handled_post_files:
+            if handled_post_file.file == csv_file:
+                skip_file = True
+        if skip_file:
+            continue
+
         file = open(csv_file, 'r', encoding="utf-16-le")
         lines = file.read().splitlines()
         if len(lines) < 2:
             libracore.log("File should have 2 or more Lines. The following file is ignored: {0}".format(csv_file.split("/")[len(csv_file.split("/"))-1]), postretouren_log, "Warning")
         else:
             for line in lines[1:]:
+                commit_counter += 1
                 columns = line.split("\t")
 
                 if len(columns) != 56:
@@ -84,7 +109,21 @@ def process_post_retouren(postretouren_log, csv_files=None):
                 libracore.handle_post_objects(pr, pn, postretouren_log)
                 libracore.set_post_retour_as_handled(columns[2], columns[3], postretouren_log)
 
+                # Aufgrund der Problemathik aus Ticket #1531 wird hier im Main-Prozess der DB-Commit ausgeführt (anstelle in den einzelnen Sub-Prozessen)
+                if commit_counter == 10:
+                    postretouren_log.save(ignore_permissions=True)
+                    frappe.db.commit()
+                    postretouren_log.reload()
+                    commit_counter = 0
+
         file.close()
+        # Mark File as handled
+        file_row = postretouren_log.append('handled_post_files', {})
+        file_row.file = csv_file
+        postretouren_log.save(ignore_permissions=True)
+        frappe.db.commit()
+        postretouren_log.reload()
+        commit_counter = 0
     
     libracore.set_postretouren_status(postretouren_log)
     postretouren_log.save(ignore_permissions=True)
