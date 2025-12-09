@@ -1,0 +1,29 @@
+{
+ "creation": "2025-12-09 14:50:40.439064",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "file"
+ ],
+ "fields": [
+  {
+   "fieldname": "file",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "File",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2025-12-09 14:50:40.439064",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Handled Post Files",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
