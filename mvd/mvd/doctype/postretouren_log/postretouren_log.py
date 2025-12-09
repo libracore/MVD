@@ -49,7 +49,7 @@ def start_post_retouren_process():
     new_postretouren_log.save()
     frappe.db.commit()
     new_postretouren_log.reload()
-    
+
     args = {
         'postretouren_log': new_postretouren_log
     }
@@ -110,7 +110,7 @@ def process_post_retouren(postretouren_log, csv_files=None):
                 libracore.set_post_retour_as_handled(columns[2], columns[3], postretouren_log)
 
                 # Aufgrund der Problemathik aus Ticket #1531 wird hier im Main-Prozess der DB-Commit ausgeführt (anstelle in den einzelnen Sub-Prozessen)
-                if commit_counter == 10:
+                if commit_counter >= 10:
                     postretouren_log.save(ignore_permissions=True)
                     frappe.db.commit()
                     postretouren_log.reload()
