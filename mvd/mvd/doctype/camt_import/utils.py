@@ -92,6 +92,9 @@ def create_unpaid_sinv(fak, betrag):
         fak_doc.status = 'Paid'
         fak_doc.bezahlt_via = sinv.name
         fak_doc.save(ignore_permissions=True)
+
+        frappe.db.commit()
+        
         return {
                 'sinv': sinv.name,
                 'customer': sinv.customer,
