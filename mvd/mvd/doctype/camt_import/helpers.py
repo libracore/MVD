@@ -65,6 +65,10 @@ def erfasse_nicht_eingelesene_zahlungen(transaction_reference, unique_reference,
     frappe.db.set_value('CAMT Import', camt_import, 'nicht_eingelesene_zahlungen', nicht_eingelesene_zahlungen)
     frappe.db.set_value('CAMT Import', camt_import, 'nicht_eingelesene_zahlungen_qty', qty)
 
+def entferne_nicht_eingelesene_zahlungen(camt_import):
+    qty = frappe.db.get_value('CAMT Import', camt_import, 'nicht_eingelesene_zahlungen_qty') - 1
+    frappe.db.set_value('CAMT Import', camt_import, 'nicht_eingelesene_zahlungen_qty', qty)
+
 def erfasse_fehlgeschlagenes_auslesen(transaction, err, camt_import):
     fehlgeschlagenes_auslesen = frappe.db.get_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen')
     qty = frappe.db.get_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen_qty') + 1

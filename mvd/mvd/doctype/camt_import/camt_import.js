@@ -226,6 +226,26 @@ frappe.ui.form.on('CAMT Import', {
             "docstatus": 0
         }
         frappe.set_route("List", "Payment Entry");
+    },
+    zahlungen_nachladen: function(frm) {
+        cur_frm.set_value("status", "In Verarbeitung");
+        cur_frm.save().then(function(){
+            frappe.call({
+                method: 'mvd.mvd.doctype.camt_import.camt_import.lese_camt_file',
+                args: {
+                    'file_path': cur_frm.doc.camt_file,
+                    'camt_import': cur_frm.doc.name,
+                    'einlesen': 0,
+                    'matchen': 0,
+                    'verbuchen': 0,
+                    'all_in_one': 0,
+                    'nachladen': 1
+                },
+                callback: function(r) {
+                    frappe.msgprint("Der CAMT-Import wurde gestartet.<br>Sie können den Fortschritt <a href='/desk#background_jobs'>hier</a> verfolgen.");
+                }
+            });
+        });
     }
 });
 
@@ -240,7 +260,8 @@ function import_payments(frm, einlesen, matchen, verbuchen, all_in_one) {
                 'einlesen': einlesen,
                 'matchen': matchen,
                 'verbuchen': verbuchen,
-                'all_in_one': all_in_one
+                'all_in_one': all_in_one,
+                'nachladen': 0
             },
             callback: function(r) {
                 //~ frappe.dom.freeze('Bitte warten, die Zahlungen werden importiert...');

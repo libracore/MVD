@@ -22,8 +22,8 @@ class CAMTImport(Document):
                 self.account = sektion.account
 
 @frappe.whitelist()
-def lese_camt_file(camt_import, file_path, einlesen, matchen, verbuchen, all_in_one):
-    def get_camt_step(einlesen, matchen, verbuchen, all_in_one):
+def lese_camt_file(camt_import, file_path, einlesen, matchen, verbuchen, all_in_one, nachladen=0):
+    def get_camt_step(einlesen, matchen, verbuchen, all_in_one, nachladen):
         if cint(all_in_one) == 1:
             return 'All in one'
         if cint(einlesen) == 1:
@@ -32,6 +32,8 @@ def lese_camt_file(camt_import, file_path, einlesen, matchen, verbuchen, all_in_
             return 'Zuweisen'
         if cint(verbuchen) == 1:
             return 'Verbuchen'
+        if cint(nachladen) == 1:
+            return 'Nachladen von Zahlungen'
     
     # lese und prüfe camt file
     camt_file = get_camt_file(file_path, test=True)
@@ -45,12 +47,13 @@ def lese_camt_file(camt_import, file_path, einlesen, matchen, verbuchen, all_in_
         'einlesen': einlesen,
         'matchen': matchen,
         'verbuchen': verbuchen,
-        'all_in_one': all_in_one
+        'all_in_one': all_in_one,
+        'nachladen': nachladen
     }
     sektion = frappe.db.get_value("CAMT Import", camt_import, "sektion_id")
-    enqueue("mvd.mvd.doctype.camt_import.camt_import.verarbeite_camt_file", queue='long', job_name='Verarbeite {0} CAMT Import {1} ({2})'.format(sektion, camt_import, get_camt_step(einlesen, matchen, verbuchen, all_in_one)), timeout=5000, **args)
+    enqueue("mvd.mvd.doctype.camt_import.camt_import.verarbeite_camt_file", queue='long', job_name='Verarbeite {0} CAMT Import {1} ({2})'.format(sektion, camt_import, get_camt_step(einlesen, matchen, verbuchen, all_in_one, nachladen)), timeout=5000, **args)
 
-def verarbeite_camt_file(camt_file, camt_import, einlesen, matchen, verbuchen, all_in_one):
+def verarbeite_camt_file(camt_file, camt_import, einlesen, matchen, verbuchen, all_in_one, nachladen):
     def get_next_step(einlesen, matchen, verbuchen):
         if cint(einlesen) == 1:
             return 0, 1, 0
@@ -93,6 +96,16 @@ def verarbeite_camt_file(camt_file, camt_import, einlesen, matchen, verbuchen, a
         except Exception as err:
             camt_status_update(camt_import, 'Failed')
             frappe.log_error("\n\n{1}".format(err, frappe.get_traceback()), 'CAMT-Import {0} failed in verbuchen'.format(camt_import))
+            return
+    elif cint(nachladen) == 1:
+        try:
+            zahlungen_einlesen(camt_file, camt_import, nachladen=True)
+            # Aktualisiere CAMT Übersicht
+            aktualisiere_camt_uebersicht(camt_import)
+            camt_status_update(camt_import, 'Zahlungen eingelesen')
+        except Exception as err:
+            camt_status_update(camt_import, 'Failed')
+            frappe.log_error("{0}\n\n{1}".format(err, frappe.get_traceback()), 'CAMT-Import {0} failed in nachladen'.format(camt_import))
             return
     else:
         # Aktualisiere CAMT Übersicht
