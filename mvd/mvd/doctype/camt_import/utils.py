@@ -105,7 +105,7 @@ def create_unpaid_sinv(fak, betrag):
         # Fakultative Rechnung wurde bereits beglichen -> erzeuge ungebuchte, aber zugewiesene Zahlung
         return False
 
-def zahlungen_einlesen(camt_file, camt_import):
+def zahlungen_einlesen(camt_file, camt_import, nachladen=False):
     """
     Diese Funktion list das CAMT-File aus und erzeugt für alle darin enthaltenen Eingangszahlungen einen Payment Entry
     """
@@ -206,12 +206,13 @@ def zahlungen_einlesen(camt_file, camt_import):
                             transaction_reference = unique_reference
                 if credit_debit == "CRDT":
                     # erfasse ausgelesene Zahlung in CAMT-Import
-                    erfasse_ausgelesene_zahlungen(transaction_reference, unique_reference, date, amount, camt_import.name)
+                    if not nachladen:
+                        erfasse_ausgelesene_zahlungen(transaction_reference, unique_reference, date, amount, camt_import.name)
                     
                     # erfasse Payment Entry
                     erstelle_zahlung(date=date, to_account=account, received_amount=amount, 
                         transaction_id=unique_reference, remarks="QRR: {0}, {1}, {2}, IBAN: {3}".format(
-                        transaction_reference, customer_name, customer_address, customer_iban), company=company, sektion=sektion, qrr=transaction_reference, camt_import=camt_import.name)
+                        transaction_reference, customer_name, customer_address, customer_iban), company=company, sektion=sektion, qrr=transaction_reference, camt_import=camt_import.name, nachladen=nachladen)
                     
                     if commit_counter == 100:
                         frappe.db.commit()
@@ -843,7 +844,7 @@ def reset_camt(camt):
     frappe.db.commit()
     aktualisiere_camt_uebersicht(camt_import.name)
 
-def erstelle_zahlung(date, to_account, received_amount, transaction_id, remarks, company, sektion, qrr, camt_import):
+def erstelle_zahlung(date, to_account, received_amount, transaction_id, remarks, company, sektion, qrr, camt_import, nachladen=False):
     """
     Diese Funktion erzeugt einen Payment Entry, insofern noch kein Payment Entry mit der selben Transaktions-ID der Bank vorhanden ist
     """
@@ -884,8 +885,11 @@ def erstelle_zahlung(date, to_account, received_amount, transaction_id, remarks,
         
         # erfasse eingelesene Zahlung in CAMT-Import
         erfasse_eingelesene_zahlungen(qrr, transaction_id, date, received_amount, camt_import)
+        if nachladen:
+            entferne_nicht_eingelesene_zahlungen(camt_import)
         return
     else:
         # erfasse nicht eingelesene Zahlung in CAMT-Import
-        erfasse_nicht_eingelesene_zahlungen(qrr, transaction_id, date, received_amount, camt_import)
+        if not nachladen:
+            erfasse_nicht_eingelesene_zahlungen(qrr, transaction_id, date, received_amount, camt_import)
         return
