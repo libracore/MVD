@@ -1,0 +1,62 @@
+{
+ "creation": "2025-12-11 08:51:43.203390",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "create_json",
+  "cb_1",
+  "load_json",
+  "section_doctypes_to_backup_restore",
+  "doctypes_to_backup_restore"
+ ],
+ "fields": [
+  {
+   "fieldname": "create_json",
+   "fieldtype": "Button",
+   "label": "Create Backup JSON"
+  },
+  {
+   "fieldname": "load_json",
+   "fieldtype": "Button",
+   "label": "Load JSON"
+  },
+  {
+   "description": "Beispielliste:<br>\n<ul><li>\"Service Plattform API\"</li>\n<li>\"Email Domain\"</li>\n<li>\"Email Account\"</li>\n<li>\"Notification\"</li>\n<li>\"Auto Email Report\"</li>\n<li>\"Social Login Key\"</li>\n<li>\"Postretouren Einstellungen\"</li>\n<li>\"MVD Settings\"</li>\n<li>\"Calendar Sync Settings\"</li>\n<li>\"JWT\"</li></ul>",
+   "fieldname": "doctypes_to_backup_restore",
+   "fieldtype": "Table",
+   "label": "DocTypes to Backup / Restore",
+   "options": "DB BackupRestore DocTypes",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_doctypes_to_backup_restore",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "issingle": 1,
+ "modified": "2025-12-11 11:11:49.261574",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "DB BackupRestore",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
