@@ -68,6 +68,7 @@ class PayrexxWebhooks(Document):
                 "payrexx_instance_name": lambda t: t.get("instance", {}).get("name"),
                 "payrexx_instance_uuid": lambda t: t.get("instance", {}).get("uuid"),
                 "original_transaction_uuid": lambda t:t.get("originalTransactionUuid"),
+                "reference_id": lambda t: t.get("invoice", {}).get("referenceId"),
             }
 
             for field, getter in field_map.items():
