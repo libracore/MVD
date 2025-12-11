@@ -31,6 +31,7 @@
   "payrexx_instance_section",
   "payrexx_instance_name",
   "payrexx_instance_uuid",
+  "reference_id",
   "json"
  ],
  "fields": [
@@ -176,9 +177,14 @@
    "fieldtype": "Link",
    "label": "Original Transaction Uuid",
    "options": "PayrexxWebhooks"
+  },
+  {
+   "fieldname": "reference_id",
+   "fieldtype": "Data",
+   "label": "reference_id"
   }
  ],
- "modified": "2025-12-04 15:46:03.691816",
+ "modified": "2025-12-11 09:41:47.125665",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "PayrexxWebhooks",

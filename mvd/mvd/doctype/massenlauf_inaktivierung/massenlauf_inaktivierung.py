@@ -73,15 +73,17 @@ class MassenlaufInaktivierung(Document):
     def before_submit(self):
         self.status = 'In Arbeit'
         args = {
-            'doc': self
+            'doc': massenlauf
         }
         enqueue("mvd.mvd.doctype.massenlauf_inaktivierung.massenlauf_inaktivierung.start_massenlauf_inaktivierung", queue='long', job_name='Massenlauf Inaktivierung {0} {1} ({2})'.format(self.ausschluss, self.sektion_id, self.name), timeout=5000, **args)
 
 def start_massenlauf_inaktivierung(doc):
     errors = []
+    commit_count = 0
     try:
         for mitgliedschaft in doc.mitgliedschaften:
             try:
+                commit_count += 1
                 ms = frappe.get_doc("Mitgliedschaft", mitgliedschaft.mv_mitgliedschaft)
                 
                 if ms.status_c in ('Ausschluss', 'Inaktiv'):
@@ -166,7 +168,12 @@ def start_massenlauf_inaktivierung(doc):
                                 fr_doc = frappe.get_doc("Fakultative Rechnung", fr.name)
                                 fr_doc.cancel()
                                 fr_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
+                if commit_count >= 10:
+                    frappe.db.commit()
+                    commit_count = 0
+                
             except Exception as error:
+                frappe.log_error(message="{0}\n{1}\n{2}".format(mitgliedschaft.mv_mitgliedschaft, str(error), frappe.get_traceback()), title="Massenlauf Inaktivierung ({0})".format(doc.name))
                 errors.append([mitgliedschaft.mv_mitgliedschaft, str(error), frappe.get_traceback()])
         
         doc.reload()

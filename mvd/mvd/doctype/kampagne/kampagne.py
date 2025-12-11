@@ -36,21 +36,27 @@ class Kampagne(Document):
         self.newsletter_names = ",".join(cleaned_list)
 
     def after_insert(self):
-        # Mitglied zuordnen
+        """
+        Versuche dem Kampagnen Eintrag eine Mitgliedschaft zuzuordnen über 
+            - den Mitglied Hash
+            - die Email
+        Über die PLZ wird immer eine Sektion zugeordnet
+        """
         email = self.email 
         mitglied_hash = self.mitglied_hash
         zip_code = self.zip_code
+
         mitglied_info = mitgliedschaft_zuweisen(email=email, mitglied_hash=mitglied_hash, zip_code=zip_code)
 
         if mitglied_info:
             if isinstance(mitglied_info, tuple):
-                mitglied_id, sektion_id = mitglied_info
-                frappe.db.set_value(self.doctype, self.name, "mitglied", mitglied_id)
+                self.mitglied_id = mitglied_info[0]
                 if not self.sektion_id:
-                    frappe.db.set_value(self.doctype, self.name, "sektion_id", sektion_id)
-            elif isinstance(mitglied_info, str):
-                if not self.sektion_id:
-                    frappe.db.set_value(self.doctype, self.name, "sektion_id", mitglied_info)
+                    self.sektion_id = mitglied_info[1]
+            elif isinstance(mitglied_info, str) and not self.sektion_id:
+                self.sektion_id = mitglied_info
+                
+            self.save(ignore_permissions=True)
 
         if cint(frappe.db.get_value("MVD Settings", "MVD Settings", "suspend_kampagne_to_sp")) != 1 \
            and self.email and self.campaign_trigger_code and self.newsletter_names:

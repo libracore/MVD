@@ -12,80 +12,93 @@ from urllib.parse import parse_qs
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import mitgliedschaft_zuweisen
 
 class PayrexxWebhooks(Document):
+
     def before_insert(self):
+
         self.set_transaction_fields()
 
     def after_insert(self):
+        """
+        Versuche dem Payrexx Eintrag eine Mitgliedschaft zuzuordnen über 
+            - den Mitglied Hash
+            - die Email
+        Über die PLZ wird immer eine Sektion zugeordnet
+        """
         email = self.email 
         mitglied_hash = self.mitglied_hash
         plz = self.plz
-        mitglied_info = mitgliedschaft_zuweisen(email=email, mitglied_hash=mitglied_hash, plz=plz)
-        if mitglied_info:
-            if isinstance(mitglied_info, tuple):
-                mitglied_id, sektion_id = mitglied_info
-                frappe.db.set_value(self.doctype, self.name, "mitglied_id", mitglied_id)
-                frappe.db.set_value(self.doctype, self.name, "sektion_id", sektion_id)
-            elif isinstance(mitglied_info, str):
-                frappe.db.set_value(self.doctype, self.name, "sektion_id", mitglied_info)
-        elif self.payrexx_instance_uuid:
-            results = frappe.get_all("Sektion",
+
+        mitglied_info = mitgliedschaft_zuweisen(email=email, mitglied_hash=mitglied_hash, zip_code=plz)
+
+        # Sektion wird primär über die payrexx_instance_uuid zugeordnet
+        if self.payrexx_instance_uuid:
+            results = frappe.get_all(
+                "Sektion",
                 filters={"payrexx_instance_uuid": self.payrexx_instance_uuid},
                 fields=["title"]
             )
             if len(results) == 1:
-                frappe.db.set_value(self.doctype, self.name, "sektion_id", results[0]["title"])
-            else: # Fallback
-                frappe.db.set_value(self.doctype, self.name, "sektion_id", "MVD")
-        else: # Fallback
-            frappe.db.set_value(self.doctype, self.name, "sektion_id", "MVD")
-        return
-    
+                self.sektion_id = results[0]["title"]
+
+        if mitglied_info:
+            if isinstance(mitglied_info, tuple):
+                self.mitglied_id = mitglied_info[0]
+                if not self.sektion_id:
+                    self.sektion_id = mitglied_info[1]
+            elif isinstance(mitglied_info, str) and not self.sektion_id:
+                self.sektion_id = mitglied_info
+        # Fallback       
+        if not self.sektion_id:
+            self.sektion_id = "MVD"
+
+        self.save(ignore_permissions=True)
+ 
+
     def set_transaction_fields(self):
+        if not self.json:
+            return
+
         try:
-            if not self.json:
-                return
-
-            data = json.loads(self.json)
-            transaction = data.get("transaction", {})
-            transaction_uuid = transaction.get("uuid")
-
-            # Define a mapping of attribute names to their paths in the JSON
-            field_map = {
-                "status": lambda t: t.get("status"),
-                "amount": lambda t: round(float(t["amount"]) / 100.0, 2) if t.get("amount") not in [None, ""] else None, # Amount comes in Rp. as Int -> convert to CHF
-                "currency": lambda t: t.get("invoice", {}).get("currency"),
-                "title": lambda t: t.get("contact", {}).get("title"),
-                "first_name": lambda t: t.get("contact", {}).get("firstname"),
-                "last_name": lambda t: t.get("contact", {}).get("lastname"),
-                "company": lambda t: t.get("contact", {}).get("company"),
-                "street": lambda t: t.get("contact", {}).get("street"),
-                "plz": lambda t: t.get("contact", {}).get("zip"),
-                "place": lambda t: t.get("contact", {}).get("place"),
-                "country": lambda t: t.get("contact", {}).get("country"),
-                "phone": lambda t: t.get("contact", {}).get("phone"),
-                "email": lambda t: t.get("contact", {}).get("email"),
-                "transaction_datetime": lambda t: t.get("time"),
-                "payrexx_instance_name": lambda t: t.get("instance", {}).get("name"),
-                "payrexx_instance_uuid": lambda t: t.get("instance", {}).get("uuid"),
-                "original_transaction_uuid": lambda t:t.get("originalTransactionUuid"),
-            }
-
-            for field, getter in field_map.items():
-                value = getter(transaction)
-                setattr(self, field, value)
-
-            # Custom logic to extract mitglied_hash because it's in a list
-            mitglied_hash = None
-            custom_fields = transaction.get("invoice", {}).get("custom_fields", [])
-            for field in custom_fields:
-                if "mitglied_hash" in field:
-                    mitglied_hash = field.get("mitglied_hash")
-                    break
-
-            self.mitglied_hash = mitglied_hash
-
+            payload = json.loads(self.json)
+            transaction = payload.get("transaction", {})
         except Exception as e:
-            frappe.log_error("PayrexxWebhook JSON parse error", str(e))
+            frappe.log_error(f"Invalid Payrexx JSON: {str(e)}", "PayrexxWebhooks")
+            return
+
+        # Define a mapping of attribute names to their paths in the JSON
+        field_map = {
+            "status": lambda t: t.get("status"),
+            "amount": lambda t: round(float(t["amount"]) / 100.0, 2) if t.get("amount") not in [None, ""] else None, # Amount comes in Rp. as Int -> convert to CHF
+            "currency": lambda t: t.get("invoice", {}).get("currency"),
+            "title": lambda t: t.get("contact", {}).get("title"),
+            "first_name": lambda t: t.get("contact", {}).get("firstname"),
+            "last_name": lambda t: t.get("contact", {}).get("lastname"),
+            "company": lambda t: t.get("contact", {}).get("company"),
+            "street": lambda t: t.get("contact", {}).get("street"),
+            "plz": lambda t: t.get("contact", {}).get("zip"),
+            "place": lambda t: t.get("contact", {}).get("place"),
+            "country": lambda t: t.get("contact", {}).get("country"),
+            "phone": lambda t: t.get("contact", {}).get("phone"),
+            "email": lambda t: t.get("contact", {}).get("email"),
+            "transaction_datetime": lambda t: t.get("time"),
+            "payrexx_instance_name": lambda t: t.get("instance", {}).get("name"),
+            "payrexx_instance_uuid": lambda t: t.get("instance", {}).get("uuid"),
+            "original_transaction_uuid": lambda t:t.get("originalTransactionUuid"),
+            "reference_id": lambda t: t.get("invoice", {}).get("referenceId"),
+        }
+
+        for field, getter in field_map.items():
+            value = getter(transaction)
+            setattr(self, field, value)
+
+        # Custom logic to extract mitglied_hash because it's in a list
+        mitglied_hash = None
+        for field in transaction.get("invoice", {}).get("custom_fields", []):
+            if "mitglied_hash" in field:
+                mitglied_hash = field.get("mitglied_hash")
+                break
+        self.mitglied_hash = mitglied_hash
+
 
 def process_webhook(kwargs):
     def is_allowed(payrexx_ip):
