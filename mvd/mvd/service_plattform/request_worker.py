@@ -630,6 +630,19 @@ def mvm_neuanlage(kwargs):
         new_mitgliedschaft.insert()
         frappe.db.commit()
         
+        # verlinke den Eintrag in PayrexxWebhooks mit der Mitgliedschaft
+        if new_mitgliedschaft.online_payment_id:
+            pw = frappe.get_all(
+                "PayrexxWebhooks",
+                filters={"reference_id": new_mitgliedschaft.online_payment_id.lstrip("_")},
+                fields=["name"]
+            )
+
+            if len(pw) == 1:
+                pw_doc = frappe.get_doc("PayrexxWebhooks", pw[0].name)
+                pw_doc.mitglied_id = new_mitgliedschaft.mitglied_id
+                pw_doc.save(ignore_permissions=True)
+            
         # ACHTUNG: False = Positiv!
         return False
         

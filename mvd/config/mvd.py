@@ -218,10 +218,11 @@ def get_data():
                     "description": _("Faktura Kunden")
                 },
                 {
-                    "type": "doctype",
-                    "name": "Webshop Order",
+                    "type": "report",
+                    "name": "Übersicht offene Bestellungen",
                     "label": _("Webshop Bestellungen"),
-                    "description": _("Webshop Order")
+                    "description": _("Webshop Order"),
+                    "doctype": "Webshop Order",
                 },
                 {
                     "type": "doctype",

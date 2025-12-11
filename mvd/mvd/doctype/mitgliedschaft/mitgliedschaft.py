@@ -2611,7 +2611,7 @@ def mitgliedschaft_zuweisen(**kwargs):
         if mitglied_hash:
             results = frappe.get_all(
                 "Mitgliedschaft",
-                filters={"mitglied_hash": mitglied_hash},
+                filters={"mitglied_hash": mitglied_hash, "status_c": ["not in", ["Inaktiv", "Wegzug"]] },
                 fields=["name", "sektion_id"]
             )
             if len(results) == 1:
@@ -2624,6 +2624,7 @@ def mitgliedschaft_zuweisen(**kwargs):
                 SELECT name, sektion_id
                 FROM `tabMitgliedschaft`
                 WHERE LOWER(e_mail_1) = %s
+                    AND status_c NOT IN ("Inaktiv", "Wegzug")
             """, email_lower, as_dict=True)
             if len(results) == 1:
                 return results[0]["name"], results[0]["sektion_id"]
