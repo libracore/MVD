@@ -300,7 +300,13 @@ def aktualisiere_camt_uebersicht(camt_import):
     report_data = ''
     # nicht eingelesene Zahlungen
     if int(frappe.db.get_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen_qty')) > 0:
-        report_data += """<p style="color: red;"><br>Achtung; {0} Zahlung(en) konnte(n) <u>nicht</u> eingelesen werden!</p>""".format(frappe.db.get_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen_qty'))
+        differenz = int(frappe.db.get_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen_qty'))
+
+        if int(frappe.db.get_value('CAMT Import', camt_import, 'nicht_eingelesene_zahlungen_qty')) < 0:
+            differenz = differenz + int(frappe.db.get_value('CAMT Import', camt_import, 'nicht_eingelesene_zahlungen_qty'))
+
+        if differenz > 0:
+            report_data += """<p style="color: red;"><br>Achtung; {0} Zahlung(en) konnte(n) <u>nicht</u> eingelesen werden!</p>""".format(differenz)
     
     
     # Artikel und Ertragskonten Aufschlüsselung
