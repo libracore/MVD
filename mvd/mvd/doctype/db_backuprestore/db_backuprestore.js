@@ -18,7 +18,7 @@ frappe.ui.form.on('DB BackupRestore', {
                 frappe.dom.freeze('Bitte warten, das JSON-File wird eingelesen...');
                 frm.call('load_json', {}).then(r => {
                     frappe.dom.unfreeze();
-                    frappe.msgprint("Das JSON wurde eingelesen");
+                    frappe.msgprint("Das JSON wird via Backgroundjob eingelesen");
                 });
             },
             function(){
