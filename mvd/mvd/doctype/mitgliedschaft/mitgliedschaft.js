@@ -104,6 +104,12 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frm.add_custom_button(__("Status Historie ergänzen"), function() {
                     status_historie_ergaenzen(frm);
                 }).addClass("btn-warning")
+
+                if (!['Wegzug', 'Inaktiv'].includes(cur_frm.doc.status_c)&&cint(cur_frm.doc.sektionswechsel_beantragt)==1) {
+                    frm.add_custom_button(__("Sektionswechsel vervollständigen"), function() {
+                        sektionswechsel_vervollstaendigen(frm);
+                    }, __("Admin Tools"))
+                }
             }
             
             if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
@@ -2498,6 +2504,33 @@ function mitglied_reaktivieren(frm) {
         function(){
             // on no
         }
+    )
+}
+
+function sektionswechsel_vervollstaendigen(frm) {
+    frappe.prompt([
+        {'fieldname': 'zuzug_id', 'fieldtype': 'Data', 'label': 'ID des Zuzug-Mitglieds', 'reqd': 1},
+        {'fieldname': 'wegzugsdatum', 'fieldtype': 'Date', 'label': 'Datum des Sektionswechsel', 'reqd': 1},
+        {'fieldname': 'zuzugs_sektion', 'fieldtype': 'Date', 'label': 'Zuzugs-Sektion', 'reqd': 1}
+    ],
+    function(values){
+        cur_frm.set_value("zuzug_id", values.zuzug_id);
+        cur_frm.set_value("wegzug", values.wegzugsdatum);
+        cur_frm.set_value("wegzug_zu", values.zuzugs_sektion);
+        cur_frm.set_value("status_c", "Wegzug");
+        
+        var status_change_log = cur_frm.add_child('status_change');
+        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', values.wegzugsdatum);
+        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
+        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Wegzug');
+        frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', `Sektionswechsel nach ${values.zuzugs_sektion}`);
+        cur_frm.refresh_field('status_change');
+        cur_frm.set_value("letzte_bearbeitung_von", 'User');
+        
+        cur_frm.save();
+    },
+    'Manuelle Sektionswechsel Vervollständigung',
+    'Vervollständigen'
     )
 }
 
