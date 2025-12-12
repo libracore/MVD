@@ -38,6 +38,7 @@ class MRJSektionsSelektion(Document):
                 WHERE `bezahltes_mitgliedschaftsjahr` < '{jahr}'
                 AND `sektion_id` = '{sektion}'
                 AND `status_c` IN ('Regulär', 'Zuzug', 'Online-Mutation')
+                AND `validierung_notwendig` != 1
                 AND (
                     `kuendigung` IS NULL
                     OR

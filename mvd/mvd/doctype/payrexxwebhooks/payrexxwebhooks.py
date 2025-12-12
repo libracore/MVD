@@ -62,7 +62,7 @@ class PayrexxWebhooks(Document):
             payload = json.loads(self.json)
             transaction = payload.get("transaction", {})
         except Exception as e:
-            frappe.log_error(f"Invalid Payrexx JSON: {str(e)}", "PayrexxWebhooks")
+            frappe.log_error("Invalid Payrexx JSON: {0}".format(str(e)), "PayrexxWebhooks")
             return
 
         # Define a mapping of attribute names to their paths in the JSON

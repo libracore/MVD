@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 import json
 from frappe.utils.password import get_decrypted_password
+from frappe.utils.background_jobs import enqueue
 
 class DBBackupRestore(Document):
     def create_json(self):
@@ -101,103 +102,107 @@ class DBBackupRestore(Document):
         return
 
     def load_json(self):
-        # Letztes (neustes) Restore-File holen
-        files = frappe.get_all(
-            "File",
-            filters={
-                "attached_to_doctype": "DB BackupRestore",
-                "attached_to_name": "DB BackupRestore",
-                "file_name": "db_backup_restore_data.json",
-            },
-            order_by="creation desc",
-            limit=1,
-        )
+        args = {}
+        enqueue("mvd.mvd.doctype.db_backuprestore.db_backuprestore._load_json", queue='long', job_name='Lade JSON Backup Konfigurationsdatei', timeout=5000, **args)
 
-        if not files:
-            frappe.throw("Kein 'db_backup_restore_data.json'-Attachment am Doctype DB BackupRestore gefunden.")
+def _load_json():
+    # Letztes (neustes) Restore-File holen
+    files = frappe.get_all(
+        "File",
+        filters={
+            "attached_to_doctype": "DB BackupRestore",
+            "attached_to_name": "DB BackupRestore",
+            "file_name": "db_backup_restore_data.json",
+        },
+        order_by="creation desc",
+        limit=1,
+    )
 
-        file_doc = frappe.get_doc("File", files[0].name)
-        content = file_doc.get_content()
+    if not files:
+        frappe.throw("Kein 'db_backup_restore_data.json'-Attachment am Doctype DB BackupRestore gefunden.")
 
-        # content kann bytes oder str sein
-        if isinstance(content, bytes):
-            content = content.decode("utf-8")
+    file_doc = frappe.get_doc("File", files[0].name)
+    content = file_doc.get_content()
 
-        data = json.loads(content)
+    # content kann bytes oder str sein
+    if isinstance(content, bytes):
+        content = content.decode("utf-8")
 
-        for dt, docs in data.items():
-            try:
-                meta = frappe.get_meta(dt)
+    data = json.loads(content)
 
-                # Single DocType
-                if meta.issingle:
-                    d = docs[0] if docs else {}
-                    if not d:
+    for dt, docs in data.items():
+        try:
+            meta = frappe.get_meta(dt)
+
+            # Single DocType
+            if meta.issingle:
+                d = docs[0] if docs else {}
+                if not d:
+                    continue
+
+                doc = frappe.get_single(dt)
+
+                # Child-Table-Felder auslesen
+                table_fields = [df for df in meta.fields if df.fieldtype == "Table"]
+
+                # normale Felder setzen (ohne Child-Tables)
+                for key, value in d.items():
+                    # Meta-Felder überspringen
+                    if key in ["name", "owner", "creation", "modified", "modified_by"]:
+                        continue
+                    # Child-Table-Felder überspringen
+                    if any(key == tf.fieldname for tf in table_fields):
                         continue
 
-                    doc = frappe.get_single(dt)
+                    setattr(doc, key, value)
 
-                    # Child-Table-Felder auslesen
-                    table_fields = [df for df in meta.fields if df.fieldtype == "Table"]
+                # Child-Tabellen neu aufbauen
+                for tf in table_fields:
+                    fieldname = tf.fieldname
+                    rows = d.get(fieldname, []) or []
 
-                    # normale Felder setzen (ohne Child-Tables)
-                    for key, value in d.items():
-                        # Meta-Felder überspringen
-                        if key in ["name", "owner", "creation", "modified", "modified_by"]:
-                            continue
-                        # Child-Table-Felder überspringen
-                        if any(key == tf.fieldname for tf in table_fields):
-                            continue
+                    # Child-Table leeren
+                    doc.set(fieldname, [])
 
-                        setattr(doc, key, value)
+                    # neue Zeilen hinzufügen
+                    for row in rows:
+                        # Meta-Felder entfernen
+                        for k in ["name", "owner", "creation", "modified", "modified_by", "parent", "parenttype", "parentfield"]:
+                            row.pop(k, None)
 
-                    # Child-Tabellen neu aufbauen
-                    for tf in table_fields:
-                        fieldname = tf.fieldname
-                        rows = d.get(fieldname, []) or []
+                        doc.append(fieldname, row)
 
-                        # Child-Table leeren
-                        doc.set(fieldname, [])
+                doc.flags.ignore_mandatory = True
+                doc.flags.ignore_permissions = True
+                doc.save()
 
-                        # neue Zeilen hinzufügen
-                        for row in rows:
-                            # Meta-Felder entfernen
-                            for k in ["name", "owner", "creation", "modified", "modified_by", "parent", "parenttype", "parentfield"]:
-                                row.pop(k, None)
+            # Normaler DocType
+            else:
+                # Alle existierende Records löschen
+                old_records = frappe.get_all(dt)
+                for old_record in old_records:
+                    frappe.delete_doc(dt, old_record.name, ignore_permissions=True, force=True)
+                frappe.db.commit()
 
-                            doc.append(fieldname, row)
+                for d in docs:
+                    name = d.get("name")
+                    
+                    if name and frappe.db.exists(dt, name):
+                        # existierenden Datensatz updaten
+                        doc = frappe.get_doc(dt, name)
+                        doc.update(d)
+                        doc.flags.ignore_mandatory = True
+                        doc.flags.ignore_permissions = True
+                        doc.save()
+                    else:
+                        # neuen Datensatz anlegen
+                        doc = frappe.get_doc(d)
+                        doc.flags.ignore_mandatory = True
+                        doc.flags.ignore_permissions = True
+                        doc.db_insert()
 
-                    doc.flags.ignore_mandatory = True
-                    doc.flags.ignore_permissions = True
-                    doc.save()
+        except Exception as err:
+            frappe.throw(str(frappe.get_traceback()))
+        frappe.db.commit()
 
-                # Normaler DocType
-                else:
-                    # Alle existierende Records löschen
-                    old_records = frappe.get_all(dt)
-                    for old_record in old_records:
-                        frappe.delete_doc(dt, old_record.name, ignore_permissions=True, force=True)
-                    frappe.db.commit()
-
-                    for d in docs:
-                        name = d.get("name")
-                        
-                        if name and frappe.db.exists(dt, name):
-                            # existierenden Datensatz updaten
-                            doc = frappe.get_doc(dt, name)
-                            doc.update(d)
-                            doc.flags.ignore_mandatory = True
-                            doc.flags.ignore_permissions = True
-                            doc.save()
-                        else:
-                            # neuen Datensatz anlegen
-                            doc = frappe.get_doc(d)
-                            doc.flags.ignore_mandatory = True
-                            doc.flags.ignore_permissions = True
-                            doc.db_insert()
-
-            except Exception as err:
-                frappe.throw(str(frappe.get_traceback()))
-            frappe.db.commit()
-
-        return
+    return
