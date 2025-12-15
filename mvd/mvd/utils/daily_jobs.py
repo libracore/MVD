@@ -362,3 +362,12 @@ def sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft(show_progress=False):
         
         if show_progress:
             loop += 1
+
+def set_trigger_sp_api_wenn_older_than_10():
+    frappe.db.sql("""
+        UPDATE `tabBeratung`
+        SET `trigger_api` = 1
+        WHERE `created_on` < NOW() - INTERVAL 10 MINUTE
+        AND `sektion_id` = 'MVZH'
+    """)
+    frappe.db.commit()
