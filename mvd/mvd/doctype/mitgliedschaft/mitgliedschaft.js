@@ -2514,11 +2514,6 @@ function sektionswechsel_vervollstaendigen(frm) {
         {'fieldname': 'zuzugs_sektion', 'fieldtype': 'Data', 'label': 'Zuzugs-Sektion', 'reqd': 1}
     ],
     function(values){
-        cur_frm.set_value("zuzug_id", values.zuzug_id);
-        cur_frm.set_value("wegzug", values.wegzugsdatum);
-        cur_frm.set_value("wegzug_zu", values.zuzugs_sektion);
-        cur_frm.set_value("status_c", "Wegzug");
-        
         var status_change_log = cur_frm.add_child('status_change');
         frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', values.wegzugsdatum);
         frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', cur_frm.doc.status_c);
@@ -2526,6 +2521,10 @@ function sektionswechsel_vervollstaendigen(frm) {
         frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', `Sektionswechsel nach ${values.zuzugs_sektion}`);
         cur_frm.refresh_field('status_change');
         cur_frm.set_value("letzte_bearbeitung_von", 'User');
+        cur_frm.set_value("zuzug_id", values.zuzug_id);
+        cur_frm.set_value("wegzug", values.wegzugsdatum);
+        cur_frm.set_value("wegzug_zu", values.zuzugs_sektion);
+        cur_frm.set_value("status_c", "Wegzug");
         
         cur_frm.save();
     },
