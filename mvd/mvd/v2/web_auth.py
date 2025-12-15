@@ -256,7 +256,7 @@ def check_reset_hash_expiry(user):
     active_reset_hash = frappe.db.sql("""
         SELECT COUNT(`name`) AS `qty`
         FROM `tabPWD Reset Hash Expiry`
-        WHERE `created_on` >= NOW() - INTERVAL {0} HOUR
+        WHERE `creation` >= NOW() - INTERVAL {0} HOUR
         AND `user` = '{1}'
     """.format(reset_hash_hours, user), as_dict=True)[0].qty
     return True if active_reset_hash > 0 else False
@@ -279,7 +279,7 @@ def reset_hash_cleanup():
     active_reset_hash = frappe.db.sql("""
         DELETE
         FROM `tabPWD Reset Hash Expiry`
-        WHERE created_on < NOW() - INTERVAL {0} HOUR;
+        WHERE `creation` < NOW() - INTERVAL {0} HOUR;
     """.format(reset_hash_hours))
     frappe.db.commit()
 
