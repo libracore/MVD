@@ -75,6 +75,27 @@ frappe.ui.form.on('Beratung', {
             // load html verknüpfungen
             load_html_verknuepfungen(frm);
             
+            // Nachschick BTN für Zürich
+            if ( cur_frm.doc.sektion_id == 'MVZH' && cur_frm.doc.trigger_api == 0) {
+                // Check if created longer than 5 minutes ago
+                const creationTime = new Date(cur_frm.doc.creation);
+                const now = new Date();
+                const minutesDiff = (now - creationTime) / 1000 / 60;
+                
+                if (minutesDiff > 5) {
+                    frm.add_custom_button(__("Beratung MVZH nachschicken"),  function() {
+                        if (cur_frm.doc.sektion_id != 'MVZH') {
+                            frappe.msgprint("Nur Beratungen des MVZH können nachgeschickt werden.");
+                            return;
+                        }
+                        cur_frm.set_value("trigger_api", 1);
+                        cur_frm.save().then(() => {
+                            frappe.show_alert({message: __("Beratung wird in spät. 4 Min. nachgeschickt"), indicator: "green"});
+                        });
+                    });
+                }
+            }
+
             if (!gesperrt) {
                 // *******************************************************************
                 // Diese Funktion wurde aktuell aufgrund ISS-2023-00031 deaktiviert
@@ -108,6 +129,7 @@ frappe.ui.form.on('Beratung', {
                 //~ }
                 // *******************************************************************
 
+                
                 // Add BTN Übernehmen
                 frm.add_custom_button(__("Übernehmen"),  function() {
                     frappe.call({
@@ -294,6 +316,9 @@ frappe.ui.form.on('Beratung', {
                 $("[title='Reply All']").hide();
                 frappe.ui.keys.off('ctrl+e', cur_frm.page);
             }
+
+            
+
             
             // Auto ToDo wurden entfernt. Kann später gelöscht werden
             //~ if (cur_frm.doc.kontaktperson&&cur_frm.doc.create_todo) {
