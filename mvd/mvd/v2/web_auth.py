@@ -297,6 +297,9 @@ def success_data(mitglied_nr):
 
     if frappe.db.exists("Mitgliedschaft", mitglied_id):
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
+        if mitgliedschaft.status_c in ['Anmeldung', 'Online-Anmeldung']:
+            return inactive_member()
+        
         code = 200
         return {
             "code": code,
