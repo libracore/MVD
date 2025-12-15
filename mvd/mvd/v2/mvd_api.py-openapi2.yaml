@@ -46,6 +46,8 @@ paths:
           description: Login korrekt, Mitgliedschaft aber inaktiv
         '409':
           description: E-Mail mehrfach vorhanden
+        '419':
+          description: Reset-Hash abgelaufen
         '500':
           description: Internal Server Error
   /mvd.mvd.v2.web_auth.reset:
@@ -97,6 +99,8 @@ paths:
           description: Success, reset_hash will be returned
         '404':
           description: User not found
+        '419':
+          description: Reset-Hash abgelaufen
         '422':
           description: Schwaches Passwort
         '498':

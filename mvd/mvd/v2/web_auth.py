@@ -123,18 +123,20 @@ def check_hash_based_credentials(reset_hash):
                                     SELECT `name`
                                    FROM `tabUser`
                                    WHERE `reset_password_key` = "{0}"
+                                   AND `name` LIKE '%@login.ch'
     """.format(reset_hash), as_dict=True)
     if len(potential_user) == 1:
-        if '@login.ch' in potential_user[0].name:
+        if check_reset_hash_expiry(potential_user[0].name):
             try:
                 return success_data(potential_user[0].name)
             except:
                 return failed_login()
+        else:
+            return expired_reset_hash()
     else:
         return failed_login()
 
 def update_pwd(user, reset_hash, pwd, clear):
-    print("{0}".format(pwd))
     user_doc = None
     if user:
         try:
@@ -146,10 +148,13 @@ def update_pwd(user, reset_hash, pwd, clear):
                                     SELECT `name`
                                    FROM `tabUser`
                                    WHERE `reset_password_key` = "{0}"
+                                   AND `name` LIKE '%@login.ch'
         """.format(reset_hash), as_dict=True)
         if len(potential_user) == 1:
-            if '@login.ch' in potential_user[0].name:
+            if check_reset_hash_expiry(potential_user[0].name):
                 user_doc = frappe.get_doc("User", potential_user[0].name)
+            else:
+                return expired_reset_hash()
     
     if not user_doc: return unknown_user()
 
@@ -161,6 +166,7 @@ def update_pwd(user, reset_hash, pwd, clear):
                 user_doc.reset_password_key = ''
                 user_doc.save(ignore_permissions=True)
                 frappe.db.commit()
+                delete_reset_hash_expiry(user_doc.name)
                 return success_data(user_doc.name)
             else:
                 return weak_pwd()
@@ -176,6 +182,7 @@ def update_pwd(user, reset_hash, pwd, clear):
             user_doc.reset_password_key = ''
             user_doc.save(ignore_permissions=True)
             frappe.db.commit()
+            delete_reset_hash_expiry(user_doc.name)
             return success_data(user_doc.name)
     else:
          return invalid_reset_hash()
@@ -201,6 +208,9 @@ def generate_reset_hash(user, email, hash_only=False):
     
     user_doc.reset_password_key = key
     user_doc.save(ignore_permissions=True)
+    # Delete old PWD Reset Hash Expiry and create new one
+    delete_reset_hash_expiry(user)
+    create_reset_hash_expiry(user)
     frappe.db.commit()
     
     if not hash_only:
@@ -240,6 +250,38 @@ def generate_reset_hash(user, email, hash_only=False):
         return success_info()
     else:
         hash_only_success_info(key)
+
+def check_reset_hash_expiry(user):
+    reset_hash_hours = frappe.db.get_value("MVD Settings", "MVD Settings", 'reset_hash_hours') or 24
+    active_reset_hash = frappe.db.sql("""
+        SELECT COUNT(`name`) AS `qty`
+        FROM `tabPWD Reset Hash Expiry`
+        WHERE `created_on` >= NOW() - INTERVAL {0} HOUR
+        AND `user` = '{1}'
+    """.format(reset_hash_hours, user), as_dict=True)[0].qty
+    return True if active_reset_hash > 0 else False
+
+def delete_reset_hash_expiry(user):
+    frappe.db.sql("""DELETE FROM `tabPWD Reset Hash Expiry` WHERE `user` = '{0}'""".format(user))
+    frappe.db.commit()
+    return
+
+def create_reset_hash_expiry(user):
+    pwd_reset_hash_expiry = frappe.get_doc({
+        'doctype': "PWD Reset Hash Expiry",
+        'user': user
+    }).insert()
+    frappe.db.commit()
+    return
+
+def reset_hash_cleanup():
+    reset_hash_hours = frappe.db.get_value("MVD Settings", "MVD Settings", 'reset_hash_hours') or 24
+    active_reset_hash = frappe.db.sql("""
+        DELETE
+        FROM `tabPWD Reset Hash Expiry`
+        WHERE created_on < NOW() - INTERVAL {0} HOUR;
+    """.format(reset_hash_hours))
+    frappe.db.commit()
 
 '''
 RETURNS
@@ -295,6 +337,10 @@ def weak_pwd():
 def invalid_reset_hash():
     frappe.response['http_status_code'] = 498
     frappe.response['message'] = "Invalid reset hash"
+
+def expired_reset_hash():
+    frappe.response['http_status_code'] = 419
+    frappe.response['message'] = "Expired reset hash"
 
 def unknown_user():
     frappe.response['http_status_code'] = 404
