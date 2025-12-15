@@ -2511,7 +2511,7 @@ function sektionswechsel_vervollstaendigen(frm) {
     frappe.prompt([
         {'fieldname': 'zuzug_id', 'fieldtype': 'Data', 'label': 'ID des Zuzug-Mitglieds', 'reqd': 1},
         {'fieldname': 'wegzugsdatum', 'fieldtype': 'Date', 'label': 'Datum des Sektionswechsel', 'reqd': 1},
-        {'fieldname': 'zuzugs_sektion', 'fieldtype': 'Date', 'label': 'Zuzugs-Sektion', 'reqd': 1}
+        {'fieldname': 'zuzugs_sektion', 'fieldtype': 'Data', 'label': 'Zuzugs-Sektion', 'reqd': 1}
     ],
     function(values){
         cur_frm.set_value("zuzug_id", values.zuzug_id);
