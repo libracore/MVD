@@ -363,11 +363,19 @@ def sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft(show_progress=False):
         if show_progress:
             loop += 1
 
-def set_trigger_sp_api_wenn_older_than_10():
-    frappe.db.sql("""
-        UPDATE `tabBeratung`
-        SET `trigger_api` = 1
-        WHERE `creation` < NOW() - INTERVAL 10 MINUTE
-        AND `sektion_id` = 'MVZH'
-    """)
+def set_trigger_sp_api():
+    from mvd.mvd.report.beratungen_mvzh.beratungen_mvzh import get_data
+
+    filters = {'failed_only': 1}
+    own_date_filter = """WHERE `creation` < NOW() - INTERVAL 20 MINUTE AND `creation` > NOW() - INTERVAL 40 MINUTE"""
+    beratungen = get_data(filters, own_date_filter=own_date_filter)
+    
+    for beratung in beratungen:
+        frappe.db.sql("""
+            UPDATE `tabBeratung`
+            SET `trigger_api` = 1
+            WHERE `name` = '{0}'
+        """.format(beratung.beratung_id))
+    
     frappe.db.commit()
+    return

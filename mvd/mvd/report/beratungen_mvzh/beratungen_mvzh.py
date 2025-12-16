@@ -25,11 +25,16 @@ def get_columns():
         {"label": _("Übermittelt an SP"), "fieldname": "sp_ok", "fieldtype": "Check"}
     ]
 
-def get_data(filters):
+def get_data(filters, own_date_filter=None):
     data = []
     return_data = []
     
-    date_filter = """WHERE `creation` BETWEEN '{0} 00:00:00' AND '{1} 23:59:59'""".format(filters.get('von'), filters.get('bis'))
+    if not own_date_filter:
+        date_filter = """WHERE `creation` BETWEEN '{0} 00:00:00' AND '{1} 23:59:59'""".format(filters.get('von'), filters.get('bis'))
+    else:
+        # Siehe Issue #1528
+        date_filter = own_date_filter
+    
     failed_only = True if cint(filters.get('failed_only')) == 1 else False
     
     beratungen = frappe.db.sql("""

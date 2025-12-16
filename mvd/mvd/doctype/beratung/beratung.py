@@ -1074,6 +1074,9 @@ def send_to_sp():
     from mvd.mvd.service_plattform.api import send_beratung
     from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
     from frappe.utils.data import get_datetime_str
+    from mvd.mvd.utils.daily_jobs import set_trigger_sp_api
+
+    set_trigger_sp_api_triggered = set_trigger_sp_api()
 
     if not int(frappe.db.get_single_value('Service Plattform API', 'send_beratung_to_sp_unterbrechen')) == 1:
         try:
