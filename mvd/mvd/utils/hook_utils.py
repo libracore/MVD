@@ -73,20 +73,30 @@ def relink_fr(sinv, event):
             sinv.zugehoerige_fr = None
 
 def remove_admin_and_guest_mails(self, event):
+    recipients_to_remove = [
+        'Administrator',
+        'admin@example.com',
+        'guest@example.com',
+        'Administrator <joel@msmr.ch>',
+        'updatech API <updatech@api.live>'
+    ]
+    cc_to_remove = [
+        'Administrator &lt;joel@msmr.ch&gt;',
+        '"update.ch API" &lt;updatech@api.live&gt;',
+        'Guest &lt;guest@example.com&gt;'
+    ]
     if self.recipients:
         removed_row = False
         for recipient in self.recipients:
-            if recipient.recipient == 'Administrator ' or \
-            'admin@example.com' in recipient.recipient or \
-            recipient.recipient == 'Guest ' or \
-            'guest@example.com' in recipient.recipient:
-                # entferne Admin/Guest Zeile
+            if recipient.recipient in recipients_to_remove:
+                # entferne Admin/Guest/updateAPI Zeile
                 self.remove(recipient)
                 removed_row = True
         if removed_row:
             if len(self.recipients) > 0:
                 # check for CC's
-                self.show_as_cc = self.show_as_cc.replace("Administrator &lt;admin@example.com&gt;", "").replace("Guest &lt;guest@example.com&gt;", "")
+                for cc in cc_to_remove:
+                    self.show_as_cc = self.show_as_cc.replace(cc, "")
                 self.save()
             else:
                 self.delete()
