@@ -41,7 +41,7 @@ def start_post_retouren_process():
 
     # Prüfung ob alle Vorgängigen Postretouren Log's verarbeitet wurden. Wenn ja, starten...
     existing_open_postretouren_logs = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabPostretouren Log` WHERE `status` IN ('Open', 'WiP')""", as_dict=True)
-    if existing_open_postretouren_logs[0].qty > 0:
+    if existing_open_postretouren_logs[0].qty > 1:
         # Stoppen der autom. Verarbeitung, da nicht alle Vorgängigen Postretouren Log's verarbeitet wurden.
         return
     
