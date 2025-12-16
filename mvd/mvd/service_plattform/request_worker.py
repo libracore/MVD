@@ -665,6 +665,20 @@ def mvm_update(mitgliedschaft, kwargs, timestamp_mismatch_retry=False):
         status_c = get_status_c(kwargs['status'])
         if not status_c:
             return 'MitgliedStatus ({status_c}) not found'.format(status_c=kwargs['status'])
+        
+        '''
+            ---------------------------------------------------------------------------------------------------------------------------
+            Hotfix Issue #1580
+            Es gibt Fälle, bei welchen ein Zuzugs-Request nicht verarbeitet werden kann, oder es zu doppelten aktiven Mitgliedschaften
+            führt, weil auf ein Wegzugs-Update ein Update folgt mit einem Status != Wegzug oder Inaktiv.
+            Diese Updates müssen verhindert werden und sollten der Zuzugs-Sektion als Online-Mutation mitgeteilt werden.
+        '''
+        if status_vor_onl_mutation == "Wegzug" and status_c not in ["Wegzug", "Inaktiv"]:
+            return "Falsche Status Abfolge: {0} folgt auf {1}".format(status_c, status_vor_onl_mutation)
+        '''
+            Ende Hotfix Issue #1580
+            ---------------------------------------------------------------------------------------------------------------------------
+        '''
             
         mitgliedtyp_c = get_mitgliedtyp_c(kwargs['typ'])
         if not mitgliedtyp_c:
