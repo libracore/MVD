@@ -164,7 +164,8 @@ scheduler_events = {
         "mvd.mvd.doctype.postretouren_log.postretouren_log.start_post_retouren_process",
         # "mvd.mvd.utils.daily_jobs.rechnungs_jahresversand",
         "mvd.mvd.utils.daily_jobs.daily_ampel_korrektur",
-        "mvd.mvd.utils.daily_jobs.sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft"
+        "mvd.mvd.utils.daily_jobs.sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft",
+        "mvd.mvd.v2.web_auth.reset_hash_cleanup"
     ],
     "all": [
         "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue",
