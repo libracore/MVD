@@ -665,9 +665,14 @@ def assign_roles(user, roles, debug=False):
         frappe.throw( _("User is not in auth0") )
     
     role_ids = []
+    found_mvxx_role = False
     if type(roles) == str:
         roles = json.loads(roles)
+    
     for r in roles:
+        if r == 'SSO_NCLC_MVXX':
+            found_mvxx_role = True
+        
         role_keys = frappe.db.sql("""
             SELECT `key`
             FROM `tabAuth0 Key`
@@ -675,6 +680,17 @@ def assign_roles(user, roles, debug=False):
         """.format(role=r), as_dict=True)
         if role_keys and len(role_keys) > 0:
             role_ids.append(role_keys[0]['key'])
+    
+    if found_mvxx_role:
+        sektions_permissions = frappe.db.sql("""SELECT `for_value` FROM `tabUser Permission` WHERE `allow` = 'Sektion' AND `user` = '{user}'""".format(user=user), as_dict=True)
+        for sektions_permission in sektions_permissions:
+            role_keys = frappe.db.sql("""
+                SELECT `key`
+                FROM `tabAuth0 Key`
+                WHERE `key_name` = "SSO_NCLC_{sektion}" and `key_type` = 'Role';
+            """.format(sektion=sektions_permission.for_value), as_dict=True)
+            if role_keys and len(role_keys) > 0:
+                role_ids.append(role_keys[0]['key'])
 
     token_check(AUTH0_SCOPE)
     config = frappe.get_doc("Service Plattform API", "Service Plattform API")
