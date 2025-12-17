@@ -51,6 +51,43 @@ frappe.ui.form.on('Payment Entry', {
                 });
             }
         }
+    },
+    get_outstanding_invoice_mvd: function(frm) {
+        // Dies ist eine Kopie der Original-Funktion aufgrund des "Resets" für paid_amount
+        // die geänderten Stellen sind markiert.
+
+        // MVD spezifisch
+        let current_paid_amopunt = frm.doc.paid_amount;
+        // ---
+        const today = frappe.datetime.get_today();
+        const fields = [
+            {fieldtype:"Section Break", label: __("Posting Date")},
+            {fieldtype:"Date", label: __("From Date"), fieldname:"from_posting_date"},
+            {fieldtype:"Column Break"},
+            {fieldtype:"Date", label: __("To Date"), fieldname:"to_posting_date"},
+            {fieldtype:"Section Break", label: __("Due Date")},
+            {fieldtype:"Date", label: __("From Date"), fieldname:"from_due_date"},
+            {fieldtype:"Column Break"},
+            {fieldtype:"Date", label: __("To Date"), fieldname:"to_due_date"},
+            {fieldtype:"Section Break", label: __("Outstanding Amount")},
+            {fieldtype:"Float", label: __("Greater Than Amount"),
+                fieldname:"outstanding_amt_greater_than", default: 0},
+            {fieldtype:"Column Break"},
+            {fieldtype:"Float", label: __("Less Than Amount"), fieldname:"outstanding_amt_less_than"},
+            {fieldtype:"Section Break"},
+            {fieldtype:"Check", label: __("Allocate Payment Amount"), fieldname:"allocate_payment_amount", default:1},
+        ];
+
+        frappe.prompt(fields, function(filters){
+            frappe.flags.allocate_payment_amount = true;
+            frm.events.validate_filters_data(frm, filters);
+            frm.events.get_outstanding_documents(frm, filters);
+            // MVD spezifisch
+            setTimeout(function () {
+                cur_frm.set_value("paid_amount", current_paid_amopunt)
+            }, 1000);
+            // ---
+        }, __("Filters"), __("Get Outstanding Invoices"));
     }
 });
 
