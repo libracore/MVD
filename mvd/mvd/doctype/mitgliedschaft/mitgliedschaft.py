@@ -944,14 +944,31 @@ def update_objekt_adresse(mitgliedschaft):
     link = address.append("links", {})
     link.link_doctype = 'Customer'
     link.link_name = mitgliedschaft.kunde_mitglied
-    address.save(ignore_permissions=True)
+
+    try:
+        address.save(ignore_permissions=True)
+    except frappe.exceptions.TimestampMismatchError:
+        # Der Adress-Datensatz wird mit jedem Speichern der Mitgliedschaft aktualisiert.
+        # im Falle eines Sektionswechsel mit unbezahlten Rechnungen kann dies dazu führen, dass
+        # dieser Prozess paralell als BG-Job ausgeführt wird. Dabei kann es zu einer RaceCondition kommen
+        # welche in dieser Exception endet.
+        frappe.clear_messages()
+        pass
     
     return address.name
 
 def join_mitglied_contact_and_address(contact, address):
     contact = frappe.get_doc("Contact", contact)
     contact.address = address
-    contact.save(ignore_permissions=True)
+    try:
+        contact.save(ignore_permissions=True)
+    except frappe.exceptions.TimestampMismatchError:
+        # Der Kontakt-Datensatz wird mit jedem Speichern der Mitgliedschaft aktualisiert.
+        # im Falle eines Sektionswechsel mit unbezahlten Rechnungen kann dies dazu führen, dass
+        # dieser Prozess paralell als BG-Job ausgeführt wird. Dabei kann es zu einer RaceCondition kommen
+        # welche in dieser Exception endet.
+        frappe.clear_messages()
+        pass
     
 def update_adresse_mitglied(mitgliedschaft):
     address = frappe.get_doc("Address", mitgliedschaft.adresse_mitglied)
@@ -991,7 +1008,16 @@ def update_adresse_mitglied(mitgliedschaft):
     link = address.append("links", {})
     link.link_doctype = 'Customer'
     link.link_name = mitgliedschaft.kunde_mitglied
-    address.save(ignore_permissions=True)
+
+    try:
+        address.save(ignore_permissions=True)
+    except frappe.exceptions.TimestampMismatchError:
+        # Der Adress-Datensatz wird mit jedem Speichern der Mitgliedschaft aktualisiert.
+        # im Falle eines Sektionswechsel mit unbezahlten Rechnungen kann dies dazu führen, dass
+        # dieser Prozess paralell als BG-Job ausgeführt wird. Dabei kann es zu einer RaceCondition kommen
+        # welche in dieser Exception endet.
+        frappe.clear_messages()
+        pass
     
     return address.name
 
@@ -1509,6 +1535,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             mitgliedschaft.status_c = "Wegzug"
             mitgliedschaft.letzte_bearbeitung_von = 'User'
             mitgliedschaft.save(ignore_permissions=True)
+            frappe.db.commit()
             return {
                     'status': 200,
                     'new_id': 'pseudo_sektion'
