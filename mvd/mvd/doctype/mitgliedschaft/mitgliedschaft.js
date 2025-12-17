@@ -1127,15 +1127,15 @@ function sektionswechsel(frm) {
                                     },
                                     freeze: true,
                                     freeze_message: 'Führe Sektionswechsel durch...',
-                                    callback: function(r)
+                                    callback: function(res)
                                     {
-                                        if (r.message.status == 200) {
+                                        if (res.message.status == 200) {
                                             cur_frm.reload_doc();
                                             cur_frm.timeline.insert_comment("Sektionswechsel zu " + values.sektion_neu + " vollzogen.");
                                             frappe.msgprint("Der Wechsel zur Sektion " + values.sektion_neu + " erfolgt.");
                                         } else {
-                                            if (r.message.status == 500) {
-                                                frappe.msgprint(`oops, da ist etwas schiefgelaufen!<br>${r.message.error}`);
+                                            if (res.message.status == 500) {
+                                                frappe.msgprint(`oops, da ist etwas schiefgelaufen!<br>${res.message.error}`);
                                             } else {
                                                 frappe.msgprint("oops, da ist etwas schiefgelaufen!<br>Unbekannter Fehler");
                                             }

@@ -252,16 +252,19 @@ def update_kontakt(mitgliedschaft, primary):
             phone_row = contact.append("phone_nos", {})
             phone_row.phone = phone
     
-    
-    contact.save(ignore_permissions=True)
-    frappe.db.commit()
+    try:
+        contact.save(ignore_permissions=True)
+        frappe.db.commit()
+    except frappe.exceptions.TimestampMismatchError:
+        # Der Kontakt-Datensatz wird mit jedem Speichern der Mitgliedschaft aktualisiert.
+        # im Falle eines Sektionswechsel mit unbezahlten Rechnungen kann dies dazu führen, dass
+        # dieser Prozess paralell als BG-Job ausgeführt wird. Dabei kann es zu einer RaceCondition kommen
+        # welche in dieser Exception endet.
+        frappe.clear_messages()
+        pass
+
 
     contact_name = contact.name
-    # Aktuell aufgrund #892 deaktiviert. Wird im Anschluss durch #886 wieder aktiviert.
-    # ---
-    # if '-Mitglied' not in contact.name or '-Solidarmitglied' not in contact.name:
-    #     contact_name = rename_contact(contact_name, primary)
-    #---
     
     return contact_name
 
