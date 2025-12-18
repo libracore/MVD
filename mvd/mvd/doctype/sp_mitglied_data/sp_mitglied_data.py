@@ -12,14 +12,22 @@ from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
 class SPMitgliedData(Document):
     pass
 
-def create_or_update_sp_mitglied_data(mitglied_nr, mitgliedschaft=None):
+def create_or_update_sp_mitglied_data(mitglied_nr, mitgliedschaft=None, timestamp_mismatch_retry=False):
     try:
         if frappe.db.exists("SP Mitglied Data", mitglied_nr):
             update(mitglied_nr, mitgliedschaft)
         else:
             create(mitglied_nr, mitgliedschaft)
+    except frappe.TimestampMismatchError as err:
+        if not timestamp_mismatch_retry:
+            frappe.clear_messages()
+            if mitgliedschaft:
+                mitgliedschaft.reload()
+            create_or_update_sp_mitglied_data(mitglied_nr, mitgliedschaft=mitgliedschaft, timestamp_mismatch_retry=True)
+        else:
+            frappe.log_error("Mitglied: {0}\n\nFehler: {1}\n\n{2}".format(mitglied_nr, str(err), frappe.get_traceback()), 'create_or_update_sp_mitglied_data Failed (timestamp_mismatch_retry)')
     except Exception as err:
-        frappe.log_error("Mitglied: {0}\n\nFehler: {1}".format(mitglied_nr, str(err)), 'create_or_update_sp_mitglied_data Failed')
+        frappe.log_error("Mitglied: {0}\n\nFehler: {1}\n\n{2}".format(mitglied_nr, str(err), frappe.get_traceback()), 'create_or_update_sp_mitglied_data Failed')
 
 def create(mitglied_nr, mitgliedschaft):
     if not mitgliedschaft:
