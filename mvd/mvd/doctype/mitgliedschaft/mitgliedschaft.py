@@ -206,6 +206,16 @@ class Mitgliedschaft(Document):
             if cint(self.web_login_user_created) != 1:
                 create_web_login_user(self.mitglied_nr)
                 self.web_login_user_created = 1
+        
+        # Lösche alle Einträge wenn das Solidarmitglied entfernt wird
+        if not self.hat_solidarmitglied:
+            self.anrede_2 = None
+            self.nachname_2 = None
+            self.vorname_2 = None
+            self.tel_p_2 = None
+            self.tel_m_2 = None
+            self.tel_g_2 = None
+            self.e_mail_2 = None
     
     def email_validierung(self, check=False):
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
