@@ -634,7 +634,10 @@ def mvm_neuanlage(kwargs):
         if new_mitgliedschaft.online_payment_id:
             pw = frappe.get_all(
                 "PayrexxWebhooks",
-                filters={"reference_id": new_mitgliedschaft.online_payment_id.lstrip("_")},
+                filters={
+                    "reference_id": new_mitgliedschaft.online_payment_id.lstrip("_"),
+                    "status": "confirmed"
+                },
                 fields=["name"]
             )
 
