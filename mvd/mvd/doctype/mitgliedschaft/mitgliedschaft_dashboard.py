@@ -11,7 +11,7 @@ def get_data():
         'fieldname': 'mv_mitgliedschaft',
         "non_standard_fieldnames": {
 			'Kampagne': 'mitglied',
-            'PayrexxWebhooks': 'mitglied',
+            'PayrexxWebhooks': 'mitglied_id',
 		},
         'transactions': [
             {
