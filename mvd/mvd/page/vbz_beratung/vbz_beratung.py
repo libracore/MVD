@@ -20,14 +20,14 @@ def get_open_data():
             's4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 0, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's6': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
-            's7': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'kontaktperson': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            's7': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's8': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 's8': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's9': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'status': 'Zusammengeführt', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's10': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'hat_termine': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
-            'r': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
-            'r1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': 'Hoch', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
-            'r2': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'beratung_prio': ['!=', 'Hoch'], 'kontaktperson': ['like','Rechtsberatung Pool%'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
-            'r3': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Open', 'r3': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r1': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'beratung_prio': 'Hoch', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r2': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'beratung_prio': ['!=', 'Hoch'], 'kontaktperson': ['like','Rechtsberatung Pool%'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r3': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'r3': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 0, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r6': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
@@ -51,7 +51,7 @@ def get_p1(user):
                                                 WHERE `user` = '{user}'  
                                                 AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
-                                            AND `status` = 'Open'
+                                            AND `status` IN ('Open', 'In Arbeit')
                                             AND `sektion_id` != 'MVDF'""".format(user=user), as_dict=True)[0].qty
     return p1_qty or 0
 
