@@ -12,28 +12,27 @@ from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
 class SPMitgliedData(Document):
     pass
 
-def create_or_update_sp_mitglied_data(mitglied_nr, mitgliedschaft=None, timestamp_mismatch_retry=False):
+def create_or_update_sp_mitglied_data(mitglied_nr, mitglied_id, timestamp_mismatch_retry=False):
     try:
         if frappe.db.exists("SP Mitglied Data", mitglied_nr):
-            update(mitglied_nr, mitgliedschaft)
+            update(mitglied_nr, mitglied_id)
         else:
-            create(mitglied_nr, mitgliedschaft)
+            create(mitglied_nr, mitglied_id)
     except frappe.TimestampMismatchError as err:
         if not timestamp_mismatch_retry:
             frappe.clear_messages()
-            if mitgliedschaft:
-                mitgliedschaft.reload()
-            create_or_update_sp_mitglied_data(mitglied_nr, mitgliedschaft=mitgliedschaft, timestamp_mismatch_retry=True)
+            create_or_update_sp_mitglied_data(mitglied_nr, mitglied_id, timestamp_mismatch_retry=True)
         else:
             frappe.log_error("Mitglied: {0}\n\nFehler: {1}\n\n{2}".format(mitglied_nr, str(err), frappe.get_traceback()), 'create_or_update_sp_mitglied_data Failed (timestamp_mismatch_retry)')
     except Exception as err:
         frappe.log_error("Mitglied: {0}\n\nFehler: {1}\n\n{2}".format(mitglied_nr, str(err), frappe.get_traceback()), 'create_or_update_sp_mitglied_data Failed')
 
-def create(mitglied_nr, mitgliedschaft):
-    if not mitgliedschaft:
+def create(mitglied_nr, mitglied_id):
+    if not mitglied_id:
         mitglied_id = get_mitglied_id_from_nr(mitglied_nr=mitglied_nr, ignore_inaktiv=True)
-        if frappe.db.exists("Mitgliedschaft", mitglied_id):
-            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
+    mitgliedschaft = False
+    if frappe.db.exists("Mitgliedschaft", mitglied_id):
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
     if mitgliedschaft:
         data =  prepare_mvm_for_sp(mitgliedschaft)
         new_record = frappe.get_doc({
@@ -44,11 +43,12 @@ def create(mitglied_nr, mitgliedschaft):
         new_record.insert(ignore_permissions=True)
         frappe.db.commit()
 
-def update(mitglied_nr, mitgliedschaft):
-    if not mitgliedschaft:
+def update(mitglied_nr, mitglied_id):
+    if not mitglied_id:
         mitglied_id = get_mitglied_id_from_nr(mitglied_nr=mitglied_nr, ignore_inaktiv=True)
-        if frappe.db.exists("Mitgliedschaft", mitglied_id):
-            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
+    mitgliedschaft = False
+    if frappe.db.exists("Mitgliedschaft", mitglied_id):
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
     if mitgliedschaft:
         data =  prepare_mvm_for_sp(mitgliedschaft)
         existing_record = frappe.get_doc("SP Mitglied Data", mitglied_nr)
@@ -56,6 +56,10 @@ def update(mitglied_nr, mitgliedschaft):
         existing_record.save(ignore_permissions=True)
         frappe.db.commit()
 
+'''
+    Das ist eine Holfsfunktion die zur initialen Datenanlage gedient hat.
+    Keine Produktive verwendung
+'''
 def initiale_daten_anlage():
     try:
         mitgliedschaften = frappe.db.sql("""SELECT DISTINCT `mitglied_nr` FROM `tabMitgliedschaft` WHERE `status_c` != 'Inaktiv' AND `mitglied_nr` LIKE 'MV0%' ORDER BY `creation` DESC""", as_dict=True)
@@ -71,3 +75,4 @@ def initiale_daten_anlage():
         print(str(err))
         pass
     return
+# ---------------------------------------------------------------------------------------------

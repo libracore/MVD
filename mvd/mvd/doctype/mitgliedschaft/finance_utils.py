@@ -400,23 +400,37 @@ def _sinv_update(mv_mitgliedschaft, timestamp_mismatch_retry=False, does_not_exi
         mitgliedschaft.save(ignore_permissions=True)
     except frappe.TimestampMismatchError as err:
         if not timestamp_mismatch_retry:
+            if not is_job_already_running('(Retry) Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft)):
+                frappe.clear_messages()
+                args = {
+                    'mv_mitgliedschaft': mv_mitgliedschaft,
+                    'timestamp_mismatch_retry': 1
+                }
+                enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='(Retry) Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft), timeout=5000, **args)
+            pass
+        else:
+            frappe.log_error("Mitglied-ID: {0}\n\nFehler: {1}\n\n{2}".format(mv_mitgliedschaft, str(err), frappe.get_traceback()), '_sinv_update Failed (2x TimestampMismatchError)')
             frappe.clear_messages()
-            args = {
-                'mv_mitgliedschaft': mv_mitgliedschaft,
-                'timestamp_mismatch_retry': 1
-            }
-            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='(Retry) Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft), timeout=5000, **args)
             pass
     except frappe.exceptions.DoesNotExistError as err2:
         if does_not_exist_counter < 5:
-            does_not_exist_counter += 1
-            frappe.clear_messages()
-            args = {
-                'mv_mitgliedschaft': mv_mitgliedschaft,
-                'does_not_exist_counter': does_not_exist_counter
-            }
-            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='(Retry) Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft), timeout=5000, **args)
+            if not is_job_already_running('(Retry) Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft)):
+                does_not_exist_counter += 1
+                frappe.clear_messages()
+                args = {
+                    'mv_mitgliedschaft': mv_mitgliedschaft,
+                    'does_not_exist_counter': does_not_exist_counter
+                }
+                enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='(Retry) Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft), timeout=5000, **args)
             pass
+        else:
+            frappe.log_error("Mitglied-ID: {0}\n\nFehler: {1}\n\n{2}".format(mv_mitgliedschaft, str(err2), frappe.get_traceback()), '_sinv_update Failed (DoesNotExistError >= 5)')
+            frappe.clear_messages()
+            pass
+    except Exception as err3:
+        frappe.log_error("Mitglied-ID: {0}\n\nFehler: {1}\n\n{2}".format(mv_mitgliedschaft, str(err3), frappe.get_traceback()), '_sinv_update Failed (Unhandled Exception)')
+        frappe.clear_messages()
+        pass
 
 def check_mitgliedschaft_in_pe(pe):
     if not pe.mv_mitgliedschaft:
