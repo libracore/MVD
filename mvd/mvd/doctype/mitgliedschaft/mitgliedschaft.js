@@ -3155,7 +3155,7 @@ function prepare_mvd_mail_composer(e, forward=false) {
 
 function check_for_running_job(frm) {
     frappe.call({
-        method: "mvd.mvd.utils.check_for_running_job",
+        method: "mvd.mvd.utils.is_job_already_running",
         args: {
             'jobname': `Aktualisiere Mitgliedschaft ${cur_frm.doc.name}`
         },

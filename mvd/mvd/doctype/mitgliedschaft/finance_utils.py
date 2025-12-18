@@ -10,7 +10,7 @@ import datetime
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
 from mvd.mvd.doctype.mitgliedschaft.utils import create_korrespondenz, sp_updater
 from frappe.utils.background_jobs import enqueue
-from mvd.mvd.utils import check_for_running_job
+from mvd.mvd.utils import is_job_already_running
 
 def check_zahlung_mitgliedschaft(mitgliedschaft, db_direct=False):
     '''
@@ -470,38 +470,3 @@ def get_and_set_mitgliednr(mitgliedId):
         frappe.log_error("Mitgliednummer für Mitglied {0} konnte nicht bezogen werden".format(mitgliedId), 'get_and_set_mitgliednr')
         pass
     return
-
-def is_job_already_running(jobname):
-    running = get_info(jobname)
-    return running
-
-def get_info(jobname):
-    from rq import Queue, Worker
-    from frappe.utils.background_jobs import get_redis_conn
-    conn = get_redis_conn()
-    queues = Queue.all(conn)
-    workers = Worker.all(conn)
-    jobs = []
-
-    def add_job(j, name):
-        if j.kwargs.get('site')==frappe.local.site:
-            jobs.append({
-                'job_name': str(j.kwargs.get('job_name')),
-                'queue': name
-            })
-
-    for w in workers:
-        j = w.get_current_job()
-        if j:
-            add_job(j, w.name)
-
-    for q in queues:
-        if q.name != 'failed':
-            for j in q.get_jobs(): add_job(j, q.name)
-    
-    found_job = False
-    for job in jobs:
-        if job['job_name'] == jobname:
-            found_job = True
-
-    return found_job

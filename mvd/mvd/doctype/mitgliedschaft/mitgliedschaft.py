@@ -26,7 +26,7 @@ from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, upda
 from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_zahlung_mitgliedschaft, check_zahlung_hv, get_ampelfarbe, \
                                                         set_max_reminder_level, check_folgejahr_regelung
 from frappe.utils.background_jobs import enqueue
-from mvd.mvd.utils import check_for_running_job
+from mvd.mvd.utils import is_job_already_running
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
@@ -199,7 +199,7 @@ class Mitgliedschaft(Document):
             if self.mitglied_hash != mitglied_hash:
                 frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}".format(self.mitglied_hash, mitglied_hash), 'Unmatching Mitglied-Hash')
 
-            if not check_for_running_job("Create / Update SP Mitglied Data ({0})".format(self.mitglied_nr)):
+            if not is_job_already_running("Create / Update SP Mitglied Data ({0})".format(self.mitglied_nr)):
                 # #1203
                 args = {
                     'mitglied_nr': self.mitglied_nr,
