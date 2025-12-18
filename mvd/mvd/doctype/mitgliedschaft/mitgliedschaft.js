@@ -3215,53 +3215,66 @@ var setup_phone_formatters = function(frm) {
 
     phone_fields.forEach(function(fieldname) {
         if (frm.fields_dict[fieldname]) {
-            frm.fields_dict[fieldname].$input.off('input').on('input', function() {
+            frm.fields_dict[fieldname].$input.off('input').on('input', function(e) {
+                let cursor_pos = this.selectionStart;
                 let val = this.value;
                 if (!val) return;
 
-                // 1. Erlaube Zahlen, + und Leerschläge
-                let val_allowed = val.replace(/[^\d+ ]/g, '');
-                if (val !== val_allowed) {
-                    this.value = val_allowed;
-                    val = val_allowed;
-                }
-
-                // 2. Vorab-Konvertierung: 00 zu +
+                // 00 zu +
                 if (val.indexOf('00') === 0) {
                     val = '+' + val.substring(2);
-                    this.value = val;
+                    if (cursor_pos <= 2) cursor_pos = 1;
                 }
 
-                // 3. Vorab-Konvertierung: Falls User 41... tippt (ohne +)
-                // Wir prüfen, ob die Ziffernfolge mit 41 startet und kein + davor ist
-                let pure_digits = val.replace(/[^\d]/g, '');
-                if (pure_digits.indexOf('41') === 0 && val.indexOf('+') === -1 && val.indexOf('0') !== 0) {
+                let temp_digits = val.replace(/[^\d]/g, '');
+                if (temp_digits.indexOf('41') === 0 && val.indexOf('+') !== 0 && val.indexOf('0') !== 0) {
                     val = '+' + val;
-                    this.value = val;
+                    cursor_pos++; 
                 }
 
+                let is_intl = (val.indexOf('+') === 0);
                 let digits = val.replace(/[^\d]/g, '');
-                let formatted = val;
+                let formatted = "";
 
-                // FALL A: Schweizer International (+41...)
-                if (val.indexOf('+41') === 0) {
-                    if (digits.length === 11) {
-                        formatted = "+41 " + digits.substring(2, 4) + " " + digits.substring(4, 7) + " " + digits.substring(7, 9) + " " + digits.substring(9, 11);
+                if (is_intl) {
+                    if (digits.length >= 2) {
+                        formatted = "+" + digits.substring(0, 2);
+                        if (digits.length > 2) formatted += " " + digits.substring(2, 4);
+                        if (digits.length > 4) formatted += " " + digits.substring(4, 7);
+                        if (digits.length > 7) formatted += " " + digits.substring(7, 9);
+                        if (digits.length > 9) formatted += " " + digits.substring(9, 11);
+                        if (digits.length > 11) formatted += digits.substring(11);
+                    } else {
+                        formatted = val;
                     }
-                } 
-                // FALL B: National (Startet mit 0)
-                else if (val.indexOf('0') === 0 && val.indexOf('+') !== 0) {
-                    if (digits.length === 10) {
-                        formatted = digits.substring(0, 3) + " " + digits.substring(3, 6) + " " + digits.substring(6, 8) + " " + digits.substring(8, 10);
+                } else {
+                    if (digits.length > 0) {
+                        formatted = digits.substring(0, 3);
+                        if (digits.length > 3) formatted += " " + digits.substring(3, 6);
+                        if (digits.length > 6) formatted += " " + digits.substring(6, 8);
+                        if (digits.length > 8) formatted += " " + digits.substring(8, 10);
+                        if (digits.length > 10) formatted += digits.substring(10);
                     }
                 }
 
-                // Formatierung anwenden und Cursor ans Ende setzen
-                if (formatted !== val) {
+                if (formatted !== this.value) {
+                    let spaces_before = (this.value.substring(0, cursor_pos).match(/ /g) || []).length;
+                    
                     this.value = formatted;
                     frm.doc[fieldname] = formatted;
-                    let end = formatted.length;
-                    this.setSelectionRange(end, end);
+
+                    let clean_before = val.substring(0, cursor_pos).replace(/[^\d+]/g, '');
+                    let new_cursor_pos = 0;
+                    let counted_clean = 0;
+
+                    for (let i = 0; i < formatted.length && counted_clean < clean_before.length; i++) {
+                        if (formatted[i] === clean_before[counted_clean]) {
+                            counted_clean++;
+                        }
+                        new_cursor_pos = i + 1;
+                    }
+                    
+                    this.setSelectionRange(new_cursor_pos, new_cursor_pos);
                 }
             });
         }
