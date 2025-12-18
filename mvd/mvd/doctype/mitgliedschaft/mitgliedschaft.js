@@ -370,6 +370,9 @@ frappe.ui.form.on('Mitgliedschaft', {
         if (cur_frm.doc.deleted_by_admin) {
             frm.set_intro("Dieser Eintrag wurde von einem Administrator inaktiviert/«gelöscht».");
         }
+
+        // Formatiere alle Telefonnummern
+        setup_phone_formatters(frm);
     },
     m_und_w: function(frm) {
         if (![0, 1].includes(cur_frm.doc.m_und_w)) {
@@ -3202,3 +3205,65 @@ function erfassung_vermieterkuendigung(frm) {
     'Erfassen'
     );
 }
+
+var setup_phone_formatters = function(frm) {
+    var phone_fields = [
+        "tel_p_1", "tel_m_1", "tel_g_1", 
+        "tel_p_2", "tel_m_2", "tel_g_2", 
+        "rg_tel_p", "rg_tel_m", "rg_tel_g"
+    ];
+
+    phone_fields.forEach(function(fieldname) {
+        if (frm.fields_dict[fieldname]) {
+            frm.fields_dict[fieldname].$input.off('input').on('input', function() {
+                let val = this.value;
+                if (!val) return;
+
+                // 1. Erlaube Zahlen, + und Leerschläge
+                let val_allowed = val.replace(/[^\d+ ]/g, '');
+                if (val !== val_allowed) {
+                    this.value = val_allowed;
+                    val = val_allowed;
+                }
+
+                // 2. Vorab-Konvertierung: 00 zu +
+                if (val.indexOf('00') === 0) {
+                    val = '+' + val.substring(2);
+                    this.value = val;
+                }
+
+                // 3. Vorab-Konvertierung: Falls User 41... tippt (ohne +)
+                // Wir prüfen, ob die Ziffernfolge mit 41 startet und kein + davor ist
+                let pure_digits = val.replace(/[^\d]/g, '');
+                if (pure_digits.indexOf('41') === 0 && val.indexOf('+') === -1 && val.indexOf('0') !== 0) {
+                    val = '+' + val;
+                    this.value = val;
+                }
+
+                let digits = val.replace(/[^\d]/g, '');
+                let formatted = val;
+
+                // FALL A: Schweizer International (+41...)
+                if (val.indexOf('+41') === 0) {
+                    if (digits.length === 11) {
+                        formatted = "+41 " + digits.substring(2, 4) + " " + digits.substring(4, 7) + " " + digits.substring(7, 9) + " " + digits.substring(9, 11);
+                    }
+                } 
+                // FALL B: National (Startet mit 0)
+                else if (val.indexOf('0') === 0 && val.indexOf('+') !== 0) {
+                    if (digits.length === 10) {
+                        formatted = digits.substring(0, 3) + " " + digits.substring(3, 6) + " " + digits.substring(6, 8) + " " + digits.substring(8, 10);
+                    }
+                }
+
+                // Formatierung anwenden und Cursor ans Ende setzen
+                if (formatted !== val) {
+                    this.value = formatted;
+                    frm.doc[fieldname] = formatted;
+                    let end = formatted.length;
+                    this.setSelectionRange(end, end);
+                }
+            });
+        }
+    });
+};
