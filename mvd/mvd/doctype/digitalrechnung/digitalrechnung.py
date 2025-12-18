@@ -72,7 +72,7 @@ def digitalrechnung_mapper(mitglied):
         else:
             return False
     
-    def update_digitalrechnung(dr, mitglied):
+    def update_digitalrechnung(dr, mitglied, timestamp_mismatch_retry=False):
         dr_doc = frappe.get_doc("Digitalrechnung", dr)
         if dr_doc.mitglied_id != mitglied.name:
             dr_doc.mitglied_id = mitglied.name
@@ -103,8 +103,15 @@ def digitalrechnung_mapper(mitglied):
         
         try:
             dr_doc.save(ignore_permissions=True)
+        except frappe.TimestampMismatchError as err:
+            if not timestamp_mismatch_retry:
+                frappe.clear_messages()
+                mitglied.reload()
+                update_digitalrechnung(dr, mitglied, timestamp_mismatch_retry=True)
+            else:
+                frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}\nFehler: {2}\n\n{3}".format(mitglied.name, dr_doc.name, str(err), frappe.get_traceback()), 'Digitalrechnung Update Failed (timestamp_mismatch_retry)')
         except Exception as err:
-            frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}\nFehler: {2}".format(mitglied.name, dr_doc.name, str(err)), 'Digitalrechnung Update Failed')
+            frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}\nFehler: {2}\n\n{3}".format(mitglied.name, dr_doc.name, str(err), frappe.get_traceback()), 'Digitalrechnung Update Failed')
 
         return dr_doc.hash
     
