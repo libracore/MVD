@@ -292,7 +292,7 @@ def zahlungen_matchen(camt_import):
                     pe.paid_to = frappe.db.get_value('Sektion', pe.sektion_id, 'account')
                     pe.paid_from = frappe.db.get_value('Company', pe.company, 'default_receivable_account')
                 
-                pe.save()
+                pe.save(ignore_permissions=True)
                 erfasse_rg_match(camt_import)
         if commit_counter == 100:
             frappe.db.commit()
