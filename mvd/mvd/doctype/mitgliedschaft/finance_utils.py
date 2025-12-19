@@ -386,49 +386,91 @@ def sinv_update(sinv, event):
                     frappe.db.set_value("Sales Invoice", sinv.name, "outstanding_amount", 0.0)
 
     if not update_blocked:
-        if sinv.mv_mitgliedschaft and not is_job_already_running('Aktualisiere Mitgliedschaft {0} ({1})'.format(sinv.mv_mitgliedschaft, sinv.name)):
+        if sinv.mv_mitgliedschaft and not is_job_already_running('Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft)):
             args = {
                 'mv_mitgliedschaft': sinv.mv_mitgliedschaft
             }
-            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0} ({1})'.format(sinv.mv_mitgliedschaft, sinv.name), timeout=5000, **args)
+            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft), timeout=5000, **args)
     return
 
-def _sinv_update(mv_mitgliedschaft, timestamp_mismatch_retry=False, does_not_exist_counter=0):
+def _sinv_update(mv_mitgliedschaft, timestamp_missmatch=0, does_not_exist=0, dead_lock=0):
+    import pymysql
+
+    def get_retry_stats():
+        return "TimeStampMissMatch: {0}\nDoesNotExist: {1}\nDeadLock: {2}".format(timestamp_missmatch, does_not_exist, dead_lock)
+    def get_error_log_description(step, err):
+        return "Mitglied-ID: {0}\nWorkflow-State: {1}\nFehler: {2}\nRetry-Stats:\n{3}\nTraceBack:\n{4}".format(mv_mitgliedschaft, step, str(err), get_retry_stats(), frappe.get_traceback())
+    
     try:
         # Speichern der Mitgliedschaft zum triggern der validate() Funktion, diese aktualisiert alle relevanten Informationen rund um das Mitglied
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
         mitgliedschaft.save(ignore_permissions=True)
     except frappe.TimestampMismatchError as err:
-        if not timestamp_mismatch_retry:
-            if not is_job_already_running('(Retry) Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft)):
+        # Möglicher Fehler 1: Zwei Prozesse Bearbeiten/Speichern gleichzeitig -> Konflikt -> Retry
+        # Es werden maximal 3 Versuche zugelassen -> Danach Abbruch & ErrorLog
+        if timestamp_missmatch < 3:
+            timestamp_missmatch += 1
+            if not is_job_already_running('Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft)):
                 frappe.clear_messages()
                 args = {
                     'mv_mitgliedschaft': mv_mitgliedschaft,
-                    'timestamp_mismatch_retry': 1
+                    'timestamp_missmatch': timestamp_missmatch,
+                    'does_not_exist': does_not_exist,
+                    'dead_lock': dead_lock
                 }
-                enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='(Retry) Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft), timeout=5000, **args)
+                enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft), timeout=5000, **args)
             pass
         else:
-            frappe.log_error("Mitglied-ID: {0}\n\nFehler: {1}\n\n{2}".format(mv_mitgliedschaft, str(err), frappe.get_traceback()), '_sinv_update Failed (2x TimestampMismatchError)')
+            frappe.log_error(get_error_log_description("TimeStampMissMatch", err), '_sinv_update Failed')
             frappe.clear_messages()
             pass
     except frappe.exceptions.DoesNotExistError as err2:
-        if does_not_exist_counter < 5:
-            if not is_job_already_running('(Retry) Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft)):
-                does_not_exist_counter += 1
+        # Möglicher Fehler 2: Die Mitgliedschaft existiert noch nicht -> Retry in der Hoffnung dass die Anlage in der Zwischenzeit erfolgt ist
+        # Es werden maximal 3 Versuche zugelassen -> Danach Abbruch & ErrorLog
+        if does_not_exist < 3:
+            does_not_exist += 1
+            if not is_job_already_running('Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft)):
                 frappe.clear_messages()
                 args = {
                     'mv_mitgliedschaft': mv_mitgliedschaft,
-                    'does_not_exist_counter': does_not_exist_counter
+                    'timestamp_missmatch': timestamp_missmatch,
+                    'does_not_exist': does_not_exist,
+                    'dead_lock': dead_lock
                 }
-                enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='(Retry) Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft), timeout=5000, **args)
+                enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft), timeout=5000, **args)
             pass
         else:
-            frappe.log_error("Mitglied-ID: {0}\n\nFehler: {1}\n\n{2}".format(mv_mitgliedschaft, str(err2), frappe.get_traceback()), '_sinv_update Failed (DoesNotExistError >= 5)')
+            frappe.log_error(get_error_log_description("DoesNotExist", err2), '_sinv_update Failed')
             frappe.clear_messages()
             pass
-    except Exception as err3:
-        frappe.log_error("Mitglied-ID: {0}\n\nFehler: {1}\n\n{2}".format(mv_mitgliedschaft, str(err3), frappe.get_traceback()), '_sinv_update Failed (Unhandled Exception)')
+    except pymysql.err.OperationalError as err3:
+        if err3.args and err3.args[0] == 1205:
+            # Möglicher Fehler 3: Die DB-Tabelle die gespeichert werden soll ist gesperrt -> Retry
+            # Es werden maximal 3 Versuche zugelassen -> Danach Abbruch & ErrorLog
+            if dead_lock < 3:
+                dead_lock += 1
+                if not is_job_already_running('Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft)):
+                    frappe.clear_messages()
+                    args = {
+                        'mv_mitgliedschaft': mv_mitgliedschaft,
+                        'timestamp_missmatch': timestamp_missmatch,
+                        'does_not_exist': does_not_exist,
+                        'dead_lock': dead_lock
+                    }
+                    enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft), timeout=5000, **args)
+                pass
+            else:
+                frappe.log_error(get_error_log_description("DeadLock", err3), '_sinv_update Failed')
+                frappe.clear_messages()
+                pass
+        else:
+            # Möglicher Fehler 4: Sonstiger DB-Fehler -> Abbruch & ErrorLog
+            frappe.log_error(get_error_log_description("DB", err3), '_sinv_update Failed')
+            frappe.clear_messages()
+            pass
+    except Exception as err4:
+        # Möglicher Fehler 5: Sonstiger Fehler -> Abbruch & ErrorLog
+        frappe.log_error(get_error_log_description("Unhandled Exception", err4), '_sinv_update Failed')
         frappe.clear_messages()
         pass
 
