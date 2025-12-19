@@ -8,6 +8,8 @@ from frappe.model.document import Document
 from frappe.utils import cint
 from frappe.utils.data import today
 import hashlib
+from frappe.utils.background_jobs import enqueue
+from mvd.mvd.utils import is_job_already_running
 
 class Digitalrechnung(Document):
     def validate(self):
@@ -72,48 +74,14 @@ def digitalrechnung_mapper(mitglied):
         else:
             return False
     
-    def update_digitalrechnung(dr, mitglied, timestamp_mismatch_retry=False):
-        dr_doc = frappe.get_doc("Digitalrechnung", dr)
-        if dr_doc.mitglied_id != mitglied.name:
-            dr_doc.mitglied_id = mitglied.name
-        if dr_doc.language != mitglied.language:
-            dr_doc.language = mitglied.language
-
-        if cint(mitglied.abweichende_rechnungsadresse) == 1 and cint(mitglied.unabhaengiger_debitor) == 1:
-            if dr_doc.email != mitglied.rg_e_mail:
-                dr_doc.email = mitglied.rg_e_mail
-        else:
-            if dr_doc.email != mitglied.e_mail_1:
-                dr_doc.email = mitglied.e_mail_1
-        
-        if dr_doc.sektion_id != mitglied.sektion_id:
-            dr_doc.sektion_id = mitglied.sektion_id
-        
-        if cint(mitglied.digitalrechnung) == 1:
-            if not dr_doc.opt_in:
-                dr_doc.set_opt_in()
-        else:
-            if not dr_doc.opt_out:
-                dr_doc.set_opt_out()
-        
-        if dr_doc.hash != mitglied.mitglied_hash:
-            dr_doc.hash = mitglied.mitglied_hash
-        
-        dr_doc.changed_by_sektion = 1
-        
-        try:
-            dr_doc.save(ignore_permissions=True)
-        except frappe.TimestampMismatchError as err:
-            if not timestamp_mismatch_retry:
-                frappe.clear_messages()
-                mitglied.reload()
-                update_digitalrechnung(dr, mitglied, timestamp_mismatch_retry=True)
-            else:
-                frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}\nFehler: {2}\n\n{3}".format(mitglied.name, dr_doc.name, str(err), frappe.get_traceback()), 'Digitalrechnung Update Failed (timestamp_mismatch_retry)')
-        except Exception as err:
-            frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}\nFehler: {2}\n\n{3}".format(mitglied.name, dr_doc.name, str(err), frappe.get_traceback()), 'Digitalrechnung Update Failed')
-
-        return dr_doc.hash
+    def update_digitalrechnung(dr, mitglied):
+        if not is_job_already_running('Aktualisiere Digitalrechnung ({0})'.format(mitglied.mitglied_nr)):
+            args = {
+                'dr': dr,
+                'mitglied': mitglied
+            }
+            enqueue("mvd.mvd.doctype.digitalrechnung.digitalrechnung._update_digitalrechnung", queue='short', job_name='Aktualisiere Digitalrechnung ({0})'.format(mitglied.mitglied_nr), timeout=5000, **args)
+        return mitglied.mitglied_hash or frappe.db.get_value('Digitalrechnung', dr, 'hash')
     
     def create_digitalrechnung(mitglied):
         dr_doc = frappe.get_doc({
@@ -147,6 +115,53 @@ def digitalrechnung_mapper(mitglied):
                 return create_digitalrechnung(mitglied)
     else:
         return mitglied.mitglied_hash
+
+def _update_digitalrechnung(dr, mitglied, timestamp_mismatch_retry=0):
+    dr_doc = frappe.get_doc("Digitalrechnung", dr)
+    if dr_doc.mitglied_id != mitglied.name:
+        dr_doc.mitglied_id = mitglied.name
+    if dr_doc.language != mitglied.language:
+        dr_doc.language = mitglied.language
+
+    if cint(mitglied.abweichende_rechnungsadresse) == 1 and cint(mitglied.unabhaengiger_debitor) == 1:
+        if dr_doc.email != mitglied.rg_e_mail:
+            dr_doc.email = mitglied.rg_e_mail
+    else:
+        if dr_doc.email != mitglied.e_mail_1:
+            dr_doc.email = mitglied.e_mail_1
+    
+    if dr_doc.sektion_id != mitglied.sektion_id:
+        dr_doc.sektion_id = mitglied.sektion_id
+    
+    if cint(mitglied.digitalrechnung) == 1:
+        if not dr_doc.opt_in:
+            dr_doc.set_opt_in()
+    else:
+        if not dr_doc.opt_out:
+            dr_doc.set_opt_out()
+    
+    if dr_doc.hash != mitglied.mitglied_hash:
+        dr_doc.hash = mitglied.mitglied_hash
+    
+    dr_doc.changed_by_sektion = 1
+    
+    try:
+        dr_doc.save(ignore_permissions=True)
+    except frappe.TimestampMismatchError as err:
+        if timestamp_mismatch_retry < 3:
+            timestamp_mismatch_retry += 1
+            frappe.clear_messages()
+            if not is_job_already_running('Aktualisiere Digitalrechnung ({0})'.format(mitglied.mitglied_nr)):
+                args = {
+                    'dr': dr,
+                    'mitglied': mitglied,
+                    'timestamp_mismatch_retry': timestamp_mismatch_retry
+                }
+                enqueue("mvd.mvd.doctype.digitalrechnung.digitalrechnung._update_digitalrechnung", queue='short', job_name='Aktualisiere Digitalrechnung ({0})'.format(mitglied.mitglied_nr), timeout=5000, **args)
+        else:
+            frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}\nAnzahl Retries: {2}\nFehler: {3}\n\n{4}".format(mitglied.name, dr_doc.name, timestamp_mismatch_retry, str(err), frappe.get_traceback()), 'Digitalrechnung Update Failed')
+    except Exception as err:
+        frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}\nAnzahl Retries: {2}\nUnerwarteter Fehler: {3}\n\n{4}".format(mitglied.name, dr_doc.name, timestamp_mismatch_retry, str(err), frappe.get_traceback()), 'Digitalrechnung Update Failed')
 
 def create_mitglied_change_log(mitglied, txt):
     comment = frappe.get_doc({
