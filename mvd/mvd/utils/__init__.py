@@ -12,7 +12,12 @@ def is_job_already_running(jobname):
     running = get_info(jobname)
     return running
 
-def get_info(jobname):
+@frappe.whitelist()
+def is_mitglied_related_job_running(mitdlied_nr):
+    running = get_info(mitdlied_nr, contains=True)
+    return running
+
+def get_info(jobname, contains=False):
     from rq import Queue, Worker
     from frappe.utils.background_jobs import get_redis_conn
     conn = get_redis_conn()
@@ -38,7 +43,11 @@ def get_info(jobname):
     
     found_job = False
     for job in jobs:
-        if job['job_name'] == jobname:
-            found_job = True
+        if contains:
+            if jobname in job['job_name']:
+                found_job = True
+        else:
+            if job['job_name'] == jobname:
+                found_job = True
 
     return found_job
