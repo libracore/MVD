@@ -372,6 +372,9 @@ frappe.ui.form.on('Mitgliedschaft', {
         if (cur_frm.doc.deleted_by_admin) {
             frm.set_intro("Dieser Eintrag wurde von einem Administrator inaktiviert/«gelöscht».");
         }
+
+        // Formatiere alle Telefonnummern
+        setup_phone_formatters(frm);
     },
     m_und_w: function(frm) {
         if (![0, 1].includes(cur_frm.doc.m_und_w)) {
@@ -3204,3 +3207,78 @@ function erfassung_vermieterkuendigung(frm) {
     'Erfassen'
     );
 }
+
+var setup_phone_formatters = function(frm) {
+    var phone_fields = [
+        "tel_p_1", "tel_m_1", "tel_g_1", 
+        "tel_p_2", "tel_m_2", "tel_g_2", 
+        "rg_tel_p", "rg_tel_m", "rg_tel_g"
+    ];
+
+    phone_fields.forEach(function(fieldname) {
+        if (frm.fields_dict[fieldname]) {
+            frm.fields_dict[fieldname].$input.off('input').on('input', function(e) {
+                let cursor_pos = this.selectionStart;
+                let val = this.value;
+                if (!val) return;
+
+                // 00 zu +
+                if (val.indexOf('00') === 0) {
+                    val = '+' + val.substring(2);
+                    if (cursor_pos <= 2) cursor_pos = 1;
+                }
+
+                let temp_digits = val.replace(/[^\d]/g, '');
+                if (temp_digits.indexOf('41') === 0 && val.indexOf('+') !== 0 && val.indexOf('0') !== 0) {
+                    val = '+' + val;
+                    cursor_pos++; 
+                }
+
+                let is_intl = (val.indexOf('+') === 0);
+                let digits = val.replace(/[^\d]/g, '');
+                let formatted = "";
+
+                if (is_intl) {
+                    if (digits.length >= 2) {
+                        formatted = "+" + digits.substring(0, 2);
+                        if (digits.length > 2) formatted += " " + digits.substring(2, 4);
+                        if (digits.length > 4) formatted += " " + digits.substring(4, 7);
+                        if (digits.length > 7) formatted += " " + digits.substring(7, 9);
+                        if (digits.length > 9) formatted += " " + digits.substring(9, 11);
+                        if (digits.length > 11) formatted += digits.substring(11);
+                    } else {
+                        formatted = val;
+                    }
+                } else {
+                    if (digits.length > 0) {
+                        formatted = digits.substring(0, 3);
+                        if (digits.length > 3) formatted += " " + digits.substring(3, 6);
+                        if (digits.length > 6) formatted += " " + digits.substring(6, 8);
+                        if (digits.length > 8) formatted += " " + digits.substring(8, 10);
+                        if (digits.length > 10) formatted += digits.substring(10);
+                    }
+                }
+
+                if (formatted !== this.value) {
+                    let spaces_before = (this.value.substring(0, cursor_pos).match(/ /g) || []).length;
+                    
+                    this.value = formatted;
+                    frm.doc[fieldname] = formatted;
+
+                    let clean_before = val.substring(0, cursor_pos).replace(/[^\d+]/g, '');
+                    let new_cursor_pos = 0;
+                    let counted_clean = 0;
+
+                    for (let i = 0; i < formatted.length && counted_clean < clean_before.length; i++) {
+                        if (formatted[i] === clean_before[counted_clean]) {
+                            counted_clean++;
+                        }
+                        new_cursor_pos = i + 1;
+                    }
+                    
+                    this.setSelectionRange(new_cursor_pos, new_cursor_pos);
+                }
+            });
+        }
+    });
+};
