@@ -221,6 +221,18 @@ class Mitgliedschaft(Document):
             self.tel_m_2 = None
             self.tel_g_2 = None
             self.e_mail_2 = None
+        
+        # Automatische Formatierung von allen Telefonnummern
+        phone_fields = [
+        "tel_p_1", "tel_m_1", "tel_g_1", 
+        "tel_p_2", "tel_m_2", "tel_g_2", 
+        "rg_tel_p", "rg_tel_m", "rg_tel_g"
+        ]
+        for phone_number in phone_fields:
+            val = self.get(phone_number)
+            if val:
+                formatted = format_phone_number(val)
+                self.set(phone_number, formatted)
     
     def email_validierung(self, check=False):
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
@@ -2712,3 +2724,45 @@ def mitgliedschaft_zuweisen(**kwargs):
         pass
 
     return False
+
+
+def format_phone_number(number):
+    if not number:
+        return number
+    # 1. Grundreinigung
+    num = number.strip()
+    # 00 zu +
+    if num.startswith('00'):
+        num = '+' + num[2:]
+    # Nur Ziffern extrahieren für die Logik
+    clean_number = re.sub(r'[^\d]', '', num)
+    # Spezialfall: Falls jemand 41... ohne + oder 00 tippt
+    # (Wir prüfen ob es mit 41 startet, aber nicht mit 0)
+    if clean_number.startswith('41') and not num.startswith('+') and not num.startswith('0'):
+        num = '+' + clean_number
+
+    is_international = num.startswith('+')
+
+    if is_international:
+        # Schweizer International: +41 XX XXX XX XX (11 Ziffern)
+        if len(clean_number) == 11 and clean_number.startswith('41'):
+            return "+{0} {1} {2} {3} {4}".format(
+                clean_number[:2], 
+                clean_number[2:4], 
+                clean_number[4:7], 
+                clean_number[7:9], 
+                clean_number[9:11]
+            )
+        # Andere internationale Nummern: Nur das + und die Ziffern (ohne Gruppierung)
+        return "+" + clean_number
+    else:
+        # Nationales Format (z.B. 079 123 45 67)       
+        if len(clean_number) == 10:
+            return "{0} {1} {2} {3}".format(
+                clean_number[:3], 
+                clean_number[3:6], 
+                clean_number[6:8], 
+                clean_number[8:10]
+            )
+
+        return clean_number
