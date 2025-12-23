@@ -3162,7 +3162,7 @@ function check_for_running_job(frm) {
     frappe.call({
         method: "mvd.mvd.utils.is_mitglied_related_job_running",
         args: {
-            'jobname': cur_frm.doc.mitglied_nr
+            'mitdlied_nr': cur_frm.doc.mitglied_nr
         },
         callback: function(r)
         {
