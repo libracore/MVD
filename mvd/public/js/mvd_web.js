@@ -10,7 +10,7 @@ window.onload = function afterWebPageLoad() {
             'color' : '#fff',
             'background-color' : '#21539e',
             'border-color': '#21539e'
-        }).parent().after("<p><a href='https://mieterverband.ch/2fa'>Information zum Login.</a></p>");
+        }).parent().after("<p>Bei Problemen <a href=\"https://www.mieterverband.ch/kontakt/#11381\">kontaktiert den MVD</a> per E-Mail unter <br> <a href=\"maito:libracore-support@mieterverband.ch\">libracore-support@mieterverband.ch</a></p>");
         $(".fa-key").after("Anmelden mit ");
         
         try {
