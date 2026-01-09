@@ -349,6 +349,12 @@ def get_data():
                     "name": "Beratungs Log",
                     "label": _("Beratungs Log"),
                     "description": _("Beratungs Log")
+                },
+                {
+                    "type": "doctype",
+                    "name": "API Log",
+                    "label": _("API Log"),
+                    "description": _("API Log")
                 }
             ]
         }

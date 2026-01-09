@@ -1,0 +1,73 @@
+{
+ "creation": "2026-01-09 10:03:30.555009",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "status_code",
+  "info_typ",
+  "request_direction",
+  "method",
+  "request_body",
+  "error"
+ ],
+ "fields": [
+  {
+   "fieldname": "status_code",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Status Code"
+  },
+  {
+   "fieldname": "info_typ",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Info Typ",
+   "options": "Info\nError"
+  },
+  {
+   "fieldname": "method",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Method"
+  },
+  {
+   "fieldname": "request_body",
+   "fieldtype": "Code",
+   "label": "Request Body"
+  },
+  {
+   "fieldname": "error",
+   "fieldtype": "Code",
+   "label": "Error"
+  },
+  {
+   "fieldname": "request_direction",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Request Direction",
+   "options": "Incoming\nOutgoing"
+  }
+ ],
+ "modified": "2026-01-09 13:26:12.852129",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "API Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

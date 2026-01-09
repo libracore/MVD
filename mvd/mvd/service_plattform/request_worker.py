@@ -132,8 +132,9 @@ def create_sp_log(kwargs):
 API Returns
 '''
 # Error Return
-def raise_xxx(code, title, message, daten=None, error_log_title='SP API Error!'):
-    frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(code, title, message, frappe.utils.get_traceback(), daten or ''), error_log_title)
+def raise_xxx(code, title, message, daten=None, error_log_title='SP API Error!', error_log=True):
+    if error_log:
+        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(code, title, message, frappe.utils.get_traceback(), daten or ''), error_log_title)
     frappe.local.response.http_status_code = code
     frappe.local.response.message = message
     return ['{code} {title}'.format(code=code, title=title), {

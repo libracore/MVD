@@ -4,21 +4,22 @@
 
 from __future__ import unicode_literals
 import frappe
-from mvd.mvd.service_plattform.request_worker import api_request_check, raise_200, raise_xxx
 import json
 import requests
-from frappe.utils.background_jobs import enqueue
 from datetime import datetime
 import random
 import string
+from frappe.utils.background_jobs import enqueue
 from frappe import _
+from frappe.utils import cint
+from mvd.mvd.service_plattform.request_worker import api_request_check, raise_200, raise_xxx
 from mvd.mvd.utils.post import _post_retouren
 from mvd.mvd.utils.post import _post_responses
 from mvd.mvd.doctype.beratung.beratung import _get_beratungs_dokument
 from mvd.mvd.doctype.webshop_order.webshop_order import create_order_from_api
 from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
 from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new_id, create_new_number
-from frappe.utils import cint
+from mvd.mvd.utils import make_api_log
 
 AUTH0_SCOPE = "Auth0"
 SVCPF_SCOPE = "ServicePF"
@@ -98,7 +99,7 @@ def update_mvm(mvm, update, return_error=False):
             headers = {"authorization": "Bearer {token}".format(token=token)}
             
             if int(frappe.db.get_single_value('Service Plattform API', 'json_error_log')) == 1:
-                frappe.log_error("{0}".format(json.dumps(mvm)), 'json for ChLa')
+                make_api_log(method="JSON for ChLa", request_direction='Outgoing', request_body=json.dumps(mvm, indent=4, ensure_ascii=False))
             
             if update:
                 sp_connection = requests.put(url, json = mvm, headers = headers)
@@ -107,7 +108,7 @@ def update_mvm(mvm, update, return_error=False):
             
             try:
                 if sp_connection.status_code != 204:
-                    frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), '{0} > update_mvm'.format(sp_connection.status_code))
+                    make_api_log(status_code=int(sp_connection.status_code), method='update_mvm', request_direction='Outgoing', info_typ='Error', request_body=json.dumps(mvm, indent=4, ensure_ascii=False), error=sp_connection.text)
                     frappe.db.commit()
                     if return_error:
                         return 0, "{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), sp_connection.status_code
@@ -119,14 +120,14 @@ def update_mvm(mvm, update, return_error=False):
                     else:
                         return 1
             except Exception as err:
-                frappe.log_error("{0}\n\n{1}".format(err, mvm), 'update_mvm failed')
+                make_api_log(status_code=999, method='update_mvm', request_direction='Outgoing', info_typ='Error', request_body=json.dumps(mvm, indent=4, ensure_ascii=False), error=str(err))
                 frappe.db.commit()
                 if return_error:
                     return 0, "{0}\n\n{1}".format(err, mvm), 999
                 else:
                     return 0
     else:
-        frappe.log_error("{0}".format(mvm), 'update_mvm deaktiviert')
+        make_api_log(status_code=200, method='update_mvm', request_direction='Outgoing', info_typ='Info', request_body=json.dumps(mvm, indent=4, ensure_ascii=False), error='update_mvm deaktiviert')
         if return_error:
             return 0, 'update_mvm deaktiviert', 999
         else:
@@ -145,7 +146,7 @@ def send_beratung(beratungs_data, beratung):
         headers = {"authorization": "Bearer {token}".format(token=token)}
         
         if int(frappe.db.get_single_value('Service Plattform API', 'json_error_log')) == 1:
-            frappe.log_error("{0}".format(json.dumps(beratungs_data)), 'json for ChLa')
+            make_api_log(method="JSON for ChLa", request_direction='Outgoing', request_body=json.dumps(beratungs_data, indent=4, ensure_ascii=False))
         
         sp_connection = requests.post(url, json = beratungs_data, headers = headers)
         
@@ -161,7 +162,7 @@ def send_beratung(beratungs_data, beratung):
                     'json': "{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, beratungs_data)
                 }).insert(ignore_permissions=True)
 
-                frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, beratungs_data), '{0} > send_beratung'.format(sp_connection.status_code))
+                make_api_log(status_code=int(sp_connection.status_code), method='send_beratung', request_direction='Outgoing', info_typ='Error', request_body=json.dumps(beratungs_data, indent=4, ensure_ascii=False), error=sp_connection.text)
                 frappe.db.commit()
                 return
             else:
@@ -187,7 +188,7 @@ def send_beratung(beratungs_data, beratung):
                     'json': "{0}\n\n{1}".format(err, beratungs_data)
                 }).insert(ignore_permissions=True)
             
-            frappe.log_error("{0}\n\n{1}".format(err, beratungs_data), 'send_beratung failed')
+            make_api_log(status_code=999, method='send_beratung', request_direction='Outgoing', info_typ='Error', request_body=json.dumps(beratungs_data, indent=4, ensure_ascii=False), error=str(err))
             frappe.db.commit()
 
 def send_postnotiz_to_sp(postnotiz_for_sp):
@@ -203,13 +204,13 @@ def send_postnotiz_to_sp(postnotiz_for_sp):
             try:
                 sp_connection = requests.post(url, json = postnotiz_for_sp, headers = headers)
                 if sp_connection.status_code != 204:
-                    frappe.log_error("{0}\n\n{1}".format(sp_connection.status_code, str(postnotiz_for_sp)), '{0} > send_postnotiz_to_sp'.format(sp_connection.status_code))
+                    make_api_log(status_code=int(sp_connection.status_code), method='send_postnotiz_to_sp', request_direction='Outgoing', info_typ='Error', request_body=str(postnotiz_for_sp), error=str(sp_connection.text))
                 return
             except Exception as err:
-                frappe.log_error("{0}".format(err), 'send_postnotiz_to_sp failed')
+                make_api_log(status_code=999, method='send_postnotiz_to_sp', request_direction='Outgoing', info_typ='Error', request_body=str(postnotiz_for_sp), error=str(err))
                 frappe.db.commit()
     else:
-        frappe.log_error("{0}".format(str(postnotiz_for_sp)), 'send_postnotiz_to_sp deaktiviert')
+        make_api_log(status_code=200, method='send_postnotiz_to_sp', request_direction='Outgoing', info_typ='Info', request_body=str(postnotiz_for_sp), error='send_postnotiz_to_sp deaktiviert')
         return
 
 def send_kampagne_to_sp(kampagne, id=None):
@@ -225,16 +226,16 @@ def send_kampagne_to_sp(kampagne, id=None):
             try:
                 sp_connection = requests.post(url, json = kampagne, headers = headers)
                 if sp_connection.status_code != 204:
-                    frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, str(kampagne)), '{0} > send_kampagne_to_sp'.format(sp_connection.status_code))
+                    make_api_log(status_code=int(sp_connection.status_code), method='send_kampagne_to_sp', request_direction='Outgoing', info_typ='Error', request_body=str(kampagne), error=str(sp_connection.text))
                 else:
                     if id:
                         frappe.db.set_value("Kampagne", id, "sent_to_sp", 1)
                 return
             except Exception as err:
-                frappe.log_error("{0}".format(err), 'send_kampagne_to_sp failed')
+                make_api_log(status_code=999, method='send_kampagne_to_sp', request_direction='Outgoing', info_typ='Error', request_body=str(kampagne), error=str(err))
                 frappe.db.commit()
     else:
-        frappe.log_error("{0}".format(str(kampagne)), 'send_kampagne_to_sp deaktiviert')
+        make_api_log(status_code=200, method='send_kampagne_to_sp', request_direction='Outgoing', info_typ='Info', request_body=str(kampagne), error='send_kampagne_to_sp deaktiviert')
         return
 
 '''
@@ -257,7 +258,7 @@ def auth_check(scope=SVCPF_SCOPE):
         if response["status"] == 'Ok':
             return True
     except:
-        frappe.log_error("{0}".format(response), 'auth_check failed, get new token')
+        make_api_log(status_code=200, method='auth_check', request_direction='Outgoing', info_typ='Info', error='auth_check failed, get new token')
         # get new token and try again
         new_token = get_token(scope)
         headers = {"authorization": "Bearer {token}".format(token=new_token)}
@@ -268,7 +269,7 @@ def auth_check(scope=SVCPF_SCOPE):
             if response["status"] == 'Ok':
                 return True
         except:
-            frappe.log_error("{0}".format(response), 'auth_check failed')
+            make_api_log(status_code=999, method='auth_check', request_direction='Outgoing', info_typ='Error', error=str(response))
             frappe.db.commit()
             return False
 
@@ -315,7 +316,7 @@ def get_token(scope=SVCPF_SCOPE):
         config.set_value(scope, 'token_date', datetime.now())
         return token
     except Exception as err:
-        frappe.log_error("{0}\n\n{1}".format(err, response), 'get_token failed')
+        make_api_log(status_code=999, method='get_token', request_direction='Outgoing', info_typ='Error', request_body=json.dumps(data, indent=4, ensure_ascii=False), error="{0}\n\n{1}".format(err, response))
     return None
 
 # ---------------------------------------------------
@@ -372,17 +373,17 @@ def sektionswechsel(mvm, sektion_code):
             
             try:
                 if sp_connection.status_code != 204:
-                    frappe.log_error("{0}\n\n{1}\n\n{2}".format(sp_connection.status_code, sp_connection.text, mvm), '{0} > sektionswechsel'.format(sp_connection.status_code))
+                    make_api_log(status_code=int(sp_connection.status_code), method='sektionswechsel', request_direction='Outgoing', info_typ='Error', request_body=json.dumps(mvm, indent=4, ensure_ascii=False), error=str(sp_connection.text))
                     frappe.db.commit()
                     return
                 else:
                     return
             except Exception as err:
-                frappe.log_error("{0}\n\n{1}".format(err, mvm), 'sektionswechsel failed')
+                make_api_log(status_code=999, method='sektionswechsel', request_direction='Outgoing', info_typ='Error', request_body=json.dumps(mvm, indent=4, ensure_ascii=False), error=str(err))
                 frappe.db.commit()
                 return
     else:
-        frappe.log_error("{0}".format(mvm), 'sektionswechsel deaktiviert')
+        make_api_log(method='sektionswechsel', request_direction='Outgoing', info_typ='Info', request_body=json.dumps(mvm, indent=4, ensure_ascii=False), error='sektionswechsel deaktiviert')
         return
 
 '''
@@ -414,15 +415,15 @@ def get_mitglied_data(**api_request):
                     data =  prepare_mvm_for_sp(mitgliedschaft)
                     return data
                 else:
-                    frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(404, 'Not Found', 'No Activ Mitglied found', frappe.utils.get_traceback(), str(api_request)), '404 > get_mitglied_data')
+                    make_api_log(status_code=404, method='get_mitglied_data', request_direction='Incoming', info_typ='Info', request_body=json.dumps(api_request, indent=4, ensure_ascii=False), error='No Activ Mitglied found')
                     frappe.local.response.http_status_code = 404
                     frappe.local.response.message = 'No Activ Mitglied found'
         else:
-            frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(400, 'Bad Request', 'MitgliedNummer missing MV', frappe.utils.get_traceback(), str(api_request)), '400 > get_mitglied_data')
+            make_api_log(status_code=400, method='get_mitglied_data', request_direction='Incoming', info_typ='Info', request_body=json.dumps(api_request, indent=4, ensure_ascii=False), error="{0}\n{1}\n{2}".format('Bad Request', 'MitgliedNummer missing MV', frappe.utils.get_traceback()))
             frappe.local.response.http_status_code = 400
             frappe.local.response.message = 'MitgliedNummer missing MV'
     else:
-        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(400, 'Bad Request', 'MitgliedNummer missing', frappe.utils.get_traceback(), str(api_request)), '400 > get_mitglied_data')
+        make_api_log(status_code=400, method='get_mitglied_data', request_direction='Incoming', info_typ='Info', request_body=json.dumps(api_request, indent=4, ensure_ascii=False), error="{0}\n{1}\n{2}".format('Bad Request', 'MitgliedNummer missing', frappe.utils.get_traceback()))
         frappe.local.response.http_status_code = 400
         frappe.local.response.message = 'MitgliedNummer missing'
 
@@ -468,9 +469,11 @@ def get_mitglied_from_mail(**api_request):
                 mitgl_list.append(mitgl.mitglied_nr)
             return mitgl_list
         else:
-            return raise_xxx(404, 'Not Found', 'No Activ Mitglied found', daten=str(api_request), error_log_title='404 > get_mitglied_from_mail')
+            make_api_log(status_code=404, method='get_mitglied_from_mail', request_direction='Incoming', info_typ='Info', request_body=json.dumps(api_request, indent=4, ensure_ascii=False), error='Not Found: No Activ Mitglied found')
+            return raise_xxx(404, 'Not Found', 'No Activ Mitglied found', daten=str(api_request), error_log=False)
     else:
-        return raise_xxx(400, 'Bad Request', 'Emailadresse missing', daten=str(api_request), error_log_title='404 > get_mitglied_from_mail')
+        make_api_log(status_code=400, method='get_mitglied_from_mail', request_direction='Incoming', info_typ='Info', request_body=json.dumps(api_request, indent=4, ensure_ascii=False), error='Bad Request: Emailadresse missing')
+        return raise_xxx(400, 'Bad Request', 'Emailadresse missing', daten=str(api_request), error_log=False)
 
 '''
 Endpunkt für den Bezug einer neuen ID:
@@ -497,7 +500,7 @@ def naming_service_new_id(**api_request):
         frappe.local.response.message = response
         return
     else:
-        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(response['code'], response['title'], response['msg'], frappe.utils.get_traceback(), str(api_request)), '{0} > naming_service_new_id'.format(response['code']))
+        make_api_log(status_code=int(response['code']), method='naming_service_new_id', request_direction='Incoming', info_typ='Error', request_body=json.dumps(api_request, indent=4, ensure_ascii=False), error="{0}\n{1}\n{2}".format(response['title'], response['msg'], frappe.utils.get_traceback()))
         frappe.local.response.http_status_code = response['code']
         frappe.local.response.message = response['msg']
         return
@@ -514,12 +517,12 @@ def naming_service_new_number(**api_request):
             frappe.local.response.http_status_code = 200
             frappe.local.response.message = response
         else:
-            frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(response['code'], response['title'], response['msg'], str(api_request), ''), '{0} > naming_service_new_number'.format(response['code']))
+            make_api_log(status_code=int(response['code']), method='naming_service_new_number', request_direction='Incoming', info_typ='Error', request_body=json.dumps(api_request, indent=4, ensure_ascii=False), error="{0}\n{1}".format(response['title'], response['msg']))
             frappe.local.response.http_status_code = response['code']
             frappe.local.response.message = response['msg']
             return
     else:
-        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(400, 'Bad Request', 'ID missing', str(api_request), ''), '400 > naming_service_new_number')
+        make_api_log(status_code=400, method='naming_service_new_number', request_direction='Incoming', info_typ='Error', request_body=json.dumps(api_request, indent=4, ensure_ascii=False), error="{0}\n{1}".format('Bad Request', 'ID missing'))
         frappe.local.response.http_status_code = 400
         frappe.local.response.message = 'ID missing'
         return
@@ -537,7 +540,8 @@ def get_kuendigung_info(**api_request):
         frappe.local.response.message = {"naechsterKuendigungstermin": nkd, "kuendigungsfristVerpasst": kuendigungsfrist_verpasst}
         return
     else:
-        return raise_xxx(400, 'Bad Request', 'ID missing', daten=str(api_request), error_log_title='400 > get_kuendigung_info')
+        make_api_log(status_code=400, method='naming_service_new_number', request_direction='Incoming', info_typ='Error', request_body=json.dumps(api_request, indent=4, ensure_ascii=False), error="{0}\n{1}".format('Bad Request', 'ID missing'))
+        return raise_xxx(400, 'Bad Request', 'ID missing', daten=str(api_request), error_log=False)
 
 # ---------------------------------------------------
 # ---------------------------------------------------
@@ -602,12 +606,12 @@ def create_user(email, first_name, last_name, debug=False):
             if debug:
                 print("{0}".format(response.status_code))
                 print("{0}".format(response.json()))
-            frappe.log_error("{0}".format(response.json()), 'update user to auth0 Code {0}'.format(response.status_code))
+            make_api_log(status_code=int(response.status_code), method='create_user', request_direction='Outgoing', info_typ='Error', request_body=json.dumps(response.json(), indent=4, ensure_ascii=False), error="update user to auth0")
         return
     except Exception as err:
         if debug:
             print("Error: {0}".format(err))
-        frappe.log_error("{0}".format(err), 'update user to auth0 failed')
+        make_api_log(status_code=999, method='create_user', request_direction='Outgoing', info_typ='Error', request_body=payload, error="update user to auth0 failed:\n{0}".format(str(err)))
 
 @frappe.whitelist()
 def create_role(role, description, debug=False):
@@ -649,7 +653,7 @@ def create_role(role, description, debug=False):
     except Exception as err:
         if debug:
             print("Error: {0}".format(err))
-        frappe.log_error("{0}".format(err), 'create role to auth0 failed')
+        make_api_log(status_code=999, method='create_role', request_direction='Outgoing', info_typ='Error', request_body=payload, error="create role to auth0 failed:\n{0}".format(err))
 
 @frappe.whitelist()
 def assign_roles(user, roles, debug=False):
@@ -717,7 +721,7 @@ def assign_roles(user, roles, debug=False):
     except Exception as err:
         if debug:
             print("Error: {0}".format(err))
-        frappe.log_error("{0}".format(err), 'assign role to auth0 failed')
+        make_api_log(status_code=999, method='assign_roles', request_direction='Outgoing', info_typ='Error', request_body=payload, error="assign role to auth0 failed:\n{0}".format(err))
 
 # ---------------------------------------------------
 # ---------------------------------------------------
