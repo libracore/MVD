@@ -25,7 +25,8 @@ def get_columns():
         {"label": _("Betrag"), "fieldname": "betrag", "fieldtype": "Currency"},
         {"label": _("Ausstehender Betrag"), "fieldname": "ausstehender_betrag", "fieldtype": "Currency"},
         {"label": _("R-Datum"), "fieldname": "datum", "fieldtype": "Date"},
-        {"label": _("Mitgliedschaftsjahr"), "fieldname": "mitgliedschaftsjahr", "fieldtype": "Int"}
+        {"label": _("Mitgliedschaftsjahr"), "fieldname": "mitgliedschaftsjahr", "fieldtype": "Int"},
+        {"label": _("Z-Datum"), "fieldname": "payment_datum", "fieldtype": "Date"}
     ]
 
 def get_data(filters):
@@ -51,9 +52,12 @@ def get_nicht_bezahlt(filters, data):
                                                 `mvm`.`mitgliedtyp_c` AS `mitgliedtyp_c`,
                                                 `mvm`.`e_mail_1` AS `e_mail_1`,
                                                 `mvm`.`tel_m_1` AS `tel_m_1`,
-                                                `mvm`.`tel_p_1` AS `tel_p_1`
+                                                `mvm`.`tel_p_1` AS `tel_p_1`,
+                                                `pe`.`posting_date` AS `payment_datum`
                                             FROM `tabSales Invoice` AS `sinv`
                                             LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `sinv`.`mv_mitgliedschaft` = `mvm`.`name`
+                                            JOIN `tabPayment Entry Reference` AS `per` ON `per`.`reference_name` = `sinv`.`name`
+                                            JOIN `tabPayment Entry` AS `pe` ON `pe`.`name` = `per`.`parent`
                                             WHERE `sinv`.`sektion_id` = '{sektion_id}'
                                             AND `sinv`.`docstatus` = 1
                                             AND `sinv`.`ist_mitgliedschaftsrechnung` = 1
