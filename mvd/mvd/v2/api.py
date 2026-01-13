@@ -391,7 +391,12 @@ def create_beratung(**args):
                 }).insert(ignore_permissions=True)
             
             if 'email' in args and args['email']:
+                # Eingangsbestätigung an Mitglied
                 send_confirmation_mail(args['mitglied_id'], new_ber.name, notiz, raised_by=args['email'], sektion=sektion)
+            
+            if frappe.db.get_value("Sektion", sektion, 'legacy_mode') == '1':
+                # Eingangsbestätigung an Sektion
+                send_confirmation_mail(args['mitglied_id'], new_ber.name, notiz, legacy_mail='1', sektion=sektion)
             
             frappe.local.response.http_status_code = 200
             frappe.local.response.message = new_ber.name
@@ -542,6 +547,7 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
         link_zur_mitgliedschaft = '<a href="https://libracore.mieterverband.ch/desk#Form/Mitgliedschaft/{0}">{1}</a>'.format(mitgliedschaft, mitglied_nr)
         link_zur_beratung = '<a href="https://libracore.mieterverband.ch/desk#Form/Beratung/{0}">{0}</a>'.format(beratung)
         beratung_email = "mv+Beratung+{0}@libracore.io".format(beratung)
+        attachments = []
 
         if not legacy_mail:
             message = """Guten Tag"""
@@ -606,7 +612,6 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
         else:
             try:
                 message = False
-                attachments = None
                 vorname = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1")
                 nachname = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1")
                 if legacy_mail == '1':
@@ -643,7 +648,6 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                             <br><b>Beratung Mail-Link:</b> <a href="mailto:{4}">{4}</a>
                             <br>{5}""".format(vorname, nachname, link_zur_mitgliedschaft, link_zur_beratung, beratung_email, notiz)
                     
-                    attachments = []
                     all_attachments = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{0}'""".format(beratung), as_dict=True)
                     for f in all_attachments:
                         attachments.append({'fid': f.name})
@@ -654,7 +658,7 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                     comm = make(
                         recipients=[recipient],
                         sender=frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail"),
-                        subject='Neue E-Mail Beratung', 
+                        subject='Neue Beratung', 
                         content=message,
                         doctype='Beratung',
                         name=beratung,
@@ -666,7 +670,7 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                     sendmail(
                         recipients=[recipient],
                         sender="{0} <{1}>".format(frappe.get_value("Sektion", sektion, "legacy_mail_absende_name"), frappe.get_value("Sektion", sektion, "legacy_mail_absender_mail")),
-                        subject='Neue E-Mail Beratung', 
+                        subject='Neue Beratung', 
                         message=message,
                         as_markdown=False,
                         delayed=True,
