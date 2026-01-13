@@ -115,6 +115,7 @@ def update_mvm(mvm, update, return_error=False):
                     else:
                         return 0
                 else:
+                    make_api_log(status_code=200, method='update_mvm', request_direction='Outgoing', info_typ='Info', request_body=json.dumps(mvm, indent=4, ensure_ascii=False))
                     if return_error:
                         return 1, False, 200
                     else:
@@ -175,6 +176,7 @@ def send_beratung(beratungs_data, beratung):
                     'title': 'Beratung an SP übermittelt',
                     'json': "{0}".format(sp_connection.status_code)
                 }).insert(ignore_permissions=True)
+                make_api_log(status_code=200, method='send_beratung', request_direction='Outgoing', info_typ='Info', request_body=json.dumps(beratungs_data, indent=4, ensure_ascii=False))
                 frappe.db.commit()
                 return
         except Exception as err:
@@ -205,6 +207,8 @@ def send_postnotiz_to_sp(postnotiz_for_sp):
                 sp_connection = requests.post(url, json = postnotiz_for_sp, headers = headers)
                 if sp_connection.status_code != 204:
                     make_api_log(status_code=int(sp_connection.status_code), method='send_postnotiz_to_sp', request_direction='Outgoing', info_typ='Error', request_body=str(postnotiz_for_sp), error=str(sp_connection.text))
+                else:
+                    make_api_log(status_code=200, method='send_postnotiz_to_sp', request_direction='Outgoing', info_typ='Info', request_body=json.dumps(postnotiz_for_sp, indent=4, ensure_ascii=False))
                 return
             except Exception as err:
                 make_api_log(status_code=999, method='send_postnotiz_to_sp', request_direction='Outgoing', info_typ='Error', request_body=str(postnotiz_for_sp), error=str(err))
@@ -228,6 +232,7 @@ def send_kampagne_to_sp(kampagne, id=None):
                 if sp_connection.status_code != 204:
                     make_api_log(status_code=int(sp_connection.status_code), method='send_kampagne_to_sp', request_direction='Outgoing', info_typ='Error', request_body=str(kampagne), error=str(sp_connection.text))
                 else:
+                    make_api_log(status_code=200, method='send_kampagne_to_sp', request_direction='Outgoing', info_typ='Info', request_body=json.dumps(kampagne, indent=4, ensure_ascii=False))
                     if id:
                         frappe.db.set_value("Kampagne", id, "sent_to_sp", 1)
                 return
@@ -267,6 +272,7 @@ def auth_check(scope=SVCPF_SCOPE):
         try:
             response = response.json()
             if response["status"] == 'Ok':
+                make_api_log(status_code=200, method='auth_check', request_direction='Outgoing', info_typ='Info', request_body=json.dumps(response, indent=4, ensure_ascii=False))
                 return True
         except:
             make_api_log(status_code=999, method='auth_check', request_direction='Outgoing', info_typ='Error', error=str(response))
@@ -314,6 +320,7 @@ def get_token(scope=SVCPF_SCOPE):
         token = response["access_token"]
         config.set_value(scope, 'api_token', token)
         config.set_value(scope, 'token_date', datetime.now())
+        make_api_log(status_code=200, method='get_token', request_direction='Outgoing', info_typ='Info', request_body=json.dumps(response, indent=4, ensure_ascii=False))
         return token
     except Exception as err:
         make_api_log(status_code=999, method='get_token', request_direction='Outgoing', info_typ='Error', request_body=json.dumps(data, indent=4, ensure_ascii=False), error="{0}\n\n{1}".format(err, response))
@@ -377,6 +384,7 @@ def sektionswechsel(mvm, sektion_code):
                     frappe.db.commit()
                     return
                 else:
+                    make_api_log(status_code=200, method='sektionswechsel', request_direction='Outgoing', info_typ='Info', request_body=json.dumps(mvm, indent=4, ensure_ascii=False))
                     return
             except Exception as err:
                 make_api_log(status_code=999, method='sektionswechsel', request_direction='Outgoing', info_typ='Error', request_body=json.dumps(mvm, indent=4, ensure_ascii=False), error=str(err))
@@ -405,6 +413,7 @@ def get_mitglied_data(**api_request):
             # Performance Optimierung (#1203):
             if frappe.db.exists("SP Mitglied Data", api_request["MitgliedNummer"]):
                 data = json.loads(frappe.get_doc("SP Mitglied Data", api_request["MitgliedNummer"]).json)
+                make_api_log(status_code=200, method='get_mitglied_data', request_direction='Incoming', info_typ='Info', request_body=json.dumps(data, indent=4, ensure_ascii=False))
                 return data
             else:
                 # Alter Workflow VOR Performance Optimierung (als Fallback)
@@ -413,6 +422,7 @@ def get_mitglied_data(**api_request):
                 if frappe.db.exists("Mitgliedschaft", mitglied_nummer):
                     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_nummer)
                     data =  prepare_mvm_for_sp(mitgliedschaft)
+                    make_api_log(status_code=200, method='get_mitglied_data', request_direction='Incoming', info_typ='Info', request_body=json.dumps(data, indent=4, ensure_ascii=False))
                     return data
                 else:
                     make_api_log(status_code=404, method='get_mitglied_data', request_direction='Incoming', info_typ='Info', request_body=json.dumps(api_request, indent=4, ensure_ascii=False), error='No Activ Mitglied found')
@@ -467,6 +477,7 @@ def get_mitglied_from_mail(**api_request):
             mitgl_list = []
             for mitgl in mitgliedschaften:
                 mitgl_list.append(mitgl.mitglied_nr)
+            make_api_log(status_code=200, method='get_mitglied_from_mail', request_direction='Incoming', info_typ='Info', request_body=str(mitgl_list))
             return mitgl_list
         else:
             make_api_log(status_code=404, method='get_mitglied_from_mail', request_direction='Incoming', info_typ='Info', request_body=json.dumps(api_request, indent=4, ensure_ascii=False), error='Not Found: No Activ Mitglied found')
@@ -496,6 +507,7 @@ def naming_service_new_id(**api_request):
     
     response = create_new_id(new_nr, existing_nr)
     if not 'error' in response:
+        make_api_log(status_code=200, method='naming_service_new_id', request_direction='Incoming', info_typ='Info', request_body=json.dumps(api_request, indent=4, ensure_ascii=False))
         frappe.local.response.http_status_code = 200
         frappe.local.response.message = response
         return
@@ -514,6 +526,7 @@ def naming_service_new_number(**api_request):
     if 'id' in api_request:
         response = create_new_number(api_request['id'])
         if not 'error' in response:
+            make_api_log(status_code=200, method='naming_service_new_number', request_direction='Incoming', info_typ='Info', request_body=json.dumps(api_request, indent=4, ensure_ascii=False))
             frappe.local.response.http_status_code = 200
             frappe.local.response.message = response
         else:
@@ -538,6 +551,7 @@ def get_kuendigung_info(**api_request):
         nkd, kuendigungsfrist_verpasst = get_naechstes_jahr_geschuldet(api_request['id'], datum_via_api=True)
         frappe.local.response.http_status_code = 200
         frappe.local.response.message = {"naechsterKuendigungstermin": nkd, "kuendigungsfristVerpasst": kuendigungsfrist_verpasst}
+        make_api_log(status_code=200, method='get_kuendigung_info', request_direction='Incoming', info_typ='Info', request_body=json.dumps(api_request, indent=4, ensure_ascii=False))
         return
     else:
         make_api_log(status_code=400, method='naming_service_new_number', request_direction='Incoming', info_typ='Error', request_body=json.dumps(api_request, indent=4, ensure_ascii=False), error="{0}\n{1}".format('Bad Request', 'ID missing'))
