@@ -113,56 +113,63 @@ def check_zahlung_mitgliedschaft(mitgliedschaft, db_direct=False):
     
     # prüfe offene Rechnungen bei sektionswechsel
     if mitgliedschaft.status_c == 'Wegzug':
-        sinvs = frappe.db.sql("""SELECT
+        if not is_job_already_running("Cancel SINV / FAK ({0})".format(mitgliedschaft.mitglied_nr)):
+            args = {
+                    'mitgliedschaft': mitgliedschaft.name
+                }
+            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils.cancel_sinv_fak_sektionswechsel", queue='short', job_name="Cancel SINV / FAK ({0})".format(mitgliedschaft.mitglied_nr), timeout=2500, **args)
+    
+    if db_direct:
+        frappe.db.commit()
+    
+    return
+
+def cancel_sinv_fak_sektionswechsel(mitgliedschaft):
+    sinvs = frappe.db.sql("""SELECT
                                     `name`,
                                     `docstatus`
                                 FROM `tabSales Invoice`
                                 WHERE `docstatus` != 2
                                 AND `ist_mitgliedschaftsrechnung` = 1
                                 AND `mv_mitgliedschaft` = '{mitgliedschaft}'
-                                AND `status` != 'Paid'""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)
-        for sinv in sinvs:
-            # sinv = frappe.get_doc("Sales Invoice", sinv.name)
-            if sinv.docstatus == 1:
-                # cancel linked FR
-                linked_fr = frappe.db.sql("""SELECT
-                                                `name`
-                                            FROM `tabFakultative Rechnung`
-                                            WHERE `sales_invoice` = '{sinv}'
-                                            AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
-                if len(linked_fr) > 0:
-                    for _fr in linked_fr:
-                        fr = frappe.get_doc("Fakultative Rechnung", _fr.name)
-                        if fr.status == 'Paid':
-                            fr.add_comment('Comment', text="Verknüpfung zu Rechnung {0} aufgrund Sektionswechsel aufgehoben".format(fr.sales_invoice))
-                            frappe.db.set_value("Fakultative Rechnung", fr.name, 'sales_invoice', None)
-                            # frappe.db.sql("""UPDATE `tabFakultative Rechnung` SET `sales_invoice` = '' WHERE `name` = '{0}'""".format(fr.name), as_list=True)
-                        else:
-                            fr.cancel()
-                
-                # cancel linked mahnungen
-                linked_mahnungen = frappe.db.sql("""SELECT DISTINCT
-                                                        `parent`
-                                                    FROM `tabMahnung Invoices`
-                                                    WHERE `sales_invoice` = '{sinv}'
-                                                    AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
-                if len(linked_mahnungen) > 0:
-                    for _mahnung in linked_mahnungen:
-                        mahnung = frappe.get_doc("Mahnung", _mahnung.parent)
-                        mahnung.cancel()
-                
-                # load & cancel sinv
-                sinv = frappe.get_doc("Sales Invoice", sinv.name)
-                sinv.cancel()
-            else:
-                if sinv.docstatus == 0:
-                    # load & delete sinv
-                    sinv.delete()
-    
-    if db_direct:
-        frappe.db.commit()
-    
-    return
+                                AND `status` != 'Paid'""".format(mitgliedschaft=mitgliedschaft), as_dict=True)
+    for sinv in sinvs:
+        # sinv = frappe.get_doc("Sales Invoice", sinv.name)
+        if sinv.docstatus == 1:
+            # cancel linked FR
+            linked_fr = frappe.db.sql("""SELECT
+                                            `name`
+                                        FROM `tabFakultative Rechnung`
+                                        WHERE `sales_invoice` = '{sinv}'
+                                        AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
+            if len(linked_fr) > 0:
+                for _fr in linked_fr:
+                    fr = frappe.get_doc("Fakultative Rechnung", _fr.name)
+                    if fr.status == 'Paid':
+                        fr.add_comment('Comment', text="Verknüpfung zu Rechnung {0} aufgrund Sektionswechsel aufgehoben".format(fr.sales_invoice))
+                        frappe.db.set_value("Fakultative Rechnung", fr.name, 'sales_invoice', None)
+                        # frappe.db.sql("""UPDATE `tabFakultative Rechnung` SET `sales_invoice` = '' WHERE `name` = '{0}'""".format(fr.name), as_list=True)
+                    else:
+                        fr.cancel()
+            
+            # cancel linked mahnungen
+            linked_mahnungen = frappe.db.sql("""SELECT DISTINCT
+                                                    `parent`
+                                                FROM `tabMahnung Invoices`
+                                                WHERE `sales_invoice` = '{sinv}'
+                                                AND `docstatus` = 1""".format(sinv=sinv.name), as_dict=True)
+            if len(linked_mahnungen) > 0:
+                for _mahnung in linked_mahnungen:
+                    mahnung = frappe.get_doc("Mahnung", _mahnung.parent)
+                    mahnung.cancel()
+            
+            # load & cancel sinv
+            sinv = frappe.get_doc("Sales Invoice", sinv.name)
+            sinv.cancel()
+        else:
+            if sinv.docstatus == 0:
+                # load & delete sinv
+                sinv.delete()
 
 def set_max_reminder_level(mitgliedschaft, db_direct=False):
     '''
