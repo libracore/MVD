@@ -5,7 +5,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils.data import add_days, getdate, now
+from frappe.utils.data import add_days, getdate, now, today
+from frappe.utils import cint
 import six
 import json
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung
@@ -299,7 +300,11 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
             "objekt_plz": anlage_daten["plz"] if int(anlage_daten["postfach"]) == 1 else '',
             "objekt_ort": anlage_daten["ort"] if int(anlage_daten["postfach"]) == 1 else '',
             "abweichende_objektadresse": 1 if int(anlage_daten["postfach"]) == 1 else '0',
-            "interessent_typ": anlage_daten["interessent_typ"]
+            "interessent_typ": anlage_daten["interessent_typ"],
+            "bezahltes_mitgliedschaftsjahr": get_mitgl_jahr_in_anlage(anlage_daten["sektion_id"]) if anlage_daten["status"] == 'Regulär' else None,
+            "datum_zahlung_mitgliedschaft": today() if anlage_daten["status"] == 'Regulär' else None,
+            "zahlung_hv": get_mitgl_jahr_in_anlage(anlage_daten["sektion_id"]) if int(anlage_daten["hv_bar_bezahlt"]) == 1 else None,
+            "datum_hv_zahlung": today() if int(anlage_daten["hv_bar_bezahlt"]) == 1 else None
         })
         mitgliedschaft.insert(ignore_permissions=True)
         
@@ -364,6 +369,13 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
         })
         faktura_kunde.insert(ignore_permissions=True)
         return faktura_kunde.name
+
+def get_mitgl_jahr_in_anlage(sektion_id):
+    sektion = frappe.get_doc("Sektion", sektion_id)
+    gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%d"))
+    if getdate(today()) >= gratis_ab:
+        return cint(getdate(today()).strftime("%Y")) + 1
+    return cint(getdate(today()).strftime("%Y"))
 
 @frappe.whitelist()
 def create_serien_email(search_hash=None, mitglied_selektion=None):
