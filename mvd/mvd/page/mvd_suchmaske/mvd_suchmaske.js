@@ -496,6 +496,9 @@ frappe.mvd_such_client = {
             },
             only_input: true,
         });
+        setTimeout(function() { // formatiere Telefonnummer: Timeout stellt sicher, dass das $input Element im DOM existiert
+            if (tel && tel.$input) {frappe.mvd.apply_phone_format(tel);}
+        }, 100); 
         return tel
     },
     create_email_field: function(page) {
@@ -690,7 +693,7 @@ frappe.mvd_such_client = {
                 hidden: 1,
                 click: function(){
                     if (frappe.user.has_role("MV_MA")) {
-                        frappe.prompt([
+                        var d = frappe.prompt([
                             {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Faktura Kund*in\nInteressent*in\nRegulär\nAnmeldung',
                                 'default': cur_page.page.search_fields.status_c.get_value() == 'Interessent*in' ? 'Interessent*in':'Anmeldung',
                                 'change': function() {
@@ -944,7 +947,12 @@ frappe.mvd_such_client = {
                         },
                         'Neuanlage',
                         'Anlage'
-                        )
+                        );
+                        if (d) {
+                        frappe.mvd.apply_phone_format(d.fields_dict.telefon);
+                        frappe.mvd.apply_phone_format(d.fields_dict.telefon_g);
+                        frappe.mvd.apply_phone_format(d.fields_dict.telefon_m);
+                    }
                     } else {
                         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
                     }
