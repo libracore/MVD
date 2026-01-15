@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 from frappe.utils import cint
 from frappe import _
 from datetime import datetime
+from mvd.mvd.utils import make_api_log
 
 class Beratung(Document):
     def validate(self):
@@ -528,6 +529,7 @@ def _get_beratungs_dokument(beratungs_dokument):
             file_doc = frappe.get_doc("File", beratungs_dokument["beratungs_dokument_id"])
             filecontent = file_doc.get_content()
             file_name = frappe.db.get_value("File", beratungs_dokument["beratungs_dokument_id"], 'file_name')
+            make_api_log(status_code=200, method='get_beratungs_dokument', request_direction='Incoming', info_typ='Info', request_body=json.dumps(beratungs_dokument, indent=4, ensure_ascii=False))
             return {
                 'filecontent': filecontent,
                 'type': str(file_name.split(".")[len(file_name.split(".")) - 1]),
@@ -535,8 +537,10 @@ def _get_beratungs_dokument(beratungs_dokument):
             }
             
         else:
+            make_api_log(status_code=400, method='get_beratungs_dokument', request_direction='Incoming', info_typ='Error', request_body=json.dumps(beratungs_dokument, indent=4, ensure_ascii=False), error='Bad Request: file not found')
             return raise_xxx(400, 'Bad Request', 'file not found', error_log_title='400 > _get_beratungs_dokument')
     else:
+        make_api_log(status_code=400, method='get_beratungs_dokument', request_direction='Incoming', info_typ='Error', request_body=json.dumps(beratungs_dokument, indent=4, ensure_ascii=False), error='Bad Request: beratungs_dokument missing')
         return raise_xxx(400, 'Bad Request', 'beratungs_dokument missing', error_log_title='400 > _get_beratungs_dokument')
 
 # Status Returns

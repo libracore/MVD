@@ -13,7 +13,9 @@ frappe.ui.form.on('Mitgliedschaft', {
        dirty_observer(frm);
 
        // check for running_update_job
-       check_for_running_job(frm);
+       if (cur_frm.doc.mitglied_nr && cur_frm.doc.mitglied_nr != 'MV') {
+            check_for_running_job(frm);
+       }
        
        if (!frm.doc.__islocal&&cur_frm.doc.status_c == 'Inaktiv'&&!cur_frm.doc.wegzug_zu) {
            frappe.call({
@@ -3158,9 +3160,9 @@ function prepare_mvd_mail_composer(e, forward=false) {
 
 function check_for_running_job(frm) {
     frappe.call({
-        method: "mvd.mvd.utils.is_job_already_running",
+        method: "mvd.mvd.utils.is_mitglied_related_job_running",
         args: {
-            'jobname': `Aktualisiere Mitgliedschaft ${cur_frm.doc.name}`
+            'mitdlied_nr': cur_frm.doc.mitglied_nr
         },
         callback: function(r)
         {

@@ -8,6 +8,7 @@ import frappe
 from frappe.utils import cint
 from frappe.utils.data import getdate, now, today
 from frappe.utils.background_jobs import enqueue
+from mvd.mvd.utils import make_api_log
 from mvd.mvd.doctype.mitgliedschaft.utils import get_sektion_id, get_status_c, get_mitgliedtyp_c, get_inkl_hv, get_sprache_abk
 
 '''
@@ -23,14 +24,17 @@ def api_request_check(kwargs):
                 missing_address = check_missing_address(kwargs)
                 if not missing_address:
                     create_sp_log(kwargs)
+                    make_api_log(status_code=200, method='mitglieder', request_direction='Incoming', info_typ='Info', request_body=json.dumps(kwargs, indent=4, ensure_ascii=False))
                     return raise_200()
                 else:
                     return missing_address
             else:
                 return missing_keys
         else:
+            make_api_log(status_code=400, method='mitglieder', request_direction='Incoming', info_typ='Error', request_body=json.dumps(kwargs, indent=4, ensure_ascii=False), error='Bad Request: mitgliedId == 0')
             return raise_xxx(400, 'Bad Request', 'mitgliedId == 0', daten=str(kwargs), error_log_title='400 > api_request_check')
     else:
+        make_api_log(status_code=400, method='mitglieder', request_direction='Incoming', info_typ='Error', request_body=json.dumps(kwargs, indent=4, ensure_ascii=False), error='Bad Request: mitgliedId missing')
         return raise_xxx(400, 'Bad Request', 'mitgliedId missing', daten=str(kwargs), error_log_title='400 > api_request_check')
 
 def check_main_keys(kwargs):
@@ -77,8 +81,10 @@ def check_main_keys(kwargs):
     '''
     for key in mandatory_keys:
         if key not in kwargs:
+            make_api_log(status_code=400, method='mitglieder', request_direction='Incoming', info_typ='Error', request_body=json.dumps(kwargs, indent=4, ensure_ascii=False), error='Bad Request: {key} missing'.format(key=key))
             return raise_xxx(400, 'Bad Request', '{key} missing'.format(key=key), daten=kwargs, error_log_title='400 > check_main_keys')
     if 'Geschenkmitgliedschaft' in kwargs:
+        make_api_log(status_code=400, method='mitglieder', request_direction='Incoming', info_typ='Error', request_body=json.dumps(kwargs, indent=4, ensure_ascii=False), error='Bad Request: Geschenkmitgliedschaft unbekannt')
         return raise_xxx(400, 'Bad Request', 'Geschenkmitgliedschaft unbekannt', daten=kwargs, error_log_title='400 > check_main_keys')
     else:
         return False
@@ -96,8 +102,9 @@ def check_missing_address(kwargs):
                 if mitglied["postleitzahl"]:
                     return False
                 else:
+                    make_api_log(status_code=400, method='mitglieder', request_direction='Incoming', info_typ='Error', request_body=json.dumps(kwargs, indent=4, ensure_ascii=False), error='Bad Request: Postleitzahl in Mitglied Address missing')
                     return raise_xxx(400, 'Bad Request', 'Postleitzahl in Mitglied Address missing', daten=kwargs, error_log_title='400 > check_missing_address')
-    
+    make_api_log(status_code=400, method='mitglieder', request_direction='Incoming', info_typ='Error', request_body=json.dumps(kwargs, indent=4, ensure_ascii=False), error='Bad Request: Mitglied Address missing')
     return raise_xxx(400, 'Bad Request', 'Mitglied Address missing', daten=kwargs, error_log_title='400 > check_missing_address')
 
 '''
@@ -132,8 +139,9 @@ def create_sp_log(kwargs):
 API Returns
 '''
 # Error Return
-def raise_xxx(code, title, message, daten=None, error_log_title='SP API Error!'):
-    frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(code, title, message, frappe.utils.get_traceback(), daten or ''), error_log_title)
+def raise_xxx(code, title, message, daten=None, error_log_title='SP API Error!', error_log=True):
+    if error_log:
+        frappe.log_error("{0}\n{1}\n{2}\n\n{3}\n\n{4}".format(code, title, message, frappe.utils.get_traceback(), daten or ''), error_log_title)
     frappe.local.response.http_status_code = code
     frappe.local.response.message = message
     return ['{code} {title}'.format(code=code, title=title), {

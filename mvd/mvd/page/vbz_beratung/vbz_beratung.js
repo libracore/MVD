@@ -58,7 +58,7 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s4").click(function(){
-            frappe.route_options = {"status": "Rückfragen", "kontaktperson": ['is', 'not set'], "sektion_id": sektion}
+            frappe.route_options = {"status": "Rückfragen", "kontaktperson": ['is', 'not set'], "ungelesen": 0, "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s5").click(function(){

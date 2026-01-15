@@ -326,7 +326,7 @@ def verbuche_matches(camt_import):
             elif sinv_doc.ist_sonstige_rechnung:
                 camt_produkte_update(camt_import)
             pe_doc.camt_status = 'Verbucht'
-            pe_doc.save()
+            pe_doc.save(ignore_permissions=True)
             pe_doc.submit()
             frappe.db.commit()
             camt_gebuchte_zahlung_update(camt_import)

@@ -12,6 +12,7 @@ from frappe.core.doctype.communication.email import make
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr, get_adressblock, get_rg_adressblock
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 import re
+from mvd.mvd.utils import make_api_log
 
 class WebshopOrder(Document):
     def validate(self):
@@ -399,8 +400,10 @@ def create_order_from_api(kwargs=None, v2=0):
                 "request": json_formatted_str,
                 "v2": v2
             }).insert(ignore_permissions=True)
+            make_api_log(status_code=200, method='create_order_from_api', request_direction='Incoming', info_typ='Info', request_body=json.dumps(kwargs, indent=4, ensure_ascii=False))
             return raise_200()
         except Exception as err:
+            make_api_log(status_code=500, method='create_order_from_api', request_direction='Incoming', info_typ='Error', request_body=json.dumps(kwargs, indent=4, ensure_ascii=False), error=str(err))
             return raise_xxx(500, '', err, daten=kwargs, error_log_title='500 > create_order_from_api')
 
 # Success Return
