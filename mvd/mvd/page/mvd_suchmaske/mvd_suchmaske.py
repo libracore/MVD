@@ -312,13 +312,14 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
         if anlage_daten["status"] == 'Regulär':
             bezahlt = True
             hv_bar_bezahlt = False
-            if int(anlage_daten["hv_bar_bezahlt"]) == 1:
-                hv_bar_bezahlt = True
+            if "hv_bar_bezahlt" in anlage_daten:
+                if int(anlage_daten["hv_bar_bezahlt"]) == 1:
+                    hv_bar_bezahlt = True
             if int(massendruck) == 1:
                 massendruck = True
             sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck)
         else:
-            if int(anlage_daten["autom_rechnung"]) == 1:
+            if "autom_rechnung" in anlage_daten and int(anlage_daten["autom_rechnung"]) == 1:
                 bezahlt = False
                 hv_bar_bezahlt = False
                 if int(massendruck) == 1:
