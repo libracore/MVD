@@ -225,14 +225,13 @@ def get_ampelfarbe(mitgliedschaft, db_direct=False):
             ueberfaellige_rechnungen = 0
             offene_rechnungen = 0
             
-            sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
-            karenzfrist_in_d = sektion.karenzfrist
+            karenzfrist_in_d = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, "karenzfrist") or 30
             ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintrittsdatum), karenzfrist_in_d)
+            karenzfrist_abgelaufen = True
             
             if getdate() < ablauf_karenzfrist:
-                karenzfrist = False
-            else:
-                karenzfrist = True
+                if cint(mitgliedschaft.zahlung_hv) > 0:
+                    karenzfrist_abgelaufen = False
             
             # musste mit v8.5.9 umgeschrieben werden, da negative Werte ebenfalls == True ergeben. (Beispiel: (1 + 2015 - 2023) == True)
             # ~ aktuelles_jahr_bezahlt = bool( 1 + cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - cint(now().split("-")[0]) )
@@ -264,15 +263,17 @@ def get_ampelfarbe(mitgliedschaft, db_direct=False):
                 if offene_rechnungen > 0:
                     ampelfarbe = 'ampelgelb'
                 else:
-                    if not karenzfrist:
+                    if not karenzfrist_abgelaufen:
                         ampelfarbe = 'ampelgelb'
                     else:
                         ampelfarbe = 'ampelgruen'
     
-    mitgliedschaft.ampel_farbe = ampelfarbe
     if db_direct:
-        frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'ampel_farbe', ampelfarbe)
-        frappe.db.commit()
+        if mitgliedschaft.ampel_farbe != ampelfarbe:
+            frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'ampel_farbe', ampelfarbe)
+            frappe.db.commit()
+    else:
+        mitgliedschaft.ampel_farbe = ampelfarbe
     
     return
 

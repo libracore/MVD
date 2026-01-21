@@ -5,11 +5,12 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils.data import today, getdate, now
-from mvd.mvd.doctype.mitgliedschaft.utils import get_ampelfarbe
+from mvd.mvd.doctype.mitgliedschaft.finance_utils import get_ampelfarbe
 from mvd.mvd.doctype.region.region import _regionen_zuteilung
 from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
 from datetime import datetime
+from tqdm import tqdm
 
 def create_daily_snap():
     new_daily_snap = frappe.get_doc({'doctype': 'Daily Snap'})
@@ -98,26 +99,85 @@ def entferne_alte_reduzierungen():
         mitgliedschaft.save()
     return
 
-def ampel_neuberechnung():
-    mitgliedschaften = frappe.db.sql("""SELECT
-                                        `name`
-                                        FROM `tabMitgliedschaft`
-                                        WHERE `ampel_farbe` = 'ampelgelb'
-                                        AND `status_c` NOT IN ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')
-                                        AND IFNULL(DATEDIFF(`eintrittsdatum`, now()), 0) < -29""", as_dict=True)
-    
-    submit_counter = 1
-    for mitgliedschaft in mitgliedschaften:
-        m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
-        neue_ampelfarbe = get_ampelfarbe(m)
-        if m.ampel_farbe != neue_ampelfarbe:
-            update_ampelfarbe = frappe.db.sql("""UPDATE `tabMitgliedschaft` SET `ampel_farbe` ='{neue_ampelfarbe}' WHERE `name` = '{id}'""".format(neue_ampelfarbe=neue_ampelfarbe, id=m.name), as_list=True)
-            if submit_counter == 100:
-                frappe.db.commit()
-                submit_counter = 1
-            else:
-                submit_counter += 1
-    frappe.db.commit()
+def ampel_neuberechnung(manuall_execution=False):
+    try:
+        aktuelles_jahr = cint(now().split("-")[0])
+
+        # Potenziell falsch rot
+        mitgliedschaften = frappe.db.sql("""SELECT
+                                            `name`
+                                            FROM `tabMitgliedschaft`
+                                            WHERE `ampel_farbe` = 'ampelrot'
+                                            AND `status_c` NOT IN ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')
+                                            AND `bezahltes_mitgliedschaftsjahr` >= {aktuelles_jahr}""".format(aktuelles_jahr=aktuelles_jahr), as_dict=True)
+        
+        if not manuall_execution:
+            for mitgliedschaft in mitgliedschaften:
+                m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                get_ampelfarbe(m, db_direct=True)
+        else:
+            for mitgliedschaft in tqdm(mitgliedschaften, desc="Ampelneuberechnung falsch rot", unit=" Mitglieder", total=len(mitgliedschaften)):
+                m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                get_ampelfarbe(m, db_direct=True)
+        frappe.db.commit()
+
+        # Potenziell falsch != rot
+        mitgliedschaften = frappe.db.sql("""SELECT
+                                            `name`
+                                            FROM `tabMitgliedschaft`
+                                            WHERE `ampel_farbe` != 'ampelrot'
+                                            AND `status_c` IN ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')""", as_dict=True)
+        
+        if not manuall_execution:
+            for mitgliedschaft in mitgliedschaften:
+                m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                get_ampelfarbe(m, db_direct=True)
+        else:
+            for mitgliedschaft in tqdm(mitgliedschaften, desc="Ampelneuberechnung falsch != rot", unit=" Mitglieder", total=len(mitgliedschaften)):
+                m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                get_ampelfarbe(m, db_direct=True)
+        frappe.db.commit()
+
+        # Potenziell falsch grün
+        mitgliedschaften = frappe.db.sql("""SELECT
+                                            `name`
+                                            FROM `tabMitgliedschaft`
+                                            WHERE `ampel_farbe` = 'ampelgruen'
+                                            AND `bezahltes_mitgliedschaftsjahr` < {aktuelles_jahr}""".format(aktuelles_jahr=aktuelles_jahr), as_dict=True)
+        
+        if not manuall_execution:
+            for mitgliedschaft in mitgliedschaften:
+                m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                get_ampelfarbe(m, db_direct=True)
+        else:
+            for mitgliedschaft in tqdm(mitgliedschaften, desc="Ampelneuberechnung falsch grün", unit=" Mitglieder", total=len(mitgliedschaften)):
+                m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                get_ampelfarbe(m, db_direct=True)
+        frappe.db.commit()
+
+        # Potenziell falsch != grün
+        mitgliedschaften = frappe.db.sql("""SELECT
+                                            `name`
+                                            FROM `tabMitgliedschaft`
+                                            WHERE `ampel_farbe` != 'ampelgruen'
+                                            AND `bezahltes_mitgliedschaftsjahr` >= {aktuelles_jahr}""".format(aktuelles_jahr=aktuelles_jahr), as_dict=True)
+        
+        if not manuall_execution:
+            for mitgliedschaft in mitgliedschaften:
+                m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                get_ampelfarbe(m, db_direct=True)
+        else:
+            for mitgliedschaft in tqdm(mitgliedschaften, desc="Ampelneuberechnung falsch != grün", unit=" Mitglieder", total=len(mitgliedschaften)):
+                m = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                get_ampelfarbe(m, db_direct=True)
+        frappe.db.commit()
+
+        # Auf potenziell falsch gelb wird verzichtet da diese implizit durch die obigen Prüfungen abgefangen werden müssten.
+    except Exception as err:
+        frappe.log_error(message="{0}\n\n{1}".format(str(err), frappe.get_traceback()))
+        pass
+
+    return
 
 def regionen_zuteilung():
     args = {}
