@@ -268,6 +268,10 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
         anlage_daten_status = anlage_daten["status"]
     
     if not faktura:
+        hv_bar_bezahlt = False
+        if "hv_bar_bezahlt" in anlage_daten and int(anlage_daten["hv_bar_bezahlt"]) == 1:
+            hv_bar_bezahlt = True
+        
         # erstelle mitgliedschaft
         mitgliedschaft = frappe.get_doc({
             "doctype": "Mitgliedschaft",
@@ -303,18 +307,14 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
             "interessent_typ": anlage_daten["interessent_typ"],
             "bezahltes_mitgliedschaftsjahr": get_mitgl_jahr_in_anlage(anlage_daten["sektion_id"]) if anlage_daten["status"] == 'Regulär' else None,
             "datum_zahlung_mitgliedschaft": today() if anlage_daten["status"] == 'Regulär' else None,
-            "zahlung_hv": get_mitgl_jahr_in_anlage(anlage_daten["sektion_id"]) if int(anlage_daten["hv_bar_bezahlt"]) == 1 else None,
-            "datum_hv_zahlung": today() if int(anlage_daten["hv_bar_bezahlt"]) == 1 else None
+            "zahlung_hv": get_mitgl_jahr_in_anlage(anlage_daten["sektion_id"]) if hv_bar_bezahlt else None,
+            "datum_hv_zahlung": today() if hv_bar_bezahlt else None
         })
         mitgliedschaft.insert(ignore_permissions=True)
         
         # optional: erstelle Rechnung
         if anlage_daten["status"] == 'Regulär':
             bezahlt = True
-            hv_bar_bezahlt = False
-            if "hv_bar_bezahlt" in anlage_daten:
-                if int(anlage_daten["hv_bar_bezahlt"]) == 1:
-                    hv_bar_bezahlt = True
             if int(massendruck) == 1:
                 massendruck = True
             sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck)
