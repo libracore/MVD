@@ -99,9 +99,10 @@ def entferne_alte_reduzierungen():
         mitgliedschaft.save()
     return
 
-def ampel_neuberechnung(manuall_execution=False):
+def ampel_neuberechnung(manuall_execution=False, limit=1000):
     try:
         aktuelles_jahr = cint(now().split("-")[0])
+        limit_filter = "LIMIT {0}".format(limit)
 
         # Potenziell falsch rot
         mitgliedschaften = frappe.db.sql("""SELECT
@@ -109,7 +110,8 @@ def ampel_neuberechnung(manuall_execution=False):
                                             FROM `tabMitgliedschaft`
                                             WHERE `ampel_farbe` = 'ampelrot'
                                             AND `status_c` NOT IN ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')
-                                            AND `bezahltes_mitgliedschaftsjahr` >= {aktuelles_jahr}""".format(aktuelles_jahr=aktuelles_jahr), as_dict=True)
+                                            AND `bezahltes_mitgliedschaftsjahr` >= {aktuelles_jahr}
+                                            {limit_filter}""".format(aktuelles_jahr=aktuelles_jahr, limit_filter=limit_filter), as_dict=True)
         
         if not manuall_execution:
             for mitgliedschaft in mitgliedschaften:
@@ -126,7 +128,8 @@ def ampel_neuberechnung(manuall_execution=False):
                                             `name`
                                             FROM `tabMitgliedschaft`
                                             WHERE `ampel_farbe` != 'ampelrot'
-                                            AND `status_c` IN ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')""", as_dict=True)
+                                            AND `status_c` IN ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')
+                                            {limit_filter}""".format(limit_filter=limit_filter), as_dict=True)
         
         if not manuall_execution:
             for mitgliedschaft in mitgliedschaften:
@@ -143,7 +146,8 @@ def ampel_neuberechnung(manuall_execution=False):
                                             `name`
                                             FROM `tabMitgliedschaft`
                                             WHERE `ampel_farbe` = 'ampelgruen'
-                                            AND `bezahltes_mitgliedschaftsjahr` < {aktuelles_jahr}""".format(aktuelles_jahr=aktuelles_jahr), as_dict=True)
+                                            AND `bezahltes_mitgliedschaftsjahr` < {aktuelles_jahr}
+                                            {limit_filter}""".format(aktuelles_jahr=aktuelles_jahr, limit_filter=limit_filter), as_dict=True)
         
         if not manuall_execution:
             for mitgliedschaft in mitgliedschaften:
@@ -160,7 +164,8 @@ def ampel_neuberechnung(manuall_execution=False):
                                             `name`
                                             FROM `tabMitgliedschaft`
                                             WHERE `ampel_farbe` != 'ampelgruen'
-                                            AND `bezahltes_mitgliedschaftsjahr` >= {aktuelles_jahr}""".format(aktuelles_jahr=aktuelles_jahr), as_dict=True)
+                                            AND `bezahltes_mitgliedschaftsjahr` >= {aktuelles_jahr}
+                                            {limit_filter}""".format(aktuelles_jahr=aktuelles_jahr, limit_filter=limit_filter), as_dict=True)
         
         if not manuall_execution:
             for mitgliedschaft in mitgliedschaften:
