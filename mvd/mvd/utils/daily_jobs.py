@@ -166,6 +166,7 @@ def ampel_neuberechnung(manuall_execution=False, limit=1000):
                                             WHERE `ampel_farbe` != 'ampelgruen'
                                             AND `bezahltes_mitgliedschaftsjahr` >= {aktuelles_jahr}
                                             AND `status_c` NOT IN ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')
+                                            AND `validierung_notwendig` != 1
                                             {limit_filter}""".format(aktuelles_jahr=aktuelles_jahr, limit_filter=limit_filter), as_dict=True)
         
         if not manuall_execution:
