@@ -613,15 +613,16 @@ class Mitgliedschaft(Document):
                 'nummer_zu': address_data.get("nummer_zu", None),
                 'plz': address_data.get("plz", None),
                 'ort': address_data.get("ort", None),
-                'history_only': 0 if "MV_MA-unvalidiert" in frappe.get_roles(frappe.session.user) else 1,
+                'history_only': 1,
                 'effective_on': today(),
                 'mv_mitgliedschaft': self.name,
                 'mitglied_nr': self.mitglied_nr
             })
             addresschange_doc.insert(ignore_permissions=True)
+            addresschange_doc.submit()
 
-            if "MV_MA-unvalidiert" not in frappe.get_roles(frappe.session.user):
-                addresschange_doc.submit()
+            if "MV_MA-unvalidiert" in frappe.get_roles(frappe.session.user):
+                self.validierung_notwendig = 1
 
             return
         
