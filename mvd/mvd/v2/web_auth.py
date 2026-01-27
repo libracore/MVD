@@ -23,7 +23,10 @@ def login(**api_request):
             clear = False
             if "clear" in api_request:
                 clear = True
-            return check_credentials(mitglied, api_request['pwd'], clear)
+            if cint(frappe.db.get_value("User", mitglied, "enabled")) == 1:
+                return check_credentials(mitglied, api_request['pwd'], clear)
+            else:
+                return failed_login()
     
     if 'reset_hash' in api_request and api_request['reset_hash']:
         return check_hash_based_credentials(api_request['reset_hash'])
@@ -45,6 +48,9 @@ def reset(**api_request):
             mitglied = "MV{0}@login.ch".format(api_request['user'])
     
         if mitglied:
+            if cint(frappe.db.get_value("User", mitglied, "enabled")) != 1:
+                return unknown_user()
+            
             if 'reset_hash' in api_request and 'pwd' in api_request:
                 clear = False
                 if "clear" in api_request:
@@ -75,7 +81,7 @@ def get_mitglied_nummer(user):
                                         `mitglied_nr`
                                     FROM `tabMitgliedschaft`
                                     WHERE `e_mail_1` = '{0}'
-                                    AND `status_c` != 'Inaktiv'
+                                    AND `status_c` NOT IN ('Inaktiv', 'Ausschluss')
                                     ORDER BY
                                     CASE
                                         WHEN `status_c` = 'Regulär' THEN 1
