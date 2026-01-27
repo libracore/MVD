@@ -90,6 +90,10 @@ class Mitgliedschaft(Document):
         # Prüfe Jahr Bezahlt (Mitgliedschaft & HV) bezgl. Folgejahr Regelung
         if self.status_c != 'Inaktiv':
             check_folgejahr_regelung(self)
+        
+        # Deaktivieren des Web-Logins #1643
+        if self.status_c in ['Inaktiv', 'Ausschluss']:
+            disable_web_login(self.mitglied_nr)
 
         if cint(self.validierung_notwendig) != 1:
             # entferne Telefonnummern mit vergessenen Leerschlägen
@@ -2766,3 +2770,16 @@ def format_phone_number(number):
             )
 
         return clean_number
+
+def disable_web_login(mitglied_nr):
+    if not is_job_already_running("Disable Web-Login ({0})".format(mitglied_nr)):
+        args = {
+            'mitglied_nr': mitglied_nr
+        }
+        enqueue("mvd.mvd.doctype.mitgliedschaft.mitgliedschaft._disable_web_login", queue='short', job_name="Disable Web-Login ({0})".format(mitglied_nr), timeout=2500, **args)
+
+def _disable_web_login(mitglied_nr):
+    active_members = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMitgliedschaft` WHERE `mitglied_nr` = '{0}' AND `status_c` NOT IN ('Inaktiv', 'Ausschluss')""".format(mitglied_nr), as_dict=True)[0].qty
+    if active_members < 1:
+        if frappe.db.exists("User", "{0}@login.ch".format(mitglied_nr)):
+            frappe.db.set_value("User", "{0}@login.ch".format(mitglied_nr), "enabled", 0)
