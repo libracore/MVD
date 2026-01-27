@@ -450,3 +450,9 @@ def set_trigger_sp_api():
     
     frappe.db.commit()
     return
+
+def execute_address_changes():
+    open_address_changes = frappe.db.sql("""SELECT `name` FROM `tabAddresschange` WHERE `docstatus` = 0 AND `effective_on` = CURDATE()""", as_dict=True)
+    for oac in open_address_changes:
+        addresschange = frappe.get_doc("Addresschange", oac.name)
+        addresschange.submit()
