@@ -280,7 +280,7 @@
    "depends_on": "eval:doc.dokument!='Mahnung'&&doc.dokument!='Geschenkmitgliedschaft'",
    "fieldname": "tipps",
    "fieldtype": "HTML",
-   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Rechnungsbetrag (Nur wenn mit EZ) -&gt; <b>%%RECHNUNGSBETRAG%%</b></li>\n<li>Rechnungsnummer -&gt; <b>%%RECHNUNGSNUMMER%%</b></li>\n<li>Datum der Webshop Order -&gt;  <b>%%WEBSHOPDATUM%%</b></li>\n<li>Briefanrede Beschenkte*r -&gt; <b>%%ANREDE BESCHENKTE%%</b></li>\n<li>Briefanrede Schenkende*r -&gt; <b>%%ANREDE SCHENKENDE%%</b></li>\n<li>Vor- Nachname Beschenkte*r -&gt; <b>%%VOR- NACHNAME BESCHENKTE%%</b></li>\n<li>Vor- Nachname Schenkende*r -&gt; <b>%%VOR- NACHNAME SCHENKENDE%%</b></li>\n<li>Link zur Anmeldung digitale Rechnung -&gt; <b>%%DIGITALERECHNUNGLINK%%</b></li>\n</ul>"
+   "options": "<h1>Tipps</h1>\n<p>M\u00f6chten Sie von Libracore gewisse Werte automatisiert einf\u00fcgen lassen, so setzten Sie die entsprechenden Platzhalter:</p>\n<ul>\n<li>Briefanrede -&gt; <b>%%ANREDE%%</b></li>\n<li>Mitgliedernummer -&gt; <b>%%MIETGLIEDERNUMMER%%</b></li>\n<li>Rechnungsbetrag (Nur wenn mit EZ) -&gt; <b>%%RECHNUNGSBETRAG%%</b></li>\n<li>Rechnungsnummer -&gt; <b>%%RECHNUNGSNUMMER%%</b></li>\n<li>Rechnungsjahr der Mitgliedschaft -&gt; <b>%%RECHNUNGSJAHR%%</b></li>\n<li>Datum der Webshop Order -&gt;  <b>%%WEBSHOPDATUM%%</b></li>\n<li>Briefanrede Beschenkte*r -&gt; <b>%%ANREDE BESCHENKTE%%</b></li>\n<li>Briefanrede Schenkende*r -&gt; <b>%%ANREDE SCHENKENDE%%</b></li>\n<li>Vor- Nachname Beschenkte*r -&gt; <b>%%VOR- NACHNAME BESCHENKTE%%</b></li>\n<li>Vor- Nachname Schenkende*r -&gt; <b>%%VOR- NACHNAME SCHENKENDE%%</b></li>\n<li>Link zur Anmeldung digitale Rechnung -&gt; <b>%%DIGITALERECHNUNGLINK%%</b></li>\n</ul>"
   },
   {
    "default": "0",
@@ -485,7 +485,7 @@
    "label": "HTML"
   }
  ],
- "modified": "2025-11-19 11:20:48.964597",
+ "modified": "2026-01-29 14:08:28.511212",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Druckvorlage",
