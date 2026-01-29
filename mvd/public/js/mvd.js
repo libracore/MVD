@@ -1093,35 +1093,46 @@ frappe.mvd.apply_phone_format = function(control) {
         let val = this.value;
         if (!val) return;
 
-        // 00 zu +
-        if (val.indexOf('00') === 0) {
-            val = '+' + val.substring(2);
-            if (cursor_pos <= 2) cursor_pos = 1;
-        }
-
-        // Swiss Prefix +41 Automatik
-        let temp_digits = val.replace(/[^\d]/g, '');
-        if (temp_digits.indexOf('41') === 0 && val.indexOf('+') !== 0 && val.indexOf('0') !== 0) {
-            val = '+' + val;
-            cursor_pos++; 
-        }
-
-        let is_intl = (val.indexOf('+') === 0);
+        // 1. Ziffern extrahieren (alles außer Zahlen weg)
+        // Das ist unsere Basis, egal was der User eingibt (+, 00, spaces)
         let digits = val.replace(/[^\d]/g, '');
+
+        let is_intl = false;
+        let clean_digits = digits; // Ziffern OHNE Präfix (also ohne 00)
+
+        // 2. Erkennung: Ist es international?
+        if (val.trim().indexOf('+') === 0) {
+            is_intl = true;
+            // digits ist schon rein (z.B. 4179...)
+        } else if (digits.indexOf('00') === 0) {
+            is_intl = true;
+            clean_digits = digits.substring(2); // Die 00 vorne abschneiden
+        } else if (digits.indexOf('41') === 0 && val.trim().indexOf('0') !== 0) {
+            // Spezialfall: Fängt mit 41 an, aber User hat keine 0 getippt
+            is_intl = true;
+            // digits ist schon rein
+        }
+
         let formatted = "";
 
+        // 3. Formatierung anwenden
         if (is_intl) {
-            if (digits.length >= 2) {
-                formatted = "+" + digits.substring(0, 2);
-                if (digits.length > 2) formatted += " " + digits.substring(2, 4);
-                if (digits.length > 4) formatted += " " + digits.substring(4, 7);
-                if (digits.length > 7) formatted += " " + digits.substring(7, 9);
-                if (digits.length > 9) formatted += " " + digits.substring(9, 11);
-                if (digits.length > 11) formatted += digits.substring(11);
-            } else {
-                formatted = val;
+            // A) SCHWEIZ International (0041...) -> Mit Leerzeichen gruppieren
+            if (clean_digits.indexOf('41') === 0 && clean_digits.length <= 11) {
+                formatted = "00" + clean_digits.substring(0, 2); // 0041
+                if (clean_digits.length > 2) formatted += " " + clean_digits.substring(2, 4); // 79
+                if (clean_digits.length > 4) formatted += " " + clean_digits.substring(4, 7); // 123
+                if (clean_digits.length > 7) formatted += " " + clean_digits.substring(7, 9); // 45
+                if (clean_digits.length > 9) formatted += " " + clean_digits.substring(9, 11); // 67
+                // Falls länger als 11 Stellen (Extension?), einfach anhängen
+                if (clean_digits.length > 11) formatted += clean_digits.substring(11);
+            } 
+            // B) ANDERES LAND International -> Einfach 00 + Ziffern (keine Gruppierung)
+            else {
+                formatted = "00" + clean_digits;
             }
         } else {
+            // C) NATIONAL (079...) -> Standard Gruppierung
             if (digits.length > 0) {
                 formatted = digits.substring(0, 3);
                 if (digits.length > 3) formatted += " " + digits.substring(3, 6);
@@ -1131,26 +1142,45 @@ frappe.mvd.apply_phone_format = function(control) {
             }
         }
 
+        // 4. Wert setzen und Cursor korrigieren
         if (formatted !== this.value) {
+            let old_val_length = val.length;
             this.value = formatted;
 
-            // Modell-Update für Formulare und Standalone Controls
+            // Modell-Update
             if (control.doc && control.df && control.df.fieldname) {
                  control.doc[control.df.fieldname] = formatted;
             }
-            if (control.set_input) {
-                control.last_value = formatted;
-                control.value = formatted;
+
+            // NEUE CURSOR-LOGIK
+            let new_cursor_pos = 0;
+            let digits_before = val.substring(0, cursor_pos).replace(/[^\d]/g, '');
+            
+            // Spezialfall: Wenn wir von "nichts" oder "41" auf "0041" springen
+            // erhöhen wir den Zähler für die bereits "verarbeiteten" Ziffern
+            let formatted_digits = formatted.replace(/[^\d]/g, '');
+            let digits_added_at_start = 0;
+
+            // Wenn der User 41 tippt und wir 0041 daraus machen, 
+            // hat das System 2 Ziffern (00) vorne hinzugefügt.
+            if (is_intl && digits_before.indexOf('00') !== 0 && formatted.indexOf('00') === 0) {
+                digits_added_at_start = 2;
             }
 
-            // Cursor-Position Logik
-            let clean_before = val.substring(0, cursor_pos).replace(/[^\d+]/g, '');
-            let new_cursor_pos = 0;
-            let counted_clean = 0;
-            for (let i = 0; i < formatted.length && counted_clean < clean_before.length; i++) {
-                if (formatted[i] === clean_before[counted_clean]) counted_clean++;
+            let counted_digits = 0;
+            let target_digits = digits_before.length + digits_added_at_start;
+
+            for (let i = 0; i < formatted.length; i++) {
+                if (counted_digits >= target_digits) break;
+                if (/\d/.test(formatted[i])) {
+                    counted_digits++;
+                }
                 new_cursor_pos = i + 1;
             }
+
+            // Verhindern, dass der Cursor vor dem 00 landet
+            if (is_intl && new_cursor_pos < 2) new_cursor_pos = 2;
+
             this.setSelectionRange(new_cursor_pos, new_cursor_pos);
         }
     });

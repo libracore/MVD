@@ -2736,41 +2736,45 @@ def format_phone_number(number):
         return number
     # 1. Grundreinigung
     num = number.strip()
-    # 00 zu +
-    if num.startswith('00'):
-        num = '+' + num[2:]
-    # Nur Ziffern extrahieren für die Logik
-    clean_number = re.sub(r'[^\d]', '', num)
-    # Spezialfall: Falls jemand 41... ohne + oder 00 tippt
-    # (Wir prüfen ob es mit 41 startet, aber nicht mit 0)
-    if clean_number.startswith('41') and not num.startswith('+') and not num.startswith('0'):
-        num = '+' + clean_number
 
-    is_international = num.startswith('+')
+    # Nur Ziffern extrahieren für die Logik
+    clean_digits = re.sub(r'[^\d]', '', num)
+
+    is_international = False
+    if num.startswith('+'):
+        is_international = True
+    elif clean_digits.startswith('00'):
+        is_international = True
+        clean_digits = clean_digits[2:] # Die führenden 00 abschneiden für sauberes Formatieren
+    elif clean_digits.startswith('41') and len(clean_digits) == 11 and not num.startswith('0'):
+        is_international = True
 
     if is_international:
-        # Schweizer International: +41 XX XXX XX XX (11 Ziffern)
-        if len(clean_number) == 11 and clean_number.startswith('41'):
-            return "+{0} {1} {2} {3} {4}".format(
-                clean_number[:2], 
-                clean_number[2:4], 
-                clean_number[4:7], 
-                clean_number[7:9], 
-                clean_number[9:11]
+        # a. Schweizer Nummer (Ländercode 41, 11 Stellen total)
+        #    Format: 0041 79 123 45 67
+        if clean_digits.startswith('41') and len(clean_digits) == 11:
+            return "00{0} {1} {2} {3} {4}".format(
+                clean_digits[:2],   # 41
+                clean_digits[2:4],  # 79 (Vorwahl ohne 0)
+                clean_digits[4:7],  # 123
+                clean_digits[7:9],  # 45
+                clean_digits[9:11]  # 67
             )
-        # Andere internationale Nummern: Nur das + und die Ziffern (ohne Gruppierung)
-        return "+" + clean_number
+        # b. Jede andere internationale Nummer (Deutschland, Österreich, etc.)
+        #    Wir geben "00" + die Ziffern zurück.
+        return "00" + clean_digits
     else:
-        # Nationales Format (z.B. 079 123 45 67)       
-        if len(clean_number) == 10:
+        # Nationale Nummer (Schweiz Standard: 079 123 45 67)
+        if len(clean_digits) == 10:
             return "{0} {1} {2} {3}".format(
-                clean_number[:3], 
-                clean_number[3:6], 
-                clean_number[6:8], 
-                clean_number[8:10]
+                clean_digits[:3], 
+                clean_digits[3:6], 
+                clean_digits[6:8], 
+                clean_digits[8:10]
             )
 
-        return clean_number
+        # Fallback: Einfach die bereinigte Nummer zurückgeben
+        return num
 
 def disable_web_login(mitglied_nr):
     if not is_job_already_running("Disable Web-Login ({0})".format(mitglied_nr)):
