@@ -10,6 +10,8 @@
  "field_order": [
   "section_uebersicht",
   "uebersicht_html",
+  "section_nextcloud",
+  "nextcloud_html",
   "section_allgemein",
   "mitglied_nr",
   "sektion_id",
@@ -1441,6 +1443,16 @@
   {
    "fieldname": "cb_7",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_nextcloud",
+   "fieldtype": "Section Break",
+   "label": "NextCloud"
+  },
+  {
+   "fieldname": "nextcloud_html",
+   "fieldtype": "HTML",
+   "options": "<div class=\"nextcloud-tree\"></div>"
   }
  ],
  "icon": "fa fa-tag",
