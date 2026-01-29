@@ -314,10 +314,12 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
         ]
     
     if sinv or fr:
+        rechnungsjahr = ""
         if sinv:
             sinv = frappe.get_doc("Sales Invoice", sinv)
             amount = sinv.outstanding_amount
             rechnungsnummer = sinv.name
+            rechnungsjahr = sinv.mitgliedschafts_jahr or ""
             key_words.append({
                 'key_word': '%%ARTIKELTABELLE%%', 'value': get_item_table(sinv)
             })
@@ -333,6 +335,9 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
         })
         key_words.append({
             'key_word': '%%RECHNUNGSNUMMER%%', 'value': rechnungsnummer
+        })
+        key_words.append({
+            'key_word': '%%RECHNUNGSJAHR%%', 'value': str(rechnungsjahr)
         })
     
     if mahnung:
