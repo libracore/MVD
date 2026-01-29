@@ -25,10 +25,10 @@
     {% if webshop_order.abweichende_rechnungsadresse %}
     <div style="width: 48%;">
         <p><b>Rechnungsadresse:</b><br>
-            {{ webshop_order.rg_vorname }} {{ webshop_order.rg_nachname }}<br>
             {% if webshop_order.rg_firma %}
                 {{ webshop_order.rg_firma }}<br>
             {% endif %}
+            {{ webshop_order.rg_vorname }} {{ webshop_order.rg_nachname }}<br>
             {{ webshop_order.rg_strasse }}{% if webshop_order.rg_strassen_nr%} {{webshop_order.rg_strassen_nr}}{% endif %}<br>
             {% if webshop_order.rg_adress_zusatz %}
                 {{ webshop_order.rg_adress_zusatz }}<br>
@@ -42,10 +42,10 @@
 
     <div style="width: 48%;">
         <p><b>Lieferadresse:</b><br>
-            {{ webshop_order.vorname }} {{ webshop_order.nachname }}<br>
             {% if webshop_order.firma %}
                 {{ webshop_order.firma }}<br>
             {% endif %}
+            {{ webshop_order.vorname }} {{ webshop_order.nachname }}<br>
             {{ webshop_order.strasse }}{% if webshop_order.strassen_nr%} {{webshop_order.strassen_nr}}{% endif %}<br>
             {% if webshop_order.adress_zusatz %}
                 {{ webshop_order.adress_zusatz }}<br>
@@ -59,10 +59,10 @@
     {% else %}
     <div style="width: 48%;">
         <p><b>Rechnungs- / Lieferadresse:</b><br>
-            {{ webshop_order.vorname }} {{ webshop_order.nachname }}<br>
             {% if webshop_order.firma %}
                 {{ webshop_order.firma }}<br>
             {% endif %}
+            {{ webshop_order.vorname }} {{ webshop_order.nachname }}<br>
             {{ webshop_order.strasse }}{% if webshop_order.strassen_nr%} {{webshop_order.strassen_nr}}{% endif %}<br>
             {% if webshop_order.adress_zusatz %}
                 {{ webshop_order.adress_zusatz }}<br>
