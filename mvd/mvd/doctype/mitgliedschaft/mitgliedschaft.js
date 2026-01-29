@@ -378,6 +378,9 @@ frappe.ui.form.on('Mitgliedschaft', {
 
         // Formatiere alle Telefonnummern
         setup_phone_formatters(frm);
+
+        // render NextCloud-Files-Tree
+        render_nextcloud_files_tree(frm);
     },
     m_und_w: function(frm) {
         if (![0, 1].includes(cur_frm.doc.m_und_w)) {
@@ -2984,3 +2987,37 @@ var setup_phone_formatters = function(frm) {
         }
     });
 };
+
+
+function render_nextcloud_files_tree(frm) {
+    const $wrapper = $(frm.fields_dict.nextcloud_html.wrapper);
+    const $tree_el = $wrapper.find(".nextcloud-tree");
+    $tree_el.empty();
+
+    frm._nextcloud_tree = new frappe.ui.Tree({
+        parent: $tree_el,
+        label: "Files",
+        method: "mvd.mvd.utils.nextcloud.list_children_tree",
+        args: {
+            sektion: frm.doc.sektion_id,
+            mitglied: frm.doc.name
+        },
+        show: true,
+        on_click(node) {
+            const d = node.data || node;
+            if (d.data) {
+                const node_data = d.data;
+                if (node_data.type === "file") {
+                    frappe.msgprint({
+                        title: d.name,
+                        message: `
+                        <div><b>Path:</b> ${node_data.path}</div>
+                        <div><b>Size:</b> ${node_data.size ?? ""}</div>
+                        <div><b>Type:</b> ${node_data.content_type ?? ""}</div>
+                        `
+                    });
+                }
+            }
+        }
+    });
+}

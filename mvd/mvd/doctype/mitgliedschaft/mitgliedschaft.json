@@ -10,6 +10,8 @@
  "field_order": [
   "section_uebersicht",
   "uebersicht_html",
+  "section_nextcloud",
+  "nextcloud_html",
   "section_allgemein",
   "mitglied_nr",
   "sektion_id",
@@ -1436,6 +1438,16 @@
    "fieldname": "adressvalidierung_bestanden",
    "fieldtype": "Check",
    "label": "Adressvalidierung bestanden"
+  },
+  {
+   "fieldname": "section_nextcloud",
+   "fieldtype": "Section Break",
+   "label": "NextCloud"
+  },
+  {
+   "fieldname": "nextcloud_html",
+   "fieldtype": "HTML",
+   "options": "<div class=\"nextcloud-tree\"></div>"
   }
  ],
  "icon": "fa fa-tag",
