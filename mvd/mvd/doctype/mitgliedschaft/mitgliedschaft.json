@@ -62,6 +62,7 @@
   "eintrittsdatum",
   "austritt",
   "kuendigung",
+  "kuendigung_am",
   "verstorben_am",
   "max_reminder_level",
   "ist_kollektiv",
@@ -286,7 +287,7 @@
   {
    "fieldname": "kuendigung",
    "fieldtype": "Date",
-   "label": "K\u00fcndigung",
+   "label": "K\u00fcndigung per",
    "read_only": 1
   },
   {
@@ -1402,10 +1403,15 @@
    "fieldname": "keine_e_mail_1",
    "fieldtype": "Check",
    "label": "keine E-Mail (von Hand gesetzt)"
+  },
+  {
+   "fieldname": "kuendigung_am",
+   "fieldtype": "Date",
+   "label": "K\u00fcndigung am"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2025-11-12 21:36:30.597990",
+ "modified": "2026-01-29 13:55:15.033543",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

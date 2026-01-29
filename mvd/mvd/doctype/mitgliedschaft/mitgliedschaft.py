@@ -1878,10 +1878,11 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
     return sinv.name
 
 @frappe.whitelist()
-def make_kuendigungs_prozess(mitgliedschaft, datum_kuendigung, massenlauf, druckvorlage, grund='Ohne Begründung'):
+def make_kuendigungs_prozess(mitgliedschaft,kuendigung_am, datum_kuendigung, massenlauf, druckvorlage, grund='Ohne Begründung'):
     # erfassung Kündigung
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     mitgliedschaft.kuendigung = datum_kuendigung
+    mitgliedschaft.kuendigung_am = kuendigung_am
     new_line = ''
     if mitgliedschaft.wichtig:
         new_line = '\n'

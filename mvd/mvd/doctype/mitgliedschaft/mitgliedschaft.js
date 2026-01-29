@@ -853,6 +853,7 @@ function kuendigung(frm) {
                             
                             if (fristgerecht) {
                                 var field_list = [
+                                    {'fieldname': 'kuendigung_am', 'fieldtype': 'Date', 'label': 'Kündigung eingegangen am', 'reqd': 1, 'default': frappe.datetime.now_date()},
                                     {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': cur_frm.doc.kuendigung ? cur_frm.doc.kuendigung:frappe.datetime.year_end()},
                                     {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe\nKeine Angabe', 'default': default_grund, 'change': function() {
                                             if (cur_dialog.fields_dict.grund.get_value() == 'Andere Gründe') {
@@ -875,6 +876,7 @@ function kuendigung(frm) {
                             } else {
                                 var field_list = [
                                     {'fieldname': 'html_info', 'fieldtype': 'HTML', 'options': '<p style="color: red;">Achtung: Kündigungsfrist verpasst!</p>'},
+                                    {'fieldname': 'kuendigung_am', 'fieldtype': 'Date', 'label': 'Kündigung eingegangen am', 'reqd': 1, 'default': frappe.datetime.now_date()},
                                     {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.add_months(frappe.datetime.year_end(), 12), 'read_only': 1},
                                     {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe', 'default': default_grund, 'change': function() {
                                             if (cur_dialog.fields_dict.grund.get_value() == 'Andere Gründe') {
@@ -917,6 +919,7 @@ function kuendigung(frm) {
                                     method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.make_kuendigungs_prozess",
                                     args:{
                                             'mitgliedschaft': cur_frm.doc.name,
+                                            'kuendigung_am': values.kuendigung_am,
                                             'datum_kuendigung': values.datum,
                                             'massenlauf': values.massenlauf,
                                             'druckvorlage': values.druckvorlage,
