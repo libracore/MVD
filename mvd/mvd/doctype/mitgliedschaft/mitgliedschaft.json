@@ -11,6 +11,8 @@
   "section_uebersicht",
   "uebersicht_html",
   "section_nextcloud",
+  "open_nextcloud_root",
+  "refresh_files_tree",
   "nextcloud_html",
   "section_allgemein",
   "mitglied_nr",
@@ -1428,6 +1430,16 @@
    "fieldname": "nextcloud_html",
    "fieldtype": "HTML",
    "options": "<div class=\"nextcloud-tree\"></div>"
+  },
+  {
+   "fieldname": "refresh_files_tree",
+   "fieldtype": "Button",
+   "label": "Files-Baum aktualisieren"
+  },
+  {
+   "fieldname": "open_nextcloud_root",
+   "fieldtype": "Button",
+   "label": "NextCloud \u00f6ffnen"
   }
  ],
  "icon": "fa fa-tag",
