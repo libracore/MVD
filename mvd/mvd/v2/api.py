@@ -394,9 +394,10 @@ def create_beratung(**args):
                 # Eingangsbestätigung an Mitglied
                 send_confirmation_mail(args['mitglied_id'], new_ber.name, notiz, raised_by=args['email'], sektion=sektion)
             
-            if frappe.db.get_value("Sektion", sektion, 'legacy_mode') == '1':
+            legacy_mode = cint(frappe.db.get_value("Sektion", sektion, 'legacy_mode'))
+            if legacy_mode > 0 and trigger_api == 1:
                 # Eingangsbestätigung an Sektion
-                send_confirmation_mail(args['mitglied_id'], new_ber.name, notiz, legacy_mail='1', sektion=sektion)
+                send_confirmation_mail(args['mitglied_id'], new_ber.name, notiz, legacy_mail=legacy_mode, sektion=sektion)
             
             frappe.local.response.http_status_code = 200
             frappe.local.response.message = new_ber.name
@@ -494,6 +495,12 @@ def upload_file_to_beratung():
         if last_file == 1:
             # mark for SP API
             frappe.db.set_value("Beratung", docname, 'trigger_api', 1, update_modified=False)
+
+            # send legacy mail an sektion
+            b_doc = frappe.get_doc("Beratung", docname)
+            legacy_mode = cint(frappe.db.get_value("Sektion", b_doc.sektion_id, 'legacy_mode'))
+            if legacy_mode > 0:
+                send_confirmation_mail(b_doc.mv_mitgliedschaft, b_doc.name, b_doc.notiz, legacy_mail=legacy_mode, sektion=b_doc.sektion_id)
         
     except (frappe.DuplicateEntryError, frappe.UniqueValidationError):
         pass
@@ -611,10 +618,11 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
             )
         else:
             try:
+                legacy_mail = cint(legacy_mail)
                 message = False
                 vorname = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "vorname_1")
                 nachname = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "nachname_1")
-                if legacy_mail == '1':
+                if legacy_mail == 1:
                     # legacy mail ohne links
                     message = """Guten Tag {0}""".format(sektion)
                     message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
@@ -625,7 +633,7 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                             <br>{5}""".format(vorname, nachname, link_zur_mitgliedschaft, link_zur_beratung, beratung_email, notiz)
                 
                 # legacy_mail 2 & 3 können aktuell nicht verwendet werden (Anhänge sind zu diesem Zeitpunkt noch nicht verfügbar!)
-                elif legacy_mail == '2':
+                elif legacy_mail == 2:
                     # legacy mail mit links
                     message = """Guten Tag {0}""".format(sektion)
                     message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
@@ -638,7 +646,7 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
                     for file_data in frappe.get_doc("Beratung", beratung).dokumente:
                         message += """<a href="{0}">{1}</a><br>""".format(get_url(file_data.file), file_data.filename)
                 
-                elif legacy_mail == '3':
+                elif legacy_mail == 3:
                     # legacy mail mit anhängen
                     message = """Guten Tag {0}""".format(sektion)
                     message += """<br><br>Die untenstehende Frage ist bei uns eingetroffen.
