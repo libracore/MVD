@@ -453,8 +453,8 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
     ncs = NCSettings(sektion)
 
     # DoNothing wenn NextCloud in der Sektion deaktiviert
-    if not ncs.IS_ENABLED:
-        return
+    # if not ncs.IS_ENABLED:
+    #     return
 
     # Root Pfad ermitteln
     root_folder_path = '{0}/'.format(sektion)
@@ -477,7 +477,7 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
     if not folder_abs_path.startswith("/"):
         folder_abs_path = "/" + folder_abs_path
     folder_abs_path = folder_abs_path.rstrip("/") or "/"
-
+    
     def _propfind_children(session, folder_abs_path):
         url = join_webdav_path(folder_abs_path)
 
@@ -551,7 +551,7 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
                 size_int = int(size) if (size is not None and str(size).strip() != "") else None
             except Exception:
                 size_int = None
-
+            
             items.append({
                 "path": rel.rstrip("/") if is_dir else rel,
                 "name": posixpath.basename(rel.rstrip("/")),
@@ -560,7 +560,8 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
                 "content_type": ctype,
                 "etag": etag,
                 "last_modified": lm,
-                "fileid": fileid
+                "fileid": fileid,
+                "nc_link": "{0}/apps/files/files/{1}?dir={2}".format(ncs.BASE_ORIGIN, urlparse.quote(str(fileid)), urlparse.quote(folder_abs_path))
             })
 
         return items
@@ -584,6 +585,7 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
                     "type": "folder",
                     "name": item["name"],
                     "path": item["path"],
+                    "nc_link": item["nc_link"]
                 }
                 nodes.append({
                     "label": item["name"],
@@ -602,7 +604,8 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
                     "content_type": item["content_type"],
                     "etag": item["etag"],
                     "last_modified": item["last_modified"],
-                    "fileid": item["fileid"]
+                    "fileid": item["fileid"],
+                    "nc_link": item["nc_link"]
                 }
                 nodes.append({
                     "label": item["name"],
