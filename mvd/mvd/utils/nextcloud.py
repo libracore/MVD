@@ -533,8 +533,8 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
     ncs = NCSettings(sektion)
 
     # DoNothing wenn NextCloud in der Sektion deaktiviert
-    if not ncs.IS_ENABLED:
-        return
+    # if not ncs.IS_ENABLED:
+    #     return
 
     # Root Pfad ermitteln
     root_folder_path = ncs.BASE_SEKTION
