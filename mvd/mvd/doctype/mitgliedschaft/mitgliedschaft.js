@@ -379,6 +379,13 @@ frappe.ui.form.on('Mitgliedschaft', {
         // render NextCloud-Files-Tree
         render_nextcloud_files_tree(frm);
     },
+    refresh_files_tree: function(frm) {
+        // render NextCloud-Files-Tree
+        render_nextcloud_files_tree(frm);
+    },
+    open_nextcloud_root: function(frm) {
+        window.open(`https://drive.libracore.mieterverband.ch/apps/files/files?dir=/${cur_frm.doc.sektion_id}/Mitglieder/${cur_frm.doc.mitglied_nr}`, "_blank", "noopener");
+    },
     m_und_w: function(frm) {
         if (![0, 1].includes(cur_frm.doc.m_und_w)) {
             if (!frappe.user.has_role("System Manager")) {
@@ -3310,19 +3317,42 @@ function render_nextcloud_files_tree(frm) {
             mitglied: frm.doc.name
         },
         show: true,
+        toolbar:  [
+            {
+                label:__("In NextCloud öffnen"),
+                condition: function(node) {
+                    const d = node.data || node;
+                    if (d.data) {
+                        if (d.data.type === "folder") {
+                            return true
+                        }
+                    }
+                    return false
+                },
+                click: function(node) {
+                    const d = node.data || node;
+                    if (d.data) {
+                        window.open(d.data.nc_link, "_blank", "noopener");
+                    }
+                },
+                btnClass: "hidden-xs",
+                dont_trigger_refresh: true
+            }
+        ],
         on_click(node) {
             const d = node.data || node;
             if (d.data) {
                 const node_data = d.data;
                 if (node_data.type === "file") {
-                    frappe.msgprint({
-                        title: d.name,
-                        message: `
-                        <div><b>Path:</b> ${node_data.path}</div>
-                        <div><b>Size:</b> ${node_data.size ?? ""}</div>
-                        <div><b>Type:</b> ${node_data.content_type ?? ""}</div>
-                        `
-                    });
+                    // frappe.msgprint({
+                    //     title: d.name,
+                    //     message: `
+                    //     <div><b>Path:</b> ${node_data.path}</div>
+                    //     <div><b>Size:</b> ${node_data.size ?? ""}</div>
+                    //     <div><b>Type:</b> ${node_data.content_type ?? ""}</div>
+                    //     `
+                    // });
+                    window.open(`${node_data.nc_link}&openfile=true`, "_blank", "noopener");
                 }
             }
         }
