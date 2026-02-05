@@ -1547,8 +1547,13 @@ def get_uebersicht_html(name):
         return frappe.render_template('templates/includes/mitgliedschaft_overview_unvalidiert.html', data)
 
 @frappe.whitelist()
-def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
+def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
     wegzugs_mitgliedschaft_id = mitgliedschaft
+    # Informationstext übergabe
+    info_text_neu = ""
+    if zuzug_info:
+        info_text_neu = f"Hinweis von der Wegzugssektion:\n{zuzug_info}\n\n"
+
     if str(get_sektion_code(neue_sektion)) not in ('ZH'):
         # Pseudo Sektion handling
         if cint(frappe.db.get_value("Sektion", neue_sektion, "pseudo_sektion")) == 1:
@@ -1618,8 +1623,10 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per):
             new_mitgliedschaft.m_w_retouren_offen = 0
             new_mitgliedschaft.m_w_anzahl = 0
             new_mitgliedschaft.austritt = None
+            alter_text = new_mitgliedschaft.wichtig or ""
+            new_mitgliedschaft.wichtig = info_text_neu + alter_text # Informationstext übergabe
             new_mitgliedschaft.insert(ignore_permissions=True)
-            
+
             frappe.db.commit()
             
             # erstelle ggf. neue Rechnung

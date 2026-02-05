@@ -1123,7 +1123,8 @@ function sektionswechsel(frm) {
                         {
                             var sektionen_zur_auswahl = r.message;
                             frappe.prompt([
-                                {'fieldname': 'sektion_neu', 'fieldtype': 'Select', 'label': 'Neue Sektion', 'reqd': 1, 'options': sektionen_zur_auswahl}  
+                                {'fieldname': 'sektion_neu', 'fieldtype': 'Select', 'label': 'Neue Sektion', 'reqd': 1, 'options': sektionen_zur_auswahl},
+                                {'fieldname': 'zuzug_info', 'fieldtype': 'Small Text', 'label': 'Informationen für die neu zuständige Sektion (Wird nachher ins Feld "Wichtige Informationen" eingefügt)'}
                             ],
                             function(values){
                                 frappe.call({
@@ -1131,7 +1132,8 @@ function sektionswechsel(frm) {
                                     args:{
                                             'mitgliedschaft': cur_frm.doc.name,
                                             'neue_sektion': values.sektion_neu,
-                                            'zuzug_per': frappe.datetime.get_today()
+                                            'zuzug_per': frappe.datetime.get_today(),
+                                            'zuzug_info': values.zuzug_info
                                     },
                                     freeze: true,
                                     freeze_message: 'Führe Sektionswechsel durch...',
