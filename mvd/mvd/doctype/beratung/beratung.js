@@ -455,6 +455,11 @@ frappe.ui.form.on('Beratung', {
                 }
             });
         });
+        
+        // Add BTN Admin ToDo
+        frm.add_custom_button(__("Erstelle ToDo"),  function() {
+            erstelle_todo(frm);
+        });
     },
     mv_mitgliedschaft: function(frm) {
         if ((!frm.doc.__islocal)&&(cur_frm.doc.mv_mitgliedschaft)) {
