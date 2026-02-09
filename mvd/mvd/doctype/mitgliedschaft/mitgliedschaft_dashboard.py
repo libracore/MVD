@@ -16,7 +16,7 @@ def get_data():
         'transactions': [
             {
                 'label': _('Termine / Beratungen'),
-                'items': ['Beratung', 'Wohnungsabgabe', 'Termin'],
+                'items': ['Beratung', 'Wohnungsabgabe', 'Termin', 'Mandat'],
             },
             {
                 'label': _('Externe Korrespondenz'),
