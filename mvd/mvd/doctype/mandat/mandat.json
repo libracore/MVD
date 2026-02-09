@@ -1,0 +1,192 @@
+{
+ "creation": "2026-02-09 15:22:16.581966",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_mandat",
+  "status",
+  "cb_1",
+  "typ",
+  "section_verknuepfungen",
+  "sektion_id",
+  "mv_mitgliedschaft",
+  "beratung",
+  "kontaktperson",
+  "cb_2",
+  "bemerkung",
+  "section_ablauf",
+  "datum_1",
+  "datum_2",
+  "datum_3",
+  "cb_3",
+  "bezeichnung_1",
+  "bezeichnung_2",
+  "bezeichnung_3",
+  "cb_4",
+  "placeholder_1",
+  "email_1",
+  "placeholder_2",
+  "email_2",
+  "placeholder_3",
+  "email_3"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_mandat",
+   "fieldtype": "Section Break",
+   "label": "Mandat"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Vormerkung\nGesuch eingereicht\nGutsprache\nAblehnung (Geschlossen)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "typ",
+   "fieldtype": "Select",
+   "label": "Typ",
+   "options": "\nRechtsschutzversicherung\nSolidarit\u00e4tsfonds"
+  },
+  {
+   "fieldname": "section_verknuepfungen",
+   "fieldtype": "Section Break",
+   "label": "Verkn\u00fcpfungen"
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Mitglied",
+   "options": "Mitgliedschaft"
+  },
+  {
+   "fieldname": "beratung",
+   "fieldtype": "Link",
+   "label": "Beratung",
+   "options": "Beratung"
+  },
+  {
+   "fieldname": "kontaktperson",
+   "fieldtype": "Link",
+   "label": "Berater*in",
+   "options": "Termin Kontaktperson"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bemerkung",
+   "fieldtype": "Text",
+   "label": "Bemerkung"
+  },
+  {
+   "fieldname": "section_ablauf",
+   "fieldtype": "Section Break",
+   "label": "Ablauf"
+  },
+  {
+   "fieldname": "datum_1",
+   "fieldtype": "Date",
+   "label": "Datum"
+  },
+  {
+   "fieldname": "datum_2",
+   "fieldtype": "Date",
+   "label": "Datum"
+  },
+  {
+   "fieldname": "datum_3",
+   "fieldtype": "Date",
+   "label": "Datum"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bezeichnung_1",
+   "fieldtype": "Data",
+   "label": "Bezeichnung"
+  },
+  {
+   "fieldname": "bezeichnung_2",
+   "fieldtype": "Data",
+   "label": "Bezeichnung"
+  },
+  {
+   "fieldname": "bezeichnung_3",
+   "fieldtype": "Data",
+   "label": "Bezeichnung"
+  },
+  {
+   "fieldname": "cb_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "email_1",
+   "fieldtype": "Button",
+   "label": "E-Mail erstellen"
+  },
+  {
+   "fieldname": "email_2",
+   "fieldtype": "Button",
+   "label": "E-Mail erstellen"
+  },
+  {
+   "fieldname": "email_3",
+   "fieldtype": "Button",
+   "label": "E-Mail erstellen"
+  },
+  {
+   "fieldname": "placeholder_1",
+   "fieldtype": "HTML",
+   "options": "<br>"
+  },
+  {
+   "fieldname": "placeholder_2",
+   "fieldtype": "HTML",
+   "options": "<br>"
+  },
+  {
+   "fieldname": "placeholder_3",
+   "fieldtype": "HTML",
+   "options": "<br>"
+  }
+ ],
+ "modified": "2026-02-09 15:24:46.707571",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Mandat",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
