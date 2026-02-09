@@ -417,12 +417,6 @@ frappe.ui.form.on('Beratung', {
                 //~ }
             //~ )
         //~ }
-        
-        // Add BTN Admin ToDo
-        frm.add_custom_button(__("Erstelle ToDo"),  function() {
-            erstelle_todo(frm);
-        });
-        
         // Add BTN Admin ToDo
         frm.add_custom_button(__("Erstelle ToDo"),  function() {
             erstelle_todo(frm);
