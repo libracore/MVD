@@ -400,6 +400,13 @@ class Beratung(Document):
                 now(),
                 update_modified=False
             )
+    
+    def create_mandat(self, berater_in=None, typ=None, bemerkung=None):
+        from mvd.mvd.doctype.mandat.mandat import create_mandat
+        mandat = create_mandat(self.sektion_id, self.name, self.mv_mitgliedschaft, berater_in, typ, bemerkung)
+        frappe.db.set_value("Beratung", self.name, "mandat", mandat)
+
+        return mandat
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
