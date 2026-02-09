@@ -20,6 +20,9 @@
                 {% if allgemein.bezahltes_mitgliedschaftsjahr %}
                     <br><b>Bezahltes Mitgliedschaftsjahr:</b> {{ allgemein.bezahltes_mitgliedschaftsjahr }}
                 {% endif %}
+                {% if allgemein.mandat %}
+                    <br><b>Mandat:</b> {% for m in allgemein.mandat %}{% if m.name %}<a href="#" onclick="frappe.set_route('Form', 'Mandat', '{{ m.name }}'); return false;">{{ m.datum }}{% if m.status %} ({{ m.status }}){% endif %}</a>{% else %}{{ m.datum }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+                {% endif %}
                 <br><b>Sprache:</b> {{ allgemein.language }}<br>
             </p>
             <p>
