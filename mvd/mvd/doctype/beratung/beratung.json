@@ -42,6 +42,7 @@
   "terminkategorie",
   "raised_by",
   "email_id",
+  "mandat",
   "cb_1",
   "subject",
   "mv_mitgliedschaft",
@@ -479,9 +480,15 @@
    "fieldname": "frist",
    "fieldtype": "Date",
    "label": "Frist"
+  },
+  {
+   "fieldname": "mandat",
+   "fieldtype": "Link",
+   "label": "Mandat",
+   "options": "Mandat"
   }
  ],
- "modified": "2025-10-21 16:47:39.316381",
+ "modified": "2026-02-09 20:09:11.181785",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

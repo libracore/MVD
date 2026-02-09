@@ -42,7 +42,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Vormerkung\nGesuch eingereicht\nGutsprache\nAblehnung (Geschlossen)",
+   "options": "Vormerkung\nGesuch eingereicht\nGutsprache\nAblehnung (Geschlossen)\nAbgeschlossen",
    "reqd": 1
   },
   {
@@ -167,7 +167,7 @@
    "options": "<br>"
   }
  ],
- "modified": "2026-02-09 15:24:46.707571",
+ "modified": "2026-02-09 19:40:19.399379",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",

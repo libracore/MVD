@@ -2511,6 +2511,12 @@ def get_beratungen_dashboard(mitgliedschaft):
     }
 
 @frappe.whitelist()
+def get_mandat_dashboard(mitgliedschaft):
+    anz_offen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMandat` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` NOT IN ('Ablehnung (Geschlossen)', 'Abgeschlossen')""".format(mitgliedschaft=mitgliedschaft), as_dict=True)[0].qty
+
+    return anz_offen
+
+@frappe.whitelist()
 def get_kuendigungsmail_txt(mitgliedschaft, sektion_id, language):
     if language == 'fr':
         txt_field = 'kuendigungs_bestaetigung_fr'
