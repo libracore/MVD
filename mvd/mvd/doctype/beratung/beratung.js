@@ -297,11 +297,6 @@ frappe.ui.form.on('Beratung', {
                     }
                 }
                 
-                // Add BTN Admin ToDo
-                frm.add_custom_button(__("Erstelle ToDo"),  function() {
-                    erstelle_todo(frm);
-                });
-                
                 // overwrite E-Mail BTN
                 override_default_email_dialog(frm);
             } else {
@@ -413,6 +408,11 @@ frappe.ui.form.on('Beratung', {
         // Add BTN Mandat
         frm.add_custom_button(__("Mandat"),  function() {
             create_mandat(frm);
+        });
+        
+        // Add BTN Admin ToDo
+        frm.add_custom_button(__("Erstelle ToDo"),  function() {
+            erstelle_todo(frm);
         });
     },
     mv_mitgliedschaft: function(frm) {
