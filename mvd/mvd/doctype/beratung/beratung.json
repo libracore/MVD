@@ -43,6 +43,7 @@
   "terminkategorie",
   "raised_by",
   "email_id",
+  "mandat",
   "cb_1",
   "subject",
   "mv_mitgliedschaft",
@@ -487,6 +488,12 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Mitgliedtyp"
+  },
+  {
+   "fieldname": "mandat",
+   "fieldtype": "Link",
+   "label": "Mandat",
+   "options": "Mandat"
   }
  ],
  "modified": "2026-04-13 18:30:17.890534",
