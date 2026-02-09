@@ -233,7 +233,12 @@ frappe.ui.form.on('Beratung', {
                         frappe.msgprint("Diese Funktion steht nur zur Verfügung wenn:<br><ul><li>Die Beratung als ungelesen markiert ist</li></ul>");
                     })
                 }
-                
+
+                // Add BTN Mandat
+                frm.add_custom_button(__("Mandat"),  function() {
+                    create_mandat(frm);
+                });
+
                 // Add BTN E-Mail Rückfrage
                 frm.add_custom_button(__("E-Mail Rückfrage"),  function() {
                     cur_frm.set_value("status", "Rückfragen");
@@ -405,11 +410,6 @@ frappe.ui.form.on('Beratung', {
             //~ )
         //~ }
 
-        // Add BTN Mandat
-        frm.add_custom_button(__("Mandat"),  function() {
-            create_mandat(frm);
-        });
-        
         // Add BTN Admin ToDo
         frm.add_custom_button(__("Erstelle ToDo"),  function() {
             erstelle_todo(frm);
