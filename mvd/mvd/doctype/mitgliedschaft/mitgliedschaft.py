@@ -1335,12 +1335,23 @@ def get_uebersicht_html(name):
             for hv in mitgliedschaft.haftpflicht:
                 haftpflicht.append(hv.datum.strftime("%d.%m.%Y"))
         
-        mandat = False
-        if len(mitgliedschaft.mandat) > 0:
-            mandat = []
-            for mnd in mitgliedschaft.mandat:
-                mandat.append(mnd.datum.strftime("%d.%m.%Y"))
-        
+        mandat = []
+        for mnd in mitgliedschaft.mandat:
+            mandat.append({
+                'name': False,
+                'datum': mnd.datum.strftime("%d.%m.%Y"),
+                'status': ''
+            })
+        mandate = frappe.get_all('Mandat', filters={'mv_mitgliedschaft': name}, fields=['name', 'creation', 'status'], order_by='creation asc')
+        for mnd in mandate:
+            mandat.append({
+                'name': mnd.name,
+                'datum': mnd.creation.strftime("%d.%m.%Y"),
+                'status': mnd.status
+            })
+        if not mandat:
+            mandat = False
+
         data = {
             'kunde_mitglied': kunde_mitglied,
             'kontakt_mitglied': kontakt_mitglied,
@@ -1411,6 +1422,23 @@ def get_uebersicht_html(name):
         else:
             bezahltes_mitgliedschaftsjahr = False
         
+        mandat_unval = []
+        for mnd in mitgliedschaft.mandat:
+            mandat_unval.append({
+                'name': False,
+                'datum': mnd.datum.strftime("%d.%m.%Y"),
+                'status': ''
+            })
+        mandate_unval = frappe.get_all('Mandat', filters={'mv_mitgliedschaft': name}, fields=['name', 'creation', 'status'], order_by='creation asc')
+        for mnd in mandate_unval:
+            mandat_unval.append({
+                'name': mnd.name,
+                'datum': mnd.creation.strftime("%d.%m.%Y"),
+                'status': mnd.status
+            })
+        if not mandat_unval:
+            mandat_unval = False
+
         allgemein = {
             'status': mitgliedschaft.status_c,
             'mitgliedtyp': mitgliedschaft.mitgliedtyp_c,
@@ -1424,7 +1452,8 @@ def get_uebersicht_html(name):
             'mitglied_nr': mitgliedschaft.mitglied_nr,
             'wichtig': mitgliedschaft.wichtig,
             'zuzug': zuzug,
-            'zuzug_von': zuzug_von
+            'zuzug_von': zuzug_von,
+            'mandat': mandat_unval
         }
         
         # Hauptmitglied
