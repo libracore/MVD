@@ -34,4 +34,3 @@ class Addresschange(Document):
         
         mitgl.flags.from_addresschange = True
         mitgl.save(ignore_permissions=True)
-

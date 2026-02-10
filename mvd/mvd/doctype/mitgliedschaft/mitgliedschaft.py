@@ -686,9 +686,6 @@ class Mitgliedschaft(Document):
                                 'ort': self.ort
                             })
 
-
-
-
 def update_rg_adresse(mitgliedschaft):
     address = frappe.get_doc("Address", mitgliedschaft.rg_adresse)
     if mitgliedschaft.rg_postfach == 1:
