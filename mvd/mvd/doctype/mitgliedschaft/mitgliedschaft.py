@@ -237,6 +237,9 @@ class Mitgliedschaft(Document):
             if val:
                 formatted = format_phone_number(val)
                 self.set(phone_number, formatted)
+        
+        # Prüfung ob Adressew geändert -> Addresschange #1556
+        self.check_for_address_change()
     
     def email_validierung(self, check=False):
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
@@ -579,6 +582,103 @@ class Mitgliedschaft(Document):
         faktura = frappe.db.sql("""SELECT `name` FROM `tabKunden` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `daten_aus_mitgliedschaft` = 1""".format(mitgliedschaft=self.name), as_dict=True)
         if len(faktura) > 0:
             update_faktura_kunde(mitgliedschaft=self, kunde=faktura[0].name)
+    
+    def check_for_address_change(self):
+        def create_addresschange_doc(address_data):
+            print(address_data)
+            addresschange_doc = frappe.get_doc({
+                'doctype': 'Addresschange',
+                'zusatz_adresse': address_data.get("zusatz_adresse", None),
+                'strasse': address_data.get("strasse", None),
+                'nummer': address_data.get("nummer", None),
+                'nummer_zu': address_data.get("nummer_zu", None),
+                'plz': address_data.get("plz", None),
+                'ort': address_data.get("ort", None),
+                'history_only': 0 if "MV_MA-unvalidiert" in frappe.get_roles(frappe.session.user) else 1,
+                'effective_on': today(),
+                'mv_mitgliedschaft': self.name,
+                'mitglied_nr': self.mitglied_nr
+            })
+            addresschange_doc.insert(ignore_permissions=True)
+
+            if "MV_MA-unvalidiert" not in frappe.get_roles(frappe.session.user):
+                addresschange_doc.submit()
+
+            return
+        
+        def has_changed(current, old, objekt=False):
+            if objekt:
+                old_str = "{0}{1}{2}{3}{4}{5}".format(old.objekt_zusatz_adresse, 
+                                                      old.objekt_strasse, 
+                                                      old.objekt_hausnummer, 
+                                                      old.objekt_nummer_zu, 
+                                                      old.objekt_plz, 
+                                                      old.objekt_ort)
+                new_str = "{0}{1}{2}{3}{4}{5}".format(current.objekt_zusatz_adresse, 
+                                                      current.objekt_strasse, 
+                                                      current.objekt_hausnummer, 
+                                                      current.objekt_nummer_zu, 
+                                                      current.objekt_plz, 
+                                                      current.objekt_ort)
+                return False if old_str == new_str else True
+            else:
+                old_str = "{0}{1}{2}{3}{4}{5}".format(old.zusatz_adresse, 
+                                                      old.strasse, 
+                                                      old.nummer, 
+                                                      old.nummer_zu, 
+                                                      old.plz, 
+                                                      old.ort)
+                new_str = "{0}{1}{2}{3}{4}{5}".format(current.zusatz_adresse, 
+                                                      current.strasse, 
+                                                      current.nummer, 
+                                                      current.nummer_zu, 
+                                                      current.plz, 
+                                                      current.ort)
+                return False if old_str == new_str else True
+
+        if not self.flags.from_addresschange:
+            old_doc = self.get_doc_before_save()
+            if old_doc:
+                if cint(self.abweichende_objektadresse) != cint(old_doc.abweichende_objektadresse):
+                    if cint(self.abweichende_objektadresse) == 1:
+                        create_addresschange_doc(address_data={
+                            'zusatz_adresse': self.objekt_zusatz_adresse,
+                            'strasse': self.objekt_strasse,
+                            'nummer': self.objekt_hausnummer,
+                            'nummer_zu': self.objekt_nummer_zu,
+                            'plz': self.objekt_plz,
+                            'ort': self.objekt_ort
+                        })
+                    else:
+                        create_addresschange_doc(address_data={
+                            'zusatz_adresse': self.zusatz_adresse,
+                            'strasse': self.strasse,
+                            'nummer': self.nummer,
+                            'nummer_zu': self.nummer_zu,
+                            'plz': self.plz,
+                            'ort': self.ort
+                        })
+                else:
+                    if cint(self.abweichende_objektadresse) == 1:
+                        if has_changed(self, old_doc, objekt=True):
+                            create_addresschange_doc(address_data={
+                                'zusatz_adresse': self.objekt_zusatz_adresse,
+                                'strasse': self.objekt_strasse,
+                                'nummer': self.objekt_hausnummer,
+                                'nummer_zu': self.objekt_nummer_zu,
+                                'plz': self.objekt_plz,
+                                'ort': self.objekt_ort
+                            })
+                    else:
+                        if has_changed(self, old_doc):
+                            create_addresschange_doc(address_data={
+                                'zusatz_adresse': self.zusatz_adresse,
+                                'strasse': self.strasse,
+                                'nummer': self.nummer,
+                                'nummer_zu': self.nummer_zu,
+                                'plz': self.plz,
+                                'ort': self.ort
+                            })
 
 def update_rg_adresse(mitgliedschaft):
     address = frappe.get_doc("Address", mitgliedschaft.rg_adresse)

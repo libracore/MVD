@@ -37,7 +37,7 @@ def get_data():
             },
             {
                 'label': _('Adresspflege'),
-                'items': ['Retouren']
+                'items': ['Retouren', 'Addresschange']
             },
             {
                 'label': _('Kampagnen'),
