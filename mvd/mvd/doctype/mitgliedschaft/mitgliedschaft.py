@@ -1689,7 +1689,7 @@ def get_uebersicht_html(name):
 def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
     info_text_neu = ""
     if zuzug_info:
-        info_text_neu = f"Hinweis von der Wegzugssektion:\n{zuzug_info}\n\n"
+        info_text_neu = "Hinweis von der Wegzugssektion:\n{zuzug_info}\n\n".format(zuzug_info=zuzug_info)
     
     wegzugs_mitgliedschaft_id = mitgliedschaft
     # if str(get_sektion_code(neue_sektion)) not in ('ZH'):
