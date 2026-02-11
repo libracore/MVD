@@ -909,17 +909,6 @@ def create_web_login_user(mitglied_nr):
                 frappe.log_error("{0}\n\n{1}".format(user_id.replace("@login.ch", ""), str(err)), 'create_web_login_user')
     return
 
-def mark_for_massenlauf(sinv=None, mitgliedschaft=None):
-    if not sinv or not mitgliedschaft:
-        return
-    frappe.db.sql("""
-                  UPDATE `tabMitgliedschaft`
-                  SET
-                    `rg_massendruck` = '{sinv}',
-                    `rg_massendruck_vormerkung` = 1
-                  WHERE `name` = '{mitgliedschaft}'""".format(sinv=sinv, mitgliedschaft=mitgliedschaft), as_list=True)
-    frappe.db.commit()
-
 @frappe.whitelist()
 def suche_massenkuendigung(mietobjekt):
     matches = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabKuendigung` WHERE `mietobjekt` = '{0}'""".format(mietobjekt), as_dict=True)[0].qty
