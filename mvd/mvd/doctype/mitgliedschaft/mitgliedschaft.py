@@ -1833,7 +1833,30 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
             }
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None, geschenk_reset=False, fast_mode=False):
+def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None, geschenk_reset=False, fast_mode=False, as_bg_job=False):
+    if as_bg_job:
+        args = {
+                'mitgliedschaft': mitgliedschaft,
+                'mitgliedschaft_obj': mitgliedschaft_obj,
+                'jahr': jahr,
+                'bezahlt': bezahlt,
+                'submit': submit,
+                'attach_as_pdf': attach_as_pdf,
+                'ignore_stichtage': ignore_stichtage,
+                'inkl_hv': inkl_hv,
+                'hv_bar_bezahlt': hv_bar_bezahlt,
+                'druckvorlage': druckvorlage,
+                'massendruck': massendruck,
+                'eigene_items': eigene_items,
+                'rechnungs_artikel': rechnungs_artikel,
+                'rechnungs_jahresversand': rechnungs_jahresversand,
+                'geschenk_reset': geschenk_reset,
+                'fast_mode': fast_mode,
+                'as_bg_job': False
+            }
+        enqueue("mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung", queue='short', job_name='Erstelle Mitgliedschaftsrechnung {0}'.format(mitgliedschaft), timeout=5000, **args)
+        return 'Erstelle Mitgliedschaftsrechnung {0}'.format(mitgliedschaft)
+    
     if not mitgliedschaft_obj:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     else:
@@ -1937,11 +1960,8 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         sinv.save(ignore_permissions=True)
     
     if massendruck:
-        args = {
-                'mitgliedschaft': mitgliedschaft.name,
-                'sinv': sinv.name
-            }
-        enqueue("mvd.mvd.doctype.mitgliedschaft.utils.mark_for_massenlauf", queue='short', job_name='Markiere {0} für Massenlauf'.format(sinv.name), timeout=5000, **args)
+        frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, "rg_massendruck", sinv.name)
+        frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, "rg_massendruck_vormerkung", 1)
     
     if submit:
         # submit workaround weil submit ignore_permissions=True nicht kennt

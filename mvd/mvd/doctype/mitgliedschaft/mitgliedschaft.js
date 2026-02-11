@@ -1673,6 +1673,8 @@ function erstelle_normale_rechnung(frm) {
                                     } else {
                                         var massendruck = null;
                                     }
+
+                                    frappe.dom.freeze('Erstelle Rechnung...');
                                     frappe.call({
                                         method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung",
                                         args:{
@@ -1684,18 +1686,33 @@ function erstelle_normale_rechnung(frm) {
                                                 'druckvorlage': values.druckvorlage,
                                                 'massendruck': massendruck,
                                                 'eigene_items': values.eigene_items,
-                                                'rechnungs_artikel': values.rechnungs_artikel
+                                                'rechnungs_artikel': values.rechnungs_artikel,
+                                                'as_bg_job': 1
                                         },
-                                        freeze: true,
-                                        freeze_message: 'Erstelle Rechnung...',
                                         callback: function(r)
                                         {
-                                            cur_frm.reload_doc();
-                                            cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung " + r.message + " erstellt.");
-                                            if (massendruck) {
-                                                frappe.msgprint("Die Rechnung wurde erstellt und für den Massenlauf vorgemerkt, Sie finden sie in den Anhängen.");
-                                            } else {
-                                                frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
+                                            var jobname = r.message;
+                                            let merge_refresher = setInterval(merge_refresher_handler, 3000, jobname);
+                                            function merge_refresher_handler(jobname) {
+                                                frappe.call({
+                                                'method': "mvd.mvd.utils.is_job_already_running",
+                                                    'args': {
+                                                        'jobname': jobname
+                                                    },
+                                                    'callback': function(res) {
+                                                        if (res.message === false) {
+                                                            clearInterval(merge_refresher);
+                                                            frappe.dom.unfreeze();
+                                                            cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung erstellt.");
+                                                            cur_frm.reload_doc();
+                                                            if (massendruck) {
+                                                                frappe.msgprint("Die Rechnung wurde erstellt und für den Massenlauf vorgemerkt, Sie finden sie in den Anhängen.");
+                                                            } else {
+                                                                frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
+                                                            }
+                                                        }
+                                                    }
+                                                });
                                             }
                                         }
                                     });
@@ -1852,6 +1869,8 @@ function erstelle_folgejahr_rechnung(frm, jahr) {
                         } else {
                             var massendruck = null;
                         }
+                        
+                        frappe.dom.freeze('Erstelle Rechnung...');
                         frappe.call({
                             method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung",
                             args:{
@@ -1865,18 +1884,33 @@ function erstelle_folgejahr_rechnung(frm, jahr) {
                                     'ignore_stichtage': true,
                                     'jahr': jahr,
                                     'eigene_items': values.eigene_items,
-                                    'rechnungs_artikel': values.rechnungs_artikel
+                                    'rechnungs_artikel': values.rechnungs_artikel,
+                                    'as_bg_job': 1
                             },
-                            freeze: true,
-                            freeze_message: 'Erstelle Rechnung...',
                             callback: function(r)
                             {
-                                cur_frm.reload_doc();
-                                cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung " + r.message + " erstellt.");
-                                if (massendruck) {
-                                    frappe.msgprint("Die Rechnung wurde erstellt und für den Massenlauf vorgemerkt, Sie finden sie in den Anhängen.");
-                                } else {
-                                    frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
+                                var jobname = r.message;
+                                let merge_refresher = setInterval(merge_refresher_handler, 3000, jobname);
+                                function merge_refresher_handler(jobname) {
+                                    frappe.call({
+                                    'method': "mvd.mvd.utils.is_job_already_running",
+                                        'args': {
+                                            'jobname': jobname
+                                        },
+                                        'callback': function(res) {
+                                            if (res.message === false) {
+                                                clearInterval(merge_refresher);
+                                                frappe.dom.unfreeze();
+                                                cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung erstellt.");
+                                                cur_frm.reload_doc();
+                                                if (massendruck) {
+                                                    frappe.msgprint("Die Rechnung wurde erstellt und für den Massenlauf vorgemerkt, Sie finden sie in den Anhängen.");
+                                                } else {
+                                                    frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
+                                                }
+                                            }
+                                        }
+                                    });
                                 }
                             }
                         });
