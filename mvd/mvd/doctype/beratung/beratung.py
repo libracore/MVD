@@ -146,6 +146,9 @@ class Beratung(Document):
         
         # Synchronisierung der Felder faktura_kunde und mv_kunde
         self.mv_kunde = self.faktura_kunde
+
+        # Touch Mitgliedschaft
+        self.touch_mitgliedschaft()
     
     def set_sektion(self):
         '''
@@ -368,6 +371,16 @@ class Beratung(Document):
                             'for_value': self.mv_mitgliedschaft,
                             'allow': 'Mitgliedschaft'
                         }).insert(ignore_permissions=True)
+    
+    def touch_mitgliedschaft(self):
+        if self.mv_mitgliedschaft:
+            frappe.db.set_value(
+                "Mitgliedschaft",
+                self.mv_mitgliedschaft,
+                "modified",
+                now(),
+                update_modified=False
+            )
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
