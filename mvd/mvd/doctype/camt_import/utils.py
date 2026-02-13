@@ -294,6 +294,17 @@ def zahlungen_matchen(camt_import):
                 
                 pe.save(ignore_permissions=True)
                 erfasse_rg_match(camt_import)
+            else:
+                # Könnte Doppelzahlung sein - versuche Zahlung zuzuweisen
+                mitgliedschaft = suche_mitgliedschaft_aus_pe(payment_entry.name, mitglied_only=True)
+                if mitgliedschaft:
+                    mitgliedschaft_data = mitgliedschaft_zuweisen(mitgliedschaft=mitgliedschaft)
+                    pe = frappe.get_doc("Payment Entry", payment_entry.name)
+                    pe.mv_mitgliedschaft= mitgliedschaft_data.get("mitgliedschaft")
+                    pe.party = mitgliedschaft_data.get("customer")
+                    pe.camt_status = 'Zugewiesen'
+                    pe.save(ignore_permissions=True)
+                
         if commit_counter == 100:
             frappe.db.commit()
             commit_counter = 1
@@ -336,7 +347,7 @@ def verbuche_matches(camt_import):
     return
 
 @frappe.whitelist()
-def suche_mitgliedschaft_aus_pe(payment_entry):
+def suche_mitgliedschaft_aus_pe(payment_entry, mitglied_only=False):
     data = []
     pe = frappe.get_doc("Payment Entry", payment_entry)
     pe_sektion = pe.sektion_id
@@ -351,6 +362,9 @@ def suche_mitgliedschaft_aus_pe(payment_entry):
                                         AND `name` != '{pe}'
                                         AND `mv_mitgliedschaft` IS NOT NULL""".format(remarks=remarks, pe=pe.name), as_dict=True)
             if len(other_pes) > 0:
+                if mitglied_only:
+                    return other_pes[0].mitgliedschaft
+                
                 for entry in other_pes:
                     unabhaengiger_debitor = frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'unabhaengiger_debitor')
                     if pe_sektion == frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id'):
@@ -384,6 +398,9 @@ def suche_mitgliedschaft_aus_pe(payment_entry):
                                     WHERE REPLACE(`esr_reference`, ' ', '') LIKE '%{qrr}%'
                                     AND `mv_mitgliedschaft` IS NOT NULL""".format(qrr=pe.esr_reference), as_dict=True)
     if len(alte_rechnungen) > 0:
+        if mitglied_only:
+            return alte_rechnungen[0].mitgliedschaft
+        
         for entry in alte_rechnungen:
             unabhaengiger_debitor = frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'unabhaengiger_debitor')
             if pe_sektion == frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id'):
@@ -395,7 +412,7 @@ def suche_mitgliedschaft_aus_pe(payment_entry):
                         'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
                         'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
                         'mitgliedschaft': entry.mitgliedschaft,
-                            'quelle': 'Rechnung'
+                        'quelle': 'Rechnung'
                     })
                 else:
                     data.append({
@@ -405,7 +422,7 @@ def suche_mitgliedschaft_aus_pe(payment_entry):
                         'sektion': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id') or '',
                         'status': frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'status_c') or '',
                         'mitgliedschaft': entry.mitgliedschaft,
-                            'quelle': 'Rechnung'
+                        'quelle': 'Rechnung'
                     })
     
     # suche Fakultative Rechnungen anhand QRR-Referenz
@@ -415,6 +432,9 @@ def suche_mitgliedschaft_aus_pe(payment_entry):
                                     WHERE REPLACE(`qrr_referenz`, ' ', '') LIKE '%{qrr}%'
                                     AND `mv_mitgliedschaft` IS NOT NULL""".format(qrr=pe.esr_reference), as_dict=True)
     if len(alte_rechnungen) > 0:
+        if mitglied_only:
+            return alte_rechnungen[0].mitgliedschaft
+        
         for entry in alte_rechnungen:
             unabhaengiger_debitor = frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'unabhaengiger_debitor')
             if pe_sektion == frappe.db.get_value('Mitgliedschaft', entry.mitgliedschaft, 'sektion_id'):
@@ -438,6 +458,8 @@ def suche_mitgliedschaft_aus_pe(payment_entry):
                         'mitgliedschaft': entry.mitgliedschaft,
                             'quelle': 'Fakultative Rechnung'
                     })
+    if mitglied_only:
+        return False
     
     return data
 
