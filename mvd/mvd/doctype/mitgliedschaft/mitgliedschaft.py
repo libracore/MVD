@@ -240,6 +240,10 @@ class Mitgliedschaft(Document):
         
         # Prüfung ob Adressew geändert -> Addresschange #1556
         self.check_for_address_change()
+
+        # Objektadresse mit Korrespondenzadresse synchron halten wenn keine abweichende Objektadresse (#1671)
+        if cint(self.abweichende_objektadresse) != 1:
+            self.copy_korrespondenz_to_objektadresse()
     
     def email_validierung(self, check=False):
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
@@ -679,6 +683,14 @@ class Mitgliedschaft(Document):
                                 'plz': self.plz,
                                 'ort': self.ort
                             })
+    
+    def copy_korrespondenz_to_objektadresse(self):
+        self.objekt_zusatz_adresse = self.zusatz_adresse
+        self.objekt_strasse = self.strasse
+        self.objekt_hausnummer = self.nummer
+        self.objekt_nummer_zu = self.nummer_zu
+        self.objekt_plz = self.plz
+        self.objekt_ort = self.ort
 
 def update_rg_adresse(mitgliedschaft):
     address = frappe.get_doc("Address", mitgliedschaft.rg_adresse)

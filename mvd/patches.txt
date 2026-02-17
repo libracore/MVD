@@ -31,3 +31,4 @@ mvd.patches.hinweis_mietzinsrechner.hinweis_mietzinsrechner
 mvd.patches.Issue_1403.cleanup
 mvd.patches.v17_0_0.switch_legacy_mail_selection
 mvd.patches.v17_0_0.disable_inactive_web_logins
+mvd.patches.issue_1671.copy_addresses
