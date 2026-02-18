@@ -5,8 +5,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from jinja2 import pass_context
 from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention
+try:
+    from jinja2 import pass_context as context_decorator
+except ImportError:
+    from jinja2 import contextfunction as context_decorator
 
 class Druckvorlage(Document):
     def validate(self):
@@ -454,7 +457,7 @@ def get_doc_from_ctx(ctx):
     doc = ctx.get("doc", None)
     return doc or ctx
 
-@pass_context
+@context_decorator
 def get_anrede(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -469,11 +472,11 @@ def get_anrede(ctx):
     mv_kunde = doc.get("mv_kunde", False)
     if mv_kunde:
         mitgliedschaft = frappe.get_doc("Kunden", mv_kunde)
-        return mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft)
+        return get_anredekonvention(self=mitgliedschaft)
 
     return 'Guten Tag'
 
-@pass_context
+@context_decorator
 def get_anrede_beschenkte(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -484,7 +487,7 @@ def get_anrede_beschenkte(ctx):
 
     return 'Guten Tag'
 
-@pass_context
+@context_decorator
 def get_anrede_schenkende(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -495,18 +498,18 @@ def get_anrede_schenkende(ctx):
 
     return 'Guten Tag'
 
-@pass_context
+@context_decorator
 def get_mitgliedernummer(ctx):
     doc = get_doc_from_ctx(ctx)
 
     mitgliedernummer = '---'
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
     if mv_mitgliedschaft:
-        mitgliedernummer = frappe.db.get_value("Mitgliedschaft", doc.mv_mitgliedschaft, "mitglied_nr")
+        mitgliedernummer = frappe.db.get_value("Mitgliedschaft", doc.get("mv_mitgliedschaft"), "mitglied_nr")
 
     return mitgliedernummer
 
-@pass_context
+@context_decorator
 def get_vor_und_nachname_beschenkte(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -517,7 +520,7 @@ def get_vor_und_nachname_beschenkte(ctx):
 
     return '---'
 
-@pass_context
+@context_decorator
 def get_vor_und_nachname_schenkende(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -528,7 +531,7 @@ def get_vor_und_nachname_schenkende(ctx):
 
     return '---'
 
-@pass_context
+@context_decorator
 def get_digitalrechnung_link(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -539,7 +542,7 @@ def get_digitalrechnung_link(ctx):
 
     return '(URL nicht verfügbar)'
 
-@pass_context
+@context_decorator
 def get_artikeltabelle(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -554,7 +557,7 @@ def get_artikeltabelle(ctx):
     
     return '---'
 
-@pass_context
+@context_decorator
 def get_webshopdatum(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -564,7 +567,7 @@ def get_webshopdatum(ctx):
     
     return '---'
 
-@pass_context
+@context_decorator
 def get_rechnungsbetrag(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -576,12 +579,12 @@ def get_rechnungsbetrag(ctx):
     
     return '---'
 
-@pass_context
+@context_decorator
 def get_rechnungsnummer(ctx):
     doc = get_doc_from_ctx(ctx)
     return doc.get("name")
 
-@pass_context
+@context_decorator
 def get_rechnungsjahr(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -590,7 +593,7 @@ def get_rechnungsjahr(ctx):
     
     return '---'
 
-@pass_context
+@context_decorator
 def get_gesamtbetrag_gemahnte_rechnungen(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -599,7 +602,7 @@ def get_gesamtbetrag_gemahnte_rechnungen(ctx):
     
     return '---'
 
-@pass_context
+@context_decorator
 def get_rechnungsdatum(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -609,7 +612,7 @@ def get_rechnungsdatum(ctx):
     
     return '---'
 
-@pass_context
+@context_decorator
 def get_jahresrechnung_jahr(ctx):
     doc = get_doc_from_ctx(ctx)
 
