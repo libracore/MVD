@@ -49,7 +49,21 @@ jenv = {
         "create_item_table_with_download_link:mvd.mvd.doctype.webshop_order.webshop_order.create_item_table_with_download_link",
         "get_mahnungs_qrrs:mvd.mvd.doctype.mahnung.mahnung.get_mahnungs_qrrs",
         "get_rg_adressblock:mvd.mvd.doctype.mitgliedschaft.utils.get_rg_adressblock",
-        "get_last_open_sinv:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_last_open_sinv"
+        "get_last_open_sinv:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_last_open_sinv",
+        "get_anrede:mvd.mvd.doctype.druckvorlage.druckvorlage.get_anrede",
+        "get_anrede_beschenkte:mvd.mvd.doctype.druckvorlage.druckvorlage.get_anrede_beschenkte",
+        "get_anrede_schenkende:mvd.mvd.doctype.druckvorlage.druckvorlage.get_anrede_schenkende",
+        "get_mitgliedernummer:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mitgliedernummer",
+        "get_vor_und_nachname_beschenkte:mvd.mvd.doctype.druckvorlage.druckvorlage.get_vor_und_nachname_beschenkte",
+        "get_digitalrechnung_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_digitalrechnung_link",
+        "get_artikeltabelle:mvd.mvd.doctype.druckvorlage.druckvorlage.get_artikeltabelle",
+        "get_webshopdatum:mvd.mvd.doctype.druckvorlage.druckvorlage.get_webshopdatum",
+        "get_rechnungsbetrag:mvd.mvd.doctype.druckvorlage.druckvorlage.get_rechnungsbetrag",
+        "get_rechnungsnummer:mvd.mvd.doctype.druckvorlage.druckvorlage.get_rechnungsnummer",
+        "get_rechnungsjahr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_rechnungsjahr",
+        "get_gesamtbetrag_gemahnte_rechnungen:mvd.mvd.doctype.druckvorlage.druckvorlage.get_gesamtbetrag_gemahnte_rechnungen",
+        "get_rechnungsdatum:mvd.mvd.doctype.druckvorlage.druckvorlage.get_rechnungsdatum",
+        "get_jahresrechnung_jahr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_jahresrechnung_jahr"
     ]
 }
 

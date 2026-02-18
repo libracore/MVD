@@ -5,6 +5,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from jinja2 import pass_context
+from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention
 
 class Druckvorlage(Document):
     def validate(self):
@@ -284,7 +286,6 @@ def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, redu
         return alle_druckvorlagen
 
 def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=False, fr=False):
-    from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention
     nur_kunde = False
     try:
         mitgliedschaft.name
@@ -448,3 +449,181 @@ def get_webshop_datum(sinv):
         return frappe.utils.get_datetime(webshop_orders[0].creation).strftime('%d.%m.%Y')
     else:
         return ''
+
+def get_doc_from_ctx(ctx):
+    doc = ctx.get("doc", None)
+    return doc or ctx
+
+@pass_context
+def get_anrede(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        if doc.get("doctype") not in ["Sales Invoice", "Mahnung"]:
+            return mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft)
+        else:
+            return mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)
+    
+    mv_kunde = doc.get("mv_kunde", False)
+    if mv_kunde:
+        mitgliedschaft = frappe.get_doc("Kunden", mv_kunde)
+        return mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft)
+
+    return 'Guten Tag'
+
+@pass_context
+def get_anrede_beschenkte(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        return mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft)
+
+    return 'Guten Tag'
+
+@pass_context
+def get_anrede_schenkende(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        return mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)
+
+    return 'Guten Tag'
+
+@pass_context
+def get_mitgliedernummer(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    mitgliedernummer = '---'
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedernummer = frappe.db.get_value("Mitgliedschaft", doc.mv_mitgliedschaft, "mitglied_nr")
+
+    return mitgliedernummer
+
+@pass_context
+def get_vor_und_nachname_beschenkte(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        return " ".join((mitgliedschaft.vorname_1 or '', mitgliedschaft.nachname_1 or ''))
+
+    return '---'
+
+@pass_context
+def get_vor_und_nachname_schenkende(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        return " ".join((mitgliedschaft.rg_vorname or '', mitgliedschaft.rg_nachname or ''))
+
+    return '---'
+
+@pass_context
+def get_digitalrechnung_link(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        return "https://libracore.mieterverband.ch/digitalrechnung?hash={0}".format(mitgliedschaft.mitglied_hash) if mitgliedschaft.mitglied_hash else '(URL nicht verfügbar)'
+
+    return '(URL nicht verfügbar)'
+
+@pass_context
+def get_artikeltabelle(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Sales Invoice":
+        sinv = frappe.get_doc("Sales Invoice", doc.get("name"))
+        return get_item_table(sinv)
+    
+    if doc.get("doctype") == "Mahnung":
+        mahnung = frappe.get_doc("Mahnung", doc.get("name"))
+        sinv = frappe.get_doc("Sales Invoice", mahnung.sales_invoices[0].sales_invoice)
+        return get_item_table(sinv)
+    
+    return '---'
+
+@pass_context
+def get_webshopdatum(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Sales Invoice":
+        sinv = frappe.get_doc("Sales Invoice", doc.get("name"))
+        return get_webshop_datum(sinv)
+    
+    return '---'
+
+@pass_context
+def get_rechnungsbetrag(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Sales Invoice":
+        return "{:,.2f}".format(doc.get("outstanding_amount")).replace(",", "'")
+
+    if doc.get("doctype") == "Fakultative Rechnung":
+        return "{:,.2f}".format(doc.get("betrag")).replace(",", "'")
+    
+    return '---'
+
+@pass_context
+def get_rechnungsnummer(ctx):
+    doc = get_doc_from_ctx(ctx)
+    return doc.get("name")
+
+@pass_context
+def get_rechnungsjahr(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Sales Invoice":
+        return doc.get("mitgliedschafts_jahr", "---")
+    
+    return '---'
+
+@pass_context
+def get_gesamtbetrag_gemahnte_rechnungen(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Mahnung":
+        return "{:,.2f}".format(doc.get("total_with_charge")).replace(",", "'")
+    
+    return '---'
+
+@pass_context
+def get_rechnungsdatum(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Mahnung":
+        mahnung = frappe.get_doc("Mahnung", doc.get("name"))
+        return frappe.utils.get_datetime(mahnung.sales_invoices[0].posting_date).strftime('%d.%m.%Y')
+    
+    return '---'
+
+@pass_context
+def get_jahresrechnung_jahr(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Mahnung":
+        mahnung = frappe.get_doc("Mahnung", doc.get("name"))
+        if mahnung.sales_invoices[0].ist_mitgliedschaftsrechnung:
+            if mahnung.sales_invoices[0].amount == mahnung.sales_invoices[0].outstanding_amount:
+                return str(mahnung.sales_invoices[0].mitgliedschafts_jahr)
+            else:
+                return str(mahnung.sales_invoices[0].mitgliedschafts_jahr) + ' (Restbetrag)'
+        else:
+            if mahnung.sales_invoices[0].amount == mahnung.sales_invoices[0].outstanding_amount:
+                return frappe.utils.get_datetime(mahnung.sales_invoices[0].posting_date).strftime('%d.%m.%Y')
+            else:
+                return frappe.utils.get_datetime(mahnung.sales_invoices[0].posting_date).strftime('%d.%m.%Y') + ' (Restbetrag)'
+    
+    return '---'
