@@ -581,7 +581,7 @@ def get_eintrittsdatum(ctx):
     return '---'
 
 @context_decorator
-def get_zahlung_haftpflicht(ctx):
+def get_jahr_haftpflicht(ctx):
     doc = get_doc_from_ctx(ctx)
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
     if mv_mitgliedschaft:

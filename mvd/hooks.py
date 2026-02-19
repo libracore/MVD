@@ -59,7 +59,7 @@ jenv = {
         "get_digitalrechnung_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_digitalrechnung_link",
         "get_austritt_per:mvd.mvd.doctype.druckvorlage.druckvorlage.get_austritt_per",
         "get_eintrittsdatum:mvd.mvd.doctype.druckvorlage.druckvorlage.get_eintrittsdatum",
-        "get_zahlung_haftpflicht:mvd.mvd.doctype.druckvorlage.druckvorlage.get_zahlung_haftpflicht",
+        "get_jahr_haftpflicht:mvd.mvd.doctype.druckvorlage.druckvorlage.get_jahr_haftpflicht",
         "get_versichertes_objekt:mvd.mvd.doctype.druckvorlage.druckvorlage.get_versichertes_objekt",
         "get_versichertes_objekt_ort:mvd.mvd.doctype.druckvorlage.druckvorlage.get_versichertes_objekt_ort",
         "get_artikeltabelle:mvd.mvd.doctype.druckvorlage.druckvorlage.get_artikeltabelle",
