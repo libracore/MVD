@@ -477,7 +477,7 @@ def get_anrede(ctx):
     return 'Guten Tag'
 
 @context_decorator
-def get_vorname_name(ctx):
+def get_vorname_nachname(ctx):
     doc = get_doc_from_ctx(ctx)
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
     if mv_mitgliedschaft:
@@ -618,6 +618,18 @@ def get_versichertes_objekt_ort(ctx):
 
     return '---'
 
+@context_decorator
+def get_geschaeftstyp(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        typ = mitgliedschaft.mvb_typ or ""
+
+        return typ[3:] if typ else "---" # 3: um den Prefix Mvb zu löschen
+    
+    return '---'
+    
 @context_decorator
 def get_artikeltabelle(ctx):
     doc = get_doc_from_ctx(ctx)
