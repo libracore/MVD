@@ -708,6 +708,26 @@ paths:
               message:
                 type: string
                 example: "Error Traceback"
+  /mvd.mvd.v2.api.get_sektion_plz_zuordnung:
+    get:
+      summary: Get Sektion PLZ Zuordnung
+      description: Returns a list of all ZIP code (PLZ) to Section (Sektion) mappings.
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                plz:
+                  type: string
+                  description: Postal code
+                sektion:
+                  type: string
+                  description: Assigned section name
+        '500':
+          description: Internal Server Error
 securityDefinitions:
   tokenAuth:
     type: apiKey
