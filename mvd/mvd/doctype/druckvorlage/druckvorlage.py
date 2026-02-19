@@ -567,6 +567,33 @@ def get_eintrittsdatum(ctx):
     return '---'
 
 @context_decorator
+def get_versichertes_objekt(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        strasse = mitgliedschaft.objekt_strasse or ""
+        hausnummer = mitgliedschaft.objekt_hausnummer or ""
+        zusatz = mitgliedschaft.get("objekt_nummer_zu") or ""
+        adresse = "{} {} {}".format(strasse, hausnummer, zusatz).strip().replace("  ", " ")
+
+        return adresse if adresse else "---"
+    
+    return '---'
+        
+@context_decorator
+def get_versichertes_objekt_ort(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        ort = mitgliedschaft.objekt_ort or ""
+
+        return ort if ort else "---"
+
+    return '---'
+
+@context_decorator
 def get_artikeltabelle(ctx):
     doc = get_doc_from_ctx(ctx)
 
