@@ -543,6 +543,19 @@ def get_digitalrechnung_link(ctx):
     return '(URL nicht verfügbar)'
 
 @context_decorator
+def get_austritt_per(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        if mitgliedschaft.kuendigung:
+            return mitgliedschaft.kuendigung.strftime('%d.%m.%Y')
+        else:
+            return "ES GIBT KEIN KÜNDIGUNG PER DATUM"
+        
+    return '---'
+
+@context_decorator
 def get_artikeltabelle(ctx):
     doc = get_doc_from_ctx(ctx)
 
