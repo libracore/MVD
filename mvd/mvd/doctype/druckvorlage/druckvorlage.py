@@ -556,6 +556,17 @@ def get_austritt_per(ctx):
     return '---'
 
 @context_decorator
+def get_eintrittsdatum(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        if mitgliedschaft.eintrittsdatum:
+            return mitgliedschaft.eintrittsdatum.strftime('%d.%m.%Y')
+        
+    return '---'
+
+@context_decorator
 def get_artikeltabelle(ctx):
     doc = get_doc_from_ctx(ctx)
 
