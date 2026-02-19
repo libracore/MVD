@@ -477,6 +477,20 @@ def get_anrede(ctx):
     return 'Guten Tag'
 
 @context_decorator
+def get_vorname_name(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        vorname = mitgliedschaft.vorname_1 or ""
+        nachname = mitgliedschaft.nachname_1 or ""
+        voller_name = "{} {}".format(vorname, nachname).strip().replace("  ", " ")
+
+        return voller_name if voller_name else "---"
+    
+    return '---'
+
+@context_decorator
 def get_anrede_beschenkte(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -563,6 +577,17 @@ def get_eintrittsdatum(ctx):
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
         if mitgliedschaft.eintrittsdatum:
             return mitgliedschaft.eintrittsdatum.strftime('%d.%m.%Y')
+        
+    return '---'
+
+@context_decorator
+def get_zahlung_haftpflicht(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        if mitgliedschaft.zahlung_hv:
+            return mitgliedschaft.zahlung_hv
         
     return '---'
 
