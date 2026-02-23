@@ -717,3 +717,21 @@ def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, lega
         # allgemeiner Fehler
         create_beratungs_log(error=1, info=0, beratung=beratung, method='send_confirmation_mail', title='Exception', json="{0}".format(str(err)))
         pass
+
+
+@frappe.whitelist(allow_guest=True)
+def get_sektion_plz_zuordnung():
+    """
+    Gibt die Doctype-Daten 'Sektion PLZ Zuordnung' als JSON zurück.
+    """
+    try:
+        zuordnungen = frappe.get_all(
+            "Sektion PLZ Zuordnung",
+            fields=["plz", "sektion"]
+        )
+        
+        return zuordnungen
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Error in get_sektion_plz_zuordnung")
+        return {"error": str(e)}
