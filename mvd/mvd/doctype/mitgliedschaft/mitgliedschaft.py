@@ -1796,6 +1796,8 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
             new_mitgliedschaft.save(ignore_permissions=True)
 
             # Update Wegzugs-Mitglied
+            alter_text = mitgliedschaft.wichtig or ""
+            mitgliedschaft.wichtig = info_text_neu + alter_text # Informationstext übergabe
             mitgliedschaft.wegzug = today()
             mitgliedschaft.wegzug_zu = neue_sektion
             mitgliedschaft.zuzug_id = new_mitgliedschaft.name
