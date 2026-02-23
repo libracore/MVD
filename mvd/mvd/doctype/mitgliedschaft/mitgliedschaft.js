@@ -954,6 +954,7 @@ function kuendigung_rueckzug(frm) {
         'Wollen Sie die Kündigung zurückziehen?',
         function(){
             cur_frm.set_value("kuendigung", '');
+            cur_frm.set_value("kuendigung_am", '');
             var status_change_log = cur_frm.add_child('status_change');
             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', 'Regulär &dagger;');
