@@ -73,6 +73,20 @@ def make_api_log(status_code=200, method='Unknown', request_direction='Incoming'
         'error': error
     }).insert(ignore_permissions=True)
 
+"""
+    #1687
+    Es kommt immer wieder mal vor, dass die Massenlauf-Vormerkungen nicht sauber gesetzt werden.
+    Hier wird zwischenzeitlich ein Log eingeführt um dem Problem auf die Schliche zu kommen.
+"""
+@frappe.whitelist()
+def rg_massenlauf_log(mitglied=None, sinv=None, vormerkung=0):
+    if mitglied:
+        ml = frappe.new_doc("Massenlauf Log")
+        ml.mv_mitgliedschaft = mitglied
+        ml.sinv = sinv
+        ml.vormerkung = vormerkung
+        ml.insert(ignore_permissions=True)
+
 @frappe.whitelist()
 def get_nextcloud_authzero_roles(user):
     sektionen = frappe.db.sql("""SELECT `for_value` FROM `tabUser Permission` WHERE `allow` = 'Sektion' AND `user` = '{user}'""".format(user=user), as_dict=True)

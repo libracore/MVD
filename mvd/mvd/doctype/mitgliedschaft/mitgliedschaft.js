@@ -1388,6 +1388,19 @@ function rg_massendruck_verarbeitet(frm) {
                 cur_frm.save().then(function(){
                     frappe.msgprint("Der Druck der Mitgliedschaftsrechnung wurde aus dem Massenlauf entfernt.");
                 });
+
+                // #1687
+                // Es kommt immer wieder mal vor, dass die Massenlauf-Vormerkungen nicht sauber gesetzt werden.
+                // Hier wird zwischenzeitlich ein Log eingeführt um dem Problem auf die Schliche zu kommen.
+                frappe.call({
+                    method: "mvd.mvd.utils.rg_massenlauf_log",
+                    args:{
+                            'mitglied': cur_frm.doc.name,
+                            'sinv': '',
+                            'vormerkung': 0
+                    }
+                });
+                // --------------------------------------------------------------------------------------------
             },
             function(){
                 // on no
@@ -1731,7 +1744,7 @@ function erstelle_normale_rechnung(frm) {
                                                         if (res.message === false) {
                                                             clearInterval(merge_refresher);
                                                             frappe.dom.unfreeze();
-                                                            cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung erstellt.");
+                                                            cur_frm.timeline.insert_comment(`Mitgliedschaftsrechnung erstellt${massendruck ? ' (mit Massenlauf Vormerkung)':''}.`);
                                                             cur_frm.reload_doc();
                                                             if (massendruck) {
                                                                 frappe.msgprint("Die Rechnung wurde erstellt und für den Massenlauf vorgemerkt, Sie finden sie in den Anhängen.");
@@ -2463,6 +2476,19 @@ function mitglied_inaktivieren(frm) {
             cur_frm.save().then(function(){
                 frappe.msgprint("Das Mitglied wurde inaktiviert.");
             });
+
+            // #1687
+            // Es kommt immer wieder mal vor, dass die Massenlauf-Vormerkungen nicht sauber gesetzt werden.
+            // Hier wird zwischenzeitlich ein Log eingeführt um dem Problem auf die Schliche zu kommen.
+            frappe.call({
+                method: "mvd.mvd.utils.rg_massenlauf_log",
+                args:{
+                        'mitglied': cur_frm.doc.name,
+                        'sinv': '',
+                        'vormerkung': 0
+                }
+            });
+            // --------------------------------------------------------------------------------------------
         },
         function(){
             // on no

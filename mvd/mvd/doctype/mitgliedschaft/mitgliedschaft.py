@@ -26,7 +26,7 @@ from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, upda
 from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_zahlung_mitgliedschaft, check_zahlung_hv, get_ampelfarbe, \
                                                         set_max_reminder_level, check_folgejahr_regelung
 from frappe.utils.background_jobs import enqueue
-from mvd.mvd.utils import is_job_already_running
+from mvd.mvd.utils import is_job_already_running, rg_massenlauf_log
 from mvd.mvd.utils.nextcloud import new_mitgliedschaft as create_nextcloud_mitgliedschaft_folder
 
 class Mitgliedschaft(Document):
@@ -2008,6 +2008,12 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
     if massendruck:
         frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, "rg_massendruck", sinv.name)
         frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, "rg_massendruck_vormerkung", 1)
+        """
+            #1687
+            Es kommt immer wieder mal vor, dass die Massenlauf-Vormerkungen nicht sauber gesetzt werden.
+            Hier wird zwischenzeitlich ein Log eingeführt um dem Problem auf die Schliche zu kommen.
+        """
+        rg_massenlauf_log(mitglied=mitgliedschaft.name, sinv=sinv.name, vormerkung=1)
     
     if submit:
         # submit workaround weil submit ignore_permissions=True nicht kennt
