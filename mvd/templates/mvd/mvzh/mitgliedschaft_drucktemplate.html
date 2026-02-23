@@ -215,7 +215,8 @@
         
         <!-- Content -->
         {% if seite.inhalt %}
-            <div id='content-{{seite.idx }}'>{{ replace_mv_keywords(seite.inhalt, mitgliedschaft, sinv=sales_invoice) }}</div>
+            {% set pre_rendered_inhalt = frappe.render_template(seite.inhalt, {'doc': doc}) %}
+            <div id='content-{{seite.idx }}'>{{ replace_mv_keywords(pre_rendered_inhalt, mitgliedschaft, sinv=sales_invoice) }}</div>
         {% endif %}
         
         <!-- Seitenzahlen (Fusszeile) -->
@@ -238,14 +239,16 @@
                 <br>
                 <div id="ausweis-rueckseite-zusatz">Karte an der Perforation herauslösen</div>
                 {% if seite.inhalt_rueckseite and seite.inhalt_rueckseite != '<div><br></div>' %}
-                    <br><br><div id="content-{{seite.idx }}">{{ replace_mv_keywords(seite.inhalt_rueckseite, mitgliedschaft, sinv=sales_invoice) }}</div>
+                    {% set pre_rendered_inhalt_rueckseite = frappe.render_template(seite.inhalt_rueckseite, {'doc': doc}) %}
+                    <br><br><div id="content-{{seite.idx }}">{{ replace_mv_keywords(pre_rendered_inhalt_rueckseite, mitgliedschaft, sinv=sales_invoice) }}</div>
                 {% endif %}
             {% else %}
                 {% if seite.inhalt_rueckseite and seite.inhalt_rueckseite != "<div><br></div>" %}
+                    {% set pre_rendered_inhalt_rueckseite = frappe.render_template(seite.inhalt_rueckseite, {'doc': doc}) %}
                     <div class="page-break"></div>
                     <div id='ausweis-rueckseite'></div>
                     <div id="ausweis-rueckseite-zusatz">&nbsp;</div>
-                    <br><br><div id="content-{{seite.idx }}">{{ replace_mv_keywords(seite.inhalt_rueckseite, mitgliedschaft, sinv=sales_invoice) }}</div>
+                    <br><br><div id="content-{{seite.idx }}">{{ replace_mv_keywords(pre_rendered_inhalt_rueckseite, mitgliedschaft, sinv=sales_invoice) }}</div>
                     {% endif %}
                {% endif %}
         {% endif %}
