@@ -352,6 +352,12 @@ def get_data():
                 },
                 {
                     "type": "doctype",
+                    "name": "Massenlauf Log",
+                    "label": _("Massenlauf Log"),
+                    "description": _("Massenlauf Log")
+                },
+                {
+                    "type": "doctype",
                     "name": "API Log",
                     "label": _("API Log"),
                     "description": _("API Log")
