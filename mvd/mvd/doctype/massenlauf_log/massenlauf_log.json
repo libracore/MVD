@@ -12,20 +12,27 @@
   {
    "fieldname": "mv_mitgliedschaft",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Mitgliedschaft"
   },
   {
    "fieldname": "sinv",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Sales Invoice"
   },
   {
+   "default": "0",
    "fieldname": "vormerkung",
-   "fieldtype": "Data",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Vormerkung"
   }
  ],
- "modified": "2026-02-23 12:11:08.087267",
+ "modified": "2026-02-23 14:01:54.906149",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Massenlauf Log",
