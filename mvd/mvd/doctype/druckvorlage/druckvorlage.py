@@ -477,6 +477,20 @@ def get_anrede(ctx):
     return 'Guten Tag'
 
 @context_decorator
+def get_vorname_nachname(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        vorname = mitgliedschaft.vorname_1 or ""
+        nachname = mitgliedschaft.nachname_1 or ""
+        voller_name = "{} {}".format(vorname, nachname).strip().replace("  ", " ")
+
+        return voller_name if voller_name else "---"
+    
+    return '---'
+
+@context_decorator
 def get_anrede_beschenkte(ctx):
     doc = get_doc_from_ctx(ctx)
 
@@ -542,6 +556,80 @@ def get_digitalrechnung_link(ctx):
 
     return '(URL nicht verfügbar)'
 
+@context_decorator
+def get_austritt_per(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        if mitgliedschaft.kuendigung:
+            return mitgliedschaft.kuendigung.strftime('%d.%m.%Y')
+        else:
+            return "ES GIBT KEIN KÜNDIGUNG PER DATUM"
+        
+    return '---'
+
+@context_decorator
+def get_eintrittsdatum(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        if mitgliedschaft.eintrittsdatum:
+            return mitgliedschaft.eintrittsdatum.strftime('%d.%m.%Y')
+        
+    return '---'
+
+@context_decorator
+def get_jahr_haftpflicht(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        if mitgliedschaft.zahlung_hv:
+            return mitgliedschaft.zahlung_hv
+        
+    return '---'
+
+@context_decorator
+def get_versichertes_objekt(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        strasse = mitgliedschaft.objekt_strasse or ""
+        hausnummer = mitgliedschaft.objekt_hausnummer or ""
+        zusatz = mitgliedschaft.get("objekt_nummer_zu") or ""
+        adresse = "{} {} {}".format(strasse, hausnummer, zusatz).strip().replace("  ", " ")
+
+        return adresse if adresse else "---"
+    
+    return '---'
+        
+@context_decorator
+def get_versichertes_objekt_ort(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        ort = mitgliedschaft.objekt_ort or ""
+
+        return ort if ort else "---"
+
+    return '---'
+
+@context_decorator
+def get_geschaeftstyp(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+        typ = mitgliedschaft.mvb_typ or ""
+
+        return typ[3:] if typ else "---" # 3: um den Prefix Mvb zu löschen
+    
+    return '---'
+    
 @context_decorator
 def get_artikeltabelle(ctx):
     doc = get_doc_from_ctx(ctx)
