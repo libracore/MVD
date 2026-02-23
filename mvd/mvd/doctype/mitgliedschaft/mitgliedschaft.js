@@ -1716,7 +1716,7 @@ function erstelle_normale_rechnung(frm) {
                                                         if (res.message === false) {
                                                             clearInterval(merge_refresher);
                                                             frappe.dom.unfreeze();
-                                                            cur_frm.timeline.insert_comment("Mitgliedschaftsrechnung erstellt.");
+                                                            cur_frm.timeline.insert_comment(`Mitgliedschaftsrechnung erstellt${massendruck ? ' (mit Massenlauf Vormerkung)':''}.`);
                                                             cur_frm.reload_doc();
                                                             if (massendruck) {
                                                                 frappe.msgprint("Die Rechnung wurde erstellt und für den Massenlauf vorgemerkt, Sie finden sie in den Anhängen.");
