@@ -56,6 +56,7 @@ jenv = {
         "get_anrede_schenkende:mvd.mvd.doctype.druckvorlage.druckvorlage.get_anrede_schenkende",
         "get_mitgliedernummer:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mitgliedernummer",
         "get_vor_und_nachname_beschenkte:mvd.mvd.doctype.druckvorlage.druckvorlage.get_vor_und_nachname_beschenkte",
+        "get_vor_und_nachname_schenkende:mvd.mvd.doctype.druckvorlage.druckvorlage.get_vor_und_nachname_schenkende",
         "get_digitalrechnung_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_digitalrechnung_link",
         "get_austritt_per:mvd.mvd.doctype.druckvorlage.druckvorlage.get_austritt_per",
         "get_eintrittsdatum:mvd.mvd.doctype.druckvorlage.druckvorlage.get_eintrittsdatum",
