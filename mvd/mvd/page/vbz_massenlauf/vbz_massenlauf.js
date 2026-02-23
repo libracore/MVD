@@ -107,7 +107,7 @@ frappe.vbz_massenlauf = {
             }
         });
         $("#rechnungen_qty").click(function(){
-            frappe.route_options = {"rg_massendruck_vormerkung": 1, 'rg_massendruck_vormerkung': 1}
+            frappe.route_options = {"rg_massendruck_vormerkung": 1}
             frappe.set_route("List", "Mitgliedschaft", "List");
         });
         $("#rechnungen_print").click(function(){

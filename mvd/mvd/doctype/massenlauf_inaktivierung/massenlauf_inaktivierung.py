@@ -9,6 +9,7 @@ from frappe.utils.data import now, getdate
 from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
 from mvd.mvd.doctype.retouren.retouren import close_open_retouren
+from mvd.mvd.utils import rg_massenlauf_log
 
 class MassenlaufInaktivierung(Document):
     def before_save(self):
@@ -119,6 +120,13 @@ def start_massenlauf_inaktivierung(doc):
                 
                 ms.save()
                 ms.add_comment('Comment', text='Ausschluss vollzogen ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
+
+                """
+                    #1687
+                    Es kommt immer wieder mal vor, dass die Massenlauf-Vormerkungen nicht sauber gesetzt werden.
+                    Hier wird zwischenzeitlich ein Log eingeführt um dem Problem auf die Schliche zu kommen.
+                """
+                rg_massenlauf_log(mitglied=ms.name, sinv=None, vormerkung=0)
 
                 if cint(doc.m_w_retouren_schliessen) ==1:
                     close_open_retouren(ms.name)

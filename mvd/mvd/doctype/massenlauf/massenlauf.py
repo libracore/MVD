@@ -10,6 +10,7 @@ from PyPDF2 import PdfFileWriter
 from frappe.utils.pdf import get_file_data_from_writer
 from frappe.utils.data import now
 from frappe.utils import cint
+from mvd.mvd.utils import rg_massenlauf_log
 
 class Massenlauf(Document):
     pass
@@ -539,10 +540,14 @@ def rechnung(massenlauf, sektion):
             _file.save(ignore_permissions=True)
         
         for m in mitgliedschaften:
-            m = frappe.get_doc("Mitgliedschaft", m['name'])
-            m.rg_massendruck_vormerkung = '0'
-            m.rg_massendruck = ''
-            m.save(ignore_permissions=True)
+            frappe.db.set_value("Mitgliedschaft", m["name"], "rg_massendruck", None)
+            frappe.db.set_value("Mitgliedschaft", m["name"], "rg_massendruck_vormerkung", 0)
+            """
+                #1687
+                Es kommt immer wieder mal vor, dass die Massenlauf-Vormerkungen nicht sauber gesetzt werden.
+                Hier wird zwischenzeitlich ein Log eingeführt um dem Problem auf die Schliche zu kommen.
+            """
+            rg_massenlauf_log(mitglied=m["name"], sinv=None, vormerkung=0)
         
         massenlauf = frappe.get_doc("Massenlauf", massenlauf)
         massenlauf.status = 'Abgeschlossen'
