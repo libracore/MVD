@@ -8,6 +8,8 @@ from frappe.model.document import Document
 import json
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr
 from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
+from tqdm import tqdm
+from frappe.utils import cint
 
 class SPMitgliedData(Document):
     pass
@@ -55,24 +57,72 @@ def update(mitglied_nr, mitglied_id):
         existing_record.json = json.dumps(data, indent=2)
         existing_record.save(ignore_permissions=True)
         frappe.db.commit()
+    else:
+        if frappe.db.exists("SP Mitglied Data", mitglied_nr):
+            # Mitglied existiert nicht, aber SP Mitglied Data schon -> Löschen
+            existing_record = frappe.get_doc("SP Mitglied Data", mitglied_nr)
+            existing_record.delete()
+            frappe.db.commit()
+
 
 '''
-    Das ist eine Holfsfunktion die zur initialen Datenanlage gedient hat.
-    Keine Produktive verwendung
+    Selbst-Heil-Methode (called via Daily Scheduler)
 '''
-def initiale_daten_anlage():
-    try:
-        mitgliedschaften = frappe.db.sql("""SELECT DISTINCT `mitglied_nr` FROM `tabMitgliedschaft` WHERE `status_c` != 'Inaktiv' AND `mitglied_nr` LIKE 'MV0%' ORDER BY `creation` DESC""", as_dict=True)
-        loop = 1
-        total = len(mitgliedschaften)
+def fixing_wrong_data(manual=False):
+    if manual:
+        print("Analyse DB, please wait...")
+    
+    mitgliedschaften = frappe.db.sql(
+        """
+            SELECT
+                spx.ref_nr,
+                spx.mitgliedId,
+                spx.status
+            FROM (
+                SELECT
+                    sp.`name` AS ref_nr,
+                    JSON_UNQUOTE(JSON_EXTRACT(sp.`json`, '$.mitgliedId')) AS mitgliedId,
+                    CASE JSON_UNQUOTE(JSON_EXTRACT(sp.`json`, '$.status'))
+                        WHEN 'Regulaer' THEN 'Regulär'
+                        WHEN 'OnlineAnmeldung' THEN 'Online-Anmeldung'
+                        WHEN 'OnlineBeitritt' THEN 'Online-Beitritt'
+                        WHEN 'OnlineKuendigung' THEN 'Online-Kündigung'
+                        WHEN 'Kuendigung' THEN 'Kündigung'
+                        WHEN 'InteressentIn' THEN 'Interessent*in'
+                        ELSE JSON_UNQUOTE(JSON_EXTRACT(sp.`json`, '$.status'))
+                    END AS status
+                FROM `tabSP Mitglied Data` sp
+            ) spx
+            LEFT JOIN `tabMitgliedschaft` m
+                ON m.`mitglied_nr` = spx.ref_nr
+                AND m.`status_c` = spx.status
+                AND m.`mitglied_id` = spx.mitgliedId
+            WHERE m.`mitglied_nr` IS NULL;
+        """,
+        as_dict=True
+    )
+
+    affected_qty = 0
+    affected_records = []
+
+    if not manual:
         for mitgliedschaft in mitgliedschaften:
-            print("{0} von {1}".format(loop, total))
-            create_or_update_sp_mitglied_data(mitgliedschaft.mitglied_nr)
-            loop += 1
-        print("Done")
-    except Exception as err:
-        print("Patch initiale Datenanlage (SP Mitglied Data) failed")
-        print(str(err))
-        pass
-    return
-# ---------------------------------------------------------------------------------------------
+            mitglied_id = get_mitglied_id_from_nr(mitglied_nr=mitgliedschaft.ref_nr, ignore_inaktiv=True)
+            if cint(frappe.db.get_value("Mitgliedschaft", mitglied_id, "validierung_notwendig")) != 1:
+                create_or_update_sp_mitglied_data(mitgliedschaft.ref_nr, mitglied_id)
+                affected_qty += 1
+                affected_records.append(mitgliedschaft.ref_nr)
+    else:
+        for mitgliedschaft in tqdm(mitgliedschaften, desc="fixing_wrong_data", unit=" Corr.", total=len(mitgliedschaften)):
+            mitglied_id = get_mitglied_id_from_nr(mitglied_nr=mitgliedschaft.ref_nr, ignore_inaktiv=True)
+            if cint(frappe.db.get_value("Mitgliedschaft", mitglied_id, "validierung_notwendig")) != 1:
+                create_or_update_sp_mitglied_data(mitgliedschaft.ref_nr, mitglied_id)
+                affected_qty += 1
+                affected_records.append(mitgliedschaft.ref_nr)
+    
+    if manual:
+        print("{0} korrigiert".format(affected_qty))
+        print(affected_records)
+    
+    if affected_qty > 0:
+        frappe.log_error("Anzahl korrigiert: {0}\nDatensätze: {1}".format(affected_qty, affected_records), 'SP Mitlgied Data fixing_wrong_data')

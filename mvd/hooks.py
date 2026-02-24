@@ -188,7 +188,8 @@ scheduler_events = {
         "mvd.mvd.utils.daily_jobs.daily_ampel_korrektur",
         "mvd.mvd.utils.daily_jobs.sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft",
         "mvd.mvd.v2.web_auth.reset_hash_cleanup",
-        "mvd.mvd.utils.daily_jobs.execute_address_changes"
+        "mvd.mvd.utils.daily_jobs.execute_address_changes",
+        "mvd.mvd.utils.daily_jobs.fixing_sp_mitglied_data"
     ],
     "all": [
         "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue",
