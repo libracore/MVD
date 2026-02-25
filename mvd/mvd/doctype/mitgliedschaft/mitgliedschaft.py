@@ -196,7 +196,7 @@ class Mitgliedschaft(Document):
         if not self.zuzug and zuzugsdatum:
             self.zuzug = zuzugsdatum
         
-        if self.mitglied_nr != "MV":
+        if self.mitglied_nr != "MV" and not self.flags.from_addresschange:
             # #1179
             from mvd.mvd.doctype.digitalrechnung.digitalrechnung import digitalrechnung_mapper
             mitglied_hash = digitalrechnung_mapper(mitglied=self)
