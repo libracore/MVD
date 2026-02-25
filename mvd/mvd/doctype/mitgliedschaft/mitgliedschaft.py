@@ -1958,6 +1958,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         "fast_mode": 1 if fast_mode else 0
     })
     
+    sinv.flags['create_mitgliedschaftsrechnung_block'] = True
     sinv.insert(ignore_permissions=True)
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
     sinv.save(ignore_permissions=True)
@@ -1976,6 +1977,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
     if massendruck:
         frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, "rg_massendruck", sinv.name)
         frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, "rg_massendruck_vormerkung", 1)
+        frappe.db.commit()
         """
             #1687
             Es kommt immer wieder mal vor, dass die Massenlauf-Vormerkungen nicht sauber gesetzt werden.
@@ -1986,6 +1988,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
     if submit:
         # submit workaround weil submit ignore_permissions=True nicht kennt
         sinv.docstatus = 1
+        sinv.flags['create_mitgliedschaftsrechnung_block'] = False
         sinv.save(ignore_permissions=True)
     
     if inkl_hv and mitgliedschaft.mitgliedtyp_c != 'Geschäft':
