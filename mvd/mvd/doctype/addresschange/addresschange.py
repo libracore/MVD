@@ -29,8 +29,9 @@ class Addresschange(Document):
             mitgl.plz = self.plz
             mitgl.ort = self.ort
         
-        if "MV_MA-unvalidiert" in frappe.get_roles(self.owner):
-            mitgl.validierung_notwendig = 1
+        if self.owner != 'Administartor':
+            if "MV_MA-unvalidiert" in frappe.get_roles(self.owner):
+                mitgl.validierung_notwendig = 1
         
         mitgl.flags.from_addresschange = True
         mitgl.save(ignore_permissions=True)
