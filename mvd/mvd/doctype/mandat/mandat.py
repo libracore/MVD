@@ -12,7 +12,14 @@ from frappe import attach_print
 from frappe.utils import get_url_to_form
 
 class Mandat(Document):
-    pass
+    def on_update(self):
+        # Bestätigungs-Email senden
+        if (self.typ == "Rechtsschutzversicherung" and 
+            self.kontaktperson and 
+            not self.bestaetigungs_email_gesendet):
+        
+            send_confirmation_email(self)
+            self.db_set("bestaetigungs_email_gesendet", 1)
 
 @frappe.whitelist()
 def create_mandat(sektion, beratung, mitglied, berater_in, typ, bemerkung):
@@ -26,14 +33,10 @@ def create_mandat(sektion, beratung, mitglied, berater_in, typ, bemerkung):
     mandat.bemerkung = bemerkung
 
     mandat.insert(ignore_permissions=True)
-    if mandat.typ == "Rechtsschutzversicherung":
-        send_confirmation_email(mandat)
 
     return mandat.name
 
 def send_confirmation_email(mandat):
-    if not mandat.kontaktperson:
-        return
     try:
         raw_recipients = frappe.db.get_all("Termin Kontaktperson Multi User", 
             filters={"parent": mandat.kontaktperson}, 
