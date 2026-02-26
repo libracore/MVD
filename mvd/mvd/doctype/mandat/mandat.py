@@ -45,9 +45,20 @@ def send_confirmation_email(mandat):
         recipients = [d.user for d in raw_recipients if d.user]
         
         sektion_data = frappe.db.get_value("Sektion", mandat.sektion_id, 
-            ["visierende_person", "template_bestaetigung_kontaktperson", "template_bestaetigung_mitglied"], as_dict=True)
+            ["visierende_person", 
+             "template_bestaetigung_kontaktperson", 
+             "template_bestaetigung_mitglied",
+             "legacy_mail_absender_mail", 
+             "legacy_mail_absende_name",
+             "pw_email"], as_dict=True)
         
         mitglied_email = frappe.db.get_value("Mitgliedschaft", mandat.mv_mitgliedschaft, "e_mail_1")
+
+        # Absender definieren
+        absender_format = "{0} <{1}>".format(
+            sektion_data.get("legacy_mail_absende_name") or "Mieterverband", 
+            sektion_data.get("legacy_mail_absender_mail")
+        )
 
         # --- 1. EMAIL AN BERATER (mit CC und Attachment) ---
         template_berater = sektion_data.get("template_bestaetigung_kontaktperson")
@@ -61,7 +72,12 @@ def send_confirmation_email(mandat):
 
             link_beratung = get_url_to_form("Beratung", mandat.beratung)
             link_mandat = get_url_to_form("Mandat", mandat.name)
-            link_mitglied = get_url_to_form("Mitgliedschaft", mandat.mv_mitgliedschaft)
+            if mandat.mv_mitgliedschaft:
+                link_mitglied = get_url_to_form("Mitgliedschaft", mandat.mv_mitgliedschaft)
+                mitglied_label = str(mandat.mv_mitgliedschaft)
+            else:
+                link_mitglied = "#"
+                mitglied_label = "Keine Mitgliedschaft verknüpft"
 
             footer_links = """
                 <br><br>
@@ -72,7 +88,7 @@ def send_confirmation_email(mandat):
                     - <a href="{2}">Direkt zum Mandat: {3}</a><br>
                     - <a href="{4}">Zur Mitgliedschaft: {5}</a>
                 </p>
-            """.format(link_beratung, mandat.beratung,link_mandat, mandat.name, link_mitglied, mandat.mv_mitgliedschaft)
+            """.format(link_beratung, mandat.beratung,link_mandat, mandat.name, link_mitglied, mitglied_label)
             
             full_message = rendered_berater.get("message") + footer_links
 
@@ -97,6 +113,7 @@ def send_confirmation_email(mandat):
 
             sendmail(
                 recipients=recipients,
+                sender=absender_format,
                 subject=rendered_berater.get("subject"),
                 content=full_message,
                 cc=cc_email,
@@ -111,16 +128,20 @@ def send_confirmation_email(mandat):
         
         # --- 2. EMAIL AN MITGLIED ---
         template_mitglied = sektion_data.get("template_bestaetigung_mitglied")
-        
-        if not mitglied_email:
-            frappe.log_error("Beim Mitglied {0} ist keine Email hinterlegt.".format(mandat.mv_mitgliedschaft), "Mandat Email Error")
+        if not mandat.mv_mitgliedschaft or not mitglied_email:
+            msg = "Mitglied-Bestätigung (Mandat {0}) fehlgeschlagen (E-Mail fehlt oder kein Mitglied hinterlegt).".format(mandat.name)
+            sendmail(recipients=sektion_data.get("pw_email"), sender="libracore@mvd.mieterverband.ch", 
+                     subject="Fehler: Bestätigung Mandat", content=msg, reference_doctype="Mandat", reference_name=mandat.name)
+            
         elif not template_mitglied:
             frappe.log_error("In Sektion {0} unter Mandat: Kein Template für Mitglied hinterlegt.".format(mandat.sektion_id), "Mandat Email Error")
+
         else:
             rendered_mitglied = get_email_template(template_mitglied, {"doc": mandat})
             
             sendmail(
                 recipients=mitglied_email,
+                sender=absender_format,
                 subject=rendered_mitglied.get("subject"),
                 content=rendered_mitglied.get("message"),
                 reference_doctype=mandat.doctype,
