@@ -197,7 +197,8 @@ scheduler_events = {
         "mvd.mvd.doctype.beratung.beratung.send_to_sp",
         "mvd.mvd.service_plattform.request_worker.service_plattform_log_worker",
         "mvd.mvd.doctype.serien_email.serien_email.send_mails",
-        "mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.mrj_worker"
+        "mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.mrj_worker",
+        "mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data.update_based_on_scheduler"
     ],
     "hourly": [
         "mvd.mvd.doctype.wohnungsabgabe.wohnungsabgabe.qa_mail"

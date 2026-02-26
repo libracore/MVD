@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "mitglied_nr",
+  "needs_update",
   "json"
  ],
  "fields": [
@@ -23,9 +24,15 @@
    "in_list_view": 1,
    "label": "JSON",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "needs_update",
+   "fieldtype": "Check",
+   "label": "Needs Update"
   }
  ],
- "modified": "2025-01-14 15:09:12.326968",
+ "modified": "2026-02-26 12:55:45.791066",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "SP Mitglied Data",
