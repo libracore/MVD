@@ -98,6 +98,9 @@ class Mitgliedschaft(Document):
         if cint(self.validierung_notwendig) != 1:
             # entferne Telefonnummern mit vergessenen Leerschlägen
             self.remove_unnecessary_blanks()
+
+            # entferne Telefonnummern Duplikate
+            self.remove_unnecessary_numbers()
             
             # handling von Kontakt(en), Adresse(n) und Kunde(n)
             self.handling_kontakt_adresse_kunde()
@@ -695,6 +698,17 @@ class Mitgliedschaft(Document):
         self.objekt_nummer_zu = self.nummer_zu
         self.objekt_plz = self.plz
         self.objekt_ort = self.ort
+    
+    def remove_unnecessary_numbers(self):
+        # Hauptmitglied
+        if self.tel_m_1 == self.tel_p_1:
+            self.tel_p_1 = None
+        # Solidarmitglied
+        if self.tel_m_2 == self.tel_p_2:
+            self.tel_p_2 = None
+        # Unabhängiger Debitor
+        if self.rg_tel_m == self.rg_tel_p:
+            self.rg_tel_p = None
 
 def update_rg_adresse(mitgliedschaft):
     address = frappe.get_doc("Address", mitgliedschaft.rg_adresse)
