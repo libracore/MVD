@@ -40,6 +40,7 @@ def create(mitglied_nr, mitglied_id):
         new_record = frappe.get_doc({
             'doctype': 'SP Mitglied Data',
             'mitglied_nr': mitglied_nr,
+            'needs_update': 0,
             'json': json.dumps(data, indent=2)
         })
         new_record.insert(ignore_permissions=True)
@@ -55,6 +56,7 @@ def update(mitglied_nr, mitglied_id):
         data =  prepare_mvm_for_sp(mitgliedschaft)
         existing_record = frappe.get_doc("SP Mitglied Data", mitglied_nr)
         existing_record.json = json.dumps(data, indent=2)
+        existing_record.needs_update = 0
         existing_record.save(ignore_permissions=True)
         frappe.db.commit()
     else:
@@ -64,6 +66,21 @@ def update(mitglied_nr, mitglied_id):
             existing_record.delete()
             frappe.db.commit()
 
+'''
+    Nachfolgende Methode wird mit dem "All"-Scheduler (~4') ausgeführt.
+'''
+def update_based_on_scheduler():
+    need_updates = frappe.db.sql(
+        """
+            SELECT
+                `name` AS `id`
+            FROM `tabSP Mitglied Data`
+            WHERE IFNULL(`needs_update`, 0) = 1
+        """,
+        as_dict=True
+    )
+    for need_update in need_updates:
+        update(need_update.id, None)
 
 '''
     Selbst-Heil-Methode (called via Daily Scheduler)

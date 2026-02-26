@@ -178,15 +178,24 @@ fehlende_plz = mdf.values.tolist()
  """
 
 @frappe.whitelist()
-def upload_data():
+def trigger_upload_job():
+    frappe.enqueue(
+        'mvd.mvd.doctype.sektion_plz_zuordnung.sektion_plz_zuordnung.run_upload_process',
+        queue='long',
+        timeout=3600
+    )
+    frappe.msgprint("Der Daten-Update wurde im Hintergrund gestartet. Dies kann einige Minuten dauern.")
+    return True
+
+
+def run_upload_process():
 	# Delete all existing records in the Doctype
 	df = prepare_data()
-	frappe.db.sql("DELETE FROM `tabSektion PLZ Zuordnung`")  # Deletes all records in Sektion PLZ Zuordnung
-	frappe.db.commit()  # Commit the transaction to the database
+	frappe.db.sql("DELETE FROM `tabSektion PLZ Zuordnung`")
+	frappe.db.commit()
 	
 	# Insert the new records into the Doctype (Sektion PLZ Zuordnung)
 	for _, row in df.iterrows():
-		# Create a new record in the "Sektion PLZ Zuordnung" Doctype
 		doc = frappe.get_doc({
 			'doctype': 'Sektion PLZ Zuordnung',
 			'plz': row['PLZ'],

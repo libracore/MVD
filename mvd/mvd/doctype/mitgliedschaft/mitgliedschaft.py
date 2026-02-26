@@ -99,6 +99,9 @@ class Mitgliedschaft(Document):
         if cint(self.validierung_notwendig) != 1:
             # entferne Telefonnummern mit vergessenen Leerschlägen
             self.remove_unnecessary_blanks()
+
+            # entferne Telefonnummern Duplikate
+            self.remove_unnecessary_numbers()
             
             # handling von Kontakt(en), Adresse(n) und Kunde(n)
             self.handling_kontakt_adresse_kunde()
@@ -204,14 +207,6 @@ class Mitgliedschaft(Document):
             if self.mitglied_hash != mitglied_hash:
                 frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}".format(self.mitglied_hash, mitglied_hash), 'Unmatching Mitglied-Hash')
 
-            if not is_job_already_running("Create / Update SP Mitglied Data ({0})".format(self.mitglied_nr)):
-                # #1203
-                args = {
-                    'mitglied_nr': self.mitglied_nr,
-                    'mitglied_id': self.name
-                }
-                enqueue("mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data.create_or_update_sp_mitglied_data", queue='short', job_name="Create / Update SP Mitglied Data ({0})".format(self.mitglied_nr), timeout=2500, **args)
-
             # #1259
             if cint(self.web_login_user_created) != 1:
                 create_web_login_user(self.mitglied_nr)
@@ -250,6 +245,18 @@ class Mitgliedschaft(Document):
         # Objektadresse mit Korrespondenzadresse synchron halten wenn keine abweichende Objektadresse (#1671)
         if cint(self.abweichende_objektadresse) != 1:
             self.copy_korrespondenz_to_objektadresse()
+        
+        if self.mitglied_nr != "MV":
+            if frappe.db.exists("SP Mitglied Data", self.mitglied_nr):
+                frappe.db.set_value("SP Mitglied Data", self.mitglied_nr, "needs_update", 1)
+            else:
+                new_spmd = frappe.get_doc({
+                    'doctype': 'SP Mitglied Data',
+                    'mitglied_nr': self.mitglied_nr,
+                    'json': 'Erstellt via Mitglied-Save',
+                    'needs_update': 1
+                })
+                new_spmd.insert(ignore_permissions=True)
     
     def email_validierung(self, check=False):
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
@@ -697,6 +704,17 @@ class Mitgliedschaft(Document):
         self.objekt_nummer_zu = self.nummer_zu
         self.objekt_plz = self.plz
         self.objekt_ort = self.ort
+    
+    def remove_unnecessary_numbers(self):
+        # Hauptmitglied
+        if self.tel_m_1 == self.tel_p_1:
+            self.tel_p_1 = None
+        # Solidarmitglied
+        if self.tel_m_2 == self.tel_p_2:
+            self.tel_p_2 = None
+        # Unabhängiger Debitor
+        if self.rg_tel_m == self.rg_tel_p:
+            self.rg_tel_p = None
 
 def update_rg_adresse(mitgliedschaft):
     address = frappe.get_doc("Address", mitgliedschaft.rg_adresse)
