@@ -26,7 +26,7 @@ from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, upda
 from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_zahlung_mitgliedschaft, check_zahlung_hv, get_ampelfarbe, \
                                                         set_max_reminder_level, check_folgejahr_regelung
 from frappe.utils.background_jobs import enqueue
-from mvd.mvd.utils import is_job_already_running
+from mvd.mvd.utils import is_job_already_running, rg_massenlauf_log
 from mvd.mvd.utils.nextcloud import new_mitgliedschaft as create_nextcloud_mitgliedschaft_folder
 
 class Mitgliedschaft(Document):
@@ -197,7 +197,7 @@ class Mitgliedschaft(Document):
         if not self.zuzug and zuzugsdatum:
             self.zuzug = zuzugsdatum
         
-        if self.mitglied_nr != "MV":
+        if self.mitglied_nr != "MV" and not self.flags.from_addresschange:
             # #1179
             from mvd.mvd.doctype.digitalrechnung.digitalrechnung import digitalrechnung_mapper
             mitglied_hash = digitalrechnung_mapper(mitglied=self)
@@ -1818,8 +1818,23 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
                 except:
                     pass
             
-            new_korrespondenz['mv_mitgliedschaft'] = new_mitgliedschaft.name
-            new_korrespondenz['massenlauf'] = 0
+            new_mitgliedschaft.save(ignore_permissions=True)
+
+            # Update Wegzugs-Mitglied
+            alter_text = mitgliedschaft.wichtig or ""
+            mitgliedschaft.wichtig = info_text_neu + alter_text # Informationstext übergabe
+            mitgliedschaft.wegzug = today()
+            mitgliedschaft.wegzug_zu = neue_sektion
+            mitgliedschaft.zuzug_id = new_mitgliedschaft.name
+            mitgliedschaft.sektionswechsel_beantragt = 1
+            status_change_log = mitgliedschaft.append("status_change", {})
+            status_change_log.datum = today()
+            status_change_log.status_alt = mitgliedschaft.status_c
+            status_change_log.status_neu = "Wegzug"
+            status_change_log.grund = "Sektionswechsel zu {0}".format(neue_sektion)
+            mitgliedschaft.status_c = "Wegzug"
+            mitgliedschaft.letzte_bearbeitung_von = 'User'
+            mitgliedschaft.save(ignore_permissions=True)
             
             new_korrespondenz = frappe.get_doc(new_korrespondenz)
             new_korrespondenz.insert(ignore_permissions=True)
@@ -1990,6 +2005,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         "fast_mode": 1 if fast_mode else 0
     })
     
+    sinv.flags['create_mitgliedschaftsrechnung_block'] = True
     sinv.insert(ignore_permissions=True)
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
     sinv.save(ignore_permissions=True)
@@ -2008,10 +2024,18 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
     if massendruck:
         frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, "rg_massendruck", sinv.name)
         frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, "rg_massendruck_vormerkung", 1)
+        frappe.db.commit()
+        """
+            #1687
+            Es kommt immer wieder mal vor, dass die Massenlauf-Vormerkungen nicht sauber gesetzt werden.
+            Hier wird zwischenzeitlich ein Log eingeführt um dem Problem auf die Schliche zu kommen.
+        """
+        rg_massenlauf_log(mitglied=mitgliedschaft.name, sinv=sinv.name, vormerkung=1)
     
     if submit:
         # submit workaround weil submit ignore_permissions=True nicht kennt
         sinv.docstatus = 1
+        sinv.flags['create_mitgliedschaftsrechnung_block'] = False
         sinv.save(ignore_permissions=True)
     
     if inkl_hv and mitgliedschaft.mitgliedtyp_c != 'Geschäft':

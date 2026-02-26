@@ -452,7 +452,11 @@ def set_trigger_sp_api():
     return
 
 def execute_address_changes():
-    open_address_changes = frappe.db.sql("""SELECT `name` FROM `tabAddresschange` WHERE `docstatus` = 0 AND `effective_on` = CURDATE()""", as_dict=True)
+    open_address_changes = frappe.db.sql("""SELECT `name` FROM `tabAddresschange` WHERE `docstatus` = 0 AND `effective_on` <= CURDATE()""", as_dict=True)
     for oac in open_address_changes:
         addresschange = frappe.get_doc("Addresschange", oac.name)
         addresschange.submit()
+
+def fixing_sp_mitglied_data():
+    from mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data import fixing_wrong_data
+    fixing_wrong_data()

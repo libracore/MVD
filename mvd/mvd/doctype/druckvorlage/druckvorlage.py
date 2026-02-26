@@ -460,10 +460,12 @@ def get_doc_from_ctx(ctx):
 @context_decorator
 def get_anrede(ctx):
     doc = get_doc_from_ctx(ctx)
-
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
         if doc.get("doctype") not in ["Sales Invoice", "Mahnung"]:
             return mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft)
         else:
@@ -480,8 +482,11 @@ def get_anrede(ctx):
 def get_vorname_nachname(ctx):
     doc = get_doc_from_ctx(ctx)
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
         vorname = mitgliedschaft.vorname_1 or ""
         nachname = mitgliedschaft.nachname_1 or ""
         voller_name = "{} {}".format(vorname, nachname).strip().replace("  ", " ")
@@ -493,10 +498,12 @@ def get_vorname_nachname(ctx):
 @context_decorator
 def get_anrede_beschenkte(ctx):
     doc = get_doc_from_ctx(ctx)
-
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
         return mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft)
 
     return 'Guten Tag'
@@ -504,10 +511,12 @@ def get_anrede_beschenkte(ctx):
 @context_decorator
 def get_anrede_schenkende(ctx):
     doc = get_doc_from_ctx(ctx)
-
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
         return mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)
 
     return 'Guten Tag'
@@ -515,21 +524,23 @@ def get_anrede_schenkende(ctx):
 @context_decorator
 def get_mitgliedernummer(ctx):
     doc = get_doc_from_ctx(ctx)
-
-    mitgliedernummer = '---'
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
-        mitgliedernummer = frappe.db.get_value("Mitgliedschaft", doc.get("mv_mitgliedschaft"), "mitglied_nr")
-
-    return mitgliedernummer
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        return mitgliedschaft.mitglied_nr
 
 @context_decorator
 def get_vor_und_nachname_beschenkte(ctx):
     doc = get_doc_from_ctx(ctx)
-
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
         return " ".join((mitgliedschaft.vorname_1 or '', mitgliedschaft.nachname_1 or ''))
 
     return '---'
@@ -537,10 +548,12 @@ def get_vor_und_nachname_beschenkte(ctx):
 @context_decorator
 def get_vor_und_nachname_schenkende(ctx):
     doc = get_doc_from_ctx(ctx)
-
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
         return " ".join((mitgliedschaft.rg_vorname or '', mitgliedschaft.rg_nachname or ''))
 
     return '---'
@@ -548,10 +561,12 @@ def get_vor_und_nachname_schenkende(ctx):
 @context_decorator
 def get_digitalrechnung_link(ctx):
     doc = get_doc_from_ctx(ctx)
-
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
         return "https://libracore.mieterverband.ch/digitalrechnung?hash={0}".format(mitgliedschaft.mitglied_hash) if mitgliedschaft.mitglied_hash else '(URL nicht verfügbar)'
 
     return '(URL nicht verfügbar)'
@@ -560,23 +575,25 @@ def get_digitalrechnung_link(ctx):
 def get_austritt_per(ctx):
     doc = get_doc_from_ctx(ctx)
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
-        if mitgliedschaft.kuendigung:
-            return mitgliedschaft.kuendigung.strftime('%d.%m.%Y')
-        else:
-            return "ES GIBT KEIN KÜNDIGUNG PER DATUM"
-        
+    if mitgliedschaft:
+        return mitgliedschaft.kuendigung.strftime('%d.%m.%Y')
+    
     return '---'
 
 @context_decorator
 def get_eintrittsdatum(ctx):
     doc = get_doc_from_ctx(ctx)
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
-        if mitgliedschaft.eintrittsdatum:
-            return mitgliedschaft.eintrittsdatum.strftime('%d.%m.%Y')
+    if mitgliedschaft:
+        return mitgliedschaft.eintrittsdatum.strftime('%d.%m.%Y')
         
     return '---'
 
@@ -584,10 +601,12 @@ def get_eintrittsdatum(ctx):
 def get_jahr_haftpflicht(ctx):
     doc = get_doc_from_ctx(ctx)
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
-        if mitgliedschaft.zahlung_hv:
-            return mitgliedschaft.zahlung_hv
+    if mitgliedschaft:
+        return mitgliedschaft.zahlung_hv
         
     return '---'
 
@@ -595,8 +614,11 @@ def get_jahr_haftpflicht(ctx):
 def get_versichertes_objekt(ctx):
     doc = get_doc_from_ctx(ctx)
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
         strasse = mitgliedschaft.objekt_strasse or ""
         hausnummer = mitgliedschaft.objekt_hausnummer or ""
         zusatz = mitgliedschaft.get("objekt_nummer_zu") or ""
@@ -610,10 +632,12 @@ def get_versichertes_objekt(ctx):
 def get_versichertes_objekt_ort(ctx):
     doc = get_doc_from_ctx(ctx)
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
         ort = mitgliedschaft.objekt_ort or ""
-
         return ort if ort else "---"
 
     return '---'
@@ -622,10 +646,12 @@ def get_versichertes_objekt_ort(ctx):
 def get_geschaeftstyp(ctx):
     doc = get_doc_from_ctx(ctx)
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
-    if mv_mitgliedschaft:
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
         typ = mitgliedschaft.mvb_typ or ""
-
         return typ[3:] if typ else "---" # 3: um den Prefix Mvb zu löschen
     
     return '---'

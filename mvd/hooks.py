@@ -56,6 +56,7 @@ jenv = {
         "get_anrede_schenkende:mvd.mvd.doctype.druckvorlage.druckvorlage.get_anrede_schenkende",
         "get_mitgliedernummer:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mitgliedernummer",
         "get_vor_und_nachname_beschenkte:mvd.mvd.doctype.druckvorlage.druckvorlage.get_vor_und_nachname_beschenkte",
+        "get_vor_und_nachname_schenkende:mvd.mvd.doctype.druckvorlage.druckvorlage.get_vor_und_nachname_schenkende",
         "get_digitalrechnung_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_digitalrechnung_link",
         "get_austritt_per:mvd.mvd.doctype.druckvorlage.druckvorlage.get_austritt_per",
         "get_eintrittsdatum:mvd.mvd.doctype.druckvorlage.druckvorlage.get_eintrittsdatum",
@@ -187,7 +188,8 @@ scheduler_events = {
         "mvd.mvd.utils.daily_jobs.daily_ampel_korrektur",
         "mvd.mvd.utils.daily_jobs.sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft",
         "mvd.mvd.v2.web_auth.reset_hash_cleanup",
-        "mvd.mvd.utils.daily_jobs.execute_address_changes"
+        "mvd.mvd.utils.daily_jobs.execute_address_changes",
+        "mvd.mvd.utils.daily_jobs.fixing_sp_mitglied_data"
     ],
     "all": [
         "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue",
