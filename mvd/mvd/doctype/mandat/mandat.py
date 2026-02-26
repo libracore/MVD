@@ -69,6 +69,8 @@ def create_mandat(sektion, beratung, mitglied, beratungskategorie, beratungskate
     mandat.persoenliche_bemerkung = persoenliche_bemerkung
 
     mandat.insert(ignore_permissions=True)
+    if mandat.typ == "Rechtsschutzversicherung":
+        send_confirmation_email(mandat)
 
     return mandat.name
 
