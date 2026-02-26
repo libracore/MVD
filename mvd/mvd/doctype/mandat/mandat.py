@@ -9,6 +9,7 @@ from frappe import sendmail
 from frappe.email.doctype.email_template.email_template import get_email_template
 from frappe.utils.pdf import get_pdf
 from frappe import attach_print
+from frappe.utils import get_url_to_form
 
 class Mandat(Document):
     pass
@@ -55,6 +56,23 @@ def send_confirmation_email(mandat):
         else:
             rendered_berater = get_email_template(template_berater, {"doc": mandat})
 
+            link_beratung = get_url_to_form("Beratung", mandat.beratung)
+            link_mandat = get_url_to_form("Mandat", mandat.name)
+            link_mitglied = get_url_to_form("Mitgliedschaft", mandat.mv_mitgliedschaft)
+
+            footer_links = """
+                <br><br>
+                <hr>
+                <p style="font-size: 12px; color: #555;">
+                    <b>Interne Links für Berater:</b><br>
+                    - <a href="{0}">Direkt zur Beratung: {1}</a><br>
+                    - <a href="{2}">Direkt zum Mandat: {3}</a><br>
+                    - <a href="{4}">Zur Mitgliedschaft: {5}</a>
+                </p>
+            """.format(link_beratung, mandat.beratung,link_mandat, mandat.name, link_mitglied, mandat.mv_mitgliedschaft)
+            
+            full_message = rendered_berater.get("message") + footer_links
+
             # Wir schicken das Stammdatenblatt als Anhang
             attachments = []
             if mandat.mv_mitgliedschaft:
@@ -77,7 +95,7 @@ def send_confirmation_email(mandat):
             sendmail(
                 recipients=recipients,
                 subject=rendered_berater.get("subject"),
-                content=rendered_berater.get("message"),
+                content=full_message,
                 cc=cc_email,
                 attachments=attachments,
                 reference_doctype=mandat.doctype,
@@ -109,7 +127,7 @@ def send_confirmation_email(mandat):
                 unsubscribe_params=None,
                 unsubscribe_message=None,
             )
-            
+
     except Exception:
         frappe.log_error(
             title="Mandat Confirmation Email Error",
