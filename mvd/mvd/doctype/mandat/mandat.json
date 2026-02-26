@@ -13,6 +13,7 @@
   "mv_mitgliedschaft",
   "beratung",
   "kontaktperson",
+  "bestaetigungs_email_gesendet",
   "cb_2",
   "bemerkung",
   "section_ablauf",
@@ -165,9 +166,15 @@
    "fieldname": "placeholder_3",
    "fieldtype": "HTML",
    "options": "<br>"
+  },
+  {
+   "default": "0",
+   "fieldname": "bestaetigungs_email_gesendet",
+   "fieldtype": "Check",
+   "label": "Bestaetigungs Email gesendet"
   }
  ],
- "modified": "2026-02-09 19:40:19.399379",
+ "modified": "2026-02-26 15:12:08.979114",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",
