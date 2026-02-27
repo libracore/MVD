@@ -71,6 +71,12 @@ def get_data():
                 },
                 {
                     "type": "doctype",
+                    "name": "MVD Data Export",
+                    "label": _("Daten Export"),
+                    "description": _("MVD Data Export")
+                },
+                {
+                    "type": "doctype",
                     "name": "MV Help Links",
                     "label": _("Hilfe Verknüpfungen"),
                     "description": _("Hilfe Verknüpfungen direkt zur MVD Wiki")
