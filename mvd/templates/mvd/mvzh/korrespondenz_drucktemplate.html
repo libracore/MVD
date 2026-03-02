@@ -34,7 +34,11 @@
         <!-- Header -->
         <div id='kopfzeile'>
             {% if seite.kopfzeile %}
-                <img src="/assets/mvd/img/mvs_nationales_logo.png" style="width: 58.1mm;">
+                {% if mitgliedschaft.mitgliedtyp_c == 'Geschäft' %}
+                    <img src="/assets/mvd/img/logo_mvbusiness.png" style="width: 58.1mm;">
+                {% else %}
+                    <img src="/assets/mvd/img/logo_mv_zuerich.png" style="width: 58.1mm;">
+                {% endif %}
             {% endif %}
         </div>
         
