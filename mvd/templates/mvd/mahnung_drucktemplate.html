@@ -137,7 +137,11 @@
         {% if sinv.ohne_betrag %}
             {% set qrr_amount = False %}
         {% else %}
-            {% set qrr_amount = "{:,.2f}".format(sinv.outstanding_amount).replace(",", "'") %}
+            {% if mahnung.reminder_charge > 0 %}
+                {% set qrr_amount = "{:,.2f}".format(sinv.outstanding_amount + mahnung.reminder_charge).replace(",", "'") %}
+            {% else %}
+                {% set qrr_amount = "{:,.2f}".format(sinv.outstanding_amount).replace(",", "'") %}
+            {% endif %}
         {% endif %}
         {% set qrr_data = {
             'top_position': '191mm',
