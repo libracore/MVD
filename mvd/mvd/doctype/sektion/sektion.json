@@ -527,6 +527,7 @@
    "label": "E-Mail Absender Name"
   },
   {
+   "description": "\u00c4nderungen hier werden automatisch auch beim Email Konto im Feld Automatische R\u00fcckantwort (Auto Reply Message) erg\u00e4nzt.",
    "fieldname": "emailberatung_email_text",
    "fieldtype": "Text",
    "label": "E-Mail Text"
@@ -1105,7 +1106,7 @@
    "label": "Beratungs Basisordner"
   }
  ],
- "modified": "2025-12-03 09:40:08.442317",
+ "modified": "2026-03-02 13:32:39.400151",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
