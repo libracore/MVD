@@ -17,6 +17,7 @@
   "typ_code",
   "language",
   "sprach_filter",
+  "mahngebuehr",
   "cb_2",
   "mahnstufe",
   "mahnungen_per_mail",
@@ -292,6 +293,12 @@
    "fieldname": "versende_test_e_mail",
    "fieldtype": "Button",
    "label": "Versende Test E-Mail"
+  },
+  {
+   "depends_on": "eval:!doc.zahlungserinnerungen",
+   "fieldname": "mahngebuehr",
+   "fieldtype": "Int",
+   "label": "Mahngeb\u00fchr"
   }
  ],
  "is_submittable": 1,
