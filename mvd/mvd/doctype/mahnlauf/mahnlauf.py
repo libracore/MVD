@@ -285,13 +285,9 @@ def _get_invoices(mahnlauf):
             total_before_charges += invoice.outstanding_amount
             invoices.append(new_invoice)
             currency = invoice.currency
-            # find reminder charge
-            charge_matches = frappe.get_all("ERPNextSwiss Settings Payment Reminder Charge", 
-                filters={ 'reminder_level': highest_level },
-                fields=['reminder_charge'])
             reminder_charge = 0
-            if charge_matches:
-                reminder_charge = charge_matches[0]['reminder_charge']
+            if cint(ml.mahngebuehr) > 0 and cint(ml.zahlungserinnerungen) == 0:
+                reminder_charge = ml.mahngebuehr
             if ml.mahnungen_per_mail == 'Ja':
                 mahnungen_per_mail = frappe.db.sql("""SELECT
                                             SUM(CASE

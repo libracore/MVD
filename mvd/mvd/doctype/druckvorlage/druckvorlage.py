@@ -760,3 +760,13 @@ def get_jahresrechnung_jahr(ctx):
                 return frappe.utils.get_datetime(mahnung.sales_invoices[0].posting_date).strftime('%d.%m.%Y') + ' (Restbetrag)'
     
     return '---'
+
+@context_decorator
+def get_mahngebuehr(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Mahnung":
+        if doc.reminder_charge > 0:
+            return "{:,.2f}".format(doc.get("reminder_charge")).replace(",", "'")
+    
+    return '---'
