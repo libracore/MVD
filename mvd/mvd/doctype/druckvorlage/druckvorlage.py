@@ -579,7 +579,7 @@ def get_austritt_per(ctx):
         mitgliedschaft = doc
     elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
-    if mitgliedschaft:
+    if mitgliedschaft and mitgliedschaft.get("kuendigung"):
         return mitgliedschaft.kuendigung.strftime('%d.%m.%Y')
     
     return '---'
@@ -592,7 +592,7 @@ def get_eintrittsdatum(ctx):
         mitgliedschaft = doc
     elif mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
-    if mitgliedschaft:
+    if mitgliedschaft and mitgliedschaft.get("eintrittsdatum"):
         return mitgliedschaft.eintrittsdatum.strftime('%d.%m.%Y')
         
     return '---'
