@@ -22,6 +22,27 @@ frappe.ui.form.on('Mahnlauf', {
         if (cur_frm.doc.manuelles_faelligkeitsdaum == 1) {
             cur_frm.set_df_property('ueberfaellig_seit', 'read_only', 0);
         }
+
+        if ((cur_frm.doc.docstatus == 1)&&(cur_frm.doc.mahnungen_erstellt != 1)) {
+            frappe.dom.freeze('Bitte warten, die Mahnungserstellung wird geprüft...');
+            var jobname = 'Mahnlauf ' + cur_frm.doc.name + ' (Erstellung)';
+            let mahnung_refresher = setInterval(mahnung_refresher_handler, 3000, jobname);
+            function mahnung_refresher_handler(jobname) {
+                frappe.call({
+                'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.is_mahnungs_job_running",
+                    'args': {
+                        'jobname': jobname
+                    },
+                    'callback': function(res) {
+                        if (res.message == 'refresh') {
+                            clearInterval(mahnung_refresher);
+                            frappe.dom.unfreeze();
+                            cur_frm.reload_doc();
+                        }
+                    }
+                });
+            }
+        }
     },
     mahnungen_buchen: function(frm) {
         frappe.dom.freeze('Bitte warten, buche Mahnungen...');
