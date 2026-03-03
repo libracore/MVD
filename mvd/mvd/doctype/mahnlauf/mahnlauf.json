@@ -11,6 +11,7 @@
   "e_mail_vorlage",
   "massenlauf",
   "e_mails_versendet",
+  "mahnungen_erstellt",
   "cb_1",
   "typ",
   "typ_code",
@@ -278,6 +279,15 @@
    "label": "Manuelles F\u00e4lligkeitsdatum"
   },
   {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "mahnungen_erstellt",
+   "fieldtype": "Check",
+   "label": "Mahnungen erstellt",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
    "depends_on": "eval:!doc.zahlungserinnerungen",
    "fieldname": "mahngebuehr",
    "fieldtype": "Int",
@@ -285,7 +295,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2026-03-02 14:03:17.187555",
+ "modified": "2026-03-03 11:00:31.666248",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnlauf",
