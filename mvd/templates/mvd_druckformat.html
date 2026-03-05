@@ -60,10 +60,15 @@
     #kopfzeile {
         padding-left: 24.5mm;
         padding-top: 17.5mm;
+        {% if doc.sektion_id == 'MVZH' %}
+            min-height: 50mm;
+            max-height: 50mm;
+        {% else %}
         min-height: 55mm;
         max-height: 55mm;
-        min-width: 128mm;
-        max-width: 128mm;
+        {% endif %}
+            min-width: 128mm;
+            max-width: 128mm;
         float: left;
     }
 
@@ -109,8 +114,13 @@
 
     #adressblock {
         margin-left: 26mm;
-        min-height: 40mm;
-        max-height: 40mm;
+        {% if doc.sektion_id == 'MVZH' %}
+            min-height: 45mm;
+            max-height: 45mm;
+        {% else %}
+            min-height: 40mm;
+            max-height: 40mm;
+        {% endif %}
         min-width: 102mm;
         max-width: 102mm;
         float: left;
@@ -137,8 +147,13 @@
     }
 
     #referenzblock {
-        min-height: 40mm;
-        max-height: 40mm;
+        {% if doc.sektion_id == 'MVZH' %}
+            min-height: 45mm;
+            max-height: 45mm;
+        {% else %}
+            min-height: 40mm;
+            max-height: 40mm;
+        {% endif %}
         min-width: 70mm;
         max-width: 70mm;
         float: left;
