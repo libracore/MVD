@@ -6,11 +6,11 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils.data import today, getdate, now
 from mvd.mvd.doctype.mitgliedschaft.finance_utils import get_ampelfarbe
-from mvd.mvd.doctype.region.region import _regionen_zuteilung
 from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
 from datetime import datetime
 from tqdm import tqdm
+from mvd.utils import is_job_already_running
 
 def create_daily_snap():
     new_daily_snap = frappe.get_doc({'doctype': 'Daily Snap'})
@@ -334,7 +334,6 @@ def mark_beratungen_as_s8():
             frappe.db.set_value("Beratung", b.name, 's8', 1)
 
 def daily_ampel_korrektur():
-    from mvd.mvd.utils import is_job_already_running
     aktuelles_jahr = datetime.now().year
     
     # Potentiell falsch Rot
@@ -458,5 +457,9 @@ def execute_address_changes():
         addresschange.submit()
 
 def fixing_sp_mitglied_data():
-    from mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data import fixing_wrong_data
-    fixing_wrong_data()
+    if not is_job_already_running('Nächtliche Inaktivierungen'):
+        from mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data import fixing_wrong_data
+        fixing_wrong_data()
+    else:
+        args = {}
+        enqueue("mvd.mvd.utils.daily_jobs.fixing_sp_mitglied_data", queue='short', job_name='fixing_sp_mitglied_data', timeout=5000, **args)
