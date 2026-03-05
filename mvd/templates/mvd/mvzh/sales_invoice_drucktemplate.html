@@ -433,29 +433,29 @@
                         {% endif %}
                     {% else %}
                         {% if seite.seitenzahlen %}
-                            min-height: 211.5mm;
-                            max-height: 211.5mm;
+                            min-height: 231mm;
+                            max-height: 231mm;
                         {% else %}
-                            min-height: 240mm;
-                            max-height: 240mm;
+                            min-height: 233mm;
+                            max-height: 233mm;
                         {% endif %}
                     {% endif %}
                 {% else %}
                     {% if seite.adressblock or seite.referenzblock %}
-                        {% if seite.fusszeile %}
-                            min-height: 63.5mm;
-                            max-height: 63.5mm;
+                        {% if seite.seitenzahlen %}
+                            min-height: 93mm;
+                            max-height: 93mm;
                         {% else %}
-                            min-height: 92mm;
-                            max-height: 92mm;
+                            min-height: 95mm;
+                            max-height: 95mm;
                         {% endif %}
                     {% else %}
                         {% if seite.seitenzahlen %}
-                            min-height: 133.5mm;
-                            max-height: 133.5mm;
+                            min-height: 137.5mm;
+                            max-height: 137.5mm;
                         {% else %}
-                            min-height: 135mm;
-                            max-height: 135mm;
+                            min-height: 140mm;
+                            max-height: 140mm;
                         {% endif %}
                     {% endif %}
                 {% endif %}
