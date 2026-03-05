@@ -83,6 +83,9 @@
   "hinweis_mietzinsrechner_erhoehung",
   "default_terminbest_hinweis_de",
   "default_terminbest_hinweis_fr",
+  "visierende_person",
+  "template_bestaetigung_kontaktperson",
+  "template_bestaetigung_mitglied",
   "section_mzr",
   "mzr_email",
   "mzr_strasse",
@@ -1093,20 +1096,38 @@
   },
   {
    "depends_on": "eval:doc.nc_enabled",
+   "description": "(F\u00fcr Beratungen <b>ohne</b> Mitgliedschaften)<br>\nz.B. Beratungen<br>\n(Der Sektions Basisordner dient als Root)",
+   "fieldname": "nc_beratung_base_folder",
+   "fieldtype": "Data",
+   "label": "Beratungs Basisordner"
+  },
+  {
+   "depends_on": "eval:doc.nc_enabled",
    "description": "(F\u00fcr Beratungen <b>mit</b> Mitgliedschaften)<br>\nz.B. Beratungen<br>\n(Der Sektions Mitgliederordner/[MitgliedNr] dient als Root)",
    "fieldname": "nc_mitglied_beratung_base_folder",
    "fieldtype": "Data",
    "label": "Mitglied-Beratung Basisordner"
   },
   {
-   "depends_on": "eval:doc.nc_enabled",
-   "description": "(F\u00fcr Beratungen <b>ohne</b> Mitgliedschaften)<br>\nz.B. Beratungen<br>\n(Der Sektions Basisordner dient als Root)",
-   "fieldname": "nc_beratung_base_folder",
-   "fieldtype": "Data",
-   "label": "Beratungs Basisordner"
+   "fieldname": "visierende_person",
+   "fieldtype": "Link",
+   "label": "Visierende Person",
+   "options": "User"
+  },
+  {
+   "fieldname": "template_bestaetigung_kontaktperson",
+   "fieldtype": "Link",
+   "label": "Template Best\u00e4tigung Kontaktperson",
+   "options": "Email Template"
+  },
+  {
+   "fieldname": "template_bestaetigung_mitglied",
+   "fieldtype": "Link",
+   "label": "Template Best\u00e4tigung Mitglied",
+   "options": "Email Template"
   }
  ],
- "modified": "2026-03-02 13:32:39.400151",
+ "modified": "2026-03-04 13:09:53.744090",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
