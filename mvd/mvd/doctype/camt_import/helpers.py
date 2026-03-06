@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from bs4 import BeautifulSoup
 import six
+from frappe.utils.data import today
 
 def get_camt_file(file_path, test=False):
     try:
@@ -572,8 +573,6 @@ def teilzahlungs_verteilung(betrag, maximalwerte):
 
     return gerundet
 
-
-
 def reset_camt_amount_from_camt_file(camt_import):
     """
     Diese Funktion list das CAMT-File aus und setzt den CAMT Amount neu
@@ -601,3 +600,59 @@ def reset_camt_amount_from_camt_file(camt_import):
                     pass
         
         frappe.db.set_value('CAMT Import', camt_import, 'camt_amount', camt_amount)
+
+def get_mahnungen(sinv=None, mitgliedschaft=None, mv_kunde=None):
+    offene_mahnungen = frappe.db.sql(
+        """
+            SELECT
+                `name` AS `mahnung`,
+                `reminder_charge`
+            FROM `tabMahnung`
+            WHERE `docstatus` = 1
+            AND IFNULL(`reminder_charge`, 0) > 0
+            AND (
+                `mv_mitgliedschaft` = '{mitgliedschaft}'
+                OR
+                `mv_kunde` = '{mv_kunde}'
+            )
+            AND `name` IN (
+                SELECT `parent` FROM `tabMahnung Invoices`
+                WHERE `sales_invoice` = '{sinv}'
+            )
+            ORDER BY `highest_level` DESC
+        """.format(mitgliedschaft=mitgliedschaft, mv_kunde=mv_kunde, sinv=sinv),
+        as_dict=True
+    )
+    if len(offene_mahnungen) > 0:
+        return {
+            'mahnung': offene_mahnungen[0].mahnung,
+            'reminder_charge': offene_mahnungen[0].reminder_charge
+        }
+
+    return False
+
+def create_sinv_from_sinv(sinv=None, mahngebuehr=0):
+    if not sinv:
+        return False
+    
+    origin_sinv = frappe.get_doc("Sales Invoice", sinv)
+    sinv_copy = frappe.copy_doc(origin_sinv)
+    sinv_copy.due_date = today()
+    sinv_copy.payment_schedule = []
+    sinv_copy.ist_mitgliedschaftsrechnung = 0
+    sinv_copy.ist_hv_rechnung = 0
+    sinv_copy.ist_spenden_rechnung = 0
+    sinv_copy.ist_sonstige_rechnung = 1
+    sinv_copy.ohne_betrag = 0
+    
+    first_item_line = sinv_copy.items[0]
+    first_item_line.item_name = "Mahngebühr"
+    first_item_line.rate = mahngebuehr
+    first_item_line.amount = mahngebuehr
+    sinv_copy.items = [first_item_line]
+
+    sinv_copy.insert(ignore_permissions=True)
+    sinv_copy.docstatus = 1
+    sinv_copy.save(ignore_permissions=True)
+
+    return sinv_copy.name
