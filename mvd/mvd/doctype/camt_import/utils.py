@@ -275,16 +275,33 @@ def zahlungen_matchen(camt_import):
                     pe.camt_status = 'Rechnungs Match'
                     row.allocated_amount = pe.paid_amount
                 else:
-                    if not double_payment:
-                        pe.camt_status = 'Überbezahlt'
-                        row.allocated_amount = sinv_lookup_data.get('outstanding_amount')
-                    else:
-                        pe.camt_status = 'Überbezahlt'
-                        bereits_erfasste_zahlungen = double_payment_control[sinv_lookup_data.get('sinv')]
-                        sinv_outstanding = sinv_lookup_data.get('outstanding_amount')
-                        diff = sinv_outstanding - bereits_erfasste_zahlungen
-                        row.allocated_amount = diff if diff > 0 else 0
-                    camt_ueberzahlung_update(camt_import)
+                    # Bevor die Rechnnung als überbezahlt angeschaut wird, wird geprüft ob es ggf. zur Rechnung Mahnungen inkl. Mahngebühren gibt
+                    offene_mahnung = get_mahnungen(sinv_lookup_data.get('sinv'), sinv_lookup_data.get('mv_mitgliedschaft'), sinv_lookup_data.get('mv_kunde'))
+                    if offene_mahnung:
+                        if (received_amount == (sinv_lookup_data.get('outstanding_amount') + offene_mahnung.get("reminder_charge"))):
+                            # Erstellung, verknüpfung und Begleichung der offenen Mahnungebühr via neue SINV
+                            mahngebuehr_sinv = create_sinv_from_sinv(sinv_lookup_data.get('sinv'), offene_mahnung.get("reminder_charge"))
+                            pe.camt_status = 'Rechnungs Match'
+                            row.allocated_amount = sinv_lookup_data.get('outstanding_amount')
+                            sec_row = pe.append('references', {})
+                            sec_row.reference_doctype = 'Sales Invoice'
+                            sec_row.reference_name = mahngebuehr_sinv
+                            sec_row.allocated_amount = offene_mahnung.get("reminder_charge")
+                        else:
+                            # Trotz gefundener Mahnung inkl. Mahngebühren überbezahlt
+                            offene_mahnung = False
+                    
+                    if not offene_mahnung:
+                        if not double_payment:
+                            pe.camt_status = 'Überbezahlt'
+                            row.allocated_amount = sinv_lookup_data.get('outstanding_amount')
+                        else:
+                            pe.camt_status = 'Überbezahlt'
+                            bereits_erfasste_zahlungen = double_payment_control[sinv_lookup_data.get('sinv')]
+                            sinv_outstanding = sinv_lookup_data.get('outstanding_amount')
+                            diff = sinv_outstanding - bereits_erfasste_zahlungen
+                            row.allocated_amount = diff if diff > 0 else 0
+                        camt_ueberzahlung_update(camt_import)
                 
                 # see #1101
                 if pe.sektion_id != sinv_lookup_data.get('sektion'):
