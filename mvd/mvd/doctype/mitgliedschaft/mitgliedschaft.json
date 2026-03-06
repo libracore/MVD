@@ -1320,7 +1320,7 @@
   {
    "depends_on": "eval:doc.sektion_id=='MVZH'",
    "fieldname": "mvb_typ",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "label": "MVB Typ",
    "options": "\nMvbMini\nMvbStandard"
   },
@@ -1412,7 +1412,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-03-06 11:01:01.666721",
+ "modified": "2026-03-06 12:03:05.895000",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
