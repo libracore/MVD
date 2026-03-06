@@ -10,7 +10,7 @@ from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
 from datetime import datetime
 from tqdm import tqdm
-from mvd.utils import is_job_already_running
+from mvd.mvd.utils import is_job_already_running
 
 def create_daily_snap():
     new_daily_snap = frappe.get_doc({'doctype': 'Daily Snap'})
