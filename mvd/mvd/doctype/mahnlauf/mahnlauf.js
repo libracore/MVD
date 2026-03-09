@@ -211,7 +211,43 @@ frappe.ui.form.on('Mahnlauf', {
                 d.show();
             }
         });
-        
+    },
+    versende_test_e_mail: function(frm) {
+        frappe.call({
+        'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.get_e_mail_field_list",
+            'args': {
+                'e_mail_vorlage': cur_frm.doc.e_mail_vorlage,
+                'test': 1
+            },
+            'callback': function(r) {
+                var d = new frappe.ui.Dialog({
+                    fields: r.message,
+                    primary_action: function(){
+                        d.hide();
+                        frappe.call({
+                            'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.send_reminder_mails",
+                            'args': {
+                                'mahnlauf': cur_frm.doc.name,
+                                'betreff': d.get_values().betreff,
+                                'message': d.get_values().message,
+                                'email_vorlage': cur_frm.doc.e_mail_vorlage,
+                                'mahnung': d.get_values().mahnung,
+                                'empfaenger': d.get_values().empfaenger,
+                                'test': 1
+                            },
+                            'freeze': true,
+                            'freeze_message': 'Bitte warten, das Test-E-Mail wird erzeugt...',
+                            'callback': function(res) {
+                                frappe.msgprint("Das Test-E-Mail wurde versendet.");
+                            }
+                        });
+                    },
+                    primary_action_label: __('Versenden'),
+                    title: 'Mahnungs E-Mail Versand'
+                });
+                d.show();
+            }
+        });
     },
     zahlungserinnerungen: function(frm) {
         if (cur_frm.doc.zahlungserinnerungen == 1) {

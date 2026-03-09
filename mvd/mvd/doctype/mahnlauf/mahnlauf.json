@@ -41,6 +41,7 @@
   "mahnungen_stornieren",
   "erstelle_pdf",
   "versende_e_mail",
+  "versende_test_e_mail",
   "cb_6",
   "steuerung_3",
   "stornierte_mahnungen"
@@ -285,10 +286,16 @@
    "label": "Mahnungen erstellt",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.gebuchte_mahnungen > 0 && doc.mahnungen_per_mail=='Ja' && doc.anzahl_mail > 0 && !doc.e_mails_versendet",
+   "fieldname": "versende_test_e_mail",
+   "fieldtype": "Button",
+   "label": "Versende Test E-Mail"
   }
  ],
  "is_submittable": 1,
- "modified": "2026-03-03 11:00:31.666248",
+ "modified": "2026-03-09 15:39:41.237576",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnlauf",

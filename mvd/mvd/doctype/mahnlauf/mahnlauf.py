@@ -482,7 +482,7 @@ def get_info(jobname):
     return found_job
 
 @frappe.whitelist()
-def get_e_mail_field_list(e_mail_vorlage=None):
+def get_e_mail_field_list(e_mail_vorlage=None, test=False):
     if e_mail_vorlage:
         druckvorlage = frappe.get_doc("Druckvorlage", e_mail_vorlage)
         fields_list = [
@@ -494,10 +494,15 @@ def get_e_mail_field_list(e_mail_vorlage=None):
             {'fieldname': 'betreff', 'label': 'Betreff', 'fieldtype': 'Data', 'reqd': 1},
             {'fieldname': 'message', 'label': 'Nachricht', 'fieldtype': 'Text Editor', 'reqd': 1}
         ]
+    
+    if test:
+        fields_list.insert(0, {'fieldname': 'mahnung', 'label': 'Mahnung', 'fieldtype': 'Link', 'options': 'Mahnung', 'reqd': 1})
+        fields_list.insert(0, {'fieldname': 'empfaenger', 'label': 'Empfänger', 'fieldtype': 'Data', 'reqd': 1})
+    
     return fields_list
 
 @frappe.whitelist()
-def send_reminder_mails(mahnlauf=None, betreff=None, message=None, email_vorlage=None, as_bg_job=False):
+def send_reminder_mails(mahnlauf=None, betreff=None, message=None, email_vorlage=None, as_bg_job=False, mahnung=None, empfaenger=None, test=False):
     if as_bg_job:
         args = {
                 'mahnlauf': mahnlauf,
@@ -509,88 +514,150 @@ def send_reminder_mails(mahnlauf=None, betreff=None, message=None, email_vorlage
         enqueue("mvd.mvd.doctype.mahnlauf.mahnlauf.send_reminder_mails", queue='long', job_name='Mahnlauf {0} (E-Mail)'.format(mahnlauf), timeout=5000, **args)
         return
 
-    mahnungen = frappe.db.sql("""SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 1 AND `per_mail` = 1""".format(mahnlauf=mahnlauf), as_dict=True)
-    mahnungen_tbl = []
-    for mahnung in mahnungen:
-        if not int(frappe.get_value('MVD Settings', 'MVD Settings', 'email_queue')) == 1:
-            mahnung = frappe.get_doc("Mahnung", mahnung.name)
-            if email_vorlage:
-                if mahnung.mv_mitgliedschaft:
-                    mitgliedschaft = mahnung.mv_mitgliedschaft
-                else:
-                    mitgliedschaft = mahnung.mv_kunde
-                email_vorlage = frappe.get_doc("Druckvorlage", email_vorlage)
-                betreff = replace_mv_keywords(email_vorlage.e_mail_betreff, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
-                message = replace_mv_keywords(email_vorlage.e_mail_text, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
-            attachments = [frappe.attach_print("Mahnung", mahnung.name, file_name=mahnung.name, print_format='Mahnung')]
-            comm = make(
-                recipients=get_recipients(mahnung),
-                sender=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
-                subject=betreff,
-                content=message,
-                doctype='Mahnung',
-                name=mahnung.name,
-                attachments=attachments,
-                send_email=False,
-                sender_full_name=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name")
-            )["name"]
+    if not test:
+        mahnungen = frappe.db.sql("""SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 1 AND `per_mail` = 1""".format(mahnlauf=mahnlauf), as_dict=True)
+        mahnungen_tbl = []
+        for mahnung in mahnungen:
+            if not int(frappe.get_value('MVD Settings', 'MVD Settings', 'email_queue')) == 1:
+                mahnung = frappe.get_doc("Mahnung", mahnung.name)
+                if email_vorlage:
+                    if mahnung.mv_mitgliedschaft:
+                        mitgliedschaft = mahnung.mv_mitgliedschaft
+                    else:
+                        mitgliedschaft = mahnung.mv_kunde
+                    email_vorlage = frappe.get_doc("Druckvorlage", email_vorlage)
+                    betreff = replace_mv_keywords(email_vorlage.e_mail_betreff, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
+                    message = replace_mv_keywords(email_vorlage.e_mail_text, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
+                attachments = [frappe.attach_print("Mahnung", mahnung.name, file_name=mahnung.name, print_format='Mahnung')]
+                comm = make(
+                    recipients=get_recipients(mahnung),
+                    sender=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
+                    subject=betreff,
+                    content=message,
+                    doctype='Mahnung',
+                    name=mahnung.name,
+                    attachments=attachments,
+                    send_email=False,
+                    sender_full_name=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name")
+                )["name"]
+                
+                sendmail(
+                    recipients=get_recipients(mahnung),
+                    sender="{0} <{1}>".format(frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name"), frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse")),
+                    subject=betreff,
+                    message=message,
+                    as_markdown=False,
+                    delayed=True,
+                    reference_doctype='Mahnung',
+                    reference_name=mahnung.name,
+                    unsubscribe_method=None,
+                    unsubscribe_params=None,
+                    unsubscribe_message=None,
+                    attachments=attachments,
+                    content=None,
+                    doctype='Mahnung',
+                    name=mahnung.name,
+                    reply_to=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
+                    cc=[],
+                    bcc=[],
+                    message_id=frappe.get_value("Communication", comm, "message_id"),
+                    in_reply_to=None,
+                    send_after=None,
+                    expose_recipients=None,
+                    send_priority=1,
+                    communication=comm,
+                    retry=1,
+                    now=None,
+                    read_receipt=None,
+                    is_notification=False,
+                    inline_images=None,
+                    template='mahnung',
+                    args={
+                        "message": message,
+                        "footer": frappe.get_value("Sektion", mahnung.sektion_id, "footer")
+                    },
+                    header=None,
+                    print_letterhead=False
+                )
+            else:
+                mahnungen_tbl.append({
+                    'mahnung': mahnung.name,
+                    'status': 'Not send'
+                })
             
-            sendmail(
-                recipients=get_recipients(mahnung),
-                sender="{0} <{1}>".format(frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name"), frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse")),
-                subject=betreff,
-                message=message,
-                as_markdown=False,
-                delayed=True,
-                reference_doctype='Mahnung',
-                reference_name=mahnung.name,
-                unsubscribe_method=None,
-                unsubscribe_params=None,
-                unsubscribe_message=None,
-                attachments=attachments,
-                content=None,
-                doctype='Mahnung',
-                name=mahnung.name,
-                reply_to=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
-                cc=[],
-                bcc=[],
-                message_id=frappe.get_value("Communication", comm, "message_id"),
-                in_reply_to=None,
-                send_after=None,
-                expose_recipients=None,
-                send_priority=1,
-                communication=comm,
-                retry=1,
-                now=None,
-                read_receipt=None,
-                is_notification=False,
-                inline_images=None,
-                template='mahnung',
-                args={
-                    "message": message,
-                    "footer": frappe.get_value("Sektion", mahnung.sektion_id, "footer")
-                },
-                header=None,
-                print_letterhead=False
-            )
-        else:
-            mahnungen_tbl.append({
-                'mahnung': mahnung.name,
-                'status': 'Not send'
-            })
+        if int(frappe.get_value('MVD Settings', 'MVD Settings', 'email_queue')) == 1:
+            new_queue = frappe.get_doc({
+                'doctype': 'MVD Email Queue',
+                'status': 'Not send',
+                'mahnlauf': mahnlauf,
+                'betreff': betreff,
+                'email_vorlage': email_vorlage,
+                'message': message,
+                'mahnungen': mahnungen_tbl
+            }).insert()
+            
+        frappe.set_value("Mahnlauf", mahnlauf, "e_mails_versendet", 1)
+    else:
+        mahnung = frappe.get_doc("Mahnung", mahnung)
+        if email_vorlage:
+            if mahnung.mv_mitgliedschaft:
+                mitgliedschaft = mahnung.mv_mitgliedschaft
+            else:
+                mitgliedschaft = mahnung.mv_kunde
+            email_vorlage = frappe.get_doc("Druckvorlage", email_vorlage)
+            betreff = replace_mv_keywords(email_vorlage.e_mail_betreff, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
+            message = replace_mv_keywords(email_vorlage.e_mail_text, mitgliedschaft, mahnung=mahnung.name, idx=0, sinv=mahnung.sales_invoices[0].sales_invoice)
+        attachments = [frappe.attach_print("Mahnung", mahnung.name, file_name=mahnung.name, print_format='Mahnung')]
+        comm = make(
+            recipients=[empfaenger],
+            sender=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
+            subject=betreff,
+            content=message,
+            doctype='Mahnung',
+            name=mahnung.name,
+            attachments=attachments,
+            send_email=False,
+            sender_full_name=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name")
+        )["name"]
         
-    if int(frappe.get_value('MVD Settings', 'MVD Settings', 'email_queue')) == 1:
-        new_queue = frappe.get_doc({
-            'doctype': 'MVD Email Queue',
-            'status': 'Not send',
-            'mahnlauf': mahnlauf,
-            'betreff': betreff,
-            'email_vorlage': email_vorlage,
-            'message': message,
-            'mahnungen': mahnungen_tbl
-        }).insert()
-        
-    frappe.set_value("Mahnlauf", mahnlauf, "e_mails_versendet", 1)
+        sendmail(
+            recipients=[empfaenger],
+            sender="{0} <{1}>".format(frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_name"), frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse")),
+            subject=betreff,
+            message=message,
+            as_markdown=False,
+            delayed=True,
+            reference_doctype='Mahnung',
+            reference_name=mahnung.name,
+            unsubscribe_method=None,
+            unsubscribe_params=None,
+            unsubscribe_message=None,
+            attachments=attachments,
+            content=None,
+            doctype='Mahnung',
+            name=mahnung.name,
+            reply_to=frappe.get_value("Sektion", mahnung.sektion_id, "mahnung_absender_adresse"),
+            cc=[],
+            bcc=[],
+            message_id=frappe.get_value("Communication", comm, "message_id"),
+            in_reply_to=None,
+            send_after=None,
+            expose_recipients=None,
+            send_priority=1,
+            communication=comm,
+            retry=1,
+            now=None,
+            read_receipt=None,
+            is_notification=False,
+            inline_images=None,
+            template='mahnung',
+            args={
+                "message": message,
+                "footer": frappe.get_value("Sektion", mahnung.sektion_id, "footer")
+            },
+            header=None,
+            print_letterhead=False
+        )
     return
 
 def get_recipients(mahnung):
