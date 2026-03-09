@@ -18,6 +18,7 @@
   "massenlauf_referenz",
   "mahnlauf",
   "per_mail",
+  "sent_with_communication",
   "zahlungserinnerung",
   "column_general",
   "sektion_id",
@@ -251,10 +252,16 @@
    "in_list_view": 1,
    "label": "Nachname (Kunde)",
    "read_only": 1
+  },
+  {
+   "fieldname": "sent_with_communication",
+   "fieldtype": "Link",
+   "label": "Gesendet mit",
+   "options": "Communication"
   }
  ],
  "is_submittable": 1,
- "modified": "2023-06-30 13:16:04.192981",
+ "modified": "2026-03-09 20:58:46.208516",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnung",
