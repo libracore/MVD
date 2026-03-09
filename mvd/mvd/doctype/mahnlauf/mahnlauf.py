@@ -497,7 +497,18 @@ def get_e_mail_field_list(e_mail_vorlage=None):
     return fields_list
 
 @frappe.whitelist()
-def send_reminder_mails(mahnlauf=None, betreff=None, message=None, email_vorlage=None):
+def send_reminder_mails(mahnlauf=None, betreff=None, message=None, email_vorlage=None, as_bg_job=False):
+    if as_bg_job:
+        args = {
+                'mahnlauf': mahnlauf,
+                'betreff': betreff,
+                'message': message,
+                'email_vorlage': email_vorlage,
+                'as_bg_job': False
+            }
+        enqueue("mvd.mvd.doctype.mahnlauf.mahnlauf.send_reminder_mails", queue='long', job_name='Mahnlauf {0} (E-Mail)'.format(mahnlauf), timeout=5000, **args)
+        return
+
     mahnungen = frappe.db.sql("""SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 1 AND `per_mail` = 1""".format(mahnlauf=mahnlauf), as_dict=True)
     mahnungen_tbl = []
     for mahnung in mahnungen:
