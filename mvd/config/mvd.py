@@ -364,6 +364,12 @@ def get_data():
                 },
                 {
                     "type": "doctype",
+                    "name": "MVD Email Queue",
+                    "label": _("MVD Email Queue"),
+                    "description": _("MVD Email Queue")
+                },
+                {
+                    "type": "doctype",
                     "name": "API Log",
                     "label": _("API Log"),
                     "description": _("API Log")
