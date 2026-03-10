@@ -16,6 +16,7 @@
   {
    "fieldname": "mahnlauf",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "mahnlauf"
   },
   {
@@ -42,6 +43,8 @@
   {
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
    "options": "Not send\nPartially send\nSending finished with errors\nSend"
   },
@@ -49,11 +52,13 @@
    "default": "0",
    "fieldname": "blocked",
    "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Gesperrt",
    "permlevel": 1
   }
  ],
- "modified": "2024-05-03 13:51:32.637224",
+ "modified": "2026-03-10 08:42:24.031046",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Email Queue",
