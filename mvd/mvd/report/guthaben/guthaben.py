@@ -18,7 +18,7 @@ def get_columns():
         {"label": _("Mitglied Status"), "fieldname": "mitglied_status", "fieldtype": "Data"},
         {"label": _("Mitgliedtyp"), "fieldname": "mitgliedtyp_c", "fieldtype": "Data"},
         {"label": _("Guthaben"), "fieldname": "guthaben", "fieldtype": "Currency"},
-        {"label": _("Manuelle Selektion erf."), "fieldname": "warning", "fieldtype": "Data"}
+        {"label": _("Man. Analyse erf."), "fieldname": "warning", "fieldtype": "Data"}
     ]
 
 def get_data(filters):
