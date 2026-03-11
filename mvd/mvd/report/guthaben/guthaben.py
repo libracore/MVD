@@ -92,19 +92,19 @@ def get_data(filters):
     doppelung_check = []
 
     for credit in guthaben:
-        if credit.rg_kunde not in doppelung_check:
+        if credit.rg_kunde and credit.rg_kunde not in doppelung_check:
             doppelung_check.append(credit.rg_kunde)
         else:
             doppelungen.append(credit.rg_kunde)
         
-        if credit.kunde_mitglied not in doppelung_check:
+        if credit.kunde_mitglied and credit.kunde_mitglied not in doppelung_check:
             doppelung_check.append(credit.kunde_mitglied)
         else:
             doppelungen.append(credit.kunde_mitglied)
     
     for credit in guthaben:
-        if (credit.rg_kunde in doppelungen or
-            credit.kunde_mitglied in doppelungen):
+        if ((credit.rg_kunde and credit.rg_kunde in doppelungen) or
+            (credit.kunde_mitglied and credit.kunde_mitglied in doppelungen)):
             credit.warning = '⚠️'
     
     return guthaben
