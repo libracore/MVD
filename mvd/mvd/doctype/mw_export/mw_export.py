@@ -349,7 +349,6 @@ def run_analysis(self):
         return
 
     all_dfs = []
-    exclude_prefix = "STOP_nicht-MVD"
 
     for f in files:
         if "STOP_nicht-MVD" in f.file_name:
@@ -366,7 +365,7 @@ def run_analysis(self):
             temp_df['dateiquelle'] = f.file_name
             all_dfs.append(temp_df)
         except Exception as e:
-            frappe.log_error(f"Fehler beim Einlesen von {f.file_name}: {str(e)}", "MW Export Analyse")
+            frappe.log_error("Fehler beim Einlesen von {0}: {1}".format(f.file_name, str(e)), "MW Export Analyse")
 
     if not all_dfs:
         return
@@ -408,16 +407,16 @@ def run_analysis(self):
         
         _file = frappe.get_doc({
             "doctype": "File",
-            "file_name": f"Gesamtauswertung_{timestamp}.xlsx",
+            "file_name": "Gesamtauswertung_{0}.xlsx".format(timestamp),
             "attached_to_doctype": "MW Export",
             "attached_to_name": self.name,
             "content": file_content,
             "is_private": 1
         })
+
         _file.save()
         
-        # Kommentar im Dokument hinterlassen
         self.add_comment('Comment', text="Pandas Analyse erfolgreich erstellt und Excel angehängt.")
         
     except Exception as e:
-        frappe.log_error(f"Fehler beim Excel-Export: {str(e)}", "MW Export Analyse")
+        frappe.log_error(title="MW Export: Fehler beim Excel Export", message=frappe.get_traceback())
