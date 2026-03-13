@@ -28,10 +28,18 @@ hm = {
     'nachname_2': 'nachname_2',
     'anrede_2': 'anrede_2',
     'vorname_2': 'vorname_2',
-    'nachname_2': 'nachname_2'
+    'nachname_2': 'nachname_2',
+    'mitgliedtyp_c': 'mitgliedtyp_c',
+    'kundentyp': 'kundentyp',
+    'mvs_quelle': 'mvs_quelle',
+    'interessent_typ': 'interessent_typ'
 }
 
-def read_csv(site_name, file_name, limit=False, bench='frappe'):
+def read_csv(site_name, file_name, limit=False, bench='frappe', record_type=False):
+    if not record_type or record_type not in ['Mitglied', 'Interessent']:
+        print("Kein Typ (Mitglied / Interessent) angegeben")
+        return
+    
     # display all coloumns for error handling
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
     
@@ -51,19 +59,26 @@ def read_csv(site_name, file_name, limit=False, bench='frappe'):
     updated = 0
     for index, row in tqdm(df.iterrows(), desc="Create / Update MVS", unit=" Mitglied", total=max_loop):
         if count <= max_loop:
-            existing = migliedschaft_existiert(get_value(row, 'asloca_id'))
-            if not existing:
-                error_in_creation = create_mitgliedschaft(row)
+            if record_type == 'Mitglied':
+                existing = migliedschaft_existiert(get_value(row, 'asloca_id'))
+                if not existing:
+                    error_in_creation = create_mitgliedschaft(row)
+                    if error_in_creation:
+                        error_list.append(error_in_creation)
+                    else:
+                        added += 1
+                else:
+                    error_in_update = update_mitgliedschaft(existing, row)
+                    if error_in_update:
+                        error_list.append(error_in_update)
+                    else:
+                        updated += 1
+            if record_type == 'Interessent':
+                error_in_creation = create_mitgliedschaft(row, interessent=True)
                 if error_in_creation:
                     error_list.append(error_in_creation)
                 else:
                     added += 1
-            else:
-                error_in_update = update_mitgliedschaft(existing, row)
-                if error_in_update:
-                    error_list.append(error_in_update)
-                else:
-                    updated += 1
             count += 1
         else:
             break
@@ -73,7 +88,7 @@ def read_csv(site_name, file_name, limit=False, bench='frappe'):
     print("Failed:")
     print(error_list)
 
-def create_mitgliedschaft(data):
+def create_mitgliedschaft(data, interessent=False):
     def get_kundentyp(data):
         if get_value(data, 'firmenname') and get_value(data, 'firmenname') != '':
             return 'Unternehmen'
@@ -99,21 +114,21 @@ def create_mitgliedschaft(data):
         mitgliedschaft = frappe.get_doc({
             "doctype": "Mitgliedschaft",
             "sektion_id": get_value(data, 'sektion_id'),
-            "status_c": "Regulär",
+            "status_c": "Regulär" if not interessent else 'Interessent*in',
             "language": get_value(data, 'language'),
-            "mitgliedtyp_c": "Privat",
+            "mitgliedtyp_c": "Privat" if not interessent else get_value(data, 'mitgliedtyp_c'),
             "eintrittsdatum": "1900-01-01",
-            "kundentyp": get_kundentyp(data),
-            "firma": get_value(data, 'firma'),
-            "zusatz_firma": get_value(data, 'zusatz_firma'),
-            "anrede_c": get_value(data, 'anrede_c'),
+            "kundentyp": get_kundentyp(data) if not interessent else get_value(data, 'kundentyp'),
+            "firma": get_value(data, 'firma') if not interessent else None,
+            "zusatz_firma": get_value(data, 'zusatz_firma') if not interessent else None,
+            "anrede_c": get_value(data, 'anrede_c') if not interessent else None,
             "nachname_1": get_value(data, 'nachname_1'),
             "vorname_1": get_value(data, 'vorname_1'),
             "tel_p_1": '',
             "tel_m_1": '',
             "tel_g_1": '',
             "e_mail_1": '',
-            "zusatz_adresse": get_value(data, 'zusatz_adresse'),
+            "zusatz_adresse": get_value(data, 'zusatz_adresse') if not interessent else None,
             "strasse": get_strasse(data),
             "nummer": get_nummer(data),
             "nummer_zu": '',
@@ -121,12 +136,14 @@ def create_mitgliedschaft(data):
             "postfach_nummer": '',
             "plz": get_value(data, 'plz'),
             "ort": get_value(data, 'ort'),
-            "asloca_id": get_value(data, 'asloca_id'),
+            "asloca_id": get_value(data, 'asloca_id') if not interessent else None,
             "region_manuell": 1,
-            'hat_solidarmitglied': check_solidarmitglied(data),
-            'anrede_2': get_value(data, 'anrede_2'),
-            'vorname_2': get_value(data, 'vorname_2'),
-            'nachname_2': get_value(data, 'nachname_2'),
+            'hat_solidarmitglied': check_solidarmitglied(data) if not interessent else None,
+            'anrede_2': get_value(data, 'anrede_2') if not interessent else None,
+            'vorname_2': get_value(data, 'vorname_2') if not interessent else None,
+            'nachname_2': get_value(data, 'nachname_2') if not interessent else None,
+            'mvs_quelle': get_value(data, 'mvs_quelle') if interessent else None,
+            'interessent_typ': get_value(data, 'interessent_typ') if interessent else None
         })
         mitgliedschaft.insert(ignore_permissions=True)
 
@@ -134,7 +151,7 @@ def create_mitgliedschaft(data):
         return False
     except Exception as err:
         frappe.log_error("{0}\n---\n{1}".format(err, data), 'create_mvs_mitgliedschaft')
-        return [get_value(data, 'asloca_id'), str(err)]
+        return [get_value(data, 'asloca_id') if not interessent else get_value(data, 'nachname_1'), str(err)]
 
 def update_mitgliedschaft(mitglied_id, data):
     try:
