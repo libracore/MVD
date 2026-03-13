@@ -202,7 +202,8 @@
   "mitglied_hash",
   "deleted_by_admin",
   "web_login_user_created",
-  "asloca_id"
+  "asloca_id",
+  "mvs_quelle"
  ],
  "fields": [
   {
@@ -1409,10 +1410,16 @@
    "fieldname": "kuendigung_am",
    "fieldtype": "Date",
    "label": "K\u00fcndigung am"
+  },
+  {
+   "fieldname": "mvs_quelle",
+   "fieldtype": "Data",
+   "label": "mvs_quelle",
+   "set_only_once": 1
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-03-06 12:03:05.895000",
+ "modified": "2026-03-13 10:29:26.410507",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
