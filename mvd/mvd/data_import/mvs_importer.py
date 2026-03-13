@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import pandas as pd
 from frappe.utils.data import add_days, getdate, get_datetime, now_datetime, now
+from tqdm import tqdm
 
 
 # Header mapping (ERPNext <> MVD)
@@ -14,7 +15,7 @@ hm = {
     'sektion_id': 'sektion_id',
     'region': 'region',
     'anrede_c': 'anrede_c',
-    'firmenname': 'firmenname',
+    'firma': 'firmenname',
     'nachname_1': 'nachname_1',
     'vorname_1': 'vorname_1',
     'zusatz': 'zusatz',
@@ -46,21 +47,30 @@ def read_csv(site_name, file_name, limit=False, bench='frappe'):
         max_loop = len(index)
     
     error_list = []
-        
-    for index, row in df.iterrows():
+    added = 0
+    updated = 0
+    for index, row in tqdm(df.iterrows(), desc="Create / Update MVS", unit=" Mitglied", total=max_loop):
         if count <= max_loop:
-            if not migliedschaft_existiert(get_value(row, 'asloca_id')):
+            existing = migliedschaft_existiert(get_value(row, 'asloca_id'))
+            if not existing:
                 error_in_creation = create_mitgliedschaft(row)
                 if error_in_creation:
                     error_list.append(error_in_creation)
+                else:
+                    added += 1
             else:
-                print("Skip")
-            #     update_mitgliedschaft(row)
-            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+                error_in_update = update_mitgliedschaft(existing, row)
+                if error_in_update:
+                    error_list.append(error_in_update)
+                else:
+                    updated += 1
             count += 1
         else:
             break
 
+    print("Added: {0}".format(added))
+    print("Updated: {0}".format(updated))
+    print("Failed:")
     print(error_list)
 
 def create_mitgliedschaft(data):
@@ -94,7 +104,7 @@ def create_mitgliedschaft(data):
             "mitgliedtyp_c": "Privat",
             "eintrittsdatum": "1900-01-01",
             "kundentyp": get_kundentyp(data),
-            "firma": get_value(data, 'firmenname'),
+            "firma": get_value(data, 'firma'),
             "zusatz_firma": get_value(data, 'zusatz_firma'),
             "anrede_c": get_value(data, 'anrede_c'),
             "nachname_1": get_value(data, 'nachname_1'),
@@ -126,15 +136,35 @@ def create_mitgliedschaft(data):
         frappe.log_error("{0}\n---\n{1}".format(err, data), 'create_mvs_mitgliedschaft')
         return [get_value(data, 'asloca_id'), str(err)]
 
-# def update_mitgliedschaft(data):
-#     try:
-#         mitgliedschaft = frappe.get_doc("MV Mitgliedschaft", str(get_value(data, 'mitglied_id')))
-#         mitgliedschaft.save(ignore_permissions=True)
-#         frappe.db.commit()
-#         return
-#     except Exception as err:
-#         frappe.log_error("{0}\n{1}".format(err, data), 'update_mitgliedschaft')
-#         return
+def update_mitgliedschaft(mitglied_id, data):
+    try:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
+        fields = [
+            'sektion_id',
+            'region',
+            'anrede_c',
+            'firma',
+            'nachname_1',
+            'vorname_1',
+            'strasse',
+            'plz',
+            'ort',
+            'language',
+            'zusatz_adresse',
+            'zusatz_firma',
+            'nachname_2',
+            'anrede_2',
+            'vorname_2',
+            'nachname_2'
+        ]
+        for field in fields:
+            if get_value(data, field) != mitgliedschaft.get(field, ''):
+                frappe.db.set_value("Mitgliedschaft", mitglied_id, field, get_value(data, field))
+        frappe.db.commit()
+        return False
+    except Exception as err:
+        frappe.log_error("{0}\n{1}".format(err, data), 'update_mitgliedschaft')
+        return [get_value(data, 'asloca_id'), str(err)]
 
 # def get_formatted_datum(datum):
 #     if datum:
@@ -160,8 +190,8 @@ def get_value(row, value):
         return ''
 
 def migliedschaft_existiert(asloca_id):
-    anz = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMitgliedschaft` WHERE `asloca_id` = '{asloca_id}'""".format(asloca_id=asloca_id), as_dict=True)[0].qty
-    if anz > 0:
-        return True
+    mitglied = frappe.db.sql("""SELECT `name` AS `mitglied` FROM `tabMitgliedschaft` WHERE `asloca_id` = '{asloca_id}'""".format(asloca_id=asloca_id), as_dict=True)
+    if len(mitglied) > 0:
+        return mitglied[0].mitglied
     else:
         return False
