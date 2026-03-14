@@ -90,7 +90,7 @@ def read_csv(site_name, file_name, limit=False, bench='frappe', record_type=Fals
 
 def create_mitgliedschaft(data, interessent=False):
     def get_kundentyp(data):
-        if get_value(data, 'firmenname') and get_value(data, 'firmenname') != '':
+        if get_value(data, 'firma') and get_value(data, 'firma') != '':
             return 'Unternehmen'
         else:
             return 'Einzelperson'
