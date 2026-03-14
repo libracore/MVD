@@ -150,7 +150,7 @@ def create_mitgliedschaft(data, interessent=False):
         frappe.db.commit()
         return False
     except Exception as err:
-        frappe.log_error("{0}\n---\n{1}".format(err, data), 'create_mvs_mitgliedschaft')
+        frappe.log_error("{0}\n---\n{1}\n---\n{2}".format(err, frappe.get_traceback(), data), 'create_mvs_mitgliedschaft')
         return [get_value(data, 'asloca_id') if not interessent else get_value(data, 'nachname_1'), str(err)]
 
 def update_mitgliedschaft(mitglied_id, data):
