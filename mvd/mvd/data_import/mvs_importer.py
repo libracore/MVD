@@ -154,6 +154,13 @@ def create_mitgliedschaft(data, interessent=False):
         return [get_value(data, 'asloca_id') if not interessent else get_value(data, 'nachname_1'), str(err)]
 
 def update_mitgliedschaft(mitglied_id, data):
+    def get_strasse(data):
+        str_list = get_value(data, 'strasse').split(" ")
+        return get_value(data, 'strasse').replace(" {0}".format(str_list[len(str_list) - 1]), "")
+    
+    def get_nummer(data):
+        str_list = get_value(data, 'strasse').split(" ")
+        return str_list[len(str_list) - 1]
     try:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
         fields = [
@@ -175,8 +182,14 @@ def update_mitgliedschaft(mitglied_id, data):
             'nachname_2'
         ]
         for field in fields:
-            if get_value(data, field) != mitgliedschaft.get(field, ''):
-                frappe.db.set_value("Mitgliedschaft", mitglied_id, field, get_value(data, field))
+            if field != 'strasse':
+                if get_value(data, field) != mitgliedschaft.get(field, ''):
+                    frappe.db.set_value("Mitgliedschaft", mitglied_id, field, get_value(data, field))
+            else:
+                if get_strasse(data) != mitgliedschaft.get('strasse', ''):
+                    frappe.db.set_value("Mitgliedschaft", mitglied_id, 'strasse', get_strasse(data))
+                if get_nummer(data) != mitgliedschaft.get('nummer', ''):
+                    frappe.db.set_value("Mitgliedschaft", mitglied_id, 'nummer', get_nummer(data))
         frappe.db.commit()
         return False
     except Exception as err:
