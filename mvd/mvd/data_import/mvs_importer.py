@@ -35,7 +35,7 @@ hm = {
     'interessent_typ': 'interessent_typ'
 }
 
-def read_csv(site_name, file_name, limit=False, bench='frappe', record_type=False):
+def read_csv(site_name, file_name, limit=False, bench='frappe', record_type=False, skip=0):
     if not record_type or record_type not in ['Mitglied', 'Interessent']:
         print("Kein Typ (Mitglied / Interessent) angegeben")
         return
@@ -58,6 +58,11 @@ def read_csv(site_name, file_name, limit=False, bench='frappe', record_type=Fals
     added = 0
     updated = 0
     for index, row in tqdm(df.iterrows(), desc="Create / Update MVS", unit=" Mitglied", total=max_loop):
+        if skip > 0:
+            if skip <= count:
+                count += 1
+                continue
+        
         if count <= max_loop:
             if record_type == 'Mitglied':
                 existing = migliedschaft_existiert(get_value(row, 'asloca_id'))
