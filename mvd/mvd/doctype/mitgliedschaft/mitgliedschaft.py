@@ -75,25 +75,26 @@ class Mitgliedschaft(Document):
         if self.zuzug:
             zuzugsdatum = self.zuzug
         
-        # update Zahlung Mitgliedschaft
-        check_zahlung_mitgliedschaft(self)
-        
-        # update Zahlung HV
-        check_zahlung_hv(self)
+        if not self.flags.from_import:
+            # update Zahlung Mitgliedschaft
+            check_zahlung_mitgliedschaft(self)
+            
+            # update Zahlung HV
+            check_zahlung_hv(self)
 
-        # Update max Reminder Level
-        set_max_reminder_level(self)
-        
-        # ampelfarbe
-        get_ampelfarbe(self)
-        
-        # Prüfe Jahr Bezahlt (Mitgliedschaft & HV) bezgl. Folgejahr Regelung
-        if self.status_c != 'Inaktiv':
-            check_folgejahr_regelung(self)
-        
-        # Deaktivieren des Web-Logins #1643
-        if self.status_c in ['Inaktiv', 'Ausschluss']:
-            disable_web_login(self.mitglied_nr)
+            # Update max Reminder Level
+            set_max_reminder_level(self)
+            
+            # ampelfarbe
+            get_ampelfarbe(self)
+            
+            # Prüfe Jahr Bezahlt (Mitgliedschaft & HV) bezgl. Folgejahr Regelung
+            if self.status_c != 'Inaktiv':
+                check_folgejahr_regelung(self)
+            
+            # Deaktivieren des Web-Logins #1643
+            if self.status_c in ['Inaktiv', 'Ausschluss']:
+                disable_web_login(self.mitglied_nr)
 
         if cint(self.validierung_notwendig) != 1:
             # entferne Telefonnummern mit vergessenen Leerschlägen
@@ -121,11 +122,12 @@ class Mitgliedschaft(Document):
             # Rechnungs Adressblock
             self.rg_adressblock = get_rg_adressblock(self)
             
-            # preisregel
-            self.check_preisregel()
-            
-            # prüfen und setzen des Wertes naechstes_jahr_geschuldet
-            self.naechstes_jahr_geschuldet = cint(get_naechstes_jahr_geschuldet(self.name, live_data=self))
+            if not self.flags.from_import:
+                # preisregel
+                self.check_preisregel()
+                
+                # prüfen und setzen des Wertes naechstes_jahr_geschuldet
+                self.naechstes_jahr_geschuldet = cint(get_naechstes_jahr_geschuldet(self.name, live_data=self))
             
             # Hotfix Zuzugs-Korrespondenz
             if self.zuzug_von:
@@ -149,17 +151,18 @@ class Mitgliedschaft(Document):
             else:
                 self.aktive_mitgliedschaft = 0
             
-            # schliesse offene abreits backlogs
-            close_open_validations(self.name, 'Daten Validieren')
-            if not cint(self.interessent_innenbrief_mit_ez) == 1:
-                close_open_validations(self.name, 'Interessent*Innenbrief mit EZ')
-            if not cint(self.anmeldung_mit_ez) == 1:
-                close_open_validations(self.name, 'Anmeldung mit EZ')
-            
-            # beziehe mitglied_nr wenn umwandlung von Interessent*in
-            if self.status_c not in ('Interessent*in', 'Inaktiv') and self.mitglied_nr == 'MV':
-                self.mitglied_nr = create_new_number(id=self.name)['nr']
-                self.letzte_bearbeitung_von = 'User'
+            if not self.flags.from_import:
+                # schliesse offene abreits backlogs
+                close_open_validations(self.name, 'Daten Validieren')
+                if not cint(self.interessent_innenbrief_mit_ez) == 1:
+                    close_open_validations(self.name, 'Interessent*Innenbrief mit EZ')
+                if not cint(self.anmeldung_mit_ez) == 1:
+                    close_open_validations(self.name, 'Anmeldung mit EZ')
+                
+                # beziehe mitglied_nr wenn umwandlung von Interessent*in
+                if self.status_c not in ('Interessent*in', 'Inaktiv') and self.mitglied_nr == 'MV':
+                    self.mitglied_nr = create_new_number(id=self.name)['nr']
+                    self.letzte_bearbeitung_von = 'User'
             
             # hotfix für onlineHaftpflicht value (null vs 0)
             if not self.online_haftpflicht:

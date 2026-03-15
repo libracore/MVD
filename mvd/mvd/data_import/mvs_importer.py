@@ -150,6 +150,7 @@ def create_mitgliedschaft(data, interessent=False):
             'mvs_quelle': get_value(data, 'mvs_quelle') if interessent else None,
             'interessent_typ': get_value(data, 'interessent_typ') if interessent else None
         })
+        mitgliedschaft.flags.from_import = True
         mitgliedschaft.insert(ignore_permissions=True)
 
         frappe.db.commit()
