@@ -58,8 +58,8 @@ def read_csv(site_name, file_name, limit=False, bench='frappe', record_type=Fals
     added = 0
     updated = 0
     for index, row in tqdm(df.iterrows(), desc="Create / Update MVS", unit=" Mitglied", total=max_loop):
-        if skip > 0:
-            if skip <= count:
+        if int(skip) > 0:
+            if int(skip) <= count:
                 count += 1
                 continue
         
