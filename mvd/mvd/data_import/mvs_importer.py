@@ -32,7 +32,8 @@ hm = {
     'mitgliedtyp_c': 'mitgliedtyp_c',
     'kundentyp': 'kundentyp',
     'mvs_quelle': 'mvs_quelle',
-    'interessent_typ': 'interessent_typ'
+    'interessent_typ': 'interessent_typ',
+    'e_mail_1': 'e_mail_1'
 }
 
 def read_csv(site_name, file_name, limit=False, bench='frappe', record_type=False, skip=0):
@@ -132,7 +133,7 @@ def create_mitgliedschaft(data, interessent=False):
             "tel_p_1": '',
             "tel_m_1": '',
             "tel_g_1": '',
-            "e_mail_1": '',
+            "e_mail_1": get_value(data, 'e_mail_1'),
             "zusatz_adresse": get_value(data, 'zusatz_adresse') if not interessent else None,
             "strasse": get_strasse(data),
             "nummer": get_nummer(data),
