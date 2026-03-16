@@ -50,7 +50,6 @@
   "section_artikel",
   "artikel_json",
   "enthaelt_download",
-  "enthaelt_nur_downloads",
   "section_break_48",
   "v2"
  ],
@@ -314,16 +313,11 @@
    "label": "Enth\u00e4lt Download"
   },
   {
-   "fieldname": "enthaelt_nur_downloads",
-   "fieldtype": "Data",
-   "label": "Enth\u00e4lt nur Downloads"
-  },
-  {
    "fieldname": "section_break_48",
    "fieldtype": "Section Break"
   }
  ],
- "modified": "2026-03-16 09:12:06.428483",
+ "modified": "2026-03-16 10:03:40.908145",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Webshop Order",
