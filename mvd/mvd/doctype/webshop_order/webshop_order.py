@@ -216,38 +216,46 @@ class WebshopOrder(Document):
 
     
     def after_insert(self):
-        # Bei altem Webshop und abweichenden Adressen soll kein Customer / Rechnung angelegt werden
         if self.v2 != 1 or self.abweichende_rechnungsadresse:
             return
-        # Bei gelösten Mitgliedschaften soll kein Customer / Rechnung angelegt werden
+            
         if self.artikel_json:
             try:
                 artikel_data = json.loads(self.artikel_json)
                 items = artikel_data.get("items", [])
+                
+                download_count = 0
+                total_count = len(items)
+                mitgliedschaft_gefunden = False
+
                 for item in items:
                     item_code = (item.get("item") or "").upper().strip()
-
-                    # Logik für Downloads: Prüfen auf "-D" am Ende
+                    
                     if item_code.endswith("-D"):
-                        self.enthaelt_download = 1
-                    # Logik für Mitgliedschaften
+                        download_count += 1
+
                     if (
                         (item_code.startswith("MV") and (item_code.endswith("-MG") or item_code.endswith("-MP")))
                         or item_code == "MVZH-MM"
                     ):
-                        self.bestellung_erledigt = 1
-                        self.save()
-                        return
-                    
-                # Falls keine Mitgliedschaft (kein Return oben), aber ein Download gefunden wurde:
-                if self.enthaelt_download == 1:
+                        mitgliedschaft_gefunden = True
+
+                if download_count > 0:
+                    self.enthaelt_download = 1
+
+                if total_count > 0 and download_count == total_count:
+                    self.enthaelt_nur_downloads = 1
+                
+                if mitgliedschaft_gefunden:
+                    self.bestellung_erledigt = 1
+
+                # Speichern falls nötig
+                if self.enthaelt_download or self.bestellung_erledigt or self.enthaelt_nur_downloads:
                     self.save()
 
-            except Exception:
-                frappe.log_error(
-                    title="Fehler beim Verarbeiten von artikel_json in Webshop Order",
-                    message=frappe.get_traceback()
-                )
+            except Exception as e:
+                frappe.log_error("Fehler in after_insert", frappe.get_traceback())
+
 
         matching_customer = frappe.get_all(
             "Kunden",
