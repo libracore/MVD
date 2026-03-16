@@ -226,6 +226,11 @@ class WebshopOrder(Document):
                 items = artikel_data.get("items", [])
                 for item in items:
                     item_code = (item.get("item") or "").upper().strip()
+
+                    # Logik für Downloads: Prüfen auf "-D" am Ende
+                    if item_code.endswith("-D"):
+                        self.enthaelt_download = 1
+                    # Logik für Mitgliedschaften
                     if (
                         (item_code.startswith("MV") and (item_code.endswith("-MG") or item_code.endswith("-MP")))
                         or item_code == "MVZH-MM"
@@ -233,8 +238,16 @@ class WebshopOrder(Document):
                         self.bestellung_erledigt = 1
                         self.save()
                         return
+                    
+                # Falls keine Mitgliedschaft (kein Return oben), aber ein Download gefunden wurde:
+                if self.enthaelt_download == 1:
+                    self.save()
+
             except Exception:
-                pass
+                frappe.log_error(
+                    title="Fehler beim Verarbeiten von artikel_json in Webshop Order",
+                    message=frappe.get_traceback()
+                )
 
         matching_customer = frappe.get_all(
             "Kunden",

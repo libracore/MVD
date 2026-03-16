@@ -49,6 +49,7 @@
   "online_payment_zahlungsfile",
   "section_artikel",
   "artikel_json",
+  "enthaelt_download",
   "v2"
  ],
  "fields": [
@@ -303,9 +304,15 @@
    "fieldname": "bestellung_erledigt",
    "fieldtype": "Check",
    "label": "Bestellung erledigt"
+  },
+  {
+   "default": "0",
+   "fieldname": "enthaelt_download",
+   "fieldtype": "Check",
+   "label": "Enth\u00e4lt Download"
   }
  ],
- "modified": "2025-11-27 10:05:09.672506",
+ "modified": "2026-03-16 08:40:09.315373",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Webshop Order",
