@@ -73,6 +73,7 @@ def spenden_versand(doc, debug=False):
             commit_count = 1
             loop = 1
             total = len(mitgliedschaften)
+            needs_reload = False
             already_exists = frappe.db.sql("""SELECT `mv_mitgliedschaft` FROM `tabFakultative Rechnung` WHERE `spenden_versand` = '{0}' AND `docstatus` = 1""".format(doc.name), as_list=True)
             for mitgliedschaft_name in mitgliedschaften:
                 if [mitgliedschaft_name.name] not in already_exists:
@@ -107,15 +108,17 @@ def spenden_versand(doc, debug=False):
                         print("{0} of {1}".format(loop, total))
                         loop += 1
                 else:
-                    existing_fr = frappe.db.sql("""SELECT `name` FROM `tabFakultative Rechnung` WHERE `spenden_versand` = '{0}' AND `docstatus` = 1 AND `mv_mitgliedschaft` = '{1}'""".format(doc.name, mitgliedschaft_name.name), as_dict=True)
-                    if len(existing_fr) > 0:
-                        if debug:
-                            print("Added {0}".format(existing_fr[0].name))
-                        fr_list.append(existing_fr[0].name)
+                    needs_reload = True
                     if debug:
                         print("Skip {0}".format(mitgliedschaft_name.name))
                         loop += 1
             
+            if needs_reload:
+                frs = frappe.db.sql("""SELECT `name` FROM `tabFakultative Rechnung` WHERE `spenden_versand` = '{0}' AND `docstatus` = 1""".format(doc.name), as_dict=True)
+                fr_list = []
+                for fr in frs:
+                    fr_list.append(fr.name)
+
             frappe.db.commit()
             create_sammel_csv(fr_list, doc)
         else:
