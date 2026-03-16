@@ -184,7 +184,8 @@ def get_csv_data(fr_list, data_only):
         'ausweis_vorname_1',
         'ausweis_nachname_1',
         'ausweis_vorname_2',
-        'ausweis_nachname_2'
+        'ausweis_nachname_2',
+        'sprache'
     ]
     data.append(titel)
 
@@ -237,6 +238,7 @@ def get_csv_data(fr_list, data_only):
         sektion_c = mitgliedschaft.sektion_id
         region_c = mitgliedschaft.region or ''
         hat_email = 1 if mitgliedschaft.e_mail_1 else 0
+        sprache = mitgliedschaft.language or 'de'
         
         # rechnungsdaten
         betrag_1 = 0.00
@@ -278,7 +280,8 @@ def get_csv_data(fr_list, data_only):
             ausweis_vorname_1,
             ausweis_nachname_1,
             ausweis_vorname_2,
-            ausweis_nachname_2
+            ausweis_nachname_2,
+            sprache
         ]
         data.append(_data)
 
