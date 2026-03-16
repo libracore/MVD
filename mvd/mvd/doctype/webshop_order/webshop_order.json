@@ -50,6 +50,7 @@
   "section_artikel",
   "artikel_json",
   "enthaelt_download",
+  "nur_downloads",
   "section_break_48",
   "v2"
  ],
@@ -315,9 +316,15 @@
   {
    "fieldname": "section_break_48",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "nur_downloads",
+   "fieldtype": "Check",
+   "label": "Nur Downloads"
   }
  ],
- "modified": "2026-03-16 10:03:40.908145",
+ "modified": "2026-03-16 10:22:03.630892",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Webshop Order",

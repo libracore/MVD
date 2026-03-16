@@ -226,7 +226,6 @@ class WebshopOrder(Document):
                 
                 download_count = 0
                 total_count = len(items)
-                mitgliedschaft_gefunden = False
 
                 for item in items:
                     item_code = (item.get("item") or "").upper().strip()
@@ -238,20 +237,15 @@ class WebshopOrder(Document):
                         (item_code.startswith("MV") and (item_code.endswith("-MG") or item_code.endswith("-MP")))
                         or item_code == "MVZH-MM"
                     ):
-                        mitgliedschaft_gefunden = True
+                        self.bestellung_erledigt = 1
+                        self.save()
+                        return # Bei Mitgliedschaften brechen wir hier ab.
 
                 if download_count > 0:
                     self.enthaelt_download = 1
 
                 if total_count > 0 and download_count == total_count:
-                    self.enthaelt_nur_downloads = 1
-                
-                if mitgliedschaft_gefunden:
-                    self.bestellung_erledigt = 1
-
-                # Speichern falls nötig
-                if self.enthaelt_download or self.bestellung_erledigt or self.enthaelt_nur_downloads:
-                    self.save()
+                    self.nur_downloads = 1
 
             except Exception as e:
                 frappe.log_error("Fehler in after_insert", frappe.get_traceback())
@@ -265,9 +259,9 @@ class WebshopOrder(Document):
         if len(matching_customer) == 1:
             self.faktura_kunde = matching_customer[0].name
             self.update_faktura_kunde()
-            self.save()
         else:
             self.create_faktura_kunde()
+        self.save()
         self.create_sinv()
         return
 
