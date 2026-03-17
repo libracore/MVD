@@ -120,9 +120,9 @@ def spenden_versand(doc, debug=False):
                     fr_list.append(fr.name)
 
             frappe.db.commit()
-            create_sammel_csv(fr_list, doc)
+            create_sammel_csv(fr_list, doc, debug=debug)
         else:
-            create_sammel_csv(mitgliedschaften, doc, data_only=True)
+            create_sammel_csv(mitgliedschaften, doc, data_only=True, debug=debug)
         
         doc.status = 'Abgeschlossen'
         doc.save()
@@ -132,9 +132,12 @@ def spenden_versand(doc, debug=False):
         doc.add_comment('Comment', text='Fehler:<br>{0}'.format(err))
         frappe.db.commit()
 
-def create_sammel_csv(fr_list, spenden_versand, data_only=False):
-    csv_data = get_csv_data(fr_list, data_only)
+def create_sammel_csv(fr_list, spenden_versand, data_only=False, debug=False):
+    csv_data = get_csv_data(fr_list, data_only, debug=debug)
 
+    if debug:
+        print("Erstelle und speichere CSV...")
+    
     csv_file = make_csv(csv_data)
 
     _file = frappe.get_doc({
@@ -150,7 +153,10 @@ def create_sammel_csv(fr_list, spenden_versand, data_only=False):
 
     return
 
-def get_csv_data(fr_list, data_only):
+def get_csv_data(fr_list, data_only, debug=False):
+    if debug:
+        print("Trage CSV Daten zusammen")
+    
     data = []
     titel = [
         'firma',
@@ -189,7 +195,12 @@ def get_csv_data(fr_list, data_only):
     ]
     data.append(titel)
 
+    loop = 1
+    total = len(fr_list)
     for fr_doc in fr_list:
+        if debug:
+            print("CSV {0} von {1}".format(loop, total))
+        
         if not data_only:
             fr = frappe.get_doc("Fakultative Rechnung", fr_doc)
             mitgliedschaft = frappe.get_doc("Mitgliedschaft", fr.mv_mitgliedschaft)
@@ -284,5 +295,6 @@ def get_csv_data(fr_list, data_only):
             sprache
         ]
         data.append(_data)
+        loop += 1
 
     return data
