@@ -86,7 +86,17 @@
     <div>Bereits bezahlt, vielen Dank für Ihre Bestellung.</div>
 {% endif %} -->
 
-<p style="margin-top: 50px;">
+<p style="margin-top: 50px;">Wir bedanken uns herzlich für Ihre Bestellung und wünschen Ihnen viel Erfolg mit unseren Dokumenten.</p>
+{% if webshop_order.nur_downloads %}
+    <p>Wir garantieren die Verfügbarkeit der Downloadlinks für <b>14 Tage</b>.</p>
+{% elif webshop_order.enthaelt_download %}
+    <p>Wir garantieren die Verfügbarkeit der Downloadlinks für <b>14 Tage</b>.</p>
+    <p>Ihre Bestellung wird in den nächsten Tagen per Post versendet.</p>
+{% else %}
+    <p>Ihre Bestellung wird in den nächsten Tagen per Post versendet.</p>
+{% endif %}
+
+<p style="margin-top: 20px;">
     Mieterinnen- und Mieterverband <br>
     shop@mvd.mieterverband.ch
 </p>

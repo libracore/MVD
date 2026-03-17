@@ -216,25 +216,40 @@ class WebshopOrder(Document):
 
     
     def after_insert(self):
-        # Bei altem Webshop und abweichenden Adressen soll kein Customer / Rechnung angelegt werden
         if self.v2 != 1 or self.abweichende_rechnungsadresse:
             return
-        # Bei gelösten Mitgliedschaften soll kein Customer / Rechnung angelegt werden
+            
         if self.artikel_json:
             try:
                 artikel_data = json.loads(self.artikel_json)
                 items = artikel_data.get("items", [])
+                
+                download_count = 0
+                total_count = len(items)
+
                 for item in items:
                     item_code = (item.get("item") or "").upper().strip()
+                    
+                    if item_code.endswith("-D"):
+                        download_count += 1
+
                     if (
                         (item_code.startswith("MV") and (item_code.endswith("-MG") or item_code.endswith("-MP")))
                         or item_code == "MVZH-MM"
                     ):
                         self.bestellung_erledigt = 1
                         self.save()
-                        return
-            except Exception:
-                pass
+                        return # Bei Mitgliedschaften brechen wir hier ab.
+
+                if download_count > 0:
+                    self.enthaelt_download = 1
+
+                if total_count > 0 and download_count == total_count:
+                    self.nur_downloads = 1
+
+            except Exception as e:
+                frappe.log_error("Fehler in after_insert", frappe.get_traceback())
+
 
         matching_customer = frappe.get_all(
             "Kunden",
@@ -244,9 +259,9 @@ class WebshopOrder(Document):
         if len(matching_customer) == 1:
             self.faktura_kunde = matching_customer[0].name
             self.update_faktura_kunde()
-            self.save()
         else:
             self.create_faktura_kunde()
+        self.save()
         self.create_sinv()
         return
 
