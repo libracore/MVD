@@ -360,9 +360,14 @@ def bulk_submit(mahnlauf):
 def bg_bulk_submit(mahnlauf):
     mahnungen = frappe.db.sql("""SELECT `name` FROM `tabMahnung` WHERE `mahnlauf` = '{mahnlauf}' AND `docstatus` = 0""".format(mahnlauf=mahnlauf), as_dict=True)
     for mahnung in mahnungen:
-        mahnung = frappe.get_doc("Mahnung", mahnung.name)
-        mahnung.update_reminder_levels()
-        mahnung.submit()
+        try:
+            mahnung = frappe.get_doc("Mahnung", mahnung.name)
+            mahnung.update_reminder_levels()
+            mahnung.submit()
+        except frappe.exceptions.CancelledLinkError:
+            mahnlauf_doc = frappe.get_doc('Mahnlauf', mahnlauf)
+            mahnlauf_doc.add_comment('Comment', 'Aufgrund einer abgebrochenen Rechnung konnte die Mahnung {0} nicht verbucht werden.<br>Bitte die Mahnung löschen.'.format(mahnung.name))
+            pass
     return
 
 @frappe.whitelist()
