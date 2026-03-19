@@ -14,19 +14,27 @@ class DailySnap(Document):
                 SELECT
                     COUNT(`name`) AS `qty`,
                     `sektion_id` AS `sektion`,
-                    `status_c` AS `status`
+                    `status_c` AS `status`,
+                    `kundentyp` AS `typ`
                 FROM `tabMitgliedschaft`
-                GROUP BY `sektion_id`, `status_c`
+                GROUP BY `sektion_id`, `status_c`, `kundentyp`
                 ORDER BY `sektion_id` ASC
             """, as_dict=True)
             
             ordered_data = {}
-            for dq in data_query:
-                if dq.get("sektion") in ordered_data:
-                    ordered_data[dq.get("sektion")][dq.get("status")] = dq.get("qty")
-                else:
-                    ordered_data[dq.get("sektion")] = {}
-                    ordered_data[dq.get("sektion")][dq.get("status")] = dq.get("qty")
             
-            json_data = json.dumps(ordered_data, indent=2)
-            self.data = json_data
+            for dq in data_query:
+                sektion = dq.get("sektion")
+                status = dq.get("status")
+                typ = dq.get("typ")
+                qty = dq.get("qty")
+
+                if sektion not in ordered_data:
+                    ordered_data[sektion] = {}
+                
+                if status not in ordered_data[sektion]:
+                    ordered_data[sektion][status] = {}
+                
+                ordered_data[sektion][status][typ] = qty
+            
+            self.data = json.dumps(ordered_data, indent=2)
