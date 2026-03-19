@@ -5,6 +5,7 @@
  "engine": "InnoDB",
  "field_order": [
   "overview",
+  "year",
   "data"
  ],
  "fields": [
@@ -17,9 +18,14 @@
    "fieldname": "data",
    "fieldtype": "Code",
    "label": "Data"
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Int",
+   "label": "Year"
   }
  ],
- "modified": "2026-03-19 09:37:53.175495",
+ "modified": "2026-03-19 11:00:09.811220",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Yearly Snap",

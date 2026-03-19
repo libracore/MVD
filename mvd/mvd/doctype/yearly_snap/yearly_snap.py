@@ -10,6 +10,9 @@ from frappe.utils import nowdate, getdate
 
 class YearlySnap(Document):
 	def validate(self):
+		if not self.jahr:
+			self.jahr = getdate().year
+			
 		if not self.data:
 			data_query = frappe.db.sql("""
                 SELECT
