@@ -15,9 +15,10 @@ class DailySnap(Document):
                     COUNT(`name`) AS `qty`,
                     `sektion_id` AS `sektion`,
                     `status_c` AS `status`,
-                    `kundentyp` AS `typ`
+                    `kundentyp` AS `typ`,
+                    `language` AS `lang`
                 FROM `tabMitgliedschaft`
-                GROUP BY `sektion_id`, `status_c`, `kundentyp`
+                GROUP BY `sektion_id`, `status_c`, `kundentyp`, `language`
                 ORDER BY `sektion_id` ASC
             """, as_dict=True)
             
@@ -27,14 +28,23 @@ class DailySnap(Document):
                 sektion = dq.get("sektion")
                 status = dq.get("status")
                 typ = dq.get("typ")
+                lang = dq.get("lang")
                 qty = dq.get("qty")
 
                 if sektion not in ordered_data:
                     ordered_data[sektion] = {}
-                
                 if status not in ordered_data[sektion]:
                     ordered_data[sektion][status] = {}
-                
-                ordered_data[sektion][status][typ] = qty
+
+                if sektion == "MVBE":
+                    if typ not in ordered_data[sektion][status]:
+                        ordered_data[sektion][status][typ] = {}
+                    
+                    ordered_data[sektion][status][typ][lang] = qty
+                else:
+                    if typ not in ordered_data[sektion][status]:
+                        ordered_data[sektion][status][typ] = 0
+                    
+                    ordered_data[sektion][status][typ] += qty
             
             self.data = json.dumps(ordered_data, indent=2)
