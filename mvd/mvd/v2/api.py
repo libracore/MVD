@@ -530,6 +530,7 @@ def webshop_download(token):
     Prüft zuerst den aktuellen Link, dann die Historie (Child Table).
     """
     target_file = None
+    target_name = None
 
     link = frappe.db.get_value(
         "Webshop Order Download Link",
@@ -540,19 +541,27 @@ def webshop_download(token):
 
     if link:
         target_file = link.pdf_file
+        target_name = link.name
     else:
         history_link = frappe.db.get_value(
             "Webshop Order Download Link History", 
             {"download_hash": token},
-            ["file", "valid_until"],
+            ["parent", "valid_until"],
             as_dict=True
         )
 
         if history_link:
             if getdate(history_link.valid_until) >= getdate(today()):
-                target_file = history_link.file
+                link = frappe.db.get_value(
+                    "Webshop Order Download Link",
+                    {"name": history_link.parent},
+                    ["name", "pdf_file"],
+                    as_dict=True
+                )
+                target_file = link.pdf_file
+                target_name = link.name
             else:
-                frappe.local.response.http_status_code = 403  # 403 = Forbidden (besser für abgelaufen)
+                frappe.local.response.http_status_code = 403
                 frappe.local.response.message = 'Dieser Download-Link ist abgelaufen.'
                 return
         else:
@@ -561,7 +570,13 @@ def webshop_download(token):
             return
 
     try:
-        file_doc = frappe.get_doc("File", target_file)
+        filters = {
+            "file_url": target_file,
+            "attached_to_doctype": "Webshop Order Download Link",
+            "attached_to_name": target_name
+            }
+        file_id = frappe.db.get_value("File", filters, "name")
+        file_doc = frappe.get_doc("File", file_id)
 
         frappe.local.response.filename = file_doc.file_name
         frappe.local.response.filecontent = file_doc.get_content()
