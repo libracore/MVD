@@ -472,7 +472,6 @@ def send_invoice_confirmation_email(e_mail, sinv_name):
         sender = "{0} <{1}>".format("Mieterverband", frappe.get_value("Email Account", {"default_outgoing": 1}, "email_id"))
         comm = make(
             recipients=[e_mail],
-            reply_to="info@mieterverband.ch",
             sender=sender,
             subject=subject,
             content=message,
