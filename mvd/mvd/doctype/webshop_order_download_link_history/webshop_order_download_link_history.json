@@ -1,0 +1,39 @@
+{
+ "creation": "2026-03-19 16:23:46.032636",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "download_hash",
+  "download_link",
+  "valid_until"
+ ],
+ "fields": [
+  {
+   "fieldname": "download_hash",
+   "fieldtype": "Data",
+   "label": "Download Hash"
+  },
+  {
+   "fieldname": "download_link",
+   "fieldtype": "Data",
+   "label": "Download Link"
+  },
+  {
+   "fieldname": "valid_until",
+   "fieldtype": "Date",
+   "label": "Valid Until"
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-03-19 16:50:27.992465",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Webshop Order Download Link History",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
