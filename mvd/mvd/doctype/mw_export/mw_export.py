@@ -334,6 +334,8 @@ def get_csv_data(mw_export, query=False):
             if commit_loop == 30:
                 frappe.db.commit()
                 commit_loop = 1
+            else:
+                commit_loop += 1
         frappe.db.commit()
 
     return data
