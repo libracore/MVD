@@ -10,6 +10,9 @@ from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_n
 from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
 from tqdm import tqdm
 from frappe.utils import cint
+from mvd.mvd.utils import is_job_already_running
+from frappe.utils.data import today
+from frappe.utils.background_jobs import enqueue
 
 class SPMitgliedData(Document):
     pass
@@ -70,6 +73,13 @@ def update(mitglied_nr, mitglied_id):
     Nachfolgende Methode wird mit dem "All"-Scheduler (~4') ausgeführt.
 '''
 def update_based_on_scheduler():
+    if is_job_already_running('Nächtliche SP Mitglied Data Korrektur'):
+        # Solange die nächtliche SP Mitglied Data Korrektur läuft, keine paralelle update_based_on_scheduler da dies Konfliktpotenzial bietet
+        return
+    if frappe.db.get_value("Race Condition Helper", "Race Condition Helper", "fixing_wrong_data") != today():
+        # Solange die nächtliche SP Mitglied Data Korrektur noch nicht durchgeführt wurde, keine paralelle update_based_on_scheduler da dies Konfliktpotenzial bietet
+        return
+    
     need_updates = frappe.db.sql(
         """
             SELECT
@@ -86,6 +96,7 @@ def update_based_on_scheduler():
     Selbst-Heil-Methode (called via Daily Scheduler)
 '''
 def fixing_wrong_data(manual=False):
+    # Diese Methode läuft (wenn als BG-Job) unter dem Job-Name "Nächtliche SP Mitglied Data Korrektur"
     if manual:
         print("Analyse DB, please wait...")
     
@@ -127,15 +138,31 @@ def fixing_wrong_data(manual=False):
             mitglied_id = get_mitglied_id_from_nr(mitglied_nr=mitgliedschaft.ref_nr, ignore_inaktiv=True)
             if cint(frappe.db.get_value("Mitgliedschaft", mitglied_id, "validierung_notwendig")) != 1:
                 create_or_update_sp_mitglied_data(mitgliedschaft.ref_nr, mitglied_id)
-                affected_qty += 1
-                affected_records.append(mitgliedschaft.ref_nr)
+                # Es gibt einen BG-Prozess welcher ~ alle 4' ausgeführt wird und die "SP Mitglied Data" aktualisiert insofern notwendig.
+                # Es kann vorkommen, dass dieser nächtliche Korrekturlauf "SP Mitglied Data" korrigiert, welche bereits zur Aktualisierung markiert waren.
+                # Wenn dies der Fall ist, wurden diese als falsch-positive Fehler geloggt.
+                # Durch das unten folgende IF werden solche falsch-positiven Fehler-Logs vermieden.
+                if (
+                    not frappe.db.exists("SP Mitglied Data", mitgliedschaft.ref_nr)
+                    or cint(frappe.db.get_value("SP Mitglied Data", mitgliedschaft.ref_nr, "needs_update")) != 1
+                ):
+                    affected_qty += 1
+                    affected_records.append(mitgliedschaft.ref_nr)
     else:
         for mitgliedschaft in tqdm(mitgliedschaften, desc="fixing_wrong_data", unit=" Corr.", total=len(mitgliedschaften)):
             mitglied_id = get_mitglied_id_from_nr(mitglied_nr=mitgliedschaft.ref_nr, ignore_inaktiv=True)
             if cint(frappe.db.get_value("Mitgliedschaft", mitglied_id, "validierung_notwendig")) != 1:
                 create_or_update_sp_mitglied_data(mitgliedschaft.ref_nr, mitglied_id)
-                affected_qty += 1
-                affected_records.append(mitgliedschaft.ref_nr)
+                # Es gibt einen BG-Prozess welcher ~ alle 4' ausgeführt wird und die "SP Mitglied Data" aktualisiert insofern notwendig.
+                # Es kann vorkommen, dass dieser nächtliche Korrekturlauf "SP Mitglied Data" korrigiert, welche bereits zur Aktualisierung markiert waren.
+                # Wenn dies der Fall ist, wurden diese als falsch-positive Fehler geloggt.
+                # Durch das unten folgende IF werden solche falsch-positiven Fehler-Logs vermieden.
+                if (
+                    not frappe.db.exists("SP Mitglied Data", mitgliedschaft.ref_nr)
+                    or cint(frappe.db.get_value("SP Mitglied Data", mitgliedschaft.ref_nr, "needs_update")) != 1
+                ):
+                    affected_qty += 1
+                    affected_records.append(mitgliedschaft.ref_nr)
     
     if manual:
         print("{0} korrigiert".format(affected_qty))
@@ -143,3 +170,8 @@ def fixing_wrong_data(manual=False):
     
     if affected_qty > 0:
         frappe.log_error("Anzahl korrigiert: {0}\nDatensätze: {1}".format(affected_qty, affected_records), 'SP Mitlgied Data fixing_wrong_data')
+    
+    # Um Race Conditions zu vermeiden, wird im DT Race Condition Helper das aktuelle Datum hinterlegt, sobald der Prozess durch ist.
+    # Dies ermöglicht in gewissen Fällen ein Serielles Abarbeiten von BG-Jobs obwohl mehrere Worker paralell arbeiten.
+    frappe.db.set_value("Race Condition Helper", "Race Condition Helper", "fixing_wrong_data", today())
+    frappe.db.commit()
