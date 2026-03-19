@@ -6,7 +6,8 @@
  "field_order": [
   "overview",
   "year",
-  "data"
+  "mitglieder_statistik",
+  "nicht_zahler"
  ],
  "fields": [
   {
@@ -15,17 +16,22 @@
    "label": "Overview"
   },
   {
-   "fieldname": "data",
-   "fieldtype": "Code",
-   "label": "Data"
-  },
-  {
    "fieldname": "year",
    "fieldtype": "Int",
    "label": "Year"
+  },
+  {
+   "fieldname": "mitglieder_statistik",
+   "fieldtype": "Code",
+   "label": "Mitglieder Statistik"
+  },
+  {
+   "fieldname": "nicht_zahler",
+   "fieldtype": "Code",
+   "label": "Nicht Zahler"
   }
  ],
- "modified": "2026-03-19 11:00:09.811220",
+ "modified": "2026-03-19 11:05:06.543862",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Yearly Snap",
