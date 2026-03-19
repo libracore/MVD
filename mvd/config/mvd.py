@@ -32,6 +32,12 @@ def get_data():
                     "name": "Daily Snap",
                     "label": _("Täglicher Mitgliedschaften Snap"),
                     "description": _("Daily Snap")
+                },
+               {
+                    "type": "doctype",
+                    "name": "Yearly Snap",
+                    "label": _("Jährlicher Mitgliedschaften Snap"),
+                    "description": _("Yearly Snap")
                 }
             ]
         },
