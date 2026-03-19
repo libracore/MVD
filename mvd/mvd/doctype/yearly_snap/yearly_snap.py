@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import json
-from frappe.utils import nowdate, getdate
+from frappe.utils import nowdate, getdate, now_datetime
 
 class YearlySnap(Document):
     def validate(self):
@@ -75,7 +75,10 @@ def erstelle_mitglieder_statistik(date=None):
     return doc.name
 
 @frappe.whitelist()
-def erstelle_nichtzahler_statistik(year):
+def erstelle_nichtzahler_statistik(year=None):
+    if not year:
+        year = int(now_datetime().year)
+
     existing_snap = frappe.db.get_value("Yearly Snap", {"year": year}, "name")
 
     if existing_snap:
