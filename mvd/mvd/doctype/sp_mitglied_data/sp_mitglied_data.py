@@ -60,7 +60,14 @@ def update(mitglied_nr, mitglied_id):
         existing_record = frappe.get_doc("SP Mitglied Data", mitglied_nr)
         existing_record.json = json.dumps(data, indent=2)
         existing_record.needs_update = 0
-        existing_record.save(ignore_permissions=True)
+        try:
+            existing_record.save(ignore_permissions=True)
+        except frappe.exceptions.TimestampMismatchError:
+            # Reload & Retry im Konfliktfall (#1716)
+            existing_record.reload()
+            existing_record.json = json.dumps(data, indent=2)
+            existing_record.needs_update = 0
+            existing_record.save(ignore_permissions=True)
         frappe.db.commit()
     else:
         if frappe.db.exists("SP Mitglied Data", mitglied_nr):
