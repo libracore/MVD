@@ -40,7 +40,9 @@
   "check_payrexx_ip",
   "payrexx_ip",
   "section_kampagne",
-  "suspend_kampagne_to_sp"
+  "suspend_kampagne_to_sp",
+  "statistik_section",
+  "btn_create_nichtzahler_statistik"
  ],
  "fields": [
   {
@@ -246,10 +248,20 @@
    "fieldname": "reset_hash_hours",
    "fieldtype": "Int",
    "label": "G\u00fcltigkeit Reset-Hash in Stunden"
+  },
+  {
+   "fieldname": "statistik_section",
+   "fieldtype": "Section Break",
+   "label": "Statistik"
+  },
+  {
+   "fieldname": "btn_create_nichtzahler_statistik",
+   "fieldtype": "Button",
+   "label": "Nichtzahler Statistik erstellen"
   }
  ],
  "issingle": 1,
- "modified": "2025-12-15 15:01:53.671469",
+ "modified": "2026-03-19 14:03:42.946548",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Settings",
