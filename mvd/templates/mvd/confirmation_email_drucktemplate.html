@@ -86,15 +86,16 @@
     <div>Bereits bezahlt, vielen Dank für Ihre Bestellung.</div>
 {% endif %} -->
 
-<p style="margin-top: 50px;">Wir bedanken uns herzlich für Ihre Bestellung und wünschen Ihnen viel Erfolg mit unseren Dokumenten.</p>
+
 {% if webshop_order.nur_downloads %}
-    <p>Wir garantieren die Verfügbarkeit der Downloadlinks für <b>14 Tage</b>.</p>
+    <p style="margin-top: 50px;">Wir garantieren die Verfügbarkeit der Downloadlinks für <b>14 Tage</b>.</p>
 {% elif webshop_order.enthaelt_download %}
-    <p>Wir garantieren die Verfügbarkeit der Downloadlinks für <b>14 Tage</b>.</p>
+    <p style="margin-top: 50px;">Die Verfügbarkeit der Downloadlinks wird für <b>14 Tage</b> garantiert.</p>
     <p>Ihre Bestellung wird in den nächsten Tagen per Post versendet.</p>
 {% else %}
-    <p>Ihre Bestellung wird in den nächsten Tagen per Post versendet.</p>
+    <p style="margin-top: 50px;">Ihre Bestellung wird in den nächsten Tagen per Post versendet.</p>
 {% endif %}
+<p>Wir bedanken uns herzlich für Ihre Bestellung und wünschen Ihnen viel Erfolg mit unseren Dokumenten.</p>
 
 <p style="margin-top: 20px;">
     Mieterinnen- und Mieterverband <br>
