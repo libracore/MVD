@@ -16,6 +16,19 @@ def create_daily_snap():
     new_daily_snap = frappe.get_doc({'doctype': 'Daily Snap'})
     new_daily_snap.insert()
 
+def check_and_run_yearly_snap():
+    heute = getdate(today())
+    if heute.month == 9 and heute.day == 14:
+        enqueue(
+            'mvd.mvd.doctype.yearly_snap.yearly_snap.erstelle_mitglieder_statistik',
+            queue='long'
+        )
+    if heute.month == 12 and heute.day == 30:
+        enqueue(
+            'mvd.mvd.doctype.yearly_snap.yearly_snap.erstelle_nichtzahler_statistik',
+            queue='long'
+        )
+
 def set_inaktiv():
     args = {}
     enqueue("mvd.mvd.utils.daily_jobs._set_inaktiv", queue='long', job_name='Nächtliche Inaktivierungen', timeout=5000, **args)
