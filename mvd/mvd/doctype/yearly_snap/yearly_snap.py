@@ -30,7 +30,7 @@ def erstelle_mitglieder_statistik(date=None):
         doc.year = year
         doc.insert()
 
-    stichtag_treue = f"{year - 1}-09-15"
+    stichtag_treue = "{0}-09-15".format(year - 1)
 
     data_query = frappe.db.sql("""
         SELECT
