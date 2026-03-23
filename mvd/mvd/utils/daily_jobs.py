@@ -16,6 +16,19 @@ def create_daily_snap():
     new_daily_snap = frappe.get_doc({'doctype': 'Daily Snap'})
     new_daily_snap.insert()
 
+def check_and_run_yearly_snap():
+    heute = getdate(today())
+    if heute.month == 9 and heute.day == 14:
+        enqueue(
+            'mvd.mvd.doctype.yearly_snap.yearly_snap.erstelle_mitglieder_statistik',
+            queue='long'
+        )
+    if heute.month == 12 and heute.day == 30:
+        enqueue(
+            'mvd.mvd.doctype.yearly_snap.yearly_snap.erstelle_nichtzahler_statistik',
+            queue='long'
+        )
+
 def set_inaktiv():
     args = {}
     enqueue("mvd.mvd.utils.daily_jobs._set_inaktiv", queue='long', job_name='Nächtliche Inaktivierungen', timeout=5000, **args)
@@ -89,6 +102,12 @@ def _set_inaktiv():
             submit_counter = 1
         else:
             submit_counter += 1
+    
+    frappe.db.commit()
+
+    # Um Race Conditions zu vermeiden, wird im DT Race Condition Helper das aktuelle Datum hinterlegt, sobald der Prozess durch ist.
+    # Dies ermöglicht in gewissen Fällen ein Serielles Abarbeiten von BG-Jobs obwohl mehrere Worker paralell arbeiten.
+    frappe.db.set_value("Race Condition Helper", "Race Condition Helper", "set_inaktiv", today())
     frappe.db.commit()
 
 def entferne_alte_reduzierungen():
@@ -458,8 +477,12 @@ def execute_address_changes():
 
 def fixing_sp_mitglied_data():
     if not is_job_already_running('Nächtliche Inaktivierungen'):
-        from mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data import fixing_wrong_data
-        fixing_wrong_data()
-    else:
-        args = {}
-        enqueue("mvd.mvd.utils.daily_jobs.fixing_sp_mitglied_data", queue='short', job_name='fixing_sp_mitglied_data', timeout=5000, **args)
+        if frappe.db.get_value("Race Condition Helper", "Race Condition Helper", "set_inaktiv") == today():
+            args = {}
+            enqueue("mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data.fixing_wrong_data", queue='long', job_name='Nächtliche SP Mitglied Data Korrektur', timeout=5000, **args)
+            return
+    
+    # Solange die nächtliche Inaktivierung läuft oder noch nicht durchgeführt wurde, keine SP Mitglied Data Korrekturen da dies Konfliktpotenzial bietet
+    args = {}
+    enqueue("mvd.mvd.utils.daily_jobs.fixing_sp_mitglied_data", queue='short', job_name='fixing_sp_mitglied_data', timeout=5000, **args)
+    return
