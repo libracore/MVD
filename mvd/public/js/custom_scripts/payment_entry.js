@@ -52,6 +52,24 @@ frappe.ui.form.on('Payment Entry', {
             }
         }
     },
+    validate: function(frm) {
+        if (cur_frm.doc.ignore_amount_deviation != 1) {
+            if (cur_frm.doc.paid_amount != cur_frm.doc.camt_amount){
+                frappe.validated=false;
+                frappe.confirm(
+                    'Der Betrag in dieser Zahlung stimmt nicht mit dem Betragf aus dem CAMT-File überein.<br>Wollen Sie die Zahlung trotzdem speichern?',
+                    function(){
+                        // on yes
+                        cur_frm.set_value("ignore_amount_deviation", 1);
+                        cur_frm.save()
+                    },
+                    function(){
+                        // on no
+                    }
+                )
+            }
+        }
+    },
     get_outstanding_invoice_mvd: function(frm) {
         // Dies ist eine Kopie der Original-Funktion aufgrund des "Resets" für paid_amount
         // die geänderten Stellen sind markiert.
