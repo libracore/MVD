@@ -923,6 +923,7 @@ def erstelle_zahlung(date, to_account, received_amount, transaction_id, remarks,
         new_payment_entry.paid_to = to_account
         new_payment_entry.received_amount = received_amount
         new_payment_entry.paid_amount = received_amount
+        new_payment_entry.camt_amount = received_amount
         new_payment_entry.reference_no = transaction_id
         new_payment_entry.reference_date = date
         new_payment_entry.remarks = remarks
