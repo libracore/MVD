@@ -14,13 +14,6 @@ import datetime
 from frappe.utils.file_manager import get_file_path
 
 class MWExport(Document):
-    def after_insert(self):
-        self.append('einzelqueries', {
-            'titel': 'STOP_nicht-MVD',
-            'query': "(`sektion_id` = 'MVBE' AND `language` = 'fr') OR `sektion_id` LIKE 'AL%' OR `sektion_id` = 'ASI' OR `sektion_id` = 'ASLOCA'"
-        })
-        self.db_update()
-
     def validate(self):
         if not self.sprach_reset:
             self.language = ''
