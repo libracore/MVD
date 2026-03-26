@@ -12,21 +12,24 @@
   {
    "fieldname": "download_hash",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Download Hash"
   },
   {
    "fieldname": "download_link",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Download Link"
   },
   {
    "fieldname": "valid_until",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Valid Until"
   }
  ],
  "istable": 1,
- "modified": "2026-03-19 16:50:27.992465",
+ "modified": "2026-03-26 17:52:00.958849",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Webshop Order Download Link History",

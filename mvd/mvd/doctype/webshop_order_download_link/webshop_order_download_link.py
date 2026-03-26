@@ -10,12 +10,12 @@ class WebshopOrderDownloadLink(Document):
     
     def before_save(self):
         if self.is_new():
-            if self.file:
+            if self.pdf_file:
                 self.generate_new_link()
             return
 
         old_doc = self.get_doc_before_save()
-        if old_doc and self.pdf_file != old_doc.pdf_file:
+        if old_doc and self.pdf_file and self.pdf_file != old_doc.pdf_file:
             if old_doc.download_hash:
                 self.append("link_history", {
                     "download_hash": old_doc.download_hash,
@@ -23,8 +23,8 @@ class WebshopOrderDownloadLink(Document):
                     "valid_until": add_days(today(), 14)
                 })
             
-            # Neuen Link für die neue Datei generieren
-            self.generate_new_link()
+            if self.pdf_file:
+                self.generate_new_link()
 
     def generate_new_link(self):
         """Erzeugt einen neuen Hash und den Link"""
