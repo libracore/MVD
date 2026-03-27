@@ -9,6 +9,7 @@ import json
 from frappe.utils import cint
 from frappe.utils.data import today, add_days
 from frappe.core.doctype.communication.email import make
+from frappe import sendmail
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import get_mitglied_id_from_nr, get_adressblock, get_rg_adressblock
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 import re
@@ -470,6 +471,8 @@ def send_invoice_confirmation_email(e_mail, sinv_name):
         if "Download" in message:
             subject = "Download-Link und Bestätigung Ihrer Bestellung"
         sender = "{0} <{1}>".format("Mieterverband", frappe.get_value("Email Account", {"default_outgoing": 1}, "email_id"))
+        bcc = "bestellung@mieterverband.ch"
+        reply_to="info@mieterverband.ch"
         comm = make(
             recipients=[e_mail],
             sender=sender,
@@ -477,9 +480,44 @@ def send_invoice_confirmation_email(e_mail, sinv_name):
             content=message,
             doctype="Sales Invoice",
             name=sinv_name,
-            bcc="bestellung@mieterverband.ch",
-            send_email=True
+            bcc=bcc,
+            send_email=False
         )["name"]
+
+        sendmail(
+            recipients=[e_mail],
+            sender=sender,
+            subject=subject,
+            message=message,
+            as_markdown=False,
+            delayed=True,
+            reference_doctype='Sales Invoice',
+            reference_name=sinv_name,
+            unsubscribe_method=None,
+            unsubscribe_params=None,
+            unsubscribe_message=None,
+            attachments=None,
+            content=None,
+            doctype='Sales Invoice',
+            name=sinv_name,
+            reply_to=reply_to,
+            cc=[],
+            bcc=[bcc],
+            message_id=frappe.get_value("Communication", comm, "message_id"),
+            in_reply_to=None,
+            send_after=None,
+            expose_recipients=None,
+            send_priority=1,
+            communication=comm,
+            retry=1,
+            now=None,
+            read_receipt=None,
+            is_notification=False,
+            inline_images=None,
+            template=None,
+            header=None,
+            print_letterhead=False
+        )
 
     except Exception as err:
         error_msg = "Rechnung: {0}\n\nFehler: {1}\n\nTraceback:\n{2}".format(

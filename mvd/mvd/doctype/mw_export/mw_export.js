@@ -2,6 +2,14 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('MW Export', {
+    onload: function(frm) {
+        if (frm.doc.__islocal && (!frm.doc.einzelqueries || frm.doc.einzelqueries.length === 0)) {
+            let child = frm.add_child('einzelqueries');
+            child.titel = 'STOP_nicht-MVD';
+            child.query = "(`sektion_id` = 'MVBE' AND `language` = 'fr') OR `sektion_id` LIKE 'AL%' OR `sektion_id` = 'ASI' OR `sektion_id` = 'ASLOCA'";
+            frm.refresh_field('einzelqueries');
+        }
+    },
     refresh: function(frm) {
         if (frm.doc.__islocal) {
            frappe.dom.freeze('Zähle Abonnent*innen...');
