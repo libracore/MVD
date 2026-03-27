@@ -14,13 +14,6 @@ import datetime
 from frappe.utils.file_manager import get_file_path
 
 class MWExport(Document):
-    def after_insert(self):
-        self.append('einzelqueries', {
-            'titel': 'STOP_nicht-MVD',
-            'query': "(`sektion_id` = 'MVBE' AND `language` = 'fr') OR `sektion_id` LIKE 'AL%' OR `sektion_id` = 'ASI' OR `sektion_id` = 'ASLOCA'"
-        })
-        self.db_update()
-
     def validate(self):
         if not self.sprach_reset:
             self.language = ''
@@ -378,38 +371,43 @@ def run_analysis(self):
     if not all_dfs:
         return
 
-    df_final = pd.concat(all_dfs, ignore_index=True)
+    df_final = pd.concat(all_dfs, ignore_index=True, sort=False)
     
     df_final['anzahl'] = pd.to_numeric(df_final['anzahl'], errors='coerce').fillna(0)
-
     df_final['is_mg'] = (df_final['anzahl'] == 1).astype(int)
     df_final['werbe_val'] = df_final['anzahl'].where(df_final['anzahl'] > 1, 0)
 
-    # Aggregation Sektion
-    stats_sektion = df_final.groupby('sektion').agg(
-        MG_Exemplare=('is_mg', 'sum'),
-        Werbeexemplare=('werbe_val', 'sum'),
-        Anzahl_Zeilen=('anzahl', 'count')
-    ).reset_index()
-    stats_sektion.loc['TOTAL'] = stats_sektion.sum(numeric_only=True)
-    stats_sektion.loc['TOTAL', 'sektion'] = 'TOTAL'
-
-    # Aggregation Quelle
-    stats_quelle = df_final.groupby('dateiquelle').agg(
-        MG_Exemplare=('is_mg', 'sum'),
-        Werbeexemplare=('werbe_val', 'sum'),
-        Anzahl_Zeilen=('anzahl', 'count')
-    ).reset_index()
-    stats_quelle.loc['TOTAL'] = stats_quelle.sum(numeric_only=True)
-    stats_quelle.loc['TOTAL', 'dateiquelle'] = 'TOTAL'
+    def get_stats(df, group_col):
+        agg_df = df.groupby(group_col).agg({
+            'is_mg': 'sum',
+            'werbe_val': 'sum',
+            'anzahl': 'count'
+        }).reset_index()
+        
+        agg_df = agg_df.rename(columns={
+            'is_mg': 'MG_Exemplare',
+            'werbe_val': 'Werbeexemplare',
+            'anzahl': 'Anzahl_Zeilen'
+        })
+        
+        total_row = agg_df.sum(numeric_only=True)
+        total_df = pd.DataFrame([{
+            group_col: 'TOTAL',
+            'MG_Exemplare': total_row['MG_Exemplare'],
+            'Werbeexemplare': total_row['Werbeexemplare'],
+            'Anzahl_Zeilen': total_row['Anzahl_Zeilen']
+        }])
+        
+        return pd.concat([agg_df, total_df], ignore_index=True, sort=False)
+    
+    stats_sektion = get_stats(df_final, 'sektion')
+    stats_quelle = get_stats(df_final, 'dateiquelle')
 
     try:
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             stats_sektion.to_excel(writer, sheet_name='Statistik_Sektion', index=False)
             stats_quelle.to_excel(writer, sheet_name='Statistik_Quelle', index=False)
-        
-        # Datei an das Dokument anhängen
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         file_content = output.getvalue()
         
@@ -423,8 +421,6 @@ def run_analysis(self):
         })
 
         _file.save()
-        
-        self.add_comment('Comment', text="Pandas Analyse erfolgreich erstellt und Excel angehängt.")
         
     except Exception as e:
         frappe.log_error(title="MW Export: Fehler beim Excel Export", message=frappe.get_traceback())
