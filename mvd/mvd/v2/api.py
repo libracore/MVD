@@ -12,6 +12,7 @@ from frappe.utils import sanitize_html
 from frappe.core.doctype.communication.email import make
 from frappe import sendmail
 from frappe.utils import get_url
+from frappe.utils import getdate, today
 
 '''
 Beispiel CURL Request
@@ -526,27 +527,75 @@ def create_order(**api_request):
 def webshop_download(token):
     """
     Serve a PDF download for a given token.
+    Prüft zuerst den aktuellen Link, dann die Historie (Child Table).
     """
-    # Look up the download link record by hash
+    target_file = None
+    target_name = None
+
     link = frappe.db.get_value(
         "Webshop Order Download Link",
         {"download_hash": token},
-        ["name", "file"],
+        ["name", "pdf_file"],
         as_dict=True
     )
 
-    if not link:
+    if link: # and link.pdf_file: # diese Zeile aktivieren wenn die Umstellung erfolgt ist.
+        target_file = link.pdf_file
+        target_name = link.name
+    else:
+        history_link = frappe.db.get_value(
+            "Webshop Order Download Link History", 
+            {"download_hash": token},
+            ["parent", "valid_until"],
+            as_dict=True
+        )
+
+        if history_link:
+            if getdate(history_link.valid_until) >= getdate(today()):
+                link = frappe.db.get_value(
+                    "Webshop Order Download Link",
+                    {"name": history_link.parent},
+                    ["name", "pdf_file"],
+                    as_dict=True
+                )
+                target_file = link.pdf_file
+                target_name = link.name
+            else:
+                frappe.local.response.http_status_code = 403
+                frappe.local.response.message = 'Dieser Download-Link ist abgelaufen.'
+                return
+        else:
+            frappe.local.response.http_status_code = 404
+            frappe.local.response.message = 'Dieser Download-Link ist ungültig. Bitte überprüfen Sie Ihre E-Mail für den richtigen Link oder kontaktieren Sie den Support (info@mieterverband.ch).'
+            return
+
+    try:
+        filters = {
+            "file_url": target_file,
+            "attached_to_doctype": "Webshop Order Download Link",
+            "attached_to_name": target_name
+            }
+        file_id = frappe.db.get_value("File", filters, "name")
+        if file_id:
+            file_doc = frappe.get_doc("File", file_id)
+        else: # dieser else Block ist nur für den Übergang, damit das alte System noch liefert.
+            old_link = frappe.db.get_value(
+                "Webshop Order Download Link",
+                {"download_hash": token},
+                ["name", "file"],
+                as_dict=True
+            ) 
+            file_doc = frappe.get_doc("File", old_link.file)
+
+        frappe.local.response.filename = file_doc.file_name
+        frappe.local.response.filecontent = file_doc.get_content()
+        frappe.local.response.type = "pdf"
+        
+    except frappe.DoesNotExistError:
         frappe.local.response.http_status_code = 404
-        frappe.local.response.message = 'Hoppla! Dieser Download-Link ist ungültig. Bitte überprüfen Sie Ihre E-Mail für den richtigen Link oder kontaktieren Sie den Support.'
+        frappe.local.response.message = 'Die angeforderte Datei wurde auf dem Server nicht gefunden. Bitte überprüfen Sie Ihre E-Mail für den richtigen Link oder kontaktieren Sie den Support (info@mieterverband.ch).'
         return
 
-    # Get the File document
-    file_doc = frappe.get_doc("File", link.file)
-
-    # Serve the file inline
-    frappe.local.response.filename = file_doc.file_name
-    frappe.local.response.filecontent = file_doc.get_content()  # get the file content
-    frappe.local.response.type = "pdf"
 
 def send_confirmation_mail(mitgliedschaft, beratung, notiz, raised_by=None, legacy_mail=False, sektion=None):
     try:
