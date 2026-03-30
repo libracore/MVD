@@ -3,3 +3,4 @@ pysftp
 icalendar
 python-docx
 tqdm
+odfpy
