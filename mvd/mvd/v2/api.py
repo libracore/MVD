@@ -539,7 +539,7 @@ def webshop_download(token):
         as_dict=True
     )
 
-    if link:
+    if link: # and link.pdf_file: # diese Zeile aktivieren wenn die Umstellung erfolgt ist.
         target_file = link.pdf_file
         target_name = link.name
     else:
@@ -576,7 +576,16 @@ def webshop_download(token):
             "attached_to_name": target_name
             }
         file_id = frappe.db.get_value("File", filters, "name")
-        file_doc = frappe.get_doc("File", file_id)
+        if file_id:
+            file_doc = frappe.get_doc("File", file_id)
+        else: # dieser else Block ist nur für den Übergang, damit das alte System noch liefert.
+            old_link = frappe.db.get_value(
+                "Webshop Order Download Link",
+                {"download_hash": token},
+                ["name", "file"],
+                as_dict=True
+            ) 
+            file_doc = frappe.get_doc("File", old_link.file)
 
         frappe.local.response.filename = file_doc.file_name
         frappe.local.response.filecontent = file_doc.get_content()
@@ -584,7 +593,7 @@ def webshop_download(token):
         
     except frappe.DoesNotExistError:
         frappe.local.response.http_status_code = 404
-        frappe.local.response.message = 'Die angeforderte Datei wurde auf dem Server nicht gefunden.'
+        frappe.local.response.message = 'Die angeforderte Datei wurde auf dem Server nicht gefunden. Bitte überprüfen Sie Ihre E-Mail für den richtigen Link oder kontaktieren Sie den Support (info@mieterverband.ch).'
         return
 
 
