@@ -1,0 +1,29 @@
+{
+ "creation": "2026-03-30 15:23:13.026655",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "email_template"
+ ],
+ "fields": [
+  {
+   "fieldname": "email_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "E-Mail Vorlage",
+   "options": "Email Template",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-03-30 15:23:13.026655",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Email Vorlagen TBL",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
