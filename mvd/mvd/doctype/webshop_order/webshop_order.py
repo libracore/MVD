@@ -251,17 +251,19 @@ class WebshopOrder(Document):
             except Exception as e:
                 frappe.log_error("Fehler in after_insert", frappe.get_traceback())
 
-
-        matching_customer = frappe.get_all(
-            "Kunden",
-            filters={"e_mail": self.e_mail},
-            fields=["name"],
-        )
-        if len(matching_customer) == 1:
-            self.faktura_kunde = matching_customer[0].name
+        if self.faktura_kunde:
             self.update_faktura_kunde()
         else:
-            self.create_faktura_kunde()
+            matching_customer = frappe.get_all(
+                "Kunden",
+                filters={"e_mail": self.e_mail},
+                fields=["name"],
+            )
+            if len(matching_customer) == 1:
+                self.faktura_kunde = matching_customer[0].name
+                self.update_faktura_kunde()
+            else:
+                self.create_faktura_kunde()
         self.save()
         self.create_sinv()
         return
@@ -293,15 +295,15 @@ class WebshopOrder(Document):
             'postfach_nummer': self.postfach if self.postfach else None,
             'abweichende_rechnungsadresse': self.abweichende_rechnungsadresse if self.abweichende_rechnungsadresse else 0,
             'rg_vorname': self.rg_vorname if self.rg_vorname else None,
-            'rg_vorname': self.rg_nachname if self.rg_nachname else None,
+            'rg_nachname': self.rg_nachname if self.rg_nachname else None,
             'rg_zusatz_adresse': self.rg_adress_zusatz if self.rg_adress_zusatz else None,
             'rg_strasse': self.rg_strasse if self.rg_strasse else None,
             'rg_nummer': self.rg_strassen_nr if self.rg_strassen_nr else None,
             'rg_nummer_zu': None,
             'rg_postfach': None,
             'rg_postfach_nummer': self.rg_postfach if self.rg_postfach else None,
-            'rg_plz': self.plz if self.plz else None,
-            'rg_ort': self.ort if self.ort else None,
+            'rg_plz': self.rg_plz if self.rg_plz else None,
+            'rg_ort': self.rg_ort if self.rg_ort else None,
             'rg_land': None,
             'daten_aus_mitgliedschaft': 0
         }).insert(ignore_permissions=True)
@@ -338,14 +340,15 @@ class WebshopOrder(Document):
         kunde.postfach_nummer = self.postfach if self.postfach else None
         kunde.abweichende_rechnungsadresse = self.abweichende_rechnungsadresse if self.abweichende_rechnungsadresse else 0
         kunde.rg_vorname if self.rg_vorname else None
+        kunde.rg_nachname if self.rg_nachname else None
         kunde.rg_zusatz_adresse = self.rg_adress_zusatz if self.rg_adress_zusatz else None
         kunde.rg_strasse = self.rg_strasse if self.rg_strasse else None
         kunde.rg_nummer = self.rg_strassen_nr if self.rg_strassen_nr else None
         kunde.rg_nummer_zu = None
         kunde.rg_postfach = None
         kunde.rg_postfach_nummer = self.rg_postfach if self.rg_postfach else None
-        kunde.rg_plz = None
-        kunde.rg_ort = None
+        kunde.rg_plz = self.rg_plz if self.rg_plz else None
+        kunde.rg_ort = self.rg_ort if self.rg_ort else None
         kunde.rg_land = None
         kunde.daten_aus_mitgliedschaft = 0
         kunde.save()
