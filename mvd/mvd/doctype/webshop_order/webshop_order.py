@@ -401,7 +401,7 @@ class WebshopOrder(Document):
         # --- send confirmation email ---
         # only for new api for the moment
         if self.v2 == 1:
-            send_invoice_confirmation_email(self.e_mail, sinv.name)
+            send_invoice_confirmation_email(self.e_mail, sinv.name, self.name)
 
         return sinv.name
 
@@ -458,7 +458,7 @@ def split_street_and_number(address: str):
     # Fallback: whole string as street, no number
     return address.strip(), None
 
-def send_invoice_confirmation_email(e_mail, sinv_name):
+def send_invoice_confirmation_email(e_mail, sinv_name, webshop_order_name):
     if not e_mail:
         return
 
@@ -518,6 +518,9 @@ def send_invoice_confirmation_email(e_mail, sinv_name):
             header=None,
             print_letterhead=False
         )
+
+        webshop_order = frappe.get_doc("Webshop Order", webshop_order_name)
+        webshop_order.add_comment('Comment', text='E-Mail wurde an {0} gesendet: <a href="/desk#Form/Communication/{1}">{1}</a>'.format(e_mail, comm))
 
     except Exception as err:
         error_msg = "Rechnung: {0}\n\nFehler: {1}\n\nTraceback:\n{2}".format(
