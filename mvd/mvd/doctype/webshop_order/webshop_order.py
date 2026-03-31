@@ -379,7 +379,6 @@ class WebshopOrder(Document):
             'items': items_list,
             'taxes_and_charges': 'MVD Gemischt - MVD',
             'druckvorlage': 'MVD Rechnung-MVD' if not self.online_payment_id else 'MVD Lieferschein-MVD',
-            'mv_mitgliedschaft': self.mv_mitgliedschaft,
             'due_date': add_days(today(), 30)
         }).insert(ignore_permissions=True)
  
