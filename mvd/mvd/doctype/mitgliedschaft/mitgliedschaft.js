@@ -538,9 +538,11 @@ frappe.ui.form.on('Mitgliedschaft', {
             }
         }
         if (cur_frm.doc.objekt_strasse) {
-            if (cur_frm.doc.objekt_strasse.length > 30) {
-                frappe.msgprint( "Die Serviceplatform lässt nur Strassen bis zu einer Zeichenlänge von <b>30</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.objekt_strasse.length + ":</b><br>" + cur_frm.doc.objekt_strasse, __("Validation") );
-                frappe.validated=false;
+            if (frm.doc.abweichende_objektadresse){ // #1725 Falls die nicht abweichend sind setzt copy_korrespondenz_to_objektadresse die objekt_strasse der strasse gleich im Python validate
+                if (cur_frm.doc.objekt_strasse.length > 30) {
+                    frappe.msgprint( "Die Serviceplatform lässt nur Strassen bis zu einer Zeichenlänge von <b>30</b> zu.<br><br><b>Zeichenlänge " + cur_frm.doc.objekt_strasse.length + ":</b><br>" + cur_frm.doc.objekt_strasse, __("Validation") );
+                    frappe.validated=false;
+                }
             }
         }
         if (cur_frm.doc.rg_zusatz_adresse) {
