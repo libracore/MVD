@@ -22,7 +22,7 @@ class Mandat(Document):
             self.db_set("bestaetigungs_email_gesendet", 1)
 
 @frappe.whitelist()
-def create_mandat(sektion, beratung, mitglied, berater_in, typ, bemerkung):
+def create_mandat(sektion, beratung, mitglied, berater_in, typ, bemerkung, persoenliche_bemerkung):
     mandat = frappe.new_doc("Mandat")
 
     mandat.mv_mitgliedschaft = mitglied
@@ -31,6 +31,7 @@ def create_mandat(sektion, beratung, mitglied, berater_in, typ, bemerkung):
     mandat.kontaktperson = berater_in
     mandat.typ = typ
     mandat.bemerkung = bemerkung
+    mandat.persoenliche_bemerkung = persoenliche_bemerkung
 
     mandat.insert(ignore_permissions=True)
 
