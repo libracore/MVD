@@ -3,6 +3,8 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+import io
+import zipfile
 import frappe
 from frappe.model.document import Document
 from frappe.core.doctype.communication.email import make
@@ -10,7 +12,8 @@ from frappe import sendmail
 from frappe.email.doctype.email_template.email_template import get_email_template
 from frappe.utils.pdf import get_pdf
 from frappe import attach_print
-from frappe.utils import get_url_to_form
+from frappe.utils import get_url_to_form, get_url
+from frappe.utils.file_manager import get_file_path
 
 class Mandat(Document):
     def on_update(self):
@@ -85,20 +88,7 @@ def send_confirmation_email(mandat):
                 link_mitglied = "#"
                 mitglied_label = "Keine Mitgliedschaft verknüpft"
 
-            footer_links = """
-                <br><br>
-                <hr>
-                <p style="font-size: 12px; color: #555;">
-                    <b>Interne Links für Berater:</b><br>
-                    - <a href="{0}">Direkt zur Beratung: {1}</a><br>
-                    - <a href="{2}">Direkt zum Mandat: {3}</a><br>
-                    - <a href="{4}">Zur Mitgliedschaft: {5}</a>
-                </p>
-            """.format(link_beratung, mandat.beratung,link_mandat, mandat.name, link_mitglied, mitglied_label)
-            
-            full_message = rendered_berater.get("message") + footer_links
-
-            # Wir schicken das Stammdatenblatt als Anhang
+            # Wir schicken das Stammdatenblatt und die Dokumente der Beratung als Anhang
             attachments = []
             if mandat.mv_mitgliedschaft:
                 pdf_content = frappe.get_print("Mitgliedschaft", mandat.mv_mitgliedschaft, "Stammdatenblatt", as_pdf=True)
@@ -114,8 +104,42 @@ def send_confirmation_email(mandat):
                 })
                 file_doc.insert(ignore_permissions=True)
                 attachments.append({"fid": file_doc.name})
-        
+            
+            zip_data = get_beratung_zip_attachment(mandat.beratung)
+            zip_link_html = ""
+            if zip_data:
+                zip_file_doc = frappe.get_doc({
+                    "doctype": "File",
+                    "file_name": zip_data["fname"],
+                    "attached_to_doctype": "Mandat",
+                    "attached_to_name": mandat.name,
+                    "content": zip_data["fcontent"],
+                    "is_private": 1
+                })
+                zip_file_doc.insert(ignore_permissions=True)
+                # Falls ZIP kleiner als 8 MB hängen wir es dem Email an
+                if len(zip_data["fcontent"]) <= 8 * 1024 * 1024:
+                    attachments.append({"fid": zip_file_doc.name})
+                    zip_link_html = "Alle Anlagen: Als ZIP-Datei im Anhang"
+                else:
+                    zip_url = get_url(zip_file_doc.file_url)
+                    zip_link_html = """<a href="{0}">Download alle Anlagen als ZIP</a> """.format(zip_url)
+
+            footer_links = """
+                <br><br>
+                <hr>
+                <p style="font-size: 12px; color: #555;">
+                    <b>Interne Links für Berater:</b><br>
+                    - <a href="{0}">Direkt zur Beratung: {1}</a><br>
+                    - <a href="{2}">Direkt zum Mandat: {3}</a><br>
+                    - <a href="{4}">Zur Mitgliedschaft: {5}</a><br>
+                    - {6}
+                </p>
+            """.format(link_beratung, mandat.beratung,link_mandat, mandat.name, link_mitglied, mitglied_label, zip_link_html)
+            
+            full_message = rendered_berater.get("message") + footer_links
             cc_email = sektion_data.get("visierende_person")
+
             comm = make(
                 recipients=recipients,
                 sender=absender_format,
@@ -186,3 +210,30 @@ def send_confirmation_email(mandat):
             message=frappe.get_traceback()
         )
         return False
+
+
+def get_beratung_zip_attachment(beratung_id):
+    files = frappe.get_all("File", filters={
+        "attached_to_doctype": "Beratung",
+        "attached_to_name": beratung_id
+    }, fields=["file_name", "file_url", "file_size"])
+
+    if not files:
+        return None
+    
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for f in files:
+            try:
+                file_path = get_file_path(f.file_name) if not f.file_url.startswith('/') else f.file_url.lstrip('/')
+                full_path = frappe.get_site_path(file_path)
+                
+                with open(full_path, "rb") as content:
+                    zip_file.writestr(f.file_name, content.read())
+            except Exception as e:
+                frappe.log_error(f"Fehler beim Zippen von {f.file_name}: {str(e)}")
+
+    return {
+        "fname": "Anlagen_Beratung_{0}.zip".format(beratung_id),
+        "fcontent": zip_buffer.getvalue()
+    }
