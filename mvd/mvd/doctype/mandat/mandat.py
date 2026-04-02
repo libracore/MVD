@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.core.doctype.communication.email import make
 from frappe import sendmail
 from frappe.email.doctype.email_template.email_template import get_email_template
 from frappe.utils.pdf import get_pdf
@@ -40,6 +41,7 @@ def create_mandat(sektion, beratung, mitglied, berater_in, typ, bemerkung, perso
 
 def send_confirmation_email(mandat):
     try:
+        email_sent = True
         raw_recipients = frappe.db.get_all("Termin Kontaktperson Multi User", 
             filters={"parent": mandat.kontaktperson}, 
             fields=["user"]
@@ -67,8 +69,10 @@ def send_confirmation_email(mandat):
 
         if not recipients:
             frappe.log_error("Keine Empfänger für Kontaktperson {0} gefunden.".format(mandat.kontaktperson), "Mandat Email Error")
+            email_sent = False
         elif not template_berater:
             frappe.log_error("In Sektion {0} unter Mandat: Kein Template für Kontaktperson hinterlegt.".format(mandat.sektion_id), "Mandat Email Error")
+            email_sent = False
         else:
             rendered_berater = get_email_template(template_berater, {"doc": mandat})
 
@@ -112,7 +116,15 @@ def send_confirmation_email(mandat):
                 attachments.append({"fid": file_doc.name})
         
             cc_email = sektion_data.get("visierende_person")
-
+            comm = make(
+                recipients=recipients,
+                sender=absender_format,
+                subject=rendered_berater.get("subject"),
+                content=full_message,
+                doctype='Mandat',
+                name=mandat.name,
+                send_email=False
+            )["name"]
             sendmail(
                 recipients=recipients,
                 sender=absender_format,
@@ -122,10 +134,12 @@ def send_confirmation_email(mandat):
                 attachments=attachments,
                 reference_doctype=mandat.doctype,
                 reference_name=mandat.name,
-                now=False,
                 unsubscribe_method=None,
                 unsubscribe_params=None,
                 unsubscribe_message=None,
+                communication=comm,
+                delayed=True,
+                message_id=frappe.get_value("Communication", comm, "message_id")
             )
         
         # --- 2. EMAIL AN MITGLIED ---
@@ -137,10 +151,18 @@ def send_confirmation_email(mandat):
             
         elif not template_mitglied:
             frappe.log_error("In Sektion {0} unter Mandat: Kein Template für Mitglied hinterlegt.".format(mandat.sektion_id), "Mandat Email Error")
-
+            email_sent = False
         else:
             rendered_mitglied = get_email_template(template_mitglied, {"doc": mandat})
-            
+            comm = make(
+                recipients=mitglied_email,
+                sender=absender_format,
+                subject=rendered_mitglied.get("subject"),
+                content=rendered_mitglied.get("message"),
+                doctype='Mandat',
+                name=mandat.name,
+                send_email=False
+            )["name"]
             sendmail(
                 recipients=mitglied_email,
                 sender=absender_format,
@@ -148,13 +170,15 @@ def send_confirmation_email(mandat):
                 content=rendered_mitglied.get("message"),
                 reference_doctype=mandat.doctype,
                 reference_name=mandat.name,
-                now=False,
                 unsubscribe_method=None,
                 unsubscribe_params=None,
                 unsubscribe_message=None,
+                communication=comm,
+                delayed=True,
+                message_id=frappe.get_value("Communication", comm, "message_id")
             )
         
-        return True
+        return email_sent
     
     except Exception:
         frappe.log_error(
