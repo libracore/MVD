@@ -82,7 +82,7 @@
   {
    "fieldname": "kontaktperson",
    "fieldtype": "Link",
-   "label": "Berater*in",
+   "label": "Vertrauensanw\u00e4lt*in",
    "options": "Termin Kontaktperson"
   },
   {
@@ -174,7 +174,7 @@
    "label": "Bestaetigungs Email gesendet"
   }
  ],
- "modified": "2026-02-26 15:12:08.979114",
+ "modified": "2026-04-02 10:14:33.548267",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",
