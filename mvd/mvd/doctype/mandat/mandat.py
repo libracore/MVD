@@ -156,7 +156,6 @@ def send_confirmation_email(mandat):
             """.format(link_beratung, mandat.beratung,link_mandat, mandat.name, link_mitglied, mitglied_label, zip_link_html)
             
             full_message = rendered_berater.get("message") + footer_links
-
             comm = make(
                 recipients=recipients,
                 sender=absender_format,
