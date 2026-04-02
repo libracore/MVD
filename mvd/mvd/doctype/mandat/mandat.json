@@ -16,6 +16,7 @@
   "bestaetigungs_email_gesendet",
   "cb_2",
   "bemerkung",
+  "persoenliche_bemerkung",
   "section_ablauf",
   "datum_1",
   "datum_2",
@@ -91,7 +92,7 @@
   },
   {
    "fieldname": "bemerkung",
-   "fieldtype": "Text",
+   "fieldtype": "Small Text",
    "label": "Bemerkung"
   },
   {
@@ -172,9 +173,14 @@
    "fieldname": "bestaetigungs_email_gesendet",
    "fieldtype": "Check",
    "label": "Bestaetigungs Email gesendet"
+  },
+  {
+   "fieldname": "persoenliche_bemerkung",
+   "fieldtype": "Small Text",
+   "label": "Pers\u00f6nliche Bemerkung"
   }
  ],
- "modified": "2026-04-02 10:14:33.548267",
+ "modified": "2026-04-02 10:53:26.179214",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",

@@ -1113,10 +1113,11 @@ function erstelle_todo(frm) {
 
 function create_mandat(frm) {
     frappe.prompt([
-        {'fieldname': 'berater_in', 'fieldtype': 'Link', 'label': 'Vertrauensanwält*in', 'reqd': 0, 'options': 'Termin Kontaktperson'},
+        {'fieldname': 'berater_in', 'fieldtype': 'Link', 'label': 'Vertrauensanwält*in', 'reqd': 0, 'options': 'Termin Kontaktperson', 'default': frm.doc.kontaktperson},
         {'fieldname': 'typ', 'fieldtype': 'Select', 'label': 'Typ', 'options': "Rechtsschutzversicherung\nSolidaritätsfonds"},
         {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0},
-        {'fieldname': 'bemerkung', 'fieldtype': 'Small Text', 'label': 'Bemerkungen'}
+        {'fieldname': 'bemerkung', 'fieldtype': 'Small Text', 'label': 'Bemerkungen'},
+        {'fieldname': 'persoenliche_bemerkung', 'fieldtype': 'Small Text', 'label': 'Persönliche Bemerkung'}
     ],
     function(values){
         frappe.call({
@@ -1125,7 +1126,8 @@ function create_mandat(frm) {
             "args": {
                 "berater_in": values.berater_in,
                 "typ": values.typ,
-                "bemerkung": values.bemerkung
+                "bemerkung": values.bemerkung,
+                "persoenliche_bemerkung": values.persoenliche_bemerkung
             },
             "callback": function(r) {
                 cur_frm.reload_doc();
