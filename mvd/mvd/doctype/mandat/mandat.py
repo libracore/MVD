@@ -139,7 +139,6 @@ def send_confirmation_email(mandat):
             
             full_message = rendered_berater.get("message") + footer_links
             cc_email = sektion_data.get("visierende_person")
-
             comm = make(
                 recipients=recipients,
                 sender=absender_format,
