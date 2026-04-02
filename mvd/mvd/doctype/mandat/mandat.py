@@ -18,8 +18,9 @@ class Mandat(Document):
             self.kontaktperson and 
             not self.bestaetigungs_email_gesendet):
         
-            send_confirmation_email(self)
-            self.db_set("bestaetigungs_email_gesendet", 1)
+            email_sent = send_confirmation_email(self)
+            if email_sent:
+                self.db_set("bestaetigungs_email_gesendet", 1)
 
 @frappe.whitelist()
 def create_mandat(sektion, beratung, mitglied, berater_in, typ, bemerkung, persoenliche_bemerkung):
@@ -152,9 +153,12 @@ def send_confirmation_email(mandat):
                 unsubscribe_params=None,
                 unsubscribe_message=None,
             )
-
+        
+        return True
+    
     except Exception:
         frappe.log_error(
             title="Mandat Confirmation Email Error",
             message=frappe.get_traceback()
         )
+        return False
