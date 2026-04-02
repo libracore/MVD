@@ -1116,7 +1116,7 @@ function create_mandat(frm) {
         {'fieldname': 'berater_in', 'fieldtype': 'Link', 'label': 'Vertrauensanwält*in', 'reqd': 0, 'options': 'Termin Kontaktperson'},
         {'fieldname': 'typ', 'fieldtype': 'Select', 'label': 'Typ', 'options': "Rechtsschutzversicherung\nSolidaritätsfonds"},
         {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0},
-        {'fieldname': 'bemerkung', 'fieldtype': 'Data', 'label': 'Bemerkungen'}
+        {'fieldname': 'bemerkung', 'fieldtype': 'Small Text', 'label': 'Bemerkungen'}
     ],
     function(values){
         frappe.call({
