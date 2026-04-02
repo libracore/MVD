@@ -237,11 +237,7 @@ frappe.ui.form.on('Beratung', {
                 // Add BTN Mandat
                 frm.add_custom_button(__("Mandat"), function() {
                     if (frm.doc.mandat) {
-                        frappe.msgprint({
-                            title: __('Hinweis'),
-                            indicator: 'red',
-                            message: __('Es existiert bereits ein Mandat für diesen Datensatz.')
-                        });
+                        frappe.msgprint("Es existiert bereits ein Mandat für diesen Datensatz.");
                     } else {
                         create_mandat(frm);
                     }
