@@ -384,7 +384,13 @@ frappe.ui.form.on('Mitgliedschaft', {
         render_nextcloud_files_tree(frm);
     },
     open_nextcloud_root: function(frm) {
-        window.open(`https://drive.libracore.mieterverband.ch/apps/files/files?dir=/${cur_frm.doc.sektion_id}/Mitglieder/${cur_frm.doc.mitglied_nr}`, "_blank", "noopener");
+        frappe.db.get_value('MVD Settings', { name: 'MVD Settings' }, 'nc_host')
+        .then(mvd_settings => {
+            frappe.db.get_value('Sektion', { name: cur_frm.doc.sektion_id }, ['nc_base_folder', 'nc_mitglied_base_folder'])
+            .then(sektion_settings => {
+                window.open(`${mvd_settings.message.nc_host}/apps/files/files?dir=/${sektion_settings.message.nc_base_folder}/${sektion_settings.message.nc_mitglied_base_folder}/${cur_frm.doc.mitglied_nr}`, "_blank", "noopener");
+            });
+        });
     },
     m_und_w: function(frm) {
         if (![0, 1].includes(cur_frm.doc.m_und_w)) {
