@@ -217,7 +217,7 @@ class Mitgliedschaft(Document):
             
             # NextCloud Mitgliedschafts-Ordner erstellen
             old_doc = self.get_doc_before_save()
-            if (old_doc and (not old_doc.mitglied_nr or old_doc.mitglied_nr == "MV") or (not old_doc)):
+            if (not old_doc or (not old_doc.mitglied_nr or old_doc.mitglied_nr == "MV") or self.flags.force_nextcloud_creation):
                 create_nextcloud_mitgliedschaft_folder(self)
         
         # Lösche alle Einträge wenn das Solidarmitglied entfernt wird
