@@ -156,7 +156,11 @@ doc_events = {
         "after_insert": "mvd.mvd.doctype.beratung.beratung.check_communication"
     },
     "File": {
-        "after_insert": "mvd.mvd.doctype.beratung.beratung.sync_mail_attachements",
+        "after_insert": [
+            "mvd.mvd.doctype.beratung.beratung.sync_mail_attachements",
+            "mvd.mvd.utils.hook_utils.sync_file_to_nextcloud"
+        ],
+        "on_trash": "mvd.mvd.utils.hook_utils.remove_file_from_nextcloud",
         "after_delete": "mvd.mvd.doctype.beratung.beratung.sync_attachments_and_beratungs_table"
     },
     "Beratung": {
