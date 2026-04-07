@@ -231,7 +231,7 @@ def get_beratung_zip_attachment(beratung_id):
                 with open(full_path, "rb") as content:
                     zip_file.writestr(f.file_name, content.read())
             except Exception as e:
-                frappe.log_error(f"Fehler beim Zippen von {f.file_name}: {str(e)}")
+                frappe.log_error("Fehler beim Zippen von {0}: {1}".format(f.file_name, str(e)))
 
     return {
         "fname": "Anlagen_Beratung_{0}.zip".format(beratung_id),
