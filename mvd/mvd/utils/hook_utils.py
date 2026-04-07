@@ -151,3 +151,108 @@ def email_queue_after_insert_hook(queue, event):
 # def mrj_mail_utf_replace(queue, event):
 #     if "From: =?utf-8?q?MV_Z=C3=BCrich_=3Cno-reply=40mvd=2Emieterverband=2Ech=3E?=" in queue.message:
 #         queue.message = queue.message.replace("From: =?utf-8?q?MV_Z=C3=BCrich_=3Cno-reply=40mvd=2Emieterverband=2Ech=3E?=", "From: =?utf-8?q?MV_Z=C3=BCrich?= <no-reply@mvd.mieterverband.ch>")
+
+def sync_file_to_nextcloud(file, event):
+    '''
+    ACHTUNG Konfliktpotenzial
+    Unbedingt mvd.mvd.doctype.beratung.beratung.sync_mail_attachements prüfen/abstimmen!
+    '''
+    from mvd.mvd.utils.nextcloud import NCSettings
+    import os
+    import frappe
+
+
+    def delete_local_file_from_disk(file_doc):
+        """
+        Löscht die physische Datei eines Frappe File-Dokuments vom lokalen Dateisystem,
+        aber lässt das File-Dokument in der DB bestehen.
+
+        Erwartet ein geladenes File-Dokument.
+        """
+        if file_doc.doctype != "File":
+            return
+
+        if not file_doc.file_url:
+            return
+
+        # Nur lokale Dateien löschen, keine externen URLs
+        if file_doc.file_url.startswith("http://") or file_doc.file_url.startswith("https://"):
+            return
+
+        file_path = frappe.get_site_path(file_doc.file_url.lstrip("/"))
+
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            os.remove(file_path)
+            return
+
+        return
+    
+    sektion = None
+    folder_path = None
+
+    if file.attached_to_doctype == 'Mitgliedschaft':
+        mitglied_nr = frappe.db.get_value("Mitgliedschaft", file.attached_to_name, "mitglied_nr")
+        if not mitglied_nr or mitglied_nr == "MV":
+            return
+        
+        sektion = frappe.db.get_value("Mitgliedschaft", file.attached_to_name, "sektion_id")
+        ncs = NCSettings(sektion)
+
+        if not ncs.IS_ENABLED:
+            return
+        
+        folder_path = "{0}/{1}".format(ncs.BASE_MITGLIED, mitglied_nr)
+    
+    if file.attached_to_doctype == 'Beratung':
+        beratung = frappe.get_doc("Beratung", file.attached_to_name)
+        sektion = beratung.sektion_id
+
+        if not sektion:
+            return
+        
+        ncs = NCSettings(sektion)
+        mitglied_nr = None
+        
+        if beratung.mv_mitgliedschaft:
+            mitglied_nr = frappe.db.get_value("Mitgliedschaft", beratung.mv_mitgliedschaft, "mitglied_nr")
+        
+        if mitglied_nr and mitglied_nr != "MV":
+            folder_path = "{0}/{1}".format(ncs.BASE_MITGLIED_BERATUNG.replace("<platzhalter>", mitglied_nr), beratung.name)
+        else:
+            folder_path = "{0}/{1}".format(ncs.BASE_BERATUNG, beratung.name)
+
+    if sektion and folder_path:
+        file_content = file.get_content()   # liefert Bytes
+        uploaded_files = ncs.upload_files(
+            folder_path,
+            [(file.file_name, file_content)]
+        )
+        
+        if len(uploaded_files) > 0 and uploaded_files[0]['file_url']:
+            delete_local_file_from_disk(file)
+            frappe.db.set_value("File", file.name, "file_url", uploaded_files[0]['file_url'])
+            frappe.db.set_value("File", file.name, "nc_remote_path", uploaded_files[0]['remote_path'])
+        
+    return
+
+def remove_file_from_nextcloud(file, event):
+    from mvd.mvd.utils.nextcloud import NCSettings
+
+    if not file.nc_remote_path:
+        return
+    
+    sektion = None
+
+    if file.attached_to_doctype == 'Mitgliedschaft':
+        sektion = frappe.db.get_value("Mitgliedschaft", file.attached_to_name, "sektion_id")
+    
+    if file.attached_to_doctype == 'Beratung':
+        sektion = frappe.db.get_value("Beratung", file.attached_to_name, "sektion_id")
+    
+    if sektion:
+        ncs = NCSettings(sektion)
+
+        if not ncs.IS_ENABLED:
+            return
+        
+        ncs.delete_file(file.nc_remote_path)
