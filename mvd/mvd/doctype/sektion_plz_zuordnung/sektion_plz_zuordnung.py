@@ -88,7 +88,11 @@ def prepare_data():
 		'BS': 'MVBS',
 		'SZ': 'MVSZ',
 		'TI': 'ASI',
-		'NE': 'ASLOCA', 'JU': 'ASLOCA', 'GE': 'ASLOCA', 'VS': 'ASLOCA', 'VD': 'ASLOCA',
+		'NE': 'ALNE',
+		'JU': 'ALJU',
+		'GE': 'ALGE',
+		'VS': 'ALVS',
+		'VD': 'ALVD'
 	}
 
 	# PLZs that map to MVBL regardless of Kanton
@@ -154,7 +158,8 @@ def prepare_data():
 
 # Extraktion der fehlenden PLZ Daten
 # Für das Adressverzeichniss der Post muss man sich bei der Post einloggen und nach Adress- und Geodaten suchen
-""" with open("./Adressverzeichnis_Post", "r", encoding="latin1") as f:
+""" 
+with open("./Adressverzeichnis_Post", "r", encoding="latin1") as f:
     lines = [line for line in f if line.startswith("01;")] # nur die sind relevant
 
 # Create an in-memory text buffer
