@@ -9,7 +9,6 @@
   "item_code",
   "download_hash",
   "download_link",
-  "file",
   "pdf_file",
   "link_history"
  ],
@@ -38,12 +37,6 @@
    "label": "Download Link"
   },
   {
-   "fieldname": "file",
-   "fieldtype": "Link",
-   "label": "File",
-   "options": "File"
-  },
-  {
    "fieldname": "pdf_file",
    "fieldtype": "Attach",
    "label": "PDF File"
@@ -55,7 +48,7 @@
    "options": "Webshop Order Download Link History"
   }
  ],
- "modified": "2026-03-26 17:39:10.015527",
+ "modified": "2026-04-09 11:15:53.788640",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Webshop Order Download Link",

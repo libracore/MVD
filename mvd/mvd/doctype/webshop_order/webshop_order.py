@@ -105,6 +105,8 @@ class WebshopOrder(Document):
                 # --- Artikel / Items ---
                 if not self.artikel_json and "items" in order_data:
                     items = []
+                    download_count = 0
+                    total_count = 0
                     for idx, it in enumerate(order_data["items"], start=1):
                         amount_raw = it.get("itemTotalPrice", 0)
                         if isinstance(amount_raw, str):
@@ -118,6 +120,15 @@ class WebshopOrder(Document):
                             "item_index": str(idx),
                         }
                         items.append(item)
+                        if item["item"] and item["item"].upper().strip().endswith("-D"):
+                            download_count += 1
+                        total_count += 1
+                    
+                    if download_count > 0:
+                        self.enthaelt_download = 1
+
+                    if total_count > 0 and download_count == total_count:
+                        self.nur_downloads = 1
 
                     data_dict = {
                         "items": items,
@@ -224,15 +235,9 @@ class WebshopOrder(Document):
             try:
                 artikel_data = json.loads(self.artikel_json)
                 items = artikel_data.get("items", [])
-                
-                download_count = 0
-                total_count = len(items)
 
                 for item in items:
                     item_code = (item.get("item") or "").upper().strip()
-                    
-                    if item_code.endswith("-D"):
-                        download_count += 1
 
                     if (
                         (item_code.startswith("MV") and (item_code.endswith("-MG") or item_code.endswith("-MP")))
@@ -241,12 +246,6 @@ class WebshopOrder(Document):
                         self.bestellung_erledigt = 1
                         self.save()
                         return # Bei Mitgliedschaften brechen wir hier ab.
-
-                if download_count > 0:
-                    self.enthaelt_download = 1
-
-                if total_count > 0 and download_count == total_count:
-                    self.nur_downloads = 1
 
             except Exception as e:
                 frappe.log_error("Fehler in after_insert", frappe.get_traceback())
