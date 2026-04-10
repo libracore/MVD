@@ -7,8 +7,10 @@
  "engine": "InnoDB",
  "field_order": [
   "kontakt",
-  "user",
   "sektion_id",
+  "user",
+  "languages",
+  "fachskill",
   "disabled",
   "cb_1",
   "dispositions_hinweis",
@@ -67,9 +69,21 @@
    "fieldname": "md_hash",
    "fieldtype": "Data",
    "label": "MD-Hash"
+  },
+  {
+   "fieldname": "languages",
+   "fieldtype": "Table MultiSelect",
+   "label": "Language",
+   "options": "Termin Kontaktperson Multi Language"
+  },
+  {
+   "fieldname": "fachskill",
+   "fieldtype": "Table MultiSelect",
+   "label": "Fachskill",
+   "options": "Termin Kontaktperson Multi Fachskill"
   }
  ],
- "modified": "2024-05-29 10:02:43.827878",
+ "modified": "2026-04-10 15:07:11.758791",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin Kontaktperson",
