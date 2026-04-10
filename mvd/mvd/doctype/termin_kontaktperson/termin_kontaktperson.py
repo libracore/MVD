@@ -41,3 +41,23 @@ class TerminKontaktperson(Document):
             else:
                 new_name = "{0} ({1})".format(self.kontakt, self.sektion_id)
                 self.md_hash = hashlib.md5(new_name.encode()).hexdigest()
+        
+        # Sync Languages & Fachskills von Termin Kontaktperson nach APB Zuweisung
+        languages = []
+        for lang in self.languages:
+            languages.append(lang.language)
+        
+        fachskills = []
+        for fk in self.fachskills:
+            fachskills.append(fk.fachskill)
+
+        frappe.db.sql("""SET SQL_SAFE_UPDATES = 0;""")
+        frappe.db.sql(
+            """
+                UPDATE `tabAPB Zuweisung`
+                SET `languages` = "{languages}"
+                SET `fachskills` = "{fachskills}"
+                WHERE `beratungsperson` = '{beratungsperson}'
+            """.format(languages=languages, fachskills=fachskills, beratungsperson=self.name)
+        )
+        frappe.db.sql("""SET SQL_SAFE_UPDATES = 1;""")

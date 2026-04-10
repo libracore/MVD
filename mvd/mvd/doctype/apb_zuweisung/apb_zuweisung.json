@@ -10,7 +10,9 @@
   "to_time",
   "beratungsperson",
   "cb_1",
-  "link_zur_beratung"
+  "link_zur_beratung",
+  "languages",
+  "fachskills"
  ],
  "fields": [
   {
@@ -58,10 +60,22 @@
   {
    "fieldname": "cb_1",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "languages",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Sprachen"
+  },
+  {
+   "fieldname": "fachskills",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Fachskills"
   }
  ],
  "istable": 1,
- "modified": "2024-06-18 14:59:52.080685",
+ "modified": "2026-04-10 15:08:44.370699",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "APB Zuweisung",

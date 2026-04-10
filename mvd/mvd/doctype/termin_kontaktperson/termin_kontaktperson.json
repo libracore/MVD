@@ -7,9 +7,11 @@
  "engine": "InnoDB",
  "field_order": [
   "kontakt",
-  "user",
   "sektion_id",
   "ist_vertrauensanwaeltin",
+  "user",
+  "languages",
+  "fachskill",
   "disabled",
   "cb_1",
   "dispositions_hinweis",
@@ -74,6 +76,18 @@
    "fieldname": "ist_vertrauensanwaeltin",
    "fieldtype": "Check",
    "label": "Ist Vertrauensanw\u00e4lt*in"
+  },
+  {
+   "fieldname": "languages",
+   "fieldtype": "Table MultiSelect",
+   "label": "Language",
+   "options": "Termin Kontaktperson Multi Language"
+  },
+  {
+   "fieldname": "fachskill",
+   "fieldtype": "Table MultiSelect",
+   "label": "Fachskill",
+   "options": "Termin Kontaktperson Multi Fachskill"
   }
  ],
  "modified": "2026-05-28 11:23:01.858466",

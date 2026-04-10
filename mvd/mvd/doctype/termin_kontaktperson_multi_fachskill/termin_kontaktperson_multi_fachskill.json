@@ -1,0 +1,30 @@
+{
+ "creation": "2026-04-10 15:06:45.344488",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "fachskill"
+ ],
+ "fields": [
+  {
+   "fieldname": "fachskill",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Fachskill",
+   "options": "Fachskill",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-04-10 15:06:45.344488",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Termin Kontaktperson Multi Fachskill",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
