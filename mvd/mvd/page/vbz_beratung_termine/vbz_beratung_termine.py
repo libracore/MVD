@@ -16,6 +16,7 @@ def get_open_data():
     alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user)
     datasets = {
         'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
+        'datenstand_for_polling': now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
         'alle_termine': alle_termine,
         'meine_termine': meine_termine
     }
@@ -113,7 +114,8 @@ def get_alle_beratungs_termine(user):
                                     '---' AS `beratungskategorie_2`,
                                     '---' AS `beratungskategorie_3`,
                                     '---' AS `name_mitglied`,
-                                  NULL AS `sort_date`
+                                    NULL AS `sort_date`,
+                                    IFNULL(`reserved`, 0) AS `reserved_mark`
                                   FROM `tabAPB Zuweisung`
                                   WHERE `name` NOT IN ('{vergebene_termine}')
                                   AND `date` >= '{datum_von}'
@@ -145,3 +147,14 @@ def get_kontaktperson_multi_user(user):
     for multi_user in kontaktperson_multi_user:
         user_list.append(multi_user.parent)
     return user_list
+
+@frappe.whitelist()
+def has_changed(since):
+    sql = """
+        SELECT
+            COUNT(`name`) AS `qty`
+        FROM `tabAPB Zuweisung`
+        WHERE `modified` > '{since}'
+    """.format(since=since.replace("T", " "))
+
+    return frappe.db.sql(sql, as_dict=True)[0].qty

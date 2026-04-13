@@ -494,7 +494,8 @@ function erstelle_beratung(frm) {
         'berater_in': '',
         'telefonnummer': '',
         'notiz': '',
-        'faktura_kunde': cur_frm.doc.name
+        'faktura_kunde': cur_frm.doc.name,
+        'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft
     }
     frappe.call({
         method: "mvd.mvd.doctype.beratung.beratung.create_neue_beratung",

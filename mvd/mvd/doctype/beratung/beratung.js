@@ -700,6 +700,7 @@ function termin_quick_entry(frm) {
                                             });
                                         }
                                     },
+                                    {'fieldname': 'typ', 'fieldtype': 'Select', 'label': __('Typ'), 'default': cur_frm.doc.mitgliedtyp_c, 'options': '\nPrivat\nGeschäft'},
                                     {'fieldname': 'telefonnummer', 'fieldtype': 'Data', 'label': __('Telefonnummer'), 'default': tel, 'reqd': 1},
                                     {'fieldname': 'von', 'fieldtype': 'Date', 'label': __('Datum'), 'reqd': 1, 'default': default_von, 'description': '"Datum" ist relevant für die Anzeige der Verfügbarkeiten. Es wird immer in dessen Zukunft geblickt.',
                                         'change': function() {

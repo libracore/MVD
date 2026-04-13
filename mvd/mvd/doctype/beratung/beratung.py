@@ -774,7 +774,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
         # erstelle neue Beratung
         beratung = frappe.get_doc({
             "doctype": "Beratung",
-            "sektion_id": frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id'),
+            "sektion_id": frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id') if mitgliedschaft else frappe.db.get_value("Kunden", faktura_kunde, 'sektion_id') if faktura_kunde else None,
             "mv_mitgliedschaft": mitgliedschaft,
             "faktura_kunde": faktura_kunde
         })
