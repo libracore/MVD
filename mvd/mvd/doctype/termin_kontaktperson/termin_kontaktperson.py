@@ -48,16 +48,17 @@ class TerminKontaktperson(Document):
             languages.append(lang.language)
         
         fachskills = []
-        for fk in self.fachskills:
+        for fk in self.fachskill:
             fachskills.append(fk.fachskill)
 
         frappe.db.sql("""SET SQL_SAFE_UPDATES = 0;""")
         frappe.db.sql(
             """
                 UPDATE `tabAPB Zuweisung`
-                SET `languages` = "{languages}"
-                SET `fachskills` = "{fachskills}"
-                WHERE `beratungsperson` = '{beratungsperson}'
+                SET
+                    `languages` = "{languages}",
+                    `fachskills` = "{fachskills}"
+                WHERE `beratungsperson` = "{beratungsperson}"
             """.format(languages=languages, fachskills=fachskills, beratungsperson=self.name)
         )
         frappe.db.sql("""SET SQL_SAFE_UPDATES = 1;""")
