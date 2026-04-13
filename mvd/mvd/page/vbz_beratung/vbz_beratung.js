@@ -85,7 +85,11 @@ frappe.vbz_beratung = {
             frappe.route_options = {"hat_termine": 1, "ungelesen": 1, "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
-        
+        $("#s11").click(function(){
+            frappe.route_options = {"kontaktperson": ['is', 'not set'], "sektion_id": sektion}
+            frappe.set_route("List", "Mandat", "List");
+        });
+
         $("#r").click(function(){
             frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
@@ -175,8 +179,43 @@ frappe.vbz_beratung = {
                 }
             });
         });
-        
-        
+        $("#p5").click(function(){
+            frappe.call({
+                'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_user_kontaktperson",
+                'args': {},
+                'async': false,
+                'callback': function(r)
+                {
+                    frappe.route_options = {'status': 'Vormerkung', 'kontaktperson': ['in', r.message], "sektion_id": sektion}
+                    frappe.set_route("List", "Mandat", "List");
+                }
+            });
+        });
+        $("#p6").click(function(){
+            frappe.call({
+                'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_user_kontaktperson",
+                'args': {},
+                'async': false,
+                'callback': function(r)
+                {
+                    frappe.route_options = {'status': ['in', ['Gesuch eingereicht', 'Gutsprache']], 'kontaktperson': ['in', r.message], "sektion_id": sektion}
+                    frappe.set_route("List", "Mandat", "List");
+                }
+            });
+        });
+        $("#p7").click(function(){
+            frappe.call({
+                'method': "mvd.mvd.page.vbz_beratung.vbz_beratung.get_user_kontaktperson",
+                'args': {},
+                'async': false,
+                'callback': function(r)
+                {
+                    frappe.route_options = {'status': 'Abgeschlossen', 'kontaktperson': ['in', r.message], "sektion_id": sektion}
+                    frappe.set_route("List", "Mandat", "List");
+                }
+            });
+        });
+
         $("#rechtsberaterinnen").click(function(){
             frappe.set_route("List", "Termin Kontaktperson", "List");
         });

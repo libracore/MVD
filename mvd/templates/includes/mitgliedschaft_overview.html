@@ -52,6 +52,9 @@
                             <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
                         {% endif %}
                         <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
+                        {% if allgemein.mandat %}
+                            <br><b>Mandat:</b> {% for m in allgemein.mandat %}{% if m.name %}<a href="#" onclick="frappe.set_route('Form', 'Mandat', '{{ m.name }}'); return false;">{{ m.datum }}{% if m.status %} ({{ m.status }}){% endif %}</a>{% else %}{{ m.datum }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+                        {% endif %}
                         {% if allgemein.bezahltes_mitgliedschaftsjahr %}
                             <br><b>Bezahltes Mitgliedschaftsjahr:</b> {{ allgemein.bezahltes_mitgliedschaftsjahr }}
                         {% endif %}
@@ -71,17 +74,10 @@
                         {{ allgemein.wichtig|replace("\n", "<br>") }}
                     {% endif %}
                 </p>
-                {% if allgemein.mandat or allgemein.haftpflicht %}
-                    {% if allgemein.haftpflicht %}
-                        <p>
-                            <b>Haftpflicht ({{ ", ".join(allgemein.haftpflicht) }})</b>
-                        </p>
-                    {% endif %}
-                    {% if allgemein.mandat %}
-                        <p>
-                            <b>Mandat ({{ ", ".join(allgemein.mandat) }})</b>
-                        </p>
-                    {% endif %}
+                {% if allgemein.haftpflicht %}
+                    <p>
+                        <b>Haftpflicht ({{ ", ".join(allgemein.haftpflicht) }})</b>
+                    </p>
                 {% endif %}
             </div>
         </div>
@@ -124,6 +120,9 @@
                             <b>Wegzug:</b> {{ frappe.utils.get_datetime(allgemein.wegzug).strftime('%d.%m.%Y') }}{% if allgemein.wegzug_zu %} (zu {{ allgemein.wegzug_zu }}){% endif %}<br>
                         {% endif %}
                         <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
+                        {% if allgemein.mandat %}
+                            <br><b>Mandat:</b> {% for m in allgemein.mandat %}{% if m.name %}<a href="#" onclick="frappe.set_route('Form', 'Mandat', '{{ m.name }}'); return false;">{{ m.datum }}{% if m.status %} ({{ m.status }}){% endif %}</a>{% else %}{{ m.datum }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+                        {% endif %}
                         {% if allgemein.bezahltes_mitgliedschaftsjahr %}
                             <br><b>Bezahltes Mitgliedschaftsjahr:</b> {{ allgemein.bezahltes_mitgliedschaftsjahr }}
                         {% endif %}
@@ -143,17 +142,10 @@
                         {{ allgemein.wichtig|replace("\n", "<br>") }}
                     {% endif %}
                 </p>
-                {% if allgemein.mandat or allgemein.haftpflicht %}
-                    {% if allgemein.haftpflicht %}
-                        <p>
-                            <b>Haftpflicht ({{ ", ".join(allgemein.haftpflicht) }})</b>
-                        </p>
-                    {% endif %}
-                    {% if allgemein.mandat %}
-                        <p>
-                            <b>Mandat ({{ ", ".join(allgemein.mandat) }})</b>
-                        </p>
-                    {% endif %}
+                {% if allgemein.haftpflicht %}
+                    <p>
+                        <b>Haftpflicht ({{ ", ".join(allgemein.haftpflicht) }})</b>
+                    </p>
                 {% endif %}
             </div>
         </div>

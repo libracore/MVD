@@ -233,7 +233,16 @@ frappe.ui.form.on('Beratung', {
                         frappe.msgprint("Diese Funktion steht nur zur Verfügung wenn:<br><ul><li>Die Beratung als ungelesen markiert ist</li></ul>");
                     })
                 }
-                
+
+                // Add BTN Mandat
+                frm.add_custom_button(__("Mandat"), function() {
+                    if (frm.doc.mandat) {
+                        frappe.msgprint("Es existiert bereits ein Mandat für diesen Datensatz.");
+                    } else {
+                        create_mandat(frm);
+                    }
+                });
+
                 // Add BTN E-Mail Rückfrage
                 frm.add_custom_button(__("E-Mail Rückfrage"),  function() {
                     cur_frm.set_value("status", "Rückfragen");
@@ -296,11 +305,6 @@ frappe.ui.form.on('Beratung', {
                         })
                     }
                 }
-                
-                // Add BTN Admin ToDo
-                frm.add_custom_button(__("Erstelle ToDo"),  function() {
-                    erstelle_todo(frm);
-                });
                 
                 // overwrite E-Mail BTN
                 override_default_email_dialog(frm);
@@ -409,6 +413,11 @@ frappe.ui.form.on('Beratung', {
                 //~ }
             //~ )
         //~ }
+
+        // Add BTN Admin ToDo
+        frm.add_custom_button(__("Erstelle ToDo"),  function() {
+            erstelle_todo(frm);
+        });
     },
     mv_mitgliedschaft: function(frm) {
         if ((!frm.doc.__islocal)&&(cur_frm.doc.mv_mitgliedschaft)) {
@@ -1097,4 +1106,33 @@ function erstelle_todo(frm) {
             )
         }
     });
+}
+
+function create_mandat(frm) {
+    frappe.prompt([
+        {'fieldname': 'berater_in', 'fieldtype': 'Link', 'label': 'Vertrauensanwält*in', 'reqd': 0, 'options': 'Termin Kontaktperson', 'default': frm.doc.kontaktperson},
+        {'fieldname': 'typ', 'fieldtype': 'Select', 'label': 'Typ', 'options': "Rechtsschutzversicherung\nSolidaritätsfonds"},
+        {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0},
+        {'fieldname': 'bemerkung', 'fieldtype': 'Small Text', 'label': 'Bemerkungen'},
+        {'fieldname': 'persoenliche_bemerkung', 'fieldtype': 'Small Text', 'label': 'Persönliche Bemerkung'}
+    ],
+    function(values){
+        frappe.call({
+            "method": "create_mandat",
+            "doc": frm.doc,
+            "args": {
+                "berater_in": values.berater_in,
+                "typ": values.typ,
+                "bemerkung": values.bemerkung,
+                "persoenliche_bemerkung": values.persoenliche_bemerkung
+            },
+            "callback": function(r) {
+                cur_frm.reload_doc();
+                frappe.msgprint(`Das Mandat (${r.message}) wurde erstellt.`);
+            }
+        });
+    },
+    'Mandat erstellen',
+    'Erstellen'
+    )
 }

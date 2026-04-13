@@ -24,6 +24,7 @@ def get_open_data():
             's8': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 's8': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's9': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'status': 'Zusammengeführt', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's10': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'hat_termine': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            's11': len(frappe.get_list('Mandat', fields='name', filters={'kontaktperson': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r1': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'beratung_prio': 'Hoch', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r2': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'beratung_prio': ['!=', 'Hoch'], 'kontaktperson': ['like','Rechtsberatung Pool%'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
@@ -37,7 +38,10 @@ def get_open_data():
             'p1': get_p1(frappe.session.user),
             'p2': get_p2(frappe.session.user),
             'p3': get_p3(frappe.session.user),
-            'p4': get_p4(frappe.session.user)
+            'p4': get_p4(frappe.session.user),
+            'p5': get_p5(frappe.session.user),
+            'p6': get_p6(frappe.session.user),
+            'p7': get_p7(frappe.session.user)
         }
     }
     
@@ -92,6 +96,42 @@ def get_p4(user):
                                             AND `hat_termine` = 1
                                             AND `sektion_id` != 'MVDF'""".format(user=user), as_dict=True)[0].qty
     return p4_qty or 0
+
+def get_p5(user):
+    p5_qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMandat`
+                                            WHERE `kontaktperson` IN (
+                                                SELECT `parent`
+                                                FROM `tabTermin Kontaktperson Multi User`
+                                                WHERE `user` = '{user}'
+                                                AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
+                                            )
+                                            AND `status` = 'Vormerkung'
+                                            AND `sektion_id` != 'MVDF'""".format(user=user), as_dict=True)[0].qty
+    return p5_qty or 0
+
+def get_p6(user):
+    p6_qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMandat`
+                                            WHERE `kontaktperson` IN (
+                                                SELECT `parent`
+                                                FROM `tabTermin Kontaktperson Multi User`
+                                                WHERE `user` = '{user}'
+                                                AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
+                                            )
+                                            AND `status` IN ('Gesuch eingereicht', 'Gutsprache')
+                                            AND `sektion_id` != 'MVDF'""".format(user=user), as_dict=True)[0].qty
+    return p6_qty or 0
+
+def get_p7(user):
+    p7_qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMandat`
+                                            WHERE `kontaktperson` IN (
+                                                SELECT `parent`
+                                                FROM `tabTermin Kontaktperson Multi User`
+                                                WHERE `user` = '{user}'
+                                                AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
+                                            )
+                                            AND `status` = 'Abgeschlossen'
+                                            AND `sektion_id` != 'MVDF'""".format(user=user), as_dict=True)[0].qty
+    return p7_qty or 0
 
 @frappe.whitelist()
 def get_user_kontaktperson(only_session_user=False):
