@@ -29,6 +29,7 @@
   "email_template",
   "default_rueckfragen_email_template",
   "naechster_termin",
+  "mitgliedtyp_c",
   "section_merge",
   "master",
   "section_allgemein",
@@ -479,9 +480,16 @@
    "fieldname": "frist",
    "fieldtype": "Date",
    "label": "Frist"
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.mitgliedtyp_c",
+   "fieldname": "mitgliedtyp_c",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Mitgliedtyp"
   }
  ],
- "modified": "2025-10-21 16:47:39.316381",
+ "modified": "2026-04-13 18:30:17.890534",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

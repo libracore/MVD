@@ -25,3 +25,11 @@ h1.vbz {
     background-color: #219D84;
     cursor: pointer;
 }
+
+.termin-reserved {
+    background-color: lightcoral;
+}
+
+.termin-reserved:hover {
+    background-color: red;
+}
