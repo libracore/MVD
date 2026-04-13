@@ -29,6 +29,7 @@
   "email_template",
   "default_rueckfragen_email_template",
   "naechster_termin",
+  "mitgliedtyp_c",
   "section_merge",
   "master",
   "section_allgemein",
@@ -482,13 +483,20 @@
    "label": "Frist"
   },
   {
+   "fetch_from": "mv_mitgliedschaft.mitgliedtyp_c",
+   "fieldname": "mitgliedtyp_c",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Mitgliedtyp"
+  },
+  {
    "fieldname": "mandat",
    "fieldtype": "Link",
    "label": "Mandat",
    "options": "Mandat"
   }
  ],
- "modified": "2026-02-09 20:09:11.181785",
+ "modified": "2026-04-13 18:30:17.890534",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
