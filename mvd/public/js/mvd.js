@@ -1,4 +1,4 @@
-// Copyright (c) 2021-2022, libracore AG and contributors
+// Copyright (c) 2021-2026, libracore AG and contributors
 // For license information, please see license.txt
 
 // add links to MVD wiki
@@ -370,6 +370,20 @@ frappe.mvd.MailComposer = Class.extend({
     init: function(opts) {
         $.extend(this, opts);
         this.make();
+        this.dialog.$wrapper.find(".modal-dialog").css("width", "90%");
+        this.dialog.$wrapper.find(".modal-dialog").css("max-width", "1200px");
+        new mvd_vorlagen_baum.ui.VorlagenBaumNavigator({
+            wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
+            parent_dialog: this.dialog,
+            sektion_id: cur_frm.doc.sektion_id || null, // null zeigt alle an
+            purpose: "email", // null zeigt alle an (null, email, druck oder dokument)
+            on_select: function(selection, details, row, parent_dialog) {
+                console.log("Auswahl:", selection);
+                console.log("Knoten-Details:", details);
+                console.log("Child-Row:", row);
+                parent_dialog.fields_dict.email_template.set_value(row.email_template || '');
+            }
+        });
     },
     make: function() {
         var me = this;
@@ -439,6 +453,7 @@ frappe.mvd.MailComposer = Class.extend({
             {label:__("BCC"), fieldtype:"MultiSelect", fieldname:"bcc",options:contactList},
             {label:__("Email Template"), fieldtype:"Link", options:"Email Template",
                 fieldname:"email_template"},
+            {fieldtype: "HTML", fieldname: "vorlagenbaum_html"},
             {fieldtype: "Section Break"},
             {label:__("Subject"), fieldtype:"Data", reqd: 1,
                 fieldname:"subject", length:524288},
