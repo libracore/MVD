@@ -523,14 +523,23 @@ def get_anrede_schenkende(ctx):
 
 @context_decorator
 def get_mitgliedernummer(ctx):
+    mitgliedschaft = None
     doc = get_doc_from_ctx(ctx)
-    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    
     if doc.doctype == "Mitgliedschaft":
         mitgliedschaft = doc
-    elif mv_mitgliedschaft:
+        
+    elif doc.get("mv_mitgliedschaft"):
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+
+    elif doc.get("mv_kunde"): # wird für den Webshop gebraucht, da geben wir die mv_mitgliedschaft nicht in die Rechnung wegen der Buchhaltung
+        mv_mitgliedschaft = frappe.db.get_value("Kunden", doc.mv_kunde, "mv_mitgliedschaft")
+        if mv_mitgliedschaft:
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+
     if mitgliedschaft:
         return mitgliedschaft.mitglied_nr
+    return '---'
 
 @context_decorator
 def get_vor_und_nachname_beschenkte(ctx):
