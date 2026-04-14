@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2026-04-14 10:58:07.099080",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-04-14 10:58:07.099080",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "vorlagen_baum_browser",
+ "owner": "Administrator",
+ "page_name": "vorlagen_baum_browser",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Vorlagen-Baum Browser"
+}
