@@ -24,17 +24,12 @@
     <!-- ---------------------------------------------------------------------------------------- -->
     {% if doc.doctype == 'Sales Invoice' %}
         {% set sales_invoice = doc.name %}
+        {% set sektion = frappe.get_doc("Sektion", doc.sektion_id) %}
         {% if doc.mv_mitgliedschaft or doc.mv_kunde %}
             {% if doc.mv_kunde %}
                 {% set mitgliedschaft = frappe.get_doc("Kunden", doc.mv_kunde) %}
-                {% set sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id) %}
             {% else %}
                 {% set mitgliedschaft = frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft) %}
-                {% if doc.druckvorlage %}
-                    {% set sektion = frappe.get_doc("Sektion", frappe.get_doc("Druckvorlage", doc.druckvorlage).sektion_id) %}
-                {% else %}
-                    {% set sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id) %}
-                {% endif %}
             {% endif %}
             {% set print_language = mitgliedschaft.language %}
             {% if doc.manueller_rechnungstext %}
