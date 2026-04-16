@@ -530,6 +530,7 @@ def get_mitgliedernummer(ctx):
         mitgliedschaft = doc
         
     elif doc.get("mv_mitgliedschaft"):
+        mv_mitgliedschaft = doc.get("mv_mitgliedschaft")
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
 
     elif doc.get("mv_kunde"): # wird für den Webshop gebraucht, da geben wir die mv_mitgliedschaft nicht in die Rechnung wegen der Buchhaltung
