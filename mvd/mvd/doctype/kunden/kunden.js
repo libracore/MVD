@@ -16,6 +16,9 @@ frappe.ui.form.on('Kunden', {
             frm.add_custom_button(__("Beratung"), function() {
                 erstelle_beratung(frm);
             }, __("Erstelle"));
+            frm.add_custom_button(__("Beratungs Termin"), function() {
+                termin_quick_entry_kunden(frm);
+            }, __("Erstelle"));
             
             if (!cur_frm.doc.mv_mitgliedschaft) {
                 frm.add_custom_button(__("Interessent*in"), function() {
@@ -519,6 +522,20 @@ function load_html_overview(frm) {
         callback: function(r)
         {
             cur_frm.set_df_property('uebersicht_html','options', r.message);
+        }
+    });
+}
+
+
+function termin_quick_entry_kunden(frm) {
+    termin_quick_entry_common({
+        sektion_id: cur_frm.doc.sektion_id,
+        telefon: cur_frm.doc.tel_m || cur_frm.doc.tel_p || cur_frm.doc.tel_g || '',
+        typ_default: 'Privat',
+        beratung_filter: {'faktura_kunde': cur_frm.doc.name},
+        create_kwargs: {
+            'faktura_kunde': cur_frm.doc.name,
+            'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft
         }
     });
 }

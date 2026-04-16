@@ -708,15 +708,23 @@ def anz_beratungen_ohne_termine(mv_mitgliedschaft):
 @frappe.whitelist()
 def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer, notiz, mitgliedschaft=None, faktura_kunde=None, beratung=None, beratung_only=False):
     if cint(beratung_only) !=1:
-        if not mitgliedschaft:
-            frappe.throw("Key Mitgliedschaft missing.")
+        if not mitgliedschaft and not faktura_kunde:
+            frappe.throw("Key Mitgliedschaft oder Faktura Kunde missing.")
+        
+        # Ermittle sektion_id basierend auf Mitgliedschaft oder Kunde
+        if mitgliedschaft:
+            sektion_id = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id')
+        else:
+            sektion_id = frappe.db.get_value("Kunden", faktura_kunde, 'sektion_id')
+        
         termin_block_data = json.loads(termin_block_data)
         if not beratung:
             # erstelle neue Beratung
             beratung = frappe.get_doc({
                 "doctype": "Beratung",
-                "sektion_id": frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id'),
+                "sektion_id": sektion_id,
                 "mv_mitgliedschaft": mitgliedschaft,
+                "faktura_kunde": faktura_kunde,
                 "kontaktperson": berater_in,
                 "notiz": "Terminnotiz:<br>{0}".format(notiz),
                 "beratungskanal": "Telefon" if art == 'telefonisch' else art
@@ -752,10 +760,18 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
         
         return beratung.name
     else:
+        # Ermittle sektion_id basierend auf Mitgliedschaft oder Kunde
+        if mitgliedschaft:
+            sektion_id = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id')
+        elif faktura_kunde:
+            sektion_id = frappe.db.get_value("Kunden", faktura_kunde, 'sektion_id')
+        else:
+            sektion_id = None
+        
         # erstelle neue Beratung
         beratung = frappe.get_doc({
             "doctype": "Beratung",
-            "sektion_id": frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id'),
+            "sektion_id": sektion_id,
             "mv_mitgliedschaft": mitgliedschaft,
             "faktura_kunde": faktura_kunde
         })
