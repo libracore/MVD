@@ -2446,8 +2446,10 @@ function mitglied_inaktivieren(frm) {
             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Inaktiv');
             frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', 'Manuelle Inaktivierung');
             cur_frm.refresh_field('status_change');
+            if (cur_frm.doc.status_c !== 'Interessent*in') { // Austrittsdatum nur setzen, wenn der alte Status nicht "Interessent*in" war
+                cur_frm.set_value("austritt", frappe.datetime.get_today());
+            }
             cur_frm.set_value("status_c", 'Inaktiv');
-            cur_frm.set_value("austritt", frappe.datetime.get_today());
             cur_frm.save().then(function(){
                 frappe.msgprint("Das Mitglied wurde inaktiviert.");
             });
