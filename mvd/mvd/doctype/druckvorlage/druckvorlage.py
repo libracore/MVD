@@ -10,6 +10,8 @@ try:
     from jinja2 import pass_context as context_decorator
 except ImportError:
     from jinja2 import contextfunction as context_decorator
+import json
+from jinja2.runtime import Context
 
 class Druckvorlage(Document):
     def validate(self):
@@ -453,9 +455,13 @@ def get_webshop_datum(sinv):
     else:
         return ''
 
-def get_doc_from_ctx(ctx):
-    doc = ctx.get("doc", None)
-    return doc or ctx
+def get_doc_from_ctx(ctx): 
+    if hasattr(ctx, "get") and ctx.get("doc"):
+        return ctx.get("doc")
+    elif isinstance(ctx, Context): # Falls der ctx vom typ jinja2.context ist -> Email
+        doc = json.loads(ctx.get('frappe').get('form_dict').get('doc'))
+        return frappe.get_doc(doc.get('doctype'), doc.get('name'))
+    return ctx
 
 @context_decorator
 def get_anrede(ctx):
