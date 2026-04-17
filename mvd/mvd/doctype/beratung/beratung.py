@@ -708,15 +708,23 @@ def anz_beratungen_ohne_termine(mv_mitgliedschaft):
 @frappe.whitelist()
 def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer, notiz, mitgliedschaft=None, faktura_kunde=None, beratung=None, beratung_only=False):
     if cint(beratung_only) !=1:
-        if not mitgliedschaft:
-            frappe.throw("Key Mitgliedschaft missing.")
+        if not mitgliedschaft and not faktura_kunde:
+            frappe.throw("Key Mitgliedschaft oder Faktura Kunde missing.")
+        
+        # Ermittle sektion_id basierend auf Mitgliedschaft oder Kunde
+        if mitgliedschaft:
+            sektion_id = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id')
+        else:
+            sektion_id = frappe.db.get_value("Kunden", faktura_kunde, 'sektion_id')
+        
         termin_block_data = json.loads(termin_block_data)
         if not beratung:
             # erstelle neue Beratung
             beratung = frappe.get_doc({
                 "doctype": "Beratung",
-                "sektion_id": frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id'),
+                "sektion_id": sektion_id,
                 "mv_mitgliedschaft": mitgliedschaft,
+                "faktura_kunde": faktura_kunde,
                 "kontaktperson": berater_in,
                 "notiz": "Terminnotiz:<br>{0}".format(notiz),
                 "beratungskanal": "Telefon" if art == 'telefonisch' else art
@@ -752,10 +760,18 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
         
         return beratung.name
     else:
+        # Ermittle sektion_id basierend auf Mitgliedschaft oder Kunde
+        if mitgliedschaft:
+            sektion_id = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id')
+        elif faktura_kunde:
+            sektion_id = frappe.db.get_value("Kunden", faktura_kunde, 'sektion_id')
+        else:
+            sektion_id = None
+        
         # erstelle neue Beratung
         beratung = frappe.get_doc({
             "doctype": "Beratung",
-            "sektion_id": frappe.db.get_value("Mitgliedschaft", mitgliedschaft, 'sektion_id'),
+            "sektion_id": sektion_id,
             "mv_mitgliedschaft": mitgliedschaft,
             "faktura_kunde": faktura_kunde
         })
@@ -922,7 +938,7 @@ def erstelle_todo(owner, beratung, description=False, datum=False, notify=0, mit
     return
 
 @frappe.whitelist()
-def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berater_in=None, faktura_kunde=None):
+def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft=None, berater_in=None, faktura_kunde=None):
     berater_in_name = frappe.get_doc("Termin Kontaktperson", berater_in).kontakt if berater_in else ''
     index = 0
     von = json.loads(von)
@@ -935,11 +951,11 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
         sprache = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "language")
     else:
         if faktura_kunde:
-            anrede = frappe.db.get_value("Kunden", faktura_kunde, "briefanrede")
+            anrede = '' # ToDo: briefanrede gibt es nicht in faktura_kunde -> frappe.db.get_value("Kunden", faktura_kunde, "briefanrede")
             sektion = frappe.db.get_value("Kunden", faktura_kunde, "sektion_id")
             sprache = frappe.db.get_value("Kunden", faktura_kunde, "language")
-    default_terminbest_hinweis_de = frappe.db.get_value("Sektion", sektion, "default_terminbest_hinweis_de")
-    default_terminbest_hinweis_fr = frappe.db.get_value("Sektion", sektion, "default_terminbest_hinweis_fr")
+    default_terminbest_hinweis_de = frappe.db.get_value("Sektion", sektion, "default_terminbest_hinweis_de") or ''
+    default_terminbest_hinweis_fr = frappe.db.get_value("Sektion", sektion, "default_terminbest_hinweis_fr") or ''
     #mail_txt = ''
     mail_txt = '<div>{0}<br><br></div>'.format(anrede)
     subject = ''
