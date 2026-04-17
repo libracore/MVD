@@ -938,7 +938,7 @@ def erstelle_todo(owner, beratung, description=False, datum=False, notify=0, mit
     return
 
 @frappe.whitelist()
-def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berater_in=None, faktura_kunde=None):
+def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft=None, berater_in=None, faktura_kunde=None):
     berater_in_name = frappe.get_doc("Termin Kontaktperson", berater_in).kontakt if berater_in else ''
     index = 0
     von = json.loads(von)
@@ -951,11 +951,11 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft, berat
         sprache = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "language")
     else:
         if faktura_kunde:
-            anrede = frappe.db.get_value("Kunden", faktura_kunde, "briefanrede")
+            anrede = '' # ToDo: briefanrede gibt es nicht in faktura_kunde -> frappe.db.get_value("Kunden", faktura_kunde, "briefanrede")
             sektion = frappe.db.get_value("Kunden", faktura_kunde, "sektion_id")
             sprache = frappe.db.get_value("Kunden", faktura_kunde, "language")
-    default_terminbest_hinweis_de = frappe.db.get_value("Sektion", sektion, "default_terminbest_hinweis_de")
-    default_terminbest_hinweis_fr = frappe.db.get_value("Sektion", sektion, "default_terminbest_hinweis_fr")
+    default_terminbest_hinweis_de = frappe.db.get_value("Sektion", sektion, "default_terminbest_hinweis_de") or ''
+    default_terminbest_hinweis_fr = frappe.db.get_value("Sektion", sektion, "default_terminbest_hinweis_fr") or ''
     #mail_txt = ''
     mail_txt = '<div>{0}<br><br></div>'.format(anrede)
     subject = ''

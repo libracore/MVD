@@ -2846,7 +2846,7 @@ function erstelle_beratung_only(frm) {
 
 
 function termin_quick_entry(frm) {
-    termin_quick_entry_common({
+    frappe.mvd.termin_quick_entry({
         sektion_id: cur_frm.doc.sektion_id,
         telefon: cur_frm.doc.tel_m_1 || cur_frm.doc.tel_p_1 || cur_frm.doc.tel_g_1 || '',
         typ_default: cur_frm.doc.mitgliedtyp_c,

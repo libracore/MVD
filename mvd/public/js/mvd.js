@@ -1189,12 +1189,14 @@ frappe.mvd.apply_phone_format = function(control) {
 // Gemeinsame Funktion für Beratungs-Termin Erstellung
 // Kann sowohl von Mitgliedschaft als auch von Kunden aufgerufen werden
 // Als globale Funktion definiert, damit sie von Mitgliedschaft und Kunden DocTypes genutzt werden kann
-window.termin_quick_entry_common = function(config) {
+frappe.provide('frappe.mvd.termin_quick_entry');
+frappe.mvd.termin_quick_entry = function(config) {
     /*
     config = {
         sektion_id: string,
         telefon: string,
         typ_default: string,
+        beratung_source: string,  // Name der Beratung (nur wenn direkte Terminerstellung aus Beratung)
         beratung_filter: object,  // z.B. {'mv_mitgliedschaft': 'MV...'} oder {'faktura_kunde': 'K-...'}
         create_kwargs: object     // z.B. {'mitgliedschaft': 'MV...'} oder {'faktura_kunde': 'K-...', 'mitgliedschaft': '...'}
     }
@@ -1225,14 +1227,14 @@ window.termin_quick_entry_common = function(config) {
                     var d = new frappe.ui.Dialog({
                         'title': __('Termin erstellen'),
                         'fields': [
-                            {'fieldname': 'beratung', 'fieldtype': 'Link', 'label': __('Für Beratung'), 'options': 'Beratung', 'reqd': 0, 'hidden': 1,
+                            {'fieldname': 'beratung', 'fieldtype': 'Link', 'label': __('Für Beratung'), 'options': 'Beratung', 'reqd': 0, 'hidden': !config.beratung_source ? 1:0, 'default': config.beratung_source ? config.beratung_source:'', 'read_only': config.beratung_source ? 1:0,
                                 'get_query': function() {
                                     return {
                                         filters: config.beratung_filter
                                     }
                                 }
                             },
-                            {'fieldname': 'neue_beratung', 'fieldtype': 'Check', 'label': __('Erstelle neue Beratung'), 'default': 1,
+                            {'fieldname': 'neue_beratung', 'fieldtype': 'Check', 'label': __('Erstelle neue Beratung'), 'default': !config.beratung_source ? 1:0, 'hidden': config.beratung_source ? 1:0,
                                 'change': function() {
                                     if (d.get_value('neue_beratung') == 1) {
                                         d.set_df_property('beratung', 'reqd', 0);
@@ -1479,7 +1481,11 @@ window.termin_quick_entry_common = function(config) {
                                                     localStorage.setItem("termin_block_tel", d.get_value('telefonnummer')||'');
                                                     localStorage.setItem("termin_block_berater_in", d.get_value('kontaktperson')||'');
                                                     
-                                                    frappe.set_route("Form", "Beratung", r.message);
+                                                    if (cur_frm && cur_frm.doc.name == r.message) {
+                                                        cur_frm.reload_doc();
+                                                    } else {
+                                                        frappe.set_route("Form", "Beratung", r.message);
+                                                    }
                                                 }
                                             }
                                         });
@@ -1491,9 +1497,12 @@ window.termin_quick_entry_common = function(config) {
                         },
                         'primary_action_label': __('Erstellen'),
                         'checkbox_clicked': function(cb) {
+                            console.log($(cb).data())
                             var termin = $(cb).data().abpzuweisung;
                             var ort = $(cb).data().ort;
+                            console.log($(cb).data().ort)
                             if (!d.get_value('ort')) {
+                                console.log("Setze ort: ", ort)
                                 d.set_value('ort', ort)
                             }
                             var beratungsperson = $(cb).data().beratungsperson;
