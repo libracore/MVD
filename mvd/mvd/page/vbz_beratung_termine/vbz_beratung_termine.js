@@ -31,7 +31,7 @@ frappe.vbz_beratung_termine = {
                     // Alten Inhalt entfernen und neu rendern
                     $(page.main).empty().html(html);
 
-                    frappe.vbz_beratung_termine.add_click_handlers();
+                    frappe.vbz_beratung_termine.add_click_handlers(page);
                     localStorage['datenstand_for_polling'] = r.message.datenstand_for_polling;
                 }
 
@@ -44,14 +44,57 @@ frappe.vbz_beratung_termine = {
         this.render_view(page);
     },
 
-    add_click_handlers: function() {
+    add_click_handlers: function(page) {
         $(".termin-tr").each(function() {
             if ($(this).attr('data-beratung')) {
                 $(this).off('click').on('click', function() {
                     if ($(this).attr('data-beratung') != '---') {
                         frappe.set_route("Form", "Beratung", $(this).attr('data-beratung'));
                     } else {
-                        frappe.msgprint("Kein Absprung zur Beratung möglich, da dieser Termin noch frei ist.");
+                        if ($(this).attr('data-name_for_reservation') != '---') {
+                            const name_for_reservation = $(this).attr('data-name_for_reservation');
+                            if ($(this).attr('data-is_reserved') != '1') {
+                                frappe.confirm(
+                                    'Dieser Termin ist noch frei, möchten Sie eine Proforma-Reservation vornehmen?',
+                                    function(){
+                                        // on yes
+                                        frappe.call({
+                                            method: "mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.add_reservation",
+                                            args: {
+                                                'termin': name_for_reservation
+                                            },
+                                            async: false,
+                                            callback: function(r) {
+                                                frappe.vbz_beratung_termine.reload_view(page);
+                                            }
+                                        });
+                                    },
+                                    function(){
+                                        // on no
+                                    }
+                                )
+                            } else {
+                                frappe.confirm(
+                                    'Dieser Termin besitzt eine Proforma-Reservation, möchten Sie diese entfernen?',
+                                    function(){
+                                        // on yes
+                                        frappe.call({
+                                            method: "mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.remove_reservation",
+                                            args: {
+                                                'termin': name_for_reservation
+                                            },
+                                            async: false,
+                                            callback: function(r) {
+                                                frappe.vbz_beratung_termine.reload_view(page);
+                                            }
+                                        });
+                                    },
+                                    function(){
+                                        // on no
+                                    }
+                                )
+                            }
+                        }
                     }
                 });
             }
