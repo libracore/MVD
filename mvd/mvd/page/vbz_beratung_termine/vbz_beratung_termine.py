@@ -8,12 +8,13 @@ from PyPDF2 import PdfFileWriter
 from frappe.utils.data import add_days, getdate, now, today, now_datetime, get_datetime
 from frappe.boot import get_bootinfo
 from frappe import _
+from frappe.utils import cint
 
 no_cache=1
 
 @frappe.whitelist()
-def get_open_data():
-    alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user)
+def get_open_data(free_only=0):
+    alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user, free_only)
     datasets = {
         'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'datenstand_for_polling': now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
@@ -22,7 +23,7 @@ def get_open_data():
     }
     return datasets
 
-def get_alle_beratungs_termine(user):
+def get_alle_beratungs_termine(user, free_only=0):
     alle = []
     meine = []
     vergebene_termin_liste = []
@@ -91,7 +92,8 @@ def get_alle_beratungs_termine(user):
                     'sort_date': frappe.utils.getdate(termin.von),
                     'name_for_reservation': '---'
                 }
-                alle.append(termin_data)
+                if not cint(free_only) == 1:
+                    alle.append(termin_data)
         if termin.berater_in in kontaktperson_multi_user:
             meine.append(termin_data)
         if termin.abp_referenz:
