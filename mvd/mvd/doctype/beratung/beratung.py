@@ -732,7 +732,7 @@ def anz_beratungen_ohne_termine(mv_mitgliedschaft):
 
 # die nachfolgende Methode erstellt ggf. eine Beratung und n zugehörige Termin(e) aus einer Mitgliedschaft heraus
 @frappe.whitelist()
-def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer, notiz, mitgliedschaft=None, faktura_kunde=None, beratung=None, beratung_only=False):
+def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer, notiz, wunsch_berater_in=None, mitgliedschaft=None, faktura_kunde=None, beratung=None, beratung_only=False):
     if cint(beratung_only) !=1:
         if not mitgliedschaft and not faktura_kunde:
             frappe.throw("Key Mitgliedschaft oder Faktura Kunde missing.")
@@ -766,6 +766,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
                 row.telefonnummer = telefonnummer
                 row.abp_referenz = termin['referenz']
                 row.notiz = notiz
+                row.wunsch_berater_in = wunsch_berater_in if wunsch_berater_in else ''
             
             beratung.save()
         else:
@@ -781,6 +782,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
                 row.telefonnummer = telefonnummer
                 row.abp_referenz = termin['referenz']
                 row.notiz = notiz
+                row.wunsch_berater_in = wunsch_berater_in if wunsch_berater_in else ''
             beratung.beratungskanal = "Telefon" if art == 'telefonisch' else art
             beratung.save()
         
