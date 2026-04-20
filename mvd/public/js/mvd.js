@@ -1335,6 +1335,8 @@ frappe.mvd.termin_quick_entry = function(config) {
                                     });
                                 }
                             },
+                            {'fieldname': 'fachskills', 'fieldtype': 'Table MultiSelect', 'label': __('Fachskills'), 'options': 'Termin Kontaktperson Multi Fachskill', 'reqd': 0},
+                            {'fieldname': 'sprache', 'fieldtype': 'Link', 'label': __('Sprache'), 'options': 'Language', 'reqd': 0},
                             {'fieldname': 'typ', 'fieldtype': 'Select', 'label': __('Typ'), 'default': config.typ_default, 'options': 'Privat\nGeschäft', 'reqd': 1},
                             {'fieldname': 'telefonnummer', 'fieldtype': 'Data', 'label': __('Telefonnummer'), 'default': tel, 'reqd': 1},
                             {'fieldname': 'von', 'fieldtype': 'Date', 'label': __('Datum'), 'reqd': 1, 'default': default_von, 'description': '"Datum" ist relevant für die Anzeige der Verfügbarkeiten. Es wird immer in dessen Zukunft geblickt.',
@@ -1363,6 +1365,7 @@ frappe.mvd.termin_quick_entry = function(config) {
                                     });
                                 }
                             },
+                            {'fieldname': 'show_reserved_only', 'fieldtype': 'Check', 'label': __('Zeige nur reservierte'), 'default': 0},
                             {'fieldname': 'short_results', 'fieldtype': 'Check', 'label': __('Zeige 14 Tage'), 'default': 1,
                                 'change': function() {
                                     // aktualisierung verfügbarkeiten
@@ -1387,6 +1390,15 @@ frappe.mvd.termin_quick_entry = function(config) {
                                             }
                                         }
                                     });
+                                }
+                            },
+                            {'fieldname': 'wunsch_berater_in', 'fieldtype': 'Link', 'label': __('Wunsch-Berater*in'), 'options': 'Termin Kontaktperson', 'reqd': 0,
+                                'get_query': function() {
+                                    return {
+                                        filters: {
+                                            'sektion_id': config.sektion_id
+                                        }
+                                    }
                                 }
                             },
                             {'fieldname': 'kontaktperson', 'fieldtype': 'Link', 'label': __('Berater*in'), 'options': 'Termin Kontaktperson', 'reqd': 1,

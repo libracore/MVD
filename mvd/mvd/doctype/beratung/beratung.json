@@ -30,6 +30,7 @@
   "default_rueckfragen_email_template",
   "naechster_termin",
   "mitgliedtyp_c",
+  "fachskill",
   "section_merge",
   "master",
   "section_allgemein",
@@ -494,9 +495,16 @@
    "fieldtype": "Link",
    "label": "Mandat",
    "options": "Mandat"
+  },
+  {
+   "fieldname": "fachskill",
+   "fieldtype": "Table MultiSelect",
+   "hidden": 1,
+   "label": "Fachskill (nur f\u00fcr Pup-Up)",
+   "options": "Termin Kontaktperson Multi Fachskill"
   }
  ],
- "modified": "2026-04-13 18:30:17.890534",
+ "modified": "2026-04-20 11:27:58.810216",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
