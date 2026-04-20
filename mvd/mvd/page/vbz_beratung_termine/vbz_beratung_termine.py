@@ -88,7 +88,8 @@ def get_alle_beratungs_termine(user):
                     'beratungskategorie_2': termin.beratungskategorie_2.split(" - ")[0] if termin.beratungskategorie_2 else '',
                     'beratungskategorie_3': termin.beratungskategorie_3.split(" - ")[0] if termin.beratungskategorie_3 else '',
                     'name_mitglied': "{0} {1}".format(frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'vorname_1'), frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'nachname_1')),
-                    'sort_date': frappe.utils.getdate(termin.von)
+                    'sort_date': frappe.utils.getdate(termin.von),
+                    'name_for_reservation': '---'
                 }
                 alle.append(termin_data)
         if termin.berater_in in kontaktperson_multi_user:
@@ -118,7 +119,9 @@ def get_alle_beratungs_termine(user):
                                     '---' AS `beratungskategorie_3`,
                                     '---' AS `name_mitglied`,
                                     NULL AS `sort_date`,
-                                    IFNULL(`reserved`, 0) AS `reserved_mark`
+                                    IFNULL(`reserved`, 0) AS `reserved_mark`,
+                                    1 AS `is_free`,
+                                    `name` AS `name_for_reservation`
                                   FROM `tabAPB Zuweisung`
                                   WHERE `name` NOT IN ('{vergebene_termine}')
                                   AND `date` >= '{datum_von}'
@@ -161,3 +164,13 @@ def has_changed(since):
     """.format(since=since.replace("T", " "))
 
     return frappe.db.sql(sql, as_dict=True)[0].qty
+
+@frappe.whitelist()
+def add_reservation(termin):
+    frappe.db.set_value("APB Zuweisung", termin, 'reserved', 1)
+    return
+
+@frappe.whitelist()
+def remove_reservation(termin):
+    frappe.db.set_value("APB Zuweisung", termin, 'reserved', 0)
+    return
