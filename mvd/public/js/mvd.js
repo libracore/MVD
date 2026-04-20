@@ -1326,10 +1326,20 @@ frappe.mvd.termin_quick_entry = function(config) {
                                     aktualisiere_verfuegbarkeiten(config, d);
                                 }
                             },
+                            {'fieldname': 'show_reserved_only', 'fieldtype': 'Check', 'label': __('Zeige nur reservierte'), 'default': 0},
                             {'fieldname': 'short_results', 'fieldtype': 'Check', 'label': __('Zeige 14 Tage'), 'default': 1,
                                 'change': function() {
                                     // aktualisierung verfügbarkeiten
                                     aktualisiere_verfuegbarkeiten(config, d);
+                                }
+                            },
+                            {'fieldname': 'wunsch_berater_in', 'fieldtype': 'Link', 'label': __('Wunsch-Berater*in'), 'options': 'Termin Kontaktperson', 'reqd': 0,
+                                'get_query': function() {
+                                    return {
+                                        filters: {
+                                            'sektion_id': config.sektion_id
+                                        }
+                                    }
                                 }
                             },
                             {'fieldname': 'wunsch_berater_in', 'fieldtype': 'Link', 'label': __('Wunsch-Berater*in'), 'options': 'Termin Kontaktperson', 'reqd': 0,
