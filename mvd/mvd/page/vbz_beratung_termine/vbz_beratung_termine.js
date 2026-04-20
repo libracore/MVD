@@ -6,7 +6,9 @@ frappe.pages['vbz_beratung_termine'].on_page_load = function(wrapper) {
     });
 
     frappe.vbz_beratung_termine.page = page;
+    frappe.vbz_beratung_termine.no_render_based_on_filter = true;
     frappe.vbz_beratung_termine.render_view(page);
+
     poll(page);
 };
 
@@ -17,10 +19,15 @@ frappe.pages['vbz_beratung_termine'].refresh = function(wrapper) {
 frappe.vbz_beratung_termine = {
     page: null,
 
+    no_render_based_on_filter: true,
+
     render_view: function(page) {
+        var free_only_field_value = page.filter_fields ? page.filter_fields.free_only_field.get_value()||'0':'0';
         frappe.call({
             method: "mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.get_open_data",
-            args: {},
+            args: {
+                free_only: free_only_field_value
+            },
             freeze: true,
             freeze_message: 'Lade Verarbeitungszentrale...',
             async: false,
@@ -31,8 +38,18 @@ frappe.vbz_beratung_termine = {
                     // Alten Inhalt entfernen und neu rendern
                     $(page.main).empty().html(html);
 
+                    // Filter Felder
+                    page.filter_fields = {}
+                    page.filter_fields.free_only_field = frappe.vbz_beratung_termine.create_free_only_field(page);
+                    $(page.filter_fields.free_only_field.label_span).html("Nur freie und reservierte Termine");
+                    frappe.vbz_beratung_termine.no_render_based_on_filter = true;
+                    page.filter_fields.free_only_field.set_value(free_only_field_value);
+                    page.filter_fields.free_only_field.refresh();
+                    setTimeout(function() {frappe.vbz_beratung_termine.no_render_based_on_filter = false;}, 1000);
+
                     frappe.vbz_beratung_termine.add_click_handlers(page);
                     localStorage['datenstand_for_polling'] = r.message.datenstand_for_polling;
+                    frappe.vbz_beratung_termine.first_load = false;
                 }
 
                 frappe.dom.unfreeze();
@@ -42,6 +59,23 @@ frappe.vbz_beratung_termine = {
 
     reload_view: function(page) {
         this.render_view(page);
+    },
+
+    create_free_only_field: function(page) {
+        var free_only_field = frappe.ui.form.make_control({
+            parent: page.main.find(".free_only"),
+            df: {
+                fieldtype: "Check",
+                fieldname: "free_only",
+                change: function(){
+                    if (!frappe.vbz_beratung_termine.no_render_based_on_filter) {
+                        frappe.vbz_beratung_termine.reload_view(page);
+                    }
+                }
+            },
+            only_input: true
+        });
+        return free_only_field
     },
 
     add_click_handlers: function(page) {
