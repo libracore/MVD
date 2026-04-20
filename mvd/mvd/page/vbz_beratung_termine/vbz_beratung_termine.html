@@ -67,7 +67,7 @@
             <th>Beratungskategorien</th>
         </tr>
         {% for termin in alle_termine %}
-            <tr class="termin-tr {% if termin.reserved_mark == 1 %}termin-reserved{% endif %}" data-beratung="{{ termin.beratung }}">
+            <tr class="termin-tr {% if termin.reserved_mark == 1 %}termin-reserved{% endif %}" data-beratung="{{ termin.beratung }}" data-name_for_reservation="{{ termin.name_for_reservation }}" data-is_reserved="{% if termin.reserved_mark == 1 %}1{% else %}0{% endif %}">
                 <td>{{ termin.beraterinn }}</td>
                 <td>{{ termin.wunsch_berater_in }}</td>
                 <td>{{ termin.wochentag }}., {{ termin.von_date }}</td>
@@ -78,7 +78,7 @@
                 <td>{{ termin.status }}</td>
                 <td><center>{% if termin.hat_attachement == 1 %}<i class="fa fa-folder-open"></i>{% else %}&nbsp;{% endif %}</center></td>
                 <td>{{ termin.name_mitglied }}</td>
-                <td>{{ termin.beratungskategorie }} {{ termin.beratungskategorie_2 }} {{ termin.beratungskategorie_3 }}</td>
+                <td>{{ termin.beratungskategorie }} {{ termin.beratungskategorie_2 }} {{ termin.beratungskategorie_3 }}{% if "is_free" in termin %} {% if termin.reserved_mark == 1 %}<i class="fa fa-minus-circle"></i>{% else %}<i class="fa fa-plus-circle"></i>{% endif %}{% endif %}</td>
             </tr>
         {% endfor %}
     </table>
