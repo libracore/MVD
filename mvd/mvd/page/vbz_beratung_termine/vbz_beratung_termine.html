@@ -55,6 +55,7 @@
     <table id="table_termin_uebersicht">
         <tr>
             <th>Berater*in</th>
+            <th>Wunsch Berater*in</th>
             <th>Datum</th>
             <th>Von - Bis</th>
             <th>Art</th>
@@ -67,7 +68,8 @@
         </tr>
         {% for termin in alle_termine %}
             <tr class="termin-tr {% if termin.reserved_mark == 1 %}termin-reserved{% endif %}" data-beratung="{{ termin.beratung }}">
-                <td>{{ termin.beraterinn }} {{ termin.reserved_mark }}</td>
+                <td>{{ termin.beraterinn }}</td>
+                <td>{{ termin.wunsch_berater_in }}</td>
                 <td>{{ termin.wochentag }}., {{ termin.von_date }}</td>
                 <td>{{ termin.von_time }} - {{ termin.bis_time }}</td>
                 <td>{{ termin.art }}</td>
