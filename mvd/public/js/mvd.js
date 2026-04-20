@@ -1290,7 +1290,10 @@ frappe.mvd.termin_quick_entry = function(config) {
                                             'ort': d.get_value('ort')||'',
                                             'marked': localStorage.getItem('selected_termine'),
                                             'short_results': d.get_value('short_results'),
-                                            'art': d.get_value('art')||''
+                                            'art': d.get_value('art')||'',
+                                            'fachskill': d.get_value('fachskills')||'',
+                                            'sprache': d.get_value('sprache')||'',
+                                            'show_reserved_only': d.get_value('show_reserved_only')
                                         },
                                         callback: function(r) {
                                             if (r.message) {
@@ -1321,7 +1324,10 @@ frappe.mvd.termin_quick_entry = function(config) {
                                             'ort': d.get_value('ort')||'',
                                             'marked': localStorage.getItem('selected_termine'),
                                             'short_results': d.get_value('short_results'),
-                                            'art': d.get_value('art')||''
+                                            'art': d.get_value('art')||'',
+                                            'fachskill': d.get_value('fachskills')||'',
+                                            'sprache': d.get_value('sprache')||'',
+                                            'show_reserved_only': d.get_value('show_reserved_only')
                                         },
                                         callback: function(r) {
                                             if (r.message) {
@@ -1335,8 +1341,64 @@ frappe.mvd.termin_quick_entry = function(config) {
                                     });
                                 }
                             },
-                            {'fieldname': 'fachskills', 'fieldtype': 'Table MultiSelect', 'label': __('Fachskills'), 'options': 'Termin Kontaktperson Multi Fachskill', 'reqd': 0},
-                            {'fieldname': 'sprache', 'fieldtype': 'Link', 'label': __('Sprache'), 'options': 'Language', 'reqd': 0},
+                            {'fieldname': 'fachskills', 'fieldtype': 'Table MultiSelect', 'label': __('Fachskills'), 'options': 'Termin Kontaktperson Multi Fachskill', 'reqd': 0,
+                                'change': function() {
+                                    // aktualisierung verfügbarkeiten
+                                    frappe.call({
+                                        method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
+                                        args:{
+                                            'sektion': config.sektion_id,
+                                            'datum': d.get_value('von'),
+                                            'beraterin': d.get_value('kontaktperson')||'',
+                                            'ort': d.get_value('ort')||'',
+                                            'marked': localStorage.getItem('selected_termine'),
+                                            'short_results': d.get_value('short_results'),
+                                            'art': d.get_value('art')||'',
+                                            'fachskill': d.get_value('fachskills')||'',
+                                            'sprache': d.get_value('sprache')||'',
+                                            'show_reserved_only': d.get_value('show_reserved_only')
+                                        },
+                                        callback: function(r) {
+                                            if (r.message) {
+                                                // anzeigen der Verfügbarkeiten
+                                                d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                                            } else {
+                                                // keine freien Beratungspersonen
+                                                d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
+                                            }
+                                        }
+                                    });
+                                }
+                            },
+                            {'fieldname': 'sprache', 'fieldtype': 'Link', 'label': __('Sprache'), 'options': 'Language', 'reqd': 0,
+                                'change': function() {
+                                    // aktualisierung verfügbarkeiten
+                                    frappe.call({
+                                        method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
+                                        args:{
+                                            'sektion': config.sektion_id,
+                                            'datum': d.get_value('von'),
+                                            'beraterin': d.get_value('kontaktperson')||'',
+                                            'ort': d.get_value('ort')||'',
+                                            'marked': localStorage.getItem('selected_termine'),
+                                            'short_results': d.get_value('short_results'),
+                                            'art': d.get_value('art')||'',
+                                            'fachskill': d.get_value('fachskills')||'',
+                                            'sprache': d.get_value('sprache')||'',
+                                            'show_reserved_only': d.get_value('show_reserved_only')
+                                        },
+                                        callback: function(r) {
+                                            if (r.message) {
+                                                // anzeigen der Verfügbarkeiten
+                                                d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                                            } else {
+                                                // keine freien Beratungspersonen
+                                                d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
+                                            }
+                                        }
+                                    });
+                                }
+                            },
                             {'fieldname': 'typ', 'fieldtype': 'Select', 'label': __('Typ'), 'default': config.typ_default, 'options': 'Privat\nGeschäft', 'reqd': 1},
                             {'fieldname': 'telefonnummer', 'fieldtype': 'Data', 'label': __('Telefonnummer'), 'default': tel, 'reqd': 1},
                             {'fieldname': 'von', 'fieldtype': 'Date', 'label': __('Datum'), 'reqd': 1, 'default': default_von, 'description': '"Datum" ist relevant für die Anzeige der Verfügbarkeiten. Es wird immer in dessen Zukunft geblickt.',
@@ -1351,7 +1413,10 @@ frappe.mvd.termin_quick_entry = function(config) {
                                             'ort': d.get_value('ort')||'',
                                             'marked': localStorage.getItem('selected_termine'),
                                             'short_results': d.get_value('short_results'),
-                                            'art': d.get_value('art')||''
+                                            'art': d.get_value('art')||'',
+                                            'fachskill': d.get_value('fachskills')||'',
+                                            'sprache': d.get_value('sprache')||'',
+                                            'show_reserved_only': d.get_value('show_reserved_only')
                                         },
                                         callback: function(r) {
                                             if (r.message) {
@@ -1365,7 +1430,35 @@ frappe.mvd.termin_quick_entry = function(config) {
                                     });
                                 }
                             },
-                            {'fieldname': 'show_reserved_only', 'fieldtype': 'Check', 'label': __('Zeige nur reservierte'), 'default': 0},
+                            {'fieldname': 'show_reserved_only', 'fieldtype': 'Check', 'label': __('Zeige nur reservierte'), 'default': 0,
+                                'change': function() {
+                                    // aktualisierung verfügbarkeiten
+                                    frappe.call({
+                                        method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
+                                        args:{
+                                            'sektion': config.sektion_id,
+                                            'datum': d.get_value('von'),
+                                            'beraterin': d.get_value('kontaktperson')||'',
+                                            'ort': d.get_value('ort')||'',
+                                            'marked': localStorage.getItem('selected_termine'),
+                                            'short_results': d.get_value('short_results'),
+                                            'art': d.get_value('art')||'',
+                                            'fachskill': d.get_value('fachskills')||'',
+                                            'sprache': d.get_value('sprache')||'',
+                                            'show_reserved_only': d.get_value('show_reserved_only')
+                                        },
+                                        callback: function(r) {
+                                            if (r.message) {
+                                                // anzeigen der Verfügbarkeiten
+                                                d.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                                            } else {
+                                                // keine freien Beratungspersonen
+                                                d.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');
+                                            }
+                                        }
+                                    });
+                                }
+                            },
                             {'fieldname': 'short_results', 'fieldtype': 'Check', 'label': __('Zeige 14 Tage'), 'default': 1,
                                 'change': function() {
                                     // aktualisierung verfügbarkeiten
@@ -1378,7 +1471,10 @@ frappe.mvd.termin_quick_entry = function(config) {
                                             'ort': d.get_value('ort')||'',
                                             'marked': localStorage.getItem('selected_termine'),
                                             'short_results': d.get_value('short_results'),
-                                            'art': d.get_value('art')||''
+                                            'art': d.get_value('art')||'',
+                                            'fachskill': d.get_value('fachskills')||'',
+                                            'sprache': d.get_value('sprache')||'',
+                                            'show_reserved_only': d.get_value('show_reserved_only')
                                         },
                                         callback: function(r) {
                                             if (r.message) {
@@ -1441,7 +1537,10 @@ frappe.mvd.termin_quick_entry = function(config) {
                                                         'ort': d.get_value('ort')||'',
                                                         'marked': localStorage.getItem('selected_termine'),
                                                         'short_results': d.get_value('short_results'),
-                                                        'art': d.get_value('art')||''
+                                                        'art': d.get_value('art')||'',
+                                                        'fachskill': d.get_value('fachskills')||'',
+                                                        'sprache': d.get_value('sprache')||'',
+                                                        'show_reserved_only': d.get_value('show_reserved_only')
                                                     },
                                                     callback: function(r) {
                                                         if (r.message) {
@@ -1467,7 +1566,10 @@ frappe.mvd.termin_quick_entry = function(config) {
                                                 'ort': d.get_value('ort')||'',
                                                 'marked': localStorage.getItem('selected_termine'),
                                                 'short_results': d.get_value('short_results'),
-                                                'art': d.get_value('art')||''
+                                                'art': d.get_value('art')||'',
+                                                'fachskill': d.get_value('fachskills')||'',
+                                                'sprache': d.get_value('sprache')||'',
+                                                'show_reserved_only': d.get_value('show_reserved_only')
                                             },
                                             callback: function(r) {
                                                 if (r.message) {
@@ -1504,7 +1606,8 @@ frappe.mvd.termin_quick_entry = function(config) {
                                             'ort': d.get_value('ort'),
                                             'berater_in': d.get_value('kontaktperson'),
                                             'telefonnummer': d.get_value('telefonnummer'),
-                                            'notiz': d.get_value('notiz')
+                                            'notiz': d.get_value('notiz'),
+                                            'wunsch_berater_in': d.get_value('wunsch_berater_in')
                                         }, config.create_kwargs);
 
                                         if (d.get_value('neue_beratung') != 1) {

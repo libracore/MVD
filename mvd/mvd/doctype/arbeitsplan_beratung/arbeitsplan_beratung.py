@@ -8,6 +8,8 @@ from frappe.model.document import Document
 from datetime import date, timedelta
 from frappe.utils.data import getdate
 from frappe import _
+import json
+from frappe.utils import cint
 
 class ArbeitsplanBeratung(Document):
     def before_save(self):
@@ -172,7 +174,7 @@ class ArbeitsplanBeratung(Document):
         return
 
 @frappe.whitelist()
-def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None, short_results=1, art=None):
+def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None, short_results=1, art=None, fachskill=None, sprache=None, show_reserved_only=1):
     von_datum = getdate(datum)
     delta = timedelta(days=1)
     if int(short_results) == 1:
@@ -184,6 +186,9 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
     beraterin_filter = ''
     ort_filter = ''
     art_filter = ''
+    fachskill_filter = ''
+    sprach_filter = ''
+    show_reserved_only_filter = ''
     verfuegbarkeiten_html = ""
     if beraterin and beraterin != '':
         beraterin_filter = '''AND `beratungsperson` = '{0}' '''.format(beraterin)
@@ -191,6 +196,25 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
         ort_filter = '''AND `art_ort` = '{0}' '''.format(ort)
     if art and art != 'telefonisch':
         art_filter = """AND `art_ort` NOT LIKE 'Telefon%'"""
+    if fachskill:
+        fachskills = json.loads(fachskill)
+        if len(fachskills) > 0:
+            fachskill_filter_str = "({})".format(", ".join("'{}'".format(fk['fachskill']) for fk in fachskills))
+            fachskill_filter = """AND `beratungsperson` IN (
+                                    SELECT `parent`
+                                    FROM `tabTermin Kontaktperson Multi Fachskill`
+                                    WHERE `fachskill` IN ({0})
+                                )""".format(fachskill_filter_str)
+    if sprache and sprache != '':
+        sprach_filter = """AND `beratungsperson` IN (
+                                SELECT `parent`
+                                FROM `tabTermin Kontaktperson Multi Language`
+                                WHERE `language` = '{0}'
+                            )""".format(sprache)
+    if cint(show_reserved_only) == 1:
+        show_reserved_only_filter = "AND `reserved` = 1"
+
+
 
     
     while von_datum <= bis_datum:
@@ -209,12 +233,16 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
                                                                 FROM `tabArbeitsplan Beratung`
                                                                 WHERE `sektion_id` = '{sektion}'
                                                             )
+                                                            {show_reserved_only_filter}
                                                             {beraterin_filter}
                                                             {ort_filter}
                                                             {art_filter}
+                                                            {fachskill_filter}
+                                                            {sprach_filter}
                                                         """.format(von_datum=von_datum.strftime("%Y-%m-%d"), \
                                                                    beraterin_filter=beraterin_filter, ort_filter=ort_filter, \
-                                                                    art_filter=art_filter, sektion=sektion), as_dict=True)
+                                                                    art_filter=art_filter, sektion=sektion, fachskill_filter=fachskill_filter, \
+                                                                    sprach_filter=sprach_filter, show_reserved_only_filter=show_reserved_only_filter), as_dict=True)
             if int(short_results) == 1:
                 verfuegbarkeiten_html += """
                     <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>
@@ -235,7 +263,8 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
                         'to_time': zugeteilte_beratungsperson.to_time,
                         'beratungsperson': zugeteilte_beratungsperson.beratungsperson.replace("({sektion})".format(sektion=sektion), ""),
                         'beratungsperson_mit_sektion': zugeteilte_beratungsperson.beratungsperson,
-                        'name': zugeteilte_beratungsperson.name
+                        'name': zugeteilte_beratungsperson.name,
+                        'proforma_reservation': "📌 " if cint(zugeteilte_beratungsperson.reserved) == 1 else ""
                     }
                     zugeteilte_beratungspersonen_liste.append(x)
                 sorted_list = sorted(zugeteilte_beratungspersonen_liste, key = lambda x: (x['ort'], x['from_time'], x['beratungsperson']))
@@ -248,7 +277,7 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
                             <div class="checkbox" style="margin-bottom: 0px !important; margin-top: 0px !important;">
                                 <label>
                                     <span class="input-area"><input type="checkbox" {checked} autocomplete="off" class="input-with-feedback" data-fieldtype="Check" data-abpzuweisung="{abpzuweisung}" data-ort="{ort_mit_sektion}" data-beratungsperson="{beratungsperson_mit_sektion}" onclick="cur_dialog.checkbox_clicked(this);"></span>
-                                    <span class="label-area small">{from_time} - {to_time} / {ort} / {beratungsperson}</span>
+                                    <span class="label-area small">{proforma_reservation}{from_time} - {to_time} / {ort} / {beratungsperson}</span>
                                 </label>
                             </div>
                         </div>
@@ -256,7 +285,8 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
                             to_time=':'.join(str(entry['to_time']).split(':')[:2]), \
                                 ort=entry['ort'], beratungsperson=entry['beratungsperson'], \
                                 abpzuweisung=entry['name'], ort_mit_sektion=entry['ort_mit_sektion'], \
-                                checked=checked, beratungsperson_mit_sektion=entry['beratungsperson_mit_sektion'])
+                                checked=checked, beratungsperson_mit_sektion=entry['beratungsperson_mit_sektion'], \
+                                proforma_reservation=entry['proforma_reservation'])
             else:
                 if int(short_results) == 1:
                     verfuegbarkeiten_html += """<pstyle="margin-top: 0px !important;">Kein(e) Berater*in verfügbar</p>"""
