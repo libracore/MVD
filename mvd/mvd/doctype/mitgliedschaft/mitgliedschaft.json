@@ -10,10 +10,6 @@
  "field_order": [
   "section_uebersicht",
   "uebersicht_html",
-  "section_nextcloud",
-  "open_nextcloud_root",
-  "refresh_files_tree",
-  "nextcloud_html",
   "section_allgemein",
   "mitglied_nr",
   "sektion_id",
@@ -211,7 +207,8 @@
   "adressvalidierung_datum",
   "adressvalidierung_manuell",
   "web_login_user_created",
-  "asloca_id"
+  "asloca_id",
+  "fachskill"
  ],
  "fields": [
   {
@@ -1465,6 +1462,14 @@
    "fieldname": "open_nextcloud_root",
    "fieldtype": "Button",
    "label": "NextCloud \u00f6ffnen"
+  },
+  {
+   "description": "Das Pop-Up \"Termin vereinbaren\" kann die Table MultiSelect nur dann richtig anzeigen, wenn dies in den locals vorhanden ist. In den Locals ist es aber nur dann vorhanden, wenn das Feld im DT vorkommt.",
+   "fieldname": "fachskill",
+   "fieldtype": "Table MultiSelect",
+   "hidden": 1,
+   "label": "Fachskill (nur f\u00fcr Pup-Up)",
+   "options": "Termin Kontaktperson Multi Fachskill"
   }
  ],
  "icon": "fa fa-tag",

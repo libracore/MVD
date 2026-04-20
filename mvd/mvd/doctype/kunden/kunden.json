@@ -14,6 +14,7 @@
   "mv_mitgliedschaft",
   "mitglied_nr",
   "cb_1",
+  "fachskill",
   "language",
   "daten_aus_mitgliedschaft",
   "section_kunde",
@@ -448,10 +449,18 @@
   {
    "fieldname": "uebersicht_html",
    "fieldtype": "HTML"
+  },
+  {
+   "description": "Das Pop-Up \"Termin vereinbaren\" kann die Table MultiSelect nur dann richtig anzeigen, wenn dies in den locals vorhanden ist. In den Locals ist es aber nur dann vorhanden, wenn das Feld im DT vorkommt.",
+   "fieldname": "fachskill",
+   "fieldtype": "Table MultiSelect",
+   "hidden": 1,
+   "label": "Fachskill (nur f\u00fcr Pup-Up)",
+   "options": "Termin Kontaktperson Multi Fachskill"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2025-08-12 12:33:03.748496",
+ "modified": "2026-04-20 11:35:17.193913",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kunden",
