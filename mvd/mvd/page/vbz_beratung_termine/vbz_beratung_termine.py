@@ -13,8 +13,8 @@ from frappe.utils import cint
 no_cache=1
 
 @frappe.whitelist()
-def get_open_data(free_only=0):
-    alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user, free_only)
+def get_open_data(free_only=0, beratungsort=None, berater_in=None, art=None, datum=None):
+    alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user, free_only, beratungsort, berater_in, art, datum)
     datasets = {
         'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'datenstand_for_polling': now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
@@ -23,7 +23,7 @@ def get_open_data(free_only=0):
     }
     return datasets
 
-def get_alle_beratungs_termine(user, free_only=0):
+def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=None, art=None, datum=None):
     alle = []
     meine = []
     vergebene_termin_liste = []
@@ -45,6 +45,20 @@ def get_alle_beratungs_termine(user, free_only=0):
     else:
         erlaubte_sektionen = False
     
+    beratungsort_filter = ''
+    if beratungsort and beratungsort != '':
+        beratungsort_filter = "AND `berTer`.`ort` = '{0}'".format(beratungsort)
+    berater_in_filter = ''
+    if berater_in and berater_in != '':
+        berater_in_filter = "AND `berTer`.`berater_in` = '{0}'".format(berater_in)
+    art_filter = ''
+    if art and art != '':
+        art_filter = "AND `berTer`.`art` = '{0}'".format(art)
+    if datum and datum != '':
+        datum_von = datum
+    else:
+        datum_von=today()
+    
     alle_termine = frappe.db.sql("""
                                     SELECT
                                         `berTer`.`von`,
@@ -64,10 +78,15 @@ def get_alle_beratungs_termine(user, free_only=0):
                                         `berTer`.`abp_referenz`
                                     FROM `tabBeratung Termin` AS `berTer`
                                     LEFT JOIN `tabBeratung` AS `beratung` ON `berTer`.`parent` = `beratung`.`name`
-                                    WHERE (`berTer`.`von` >= '{datum_von} 00:00:00') OR 
-                                          (`beratung`.`status` = 'Termin vereinbart' AND `berTer`.`von` < '{datum_von} 00:00:00')
+                                    WHERE (
+                                        (`berTer`.`von` >= '{datum_von} 00:00:00') OR 
+                                        (`beratung`.`status` = 'Termin vereinbart' AND `berTer`.`von` < '{datum_von} 00:00:00')
+                                    )
+                                    {beratungsort_filter}
+                                    {berater_in_filter}
+                                    {art_filter}
                                     ORDER BY `berTer`.`von` DESC
-                                 """.format(datum_von=today()), as_dict=True)
+                                 """.format(datum_von=datum_von, beratungsort_filter=beratungsort_filter, berater_in_filter=berater_in_filter, art_filter=art_filter), as_dict=True, debug=True)
     for termin in alle_termine:
         if not erlaubte_sektionen or termin.sektion_id in erlaubte_sektionen:
             if not erb_block or termin.berater_in in kontaktperson_multi_user:
@@ -101,6 +120,13 @@ def get_alle_beratungs_termine(user, free_only=0):
     if len(meine) < 1:
         meine.append({'show_placeholder': 1})
     
+    beratungsort_filter = ''
+    if beratungsort and beratungsort != '':
+        beratungsort_filter = "AND `art_ort` = '{0}'".format(beratungsort)
+    berater_in_filter = ''
+    if berater_in and berater_in != '':
+        berater_in_filter = "AND `beratungsperson` = '{0}'".format(berater_in)
+    
     freie_termine = frappe.db.sql("""
                                   SELECT DISTINCT
                                     CONCAT(`date`, ' ', `from_time`) AS `von`,
@@ -127,7 +153,9 @@ def get_alle_beratungs_termine(user, free_only=0):
                                   FROM `tabAPB Zuweisung`
                                   WHERE `name` NOT IN ('{vergebene_termine}')
                                   AND `date` >= '{datum_von}'
-                                  """.format(vergebene_termine="', '".join(vergebene_termin_liste), datum_von=today()), as_dict=True)
+                                  {beratungsort_filter}
+                                  {berater_in_filter}
+                                  """.format(vergebene_termine="', '".join(vergebene_termin_liste), datum_von=datum_von, beratungsort_filter=beratungsort_filter, berater_in_filter=berater_in_filter), as_dict=True)
     for freier_termin in freie_termine:
         freier_termin.von = frappe.utils.get_datetime(freier_termin.von)
         freier_termin.bis = frappe.utils.get_datetime(freier_termin.bis)
