@@ -10,6 +10,7 @@
   "ort",
   "berater_in",
   "telefonnummer",
+  "wunsch_berater_in",
   "notiz",
   "abp_referenz"
  ],
@@ -62,10 +63,15 @@
    "fieldtype": "Data",
    "label": "ABP Zuweisungs Referenz",
    "read_only": 1
+  },
+  {
+   "fieldname": "wunsch_berater_in",
+   "fieldtype": "Data",
+   "label": "Wunsch Berater*in"
   }
  ],
  "istable": 1,
- "modified": "2024-05-24 11:48:34.054578",
+ "modified": "2026-04-20 13:09:36.346745",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung Termin",
