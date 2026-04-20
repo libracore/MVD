@@ -773,7 +773,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
                 row.telefonnummer = telefonnummer
                 row.abp_referenz = termin['referenz']
                 row.notiz = notiz
-                row.wunsch_berater_in = wunsch_berater_in if wunsch_berater_in else ''
+                row.wunsch_berater_in = wunsch_berater_in.replace("({0})".format(sektion_id), "") if wunsch_berater_in else ''
             
             beratung.save()
         else:
@@ -789,7 +789,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
                 row.telefonnummer = telefonnummer
                 row.abp_referenz = termin['referenz']
                 row.notiz = notiz
-                row.wunsch_berater_in = wunsch_berater_in if wunsch_berater_in else ''
+                row.wunsch_berater_in = wunsch_berater_in.replace("({0})".format(sektion_id), "") if wunsch_berater_in else ''
             beratung.beratungskanal = "Telefon" if art == 'telefonisch' else art
             beratung.save()
         
