@@ -1326,7 +1326,6 @@ frappe.mvd.termin_quick_entry = function(config) {
                                     aktualisiere_verfuegbarkeiten(config, d);
                                 }
                             },
-                            {'fieldname': 'show_reserved_only', 'fieldtype': 'Check', 'label': __('Zeige nur reservierte'), 'default': 0},
                             {'fieldname': 'short_results', 'fieldtype': 'Check', 'label': __('Zeige 14 Tage'), 'default': 1,
                                 'change': function() {
                                     // aktualisierung verfügbarkeiten
