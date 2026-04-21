@@ -11,6 +11,8 @@
   "berater_in",
   "telefonnummer",
   "wunsch_berater_in",
+  "language",
+  "fachskill",
   "notiz",
   "abp_referenz"
  ],
@@ -68,10 +70,21 @@
    "fieldname": "wunsch_berater_in",
    "fieldtype": "Data",
    "label": "Wunsch Berater*in"
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Sprache",
+   "options": "Language"
+  },
+  {
+   "fieldname": "fachskill",
+   "fieldtype": "Code",
+   "label": "Fachskill"
   }
  ],
  "istable": 1,
- "modified": "2026-04-20 13:09:36.346745",
+ "modified": "2026-04-21 13:51:29.879949",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung Termin",
