@@ -9,12 +9,13 @@ from frappe.utils.data import add_days, getdate, now, today, now_datetime, get_d
 from frappe.boot import get_bootinfo
 from frappe import _
 from frappe.utils import cint
+import json
 
 no_cache=1
 
 @frappe.whitelist()
-def get_open_data(free_only=0, beratungsort=None, berater_in=None, art=None, datum=None):
-    alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user, free_only, beratungsort, berater_in, art, datum)
+def get_open_data(free_only=0, beratungsort=None, berater_in=None, art=None, datum=None, language=None, fachskill=None):
+    alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user, free_only, beratungsort, berater_in, art, datum, language, fachskill)
     datasets = {
         'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'datenstand_for_polling': now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
@@ -23,7 +24,7 @@ def get_open_data(free_only=0, beratungsort=None, berater_in=None, art=None, dat
     }
     return datasets
 
-def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=None, art=None, datum=None):
+def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=None, art=None, datum=None, language=None, fachskill=None):
     alle = []
     meine = []
     vergebene_termin_liste = []
@@ -45,19 +46,31 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=
     else:
         erlaubte_sektionen = False
     
+    # Filter
     beratungsort_filter = ''
     if beratungsort and beratungsort != '':
         beratungsort_filter = "AND `berTer`.`ort` = '{0}'".format(beratungsort)
+    
     berater_in_filter = ''
     if berater_in and berater_in != '':
         berater_in_filter = "AND `berTer`.`berater_in` = '{0}'".format(berater_in)
+    
     art_filter = ''
     if art and art != '':
         art_filter = "AND `berTer`.`art` = '{0}'".format(art)
+    
     if datum and datum != '':
         datum_von = datum
     else:
         datum_von=today()
+    
+    fachskill_filter = ''
+    if fachskill and fachskill != '':
+        fachskill_filter = "AND `berTer`.`fachskill` LIKE '%{0}%'".format(fachskill)
+    
+    sprach_filter = ''
+    if language and language != '':
+        sprach_filter = "AND `berTer`.`language` = '{0}'".format(language)
     
     alle_termine = frappe.db.sql("""
                                     SELECT
@@ -85,8 +98,11 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=
                                     {beratungsort_filter}
                                     {berater_in_filter}
                                     {art_filter}
+                                    {fachskill_filter}
+                                    {sprach_filter}
                                     ORDER BY `berTer`.`von` DESC
-                                 """.format(datum_von=datum_von, beratungsort_filter=beratungsort_filter, berater_in_filter=berater_in_filter, art_filter=art_filter), as_dict=True, debug=True)
+                                 """.format(datum_von=datum_von, beratungsort_filter=beratungsort_filter, berater_in_filter=berater_in_filter, \
+                                            art_filter=art_filter, fachskill_filter=fachskill_filter, sprach_filter=sprach_filter), as_dict=True)
     for termin in alle_termine:
         if not erlaubte_sektionen or termin.sektion_id in erlaubte_sektionen:
             if not erb_block or termin.berater_in in kontaktperson_multi_user:
@@ -120,12 +136,26 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=
     if len(meine) < 1:
         meine.append({'show_placeholder': 1})
     
+    # Filter
     beratungsort_filter = ''
     if beratungsort and beratungsort != '':
         beratungsort_filter = "AND `art_ort` = '{0}'".format(beratungsort)
+    
     berater_in_filter = ''
     if berater_in and berater_in != '':
         berater_in_filter = "AND `beratungsperson` = '{0}'".format(berater_in)
+    
+    fachskill_filter = ''
+    if fachskill and fachskill != '':
+        fachskill_filter = """AND `beratungsperson` IN (
+            SELECT `parent` FROM `tabTermin Kontaktperson Multi Fachskill` WHERE `fachskill` = '{0}'
+        )""".format(fachskill)
+    
+    sprach_filter = ''
+    if language and language != '':
+        sprach_filter = """AND `beratungsperson` IN (
+            SELECT `parent` FROM `tabTermin Kontaktperson Multi Language` WHERE `language` = '{0}'
+        )""".format(language)
     
     freie_termine = frappe.db.sql("""
                                   SELECT DISTINCT
@@ -155,7 +185,12 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=
                                   AND `date` >= '{datum_von}'
                                   {beratungsort_filter}
                                   {berater_in_filter}
-                                  """.format(vergebene_termine="', '".join(vergebene_termin_liste), datum_von=datum_von, beratungsort_filter=beratungsort_filter, berater_in_filter=berater_in_filter), as_dict=True)
+                                  {fachskill_filter}
+                                  {sprach_filter}
+                                  """.format(vergebene_termine="', '".join(vergebene_termin_liste), \
+                                             datum_von=datum_von, beratungsort_filter=beratungsort_filter, \
+                                             berater_in_filter=berater_in_filter, fachskill_filter=fachskill_filter, \
+                                             sprach_filter=sprach_filter), as_dict=True)
     for freier_termin in freie_termine:
         freier_termin.von = frappe.utils.get_datetime(freier_termin.von)
         freier_termin.bis = frappe.utils.get_datetime(freier_termin.bis)
