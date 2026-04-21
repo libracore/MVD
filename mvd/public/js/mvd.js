@@ -1589,7 +1589,9 @@ frappe.mvd.termin_quick_entry = function(config) {
                                             'berater_in': d.get_value('kontaktperson'),
                                             'telefonnummer': d.get_value('telefonnummer'),
                                             'notiz': d.get_value('notiz'),
-                                            'wunsch_berater_in': d.get_value('wunsch_berater_in')
+                                            'wunsch_berater_in': d.get_value('wunsch_berater_in'),
+                                            'fachskill': d.get_value('fachskills')||'',
+                                            'sprache': d.get_value('sprache')||'',
                                         }, config.create_kwargs);
 
                                         if (d.get_value('neue_beratung') != 1) {

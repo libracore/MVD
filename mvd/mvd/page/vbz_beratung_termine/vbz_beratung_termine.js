@@ -27,6 +27,8 @@ frappe.vbz_beratung_termine = {
         var berater_in_field_value = page.filter_fields ? page.filter_fields.berater_in_field.get_value()||'':'';
         var art_field_value = page.filter_fields ? page.filter_fields.art_field.get_value()||'':'';
         var datum_field_value = page.filter_fields ? page.filter_fields.datum_field.get_value()||'':'';
+        var language_field_value = page.filter_fields ? page.filter_fields.language_field.get_value()||'':'';
+        var fachskill_field_value = page.filter_fields ? page.filter_fields.fachskill_field.get_value()||'':'';
         
         frappe.call({
             method: "mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.get_open_data",
@@ -35,7 +37,9 @@ frappe.vbz_beratung_termine = {
                 beratungsort: beratungsort_field_value,
                 berater_in: berater_in_field_value,
                 art: art_field_value,
-                datum: datum_field_value
+                datum: datum_field_value,
+                language: language_field_value,
+                fachskill: fachskill_field_value
             },
             freeze: true,
             freeze_message: 'Lade Verarbeitungszentrale...',
@@ -72,6 +76,14 @@ frappe.vbz_beratung_termine = {
                     page.filter_fields.datum_field = frappe.vbz_beratung_termine.create_datum_field(page);
                     page.filter_fields.datum_field.set_value(datum_field_value);
                     page.filter_fields.datum_field.refresh();
+                    // Link: Sprache
+                    page.filter_fields.language_field = frappe.vbz_beratung_termine.create_language_field(page);
+                    page.filter_fields.language_field.set_value(language_field_value);
+                    page.filter_fields.language_field.refresh();
+                    // Link: Fachskill
+                    page.filter_fields.fachskill_field = frappe.vbz_beratung_termine.create_fachskill_field(page);
+                    page.filter_fields.fachskill_field.set_value(fachskill_field_value);
+                    page.filter_fields.fachskill_field.refresh();
 
                     setTimeout(function() {frappe.vbz_beratung_termine.no_render_based_on_filter = false;}, 1000);
 
@@ -163,6 +175,25 @@ frappe.vbz_beratung_termine = {
         return art_field
     },
 
+    create_language_field: function(page) {
+        var language_field = frappe.ui.form.make_control({
+            parent: page.main.find(".sprache"),
+            df: {
+                fieldtype: "Link",
+                fieldname: "language",
+                options: "Language",
+                placeholder: "Sprache",
+                change: function(){
+                    if (!frappe.vbz_beratung_termine.no_render_based_on_filter) {
+                        frappe.vbz_beratung_termine.reload_view(page);
+                    }
+                }
+            },
+            only_input: true
+        });
+        return language_field
+    },
+
     create_datum_field: function(page) {
         var datum_field = frappe.ui.form.make_control({
             parent: page.main.find(".datum"),
@@ -179,6 +210,25 @@ frappe.vbz_beratung_termine = {
             only_input: true
         });
         return datum_field
+    },
+
+    create_fachskill_field: function(page) {
+        var fachskill_field = frappe.ui.form.make_control({
+            parent: page.main.find(".fachskill"),
+            df: {
+                fieldtype: "Link",
+                fieldname: "fachskill",
+                options: "Fachskill",
+                placeholder: "Fachskill",
+                change: function(){
+                    if (!frappe.vbz_beratung_termine.no_render_based_on_filter) {
+                        frappe.vbz_beratung_termine.reload_view(page);
+                    }
+                }
+            },
+            only_input: true
+        });
+        return fachskill_field
     },
 
     add_click_handlers: function(page) {
