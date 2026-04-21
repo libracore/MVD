@@ -153,6 +153,9 @@ class Beratung(Document):
         # NextCloud Beratuns-Ordner erstellen oder verschieben
         self.handle_nextcloud_folder()
 
+        # Alle reservierten Termine des aktuellen Users freigeben
+        self.release_all_reserved_dates()
+
     def handle_nextcloud_folder(self):
         from mvd.mvd.utils.nextcloud import new_beratung as create_nextcloud_beratungs_folder
         from mvd.mvd.utils.nextcloud import added_mitglied_to_beratung as move_folder_from_beratung_to_mitglied
@@ -414,6 +417,11 @@ class Beratung(Document):
         frappe.db.set_value("Beratung", self.name, "mandat", mandat)
 
         return mandat
+    
+    def release_all_reserved_dates(self):
+        reserved_dates = frappe.db.sql("""SELECT `name` FROM `tabAPB Zuweisung` WHERE `reserved_by` = '{0}'""".format(frappe.session.user), as_dict=True)
+        for reserved_date in reserved_dates:
+            frappe.db.set_value("APB Zuweisung", reserved_date.name, {'reserved': 0, 'reserved_by': None})
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
