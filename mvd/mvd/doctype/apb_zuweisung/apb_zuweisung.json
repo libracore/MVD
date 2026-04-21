@@ -13,7 +13,8 @@
   "cb_1",
   "link_zur_beratung",
   "languages",
-  "fachskills"
+  "fachskills",
+  "reserved_by"
  ],
  "fields": [
   {
@@ -86,10 +87,16 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Reserviert"
+  },
+  {
+   "fieldname": "reserved_by",
+   "fieldtype": "Link",
+   "label": "Reserviert von",
+   "options": "User"
   }
  ],
  "istable": 1,
- "modified": "2026-04-13 18:39:42.592298",
+ "modified": "2026-04-21 15:31:16.302570",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "APB Zuweisung",
