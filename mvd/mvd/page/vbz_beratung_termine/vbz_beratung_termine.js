@@ -29,6 +29,7 @@ frappe.vbz_beratung_termine = {
         var datum_field_value = page.filter_fields ? page.filter_fields.datum_field.get_value()||'':'';
         var language_field_value = page.filter_fields ? page.filter_fields.language_field.get_value()||'':'';
         var fachskill_field_value = page.filter_fields ? page.filter_fields.fachskill_field.get_value()||'':'';
+        var my_reservations_field_value = page.filter_fields ? page.filter_fields.my_reservations_field.get_value()||'':'';
         
         frappe.call({
             method: "mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.get_open_data",
@@ -39,7 +40,8 @@ frappe.vbz_beratung_termine = {
                 art: art_field_value,
                 datum: datum_field_value,
                 language: language_field_value,
-                fachskill: fachskill_field_value
+                fachskill: fachskill_field_value,
+                my_reservations_only: my_reservations_field_value
             },
             freeze: true,
             freeze_message: 'Lade Verarbeitungszentrale...',
@@ -84,6 +86,11 @@ frappe.vbz_beratung_termine = {
                     page.filter_fields.fachskill_field = frappe.vbz_beratung_termine.create_fachskill_field(page);
                     page.filter_fields.fachskill_field.set_value(fachskill_field_value);
                     page.filter_fields.fachskill_field.refresh();
+                    // CB: Zeige meine Reservationen
+                    page.filter_fields.my_reservations_field = frappe.vbz_beratung_termine.create_my_reservations_field(page);
+                    $(page.filter_fields.my_reservations_field.label_span).html("Nur meine reservierten Termine");
+                    page.filter_fields.my_reservations_field.set_value(my_reservations_field_value);
+                    page.filter_fields.my_reservations_field.refresh();
 
                     setTimeout(function() {frappe.vbz_beratung_termine.no_render_based_on_filter = false;}, 1000);
 
@@ -116,6 +123,23 @@ frappe.vbz_beratung_termine = {
             only_input: true
         });
         return free_only_field
+    },
+
+    create_my_reservations_field: function(page) {
+        var my_reservations_field = frappe.ui.form.make_control({
+            parent: page.main.find(".my_reservations"),
+            df: {
+                fieldtype: "Check",
+                fieldname: "my_reservations",
+                change: function(){
+                    if (!frappe.vbz_beratung_termine.no_render_based_on_filter) {
+                        frappe.vbz_beratung_termine.reload_view(page);
+                    }
+                }
+            },
+            only_input: true
+        });
+        return my_reservations_field
     },
 
     create_beratungsort_field: function(page) {

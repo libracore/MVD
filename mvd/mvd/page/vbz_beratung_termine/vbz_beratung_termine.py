@@ -14,8 +14,8 @@ import json
 no_cache=1
 
 @frappe.whitelist()
-def get_open_data(free_only=0, beratungsort=None, berater_in=None, art=None, datum=None, language=None, fachskill=None):
-    alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user, free_only, beratungsort, berater_in, art, datum, language, fachskill)
+def get_open_data(free_only=0, beratungsort=None, berater_in=None, art=None, datum=None, language=None, fachskill=None, my_reservations_only=0):
+    alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user, free_only, beratungsort, berater_in, art, datum, language, fachskill, my_reservations_only)
     datasets = {
         'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'datenstand_for_polling': now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
@@ -24,7 +24,7 @@ def get_open_data(free_only=0, beratungsort=None, berater_in=None, art=None, dat
     }
     return datasets
 
-def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=None, art=None, datum=None, language=None, fachskill=None):
+def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=None, art=None, datum=None, language=None, fachskill=None, my_reservations_only=0):
     alle = []
     meine = []
     vergebene_termin_liste = []
@@ -72,68 +72,72 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=
     if language and language != '':
         sprach_filter = "AND `berTer`.`language` = '{0}'".format(language)
     
-    alle_termine = frappe.db.sql("""
-                                    SELECT
-                                        `berTer`.`von`,
-                                        `berTer`.`bis`,
-                                        `berTer`.`art`,
-                                        `berTer`.`ort`,
-                                        `berTer`.`parent`,
-                                        `berTer`.`berater_in`,
-                                        `berTer`.`telefonnummer`,
-                                        IFNULL(`berTer`.`wunsch_berater_in`, '---') AS `wunsch_berater_in`,
-                                        `beratung`.`sektion_id`,
-                                        `beratung`.`beratungskategorie`,
-                                        `beratung`.`beratungskategorie_2`,
-                                        `beratung`.`beratungskategorie_3`,
-                                        `beratung`.`mv_mitgliedschaft`,
-                                        `beratung`.`status`,
-                                        `berTer`.`abp_referenz`
-                                    FROM `tabBeratung Termin` AS `berTer`
-                                    LEFT JOIN `tabBeratung` AS `beratung` ON `berTer`.`parent` = `beratung`.`name`
-                                    WHERE (
-                                        (`berTer`.`von` >= '{datum_von} 00:00:00') OR 
-                                        (`beratung`.`status` = 'Termin vereinbart' AND `berTer`.`von` < '{datum_von} 00:00:00')
-                                    )
-                                    {beratungsort_filter}
-                                    {berater_in_filter}
-                                    {art_filter}
-                                    {fachskill_filter}
-                                    {sprach_filter}
-                                    ORDER BY `berTer`.`von` DESC
-                                 """.format(datum_von=datum_von, beratungsort_filter=beratungsort_filter, berater_in_filter=berater_in_filter, \
-                                            art_filter=art_filter, fachskill_filter=fachskill_filter, sprach_filter=sprach_filter), as_dict=True)
-    for termin in alle_termine:
-        if not erlaubte_sektionen or termin.sektion_id in erlaubte_sektionen:
-            if not erb_block or termin.berater_in in kontaktperson_multi_user:
-                hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.parent), as_dict=True)[0].qty > 0 else 0
-                termin_data = {
-                    'von_date': get_datetime(termin.von).strftime('%d.%m.%Y'),
-                    'von_time': get_datetime(termin.von).strftime('%H:%M'),
-                    'bis_time': get_datetime(termin.bis).strftime('%H:%M'),
-                    'art': termin.art,
-                    'ort': termin.ort,
-                    'status': termin.status,
-                    'beratung': termin.parent,
-                    'beraterinn': termin.berater_in,
-                    'hat_attachement': hat_attachement,
-                    'telefonnummer': termin.telefonnummer,
-                    'wunsch_berater_in': termin.wunsch_berater_in,
-                    'wochentag': _(get_datetime(termin.von).strftime('%A'))[:2],
-                    'beratungskategorie': termin.beratungskategorie.split(" - ")[0] if termin.beratungskategorie else '',
-                    'beratungskategorie_2': termin.beratungskategorie_2.split(" - ")[0] if termin.beratungskategorie_2 else '',
-                    'beratungskategorie_3': termin.beratungskategorie_3.split(" - ")[0] if termin.beratungskategorie_3 else '',
-                    'name_mitglied': "{0} {1}".format(frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'vorname_1'), frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'nachname_1')),
-                    'sort_date': frappe.utils.getdate(termin.von),
-                    'name_for_reservation': '---'
-                }
-                if not cint(free_only) == 1:
-                    alle.append(termin_data)
-        if termin.berater_in in kontaktperson_multi_user:
-            meine.append(termin_data)
-        if termin.abp_referenz:
-            vergebene_termin_liste.append(termin.abp_referenz)
-    if len(meine) < 1:
+    if not cint(my_reservations_only) == 1:
+    
+        alle_termine = frappe.db.sql("""
+                                        SELECT
+                                            `berTer`.`von`,
+                                            `berTer`.`bis`,
+                                            `berTer`.`art`,
+                                            `berTer`.`ort`,
+                                            `berTer`.`parent`,
+                                            `berTer`.`berater_in`,
+                                            `berTer`.`telefonnummer`,
+                                            IFNULL(`berTer`.`wunsch_berater_in`, '---') AS `wunsch_berater_in`,
+                                            `beratung`.`sektion_id`,
+                                            `beratung`.`beratungskategorie`,
+                                            `beratung`.`beratungskategorie_2`,
+                                            `beratung`.`beratungskategorie_3`,
+                                            `beratung`.`mv_mitgliedschaft`,
+                                            `beratung`.`status`,
+                                            `berTer`.`abp_referenz`
+                                        FROM `tabBeratung Termin` AS `berTer`
+                                        LEFT JOIN `tabBeratung` AS `beratung` ON `berTer`.`parent` = `beratung`.`name`
+                                        WHERE (
+                                            (`berTer`.`von` >= '{datum_von} 00:00:00') OR 
+                                            (`beratung`.`status` = 'Termin vereinbart' AND `berTer`.`von` < '{datum_von} 00:00:00')
+                                        )
+                                        {beratungsort_filter}
+                                        {berater_in_filter}
+                                        {art_filter}
+                                        {fachskill_filter}
+                                        {sprach_filter}
+                                        ORDER BY `berTer`.`von` DESC
+                                    """.format(datum_von=datum_von, beratungsort_filter=beratungsort_filter, berater_in_filter=berater_in_filter, \
+                                                art_filter=art_filter, fachskill_filter=fachskill_filter, sprach_filter=sprach_filter), as_dict=True)
+        for termin in alle_termine:
+            if not erlaubte_sektionen or termin.sektion_id in erlaubte_sektionen:
+                if not erb_block or termin.berater_in in kontaktperson_multi_user:
+                    hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.parent), as_dict=True)[0].qty > 0 else 0
+                    termin_data = {
+                        'von_date': get_datetime(termin.von).strftime('%d.%m.%Y'),
+                        'von_time': get_datetime(termin.von).strftime('%H:%M'),
+                        'bis_time': get_datetime(termin.bis).strftime('%H:%M'),
+                        'art': termin.art,
+                        'ort': termin.ort,
+                        'status': termin.status,
+                        'beratung': termin.parent,
+                        'beraterinn': termin.berater_in,
+                        'hat_attachement': hat_attachement,
+                        'telefonnummer': termin.telefonnummer,
+                        'wunsch_berater_in': termin.wunsch_berater_in,
+                        'wochentag': _(get_datetime(termin.von).strftime('%A'))[:2],
+                        'beratungskategorie': termin.beratungskategorie.split(" - ")[0] if termin.beratungskategorie else '',
+                        'beratungskategorie_2': termin.beratungskategorie_2.split(" - ")[0] if termin.beratungskategorie_2 else '',
+                        'beratungskategorie_3': termin.beratungskategorie_3.split(" - ")[0] if termin.beratungskategorie_3 else '',
+                        'name_mitglied': "{0} {1}".format(frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'vorname_1'), frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'nachname_1')),
+                        'sort_date': frappe.utils.getdate(termin.von),
+                        'name_for_reservation': '---'
+                    }
+                    if not cint(free_only) == 1:
+                        alle.append(termin_data)
+            if termin.berater_in in kontaktperson_multi_user:
+                meine.append(termin_data)
+            if termin.abp_referenz:
+                vergebene_termin_liste.append(termin.abp_referenz)
+        if len(meine) < 1:
+            meine.append({'show_placeholder': 1})
+    else:
         meine.append({'show_placeholder': 1})
     
     # Filter
@@ -178,6 +182,7 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=
                                     '---' AS `name_mitglied`,
                                     NULL AS `sort_date`,
                                     IFNULL(`reserved`, 0) AS `reserved_mark`,
+                                    `reserved_by`,
                                     1 AS `is_free`,
                                     `name` AS `name_for_reservation`
                                   FROM `tabAPB Zuweisung`
@@ -204,7 +209,11 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=
     for freier_termin in freie_termine:
         if not erlaubte_sektionen or freier_termin.sektion_id in erlaubte_sektionen:
             if not erb_block or freier_termin.beraterinn in kontaktperson_multi_user:
-                alle.append(freier_termin)
+                if not cint(my_reservations_only) == 1:
+                    alle.append(freier_termin)
+                else:
+                    if freier_termin.reserved_by == frappe.session.user:
+                        alle.append(freier_termin)
     
     alle_sortiert = sorted(alle, key = lambda x: (x['sort_date'], x['beraterinn'] or 'ZZZ', x['von_time']))
     
@@ -232,10 +241,10 @@ def has_changed(since):
 
 @frappe.whitelist()
 def add_reservation(termin):
-    frappe.db.set_value("APB Zuweisung", termin, 'reserved', 1)
+    frappe.db.set_value("APB Zuweisung", termin, {'reserved': 1, 'reserved_by': frappe.session.user})
     return
 
 @frappe.whitelist()
 def remove_reservation(termin):
-    frappe.db.set_value("APB Zuweisung", termin, 'reserved', 0)
+    frappe.db.set_value("APB Zuweisung", termin, {'reserved': 0, 'reserved_by': None})
     return
