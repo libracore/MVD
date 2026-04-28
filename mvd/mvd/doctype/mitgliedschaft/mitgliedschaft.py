@@ -247,10 +247,12 @@ class Mitgliedschaft(Document):
             if frappe.db.exists("SP Mitglied Data", self.mitglied_nr):
                 frappe.db.set_value("SP Mitglied Data", self.mitglied_nr, "needs_update", 1)
             else:
+                from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
+                data = prepare_mvm_for_sp(self)
                 new_spmd = frappe.get_doc({
                     'doctype': 'SP Mitglied Data',
                     'mitglied_nr': self.mitglied_nr,
-                    'json': 'Erstellt via Mitglied-Save',
+                    'json': json.dumps(data, indent=2),
                     'needs_update': 0
                 })
                 new_spmd.insert(ignore_permissions=True)
