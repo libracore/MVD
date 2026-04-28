@@ -19,10 +19,10 @@ class SPMitgliedData(Document):
         mitglied_id = get_mitglied_id_from_nr(mitglied_nr=self.name, ignore_inaktiv=True)
         if frappe.db.exists("Mitgliedschaft", mitglied_id):
             mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
-        if mitgliedschaft:
-            data = prepare_mvm_for_sp(mitgliedschaft)
-            self.json = json.dumps(data, indent=2)
-            self.save()
+            if mitgliedschaft:
+                data = prepare_mvm_for_sp(mitgliedschaft)
+                self.json = json.dumps(data, indent=2)
+                self.save()
 
 def create_or_update_sp_mitglied_data(mitglied_nr, mitglied_id, timestamp_mismatch_retry=False):
     try:
