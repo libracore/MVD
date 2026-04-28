@@ -251,7 +251,7 @@ class Mitgliedschaft(Document):
                     'doctype': 'SP Mitglied Data',
                     'mitglied_nr': self.mitglied_nr,
                     'json': 'Erstellt via Mitglied-Save',
-                    'needs_update': 1
+                    'needs_update': 0
                 })
                 new_spmd.insert(ignore_permissions=True)
     

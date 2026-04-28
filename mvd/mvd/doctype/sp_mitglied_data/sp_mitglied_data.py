@@ -15,7 +15,14 @@ from frappe.utils.data import today
 from frappe.utils.background_jobs import enqueue
 
 class SPMitgliedData(Document):
-    pass
+    def after_insert(self):
+        mitglied_id = get_mitglied_id_from_nr(mitglied_nr=self.name, ignore_inaktiv=True)
+        if frappe.db.exists("Mitgliedschaft", mitglied_id):
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
+        if mitgliedschaft:
+            data = prepare_mvm_for_sp(mitgliedschaft)
+            self.json = json.dumps(data, indent=2)
+            self.save()
 
 def create_or_update_sp_mitglied_data(mitglied_nr, mitglied_id, timestamp_mismatch_retry=False):
     try:
@@ -39,7 +46,7 @@ def create(mitglied_nr, mitglied_id):
     if frappe.db.exists("Mitgliedschaft", mitglied_id):
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied_id)
     if mitgliedschaft:
-        data =  prepare_mvm_for_sp(mitgliedschaft)
+        data = prepare_mvm_for_sp(mitgliedschaft)
         new_record = frappe.get_doc({
             'doctype': 'SP Mitglied Data',
             'mitglied_nr': mitglied_nr,

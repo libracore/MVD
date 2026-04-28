@@ -412,7 +412,16 @@ def get_mitglied_data(**api_request):
         if "MV" in api_request["MitgliedNummer"]:
             # Performance Optimierung (#1203):
             if frappe.db.exists("SP Mitglied Data", api_request["MitgliedNummer"]):
-                data = json.loads(frappe.get_doc("SP Mitglied Data", api_request["MitgliedNummer"]).json)
+                try:
+                    data = json.loads(frappe.get_doc("SP Mitglied Data", api_request["MitgliedNummer"]).json)
+                except Exception as err:
+                    # #1754
+                    # Der "SP Mitglied Data"-Datensatz existiert, besitzt aber noch kein JSON.
+                    # Es wird zwischenzeitlich ein 404 zurückgegeben, damit der Retry-Mechanismus ausgelöst wird.
+                    make_api_log(status_code=404, method='get_mitglied_data', request_direction='Incoming', info_typ='Info', request_body=json.dumps(api_request, indent=4, ensure_ascii=False), error='No Activ Mitglied found')
+                    frappe.local.response.http_status_code = 404
+                    frappe.local.response.message = 'No Activ Mitglied found'
+                    return
                 make_api_log(status_code=200, method='get_mitglied_data', request_direction='Incoming', info_typ='Info', request_body=json.dumps(data, indent=4, ensure_ascii=False))
                 return data
             else:
