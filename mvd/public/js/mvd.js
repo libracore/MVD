@@ -1739,3 +1739,189 @@ frappe.mvd.schlichtungsbehoerde_listener = function(frm, field_name) {
             });
         });
 };
+
+frappe.provide("mvd_dialoge");
+mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRechnung {
+    constructor(opts) {
+        this.settings = opts.settings;
+        this.folgejahr = opts.folgejahr || false;
+        this.jahr = opts.jahr || 0;
+        this.dialog =  new frappe.ui.Dialog({
+            title: "Rechnungs Erstellung",
+            no_submit_on_enter: true,
+            fields: this.get_fields(),
+            primary_action_label: "Erstellen",
+            primary_action: () => {
+                this.dialog.hide();
+                this.call_primary_action();
+            }
+        });
+
+        this.dialog.$wrapper.find(".modal-dialog").css("width", "90%");
+        this.dialog.$wrapper.find(".modal-dialog").css("max-width", "1200px");
+        new mvd_vorlagen_baum.ui.VorlagenBaumNavigator({
+            wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
+            parent_dialog: this.dialog,
+            sektion_id: cur_frm.doc.sektion_id || null, // null zeigt alle an
+            purpose: "druck", // null zeigt alle an (null, email, druck oder dokument)
+            on_select: function(selection, details, row, parent_dialog) {
+                parent_dialog.fields_dict.druckvorlage.set_value(row.druckvorlage || '');
+            }
+        });
+
+        this.dialog.show();
+    }
+
+    get_fields() {
+        var me = this;
+        return [
+            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 1},
+            {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
+            {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1},
+            {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
+            {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0},
+            {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 0, 'hidden': me.settings.manuelle_artikelauswahl ? 0:1},
+            {
+                label: "Rechnungs Artikel",
+                fieldname: "rechnungs_artikel", 
+                fieldtype: "Table", 
+                cannot_add_rows: false,
+                in_place_edit: false,
+                depends_on: 'eval:doc.eigene_items',
+                data: [],
+                get_data: () => {
+                    return [];
+                },
+                fields: [
+                {
+                    fieldtype:'Link',
+                    fieldname:"item_code",
+                    options: 'Item',
+                    in_list_view: 1,
+                    read_only: 0,
+                    reqd: 1,
+                    label: __('Item Code'),
+                    change: function() {
+                        if (this.get_value()) {
+                            var rate_field = this.grid_row.on_grid_fields[2]
+                            var qty_field = this.grid_row.on_grid_fields[1];
+                            frappe.call({
+                                method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
+                                args:{
+                                        'item': this.get_value()
+                                },
+                                callback: function(r)
+                                {
+                                    rate_field.set_value(r.message.price);
+                                    qty_field.set_value(1);
+                                }
+                            });
+                        }
+                    },
+                    get_query: function() {
+                        return { 'filters': { 'mitgliedschaftsspezifischer_artikel': 1 } };
+                    }
+                },
+                {
+                    fieldtype:'Int',
+                    fieldname:"qty",
+                    in_list_view: 1,
+                    read_only: 1,
+                    label: __('Qty'),
+                    reqd: 1
+                },
+                {
+                    fieldtype:'Currency',
+                    fieldname:"rate",
+                    in_list_view: 1,
+                    read_only: 0,
+                    label: __('Rate'),
+                    reqd: 1
+                }]
+            }
+        ]
+    }
+
+    call_primary_action() {
+        if (this.dialog.get_value('bar_bezahlt') == 1) {
+            var bar_bezahlt = true;
+            if (this.dialog.get_value('hv_bar_bezahlt') == 1) {
+                var hv_bar_bezahlt = true;
+            } else {
+                var hv_bar_bezahlt = null;
+            }
+        } else {
+            var bar_bezahlt = null;
+            var hv_bar_bezahlt = null;
+        }
+        if (this.dialog.get_value('massendruck') == 1) {
+            var massendruck = true;
+        } else {
+            var massendruck = null;
+        }
+
+        frappe.dom.freeze('Erstelle Rechnung...');
+        frappe.call({
+            method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung",
+            args: this.folgejahr ? this.get_mitgliedschafts_folgejahr_rechnungs_args(bar_bezahlt, hv_bar_bezahlt, massendruck, this.jahr):this.get_mitgliedschafts_rechnungs_args(bar_bezahlt, hv_bar_bezahlt, massendruck),
+            callback: function(r)
+            {
+                var jobname = r.message;
+                let merge_refresher = setInterval(merge_refresher_handler, 3000, jobname);
+                function merge_refresher_handler(jobname) {
+                    frappe.call({
+                    'method': "mvd.mvd.utils.is_job_already_running",
+                        'args': {
+                            'jobname': jobname
+                        },
+                        'callback': function(res) {
+                            if (res.message === false) {
+                                clearInterval(merge_refresher);
+                                frappe.dom.unfreeze();
+                                cur_frm.timeline.insert_comment(`Mitgliedschaftsrechnung erstellt${massendruck ? ' (mit Massenlauf Vormerkung)':''}.`);
+                                cur_frm.reload_doc();
+                                if (massendruck) {
+                                    frappe.msgprint("Die Rechnung wurde erstellt und für den Massenlauf vorgemerkt, Sie finden sie in den Anhängen.");
+                                } else {
+                                    frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    get_mitgliedschafts_rechnungs_args(bar_bezahlt, hv_bar_bezahlt, massendruck) {
+        return {
+            'mitgliedschaft': cur_frm.doc.name,
+            'bezahlt': bar_bezahlt,
+            'attach_as_pdf': true,
+            'submit': true,
+            'hv_bar_bezahlt': hv_bar_bezahlt,
+            'druckvorlage': this.dialog.get_value('druckvorlage'),
+            'massendruck': massendruck,
+            'eigene_items': this.dialog.get_value('eigene_items'),
+            'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
+            'as_bg_job': 1
+        }
+    }
+
+    get_mitgliedschafts_folgejahr_rechnungs_args(bar_bezahlt, hv_bar_bezahlt, massendruck, jahr) {
+        return {
+            'mitgliedschaft': cur_frm.doc.name,
+            'bezahlt': bar_bezahlt,
+            'attach_as_pdf': true,
+            'submit': true,
+            'hv_bar_bezahlt': hv_bar_bezahlt,
+            'druckvorlage': this.dialog.get_value('druckvorlage'),
+            'massendruck': massendruck,
+            'ignore_stichtage': true,
+            'jahr': jahr,
+            'eigene_items': this.dialog.get_value('eigene_items'),
+            'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
+            'as_bg_job': 1
+        }
+    }
+}
