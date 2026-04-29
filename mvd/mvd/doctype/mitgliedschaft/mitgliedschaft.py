@@ -1428,11 +1428,9 @@ def get_uebersicht_html(name):
 
         if mitgliedschaft.mitgliedtyp_c == 'Privat':
             if mitgliedschaft.zahlung_hv:
-                hv_status = 'HV bezahlt im {0}'.format(mitgliedschaft.zahlung_hv)
-                if mitgliedschaft.datum_hv_zahlung:
-                    hv_status = 'HV bezahlt am {0}'.format(frappe.utils.get_datetime(mitgliedschaft.datum_hv_zahlung).strftime('%d.%m.%Y'))
+                hv_status = mitgliedschaft.zahlung_hv
             else:
-                hv_status = 'HV unbezahlt'
+                hv_status = 'unbezahlt'
         else:
             hv_status = False
         
