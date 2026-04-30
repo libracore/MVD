@@ -1763,62 +1763,7 @@ function erstelle_hv_rechnung(frm) {
 
 function erstelle_korrespondenz(frm) {
     if (frappe.user.has_role("MV_MA")) {
-        frappe.call({
-            method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
-            args:{
-                    'sektion': cur_frm.doc.sektion_id,
-                    'dokument': 'Korrespondenz',
-                    //'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
-                    'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
-                    'language': cur_frm.doc.language
-            },
-            async: false,
-            callback: function(res)
-            {
-                var druckvorlagen = res.message;
-                // Default Druckvorlage für den Moment deaktiviert!
-                //~ frappe.prompt([
-                    //~ {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1},
-                    //~ {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
-                        //~ 'get_query': function() {
-                            //~ return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
-                        //~ }
-                    //~ }
-                //~ ],
-                frappe.prompt([
-                    {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1},
-                    {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage',
-                        'get_query': function() {
-                            return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
-                        }
-                    }
-                ],
-                function(values){
-                    if (values.druckvorlage) {
-                        var druckvorlage = values.druckvorlage;
-                    } else {
-                        var druckvorlage = 'keine'
-                    }
-                    frappe.call({
-                        method: "mvd.mvd.doctype.mitgliedschaft.utils.create_korrespondenz",
-                        args:{
-                                'mitgliedschaft': cur_frm.doc.name,
-                                'druckvorlage': druckvorlage,
-                                'titel': values.titel
-                        },
-                        freeze: true,
-                        freeze_message: 'Erstelle Korrespondenz...',
-                        callback: function(r)
-                        {
-                            frappe.set_route("Form", "Korrespondenz", r.message);
-                        }
-                    });
-                },
-                'Korrespondenz Erstellung',
-                'Erstellen'
-                )
-            }
-        });
+        new mvd_dialoge.erstelle_korrespondenz({});
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
     }
