@@ -117,6 +117,7 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
             args: {
                 query: query,
                 sektion_id: this.sektion_id,
+                purpose: this.purpose,
                 limit: 30
             },
             callback: (r) => {
@@ -261,6 +262,12 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
                             ${row.use_for_druckvorlagen ? '<span class="label label-default" style="margin-right:4px;">Druck</span>' : ''}
                             ${row.use_for_dokumentenvorlagen ? '<span class="label label-default">Dokument</span>' : ''}
                         </div>
+                        ${row.match_label && row.match_value ? `
+                            <div class="text-muted" style="margin-top:6px; font-size:12px;">
+                                Treffer in ${frappe.utils.escape_html(row.match_label)}:
+                                <strong>${frappe.utils.escape_html(row.match_value)}</strong>
+                            </div>
+                        ` : ''}
                     </div>
 
                     <div style="white-space:nowrap;">
