@@ -1972,3 +1972,61 @@ mvd_dialoge.erstelle_hv_rechnung = class ErstelleHvRechnung {
         });
     }
 }
+
+mvd_dialoge.erstelle_korrespondenz = class ErstelleKorrespondenz {
+    constructor(opts) {
+        this.dialog =  new frappe.ui.Dialog({
+            title: "Korrespondenz Erstellung",
+            no_submit_on_enter: true,
+            fields: this.get_fields(),
+            primary_action_label: "Erstellen",
+            primary_action: () => {
+                this.dialog.hide();
+                this.call_primary_action();
+            }
+        });
+
+        
+        this.dialog.$wrapper.find(".modal-dialog").css("width", `${opts.modal_width || '50'}%`);
+        this.dialog.$wrapper.find(".modal-dialog").css("min-width", `${opts.modal_min_width || '700'}px`);
+        this.dialog.$wrapper.find(".modal-dialog").css("max-width", `${opts.modal_max_width || '1200'}px`);
+        
+        new mvd_vorlagen_baum.ui.VorlagenBaumNavigator({
+            wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
+            parent_dialog: this.dialog,
+            sektion_id: cur_frm.doc.sektion_id || null, // null zeigt alle an
+            purpose: "druck", // null zeigt alle an (null, email, druck oder dokument)
+            on_select: function(selection, details, row, parent_dialog) {
+                parent_dialog.fields_dict.druckvorlage.set_value(row.druckvorlage || '');
+            }
+        });
+
+        this.dialog.show();
+    }
+
+    get_fields() {
+        var me = this;
+        return [
+            {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1},
+            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage', 'read_only': 1},
+            {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
+        ]
+    }
+
+    call_primary_action() {
+        frappe.call({
+            method: "mvd.mvd.doctype.mitgliedschaft.utils.create_korrespondenz",
+            args:{
+                    'mitgliedschaft': cur_frm.doc.name,
+                    'druckvorlage': this.dialog.get_value('druckvorlage') || 'keine',
+                    'titel': this.dialog.get_value('titel')
+            },
+            freeze: true,
+            freeze_message: 'Erstelle Korrespondenz...',
+            callback: function(r)
+            {
+                frappe.set_route("Form", "Korrespondenz", r.message);
+            }
+        });
+    }
+}
