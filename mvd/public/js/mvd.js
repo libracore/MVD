@@ -1771,27 +1771,10 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
     }
 
     call_primary_action() {
-        if (this.dialog.get_value('bar_bezahlt') == 1) {
-            var bar_bezahlt = true;
-            if (this.dialog.get_value('hv_bar_bezahlt') == 1) {
-                var hv_bar_bezahlt = true;
-            } else {
-                var hv_bar_bezahlt = null;
-            }
-        } else {
-            var bar_bezahlt = null;
-            var hv_bar_bezahlt = null;
-        }
-        if (this.dialog.get_value('massendruck') == 1) {
-            var massendruck = true;
-        } else {
-            var massendruck = null;
-        }
-
         frappe.dom.freeze('Erstelle Rechnung...');
         frappe.call({
             method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung",
-            args: this.folgejahr ? this.get_mitgliedschafts_folgejahr_rechnungs_args(bar_bezahlt, hv_bar_bezahlt, massendruck, this.jahr):this.get_mitgliedschafts_rechnungs_args(bar_bezahlt, hv_bar_bezahlt, massendruck),
+            args: this.folgejahr ? this.get_mitgliedschafts_folgejahr_rechnungs_args():this.get_mitgliedschafts_rechnungs_args(),
             callback: function(r)
             {
                 var jobname = r.message;
@@ -1821,32 +1804,32 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
         });
     }
 
-    get_mitgliedschafts_rechnungs_args(bar_bezahlt, hv_bar_bezahlt, massendruck) {
+    get_mitgliedschafts_rechnungs_args() {
         return {
             'mitgliedschaft': cur_frm.doc.name,
-            'bezahlt': bar_bezahlt,
+            'bezahlt': this.dialog.get_value('bar_bezahlt') == 1 ? true:null,
             'attach_as_pdf': true,
             'submit': true,
-            'hv_bar_bezahlt': hv_bar_bezahlt,
+            'hv_bar_bezahlt': this.dialog.get_value('hv_bar_bezahlt') == 1 ? true:null,
             'druckvorlage': this.dialog.get_value('druckvorlage'),
-            'massendruck': massendruck,
+            'massendruck': this.dialog.get_value('massendruck') == 1 ? true:null,
             'eigene_items': this.dialog.get_value('eigene_items'),
             'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
             'as_bg_job': 1
         }
     }
 
-    get_mitgliedschafts_folgejahr_rechnungs_args(bar_bezahlt, hv_bar_bezahlt, massendruck, jahr) {
+    get_mitgliedschafts_folgejahr_rechnungs_args() {
         return {
             'mitgliedschaft': cur_frm.doc.name,
-            'bezahlt': bar_bezahlt,
+            'bezahlt': this.dialog.get_value('bar_bezahlt') == 1 ? true:null,
             'attach_as_pdf': true,
             'submit': true,
-            'hv_bar_bezahlt': hv_bar_bezahlt,
+            'hv_bar_bezahlt': this.dialog.get_value('hv_bar_bezahlt') == 1 ? true:null,
             'druckvorlage': this.dialog.get_value('druckvorlage'),
-            'massendruck': massendruck,
+            'massendruck': this.dialog.get_value('massendruck') == 1 ? true:null,
             'ignore_stichtage': true,
-            'jahr': jahr,
+            'jahr': this.jahr,
             'eigene_items': this.dialog.get_value('eigene_items'),
             'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
             'as_bg_job': 1
@@ -2033,7 +2016,7 @@ mvd_dialoge.erstelle_korrespondenz = class ErstelleKorrespondenz {
 
 mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
     constructor(opts) {
-        this.settings = opts.settings;
+        this.dt_scope = opts.dt_scope || "Mitgliedschaft";
         this.dialog =  new frappe.ui.Dialog({
             title: "Rechnungs Erstellung (Sonstiges)",
             no_submit_on_enter: true,
@@ -2065,122 +2048,180 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
 
     get_fields() {
         var me = this;
-        return [
-            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 1},
-            {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
-            {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0},
-            {'fieldname': 'ohne_betrag', 'fieldtype': 'Check', 'label': 'Betrag ausblenden', 'reqd': 0, 'default': 0, 'hidden': 0},
-            {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 1, 'read_only': 1},
-            {'fieldname': 'ignore_pricing_rule', 'fieldtype': 'Check', 'label': 'Preisregeln ignorieren', 'reqd': 0, 'default': 0, 'read_only': 0},
-            {
-                label: "Rechnungs Artikel",
-                fieldname: "rechnungs_artikel", 
-                fieldtype: "Table", 
-                description: 'Die Preise der untenstehenden Tabelle werden nur im Zusammenhang mit "Preisregel ignorieren" verwendet.',
-                cannot_add_rows: false,
-                in_place_edit: false,
-                reqd: 1,
-                data: [],
-                get_data: () => {
-                    return [];
-                },
-                fields: [
+        if (me.dt_scope == "Mitgliedschaft") {
+            return [
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 1},
+                {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
+                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0},
+                {'fieldname': 'ohne_betrag', 'fieldtype': 'Check', 'label': 'Betrag ausblenden', 'reqd': 0, 'default': 0, 'hidden': 0},
+                {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 1, 'read_only': 1},
+                {'fieldname': 'ignore_pricing_rule', 'fieldtype': 'Check', 'label': 'Preisregeln ignorieren', 'reqd': 0, 'default': 0, 'read_only': 0},
                 {
-                    fieldtype:'Link',
-                    fieldname:"item_code",
-                    options: 'Item',
-                    in_list_view: 1,
-                    read_only: 0,
+                    label: "Rechnungs Artikel",
+                    fieldname: "rechnungs_artikel", 
+                    fieldtype: "Table", 
+                    description: 'Die Preise der untenstehenden Tabelle werden nur im Zusammenhang mit "Preisregel ignorieren" verwendet.',
+                    cannot_add_rows: false,
+                    in_place_edit: false,
                     reqd: 1,
-                    label: __('Item Code'),
-                    change: function() {
-                        if (this.get_value()) {
-                            if (this.section) {
-                                var rate_field = this.section.fields_dict.rate;
-                                var qty_field = this.section.fields_dict.qty;
-                                var description_field = this.section.fields_dict.description;
-                            } else {
-                                var rate_field = this.grid_row.on_grid_fields[2];
-                                var qty_field = this.grid_row.on_grid_fields[1];
-                                var description_field = this.grid_row.on_grid_fields[3];
-                            }
-                            frappe.call({
-                                method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
-                                args:{
-                                        'item': this.get_value()
-                                },
-                                callback: function(r)
-                                {
-                                    rate_field.set_value(r.message.price);
-                                    description_field.set_value(r.message.description);
-                                    qty_field.set_value(1);
+                    data: [],
+                    get_data: () => {
+                        return [];
+                    },
+                    fields: [
+                    {
+                        fieldtype:'Link',
+                        fieldname:"item_code",
+                        options: 'Item',
+                        in_list_view: 1,
+                        read_only: 0,
+                        reqd: 1,
+                        label: __('Item Code'),
+                        change: function() {
+                            if (this.get_value()) {
+                                if (this.section) {
+                                    var rate_field = this.section.fields_dict.rate;
+                                    var qty_field = this.section.fields_dict.qty;
+                                    var description_field = this.section.fields_dict.description;
+                                } else {
+                                    var rate_field = this.grid_row.on_grid_fields[2];
+                                    var qty_field = this.grid_row.on_grid_fields[1];
+                                    var description_field = this.grid_row.on_grid_fields[3];
                                 }
-                            });
+                                frappe.call({
+                                    method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
+                                    args:{
+                                            'item': this.get_value()
+                                    },
+                                    callback: function(r)
+                                    {
+                                        rate_field.set_value(r.message.price);
+                                        description_field.set_value(r.message.description);
+                                        qty_field.set_value(1);
+                                    }
+                                });
+                            }
+                        },
+                        get_query: function() {
+                            return { 'filters': { 'mitgliedschaftsspezifischer_artikel': 0 } };
                         }
                     },
-                    get_query: function() {
-                        return { 'filters': { 'mitgliedschaftsspezifischer_artikel': 0 } };
-                    }
-                },
+                    {
+                        fieldtype:'Int',
+                        fieldname:"qty",
+                        in_list_view: 1,
+                        read_only: 0,
+                        label: __('Qty'),
+                        reqd: 1
+                    },
+                    {
+                        fieldtype:'Currency',
+                        fieldname:"rate",
+                        in_list_view: 1,
+                        read_only: 0,
+                        label: __('Rate'),
+                        reqd: 1
+                    },
+                    {
+                        fieldtype:'Text Editor',
+                        fieldname:"description",
+                        in_list_view: 1,
+                        read_only: 0,
+                        label: __('Description'),
+                        reqd: 0
+                    }]
+                }
+            ]
+        } else {
+            return [
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 1},
+                {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
+                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0},
+                {'fieldname': 'ohne_betrag', 'fieldtype': 'Check', 'label': 'Betrag ausblenden', 'reqd': 0, 'default': 0, 'hidden': 0},
+                {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 1, 'read_only': 1},
+                {'fieldname': 'ignore_pricing_rule', 'fieldtype': 'Check', 'label': 'Preisregeln ignorieren', 'reqd': 0, 'default': 0, 'read_only': 0},
                 {
-                    fieldtype:'Int',
-                    fieldname:"qty",
-                    in_list_view: 1,
-                    read_only: 0,
-                    label: __('Qty'),
-                    reqd: 1
-                },
-                {
-                    fieldtype:'Currency',
-                    fieldname:"rate",
-                    in_list_view: 1,
-                    read_only: 0,
-                    label: __('Rate'),
-                    reqd: 1
-                },
-                {
-                    fieldtype:'Text Editor',
-                    fieldname:"description",
-                    in_list_view: 1,
-                    read_only: 0,
-                    label: __('Description'),
-                    reqd: 0
-                }]
-            }
-        ]
+                    label: "Rechnungs Artikel",
+                    fieldname: "rechnungs_artikel", 
+                    fieldtype: "Table", 
+                    description: 'Die Preise der untenstehenden Tabelle werden nur im Zusammenhang mit "Preisregel ignorieren" verwendet.',
+                    cannot_add_rows: false,
+                    in_place_edit: false,
+                    reqd: 1,
+                    data: [],
+                    get_data: () => {
+                        return [];
+                    },
+                    fields: [
+                    {
+                        fieldtype:'Link',
+                        fieldname:"item_code",
+                        options: 'Item',
+                        in_list_view: 1,
+                        read_only: 0,
+                        reqd: 1,
+                        label: __('Item Code'),
+                        change: function() {
+                            if (this.get_value()) {
+                                if (this.section) {
+                                    var rate_field = this.section.fields_dict.rate;
+                                    var qty_field = this.section.fields_dict.qty;
+                                } else {
+                                    var rate_field = this.grid_row.on_grid_fields[2];
+                                    var qty_field = this.grid_row.on_grid_fields[1];
+                                }
+                                frappe.call({
+                                    method: "mvd.mvd.utils.manuelle_rechnungs_items.get_item_price",
+                                    args:{
+                                            'item': this.get_value(),
+                                            'customer_customer': cur_frm.doc.kunde_kunde
+                                    },
+                                    callback: function(r)
+                                    {
+                                        rate_field.set_value(r.message.price);
+                                        qty_field.set_value(1);
+                                    }
+                                });
+                            }
+                        },
+                        get_query: function() {
+                            return { 'filters': { 'mitgliedschaftsspezifischer_artikel': 0 } };
+                        }
+                    },
+                    {
+                        fieldtype:'Int',
+                        fieldname:"qty",
+                        in_list_view: 1,
+                        read_only: 0,
+                        label: __('Qty'),
+                        reqd: 1
+                    },
+                    {
+                        fieldtype:'Currency',
+                        fieldname:"rate",
+                        in_list_view: 1,
+                        read_only: 0,
+                        label: __('Rate'),
+                        reqd: 1
+                    },
+                    {
+                        fieldtype:'Text Editor',
+                        fieldname:"description",
+                        in_list_view: 0,
+                        read_only: 0,
+                        label: __('Description'),
+                        reqd: 0,
+                        description: 'Dieses Feld soll nur beschrieben werden, wenn der Standard-Artikel-Text überschrieben werden soll.',
+                    }]
+                }
+            ]
+        }
     }
 
     call_primary_action() {
-        if (this.dialog.get_value('bar_bezahlt') == 1) {
-            var bar_bezahlt = true;
-        } else {
-            var bar_bezahlt = null;
-        }
-        
-        if (this.dialog.get_value('ohne_betrag') == 1) {
-            var ohne_betrag = true;
-        } else {
-            var ohne_betrag = null;
-        }
-        
-        if (this.dialog.get_value('ignore_pricing_rule') == 1) {
-            var ignore_pricing_rule = true;
-        } else {
-            var ignore_pricing_rule = null;
-        }
         frappe.call({
             method: "mvd.mvd.utils.sonstige_rechnungen.create_rechnung_sonstiges",
-            args:{
-                    'sektion': cur_frm.doc.sektion_id,
-                    'mitgliedschaft': cur_frm.doc.name,
-                    'bezahlt': bar_bezahlt,
-                    'attach_as_pdf': true,
-                    'submit': true,
-                    'druckvorlage': this.dialog.get_value('druckvorlage'),
-                    'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
-                    'ohne_betrag': ohne_betrag,
-                    'ignore_pricing_rule': ignore_pricing_rule
-            },
+            args: this.get_primary_action_args(),
             freeze: true,
             freeze_message: 'Erstelle Rechnung (Sonstiges)...',
             callback: function(r)
@@ -2190,5 +2231,34 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
                 frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
             }
         });
+    }
+
+    get_primary_action_args() {
+        if (this.dt_scope == "Mitgliedschaft") {
+            return {
+                'sektion': cur_frm.doc.sektion_id,
+                'mitgliedschaft': cur_frm.doc.name,
+                'bezahlt': this.dialog.get_value('bar_bezahlt') == 1 ? true:null,
+                'attach_as_pdf': true,
+                'submit': true,
+                'druckvorlage': this.dialog.get_value('druckvorlage'),
+                'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
+                'ohne_betrag': this.dialog.get_value('ohne_betrag') == 1 ? true:null,
+                'ignore_pricing_rule': this.dialog.get_value('ignore_pricing_rule') == 1 ? true:null
+            }
+        } else {
+            return {
+                'sektion': cur_frm.doc.sektion_id,
+                'kunde': cur_frm.doc.name,
+                'bezahlt': this.dialog.get_value('bar_bezahlt') == 1 ? true:null,
+                'attach_as_pdf': true,
+                'submit': true,
+                'druckvorlage': this.dialog.get_value('druckvorlage'),
+                'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
+                'ohne_betrag': this.dialog.get_value('ohne_betrag') == 1 ? true:null,
+                'mv_mitgliedschaft': cur_frm.doc.mv_mitgliedschaft,
+                'ignore_pricing_rule': this.dialog.get_value('ignore_pricing_rule') == 1 ? true:null
+            }
+        }
     }
 }
