@@ -1755,57 +1755,7 @@ function override_default_email_dialog(frm) {
 
 function erstelle_hv_rechnung(frm) {
     if (frappe.user.has_role("MV_MA")) {
-        frappe.call({
-            method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
-            args:{
-                    'sektion': cur_frm.doc.sektion_id,
-                    'dokument': 'HV mit EZ',
-                    'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
-                    'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
-                    'language': cur_frm.doc.language
-            },
-            async: false,
-            callback: function(res)
-            {
-                var druckvorlagen = res.message;
-                // Default Druckvorlage für den Moment deaktiviert!
-                //~ frappe.prompt([
-                    //~ {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'default': druckvorlagen.default_druckvorlage, 
-                        //~ 'get_query': function() {
-                            //~ return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
-                        //~ }
-                    //~ }
-                //~ ],
-                frappe.prompt([
-                    {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
-                        'get_query': function() {
-                            return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
-                        }
-                    }
-                ],
-                function(values){
-                    frappe.call({
-                        method: "mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung.create_hv_fr",
-                        args:{
-                                'mitgliedschaft': cur_frm.doc.name,
-                                'druckvorlage': values.druckvorlage,
-                                'asap_print': true
-                        },
-                        freeze: true,
-                        freeze_message: 'Erstelle HV-Rechnung...',
-                        callback: function(r)
-                        {
-                            cur_frm.timeline.insert_comment("HV-Rechnung " + r.message + " erstellt.");
-                            cur_frm.reload_doc();
-                            frappe.msgprint("Die HV-Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
-                        }
-                    });
-                },
-                'HV-Rechnung Erstellung',
-                'Erstellen'
-                )
-            }
-        });
+        new mvd_dialoge.erstelle_hv_rechnung({});
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
     }
