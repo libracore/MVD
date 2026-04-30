@@ -2185,18 +2185,8 @@ function sektionswechsel_vervollstaendigen(frm) {
 
 function erstelle_rechnung_sonstiges(frm) {
     if (frappe.user.has_role("MV_MA")) {
-        frappe.call({
-            'method': "frappe.client.get",
-            'args': {
-                'doctype': "MVD Settings",
-                'name': "MVD Settings"
-            },
-            'callback': function(settings_response) {
-                var settings = settings_response.message;
-                new mvd_dialoge.erstelle_sonstiges_rechnung({
-                    settings: settings
-                });
-            }
+        new mvd_dialoge.erstelle_sonstiges_rechnung({
+            dt_scope: "Mitgliedschaft"
         });
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
