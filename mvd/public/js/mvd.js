@@ -2279,4 +2279,33 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
             });
         }
     }
+
+    get_primary_action_args() {
+        if (this.dt_scope == "Mitgliedschaft") {
+            return {
+                'sektion': cur_frm.doc.sektion_id,
+                'mitgliedschaft': cur_frm.doc.name,
+                'bezahlt': this.dialog.get_value('bar_bezahlt') == 1 ? true:null,
+                'attach_as_pdf': true,
+                'submit': true,
+                'druckvorlage': this.dialog.get_value('druckvorlage'),
+                'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
+                'ohne_betrag': this.dialog.get_value('ohne_betrag') == 1 ? true:null,
+                'ignore_pricing_rule': this.dialog.get_value('ignore_pricing_rule') == 1 ? true:null
+            }
+        } else {
+            return {
+                'sektion': cur_frm.doc.sektion_id,
+                'kunde': cur_frm.doc.name,
+                'bezahlt': this.dialog.get_value('bar_bezahlt') == 1 ? true:null,
+                'attach_as_pdf': true,
+                'submit': true,
+                'druckvorlage': this.dialog.get_value('druckvorlage'),
+                'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
+                'ohne_betrag': this.dialog.get_value('ohne_betrag') == 1 ? true:null,
+                'mv_mitgliedschaft': cur_frm.doc.mv_mitgliedschaft,
+                'ignore_pricing_rule': this.dialog.get_value('ignore_pricing_rule') == 1 ? true:null
+            }
+        }
+    }
 }
