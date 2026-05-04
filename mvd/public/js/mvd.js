@@ -434,9 +434,12 @@ frappe.mvd.MailComposer = Class.extend({
         let contactList = [];
         var fields= [
             {label:__("To"), fieldtype:"MultiSelect", reqd: 0, fieldname:"recipients",options:contactList},
-            {fieldtype: "Section Break", collapsible: this.cc ? 0:this.bcc ? 0:1, label: __("CC, BCC & Email Template")},
-            {label:__("CC"), fieldtype:"MultiSelect", fieldname:"cc",options:contactList},
-            {label:__("BCC"), fieldtype:"MultiSelect", fieldname:"bcc",options:contactList},
+            {fieldtype: "Section Break"},
+            {fieldtype: "Column Break"}, 
+            {label:__("CC"), fieldtype:"MultiSelect", fieldname:"cc", options:contactList},
+            {fieldtype: "Column Break"}, 
+            {label:__("BCC"), fieldtype:"MultiSelect", fieldname:"bcc", options:contactList},
+            {fieldtype: "Section Break"},
             {label:__("Email Template"), fieldtype:"Link", options:"Email Template",
                 fieldname:"email_template"},
             {fieldtype: "Section Break"},
