@@ -624,21 +624,32 @@ frappe.mvd.MailComposer = Class.extend({
         if(this.subject){
             this.key = this.key + ":" + this.subject;
         }
+        const storage_key = `frappe_comm_backup_${this.doc}_${this.key}`;
         this.dialog.onhide = function() {
-            var last_edited_communication = me.get_last_edited_communication();
-            $.extend(last_edited_communication, {
-                sender: me.dialog.get_value("sender"),
-                recipients: me.dialog.get_value("recipients"),
-                cc: me.dialog.get_value("cc"),
-                bcc: me.dialog.get_value("bcc"),
-                subject: me.dialog.get_value("subject"),
-                content: me.dialog.get_value("content"),
-            });
-        }
+        var last_edited_communication = me.get_last_edited_communication();
+        var data_to_save = {
+            sender: me.dialog.get_value("sender"),
+            recipients: me.dialog.get_value("recipients"),
+            cc: me.dialog.get_value("cc"),
+            bcc: me.dialog.get_value("bcc"),
+            subject: me.dialog.get_value("subject"),
+            content: me.dialog.get_value("content"),
+            timestamp: new Date().getTime() // Zeitstempel für Validierung
+        };
+        $.extend(last_edited_communication, data_to_save);
+        // Als Fallback speichern auch noch im Local Storage
+        localStorage.setItem(storage_key, JSON.stringify(data_to_save));
+    };
 
         this.dialog.on_page_show = function() {
             if (!me.txt) {
                 var last_edited_communication = me.get_last_edited_communication();
+                if (!last_edited_communication.content) {
+                    var backup = localStorage.getItem(storage_key);
+                    if (backup) {
+                        last_edited_communication = JSON.parse(backup);
+                    }
+                }
                 if(last_edited_communication.content) {
                     me.dialog.set_value("sender", last_edited_communication.sender || "");
                     me.dialog.set_value("subject", last_edited_communication.subject || "");
@@ -654,6 +665,10 @@ frappe.mvd.MailComposer = Class.extend({
     },
 
     get_last_edited_communication: function() {
+        if (!frappe.last_edited_communication) {
+            frappe.last_edited_communication = {};
+        }
+
         if (!frappe.last_edited_communication[this.doc]) {
             frappe.last_edited_communication[this.doc] = {};
         }
