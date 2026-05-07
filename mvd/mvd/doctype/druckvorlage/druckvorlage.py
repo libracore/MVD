@@ -795,6 +795,57 @@ def get_beratungstermin_ort(ctx):
         
     return '---'
 
+@context_decorator
+def get_beratungs_daten(ctx):
+    doc = get_doc_from_ctx(ctx)
+    sektion = ""
+    sprache = "de"
+    anrede = ""
+    if not doc:
+        return {}
+    
+    if doc.mv_mitgliedschaft:
+        m = frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft)
+        anrede = m.briefanrede or ""
+        sektion = m.sektion_id
+        sprache = m.language or "de"
+    elif doc.faktura_kunde:
+        k = frappe.get_value("Kunde", doc.faktura_kunde, ["sektion_id", "language"], as_dict=True)
+        sektion = k.sektion_id
+        sprache = k.language or "de"
+
+    berater_name = frappe.db.get_value("Termin Kontaktperson", doc.kontaktperson, "kontakt") or ""
+    beratung_art = frappe.db.get_value("Beratung Termin", {"parent": doc.name}, "art") or ""
+    termine_liste = []
+    child_termine = frappe.get_all("Beratung Termin", 
+        filters={"parent": doc.name}, 
+        fields=["von", "bis", "telefonnummer", "ort"],
+        order_by="von asc"
+    )
+
+    for t in child_termine:
+        ort_info = frappe.db.get_value("Beratungsort", t.ort, "infofeld") or ""
+        ort_clean = t.ort.replace("({0})".format(sektion), "").strip() if t.ort else ""
+        dauer = int((t.bis - t.von).total_seconds() / 60) if t.bis and t.von else 0
+        
+        termine_liste.append({
+            "wochentag": _(t.von.strftime('%A'), lang=sprache),
+            "datum": t.von.strftime('%d.%m.%y'),
+            "von": t.von.strftime('%H:%M'),
+            "bis": t.bis.strftime('%H:%M'),
+            "dauer": dauer,
+            "telefonnummer": t.telefonnummer or "---",
+            "ort": ort_clean,
+            "ort_info": ort_info.replace(', ', '<br>')
+        })
+
+    return {
+        "anrede": anrede,
+        "sprache": sprache,
+        "berater": berater_name,
+        "termine": termine_liste,
+        "art": beratung_art
+    }
 
 @context_decorator
 def get_rechnungsbetrag(ctx):

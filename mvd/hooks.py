@@ -80,7 +80,8 @@ jenv = {
         "get_beratungstermin_wochentag_de:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungstermin_wochentag_de",
         "get_beratungstermin_wochentag_fr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungstermin_wochentag_fr",
         "get_beratungstermin_telefonnummer:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungstermin_telefonnummer",
-        "get_beratungstermin_ort:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungstermin_ort"
+        "get_beratungstermin_ort:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungstermin_ort",
+        "get_beratungs_daten:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungs_daten"
     ]
 }
 
