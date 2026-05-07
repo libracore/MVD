@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention
 try:
@@ -696,6 +697,104 @@ def get_webshopdatum(ctx):
         return get_webshop_datum(sinv)
     
     return '---'
+
+
+### Kontexte für die Beratungsemails ###
+@context_decorator
+def get_beraterin_name(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "Beratung":
+        name_kontaktperson = frappe.db.get_value("Termin Kontaktperson", doc.kontaktperson, "kontakt")
+        if name_kontaktperson:
+            return name_kontaktperson 
+        
+    return '---'
+
+@context_decorator
+def get_beratungstermin_datum(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "Beratung":
+        termin_von = frappe.db.get_value("Beratung Termin", {"parent": doc.name}, "von")
+        if termin_von:
+            return termin_von.strftime('%d.%m.%y') 
+        
+    return '---'
+
+@context_decorator
+def get_beratungstermin_wochentag_fr(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "Beratung":
+        termin_von = frappe.db.get_value("Beratung Termin", {"parent": doc.name}, "von")
+        if termin_von:
+            return _(termin_von.strftime('%A'), lang='fr')
+        
+    return '---'
+
+@context_decorator
+def get_beratungstermin_wochentag_de(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "Beratung":
+        termin_von = frappe.db.get_value("Beratung Termin", {"parent": doc.name}, "von")
+        if termin_von:
+            return _(termin_von.strftime('%A'), lang='de')
+        
+    return '---'
+
+@context_decorator
+def get_beratungstermin_von(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "Beratung":
+        termin_von = frappe.db.get_value("Beratung Termin", {"parent": doc.name}, "von")
+        if termin_von:
+            return termin_von.strftime('%H:%M') 
+        
+    return '---'
+
+@context_decorator
+def get_beratungstermin_bis(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "Beratung":
+        termin_bis = frappe.db.get_value("Beratung Termin", {"parent": doc.name}, "bis")
+        if termin_bis:
+            return termin_bis.strftime('%H:%M') 
+        
+    return '---'
+
+@context_decorator
+def get_beratungstermin_dauer(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "Beratung":
+        termin_von = frappe.db.get_value("Beratung Termin", {"parent": doc.name}, "von")
+        termin_bis = frappe.db.get_value("Beratung Termin", {"parent": doc.name}, "bis")
+        if termin_bis and termin_von:
+            differenz = termin_bis - termin_von
+            termin_dauer = int(differenz.total_seconds() / 60)
+            return termin_dauer
+        
+    return '---'
+
+@context_decorator
+def get_beratungstermin_telefonnummer(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "Beratung":
+        tel = frappe.db.get_value("Beratung Termin", {"parent": doc.name}, "telefonnummer")
+        if tel:
+            return tel
+        
+    return '---'
+
+@context_decorator
+def get_beratungstermin_ort(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "Beratung":
+        ort = frappe.db.get_value("Beratung Termin", {"parent": doc.name}, "ort")
+        if ort:
+            ort_info = frappe.db.get_value("Beratungsort", ort, "infofeld")
+            if ort_info:
+                return ort_info
+        
+    return '---'
+
 
 @context_decorator
 def get_rechnungsbetrag(ctx):
