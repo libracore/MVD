@@ -195,7 +195,7 @@ class Mitgliedschaft(Document):
                 self.language = 'de'
 
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
-            if not self.asloca_id and not self.mvs_quelle:
+            if not self.asloca_id and not (self.status_c == 'Interessent*in' and self.mvs_quelle):
                 sp_updater(self)
         
         # Hotfix ISS-2024-60 / #942
