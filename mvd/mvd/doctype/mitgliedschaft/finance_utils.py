@@ -199,10 +199,6 @@ def get_ampelfarbe(mitgliedschaft, db_direct=False):
         - Grün: ampelgruen --> Mitglied kann alle Dienstleistungen beziehen (keine Karenzfristen, keine überfälligen oder offen Rechnungen)
         - Gelb: ampelgelb --> Karenzfristen oder offene Rechnungen
         - Rot: ampelrot --> überfällige offene Rechnungen
-        
-        MVZH Ausnahme:
-        - Grün --> Jahr bezahlt >= aktuelles Jahr
-        - Rot --> Jahr bezahlt < aktuelles Jahr
         ---------------------------------------------------------
         mitgliedschaft -> Muss immer einem Objekt entsprechen!
     
@@ -213,60 +209,51 @@ def get_ampelfarbe(mitgliedschaft, db_direct=False):
     if mitgliedschaft.status_c in ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in'):
         ampelfarbe = 'ampelrot'
     else:
+        ueberfaellige_rechnungen = 0
+        offene_rechnungen = 0
         
-        # MVZH Ausnahme Start
-        if mitgliedschaft.sektion_id == 'MVZH':
-            if cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) < cint(datetime.date.today().year):
-                ampelfarbe = 'ampelrot'
-            else:
-                ampelfarbe = 'ampelgruen'
-        # MVZH Ausnahme Ende
-        else:
-            ueberfaellige_rechnungen = 0
-            offene_rechnungen = 0
-            
-            karenzfrist_in_d = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, "karenzfrist") or 30
-            ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintrittsdatum), karenzfrist_in_d)
-            karenzfrist_abgelaufen = True
-            
-            if getdate() < ablauf_karenzfrist:
-                if cint(mitgliedschaft.zahlung_hv) > 0:
-                    karenzfrist_abgelaufen = False
-            
-            # musste mit v8.5.9 umgeschrieben werden, da negative Werte ebenfalls == True ergeben. (Beispiel: (1 + 2015 - 2023) == True)
-            # ~ aktuelles_jahr_bezahlt = bool( 1 + cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - cint(now().split("-")[0]) )
-            aktuelles_jahr_bezahlt = False if ( 1 + cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - cint(now().split("-")[0]) ) <= 0 else True
-            
-            if not aktuelles_jahr_bezahlt:
-                ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
-                                                            FROM `tabSales Invoice` 
-                                                            WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
-                                                            AND `ist_mitgliedschaftsrechnung` = 1
-                                                            AND `due_date` < CURDATE()
-                                                            AND `docstatus` = 1""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)[0].open_amount
-            else:
-                ueberfaellige_rechnungen = 0
-            
-            if ueberfaellige_rechnungen > 0:
-                ampelfarbe = 'ampelrot'
-            else:
-                if not aktuelles_jahr_bezahlt:
-                    offene_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
+        karenzfrist_in_d = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, "karenzfrist") or 30
+        ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintrittsdatum), karenzfrist_in_d)
+        karenzfrist_abgelaufen = True
+        
+        if getdate() < ablauf_karenzfrist:
+            if cint(mitgliedschaft.zahlung_hv) > 0:
+                karenzfrist_abgelaufen = False
+        
+        # musste mit v8.5.9 umgeschrieben werden, da negative Werte ebenfalls == True ergeben. (Beispiel: (1 + 2015 - 2023) == True)
+        # ~ aktuelles_jahr_bezahlt = bool( 1 + cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - cint(now().split("-")[0]) )
+        aktuelles_jahr_bezahlt = False if ( 1 + cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) - cint(now().split("-")[0]) ) <= 0 else True
+        
+        if not aktuelles_jahr_bezahlt:
+            ueberfaellige_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
                                                         FROM `tabSales Invoice` 
                                                         WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
                                                         AND `ist_mitgliedschaftsrechnung` = 1
-                                                        AND `due_date` >= CURDATE()
+                                                        AND `due_date` < CURDATE()
                                                         AND `docstatus` = 1""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)[0].open_amount
-                else:
-                    offene_rechnungen = 0
-                
-                if offene_rechnungen > 0:
+        else:
+            ueberfaellige_rechnungen = 0
+        
+        if ueberfaellige_rechnungen > 0:
+            ampelfarbe = 'ampelrot'
+        else:
+            if not aktuelles_jahr_bezahlt:
+                offene_rechnungen = frappe.db.sql("""SELECT IFNULL(SUM(`outstanding_amount`), 0) AS `open_amount`
+                                                    FROM `tabSales Invoice` 
+                                                    WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
+                                                    AND `ist_mitgliedschaftsrechnung` = 1
+                                                    AND `due_date` >= CURDATE()
+                                                    AND `docstatus` = 1""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)[0].open_amount
+            else:
+                offene_rechnungen = 0
+            
+            if offene_rechnungen > 0:
+                ampelfarbe = 'ampelgelb'
+            else:
+                if not karenzfrist_abgelaufen:
                     ampelfarbe = 'ampelgelb'
                 else:
-                    if not karenzfrist_abgelaufen:
-                        ampelfarbe = 'ampelgelb'
-                    else:
-                        ampelfarbe = 'ampelgruen'
+                    ampelfarbe = 'ampelgruen'
     
     if db_direct:
         if mitgliedschaft.ampel_farbe != ampelfarbe:
