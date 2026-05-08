@@ -123,6 +123,12 @@ def get_data():
                     "label": _("Mahnungen"),
                     "description": _("Mahnungen")
                 },
+                                {
+                    "type": "doctype",
+                    "name": "Mahnlauf",
+                    "label": _("Mahnläufe"),
+                    "description": _("Mahnläufe")
+                },
                 {
                     "type": "report",
                     "name": "Mitgliederbeitraege",
@@ -259,6 +265,12 @@ def get_data():
                     "name": "MW Export",
                     "label": _("M+W Export"),
                     "description": _("M+W Export")
+                },
+                {
+                    "type": "doctype",
+                    "name": "MW",
+                    "label": _("M+W Ausgaben"),
+                    "description": _("M+W Ausgaben")
                 }
             ]
         },
@@ -289,12 +301,6 @@ def get_data():
                     "name": "Retouren",
                     "label": _("Retouren"),
                     "description": _("Retouren")
-                },
-                {
-                    "type": "doctype",
-                    "name": "MW",
-                    "label": _("MW"),
-                    "description": _("MW")
                 },
                 {
                     "type": "doctype",
