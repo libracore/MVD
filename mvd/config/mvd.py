@@ -274,24 +274,6 @@ def get_data():
                 }
             ]
         },
-                {
-            "label": _("Kampagnen-Sites"),
-            "icon": "fa fa-cog",
-            "items": [
-                {
-                    "type": "doctype",
-                    "name": "Kampagne",
-                    "label": _("Kampagne"),
-                    "description": _("Kampagne")
-                },
-                {
-                    "type": "doctype",
-                    "name": "PayrexxWebhooks",
-                    "label": _("PayrexxWebhooks"),
-                    "description": _("PayrexxWebhooks")
-                }
-            ]
-        },
         {
             "label": _("Adresspflege"),
             "icon": "fa fa-cog",
@@ -385,6 +367,54 @@ def get_data():
                     "name": "API Log",
                     "label": _("API Log"),
                     "description": _("API Log")
+                }
+            ]
+        },
+                {
+            "label": _("Websites (mieterverband.ch und Kampagnen)"),
+            "icon": "fa fa-cog",
+            "items": [
+                {
+                    "type": "doctype",
+                    "name": "WebFormular",
+                    "label": _("WebFormular"),
+                    "description": _("WebFormular")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Kampagne",
+                    "label": _("Kampagne"),
+                    "description": _("Kampagne")
+                },
+                {
+                    "type": "doctype",
+                    "name": "SP Mitglied Data",
+                    "label": _("Cache Mitgliederdaten für SP/Website"),
+                    "description": _("Cache Mitgliederdaten für SP/Website")
+                },
+                {
+                    "type": "doctype",
+                    "name": "PayrexxWebhooks",
+                    "label": _("PayrexxWebhooks"),
+                    "description": _("PayrexxWebhooks")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Sektion",
+                    "label": _("Sektionen"),
+                    "description": _("Sektions Einstellungen")
+                },
+                {
+                    "type": "doctype",
+                    "name": "MVD Settings",
+                    "label": _("MVD Settings"),
+                    "description": _("MVD Settings")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Service Plattform API",
+                    "label": _("Service Plattform API Einstellungen"),
+                    "description": _("Service Plattform API Einstellungen")
                 }
             ]
         }
