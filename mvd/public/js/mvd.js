@@ -1778,7 +1778,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
     get_fields() {
         var me = this;
         return [
-            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 1},
+            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
             {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
             {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1},
             {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
@@ -1947,7 +1947,7 @@ mvd_dialoge.erstelle_spenden_rechnung = class ErstelleSpendenRechnung {
         var me = this;
         return [
             {'fieldname': 'betrag', 'fieldtype': 'Currency', 'label': 'Vorgeschlagener Betrag', 'reqd': 1, 'default': 0.0},
-            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 1},
+            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
             {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
         ]
     }
@@ -2006,7 +2006,7 @@ mvd_dialoge.erstelle_hv_rechnung = class ErstelleHvRechnung {
     get_fields() {
         var me = this;
         return [
-            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 1},
+            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
             {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
         ]
     }
@@ -2066,7 +2066,7 @@ mvd_dialoge.erstelle_korrespondenz = class ErstelleKorrespondenz {
         var me = this;
         return [
             {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1},
-            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage', 'read_only': 1},
+            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage', 'read_only': 0},
             {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
         ]
     }
@@ -2125,7 +2125,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
         var me = this;
         if (me.dt_scope == "Mitgliedschaft") {
             return [
-                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 1},
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
                 {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
                 {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0},
                 {'fieldname': 'ohne_betrag', 'fieldtype': 'Check', 'label': 'Betrag ausblenden', 'reqd': 0, 'default': 0, 'hidden': 0},
