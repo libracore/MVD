@@ -699,7 +699,6 @@ def get_webshopdatum(ctx):
     
     return '---'
 
-
 ### Kontexte für die Beratungsemails ###
 @context_decorator
 def get_beratungs_daten(ctx):
