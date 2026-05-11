@@ -72,15 +72,6 @@ jenv = {
         "get_gesamtbetrag_gemahnte_rechnungen:mvd.mvd.doctype.druckvorlage.druckvorlage.get_gesamtbetrag_gemahnte_rechnungen",
         "get_rechnungsdatum:mvd.mvd.doctype.druckvorlage.druckvorlage.get_rechnungsdatum",
         "get_jahresrechnung_jahr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_jahresrechnung_jahr",
-        "get_beraterin_name:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beraterin_name",
-        "get_beratungstermin_von:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungstermin_von",
-        "get_beratungstermin_bis:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungstermin_bis",
-        "get_beratungstermin_dauer:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungstermin_dauer",
-        "get_beratungstermin_datum:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungstermin_datum",
-        "get_beratungstermin_wochentag_de:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungstermin_wochentag_de",
-        "get_beratungstermin_wochentag_fr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungstermin_wochentag_fr",
-        "get_beratungstermin_telefonnummer:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungstermin_telefonnummer",
-        "get_beratungstermin_ort:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungstermin_ort",
         "get_beratungs_daten:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungs_daten"
     ]
 }
