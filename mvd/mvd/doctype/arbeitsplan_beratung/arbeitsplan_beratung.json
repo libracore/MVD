@@ -7,6 +7,7 @@
  "field_order": [
   "from_date",
   "description",
+  "termin_import_file",
   "cb_1",
   "to_date",
   "sektion_id",
@@ -71,9 +72,14 @@
    "fieldtype": "Data",
    "label": "Titel",
    "unique": 1
+  },
+  {
+   "fieldname": "termin_import_file",
+   "fieldtype": "Attach",
+   "label": "Termin Import File"
   }
  ],
- "modified": "2024-06-24 10:58:09.987992",
+ "modified": "2026-05-11 11:07:19.157962",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Arbeitsplan Beratung",
