@@ -10,6 +10,7 @@ from frappe.utils.data import getdate
 from frappe import _
 import json
 from frappe.utils import cint
+from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file
 
 class ArbeitsplanBeratung(Document):
     def before_save(self):
@@ -138,6 +139,30 @@ class ArbeitsplanBeratung(Document):
         self.einteilung = sorted_einteilung_list
         self.save()
         return
+    
+    def import_from_excel(self):
+        if not self.termin_import_file:
+            frappe.throw("Bitte zuerst ein Excel-Import-File hochladen.")
+        
+        import_file = read_xlsx_file_from_attached_file(file_url=self.termin_import_file)
+
+        if import_file[7][1:8] != ['Wochentag', 'Schicht', 'Datum', 'Ort', 'Von', 'Bis', 'Berater*in']:
+            print(import_file[7][1:7])
+            frappe.throw("Die Import-Vorlage verfügt nicht über die erwartete Struktur - Kann nicht eingelesen werden.")
+        
+        import_rows = import_file[8:]
+        for row in import_rows:
+            if row[1]:
+                tbl_row = self.append('einteilung', {})
+                tbl_row.date = row[3].strftime("%Y-%m-%d")
+                tbl_row.from_time = row[5].strftime("%H:%M")
+                tbl_row.to_time = row[6].strftime("%H:%M")
+                tbl_row.art_ort = row[4]
+                tbl_row.beratungsperson = row[7]
+        
+        self.save()
+        return
+
 
 @frappe.whitelist()
 def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None, short_results=1, art=None, fachskill=None, sprache=None, show_reserved_only=1):
