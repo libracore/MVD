@@ -1,0 +1,93 @@
+{
+ "creation": "2026-05-11 12:07:34.741477",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "stn_label",
+  "adr_number",
+  "plz",
+  "wohnort",
+  "com_fosnr",
+  "com_name",
+  "com_canton",
+  "adr_modified",
+  "adr_northing",
+  "adr_easting"
+ ],
+ "fields": [
+  {
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "label": "PLZ"
+  },
+  {
+   "fieldname": "wohnort",
+   "fieldtype": "Data",
+   "label": "Wohnort"
+  },
+  {
+   "fieldname": "stn_label",
+   "fieldtype": "Data",
+   "label": "Strasse"
+  },
+  {
+   "fieldname": "adr_number",
+   "fieldtype": "Data",
+   "label": "Nummer"
+  },
+  {
+   "fieldname": "com_fosnr",
+   "fieldtype": "Data",
+   "label": "BFS Gemeindenummer"
+  },
+  {
+   "fieldname": "com_name",
+   "fieldtype": "Data",
+   "label": "Gemeinde"
+  },
+  {
+   "fieldname": "com_canton",
+   "fieldtype": "Data",
+   "label": "Kanton"
+  },
+  {
+   "fieldname": "adr_modified",
+   "fieldtype": "Date",
+   "label": "Letztes \u00c4nderungsdatum"
+  },
+  {
+   "fieldname": "adr_northing",
+   "fieldtype": "Float",
+   "label": "Koordinaten Nord"
+  },
+  {
+   "fieldname": "adr_easting",
+   "fieldtype": "Float",
+   "label": "Koordinaten Ost"
+  }
+ ],
+ "modified": "2026-05-11 12:31:55.450385",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Amtliches Gebaeudeverzeichnis",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
