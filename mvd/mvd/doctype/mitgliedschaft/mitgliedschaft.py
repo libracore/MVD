@@ -2959,3 +2959,53 @@ def _disable_web_login(mitglied_nr):
     if active_members < 1:
         if frappe.db.exists("User", "{0}@login.ch".format(mitglied_nr)):
             frappe.db.set_value("User", "{0}@login.ch".format(mitglied_nr), "enabled", 0)
+
+def validate_member_addresses(limit=0):
+    if limit == 0:
+        limit = frappe.get_value("MVD Settings", "MVD Settings", "adressvalidierung_anzahl")
+
+    four_months_ago = frappe.utils.add_months(frappe.utils.today(), -4)
+    if limit != 0:
+        members = frappe.get_all("Mitgliedschaft", 
+            filters={"adressvalidierung_manuell": 0},
+            or_filters=[["adressvalidierung_datum", "<", four_months_ago],
+                        ["adressvalidierung_datum", "is", "not set"]
+                        ],
+            fields=[
+                "name", "objekt_strasse", "objekt_hausnummer", 
+                "objekt_nummer_zu", "objekt_plz", "objekt_ort"
+                ],
+            order_by="RAND()",
+            limit_page_length=limit
+        )
+
+        count_success = 0
+        count_failed = 0
+
+        for m in members:
+            full_number = m.objekt_hausnummer or ""
+            if m.objekt_nummer_zu:
+                full_number = "{0}{1}".format(full_number, m.objekt_nummer_zu)
+
+            valid_entry = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", 
+                {
+                    "stn_label": m.objekt_strasse,
+                    "adr_number": full_number,
+                    "plz": m.objekt_plz,
+                    "wohnort": m.objekt_ort
+                }, 
+                "name"
+            )
+            status = 1 if valid_entry else 0
+
+            frappe.db.set_value("Mitgliedschaft", m.name, {
+                "adressvalidierung_datum": frappe.utils.nowdate(),
+                "adressvalidierung_bestanden": status,
+            }, update_modified=False)
+            
+            if valid_entry:
+                count_success += 1
+            else:
+                count_failed += 1
+        
+        frappe.db.commit()
