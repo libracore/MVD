@@ -203,6 +203,9 @@ scheduler_events = {
     ],
     "hourly": [
         "mvd.mvd.doctype.wohnungsabgabe.wohnungsabgabe.qa_mail"
+    ],
+    "monthly": [
+        "mvd.mvd.doctype.amtliches_gebaeudeverzeichnis.amtliches_gebaeudeverzeichnis.run_sql_import"
     ]
 }
 # scheduler_events = {
