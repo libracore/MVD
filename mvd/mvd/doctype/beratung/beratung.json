@@ -31,6 +31,7 @@
   "naechster_termin",
   "mitgliedtyp_c",
   "fachskill",
+  "person_ist_eingetroffen",
   "section_merge",
   "master",
   "section_allgemein",
@@ -502,9 +503,16 @@
    "hidden": 1,
    "label": "Fachskill (nur f\u00fcr Pup-Up)",
    "options": "Termin Kontaktperson Multi Fachskill"
+  },
+  {
+   "default": "0",
+   "fieldname": "person_ist_eingetroffen",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "person_ist_eingetroffen"
   }
  ],
- "modified": "2026-04-20 11:27:58.810216",
+ "modified": "2026-05-12 14:26:55.114922",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
