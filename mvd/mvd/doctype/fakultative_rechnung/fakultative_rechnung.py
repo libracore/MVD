@@ -19,7 +19,7 @@ class FakultativeRechnung(Document):
             frappe.throw("Bezahlte Fakultative Rechnungen können nicht storniert werden.")
 
 @frappe.whitelist()
-def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False, druckvorlage='', asap_print=False, bezugsjahr=0, spendenlauf_referenz=None):
+def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False, druckvorlage='', asap_print=False, bezugsjahr=0, spendenlauf_referenz=None, zahlungsart=None):
     if not betrag_spende:
         cancel_old_hv_fr(mitgliedschaft)
         """
@@ -55,7 +55,7 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spend
     
     if bezahlt:
         fr.status = 'Paid'
-        fr.bezahlt_via = create_paid_sinv(fr, mitgliedschaft, sektion)
+        fr.bezahlt_via = create_paid_sinv(fr, mitgliedschaft, sektion, zahlungsart=zahlungsart)
         fr.save(ignore_permissions=True)
     
     fr.submit()
@@ -97,7 +97,7 @@ def cancel_old_hv_fr(mitgliedschaft):
         old_hv.cancel()
         return
 
-def create_paid_sinv(fr, mitgliedschaft, sektion):
+def create_paid_sinv(fr, mitgliedschaft, sektion, zahlungsart=None):
     company = frappe.get_doc("Company", sektion.company)
     if not mitgliedschaft.rg_kunde:
         customer = mitgliedschaft.kunde_mitglied
@@ -137,7 +137,10 @@ def create_paid_sinv(fr, mitgliedschaft, sektion):
     })
     sinv.insert(ignore_permissions=True)
     
-    pos_profile = frappe.get_doc("POS Profile", sektion.pos_barzahlung)
+    if zahlungsart == 'Zahlungsterminal':
+        pos_profile = frappe.get_doc("POS Profile", sektion.pos_zahlungsterminal or sektion.pos_barzahlung)
+    else:
+        pos_profile = frappe.get_doc("POS Profile", sektion.pos_barzahlung)
     sinv.is_pos = 1
     sinv.pos_profile = pos_profile.name
     row = sinv.append('payments', {})

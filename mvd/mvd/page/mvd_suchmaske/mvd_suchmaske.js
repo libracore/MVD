@@ -697,48 +697,74 @@ frappe.mvd_such_client = {
                             {'fieldname': 'status', 'fieldtype': 'Select', 'label': 'Status', 'reqd': 1, 'options': 'Faktura Kund*in\nInteressent*in\nRegulär\nAnmeldung',
                                 'default': cur_page.page.search_fields.status_c.get_value() == 'Interessent*in' ? 'Interessent*in':'Anmeldung',
                                 'change': function() {
-                                    if (cur_dialog.fields_dict.status.get_value() == 'Regulär') {
-                                        // auto rg
-                                        cur_dialog.fields_dict.autom_rechnung.set_value(1);
-                                        cur_dialog.fields_dict.autom_rechnung.df.hidden = 0;
-                                        //~ cur_dialog.fields_dict.autom_rechnung.df.read_only = 1;
-                                        cur_dialog.fields_dict.autom_rechnung.refresh();
-                                        // rg bez
-                                        setTimeout(function(){
-                                            cur_dialog.fields_dict.bar_bezahlt.set_value(1);
-                                            cur_dialog.fields_dict.bar_bezahlt.df.hidden = 0;
-                                            cur_dialog.fields_dict.bar_bezahlt.df.read_only = 1;
-                                            cur_dialog.fields_dict.bar_bezahlt.refresh();
-                                            // hv
-                                            setTimeout(function(){
-                                                cur_dialog.fields_dict.hv_bar_bezahlt.df.hidden = 0;
-                                                cur_dialog.fields_dict.hv_bar_bezahlt.refresh();
-                                            }, 100);
-                                        }, 100);
-                                    } else {
-                                        // auto rg
+                                    // RG Erstellung & Zahlungsart
+                                    if (cur_dialog.fields_dict.status.get_value() == 'Faktura Kund*in') {
+                                        // Zahlungsart
+                                        cur_dialog.fields_dict.zahlungsart.set_value("Unbezahlt");
+                                        cur_dialog.fields_dict.zahlungsart.df.hidden = 1;
+                                        cur_dialog.fields_dict.zahlungsart.df.read_only = 1;
+                                        cur_dialog.fields_dict.zahlungsart.refresh();
+
+                                        // Autom. RG
                                         cur_dialog.fields_dict.autom_rechnung.set_value(0);
-                                        if (cur_dialog.fields_dict.status.get_value() == 'Faktura Kund*in') {
-                                            cur_dialog.fields_dict.autom_rechnung.df.hidden = 1;
-                                        } else {
-                                            cur_dialog.fields_dict.autom_rechnung.df.hidden = 0;
-                                        }
-                                        cur_dialog.fields_dict.autom_rechnung.df.read_only = 0;
+                                        cur_dialog.fields_dict.autom_rechnung.df.hidden = 1;
                                         cur_dialog.fields_dict.autom_rechnung.refresh();
-                                        // rg bez
-                                        cur_dialog.fields_dict.bar_bezahlt.set_value(0);
-                                        cur_dialog.fields_dict.bar_bezahlt.df.hidden = 0;
-                                        cur_dialog.fields_dict.bar_bezahlt.df.read_only = 0;
-                                        cur_dialog.fields_dict.bar_bezahlt.refresh();
-                                        // hv
-                                        setTimeout(function(){
-                                            cur_dialog.fields_dict.hv_bar_bezahlt.df.hidden = 1;
-                                            cur_dialog.fields_dict.hv_bar_bezahlt.refresh();
-                                        }, 100);
+
+                                        // inkl. HV
+                                        cur_dialog.fields_dict.inkl_hv.set_value(0);
+                                        cur_dialog.fields_dict.inkl_hv.df.hidden = 1;
+                                        cur_dialog.fields_dict.inkl_hv.refresh();
+                                    } else {
+                                        if (cur_dialog.fields_dict.status.get_value() == 'Regulär') {
+                                            // Zahlungsart
+                                            cur_dialog.fields_dict.zahlungsart.set_value("Barzahlung");
+                                            cur_dialog.fields_dict.zahlungsart.df.hidden = 0;
+                                            cur_dialog.fields_dict.zahlungsart.df.read_only = 0;
+                                            cur_dialog.fields_dict.zahlungsart.refresh();
+
+                                            // Autom. RG
+                                            cur_dialog.fields_dict.autom_rechnung.set_value(1);
+                                            cur_dialog.fields_dict.autom_rechnung.df.hidden = 0;
+                                            cur_dialog.fields_dict.autom_rechnung.refresh();
+
+                                            // inkl. HV
+                                            cur_dialog.fields_dict.inkl_hv.set_value(0);
+                                            cur_dialog.fields_dict.inkl_hv.df.hidden = 0;
+                                            cur_dialog.fields_dict.inkl_hv.refresh();
+                                        } else {
+                                            // Zahlungsart
+                                            cur_dialog.fields_dict.zahlungsart.set_value("Unbezahlt");
+                                            cur_dialog.fields_dict.zahlungsart.df.hidden = 0;
+                                            cur_dialog.fields_dict.zahlungsart.df.read_only = 0;
+                                            cur_dialog.fields_dict.zahlungsart.refresh();
+
+                                            // Autom. RG
+                                            cur_dialog.fields_dict.autom_rechnung.set_value(0);
+                                            cur_dialog.fields_dict.autom_rechnung.df.hidden = 0;
+                                            cur_dialog.fields_dict.autom_rechnung.refresh();
+
+                                            // inkl. HV
+                                            if (cur_dialog.fields_dict.status.get_value() == 'Interessent*in') {
+                                                cur_dialog.fields_dict.inkl_hv.set_value(0);
+                                                cur_dialog.fields_dict.inkl_hv.df.hidden = 1;
+                                                cur_dialog.fields_dict.inkl_hv.refresh();
+                                            } else {
+                                                cur_dialog.fields_dict.inkl_hv.set_value(0);
+                                                cur_dialog.fields_dict.inkl_hv.df.hidden = 0;
+                                                cur_dialog.fields_dict.inkl_hv.refresh();
+                                            }
+                                        }
                                     }
+
+                                    // Interessenten Typ
                                     if (cur_dialog.fields_dict.status.get_value() == 'Interessent*in') {
                                         cur_dialog.fields_dict.interessent_typ.df.hidden = 0;
                                         cur_dialog.fields_dict.interessent_typ.refresh();
+
+                                        // inkl. HV
+                                        cur_dialog.fields_dict.inkl_hv.set_value(0);
+                                        cur_dialog.fields_dict.inkl_hv.df.hidden = 1;
+                                        cur_dialog.fields_dict.inkl_hv.refresh();
                                     } else {
                                         cur_dialog.fields_dict.interessent_typ.df.hidden = 1;
                                         cur_dialog.fields_dict.interessent_typ.refresh();
@@ -755,57 +781,27 @@ frappe.mvd_such_client = {
                             },
                             {'fieldname': 'language', 'fieldtype': 'Link', 'label': 'Sprache', 'reqd': 1, 'hidden': 0, 'options': 'Language', 'default': cur_page.page.search_fields.language.get_value()||'de'},
                             {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'hidden': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value()},
-                            {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 0, 'read_only': 0,
-                                'change': function() {
-                                    if (cur_dialog.fields_dict.autom_rechnung.get_value() == 1) {
-                                        if (cur_dialog.fields_dict.status.get_value() == 'Regulär') {
-                                            cur_dialog.fields_dict.bar_bezahlt.set_value(1);
-                                            cur_dialog.fields_dict.bar_bezahlt.df.read_only = 1;
-                                            cur_dialog.fields_dict.hv_bar_bezahlt.set_value(0);
-                                            cur_dialog.fields_dict.hv_bar_bezahlt.df.hidden = 0;
-                                            cur_dialog.fields_dict.hv_bar_bezahlt.refresh();
-                                        } else {
-                                            cur_dialog.fields_dict.bar_bezahlt.set_value(0);
-                                            cur_dialog.fields_dict.bar_bezahlt.df.read_only = 0;
-                                        }
-                                        cur_dialog.fields_dict.bar_bezahlt.df.hidden = 0;
-                                        cur_dialog.fields_dict.bar_bezahlt.refresh();
-                                    } else {
-                                        cur_dialog.fields_dict.bar_bezahlt.set_value(0);
-                                        cur_dialog.fields_dict.bar_bezahlt.df.hidden = 1;
-                                        cur_dialog.fields_dict.bar_bezahlt.df.read_only = 0;
-                                        cur_dialog.fields_dict.bar_bezahlt.refresh();
-                                        
-                                        cur_dialog.fields_dict.hv_bar_bezahlt.set_value(0);
-                                        cur_dialog.fields_dict.hv_bar_bezahlt.df.hidden = 1;
-                                        cur_dialog.fields_dict.hv_bar_bezahlt.refresh();
-                                    }
-                                }
-                            },
-                            {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0,
-                                'default': 0,
-                                'hidden': 1,
+                            {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 0, 'read_only': 0},
+                            {'fieldname': 'inkl_hv', 'fieldtype': 'Check', 'label': 'inkl. HV', 'reqd': 0, 'default': 0, 'hidden': 0, 'depends_on': 'eval:doc.autom_rechnung'},
+                            {'fieldname': 'zahlungsart', 'fieldtype': 'Select', 'label': 'Zahlungsart', 'options': 'Unbezahlt\nBarzahlung\nZahlungsterminal', 'reqd': 0,
+                                'hidden': 0,
                                 'read_only': 0,
+                                'default': 'Unbezahlt',
+                                'depends_on': 'eval:doc.autom_rechnung',
                                 'change': function() {
-                                    if (cur_dialog.fields_dict.bar_bezahlt.get_value() == 1) {
+                                    if (cur_dialog.fields_dict.zahlungsart.get_value() != 'Unbezahlt') {
                                         if (cur_dialog.fields_dict.status.get_value() != 'Regulär') {
                                             cur_dialog.fields_dict.status.set_value('Regulär');
                                             cur_dialog.fields_dict.status.refresh();
+                                            // Autom. RG
+                                            cur_dialog.fields_dict.autom_rechnung.set_value(1);
+                                            cur_dialog.fields_dict.autom_rechnung.df.hidden = 0;
+                                            cur_dialog.fields_dict.autom_rechnung.refresh();
                                         }
                                     }
                                 }
                             },
-                            {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0,
-                                'hidden': 1,
-                                'change': function() {
-                                    if (cur_dialog.fields_dict.hv_bar_bezahlt.get_value() == 1) {
-                                        if (cur_dialog.fields_dict.status.get_value() != 'Regulär') {
-                                            cur_dialog.fields_dict.status.set_value('Regulär');
-                                            cur_dialog.fields_dict.status.refresh();
-                                        }
-                                    }
-                                }
-                            },
+                            {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 1, 'read_only': 0},
                             {'fieldname': 's1', 'fieldtype': 'Section Break'},
                             {'fieldname': 'kundentyp', 'fieldtype': 'Select', 'label': 'Kontakttyp', 'reqd': 1, 'options': 'Einzelperson\nUnternehmen', 'default': cur_page.page.search_fields.mitgliedtyp_c.get_value() == 'Geschäft' ? 'Unternehmen':'Einzelperson', 'change': function() {
                                     if (cur_dialog.fields_dict.kundentyp.get_value() == 'Einzelperson') {

@@ -268,9 +268,20 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
         anlage_daten_status = anlage_daten["status"]
     
     if not faktura:
-        hv_bar_bezahlt = False
-        if "hv_bar_bezahlt" in anlage_daten and int(anlage_daten["hv_bar_bezahlt"]) == 1:
-            hv_bar_bezahlt = True
+        mitglied_bezahlt = False
+        hv_bezahlt = False
+        zahlungsart = 'Unbezahlt'
+        inkl_hv = False
+        if "inkl_hv" in anlage_daten and int(anlage_daten["inkl_hv"]) == 1:
+            inkl_hv = True
+        
+        if "autom_rechnung" in anlage_daten and int(anlage_daten["autom_rechnung"]) == 1:
+            if "zahlungsart" in anlage_daten and anlage_daten["zahlungsart"] != 'Unbezahlt':
+                zahlungsart = anlage_daten["zahlungsart"]
+                mitglied_bezahlt = True
+                if inkl_hv:
+                    hv_bezahlt = True
+        
         
         # erstelle mitgliedschaft
         mitgliedschaft = frappe.get_doc({
@@ -305,41 +316,33 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
             "objekt_ort": anlage_daten["ort"] if int(anlage_daten["postfach"]) == 1 else '',
             "abweichende_objektadresse": 1 if int(anlage_daten["postfach"]) == 1 else '0',
             "interessent_typ": anlage_daten["interessent_typ"],
-            "bezahltes_mitgliedschaftsjahr": get_mitgl_jahr_in_anlage(anlage_daten["sektion_id"]) if anlage_daten["status"] == 'Regulär' else None,
-            "datum_zahlung_mitgliedschaft": today() if anlage_daten["status"] == 'Regulär' else None,
-            "zahlung_hv": get_mitgl_jahr_in_anlage(anlage_daten["sektion_id"]) if hv_bar_bezahlt else None,
-            "datum_hv_zahlung": today() if hv_bar_bezahlt else None
+            "bezahltes_mitgliedschaftsjahr": get_mitgl_jahr_in_anlage(anlage_daten["sektion_id"]) if mitglied_bezahlt else None,
+            "datum_zahlung_mitgliedschaft": today() if mitglied_bezahlt else None,
+            "zahlung_hv": get_mitgl_jahr_in_anlage(anlage_daten["sektion_id"]) if hv_bezahlt else None,
+            "datum_hv_zahlung": today() if hv_bezahlt else None
         })
         mitgliedschaft.insert(ignore_permissions=True)
         
         # optional: erstelle Rechnung
-        if anlage_daten["status"] == 'Regulär':
-            bezahlt = True
+        if "autom_rechnung" in anlage_daten and int(anlage_daten["autom_rechnung"]) == 1:
             if int(massendruck) == 1:
                 massendruck = True
-            sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck)
-        else:
-            if "autom_rechnung" in anlage_daten and int(anlage_daten["autom_rechnung"]) == 1:
-                bezahlt = False
-                hv_bar_bezahlt = False
-                if int(massendruck) == 1:
-                    massendruck = True
-                else:
-                    massendruck = False
-                sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck)
             else:
-                if anlage_daten["status"] == 'Interessent*in':
-                    # erstelle ABL für Interessent*Innenbrief mit EZ
-                    create_abl("Interessent*Innenbrief mit EZ", mitgliedschaft)
-                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
-                    mitgliedschaft.interessent_innenbrief_mit_ez = 1
-                    mitgliedschaft.save()
-                if anlage_daten["status"] == 'Anmeldung' and anlage_daten["sektion_id"] != "M+W-Abo":
-                    # erstelle ABL für Anmeldung mit EZ
-                    create_abl("Anmeldung mit EZ", mitgliedschaft)
-                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
-                    mitgliedschaft.anmeldung_mit_ez = 1
-                    mitgliedschaft.save()
+                massendruck = False
+            sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=mitglied_bezahlt, submit=True, attach_as_pdf=True, inkl_hv=inkl_hv, hv_bar_bezahlt=hv_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck, zahlungsart=zahlungsart)
+        else:
+            if anlage_daten["status"] == 'Interessent*in':
+                # erstelle ABL für Interessent*Innenbrief mit EZ
+                create_abl("Interessent*Innenbrief mit EZ", mitgliedschaft)
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                mitgliedschaft.interessent_innenbrief_mit_ez = 1
+                mitgliedschaft.save()
+            if anlage_daten["status"] == 'Anmeldung' and anlage_daten["sektion_id"] != "M+W-Abo":
+                # erstelle ABL für Anmeldung mit EZ
+                create_abl("Anmeldung mit EZ", mitgliedschaft)
+                mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
+                mitgliedschaft.anmeldung_mit_ez = 1
+                mitgliedschaft.save()
         
         return mitgliedschaft.name
     else:
