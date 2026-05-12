@@ -156,6 +156,9 @@ class Beratung(Document):
         # Alle reservierten Termine des aktuellen Users freigeben
         self.release_all_reserved_dates()
 
+        # Markierung dass die zu beratende Person eingetroffen ist entfernen
+        self.person_ist_eingetroffen = 0
+
     def handle_nextcloud_folder(self):
         from mvd.mvd.utils.nextcloud import new_beratung as create_nextcloud_beratungs_folder
         from mvd.mvd.utils.nextcloud import added_mitglied_to_beratung as move_folder_from_beratung_to_mitglied

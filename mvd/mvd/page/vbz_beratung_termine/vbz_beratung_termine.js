@@ -96,6 +96,7 @@ frappe.vbz_beratung_termine = {
 
                     frappe.vbz_beratung_termine.add_click_handlers(page);
                     localStorage['datenstand_for_polling'] = r.message.datenstand_for_polling;
+                    localStorage['anz_eingetroffen_for_polling'] = r.message.anz_eingetroffen_for_polling;
                     frappe.vbz_beratung_termine.first_load = false;
                 }
 
@@ -260,7 +261,44 @@ frappe.vbz_beratung_termine = {
             if ($(this).attr('data-beratung')) {
                 $(this).off('click').on('click', function() {
                     if ($(this).attr('data-beratung') != '---') {
-                        frappe.set_route("Form", "Beratung", $(this).attr('data-beratung'));
+                        if ($(this).attr('data-person_ist_eingetroffen') != 1) {
+                            const beratung_name = $(this).attr('data-beratung');
+                            const d = new frappe.ui.Dialog({
+                                title: "Wählen Sie eine Aktion",
+                                fields: [
+                                    {
+                                        fieldtype: "Button",
+                                        fieldname: "open",
+                                        label: "Beratung öffnen",
+                                        click: function() {
+                                            d.hide();
+                                            frappe.set_route("Form", "Beratung", beratung_name);
+                                        }
+                                    },
+                                    {
+                                        fieldtype: "Button",
+                                        fieldname: "mark_as_eingetroffen",
+                                        label: 'Als "eingetroffen" markieren',
+                                        click: function() {
+                                            d.hide();
+                                            frappe.call({
+                                                method: "mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.person_ist_eingetroffen",
+                                                args: {
+                                                    'beratung': beratung_name
+                                                },
+                                                async: false,
+                                                callback: function(r) {
+                                                    frappe.vbz_beratung_termine.reload_view(page);
+                                                }
+                                            });
+                                        }
+                                    }
+                                ]
+                            });
+                            d.show();
+                        } else {
+                            frappe.set_route("Form", "Beratung", $(this).attr('data-beratung'));
+                        }
                     } else {
                         if ($(this).attr('data-name_for_reservation') != '---') {
                             const name_for_reservation = $(this).attr('data-name_for_reservation');
@@ -322,11 +360,18 @@ async function poll(page) {
         if (frappe.get_route_str() !== 'vbz_beratung_termine') return;
 
         const since = localStorage['datenstand_for_polling'];
-        const res = await fetch(`/api/method/mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.has_changed?since=${since}`);
-        const data = await res.json();
+        const qty = localStorage['anz_eingetroffen_for_polling']
+        const since_res = await fetch(`/api/method/mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.has_changed?since=${since}`);
+        const since_data = await since_res.json();
 
-        if (data.message > 0) {
+        if (since_data.message > 0) {
             frappe.vbz_beratung_termine.reload_view(page);
+        } else {
+            const qty_res = await fetch(`/api/method/mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.get_anz_eingetroffen`);
+            const qty_data = await qty_res.json();
+            if (qty_data.message != qty) {
+                frappe.vbz_beratung_termine.reload_view(page);
+            }
         }
     } catch (err) {
         console.error(err);
