@@ -1904,7 +1904,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
     #         }
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None, geschenk_reset=False, fast_mode=False, as_bg_job=False):
+def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None, geschenk_reset=False, fast_mode=False, as_bg_job=False, zahlungsart=None):
     if as_bg_job:
         args = {
                 'mitgliedschaft': mitgliedschaft,
@@ -1923,7 +1923,8 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
                 'rechnungs_jahresversand': rechnungs_jahresversand,
                 'geschenk_reset': geschenk_reset,
                 'fast_mode': fast_mode,
-                'as_bg_job': False
+                'as_bg_job': False,
+                'zahlungsart': zahlungsart
             }
         enqueue("mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung", queue='short', job_name='Erstelle Mitgliedschaftsrechnung {0}'.format(mitgliedschaft), timeout=5000, **args)
         return 'Erstelle Mitgliedschaftsrechnung {0}'.format(mitgliedschaft)
@@ -2021,7 +2022,10 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
     sinv.save(ignore_permissions=True)
     
     if bezahlt:
-        pos_profile = frappe.get_doc("POS Profile", sektion.pos_barzahlung)
+        if zahlungsart == 'Zahlungsterminal':
+            pos_profile = frappe.get_doc("POS Profile", sektion.pos_zahlungsterminal or sektion.pos_barzahlung)
+        else:
+            pos_profile = frappe.get_doc("POS Profile", sektion.pos_barzahlung)
         sinv.is_pos = 1
         sinv.pos_profile = pos_profile.name
         row = sinv.append('payments', {})
@@ -2050,7 +2054,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
     
     if inkl_hv and mitgliedschaft.mitgliedtyp_c != 'Geschäft':
         bezugsjahr = jahr or cint(getdate(today()).strftime("%Y"))
-        fr_rechnung = create_hv_fr(mitgliedschaft=mitgliedschaft.name, sales_invoice=sinv.name, bezahlt=hv_bar_bezahlt, bezugsjahr=bezugsjahr)
+        fr_rechnung = create_hv_fr(mitgliedschaft=mitgliedschaft.name, sales_invoice=sinv.name, bezahlt=hv_bar_bezahlt, bezugsjahr=bezugsjahr, zahlungsart=zahlungsart)
     
     if attach_as_pdf:
         # add doc signature to allow print
