@@ -33,3 +33,7 @@ h1.vbz {
 .termin-reserved:hover {
     background-color: red;
 }
+
+.person-eingetroffen {
+    background-color: #E5702B !important;
+}
