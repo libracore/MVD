@@ -7,11 +7,14 @@
  "field_order": [
   "from_date",
   "description",
-  "termin_import_file",
   "cb_1",
   "to_date",
   "sektion_id",
   "titel",
+  "section_excel_import",
+  "termin_import_file",
+  "cb_2",
+  "import_from_excel",
   "section_einteilung",
   "dispositions_hinweis",
   "einteilung"
@@ -77,9 +80,25 @@
    "fieldname": "termin_import_file",
    "fieldtype": "Attach",
    "label": "Termin Import File"
+  },
+  {
+   "depends_on": "eval:doc.sektion_id==\"MVZH\"",
+   "fieldname": "section_excel_import",
+   "fieldtype": "Section Break",
+   "label": "Excel Import"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.termin_import_file",
+   "fieldname": "import_from_excel",
+   "fieldtype": "Button",
+   "label": "Termine aus Excel importieren"
   }
  ],
- "modified": "2026-05-11 11:07:19.157962",
+ "modified": "2026-05-12 12:54:39.575225",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Arbeitsplan Beratung",
