@@ -15,10 +15,11 @@ no_cache=1
 
 @frappe.whitelist()
 def get_open_data(free_only=0, beratungsort=None, berater_in=None, art=None, datum=None, language=None, fachskill=None, my_reservations_only=0):
-    alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user, free_only, beratungsort, berater_in, art, datum, language, fachskill, my_reservations_only)
+    alle_termine, meine_termine, anz_eingetroffen = get_alle_beratungs_termine(frappe.session.user, free_only, beratungsort, berater_in, art, datum, language, fachskill, my_reservations_only)
     datasets = {
         'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'datenstand_for_polling': now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
+        'anz_eingetroffen_for_polling': anz_eingetroffen,
         'alle_termine': alle_termine,
         'meine_termine': meine_termine
     }
@@ -27,6 +28,7 @@ def get_open_data(free_only=0, beratungsort=None, berater_in=None, art=None, dat
 def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=None, art=None, datum=None, language=None, fachskill=None, my_reservations_only=0):
     alle = []
     meine = []
+    anz_eingetroffen = 0
     vergebene_termin_liste = []
     kontaktperson_multi_user = get_kontaktperson_multi_user(user)
     erb_block = True if "MV_ERB" in frappe.get_roles() else False
@@ -90,6 +92,7 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=
                                             `beratung`.`beratungskategorie_3`,
                                             `beratung`.`mv_mitgliedschaft`,
                                             `beratung`.`status`,
+                                            IFNULL(`beratung`.`person_ist_eingetroffen`, 0) AS `person_ist_eingetroffen`,
                                             `berTer`.`abp_referenz`
                                         FROM `tabBeratung Termin` AS `berTer`
                                         LEFT JOIN `tabBeratung` AS `beratung` ON `berTer`.`parent` = `beratung`.`name`
@@ -127,8 +130,12 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=
                         'beratungskategorie_3': termin.beratungskategorie_3.split(" - ")[0] if termin.beratungskategorie_3 else '',
                         'name_mitglied': "{0} {1}".format(frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'vorname_1'), frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'nachname_1')),
                         'sort_date': frappe.utils.getdate(termin.von),
-                        'name_for_reservation': '---'
+                        'name_for_reservation': '---',
+                        'person_ist_eingetroffen': termin.person_ist_eingetroffen
                     }
+                    if cint(termin.person_ist_eingetroffen) == 1:
+                        anz_eingetroffen += 1
+                    
                     if not cint(free_only) == 1:
                         alle.append(termin_data)
             if termin.berater_in in kontaktperson_multi_user:
@@ -217,7 +224,7 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None, berater_in=
     
     alle_sortiert = sorted(alle, key = lambda x: (x['sort_date'], x['beraterinn'] or 'ZZZ', x['von_time']))
     
-    return alle_sortiert, meine
+    return alle_sortiert, meine, anz_eingetroffen
 
 def get_kontaktperson_multi_user(user):
     kontaktperson_multi_user = frappe.db.sql("""SELECT `parent`
@@ -240,6 +247,17 @@ def has_changed(since):
     return frappe.db.sql(sql, as_dict=True)[0].qty
 
 @frappe.whitelist()
+def get_anz_eingetroffen():
+    sql = """
+        SELECT
+            COUNT(`name`) AS `qty`
+        FROM `tabBeratung`
+        WHERE `person_ist_eingetroffen` = 1
+    """
+
+    return frappe.db.sql(sql, as_dict=True)[0].qty
+
+@frappe.whitelist()
 def add_reservation(termin):
     frappe.db.set_value("APB Zuweisung", termin, {'reserved': 1, 'reserved_by': frappe.session.user})
     return
@@ -247,4 +265,9 @@ def add_reservation(termin):
 @frappe.whitelist()
 def remove_reservation(termin):
     frappe.db.set_value("APB Zuweisung", termin, {'reserved': 0, 'reserved_by': None})
+    return
+
+@frappe.whitelist()
+def person_ist_eingetroffen(beratung):
+    frappe.db.set_value("Beratung", beratung, 'person_ist_eingetroffen', 1, update_modified=False)
     return
