@@ -32,6 +32,7 @@
   "reduzierter_mitgliederbeitrag",
   "gratis_bis_ende_jahr",
   "pos_barzahlung",
+  "pos_zahlungsterminal",
   "betrag_hv",
   "folgejahr_regelung",
   "mwst_faktura_ausblenden",
@@ -1132,6 +1133,12 @@
    "fieldtype": "Link",
    "label": "Template Suche Vertrauensanw\u00e4lt*in",
    "options": "Email Template"
+  },
+  {
+   "fieldname": "pos_zahlungsterminal",
+   "fieldtype": "Link",
+   "label": "POS Profil f\u00fcr Terminalzahlungen",
+   "options": "POS Profile"
   }
  ],
  "modified": "2026-05-28 13:54:50.638438",
