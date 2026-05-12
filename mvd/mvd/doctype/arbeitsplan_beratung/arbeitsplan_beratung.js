@@ -36,16 +36,6 @@ frappe.ui.form.on('Arbeitsplan Beratung', {
                 )
             }
         });
-
-        frm.add_custom_button(__("Termine aus Excel importieren"), function() {
-            if (cur_frm.is_dirty()) {
-                frappe.throw("Bitte speichern Sie den Arbeitsplan zuerst.")
-            } else {
-                frm.call("import_from_excel", {}, (r) => {
-                    frm.reload_doc();
-                });
-            }
-        });
         
         if (cur_frm.doc.einteilung.length > 0) {
             // holen der bereits verwendeten Termin-Blocks (um zu verhindern dass diese gelöscht/geändert werden)
