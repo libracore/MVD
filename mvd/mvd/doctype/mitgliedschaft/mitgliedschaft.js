@@ -2387,7 +2387,11 @@ var setup_phone_formatters = function(frm) {
 
 
 function render_nextcloud_files_tree(frm) {
-    const $wrapper = $(frm.fields_dict.nextcloud_html.wrapper);
+    try {
+        const $wrapper = $(frm.fields_dict.nextcloud_html.wrapper);
+    } catch {
+        return
+    }
     const $tree_el = $wrapper.find(".nextcloud-tree");
     $tree_el.empty();
 

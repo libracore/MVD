@@ -9,6 +9,7 @@
   "from_time",
   "to_time",
   "beratungsperson",
+  "beratungskategorie",
   "reserved",
   "cb_1",
   "link_zur_beratung",
@@ -93,10 +94,17 @@
    "fieldtype": "Link",
    "label": "Reserviert von",
    "options": "User"
+  },
+  {
+   "default": "Privat",
+   "fieldname": "beratungskategorie",
+   "fieldtype": "Select",
+   "label": "Beratungskategorie",
+   "options": "Privat\nGesch\u00e4ft"
   }
  ],
  "istable": 1,
- "modified": "2026-04-21 15:31:16.302570",
+ "modified": "2026-05-13 12:45:31.732075",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "APB Zuweisung",
