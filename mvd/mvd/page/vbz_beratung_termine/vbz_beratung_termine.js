@@ -30,6 +30,7 @@ frappe.vbz_beratung_termine = {
         var language_field_value = page.filter_fields ? page.filter_fields.language_field.get_value()||'':'';
         var fachskill_field_value = page.filter_fields ? page.filter_fields.fachskill_field.get_value()||'':'';
         var my_reservations_field_value = page.filter_fields ? page.filter_fields.my_reservations_field.get_value()||'':'';
+        var beratungskategorie_field_value = page.filter_fields ? page.filter_fields.beratungskategorie_field.get_value()||'Beratungskategorie':'Beratungskategorie';
         
         frappe.call({
             method: "mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.get_open_data",
@@ -41,7 +42,8 @@ frappe.vbz_beratung_termine = {
                 datum: datum_field_value,
                 language: language_field_value,
                 fachskill: fachskill_field_value,
-                my_reservations_only: my_reservations_field_value
+                my_reservations_only: my_reservations_field_value,
+                beratungskategorie: beratungskategorie_field_value
             },
             freeze: true,
             freeze_message: 'Lade Verarbeitungszentrale...',
@@ -91,6 +93,10 @@ frappe.vbz_beratung_termine = {
                     $(page.filter_fields.my_reservations_field.label_span).html("Nur meine reservierten Termine");
                     page.filter_fields.my_reservations_field.set_value(my_reservations_field_value);
                     page.filter_fields.my_reservations_field.refresh();
+                    // Select: Beratungskategorie
+                    page.filter_fields.beratungskategorie_field = frappe.vbz_beratung_termine.create_beratungskategorie_field(page);
+                    page.filter_fields.beratungskategorie_field.set_value(beratungskategorie_field_value);
+                    page.filter_fields.beratungskategorie_field.refresh();
 
                     setTimeout(function() {frappe.vbz_beratung_termine.no_render_based_on_filter = false;}, 1000);
 
@@ -198,6 +204,25 @@ frappe.vbz_beratung_termine = {
             only_input: true
         });
         return art_field
+    },
+
+    create_beratungskategorie_field: function(page) {
+        var beratungskategorie_field = frappe.ui.form.make_control({
+            parent: page.main.find(".beratungskategorie"),
+            df: {
+                fieldtype: "Select",
+                fieldname: "beratungskategorie",
+                options: "Beratungskategorie\nPrivat\nGeschäft",
+                placeholder: "Beratungskategorie",
+                change: function(){
+                    if (!frappe.vbz_beratung_termine.no_render_based_on_filter) {
+                        frappe.vbz_beratung_termine.reload_view(page);
+                    }
+                }
+            },
+            only_input: true
+        });
+        return beratungskategorie_field
     },
 
     create_language_field: function(page) {
