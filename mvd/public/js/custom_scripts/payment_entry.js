@@ -24,11 +24,6 @@ frappe.ui.form.on('Payment Entry', {
                     frm.add_custom_button(__("Spende"), function() {
                         mit_spende_ausgleichen(frm);
                     }, __("Verbuchen als ..."));
-                    
-                    frm.add_custom_button(__("Rückzahlung"), function() {
-                        rueckzahlung(frm);
-                    }, __("Ausgleichen mit ..."));
-                    
                 }
                 if (check_underpaid(frm)) {
                     frm.add_custom_button(__("Differenz als Kulanz ausgleichen"), function() {
@@ -36,6 +31,11 @@ frappe.ui.form.on('Payment Entry', {
                     });
                 }
             }
+
+            frm.add_custom_button(__("Rückzahlung"), function() {
+                rueckzahlung(frm);
+            }, __("Ausgleichen mit ..."));
+            
             if (cur_frm.doc.docstatus == 0) {
                 frm.add_custom_button(__("Mitgliedschaft"), function() {
                     mitgliedschaft_zuweisen(frm);
