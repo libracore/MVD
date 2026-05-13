@@ -1341,24 +1341,6 @@ frappe.mvd.termin_quick_entry = function(config) {
                                     }
                                 }
                             },
-                            {'fieldname': 'wunsch_berater_in', 'fieldtype': 'Link', 'label': __('Wunsch-Berater*in'), 'options': 'Termin Kontaktperson', 'reqd': 0,
-                                'get_query': function() {
-                                    return {
-                                        filters: {
-                                            'sektion_id': config.sektion_id
-                                        }
-                                    }
-                                }
-                            },
-                            {'fieldname': 'wunsch_berater_in', 'fieldtype': 'Link', 'label': __('Wunsch-Berater*in'), 'options': 'Termin Kontaktperson', 'reqd': 0,
-                                'get_query': function() {
-                                    return {
-                                        filters: {
-                                            'sektion_id': config.sektion_id
-                                        }
-                                    }
-                                }
-                            },
                             {'fieldname': 'kontaktperson', 'fieldtype': 'Link', 'label': __('Berater*in'), 'options': 'Termin Kontaktperson', 'reqd': 1,
                                 'get_query': function() {
                                     return {
