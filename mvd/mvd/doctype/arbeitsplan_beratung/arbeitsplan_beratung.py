@@ -199,7 +199,7 @@ class ArbeitsplanBeratung(Document):
 
 
 @frappe.whitelist()
-def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None, short_results=1, art=None, fachskill=None, sprache=None, show_reserved_only=1):
+def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None, short_results=1, art=None, fachskill=None, sprache=None, show_reserved_only=1, beratungskategorie="Unspezifisch"):
     von_datum = getdate(datum)
     delta = timedelta(days=1)
     if int(short_results) == 1:
@@ -214,6 +214,7 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
     fachskill_filter = ''
     sprach_filter = ''
     show_reserved_only_filter = ''
+    beratungskategorie_filter = ''
     verfuegbarkeiten_html = ""
     if beraterin and beraterin != '':
         beraterin_filter = '''AND `beratungsperson` = '{0}' '''.format(beraterin)
@@ -238,6 +239,8 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
                             )""".format(sprache)
     if cint(show_reserved_only) == 1:
         show_reserved_only_filter = "AND `reserved` = 1"
+    if beratungskategorie != "Unspezifisch":
+        beratungskategorie_filter = "AND `beratungskategorie` = '{0}'".format(beratungskategorie)
 
 
 
@@ -264,10 +267,12 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
                                                             {art_filter}
                                                             {fachskill_filter}
                                                             {sprach_filter}
+                                                            {beratungskategorie_filter}
                                                         """.format(von_datum=von_datum.strftime("%Y-%m-%d"), \
                                                                    beraterin_filter=beraterin_filter, ort_filter=ort_filter, \
                                                                     art_filter=art_filter, sektion=sektion, fachskill_filter=fachskill_filter, \
-                                                                    sprach_filter=sprach_filter, show_reserved_only_filter=show_reserved_only_filter), as_dict=True)
+                                                                    sprach_filter=sprach_filter, show_reserved_only_filter=show_reserved_only_filter, \
+                                                                    beratungskategorie_filter=beratungskategorie_filter), as_dict=True)
             if int(short_results) == 1:
                 verfuegbarkeiten_html += """
                     <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>

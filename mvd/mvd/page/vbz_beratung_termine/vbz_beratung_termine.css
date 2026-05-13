@@ -26,6 +26,14 @@ h1.vbz {
     cursor: pointer;
 }
 
+.business {
+    background-color: #c9f7f9;
+}
+
+.business:hover {
+    background-color: #91d4f4;
+}
+
 .termin-reserved {
     background-color: lightcoral;
 }
@@ -35,5 +43,5 @@ h1.vbz {
 }
 
 .person-eingetroffen {
-    background-color: #E5702B !important;
+    background-color: #E5702B;
 }
