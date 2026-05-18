@@ -68,6 +68,8 @@ frappe.ui.form.on('Kunden', {
         if (!frm.doc.__islocal) {
             // load html overview
             load_html_overview(frm);
+            // Eventlistener für den Schlichtungsbehörden Knopf
+            frappe.mvd.schlichtungsbehoerde_listener(frm, 'uebersicht_html');
         }
     },
     postfach: function(frm){

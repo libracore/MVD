@@ -1562,6 +1562,7 @@ frappe.mvd.schlichtungsbehoerde_listener = function(frm, field_name) {
             e.preventDefault();
             
             var doc_name = $(this).attr('data-name');
+            var doc_type = $(this).attr('data-type');
             
             if (!doc_name) {
                 frappe.msgprint(__('Fehler: Keine Mitgliedschafts-ID gefunden.'));
@@ -1576,7 +1577,8 @@ frappe.mvd.schlichtungsbehoerde_listener = function(frm, field_name) {
             frappe.call({
                 method: 'mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_arbitration_authority_with_validation',
                 args: {
-                    mitglied_id: doc_name
+                    doc_id: doc_name,
+                    doc_type: doc_type
                 },
                 callback: function(r) {
                     if (r.message && r.message.success) {

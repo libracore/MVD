@@ -1101,7 +1101,8 @@ def get_uebersicht_html(name):
             'rg_tel_g': faktura_kunde.rg_tel_g or '',
             'language': faktura_kunde.language or 'de',
             'sektion': faktura_kunde.sektion_id,
-            'region': ''
+            'region': '',
+            'kunden_id': faktura_kunde.name
         }
     }
     
