@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import json
 import datetime
+import requests
 from PyPDF2 import PdfFileWriter
 import re
 import frappe
@@ -1511,6 +1512,7 @@ def get_uebersicht_html(name):
                 'sektion': mitgliedschaft.sektion_id,
                 'region': '({0})'.format(mitgliedschaft.region) if mitgliedschaft.region else '',
                 'mitglied_nr': mitgliedschaft.mitglied_nr,
+                'mitglied_id': mitgliedschaft.name,
                 'mandat': mandat,
                 'haftpflicht': haftpflicht
             }
@@ -3009,3 +3011,81 @@ def validate_member_addresses(limit=0):
                 count_failed += 1
         
         frappe.db.commit()
+
+@frappe.whitelist(allow_guest=True)
+def get_arbitration_authority_with_validation(mitglied_id):
+    if not mitglied_id:
+        return {"success": False, "message": "Keine Mitgliedschaft ID übergeben."}
+
+    doc = frappe.get_doc("Mitgliedschaft", mitglied_id)
+    
+    if not doc.adressvalidierung_bestanden:
+        full_number = doc.objekt_hausnummer or ""
+        if doc.objekt_nummer_zu:
+            full_number = "{0}{1}".format(full_number, doc.objekt_nummer_zu)
+            
+        valid_entry = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", 
+            {
+                "stn_label": doc.objekt_strasse,
+                "adr_number": full_number,
+                "plz": doc.objekt_plz,
+                "wohnort": doc.objekt_ort
+            }, 
+            ["name", "com_fosnr"], 
+            as_dict=True
+        )
+        
+        status = 1 if valid_entry else 0
+        
+        frappe.db.set_value("Mitgliedschaft", doc.name, {
+            "adressvalidierung_datum": frappe.utils.nowdate(),
+            "adressvalidierung_bestanden": status,
+        }, update_modified=False)
+        frappe.db.commit()
+        
+        if not status:
+            return {"success": False, "message": 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/ubersicht" target="_blank">mietrecht.ch</a> mit PLZ recherchieren.'}
+        
+        bfs_nr = valid_entry.get("com_fosnr")
+        
+    else:
+        full_number = doc.objekt_hausnummer or ""
+        if doc.objekt_nummer_zu:
+            full_number = "{0}{1}".format(full_number, doc.objekt_nummer_zu)
+            
+        bfs_nr = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", 
+            {
+                "stn_label": doc.objekt_strasse,
+                "adr_number": full_number,
+                "plz": doc.objekt_plz,
+                "wohnort": doc.objekt_ort
+            }, 
+            "com_fosnr"
+        )
+
+    if not bfs_nr:
+        return {"success": False, "message": "Keine BFS-Nummer im Gebäudeverzeichnis gefunden."}
+        
+    # --- EXTERNER API CALL AN MP ---
+    api_url = "https://mp.libracore.ch/api/method/mietrechtspraxis.api.get_arbitration_authority_from_bfs"
+    try:
+        response = requests.get(api_url, params={"bfs_nr": bfs_nr}, timeout=10)
+        if response.status_code == 200:
+            response_json = response.json()
+            aa_data = response_json.get("message") if response_json else None
+            
+            if aa_data and aa_data.get("aa_address_html"):
+                return {"success": True, "aa_address_html": aa_data["aa_address_html"]}
+        else:
+            return {
+                "success": False, 
+                "message": "Fehler: mp.libracore.ch antwortete mit Statuscode {0}".format(response.status_code)
+            }
+            
+    except Exception as e:
+        return {
+            "success": False, 
+            "message": "Fehler beim Verbinden mit mp.libracore.ch: {0}".format(str(e))
+        }
+        
+    return {"success": False, "message": "Keine Schlichtungsbehörde für die BFS-Nr. {0} auf mp.libracore.ch gefunden.".format(bfs_nr)}
