@@ -192,6 +192,7 @@ scheduler_events = {
         "mvd.mvd.v2.web_auth.reset_hash_cleanup",
         "mvd.mvd.utils.daily_jobs.execute_address_changes",
         "mvd.mvd.utils.daily_jobs.fixing_sp_mitglied_data"
+        "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.validate_member_addresses"
     ],
     "all": [
         "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue",
@@ -204,6 +205,9 @@ scheduler_events = {
     ],
     "hourly": [
         "mvd.mvd.doctype.wohnungsabgabe.wohnungsabgabe.qa_mail"
+    ],
+    "monthly": [
+        "mvd.mvd.doctype.amtliches_gebaeudeverzeichnis.amtliches_gebaeudeverzeichnis.run_sql_import"
     ]
 }
 # scheduler_events = {

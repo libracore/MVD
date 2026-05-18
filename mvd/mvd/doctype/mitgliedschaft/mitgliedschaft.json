@@ -203,7 +203,10 @@
   "mvs_quelle",
   "deleted_by_admin",
   "web_login_user_created",
-  "asloca_id"
+  "asloca_id",
+  "adressvalidierung_bestanden",
+  "adressvalidierung_datum",
+  "adressvalidierung_manuell"
  ],
  "fields": [
   {
@@ -1416,10 +1419,27 @@
    "fieldtype": "Data",
    "label": "mvs_quelle",
    "permlevel": 1
+  },
+  {
+   "fieldname": "adressvalidierung_datum",
+   "fieldtype": "Date",
+   "label": "Adressvalidierung Datum"
+  },
+  {
+   "default": "0",
+   "fieldname": "adressvalidierung_manuell",
+   "fieldtype": "Check",
+   "label": "Adressvalidierung manuell"
+  },
+  {
+   "default": "0",
+   "fieldname": "adressvalidierung_bestanden",
+   "fieldtype": "Check",
+   "label": "Adressvalidierung bestanden"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-04-16 11:09:22.065464",
+ "modified": "2026-05-11 15:18:32.112503",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

@@ -1550,3 +1550,60 @@ frappe.mvd.termin_quick_entry = function(config) {
         }
     });
 };
+
+// Eventlistener für den Schlichtungsbehörden Knopf
+frappe.provide('frappe.mvd');
+frappe.mvd.schlichtungsbehoerde_listener = function(frm, field_name) {
+    if (!frm || !frm.fields_dict[field_name]) return;
+
+    $(frm.fields_dict[field_name].wrapper)
+        .off('click', '.btn-schlichtung')
+        .on('click', '.btn-schlichtung', function(e) {
+            e.preventDefault();
+            
+            var doc_name = $(this).attr('data-name');
+            var doc_type = $(this).attr('data-type');
+            
+            if (!doc_name) {
+                frappe.msgprint(__('Fehler: Keine Mitgliedschafts-ID gefunden.'));
+                return;
+            }
+            
+            frappe.show_alert({
+                message: __('Prüfe Adresse und suche Behörde...'), 
+                indicator: 'blue'
+            });
+
+            frappe.call({
+                method: 'mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_arbitration_authority_with_validation',
+                args: {
+                    doc_id: doc_name,
+                    doc_type: doc_type
+                },
+                callback: function(r) {
+                    if (r.message && r.message.success) {
+                        frappe.show_alert({message: __('Behörde gefunden!'), indicator: 'green'});
+                        
+                        var raw_address = r.message.aa_address_html;
+                        var formatted_address = raw_address.replace(/,\s*/g, '<br>');
+                        
+                        frappe.msgprint({
+                            title: __('Zuständige Schlichtungsbehörde'),
+                            message: formatted_address,
+                            indicator: 'blue'
+                        });
+                        
+                        if (frm && typeof frm.reload_doc === 'function') {
+                            frm.reload_doc();   
+                        }
+                    } else {
+                        frappe.msgprint({
+                            title: __('Hinweis'),
+                            indicator: 'orange',
+                            message: r.message ? r.message.message : __('Ein unerwarteter Fehler ist aufgetreten.')
+                        });
+                    }
+                }
+            });
+        });
+};
