@@ -93,6 +93,16 @@
                 <td style="text-align: right;"><b>{{ r1_as }}</b></td>
             {% endif %}
         </tr>
+        {% if frappe.boot.default_sektion == "MVBS" %}
+        <tr id="r2_bs">
+            <td>R2</td>
+            <td>Im Pool (ohne MNE)</td>
+            {% if r2_bs > 99 %}
+                <td style="text-align: right;"><b>99+</b></td>
+            {% else %}
+                <td style="text-align: right;"><b>{{ r2_bs }}</b></td>
+            {% endif %}
+        {% else %}
         <tr id="r2_as">
             <td>R2</td>
             <td>Im Pool</td>
@@ -102,6 +112,7 @@
                 <td style="text-align: right;"><b>{{ r2_as }}</b></td>
             {% endif %}
         </tr>
+        {% endif %}
         <tr id="r3_as">
             <td>R3</td>
             <td>Nicht im Pool/Einzelzuweisung</td>
