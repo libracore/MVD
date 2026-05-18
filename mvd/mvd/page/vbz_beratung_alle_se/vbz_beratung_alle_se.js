@@ -105,6 +105,10 @@ frappe.vbz_beratung_alle_se = {
             frappe.route_options = {'status': 'Open', 'kontaktperson': ['like','Rechtsberatung Pool%'], 'beratung_prio': ['!=', 'Hoch']}
             frappe.set_route("List", "Beratung", "List");
         });
+           $("#r2_bs").click(function(){
+            frappe.route_options = {'status': 'Open', 'kontaktperson': ['like','Rechtsberatung Pool%'], 'beratung_prio': ['!=', 'Hoch'], '_user_tags': ['not like', '%MNE-MVBS%']}
+            frappe.set_route("List", "Beratung", "List");
+        });
         $("#r3_as").click(function(){
             frappe.route_options = {'status': 'Open', 'r3': 1}
             frappe.set_route("List", "Beratung", "List");
