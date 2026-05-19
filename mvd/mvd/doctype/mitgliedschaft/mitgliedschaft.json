@@ -10,6 +10,10 @@
  "field_order": [
   "section_uebersicht",
   "uebersicht_html",
+  "section_nextcloud",
+  "open_nextcloud_root",
+  "refresh_files_tree",
+  "nextcloud_html",
   "section_allgemein",
   "mitglied_nr",
   "sektion_id",
@@ -1419,6 +1423,26 @@
    "permlevel": 1
   },
   {
+   "fieldname": "section_nextcloud",
+   "fieldtype": "Section Break",
+   "label": "NextCloud"
+  },
+  {
+   "fieldname": "nextcloud_html",
+   "fieldtype": "HTML",
+   "options": "<div class=\"nextcloud-tree\"></div>"
+  },
+  {
+   "fieldname": "refresh_files_tree",
+   "fieldtype": "Button",
+   "label": "Files-Baum aktualisieren"
+  },
+  {
+   "fieldname": "open_nextcloud_root",
+   "fieldtype": "Button",
+   "label": "NextCloud \u00f6ffnen"
+  },
+  {
    "description": "Das Pop-Up \"Termin vereinbaren\" kann die Table MultiSelect nur dann richtig anzeigen, wenn dies in den locals vorhanden ist. In den Locals ist es aber nur dann vorhanden, wenn das Feld im DT vorkommt.",
    "fieldname": "fachskill",
    "fieldtype": "Table MultiSelect",
@@ -1428,7 +1452,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-04-20 11:33:42.898507",
+ "modified": "2026-05-19 11:00:00",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
