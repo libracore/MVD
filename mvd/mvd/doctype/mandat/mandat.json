@@ -13,8 +13,10 @@
   "mv_mitgliedschaft",
   "beratung",
   "kontaktperson",
+  "bestaetigungs_email_gesendet",
   "cb_2",
   "bemerkung",
+  "persoenliche_bemerkung",
   "section_ablauf",
   "datum_1",
   "datum_2",
@@ -81,7 +83,7 @@
   {
    "fieldname": "kontaktperson",
    "fieldtype": "Link",
-   "label": "Berater*in",
+   "label": "Vertrauensanw\u00e4lt*in",
    "options": "Termin Kontaktperson"
   },
   {
@@ -90,7 +92,7 @@
   },
   {
    "fieldname": "bemerkung",
-   "fieldtype": "Text",
+   "fieldtype": "Small Text",
    "label": "Bemerkung"
   },
   {
@@ -165,9 +167,20 @@
    "fieldname": "placeholder_3",
    "fieldtype": "HTML",
    "options": "<br>"
+  },
+  {
+   "default": "0",
+   "fieldname": "bestaetigungs_email_gesendet",
+   "fieldtype": "Check",
+   "label": "Bestaetigungs Email gesendet"
+  },
+  {
+   "fieldname": "persoenliche_bemerkung",
+   "fieldtype": "Small Text",
+   "label": "Pers\u00f6nliche Bemerkung"
   }
  ],
- "modified": "2026-02-09 19:40:19.399379",
+ "modified": "2026-05-01 10:53:26.179214",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",

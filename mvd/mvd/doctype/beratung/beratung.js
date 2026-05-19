@@ -237,8 +237,12 @@ frappe.ui.form.on('Beratung', {
                 }
 
                 // Add BTN Mandat
-                frm.add_custom_button(__("Mandat"),  function() {
-                    create_mandat(frm);
+                frm.add_custom_button(__("Mandat"), function() {
+                    if (frm.doc.mandat) {
+                        frappe.msgprint("Es existiert bereits ein Mandat für diesen Datensatz.");
+                    } else {
+                        create_mandat(frm);
+                    }
                 });
 
                 // Add BTN E-Mail Rückfrage
@@ -788,10 +792,11 @@ function erstelle_todo(frm) {
 
 function create_mandat(frm) {
     frappe.prompt([
-        {'fieldname': 'berater_in', 'fieldtype': 'Link', 'label': 'Berater*in', 'reqd': 0, 'options': 'Termin Kontaktperson'},
+        {'fieldname': 'berater_in', 'fieldtype': 'Link', 'label': 'Vertrauensanwält*in', 'reqd': 0, 'options': 'Termin Kontaktperson', 'default': frm.doc.kontaktperson},
         {'fieldname': 'typ', 'fieldtype': 'Select', 'label': 'Typ', 'options': "Rechtsschutzversicherung\nSolidaritätsfonds"},
         {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0},
-        {'fieldname': 'bemerkung', 'fieldtype': 'Data', 'label': 'Bemerkungen'}
+        {'fieldname': 'bemerkung', 'fieldtype': 'Small Text', 'label': 'Bemerkungen'},
+        {'fieldname': 'persoenliche_bemerkung', 'fieldtype': 'Small Text', 'label': 'Persönliche Bemerkung'}
     ],
     function(values){
         frappe.call({
@@ -800,7 +805,8 @@ function create_mandat(frm) {
             "args": {
                 "berater_in": values.berater_in,
                 "typ": values.typ,
-                "bemerkung": values.bemerkung
+                "bemerkung": values.bemerkung,
+                "persoenliche_bemerkung": values.persoenliche_bemerkung
             },
             "callback": function(r) {
                 cur_frm.reload_doc();
