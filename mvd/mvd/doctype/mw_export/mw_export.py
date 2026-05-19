@@ -8,6 +8,10 @@ from frappe.model.document import Document
 from frappe.utils.data import add_days, today, now
 from frappe.utils.csvutils import to_csv as make_csv
 from frappe.utils.background_jobs import enqueue
+import pandas as pd
+import io
+import datetime
+from frappe.utils.file_manager import get_file_path
 
 class MWExport(Document):
     def validate(self):
@@ -194,7 +198,8 @@ def bg_export_queries(self):
             "attached_to_name": self.name
         })
         _file.save()
-        
+        frappe.db.commit()
+        run_analysis(self)
         self.db_set('status', 'Abgeschlossen', commit=True)
     except Exception as err:
         self.add_comment('Comment', text=str(err))
@@ -318,10 +323,104 @@ def get_csv_data(mw_export, query=False):
             ]
             data.append(_data)
             
-            frappe.db.set_value("Mitgliedschaft", entry.name, "m_und_w_export", mw_export, update_modified=False)
+            frappe.db.sql(
+                """
+                UPDATE `tabMitgliedschaft`
+                SET `m_und_w_export` = '{0}'
+                WHERE `name` = '{1}'
+                """.format(mw_export, entry.name)
+            )
             if commit_loop == 30:
                 frappe.db.commit()
                 commit_loop = 1
+            else:
+                commit_loop += 1
         frappe.db.commit()
 
     return data
+
+def run_analysis(self):
+    files = frappe.get_all("File", filters={
+        "attached_to_doctype": "MW Export",
+        "attached_to_name": self.name,
+        "file_name": ["like", "%.csv"]
+    }, fields=["file_name", "file_url"])
+
+    if not files:
+        return
+
+    all_dfs = []
+
+    for f in files:
+        if "STOP_nicht-MVD" in f.file_name:
+            continue
+
+        try:
+            file_path = get_file_path(f.file_name) if not f.file_url.startswith('/') else f.file_url.lstrip('/')
+            full_path = frappe.get_site_path(file_path)
+            
+            temp_df = pd.read_csv(full_path, low_memory=False)
+            if temp_df.empty:
+                continue
+            
+            temp_df['dateiquelle'] = f.file_name
+            all_dfs.append(temp_df)
+        except Exception as e:
+            frappe.log_error("Fehler beim Einlesen von {0}: {1}".format(f.file_name, str(e)), "MW Export Analyse")
+
+    if not all_dfs:
+        return
+
+    df_final = pd.concat(all_dfs, ignore_index=True, sort=False)
+    
+    df_final['anzahl'] = pd.to_numeric(df_final['anzahl'], errors='coerce').fillna(0)
+    df_final['is_mg'] = (df_final['anzahl'] == 1).astype(int)
+    df_final['werbe_val'] = df_final['anzahl'].where(df_final['anzahl'] > 1, 0)
+
+    def get_stats(df, group_col):
+        agg_df = df.groupby(group_col).agg({
+            'is_mg': 'sum',
+            'werbe_val': 'sum',
+            'anzahl': 'count'
+        }).reset_index()
+        
+        agg_df = agg_df.rename(columns={
+            'is_mg': 'MG_Exemplare',
+            'werbe_val': 'Werbeexemplare',
+            'anzahl': 'Anzahl_Zeilen'
+        })
+        
+        total_row = agg_df.sum(numeric_only=True)
+        total_df = pd.DataFrame([{
+            group_col: 'TOTAL',
+            'MG_Exemplare': total_row['MG_Exemplare'],
+            'Werbeexemplare': total_row['Werbeexemplare'],
+            'Anzahl_Zeilen': total_row['Anzahl_Zeilen']
+        }])
+        
+        return pd.concat([agg_df, total_df], ignore_index=True, sort=False)
+    
+    stats_sektion = get_stats(df_final, 'sektion')
+    stats_quelle = get_stats(df_final, 'dateiquelle')
+
+    try:
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            stats_sektion.to_excel(writer, sheet_name='Statistik_Sektion', index=False)
+            stats_quelle.to_excel(writer, sheet_name='Statistik_Quelle', index=False)
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        file_content = output.getvalue()
+        
+        _file = frappe.get_doc({
+            "doctype": "File",
+            "file_name": "Gesamtauswertung_{0}.xlsx".format(timestamp),
+            "attached_to_doctype": "MW Export",
+            "attached_to_name": self.name,
+            "content": file_content,
+            "is_private": 1
+        })
+
+        _file.save()
+        
+    except Exception as e:
+        frappe.log_error(title="MW Export: Fehler beim Excel Export", message=frappe.get_traceback())

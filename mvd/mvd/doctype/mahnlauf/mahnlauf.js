@@ -22,6 +22,27 @@ frappe.ui.form.on('Mahnlauf', {
         if (cur_frm.doc.manuelles_faelligkeitsdaum == 1) {
             cur_frm.set_df_property('ueberfaellig_seit', 'read_only', 0);
         }
+
+        if ((cur_frm.doc.docstatus == 1)&&(cur_frm.doc.mahnungen_erstellt != 1)) {
+            frappe.dom.freeze('Bitte warten, die Mahnungserstellung wird geprüft...');
+            var jobname = 'Mahnlauf ' + cur_frm.doc.name + ' (Erstellung)';
+            let mahnung_refresher = setInterval(mahnung_refresher_handler, 3000, jobname);
+            function mahnung_refresher_handler(jobname) {
+                frappe.call({
+                'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.is_mahnungs_job_running",
+                    'args': {
+                        'jobname': jobname
+                    },
+                    'callback': function(res) {
+                        if (res.message == 'refresh') {
+                            clearInterval(mahnung_refresher);
+                            frappe.dom.unfreeze();
+                            cur_frm.reload_doc();
+                        }
+                    }
+                });
+            }
+        }
     },
     mahnungen_buchen: function(frm) {
         frappe.dom.freeze('Bitte warten, buche Mahnungen...');
@@ -152,17 +173,35 @@ frappe.ui.form.on('Mahnlauf', {
                     fields: r.message,
                     primary_action: function(){
                         d.hide();
+                        frappe.dom.freeze('Bitte warten, die E-Mails werden erzeugt...');
                         frappe.call({
                             'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.send_reminder_mails",
                             'args': {
                                 'mahnlauf': cur_frm.doc.name,
                                 'betreff': d.get_values().betreff,
                                 'message': d.get_values().message,
-                                'email_vorlage': cur_frm.doc.e_mail_vorlage
+                                'email_vorlage': cur_frm.doc.e_mail_vorlage,
+                                'as_bg_job': 1
                             },
                             'callback': function(res) {
-                                cur_frm.reload_doc();
-                                frappe.msgprint("Die E-Mails wurden versendet.");
+                                var jobname = 'Mahnlauf ' + cur_frm.doc.name + ' (E-Mail)';
+                                let mahnung_refresher = setInterval(mahnung_refresher_handler, 3000, jobname);
+                                function mahnung_refresher_handler(jobname) {
+                                    frappe.call({
+                                    'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.is_mahnungs_job_running",
+                                        'args': {
+                                            'jobname': jobname
+                                        },
+                                        'callback': function(res) {
+                                            if (res.message == 'refresh') {
+                                                clearInterval(mahnung_refresher);
+                                                frappe.dom.unfreeze();
+                                                cur_frm.reload_doc();
+                                                frappe.msgprint("Die E-Mails wurden versendet.");
+                                            }
+                                        }
+                                    });
+                                }
                             }
                         });
                     },
@@ -172,7 +211,43 @@ frappe.ui.form.on('Mahnlauf', {
                 d.show();
             }
         });
-        
+    },
+    versende_test_e_mail: function(frm) {
+        frappe.call({
+        'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.get_e_mail_field_list",
+            'args': {
+                'e_mail_vorlage': cur_frm.doc.e_mail_vorlage,
+                'test': 1
+            },
+            'callback': function(r) {
+                var d = new frappe.ui.Dialog({
+                    fields: r.message,
+                    primary_action: function(){
+                        d.hide();
+                        frappe.call({
+                            'method': "mvd.mvd.doctype.mahnlauf.mahnlauf.send_reminder_mails",
+                            'args': {
+                                'mahnlauf': cur_frm.doc.name,
+                                'betreff': d.get_values().betreff,
+                                'message': d.get_values().message,
+                                'email_vorlage': cur_frm.doc.e_mail_vorlage,
+                                'mahnung': d.get_values().mahnung,
+                                'empfaenger': d.get_values().empfaenger,
+                                'test': 1
+                            },
+                            'freeze': true,
+                            'freeze_message': 'Bitte warten, das Test-E-Mail wird erzeugt...',
+                            'callback': function(res) {
+                                frappe.msgprint("Das Test-E-Mail wurde versendet.");
+                            }
+                        });
+                    },
+                    primary_action_label: __('Versenden'),
+                    title: 'Mahnungs E-Mail Versand'
+                });
+                d.show();
+            }
+        });
     },
     zahlungserinnerungen: function(frm) {
         if (cur_frm.doc.zahlungserinnerungen == 1) {

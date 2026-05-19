@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import json
 import datetime
+import requests
 from PyPDF2 import PdfFileWriter
 import re
 import frappe
@@ -26,7 +27,7 @@ from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, upda
 from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_zahlung_mitgliedschaft, check_zahlung_hv, get_ampelfarbe, \
                                                         set_max_reminder_level, check_folgejahr_regelung
 from frappe.utils.background_jobs import enqueue
-from mvd.mvd.utils import is_job_already_running
+from mvd.mvd.utils import is_job_already_running, rg_massenlauf_log
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
@@ -75,29 +76,33 @@ class Mitgliedschaft(Document):
         if self.zuzug:
             zuzugsdatum = self.zuzug
         
-        # update Zahlung Mitgliedschaft
-        check_zahlung_mitgliedschaft(self)
-        
-        # update Zahlung HV
-        check_zahlung_hv(self)
+        if not self.flags.from_import:
+            # update Zahlung Mitgliedschaft
+            check_zahlung_mitgliedschaft(self)
+            
+            # update Zahlung HV
+            check_zahlung_hv(self)
 
-        # Update max Reminder Level
-        set_max_reminder_level(self)
-        
-        # ampelfarbe
-        get_ampelfarbe(self)
-        
-        # Prüfe Jahr Bezahlt (Mitgliedschaft & HV) bezgl. Folgejahr Regelung
-        if self.status_c != 'Inaktiv':
-            check_folgejahr_regelung(self)
-        
-        # Deaktivieren des Web-Logins #1643
-        if self.status_c in ['Inaktiv', 'Ausschluss']:
-            disable_web_login(self.mitglied_nr)
+            # Update max Reminder Level
+            set_max_reminder_level(self)
+            
+            # ampelfarbe
+            get_ampelfarbe(self)
+            
+            # Prüfe Jahr Bezahlt (Mitgliedschaft & HV) bezgl. Folgejahr Regelung
+            if self.status_c != 'Inaktiv':
+                check_folgejahr_regelung(self)
+            
+            # Deaktivieren des Web-Logins #1643
+            if self.status_c in ['Inaktiv', 'Ausschluss']:
+                disable_web_login(self.mitglied_nr)
 
         if cint(self.validierung_notwendig) != 1:
             # entferne Telefonnummern mit vergessenen Leerschlägen
             self.remove_unnecessary_blanks()
+
+            # entferne Telefonnummern Duplikate
+            self.remove_unnecessary_numbers()
             
             # handling von Kontakt(en), Adresse(n) und Kunde(n)
             self.handling_kontakt_adresse_kunde()
@@ -118,11 +123,12 @@ class Mitgliedschaft(Document):
             # Rechnungs Adressblock
             self.rg_adressblock = get_rg_adressblock(self)
             
-            # preisregel
-            self.check_preisregel()
-            
-            # prüfen und setzen des Wertes naechstes_jahr_geschuldet
-            self.naechstes_jahr_geschuldet = cint(get_naechstes_jahr_geschuldet(self.name, live_data=self))
+            if not self.flags.from_import:
+                # preisregel
+                self.check_preisregel()
+                
+                # prüfen und setzen des Wertes naechstes_jahr_geschuldet
+                self.naechstes_jahr_geschuldet = cint(get_naechstes_jahr_geschuldet(self.name, live_data=self))
             
             # Hotfix Zuzugs-Korrespondenz
             if self.zuzug_von:
@@ -146,17 +152,18 @@ class Mitgliedschaft(Document):
             else:
                 self.aktive_mitgliedschaft = 0
             
-            # schliesse offene abreits backlogs
-            close_open_validations(self.name, 'Daten Validieren')
-            if not cint(self.interessent_innenbrief_mit_ez) == 1:
-                close_open_validations(self.name, 'Interessent*Innenbrief mit EZ')
-            if not cint(self.anmeldung_mit_ez) == 1:
-                close_open_validations(self.name, 'Anmeldung mit EZ')
-            
-            # beziehe mitglied_nr wenn umwandlung von Interessent*in
-            if self.status_c not in ('Interessent*in', 'Inaktiv') and self.mitglied_nr == 'MV':
-                self.mitglied_nr = create_new_number(id=self.name)['nr']
-                self.letzte_bearbeitung_von = 'User'
+            if not self.flags.from_import:
+                # schliesse offene abreits backlogs
+                close_open_validations(self.name, 'Daten Validieren')
+                if not cint(self.interessent_innenbrief_mit_ez) == 1:
+                    close_open_validations(self.name, 'Interessent*Innenbrief mit EZ')
+                if not cint(self.anmeldung_mit_ez) == 1:
+                    close_open_validations(self.name, 'Anmeldung mit EZ')
+                
+                # beziehe mitglied_nr wenn umwandlung von Interessent*in
+                if self.status_c not in ('Interessent*in', 'Inaktiv') and self.mitglied_nr == 'MV':
+                    self.mitglied_nr = create_new_number(id=self.name)['nr']
+                    self.letzte_bearbeitung_von = 'User'
             
             # hotfix für onlineHaftpflicht value (null vs 0)
             if not self.online_haftpflicht:
@@ -189,27 +196,19 @@ class Mitgliedschaft(Document):
                 self.language = 'de'
 
             # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
-            if not self.asloca_id:
+            if not self.asloca_id and not (self.status_c == 'Interessent*in' and self.mvs_quelle):
                 sp_updater(self)
         
         # Hotfix ISS-2024-60 / #942
         if not self.zuzug and zuzugsdatum:
             self.zuzug = zuzugsdatum
         
-        if self.mitglied_nr != "MV":
+        if self.mitglied_nr != "MV" and not self.flags.from_addresschange:
             # #1179
             from mvd.mvd.doctype.digitalrechnung.digitalrechnung import digitalrechnung_mapper
             mitglied_hash = digitalrechnung_mapper(mitglied=self)
             if self.mitglied_hash != mitglied_hash:
                 frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}".format(self.mitglied_hash, mitglied_hash), 'Unmatching Mitglied-Hash')
-
-            if not is_job_already_running("Create / Update SP Mitglied Data ({0})".format(self.mitglied_nr)):
-                # #1203
-                args = {
-                    'mitglied_nr': self.mitglied_nr,
-                    'mitglied_id': self.name
-                }
-                enqueue("mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data.create_or_update_sp_mitglied_data", queue='short', job_name="Create / Update SP Mitglied Data ({0})".format(self.mitglied_nr), timeout=2500, **args)
 
             # #1259
             if cint(self.web_login_user_created) != 1:
@@ -237,6 +236,27 @@ class Mitgliedschaft(Document):
             if val:
                 formatted = format_phone_number(val)
                 self.set(phone_number, formatted)
+        
+        # Prüfung ob Adressew geändert -> Addresschange #1556
+        self.check_for_address_change()
+
+        # Objektadresse mit Korrespondenzadresse synchron halten wenn keine abweichende Objektadresse (#1671)
+        if cint(self.abweichende_objektadresse) != 1:
+            self.copy_korrespondenz_to_objektadresse()
+        
+        if self.mitglied_nr != "MV":
+            if frappe.db.exists("SP Mitglied Data", self.mitglied_nr):
+                frappe.db.set_value("SP Mitglied Data", self.mitglied_nr, "needs_update", 1)
+            else:
+                from mvd.mvd.doctype.mitgliedschaft.utils import prepare_mvm_for_sp
+                data = prepare_mvm_for_sp(self)
+                new_spmd = frappe.get_doc({
+                    'doctype': 'SP Mitglied Data',
+                    'mitglied_nr': self.mitglied_nr,
+                    'json': json.dumps(data, indent=2),
+                    'needs_update': 0
+                })
+                new_spmd.insert(ignore_permissions=True)
     
     def email_validierung(self, check=False):
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
@@ -579,6 +599,122 @@ class Mitgliedschaft(Document):
         faktura = frappe.db.sql("""SELECT `name` FROM `tabKunden` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `daten_aus_mitgliedschaft` = 1""".format(mitgliedschaft=self.name), as_dict=True)
         if len(faktura) > 0:
             update_faktura_kunde(mitgliedschaft=self, kunde=faktura[0].name)
+    
+    def check_for_address_change(self):
+        def create_addresschange_doc(address_data):
+            print(address_data)
+            addresschange_doc = frappe.get_doc({
+                'doctype': 'Addresschange',
+                'zusatz_adresse': address_data.get("zusatz_adresse", None),
+                'strasse': address_data.get("strasse", None),
+                'nummer': address_data.get("nummer", None),
+                'nummer_zu': address_data.get("nummer_zu", None),
+                'plz': address_data.get("plz", None),
+                'ort': address_data.get("ort", None),
+                'history_only': 0 if "MV_MA-unvalidiert" in frappe.get_roles(frappe.session.user) else 1,
+                'effective_on': today(),
+                'mv_mitgliedschaft': self.name,
+                'mitglied_nr': self.mitglied_nr
+            })
+            addresschange_doc.insert(ignore_permissions=True)
+
+            if "MV_MA-unvalidiert" not in frappe.get_roles(frappe.session.user):
+                addresschange_doc.submit()
+
+            return
+        
+        def has_changed(current, old, objekt=False):
+            if objekt:
+                old_str = "{0}{1}{2}{3}{4}{5}".format(old.objekt_zusatz_adresse, 
+                                                      old.objekt_strasse, 
+                                                      old.objekt_hausnummer, 
+                                                      old.objekt_nummer_zu, 
+                                                      old.objekt_plz, 
+                                                      old.objekt_ort)
+                new_str = "{0}{1}{2}{3}{4}{5}".format(current.objekt_zusatz_adresse, 
+                                                      current.objekt_strasse, 
+                                                      current.objekt_hausnummer, 
+                                                      current.objekt_nummer_zu, 
+                                                      current.objekt_plz, 
+                                                      current.objekt_ort)
+                return False if old_str == new_str else True
+            else:
+                old_str = "{0}{1}{2}{3}{4}{5}".format(old.zusatz_adresse, 
+                                                      old.strasse, 
+                                                      old.nummer, 
+                                                      old.nummer_zu, 
+                                                      old.plz, 
+                                                      old.ort)
+                new_str = "{0}{1}{2}{3}{4}{5}".format(current.zusatz_adresse, 
+                                                      current.strasse, 
+                                                      current.nummer, 
+                                                      current.nummer_zu, 
+                                                      current.plz, 
+                                                      current.ort)
+                return False if old_str == new_str else True
+
+        if not self.flags.from_addresschange:
+            old_doc = self.get_doc_before_save()
+            if old_doc:
+                if cint(self.abweichende_objektadresse) != cint(old_doc.abweichende_objektadresse):
+                    if cint(self.abweichende_objektadresse) == 1:
+                        create_addresschange_doc(address_data={
+                            'zusatz_adresse': self.objekt_zusatz_adresse,
+                            'strasse': self.objekt_strasse,
+                            'nummer': self.objekt_hausnummer,
+                            'nummer_zu': self.objekt_nummer_zu,
+                            'plz': self.objekt_plz,
+                            'ort': self.objekt_ort
+                        })
+                    else:
+                        create_addresschange_doc(address_data={
+                            'zusatz_adresse': self.zusatz_adresse,
+                            'strasse': self.strasse,
+                            'nummer': self.nummer,
+                            'nummer_zu': self.nummer_zu,
+                            'plz': self.plz,
+                            'ort': self.ort
+                        })
+                else:
+                    if cint(self.abweichende_objektadresse) == 1:
+                        if has_changed(self, old_doc, objekt=True):
+                            create_addresschange_doc(address_data={
+                                'zusatz_adresse': self.objekt_zusatz_adresse,
+                                'strasse': self.objekt_strasse,
+                                'nummer': self.objekt_hausnummer,
+                                'nummer_zu': self.objekt_nummer_zu,
+                                'plz': self.objekt_plz,
+                                'ort': self.objekt_ort
+                            })
+                    else:
+                        if has_changed(self, old_doc):
+                            create_addresschange_doc(address_data={
+                                'zusatz_adresse': self.zusatz_adresse,
+                                'strasse': self.strasse,
+                                'nummer': self.nummer,
+                                'nummer_zu': self.nummer_zu,
+                                'plz': self.plz,
+                                'ort': self.ort
+                            })
+    
+    def copy_korrespondenz_to_objektadresse(self):
+        self.objekt_zusatz_adresse = self.zusatz_adresse
+        self.objekt_strasse = self.strasse
+        self.objekt_hausnummer = self.nummer
+        self.objekt_nummer_zu = self.nummer_zu
+        self.objekt_plz = self.plz
+        self.objekt_ort = self.ort
+    
+    def remove_unnecessary_numbers(self):
+        # Hauptmitglied
+        if self.tel_m_1 == self.tel_p_1:
+            self.tel_p_1 = None
+        # Solidarmitglied
+        if self.tel_m_2 == self.tel_p_2:
+            self.tel_p_2 = None
+        # Unabhängiger Debitor
+        if self.rg_tel_m == self.rg_tel_p:
+            self.rg_tel_p = None
 
 def update_rg_adresse(mitgliedschaft):
     address = frappe.get_doc("Address", mitgliedschaft.rg_adresse)
@@ -1293,11 +1429,9 @@ def get_uebersicht_html(name):
 
         if mitgliedschaft.mitgliedtyp_c == 'Privat':
             if mitgliedschaft.zahlung_hv:
-                hv_status = 'HV bezahlt im {0}'.format(mitgliedschaft.zahlung_hv)
-                if mitgliedschaft.datum_hv_zahlung:
-                    hv_status = 'HV bezahlt am {0}'.format(frappe.utils.get_datetime(mitgliedschaft.datum_hv_zahlung).strftime('%d.%m.%Y'))
+                hv_status = mitgliedschaft.zahlung_hv
             else:
-                hv_status = 'HV unbezahlt'
+                hv_status = 'unbezahlt'
         else:
             hv_status = False
         
@@ -1389,6 +1523,7 @@ def get_uebersicht_html(name):
                 'sektion': mitgliedschaft.sektion_id,
                 'region': '({0})'.format(mitgliedschaft.region) if mitgliedschaft.region else '',
                 'mitglied_nr': mitgliedschaft.mitglied_nr,
+                'mitglied_id': mitgliedschaft.name,
                 'mandat': mandat,
                 'haftpflicht': haftpflicht
             }
@@ -1581,7 +1716,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
     # Informationstext übergabe
     info_text_neu = ""
     if zuzug_info:
-        info_text_neu = f"Hinweis von der Wegzugssektion:\n{zuzug_info}\n\n"
+        info_text_neu = "Hinweis von der Wegzugssektion:\n{zuzug_info}\n\n".format(zuzug_info=zuzug_info)
 
     if str(get_sektion_code(neue_sektion)) not in ('ZH'):
         # Pseudo Sektion handling
@@ -1713,6 +1848,8 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
             new_mitgliedschaft.save(ignore_permissions=True)
 
             # Update Wegzugs-Mitglied
+            alter_text = mitgliedschaft.wichtig or ""
+            mitgliedschaft.wichtig = info_text_neu + alter_text # Informationstext übergabe
             mitgliedschaft.wegzug = today()
             mitgliedschaft.wegzug_zu = neue_sektion
             mitgliedschaft.zuzug_id = new_mitgliedschaft.name
@@ -1762,7 +1899,30 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
             }
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None, geschenk_reset=False, fast_mode=False):
+def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None, geschenk_reset=False, fast_mode=False, as_bg_job=False):
+    if as_bg_job:
+        args = {
+                'mitgliedschaft': mitgliedschaft,
+                'mitgliedschaft_obj': mitgliedschaft_obj,
+                'jahr': jahr,
+                'bezahlt': bezahlt,
+                'submit': submit,
+                'attach_as_pdf': attach_as_pdf,
+                'ignore_stichtage': ignore_stichtage,
+                'inkl_hv': inkl_hv,
+                'hv_bar_bezahlt': hv_bar_bezahlt,
+                'druckvorlage': druckvorlage,
+                'massendruck': massendruck,
+                'eigene_items': eigene_items,
+                'rechnungs_artikel': rechnungs_artikel,
+                'rechnungs_jahresversand': rechnungs_jahresversand,
+                'geschenk_reset': geschenk_reset,
+                'fast_mode': fast_mode,
+                'as_bg_job': False
+            }
+        enqueue("mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung", queue='short', job_name='Erstelle Mitgliedschaftsrechnung {0}'.format(mitgliedschaft), timeout=5000, **args)
+        return 'Erstelle Mitgliedschaftsrechnung {0}'.format(mitgliedschaft)
+    
     if not mitgliedschaft_obj:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     else:
@@ -1850,6 +2010,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         "fast_mode": 1 if fast_mode else 0
     })
     
+    sinv.flags['create_mitgliedschaftsrechnung_block'] = True
     sinv.insert(ignore_permissions=True)
     sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name)
     sinv.save(ignore_permissions=True)
@@ -1866,15 +2027,20 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         sinv.save(ignore_permissions=True)
     
     if massendruck:
-        args = {
-                'mitgliedschaft': mitgliedschaft.name,
-                'sinv': sinv.name
-            }
-        enqueue("mvd.mvd.doctype.mitgliedschaft.utils.mark_for_massenlauf", queue='short', job_name='Markiere {0} für Massenlauf'.format(sinv.name), timeout=5000, **args)
+        frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, "rg_massendruck", sinv.name)
+        frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, "rg_massendruck_vormerkung", 1)
+        frappe.db.commit()
+        """
+            #1687
+            Es kommt immer wieder mal vor, dass die Massenlauf-Vormerkungen nicht sauber gesetzt werden.
+            Hier wird zwischenzeitlich ein Log eingeführt um dem Problem auf die Schliche zu kommen.
+        """
+        rg_massenlauf_log(mitglied=mitgliedschaft.name, sinv=sinv.name, vormerkung=1)
     
     if submit:
         # submit workaround weil submit ignore_permissions=True nicht kennt
         sinv.docstatus = 1
+        sinv.flags['create_mitgliedschaftsrechnung_block'] = False
         sinv.save(ignore_permissions=True)
     
     if inkl_hv and mitgliedschaft.mitgliedtyp_c != 'Geschäft':
@@ -2830,3 +2996,150 @@ def _disable_web_login(mitglied_nr):
     if active_members < 1:
         if frappe.db.exists("User", "{0}@login.ch".format(mitglied_nr)):
             frappe.db.set_value("User", "{0}@login.ch".format(mitglied_nr), "enabled", 0)
+
+def validate_member_addresses(limit=0):
+    if limit == 0:
+        limit = frappe.get_value("MVD Settings", "MVD Settings", "adressvalidierung_anzahl")
+
+    four_months_ago = frappe.utils.add_months(frappe.utils.today(), -4)
+    if limit != 0:
+        members = frappe.get_all("Mitgliedschaft", 
+            filters={"adressvalidierung_manuell": 0},
+            or_filters=[["adressvalidierung_datum", "<", four_months_ago],
+                        ["adressvalidierung_datum", "is", "not set"]
+                        ],
+            fields=[
+                "name", "objekt_strasse", "objekt_hausnummer", 
+                "objekt_nummer_zu", "objekt_plz", "objekt_ort"
+                ],
+            order_by="RAND()",
+            limit_page_length=limit
+        )
+
+        count_success = 0
+        count_failed = 0
+
+        for m in members:
+            full_number = m.objekt_hausnummer or ""
+            if m.objekt_nummer_zu:
+                full_number = "{0}{1}".format(full_number, m.objekt_nummer_zu)
+
+            valid_entry = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", 
+                {
+                    "stn_label": m.objekt_strasse,
+                    "adr_number": full_number,
+                    "plz": m.objekt_plz,
+                    "wohnort": m.objekt_ort
+                }, 
+                "name"
+            )
+            status = 1 if valid_entry else 0
+
+            frappe.db.set_value("Mitgliedschaft", m.name, {
+                "adressvalidierung_datum": frappe.utils.nowdate(),
+                "adressvalidierung_bestanden": status,
+            }, update_modified=False)
+            
+            if valid_entry:
+                count_success += 1
+            else:
+                count_failed += 1
+        
+        frappe.db.commit()
+
+@frappe.whitelist(allow_guest=True)
+def get_arbitration_authority_with_validation(doc_id, doc_type="Mitgliedschaft"):
+    if not doc_id:
+        return {"success": False, "message": "Keine ID übergeben."}
+
+    bfs_nr = None
+
+    if doc_type == "Kunden":
+        doc = frappe.get_doc("Kunden", doc_id)
+        
+        full_number = doc.nummer or ""
+        if doc.nummer_zu:
+            full_number = "{0}{1}".format(full_number, doc.nummer_zu)
+            
+        bfs_nr = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", 
+            {
+                "stn_label": doc.strasse,
+                "adr_number": full_number,
+                "plz": doc.plz,
+                "wohnort": doc.ort
+            }, 
+            "com_fosnr"
+        )
+    else:
+        doc = frappe.get_doc("Mitgliedschaft", doc_id)
+        
+        if not doc.adressvalidierung_bestanden:
+            full_number = doc.objekt_hausnummer or ""
+            if doc.objekt_nummer_zu:
+                full_number = "{0}{1}".format(full_number, doc.objekt_nummer_zu)
+                
+            valid_entry = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", 
+                {
+                    "stn_label": doc.objekt_strasse,
+                    "adr_number": full_number,
+                    "plz": doc.objekt_plz,
+                    "wohnort": doc.objekt_ort
+                }, 
+                ["name", "com_fosnr"], 
+                as_dict=True
+            )
+            
+            status = 1 if valid_entry else 0
+            
+            frappe.db.set_value("Mitgliedschaft", doc.name, {
+                "adressvalidierung_datum": frappe.utils.nowdate(),
+                "adressvalidierung_bestanden": status,
+            }, update_modified=False)
+            frappe.db.commit()
+            
+            if not status:
+                return {"success": False, "message": 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/ubersicht" target="_blank">mietrecht.ch</a> mit PLZ recherchieren.'}
+            
+            bfs_nr = valid_entry.get("com_fosnr")
+            
+        else:
+            full_number = doc.objekt_hausnummer or ""
+            if doc.objekt_nummer_zu:
+                full_number = "{0}{1}".format(full_number, doc.objekt_nummer_zu)
+                
+            bfs_nr = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", 
+                {
+                    "stn_label": doc.objekt_strasse,
+                    "adr_number": full_number,
+                    "plz": doc.objekt_plz,
+                    "wohnort": doc.objekt_ort
+                }, 
+                "com_fosnr"
+            )
+
+    if not bfs_nr:
+        return {"success": False, "message": 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/ubersicht" target="_blank">mietrecht.ch</a> mit PLZ recherchieren.'}
+        
+    # --- EXTERNER API CALL AN MP ---
+    api_url = "https://mp.libracore.ch/api/method/mietrechtspraxis.api.get_arbitration_authority_from_bfs"
+    try:
+        response = requests.get(api_url, params={"bfs_nr": bfs_nr}, timeout=10)
+        if response.status_code == 200:
+            response_json = response.json()
+            aa_data = response_json.get("message") if response_json else None
+            
+            if aa_data and aa_data.get("aa_address_html"):
+                return {"success": True, "aa_address_html": aa_data["aa_address_html"]}
+        else:
+            return {
+                "success": False, 
+                "message": "Fehler: mp.libracore.ch antwortete mit Statuscode {0}".format(response.status_code)
+            }
+            
+    except Exception as e:
+        return {
+            "success": False, 
+            "message": "Fehler beim Verbinden mit mp.libracore.ch: {0}".format(str(e))
+        }
+        
+    return {"success": False, "message": "Keine Schlichtungsbehörde für die BFS-Nr. {0} auf mp.libracore.ch gefunden.".format(bfs_nr)}

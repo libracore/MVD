@@ -6,15 +6,28 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils.data import today, getdate, now
 from mvd.mvd.doctype.mitgliedschaft.finance_utils import get_ampelfarbe
-from mvd.mvd.doctype.region.region import _regionen_zuteilung
 from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
 from datetime import datetime
 from tqdm import tqdm
+from mvd.mvd.utils import is_job_already_running
 
 def create_daily_snap():
     new_daily_snap = frappe.get_doc({'doctype': 'Daily Snap'})
     new_daily_snap.insert()
+
+def check_and_run_yearly_snap():
+    heute = getdate(today())
+    if heute.month == 9 and heute.day == 14:
+        enqueue(
+            'mvd.mvd.doctype.yearly_snap.yearly_snap.erstelle_mitglieder_statistik',
+            queue='long'
+        )
+    if heute.month == 12 and heute.day == 30:
+        enqueue(
+            'mvd.mvd.doctype.yearly_snap.yearly_snap.erstelle_nichtzahler_statistik',
+            queue='long'
+        )
 
 def set_inaktiv():
     args = {}
@@ -89,6 +102,12 @@ def _set_inaktiv():
             submit_counter = 1
         else:
             submit_counter += 1
+    
+    frappe.db.commit()
+
+    # Um Race Conditions zu vermeiden, wird im DT Race Condition Helper das aktuelle Datum hinterlegt, sobald der Prozess durch ist.
+    # Dies ermöglicht in gewissen Fällen ein Serielles Abarbeiten von BG-Jobs obwohl mehrere Worker paralell arbeiten.
+    frappe.db.set_value("Race Condition Helper", "Race Condition Helper", "set_inaktiv", today())
     frappe.db.commit()
 
 def entferne_alte_reduzierungen():
@@ -334,7 +353,6 @@ def mark_beratungen_as_s8():
             frappe.db.set_value("Beratung", b.name, 's8', 1)
 
 def daily_ampel_korrektur():
-    from mvd.mvd.utils import is_job_already_running
     aktuelles_jahr = datetime.now().year
     
     # Potentiell falsch Rot
@@ -449,4 +467,22 @@ def set_trigger_sp_api():
         """.format(beratung.beratung_id))
     
     frappe.db.commit()
+    return
+
+def execute_address_changes():
+    open_address_changes = frappe.db.sql("""SELECT `name` FROM `tabAddresschange` WHERE `docstatus` = 0 AND `effective_on` <= CURDATE()""", as_dict=True)
+    for oac in open_address_changes:
+        addresschange = frappe.get_doc("Addresschange", oac.name)
+        addresschange.submit()
+
+def fixing_sp_mitglied_data():
+    if not is_job_already_running('Nächtliche Inaktivierungen'):
+        if frappe.db.get_value("Race Condition Helper", "Race Condition Helper", "set_inaktiv") == today():
+            args = {}
+            enqueue("mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data.fixing_wrong_data", queue='long', job_name='Nächtliche SP Mitglied Data Korrektur', timeout=5000, **args)
+            return
+    
+    # Solange die nächtliche Inaktivierung läuft oder noch nicht durchgeführt wurde, keine SP Mitglied Data Korrekturen da dies Konfliktpotenzial bietet
+    args = {}
+    enqueue("mvd.mvd.utils.daily_jobs.fixing_sp_mitglied_data", queue='short', job_name='fixing_sp_mitglied_data', timeout=5000, **args)
     return

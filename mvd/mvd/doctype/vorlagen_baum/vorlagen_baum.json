@@ -1,0 +1,154 @@
+{
+ "allow_rename": 1,
+ "autoname": "field:vorlagen_baum_name",
+ "creation": "2026-03-30 15:05:48.682860",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "vorlagen_baum_name",
+  "sektion_id",
+  "lft",
+  "rgt",
+  "is_group",
+  "old_parent",
+  "parent_vorlagen_baum",
+  "section_e_mail",
+  "use_for_email",
+  "email_vorlagen",
+  "section_druckvorlagen",
+  "use_for_druckvorlagen",
+  "druckvorlagen",
+  "section_dokumentenvorlagen",
+  "use_for_dokumentenvorlagen",
+  "dokumentenvorlagen"
+ ],
+ "fields": [
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Left",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Right",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Ist Gruppen-Knoten"
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Old Parent",
+   "options": "Vorlagen Baum"
+  },
+  {
+   "fieldname": "parent_vorlagen_baum",
+   "fieldtype": "Link",
+   "label": "\u00dcbergeordneter Gruppen-Knoten",
+   "options": "Vorlagen Baum"
+  },
+  {
+   "fieldname": "vorlagen_baum_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Titel",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "section_e_mail",
+   "fieldtype": "Section Break",
+   "label": "E-Mail Vorlagen"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_for_email",
+   "fieldtype": "Check",
+   "label": "Verwendung f\u00fcr E-Mail Vorlagen"
+  },
+  {
+   "fieldname": "section_druckvorlagen",
+   "fieldtype": "Section Break",
+   "label": "Druckvorlagen"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_for_druckvorlagen",
+   "fieldtype": "Check",
+   "label": "Verwendung f\u00fcr Druckvorlagen"
+  },
+  {
+   "fieldname": "section_dokumentenvorlagen",
+   "fieldtype": "Section Break",
+   "label": "Dokumentenvorlagen"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_for_dokumentenvorlagen",
+   "fieldtype": "Check",
+   "label": "Verwendung f\u00fcr Dokumentenvorlagen"
+  },
+  {
+   "depends_on": "eval:doc.use_for_email",
+   "fieldname": "email_vorlagen",
+   "fieldtype": "Table",
+   "label": "Vorlagen",
+   "options": "Email Vorlagen TBL"
+  },
+  {
+   "depends_on": "eval:doc.use_for_druckvorlagen",
+   "fieldname": "druckvorlagen",
+   "fieldtype": "Table",
+   "label": "Vorlagen",
+   "options": "Druckvorlagen TBL"
+  },
+  {
+   "depends_on": "eval:doc.use_for_dokumentenvorlagen",
+   "fieldname": "dokumentenvorlagen",
+   "fieldtype": "Table",
+   "label": "Vorlagen",
+   "options": "Dokumentenvorlage TBL"
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
+  }
+ ],
+ "is_tree": 1,
+ "modified": "2026-03-30 15:35:17.918102",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Vorlagen Baum",
+ "nsm_parent_field": "parent_vorlagen_baum",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

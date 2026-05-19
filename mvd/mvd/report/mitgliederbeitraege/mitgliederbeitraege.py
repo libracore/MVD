@@ -30,54 +30,54 @@ def get_columns():
     ]
 
 def get_data(filters):
-    data = []
-    data = get_nicht_bezahlt(filters, data)
-    return data
-
-def get_nicht_bezahlt(filters, data):
-    # Mitglieder
-    status_filter = get_status_filter(filters)
-    jahr_filter = get_jahr_filter(filters)
-    nicht_bezahlt_per_se = frappe.db.sql("""SELECT
-                                                `sinv`.`name` AS `rechnung`,
-                                                `sinv`.`grand_total` AS `betrag`,
-                                                `sinv`.`outstanding_amount` AS `ausstehender_betrag`,
-                                                `sinv`.`posting_date` AS `datum`,
-                                                `sinv`.`mitgliedschafts_jahr` AS `mitgliedschaftsjahr`,
-                                                `sinv`.`status` AS `rechnung_status`,
-                                                `sinv`.`title` AS `mitglied_name`,
-                                                `mvm`.`mitglied_nr` AS `mitglied_nr`,
-                                                `mvm`.`mitglied_id` AS `mitglied_id`,
-                                                `mvm`.`status_c` AS `mitglied_status`,
-                                                `mvm`.`mitgliedtyp_c` AS `mitgliedtyp_c`,
-                                                `mvm`.`e_mail_1` AS `e_mail_1`,
-                                                `mvm`.`tel_m_1` AS `tel_m_1`,
-                                                `mvm`.`tel_p_1` AS `tel_p_1`,
-                                                `pe`.`posting_date` AS `payment_datum`
-                                            FROM `tabSales Invoice` AS `sinv`
-                                            LEFT JOIN `tabMitgliedschaft` AS `mvm` ON `sinv`.`mv_mitgliedschaft` = `mvm`.`name`
-                                            JOIN `tabPayment Entry Reference` AS `per` ON `per`.`reference_name` = `sinv`.`name`
-                                            JOIN `tabPayment Entry` AS `pe` ON `pe`.`name` = `per`.`parent`
-                                            WHERE `sinv`.`sektion_id` = '{sektion_id}'
-                                            AND `sinv`.`docstatus` = 1
-                                            AND `sinv`.`ist_mitgliedschaftsrechnung` = 1
-                                            {status_filter}
-                                            {jahr_filter}""".format(sektion_id=filters.sektion_id, status_filter=status_filter, jahr_filter=jahr_filter), as_dict=True)
-    for record in nicht_bezahlt_per_se:
-        data.append(record)
-    
-    return data
-
-def get_status_filter(filters):
-    status_filter = ''
-    if filters.zahlstatus == 'Offen':
-        status_filter = """AND `sinv`.`status` != 'Paid'"""
-    elif filters.zahlstatus == 'Beglichen':
-        status_filter = """AND `sinv`.`status` = 'Paid'"""
-    return status_filter
-
-def get_jahr_filter(filters):
-    jahr_filter = ''
-    if filters.jahr and filters.jahr != '':
-        jahr_filter = """AND `sinv`.`mitgliedschafts_jahr` = '{0}'""".format(filters.jahr)
-    return jahr_filter
+    return frappe.db.sql("""
+        SELECT
+            sinv.name AS rechnung,
+            sinv.grand_total AS betrag,
+            sinv.outstanding_amount AS ausstehender_betrag,
+            sinv.posting_date AS datum,
+            sinv.mitgliedschafts_jahr AS mitgliedschaftsjahr,
+            sinv.status AS rechnung_status,
+            sinv.title AS mitglied_name,
+            mvm.mitglied_nr,
+            mvm.mitglied_id,
+            mvm.status_c AS mitglied_status,
+            mvm.mitgliedtyp_c,
+            mvm.e_mail_1,
+            mvm.tel_m_1,
+            mvm.tel_p_1,
+            IF(
+                sinv.grand_total != sinv.outstanding_amount,
+                IFNULL(pay.letztes_payment_datum, '---'),
+                '---'
+            ) AS payment_datum
+        FROM `tabSales Invoice` sinv
+        LEFT JOIN `tabMitgliedschaft` mvm
+            ON sinv.mv_mitgliedschaft = mvm.name
+        LEFT JOIN (
+            SELECT
+                per.reference_name,
+                MAX(pe.posting_date) AS letztes_payment_datum
+            FROM `tabPayment Entry Reference` per
+            LEFT JOIN `tabPayment Entry` pe
+                ON pe.name = per.parent
+            GROUP BY per.reference_name
+        ) pay
+            ON pay.reference_name = sinv.name
+        WHERE sinv.sektion_id = %(sektion_id)s
+          AND sinv.docstatus = 1
+          AND sinv.ist_mitgliedschaftsrechnung = 1
+          AND (
+              %(zahlstatus)s = ''
+              OR (%(zahlstatus)s = 'Offen' AND sinv.status != 'Paid')
+              OR (%(zahlstatus)s = 'Beglichen' AND sinv.status = 'Paid')
+          )
+          AND (
+              %(jahr)s = ''
+              OR sinv.mitgliedschafts_jahr = %(jahr)s
+          )
+    """, {
+        "sektion_id": filters.sektion_id,
+        "zahlstatus": filters.get("zahlstatus") or "",
+        "jahr": filters.get("jahr") or ""
+    }, as_dict=True)

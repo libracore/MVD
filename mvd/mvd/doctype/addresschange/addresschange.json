@@ -1,0 +1,157 @@
+{
+ "creation": "2026-01-27 11:46:18.189287",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_allgemein",
+  "mv_mitgliedschaft",
+  "effective_on",
+  "cb_1",
+  "mitglied_nr",
+  "sektion_id",
+  "history_only",
+  "section_address",
+  "zusatz_adresse",
+  "strasse",
+  "nummer",
+  "nummer_zu",
+  "plz",
+  "ort",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mitglied",
+   "options": "Mitgliedschaft",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.mitglied_nr",
+   "fieldname": "mitglied_nr",
+   "fieldtype": "Data",
+   "label": "Mitglied-Nr",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_address",
+   "fieldtype": "Section Break",
+   "label": "Zuk\u00fcnftige Adresse"
+  },
+  {
+   "fieldname": "zusatz_adresse",
+   "fieldtype": "Data",
+   "label": "Zusatzadresse"
+  },
+  {
+   "fieldname": "strasse",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Strasse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nummer",
+   "fieldtype": "Data",
+   "label": "Hausnummer"
+  },
+  {
+   "fieldname": "nummer_zu",
+   "fieldtype": "Data",
+   "label": "Nr. Zusatz"
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "PLZ",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Wohnort",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Addresschange",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.sektion_id",
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "effective_on",
+   "fieldtype": "Date",
+   "label": "G\u00fcltig ab",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "history_only",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "History only"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2026-01-27 14:07:38.488769",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Addresschange",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "mitglied_nr"
+}

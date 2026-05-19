@@ -24,11 +24,6 @@ frappe.ui.form.on('Payment Entry', {
                     frm.add_custom_button(__("Spende"), function() {
                         mit_spende_ausgleichen(frm);
                     }, __("Verbuchen als ..."));
-                    
-                    frm.add_custom_button(__("Rückzahlung"), function() {
-                        rueckzahlung(frm);
-                    }, __("Ausgleichen mit ..."));
-                    
                 }
                 if (check_underpaid(frm)) {
                     frm.add_custom_button(__("Differenz als Kulanz ausgleichen"), function() {
@@ -36,6 +31,11 @@ frappe.ui.form.on('Payment Entry', {
                     });
                 }
             }
+
+            frm.add_custom_button(__("Rückzahlung"), function() {
+                rueckzahlung(frm);
+            }, __("Ausgleichen mit ..."));
+            
             if (cur_frm.doc.docstatus == 0) {
                 frm.add_custom_button(__("Mitgliedschaft"), function() {
                     mitgliedschaft_zuweisen(frm);
@@ -49,6 +49,24 @@ frappe.ui.form.on('Payment Entry', {
                 frm.add_custom_button(__("Storno Rollback"), function() {
                     storno_rollback(frm);
                 });
+            }
+        }
+    },
+    validate: function(frm) {
+        if (cur_frm.doc.ignore_amount_deviation != 1) {
+            if (cur_frm.doc.paid_amount != cur_frm.doc.camt_amount){
+                frappe.validated=false;
+                frappe.confirm(
+                    'Der Betrag in dieser Zahlung stimmt nicht mit dem Betragf aus dem CAMT-File überein.<br>Wollen Sie die Zahlung trotzdem speichern?',
+                    function(){
+                        // on yes
+                        cur_frm.set_value("ignore_amount_deviation", 1);
+                        cur_frm.save()
+                    },
+                    function(){
+                        // on no
+                    }
+                )
             }
         }
     },

@@ -4,7 +4,15 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
+from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention
+try:
+    from jinja2 import pass_context as context_decorator
+except ImportError:
+    from jinja2 import contextfunction as context_decorator
+import json
+from jinja2.runtime import Context
 
 class Druckvorlage(Document):
     def validate(self):
@@ -284,7 +292,6 @@ def get_druckvorlagen(sektion, dokument='Korrespondenz', mitgliedtyp=False, redu
         return alle_druckvorlagen
 
 def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=False, fr=False):
-    from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention
     nur_kunde = False
     try:
         mitgliedschaft.name
@@ -448,3 +455,363 @@ def get_webshop_datum(sinv):
         return frappe.utils.get_datetime(webshop_orders[0].creation).strftime('%d.%m.%Y')
     else:
         return ''
+
+def get_doc_from_ctx(ctx): 
+    if hasattr(ctx, "get") and ctx.get("doc"):
+        return ctx.get("doc")
+    elif isinstance(ctx, Context): # Falls der ctx vom typ jinja2.context ist -> Email
+        doc = json.loads(ctx.get('frappe').get('form_dict').get('doc'))
+        return frappe.get_doc(doc.get('doctype'), doc.get('name'))
+    return ctx
+
+@context_decorator
+def get_anrede(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        if doc.get("doctype") not in ["Sales Invoice", "Mahnung"]:
+            return mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft)
+        else:
+            return mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)
+    
+    mv_kunde = doc.get("mv_kunde", False)
+    if mv_kunde:
+        mitgliedschaft = frappe.get_doc("Kunden", mv_kunde)
+        return get_anredekonvention(self=mitgliedschaft)
+
+    return 'Guten Tag'
+
+@context_decorator
+def get_vorname_nachname(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        vorname = mitgliedschaft.vorname_1 or ""
+        nachname = mitgliedschaft.nachname_1 or ""
+        voller_name = "{} {}".format(vorname, nachname).strip().replace("  ", " ")
+
+        return voller_name if voller_name else "---"
+    
+    return '---'
+
+@context_decorator
+def get_anrede_beschenkte(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        return mitgliedschaft.briefanrede or get_anredekonvention(self=mitgliedschaft)
+
+    return 'Guten Tag'
+
+@context_decorator
+def get_anrede_schenkende(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        return mitgliedschaft.rg_briefanrede or get_anredekonvention(self=mitgliedschaft, rg=True)
+
+    return 'Guten Tag'
+
+@context_decorator
+def get_mitgliedernummer(ctx):
+    mitgliedschaft = None
+    doc = get_doc_from_ctx(ctx)
+    
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+        
+    elif doc.get("mv_mitgliedschaft"):
+        mv_mitgliedschaft = doc.get("mv_mitgliedschaft")
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+
+    elif doc.get("mv_kunde"): # wird für den Webshop gebraucht, da geben wir die mv_mitgliedschaft nicht in die Rechnung wegen der Buchhaltung
+        mv_mitgliedschaft = frappe.db.get_value("Kunden", doc.mv_kunde, "mv_mitgliedschaft")
+        if mv_mitgliedschaft:
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+
+    if mitgliedschaft:
+        return mitgliedschaft.mitglied_nr
+    return '---'
+
+@context_decorator
+def get_vor_und_nachname_beschenkte(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        return " ".join((mitgliedschaft.vorname_1 or '', mitgliedschaft.nachname_1 or ''))
+
+    return '---'
+
+@context_decorator
+def get_vor_und_nachname_schenkende(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        return " ".join((mitgliedschaft.rg_vorname or '', mitgliedschaft.rg_nachname or ''))
+
+    return '---'
+
+@context_decorator
+def get_digitalrechnung_link(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        return "https://libracore.mieterverband.ch/digitalrechnung?hash={0}".format(mitgliedschaft.mitglied_hash) if mitgliedschaft.mitglied_hash else '(URL nicht verfügbar)'
+
+    return '(URL nicht verfügbar)'
+
+@context_decorator
+def get_austritt_per(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft and mitgliedschaft.get("kuendigung"):
+        return mitgliedschaft.kuendigung.strftime('%d.%m.%Y')
+    
+    return '---'
+
+@context_decorator
+def get_eintrittsdatum(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft and mitgliedschaft.get("eintrittsdatum"):
+        return mitgliedschaft.eintrittsdatum.strftime('%d.%m.%Y')
+        
+    return '---'
+
+@context_decorator
+def get_jahr_haftpflicht(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        return mitgliedschaft.zahlung_hv
+        
+    return '---'
+
+@context_decorator
+def get_versichertes_objekt(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        strasse = mitgliedschaft.objekt_strasse or ""
+        hausnummer = mitgliedschaft.objekt_hausnummer or ""
+        zusatz = mitgliedschaft.get("objekt_nummer_zu") or ""
+        adresse = "{} {} {}".format(strasse, hausnummer, zusatz).strip().replace("  ", " ")
+
+        return adresse if adresse else "---"
+    
+    return '---'
+        
+@context_decorator
+def get_versichertes_objekt_ort(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        ort = mitgliedschaft.objekt_ort or ""
+        return ort if ort else "---"
+
+    return '---'
+
+@context_decorator
+def get_geschaeftstyp(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        typ = mitgliedschaft.mvb_typ or ""
+        return typ[3:] if typ else "---" # 3: um den Prefix Mvb zu löschen
+    
+    return '---'
+    
+@context_decorator
+def get_artikeltabelle(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Sales Invoice":
+        sinv = frappe.get_doc("Sales Invoice", doc.get("name"))
+        return get_item_table(sinv)
+    
+    if doc.get("doctype") == "Mahnung":
+        mahnung = frappe.get_doc("Mahnung", doc.get("name"))
+        sinv = frappe.get_doc("Sales Invoice", mahnung.sales_invoices[0].sales_invoice)
+        return get_item_table(sinv)
+    
+    return '---'
+
+@context_decorator
+def get_webshopdatum(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Sales Invoice":
+        sinv = frappe.get_doc("Sales Invoice", doc.get("name"))
+        return get_webshop_datum(sinv)
+    
+    return '---'
+
+
+### Kontexte für die Beratungsemails ###
+@context_decorator
+def get_beratungs_daten(ctx):
+    doc = get_doc_from_ctx(ctx)
+    sektion = ""
+    sprache = "de"
+    anrede = ""
+    if not doc:
+        return {}
+    
+    if doc.mv_mitgliedschaft:
+        m = frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft)
+        anrede = m.briefanrede or ""
+        sektion = m.sektion_id
+        sprache = m.language or "de"
+    elif doc.faktura_kunde:
+        k = frappe.get_value("Kunde", doc.faktura_kunde, ["sektion_id", "language"], as_dict=True)
+        sektion = k.sektion_id
+        sprache = k.language or "de"
+
+    berater_name = frappe.db.get_value("Termin Kontaktperson", doc.kontaktperson, "kontakt") or ""
+    beratung_art = frappe.db.get_value("Beratung Termin", {"parent": doc.name}, "art") or ""
+    termine_liste = []
+    child_termine = frappe.get_all("Beratung Termin", 
+        filters={"parent": doc.name}, 
+        fields=["von", "bis", "telefonnummer", "ort"],
+        order_by="von asc"
+    )
+
+    for t in child_termine:
+        ort_info = frappe.db.get_value("Beratungsort", t.ort, "infofeld") or ""
+        ort_clean = t.ort.replace("({0})".format(sektion), "").strip() if t.ort else ""
+        dauer = int((t.bis - t.von).total_seconds() / 60) if t.bis and t.von else 0
+        
+        termine_liste.append({
+            "wochentag": _(t.von.strftime('%A'), lang=sprache),
+            "datum": t.von.strftime('%d.%m.%y'),
+            "von": t.von.strftime('%H:%M'),
+            "bis": t.bis.strftime('%H:%M'),
+            "dauer": dauer,
+            "telefonnummer": t.telefonnummer or "---",
+            "ort": ort_clean,
+            "ort_info": ort_info.replace(', ', '<br>')
+        })
+
+    return {
+        "anrede": anrede,
+        "sprache": sprache,
+        "berater": berater_name,
+        "termine": termine_liste,
+        "art": beratung_art
+    }
+
+@context_decorator
+def get_rechnungsbetrag(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Sales Invoice":
+        return "{:,.2f}".format(doc.get("outstanding_amount")).replace(",", "'")
+
+    if doc.get("doctype") == "Fakultative Rechnung":
+        return "{:,.2f}".format(doc.get("betrag")).replace(",", "'")
+    
+    return '---'
+
+@context_decorator
+def get_rechnungsnummer(ctx):
+    doc = get_doc_from_ctx(ctx)
+    return doc.get("name")
+
+@context_decorator
+def get_rechnungsjahr(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Sales Invoice":
+        return doc.get("mitgliedschafts_jahr", "---")
+    
+    return '---'
+
+@context_decorator
+def get_gesamtbetrag_gemahnte_rechnungen(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Mahnung":
+        return "{:,.2f}".format(doc.get("total_with_charge")).replace(",", "'")
+    
+    return '---'
+
+@context_decorator
+def get_rechnungsdatum(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Mahnung":
+        mahnung = frappe.get_doc("Mahnung", doc.get("name"))
+        return frappe.utils.get_datetime(mahnung.sales_invoices[0].posting_date).strftime('%d.%m.%Y')
+    
+    return '---'
+
+@context_decorator
+def get_jahresrechnung_jahr(ctx):
+    doc = get_doc_from_ctx(ctx)
+
+    if doc.get("doctype") == "Mahnung":
+        mahnung = frappe.get_doc("Mahnung", doc.get("name"))
+        if mahnung.sales_invoices[0].ist_mitgliedschaftsrechnung:
+            if mahnung.sales_invoices[0].amount == mahnung.sales_invoices[0].outstanding_amount:
+                return str(mahnung.sales_invoices[0].mitgliedschafts_jahr)
+            else:
+                return str(mahnung.sales_invoices[0].mitgliedschafts_jahr) + ' (Restbetrag)'
+        else:
+            if mahnung.sales_invoices[0].amount == mahnung.sales_invoices[0].outstanding_amount:
+                return frappe.utils.get_datetime(mahnung.sales_invoices[0].posting_date).strftime('%d.%m.%Y')
+            else:
+                return frappe.utils.get_datetime(mahnung.sales_invoices[0].posting_date).strftime('%d.%m.%Y') + ' (Restbetrag)'
+    
+    return '---'

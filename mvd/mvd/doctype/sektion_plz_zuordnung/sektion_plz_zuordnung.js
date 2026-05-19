@@ -13,7 +13,7 @@ frappe.ui.form.on('Sektion PLZ Zuordnung', {
             d.$wrapper.find('.modal-body').html('<div class="text-center">' + __('Bitte warten...') + '</div>');
 			// Call the backend function
             frappe.call({
-                method: 'mvd.mvd.doctype.sektion_plz_zuordnung.sektion_plz_zuordnung.upload_data',
+                method: 'mvd.mvd.doctype.sektion_plz_zuordnung.sektion_plz_zuordnung.trigger_upload_job',
                 args: {},
                 callback: function(r) {
 					d.hide();

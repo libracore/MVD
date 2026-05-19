@@ -1,0 +1,60 @@
+{
+ "allow_rename": 1,
+ "autoname": "field:file_name",
+ "creation": "2026-03-30 12:06:05.751366",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "file_name",
+  "file_base",
+  "file_path"
+ ],
+ "fields": [
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dokumentenname",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "file_base",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "File-Ablage",
+   "options": "Nextcloud\nERPNext\nAnhang",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.file_base != 'Anhang'",
+   "fieldname": "file_path",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "File-Pfad"
+  }
+ ],
+ "modified": "2026-03-30 12:10:57.917036",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Dokumentenvorlage",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "file_name"
+}

@@ -59,7 +59,7 @@
                             <br><b>Bezahltes Mitgliedschaftsjahr:</b> {{ allgemein.bezahltes_mitgliedschaftsjahr }}
                         {% endif %}
                         {% if allgemein.hv_status %}
-                            <br>{{ allgemein.hv_status }}
+                            <br><b>Bezahltes HV-Jahr:</b> {{ allgemein.hv_status }}
                         {% endif %}
                     {% else %}
                         {% if allgemein.eintritt %}
@@ -127,7 +127,7 @@
                             <br><b>Bezahltes Mitgliedschaftsjahr:</b> {{ allgemein.bezahltes_mitgliedschaftsjahr }}
                         {% endif %}
                         {% if allgemein.hv_status %}
-                            <br>{{ allgemein.hv_status }}
+                            <br><b>Bezahltes HV-Jahr:</b> {{ allgemein.hv_status }}
                         {% endif %}
                     {% else %}
                         {% if allgemein.eintritt %}
@@ -158,7 +158,22 @@
 {% if kunde_mitglied %}
     <div class="col-sm-{{ col_qty }}">
         <div class="address-box">
-            <p><b>{% if allgemein.status != 'Faktura Kunde' %}Mitglied{% else %}Faktura Kunde{% endif %}</b></p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <p><b>{% if allgemein.status != 'Faktura Kunde' %}Mitglied{% else %}Faktura Kunde{% endif %}</b></p>
+                {% if allgemein.status != 'Faktura Kunde' %}
+                <button class="btn btn-xs btn-default btn-schlichtung" 
+                        data-type="Mitgliedschaft" 
+                        data-name="{{ allgemein.mitglied_id }}">
+                    Schlichtungsbehörde anzeigen
+                </button>
+            {% else %}
+                <button class="btn btn-xs btn-default btn-schlichtung" 
+                        data-type="Kunden" 
+                        data-name="{{ allgemein.kunden_id }}">
+                    Schlichtungsbehörde anzeigen
+                </button>
+            {% endif %}
+            </div>
             <!-- Unternehmen -->
             {% if kunde_mitglied.customer_type == 'Company' %}
                 <p>

@@ -371,6 +371,9 @@ def check_folgejahr_regelung(mitgliedschaft, db_direct=False):
 
 def sinv_update(sinv, event):
     update_blocked = False
+    if "create_mitgliedschaftsrechnung_block" in sinv.flags and sinv.flags['create_mitgliedschaftsrechnung_block']:
+        update_blocked = True
+    
     old_sinv = sinv.get_doc_before_save()
     if old_sinv:
         if old_sinv.status and old_sinv.status == sinv.status:

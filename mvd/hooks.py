@@ -49,7 +49,30 @@ jenv = {
         "create_item_table_with_download_link:mvd.mvd.doctype.webshop_order.webshop_order.create_item_table_with_download_link",
         "get_mahnungs_qrrs:mvd.mvd.doctype.mahnung.mahnung.get_mahnungs_qrrs",
         "get_rg_adressblock:mvd.mvd.doctype.mitgliedschaft.utils.get_rg_adressblock",
-        "get_last_open_sinv:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_last_open_sinv"
+        "get_last_open_sinv:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_last_open_sinv",
+        "get_anrede:mvd.mvd.doctype.druckvorlage.druckvorlage.get_anrede",
+        "get_vorname_nachname:mvd.mvd.doctype.druckvorlage.druckvorlage.get_vorname_nachname",
+        "get_anrede_beschenkte:mvd.mvd.doctype.druckvorlage.druckvorlage.get_anrede_beschenkte",
+        "get_anrede_schenkende:mvd.mvd.doctype.druckvorlage.druckvorlage.get_anrede_schenkende",
+        "get_mitgliedernummer:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mitgliedernummer",
+        "get_vor_und_nachname_beschenkte:mvd.mvd.doctype.druckvorlage.druckvorlage.get_vor_und_nachname_beschenkte",
+        "get_vor_und_nachname_schenkende:mvd.mvd.doctype.druckvorlage.druckvorlage.get_vor_und_nachname_schenkende",
+        "get_digitalrechnung_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_digitalrechnung_link",
+        "get_austritt_per:mvd.mvd.doctype.druckvorlage.druckvorlage.get_austritt_per",
+        "get_eintrittsdatum:mvd.mvd.doctype.druckvorlage.druckvorlage.get_eintrittsdatum",
+        "get_jahr_haftpflicht:mvd.mvd.doctype.druckvorlage.druckvorlage.get_jahr_haftpflicht",
+        "get_versichertes_objekt:mvd.mvd.doctype.druckvorlage.druckvorlage.get_versichertes_objekt",
+        "get_versichertes_objekt_ort:mvd.mvd.doctype.druckvorlage.druckvorlage.get_versichertes_objekt_ort",
+        "get_geschaeftstyp:mvd.mvd.doctype.druckvorlage.druckvorlage.get_geschaeftstyp",
+        "get_artikeltabelle:mvd.mvd.doctype.druckvorlage.druckvorlage.get_artikeltabelle",
+        "get_webshopdatum:mvd.mvd.doctype.druckvorlage.druckvorlage.get_webshopdatum",
+        "get_rechnungsbetrag:mvd.mvd.doctype.druckvorlage.druckvorlage.get_rechnungsbetrag",
+        "get_rechnungsnummer:mvd.mvd.doctype.druckvorlage.druckvorlage.get_rechnungsnummer",
+        "get_rechnungsjahr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_rechnungsjahr",
+        "get_gesamtbetrag_gemahnte_rechnungen:mvd.mvd.doctype.druckvorlage.druckvorlage.get_gesamtbetrag_gemahnte_rechnungen",
+        "get_rechnungsdatum:mvd.mvd.doctype.druckvorlage.druckvorlage.get_rechnungsdatum",
+        "get_jahresrechnung_jahr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_jahresrechnung_jahr",
+        "get_beratungs_daten:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungs_daten"
     ]
 }
 
@@ -152,6 +175,7 @@ doc_events = {
 scheduler_events = {
     "daily": [
         "mvd.mvd.utils.daily_jobs.create_daily_snap",
+        "mvd.mvd.utils.daily_jobs.check_and_run_yearly_snap",
         "mvd.mvd.utils.daily_jobs.reset_geschenk_mitgliedschaften",
         "mvd.mvd.utils.daily_jobs.set_inaktiv",
         "mvd.mvd.utils.daily_jobs.entferne_alte_reduzierungen",
@@ -165,7 +189,10 @@ scheduler_events = {
         # "mvd.mvd.utils.daily_jobs.rechnungs_jahresversand",
         "mvd.mvd.utils.daily_jobs.daily_ampel_korrektur",
         "mvd.mvd.utils.daily_jobs.sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft",
-        "mvd.mvd.v2.web_auth.reset_hash_cleanup"
+        "mvd.mvd.v2.web_auth.reset_hash_cleanup",
+        "mvd.mvd.utils.daily_jobs.execute_address_changes",
+        "mvd.mvd.utils.daily_jobs.fixing_sp_mitglied_data"
+        "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.validate_member_addresses"
     ],
     "all": [
         "mvd.mvd.doctype.service_platform_queue.service_platform_queue.flush_queue",
@@ -173,10 +200,14 @@ scheduler_events = {
         "mvd.mvd.doctype.beratung.beratung.send_to_sp",
         "mvd.mvd.service_plattform.request_worker.service_plattform_log_worker",
         "mvd.mvd.doctype.serien_email.serien_email.send_mails",
-        "mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.mrj_worker"
+        "mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.mrj_worker",
+        "mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data.update_based_on_scheduler"
     ],
     "hourly": [
         "mvd.mvd.doctype.wohnungsabgabe.wohnungsabgabe.qa_mail"
+    ],
+    "monthly": [
+        "mvd.mvd.doctype.amtliches_gebaeudeverzeichnis.amtliches_gebaeudeverzeichnis.run_sql_import"
     ]
 }
 # scheduler_events = {

@@ -26,6 +26,7 @@
   "status_c",
   "interessent_typ",
   "mitgliedtyp_c",
+  "mvb_typ",
   "kontaktkategorien",
   "todesfall_uebernahme",
   "inkl_hv",
@@ -56,7 +57,6 @@
   "wegzug_zu",
   "naechstes_jahr_geschuldet",
   "ampel_farbe",
-  "mvb_typ",
   "cb_1",
   "eintritt",
   "eintrittsdatum",
@@ -200,9 +200,13 @@
   "geschenk_reset_rechnung",
   "digitalrechnung_hash",
   "mitglied_hash",
+  "mvs_quelle",
   "deleted_by_admin",
   "web_login_user_created",
-  "asloca_id"
+  "asloca_id",
+  "adressvalidierung_bestanden",
+  "adressvalidierung_datum",
+  "adressvalidierung_manuell"
  ],
  "fields": [
   {
@@ -1320,8 +1324,9 @@
   {
    "depends_on": "eval:doc.sektion_id=='MVZH'",
    "fieldname": "mvb_typ",
-   "fieldtype": "Data",
-   "label": "MVB Typ"
+   "fieldtype": "Select",
+   "label": "MVB Typ",
+   "options": "\nMvbMini\nMvbStandard"
   },
   {
    "description": "Bevor das Mitglied zu dieser Sektion zugezogen ist, besass es die ID \"Wegzug ID\"",
@@ -1408,10 +1413,33 @@
    "fieldname": "kuendigung_am",
    "fieldtype": "Date",
    "label": "K\u00fcndigung am"
+  },
+  {
+   "fieldname": "mvs_quelle",
+   "fieldtype": "Data",
+   "label": "mvs_quelle",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "adressvalidierung_datum",
+   "fieldtype": "Date",
+   "label": "Adressvalidierung Datum"
+  },
+  {
+   "default": "0",
+   "fieldname": "adressvalidierung_manuell",
+   "fieldtype": "Check",
+   "label": "Adressvalidierung manuell"
+  },
+  {
+   "default": "0",
+   "fieldname": "adressvalidierung_bestanden",
+   "fieldtype": "Check",
+   "label": "Adressvalidierung bestanden"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-01-29 13:55:15.033543",
+ "modified": "2026-05-11 15:18:32.112503",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

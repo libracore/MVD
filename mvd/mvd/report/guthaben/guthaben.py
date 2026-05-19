@@ -17,7 +17,8 @@ def get_columns():
         {"label": _("Mitglied Name"), "fieldname": "mitglied_name", "fieldtype": "Data"},
         {"label": _("Mitglied Status"), "fieldname": "mitglied_status", "fieldtype": "Data"},
         {"label": _("Mitgliedtyp"), "fieldname": "mitgliedtyp_c", "fieldtype": "Data"},
-        {"label": _("Guthaben"), "fieldname": "guthaben", "fieldtype": "Currency"}
+        {"label": _("Guthaben"), "fieldname": "guthaben", "fieldtype": "Currency"},
+        {"label": _("Man. Analyse erf."), "fieldname": "warning", "fieldtype": "Data"}
     ]
 
 def get_data(filters):
@@ -33,7 +34,8 @@ def get_data(filters):
             `data`.`status_c` AS `mitglied_status`,
             `data`.`mitgliedtyp_c` AS `mitgliedtyp_c`,
             `data`.`kunde_mitglied`,
-            `data`.`rg_kunde`
+            `data`.`rg_kunde`,
+            NULL AS `warning`
         FROM (
             SELECT
                 `data_tbl`.`guthaben`,
@@ -85,4 +87,24 @@ def get_data(filters):
             AND IFNULL(`mitgl`.`rg_kunde`, '') != ''
         ) AS `data`
     """.format(company=company), as_dict=True)
+
+    doppelungen = []
+    doppelung_check = []
+
+    for credit in guthaben:
+        if credit.rg_kunde and credit.rg_kunde not in doppelung_check:
+            doppelung_check.append(credit.rg_kunde)
+        else:
+            doppelungen.append(credit.rg_kunde)
+        
+        if credit.kunde_mitglied and credit.kunde_mitglied not in doppelung_check:
+            doppelung_check.append(credit.kunde_mitglied)
+        else:
+            doppelungen.append(credit.kunde_mitglied)
+    
+    for credit in guthaben:
+        if ((credit.rg_kunde and credit.rg_kunde in doppelungen) or
+            (credit.kunde_mitglied and credit.kunde_mitglied in doppelungen)):
+            credit.warning = '⚠️'
+    
     return guthaben
