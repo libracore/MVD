@@ -274,7 +274,7 @@ frappe.ui.form.on('Mitgliedschaft', {
             });
             
             load_beratungen_overview(frm);
-
+            load_mandat_overview(frm);
             
             // assign hack
             $(".add-assignment.text-muted").remove();
@@ -770,6 +770,23 @@ function load_beratungen_overview(frm) {
             }
             if (datas.ungelesen_qty > 0) {
                 cur_frm.set_intro("Dieses Mitglied besitzt ungelesene Beratungen");
+            }
+        }
+    });
+}
+
+function load_mandat_overview(frm) {
+    frappe.call({
+        method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_mandat_dashboard",
+        args:{
+                'mitgliedschaft': cur_frm.doc.name
+        },
+        callback: function(r)
+        {
+            let anz_offen = r.message;
+            let show = anz_offen > 0 ? true:false;
+            if (show) {
+                cur_frm.dashboard.add_indicator("Offenes Mandat", "red");
             }
         }
     });
