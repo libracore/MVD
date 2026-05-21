@@ -191,6 +191,7 @@
   "status_vor_onl_mutation",
   "search_hash",
   "aktive_mitgliedschaft",
+  "cb_7",
   "m_w_retouren_offen",
   "m_w_retouren_in_bearbeitung",
   "m_w_anzahl",
@@ -202,11 +203,11 @@
   "mitglied_hash",
   "mvs_quelle",
   "deleted_by_admin",
-  "web_login_user_created",
-  "asloca_id",
   "adressvalidierung_bestanden",
   "adressvalidierung_datum",
-  "adressvalidierung_manuell"
+  "adressvalidierung_manuell",
+  "web_login_user_created",
+  "asloca_id"
  ],
  "fields": [
   {
@@ -1436,10 +1437,14 @@
    "fieldname": "adressvalidierung_bestanden",
    "fieldtype": "Check",
    "label": "Adressvalidierung bestanden"
+  },
+  {
+   "fieldname": "cb_7",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-05-11 15:18:32.112503",
+ "modified": "2026-05-21 10:34:47.874817",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
