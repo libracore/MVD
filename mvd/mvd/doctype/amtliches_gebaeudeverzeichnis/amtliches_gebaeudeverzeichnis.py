@@ -37,6 +37,7 @@ def run_sql_import():
 
 	with zipfile.ZipFile(io.BytesIO(response.content)) as z:
 		csv_filename = [f for f in z.namelist() if f.endswith('.csv')][0]
+		now_time = frappe.db.escape(frappe.utils.now_datetime())
 		with z.open(csv_filename) as f:
 			content = io.TextIOWrapper(f, encoding='utf-8-sig')
 			reader = csv.DictReader(content, delimiter=';')
@@ -48,7 +49,7 @@ def run_sql_import():
 				wohnort = zip_parts[1] if len(zip_parts) > 1 else ""
 				d = datetime.strptime(row.get('ADR_MODIFIED'), '%d.%m.%Y').strftime('%Y-%m-%d')
 				formatted_date = "'{0}'".format(d)
-				val = "({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, 'Administrator', 'Administrator')".format(
+				val = "({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, 'Administrator', 'Administrator', {11}, {12}, 0)".format(
 									frappe.db.escape(row.get('ADR_EGAID')),
 									frappe.db.escape(row.get('STN_LABEL')),
 									frappe.db.escape(row.get('ADR_NUMBER')),
@@ -59,7 +60,9 @@ def run_sql_import():
 									frappe.db.escape(row.get('COM_CANTON')),
 									formatted_date,
 									row.get('ADR_EASTING') or 0,
-									row.get('ADR_NORTHING') or 0
+									row.get('ADR_NORTHING') or 0,
+									now_time,
+                                    now_time
 								)
 				batch.append(val)
 				if len(batch) >= 5000:
@@ -74,7 +77,7 @@ def run_sql_import():
 def execute_raw_sql(batch):
 	query = """
 		INSERT INTO `tabAmtliches Gebaeudeverzeichnis` 
-		(name, stn_label, adr_number, plz, wohnort, com_fosnr, com_name, com_canton, adr_modified, adr_easting, adr_northing, owner, modified_by)
+		(name, stn_label, adr_number, plz, wohnort, com_fosnr, com_name, com_canton, adr_modified, adr_easting, adr_northing, owner, modified_by, creation, modified, docstatus)
 		VALUES {0}
 	""".format(", ".join(batch))
 	frappe.db.sql(query)

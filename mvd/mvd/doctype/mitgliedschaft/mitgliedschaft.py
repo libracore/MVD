@@ -3020,31 +3020,29 @@ def validate_member_addresses(limit=0):
         count_failed = 0
 
         for m in members:
-            full_number = m.objekt_hausnummer or ""
-            if m.objekt_nummer_zu:
-                full_number = "{0}{1}".format(full_number, m.objekt_nummer_zu)
-
-            valid_entry = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", 
-                {
-                    "stn_label": m.objekt_strasse,
-                    "adr_number": full_number,
-                    "plz": m.objekt_plz,
-                    "wohnort": m.objekt_ort
-                }, 
-                "name"
-            )
-            status = 1 if valid_entry else 0
+            full_number = "{0}{1}".format(m.objekt_hausnummer or "", m.objekt_nummer_zu or "")
+            safe_strasse = str(m.objekt_strasse).replace("'", "''")
+            safe_ort = str(m.objekt_ort).replace("'", "''")
+            safe_full_number = str(full_number).replace("'", "''")
+            sql_result = frappe.db.sql("""SELECT com_fosnr
+                                FROM `tabAmtliches Gebaeudeverzeichnis`
+                                WHERE plz = '{0}'
+                                AND stn_label = '{1}'
+                                AND adr_number = '{2}'
+                                AND wohnort = '{3}'
+                                LIMIT 1
+                                """.format(m.objekt_plz, safe_strasse, safe_full_number, safe_ort), as_dict=True)
+            status = 1 if sql_result else 0
 
             frappe.db.set_value("Mitgliedschaft", m.name, {
                 "adressvalidierung_datum": frappe.utils.nowdate(),
                 "adressvalidierung_bestanden": status,
             }, update_modified=False)
             
-            if valid_entry:
+            if sql_result:
                 count_success += 1
             else:
                 count_failed += 1
-        
         frappe.db.commit()
 
 @frappe.whitelist(allow_guest=True)
@@ -3055,67 +3053,51 @@ def get_arbitration_authority_with_validation(doc_id, doc_type="Mitgliedschaft")
     bfs_nr = None
 
     if doc_type == "Kunden":
-        doc = frappe.get_doc("Kunden", doc_id)
+        doc = frappe.db.get_value("Kunden", doc_id, ["strasse", "nummer", "nummer_zu", "plz", "ort"], as_dict=True)
         
-        full_number = doc.nummer or ""
-        if doc.nummer_zu:
-            full_number = "{0}{1}".format(full_number, doc.nummer_zu)
-            
-        bfs_nr = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", 
-            {
-                "stn_label": doc.strasse,
-                "adr_number": full_number,
-                "plz": doc.plz,
-                "wohnort": doc.ort
-            }, 
-            "com_fosnr"
-        )
+        full_number = "{0}{1}".format(doc.nummer or "", doc.nummer_zu or "")
+        strasse = str(doc.strasse).replace("'", "''")
+        ort = str(doc.ort).replace("'", "''")
+        full_number = str(full_number).replace("'", "''")
+        sql_result = frappe.db.sql("""SELECT com_fosnr
+                               FROM `tabAmtliches Gebaeudeverzeichnis`
+                               WHERE plz = '{0}'
+                               AND stn_label = '{1}'
+                               AND adr_number = '{2}' 
+                               AND wohnort = '{3}'
+                               LIMIT 1
+                               """.format(doc.plz, strasse, full_number, ort), as_dict=True)
+        if sql_result:
+            bfs_nr = sql_result[0].get("com_fosnr")
     else:
-        doc = frappe.get_doc("Mitgliedschaft", doc_id)
-        
+        doc = frappe.db.get_value("Mitgliedschaft", doc_id, [
+            "name", "objekt_strasse", "objekt_hausnummer", "objekt_nummer_zu", 
+            "objekt_plz", "objekt_ort", "adressvalidierung_bestanden"
+        ], as_dict=True)
+
+        full_number = "{0}{1}".format(doc.objekt_hausnummer or "", doc.objekt_nummer_zu or "")
+        strasse = str(doc.objekt_strasse).replace("'", "''")
+        ort = str(doc.objekt_ort).replace("'", "''")
+        full_number = str(full_number).replace("'", "''")
+        sql_result = frappe.db.sql("""SELECT name, com_fosnr
+                               FROM `tabAmtliches Gebaeudeverzeichnis`
+                               WHERE plz = '{0}'
+                               AND stn_label = '{1}'
+                               AND adr_number = '{2}'
+                               AND wohnort = '{3}'
+                               LIMIT 1
+                               """.format(doc.objekt_plz, strasse, full_number, ort), as_dict=True)
+        status = 1 if sql_result else 0
+        if sql_result:
+            bfs_nr = sql_result[0].get("com_fosnr")
         if not doc.adressvalidierung_bestanden:
-            full_number = doc.objekt_hausnummer or ""
-            if doc.objekt_nummer_zu:
-                full_number = "{0}{1}".format(full_number, doc.objekt_nummer_zu)
-                
-            valid_entry = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", 
-                {
-                    "stn_label": doc.objekt_strasse,
-                    "adr_number": full_number,
-                    "plz": doc.objekt_plz,
-                    "wohnort": doc.objekt_ort
-                }, 
-                ["name", "com_fosnr"], 
-                as_dict=True
-            )
-            
-            status = 1 if valid_entry else 0
-            
             frappe.db.set_value("Mitgliedschaft", doc.name, {
-                "adressvalidierung_datum": frappe.utils.nowdate(),
-                "adressvalidierung_bestanden": status,
-            }, update_modified=False)
-            frappe.db.commit()
-            
-            if not status:
+                    "adressvalidierung_datum": frappe.utils.nowdate(),
+                    "adressvalidierung_bestanden": status
+                }, update_modified=False)
+        
+        if not status:
                 return {"success": False, "message": 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/ubersicht" target="_blank">mietrecht.ch</a> mit PLZ recherchieren.'}
-            
-            bfs_nr = valid_entry.get("com_fosnr")
-            
-        else:
-            full_number = doc.objekt_hausnummer or ""
-            if doc.objekt_nummer_zu:
-                full_number = "{0}{1}".format(full_number, doc.objekt_nummer_zu)
-                
-            bfs_nr = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", 
-                {
-                    "stn_label": doc.objekt_strasse,
-                    "adr_number": full_number,
-                    "plz": doc.objekt_plz,
-                    "wohnort": doc.objekt_ort
-                }, 
-                "com_fosnr"
-            )
 
     if not bfs_nr:
         return {"success": False, "message": 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/ubersicht" target="_blank">mietrecht.ch</a> mit PLZ recherchieren.'}
@@ -3123,7 +3105,7 @@ def get_arbitration_authority_with_validation(doc_id, doc_type="Mitgliedschaft")
     # --- EXTERNER API CALL AN MP ---
     api_url = "https://mp.libracore.ch/api/method/mietrechtspraxis.api.get_arbitration_authority_from_bfs"
     try:
-        response = requests.get(api_url, params={"bfs_nr": bfs_nr}, timeout=10)
+        response = requests.get(api_url, params={"bfs_nr": bfs_nr}, timeout=5)
         if response.status_code == 200:
             response_json = response.json()
             aa_data = response_json.get("message") if response_json else None
@@ -3142,4 +3124,4 @@ def get_arbitration_authority_with_validation(doc_id, doc_type="Mitgliedschaft")
             "message": "Fehler beim Verbinden mit mp.libracore.ch: {0}".format(str(e))
         }
         
-    return {"success": False, "message": "Keine Schlichtungsbehörde für die BFS-Nr. {0} auf mp.libracore.ch gefunden.".format(bfs_nr)}
+    return {"success": False, "message": 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/ubersicht" target="_blank">mietrecht.ch</a> mit PLZ recherchieren.'}
