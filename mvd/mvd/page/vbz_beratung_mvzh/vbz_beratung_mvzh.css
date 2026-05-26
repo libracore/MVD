@@ -1,0 +1,59 @@
+#page-vbz-beratung {
+    background-color: #e6ebef;
+}
+
+h1.vbz {
+    font-weight: bold;
+    padding-left: 15px;
+}
+
+#datenstand {
+    font-weight: normal !important;
+    font-size: 15px !important;
+}
+
+#reload_info {
+    font-weight: normal !important;
+    font-size: 15px !important;
+}
+
+#table_beratungs_uebersicht {
+    margin-left: 10em;
+    width: 50%;
+}
+
+#s_as:hover,
+#s1_as:hover,
+#s2_as:hover,
+#s3_as:hover,
+#s3:hover,
+#s4_as:hover,
+#s5_as:hover,
+#s6_as:hover,
+#s7_as:hover,
+#s8_as:hover,
+#a1_as:hover,
+#r_as:hover,
+#r1_as:hover,
+#r2_as:hover,
+#r2_bs:hover,
+#r3_as:hover,
+#r4_as:hover,
+#r5_as:hover,
+#r6_as:hover,
+#r7_as:hover,
+#r8_as:hover,
+#r9_as:hover,
+#r10_bs:hover,
+#r11_bs:hover,
+#r12_bs:hover,
+#p1_as:hover,
+#p2_as:hover,
+#p3_as:hover,
+#p4_as:hover,
+#rechtsberaterinnen_as:hover,
+#beratungskategorien_as:hover,
+#statistik_as:hover {
+    background-color: #219D84;
+    cursor: pointer;
+}
