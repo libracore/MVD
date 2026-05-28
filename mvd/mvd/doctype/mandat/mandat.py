@@ -9,6 +9,8 @@ import frappe
 from frappe.model.document import Document
 from frappe.core.doctype.communication.email import make
 from frappe import sendmail
+from frappe.utils import datetime
+from frappe.model.naming import make_autoname
 from frappe.email.doctype.email_template.email_template import get_email_template
 from frappe.utils.pdf import get_pdf
 from frappe import attach_print
@@ -16,6 +18,14 @@ from frappe.utils import get_url_to_form, get_url
 from frappe.utils.file_manager import get_file_path
 
 class Mandat(Document):
+    def autoname(self):
+        jahr = datetime.date.today().year
+        if self.mv_mitgliedschaft:
+            sektion = frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "sektion_id")
+        else:
+            sektion = 'MVD'
+        self.name = make_autoname("{0}-{1}-.#".format(sektion, jahr))
+
     def on_update(self):
         # Bestätigungs-Email senden
         if (self.typ == "Rechtsschutzversicherung" and 
