@@ -2172,3 +2172,102 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
         }
     }
 }
+
+mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
+    constructor(opts) {
+        this.dialog =  new frappe.ui.Dialog({
+            title: "RSV-Mandat Erstellung",
+            fields: this.get_fields(opts),
+            primary_action_label: "Erstellen",
+            primary_action: () => {
+                this.dialog.hide();
+                this.call_primary_action(opts);
+            }
+        });
+
+        this.dialog.show();
+    }
+
+    get_fields(opts) {
+        var me = this;
+        return [
+            {'fieldname': 'rsv_mandatliste', 'fieldtype': 'Link', 'label': 'RSV-Mandatliste', 'reqd': 0, 'hidden': 1,'options': 'RSVMandatsliste', 'description': 'Wenn hier eine RSV-Mandatsliste ausgewählt wird, so wird das neu zu erstellende RSV-Mandat diesem hinzugefügt. Wenn explizit eine neue RSV-Mandatsliste angelegt werden, so benutzen Sie bitte nachfolgende Checkbox.',
+                get_query: function() {
+                    if(me.dialog.get_value('rsv_mandatliste_filter')) {
+                        return { 'filters': { 'siedlung': me.dialog.get_value('rsv_mandatliste_filter') } };
+                    }
+                }
+            },
+            {'fieldname': 'rsv_mandatliste_filter', 'fieldtype': 'Data', 'label': 'rsv_mandatliste_filter', 'reqd': 0, 'hidden': 1},
+            {'fieldname': 'rsv_mandatliste_new_creation', 'fieldtype': 'Check', 'label': 'RSV-Mandatsliste Neuanlage erzwingen', 'reqd': 0, 'hidden': 1, 
+                change: function() {
+                    if (me.dialog.get_value('rsv_mandatliste_filter')) {
+                        me.dialog.set_df_property("rsv_mandatliste", "hidden", 0);
+                        if(me.dialog.get_value('rsv_mandatliste_new_creation')) {
+                            me.dialog.set_df_property("rsv_mandatliste", "reqd", 0);
+                        } else {
+                            me.dialog.set_df_property("rsv_mandatliste", "reqd", 1);
+                        }
+                    } else {
+                        me.dialog.set_df_property("rsv_mandatliste", "reqd", 0);
+                    }
+                }
+            },
+            {'fieldname': 'strasse', 'fieldtype': 'Data', 'label': 'Strasse', 'reqd': 1, 'default': opts.objekt_strasse},
+            {'fieldname': 'hausnummer', 'fieldtype': 'Data', 'label': 'Hausnummer', 'reqd': 1, 'default': opts.objekt_hausnummer},
+            {'fieldname': 'nr_zusatz', 'fieldtype': 'Data', 'label': 'Hausnummer Zusatz', 'reqd': 0, 'default': opts.objekt_nummer_zu},
+            {'fieldname': 'plz', 'fieldtype': 'Data', 'label': 'PLZ', 'reqd': 1, 'default': opts.objekt_plz},
+            {'fieldname': 'ort', 'fieldtype': 'Data', 'label': 'Ort', 'reqd': 1, 'default': opts.objekt_ort},
+            {'fieldname': 'mv_mitgliedschaft', 'fieldtype': 'Data', 'label': 'Mitgliedschaft', 'reqd': 0, 'hidden': 1, 'default': opts.mv_mitgliedschaft}
+        ]
+    }
+
+    call_primary_action(opts) {
+        var me = this;
+        if (me.dialog.get_value("rsv_mandatliste_new_creation") != 1 && !me.dialog.get_value("rsv_mandatliste")) {
+            frappe.call({
+                method: "mvd.mvd.doctype.rsvmandat.rsvmandat.check_for_existing_rsvmandaliste",
+                args: me.dialog.get_values(),
+                freeze: true,
+                freeze_message: 'Erstelle RSV-Mandat...',
+                callback: function(r)
+                {
+                    if (!r.message) {
+                        frappe.call({
+                            method: "mvd.mvd.doctype.rsvmandat.rsvmandat.create_rsv_mandat",
+                            args: me.dialog.get_values(),
+                            freeze: true,
+                            freeze_message: 'Erstelle RSV-Mandat...',
+                            callback: function(r)
+                            {
+                                frappe.db.set_value("Beratung", opts.beratung, 'rsv_mandat', r.message);
+                                cur_frm.reload_doc();
+                                frappe.set_route("Form", "RSVMandat", r.message);
+                            }
+                        });
+                    } else {
+                        me.dialog.show();
+                        me.dialog.set_value("rsv_mandatliste_filter", r.message)
+                        me.dialog.set_df_property("rsv_mandatliste", "hidden", 0);
+                        me.dialog.set_df_property("rsv_mandatliste", "reqd", 1);
+                        me.dialog.set_df_property("rsv_mandatliste_new_creation", "hidden", 0);
+                        frappe.msgprint('Biite das neue Feld "RSV-Mandatliste" beachten!')
+                    }
+                }
+            });
+        } else {
+            frappe.call({
+                method: "mvd.mvd.doctype.rsvmandat.rsvmandat.create_rsv_mandat",
+                args: me.dialog.get_values(),
+                freeze: true,
+                freeze_message: 'Erstelle RSV-Mandat...',
+                callback: function(r)
+                {
+                    frappe.db.set_value("Beratung", opts.beratung, 'rsv_mandat', r.message);
+                    cur_frm.reload_doc();
+                    frappe.set_route("Form", "RSVMandat", r.message);
+                }
+            });
+        }
+    }
+}

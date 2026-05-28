@@ -1,0 +1,28 @@
+{
+ "creation": "2026-05-26 12:04:57.212978",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "adr_egaid"
+ ],
+ "fields": [
+  {
+   "fieldname": "adr_egaid",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "ADR_EGAID",
+   "options": "Amtliches Gebaeudeverzeichnis",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-05-26 16:17:03.613065",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Zugehoerige Gebaeude",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
