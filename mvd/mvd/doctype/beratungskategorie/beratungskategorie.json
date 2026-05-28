@@ -8,7 +8,9 @@
  "field_order": [
   "code",
   "kategorie",
-  "titel"
+  "titel",
+  "rsv",
+  "dokumente"
  ],
  "fields": [
   {
@@ -32,9 +34,21 @@
    "label": "Kategorie",
    "reqd": 1,
    "set_only_once": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "rsv",
+   "fieldtype": "Check",
+   "label": "Ist RSV Kategorie"
+  },
+  {
+   "fieldname": "dokumente",
+   "fieldtype": "Table",
+   "label": "Ben\u00f6tigte Dokumente",
+   "options": "RSV Thema Dokument Mapping"
   }
  ],
- "modified": "2023-02-20 10:52:49.350532",
+ "modified": "2026-05-28 12:32:48.403442",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratungskategorie",

@@ -1,0 +1,216 @@
+{
+ "autoname": "RSVM-.######",
+ "creation": "2026-05-26 10:48:39.520354",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "status",
+  "fallnummer",
+  "datum_pruefung",
+  "datum_vergabe",
+  "anwalt",
+  "mv_mitgliedschaft",
+  "zusatz_adresse",
+  "strasse",
+  "hausnummer",
+  "nr_zusatz",
+  "plz",
+  "ort",
+  "beschreibung",
+  "notiz",
+  "speicherpfad_dokumente",
+  "vermieterin",
+  "verwaltung",
+  "bezirk",
+  "schlichtungsbehoerde",
+  "entstehung",
+  "thema",
+  "rsvmandatsliste",
+  "dokumente",
+  "create_zip_file",
+  "section_workflow_helper",
+  "manuelle_rsvmandatliste_auswahl",
+  "force_new_rsvmandatliste",
+  "adr_egaid",
+  "bfs_nr"
+ ],
+ "fields": [
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Provisorisch\nVorpr\u00fcfung\nGepr\u00fcft\nmanuelle Vergabe\nEingereicht\nVergeben\nAbgelehnt\nAbgeschlossen\nR\u00fcckzug\nkeine Antwort\nDoppelversicherung"
+  },
+  {
+   "fieldname": "fallnummer",
+   "fieldtype": "Data",
+   "label": "Mandat-Fallnr. (Coop)"
+  },
+  {
+   "fieldname": "datum_pruefung",
+   "fieldtype": "Date",
+   "label": "Datum Pr\u00fcfung"
+  },
+  {
+   "fieldname": "datum_vergabe",
+   "fieldtype": "Date",
+   "label": "Datum Vergabe"
+  },
+  {
+   "fieldname": "anwalt",
+   "fieldtype": "Data",
+   "label": "Anwalt"
+  },
+  {
+   "fieldname": "zusatz_adresse",
+   "fieldtype": "Data",
+   "label": "Zusatzadresse"
+  },
+  {
+   "fieldname": "strasse",
+   "fieldtype": "Data",
+   "label": "Strasse"
+  },
+  {
+   "fieldname": "hausnummer",
+   "fieldtype": "Data",
+   "label": "Hausnummer"
+  },
+  {
+   "fieldname": "nr_zusatz",
+   "fieldtype": "Data",
+   "label": "Nr. Zusatz"
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "label": "PLZ"
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "label": "Ort"
+  },
+  {
+   "fieldname": "beschreibung",
+   "fieldtype": "Long Text",
+   "label": "Beschreibung"
+  },
+  {
+   "fieldname": "notiz",
+   "fieldtype": "Small Text",
+   "label": "Notiz"
+  },
+  {
+   "fieldname": "speicherpfad_dokumente",
+   "fieldtype": "Data",
+   "label": "Speicherpfad Dokumente"
+  },
+  {
+   "fieldname": "vermieterin",
+   "fieldtype": "Data",
+   "label": "Gegenseite (Vermieterin)"
+  },
+  {
+   "fieldname": "verwaltung",
+   "fieldtype": "Data",
+   "label": "Gegenseite (Verwaltung)"
+  },
+  {
+   "fieldname": "bezirk",
+   "fieldtype": "Data",
+   "label": "Bezirk"
+  },
+  {
+   "fieldname": "entstehung",
+   "fieldtype": "Small Text",
+   "label": "Entstehung"
+  },
+  {
+   "fieldname": "thema",
+   "fieldtype": "Table MultiSelect",
+   "label": "Thema",
+   "options": "RSV Thema MultiTable"
+  },
+  {
+   "fieldname": "bfs_nr",
+   "fieldtype": "Data",
+   "label": "BFS Nr.",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "section_workflow_helper",
+   "fieldtype": "Section Break",
+   "label": "Workflow Helper"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Mitglied",
+   "options": "Mitgliedschaft"
+  },
+  {
+   "fieldname": "adr_egaid",
+   "fieldtype": "Data",
+   "label": "ADR_EGAID",
+   "options": "Amtliches Gebaeudeverzeichnis"
+  },
+  {
+   "default": "0",
+   "fieldname": "force_new_rsvmandatliste",
+   "fieldtype": "Check",
+   "label": "force_new_rsvmandatliste"
+  },
+  {
+   "default": "0",
+   "fieldname": "manuelle_rsvmandatliste_auswahl",
+   "fieldtype": "Check",
+   "label": "Manuelle RSVMandatliste Auswahl erforderlich",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "rsvmandatsliste",
+   "fieldtype": "Link",
+   "label": "RSV-Mandatsliste",
+   "options": "RSVMandatsliste"
+  },
+  {
+   "fieldname": "schlichtungsbehoerde",
+   "fieldtype": "Data",
+   "label": "Schlichtungsbeh\u00f6rde"
+  },
+  {
+   "fieldname": "dokumente",
+   "fieldtype": "Table",
+   "label": "Dokumente",
+   "options": "RSV Mandat Dokumente"
+  },
+  {
+   "fieldname": "create_zip_file",
+   "fieldtype": "Button",
+   "label": "ZIP-File aus allen Dokumenten erzeugen"
+  }
+ ],
+ "modified": "2026-05-27 13:06:34.795557",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "RSVMandat",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -46,6 +46,7 @@
   "raised_by",
   "email_id",
   "mandat",
+  "rsv_mandat",
   "cb_1",
   "subject",
   "mv_mitgliedschaft",
@@ -510,9 +511,16 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "person_ist_eingetroffen"
+  },
+  {
+   "depends_on": "eval:doc.sektion_id == 'MVZH'",
+   "fieldname": "rsv_mandat",
+   "fieldtype": "Link",
+   "label": "RSV Mandat",
+   "options": "RSVMandat"
   }
  ],
- "modified": "2026-05-12 14:26:55.114922",
+ "modified": "2026-05-26 14:38:45.810160",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
