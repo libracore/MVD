@@ -1,0 +1,70 @@
+.rsv-dashboard {
+    padding: 24px;
+    background: #f7f9fc;
+    min-height: 100%;
+}
+
+.rsv-header {
+    margin-bottom: 24px;
+}
+
+.rsv-header h2 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.rsv-header p {
+    margin-top: 6px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.rsv-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+}
+
+.rsv-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 8px 24px rgba(31, 41, 55, 0.08);
+    border-left: 5px solid #4f46e5;
+    transition: all 0.2s ease;
+}
+
+.rsv-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(31, 41, 55, 0.12);
+}
+
+.rsv-card-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b7280;
+    margin-bottom: 10px;
+}
+
+.rsv-card-count {
+    font-size: 34px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.rsv-card-footer {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+.rsv-clickable-card {
+    cursor: pointer;
+}
+
+.rsv-clickable-card:hover .rsv-card-footer {
+    color: #4f46e5;
+}

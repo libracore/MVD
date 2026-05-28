@@ -247,6 +247,19 @@ frappe.ui.form.on('Beratung', {
                     });
                 }
 
+                // Add BTN RSV-Mandat
+                if (cur_frm.doc.sektion_id == 'MVZH') {
+                    frm.add_custom_button(__("RSV-Mandat"), function() {
+                        frappe.db.get_value('Beratung', cur_frm.doc.name, 'rsv_mandat').then(r => {
+                            if (r.message.rsv_mandat) {
+                            frappe.msgprint("Es existiert bereits ein RSV-Mandat für diesen Datensatz.");
+                            } else {
+                                create_rsv_mandat(frm);
+                            }
+                        });
+                    });
+                }
+
                 // Add BTN E-Mail Rückfrage
                 frm.add_custom_button(__("E-Mail Rückfrage"),  function() {
                     cur_frm.set_value("status", "Rückfragen");
@@ -818,4 +831,21 @@ function create_mandat(frm) {
     'Mandat erstellen',
     'Erstellen'
     )
+}
+
+function create_rsv_mandat(frm) {
+    frappe.db.get_value('Mitgliedschaft', cur_frm.doc.mv_mitgliedschaft, [
+        'objekt_strasse',
+        'objekt_hausnummer',
+        'objekt_nummer_zu',
+        'objekt_plz',
+        'objekt_ort'
+    ]).then(r => {
+        const opts = {
+            ...r.message,
+            mv_mitgliedschaft: cur_frm.doc.mv_mitgliedschaft,
+            beratung: cur_frm.doc.name
+        };
+        new mvd_dialoge.erstelle_rsv_mandat(opts);
+    });
 }
