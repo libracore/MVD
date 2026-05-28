@@ -44,7 +44,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Vormerkung\nGesuch eingereicht\nGutsprache\nAblehnung (Geschlossen)\nAbgeschlossen",
+   "options": "Vormerkung\nUnzugewiesen\nGesuch eingereicht\nGutsprache\nAblehnung (Geschlossen)\nAbgeschlossen",
    "reqd": 1
   },
   {
@@ -180,7 +180,7 @@
    "label": "Pers\u00f6nliche Bemerkung"
   }
  ],
- "modified": "2026-05-01 10:53:26.179214",
+ "modified": "2026-05-28 10:45:45.909730",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",

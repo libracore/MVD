@@ -26,6 +26,10 @@ class Mandat(Document):
             sektion = 'MVD'
         self.name = make_autoname("{0}-{1}-.#".format(sektion, jahr))
 
+    def before_save(self):
+            if not self.kontaktperson:
+                self.status = "Unzugewiesen"
+
     def on_update(self):
         # Bestätigungs-Email senden
         if (self.typ == "Rechtsschutzversicherung" and 
