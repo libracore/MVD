@@ -1,0 +1,59 @@
+{
+ "allow_rename": 1,
+ "autoname": "SID-.######",
+ "creation": "2026-05-26 12:01:56.136268",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bezeichnung",
+  "grundbuch",
+  "anz_wohnungen",
+  "zugehoerige_gebaeude"
+ ],
+ "fields": [
+  {
+   "fieldname": "bezeichnung",
+   "fieldtype": "Data",
+   "label": "Bezeichnung"
+  },
+  {
+   "fieldname": "grundbuch",
+   "fieldtype": "Data",
+   "label": "Grundbuch"
+  },
+  {
+   "fieldname": "anz_wohnungen",
+   "fieldtype": "Int",
+   "label": "Anzahl Wohnungen"
+  },
+  {
+   "fieldname": "zugehoerige_gebaeude",
+   "fieldtype": "Table",
+   "label": "Zugeh\u00f6rige Geb\u00e4ude",
+   "options": "Zugehoerige Gebaeude"
+  }
+ ],
+ "modified": "2026-05-26 12:05:21.249927",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Siedlung",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "bezeichnung"
+}

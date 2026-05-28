@@ -1,0 +1,30 @@
+{
+ "creation": "2026-05-27 11:25:57.591191",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "dokument"
+ ],
+ "fields": [
+  {
+   "fieldname": "dokument",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Dokument",
+   "options": "Schadenanzeige\nMietvertrag\nMietzinserh\u00f6hungsformular\nAnfechtung\nVertrags\u00e4nderungsformular\nKommunikation mit Verwaltung\nSB Klage\nK\u00fcndigunsformular\nM\u00e4ngelr\u00fcge\nSperrkonto Best\u00e4tigung\nHKNK Abrechnung\nAnfangsmietzinsformular\nSchlussaberechnung\nHerabsetzungsbegehren",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-05-27 11:25:57.591191",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "RSV Thema Dokument Mapping",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
