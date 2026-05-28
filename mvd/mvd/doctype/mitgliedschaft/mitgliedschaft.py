@@ -3069,11 +3069,15 @@ def get_arbitration_authority_with_validation(doc_id, doc_type="Mitgliedschaft")
                                """.format(doc.plz, strasse, full_number, ort), as_dict=True)
         if sql_result:
             bfs_nr = sql_result[0].get("com_fosnr")
+        if not sql_result:
+            return {"success": False, "message": 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/?plz_city={0}" target="_blank">mietrecht.ch</a> recherchieren.'.format(doc.plz or "")}
     else:
         doc = frappe.db.get_value("Mitgliedschaft", doc_id, [
             "name", "objekt_strasse", "objekt_hausnummer", "objekt_nummer_zu", 
             "objekt_plz", "objekt_ort", "adressvalidierung_bestanden"
         ], as_dict=True)
+        if not doc:
+            return {"success": False, "message": "Mitgliedschaft nicht gefunden."}
 
         full_number = "{0}{1}".format(doc.objekt_hausnummer or "", doc.objekt_nummer_zu or "")
         strasse = str(doc.objekt_strasse).replace("'", "''")
@@ -3097,7 +3101,7 @@ def get_arbitration_authority_with_validation(doc_id, doc_type="Mitgliedschaft")
                 }, update_modified=False)
         
         if not status:
-                return {"success": False, "message": 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/ubersicht" target="_blank">mietrecht.ch</a> mit PLZ recherchieren.'}
+                return {"success": False, "message": 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/?plz_city={0}" target="_blank">mietrecht.ch</a> recherchieren.'.format(doc.objekt_plz or "")}
 
     if not bfs_nr:
         return {"success": False, "message": 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/ubersicht" target="_blank">mietrecht.ch</a> mit PLZ recherchieren.'}
