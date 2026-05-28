@@ -16,22 +16,7 @@
   "bestaetigungs_email_gesendet",
   "cb_2",
   "bemerkung",
-  "persoenliche_bemerkung",
-  "section_ablauf",
-  "datum_1",
-  "datum_2",
-  "datum_3",
-  "cb_3",
-  "bezeichnung_1",
-  "bezeichnung_2",
-  "bezeichnung_3",
-  "cb_4",
-  "placeholder_1",
-  "email_1",
-  "placeholder_2",
-  "email_2",
-  "placeholder_3",
-  "email_3"
+  "persoenliche_bemerkung"
  ],
  "fields": [
   {
@@ -96,79 +81,6 @@
    "label": "Bemerkung"
   },
   {
-   "fieldname": "section_ablauf",
-   "fieldtype": "Section Break",
-   "label": "Ablauf"
-  },
-  {
-   "fieldname": "datum_1",
-   "fieldtype": "Date",
-   "label": "Datum"
-  },
-  {
-   "fieldname": "datum_2",
-   "fieldtype": "Date",
-   "label": "Datum"
-  },
-  {
-   "fieldname": "datum_3",
-   "fieldtype": "Date",
-   "label": "Datum"
-  },
-  {
-   "fieldname": "cb_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "bezeichnung_1",
-   "fieldtype": "Data",
-   "label": "Bezeichnung"
-  },
-  {
-   "fieldname": "bezeichnung_2",
-   "fieldtype": "Data",
-   "label": "Bezeichnung"
-  },
-  {
-   "fieldname": "bezeichnung_3",
-   "fieldtype": "Data",
-   "label": "Bezeichnung"
-  },
-  {
-   "fieldname": "cb_4",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "email_1",
-   "fieldtype": "Button",
-   "label": "E-Mail erstellen"
-  },
-  {
-   "fieldname": "email_2",
-   "fieldtype": "Button",
-   "label": "E-Mail erstellen"
-  },
-  {
-   "fieldname": "email_3",
-   "fieldtype": "Button",
-   "label": "E-Mail erstellen"
-  },
-  {
-   "fieldname": "placeholder_1",
-   "fieldtype": "HTML",
-   "options": "<br>"
-  },
-  {
-   "fieldname": "placeholder_2",
-   "fieldtype": "HTML",
-   "options": "<br>"
-  },
-  {
-   "fieldname": "placeholder_3",
-   "fieldtype": "HTML",
-   "options": "<br>"
-  },
-  {
    "default": "0",
    "fieldname": "bestaetigungs_email_gesendet",
    "fieldtype": "Check",
@@ -180,7 +92,7 @@
    "label": "Pers\u00f6nliche Bemerkung"
   }
  ],
- "modified": "2026-05-28 10:45:45.909730",
+ "modified": "2026-05-28 10:52:51.259979",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",
