@@ -3,18 +3,33 @@
 
 frappe.ui.form.on('Mandat', {
     refresh: function(frm) {
-        if (!frm.is_new()) {
+        if (!frm.is_new() && !frm.doc.kontaktperson) {
             frm.add_custom_button(__('Suche Vertrauensanwält*in'), function() {
+                
                 frappe.call({
                     method: 'mvd.mvd.doctype.mandat.mandat.suche_vertrauensanwaeltin',
                     args: {
                         "mandat_id": frm.doc.name,
-						"sektion_id": frm.doc.sektion_id
+                        "sektion_id": frm.doc.sektion_id
                     },
                     freeze: true,
                     callback: function(r) {
                         if (!r.exc && r.message) {
-                            frappe.msgprint(__("Benachrichtigung wurde erfolgreich an {0} Vertrauensanwält*in(nen) gesendet.").replace('{0}', r.message));
+                            var mail_data = r.message;
+                            var current_user_sender = frappe.session.user_fullname + " <" + frappe.session.user + ">";
+                            
+                            new frappe.mvd.MailComposer({
+                                doc: frm.doc,
+                                frm: frm,
+                                subject: mail_data.subject,      
+                                recipients: mail_data.recipients, 
+                                attach_document_print: false,
+                                txt: '',    
+                                email_template: mail_data.email_template,       
+                                last_email: '',                   
+                                is_a_reply: false,                
+                                sender: current_user_sender                        
+                            });
                         }
                     }
                 });

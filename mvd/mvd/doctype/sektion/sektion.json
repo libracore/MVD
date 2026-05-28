@@ -86,6 +86,7 @@
   "visierende_person",
   "template_bestaetigung_kontaktperson",
   "template_bestaetigung_mitglied",
+  "template_suche_vertrauensanwaeltin",
   "section_mzr",
   "mzr_email",
   "mzr_strasse",
@@ -1125,9 +1126,15 @@
    "fieldtype": "Link",
    "label": "Template Best\u00e4tigung Mitglied",
    "options": "Email Template"
+  },
+  {
+   "fieldname": "template_suche_vertrauensanwaeltin",
+   "fieldtype": "Link",
+   "label": "Template Suche Vertrauensanw\u00e4lt*in",
+   "options": "Email Template"
   }
  ],
- "modified": "2026-03-04 13:09:53.744090",
+ "modified": "2026-05-28 13:54:50.638438",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

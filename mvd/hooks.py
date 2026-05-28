@@ -72,7 +72,9 @@ jenv = {
         "get_gesamtbetrag_gemahnte_rechnungen:mvd.mvd.doctype.druckvorlage.druckvorlage.get_gesamtbetrag_gemahnte_rechnungen",
         "get_rechnungsdatum:mvd.mvd.doctype.druckvorlage.druckvorlage.get_rechnungsdatum",
         "get_jahresrechnung_jahr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_jahresrechnung_jahr",
-        "get_beratungs_daten:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungs_daten"
+        "get_beratungs_daten:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungs_daten",
+        "get_mandat_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mandat_link",
+        "get_beratung_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratung_link"
     ]
 }
 
