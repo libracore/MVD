@@ -160,19 +160,21 @@
         <div class="address-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <p><b>{% if allgemein.status != 'Faktura Kunde' %}Mitglied{% else %}Faktura Kunde{% endif %}</b></p>
-                {% if allgemein.status != 'Faktura Kunde' %}
-                <button class="btn btn-xs btn-default btn-schlichtung" 
-                        data-type="Mitgliedschaft" 
-                        data-name="{{ allgemein.mitglied_id }}">
-                    Schlichtungsbehörde anzeigen
-                </button>
-            {% else %}
-                <button class="btn btn-xs btn-default btn-schlichtung" 
-                        data-type="Kunden" 
-                        data-name="{{ allgemein.kunden_id }}">
-                    Schlichtungsbehörde anzeigen
-                </button>
-            {% endif %}
+                {% if objekt_adresse == False %}
+                    {% if allgemein.status != 'Faktura Kunde' %}
+                    <button class="btn btn-xs btn-default btn-schlichtung" 
+                            data-type="Mitgliedschaft" 
+                            data-name="{{ allgemein.mitglied_id }}">
+                        Schlichtungsbehörde anzeigen
+                    </button>
+                    {% else %}
+                    <button class="btn btn-xs btn-default btn-schlichtung" 
+                            data-type="Kunden" 
+                            data-name="{{ allgemein.kunden_id }}">
+                        Schlichtungsbehörde anzeigen
+                    </button>
+                    {% endif %}
+                {% endif %}
             </div>
             <!-- Unternehmen -->
             {% if kunde_mitglied.customer_type == 'Company' %}
@@ -250,7 +252,14 @@
 {% if objekt_adresse %}
     <div class="col-sm-{{ col_qty }}">
         <div class="address-box">
-            <p><b>Objekt</b></p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <p><b>Objekt</b></p>
+                <button class="btn btn-xs btn-default btn-schlichtung" 
+                        data-type="Mitgliedschaft" 
+                        data-name="{{ allgemein.mitglied_id }}">
+                    Schlichtungsbehörde anzeigen
+                </button>
+            </div>
             <!-- Adresse (zwingend Objekt) -->
             <p>
                 {% if objekt_adresse.address_line2 %}
