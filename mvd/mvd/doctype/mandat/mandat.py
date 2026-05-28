@@ -251,3 +251,68 @@ def get_beratung_zip_attachment(beratung_id):
         "fname": "Anlagen_Beratung_{0}.zip".format(beratung_id),
         "fcontent": zip_buffer.getvalue()
     }
+
+
+@frappe.whitelist()
+def suche_vertrauensanwaeltin(mandat_id, sektion_id):
+
+    anwaelte = frappe.db.get_all("Termin Kontaktperson", 
+        filters={"ist_vertrauensanwaeltin": 1, "sektion_id": sektion_id}, 
+        fields=["name"]
+    )
+    if not anwaelte:
+        frappe.throw("Es wurden keine Kontaktpersonen mit dem Status 'Vertrauensanwält*in' gefunden.")
+    
+    anwaelte_liste = [d.name for d in anwaelte]
+    raw_recipients = frappe.db.get_all("Termin Kontaktperson Multi User", 
+        filters={"parent": ["in", anwaelte_liste]}, 
+        fields=["user"]
+    )
+    recipients = list(set([d.user for d in raw_recipients if d.user]))
+    if not recipients:
+        frappe.throw("Es wurden keine Vertrauensanwält*innen mit hinterlegter E-Mail-Adresse gefunden.")
+
+    link_mandat = get_url_to_form("Mandat", mandat_id)
+    subject = "Neues unzugewiesenes Mandat verfügbar: {0}".format(mandat_id)
+    
+    content = """
+        <p>Guten Tag,</p>
+        <p>Es ist ein neues Mandat eingegangen, welches aktuell noch keine/n Vertrauensanwält*in zugewiesen hat.</p>
+        <p>Sie können das Mandat über folgenden Link direkt einsehen und übernehmen:</p>
+        <a href="{0}">Direkt zum Mandat: {1}</a><br>
+        <br>
+        <p>Freundliche Grüsse<br>Mieterverband</p>
+    """.format(link_mandat, mandat_id)
+    
+    comm = make(
+        recipients=recipients,
+        subject=subject,
+        content=content,
+        doctype='Mandat',
+        name=mandat_id,
+        send_email=False
+    )["name"]
+
+    sendmail(
+        recipients=recipients,
+        subject=subject,
+        content=content,
+        reference_doctype='Mandat',
+        reference_name=mandat_id,
+        unsubscribe_method=None,
+        unsubscribe_params=None,
+        unsubscribe_message=None,
+        communication=comm,
+        delayed=True,
+        message_id=frappe.get_value("Communication", comm, "message_id")
+    )
+    # sendmail(
+    #     recipients=recipients,
+    #     subject=subject,
+    #     content=content,
+    #     reference_doctype="Mandat",
+    #     reference_name=mandat_id,
+    #     delayed=False # Sofort senden
+    # )
+
+    return len(anwaelte)
