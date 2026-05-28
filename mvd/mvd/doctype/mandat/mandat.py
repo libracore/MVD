@@ -177,40 +177,40 @@ def send_confirmation_email(mandat):
             )
         
         # --- 2. EMAIL AN MITGLIED ---
-        template_mitglied = sektion_data.get("template_bestaetigung_mitglied")
-        if not mandat.mv_mitgliedschaft or not mitglied_email:
-            msg = "Mitglied-Bestätigung (Mandat {0}) fehlgeschlagen (E-Mail fehlt oder kein Mitglied hinterlegt).".format(mandat.name)
-            sendmail(recipients=sektion_data.get("pw_email"), sender="libracore@mvd.mieterverband.ch", 
-                     subject="Fehler: Bestätigung Mandat", content=msg, reference_doctype="Mandat", reference_name=mandat.name)
+        # template_mitglied = sektion_data.get("template_bestaetigung_mitglied")
+        # if not mandat.mv_mitgliedschaft or not mitglied_email:
+        #     msg = "Mitglied-Bestätigung (Mandat {0}) fehlgeschlagen (E-Mail fehlt oder kein Mitglied hinterlegt).".format(mandat.name)
+        #     sendmail(recipients=sektion_data.get("pw_email"), sender="libracore@mvd.mieterverband.ch", 
+        #              subject="Fehler: Bestätigung Mandat", content=msg, reference_doctype="Mandat", reference_name=mandat.name)
             
-        elif not template_mitglied:
-            frappe.log_error("In Sektion {0} unter Mandat: Kein Template für Mitglied hinterlegt.".format(mandat.sektion_id), "Mandat Email Error")
-            email_sent = False
-        else:
-            rendered_mitglied = get_email_template(template_mitglied, {"doc": mandat})
-            comm = make(
-                recipients=mitglied_email,
-                sender=absender_format,
-                subject=rendered_mitglied.get("subject"),
-                content=rendered_mitglied.get("message"),
-                doctype='Mandat',
-                name=mandat.name,
-                send_email=False
-            )["name"]
-            sendmail(
-                recipients=mitglied_email,
-                sender=absender_format,
-                subject=rendered_mitglied.get("subject"),
-                content=rendered_mitglied.get("message"),
-                reference_doctype=mandat.doctype,
-                reference_name=mandat.name,
-                unsubscribe_method=None,
-                unsubscribe_params=None,
-                unsubscribe_message=None,
-                communication=comm,
-                delayed=True,
-                message_id=frappe.get_value("Communication", comm, "message_id")
-            )
+        # elif not template_mitglied:
+        #     frappe.log_error("In Sektion {0} unter Mandat: Kein Template für Mitglied hinterlegt.".format(mandat.sektion_id), "Mandat Email Error")
+        #     email_sent = False
+        # else:
+        #     rendered_mitglied = get_email_template(template_mitglied, {"doc": mandat})
+        #     comm = make(
+        #         recipients=mitglied_email,
+        #         sender=absender_format,
+        #         subject=rendered_mitglied.get("subject"),
+        #         content=rendered_mitglied.get("message"),
+        #         doctype='Mandat',
+        #         name=mandat.name,
+        #         send_email=False
+        #     )["name"]
+        #     sendmail(
+        #         recipients=mitglied_email,
+        #         sender=absender_format,
+        #         subject=rendered_mitglied.get("subject"),
+        #         content=rendered_mitglied.get("message"),
+        #         reference_doctype=mandat.doctype,
+        #         reference_name=mandat.name,
+        #         unsubscribe_method=None,
+        #         unsubscribe_params=None,
+        #         unsubscribe_message=None,
+        #         communication=comm,
+        #         delayed=True,
+        #         message_id=frappe.get_value("Communication", comm, "message_id")
+        #     )
         
         return email_sent
     
