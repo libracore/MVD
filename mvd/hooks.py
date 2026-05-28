@@ -155,7 +155,10 @@ doc_events = {
         "on_update": "mvd.mvd.doctype.retouren.retouren.check_dates"
     },
     "Communication": {
-        "after_insert": "mvd.mvd.doctype.beratung.beratung.check_communication"
+        "after_insert": [
+            "mvd.mvd.doctype.beratung.beratung.check_communication", 
+            "mvd.mvd.doctype.mandat.mandat.update_mandat_status_nach_email"
+            ]
     },
     "File": {
         "after_insert": "mvd.mvd.doctype.beratung.beratung.sync_mail_attachements",
