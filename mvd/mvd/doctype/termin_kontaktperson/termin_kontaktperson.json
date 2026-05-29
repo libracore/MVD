@@ -9,6 +9,7 @@
   "kontakt",
   "user",
   "sektion_id",
+  "ist_vertrauensanwaeltin",
   "disabled",
   "cb_1",
   "dispositions_hinweis",
@@ -67,9 +68,15 @@
    "fieldname": "md_hash",
    "fieldtype": "Data",
    "label": "MD-Hash"
+  },
+  {
+   "default": "0",
+   "fieldname": "ist_vertrauensanwaeltin",
+   "fieldtype": "Check",
+   "label": "Ist Vertrauensanw\u00e4lt*in"
   }
  ],
- "modified": "2024-05-29 10:02:43.827878",
+ "modified": "2026-05-28 11:23:01.858466",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin Kontaktperson",

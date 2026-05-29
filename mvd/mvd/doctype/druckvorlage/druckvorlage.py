@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import get_url_to_form, get_url
 from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention
 try:
     from jinja2 import pass_context as context_decorator
@@ -751,6 +752,31 @@ def get_beratungs_daten(ctx):
         "termine": termine_liste,
         "art": beratung_art
     }
+
+### Kontexte für die Mandate ###
+@context_decorator
+def get_mandat_link(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "Mandat":
+        link_mandat = get_url_to_form("Mandat", doc.name)
+        link = """
+        <a href="{0}">Link zum Mandat: {1}</a>
+        """.format(link_mandat, doc.name)
+        return link
+    
+    return '---'
+
+@context_decorator
+def get_beratung_link(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "Mandat":
+        link_beratung = get_url_to_form("Beratung", doc.beratung)
+        link = """
+        <a href="{0}">Link zur Beratung: {1}</a>
+        """.format(link_beratung, doc.beratung)
+        return link
+    
+    return '---'
 
 @context_decorator
 def get_rechnungsbetrag(ctx):

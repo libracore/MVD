@@ -9,6 +9,8 @@ import frappe
 from frappe.model.document import Document
 from frappe.core.doctype.communication.email import make
 from frappe import sendmail
+from frappe.utils import datetime
+from frappe.model.naming import make_autoname
 from frappe.email.doctype.email_template.email_template import get_email_template
 from frappe.utils.pdf import get_pdf
 from frappe import attach_print
@@ -16,6 +18,23 @@ from frappe.utils import get_url_to_form, get_url
 from frappe.utils.file_manager import get_file_path
 
 class Mandat(Document):
+    def autoname(self):
+        jahr = datetime.date.today().year
+        if self.mv_mitgliedschaft:
+            sektion = frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "sektion_id")
+        else:
+            sektion = 'MVD'
+        self.name = make_autoname("{0}-{1}-.#".format(sektion, jahr))
+
+    def before_save(self):
+            if not self.kontaktperson:
+                self.status = "Unzugewiesen"
+            
+            elif not self.is_new():
+                old_doc = self.get_doc_before_save()
+                if old_doc and not old_doc.kontaktperson and self.kontaktperson:
+                    self.status = "Vormerkung"
+
     def on_update(self):
         # Bestätigungs-Email senden
         if (self.typ == "Rechtsschutzversicherung" and 
@@ -52,8 +71,7 @@ def send_confirmation_email(mandat):
         recipients = [d.user for d in raw_recipients if d.user]
         
         sektion_data = frappe.db.get_value("Sektion", mandat.sektion_id, 
-            ["visierende_person", 
-             "template_bestaetigung_kontaktperson", 
+            ["template_bestaetigung_kontaktperson", 
              "template_bestaetigung_mitglied",
              "legacy_mail_absender_mail", 
              "legacy_mail_absende_name",
@@ -138,7 +156,6 @@ def send_confirmation_email(mandat):
             """.format(link_beratung, mandat.beratung,link_mandat, mandat.name, link_mitglied, mitglied_label, zip_link_html)
             
             full_message = rendered_berater.get("message") + footer_links
-            cc_email = sektion_data.get("visierende_person")
 
             comm = make(
                 recipients=recipients,
@@ -154,7 +171,6 @@ def send_confirmation_email(mandat):
                 sender=absender_format,
                 subject=rendered_berater.get("subject"),
                 content=full_message,
-                cc=cc_email,
                 attachments=attachments,
                 reference_doctype=mandat.doctype,
                 reference_name=mandat.name,
@@ -167,40 +183,40 @@ def send_confirmation_email(mandat):
             )
         
         # --- 2. EMAIL AN MITGLIED ---
-        template_mitglied = sektion_data.get("template_bestaetigung_mitglied")
-        if not mandat.mv_mitgliedschaft or not mitglied_email:
-            msg = "Mitglied-Bestätigung (Mandat {0}) fehlgeschlagen (E-Mail fehlt oder kein Mitglied hinterlegt).".format(mandat.name)
-            sendmail(recipients=sektion_data.get("pw_email"), sender="libracore@mvd.mieterverband.ch", 
-                     subject="Fehler: Bestätigung Mandat", content=msg, reference_doctype="Mandat", reference_name=mandat.name)
+        # template_mitglied = sektion_data.get("template_bestaetigung_mitglied")
+        # if not mandat.mv_mitgliedschaft or not mitglied_email:
+        #     msg = "Mitglied-Bestätigung (Mandat {0}) fehlgeschlagen (E-Mail fehlt oder kein Mitglied hinterlegt).".format(mandat.name)
+        #     sendmail(recipients=sektion_data.get("pw_email"), sender="libracore@mvd.mieterverband.ch", 
+        #              subject="Fehler: Bestätigung Mandat", content=msg, reference_doctype="Mandat", reference_name=mandat.name)
             
-        elif not template_mitglied:
-            frappe.log_error("In Sektion {0} unter Mandat: Kein Template für Mitglied hinterlegt.".format(mandat.sektion_id), "Mandat Email Error")
-            email_sent = False
-        else:
-            rendered_mitglied = get_email_template(template_mitglied, {"doc": mandat})
-            comm = make(
-                recipients=mitglied_email,
-                sender=absender_format,
-                subject=rendered_mitglied.get("subject"),
-                content=rendered_mitglied.get("message"),
-                doctype='Mandat',
-                name=mandat.name,
-                send_email=False
-            )["name"]
-            sendmail(
-                recipients=mitglied_email,
-                sender=absender_format,
-                subject=rendered_mitglied.get("subject"),
-                content=rendered_mitglied.get("message"),
-                reference_doctype=mandat.doctype,
-                reference_name=mandat.name,
-                unsubscribe_method=None,
-                unsubscribe_params=None,
-                unsubscribe_message=None,
-                communication=comm,
-                delayed=True,
-                message_id=frappe.get_value("Communication", comm, "message_id")
-            )
+        # elif not template_mitglied:
+        #     frappe.log_error("In Sektion {0} unter Mandat: Kein Template für Mitglied hinterlegt.".format(mandat.sektion_id), "Mandat Email Error")
+        #     email_sent = False
+        # else:
+        #     rendered_mitglied = get_email_template(template_mitglied, {"doc": mandat})
+        #     comm = make(
+        #         recipients=mitglied_email,
+        #         sender=absender_format,
+        #         subject=rendered_mitglied.get("subject"),
+        #         content=rendered_mitglied.get("message"),
+        #         doctype='Mandat',
+        #         name=mandat.name,
+        #         send_email=False
+        #     )["name"]
+        #     sendmail(
+        #         recipients=mitglied_email,
+        #         sender=absender_format,
+        #         subject=rendered_mitglied.get("subject"),
+        #         content=rendered_mitglied.get("message"),
+        #         reference_doctype=mandat.doctype,
+        #         reference_name=mandat.name,
+        #         unsubscribe_method=None,
+        #         unsubscribe_params=None,
+        #         unsubscribe_message=None,
+        #         communication=comm,
+        #         delayed=True,
+        #         message_id=frappe.get_value("Communication", comm, "message_id")
+        #     )
         
         return email_sent
     
@@ -237,3 +253,99 @@ def get_beratung_zip_attachment(beratung_id):
         "fname": "Anlagen_Beratung_{0}.zip".format(beratung_id),
         "fcontent": zip_buffer.getvalue()
     }
+
+
+@frappe.whitelist()
+def suche_vertrauensanwaeltin(mandat_id, sektion_id):
+    anwaelte = frappe.db.get_all("Termin Kontaktperson", 
+        filters={"ist_vertrauensanwaeltin": 1, "sektion_id": sektion_id}, 
+        fields=["name"]
+    )
+    if not anwaelte:
+        frappe.throw("Es wurden keine Kontaktpersonen mit dem Status 'Vertrauensanwält*in' gefunden.")
+    
+    anwaelte_liste = [d.name for d in anwaelte]
+    raw_recipients = frappe.db.get_all("Termin Kontaktperson Multi User", 
+        filters={"parent": ["in", anwaelte_liste]}, 
+        fields=["user"]
+    )
+    
+    recipients_list = list(set([d.user for d in raw_recipients if d.user]))
+    if not recipients_list:
+        frappe.throw("Es wurden keine Vertrauensanwält*innen mit hinterlegter E-Mail-Adresse gefunden.")
+        
+    recipients_string = ", ".join(recipients_list)
+    subject = "Neues unzugewiesenes Mandat verfügbar: {0}".format(mandat_id)
+
+    email_template = frappe.db.get_value("Sektion", sektion_id, "template_suche_vertrauensanwaeltin")
+
+    return {
+        "recipients": recipients_string,
+        "subject": subject,
+        "email_template": email_template or ''
+    }
+
+
+def update_mandat_status_nach_email(doc, method):
+    if doc.reference_doctype == "Mandat" and doc.reference_name:
+        
+        if doc.sent_or_received == "Received" and doc.communication_type == "Communication":
+            anzahl_bisheriger_emails = frappe.db.count("Communication", filters={
+                "reference_doctype": "Mandat",
+                "reference_name": doc.reference_name,
+                "sent_or_received": "Received",
+                "communication_type": "Communication",
+                "name": ("!=", doc.name)
+            })
+            if anzahl_bisheriger_emails == 0:
+                frappe.db.set_value("Mandat", doc.reference_name, "status", "Gesuch eingereicht")
+                frappe.get_doc({
+                    "doctype": "Comment",
+                    "comment_type": "Info",
+                    "reference_doctype": "Mandat",
+                    "reference_name": doc.reference_name,
+                    "content": "Status automatisch auf 'Gesuch eingereicht' geändert (Erste E-Mail eingegangen)."
+                }).insert(ignore_permissions=True)
+
+                sektion_id = frappe.db.get_value("Mandat", doc.reference_name, "sektion_id")
+                visierende_person = frappe.db.get_value("Sektion", sektion_id, "visierende_person")
+                if visierende_person:
+                    recipients = [visierende_person]
+                    link_mandat = get_url_to_form("Mandat", doc.reference_name)
+                    subject = "Neue Nachricht in Mandat : {0}".format(doc.reference_name)
+                    content = """
+                        <p>Guten Tag,</p>
+                        <p>Es ist ein neue Nachricht im Mandat eingegangen.</p>
+                        <a href="{0}">Link zum Mandat: {1}</a><br>
+                        <br>
+                        <p>Liebe Grüsse<br>Libracore</p>
+                    """.format(link_mandat, doc.reference_name)
+                    
+                    comm = make(
+                        recipients=recipients,
+                        subject=subject,
+                        content=content,
+                        doctype='Mandat',
+                        name=doc.reference_name,
+                        send_email=False
+                    )["name"]
+
+                    sendmail(
+                        recipients=recipients,
+                        subject=subject,
+                        content=content,
+                        reference_doctype='Mandat',
+                        reference_name=doc.reference_name,
+                        unsubscribe_method=None,
+                        unsubscribe_params=None,
+                        unsubscribe_message=None,
+                        communication=comm,
+                        delayed=True,
+                        message_id=frappe.get_value("Communication", comm, "message_id")
+                    )
+                else:
+                    frappe.log_error(
+                        "Keine visierende Person für Sektion {0} gefunden. Benachrichtigung für Mandat {1} nicht gesendet."
+                        .format(sektion_id, doc.reference_name), 
+                        "Mandat Email Error"
+                    )
