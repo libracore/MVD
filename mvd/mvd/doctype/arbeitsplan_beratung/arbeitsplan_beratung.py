@@ -18,6 +18,7 @@ class ArbeitsplanBeratung(Document):
     def validate(self):
         self.validate_date()
         self.validate_overlapping()
+        self.validate_sections()
     
     def validate_date(self):
         if self.to_date < self.from_date:
@@ -45,6 +46,39 @@ class ArbeitsplanBeratung(Document):
                 overlaps += overlap[0] + "<br>"
             frappe.throw("Der Datumsbereich dieses Arbeitsplan überschneited sich mit:<br>{0}".format(overlaps))
 
+    def validate_sections(self):
+        if not self.einteilung:
+            return
+
+        fehlerhafte_einträge = []
+
+        for row in self.einteilung:
+            bp_sektion = frappe.db.get_value("Termin Kontaktperson", row.beratungsperson, "sektion_id")
+            ort_sektion = frappe.db.get_value("Beratungsort", row.art_ort, "sektion_id")
+            
+            bp_falsch = (bp_sektion != self.sektion_id) if bp_sektion else False
+            ort_falsch = (ort_sektion != self.sektion_id) if ort_sektion else False
+
+            if bp_falsch or ort_falsch:
+                fehlerhafte_einträge.append({
+                    "row_idx": row.idx or "",
+                    "date": frappe.utils.getdate(row.date).strftime('%d.%m.%Y'),
+                    "bp": row.beratungsperson,
+                    "bp_sektion": bp_sektion or "Keine",
+                    "ort": row.art_ort,
+                    "ort_sektion": ort_sektion or "Keine"
+                })
+
+        if fehlerhafte_einträge:
+            msg = _("<b>Hinweis: Einige Zuweisungen stimmen nicht mit der Sektion des Arbeitsplans ({0}) überein:</b><br><br>").format(self.sektion_id)
+            
+            for f in fehlerhafte_einträge:
+                msg += _("• Zeile {0} ({1}): Berater*in: {2} (Sektion: {3}) | Ort: {4} (Sektion: {5})<br>").format(
+                    f["row_idx"], f["date"], f["bp"], f["bp_sektion"], f["ort"], f["ort_sektion"]
+                )
+            
+            frappe.msgprint(msg, title=_("Abweichende Sektionen"), indicator="orange", alert=False)
+  
     def get_personen(self, einzel, person):
         def get_beratungspersonen(weekday, sektion):
             person_query = ''
