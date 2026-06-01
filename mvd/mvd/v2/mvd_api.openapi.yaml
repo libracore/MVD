@@ -712,6 +712,10 @@ components:
   schemas:
     KampagneBody:
       type: object
+      required:
+        - zip_code
+        - email
+        - newsletter_names
       properties:
         id:
           type: string
