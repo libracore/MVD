@@ -9,7 +9,6 @@
   "cb_0",
   "newsletter_names",
   "sb_0",
-  "campaign_trigger_code",
   "subscribed_over_pledge",
   "zip_code",
   "last_name",
@@ -38,7 +37,9 @@
   "initiative25_sticker",
   "initiative25_infos",
   "initiative25_summe_von_anzahl_unterschriften",
-  "initiative25_anzahl_von_codes"
+  "initiative25_anzahl_von_codes",
+  "veraltete_daten_section",
+  "campaign_trigger_code"
  ],
  "fields": [
   {
@@ -224,9 +225,15 @@
    "fieldname": "initiative25_section",
    "fieldtype": "Section Break",
    "label": "Initiative25"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "veraltete_daten_section",
+   "fieldtype": "Section Break",
+   "label": "Veraltete Daten"
   }
  ],
- "modified": "2025-10-30 13:53:19.204917",
+ "modified": "2026-06-01 09:44:23.771821",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",
