@@ -842,7 +842,7 @@ frappe.mvd_such_client = {
                             {'fieldname': 'postfach', 'fieldtype': 'Check', 'label': 'Postfach', 'reqd': 0, 'default': cur_page.page.search_fields.postfach.get_value()},
                             {'fieldname': 'postfach_nummer', 'fieldtype': 'Data', 'label': 'Postfach Nummer', 'reqd': 0, 'default': cur_page.page.search_fields.postfach_nummer.get_value(), 'depends_on': 'eval:doc.postfach'},
                             {'fieldname': 'strasse', 'fieldtype': 'Data', 'label': 'Strasse', 'reqd': 1, 'default': cur_page.page.search_fields.strasse.get_value()},
-                            {'fieldname': 'nummer', 'fieldtype': 'Data', 'label': 'Nummer', 'reqd': 0, 'default': cur_page.page.search_fields.nummer.get_value()},
+                            {'fieldname': 'nummer', 'fieldtype': 'Data', 'label': 'Nummer', 'reqd': 1, 'default': cur_page.page.search_fields.nummer.get_value()},
                             {'fieldname': 'nummer_zu', 'fieldtype': 'Data', 'label': 'Nr. Zusatz', 'reqd': 0, 'default': cur_page.page.search_fields.nummer_zu.get_value()},
                             {'fieldname': 'plz', 'fieldtype': 'Data', 'label': 'PLZ', 'reqd': 1, 'default': cur_page.page.search_fields.plz.get_value(), 'change': function() {
                                     pincode_lookup(cur_dialog.fields_dict.plz.get_value(), cur_dialog.fields_dict.ort);
