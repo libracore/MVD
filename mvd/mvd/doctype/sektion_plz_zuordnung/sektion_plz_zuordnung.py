@@ -110,6 +110,12 @@ def prepare_data():
 		return kanton_to_sektion.get(kanton, 'Unknown')
 
 	df['Sektion'] = df.apply(assign_section, axis=1)
+
+	# Technische PLZ
+	technische_plz = [['9903','','MVAG'], ['9904','', 'MVBE'], ['9907','', 'MVBL'], ['9908','', 'MVBS'], ['9909','', 'MVGR'], ['9910','', 'MVDF'], ['9913','', 'MVOS'], ['9914','', 'MVLU'], ['9915','', 'MVOS'], ['9916','', 'MVSH'], ['9917','', 'MVSO'], ['9918','', 'MVSZ'], ['9920','', 'MVZG'], ['9921','', 'MVZH']]
+	technische_plz_df = pd.DataFrame(technische_plz, columns=["PLZ", "Kantonskürzel", "Sektion"])
+	df = pd.concat([df, technische_plz_df], ignore_index=True)
+
 	df_unduplicated = df.copy() # brauchen wir um die gelöschten Einträge zu loggen
 	# Keep the duplicated PLZ based on the most occuring Sektion per PLZ
 	duplicated_plz_list = df[df.duplicated(subset=['PLZ'], keep=False)]['PLZ'].astype(str).unique().tolist()
