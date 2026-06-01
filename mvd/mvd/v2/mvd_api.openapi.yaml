@@ -352,9 +352,10 @@ paths:
     post:
       summary: Create or Update Kampagne
       description: |
-        Dieser Endpunkt ist für Formulare in Kampagnenseiten, insb. für Emarsys Newsletter-Anmeldungen und Trigger.
+        Dieser Endpunkt ist für Formulare in Kampagnenseiten, insb. für Brevo Newsletter-Anmeldungen.
 
-        Bei der Neuanlage wird über die Service-Plattform ein Emarsys Update gemacht!
+        Bei der Neuanlage wird über die Service-Plattform ein Brevo Update gemacht! \
+        Ein Update löst kein Update in Brevo über die Service-Plattfrom aus.
 
         - If `id` is provided and matches an existing document, that document is updated.
         - If `id` is not provided or doesn't exist, a new document is created.
@@ -711,6 +712,10 @@ components:
   schemas:
     KampagneBody:
       type: object
+      required:
+        - zip_code
+        - email
+        - newsletter_names
       properties:
         id:
           type: string
