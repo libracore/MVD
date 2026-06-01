@@ -277,7 +277,7 @@ def kampagne(**kwargs):
         kwargs["newsletter_names"] = json.dumps(kwargs["newsletter_names"])
 
     # Validation for required fields
-    required_fields = ["email", "campaign_trigger_code", "newsletter_names"]
+    required_fields = ["email", "newsletter_names", "zip_code"]
     missing_fields = [f for f in required_fields if not kwargs.get(f)]
     if missing_fields:
         frappe.local.response.http_status_code = 400
