@@ -59,12 +59,12 @@ class Kampagne(Document):
             self.save(ignore_permissions=True)
 
         if cint(frappe.db.get_value("MVD Settings", "MVD Settings", "suspend_kampagne_to_sp")) != 1 \
-           and self.email and self.campaign_trigger_code and self.newsletter_names:
+           and self.email and self.newsletter_names:
                     # Send to emarsis
             sp_data = {
                 "Email": self.email or None,
                 "NewsletterNames": self.newsletter_names.split(","),
-                "CampaignTriggerCode": str(self.campaign_trigger_code),
+                "CampaignTriggerCode": str(self.campaign_trigger_code or ""),
                 "SubscribedOverPledge": False if cint(self.subscribed_over_pledge) != 1 else True,
                 "Zip_code": self.zip_code or 0,
                 "Last_name": self.last_name or None,
