@@ -129,6 +129,7 @@ def _serialize_child_row(row, parent_doc=None):
     data["_link_fields"] = link_fields
     return data
 
+
 @frappe.whitelist()
 def search_nodes(query, sektion_id=None, purpose=None, limit=30):
     query = (query or "").strip()
