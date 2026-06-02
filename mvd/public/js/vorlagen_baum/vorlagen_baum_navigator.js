@@ -6,6 +6,7 @@ frappe.provide("mvd_vorlagen_baum.ui");
 // email -> Zeigt nur E-Mail-Templates an
 // druck -> Zeigt nur Druckvorlagen an
 // dokument -> Zeigt nur Dokumentenvorlagen an
+// Text -> Zeigt nur Textvorlagen an und kopiert den Inhalt in die Zwischenablage
 
 mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
     constructor(opts) {
@@ -196,7 +197,8 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
                         <div style="margin-top:6px;">
                             ${row.use_for_email ? '<span class="label label-default" style="margin-right:4px;">E-Mail</span>' : ''}
                             ${row.use_for_druckvorlagen ? '<span class="label label-default" style="margin-right:4px;">Druck</span>' : ''}
-                            ${row.use_for_dokumentenvorlagen ? '<span class="label label-default">Dokument</span>' : ''}
+                            ${row.use_for_dokumentenvorlagen ? '<span class="label label-default" style="margin-right:4px;">Dokument</span>' : ''}
+                            ${row.use_for_textvorlagen ? '<span class="label label-default">Text</span>' : ''}
                         </div>
                     </div>
 
@@ -260,7 +262,8 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
                         <div style="margin-top:6px;">
                             ${row.use_for_email ? '<span class="label label-default" style="margin-right:4px;">E-Mail</span>' : ''}
                             ${row.use_for_druckvorlagen ? '<span class="label label-default" style="margin-right:4px;">Druck</span>' : ''}
-                            ${row.use_for_dokumentenvorlagen ? '<span class="label label-default">Dokument</span>' : ''}
+                            ${row.use_for_dokumentenvorlagen ? '<span class="label label-default" style="margin-right:4px;">Dokument</span>' : ''}
+                            ${row.use_for_textvorlagen ? '<span class="label label-default">Text</span>' : ''}
                         </div>
                         ${row.match_label && row.match_value ? `
                             <div class="text-muted" style="margin-top:6px; font-size:12px;">
@@ -290,10 +293,12 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
     }
 
     load_details(node_name, auto_open_children) {
+        console.log(cur_frm);
         frappe.call({
             method: "mvd.mvd.utils.vorlagen_baum.vorlagen_baum.get_node_details",
             args: {
-                node_name: node_name
+                node_name: node_name,
+                parent_doc: cur_frm ? cur_frm.doc:null
             },
             callback: (r) => {
                 const details = r.message;
@@ -332,6 +337,13 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
         return !!details.use_for_dokumentenvorlagen;
     }
 
+    show_text_section(details) {
+        if (this.purpose && this.purpose !== "Text") {
+            return false;
+        }
+        return !!details.use_for_textvorlagen;
+    }
+
     render_details(details) {
         let html = `
             <div style="border:1px solid #d1d8dd; border-radius:6px; padding:14px; background:#fff;">
@@ -360,6 +372,7 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
                     ${this.show_email_section(details) ? '<span class="label label-default" style="margin-left:6px;">E-Mail</span>' : ''}
                     ${this.show_druck_section(details) ? '<span class="label label-default" style="margin-left:6px;">Druckvorlagen</span>' : ''}
                     ${this.show_dokument_section(details) ? '<span class="label label-default" style="margin-left:6px;">Dokumentenvorlagen</span>' : ''}
+                    ${this.show_text_section(details) ? '<span class="label label-default" style="margin-left:6px;">Textvorlagen</span>' : ''}
                 </div>
 
                 <div class="vb-extra-sections"></div>
@@ -380,6 +393,10 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
 
         if (this.show_dokument_section(details)) {
             $extra.append(this.render_dokument_section(details.dokumentenvorlagen || []));
+        }
+
+        if (this.show_text_section(details)) {
+            $extra.append(this.render_text_section(details.textvorlagen || []));
         }
 
         this.$details.find(".vb-doc-link").on("click", function(e) {
@@ -409,6 +426,13 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
                 selected_row = (details.druckvorlagen || [])[row_index] || null;
             } else if (selection_type === "dokumentenvorlage") {
                 selected_row = (details.dokumentenvorlagen || [])[row_index] || null;
+            } else if (selection_type === "textvorlage") {
+                selected_row = (details.textvorlagen || [])[row_index] || null;
+                this.copy_to_clipboard(selection_name);
+                frappe.show_alert({
+                    message: __("Textvorlage wurde in die Zwischenablage kopiert."),
+                    indicator: "green"
+                });
             }
 
             this.trigger_item_select({
@@ -420,6 +444,21 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
                 sektion_id: details.sektion_id
             }, details, selected_row);
         });
+    }
+
+    copy_to_clipboard(text) {
+        text = text || "";
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text);
+            return;
+        }
+
+        const $temp = $("<textarea>");
+        $("body").append($temp);
+        $temp.val(text).select();
+        document.execCommand("copy");
+        $temp.remove();
     }
 
     render_email_section(rows) {
@@ -520,6 +559,42 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
                         </div>
                         <div style="white-space:nowrap;">
                             <button class="btn btn-xs btn-primary vb-item-select-btn">Auswählen</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+        return html;
+    }
+
+    render_text_section(rows) {
+        let html = `
+            <div style="margin-top:18px;">
+                <h5 style="margin-bottom:8px;">Textvorlagen</h5>
+        `;
+
+        if (!rows.length) {
+            html += `<div class="text-muted">Keine Textvorlagen vorhanden.</div></div>`;
+            return html;
+        }
+
+        rows.forEach((row, idx) => {
+            const value = row.textvorlage || "";
+            html += `
+                <div class="vb-selectable-item"
+                     data-selection-type="textvorlage"
+                     data-selection-doctype="Textvorlage"
+                     data-selection-name="${frappe.utils.escape_html(value)}"
+                     data-row-index="${idx}"
+                     style="padding:10px; border:1px solid #e1e4e8; border-radius:6px; margin-bottom:8px; background:#fafbfc;">
+                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
+                        <div style="font-weight:500;">
+                            ${frappe.utils.escape_html(value)}
+                        </div>
+                        <div style="white-space:nowrap;">
+                            <button class="btn btn-xs btn-primary vb-item-select-btn">Kopieren</button>
                         </div>
                     </div>
                 </div>
