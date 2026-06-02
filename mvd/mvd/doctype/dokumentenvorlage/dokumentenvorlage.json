@@ -8,7 +8,8 @@
  "field_order": [
   "file_name",
   "file_base",
-  "file_path"
+  "file_path",
+  "mapping_tbl"
  ],
  "fields": [
   {
@@ -33,9 +34,15 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "File-Pfad"
+  },
+  {
+   "fieldname": "mapping_tbl",
+   "fieldtype": "Table",
+   "label": "Dokumentenvorlage Mapping",
+   "options": "Dokumentenvorlage Mapping TBL"
   }
  ],
- "modified": "2026-03-30 12:10:57.917036",
+ "modified": "2026-06-02 18:21:36.780432",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Dokumentenvorlage",

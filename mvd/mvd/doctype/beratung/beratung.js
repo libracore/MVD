@@ -434,6 +434,23 @@ frappe.ui.form.on('Beratung', {
         frm.add_custom_button(__("Erstelle ToDo"),  function() {
             erstelle_todo(frm);
         });
+
+        frm.add_custom_button(__("Erstelle Schadenanzeige"), function() {
+            frappe.call({
+                method: "mvd.mvd.utils.document_template_handler.use_template",
+                args:{
+                        template: "Schadenanzeige",
+                        source_doc: cur_frm.doc.name,
+                        source_dt: "Beratung"
+                },
+                freeze: true,
+                freeze_message: 'Verarbeite Vorlage...',
+                callback: function(r)
+                {
+                    cur_frm.reload_doc();
+                }
+            });
+        });
     },
     mv_mitgliedschaft: function(frm) {
         if ((!frm.doc.__islocal)&&(cur_frm.doc.mv_mitgliedschaft)) {
