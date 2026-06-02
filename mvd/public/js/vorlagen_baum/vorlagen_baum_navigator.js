@@ -11,7 +11,7 @@ frappe.provide("mvd_vorlagen_baum.ui");
 mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
     constructor(opts) {
         this.wrapper = opts.wrapper;
-        this.sektion_id = opts.sektion_id || null;
+        this.sektion_id = opts.sektion_id || this.get_default_sektion() || null;
         this.purpose = opts.purpose || null;
         this.on_select = opts.on_select || function() {};
         this.parent_dialog = opts.parent_dialog || null;
@@ -621,5 +621,15 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
                 </a>
             </div>
         `;
+    }
+
+    get_default_sektion() {
+        frappe.call({
+            method: "mvd.mvd.utils.mvd_bootinfo.get_default_sektion",
+            callback: (r) => {
+                if (r.message) return r.message
+                return null
+            }
+        });
     }
 };
