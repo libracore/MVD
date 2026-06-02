@@ -12,15 +12,19 @@ from frappe.utils.file_manager import save_file
 import json
 
 @frappe.whitelist()
-def use_template(template=None, replacements=None, test=False):
+def use_template(template=None, replacements=None, source_doc=None, source_dt=None, test=False):
     if not template:
         frappe.throw("Es wird eine Dokumentenvorlage benötigt.")
     else:
         if not frappe.db.exists("Dokumentenvorlage", template):
             frappe.throw("Die Dokumentenvorlage '{0}' existiert nicht!".format(template))
     
+    temp = frappe.get_doc("Dokumentenvorlage", template)
+    if source_dt:
+        source_doc = frappe.get_doc(source_dt, source_doc)
+
     if replacements is None:
-        replacements = {}
+        replacements = temp.get_placeholder_values(source_doc) if source_doc else {}
 
     # Falls von Client (String) --> parsen
     if isinstance(replacements, str):
@@ -29,7 +33,6 @@ def use_template(template=None, replacements=None, test=False):
         except json.JSONDecodeError:
             frappe.throw("replacements ist kein gültiges JSON")
     
-    temp = frappe.get_doc("Dokumentenvorlage", template)
     file_path = False
     bench_path = frappe.utils.get_bench_path()
     site_name = frappe.local.site
@@ -59,13 +62,13 @@ def use_template(template=None, replacements=None, test=False):
         frappe.throw("Diese Funktionalität muss noch ausgebaut werden...")
     
     if file_path:
-        replace_in_odt(file_path, "/tmp/Test.odt", replacements, test, template)
+        replace_in_odt(file_path, "/tmp/Test.odt", replacements, test, template, source_doc)
 
 def replace_in_text_node(node, replacements: dict[str, str]) -> None:
     if hasattr(node, "data") and isinstance(node.data, str):
         text = node.data
         for old, new in replacements.items():
-            text = text.replace(old, new)
+            text = text.replace(old, new or old)
         node.data = text
 
     if hasattr(node, "childNodes"):
@@ -73,7 +76,7 @@ def replace_in_text_node(node, replacements: dict[str, str]) -> None:
             replace_in_text_node(child, replacements)
 
 
-def replace_in_odt(input_file: str, output_file: str, replacements: dict[str, str], test: bool, template: str) -> None:
+def replace_in_odt(input_file: str, output_file: str, replacements: dict[str, str], test: bool, template: str, source_doc: dict[str, str]) -> None:
     """
     Ersetzt Wörter/Textstellen in einer .odt-Datei und speichert das Ergebnis.
     """
@@ -89,17 +92,14 @@ def replace_in_odt(input_file: str, output_file: str, replacements: dict[str, st
     for elem in doc.getElementsByType(Span):
         replace_in_text_node(elem, replacements)
 
-    if test:
-        buffer = io.BytesIO()
-        doc.save(buffer)
-        buffer.seek(0)
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
 
-        file_doc = save_file(
-            fname="verarbeitete_vorlage.odt",
-            content=buffer.getvalue(),
-            dt="Dokumentenvorlage",
-            dn=template,
-            is_private=1
-        )
-    else:
-        doc.save(output_file)
+    file_doc = save_file(
+        fname="verarbeitete_vorlage.odt",
+        content=buffer.getvalue(),
+        dt="Dokumentenvorlage" if test else source_doc.doctype,
+        dn=template if test else source_doc.name,
+        is_private=1
+    )
