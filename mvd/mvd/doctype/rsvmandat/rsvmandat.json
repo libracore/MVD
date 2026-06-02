@@ -5,7 +5,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "uebersicht_html",
   "section_mandat",
   "fallnummer",
   "status",
@@ -13,6 +12,8 @@
   "anwalt",
   "datum_vergabe",
   "datum_pruefung",
+  "section_mitgliedschafts_overview",
+  "uebersicht_html",
   "section_mitgliedschaft",
   "strasse",
   "hausnummer",
@@ -207,6 +208,7 @@
    "label": "Mandat"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_mitgliedschaft",
    "fieldtype": "Section Break",
    "label": "Mitglied"
@@ -223,9 +225,14 @@
   {
    "fieldname": "cb_2",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_mitgliedschafts_overview",
+   "fieldtype": "Section Break",
+   "label": "Mitgliedschafts\u00fcbersicht"
   }
  ],
- "modified": "2026-06-02 16:20:30.070934",
+ "modified": "2026-06-02 17:29:43.702343",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",
