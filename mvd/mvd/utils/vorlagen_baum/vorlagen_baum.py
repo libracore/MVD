@@ -37,7 +37,8 @@ def get_children(parent_name=None, sektion_id=None):
             "parent_vorlagen_baum",
             "use_for_email",
             "use_for_druckvorlagen",
-            "use_for_dokumentenvorlagen"
+            "use_for_dokumentenvorlagen",
+            "use_for_textvorlagen"
         ],
         order_by="vorlagen_baum_name asc"
     )
@@ -52,14 +53,15 @@ def get_children(parent_name=None, sektion_id=None):
             "parent": row.parent_vorlagen_baum,
             "use_for_email": cint(row.use_for_email),
             "use_for_druckvorlagen": cint(row.use_for_druckvorlagen),
-            "use_for_dokumentenvorlagen": cint(row.use_for_dokumentenvorlagen)
+            "use_for_dokumentenvorlagen": cint(row.use_for_dokumentenvorlagen),
+            "use_for_textvorlagen": cint(row.get("use_for_textvorlagen"))
         })
 
     return result
 
 
 @frappe.whitelist()
-def get_node_details(node_name):
+def get_node_details(node_name, parent_doc=None):
     if not frappe.has_permission(DOCTYPE, "read"):
         frappe.throw(_("Keine Leseberechtigung für {0}").format(DOCTYPE))
 
@@ -73,38 +75,45 @@ def get_node_details(node_name):
         "use_for_email": cint(doc.use_for_email),
         "use_for_druckvorlagen": cint(doc.use_for_druckvorlagen),
         "use_for_dokumentenvorlagen": cint(doc.use_for_dokumentenvorlagen),
+        "use_for_textvorlagen": cint(doc.get("use_for_textvorlagen")),
         "email_vorlagen": [],
         "druckvorlagen": [],
-        "dokumentenvorlagen": []
+        "dokumentenvorlagen": [],
+        "textvorlagen": []
     }
 
-    # Child Table: E-Mail Vorlagen
     for row in doc.get("email_vorlagen") or []:
         result["email_vorlagen"].append(_serialize_child_row(row))
 
-    # Child Table: Druckvorlagen
     for row in doc.get("druckvorlagen") or []:
         result["druckvorlagen"].append(_serialize_child_row(row))
 
-    # Child Table: Dokumentenvorlagen
     for row in doc.get("dokumentenvorlagen") or []:
         result["dokumentenvorlagen"].append(_serialize_child_row(row))
+
+    for row in doc.get("textvorlagen") or []:
+        result["textvorlagen"].append(_serialize_child_row(row, parent_doc))
 
     return result
 
 
-def _serialize_child_row(row):
+def _serialize_child_row(row, parent_doc=None):
     data = {
         "name": row.name,
         "doctype": row.doctype
     }
 
-    # Alle Felder der Child-Row mitgeben, damit das Frontend flexibel für die Zukunft bleibt
     for fieldname, value in row.as_dict().items():
         if fieldname not in data:
-            data[fieldname] = value
+            print(row.doctype, fieldname, value)
+            if row.doctype == 'Textvorlagen TBL' and fieldname == 'textvorlage' and parent_doc:
+                import json
+                _parent_doc = json.loads(parent_doc)
+                value = frappe.render_template(template=value, context=_parent_doc)
+                data[fieldname] = value
+            else:
+                data[fieldname] = value
 
-    # Versuch Link-Felder zu erkennen
     meta = frappe.get_meta(row.doctype)
     link_fields = []
 
@@ -119,6 +128,7 @@ def _serialize_child_row(row):
 
     data["_link_fields"] = link_fields
     return data
+
 
 @frappe.whitelist()
 def search_nodes(query, sektion_id=None, purpose=None, limit=30):
@@ -156,6 +166,7 @@ def search_nodes(query, sektion_id=None, purpose=None, limit=30):
             "use_for_email": cint(doc.use_for_email),
             "use_for_druckvorlagen": cint(doc.use_for_druckvorlagen),
             "use_for_dokumentenvorlagen": cint(doc.use_for_dokumentenvorlagen),
+            "use_for_textvorlagen": cint(doc.get("use_for_textvorlagen")),
             "match_type": match_type,
             "match_label": match_label,
             "match_value": match_value or doc.vorlagen_baum_name or doc.name
@@ -163,7 +174,6 @@ def search_nodes(query, sektion_id=None, purpose=None, limit=30):
 
         seen.add(key)
 
-    # 1. Suche direkt im Knoten
     filters = []
     if sektion_id:
         filters.append(["sektion_id", "=", sektion_id])
@@ -187,7 +197,6 @@ def search_nodes(query, sektion_id=None, purpose=None, limit=30):
             match_value=row.vorlagen_baum_name or row.name
         )
 
-    # 2. Suche in Child Table: email_vorlagen
     if not purpose or purpose == "email":
         email_rows = frappe.get_all(
             "Email Vorlagen TBL",
@@ -207,7 +216,6 @@ def search_nodes(query, sektion_id=None, purpose=None, limit=30):
                 match_value=row.email_template
             )
 
-    # 3. Suche in Child Table: druckvorlagen
     if not purpose or purpose == "druck":
         druck_rows = frappe.get_all(
             "Druckvorlagen TBL",
@@ -227,7 +235,6 @@ def search_nodes(query, sektion_id=None, purpose=None, limit=30):
                 match_value=row.druckvorlage
             )
 
-    # 4. Suche in Child Table: dokumentenvorlagen
     if not purpose or purpose == "dokument":
         dokument_rows = frappe.get_all(
             "Dokumentenvorlage TBL",
@@ -247,4 +254,29 @@ def search_nodes(query, sektion_id=None, purpose=None, limit=30):
                 match_value=row.dokumentenvorlage
             )
 
+    if not purpose or purpose == "Text":
+        text_rows = frappe.get_all(
+            "Textvorlagen TBL",
+            filters={
+                "textvorlage": ["like", "%%%s%%" % query],
+                "parenttype": DOCTYPE
+            },
+            fields=["parent", "textvorlage"],
+            limit_page_length=limit
+        )
+
+        for row in text_rows:
+            add_node(
+                row.parent,
+                match_type="textvorlage",
+                match_label="Textvorlage",
+                match_value=row.textvorlage
+            )
+
     return results[:limit]
+
+@frappe.whitelist()
+def replace_jinja_in_text(text, doc):
+    import json
+    _doc = json.loads(doc)
+    return frappe.render_template(template=text, context=_doc)
