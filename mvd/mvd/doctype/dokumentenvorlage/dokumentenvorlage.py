@@ -5,6 +5,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from datetime import date, datetime
+from frappe.utils import getdate
 
 class Dokumentenvorlage(Document):
     def translate(self):
@@ -16,6 +18,21 @@ class Dokumentenvorlage(Document):
             for row in self.mapping_tbl
             if row.platzhalter and row.d_type and row.field
         }
+
+    def format_value(self, value, doctype, fieldname):
+        if value is None:
+            return ""
+
+        meta = frappe.get_meta(doctype)
+        df = meta.get_field(fieldname)
+
+        if df and df.fieldtype in ("Date", "Datetime"):
+            if isinstance(value, (date, datetime)):
+                return value.strftime("%d.%m.%Y")
+
+            return getdate(value).strftime("%d.%m.%Y")
+
+        return str(value)
 
     def get_placeholder_values(self, doc):
         result = {}
@@ -35,25 +52,36 @@ class Dokumentenvorlage(Document):
 
             # Feld ist direkt auf dem aktuellen Dokument
             if target_doctype == doc.doctype:
-                result[placeholder] = doc.get(target_fieldname)
+                value = doc.get(target_fieldname)
+                result[placeholder] = self.format_value(
+                    value,
+                    target_doctype,
+                    target_fieldname
+                )
                 continue
 
             # Feld kommt von einem verknuepften Dokument
             link_fieldname = link_fields_by_doctype.get(target_doctype)
 
             if not link_fieldname:
-                result[placeholder] = None
+                result[placeholder] = ""
                 continue
 
             linked_docname = doc.get(link_fieldname)
 
             if not linked_docname:
-                result[placeholder] = None
+                result[placeholder] = ""
                 continue
 
-            result[placeholder] = frappe.db.get_value(
+            value = frappe.db.get_value(
                 target_doctype,
                 linked_docname,
+                target_fieldname
+            )
+
+            result[placeholder] = self.format_value(
+                value,
+                target_doctype,
                 target_fieldname
             )
 
