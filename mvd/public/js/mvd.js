@@ -49,15 +49,16 @@ $(document).ready(function() {
     
     // Set Keyboard-Shortcut to open Textvorlagen
     frappe.ui.keys.on('shift+ctrl+k', () => {
-        if (cur_frm && cur_frm.doc) {
-            if (cur_frm.doc.sektion_id) {
-                new mvd_dialoge.open_textvorlagen();
-            } else {
-                frappe.msgprint("Von hier können die Textvorlagen nicht verwendet werden, da der aktuelle Ort über keine Sektion verfügt.");
-            }
-        } else {
-            frappe.msgprint("Von hier können die Textvorlagen nicht verwendet werden, da der aktuelle Ort über keine Sektion verfügt.");
-        }
+        new mvd_dialoge.open_textvorlagen();
+        // if (cur_frm && cur_frm.doc) {
+        //     if (cur_frm.doc.sektion_id) {
+        //         new mvd_dialoge.open_textvorlagen();
+        //     } else {
+        //         frappe.msgprint("Von hier können die Textvorlagen nicht verwendet werden, da der aktuelle Ort über keine Sektion verfügt.");
+        //     }
+        // } else {
+        //     frappe.msgprint("Von hier können die Textvorlagen nicht verwendet werden, da der aktuelle Ort über keine Sektion verfügt.");
+        // }
     });
 });
 
@@ -2290,11 +2291,11 @@ mvd_dialoge.open_textvorlagen = class OpenTextvorlagen {
             title: "Auswahl Textvorlage",
             no_submit_on_enter: true,
             fields: this.get_fields(),
-            primary_action_label: "Auswählen",
+            primary_action_label: "Schliessen",
             primary_action: () => {
                 this.dialog.hide();
-                this.call_primary_action();
-            }
+            },
+            secondary_action: false
         });
 
         
@@ -2305,7 +2306,7 @@ mvd_dialoge.open_textvorlagen = class OpenTextvorlagen {
         new mvd_vorlagen_baum.ui.VorlagenBaumNavigator({
             wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
             parent_dialog: this.dialog,
-            sektion_id: cur_frm.doc.sektion_id || null,
+            sektion_id: cur_frm ? cur_frm.doc.sektion_id:this.get_default_sektion() || null,
             purpose: "Text",
             on_select: function(selection, details, row, parent_dialog) {
                 if (parent_dialog) {
@@ -2324,47 +2325,13 @@ mvd_dialoge.open_textvorlagen = class OpenTextvorlagen {
         ]
     }
 
-    call_primary_action() {
+    get_default_sektion() {
         frappe.call({
-            method: "mvd.mvd.utils.sonstige_rechnungen.create_rechnung_sonstiges",
-            args: this.get_primary_action_args(),
-            freeze: true,
-            freeze_message: 'Erstelle Rechnung (Sonstiges)...',
-            callback: function(r)
-            {
-                cur_frm.reload_doc();
-                cur_frm.timeline.insert_comment("Rechnung (Sonstiges) " + r.message + " erstellt.");
-                frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
+            method: "mvd.mvd.utils.mvd_bootinfo.get_default_sektion",
+            callback: (r) => {
+                if (r.message) return r.message
+                return null
             }
         });
-    }
-
-    get_primary_action_args() {
-        if (this.dt_scope == "Mitgliedschaft") {
-            return {
-                'sektion': cur_frm.doc.sektion_id,
-                'mitgliedschaft': cur_frm.doc.name,
-                'bezahlt': this.dialog.get_value('bar_bezahlt') == 1 ? true:null,
-                'attach_as_pdf': true,
-                'submit': true,
-                'druckvorlage': this.dialog.get_value('druckvorlage'),
-                'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
-                'ohne_betrag': this.dialog.get_value('ohne_betrag') == 1 ? true:null,
-                'ignore_pricing_rule': this.dialog.get_value('ignore_pricing_rule') == 1 ? true:null
-            }
-        } else {
-            return {
-                'sektion': cur_frm.doc.sektion_id,
-                'kunde': cur_frm.doc.name,
-                'bezahlt': this.dialog.get_value('bar_bezahlt') == 1 ? true:null,
-                'attach_as_pdf': true,
-                'submit': true,
-                'druckvorlage': this.dialog.get_value('druckvorlage'),
-                'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
-                'ohne_betrag': this.dialog.get_value('ohne_betrag') == 1 ? true:null,
-                'mv_mitgliedschaft': cur_frm.doc.mv_mitgliedschaft,
-                'ignore_pricing_rule': this.dialog.get_value('ignore_pricing_rule') == 1 ? true:null
-            }
-        }
     }
 }

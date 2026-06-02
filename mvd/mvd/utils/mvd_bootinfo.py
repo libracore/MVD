@@ -9,8 +9,8 @@ def boot_session(bootinfo):
     bootinfo.default_sektion, bootinfo.multi_sektion = get_default_sektion()
     bootinfo.default_beratungs_sender = get_default_beratungs_sender(bootinfo.default_sektion)
 
+@frappe.whitelist()
 def get_default_sektion():
-    # ~ sektionen = frappe.db.sql("""SELECT `for_value` FROM `tabUser Permission` WHERE `allow` = 'Sektion' AND `is_default` = 1 AND `user` = '{user}'""".format(user=frappe.session.user), as_dict=True)
     sektionen = frappe.db.sql("""SELECT `for_value` FROM `tabUser Permission` WHERE `allow` = 'Sektion' AND `user` = '{user}' ORDER BY `is_default` DESC""".format(user=frappe.session.user), as_dict=True)
     if len(sektionen) > 1:
         return sektionen[0].for_value, True
