@@ -11,6 +11,9 @@ frappe.ui.form.on('RSVMandat', {
              }
         }
 
+        // load html overview
+        load_html_overview(frm);
+
         if (frm._refresh_msg_running) return;
         frm._refresh_msg_running = true;
 
@@ -64,4 +67,20 @@ function _create_zip_file(frm) {
             cur_frm.reload_doc();
         }
     });
+}
+
+function load_html_overview(frm) {
+    if (cur_frm.doc.mv_mitgliedschaft) {
+        // Lade Übersicht für Mitglied
+        frappe.call({
+            method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_uebersicht_html",
+            args:{
+                    'name': cur_frm.doc.mv_mitgliedschaft
+            },
+            callback: function(r)
+            {
+                cur_frm.set_df_property('uebersicht_html','options', r.message);
+            }
+        });
+    }
 }
