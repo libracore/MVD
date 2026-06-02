@@ -48,7 +48,7 @@ $(document).ready(function() {
     }
     
     // Set Keyboard-Shortcut to open Textvorlagen
-    frappe.ui.keys.on('ctrl+k', () => {
+    frappe.ui.keys.on('shift+ctrl+k', () => {
         if (cur_frm && cur_frm.doc) {
             if (cur_frm.doc.sektion_id) {
                 new mvd_dialoge.open_textvorlagen();
