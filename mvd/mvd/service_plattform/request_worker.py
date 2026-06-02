@@ -168,6 +168,34 @@ def service_plattform_log_worker(zh_only=False, called_by_cron=False):
 
     Hinweis: jede Minute ruft ein Cron-Job folgende Methode auf: service_plattform_log_worker_via_cron()
     '''
+    def sektionswechsel_abfolge_handler(sp_log):
+        sp_log_json = json.loads(sp_log.json)
+        if sp_log_json.get("status", None) == 'Zuzug':
+            affected_mitglied_nummer = sp_log_json.get("mitgliedNummer", None)
+            id_ausschluss = sp_log_json.get("mitgliedId", None)
+            if affected_mitglied_nummer and id_ausschluss:
+                open_updates = frappe.db.sql("""
+                    SELECT `name`
+                    FROM `tabService Plattform Log`
+                    WHERE `status` IN ('New', 'Failed')
+                    AND `neuanlage` != 1
+                    AND `retry_count` < 4
+                    JSON_UNQUOTE(JSON_EXTRACT(`json`, '$.mitgliedNummer')) = '{affected_mitglied_nummer}'
+                    JSON_UNQUOTE(JSON_EXTRACT(`json`, '$.mitgliedId')) != '{id_ausschluss}'
+                    ORDER BY `creation` ASC
+                """.format(affected_mitglied_nummer=affected_mitglied_numme, id_ausschluss=id_ausschluss), as_dict=True)
+                if len(open_updates) > 0:
+                    for open_update in open_updates:
+                        sp_update_log = frappe.get_doc("Service Plattform Log", open_update.name)
+                        sp_log_free_to_execute = True
+                        if sp_log.status == 'New' and sp_log.mv_mitgliedschaft:
+                            existing_failed_log = get_existing_failed_log(sp_log.mv_mitgliedschaft, sp_log.name)
+                            if existing_failed_log > 0:
+                                sp_log_free_to_execute = False
+                        if sp_log_free_to_execute:
+                            execute_sp_log(sp_log)
+        return
+    
     if not zh_only:
         if cint(frappe.db.get_single_value('Service Plattform API', 'sp_queue_via_cron')) == 1 and not called_by_cron:
             # Aufegrufen via BG-Worker aber definiert als Cron -> Beenden
@@ -209,6 +237,7 @@ def service_plattform_log_worker(zh_only=False, called_by_cron=False):
     
         for service_plattform_log in open_creation_logs:
             sp_log = frappe.get_doc("Service Plattform Log", service_plattform_log.name)
+            sektionswechsel_abfolge_handler(sp_log)
             sp_log_free_to_execute = True
             if sp_log.status == 'New' and sp_log.mv_mitgliedschaft:
                 existing_failed_log = get_existing_failed_log(sp_log.mv_mitgliedschaft, sp_log.name)
