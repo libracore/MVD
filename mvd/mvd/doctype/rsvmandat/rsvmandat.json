@@ -5,18 +5,24 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "status",
+  "uebersicht_html",
+  "section_mandat",
   "fallnummer",
-  "datum_pruefung",
-  "datum_vergabe",
+  "status",
+  "cb_1",
   "anwalt",
-  "mv_mitgliedschaft",
-  "zusatz_adresse",
+  "datum_vergabe",
+  "datum_pruefung",
+  "section_mitgliedschaft",
   "strasse",
   "hausnummer",
-  "nr_zusatz",
   "plz",
+  "mv_mitgliedschaft",
+  "cb_2",
+  "zusatz_adresse",
+  "nr_zusatz",
   "ort",
+  "section_fallinformationen",
   "beschreibung",
   "notiz",
   "speicherpfad_dokumente",
@@ -190,9 +196,36 @@
    "fieldname": "create_zip_file",
    "fieldtype": "Button",
    "label": "ZIP-File aus allen Dokumenten erzeugen"
+  },
+  {
+   "fieldname": "uebersicht_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_mandat",
+   "fieldtype": "Section Break",
+   "label": "Mandat"
+  },
+  {
+   "fieldname": "section_mitgliedschaft",
+   "fieldtype": "Section Break",
+   "label": "Mitglied"
+  },
+  {
+   "fieldname": "section_fallinformationen",
+   "fieldtype": "Section Break",
+   "label": "Fallinformationen"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2026-05-27 13:06:34.795557",
+ "modified": "2026-06-02 16:20:30.070934",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",
