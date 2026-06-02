@@ -180,8 +180,8 @@ def service_plattform_log_worker(zh_only=False, called_by_cron=False):
                     WHERE `status` IN ('New', 'Failed')
                     AND `neuanlage` != 1
                     AND `retry_count` < 4
-                    JSON_UNQUOTE(JSON_EXTRACT(`json`, '$.mitgliedNummer')) = '{affected_mitglied_nummer}'
-                    JSON_UNQUOTE(JSON_EXTRACT(`json`, '$.mitgliedId')) != '{id_ausschluss}'
+                    AND JSON_UNQUOTE(JSON_EXTRACT(`json`, '$.mitgliedNummer')) = '{affected_mitglied_nummer}'
+                    AND JSON_UNQUOTE(JSON_EXTRACT(`json`, '$.mitgliedId')) != '{id_ausschluss}'
                     ORDER BY `creation` ASC
                 """.format(affected_mitglied_nummer=affected_mitglied_nummer, id_ausschluss=id_ausschluss), as_dict=True)
                 if len(open_updates) > 0:
