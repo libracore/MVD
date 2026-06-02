@@ -51,6 +51,9 @@ frappe.ui.form.on('Mitgliedschaft', {
             frm.add_custom_button(__("User"), function() {
                 frappe.set_route("List", "User", {'username': cur_frm.doc.mitglied_nr});
             }, __("Admin Tools"))
+            frm.add_custom_button(__("SP Mitglied Data"), function() {
+                frappe.set_route("Form", "SP Mitglied Data", cur_frm.doc.mitglied_nr);
+            }, __("Admin Tools"))
         }
 
         if (frappe.user.has_role("MV_MA")) {
