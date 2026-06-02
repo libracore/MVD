@@ -193,7 +193,7 @@ def service_plattform_log_worker(zh_only=False, called_by_cron=False):
                             if existing_failed_log > 0:
                                 sp_log_free_to_execute = False
                         if sp_log_free_to_execute:
-                            execute_sp_log(sp_log)
+                            execute_sp_log(sp_log, ignore_previous_status=True)
         return
     
     if not zh_only:
@@ -279,7 +279,7 @@ def get_existing_failed_log(mv_mitgliedschaft, sp_log):
     return existing_failed_log or 0
 
 @frappe.whitelist()
-def execute_sp_log(sp_log, manual_execution=False):
+def execute_sp_log(sp_log, manual_execution=False, ignore_previous_status=False):
     if manual_execution:
         sp_log = frappe.get_doc("Service Plattform Log", sp_log)
         if sp_log.mv_mitgliedschaft:
@@ -362,20 +362,23 @@ def execute_sp_log(sp_log, manual_execution=False):
                 frappe.db.commit()
                 return
             else:
-                # Erweiterte Doppel-Zuzugs-Prüfung (#1287)
-                aktive_mitglieder_mit_identischer_nr = frappe.db.sql("""
-                                                                        SELECT COUNT(`name`) AS `qty`
-                                                                        FROM `tabMitgliedschaft`
-                                                                        WHERE `mitglied_nr` = '{0}'
-                                                                        AND `status_c` NOT IN ('Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')
-                                                                        """.format(api_kwargs['mitgliedNummer']), as_dict=True)[0].qty
-                if aktive_mitglieder_mit_identischer_nr > 0:
-                    sp_log.status = 'Failed'
-                    sp_log.retry_count = cint(sp_log.retry_count) + 1
-                    sp_log.add_comment('Comment', text='Doppel-Zuzug Issue #1287 - Es existiert eine andere Mitgliedschaft mit der selben MitgliedNr, welche keinen inaktiven Status besitzt. Bitte manuell prüfen.')
-                    sp_log.save()
-                    frappe.db.commit()
-                    return
+                if not ignore_previous_status:
+                    # Erweiterte Doppel-Zuzugs-Prüfung (#1287)
+                    aktive_mitglieder_mit_identischer_nr = frappe.db.sql("""
+                                                                            SELECT COUNT(`name`) AS `qty`
+                                                                            FROM `tabMitgliedschaft`
+                                                                            WHERE `mitglied_nr` = '{0}'
+                                                                            AND `status_c` NOT IN ('Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in')
+                                                                            """.format(api_kwargs['mitgliedNummer']), as_dict=True)[0].qty
+                    if aktive_mitglieder_mit_identischer_nr > 0:
+                        sp_log.status = 'Failed'
+                        sp_log.retry_count = cint(sp_log.retry_count) + 1
+                        sp_log.add_comment('Comment', text='Doppel-Zuzug Issue #1287 - Es existiert eine andere Mitgliedschaft mit der selben MitgliedNr, welche keinen inaktiven Status besitzt. Bitte manuell prüfen.')
+                        sp_log.save()
+                        frappe.db.commit()
+                        return
+                    else:
+                        error_in_execution = mvm_neuanlage(api_kwargs)
                 else:
                     error_in_execution = mvm_neuanlage(api_kwargs)
     
