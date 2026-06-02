@@ -1,0 +1,45 @@
+{
+ "creation": "2026-06-02 18:21:02.568867",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "platzhalter",
+  "d_type",
+  "field"
+ ],
+ "fields": [
+  {
+   "fieldname": "platzhalter",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Platzhalter",
+   "reqd": 1
+  },
+  {
+   "fieldname": "d_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Doctype",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "field",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Feld",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-06-02 19:28:05.670816",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Dokumentenvorlage Mapping TBL",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
