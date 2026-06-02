@@ -183,7 +183,7 @@ def service_plattform_log_worker(zh_only=False, called_by_cron=False):
                     JSON_UNQUOTE(JSON_EXTRACT(`json`, '$.mitgliedNummer')) = '{affected_mitglied_nummer}'
                     JSON_UNQUOTE(JSON_EXTRACT(`json`, '$.mitgliedId')) != '{id_ausschluss}'
                     ORDER BY `creation` ASC
-                """.format(affected_mitglied_nummer=affected_mitglied_numme, id_ausschluss=id_ausschluss), as_dict=True)
+                """.format(affected_mitglied_nummer=affected_mitglied_nummer, id_ausschluss=id_ausschluss), as_dict=True)
                 if len(open_updates) > 0:
                     for open_update in open_updates:
                         sp_update_log = frappe.get_doc("Service Plattform Log", open_update.name)
