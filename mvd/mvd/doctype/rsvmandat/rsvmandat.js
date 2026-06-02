@@ -13,6 +13,8 @@ frappe.ui.form.on('RSVMandat', {
 
         // load html overview
         load_html_overview(frm);
+        // Eventlistener für den Schlichtungsbehörden Knopf
+        frappe.mvd.schlichtungsbehoerde_listener(frm, 'uebersicht_html');
 
         if (frm._refresh_msg_running) return;
         frm._refresh_msg_running = true;
