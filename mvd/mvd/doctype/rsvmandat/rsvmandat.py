@@ -11,6 +11,12 @@ from frappe.utils.background_jobs import enqueue
 import os
 import zipfile
 from urllib.parse import unquote
+try:
+    from jinja2 import pass_context as context_decorator
+except ImportError:
+    from jinja2 import contextfunction as context_decorator
+from jinja2.runtime import Context
+import json
 
 '''
 current Working:
@@ -283,3 +289,38 @@ def create_rsv_mandat(**kwargs):
 
     rsv_mandat.insert()
     return rsv_mandat.name
+
+### Jinja-Methoden für die RSV-Mandat E-Mails ###
+def get_doc_from_ctx(ctx): 
+    if hasattr(ctx, "get") and ctx.get("doc"):
+        return ctx.get("doc")
+    elif isinstance(ctx, Context): # Falls der ctx vom typ jinja2.context ist -> Email
+        doc = json.loads(ctx.get('frappe').get('form_dict').get('doc'))
+        return frappe.get_doc(doc.get('doctype'), doc.get('name'))
+    return ctx
+
+@context_decorator
+def rsv_dokumente_fehlende(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "RSVMandat":
+        if doc.dokumente:
+            document_list_html = ""
+            for document in doc.dokumente:
+                if not document.file_upload:
+                    document_list_html += "- {0}<br>".format(document.dokument)
+            return document_list_html
+    
+    return '---'
+
+@context_decorator
+def rsv_dokumente_erhalten(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "RSVMandat":
+        if doc.dokumente:
+            document_list_html = ""
+            for document in doc.dokumente:
+                if document.file_upload:
+                    document_list_html += "- {0}<br>".format(document.dokument)
+            return document_list_html
+    
+    return '---'
