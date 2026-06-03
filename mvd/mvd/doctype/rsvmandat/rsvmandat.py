@@ -31,6 +31,8 @@ class RSVMandat(Document):
             if gebaeudeverzeichnis_id_and_bfs_nr is not None:
                 self.adr_egaid = gebaeudeverzeichnis_id_and_bfs_nr.get("adr_egaid")
                 self.bfs_nr = gebaeudeverzeichnis_id_and_bfs_nr.get("bfs_nr")
+            else:
+                self.reason_missing_rsvmandatlist = "Auf Basis der Adressdaten konnte keine Gebäude ID zugeordnet werden.<br>Eine entsprechende Mandatsliste muss manuell angelegt und verknüpft werden."
         
         if not self.schlichtungsbehoerde:
             self.schlichtungsbehoerde = get_schlichtungsbehoerde(self.bfs_nr)
@@ -41,10 +43,8 @@ class RSVMandat(Document):
         self.save()
     
     def on_update(self):
-        if self.rsvmandatsliste and self.manuelle_rsvmandatliste_auswahl == 1:
-            self.manuelle_rsvmandatliste_auswahl = 0
-        elif not self.rsvmandatsliste and self.manuelle_rsvmandatliste_auswahl == 0:
-            self.manuelle_rsvmandatliste_auswahl = 1
+        if self.rsvmandatsliste:
+            self.reason_missing_rsvmandatlist = None
         
         if self.rsvmandatsliste:
             args = {
@@ -89,15 +89,18 @@ class RSVMandat(Document):
             if rsvmandatsliste.get("qty") in [0, 1]:
                 return rsvmandatsliste.get("rsvmandatsliste")
             else:
-                self.manuelle_rsvmandatliste_auswahl = 1
-                return None
+                self.reason_missing_rsvmandatlist = "Auf Basis der zutreffenden Siedlung gibt es mehrere Mandatslisten. Bitte wählen Sie die zugehörige manuell aus."
+        else:
+            self.reason_missing_rsvmandatlist = "Auf Basis der Adressdaten konnte keine Siedlung zugeordnet werden.<br>Eine entsprechende Mandatsliste muss manuell angelegt und verknüpft werden."
+        
+        return None
     
     def create_zip(self):
         file_urls = []
         for dokument in self.dokumente:
             if dokument.file_upload:
                 file_urls.append(dokument.file_upload)
-        print(file_urls)
+        
         if len(file_urls) > 0:
             zip_url = create_zip_and_attach(
                 file_urls=file_urls,

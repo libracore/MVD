@@ -2263,7 +2263,7 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
                         me.dialog.set_df_property("rsv_mandatliste", "hidden", 0);
                         me.dialog.set_df_property("rsv_mandatliste", "reqd", 1);
                         me.dialog.set_df_property("rsv_mandatliste_new_creation", "hidden", 0);
-                        frappe.msgprint('Biite das neue Feld "RSV-Mandatliste" beachten!')
+                        frappe.msgprint('Bitte das neue Feld "RSV-Mandatliste" beachten!')
                     }
                 }
             });
