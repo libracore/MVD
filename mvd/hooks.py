@@ -78,7 +78,9 @@ jenv = {
         "get_beratungs_daten:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungs_daten",
         "get_mandat_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mandat_link",
         "get_beratung_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratung_link",
-        "get_mahngebuehr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mahngebuehr"
+        "get_mahngebuehr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mahngebuehr",
+        "rsv_dokumente_fehlende:mvd.mvd.doctype.rsvmandat.rsvmandat.rsv_dokumente_fehlende",
+        "rsv_dokumente_erhalten:mvd.mvd.doctype.rsvmandat.rsvmandat.rsv_dokumente_erhalten"
     ]
 }
 
