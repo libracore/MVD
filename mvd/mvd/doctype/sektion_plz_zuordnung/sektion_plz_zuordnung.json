@@ -18,11 +18,12 @@
   {
    "fieldname": "sektion",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Sektion",
    "options": "Sektion"
   }
  ],
- "modified": "2025-05-13 11:00:36.227908",
+ "modified": "2026-06-02 20:32:50.600432",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion PLZ Zuordnung",
