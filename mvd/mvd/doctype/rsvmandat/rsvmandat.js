@@ -16,20 +16,11 @@ frappe.ui.form.on('RSVMandat', {
         // Eventlistener für den Schlichtungsbehörden Knopf
         frappe.mvd.schlichtungsbehoerde_listener(frm, 'uebersicht_html');
 
-        if (frm._refresh_msg_running) return;
-        frm._refresh_msg_running = true;
-
-        if (
-            frm.doc.manuelle_rsvmandatliste_auswahl &&
-            !frm.doc.__islocal
-        ) {
-            frappe.msgprint("Die zugehörige RSV-Mandatliste muss selbst gewählt werden.");
+        if (cur_frm.doc.reason_missing_rsvmandatlist) {
+            cur_frm.dashboard.add_comment(cur_frm.doc.reason_missing_rsvmandatlist, 'yellow', true);
+        } else {
+            cur_frm.dashboard.clear_comment();
         }
-
-        // msgprint nach aktuellem refresh wieder freigeben
-        setTimeout(() => {
-            frm._refresh_msg_running = false;
-        }, 0);
     },
     create_zip_file: function(frm) {
         cur_frm.save().then(() => {

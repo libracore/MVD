@@ -37,10 +37,10 @@
   "dokumente",
   "create_zip_file",
   "section_workflow_helper",
-  "manuelle_rsvmandatliste_auswahl",
   "force_new_rsvmandatliste",
   "adr_egaid",
-  "bfs_nr"
+  "bfs_nr",
+  "reason_missing_rsvmandatlist"
  ],
  "fields": [
   {
@@ -170,13 +170,6 @@
    "label": "force_new_rsvmandatliste"
   },
   {
-   "default": "0",
-   "fieldname": "manuelle_rsvmandatliste_auswahl",
-   "fieldtype": "Check",
-   "label": "Manuelle RSVMandatliste Auswahl erforderlich",
-   "no_copy": 1
-  },
-  {
    "fieldname": "rsvmandatsliste",
    "fieldtype": "Link",
    "label": "RSV-Mandatsliste",
@@ -230,9 +223,15 @@
    "fieldname": "section_mitgliedschafts_overview",
    "fieldtype": "Section Break",
    "label": "Mitgliedschafts\u00fcbersicht"
+  },
+  {
+   "fieldname": "reason_missing_rsvmandatlist",
+   "fieldtype": "Data",
+   "label": "Grund f\u00fcr fehlende RSV-Mandatsliste",
+   "length": 300
   }
  ],
- "modified": "2026-06-02 17:29:43.702343",
+ "modified": "2026-06-03 15:02:45.152075",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",
