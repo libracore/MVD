@@ -150,7 +150,6 @@ def fixing_wrong_data(manual=False):
         affected_records = []
 
         if not manual:
-
             for mitgliedschaft in mitgliedschaften:
                 mitglied_id = get_mitglied_id_from_nr(mitglied_nr=mitgliedschaft.ref_nr, ignore_inaktiv=True)
                 if cint(frappe.db.get_value("Mitgliedschaft", mitglied_id, "validierung_notwendig")) != 1:
