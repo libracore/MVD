@@ -260,7 +260,10 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
     
     eintritt = None
     if anlage_daten["status"] == 'Regulär':
-        eintritt = now()
+        if anlage_daten["datum_zahlung_eintritt"]:
+            eintritt = anlage_daten["datum_zahlung_eintritt"]
+        else:
+            eintritt = now()
     
     if anlage_daten["sektion_id"] == "M+W-Abo":
         anlage_daten_status = 'Regulär'
@@ -306,9 +309,9 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
             "abweichende_objektadresse": 1 if int(anlage_daten["postfach"]) == 1 else '0',
             "interessent_typ": anlage_daten["interessent_typ"],
             "bezahltes_mitgliedschaftsjahr": get_mitgl_jahr_in_anlage(anlage_daten["sektion_id"]) if anlage_daten["status"] == 'Regulär' else None,
-            "datum_zahlung_mitgliedschaft": today() if anlage_daten["status"] == 'Regulär' else None,
+            "datum_zahlung_mitgliedschaft": eintritt,
             "zahlung_hv": get_mitgl_jahr_in_anlage(anlage_daten["sektion_id"]) if hv_bar_bezahlt else None,
-            "datum_hv_zahlung": today() if hv_bar_bezahlt else None
+            "datum_hv_zahlung": (eintritt if eintritt else today()) if hv_bar_bezahlt else None
         })
         mitgliedschaft.insert(ignore_permissions=True)
         
@@ -317,7 +320,7 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
             bezahlt = True
             if int(massendruck) == 1:
                 massendruck = True
-            sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck)
+            sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, bezahl_datum=eintritt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck)
         else:
             if "autom_rechnung" in anlage_daten and int(anlage_daten["autom_rechnung"]) == 1:
                 bezahlt = False

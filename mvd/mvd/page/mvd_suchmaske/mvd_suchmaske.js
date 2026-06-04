@@ -713,6 +713,8 @@ frappe.mvd_such_client = {
                                             setTimeout(function(){
                                                 cur_dialog.fields_dict.hv_bar_bezahlt.df.hidden = 0;
                                                 cur_dialog.fields_dict.hv_bar_bezahlt.refresh();
+                                                cur_dialog.fields_dict.datum_zahlung_eintritt.df.hidden = 0;
+                                                cur_dialog.fields_dict.datum_zahlung_eintritt.refresh();
                                             }, 100);
                                         }, 100);
                                     } else {
@@ -734,6 +736,8 @@ frappe.mvd_such_client = {
                                         setTimeout(function(){
                                             cur_dialog.fields_dict.hv_bar_bezahlt.df.hidden = 1;
                                             cur_dialog.fields_dict.hv_bar_bezahlt.refresh();
+                                            cur_dialog.fields_dict.datum_zahlung_eintritt.df.hidden = 1;
+                                            cur_dialog.fields_dict.datum_zahlung_eintritt.refresh();
                                         }, 100);
                                     }
                                     if (cur_dialog.fields_dict.status.get_value() == 'Interessent*in') {
@@ -795,6 +799,7 @@ frappe.mvd_such_client = {
                                     }
                                 }
                             },
+                            {'fieldname': 'datum_zahlung_eintritt', 'fieldtype': 'Date', 'label': 'Datum Zahlung/Eintritt', 'reqd': 0, 'default': 0, 'hidden': 1},
                             {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0,
                                 'hidden': 1,
                                 'change': function() {
