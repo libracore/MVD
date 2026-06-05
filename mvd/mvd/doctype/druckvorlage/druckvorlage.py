@@ -457,12 +457,22 @@ def get_webshop_datum(sinv):
     else:
         return ''
 
-def get_doc_from_ctx(ctx): 
+def get_doc_from_ctx(ctx):
     if hasattr(ctx, "get") and ctx.get("doc"):
         return ctx.get("doc")
-    elif isinstance(ctx, Context): # Falls der ctx vom typ jinja2.context ist -> Email
-        doc = json.loads(ctx.get('frappe').get('form_dict').get('doc'))
-        return frappe.get_doc(doc.get('doctype'), doc.get('name'))
+
+    if isinstance(ctx, Context):
+        form_dict = ctx.get("frappe", {}).get("form_dict", {})
+
+        raw_doc = form_dict.get("doc") or form_dict.get("parent_doc")
+
+        if raw_doc:
+            doc = json.loads(raw_doc) if isinstance(raw_doc, str) else raw_doc
+            return frappe.get_doc(doc.get("doctype"), doc.get("name"))
+
+        if ctx.get("doctype") and ctx.get("name"):
+            return frappe.get_doc(ctx.get("doctype"), ctx.get("name"))
+
     return ctx
 
 @context_decorator

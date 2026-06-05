@@ -17,6 +17,7 @@ except ImportError:
     from jinja2 import contextfunction as context_decorator
 from jinja2.runtime import Context
 import json
+from mvd.mvd.doctype.druckvorlage.druckvorlage import get_doc_from_ctx
 
 '''
 current Working:
@@ -291,14 +292,6 @@ def create_rsv_mandat(**kwargs):
     return rsv_mandat.name
 
 ### Jinja-Methoden für die RSV-Mandat E-Mails ###
-def get_doc_from_ctx(ctx): 
-    if hasattr(ctx, "get") and ctx.get("doc"):
-        return ctx.get("doc")
-    elif isinstance(ctx, Context): # Falls der ctx vom typ jinja2.context ist -> Email
-        doc = json.loads(ctx.get('frappe').get('form_dict').get('doc'))
-        return frappe.get_doc(doc.get('doctype'), doc.get('name'))
-    return ctx
-
 @context_decorator
 def rsv_dokumente_fehlende(ctx):
     doc = get_doc_from_ctx(ctx)
