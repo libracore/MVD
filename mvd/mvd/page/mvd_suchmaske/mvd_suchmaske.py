@@ -274,7 +274,6 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
         hv_bar_bezahlt = False
         if "hv_bar_bezahlt" in anlage_daten and int(anlage_daten["hv_bar_bezahlt"]) == 1:
             hv_bar_bezahlt = True
-        
         # erstelle mitgliedschaft
         mitgliedschaft = frappe.get_doc({
             "doctype": "Mitgliedschaft",
@@ -286,6 +285,7 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
             "inkl_hv": 1,
             "eintrittsdatum": eintritt,
             "kundentyp": anlage_daten["kundentyp"],
+            "mvb_typ": anlage_daten["mvb_typ"] if "mvb_typ" in anlage_daten else None,
             "firma": firma,
             "zusatz_firma": zusatz_firma,
             "anrede_c": anlage_daten["anrede"] if 'anrede' in anlage_daten else '',

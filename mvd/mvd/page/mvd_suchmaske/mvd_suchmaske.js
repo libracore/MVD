@@ -755,8 +755,15 @@ frappe.mvd_such_client = {
                                         cur_dialog.fields_dict.kundentyp.set_value("Einzelperson");
                                         cur_dialog.fields_dict.kundentyp.refresh();
                                     }
+                                    if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Geschäft' &
+                                    cur_dialog.fields_dict.sektion_id.get_value() == 'MVZH'
+                                ) {
+                                        cur_dialog.fields_dict.mvb_typ.df.hidden = 0;
+                                        cur_dialog.fields_dict.mvb_typ.refresh();
+                                    }
                                 }
                             },
+                            {'fieldname': 'mvb_typ', 'fieldtype': 'Select', 'label': 'MVB Typ', 'reqd': 0, 'hidden': 1, 'options': '\nMvbMini\nMvbStandard'},
                             {'fieldname': 'language', 'fieldtype': 'Link', 'label': 'Sprache', 'reqd': 1, 'hidden': 0, 'options': 'Language', 'default': cur_page.page.search_fields.language.get_value()||'de'},
                             {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'hidden': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value()},
                             {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 0, 'read_only': 0,
