@@ -19,7 +19,7 @@ class FakultativeRechnung(Document):
             frappe.throw("Bezahlte Fakultative Rechnungen können nicht storniert werden.")
 
 @frappe.whitelist()
-def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, bezahl_datum=None, betrag_spende=False, druckvorlage='', asap_print=False, bezugsjahr=0, spendenlauf_referenz=None):
+def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, betrag_spende=False, druckvorlage='', asap_print=False, bezugsjahr=0, spendenlauf_referenz=None):
     if not betrag_spende:
         cancel_old_hv_fr(mitgliedschaft)
         """
@@ -35,6 +35,7 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, bezahl_datum
         # -------------------------------------------------------------------------------------------------------------
     mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
     sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+    
     fr = frappe.get_doc({
         "doctype": "Fakultative Rechnung",
         "mv_mitgliedschaft": mitgliedschaft.name,
@@ -54,7 +55,7 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, bezahl_datum
     
     if bezahlt:
         fr.status = 'Paid'
-        fr.bezahlt_via = create_paid_sinv(fr, mitgliedschaft, sektion, bezahl_datum=bezahl_datum)
+        fr.bezahlt_via = create_paid_sinv(fr, mitgliedschaft, sektion)
         fr.save(ignore_permissions=True)
     
     fr.submit()
@@ -96,7 +97,7 @@ def cancel_old_hv_fr(mitgliedschaft):
         old_hv.cancel()
         return
 
-def create_paid_sinv(fr, mitgliedschaft, sektion, bezahl_datum=None):
+def create_paid_sinv(fr, mitgliedschaft, sektion):
     company = frappe.get_doc("Company", sektion.company)
     if not mitgliedschaft.rg_kunde:
         customer = mitgliedschaft.kunde_mitglied
@@ -126,9 +127,7 @@ def create_paid_sinv(fr, mitgliedschaft, sektion, bezahl_datum=None):
         "customer_address": address,
         "contact_person": contact,
         'mitgliedschafts_jahr': fr.bezugsjahr if fr.bezugsjahr and fr.bezugsjahr > 0 else int(getdate(today()).strftime("%Y")),
-        'posting_date': bezahl_datum if bezahl_datum else today(),
-        'set_posting_time': 1,
-        'due_date': add_days(bezahl_datum, 30) if bezahl_datum else add_days(today(), 30),
+        'due_date': add_days(today(), 30),
         'debit_to': company.default_receivable_account,
         'sektions_code': str(sektion.sektion_id) or '00',
         'sektion_id': fr.sektion_id,
