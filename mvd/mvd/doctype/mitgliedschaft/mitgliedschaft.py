@@ -1918,7 +1918,8 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
                 'rechnungs_jahresversand': rechnungs_jahresversand,
                 'geschenk_reset': geschenk_reset,
                 'fast_mode': fast_mode,
-                'as_bg_job': False
+                'as_bg_job': False,
+                'bezahl_datum': bezahl_datum
             }
         enqueue("mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung", queue='short', job_name='Erstelle Mitgliedschaftsrechnung {0}'.format(mitgliedschaft), timeout=5000, **args)
         return 'Erstelle Mitgliedschaftsrechnung {0}'.format(mitgliedschaft)
