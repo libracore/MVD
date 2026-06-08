@@ -261,6 +261,8 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
     eintritt = None
     if anlage_daten["status"] == 'Regulär':
         eintritt = now()
+        if anlage_daten["datum_zahlung_eintritt"]:
+            eintritt = anlage_daten["datum_zahlung_eintritt"]
     
     if anlage_daten["sektion_id"] == "M+W-Abo":
         anlage_daten_status = 'Regulär'
@@ -294,6 +296,7 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
             "inkl_hv": 1,
             "eintrittsdatum": eintritt,
             "kundentyp": anlage_daten["kundentyp"],
+            "mvb_typ": anlage_daten["mvb_typ"] if "mvb_typ" in anlage_daten else None,
             "firma": firma,
             "zusatz_firma": zusatz_firma,
             "anrede_c": anlage_daten["anrede"] if 'anrede' in anlage_daten else '',
@@ -317,9 +320,9 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
             "abweichende_objektadresse": 1 if int(anlage_daten["postfach"]) == 1 else '0',
             "interessent_typ": anlage_daten["interessent_typ"],
             "bezahltes_mitgliedschaftsjahr": get_mitgl_jahr_in_anlage(anlage_daten["sektion_id"]) if mitglied_bezahlt else None,
-            "datum_zahlung_mitgliedschaft": today() if mitglied_bezahlt else None,
+            "datum_zahlung_mitgliedschaft": eintritt,
             "zahlung_hv": get_mitgl_jahr_in_anlage(anlage_daten["sektion_id"]) if hv_bezahlt else None,
-            "datum_hv_zahlung": today() if hv_bezahlt else None
+            "datum_hv_zahlung": (eintritt if eintritt else today()) if hv_bezahlt else None
         })
         mitgliedschaft.insert(ignore_permissions=True)
         
@@ -329,7 +332,7 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
                 massendruck = True
             else:
                 massendruck = False
-            sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=mitglied_bezahlt, submit=True, attach_as_pdf=True, inkl_hv=inkl_hv, hv_bar_bezahlt=hv_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck, zahlungsart=zahlungsart)
+            sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=mitglied_bezahlt, bezahl_datum=eintritt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck)
         else:
             if anlage_daten["status"] == 'Interessent*in':
                 # erstelle ABL für Interessent*Innenbrief mit EZ
