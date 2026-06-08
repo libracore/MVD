@@ -1904,7 +1904,7 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
     #         }
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None, geschenk_reset=False, fast_mode=False, as_bg_job=False, zahlungsart=None):
+def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, bezahl_datum=None, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None, geschenk_reset=False, fast_mode=False, as_bg_job=False, zahlungsart=None):
     if as_bg_job:
         args = {
                 'mitgliedschaft': mitgliedschaft,
@@ -1924,6 +1924,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
                 'geschenk_reset': geschenk_reset,
                 'fast_mode': fast_mode,
                 'as_bg_job': False,
+                'bezahl_datum': bezahl_datum,
                 'zahlungsart': zahlungsart
             }
         enqueue("mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung", queue='short', job_name='Erstelle Mitgliedschaftsrechnung {0}'.format(mitgliedschaft), timeout=5000, **args)
@@ -2004,7 +2005,9 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
         "customer_address": address,
         "contact_person": contact,
         'mitgliedschafts_jahr': jahr or cint(getdate(today()).strftime("%Y")),
-        'due_date': add_days(today(), 30),
+        'posting_date': bezahl_datum if bezahl_datum else today(),
+        'set_posting_time': 1,
+        'due_date': add_days(bezahl_datum, 30) if bezahl_datum else add_days(today(), 30),
         'debit_to': company.default_receivable_account,
         'sektions_code': str(sektion.sektion_id) or '00',
         'sektion_id': mitgliedschaft.sektion_id,
@@ -2054,7 +2057,7 @@ def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jah
     
     if inkl_hv and mitgliedschaft.mitgliedtyp_c != 'Geschäft':
         bezugsjahr = jahr or cint(getdate(today()).strftime("%Y"))
-        fr_rechnung = create_hv_fr(mitgliedschaft=mitgliedschaft.name, sales_invoice=sinv.name, bezahlt=hv_bar_bezahlt, bezugsjahr=bezugsjahr, zahlungsart=zahlungsart)
+        fr_rechnung = create_hv_fr(mitgliedschaft=mitgliedschaft.name, sales_invoice=sinv.name, bezahlt=hv_bar_bezahlt, bezahl_datum=bezahl_datum, bezugsjahr=bezugsjahr, zahlungsart=zahlungsart)
     
     if attach_as_pdf:
         # add doc signature to allow print

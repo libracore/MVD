@@ -731,6 +731,8 @@ frappe.mvd_such_client = {
                                             cur_dialog.fields_dict.inkl_hv.set_value(0);
                                             cur_dialog.fields_dict.inkl_hv.df.hidden = 0;
                                             cur_dialog.fields_dict.inkl_hv.refresh();
+                                            cur_dialog.fields_dict.datum_zahlung_eintritt.df.hidden = 0;
+                                            cur_dialog.fields_dict.datum_zahlung_eintritt.refresh();
                                         } else {
                                             // Zahlungsart
                                             cur_dialog.fields_dict.zahlungsart.set_value("Unbezahlt");
@@ -748,10 +750,14 @@ frappe.mvd_such_client = {
                                                 cur_dialog.fields_dict.inkl_hv.set_value(0);
                                                 cur_dialog.fields_dict.inkl_hv.df.hidden = 1;
                                                 cur_dialog.fields_dict.inkl_hv.refresh();
+                                                cur_dialog.fields_dict.datum_zahlung_eintritt.df.hidden = 1;
+                                                cur_dialog.fields_dict.datum_zahlung_eintritt.refresh();
                                             } else {
                                                 cur_dialog.fields_dict.inkl_hv.set_value(0);
                                                 cur_dialog.fields_dict.inkl_hv.df.hidden = 0;
                                                 cur_dialog.fields_dict.inkl_hv.refresh();
+                                                cur_dialog.fields_dict.datum_zahlung_eintritt.df.hidden = 0;
+                                                cur_dialog.fields_dict.datum_zahlung_eintritt.refresh();
                                             }
                                         }
                                     }
@@ -765,6 +771,8 @@ frappe.mvd_such_client = {
                                         cur_dialog.fields_dict.inkl_hv.set_value(0);
                                         cur_dialog.fields_dict.inkl_hv.df.hidden = 1;
                                         cur_dialog.fields_dict.inkl_hv.refresh();
+                                        cur_dialog.fields_dict.datum_zahlung_eintritt.df.hidden = 1;
+                                        cur_dialog.fields_dict.datum_zahlung_eintritt.refresh();
                                     } else {
                                         cur_dialog.fields_dict.interessent_typ.df.hidden = 1;
                                         cur_dialog.fields_dict.interessent_typ.refresh();
@@ -776,6 +784,12 @@ frappe.mvd_such_client = {
                                     if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Privat') {
                                         cur_dialog.fields_dict.kundentyp.set_value("Einzelperson");
                                         cur_dialog.fields_dict.kundentyp.refresh();
+                                    }
+                                    if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Geschäft' &
+                                        cur_dialog.fields_dict.sektion_id.get_value() == 'MVZH'
+                                    ) {
+                                        cur_dialog.fields_dict.mvb_typ.df.hidden = 0;
+                                        cur_dialog.fields_dict.mvb_typ.refresh();
                                     }
                                 }
                             },
@@ -802,6 +816,7 @@ frappe.mvd_such_client = {
                                 }
                             },
                             {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 1, 'read_only': 0},
+                            {'fieldname': 'datum_zahlung_eintritt', 'fieldtype': 'Date', 'label': 'Datum Zahlung/Eintritt', 'reqd': 0, 'default': 0, 'hidden': 1},
                             {'fieldname': 's1', 'fieldtype': 'Section Break'},
                             {'fieldname': 'kundentyp', 'fieldtype': 'Select', 'label': 'Kontakttyp', 'reqd': 1, 'options': 'Einzelperson\nUnternehmen', 'default': cur_page.page.search_fields.mitgliedtyp_c.get_value() == 'Geschäft' ? 'Unternehmen':'Einzelperson', 'change': function() {
                                     if (cur_dialog.fields_dict.kundentyp.get_value() == 'Einzelperson') {
@@ -838,7 +853,7 @@ frappe.mvd_such_client = {
                             {'fieldname': 'postfach', 'fieldtype': 'Check', 'label': 'Postfach', 'reqd': 0, 'default': cur_page.page.search_fields.postfach.get_value()},
                             {'fieldname': 'postfach_nummer', 'fieldtype': 'Data', 'label': 'Postfach Nummer', 'reqd': 0, 'default': cur_page.page.search_fields.postfach_nummer.get_value(), 'depends_on': 'eval:doc.postfach'},
                             {'fieldname': 'strasse', 'fieldtype': 'Data', 'label': 'Strasse', 'reqd': 1, 'default': cur_page.page.search_fields.strasse.get_value()},
-                            {'fieldname': 'nummer', 'fieldtype': 'Data', 'label': 'Nummer', 'reqd': 0, 'default': cur_page.page.search_fields.nummer.get_value()},
+                            {'fieldname': 'nummer', 'fieldtype': 'Data', 'label': 'Nummer', 'reqd': 1, 'default': cur_page.page.search_fields.nummer.get_value()},
                             {'fieldname': 'nummer_zu', 'fieldtype': 'Data', 'label': 'Nr. Zusatz', 'reqd': 0, 'default': cur_page.page.search_fields.nummer_zu.get_value()},
                             {'fieldname': 'plz', 'fieldtype': 'Data', 'label': 'PLZ', 'reqd': 1, 'default': cur_page.page.search_fields.plz.get_value(), 'change': function() {
                                     pincode_lookup(cur_dialog.fields_dict.plz.get_value(), cur_dialog.fields_dict.ort);
