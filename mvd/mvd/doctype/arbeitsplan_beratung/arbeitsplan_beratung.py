@@ -180,8 +180,7 @@ class ArbeitsplanBeratung(Document):
         
         import_file = read_xlsx_file_from_attached_file(file_url=self.termin_import_file)
 
-        if import_file[7][1:8] != ['Wochentag', 'Schicht', 'Datum', 'Ort', 'Von', 'Bis', 'Berater*in']:
-            print(import_file[7][1:7])
+        if import_file[7][1:9] != ['Wochentag', 'Schicht', 'Datum', 'Ort', 'Von', 'Bis', 'Berater*in', 'Beratungstyp']:
             frappe.throw("Die Import-Vorlage verfügt nicht über die erwartete Struktur - Kann nicht eingelesen werden.")
         
         import_rows = import_file[8:]
@@ -193,13 +192,14 @@ class ArbeitsplanBeratung(Document):
                 tbl_row.to_time = row[6].strftime("%H:%M")
                 tbl_row.art_ort = row[4]
                 tbl_row.beratungsperson = row[7]
+                tbl_row.beratungstyp = row[8]
         
         self.save()
         return
 
 
 @frappe.whitelist()
-def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None, short_results=1, art=None, fachskill=None, sprache=None, show_reserved_only=1, beratungskategorie="Unspezifisch"):
+def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None, short_results=1, art=None, fachskill=None, sprache=None, show_reserved_only=1, beratungstyp="Unspezifisch"):
     von_datum = getdate(datum)
     delta = timedelta(days=1)
     if int(short_results) == 1:
@@ -214,7 +214,7 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
     fachskill_filter = ''
     sprach_filter = ''
     show_reserved_only_filter = ''
-    beratungskategorie_filter = ''
+    beratungstyp_filter = ''
     verfuegbarkeiten_html = ""
     if beraterin and beraterin != '':
         beraterin_filter = '''AND `beratungsperson` = '{0}' '''.format(beraterin)
@@ -239,8 +239,8 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
                             )""".format(sprache)
     if cint(show_reserved_only) == 1:
         show_reserved_only_filter = "AND `reserved` = 1"
-    if beratungskategorie != "Unspezifisch":
-        beratungskategorie_filter = "AND `beratungskategorie` = '{0}'".format(beratungskategorie)
+    if beratungstyp != "Unspezifisch":
+        beratungstyp_filter = "AND `beratungstyp` = '{0}'".format(beratungstyp)
 
 
 
@@ -267,12 +267,12 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
                                                             {art_filter}
                                                             {fachskill_filter}
                                                             {sprach_filter}
-                                                            {beratungskategorie_filter}
+                                                            {beratungstyp_filter}
                                                         """.format(von_datum=von_datum.strftime("%Y-%m-%d"), \
                                                                    beraterin_filter=beraterin_filter, ort_filter=ort_filter, \
                                                                     art_filter=art_filter, sektion=sektion, fachskill_filter=fachskill_filter, \
                                                                     sprach_filter=sprach_filter, show_reserved_only_filter=show_reserved_only_filter, \
-                                                                    beratungskategorie_filter=beratungskategorie_filter), as_dict=True)
+                                                                    beratungstyp_filter=beratungstyp_filter), as_dict=True)
             if int(short_results) == 1:
                 verfuegbarkeiten_html += """
                     <p style="margin-bottom: 0px !important;"><b>{wochentag}, {datum}</b></p>

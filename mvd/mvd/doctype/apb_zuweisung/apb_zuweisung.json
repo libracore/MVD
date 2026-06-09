@@ -10,6 +10,7 @@
   "to_time",
   "beratungsperson",
   "beratungskategorie",
+  "beratungstyp",
   "reserved",
   "cb_1",
   "link_zur_beratung",
@@ -99,12 +100,20 @@
    "default": "Privat",
    "fieldname": "beratungskategorie",
    "fieldtype": "Select",
-   "label": "Beratungskategorie",
+   "hidden": 1,
+   "label": "Beratungskategorie (Obsolet)",
+   "options": "Privat\nGesch\u00e4ft",
+   "read_only": 1
+  },
+  {
+   "fieldname": "beratungstyp",
+   "fieldtype": "Select",
+   "label": "Beratungstyp",
    "options": "Privat\nGesch\u00e4ft"
   }
  ],
  "istable": 1,
- "modified": "2026-05-13 12:45:31.732075",
+ "modified": "2026-06-09 16:37:34.197816",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "APB Zuweisung",

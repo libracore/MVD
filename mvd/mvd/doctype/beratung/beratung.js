@@ -684,7 +684,7 @@ function termin_quick_entry(frm) {
             frappe.mvd.termin_quick_entry({
                 sektion_id: cur_frm.doc.sektion_id,
                 telefon: telefon.message || '',
-                typ_default: 'Privat',
+                typ_default: 'Unspezifisch',
                 beratung_source: cur_frm.doc.name,
                 beratung_filter: {
                     'faktura_kunde': cur_frm.doc.faktura_kunde,

@@ -15,7 +15,8 @@
   "fachskill",
   "notiz",
   "abp_referenz",
-  "beratungskategorie"
+  "beratungskategorie",
+  "beratungstyp"
  ],
  "fields": [
   {
@@ -86,12 +87,18 @@
   {
    "fieldname": "beratungskategorie",
    "fieldtype": "Data",
-   "label": "Beratungskategorie",
+   "hidden": 1,
+   "label": "Beratungskategorie (Obsolet)",
    "read_only": 1
+  },
+  {
+   "fieldname": "beratungstyp",
+   "fieldtype": "Data",
+   "label": "Beratungstyp"
   }
  ],
  "istable": 1,
- "modified": "2026-05-13 13:59:09.949104",
+ "modified": "2026-06-09 16:37:17.429916",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung Termin",
