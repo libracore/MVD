@@ -1319,7 +1319,7 @@ frappe.mvd.termin_quick_entry = function(config) {
                                     aktualisiere_verfuegbarkeiten(config, d);
                                 }
                             },
-                            {'fieldname': 'typ', 'fieldtype': 'Select', 'label': __('Beratungskategorie'), 'default': config.typ_default, 'options': 'Privat\nGeschäft\nUnspezifisch', 'reqd': 1,
+                            {'fieldname': 'typ', 'fieldtype': 'Select', 'label': __('Beratungstyp'), 'default': config.typ_default, 'options': 'Unspezifisch\nPrivat\nGeschäft', 'reqd': 1,
                                 'change': function() {
                                     // aktualisierung verfügbarkeiten
                                     aktualisiere_verfuegbarkeiten(config, d);
@@ -1342,15 +1342,6 @@ frappe.mvd.termin_quick_entry = function(config) {
                                 'change': function() {
                                     // aktualisierung verfügbarkeiten
                                     aktualisiere_verfuegbarkeiten(config, d);
-                                }
-                            },
-                            {'fieldname': 'wunsch_berater_in', 'fieldtype': 'Link', 'label': __('Wunsch-Berater*in'), 'options': 'Termin Kontaktperson', 'reqd': 0,
-                                'get_query': function() {
-                                    return {
-                                        filters: {
-                                            'sektion_id': config.sektion_id
-                                        }
-                                    }
                                 }
                             },
                             {'fieldname': 'wunsch_berater_in', 'fieldtype': 'Link', 'label': __('Wunsch-Berater*in'), 'options': 'Termin Kontaktperson', 'reqd': 0,
@@ -1516,7 +1507,7 @@ function aktualisiere_verfuegbarkeiten(config, dialog) {
             'fachskill': dialog.get_value('fachskills')||'',
             'sprache': dialog.get_value('sprache')||'',
             'show_reserved_only': dialog.get_value('show_reserved_only'),
-            'beratungskategorie': dialog.get_value('typ')
+            'beratungstyp': dialog.get_value('typ')
         },
         callback: function(r) {
             if (r.message) {

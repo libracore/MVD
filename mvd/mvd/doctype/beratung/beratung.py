@@ -780,7 +780,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
                 row.wunsch_berater_in = wunsch_berater_in.replace("({0})".format(sektion_id), "") if wunsch_berater_in else ''
                 row.fachskill = ", ".join(item["fachskill"] for item in json.loads(fachskill))
                 row.language = sprache
-                row.beratungskategorie = termin['beratungskategorie']
+                row.beratungstyp = termin['beratungstyp']
             
             beratung.save()
         else:
@@ -799,7 +799,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
                 row.wunsch_berater_in = wunsch_berater_in.replace("({0})".format(sektion_id), "") if wunsch_berater_in else ''
                 row.fachskill = ", ".join(item["fachskill"] for item in json.loads(fachskill))
                 row.language = sprache
-                row.beratungskategorie = termin['beratungskategorie']
+                row.beratungstyp = termin['beratungstyp']
             
             beratung.beratungskanal = "Telefon" if art == 'telefonisch' else art
             beratung.save()
@@ -1105,7 +1105,7 @@ def get_termin_block_data(abp_zuweisungen):
             'von': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'from_time'),
             'bis': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'to_time'),
             'date': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'date'),
-            'beratungskategorie': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'beratungskategorie')
+            'beratungstyp': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'beratungstyp')
         })
     return return_data
 
