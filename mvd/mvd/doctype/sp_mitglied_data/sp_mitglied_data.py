@@ -110,6 +110,7 @@ def update_based_on_scheduler():
     Selbst-Heil-Methode (called via Daily Scheduler)
 '''
 def fixing_wrong_data(manual=False):
+    frappe.error_log("fixing_wrong_data wurde am {0} gestartet".format(frappe.utils.now()), "#1827: start fixing_wrong_data")
     # Diese Methode läuft (wenn als BG-Job) unter dem Job-Name "Nächtliche SP Mitglied Data Korrektur"
     if manual:
         print("Analyse DB, please wait...")
@@ -149,6 +150,7 @@ def fixing_wrong_data(manual=False):
         affected_records = []
 
         if not manual:
+
             for mitgliedschaft in mitgliedschaften:
                 mitglied_id = get_mitglied_id_from_nr(mitglied_nr=mitgliedschaft.ref_nr, ignore_inaktiv=True)
                 if cint(frappe.db.get_value("Mitgliedschaft", mitglied_id, "validierung_notwendig")) != 1:
@@ -193,3 +195,5 @@ def fixing_wrong_data(manual=False):
     # Dies ermöglicht in gewissen Fällen ein Serielles Abarbeiten von BG-Jobs obwohl mehrere Worker paralell arbeiten.
     frappe.db.set_value("Race Condition Helper", "Race Condition Helper", "fixing_wrong_data", today())
     frappe.db.commit()
+
+    frappe.error_log("fixing_wrong_data wurde am {0} beendet".format(frappe.utils.now()), "#1827: beendet fixing_wrong_data")
