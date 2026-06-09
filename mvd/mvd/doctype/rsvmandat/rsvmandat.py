@@ -19,15 +19,6 @@ from jinja2.runtime import Context
 import json
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_doc_from_ctx
 
-'''
-current Working:
-- Page für Status-Übersicht von RSVMandat & RSVMandatsliste inkl. Absprung in Liste mit Filter
-
-ToDo bis Do Mittag:
-- Button "Fehlende Dokumente Anforderung" -> Macht ein Mail-Dialog mit Template welches alle Fehlenden Dokumente auflistet
-- (P2) Mail-In mit Anhang: Anhang autom. als Attachment in RSVMandat
-'''
-
 class RSVMandat(Document):
     def validate(self):
         self.fetch_document_table()
@@ -44,8 +35,14 @@ class RSVMandat(Document):
         if not self.schlichtungsbehoerde:
             self.schlichtungsbehoerde = get_schlichtungsbehoerde(self.bfs_nr)
         
-        if not self.rsvmandatsliste and self.adr_egaid:
-            self.rsvmandatsliste = self.get_gruppenmandat(cint(self.force_new_rsvmandatliste))
+        if not cint(self.mandatslisten_und_siedlungs_sperre) == 1:
+            if not self.rsvmandatsliste and self.adr_egaid:
+                self.rsvmandatsliste = self.get_gruppenmandat(cint(self.force_new_rsvmandatliste))
+        else:
+            # Keine autom. Mandatslisten- und Siedlungsanlage durch after_insert.
+            # Wird autom. wieder entfernt, da es nach after_insert keinen Nutzen mehr hat.
+            self.mandatslisten_und_siedlungs_sperre = 0
+            self.reason_missing_rsvmandatlist = "Die allfällige autom. Mandatslisten- sowie Siedlungsanlage wurde gesperrt. Diese müssen ggf. manuell angelegt und verknüpft werden."
         
         self.save()
     
@@ -287,6 +284,13 @@ def create_rsv_mandat(**kwargs):
         if cint(kwargs.get("rsv_mandatliste_new_creation", None)) == 1:
             rsv_mandat.force_new_rsvmandatliste = 1
             rsv_mandat.rsvmandatsliste = None
+    
+    if kwargs.get("mandatslisten_und_siedlungs_sperre", None):
+        if cint(kwargs.get("mandatslisten_und_siedlungs_sperre", None)) == 1:
+            rsv_mandat.mandatslisten_und_siedlungs_sperre = 1
+    
+    if kwargs.get("mandat_typ", None):
+        rsv_mandat.status = kwargs.get("mandat_typ", None)
 
     rsv_mandat.insert()
     return rsv_mandat.name

@@ -40,14 +40,15 @@
   "force_new_rsvmandatliste",
   "adr_egaid",
   "bfs_nr",
-  "reason_missing_rsvmandatlist"
+  "reason_missing_rsvmandatlist",
+  "mandatslisten_und_siedlungs_sperre"
  ],
  "fields": [
   {
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Provisorisch\nVorpr\u00fcfung\nGepr\u00fcft\nmanuelle Vergabe\nEingereicht\nVergeben\nAbgelehnt\nAbgeschlossen\nR\u00fcckzug\nkeine Antwort\nDoppelversicherung"
+   "options": "Provisorisch EM\nProvisorisch GM\nVorpr\u00fcfung\nGepr\u00fcft\nmanuelle Vergabe\nEingereicht\nVergeben\nAbgelehnt\nAbgeschlossen\nR\u00fcckzug\nkeine Antwort\nDoppelversicherung"
   },
   {
    "fieldname": "fallnummer",
@@ -229,9 +230,15 @@
    "fieldtype": "Data",
    "label": "Grund f\u00fcr fehlende RSV-Mandatsliste",
    "length": 300
+  },
+  {
+   "default": "0",
+   "fieldname": "mandatslisten_und_siedlungs_sperre",
+   "fieldtype": "Check",
+   "label": "mandatslisten_und_siedlungs_sperre"
   }
  ],
- "modified": "2026-06-03 15:02:45.152075",
+ "modified": "2026-06-09 14:42:00.754068",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",

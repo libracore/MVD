@@ -2203,6 +2203,15 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
     get_fields(opts) {
         var me = this;
         return [
+            {'fieldname': 'mandat_typ', 'fieldtype': 'Select', 'label': 'Mandattyp', 'reqd': 1, 'options': 'Provisorisch EM\nProvisorisch GM'},
+            {'fieldname': 'mandatslisten_und_siedlungs_sperre', 'fieldtype': 'Check', 'label': 'Keine Mandatslisten- und Siedlungs-Anlage', 'default': 1, 'read_only': 0, 
+                change: function() {
+                    // Ist ein Hack weil wenn der Default-Wert auf 1 und die Checkbox auf Read-Only gesetzt wird, erkennt das Framework die CB NICHT als gesetzt.
+                    if (me.dialog.get_value('mandatslisten_und_siedlungs_sperre') != 1) {
+                        me.dialog.set_value('mandatslisten_und_siedlungs_sperre', 1);
+                    }
+                }
+            },
             {'fieldname': 'rsv_mandatliste', 'fieldtype': 'Link', 'label': 'RSV-Mandatliste', 'reqd': 0, 'hidden': 1,'options': 'RSVMandatsliste', 'description': 'Wenn hier eine RSV-Mandatsliste ausgewählt wird, so wird das neu zu erstellende RSV-Mandat diesem hinzugefügt. Wenn explizit eine neue RSV-Mandatsliste angelegt werden, so benutzen Sie bitte nachfolgende Checkbox.',
                 get_query: function() {
                     if(me.dialog.get_value('rsv_mandatliste_filter')) {
@@ -2236,7 +2245,7 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
 
     call_primary_action(opts) {
         var me = this;
-        if (me.dialog.get_value("rsv_mandatliste_new_creation") != 1 && !me.dialog.get_value("rsv_mandatliste")) {
+        if (me.dialog.get_value("rsv_mandatliste_new_creation") != 1 && !me.dialog.get_value("rsv_mandatliste") && me.dialog.get_value("mandatslisten_und_siedlungs_sperre") != 1) {
             frappe.call({
                 method: "mvd.mvd.doctype.rsvmandat.rsvmandat.check_for_existing_rsvmandaliste",
                 args: me.dialog.get_values(),
