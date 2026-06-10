@@ -1,11 +1,13 @@
 
 <div class="row">
-    <h1 class="vbz">Meine Beratungstermine<span id="datenstand_as" class="pull-right">Datenstand: {{ datenstand_as }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
+    <h1 class="vbz">Beratungsterminübersicht<span id="datenstand_as" class="pull-right">Datenstand: {{ datenstand_as }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
 </div>
 <div class="row">
-    <div class="col-sm-2">
+    <div class="col-sm-3">
         <p class="free_only"></p>
         <p class="my_reservations"></p>
+        <p class="termine_heute"></p>
+        <p class="termine_gebucht"></p>
     </div>
     <div class="col-sm-2">
         <p class="beratungsort"></p>
@@ -19,7 +21,7 @@
     <div class="col-sm-2">
         <p class="beratungstyp"></p>
     </div>
-    <div class="col-sm-2">
+    <div class="col-sm-1">
         <!-- placeholder -->
          &nbsp;<br>&nbsp;<br>&nbsp;
     </div>
@@ -385,6 +387,9 @@
     <div class="col-sm-2">
         <p class="fachskill"></p>
     </div>
+</div>
+<div class="row">
+    <h1 class="vbz">Meine Beratungstermine</h1>
 </div>
 <div class="row">
     <table id="table_termin_uebersicht">
