@@ -19,6 +19,13 @@ h1.vbz {
 
 #table_termin_uebersicht {
     width: 100%;
+    border-collapse: collapse;
+}
+
+#table_termin_uebersicht td,
+#table_termin_uebersicht th {
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .termin-tr:hover {
