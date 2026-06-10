@@ -2274,7 +2274,7 @@ function termin_quick_entry(frm) {
     frappe.mvd.termin_quick_entry({
         sektion_id: cur_frm.doc.sektion_id,
         telefon: cur_frm.doc.tel_m_1 || cur_frm.doc.tel_p_1 || cur_frm.doc.tel_g_1 || '',
-        typ_default: cur_frm.doc.mitgliedtyp_c,
+        typ_default: cur_frm.doc.sektion_id == 'MVZH' ? cur_frm.doc.mitgliedtyp_c:'Unspezifisch',
         beratung_filter: {'mv_mitgliedschaft': cur_frm.doc.name},
         create_kwargs: {'mitgliedschaft': cur_frm.doc.name}
     });

@@ -1319,7 +1319,7 @@ frappe.mvd.termin_quick_entry = function(config) {
                                     aktualisiere_verfuegbarkeiten(config, d);
                                 }
                             },
-                            {'fieldname': 'typ', 'fieldtype': 'Select', 'label': __('Beratungstyp'), 'default': config.typ_default, 'options': 'Unspezifisch\nPrivat\nGeschäft', 'reqd': 1,
+                            {'fieldname': 'typ', 'fieldtype': 'Select', 'label': __('Beratungstyp'), 'default': config.typ_default, 'options': 'Unspezifisch\nPrivat\nGeschäft', 'reqd': 1, 'hidden': config.sektion_id == 'MVZH' ? 0:1,
                                 'change': function() {
                                     // aktualisierung verfügbarkeiten
                                     aktualisiere_verfuegbarkeiten(config, d);
