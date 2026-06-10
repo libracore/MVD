@@ -122,6 +122,7 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
                                             `beratung`.`beratungskategorie_3`,
                                             `beratung`.`mv_mitgliedschaft`,
                                             `beratung`.`status`,
+                                            `beratung`.`terminkategorie`,
                                             IFNULL(`beratung`.`person_ist_eingetroffen`, 0) AS `person_ist_eingetroffen`,
                                             `berTer`.`abp_referenz`,
                                             `berTer`.`beratungstyp`
@@ -163,7 +164,8 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
                         'sort_date': frappe.utils.getdate(termin.von),
                         'name_for_reservation': '---',
                         'person_ist_eingetroffen': termin.person_ist_eingetroffen,
-                        'is_business': 1 if termin.beratungstyp == "Geschäft" else 0
+                        'is_business': 1 if termin.beratungstyp == "Geschäft" else 0,
+                        'terminkategorie': termin.terminkategorie
                     }
                     if cint(termin.person_ist_eingetroffen) == 1:
                         anz_eingetroffen += 1
@@ -236,6 +238,7 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
                                         '---' AS `beratungskategorie`,
                                         '---' AS `beratungskategorie_2`,
                                         '---' AS `beratungskategorie_3`,
+                                        '---' AS `terminkategorie`,
                                         '---' AS `name_mitglied`,
                                         NULL AS `sort_date`,
                                         IFNULL(`reserved`, 0) AS `reserved_mark`,
