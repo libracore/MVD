@@ -23,18 +23,22 @@ def get_open_data():
             's7': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's8': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 's8': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's9': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'status': 'Zusammengeführt', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
-            's10': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'hat_termine': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            's10': len(frappe.get_list('Beratung', fields='name', filters={
+                'ungelesen': 1, 
+                'sektion_id': ['!=', 'MVDF'],
+                'name': ['in', frappe.db.sql_list("SELECT DISTINCT parent FROM `tabBeratung Termin` WHERE `von` > %s", now_datetime())]
+            }, limit=100, distinct=True)),
             's11': len(frappe.get_list('Mandat', fields='name', filters={'kontaktperson': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r1': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'beratung_prio': 'Hoch', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
-            'r2': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'beratung_prio': ['!=', 'Hoch'], 'kontaktperson': ['like','Rechtsberatung Pool%'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r2': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'beratung_prio': ['not in', ['Hoch']], 'kontaktperson': ['like','Rechtsberatung Pool%'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r3': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'r3': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 0, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r6': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r7': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 'hat_termine': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'r8': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Closed', 'hat_termine': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
-            'r9': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Open', 'Zusammengeführt', 'Termin vereinbart']], 'ungelesen': 1, 'kontaktperson': ['is', 'set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            'r9': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Open', 'Zusammengeführt', 'Termin vereinbart', "Rückfrage: Termin vereinbaren"]], 'ungelesen': 1, 'kontaktperson': ['is', 'set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             'p1': get_p1(frappe.session.user),
             'p2': get_p2(frappe.session.user),
             'p3': get_p3(frappe.session.user),
@@ -148,3 +152,6 @@ def get_user_kontaktperson(only_session_user=False):
                 user_kontaktpersonen.append(uk.parent)
     return user_kontaktpersonen
                 
+@frappe.whitelist()
+def get_termine_in_zukunft():
+    return frappe.db.sql_list("SELECT DISTINCT parent FROM `tabBeratung Termin` WHERE `von` > %s", now_datetime())

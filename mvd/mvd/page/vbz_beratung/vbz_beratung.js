@@ -82,8 +82,22 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s10").click(function(){
-            frappe.route_options = {"hat_termine": 1, "ungelesen": 1, "sektion_id": sektion}
-            frappe.set_route("List", "Beratung", "List");
+            frappe.call({
+                method: "mvd.mvd.page.vbz_beratung.vbz_beratung.get_termine_in_zukunft",
+                args: {},
+                callback: function(r) {
+                    var parents = r.message || [];
+                    if (parents.length === 0) {
+                        parents = [""];
+                    }
+                    frappe.route_options = {
+                        "ungelesen": 1,
+                        "sektion_id": sektion,
+                        "name": ["in", parents]
+                    }
+                    frappe.set_route("List", "Beratung", "List");
+                }
+            });
         });
         $("#s11").click(function(){
             frappe.route_options = {"kontaktperson": ['is', 'not set'], "sektion_id": sektion}
@@ -99,7 +113,7 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r2").click(function(){
-             frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['like', 'Rechtsberatung Pool%'], 'beratung_prio': ['!=', 'Hoch'], "sektion_id": sektion}
+             frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['like', 'Rechtsberatung Pool%'], 'beratung_prio': ['not in', ['Hoch']], "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r3").click(function(){
@@ -115,7 +129,7 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r6").click(function(){
-            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1, "sektion_id": sektion}
+            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'ungelesen': 1, "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r7").click(function(){
@@ -127,7 +141,7 @@ frappe.vbz_beratung = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#r9").click(function(){
-            frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt", "Termin vereinbart"]], "ungelesen": 1, "kontaktperson": ['is', 'set'], "sektion_id": sektion}
+            frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt", "Termin vereinbart", "Rückfrage: Termin vereinbaren"]], "ungelesen": 1, "kontaktperson": ['is', 'set'], "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
         
