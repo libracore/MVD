@@ -332,7 +332,11 @@ frappe.vbz_beratung_termine = {
     add_click_handlers: function(page) {
         $(".termin-tr").each(function() {
             if ($(this).attr('data-beratung')) {
-                $(this).off('click').on('click', function() {
+                $(this).off('click').on('click', function(e) {
+                    if ($(e.target).closest('a, button').length) {
+                        // verhindert dass das Pop-Up oder die Beratung geöffnet wird, wenn auf den Mitgliedschafts-Link geklickt wird
+                        return;
+                    }
                     if ($(this).attr('data-beratung') != '---') {
                         if ($(this).attr('data-person_ist_eingetroffen') != 1) {
                             const beratung_name = $(this).attr('data-beratung');
@@ -345,7 +349,8 @@ frappe.vbz_beratung_termine = {
                                         label: "Beratung öffnen",
                                         click: function() {
                                             d.hide();
-                                            frappe.set_route("Form", "Beratung", beratung_name);
+                                            const url = `/desk#Form/Beratung/${beratung_name}`;
+                                            window.open(url, '_blank');
                                         }
                                     },
                                     {
@@ -370,7 +375,9 @@ frappe.vbz_beratung_termine = {
                             });
                             d.show();
                         } else {
-                            frappe.set_route("Form", "Beratung", $(this).attr('data-beratung'));
+                            const beratung = $(this).attr('data-beratung');
+                            const url = `/desk#Form/Beratung/${beratung}`;
+                            window.open(url, '_blank');
                         }
                     } else {
                         if ($(this).attr('data-name_for_reservation') != '---') {
