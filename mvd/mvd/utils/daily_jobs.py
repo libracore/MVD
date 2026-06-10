@@ -30,12 +30,12 @@ def check_and_run_yearly_snap():
         )
 
 def set_inaktiv():
-    frappe.error_log("set_inaktiv wurde gequeued am {0}".format(frappe.utils.now()), "#1827: Queue set_inaktiv")
+    frappe.log_error("set_inaktiv wurde gequeued am {0}".format(frappe.utils.now()), "#1827: Queue set_inaktiv")
     args = {}
     enqueue("mvd.mvd.utils.daily_jobs._set_inaktiv", queue='long', job_name='Nächtliche Inaktivierungen', timeout=5000, **args)
 
 def _set_inaktiv():
-    frappe.error_log("_set_inaktiv wurde gestartet am {0}".format(frappe.utils.now()), "#1827: start _set_inaktiv")
+    frappe.log_error("_set_inaktiv wurde gestartet am {0}".format(frappe.utils.now()), "#1827: start _set_inaktiv")
     mitgliedschaften = frappe.db.sql("""
                                     SELECT
                                         `name`
@@ -112,7 +112,7 @@ def _set_inaktiv():
     frappe.db.set_value("Race Condition Helper", "Race Condition Helper", "set_inaktiv", today())
     frappe.db.commit()
 
-    frappe.error_log("_set_inaktiv wurde beendet am {0}".format(frappe.utils.now()), "#1827: beendet _set_inaktiv")
+    frappe.log_error("_set_inaktiv wurde beendet am {0}".format(frappe.utils.now()), "#1827: beendet _set_inaktiv")
 
 def entferne_alte_reduzierungen():
     alte_preisregeln = frappe.db.sql("""SELECT `name` FROM `tabPricing Rule` WHERE `name` LIKE 'Reduzierung%' AND `disable` = 0 AND `valid_upto` < CURDATE()""", as_dict=True)
@@ -480,17 +480,17 @@ def execute_address_changes():
         addresschange.submit()
 
 def fixing_sp_mitglied_data():
-    frappe.error_log("fixing_sp_mitglied_data prüfe ausführung am {0}".format(frappe.utils.now()), "#1827: Prüfe Ausführung fixing_sp_mitglied_data")
+    frappe.log_error("fixing_sp_mitglied_data prüfe ausführung am {0}".format(frappe.utils.now()), "#1827: Prüfe Ausführung fixing_sp_mitglied_data")
     if not is_job_already_running('Nächtliche Inaktivierungen'):
-        frappe.error_log("Nächtliche Inaktivierungen läuft nicht mehr am {0}".format(frappe.utils.now()), "#1827: Step 1 passed fixing_sp_mitglied_data")
+        frappe.log_error("Nächtliche Inaktivierungen läuft nicht mehr am {0}".format(frappe.utils.now()), "#1827: Step 1 passed fixing_sp_mitglied_data")
         if frappe.db.get_value("Race Condition Helper", "Race Condition Helper", "set_inaktiv") == today():
-            frappe.error_log("Race Condition Helper set_inaktiv gesetzt am {0}".format(frappe.utils.now()), "#1827: Step 2 passed fixing_sp_mitglied_data")
+            frappe.log_error("Race Condition Helper set_inaktiv gesetzt am {0}".format(frappe.utils.now()), "#1827: Step 2 passed fixing_sp_mitglied_data")
             args = {}
             enqueue("mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data.fixing_wrong_data", queue='long', job_name='Nächtliche SP Mitglied Data Korrektur', timeout=5000, **args)
             return
     
     # Solange die nächtliche Inaktivierung läuft oder noch nicht durchgeführt wurde, keine SP Mitglied Data Korrekturen da dies Konfliktpotenzial bietet
-    frappe.error_log("Step 1 und/oder 2 nicht erfüllt am {0}".format(frappe.utils.now()), "#1827: Restart Prüfung fixing_sp_mitglied_data")
+    frappe.log_error("Step 1 und/oder 2 nicht erfüllt am {0}".format(frappe.utils.now()), "#1827: Restart Prüfung fixing_sp_mitglied_data")
     args = {}
     enqueue("mvd.mvd.utils.daily_jobs.fixing_sp_mitglied_data", queue='short', job_name='fixing_sp_mitglied_data', timeout=5000, **args)
     return
