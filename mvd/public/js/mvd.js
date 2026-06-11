@@ -2234,6 +2234,15 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
         ]
     }
 
+    get_template_from_type() {
+        var me = this;
+        var templates = {
+            'Provisorisch EM': 'Schadenanzeige EM',
+            'Provisorisch GM': 'Schadenanzeige GM'
+        }
+        return templates[me.dialog.get_value('mandat_typ')]
+    }
+
     call_primary_action(opts) {
         var me = this;
         if (me.dialog.get_value("rsv_mandatliste_new_creation") != 1 && !me.dialog.get_value("rsv_mandatliste") && me.dialog.get_value("mandatslisten_und_siedlungs_sperre") != 1) {
@@ -2273,11 +2282,26 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
                 args: me.dialog.get_values(),
                 freeze: true,
                 freeze_message: 'Erstelle RSV-Mandat...',
-                callback: function(r)
+                callback: function(rsv_response)
                 {
-                    frappe.db.set_value("Beratung", opts.beratung, 'rsv_mandat', r.message);
-                    cur_frm.reload_doc();
-                    frappe.set_route("Form", "RSVMandat", r.message);
+                    frappe.call({
+                        method: "mvd.mvd.utils.document_template_handler.use_template",
+                        args:{
+                                template: me.get_template_from_type(),
+                                source_doc: cur_frm.doc.name,
+                                source_dt: "Beratung",
+                                save_output_to: [["Beratung", cur_frm.doc.name], ["RSVMandat", rsv_response.message]],
+                                filename: `${me.get_template_from_type()}_${rsv_response.message}.odt`
+                        },
+                        freeze: true,
+                        freeze_message: 'Erstelle Schadenanzeige...',
+                        callback: function(template_response)
+                        {
+                            frappe.db.set_value("Beratung", opts.beratung, 'rsv_mandat', rsv_response.message);
+                            cur_frm.reload_doc();
+                            frappe.set_route("Form", "RSVMandat", rsv_response.message);
+                        }
+                    });
                 }
             });
         }
