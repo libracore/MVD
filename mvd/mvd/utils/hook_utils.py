@@ -211,6 +211,9 @@ def sync_file_to_nextcloud(file, event):
             return
         
         ncs = NCSettings(sektion)
+        if not ncs.IS_ENABLED:
+            return
+        
         mitglied_nr = None
         
         if beratung.mv_mitgliedschaft:
