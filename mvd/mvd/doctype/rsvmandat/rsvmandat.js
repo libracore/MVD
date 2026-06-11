@@ -45,6 +45,21 @@ frappe.ui.form.on('RSVMandat', {
                 )
             }
         });
+    },
+    open_beratung: function(frm) {
+        frappe.call({
+            method: "open_beratung",
+            doc: frm.doc,
+            freeze: true,
+            freeze_message: 'Suche und öffne zugehörige Beratung...',
+            callback: function(r)
+            {
+                if (r.message) {
+                    const url = `/desk#Form/Beratung/${r.message}`;
+                    window.open(url, '_blank');
+                }
+            }
+        });
     }
 });
 
