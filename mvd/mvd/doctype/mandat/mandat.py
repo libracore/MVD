@@ -27,13 +27,20 @@ class Mandat(Document):
         self.name = make_autoname("{0}-{1}-.#".format(sektion, jahr))
 
     def before_save(self):
-            if not self.kontaktperson:
-                self.status = "Unzugewiesen"
-            
-            elif not self.is_new():
-                old_doc = self.get_doc_before_save()
-                if old_doc and not old_doc.kontaktperson and self.kontaktperson:
-                    self.status = "Vorgemerkt"
+        if self.kontaktperson and "pool" in self.kontaktperson.lower():
+            self.kontaktperson = None
+            frappe.throw(
+                msg=frappe._("Pool ist als Vertrauensanwält*in nicht erlaubt. Bitte korrigieren."),
+                title=frappe._("Ungültige Kontaktperson")
+            )
+
+        if not self.kontaktperson:
+            self.status = "Unzugewiesen"
+        
+        elif not self.is_new():
+            old_doc = self.get_doc_before_save()
+            if old_doc and not old_doc.kontaktperson and self.kontaktperson:
+                self.status = "Vorgemerkt"
 
     def on_update(self):
         # Bestätigungs-Email senden

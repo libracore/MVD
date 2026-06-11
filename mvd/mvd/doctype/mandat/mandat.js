@@ -3,6 +3,15 @@
 
 frappe.ui.form.on('Mandat', {
     refresh: function(frm) {
+        // Pool darf nicht zugeordnet werden
+        frm.set_query('kontaktperson', function() {
+            return {
+                filters: [
+                    ['Termin Kontaktperson', 'name', 'not like', '%pool%']
+                ]
+            };
+        });
+
         if (!frm.is_new() && !frm.doc.kontaktperson) {
             frm.add_custom_button(__('Suche Vertrauensanwält*in'), function() {
                 
