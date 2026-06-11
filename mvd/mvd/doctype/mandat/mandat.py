@@ -33,7 +33,7 @@ class Mandat(Document):
             elif not self.is_new():
                 old_doc = self.get_doc_before_save()
                 if old_doc and not old_doc.kontaktperson and self.kontaktperson:
-                    self.status = "Vormerkung"
+                    self.status = "Vorgemerkt"
 
     def on_update(self):
         # Bestätigungs-Email senden
