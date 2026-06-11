@@ -37,6 +37,7 @@
    "label": "File-Pfad"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "mapping_tbl",
    "fieldtype": "Table",
    "label": "Dokumentenvorlage Mapping",
@@ -49,7 +50,7 @@
    "options": "Sektion"
   }
  ],
- "modified": "2026-06-11 10:43:15.102705",
+ "modified": "2026-06-11 10:46:35.550919",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Dokumentenvorlage",
