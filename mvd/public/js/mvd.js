@@ -2290,7 +2290,7 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
                                 template: me.get_template_from_type(),
                                 source_doc: cur_frm.doc.name,
                                 source_dt: "Beratung",
-                                save_output_to: [["Beratung", cur_frm.doc.name], ["RSVMandat", rsv_response.message]],
+                                save_output_to: [["Beratung", cur_frm.doc.name]],
                                 filename: `${me.get_template_from_type()}_${rsv_response.message}.odt`
                         },
                         freeze: true,

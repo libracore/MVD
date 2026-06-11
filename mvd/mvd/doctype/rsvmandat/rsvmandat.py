@@ -70,21 +70,21 @@ class RSVMandat(Document):
                             mietvertrag_pfad = self.get_mietvertrag_pfad()
                             if mietvertrag_pfad:
                                 doc_row.file_upload = mietvertrag_pfad
-                        if document.dokument == 'Schadenanzeige':
-                            attachments = frappe.db.sql(
-                                """
-                                    SELECT `file_url`, `file_name`
-                                    FROM `tabFile`
-                                    WHERE `attached_to_doctype` = 'RSVMandat'
-                                    AND `attached_to_name` = '{0}'
-                                    LIMIT 1
-                                """.format(self.name),
-                                as_dict=True
-                            )
-                            if len(attachments) > 0:
-                                for attachment in attachments:
-                                    if "Schadenanzeige" in attachment.file_name and "{0}".format(self.name) in attachment.file_name:
-                                        doc_row.file_upload = attachment.file_url
+                        # if document.dokument == 'Schadenanzeige':
+                        #     attachments = frappe.db.sql(
+                        #         """
+                        #             SELECT `file_url`, `file_name`
+                        #             FROM `tabFile`
+                        #             WHERE `attached_to_doctype` = 'RSVMandat'
+                        #             AND `attached_to_name` = '{0}'
+                        #             LIMIT 1
+                        #         """.format(self.name),
+                        #         as_dict=True
+                        #     )
+                        #     if len(attachments) > 0:
+                        #         for attachment in attachments:
+                        #             if "Schadenanzeige" in attachment.file_name and "{0}".format(self.name) in attachment.file_name:
+                        #                 doc_row.file_upload = attachment.file_url
     
     def get_mietvertrag_pfad(self):
         mietvertrag_pfad = frappe.db.sql(
