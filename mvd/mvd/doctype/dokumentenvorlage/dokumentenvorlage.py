@@ -15,7 +15,11 @@ class Dokumentenvorlage(Document):
                 "doctype": row.d_type,
                 "fieldname": row.field
             }
-            for row in self.mapping_tbl
+            for row in sorted(
+                self.mapping_tbl,
+                key=lambda row: len(row.platzhalter),
+                reverse=True
+            )
             if row.platzhalter and row.d_type and row.field
         }
 
