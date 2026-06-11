@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "file_name",
+  "sektion_id",
   "file_base",
   "file_path",
   "mapping_tbl"
@@ -40,9 +41,15 @@
    "fieldtype": "Table",
    "label": "Dokumentenvorlage Mapping",
    "options": "Dokumentenvorlage Mapping TBL"
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
   }
  ],
- "modified": "2026-06-02 18:21:36.780432",
+ "modified": "2026-06-11 10:43:15.102705",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Dokumentenvorlage",
