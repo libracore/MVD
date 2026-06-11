@@ -372,9 +372,9 @@ class Beratung(Document):
                             'allow': 'Mitgliedschaft'
                         }).insert(ignore_permissions=True)
     
-    def create_mandat(self, berater_in=None, typ=None, bemerkung=None, persoenliche_bemerkung=None):
+    def create_mandat(self, berater_in=None, typ=None, fertigstellen_bis=None, bemerkung=None, persoenliche_bemerkung=None):
         from mvd.mvd.doctype.mandat.mandat import create_mandat
-        mandat = create_mandat(self.sektion_id, self.name, self.mv_mitgliedschaft, berater_in, typ, bemerkung, persoenliche_bemerkung)
+        mandat = create_mandat(self.sektion_id, self.name, self.mv_mitgliedschaft, self.beratungskategorie, self.beratungskategorie_2, self.beratungskategorie_3, berater_in, typ, fertigstellen_bis, bemerkung, persoenliche_bemerkung)
         frappe.db.set_value("Beratung", self.name, "mandat", mandat)
 
         return mandat

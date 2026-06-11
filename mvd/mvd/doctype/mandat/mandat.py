@@ -27,13 +27,20 @@ class Mandat(Document):
         self.name = make_autoname("{0}-{1}-.#".format(sektion, jahr))
 
     def before_save(self):
-            if not self.kontaktperson:
-                self.status = "Unzugewiesen"
-            
-            elif not self.is_new():
-                old_doc = self.get_doc_before_save()
-                if old_doc and not old_doc.kontaktperson and self.kontaktperson:
-                    self.status = "Vormerkung"
+        if self.kontaktperson and "pool" in self.kontaktperson.lower():
+            self.kontaktperson = None
+            frappe.throw(
+                msg=frappe._("Pool ist als Vertrauensanwält*in nicht erlaubt. Bitte korrigieren."),
+                title=frappe._("Ungültige Kontaktperson")
+            )
+
+        if not self.kontaktperson:
+            self.status = "Unzugewiesen"
+        
+        elif not self.is_new():
+            old_doc = self.get_doc_before_save()
+            if old_doc and not old_doc.kontaktperson and self.kontaktperson:
+                self.status = "Vorgemerkt"
 
     def on_update(self):
         # Bestätigungs-Email senden
@@ -46,14 +53,18 @@ class Mandat(Document):
                 self.db_set("bestaetigungs_email_gesendet", 1)
 
 @frappe.whitelist()
-def create_mandat(sektion, beratung, mitglied, berater_in, typ, bemerkung, persoenliche_bemerkung):
+def create_mandat(sektion, beratung, mitglied, beratungskategorie, beratungskategorie_2, beratungskategorie_3, berater_in, typ, fertigstellen_bis, bemerkung, persoenliche_bemerkung):
     mandat = frappe.new_doc("Mandat")
 
     mandat.mv_mitgliedschaft = mitglied
     mandat.sektion_id = sektion
     mandat.beratung = beratung
+    mandat.beratungskategorie = beratungskategorie
+    mandat.beratungskategorie_2 = beratungskategorie_2
+    mandat.beratungskategorie_3 = beratungskategorie_3
     mandat.kontaktperson = berater_in
     mandat.typ = typ
+    mandat.fertigstellen_bis = fertigstellen_bis
     mandat.bemerkung = bemerkung
     mandat.persoenliche_bemerkung = persoenliche_bemerkung
 
@@ -275,6 +286,9 @@ def suche_vertrauensanwaeltin(mandat_id, sektion_id):
         frappe.throw("Es wurden keine Vertrauensanwält*innen mit hinterlegter E-Mail-Adresse gefunden.")
         
     recipients_string = ", ".join(recipients_list)
+
+    visierende_person = frappe.db.get_value("Sektion", sektion_id, "visierende_person")
+
     subject = "Neues unzugewiesenes Mandat verfügbar: {0}".format(mandat_id)
 
     email_template = frappe.db.get_value("Sektion", sektion_id, "template_suche_vertrauensanwaeltin")
@@ -282,7 +296,8 @@ def suche_vertrauensanwaeltin(mandat_id, sektion_id):
     return {
         "recipients": recipients_string,
         "subject": subject,
-        "email_template": email_template or ''
+        "email_template": email_template or '',
+        "cc": visierende_person or ''
     }
 
 

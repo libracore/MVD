@@ -6,17 +6,24 @@
  "field_order": [
   "section_mandat",
   "status",
+  "fertigstellen_bis",
   "cb_1",
   "typ",
   "section_verknuepfungen",
   "sektion_id",
   "mv_mitgliedschaft",
   "beratung",
+  "beratungskategorie",
+  "beratungskategorie_2",
+  "beratungskategorie_3",
   "kontaktperson",
   "bestaetigungs_email_gesendet",
   "cb_2",
   "bemerkung",
-  "persoenliche_bemerkung"
+  "persoenliche_bemerkung",
+  "section_verwaltung",
+  "visum",
+  "fall_verfolgen"
  ],
  "fields": [
   {
@@ -29,7 +36,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Vormerkung\nUnzugewiesen\nGesuch eingereicht\nGutsprache\nAblehnung (Geschlossen)\nAbgeschlossen",
+   "options": "Unzugewiesen\nVorgemerkt\nGesuch eingereicht\nGutsprache\nAbgelehnt\nAbgeschlossen",
    "reqd": 1
   },
   {
@@ -90,9 +97,52 @@
    "fieldname": "persoenliche_bemerkung",
    "fieldtype": "Small Text",
    "label": "Pers\u00f6nliche Bemerkung"
+  },
+  {
+   "fieldname": "beratungskategorie",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Beratungskategorie",
+   "options": "Beratungskategorie"
+  },
+  {
+   "depends_on": "eval:doc.beratungskategorie",
+   "fieldname": "beratungskategorie_2",
+   "fieldtype": "Link",
+   "label": "(2) Beratungskategorie",
+   "options": "Beratungskategorie"
+  },
+  {
+   "depends_on": "eval:doc.beratungskategorie_2",
+   "fieldname": "beratungskategorie_3",
+   "fieldtype": "Link",
+   "label": "(3) Beratungskategorie",
+   "options": "Beratungskategorie"
+  },
+  {
+   "fieldname": "fertigstellen_bis",
+   "fieldtype": "Date",
+   "label": "Fertigstellen bis"
+  },
+  {
+   "fieldname": "section_verwaltung",
+   "fieldtype": "Section Break",
+   "label": "Verwaltung"
+  },
+  {
+   "default": "0",
+   "fieldname": "visum",
+   "fieldtype": "Check",
+   "label": "Visum"
+  },
+  {
+   "default": "0",
+   "fieldname": "fall_verfolgen",
+   "fieldtype": "Check",
+   "label": "Fall verfolgen"
   }
  ],
- "modified": "2026-05-28 10:52:51.259979",
+ "modified": "2026-06-11 10:03:51.576415",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",
