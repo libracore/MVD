@@ -20,7 +20,10 @@
   "bestaetigungs_email_gesendet",
   "cb_2",
   "bemerkung",
-  "persoenliche_bemerkung"
+  "persoenliche_bemerkung",
+  "section_verwaltung",
+  "visum",
+  "fall_verfolgen"
  ],
  "fields": [
   {
@@ -120,9 +123,26 @@
    "fieldname": "fertigstellen_bis",
    "fieldtype": "Date",
    "label": "Fertigstellen bis"
+  },
+  {
+   "fieldname": "section_verwaltung",
+   "fieldtype": "Section Break",
+   "label": "Verwaltung"
+  },
+  {
+   "default": "0",
+   "fieldname": "visum",
+   "fieldtype": "Check",
+   "label": "Visum"
+  },
+  {
+   "default": "0",
+   "fieldname": "fall_verfolgen",
+   "fieldtype": "Check",
+   "label": "Fall verfolgen"
   }
  ],
- "modified": "2026-06-11 09:37:38.105509",
+ "modified": "2026-06-11 10:03:51.576415",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",
