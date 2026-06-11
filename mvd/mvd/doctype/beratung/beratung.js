@@ -807,6 +807,7 @@ function create_mandat(frm) {
             "args": {
                 "berater_in": values.berater_in,
                 "typ": values.typ,
+                "fertigstellen_bis": values.datum,
                 "bemerkung": values.bemerkung,
                 "persoenliche_bemerkung": values.persoenliche_bemerkung
             },
