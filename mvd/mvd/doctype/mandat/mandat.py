@@ -279,6 +279,9 @@ def suche_vertrauensanwaeltin(mandat_id, sektion_id):
         frappe.throw("Es wurden keine Vertrauensanwält*innen mit hinterlegter E-Mail-Adresse gefunden.")
         
     recipients_string = ", ".join(recipients_list)
+
+    visierende_person = frappe.db.get_value("Sektion", sektion_id, "visierende_person")
+
     subject = "Neues unzugewiesenes Mandat verfügbar: {0}".format(mandat_id)
 
     email_template = frappe.db.get_value("Sektion", sektion_id, "template_suche_vertrauensanwaeltin")
@@ -286,7 +289,8 @@ def suche_vertrauensanwaeltin(mandat_id, sektion_id):
     return {
         "recipients": recipients_string,
         "subject": subject,
-        "email_template": email_template or ''
+        "email_template": email_template or '',
+        "cc": visierende_person or ''
     }
 
 

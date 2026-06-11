@@ -23,6 +23,7 @@ frappe.ui.form.on('Mandat', {
                                 frm: frm,
                                 subject: mail_data.subject,      
                                 recipients: mail_data.recipients, 
+                                cc: mail_data.cc,
                                 attach_document_print: false,
                                 txt: '',    
                                 email_template: mail_data.email_template,       
