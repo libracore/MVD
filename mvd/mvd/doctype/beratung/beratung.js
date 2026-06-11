@@ -249,7 +249,7 @@ frappe.ui.form.on('Beratung', {
 
                 // Add BTN RSV-Mandat
                 if (cur_frm.doc.sektion_id == 'MVZH') {
-                    frm.add_custom_button(__("RSV-Mandat"), function() {
+                    frm.add_custom_button(__("Schadenanzeige"), function() {
                         frappe.db.get_value('Beratung', cur_frm.doc.name, 'rsv_mandat').then(r => {
                             if (r.message.rsv_mandat) {
                             frappe.msgprint("Es existiert bereits ein RSV-Mandat für diesen Datensatz.");
