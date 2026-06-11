@@ -127,6 +127,20 @@ class RSVMandat(Document):
                 docname=self.name,
                 zip_name="Dokumente_{0}.zip".format(self.name)
             )
+    
+    def open_beratung(self):
+        beratung = frappe.db.sql(
+            """
+                SELECT `name` FROM `tabBeratung`
+                WHERE `rsv_mandat` = '{0}'
+            """.format(self.name),
+            as_dict=True
+        )
+
+        if len(beratung) < 1:
+            frappe.throw("Es wurde keine zugehörige Beratung gefunden.")
+        
+        return beratung[0].name
 
 def resolve_file_path(file_url):
     file_url = unquote(file_url)
