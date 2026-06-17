@@ -414,13 +414,6 @@ class Beratung(Document):
                 update_modified=False
             )
     
-    def create_mandat(self, berater_in=None, typ=None, bemerkung=None, persoenliche_bemerkung=None):
-        from mvd.mvd.doctype.mandat.mandat import create_mandat
-        mandat = create_mandat(self.sektion_id, self.name, self.mv_mitgliedschaft, berater_in, typ, bemerkung, persoenliche_bemerkung)
-        frappe.db.set_value("Beratung", self.name, "mandat", mandat)
-
-        return mandat
-    
     def release_all_reserved_dates(self):
         reserved_dates = frappe.db.sql("""SELECT `name` FROM `tabAPB Zuweisung` WHERE `reserved_by` = '{0}'""".format(frappe.session.user), as_dict=True)
         for reserved_date in reserved_dates:

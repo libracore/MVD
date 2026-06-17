@@ -431,11 +431,6 @@ frappe.ui.form.on('Beratung', {
             //~ )
         //~ }
 
-        // Add BTN Mandat
-        frm.add_custom_button(__("Mandat"),  function() {
-            create_mandat(frm);
-        });
-
         frm.add_custom_button(__("Erstelle Schadenanzeige"), function() {
             frappe.call({
                 method: "mvd.mvd.utils.document_template_handler.use_template",
