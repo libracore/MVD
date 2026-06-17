@@ -121,6 +121,7 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
                                             `beratung`.`beratungskategorie_2`,
                                             `beratung`.`beratungskategorie_3`,
                                             `beratung`.`mv_mitgliedschaft`,
+                                            `beratung`.`faktura_kunde`,
                                             `beratung`.`status`,
                                             `beratung`.`terminkategorie`,
                                             IFNULL(`beratung`.`person_ist_eingetroffen`, 0) AS `person_ist_eingetroffen`,
@@ -144,6 +145,19 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
             if not erlaubte_sektionen or termin.sektion_id in erlaubte_sektionen:
                 if not erb_block or termin.berater_in in kontaktperson_multi_user:
                     hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.parent), as_dict=True)[0].qty > 0 else 0
+                    
+                    if termin.mv_mitgliedschaft:
+                        m_daten = frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, ["vorname_1", "nachname_1"], as_dict=True)
+                        vorname = m_daten.get("vorname_1") if m_daten else ""
+                        nachname = m_daten.get("nachname_1") if m_daten else ""
+                    elif termin.faktura_kunde:
+                        k_daten = frappe.db.get_value("Kunden", termin.faktura_kunde, ["vorname", "nachname"], as_dict=True)
+                        vorname = k_daten.get("vorname") if k_daten else ""
+                        nachname = k_daten.get("nachname") if k_daten else ""
+                    else:
+                        vorname, nachname = "", ""
+                    name_mitglied = "{0} {1}".format(vorname or "", nachname or "").strip()
+
                     termin_data = {
                         'von_date': get_datetime(termin.von).strftime('%d.%m.%Y'),
                         'von_time': get_datetime(termin.von).strftime('%H:%M'),
@@ -160,7 +174,7 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
                         'beratungskategorie': termin.beratungskategorie.split(" - ")[0] if termin.beratungskategorie else '',
                         'beratungskategorie_2': termin.beratungskategorie_2.split(" - ")[0] if termin.beratungskategorie_2 else '',
                         'beratungskategorie_3': termin.beratungskategorie_3.split(" - ")[0] if termin.beratungskategorie_3 else '',
-                        'name_mitglied': """<a href="/desk#Form/Mitgliedschaft/{0}" target="_blank">{1} {2}<br>({3})</a>""".format(termin.mv_mitgliedschaft, frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'vorname_1'), frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'nachname_1'), frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'status_c')),
+                        'name_mitglied': """<a href="/desk#Form/Mitgliedschaft/{0}" target="_blank">{1}<br>({2})</a>""".format(termin.mv_mitgliedschaft, name_mitglied, frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, 'status_c')),
                         'sort_date': frappe.utils.getdate(termin.von),
                         'name_for_reservation': '---',
                         'person_ist_eingetroffen': termin.person_ist_eingetroffen,
