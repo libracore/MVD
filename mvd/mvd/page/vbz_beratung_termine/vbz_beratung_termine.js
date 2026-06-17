@@ -43,6 +43,7 @@ frappe.vbz_beratung_termine = {
         var berater_in_field_value = page.filter_fields ? page.filter_fields.berater_in_field.get_value()||'':'';
         var art_field_value = page.filter_fields ? page.filter_fields.art_field.get_value()||'':'';
         var datum_field_value = page.filter_fields ? page.filter_fields.datum_field.get_value()||'':'';
+        var datum_bis_field_value = page.filter_fields ? page.filter_fields.datum_bis_field.get_value()||'':'';
         var language_field_value = page.filter_fields ? page.filter_fields.language_field.get_value()||'':'';
         var fachskill_field_value = page.filter_fields ? page.filter_fields.fachskill_field.get_value()||'':'';
         var my_reservations_field_value = page.filter_fields ? page.filter_fields.my_reservations_field.get_value()||'0':'0';
@@ -58,6 +59,7 @@ frappe.vbz_beratung_termine = {
                 berater_in: berater_in_field_value,
                 art: art_field_value,
                 datum: datum_field_value,
+                datum_bis: datum_bis_field_value,
                 language: language_field_value,
                 fachskill: fachskill_field_value,
                 my_reservations_only: my_reservations_field_value,
@@ -108,6 +110,10 @@ frappe.vbz_beratung_termine = {
                     page.filter_fields.datum_field = frappe.vbz_beratung_termine.create_datum_field(page);
                     page.filter_fields.datum_field.set_value(datum_field_value);
                     page.filter_fields.datum_field.refresh();
+                    // Date: Datum bis
+                    page.filter_fields.datum_bis_field = frappe.vbz_beratung_termine.create_datum_bis_field(page);
+                    page.filter_fields.datum_bis_field.set_value(datum_bis_field_value);
+                    page.filter_fields.datum_bis_field.refresh();
                     // Link: Sprache
                     page.filter_fields.language_field = frappe.vbz_beratung_termine.create_language_field(page);
                     page.filter_fields.language_field.set_value(language_field_value);
@@ -324,6 +330,24 @@ frappe.vbz_beratung_termine = {
             only_input: true
         });
         return datum_field
+    },
+
+    create_datum_bis_field: function(page) {
+        var datum_bis_field = frappe.ui.form.make_control({
+            parent: page.main.find(".datum_bis"),
+            df: {
+                fieldtype: "Date",
+                fieldname: "datum_bis",
+                placeholder: "Datum bis",
+                change: function(){
+                    if (!frappe.vbz_beratung_termine.no_render_based_on_filter) {
+                        frappe.vbz_beratung_termine.reload_view(page);
+                    }
+                }
+            },
+            only_input: true
+        });
+        return datum_bis_field
     },
 
     create_fachskill_field: function(page) {

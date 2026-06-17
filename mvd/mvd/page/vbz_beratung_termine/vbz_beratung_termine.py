@@ -17,11 +17,11 @@ no_cache=1
 def get_open_data(free_only=0, beratungsort=None, berater_in=None,
                   art=None, datum=None, language=None, fachskill=None,
                   my_reservations_only=0, beratungstyp=None, termine_heute=0,
-                  termine_gebucht=0):
+                  termine_gebucht=0, datum_bis=None):
     alle_termine, meine_termine, anz_eingetroffen = get_alle_beratungs_termine(frappe.session.user, free_only, beratungsort,
                                                                                berater_in, art, datum, language, fachskill,
                                                                                my_reservations_only, beratungstyp, termine_heute,
-                                                                               termine_gebucht)
+                                                                               termine_gebucht, datum_bis)
     datasets = {
         'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'datenstand_for_polling': now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
@@ -34,7 +34,8 @@ def get_open_data(free_only=0, beratungsort=None, berater_in=None,
 def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
                                berater_in=None, art=None, datum=None,
                                language=None, fachskill=None, my_reservations_only=0,
-                               beratungstyp=None, termine_heute=0, termine_gebucht=0):
+                               beratungstyp=None, termine_heute=0, termine_gebucht=0,
+                               datum_bis=None):
     alle = []
     meine = []
     anz_eingetroffen = 0
@@ -57,10 +58,10 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
     else:
         erlaubte_sektionen = False
     
+    datum_von = today()
     if datum and datum != '':
-        datum_von = datum
-    else:
-        datum_von=today()
+        if cint(termine_heute) != 1:
+            datum_von = datum
     
     # Filter
     beratungsort_filter = ''
@@ -82,12 +83,20 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
             AND `berTer`.`von` <= '{datum_von} 23:59:59'
         """.format(datum_von=datum_von)
     else:
-        datum_filter = """
-            (
-                (`berTer`.`von` >= '{datum_von} 00:00:00') OR 
-                (`beratung`.`status` = 'Termin vereinbart' AND `berTer`.`von` < '{datum_von} 00:00:00')
-            )
-        """.format(datum_von=datum_von)
+        if (datum_bis):
+            datum_filter = """
+                (
+                    (`berTer`.`von` BETWEEN '{datum_von} 00:00:00' AND '{datum_bis} 23:59:59') OR 
+                    (`beratung`.`status` = 'Termin vereinbart' AND `berTer`.`von` < '{datum_von} 00:00:00')
+                )
+            """.format(datum_von=datum_von, datum_bis=datum_bis)
+        else:
+            datum_filter = """
+                (
+                    (`berTer`.`von` >= '{datum_von} 00:00:00') OR 
+                    (`beratung`.`status` = 'Termin vereinbart' AND `berTer`.`von` < '{datum_von} 00:00:00')
+                )
+            """.format(datum_von=datum_von)
     
     fachskill_filter = ''
     if fachskill and fachskill != '':
