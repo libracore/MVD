@@ -496,7 +496,8 @@
    "fieldname": "mandat",
    "fieldtype": "Link",
    "label": "Mandat",
-   "options": "Mandat"
+   "options": "Mandat",
+   "read_only": 1
   },
   {
    "fieldname": "fachskill",
@@ -517,10 +518,11 @@
    "fieldname": "rsv_mandat",
    "fieldtype": "Link",
    "label": "RSV Mandat",
-   "options": "RSVMandat"
+   "options": "RSVMandat",
+   "read_only": 1
   }
  ],
- "modified": "2026-05-26 14:38:45.810160",
+ "modified": "2026-06-17 14:57:05.843495",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
