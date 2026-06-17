@@ -2299,7 +2299,7 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
                         {
                             frappe.db.set_value("Beratung", opts.beratung, 'rsv_mandat', rsv_response.message);
                             cur_frm.reload_doc();
-                            frappe.set_route("Form", "RSVMandat", rsv_response.message);
+                            frappe.msgprint(`Das Mandat (${rsv_response.message}) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
                         }
                     });
                 }
