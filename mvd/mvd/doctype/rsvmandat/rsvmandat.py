@@ -21,6 +21,11 @@ from mvd.mvd.doctype.druckvorlage.druckvorlage import get_doc_from_ctx
 
 class RSVMandat(Document):
     def validate(self):
+        if self.faktura_kunde:
+            self.faktura_kunde_name = "{0} {1}".format(frappe.db.get_value("Kunden", self.faktura_kunde, "vorname"), frappe.db.get_value("Kunden", self.faktura_kunde, "nachname"))
+        else:
+            self.faktura_kunde_name = None
+        
         self.fetch_document_table()
     
     def after_insert(self):
@@ -305,6 +310,7 @@ def create_rsv_mandat(**kwargs):
     rsv_mandat.plz = kwargs.get("plz", None)
     rsv_mandat.ort = kwargs.get("ort", None)
     rsv_mandat.mv_mitgliedschaft = kwargs.get("mv_mitgliedschaft", None)
+    rsv_mandat.faktura_kunde = kwargs.get("faktura_kunde", None)
 
     if kwargs.get("rsv_mandatliste", None):
         rsv_mandat.rsvmandatsliste = kwargs.get("rsv_mandatliste", None)

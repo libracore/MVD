@@ -78,12 +78,21 @@ function _create_zip_file(frm) {
 }
 
 function load_html_overview(frm) {
+    var method = false;
     if (cur_frm.doc.mv_mitgliedschaft) {
-        // Lade Übersicht für Mitglied
+        method = "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_uebersicht_html";
+    } else {
+        if (cur_frm.doc.faktura_kunde) {
+            method = "mvd.mvd.doctype.kunden.kunden.get_uebersicht_html";
+        }
+    }
+
+    if (method) {
+        // Lade Übersicht für Mitglied/Faktura Kunde
         frappe.call({
-            method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_uebersicht_html",
+            method: method,
             args:{
-                    'name': cur_frm.doc.mv_mitgliedschaft
+                    'name': cur_frm.doc.mv_mitgliedschaft ? cur_frm.doc.mv_mitgliedschaft:cur_frm.doc.faktura_kunde
             },
             callback: function(r)
             {

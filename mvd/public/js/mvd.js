@@ -2230,7 +2230,8 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
             {'fieldname': 'nr_zusatz', 'fieldtype': 'Data', 'label': 'Hausnummer Zusatz', 'reqd': 0, 'default': opts.objekt_nummer_zu},
             {'fieldname': 'plz', 'fieldtype': 'Data', 'label': 'PLZ', 'reqd': 1, 'default': opts.objekt_plz},
             {'fieldname': 'ort', 'fieldtype': 'Data', 'label': 'Ort', 'reqd': 1, 'default': opts.objekt_ort},
-            {'fieldname': 'mv_mitgliedschaft', 'fieldtype': 'Data', 'label': 'Mitgliedschaft', 'reqd': 0, 'hidden': 1, 'default': opts.mv_mitgliedschaft}
+            {'fieldname': 'mv_mitgliedschaft', 'fieldtype': 'Data', 'label': 'Mitgliedschaft', 'reqd': 0, 'hidden': 1, 'default': opts.mv_mitgliedschaft},
+            {'fieldname': 'faktura_kunde', 'fieldtype': 'Data', 'label': 'Kunde', 'reqd': 0, 'hidden': 1, 'default': opts.faktura_kunde}
         ]
     }
 
@@ -2251,24 +2252,24 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
                 args: me.dialog.get_values(),
                 freeze: true,
                 freeze_message: 'Erstelle RSV-Mandat...',
-                callback: function(r)
+                callback: function(existing_rsvmandaliste)
                 {
-                    if (!r.message) {
+                    if (!existing_rsvmandaliste.message) {
                         frappe.call({
                             method: "mvd.mvd.doctype.rsvmandat.rsvmandat.create_rsv_mandat",
                             args: me.dialog.get_values(),
                             freeze: true,
                             freeze_message: 'Erstelle RSV-Mandat...',
-                            callback: function(r)
+                            callback: function(rsv_response)
                             {
-                                frappe.db.set_value("Beratung", opts.beratung, 'rsv_mandat', r.message);
+                                frappe.db.set_value(cur_frm.doctype, cur_frm.doc.name, 'rsv_mandat', rsv_response.message);
                                 cur_frm.reload_doc();
-                                frappe.set_route("Form", "RSVMandat", r.message);
+                                frappe.msgprint(`Das Mandat (${rsv_response.message}) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
                             }
                         });
                     } else {
                         me.dialog.show();
-                        me.dialog.set_value("rsv_mandatliste_filter", r.message)
+                        me.dialog.set_value("rsv_mandatliste_filter", existing_rsvmandaliste.message)
                         me.dialog.set_df_property("rsv_mandatliste", "hidden", 0);
                         me.dialog.set_df_property("rsv_mandatliste", "reqd", 1);
                         me.dialog.set_df_property("rsv_mandatliste_new_creation", "hidden", 0);
@@ -2289,17 +2290,18 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
                         args:{
                                 template: me.get_template_from_type(),
                                 source_doc: cur_frm.doc.name,
-                                source_dt: "Beratung",
-                                save_output_to: [["Beratung", cur_frm.doc.name]],
+                                source_dt: cur_frm.doctype,
+                                save_output_to: [[cur_frm.doctype, cur_frm.doc.name]],
                                 filename: `${me.get_template_from_type()}_${rsv_response.message}.odt`
                         },
                         freeze: true,
                         freeze_message: 'Erstelle Schadenanzeige...',
                         callback: function(template_response)
                         {
-                            frappe.db.set_value("Beratung", opts.beratung, 'rsv_mandat', rsv_response.message);
-                            cur_frm.reload_doc();
-                            frappe.msgprint(`Das Mandat (${rsv_response.message}) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
+                            frappe.db.set_value(cur_frm.doctype, cur_frm.doc.name, 'rsv_mandat', rsv_response.message).then(() => {
+                                cur_frm.reload_doc();
+                                frappe.msgprint(`Das Mandat (${rsv_response.message}) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
+                            });
                         }
                     });
                 }

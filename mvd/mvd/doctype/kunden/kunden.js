@@ -32,6 +32,26 @@ frappe.ui.form.on('Kunden', {
                 frm.add_custom_button(__("Mitglied (Regulär)"), function() {
                     umwandlung(frm, 'Regulär');
                 }, __("Umwandlung"));
+                // Add BTN RSV-Mandat
+                if (cur_frm.doc.sektion_id != 'MVZH') {
+                    frm.add_custom_button(__("Schadenanzeige"), function() {
+                        frappe.db.get_value('Kunden', cur_frm.doc.name, 'rsv_mandat').then(r => {
+                            if (r.message.rsv_mandat) {
+                            frappe.msgprint("Es existiert bereits ein RSV-Mandat für diesen Datensatz.");
+                            } else {
+                                const opts = {
+                                    objekt_strasse: cur_frm.doc.strasse,
+                                    objekt_hausnummer: cur_frm.doc.nummer,
+                                    objekt_nummer_zu: cur_frm.doc.nummer_zu,
+                                    objekt_plz: cur_frm.doc.plz,
+                                    objekt_ort: cur_frm.doc.ort,
+                                    faktura_kunde: cur_frm.doc.name
+                                };
+                                new mvd_dialoge.erstelle_rsv_mandat(opts);
+                            }
+                        });
+                    }, __("Erstelle"));
+                }
             }
             
             if (!cur_frm.dirty()) {

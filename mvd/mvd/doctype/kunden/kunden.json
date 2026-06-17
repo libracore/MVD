@@ -13,6 +13,7 @@
   "sektion_id",
   "mv_mitgliedschaft",
   "mitglied_nr",
+  "rsv_mandat",
   "cb_1",
   "fachskill",
   "language",
@@ -457,10 +458,16 @@
    "hidden": 1,
    "label": "Fachskill (nur f\u00fcr Pup-Up)",
    "options": "Termin Kontaktperson Multi Fachskill"
+  },
+  {
+   "fieldname": "rsv_mandat",
+   "fieldtype": "Link",
+   "label": "RSV Mandat",
+   "options": "RSVMandat"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-04-20 11:35:17.193913",
+ "modified": "2026-06-17 13:02:51.735853",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kunden",
