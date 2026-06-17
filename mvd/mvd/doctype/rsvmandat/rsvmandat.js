@@ -60,6 +60,49 @@ frappe.ui.form.on('RSVMandat', {
                 }
             }
         });
+    },
+    get_or_create_rsv_mandat_list: function(frm) {
+        frappe.call({
+            method: "get_or_create_rsv_mandat_list",
+            doc: frm.doc,
+            args: {
+                for_lookup: 1
+            },
+            freeze: true,
+            freeze_message: 'Suche zugehörige Mandatslisten...',
+            callback: function(rsv_mandat_list)
+            {
+                var response = rsv_mandat_list.message;
+                if (response.qty > 0) {
+                    rsv_mandat_listen_selektion(frm, response.rsvmandatsliste);
+                } else {
+                    frappe.confirm(
+                        'Es wurde keine zugehörige RSV Mandatsliste gefunden.<br>Möchten Sie eine neue Anlegen?',
+                        function(){
+                            // on yes
+                            frappe.call({
+                                method: "get_or_create_rsv_mandat_list",
+                                doc: frm.doc,
+                                args: {
+                                    force_new_rsvmandatliste: 1
+                                },
+                                freeze: true,
+                                freeze_message: 'Neuanlage Mandatsliste...',
+                                callback: function(rsv_mandat_list)
+                                {
+                                    var response = rsv_mandat_list.message;
+                                    cur_frm.set_value("rsvmandatsliste", response);
+                                    cur_frm.save();
+                                }
+                            });
+                        },
+                        function(){
+                            // on no
+                        }
+                    )
+                }
+            }
+        });
     }
 });
 
@@ -100,4 +143,46 @@ function load_html_overview(frm) {
             }
         });
     }
+}
+
+function rsv_mandat_listen_selektion(frm, rsv_mandatliste) {
+    const input = rsv_mandatliste;
+    const filter_names = Array.isArray(input) ? input.map(({ name }) => name) : [input];
+
+    var d = new frappe.ui.Dialog({
+        'fields': [
+            {'fieldname': 'rsv_mandatliste', 'fieldtype': 'Link', 'options': 'RSVMandatsliste', 'label': 'Gefundene RSV-Mandatslisten', 'reqd': 1,
+                'get_query': function() { return { filters: {'name': ['in', filter_names]}}},
+                'description': "Sie können entweder im obigen Feld eine gefundene RSV-Mandatsliste auswählen und verknüpfen, oder nachfolgend eine Neuanlage erzwingen."
+            },
+            {'fieldname': 'neuanlage', 'fieldtype': 'Button', 'label': 'RSV-Mandatsliste Neuanlage',
+                'click': function() {
+                    d.hide();
+                    frappe.call({
+                        method: "get_or_create_rsv_mandat_list",
+                        doc: frm.doc,
+                        args: {
+                            force_new_rsvmandatliste: 1
+                        },
+                        freeze: true,
+                        freeze_message: 'Neuanlage Mandatsliste...',
+                        callback: function(rsv_mandat_list)
+                        {
+                            var response = rsv_mandat_list.message;
+                            cur_frm.set_value("rsvmandatsliste", response);
+                            cur_frm.save();
+                        }
+                    });
+                }
+            }
+        ],
+        primary_action: function(){
+            d.hide();
+            cur_frm.set_value("rsvmandatsliste", d.get_value("rsv_mandatliste"));
+            cur_frm.save();
+        },
+        primary_action_label: __('Verknüpfen'),
+        title: __('Suchresultate')
+    });
+    d.show();
 }

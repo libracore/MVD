@@ -46,6 +46,7 @@
   "entstehung",
   "thema",
   "rsvmandatsliste",
+  "get_or_create_rsv_mandat_list",
   "dokumente",
   "create_zip_file",
   "section_workflow_helper",
@@ -323,9 +324,15 @@
    "fieldtype": "Data",
    "label": "Faktura Kunden Namen",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.rsvmandatsliste",
+   "fieldname": "get_or_create_rsv_mandat_list",
+   "fieldtype": "Button",
+   "label": "Mandate \u00fcber Adresse pr\u00fcfen"
   }
  ],
- "modified": "2026-06-17 13:18:45.829603",
+ "modified": "2026-06-17 13:54:08.758745",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",

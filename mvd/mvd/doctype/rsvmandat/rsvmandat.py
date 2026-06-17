@@ -42,7 +42,7 @@ class RSVMandat(Document):
         
         if not cint(self.mandatslisten_und_siedlungs_sperre) == 1:
             if not self.rsvmandatsliste and self.adr_egaid:
-                self.rsvmandatsliste = self.get_gruppenmandat(cint(self.force_new_rsvmandatliste))
+                self.rsvmandatsliste = self.get_gruppenmandat(force_new_rsvmandatliste=cint(self.force_new_rsvmandatliste))
         else:
             # Keine autom. Mandatslisten- und Siedlungsanlage durch after_insert.
             # Wird autom. wieder entfernt, da es nach after_insert keinen Nutzen mehr hat.
@@ -106,15 +106,19 @@ class RSVMandat(Document):
 
         return mietvertrag_pfad[0].mietvertrag_pfad
     
-    def get_gruppenmandat(self, force_new_rsvmandatliste):
+    def get_gruppenmandat(self, force_new_rsvmandatliste=0, for_lookup=False):
         siedlung = get_siedlung(self.adr_egaid)
         if siedlung:
-            rsvmandatsliste = get_gruppenmandat_based_on_siedlung(siedlung, force_new_rsvmandatliste)
+            rsvmandatsliste = get_gruppenmandat_based_on_siedlung(siedlung, force_new_rsvmandatliste=force_new_rsvmandatliste, for_lookup=for_lookup)
+            if for_lookup:
+                return rsvmandatsliste
             if rsvmandatsliste.get("qty") in [0, 1]:
                 return rsvmandatsliste.get("rsvmandatsliste")
             else:
                 self.reason_missing_rsvmandatlist = "Auf Basis der zutreffenden Siedlung gibt es mehrere Mandatslisten. Bitte wählen Sie die zugehörige manuell aus."
         else:
+            if for_lookup:
+                return "Keine Siedlung gefunden"
             self.reason_missing_rsvmandatlist = "Auf Basis der Adressdaten konnte keine Siedlung zugeordnet werden.<br>Eine entsprechende Mandatsliste muss manuell angelegt und verknüpft werden."
         
         return None
@@ -146,6 +150,10 @@ class RSVMandat(Document):
             frappe.throw("Es wurde keine zugehörige Beratung gefunden.")
         
         return beratung[0].name
+    
+    def get_or_create_rsv_mandat_list(self, force_new_rsvmandatliste=0, for_lookup=False):
+        return self.get_gruppenmandat(force_new_rsvmandatliste=force_new_rsvmandatliste, for_lookup=for_lookup)
+
 
 def resolve_file_path(file_url):
     file_url = unquote(file_url)
@@ -255,7 +263,7 @@ def get_siedlung(adr_egaid, no_auto_creation=False):
     
     return create_siedlung(adr_egaid)
 
-def get_gruppenmandat_based_on_siedlung(siedlung, force_new_rsvmandatliste=0):
+def get_gruppenmandat_based_on_siedlung(siedlung, force_new_rsvmandatliste=0, for_lookup=False):
     def create_gruppenmandat_based_on_siedlung(siedlung):
         new_rsvmandatsliste = frappe.new_doc('RSVMandatsliste')
         new_rsvmandatsliste.siedlung = siedlung
@@ -276,6 +284,10 @@ def get_gruppenmandat_based_on_siedlung(siedlung, force_new_rsvmandatliste=0):
 
     rsvmandatsliste = frappe.db.sql(query, as_dict=True)
     if len(rsvmandatsliste) < 1:
+        if for_lookup:
+            return {
+                'qty': 0
+            }
         return {
             'qty': 0,
             'rsvmandatsliste': create_gruppenmandat_based_on_siedlung(siedlung)
