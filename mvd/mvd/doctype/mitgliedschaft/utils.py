@@ -250,6 +250,39 @@ def get_anredekonvention(mitgliedschaft=None, self=None, rg=False):
             else:
                 return get_anredekonvention(self=mitgliedschaft)
 
+def get_anredekonvention_kunde(kunde=None, self=None):
+    if self:
+        kunde = self
+    else:
+        kunde = frappe.get_doc("Kunden", kunde)
+    
+    # Auslesen der Sprache (Fallback auf 'de')
+    lang = kunde.language or 'de'
+    
+    # 1. Fall: Unabhängiger Debitor (Rechnungsanschrift greift)
+    if hasattr(kunde, 'unabhaengiger_debitor') and cint(kunde.unabhaengiger_debitor) == 1:
+        if kunde.rg_anrede == 'Herr':
+            return _('Sehr geehrter Herr {nachname}', lang).format(nachname=kunde.rg_nachname or '')
+        elif kunde.rg_anrede == 'Frau':
+            return _('Sehr geehrte Frau {nachname}', lang).format(nachname=kunde.rg_nachname or '')
+        else:
+            return _('Guten Tag {vorname} {nachname}', lang).format(
+                vorname=kunde.rg_vorname or '', 
+                nachname=kunde.rg_nachname or ''
+            )
+            
+    # 2. Fall: Normaler Kunde / Standard-Anschrift
+    else:
+        if kunde.anrede == 'Herr':
+            return _('Sehr geehrter Herr {nachname}', lang).format(nachname=kunde.nachname or '')
+        elif kunde.anrede == 'Frau':
+            return _('Sehr geehrte Frau {nachname}', lang).format(nachname=kunde.nachname or '')
+        else:
+            return _('Guten Tag {vorname} {nachname}', lang).format(
+                vorname=kunde.vorname or '', 
+                nachname=kunde.nachname or ''
+            )
+        
 def get_adressblock(mitgliedschaft):
     adressblock = ''
     

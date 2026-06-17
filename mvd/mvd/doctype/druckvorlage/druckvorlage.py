@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_url_to_form, get_url
-from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention
+from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention, get_anredekonvention_kunde
 try:
     from jinja2 import pass_context as context_decorator
 except ImportError:
@@ -716,9 +716,11 @@ def get_beratungs_daten(ctx):
         sektion = m.sektion_id
         sprache = m.language or "de"
     elif doc.faktura_kunde:
-        k = frappe.get_value("Kunde", doc.faktura_kunde, ["sektion_id", "language"], as_dict=True)
+        k = frappe.get_value("Kunden", doc.faktura_kunde, ["sektion_id", "language"], as_dict=True)
         sektion = k.sektion_id
         sprache = k.language or "de"
+
+        anrede = get_anredekonvention_kunde(kunde=k)
 
     berater_name = frappe.db.get_value("Termin Kontaktperson", doc.kontaktperson, "kontakt") or ""
     beratung_art = frappe.db.get_value("Beratung Termin", {"parent": doc.name}, "art") or ""

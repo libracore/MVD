@@ -12,6 +12,7 @@ from frappe.utils import cint
 from frappe import _
 from datetime import datetime
 from mvd.mvd.utils import make_api_log
+from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention_kunde
 
 class Beratung(Document):
     def validate(self):
@@ -71,6 +72,12 @@ class Beratung(Document):
         if self.raised_by:
             self.email_id = self.raised_by
         
+        # Email Faktura Kunde
+        if self.faktura_kunde and not self.email_id:
+            kunden_email = frappe.db.get_value("Kunden", self.faktura_kunde, "e_mail")
+            if kunden_email:
+                self.email_id = kunden_email
+
         # verknüpfung von mitgliedschaft auf basis email (wenn eingangsmailaccount-sektion == mitgliedschafts sektion)
         if self.raised_by and (not self.mv_mitgliedschaft and not self.faktura_kunde):
                 mitgliedschaften = frappe.db.sql("""
@@ -958,7 +965,7 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft=None, 
         sprache = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, "language")
     else:
         if faktura_kunde:
-            anrede = '' # ToDo: briefanrede gibt es nicht in faktura_kunde -> frappe.db.get_value("Kunden", faktura_kunde, "briefanrede")
+            anrede = get_anredekonvention_kunde(kunde=faktura_kunde)
             sektion = frappe.db.get_value("Kunden", faktura_kunde, "sektion_id")
             sprache = frappe.db.get_value("Kunden", faktura_kunde, "language")
     default_terminbest_hinweis_de = frappe.db.get_value("Sektion", sektion, "default_terminbest_hinweis_de") or ''
