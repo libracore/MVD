@@ -7,8 +7,14 @@ frappe.pages['vbz_beratung_termine'].on_page_load = function(wrapper) {
 
     frappe.vbz_beratung_termine.page = page;
     frappe.vbz_beratung_termine.no_render_based_on_filter = true;
-    frappe.vbz_beratung_termine.render_view(page);
-
+    frappe.call({
+        method: "mvd.mvd.utils.mvd_bootinfo.get_default_sektion",
+        callback: (r) => {
+            frappe.vbz_beratung_termine.default_sektion = r.message;
+            frappe.vbz_beratung_termine.render_view(page);
+        }
+    });
+    
     poll(page);
 };
 
@@ -18,11 +24,19 @@ frappe.pages['vbz_beratung_termine'].refresh = function(wrapper) {
 
 frappe.vbz_beratung_termine = {
     page: null,
-
+    first_load: true,
+    default_sektion: null,
     no_render_based_on_filter: true,
 
     render_view: function(page) {
         var free_only_field_value = page.filter_fields ? page.filter_fields.free_only_field.get_value()||'0':'0';
+        // Setze Default Filter für MVZH beim initialen Laden
+        if (frappe.vbz_beratung_termine.first_load) {
+            frappe.vbz_beratung_termine.first_load = false;
+            if (frappe.vbz_beratung_termine.default_sektion == 'MVZH') {
+                free_only_field_value = '1';
+            }
+        }
         var termine_heute_field_value = page.filter_fields ? page.filter_fields.termine_heute_field.get_value()||'0':'0';
         var termine_gebucht_field_value = page.filter_fields ? page.filter_fields.termine_gebucht_field.get_value()||'0':'0';
         var beratungsort_field_value = page.filter_fields ? page.filter_fields.beratungsort_field.get_value()||'':'';
@@ -112,7 +126,9 @@ frappe.vbz_beratung_termine = {
                     page.filter_fields.beratungstyp_field.set_value(beratungstyp_field_value);
                     page.filter_fields.beratungstyp_field.refresh();
 
-                    setTimeout(function() {frappe.vbz_beratung_termine.no_render_based_on_filter = false;}, 1000);
+                    setTimeout(function() {
+                        frappe.vbz_beratung_termine.no_render_based_on_filter = false;
+                    }, 1000);
 
                     frappe.vbz_beratung_termine.add_click_handlers(page);
                     localStorage['datenstand_for_polling'] = r.message.datenstand_for_polling;
