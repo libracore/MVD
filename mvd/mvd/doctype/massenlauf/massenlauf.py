@@ -10,6 +10,7 @@ from PyPDF2 import PdfFileWriter
 from frappe.utils.pdf import get_file_data_from_writer
 from frappe.utils.data import now
 from frappe.utils import cint
+from frappe.utils import nowdate
 from mvd.mvd.utils import rg_massenlauf_log
 
 class Massenlauf(Document):
@@ -72,6 +73,13 @@ def verarbeitung_massenlauf(massenlauf):
             'sektion': massenlauf.sektion_id
         }
         enqueue("mvd.mvd.doctype.massenlauf.massenlauf.rechnung", queue='long', job_name='Verarbeite Massenlauf {0}'.format(massenlauf.name), timeout=5000, **args)
+        return 1
+    
+    if massenlauf.typ == 'Beratungstermine':
+        args = {
+            'massenlauf': massenlauf.name,
+        }
+        enqueue("mvd.mvd.doctype.massenlauf.massenlauf.beratungstermine", queue='long', job_name='Verarbeite Massenlauf {0}'.format(massenlauf.name), timeout=5000, **args)
         return 1
 
 def mahnung(massenlauf, sektion):
@@ -558,3 +566,46 @@ def rechnung(massenlauf, sektion):
         massenlauf.status = 'Fehlgeschlagen'
         massenlauf.error = str(err)
         massenlauf.save(ignore_permissions=True)
+
+def beratungstermine(massenlauf):
+    try:
+        heute = nowdate()
+        beratungen = frappe.db.sql("""
+            SELECT DISTINCT termin.parent 
+            FROM `tabBeratung Termin` as termin
+            INNER JOIN `tabBeratung` as beratung ON termin.parent = beratung.name
+            WHERE DATE(termin.von) = %(heute)s 
+            AND beratung.sektion_id = 'MVBE'
+        """, {"heute": heute}, as_dict=True)
+        
+        output = PdfFileWriter()
+        
+        for b_doc in beratungen:
+            output = frappe.get_print("Beratung", b_doc['parent'], 'MVZH Deckblatt für Beratungstermine', as_pdf=True, output=output)     
+        if len(beratungen) > 0:
+            file_name = "Beratungstermine_Sammel_PDF_{datetime}.pdf".format(
+                datetime=now().replace(" ", "_").replace(":", "-").split(".")[0]
+            )
+            filedata = get_file_data_from_writer(output)
+            
+            _file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": file_name,
+                "folder": "Home/Attachments",
+                "is_private": 1,
+                "content": filedata,
+                "attached_to_doctype": 'Massenlauf',
+                "attached_to_name": massenlauf
+            })
+            _file.save(ignore_permissions=True)
+            
+        massenlauf_doc = frappe.get_doc("Massenlauf", massenlauf)
+        massenlauf_doc.status = 'Abgeschlossen'
+        massenlauf_doc.error = ''
+        massenlauf_doc.save(ignore_permissions=True)
+        
+    except Exception as err:
+        massenlauf_doc = frappe.get_doc("Massenlauf", massenlauf)
+        massenlauf_doc.status = 'Fehlgeschlagen'
+        massenlauf_doc.error = str(err)
+        massenlauf_doc.save(ignore_permissions=True)

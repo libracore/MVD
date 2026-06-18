@@ -36,6 +36,7 @@ frappe.vbz_massenlauf = {
                         'rechnungen': eval(r.message.rg_massenlauf),
                         'begruessung_online': eval(r.message.begruessung_online_massenlauf),
                         'mahnungen': eval(r.message.mahnung_massenlauf),
+                        'beratungstermine': eval(r.message.beratungstermine_massenlauf),
                         'begruessung_bezahlt': eval(r.message.begruessung_bezahlt_massenlauf)
                     }))
                     frappe.vbz_massenlauf.add_click_handlers(eval(r.message));
@@ -57,6 +58,7 @@ frappe.vbz_massenlauf = {
         $("#begruessung_online_print").off("click");
         $("#mahnungen_qty").off("click");
         $("#mahnungen_print").off("click");
+        $("#beratungstermine_print").off("click");
         $("#alle_massenlaeufe").off("click");
     },
     add_click_handlers: function(open_datas) {
@@ -137,6 +139,13 @@ frappe.vbz_massenlauf = {
                 frappe.vbz_massenlauf.mahnung_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind für zur Ausführung dieser Aktion nicht berechtigt.");
+            }
+        });
+        $("#beratungstermine_print").click(function(){
+            if (!frappe.user.has_role("MV_RB")||frappe.user.has_role("System Manager")) {
+                frappe.vbz_massenlauf.execute_beratungstermine_massenlauf();
+            } else {
+                frappe.msgprint("Sie haben eine Read-Only Rolle und sind zur Ausführung dieser Aktion nicht berechtigt.");
             }
         });
         $("#alle_massenlaeufe").click(function(){
@@ -367,6 +376,20 @@ frappe.vbz_massenlauf = {
             args:{
                 'sektion': sektion
             },
+            freeze: true,
+            freeze_message: 'Vorbereitung Massenlauf...',
+            async: false,
+            callback: function(r)
+            {
+                frappe.dom.unfreeze();
+                frappe.set_route("Form", "Massenlauf", r.message);
+            }
+        });
+    },
+    execute_beratungstermine_massenlauf: function(sektion) {
+        frappe.dom.freeze('Vorbereitung Massenlauf...');
+        frappe.call({
+            method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.beratungstermine_massenlauf",
             freeze: true,
             freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
