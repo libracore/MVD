@@ -13,7 +13,8 @@ function take(mandatsliste, va_in_list) {
         frappe.call({
             method: "mvd.www.va.vergabeliste.add_va",
             args: {
-                mandatsliste: mandatsliste
+                mandatsliste: mandatsliste,
+                bemerkung: $(`#message-${mandatsliste}`).val()
             },
             freeze: true,
             freeze_message: 'Erfasse Interesse...',

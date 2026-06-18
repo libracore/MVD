@@ -159,7 +159,7 @@ def get_cards():
                     <h3>Interesse hinterlegen</h3>
 
                     <label for="message">Nachricht / Bemerkung</label>
-                    <textarea id="message" placeholder="Kurze Bemerkung zu Kapazität, Erfahrung oder Rückfragen..."></textarea>
+                    <textarea id="message-{mandatsliste}" placeholder="Kurze Bemerkung zu Kapazität, Erfahrung oder Rückfragen..."></textarea>
 
                     <div class="actions">
                         <button class="btn-primary" onclick="take('{mandatsliste}', '{va_in_list}')">Ja, ich bin interessiert</button>
@@ -203,10 +203,11 @@ def get_cards():
     return cards, detail_cards
 
 @frappe.whitelist()
-def add_va(mandatsliste):
+def add_va(mandatsliste, bemerkung):
     ml = frappe.get_doc("RSVMandatsliste", mandatsliste)
     row = ml.append("va_vergabe", {})
     row.va_user = frappe.session.user
+    row.remarks = bemerkung
     ml.save(ignore_permissions=True)
     return
 
