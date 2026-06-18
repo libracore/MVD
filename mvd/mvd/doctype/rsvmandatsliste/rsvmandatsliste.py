@@ -8,7 +8,18 @@ from frappe.model.document import Document
 from frappe.utils import cint
 
 class RSVMandatsliste(Document):
-    pass
+    def validate(self):
+        if self.fallnummer:
+            mandate = frappe.db.sql(
+                """
+                    SELECT `name`
+                    FROM `tabRSVMandat`
+                    WHERE `rsvmandatsliste` = '{0}'
+                """.format(self.name),
+                as_dict=True
+            )
+            for mandat in mandate:
+                frappe.db.set_value("RSVMandat", mandat.name, "fallnummer", self.fallnummer)
 
 def reset_status(rsvmandatsliste):
     rsvml = frappe.get_doc("RSVMandatsliste", rsvmandatsliste)

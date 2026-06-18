@@ -5,7 +5,8 @@
  "engine": "InnoDB",
  "field_order": [
   "va_user",
-  "remarks"
+  "remarks",
+  "assigned"
  ],
  "fields": [
   {
@@ -21,10 +22,17 @@
    "fieldtype": "Text",
    "in_list_view": 1,
    "label": "Bemerkungen"
+  },
+  {
+   "default": "0",
+   "fieldname": "assigned",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Zugewiesen"
   }
  ],
  "istable": 1,
- "modified": "2026-06-18 11:41:15.705561",
+ "modified": "2026-06-18 11:51:53.088347",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "VA Vergabe TBL",
