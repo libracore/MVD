@@ -7,6 +7,7 @@ import frappe
 from PyPDF2 import PdfFileWriter
 from frappe.utils.data import add_days, getdate, now, today, now_datetime
 from frappe.utils.pdf import get_file_data_from_writer
+from frappe.utils import nowdate
 
 @frappe.whitelist()
 def get_open_data():
@@ -18,6 +19,7 @@ def get_open_data():
     begruessung_online_qty = len(frappe.get_list('Mitgliedschaft', fields='name', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 0}, limit=100, distinct=True, ignore_ifnull=True))
     begruessung_bezahlt_qty = len(frappe.get_list('Mitgliedschaft', fields='name', filters={'begruessung_massendruck': 1, 'begruessung_via_zahlung': 1}, limit=100, distinct=True, ignore_ifnull=True))
     mahnung_qty = len(frappe.get_list('Mahnung', fields='name', filters={'massenlauf': 1, 'docstatus': 1}, limit=100, distinct=True, ignore_ifnull=True))
+    beratungstermine_qty = get_anzahl_mvzh_beratungen_heute()
     
     # massenlauf total
     massenlauf_total = kuendigung_qty + korrespondenz_qty + zuzug_qty + rg_massendruck_qty + begruessung_online_qty + begruessung_bezahlt_qty + mahnung_qty
@@ -44,6 +46,9 @@ def get_open_data():
         },
         'mahnung_massenlauf': {
             'qty': mahnung_qty
+        },
+        'beratungstermine_massenlauf': {
+            'qty': beratungstermine_qty
         }
     }
     
@@ -187,3 +192,33 @@ def mahnung_massenlauf(sektion=False):
             frappe.throw("Es gibt keine Mahnungen die für einen Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
     else:
         frappe.throw("Fehlende Sektionsinformationen")
+
+def get_anzahl_mvzh_beratungen_heute():
+    heute = nowdate()
+    ergebnis = frappe.db.sql("""
+        SELECT COUNT(DISTINCT termin.parent) 
+        FROM `tabBeratung Termin` as termin
+        INNER JOIN `tabBeratung` as beratung ON termin.parent = beratung.name
+        WHERE DATE(termin.von) = %(heute)s 
+          AND beratung.sektion_id = 'MVZH'
+    """, {"heute": heute})
+    
+    if ergebnis:
+        return ergebnis[0][0]
+    
+    return 0
+
+@frappe.whitelist()
+def beratungstermine_massenlauf():
+    anzahl_beratungen = get_anzahl_mvzh_beratungen_heute()
+    if anzahl_beratungen > 0:
+        massenlauf = frappe.get_doc({
+            "doctype": "Massenlauf",
+            "sektion_id": "MVZH",
+            "status": "Offen",
+            "typ": "Beratungstermine"
+        })
+        massenlauf.insert(ignore_permissions=True)
+        return massenlauf.name
+    else:
+        frappe.throw("Es gibt keine Beratungen die für einen Massenlauf vorgemerkt sind.<br>Bitte aktualisieren Sie die Verarbeitungszentrale.")
