@@ -1,0 +1,30 @@
+{
+ "creation": "2026-06-18 07:45:35.228392",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "va_user"
+ ],
+ "fields": [
+  {
+   "fieldname": "va_user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "VA User",
+   "options": "User",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-06-18 07:45:35.228392",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "VA Vergabe TBL",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

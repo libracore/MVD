@@ -8,7 +8,14 @@
  "field_order": [
   "typ",
   "bezeichnung",
-  "siedlung"
+  "siedlung",
+  "section_va_vergabe",
+  "publikation_per",
+  "frist",
+  "verhandlungsdatum",
+  "language",
+  "kurzbeschrieb",
+  "va_vergabe"
  ],
  "fields": [
   {
@@ -27,9 +34,46 @@
    "fieldtype": "Link",
    "label": "Siedlung",
    "options": "Siedlung"
+  },
+  {
+   "fieldname": "section_va_vergabe",
+   "fieldtype": "Section Break",
+   "label": "VA Vergabe"
+  },
+  {
+   "fieldname": "publikation_per",
+   "fieldtype": "Date",
+   "label": "Datum Publikation per"
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Select",
+   "label": "Sprache",
+   "options": "Deutsch\nEnglisch\nFranz\u00f6sisch\nItalienisch\nSonstiges"
+  },
+  {
+   "fieldname": "kurzbeschrieb",
+   "fieldtype": "Text",
+   "label": "Kurzbeschrieb"
+  },
+  {
+   "fieldname": "va_vergabe",
+   "fieldtype": "Table",
+   "label": "VA Vergabe",
+   "options": "VA Vergabe TBL"
+  },
+  {
+   "fieldname": "frist",
+   "fieldtype": "Data",
+   "label": "Frist"
+  },
+  {
+   "fieldname": "verhandlungsdatum",
+   "fieldtype": "Data",
+   "label": "Verhandlungsdatum"
   }
  ],
- "modified": "2026-05-26 18:13:42.625644",
+ "modified": "2026-06-18 09:49:30.560437",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandatsliste",
