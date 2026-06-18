@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 import requests
 from frappe.utils import cint
+from frappe.utils.data import today, formatdate
 from frappe.utils.background_jobs import enqueue
 import os
 import zipfile
@@ -20,6 +21,28 @@ import json
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_doc_from_ctx
 
 class RSVMandat(Document):
+    def autoname(self):
+        if self.mv_mitgliedschaft:
+            vorname = self.vorname if self.vorname else frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1")
+            nachname = self.nachname if self.nachname else frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "nachname_1")
+        elif self.faktura_kunde:
+            vorname = frappe.db.get_value("Kunden", self.faktura_kunde, "vorname")
+            nachname = frappe.db.get_value("Kunden", self.faktura_kunde, "nachname")
+        
+        new_name = "{0}_{1}_{2}".format(formatdate(today(), "yy-MM-dd"), vorname, nachname)
+
+        if frappe.db.exists("RSVMandat", new_name):
+            counter = frappe.db.sql(
+                """
+                    SELECT COUNT(`name`) AS `qty` FROM `tabRSVMandat` WHERE `name` LIKE '{0}%'
+                """.format(new_name),
+                as_dict=True
+            )[0].qty
+
+            new_name = "{0}-{1}".format(new_name, counter)
+        
+        self.name = new_name
+    
     def validate(self):
         if self.faktura_kunde:
             self.faktura_kunde_name = "{0} {1}".format(frappe.db.get_value("Kunden", self.faktura_kunde, "vorname"), frappe.db.get_value("Kunden", self.faktura_kunde, "nachname"))
