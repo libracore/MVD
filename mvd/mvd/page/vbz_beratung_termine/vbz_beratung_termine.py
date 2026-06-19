@@ -72,17 +72,21 @@ def get_alle_beratungs_termine(user):
                 hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.parent), as_dict=True)[0].qty > 0 else 0
 
                 if termin.mv_mitgliedschaft:
-                    m_daten = frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, ["vorname_1", "nachname_1"], as_dict=True)
+                    m_daten = frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, ["vorname_1", "nachname_1", "status_c"], as_dict=True)
                     vorname = m_daten.get("vorname_1") if m_daten else ""
                     nachname = m_daten.get("nachname_1") if m_daten else ""
+                    status_c = m_daten.get("status_c") if m_daten else ""
+                    link = "/desk#Form/Mitgliedschaft/{0}".format(termin.mv_mitgliedschaft)
                 elif termin.faktura_kunde:
                     k_daten = frappe.db.get_value("Kunden", termin.faktura_kunde, ["vorname", "nachname"], as_dict=True)
                     vorname = k_daten.get("vorname") if k_daten else ""
                     nachname = k_daten.get("nachname") if k_daten else ""
+                    status_c = "Kunde"
+                    link = "/desk#Form/Kunden/{0}".format(termin.faktura_kunde)
                 else:
                     vorname, nachname = "", ""
-
                 name_mitglied = "{0} {1}".format(vorname or "", nachname or "").strip()
+                name_mitglied_mit_link = """<a href="{0}" target="_blank">{1}<br>({2})</a>""".format(link, name_mitglied, status_c),
 
                 termin_data = {
                     'von_date': get_datetime(termin.von).strftime('%d.%m.%Y'),
@@ -99,7 +103,7 @@ def get_alle_beratungs_termine(user):
                     'beratungskategorie': termin.beratungskategorie.split(" - ")[0] if termin.beratungskategorie else '',
                     'beratungskategorie_2': termin.beratungskategorie_2.split(" - ")[0] if termin.beratungskategorie_2 else '',
                     'beratungskategorie_3': termin.beratungskategorie_3.split(" - ")[0] if termin.beratungskategorie_3 else '',
-                    'name_mitglied': name_mitglied,
+                    'name_mitglied': name_mitglied_mit_link,
                     'sort_date': frappe.utils.getdate(termin.von)
                 }
                 alle.append(termin_data)
