@@ -11,6 +11,7 @@ from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
 from mvd.mvd.doctype.mitgliedschaft.utils import create_korrespondenz, sp_updater
 from frappe.utils.background_jobs import enqueue
 from mvd.mvd.utils import is_job_already_running
+from frappe.utils.pdf import get_pdf
 
 def check_zahlung_mitgliedschaft(mitgliedschaft, db_direct=False):
     '''
@@ -498,3 +499,19 @@ def get_and_set_mitgliednr(mitgliedId):
         frappe.log_error("Mitgliednummer für Mitglied {0} konnte nicht bezogen werden".format(mitgliedId), 'get_and_set_mitgliednr')
         pass
     return
+
+@frappe.whitelist()
+def quittung_drucken(sales_invoice):
+    sinv = frappe.get_doc("Sales Invoice", sales_invoice)
+
+    html = frappe.render_template(
+        'templates/mvd/mvzh/quittung.html',
+        {"doc": sinv}
+    )
+
+    pdf = get_pdf(html)
+
+    frappe.local.response.filename = "Quittung_{0}.pdf".format(sales_invoice)
+    frappe.local.response.filecontent = pdf
+    frappe.local.response.type = "download"
+    frappe.local.response.content_type = "application/pdf"

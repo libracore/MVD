@@ -30,6 +30,11 @@ frappe.ui.form.on('Sales Invoice', {
                 storno_rollback(frm);
             });
         }
+        if ((cur_frm.doc.docstatus == 1)&&(cur_frm.doc.status == 'Paid')&&(cur_frm.doc.sektion_id == "MVZH")) {
+            frm.add_custom_button(__("Quittung drucken"), function() {
+                quittung_drucken(frm);
+            });
+        }
         // hack to default buttons
         setTimeout(function(){
             $("[data-label='Create']").remove();
@@ -294,6 +299,12 @@ function storno_rollback(frm) {
             cur_frm.reload_doc();
         }
     });
+}
+
+function quittung_drucken(frm) {
+    const url = "/api/method/mvd.mvd.doctype.mitgliedschaft.finance_utils.quittung_drucken"
+    + "?sales_invoice=" + encodeURIComponent(frm.doc.name);
+    window.open(url, "_blank");
 }
 
 function manueller_rechnungstext(frm) {

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_url_to_form, get_url
+from frappe.utils import get_url_to_form, get_url, cint
 from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention, get_anredekonvention_kunde
 try:
     from jinja2 import pass_context as context_decorator
@@ -332,6 +332,9 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
                 'key_word': '%%ARTIKELTABELLE%%', 'value': get_item_table(sinv)
             })
             key_words.append({
+                'key_word': '%%QUITTUNGTABELLE%%', 'value': get_item_table(sinv, quittung=True)
+            })
+            key_words.append({
                 'key_word': '%%WEBSHOPDATUM%%', 'value': get_webshop_datum(sinv)
             })
         if fr:
@@ -378,7 +381,20 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
         txt = txt.replace(key_word['key_word'], key_word['value'])
     return txt
 
-def get_item_table(sinv):
+def get_item_table(sinv, quittung=False):
+    def get_payment_txt(mode_of_payment):
+        payment_txt = {
+            'Cash': "Abzüglich Zahlung in Bar",
+            'Credit Card': "Abzüglich Zahlung mit Karte"
+        }
+        if not mode_of_payment or mode_of_payment == '':
+            return "Abzüglich Zahlung"
+
+        try:
+            return payment_txt[mode_of_payment]
+        except:
+            return "Abzüglich Zahlung"
+    
     taxes = {}
     for tax in sinv.taxes:
         taxes[tax.description] = 0
@@ -417,19 +433,66 @@ def get_item_table(sinv):
         if item.item_tax_template and item.item_tax_template in taxes:
             taxes[item.item_tax_template] += item.amount
     
+    if not quittung:
+        total_txt = "<b>Total</b>{mwst}".format(mwst=" (inkl. MWSt.)" if mwst == 1 else '')
+    else:
+        total_txt = "Zwischentotal{mwst}".format(mwst=" (inkl. MWSt.)" if mwst == 1 else '')
+    
     table += """
                 <tr style="border-bottom: 1px solid black; border-top: 1px solid black;">
-                    <td colspan="2" style="text-align: left;"><b>Total</b>{mwst}</td>
+                    <td colspan="2" style="text-align: left;">{total_txt}</td>
                     <td style="text-align: right;">Fr.</td>
                     <td style="text-align: right;">{grand_total}</td>
                     <td></td>
-                </tr>""".format(grand_total="{:,.2f}".format(sinv.grand_total).replace(",", "'"), mwst=" (inkl. MWSt.)" if mwst == 1 else '')
+                </tr>""".format(grand_total="{:,.2f}".format(sinv.grand_total).replace(",", "'"), total_txt=total_txt)
     
-    if mwst == 1:
+    if quittung:
+        if cint(sinv.is_pos) == 1:
+            if len(sinv.payments) > 0:
+                for payment in sinv.payments:
+                    zahlungsart = get_payment_txt(payment.mode_of_payment)
+                    table += """
+                        <tr>
+                            <td colspan="2" style="text-align: left;">{zahlungsart}</td>
+                            <td style="text-align: right;">Fr.</td>
+                            <td style="text-align: right;">{amount}</td>
+                            <td></td>
+                        </tr>""".format(zahlungsart=zahlungsart, amount="{:,.2f}".format(payment.amount).replace(",", "'"))
+                
+        else:
+            # Suche nach Payment Records
+            payments = frappe.db.sql(
+                """
+                    SELECT `allocated_amount`
+                    FROM `tabPayment Entry Reference`
+                    WHERE `reference_name` = '{sinv_name}'
+                    AND `docstatus` = 1
+                """.format(sinv_name=sinv.name),
+                as_dict=True
+            )
+            for payment in payments:
+                table += """
+                    <tr>
+                        <td colspan="2" style="text-align: left;">Ihre Banküberweisung</td>
+                        <td style="text-align: right;">Fr.</td>
+                        <td style="text-align: right;">{amount}</td>
+                        <td></td>
+                    </tr>""".format(amount="{:,.2f}".format(payment.allocated_amount).replace(",", "'"))
+        
+        table += """
+            <tr style="border-bottom: 1px solid black; border-top: 1px solid black;">
+                <td colspan="2" style="text-align: left;"><b>Total</b>{mwst}</td>
+                <td style="text-align: right;">Fr.</td>
+                <td style="text-align: right;">{grand_total}</td>
+                <td></td>
+            </tr>""".format(grand_total="{:,.2f}".format(sinv.outstanding_amount).replace(",", "'"), mwst=" (inkl. MWSt.)" if mwst == 1 else '')
+    
+    if mwst == 1 and len(sinv.taxes) > 0:
         table += """
                     <tr style="line-height: 1;">
                         <td colspan="2" style="text-align: left; font-size: 8px;">Unsere MWST-Nr: CHE-100.822.971 MWST</td>
-                        <td colspan="3" style="text-align: right;"><table style="width: 100%;">"""
+                        <td colspan="3" style="text-align: right;">
+                            <table style="width: 100%;">"""
         for tax in sinv.taxes:
             if tax.tax_amount > 0:
                 table += """<tr style="line-height: 1;">
@@ -443,6 +506,7 @@ def get_item_table(sinv):
                                             betrag="{:,.2f}".format(taxes[tax.description]).replace(",", "'"), \
                                             steuer="{:,.2f}".format(tax.tax_amount).replace(",", "'"))
         table += """</table></td></tr>"""
+    
     
     table += """
                     </tbody>
