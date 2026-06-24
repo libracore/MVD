@@ -86,34 +86,37 @@ class RSVMandat(Document):
             enqueue("mvd.mvd.doctype.rsvmandatsliste.rsvmandatsliste.update_rsvmandatlise", queue='short', job_name='Update {0}'.format(self.rsvmandatsliste), timeout=5000, **args)
     
     def fetch_document_table(self):
-        if len(self.dokumente) < 1:
-            fetched_documents = []
-            for _thema in self.thema:
-                thema = frappe.get_doc("Beratungskategorie", _thema.thema)
-                for document in thema.dokumente:
-                    if document.dokument not in fetched_documents:
-                        fetched_documents.append(document.dokument)
-                        doc_row = self.append("dokumente", {})
-                        doc_row.dokument = document.dokument
-                        if document.dokument == 'Mietvertrag':
-                            mietvertrag_pfad = self.get_mietvertrag_pfad()
-                            if mietvertrag_pfad:
-                                doc_row.file_upload = mietvertrag_pfad
-                        # if document.dokument == 'Schadenanzeige':
-                        #     attachments = frappe.db.sql(
-                        #         """
-                        #             SELECT `file_url`, `file_name`
-                        #             FROM `tabFile`
-                        #             WHERE `attached_to_doctype` = 'RSVMandat'
-                        #             AND `attached_to_name` = '{0}'
-                        #             LIMIT 1
-                        #         """.format(self.name),
-                        #         as_dict=True
-                        #     )
-                        #     if len(attachments) > 0:
-                        #         for attachment in attachments:
-                        #             if "Schadenanzeige" in attachment.file_name and "{0}".format(self.name) in attachment.file_name:
-                        #                 doc_row.file_upload = attachment.file_url
+        fetched_documents = []
+        if len(self.dokumente) > 0:
+            for document in self.dokumente:
+                fetched_documents.append(document.dokument)
+        
+        for _thema in self.thema:
+            thema = frappe.get_doc("Beratungskategorie", _thema.thema)
+            for document in thema.dokumente:
+                if document.dokument not in fetched_documents:
+                    fetched_documents.append(document.dokument)
+                    doc_row = self.append("dokumente", {})
+                    doc_row.dokument = document.dokument
+                    if document.dokument == 'Mietvertrag':
+                        mietvertrag_pfad = self.get_mietvertrag_pfad()
+                        if mietvertrag_pfad:
+                            doc_row.file_upload = mietvertrag_pfad
+                    # if document.dokument == 'Schadenanzeige':
+                    #     attachments = frappe.db.sql(
+                    #         """
+                    #             SELECT `file_url`, `file_name`
+                    #             FROM `tabFile`
+                    #             WHERE `attached_to_doctype` = 'RSVMandat'
+                    #             AND `attached_to_name` = '{0}'
+                    #             LIMIT 1
+                    #         """.format(self.name),
+                    #         as_dict=True
+                    #     )
+                    #     if len(attachments) > 0:
+                    #         for attachment in attachments:
+                    #             if "Schadenanzeige" in attachment.file_name and "{0}".format(self.name) in attachment.file_name:
+                    #                 doc_row.file_upload = attachment.file_url
     
     def get_mietvertrag_pfad(self):
         mietvertrag_pfad = frappe.db.sql(
