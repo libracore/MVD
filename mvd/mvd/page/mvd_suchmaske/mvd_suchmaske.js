@@ -816,7 +816,7 @@ frappe.mvd_such_client = {
                                 }
                             },
                             {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 1, 'read_only': 0},
-                            {'fieldname': 'datum_zahlung_eintritt', 'fieldtype': 'Date', 'label': 'Datum Zahlung/Eintritt', 'reqd': 0, 'default': 0, 'hidden': 1},
+                            {'fieldname': 'datum_zahlung_eintritt', 'fieldtype': 'Date', 'label': 'Datum Zahlung/Eintritt', 'reqd': 0, 'default': frappe.datetime.nowdate(), 'hidden': 1},
                             {'fieldname': 's1', 'fieldtype': 'Section Break'},
                             {'fieldname': 'kundentyp', 'fieldtype': 'Select', 'label': 'Kontakttyp', 'reqd': 1, 'options': 'Einzelperson\nUnternehmen', 'default': cur_page.page.search_fields.mitgliedtyp_c.get_value() == 'Geschäft' ? 'Unternehmen':'Einzelperson', 'change': function() {
                                     if (cur_dialog.fields_dict.kundentyp.get_value() == 'Einzelperson') {
