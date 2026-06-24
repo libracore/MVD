@@ -19,36 +19,43 @@
   {
    "fieldname": "plz",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "PLZ"
   },
   {
    "fieldname": "wohnort",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Wohnort"
   },
   {
    "fieldname": "stn_label",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Strasse"
   },
   {
    "fieldname": "adr_number",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Nummer"
   },
   {
    "fieldname": "com_fosnr",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "BFS Gemeindenummer"
   },
   {
    "fieldname": "com_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Gemeinde"
   },
   {
    "fieldname": "com_canton",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Kanton"
   },
   {
@@ -67,7 +74,7 @@
    "label": "Koordinaten Ost"
   }
  ],
- "modified": "2026-05-11 12:31:55.450385",
+ "modified": "2026-06-24 09:32:01.751598",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Amtliches Gebaeudeverzeichnis",
