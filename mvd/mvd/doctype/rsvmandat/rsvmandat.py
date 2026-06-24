@@ -377,7 +377,7 @@ def rsv_dokumente_fehlende(ctx):
         if doc.dokumente:
             document_list_html = ""
             for document in doc.dokumente:
-                if cint(document.kontrolliert) != 1:
+                if cint(document.formal_gepr) != 1:
                     document_list_html += "- {0}<br>".format(document.dokument)
             return document_list_html
     
@@ -390,7 +390,7 @@ def rsv_dokumente_erhalten(ctx):
         if doc.dokumente:
             document_list_html = ""
             for document in doc.dokumente:
-                if cint(document.kontrolliert) == 1:
+                if cint(document.formal_gepr) == 1:
                     document_list_html += "- {0}<br>".format(document.dokument)
             return document_list_html
     

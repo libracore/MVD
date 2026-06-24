@@ -4,19 +4,12 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "kontrolliert",
+  "formal_gepr",
+  "inhalt_gepr",
   "dokument",
   "file_upload"
  ],
  "fields": [
-  {
-   "columns": 3,
-   "default": "0",
-   "fieldname": "kontrolliert",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "label": "Kontrolliert"
-  },
   {
    "fieldname": "dokument",
    "fieldtype": "Data",
@@ -28,10 +21,22 @@
    "fieldtype": "Attach",
    "in_list_view": 1,
    "label": "File Upload"
+  },
+  {
+   "default": "0",
+   "fieldname": "formal_gepr",
+   "fieldtype": "Check",
+   "label": "formal Gepr."
+  },
+  {
+   "default": "0",
+   "fieldname": "inhalt_gepr",
+   "fieldtype": "Check",
+   "label": "inhalt. Gepr."
   }
  ],
  "istable": 1,
- "modified": "2026-05-27 12:08:25.171749",
+ "modified": "2026-06-24 13:29:34.707011",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSV Mandat Dokumente",
