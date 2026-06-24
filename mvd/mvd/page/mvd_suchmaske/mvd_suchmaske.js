@@ -796,6 +796,7 @@ frappe.mvd_such_client = {
                                     }
                                 }
                             },
+                            {'fieldname': 'mvb_typ', 'fieldtype': 'Select', 'label': 'MVB Typ', 'reqd': 0, 'hidden': 1, 'options': '\nMvbMini\nMvbStandard'},
                             {'fieldname': 'language', 'fieldtype': 'Link', 'label': 'Sprache', 'reqd': 1, 'hidden': 0, 'options': 'Language', 'default': cur_page.page.search_fields.language.get_value()||'de'},
                             {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'hidden': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value()},
                             {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 0, 'read_only': 0},
