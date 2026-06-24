@@ -143,6 +143,20 @@ function load_html_overview(frm) {
             }
         });
     }
+
+    if (cur_frm.doc.adr_egaid) {
+        // Lade Übersicht für die Siedlungsadresse
+        frappe.call({
+            method: "mvd.mvd.doctype.rsvmandat.rsvmandat.get_siedlungs_adressen_html",
+            args:{
+                    'adr_egaid': cur_frm.doc.adr_egaid
+            },
+            callback: function(r)
+            {
+                cur_frm.set_df_property('siedlungs_adressen_html','options', r.message);
+            }
+        });
+    }
 }
 
 function rsv_mandat_listen_selektion(frm, rsv_mandatliste) {

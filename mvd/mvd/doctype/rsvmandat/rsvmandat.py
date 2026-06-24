@@ -80,9 +80,10 @@ class RSVMandat(Document):
         
         if self.rsvmandatsliste:
             args = {
+                'rsvmandat': self.name,
                 'rsvmandatsliste': self.rsvmandatsliste
             }
-            enqueue("mvd.mvd.doctype.rsvmandatsliste.rsvmandatsliste.reset_status", queue='short', job_name='Update {0} Typ'.format(self.rsvmandatsliste), timeout=5000, **args)
+            enqueue("mvd.mvd.doctype.rsvmandatsliste.rsvmandatsliste.update_rsvmandatlise", queue='short', job_name='Update {0}'.format(self.rsvmandatsliste), timeout=5000, **args)
     
     def fetch_document_table(self):
         if len(self.dokumente) < 1:
@@ -391,3 +392,14 @@ def rsv_dokumente_erhalten(ctx):
             return document_list_html
     
     return '---'
+
+@frappe.whitelist()
+def get_siedlungs_adressen_html(adr_egaid):
+    adr = frappe.get_doc("Amtliches Gebaeudeverzeichnis", adr_egaid)
+    data = {
+        'strasse': adr.stn_label,
+        'nummer': adr.adr_number,
+        'plz': adr.plz,
+        'ort': adr.wohnort
+    }
+    return frappe.render_template('templates/includes/siedlungsadresse.html', data)

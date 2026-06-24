@@ -9,6 +9,10 @@
   "typ",
   "bezeichnung",
   "siedlung",
+  "bezirk",
+  "vermieterin",
+  "verwaltung",
+  "thema",
   "section_va_vergabe",
   "publikation_per",
   "frist",
@@ -77,9 +81,30 @@
    "fieldname": "fallnummer",
    "fieldtype": "Data",
    "label": "Fallnummer"
+  },
+  {
+   "fieldname": "bezirk",
+   "fieldtype": "Data",
+   "label": "Bezirk"
+  },
+  {
+   "fieldname": "vermieterin",
+   "fieldtype": "Data",
+   "label": "Gegenseite (Vermieterin)"
+  },
+  {
+   "fieldname": "verwaltung",
+   "fieldtype": "Data",
+   "label": "Gegenseite (Verwaltung)"
+  },
+  {
+   "fieldname": "thema",
+   "fieldtype": "Table MultiSelect",
+   "label": "Thema",
+   "options": "RSV Thema MultiTable"
   }
  ],
- "modified": "2026-06-18 12:24:36.033381",
+ "modified": "2026-06-24 11:50:25.021485",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandatsliste",

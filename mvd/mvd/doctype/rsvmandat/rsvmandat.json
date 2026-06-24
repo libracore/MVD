@@ -20,6 +20,7 @@
   "unterlagen_bei_ra",
   "section_mitgliedschafts_overview",
   "uebersicht_html",
+  "siedlungs_adressen_html",
   "section_mitgliedschaft",
   "strasse",
   "hausnummer",
@@ -137,17 +138,20 @@
   {
    "fieldname": "vermieterin",
    "fieldtype": "Data",
-   "label": "Gegenseite (Vermieterin)"
+   "label": "Gegenseite (Vermieterin)",
+   "read_only": 1
   },
   {
    "fieldname": "verwaltung",
    "fieldtype": "Data",
-   "label": "Gegenseite (Verwaltung)"
+   "label": "Gegenseite (Verwaltung)",
+   "read_only": 1
   },
   {
    "fieldname": "bezirk",
    "fieldtype": "Data",
-   "label": "Bezirk"
+   "label": "Bezirk",
+   "read_only": 1
   },
   {
    "fieldname": "entstehung",
@@ -343,9 +347,13 @@
    "fieldtype": "Data",
    "label": "Sprache",
    "read_only": 1
+  },
+  {
+   "fieldname": "siedlungs_adressen_html",
+   "fieldtype": "HTML"
   }
  ],
- "modified": "2026-06-18 13:49:33.896122",
+ "modified": "2026-06-24 12:40:57.952440",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",
