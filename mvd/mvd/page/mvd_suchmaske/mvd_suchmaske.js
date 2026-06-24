@@ -784,6 +784,9 @@ frappe.mvd_such_client = {
                                     if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Privat') {
                                         cur_dialog.fields_dict.kundentyp.set_value("Einzelperson");
                                         cur_dialog.fields_dict.kundentyp.refresh();
+                                    } else {
+                                        cur_dialog.fields_dict.kundentyp.set_value("Unternehmen");
+                                        cur_dialog.fields_dict.kundentyp.refresh();
                                     }
                                     if (cur_dialog.fields_dict.mitgliedtyp.get_value() == 'Geschäft' &
                                         cur_dialog.fields_dict.sektion_id.get_value() == 'MVZH'
