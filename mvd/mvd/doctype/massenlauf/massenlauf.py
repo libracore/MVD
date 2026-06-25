@@ -575,8 +575,8 @@ def beratungstermine(massenlauf):
             FROM `tabBeratung Termin` as termin
             INNER JOIN `tabBeratung` as beratung ON termin.parent = beratung.name
             WHERE DATE(termin.von) = %(heute)s 
-            AND beratung.sektion_id = 'MVBE'
-        """, {"heute": heute}, as_dict=True)
+            AND beratung.sektion_id = 'MVZH'
+        """, {"heute": heute}, as_dict=True, debug=True)
         
         output = PdfFileWriter()
         
