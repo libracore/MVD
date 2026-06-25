@@ -3020,31 +3020,41 @@ def validate_member_addresses(limit=0):
         count_failed = 0
 
         for m in members:
-            full_number = "{0}{1}".format(m.objekt_hausnummer or "", m.objekt_nummer_zu or "")
-            safe_strasse = str(m.objekt_strasse).replace("'", "''")
-            safe_ort = str(m.objekt_ort).replace("'", "''")
-            safe_full_number = str(full_number).replace("'", "''")
-            sql_result = frappe.db.sql("""SELECT com_fosnr
-                                FROM `tabAmtliches Gebaeudeverzeichnis`
-                                WHERE plz = '{0}'
-                                AND stn_label = '{1}'
-                                AND adr_number = '{2}'
-                                AND wohnort = '{3}'
-                                LIMIT 1
-                                """.format(m.objekt_plz, safe_strasse, safe_full_number, safe_ort), as_dict=True)
-            status = 1 if sql_result else 0
+            try:
+                full_number = "{0}{1}".format(m.objekt_hausnummer or "", m.objekt_nummer_zu or "")
+                safe_strasse = str(m.objekt_strasse).replace("'", "''")
+                safe_ort = str(m.objekt_ort).replace("'", "''")
+                safe_full_number = str(full_number).replace("'", "''")
+                sql_result = frappe.db.sql("""SELECT com_fosnr
+                                    FROM `tabAmtliches Gebaeudeverzeichnis`
+                                    WHERE plz = '{0}'
+                                    AND stn_label = '{1}'
+                                    AND adr_number = '{2}'
+                                    AND wohnort = '{3}'
+                                    LIMIT 1
+                                    """.format(m.objekt_plz, safe_strasse, safe_full_number, safe_ort), as_dict=True)
+                status = 1 if sql_result else 0
 
-            frappe.db.set_value("Mitgliedschaft", m.name, {
-                "adressvalidierung_datum": frappe.utils.nowdate(),
-                "adressvalidierung_bestanden": status,
-            }, update_modified=False)
-            
-            if sql_result:
-                count_success += 1
-            else:
-                count_failed += 1
+                frappe.db.set_value("Mitgliedschaft", m.name, {
+                    "adressvalidierung_datum": frappe.utils.nowdate(),
+                    "adressvalidierung_bestanden": status,
+                }, update_modified=False)
+                
+                if sql_result:
+                    count_success += 1
+                else:
+                    count_failed += 1
+            except Exception as e:
+                frappe.log_error(message=frappe.get_traceback(),  title="Fehler bei Adressvalidierung: {0}".format(m.name))
         frappe.db.commit()
+        summary_message = (
+            "Adressvalidierung beendet.\n"
+            "Geprüft: {0}\n"
+            "Erfolgreich (Bestanden): {1}\n"
+            "Nicht erfolgreich (Durchgefallen): {2}\n"
+        ).format(len(members), count_success, count_failed)
 
+        frappe.log_error(message=summary_message, title="Zusammenfassung: Adressvalidierung")
 @frappe.whitelist(allow_guest=True)
 def get_arbitration_authority_with_validation(doc_id, doc_type="Mitgliedschaft"):
     if not doc_id:
