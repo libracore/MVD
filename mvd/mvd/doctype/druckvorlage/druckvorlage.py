@@ -788,11 +788,16 @@ def get_beratungs_daten(ctx):
         anrede = m.briefanrede or ""
         sektion = m.sektion_id
         sprache = m.language or "de"
+        typ = m.mitgliedtyp_c
+        status = m.status_c
+
     elif doc.faktura_kunde:
-        k = frappe.get_value("Kunden", doc.faktura_kunde, ["sektion_id", "language"], as_dict=True)
+        k = frappe.get_value("Kunden", doc.faktura_kunde, ["sektion_id", "language", "kundentyp"], as_dict=True)
         sektion = k.sektion_id
         sprache = k.language or "de"
         anrede = get_anredekonvention_kunde(kunde=k)
+        typ = k.kundentyp
+        status = None
 
     berater_name = frappe.db.get_value("Termin Kontaktperson", doc.kontaktperson, "kontakt") or ""
     beratung_art = frappe.db.get_value("Beratung Termin", {"parent": doc.name}, "art") or ""
@@ -824,7 +829,9 @@ def get_beratungs_daten(ctx):
         "sprache": sprache,
         "berater": berater_name,
         "termine": termine_liste,
-        "art": beratung_art
+        "art": beratung_art,
+        "typ": typ,
+        "status": status
     }
 
 ### Kontexte für die Mandate ###
