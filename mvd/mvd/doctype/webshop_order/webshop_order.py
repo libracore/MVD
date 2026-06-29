@@ -240,7 +240,7 @@ class WebshopOrder(Document):
                     item_code = (item.get("item") or "").upper().strip()
 
                     if (
-                        (item_code.startswith("MV") and (item_code.endswith("-MG") or item_code.endswith("-MP") or item_code.endswith("-MA")))
+                        (item_code.startswith("MV") and (item_code.endswith("-MG") or item_code.endswith("-MP") or item_code.endswith("-MA") or item_code.endswith("-MS")))
                         or item_code == "MVZH-MM"
                     ):
                         self.bestellung_erledigt = 1

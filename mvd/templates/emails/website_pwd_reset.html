@@ -13,7 +13,7 @@ a img { border: none; }
 table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
 th { font-weight: normal; text-align: left; }
 .nl2go-default-textstyle { color: #3b3f44; font-family: Arial; font-size: 16px; line-height: 1.5; word-break: break-word; }
-.default-button { color: #ffffff; font-family: Arial; font-size: 16px; font-style: normal; font-weight: normal; line-height: 1.15; text-decoration: none; word-break: break-word; }
+.default-button { color: #ffffff; font-family: Arial; font-size: 16px; font-style: normal; font-weight: normal; line-height: 1.15; text-decoration: none !important; word-break: break-word; }
 a, a:link { color: #219d84; text-decoration: underline; }
 a[x-apple-data-detectors] { color: inherit !important; text-decoration: inherit !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
 @media (max-width: 600px) {
@@ -85,8 +85,8 @@ Ihr Login-Link für mieterverband.ch.</div>
     <table cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin: 8px 0;">
     <tbody><tr>
       <td style="background-color: #003a62; border-radius: 1px;" class="btn-td">
-        <a href="{{ link }}" target="_blank"
-           style="display: block; padding: 14px 38px; font-family: Arial; font-size: 16px; color: #ffffff; font-weight: normal; text-decoration: none; line-height: 1.15; white-space: nowrap;">
+        <a href="{{ link }}" target="_blank" class="default-button"
+           style="display: block; padding: 14px 38px; font-family: Arial; font-size: 16px; color: #ffffff; font-weight: normal; text-decoration: none !important; line-height: 1.15; white-space: nowrap;">
           Zum Online-Konto
         </a>
       </td>
