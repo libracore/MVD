@@ -238,12 +238,24 @@ class Mitgliedschaft(Document):
                 self.set(phone_number, formatted)
         
         # Prüfung ob Adressew geändert -> Addresschange #1556
-        self.check_for_address_change()
+        adress_changed =  self.check_for_address_change()
 
         # Objektadresse mit Korrespondenzadresse synchron halten wenn keine abweichende Objektadresse (#1671)
         if cint(self.abweichende_objektadresse) != 1:
             self.copy_korrespondenz_to_objektadresse()
         
+        if adress_changed and not self.adressvalidierung_manuell:
+            # Adressvalidierung -> diese kann abgestellt werden um die Validierung der Mitgliedschaft zu beschleunigen
+            self.adressvalidierung_bestanden = 0
+            self.adr_egaid = None
+            res = validate_address(doc_type="Mitgliedschaft", doc=self)
+            if not res.get("success"):
+                frappe.msgprint(
+                    msg="Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden.",
+                    title="Adressvalidierung fehlgeschlagen",
+                    indicator="orange"
+                )
+
         if self.mitglied_nr != "MV":
             if frappe.db.exists("SP Mitglied Data", self.mitglied_nr):
                 frappe.db.set_value("SP Mitglied Data", self.mitglied_nr, "needs_update", 1)
@@ -654,6 +666,9 @@ class Mitgliedschaft(Document):
                 return False if old_str == new_str else True
 
         if not self.flags.from_addresschange:
+            if self.is_new():
+                return True
+            
             old_doc = self.get_doc_before_save()
             if old_doc:
                 if cint(self.abweichende_objektadresse) != cint(old_doc.abweichende_objektadresse):
@@ -666,6 +681,7 @@ class Mitgliedschaft(Document):
                             'plz': self.objekt_plz,
                             'ort': self.objekt_ort
                         })
+                        return True
                     else:
                         create_addresschange_doc(address_data={
                             'zusatz_adresse': self.zusatz_adresse,
@@ -675,6 +691,7 @@ class Mitgliedschaft(Document):
                             'plz': self.plz,
                             'ort': self.ort
                         })
+                        return True
                 else:
                     if cint(self.abweichende_objektadresse) == 1:
                         if has_changed(self, old_doc, objekt=True):
@@ -686,6 +703,7 @@ class Mitgliedschaft(Document):
                                 'plz': self.objekt_plz,
                                 'ort': self.objekt_ort
                             })
+                            return True
                     else:
                         if has_changed(self, old_doc):
                             create_addresschange_doc(address_data={
@@ -696,6 +714,8 @@ class Mitgliedschaft(Document):
                                 'plz': self.plz,
                                 'ort': self.ort
                             })
+                            return True
+        return False
     
     def copy_korrespondenz_to_objektadresse(self):
         self.objekt_zusatz_adresse = self.zusatz_adresse
@@ -3057,9 +3077,9 @@ def validate_member_addresses(limit=0):
         ).format(len(members), count_success, count_failed)
 
         frappe.log_error(message=summary_message, title="Zusammenfassung: Adressvalidierung")
-@frappe.whitelist(allow_guest=True)
-def get_arbitration_authority_with_validation(doc_id, doc_type="Mitgliedschaft"):
-    if not doc_id:
+
+def validate_address(doc_id=None, doc_type="Mitgliedschaft", doc=None):
+    if not doc_id and not doc:
         return {"success": False, "message": "Keine ID übergeben."}
 
     bfs_nr = None
@@ -3082,14 +3102,15 @@ def get_arbitration_authority_with_validation(doc_id, doc_type="Mitgliedschaft")
         if sql_result:
             bfs_nr = sql_result[0].get("com_fosnr")
         if not sql_result:
-            return {"success": False, "message": 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/?plz_city={0}" target="_blank">mietrecht.ch</a> recherchieren.'.format(doc.plz or "")}
+            return {"success": False, "plz": doc.plz or ""}
     else:
-        doc = frappe.db.get_value("Mitgliedschaft", doc_id, [
-            "name", "objekt_strasse", "objekt_hausnummer", "objekt_nummer_zu", 
-            "objekt_plz", "objekt_ort", "adressvalidierung_bestanden"
-        ], as_dict=True)
         if not doc:
-            return {"success": False, "message": "Mitgliedschaft nicht gefunden."}
+            doc = frappe.db.get_value("Mitgliedschaft", doc_id, [
+                "name", "objekt_strasse", "objekt_hausnummer", "objekt_nummer_zu", 
+                "objekt_plz", "objekt_ort", "adressvalidierung_bestanden"
+            ], as_dict=True)
+            if not doc:
+                return {"success": False, "message": "Mitgliedschaft nicht gefunden."}
 
         full_number = "{0}{1}".format(doc.objekt_hausnummer or "", doc.objekt_nummer_zu or "")
         strasse = str(doc.objekt_strasse).replace("'", "''")
@@ -3104,20 +3125,43 @@ def get_arbitration_authority_with_validation(doc_id, doc_type="Mitgliedschaft")
                                LIMIT 1
                                """.format(doc.objekt_plz, strasse, full_number, ort), as_dict=True)
         status = 1 if sql_result else 0
+        adr_egaid = sql_result[0].name if sql_result else None
         if sql_result:
             bfs_nr = sql_result[0].get("com_fosnr")
-        if not doc.adressvalidierung_bestanden:
+
+        if not doc_id:
+            doc.adressvalidierung_datum = frappe.utils.nowdate()
+            doc.adressvalidierung_bestanden = status
+            doc.adr_egaid = adr_egaid
+
+        elif doc_id:
             frappe.db.set_value("Mitgliedschaft", doc.name, {
                     "adressvalidierung_datum": frappe.utils.nowdate(),
-                    "adressvalidierung_bestanden": status
+                    "adressvalidierung_bestanden": status,
+                    "adr_egaid": adr_egaid,
                 }, update_modified=False)
         
         if not status:
-                return {"success": False, "message": 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/?plz_city={0}" target="_blank">mietrecht.ch</a> recherchieren.'.format(doc.objekt_plz or "")}
+                return {"success": False, "plz": doc.objekt_plz or ""}
 
     if not bfs_nr:
-        return {"success": False, "message": 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/ubersicht" target="_blank">mietrecht.ch</a> mit PLZ recherchieren.'}
+        return {"success": False}
+    
+    return {"success": True, "bfs_nr": bfs_nr}
+
+@frappe.whitelist(allow_guest=True)
+def get_arbitration_authority_with_validation(doc_id, doc_type="Mitgliedschaft"):
+    validation_res = validate_address(doc_id, doc_type)
+    
+    if not validation_res.get("success"):
+        if validation_res.get("message"):
+            message = validation_res.get("message")
+        else:
+            message = 'Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden. Bitte Angaben prüfen oder über <a href="https://www.mietrecht.ch/schlichtungsbehorden/?plz_city={0}" target="_blank">mietrecht.ch</a> recherchieren.'.format(validation_res.get("plz") or "")
+        return {"success": validation_res.get("success"), "message": message}
         
+    bfs_nr = validation_res.get("bfs_nr")
+
     # --- EXTERNER API CALL AN MP ---
     api_url = "https://mp.libracore.ch/api/method/mietrechtspraxis.api.get_arbitration_authority_from_bfs"
     try:
