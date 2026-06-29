@@ -206,6 +206,7 @@
   "adressvalidierung_bestanden",
   "adressvalidierung_datum",
   "adressvalidierung_manuell",
+  "adr_egaid",
   "web_login_user_created",
   "asloca_id"
  ],
@@ -1441,10 +1442,16 @@
   {
    "fieldname": "cb_7",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "adr_egaid",
+   "fieldtype": "Link",
+   "label": "Eidgen\u00f6ssischer Geb\u00e4udeadressidentifikator",
+   "options": "Amtliches Gebaeudeverzeichnis"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-05-21 10:34:47.874817",
+ "modified": "2026-06-29 10:07:45.329684",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

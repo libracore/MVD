@@ -3025,7 +3025,7 @@ def validate_member_addresses(limit=0):
                 safe_strasse = str(m.objekt_strasse).replace("'", "''")
                 safe_ort = str(m.objekt_ort).replace("'", "''")
                 safe_full_number = str(full_number).replace("'", "''")
-                sql_result = frappe.db.sql("""SELECT com_fosnr
+                sql_result = frappe.db.sql("""SELECT name
                                     FROM `tabAmtliches Gebaeudeverzeichnis`
                                     WHERE plz = '{0}'
                                     AND stn_label = '{1}'
@@ -3034,10 +3034,12 @@ def validate_member_addresses(limit=0):
                                     LIMIT 1
                                     """.format(m.objekt_plz, safe_strasse, safe_full_number, safe_ort), as_dict=True)
                 status = 1 if sql_result else 0
+                adr_egaid = sql_result[0].name if sql_result else None
 
                 frappe.db.set_value("Mitgliedschaft", m.name, {
                     "adressvalidierung_datum": frappe.utils.nowdate(),
                     "adressvalidierung_bestanden": status,
+                    "adr_egaid": adr_egaid,
                 }, update_modified=False)
                 
                 if sql_result:
