@@ -1,0 +1,30 @@
+{
+ "creation": "2026-06-30 12:22:58.683557",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sprache"
+ ],
+ "fields": [
+  {
+   "fieldname": "sprache",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sprache",
+   "options": "Language",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-06-30 12:22:58.683557",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "RSV Sprache MultiTable",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

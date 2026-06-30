@@ -13,6 +13,7 @@
   "vermieterin",
   "verwaltung",
   "thema",
+  "sprachen",
   "section_va_vergabe",
   "publikation_per",
   "frist",
@@ -102,9 +103,15 @@
    "fieldtype": "Table MultiSelect",
    "label": "Thema",
    "options": "RSV Thema MultiTable"
+  },
+  {
+   "fieldname": "sprachen",
+   "fieldtype": "Table MultiSelect",
+   "label": "Sprache(n)",
+   "options": "RSV Sprache MultiTable"
   }
  ],
- "modified": "2026-06-24 11:50:25.021485",
+ "modified": "2026-06-30 12:23:40.143516",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandatsliste",
