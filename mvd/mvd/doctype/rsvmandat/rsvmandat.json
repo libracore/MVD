@@ -84,9 +84,10 @@
   },
   {
    "fieldname": "anwalt",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Anwalt"
+   "label": "Anwalt",
+   "options": "Termin Kontaktperson"
   },
   {
    "fieldname": "zusatz_adresse",
@@ -353,7 +354,7 @@
    "fieldtype": "HTML"
   }
  ],
- "modified": "2026-06-24 12:40:57.952440",
+ "modified": "2026-06-30 09:55:06.123264",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",

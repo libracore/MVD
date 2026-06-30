@@ -10,6 +10,13 @@ frappe.ui.form.on('RSVMandat', {
                  }
              }
         }
+        cur_frm.fields_dict['anwalt'].get_query = function(doc) {
+             return {
+                 filters: {
+                     "ist_vertrauensanwaeltin": 1
+                 }
+             }
+        }
 
         // load html overview
         load_html_overview(frm);
