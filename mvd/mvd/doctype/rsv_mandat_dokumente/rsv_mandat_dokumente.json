@@ -26,17 +26,19 @@
    "default": "0",
    "fieldname": "formal_gepr",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "formal Gepr."
   },
   {
    "default": "0",
    "fieldname": "inhalt_gepr",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "inhalt. Gepr."
   }
  ],
  "istable": 1,
- "modified": "2026-06-24 13:29:34.707011",
+ "modified": "2026-06-30 09:26:15.535648",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSV Mandat Dokumente",
