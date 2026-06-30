@@ -118,9 +118,13 @@ def get_cards():
             qty = 1
         
         status_pill = '<span class="status-pill">Offen für Interesse</span>'
+        interessiert_btn = 'Ja, ich bin interessiert'
+        interessiert_btn_color = 'primary'
         va_in_list = is_va_already_in_list(mandatsliste.name)
         if va_in_list:
             status_pill = '<span class="status-pill">Interesse bereits hinterlegt</span>'
+            interessiert_btn = 'kein Interesse'
+            interessiert_btn_color = 'danger'
 
         detail_card_template = """
             <section class="detail hidden" data-belongstomandatsliste="{mandatsliste}">
@@ -162,14 +166,14 @@ def get_cards():
                     <textarea id="message-{mandatsliste}" placeholder="Kurze Bemerkung zu Kapazität, Erfahrung oder Rückfragen..."></textarea>
 
                     <div class="actions">
-                        <button class="btn-primary" onclick="take('{mandatsliste}', '{va_in_list}')">Ja, ich bin interessiert</button>
+                        <button class="btn-{interessiert_btn_color}" onclick="take('{mandatsliste}', '{va_in_list}')">{interessiert_btn}</button>
                     </div>
                 </div>
             </section>
         """.format(mandatsliste=mandatsliste.name, titel=mandatsliste.bezeichnung or mandatsliste.name,
                    language=mandatsliste.language or 'Deutsch', qty=qty, typ=mandatsliste.typ, kurzbeschrieb=mandatsliste.kurzbeschrieb or '',
-                   frist=mandatsliste.frist or '-', verhandlungsdatum=mandatsliste.verhandlungsdatum or '-',
-                   einzelmandat_details=get_einzelmandat_details(mandatsliste), status_pill=status_pill, va_in_list=va_in_list)
+                   frist=mandatsliste.frist or '-', verhandlungsdatum=mandatsliste.verhandlungsdatum or '-', interessiert_btn_color=interessiert_btn_color,
+                   einzelmandat_details=get_einzelmandat_details(mandatsliste), status_pill=status_pill, va_in_list=va_in_list, interessiert_btn=interessiert_btn)
 
         return detail_card_template
     
@@ -208,6 +212,15 @@ def add_va(mandatsliste, bemerkung):
     row = ml.append("va_vergabe", {})
     row.va_user = frappe.session.user
     row.remarks = bemerkung
+    ml.save(ignore_permissions=True)
+    return
+
+@frappe.whitelist()
+def remove_va(mandatsliste):
+    ml = frappe.get_doc("RSVMandatsliste", mandatsliste)
+    for va in ml.va_vergabe:
+        if va.va_user == frappe.session.user:
+            ml.remove(va)
     ml.save(ignore_permissions=True)
     return
 
