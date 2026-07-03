@@ -932,3 +932,17 @@ def get_mahngebuehr(ctx):
             return "{:,.2f}".format(doc.get("reminder_charge")).replace(",", "'")
     
     return '---'
+
+@context_decorator
+def get_mailin_dmc(ctx, size=6):
+    doc = get_doc_from_ctx(ctx)
+    if all([
+        doc.get("name", False),
+        doc.get("doctype", False)
+    ]):
+        return '<img src="https://data.libracore.ch/phpqrcode/api/qrcode.php?content=mailto:mv+{dn}+{dt}@libracore.io&ecc=H&size={size}&frame=2" />'.format(
+            dn=doc.get("name"),
+            dt=doc.get("doctype"),
+            size=size
+        )
+    return '---'

@@ -80,7 +80,8 @@ jenv = {
         "get_beratung_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratung_link",
         "get_mahngebuehr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mahngebuehr",
         "rsv_dokumente_fehlende:mvd.mvd.doctype.rsvmandat.rsvmandat.rsv_dokumente_fehlende",
-        "rsv_dokumente_erhalten:mvd.mvd.doctype.rsvmandat.rsvmandat.rsv_dokumente_erhalten"
+        "rsv_dokumente_erhalten:mvd.mvd.doctype.rsvmandat.rsvmandat.rsv_dokumente_erhalten",
+        "get_mailin_dmc:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mailin_dmc"
     ]
 }
 
