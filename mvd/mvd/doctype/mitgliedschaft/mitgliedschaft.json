@@ -1094,7 +1094,7 @@
    "fieldname": "grund_abweichender_betrag",
    "fieldtype": "Select",
    "label": "Grund f\u00fcr abweichenden Betrag",
-   "options": "Sonstiges\nKollektiv\nMitarbeitende\nReduziert\nStudierende"
+   "options": "Sonstiges\nKollektiv\nMitarbeitende\nReduziert\nStudierende\nSoziale Institution"
   },
   {
    "default": "0",
@@ -1451,7 +1451,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-06-29 10:07:45.329684",
+ "modified": "2026-07-03 17:38:22.934600",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
