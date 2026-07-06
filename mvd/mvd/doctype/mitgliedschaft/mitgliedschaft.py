@@ -3135,12 +3135,18 @@ def validate_address(doc_id=None, doc_type="Mitgliedschaft", doc=None):
             doc.adr_egaid = adr_egaid
 
         elif doc_id:
-            frappe.db.set_value("Mitgliedschaft", doc.name, {
-                    "adressvalidierung_datum": frappe.utils.nowdate(),
-                    "adressvalidierung_bestanden": status,
-                    "adr_egaid": adr_egaid,
-                }, update_modified=False)
-        
+            try:
+                frappe.db.set_value("Mitgliedschaft", doc.name, {
+                        "adressvalidierung_datum": frappe.utils.nowdate(),
+                        "adressvalidierung_bestanden": status,
+                        "adr_egaid": adr_egaid,
+                    }, update_modified=False)
+            except Exception as err:
+                frappe.log_error(
+                    title="Adressvalidierung Fehler",
+                    message="{error}\n\n{traceback}\n\nDie adr_egaid '{adr_egaid}' existiert nicht im Amtlichen Gebaeudeverzeichnis. Mitgliedschaft: {name}".format(error=str(err), traceback=frappe.get_traceback(), adr_egaid=adr_egaid, name=doc.name)
+                    )
+
         if not status:
                 return {"success": False, "plz": doc.objekt_plz or ""}
 
