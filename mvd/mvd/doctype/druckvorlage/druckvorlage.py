@@ -934,13 +934,13 @@ def get_mahngebuehr(ctx):
     return '---'
 
 @context_decorator
-def get_mailin_dmc(ctx, size=6):
+def get_mailin_dmc(ctx, size=80):
     doc = get_doc_from_ctx(ctx)
     if all([
         doc.get("name", False),
         doc.get("doctype", False)
-    ]):
-        return '<img src="https://data.libracore.ch/phpqrcode/api/qrcode.php?content=mailto:mv+{dn}+{dt}@libracore.io&ecc=H&size={size}&frame=2" />'.format(
+    ]) and ' ' not in doc.get("doctype", ''):
+        return '<img src="https://data.libracore.ch/phpqrcode/api/barcode.php?f=png&s=dmtx&d=mailto:mv+{dn}+{dt}@libracore.io&h={size}&w={size}" />'.format(
             dn=doc.get("name"),
             dt=doc.get("doctype"),
             size=size
