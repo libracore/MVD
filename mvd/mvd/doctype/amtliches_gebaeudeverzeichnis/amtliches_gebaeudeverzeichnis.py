@@ -12,7 +12,7 @@ from datetime import datetime
 from frappe.model.document import Document
 
 class AmtlichesGebaeudeverzeichnis(Document):
-    pass
+	pass
 
 @frappe.whitelist()
 def trigger_upload_job():
@@ -118,25 +118,10 @@ def run_sql_import():
         
 
 def execute_raw_sql(batch):
-    query = """
-        INSERT INTO `tabAmtliches Gebaeudeverzeichnis` 
-        (name, stn_label, adr_number, plz, wohnort, com_fosnr, com_name, com_canton, adr_modified, adr_easting, adr_northing, owner, modified_by, creation, modified, docstatus)
-        VALUES {0}
-    """.format(", ".join(batch))
-    frappe.db.sql(query)
-    frappe.db.commit()
-
-@frappe.whitelist()
-def get_swisstopo_url(ADR_EGAID=None):
-    if not ADR_EGAID: return
-
-    adr_easting = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", ADR_EGAID, 'adr_easting')
-    adr_northing = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", ADR_EGAID, 'adr_northing')
-
-    return """
-        https://map.geo.admin.ch/#/map?lang=de&center={adr_easting},{adr_northing}&z=9&topic=ech&layers=ch.swisstopo.amtliches-gebaeudeadressverzeichnis@features={ADR_EGAID}&bgLayer=ch.swisstopo.pixelkarte-farbe
-    """.format(
-        adr_easting=adr_easting,
-        adr_northing=adr_northing,
-        ADR_EGAID=ADR_EGAID
-    )
+	query = """
+		INSERT INTO `tabAmtliches Gebaeudeverzeichnis` 
+		(name, stn_label, adr_number, plz, wohnort, com_fosnr, com_name, com_canton, adr_modified, adr_easting, adr_northing, owner, modified_by, creation, modified, docstatus)
+		VALUES {0}
+	""".format(", ".join(batch))
+	frappe.db.sql(query)
+	frappe.db.commit()

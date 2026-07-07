@@ -10,10 +10,6 @@
  "field_order": [
   "section_uebersicht",
   "uebersicht_html",
-  "section_nextcloud",
-  "open_nextcloud_root",
-  "refresh_files_tree",
-  "nextcloud_html",
   "section_allgemein",
   "mitglied_nr",
   "sektion_id",
@@ -182,8 +178,6 @@
   "adressvalidierung_datum",
   "adressvalidierung_manuell",
   "adr_egaid",
-  "cb_8",
-  "get_swisstopo_url",
   "section_workflow_helpers",
   "validierung_notwendig",
   "kuendigung_verarbeiten",
@@ -215,8 +209,7 @@
   "mvs_quelle",
   "deleted_by_admin",
   "web_login_user_created",
-  "asloca_id",
-  "fachskill"
+  "asloca_id"
  ],
  "fields": [
   {
@@ -1462,48 +1455,10 @@
    "fieldname": "section_adressvalidierung",
    "fieldtype": "Section Break",
    "label": "Adressvalidierung"
-  },
-  {
-   "fieldname": "section_nextcloud",
-   "fieldtype": "Section Break",
-   "label": "NextCloud"
-  },
-  {
-   "fieldname": "open_nextcloud_root",
-   "fieldtype": "Button",
-   "label": "NextCloud \u00f6ffnen"
-  },
-  {
-   "fieldname": "refresh_files_tree",
-   "fieldtype": "Button",
-   "label": "Files-Baum aktualisieren"
-  },
-  {
-   "fieldname": "nextcloud_html",
-   "fieldtype": "HTML",
-   "options": "<div class=\"nextcloud-tree\"></div>"
-  },
-  {
-   "fieldname": "cb_8",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.adr_egaid",
-   "fieldname": "get_swisstopo_url",
-   "fieldtype": "Button",
-   "label": "<i class=\"fa fa-map\"></i> SwissTopo"
-  },
-  {
-   "description": "Das Pop-Up \"Termin vereinbaren\" kann die Table MultiSelect nur dann richtig anzeigen, wenn dies in den locals vorhanden ist. In den Locals ist es aber nur dann vorhanden, wenn das Feld im DT vorkommt.",
-   "fieldname": "fachskill",
-   "fieldtype": "Table MultiSelect",
-   "hidden": 1,
-   "label": "Fachskill (nur f\u00fcr Pup-Up)",
-   "options": "Termin Kontaktperson Multi Fachskill"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-07-07 11:59:48.881010",
+ "modified": "2026-07-06 14:48:55.510119",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

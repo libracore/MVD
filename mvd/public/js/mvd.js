@@ -1607,17 +1607,3 @@ frappe.mvd.schlichtungsbehoerde_listener = function(frm, field_name) {
             });
         });
 };
-
-frappe.provide('frappe.mvd.get_swisstopo_url');
-frappe.mvd.get_swisstopo_url = function(ADR_EGAID) {
-    frappe.call({
-        method: "mvd.mvd.doctype.amtliches_gebaeudeverzeichnis.amtliches_gebaeudeverzeichnis.get_swisstopo_url",
-        args: {
-            ADR_EGAID:ADR_EGAID
-        },
-        callback: (r) => {
-            var url = r.message;
-            window.open(url, '_blank');
-        }
-    });
-}
