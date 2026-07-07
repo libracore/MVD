@@ -235,18 +235,12 @@ class Beratung(Document):
             # Beratung wird aktuell angelegt
             if self.anlage_durch_web_formular:
                 # anlage via web formular
-                '''
-                Achtung MVBE-Hack
-                '''
-                if self.sektion_id == 'MVBE' or self.sektion_id == 'MVLU':
+                if self.sektion_id in ['MVBE', 'MVLU', 'MVZH']:
                     if self.status == 'Eingang':
-                        if self.beratungskategorie not in ('202 - Mietzinserhöhung', '203 - Mietzinssenkung', '300 - Nebenkosten'):
+                        if self.sektion_id == 'MVZH' or self.beratungskategorie not in ('202 - Mietzinserhöhung', '203 - Mietzinssenkung', '300 - Nebenkosten'):
                             self.status = 'Open'
                             # Zuweisung Defaultberater*in
                             self.zuweisung_default_berater_in()
-                '''
-                /MVBE-Hack
-                '''
             else:
                 if self.raised_by:
                     # Anlage via Mail
