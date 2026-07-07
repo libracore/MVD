@@ -4,7 +4,11 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "adr_egaid"
+  "adr_egaid",
+  "stn_label",
+  "adr_number",
+  "plz",
+  "wohnort"
  ],
  "fields": [
   {
@@ -14,10 +18,42 @@
    "label": "ADR_EGAID",
    "options": "Amtliches Gebaeudeverzeichnis",
    "reqd": 1
+  },
+  {
+   "fetch_from": "adr_egaid.stn_label",
+   "fieldname": "stn_label",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Strasse",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "adr_egaid.adr_number",
+   "fieldname": "adr_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nummer",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "adr_egaid.plz",
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "PLZ",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "adr_egaid.wohnort",
+   "fieldname": "wohnort",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Wohnort",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2026-05-26 16:17:03.613065",
+ "modified": "2026-07-07 10:41:57.890638",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Zugehoerige Gebaeude",
