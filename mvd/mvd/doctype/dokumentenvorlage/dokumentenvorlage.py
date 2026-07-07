@@ -7,20 +7,33 @@ import frappe
 from frappe.model.document import Document
 from datetime import date, datetime
 from frappe.utils import getdate
+import requests
 
 class Dokumentenvorlage(Document):
+    def validate(self):
+        for mapping in self.mapping_tbl:
+            if mapping.replace_with == 'Feld':
+                mapping.function = None
+                if not mapping.field: frappe.throw('Bitte erfassen sie "Feld" in Zeile {idx}'.format(idx=mapping.idx))
+            if mapping.replace_with == 'Funktion':
+                mapping.field = None
+                if not mapping.function: frappe.throw('Bitte erfassen sie "Funktion" in Zeile {idx}'.format(idx=mapping.idx))
+        return
+    
     def translate(self):
         return {
             row.platzhalter: {
                 "doctype": row.d_type,
-                "fieldname": row.field
+                "fieldname": row.field,
+                "replace_with": row.replace_with,
+                "function": row.function
             }
             for row in sorted(
                 self.mapping_tbl,
                 key=lambda row: len(row.platzhalter),
                 reverse=True
             )
-            if row.platzhalter and row.d_type and row.field
+            if row.platzhalter and row.d_type and (row.replace_with == 'Feld' and row.field) or (row.replace_with == 'Funktion' and row.function)
         }
 
     def format_value(self, value, doctype, fieldname):
@@ -51,43 +64,49 @@ class Dokumentenvorlage(Document):
                 link_fields_by_doctype[df.options] = df.fieldname
 
         for placeholder, config in translations.items():
+            replace_with = config.get("replace_with")
+            replace_function = config.get("function")
             target_doctype = config.get("doctype")
             target_fieldname = config.get("fieldname")
 
-            # Feld ist direkt auf dem aktuellen Dokument
-            if target_doctype == doc.doctype:
-                value = doc.get(target_fieldname)
-                result[placeholder] = self.format_value(
+            if replace_with == "Feld":
+                # Feld ist direkt auf dem aktuellen Dokument
+                if target_doctype == doc.doctype:
+                    value = doc.get(target_fieldname)
+                    result[placeholder] = ['txt', self.format_value(
+                        value,
+                        target_doctype,
+                        target_fieldname
+                    )]
+                    continue
+
+                # Feld kommt von einem verknuepften Dokument
+                link_fieldname = link_fields_by_doctype.get(target_doctype)
+
+                if not link_fieldname:
+                    result[placeholder] = ['txt', ""]
+                    continue
+
+                linked_docname = doc.get(link_fieldname)
+
+                if not linked_docname:
+                    result[placeholder] = ['txt', ""]
+                    continue
+
+                value = frappe.db.get_value(
+                    target_doctype,
+                    linked_docname,
+                    target_fieldname
+                )
+
+                result[placeholder] = ['txt', self.format_value(
                     value,
                     target_doctype,
                     target_fieldname
-                )
-                continue
-
-            # Feld kommt von einem verknuepften Dokument
-            link_fieldname = link_fields_by_doctype.get(target_doctype)
-
-            if not link_fieldname:
-                result[placeholder] = ""
-                continue
-
-            linked_docname = doc.get(link_fieldname)
-
-            if not linked_docname:
-                result[placeholder] = ""
-                continue
-
-            value = frappe.db.get_value(
-                target_doctype,
-                linked_docname,
-                target_fieldname
-            )
-
-            result[placeholder] = self.format_value(
-                value,
-                target_doctype,
-                target_fieldname
-            )
+                )]
+            if replace_with == "Funktion":
+                if replace_function == "Mail-In DMC":
+                    result[placeholder] = ['img', get_dmc_png(doc.doctype, doc.name)]
 
         return result
 
@@ -103,3 +122,23 @@ def get_doc_fields(doctype):
         """.format(doctype),
         as_dict=True
     )
+
+def get_dmc_png(dt, dn):
+    url = 'https://data.libracore.ch/phpqrcode/api/barcode.php'
+
+    response = requests.get(url, params={
+            "f": "png",
+            "s": "dmtx",
+            "d": "mailto:mv+{dn}+{dt}@libracore.io".format(dn=dn, dt=dt),
+            "h": 80,
+            "w": 80,
+        }, timeout=10)
+
+    if response.status_code != 200:
+        frappe.throw("DMC konnte nicht geladen werden: HTTP {0}".format(response.status_code))
+
+    content_type = response.headers.get("Content-Type", "")
+    if "image/png" not in content_type:
+        frappe.throw("DMC-Endpunkt hat kein PNG zurückgegeben: {0}".format(content_type))
+
+    return response.content

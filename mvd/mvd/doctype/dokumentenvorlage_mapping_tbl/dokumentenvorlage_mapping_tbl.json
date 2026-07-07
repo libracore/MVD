@@ -4,8 +4,10 @@
  "engine": "InnoDB",
  "field_order": [
   "platzhalter",
+  "replace_with",
   "d_type",
-  "field"
+  "field",
+  "function"
  ],
  "fields": [
   {
@@ -24,15 +26,31 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.replace_with == 'Feld'",
    "fieldname": "field",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Feld",
+   "label": "Feld"
+  },
+  {
+   "fieldname": "replace_with",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Ersetzen mit",
+   "options": "Feld\nFunktion",
    "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.replace_with == 'Funktion'",
+   "fieldname": "function",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Funktion",
+   "options": "Mail-In DMC"
   }
  ],
  "istable": 1,
- "modified": "2026-06-02 19:28:05.670816",
+ "modified": "2026-07-06 11:59:58.015876",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Dokumentenvorlage Mapping TBL",
