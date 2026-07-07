@@ -26,53 +26,96 @@ def trigger_upload_job():
 
 
 def run_sql_import():
-	url = "https://data.geo.admin.ch/ch.swisstopo.amtliches-gebaeudeadressverzeichnis/amtliches-gebaeudeadressverzeichnis_ch/amtliches-gebaeudeadressverzeichnis_ch_2056.csv.zip"
-	
-	response = requests.get(url, stream=True)
-	if response.status_code != 200:
-		frappe.throw("Download fehlgeschlagen.")
+    url = "https://data.geo.admin.ch/ch.swisstopo.amtliches-gebaeudeadressverzeichnis/amtliches-gebaeudeadressverzeichnis_ch/amtliches-gebaeudeadressverzeichnis_ch_2056.csv.zip"
+    
+    try:
+        response = requests.get(url, stream=True)
+        if response.status_code != 200:
+            frappe.log_error(
+                title="Fehler: Import Gebäudeverzeichnis (Download)",
+                message="HTTP Status {0} - Die Datei konnte nicht von Swisstopo heruntergeladen werden.".format(response.status_code)
+            )
+            return
 
-	frappe.db.sql("DELETE FROM `tabAmtliches Gebaeudeverzeichnis`")
-	frappe.db.commit()
+        content_bytes = io.BytesIO(response.content)
+        csv_file_content = None
 
-	with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-		csv_filename = [f for f in z.namelist() if f.endswith('.csv')][0]
-		now_time = frappe.db.escape(frappe.utils.now_datetime())
-		with z.open(csv_filename) as f:
-			content = io.TextIOWrapper(f, encoding='utf-8-sig')
-			reader = csv.DictReader(content, delimiter=';')
+        if zipfile.is_zipfile(content_bytes):
+            with zipfile.ZipFile(content_bytes) as z:
+                csv_filenames = [f for f in z.namelist() if f.endswith('.csv')]
+                if not csv_filenames:
+                    frappe.log_error(
+                        title="Fehler: Import Gebäudeverzeichnis (Format)",
+                        message="Das ZIP-Archiv enthält keine CSV-Datei."
+                    )
+                    return
+                
+                csv_filename = csv_filenames[0]
+                with z.open(csv_filename) as f:
+                    csv_file_content = f.read().decode('utf-8-sig')
+        else:
+            csv_file_content = response.content.decode('utf-8-sig')
 
-			batch = []
-			for row in reader:
-				zip_parts = row['ZIP_LABEL'].split(' ', 1)
-				plz = zip_parts[0] if len(zip_parts) > 0 else ""
-				wohnort = zip_parts[1] if len(zip_parts) > 1 else ""
-				d = datetime.strptime(row.get('ADR_MODIFIED'), '%d.%m.%Y').strftime('%Y-%m-%d')
-				formatted_date = "'{0}'".format(d)
-				val = "({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, 'Administrator', 'Administrator', {11}, {12}, 0)".format(
-									frappe.db.escape(row.get('ADR_EGAID')),
-									frappe.db.escape(row.get('STN_LABEL')),
-									frappe.db.escape(row.get('ADR_NUMBER')),
-									frappe.db.escape(plz),
-									frappe.db.escape(wohnort),
-									frappe.db.escape(row.get('COM_FOSNR')),
-									frappe.db.escape(row.get('COM_NAME')),
-									frappe.db.escape(row.get('COM_CANTON')),
-									formatted_date,
-									row.get('ADR_EASTING') or 0,
-									row.get('ADR_NORTHING') or 0,
-									now_time,
-                                    now_time
-								)
-				batch.append(val)
-				if len(batch) >= 5000:
-					execute_raw_sql(batch)
-					batch = []
-			if batch:
-				execute_raw_sql(batch)
+        if not csv_file_content:
+            frappe.log_error(
+                title="Fehler: Import Gebäudeverzeichnis (Leer)",
+                message="Der heruntergeladene Inhalt ist leer oder konnte nicht gelesen werden."
+            )
+            return
 
-	frappe.db.commit()
+        frappe.db.sql("DELETE FROM `tabAmtliches Gebaeudeverzeichnis`")
+        frappe.db.commit()
 
+        now_time = frappe.db.escape(frappe.utils.now_datetime())
+        content = io.TextIOWrapper(f, encoding='utf-8-sig')
+        reader = csv.DictReader(content, delimiter=';')
+
+        batch = []
+        for row in reader:
+            zip_parts = row.get('ZIP_LABEL', '').split(' ', 1)
+            plz = zip_parts[0] if len(zip_parts) > 0 else ""
+            wohnort = zip_parts[1] if len(zip_parts) > 1 else ""
+            
+            # Datum sicherer parsen (falls mal ein leeres Feld kommt)
+            raw_date = row.get('ADR_MODIFIED')
+            if raw_date:
+                d = datetime.strptime(raw_date, '%d.%m.%Y').strftime('%Y-%m-%d')
+                formatted_date = "'{0}'".format(d)
+            else:
+                formatted_date = 'NULL'
+
+            val = "({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, 'Administrator', 'Administrator', {11}, {12}, 0)".format(
+                                frappe.db.escape(row.get('ADR_EGAID', '')),
+                                frappe.db.escape(row.get('STN_LABEL', '')),
+                                frappe.db.escape(row.get('ADR_NUMBER', '')),
+                                frappe.db.escape(plz),
+                                frappe.db.escape(wohnort),
+                                frappe.db.escape(row.get('COM_FOSNR', '')),
+                                frappe.db.escape(row.get('COM_NAME', '')),
+                                frappe.db.escape(row.get('COM_CANTON', '')),
+                                formatted_date,
+                                row.get('ADR_EASTING') or 0,
+                                row.get('ADR_NORTHING') or 0,
+                                now_time,
+                                now_time
+                            )
+            batch.append(val)
+            if len(batch) >= 5000:
+                execute_raw_sql(batch)
+                batch = []
+                
+        if batch:
+            execute_raw_sql(batch)
+
+        frappe.db.commit()
+
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.log_error(
+            title="Fehler: Import Gebäudeverzeichnis",
+            message="Fehler beim Ausführen des Imports:\n{0}\n\nTraceback:\n{1}".format(str(e), frappe.get_traceback())
+        )
+        
 
 def execute_raw_sql(batch):
 	query = """
