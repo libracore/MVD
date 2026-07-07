@@ -12,7 +12,7 @@ from datetime import datetime
 from frappe.model.document import Document
 
 class AmtlichesGebaeudeverzeichnis(Document):
-	pass
+    pass
 
 @frappe.whitelist()
 def trigger_upload_job():
@@ -26,59 +26,74 @@ def trigger_upload_job():
 
 
 def run_sql_import():
-	url = "https://data.geo.admin.ch/ch.swisstopo.amtliches-gebaeudeadressverzeichnis/amtliches-gebaeudeadressverzeichnis_ch/amtliches-gebaeudeadressverzeichnis_ch_2056.csv.zip"
-	
-	response = requests.get(url, stream=True)
-	if response.status_code != 200:
-		frappe.throw("Download fehlgeschlagen.")
+    url = "https://data.geo.admin.ch/ch.swisstopo.amtliches-gebaeudeadressverzeichnis/amtliches-gebaeudeadressverzeichnis_ch/amtliches-gebaeudeadressverzeichnis_ch_2056.csv.zip"
 
-	frappe.db.sql("DELETE FROM `tabAmtliches Gebaeudeverzeichnis`")
-	frappe.db.commit()
+    response = requests.get(url, stream=True)
+    if response.status_code != 200:
+        frappe.throw("Download fehlgeschlagen.")
 
-	with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-		csv_filename = [f for f in z.namelist() if f.endswith('.csv')][0]
-		now_time = frappe.db.escape(frappe.utils.now_datetime())
-		with z.open(csv_filename) as f:
-			content = io.TextIOWrapper(f, encoding='utf-8-sig')
-			reader = csv.DictReader(content, delimiter=';')
+    frappe.db.sql("DELETE FROM `tabAmtliches Gebaeudeverzeichnis`")
+    frappe.db.commit()
 
-			batch = []
-			for row in reader:
-				zip_parts = row['ZIP_LABEL'].split(' ', 1)
-				plz = zip_parts[0] if len(zip_parts) > 0 else ""
-				wohnort = zip_parts[1] if len(zip_parts) > 1 else ""
-				d = datetime.strptime(row.get('ADR_MODIFIED'), '%d.%m.%Y').strftime('%Y-%m-%d')
-				formatted_date = "'{0}'".format(d)
-				val = "({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, 'Administrator', 'Administrator', {11}, {12}, 0)".format(
-									frappe.db.escape(row.get('ADR_EGAID')),
-									frappe.db.escape(row.get('STN_LABEL')),
-									frappe.db.escape(row.get('ADR_NUMBER')),
-									frappe.db.escape(plz),
-									frappe.db.escape(wohnort),
-									frappe.db.escape(row.get('COM_FOSNR')),
-									frappe.db.escape(row.get('COM_NAME')),
-									frappe.db.escape(row.get('COM_CANTON')),
-									formatted_date,
-									row.get('ADR_EASTING') or 0,
-									row.get('ADR_NORTHING') or 0,
-									now_time,
+    with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+        csv_filename = [f for f in z.namelist() if f.endswith('.csv')][0]
+        now_time = frappe.db.escape(frappe.utils.now_datetime())
+        with z.open(csv_filename) as f:
+            content = io.TextIOWrapper(f, encoding='utf-8-sig')
+            reader = csv.DictReader(content, delimiter=';')
+
+            batch = []
+            for row in reader:
+                zip_parts = row['ZIP_LABEL'].split(' ', 1)
+                plz = zip_parts[0] if len(zip_parts) > 0 else ""
+                wohnort = zip_parts[1] if len(zip_parts) > 1 else ""
+                d = datetime.strptime(row.get('ADR_MODIFIED'), '%d.%m.%Y').strftime('%Y-%m-%d')
+                formatted_date = "'{0}'".format(d)
+                val = "({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, 'Administrator', 'Administrator', {11}, {12}, 0)".format(
+                                    frappe.db.escape(row.get('ADR_EGAID')),
+                                    frappe.db.escape(row.get('STN_LABEL')),
+                                    frappe.db.escape(row.get('ADR_NUMBER')),
+                                    frappe.db.escape(plz),
+                                    frappe.db.escape(wohnort),
+                                    frappe.db.escape(row.get('COM_FOSNR')),
+                                    frappe.db.escape(row.get('COM_NAME')),
+                                    frappe.db.escape(row.get('COM_CANTON')),
+                                    formatted_date,
+                                    row.get('ADR_EASTING') or 0,
+                                    row.get('ADR_NORTHING') or 0,
+                                    now_time,
                                     now_time
-								)
-				batch.append(val)
-				if len(batch) >= 5000:
-					execute_raw_sql(batch)
-					batch = []
-			if batch:
-				execute_raw_sql(batch)
+                                )
+                batch.append(val)
+                if len(batch) >= 5000:
+                    execute_raw_sql(batch)
+                    batch = []
+            if batch:
+                execute_raw_sql(batch)
 
-	frappe.db.commit()
+    frappe.db.commit()
 
 
 def execute_raw_sql(batch):
-	query = """
-		INSERT INTO `tabAmtliches Gebaeudeverzeichnis` 
-		(name, stn_label, adr_number, plz, wohnort, com_fosnr, com_name, com_canton, adr_modified, adr_easting, adr_northing, owner, modified_by, creation, modified, docstatus)
-		VALUES {0}
-	""".format(", ".join(batch))
-	frappe.db.sql(query)
-	frappe.db.commit()
+    query = """
+        INSERT INTO `tabAmtliches Gebaeudeverzeichnis` 
+        (name, stn_label, adr_number, plz, wohnort, com_fosnr, com_name, com_canton, adr_modified, adr_easting, adr_northing, owner, modified_by, creation, modified, docstatus)
+        VALUES {0}
+    """.format(", ".join(batch))
+    frappe.db.sql(query)
+    frappe.db.commit()
+
+@frappe.whitelist()
+def get_swisstopo_url(ADR_EGAID=None):
+    if not ADR_EGAID: return
+
+    adr_easting = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", ADR_EGAID, 'adr_easting')
+    adr_northing = frappe.db.get_value("Amtliches Gebaeudeverzeichnis", ADR_EGAID, 'adr_northing')
+
+    return """
+        https://map.geo.admin.ch/#/map?lang=de&center={adr_easting},{adr_northing}&z=9&topic=ech&layers=ch.swisstopo.amtliches-gebaeudeadressverzeichnis@features={ADR_EGAID}&bgLayer=ch.swisstopo.pixelkarte-farbe
+    """.format(
+        adr_easting=adr_easting,
+        adr_northing=adr_northing,
+        ADR_EGAID=ADR_EGAID
+    )
