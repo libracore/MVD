@@ -178,6 +178,8 @@
   "adressvalidierung_datum",
   "adressvalidierung_manuell",
   "adr_egaid",
+  "cb_8",
+  "get_swisstopo_url",
   "section_workflow_helpers",
   "validierung_notwendig",
   "kuendigung_verarbeiten",
@@ -1455,10 +1457,20 @@
    "fieldname": "section_adressvalidierung",
    "fieldtype": "Section Break",
    "label": "Adressvalidierung"
+  },
+  {
+   "fieldname": "cb_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.adr_egaid",
+   "fieldname": "get_swisstopo_url",
+   "fieldtype": "Button",
+   "label": "<i class=\"fa fa-map\"></i> SwissTopo"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-07-06 14:48:55.510119",
+ "modified": "2026-07-07 12:15:28.528548",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

@@ -14,5 +14,10 @@ frappe.ui.form.on('Amtliches Gebaeudeverzeichnis', {
                 }
             });
         }).addClass('btn-primary');
+
+        frm.add_custom_button(__("<i class='fa fa-map'></i> SwissTopo"),  function(){
+            frappe.mvd.get_swisstopo_url(cur_frm.doc.name);
+        });
+
     }
 });
