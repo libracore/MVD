@@ -129,11 +129,28 @@ def _serialize_child_row(row, parent_doc=None):
     data["_link_fields"] = link_fields
     return data
 
-
 @frappe.whitelist()
 def search_nodes(query, sektion_id=None, purpose=None, limit=30):
+    import json
+
     query = (query or "").strip()
     limit = cint(limit) or 30
+
+    if isinstance(purpose, str):
+        try:
+            parsed_purpose = json.loads(purpose)
+            if isinstance(parsed_purpose, list):
+                purpose = parsed_purpose
+            else:
+                purpose = [purpose]
+        except Exception:
+            purpose = [purpose]
+    elif purpose:
+        purpose = list(purpose)
+    else:
+        purpose = []
+
+    purpose = [str(p).lower() for p in purpose]
 
     if not query:
         return []
@@ -143,6 +160,9 @@ def search_nodes(query, sektion_id=None, purpose=None, limit=30):
 
     results = []
     seen = set()
+
+    def has_purpose(value):
+        return not purpose or value.lower() in purpose
 
     def add_node(node_name, match_type="node", match_label="Knoten", match_value=None):
         if not node_name:
@@ -197,7 +217,7 @@ def search_nodes(query, sektion_id=None, purpose=None, limit=30):
             match_value=row.vorlagen_baum_name or row.name
         )
 
-    if not purpose or purpose == "email":
+    if has_purpose("email"):
         email_rows = frappe.get_all(
             "Email Vorlagen TBL",
             filters={
@@ -216,7 +236,7 @@ def search_nodes(query, sektion_id=None, purpose=None, limit=30):
                 match_value=row.email_template
             )
 
-    if not purpose or purpose == "druck":
+    if has_purpose("druck"):
         druck_rows = frappe.get_all(
             "Druckvorlagen TBL",
             filters={
@@ -235,7 +255,7 @@ def search_nodes(query, sektion_id=None, purpose=None, limit=30):
                 match_value=row.druckvorlage
             )
 
-    if not purpose or purpose == "dokument":
+    if has_purpose("dokument"):
         dokument_rows = frappe.get_all(
             "Dokumentenvorlage TBL",
             filters={
@@ -254,7 +274,7 @@ def search_nodes(query, sektion_id=None, purpose=None, limit=30):
                 match_value=row.dokumentenvorlage
             )
 
-    if not purpose or purpose == "Text":
+    if has_purpose("text"):
         text_rows = frappe.get_all(
             "Textvorlagen TBL",
             filters={

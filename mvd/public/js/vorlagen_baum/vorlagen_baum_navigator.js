@@ -7,12 +7,13 @@ frappe.provide("mvd_vorlagen_baum.ui");
 // druck -> Zeigt nur Druckvorlagen an
 // dokument -> Zeigt nur Dokumentenvorlagen an
 // Text -> Zeigt nur Textvorlagen an und kopiert den Inhalt in die Zwischenablage
+// Es sind auch Kompinationen möglich, dann als Liste, z.B. ["Text", "dokument"]
 
 mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
     constructor(opts) {
         this.wrapper = opts.wrapper;
         this.sektion_id = opts.sektion_id || this.get_default_sektion() || null;
-        this.purpose = opts.purpose || null;
+        this.purpose = this.normalize_purpose(opts.purpose || null);
         this.on_select = opts.on_select || function() {};
         this.parent_dialog = opts.parent_dialog || null;
 
@@ -21,6 +22,23 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
         this.is_search_mode = false;
 
         this.make();
+    }
+
+    normalize_purpose(purpose) {
+        if (!purpose) {
+            return null;
+        }
+        if (!Array.isArray(purpose)) {
+            purpose = [purpose];
+        }
+        return purpose.map(p => String(p).toLowerCase());
+    }
+
+    has_purpose(purpose) {
+        if (!this.purpose) {
+            return true;
+        }
+        return this.purpose.includes(String(purpose).toLowerCase());
     }
 
     make() {
@@ -317,28 +335,28 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
     }
 
     show_email_section(details) {
-        if (this.purpose && this.purpose !== "email") {
+        if (!this.has_purpose("email")) {
             return false;
         }
         return !!details.use_for_email;
     }
 
     show_druck_section(details) {
-        if (this.purpose && this.purpose !== "druck") {
+        if (!this.has_purpose("druck")) {
             return false;
         }
         return !!details.use_for_druckvorlagen;
     }
 
     show_dokument_section(details) {
-        if (this.purpose && this.purpose !== "dokument") {
+        if (!this.has_purpose("dokument")) {
             return false;
         }
         return !!details.use_for_dokumentenvorlagen;
     }
 
     show_text_section(details) {
-        if (this.purpose && this.purpose !== "Text") {
+        if (!this.has_purpose("Text")) {
             return false;
         }
         return !!details.use_for_textvorlagen;

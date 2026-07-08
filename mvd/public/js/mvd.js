@@ -49,16 +49,7 @@ $(document).ready(function() {
     
     // Set Keyboard-Shortcut to open Textvorlagen
     frappe.ui.keys.on('shift+ctrl+k', () => {
-        new mvd_dialoge.open_textvorlagen();
-        // if (cur_frm && cur_frm.doc) {
-        //     if (cur_frm.doc.sektion_id) {
-        //         new mvd_dialoge.open_textvorlagen();
-        //     } else {
-        //         frappe.msgprint("Von hier können die Textvorlagen nicht verwendet werden, da der aktuelle Ort über keine Sektion verfügt.");
-        //     }
-        // } else {
-        //     frappe.msgprint("Von hier können die Textvorlagen nicht verwendet werden, da der aktuelle Ort über keine Sektion verfügt.");
-        // }
+        new mvd_dialoge.open_text_und_dokumentenvorlagen();
     });
 });
 
@@ -2310,11 +2301,11 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
     }
 }
 
-mvd_dialoge.open_textvorlagen = class OpenTextvorlagen {
+mvd_dialoge.open_text_und_dokumentenvorlagen = class OpenTextUndDokumentenVorlagen {
     constructor(opts={}) {
         this.dt_scope = opts.dt_scope || "Mitgliedschaft";
         this.dialog =  new frappe.ui.Dialog({
-            title: "Auswahl Textvorlage",
+            title: "Auswahl Text- oder Dokumentenvorlage",
             no_submit_on_enter: true,
             fields: this.get_fields(),
             primary_action_label: "Schliessen",
@@ -2333,10 +2324,28 @@ mvd_dialoge.open_textvorlagen = class OpenTextvorlagen {
             wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
             parent_dialog: this.dialog,
             sektion_id: cur_frm ? cur_frm.doc.sektion_id:this.get_default_sektion() || null,
-            purpose: "Text",
+            purpose: ["Text", "dokument"],
             on_select: function(selection, details, row, parent_dialog) {
                 if (parent_dialog) {
                     parent_dialog.hide();
+                }
+                if (selection.selection_doctype == 'Dokumentenvorlage') {
+                    frappe.call({
+                        method: "mvd.mvd.utils.document_template_handler.use_template",
+                        args:{
+                                template: selection.selection_name,
+                                source_doc: cur_frm.doc.name,
+                                source_dt: cur_frm.doctype,
+                                save_output_to: [[cur_frm.doctype, cur_frm.doc.name]],
+                                filename: `${selection.selection_name}_${cur_frm.doc.name}.odt`
+                        },
+                        freeze: true,
+                        freeze_message: `Erstelle ${selection.selection_name}...`,
+                        callback: function(template_response)
+                        {
+                            cur_frm.reload_doc();
+                        }
+                    });
                 }
             }
         });
