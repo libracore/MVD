@@ -1097,7 +1097,7 @@
    "fieldname": "grund_abweichender_betrag",
    "fieldtype": "Select",
    "label": "Grund f\u00fcr abweichenden Betrag",
-   "options": "Sonstiges\nKollektiv\nMitarbeitende\nReduziert\nStudierende"
+   "options": "Sonstiges\nKollektiv\nMitarbeitende\nReduziert\nStudierende\nSoziale Institution"
   },
   {
    "default": "0",
