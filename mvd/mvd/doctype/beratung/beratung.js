@@ -19,6 +19,12 @@ frappe.ui.form.on('Beratung', {
         }
     },
     refresh: function(frm) {
+        // Typ zeigen wir nur für MVZH an
+        if (frappe.boot.default_sektion === "MVZH") {
+            frm.toggle_display('typ', true);  // Feld anzeigen
+        } else {
+            frm.toggle_display('typ', false); // Feld ausblenden
+        }
         // First, check zuerst ob die Sperrung älter als 5h ist
         if (!check_if_protection_older_than_5h(frm)) {
             return; // stop further lock handling if it was cleared
