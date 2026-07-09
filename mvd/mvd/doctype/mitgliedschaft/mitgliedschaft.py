@@ -251,8 +251,8 @@ class Mitgliedschaft(Document):
             res = validate_address(doc_type="Mitgliedschaft", doc=self)
             if not res.get("success"):
                 frappe.msgprint(
-                    msg="Die Adresse konnte nicht gegen das amtliche Gebäudeverzeichnis validiert werden.",
-                    title="Adressvalidierung fehlgeschlagen",
+                    msg="Die Adresse konnte nicht im amtlichen Gebäudeverzeichnis gefunden werden. Bitte Adresse auf korrekte Schreibweise überprüfen. <br>Hinweis: Es kann sein, dass eine korrekte Adress nicht im Gebäudeverzeichnis enthalten ist.",
+                    title="Adressabgleich fehlgeschlagen",
                     indicator="orange"
                 )
 
