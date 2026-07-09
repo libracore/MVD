@@ -166,6 +166,32 @@ class NCSettings():
                 })
         return uploaded
     
+    def download_file(self, remote_path):
+        """
+        Lädt eine Datei aus der Nextcloud per WebDAV herunter
+        remote_path z.B.: /Sektion/Mitglieder/1234/datei.pdf
+        """
+        remote_path = "/" + remote_path.strip("/")
+        url = self.join_webdav_path(remote_path)
+
+        with requests.Session() as s:
+            s.auth = (self.USERNAME, self.APP_PASS)
+
+            resp = s.get(url, verify=self.VERIFY_TLS)
+
+            if resp.status_code != 200:
+                frappe.log_error(
+                    "status_code: {0}\nError: {1}\nurl: {2}".format(
+                        resp.status_code,
+                        resp.text,
+                        url
+                    ),
+                    "Nextcloud download_file failed"
+                )
+                resp.raise_for_status()
+
+            return resp.content
+    
     def delete_file(self, remote_path):
         remote_path = "/" + remote_path.strip("/")
         url = self.join_webdav_path(remote_path)
