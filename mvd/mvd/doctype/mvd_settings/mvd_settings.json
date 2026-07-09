@@ -48,7 +48,9 @@
   "nc_host",
   "nc_user",
   "nc_password",
-  "nc_verify_ssl"
+  "nc_verify_ssl",
+  "onlyoffice_document_server",
+  "onlyoffice_document_server_jwt"
  ],
  "fields": [
   {
@@ -306,10 +308,20 @@
    "fieldname": "nc_verify_ssl",
    "fieldtype": "Check",
    "label": "SSL"
+  },
+  {
+   "fieldname": "onlyoffice_document_server",
+   "fieldtype": "Data",
+   "label": "OnlyOffice Document Server"
+  },
+  {
+   "fieldname": "onlyoffice_document_server_jwt",
+   "fieldtype": "Password",
+   "label": "OnlyOffice Document Server JWT"
   }
  ],
  "issingle": 1,
- "modified": "2026-05-11 16:42:12.463429",
+ "modified": "2026-07-09 15:31:10.707835",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Settings",

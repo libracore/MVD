@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils.file_manager import save_file
 from frappe.utils.password import get_decrypted_password
 from frappe.utils import cint
 import urllib.parse as urlparse
@@ -11,6 +12,9 @@ import requests
 import posixpath
 import mimetypes
 import xml.etree.ElementTree as ET
+import uuid
+import jwt
+import json
 
 # ---------------------------------------------
 # ---------- NextCloud Klassenobjekt ----------
@@ -257,6 +261,168 @@ class NCSettings():
             return "{:.2f} MB".format(size / mb)
         else:
             return "{:.2f} GB".format(size / gb)
+
+    def convert_nextcloud_file_to_pdf_with_onlyoffice(
+        self,
+        source_path,
+        target_path=None,
+        filetype=None,
+        timeout=120,
+        dt=None,
+        dn=None
+    ):
+        """
+        Konvertiert eine Datei aus der Nextcloud via ONLYOFFICE in ein PDF
+        und speichert das PDF wieder in Nextcloud und in ERPNext.
+        """
+
+        if not self.IS_ENABLED:
+            frappe.throw("Nextcloud ist nicht aktiviert.")
+
+        source_path = "/" + source_path.strip("/")
+
+        source_filename = posixpath.basename(source_path)
+        source_folder = posixpath.dirname(source_path)
+
+        if not filetype:
+            filetype = source_filename.split(".")[-1].lower()
+
+        if not target_path:
+            base_name = ".".join(source_filename.split(".")[:-1]) or source_filename
+            target_path = posixpath.join(source_folder, base_name + ".pdf")
+
+        target_path = "/" + target_path.strip("/")
+        target_folder = posixpath.dirname(target_path).strip("/")
+        target_filename = posixpath.basename(target_path)
+
+        document_server = frappe.db.get_value("MVD Settings", "MVD Settings", "onlyoffice_document_server")
+        jwt_secret = get_decrypted_password("MVD Settings", "MVD Settings", 'onlyoffice_document_server_jwt', False)
+
+        if not document_server:
+            frappe.throw("onlyoffice_document_server fehlt")
+
+        if not jwt_secret:
+            frappe.throw("onlyoffice_jwt_secret fehlt")
+
+        tmp_file = None
+
+        try:
+            # 1. Datei aus Nextcloud herunterladen
+            source_content = self.download_file(source_path)
+
+            # 2. Temporär als Frappe-File speichern damit ONLYOFFICE darauf zugreiffen kann
+            tmp_file = save_file(
+                fname=source_filename,
+                content=source_content,
+                dt=None,
+                dn=None,
+                folder="Home/Attachments",
+                is_private=0
+            )
+
+            file_url = frappe.utils.get_url(tmp_file.file_url)
+
+            # 3. ONLYOFFICE Payload bauen
+            key = uuid.uuid4().hex
+
+            payload_without_token = {
+                "async": False,
+                "filetype": filetype,
+                "outputtype": "pdf",
+                "title": source_filename,
+                "key": key,
+                "url": file_url.replace("http://", "https://").replace(":8000", "")
+            }
+
+            token = jwt.encode(
+                payload_without_token,
+                jwt_secret,
+                algorithm="HS256"
+            )
+
+            payload = payload_without_token.copy()
+            payload["token"] = token
+
+            headers = {
+                "Content-Type": "application/json"
+            }
+
+            converter_url = "{0}/converter?shardkey={1}".format(
+                document_server.rstrip("/"),
+                key
+            )
+
+            # 4. ONLYOFFICE Konvertierung (doc -> pdf)
+            res = requests.post(
+                converter_url,
+                json=payload,
+                headers=headers,
+                timeout=timeout
+            )
+
+            res.raise_for_status()
+            data = res.json()
+
+            if data.get("error"):
+                frappe.throw("ONLYOFFICE Conversion Error: {0}".format(data.get("error")))
+
+            if not data.get("endConvert"):
+                frappe.throw("ONLYOFFICE-Konvertierung wurde nicht abgeschlossen.")
+
+            pdf_url = data.get("fileUrl")
+            if not pdf_url:
+                frappe.throw("ONLYOFFICE hat keine PDF-URL zurückgegeben.")
+
+            # 5. PDF von ONLYOFFICE herunterladen
+            pdf_res = requests.get(pdf_url, timeout=timeout)
+            pdf_res.raise_for_status()
+
+            # 6. PDF nach Nextcloud hochladen
+            uploaded = self.upload_files(
+                target_folder,
+                [
+                    (
+                        target_filename,
+                        pdf_res.content
+                    )
+                ]
+            )
+
+            # 7. File Record von PDF in ERPNext anlegen
+            uploaded_file = uploaded[0] if uploaded else None
+
+            if uploaded_file and uploaded_file.get("file_url"):
+                pdf_erp_file = frappe.new_doc("File")
+                pdf_erp_file.file_name = uploaded_file.get("filename")
+                pdf_erp_file.file_url = uploaded_file.get("file_url")
+                pdf_erp_file.nc_remote_path = uploaded_file.get("remote_path")
+                pdf_erp_file.is_private = 1
+                pdf_erp_file.folder = "Home/Attachments"
+                pdf_erp_file.attached_to_doctype = dt
+                pdf_erp_file.attached_to_name = dn
+                pdf_erp_file.insert(ignore_permissions=True)
+
+                uploaded_file["erpnext_file_name"] = pdf_erp_file.name
+                uploaded_file["erpnext_file_url"] = pdf_erp_file.file_url
+            
+            return uploaded_file
+
+        finally:
+            # 8. Temporäres Frappe-File löschen
+            if tmp_file:
+                try:
+                    frappe.delete_doc(
+                        "File",
+                        tmp_file.name,
+                        ignore_permissions=True,
+                        force=True
+                    )
+                    frappe.db.commit()
+                except Exception:
+                    frappe.log_error(
+                        frappe.get_traceback(),
+                        "ONLYOFFICE tmp file cleanup failed"
+                    )
 
 # ----------------------------------------
 # ---------- Funktions-Methoden ----------
@@ -723,3 +889,23 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
                 })
 
         return nodes
+
+'''
+    Nachfolgend die Methoden damit (zB via E-Mail-Dialog) Dateien aus der Nextcloud via ONLYOFFICE-Server
+    in PDF konvertiert und heruntergeladen werden können
+'''
+@frappe.whitelist()
+def convert_nextcloud_files_to_pdf(files, sektion, dt=None, dn=None):
+    files = json.loads(files)
+    convertet_files = []
+    ncs = NCSettings(sektion=sektion)
+    for file in files:
+        f = frappe.get_doc("File", file)
+        result = ncs.convert_nextcloud_file_to_pdf_with_onlyoffice(
+            source_path=f.nc_remote_path,
+            target_path=f.nc_remote_path.replace(f.file_name, "PDF/{0}".format(f.file_name.replace(".odt", ".pdf").replace(".docx", ".pdf"))),
+            dt=dt,
+            dn=dn
+        )
+        convertet_files.append(result.get("erpnext_file_name"))
+    return convertet_files

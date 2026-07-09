@@ -190,6 +190,9 @@ def sync_file_to_nextcloud(file, event):
     sektion = None
     folder_path = None
 
+    # liegt bereits auf der Nextcloud -> Abbruch
+    if file.nc_remote_path: return
+
     if file.attached_to_doctype == 'Mitgliedschaft':
         mitglied_nr = frappe.db.get_value("Mitgliedschaft", file.attached_to_name, "mitglied_nr")
         if not mitglied_nr or mitglied_nr == "MV":

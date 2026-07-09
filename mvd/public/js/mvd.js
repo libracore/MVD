@@ -799,11 +799,20 @@ frappe.mvd.MailComposer = Class.extend({
             }
         }
 
-        $("<h6 class='text-muted add-attachment' style='margin-top: 12px; cursor:pointer;'>"
-            +__("Select Attachments")+"</h6><div class='attach-list'></div>\
-            <p class='add-more-attachments'>\
-            <a class='text-muted small'><i class='octicon octicon-plus' style='font-size: 12px'></i> "
-            +__("Add Attachment")+"</a></p>").appendTo(attach.empty())
+        $(`<h6 class='text-muted add-attachment' style='margin-top: 12px; cursor:pointer;'>
+                ${__("Select Attachments")} (Versand im original Format)
+            </h6>
+            <div class='attach-list'></div>
+            <p class='add-more-attachments'>
+                <a class='text-muted small'>
+                    <i class='octicon octicon-plus' style='font-size: 12px'></i>
+                    ${__("Add Attachment")}
+                </a>
+            </p>
+            <h6 class='text-muted add-attachment' style='margin-top: 12px; cursor:pointer;'>
+                ${__("Select Attachments")} (Versand als PDF)
+            </h6>
+            <div class='pdf-attach-list'></div>`).appendTo(attach.empty())
         attach
             .find(".add-more-attachments a")
             .on('click',() => new frappe.ui.FileUploader(args));
@@ -812,6 +821,7 @@ frappe.mvd.MailComposer = Class.extend({
     render_attach:function(){
         var fields = this.dialog.fields_dict;
         var attach = $(fields.select_attachments.wrapper).find(".attach-list").empty();
+        var pdf_attach = $(fields.select_attachments.wrapper).find(".pdf-attach-list").empty();
 
         var files = [];
         if (this.attachments && this.attachments.length) {
@@ -825,14 +835,31 @@ frappe.mvd.MailComposer = Class.extend({
             $.each(files, function(i, f) {
                 if (!f.file_name) return;
                 f.file_url = frappe.urllib.get_full_url(f.file_url);
-
-                $(repl('<p class="checkbox">'
-                    +	'<label><span><input type="checkbox" data-file-name="%(name)s"></input></span>'
-                    +		'<span class="small">%(file_name)s</span>'
-                    +	' <a href="%(file_url)s" target="_blank" class="text-muted small">'
-                    +		'<i class="fa fa-share" style="vertical-align: middle; margin-left: 3px;"></i>'
-                    + '</label></p>', f))
-                    .appendTo(attach)
+                $(repl(`
+                    <p class="checkbox">
+                        <label>
+                            <span><input type="checkbox" data-file-name="${f.file_name}"></input></span>
+                            <span class="small">${f.file_name}</span>
+                            <a href="${f.file_url}" target="_blank" class="text-muted small">
+                                <i class="fa fa-share" style="vertical-align: middle; margin-left: 3px;"></i>
+                            </a>
+                        </label>
+                    </p>
+                `)).appendTo(attach)
+                
+                if ((f.file_name.includes(".odt")||f.file_name.includes(".docx"))&&f.file_url.includes("http")) {
+                    $(repl(`
+                        <p class="checkbox">
+                            <label>
+                                <span><input type="checkbox" data-pdf-file="${f.name}"></input></span>
+                                <span class="small">${f.file_name}</span>
+                                <a href="${f.file_url}" target="_blank" class="text-muted small">
+                                    <i class="fa fa-share" style="vertical-align: middle; margin-left: 3px;"></i>
+                                </a>
+                            </label>
+                        </p>
+                    `)).appendTo(pdf_attach)
+                }
             });
         }
         this.select_attachments();
@@ -881,12 +908,46 @@ frappe.mvd.MailComposer = Class.extend({
             $.map($(me.dialog.wrapper).find("[data-file-name]:checked"), function (element) {
                 return $(element).attr("data-file-name");
             });
-
-
-        if(form_values.attach_document_print) {
-            me.send_email(btn, form_values, selected_attachments, null, form_values.select_print_format || "");
+        
+        var selected_pdf_attachments =
+            $.map($(me.dialog.wrapper).find("[data-pdf-file]:checked"), function (element) {
+                return $(element).attr("data-pdf-file");
+            });
+        
+        if (selected_pdf_attachments.length > 0) {
+            me.dialog.hide();
+            frappe.dom.freeze('Bitte warten, die PDF werden erstellt und das E-Mail versendet...');
+            frappe.call({
+                method: "mvd.mvd.utils.nextcloud.convert_nextcloud_files_to_pdf",
+                args: {
+                    files: selected_pdf_attachments,
+                    sektion: cur_frm.doc.sektion_id,
+                    dt: cur_frm.doctype,
+                    dn: cur_frm.doc.name
+                },
+                callback: function(r) {
+                    if (r.message) {
+                        for (var i=0; i < r.message.length; i++) {
+                            selected_attachments.push(r.message[i]);
+                        }
+                    }
+                    frappe.dom.unfreeze();
+                    if(form_values.attach_document_print) {
+                        me.send_email(btn, form_values, selected_attachments, null, form_values.select_print_format || "");
+                    } else {
+                        me.send_email(btn, form_values, selected_attachments);
+                    }
+                },
+                error: function() {
+                    frappe.dom.unfreeze();
+                }
+            });
         } else {
-            me.send_email(btn, form_values, selected_attachments);
+            if(form_values.attach_document_print) {
+                me.send_email(btn, form_values, selected_attachments, null, form_values.select_print_format || "");
+            } else {
+                me.send_email(btn, form_values, selected_attachments);
+            }
         }
     },
 
