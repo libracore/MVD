@@ -10,36 +10,53 @@ from frappe.utils.pdf import get_file_data_from_writer
 
 @frappe.whitelist()
 def get_open_data():
+    zukunft_termine = frappe.db.sql_list("SELECT DISTINCT parent FROM `tabBeratung Termin` WHERE `von` > %s", now_datetime())
+
     open_data = {
         'beratung': {
             'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
-            's1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set']}, limit=100, distinct=True)),
-            's6': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set']}, limit=100, distinct=True)),
-            's10': len(frappe.get_list('Beratung', fields='name', filters={
-                'ungelesen': 1, 
-                'sektion_id': ['!=', 'MVDF'],
-                'name': ['in', frappe.db.sql_list("SELECT DISTINCT parent FROM `tabBeratung Termin` WHERE `von` > %s", now_datetime())]
-            }, limit=100, distinct=True)),
-            'r': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']]}, limit=100, distinct=True)),
-            'r1': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'beratung_prio': 'Hoch'}, limit=100, distinct=True)),
-            'r2': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'beratung_prio': ['not in', ['Hoch']], 'kontaktperson': ['like','Rechtsberatung Pool%']}, limit=100, distinct=True)),
-            'r3': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'r3': 1}, limit=100, distinct=True)),
-            'r4': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 0}, limit=100, distinct=True)),
-            'r5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['like', 'Rechtsberatung Pool%'], 'ungelesen': 1}, limit=100, distinct=True)),
-            'r6': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'ungelesen': 1}, limit=100, distinct=True)),
-            'r7': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 'hat_termine': 1}, limit=100, distinct=True)),
-            'r8': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Closed', 'hat_termine': 1}, limit=100, distinct=True)),
-            'r9': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Open', 'Zusammengeführt', 'Termin vereinbart', "Rückfrage: Termin vereinbaren"]], 'ungelesen': 1, 'kontaktperson': ['is', 'set']}, limit=100, distinct=True)),
-            'p1': get_p1(frappe.session.user),
-            'p2': get_p2(frappe.session.user),
-            'p3': get_p3(frappe.session.user),
-            'p4': get_p4(frappe.session.user)
+            's1_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set'], 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            's1_business': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set'], 'typ': 'Business'}, limit=100, distinct=True)),
+            's6_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set'], 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            's6_business': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set'], 'typ': 'Business'}, limit=100, distinct=True)),
+            's10_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'sektion_id': ['!=', 'MVDF'], 'name': ['in', zukunft_termine], 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            's10_business': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'sektion_id': ['!=', 'MVDF'], 'name': ['in', zukunft_termine], 'typ': 'Business'}, limit=100, distinct=True)),
+            'r_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            'r_business': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'typ': 'Business'}, limit=100, distinct=True)),
+            'r1_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'beratung_prio': 'Hoch', 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            'r1_business': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'beratung_prio': 'Hoch', 'typ': 'Business'}, limit=100, distinct=True)),
+            'r2_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'beratung_prio': ['not in', ['Hoch']], 'kontaktperson': ['like','Rechtsberatung Pool%'], 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            'r2_business': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'beratung_prio': ['not in', ['Hoch']], 'kontaktperson': ['like','Rechtsberatung Pool%'], 'typ': 'Business'}, limit=100, distinct=True)),
+            'r3_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'r3': 1, 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            'r3_business': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'r3': 1, 'typ': 'Business'}, limit=100, distinct=True)),
+            'r4_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 0, 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            'r4_business': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 0, 'typ': 'Business'}, limit=100, distinct=True)),
+            'r5_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['like', 'Rechtsberatung Pool%'], 'ungelesen': 1, 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            'r5_business': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['like', 'Rechtsberatung Pool%'], 'ungelesen': 1, 'typ': 'Business'}, limit=100, distinct=True)),
+            'r6_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'ungelesen': 1, 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            'r6_business': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'ungelesen': 1, 'typ': 'Business'}, limit=100, distinct=True)),
+            'r7_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 'hat_termine': 1, 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            'r7_business': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 'hat_termine': 1, 'typ': 'Business'}, limit=100, distinct=True)),
+            'r8_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Closed', 'hat_termine': 1, 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            'r8_business': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Closed', 'hat_termine': 1, 'typ': 'Business'}, limit=100, distinct=True)),
+            'r9_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Open', 'Zusammengeführt', 'Termin vereinbart', "Rückfrage: Termin vereinbaren"]], 'ungelesen': 1, 'kontaktperson': ['is', 'set'], 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            'r9_business': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Open', 'Zusammengeführt', 'Termin vereinbart', "Rückfrage: Termin vereinbaren"]], 'ungelesen': 1, 'kontaktperson': ['is', 'set'], 'typ': 'Business'}, limit=100, distinct=True)),
+            
+            
+            'p1_wohnen': get_p1(frappe.session.user, 'Wohnen'),
+            'p1_business': get_p1(frappe.session.user, 'Business'),
+            'p2_wohnen': get_p2(frappe.session.user, 'Wohnen'),
+            'p2_business': get_p2(frappe.session.user, 'Business'),
+            'p3_wohnen': get_p3(frappe.session.user, 'Wohnen'),
+            'p3_business': get_p3(frappe.session.user, 'Business'),
+            'p4_wohnen': get_p4(frappe.session.user, 'Wohnen'),
+            'p4_business': get_p4(frappe.session.user, 'Business')
         }
     }
     
     return open_data
 
-def get_p1(user):
+def get_p1(user, typ):
     p1_qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratung`
                                             WHERE `kontaktperson` IN (
                                                 SELECT `parent`
@@ -47,10 +64,11 @@ def get_p1(user):
                                                 WHERE `user` = '{user}'  
                                                 AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
-                                            AND `status` IN ('Open', 'In Arbeit')""".format(user=user), as_dict=True)[0].qty
+                                            AND `status` IN ('Open', 'In Arbeit')
+                                            AND `typ` = '{typ}'""".format(user=user, typ=typ), as_dict=True)[0].qty
     return p1_qty or 0
 
-def get_p2(user):
+def get_p2(user, typ):
     p2_qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratung`
                                             WHERE `kontaktperson` IN (
                                                 SELECT `parent`
@@ -59,10 +77,11 @@ def get_p2(user):
                                                 AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
                                             AND `status` = 'Rückfragen'
-                                            AND `ungelesen` = 0""".format(user=user), as_dict=True)[0].qty
+                                            AND `ungelesen` = 0
+                                            AND `typ` = '{typ}'""".format(user=user, typ=typ), as_dict=True)[0].qty
     return p2_qty or 0
 
-def get_p3(user):
+def get_p3(user, typ):
     p3_qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratung`
                                             WHERE `kontaktperson` IN (
                                                 SELECT `parent`
@@ -70,10 +89,11 @@ def get_p3(user):
                                                 WHERE `user` = '{user}'  AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
                                             AND `status` = 'Rückfragen'
-                                            AND `ungelesen` = 1""".format(user=user), as_dict=True)[0].qty
+                                            AND `ungelesen` = 1
+                                            AND `typ` = '{typ}'""".format(user=user, typ=typ), as_dict=True)[0].qty
     return p3_qty or 0
 
-def get_p4(user):
+def get_p4(user, typ):
     p4_qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratung`
                                             WHERE `kontaktperson` IN (
                                                 SELECT `parent`
@@ -82,7 +102,8 @@ def get_p4(user):
                                                 AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
                                             AND `status` = 'Termin vereinbart'
-                                            AND `hat_termine` = 1""".format(user=user), as_dict=True)[0].qty
+                                            AND `hat_termine` = 1
+                                            AND `typ` = '{typ}'""".format(user=user, typ=typ), as_dict=True)[0].qty
     return p4_qty or 0
 
 

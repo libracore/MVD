@@ -6,183 +6,223 @@
         <tr>
             <th></th>
             <th></th>
-            <th style="text-align: right;"><b>Anzahl</b></th>
+            <th style="text-align: right; padding-left: 20px;"><b>Wohnen</b></th>
+            <th style="text-align: right; padding-left: 20px;"><b>Business</b></th>
         </tr>
-        <tr id="s1">
+        
+        <tr>
             <td>S1</td>
             <td>Nicht Mitgliedern zugeordnet</td>
-            {% if s1 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ s1 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="s1_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if s1_wohnen > 99 %}99+{% else %}{{ s1_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="s1_business" class="clickable-badge" data-type="business">
+                <b>{% if s1_business > 99 %}99+{% else %}{{ s1_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="s6">
+        
+        <tr>
             <td>S6</td>
             <td>Weitere Korrespondenz</td>
-            {% if s6 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ s6 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="s6_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if s6_wohnen > 99 %}99+{% else %}{{ s6_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="s6_business" class="clickable-badge" data-type="business">
+                <b>{% if s6_business > 99 %}99+{% else %}{{ s6_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="s10">
+        
+        <tr>
             <td>S10</td>
             <td>Mitgliederanfragen bei vereinbartem Termin</td>
-            {% if s10 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ s10 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="s10_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if s10_wohnen > 99 %}99+{% else %}{{ s10_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="s10_business" class="clickable-badge" data-type="business">
+                <b>{% if s10_business > 99 %}99+{% else %}{{ s10_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-        <tr id="r">
+        
+        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        
+        <tr>
             <td>R</td>
             <td><b>Rechtsberatung</b></td>
-            {% if r > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ r }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="r_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if r_wohnen > 99 %}99+{% else %}{{ r_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="r_business" class="clickable-badge" data-type="business">
+                <b>{% if r_business > 99 %}99+{% else %}{{ r_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="r1">
+        
+        <tr>
             <td>R1</td>
             <td>Dringend</td>
-            {% if r1 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ r1 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="r1_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if r1_wohnen > 99 %}99+{% else %}{{ r1_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="r1_business" class="clickable-badge" data-type="business">
+                <b>{% if r1_business > 99 %}99+{% else %}{{ r1_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="r2">
+        
+        <tr>
             <td>R2</td>
             <td>Im Pool</td>
-            {% if r2 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ r2 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="r2_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if r2_wohnen > 99 %}99+{% else %}{{ r2_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="r2_business" class="clickable-badge" data-type="business">
+                <b>{% if r2_business > 99 %}99+{% else %}{{ r2_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="r3">
+
+        <tr>
             <td>R3</td>
             <td>Nicht im Pool/Einzelzuweisung</td>
-            {% if r3 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ r3 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="r3_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if r3_wohnen > 99 %}99+{% else %}{{ r3_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="r3_business" class="clickable-badge" data-type="business">
+                <b>{% if r3_business > 99 %}99+{% else %}{{ r3_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="r4">
+
+        <tr>
             <td>R4</td>
             <td>Offene Rückfragen</td>
-            {% if r4 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ r4 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="r4_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if r4_wohnen > 99 %}99+{% else %}{{ r4_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="r4_business" class="clickable-badge" data-type="business">
+                <b>{% if r4_business > 99 %}99+{% else %}{{ r4_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="r5">
+
+        <tr>
             <td>R5</td>
             <td>Beantwortete Rückfragen Pool (Posteingang)</td>
-            {% if r5 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ r5 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="r5_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if r5_wohnen > 99 %}99+{% else %}{{ r5_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="r5_business" class="clickable-badge" data-type="business">
+                <b>{% if r5_business > 99 %}99+{% else %}{{ r5_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="r6">
+
+        <tr>
             <td>R6</td>
             <td>Beantwortete Rückfragen für einzelne Berater*in (Posteingang)</td>
-            {% if r6 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ r6 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="r6_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if r6_wohnen > 99 %}99+{% else %}{{ r6_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="r6_business" class="clickable-badge" data-type="business">
+                <b>{% if r6_business > 99 %}99+{% else %}{{ r6_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="r7">
+
+        <tr>
             <td>R7</td>
             <td>Alle vereinbarten Termine</td>
-            {% if r7 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ r7 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="r7_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if r7_wohnen > 99 %}99+{% else %}{{ r7_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="r7_business" class="clickable-badge" data-type="business">
+                <b>{% if r7_business > 99 %}99+{% else %}{{ r7_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="r8">
+
+        <tr>
             <td>R8</td>
             <td>Vergangene Termine</td>
-            {% if r8 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ r8 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="r8_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if r8_wohnen > 99 %}99+{% else %}{{ r8_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="r8_business" class="clickable-badge" data-type="business">
+                <b>{% if r8_business > 99 %}99+{% else %}{{ r8_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="r9">
+
+        <tr>
             <td>R9</td>
             <td>Weitere Korrespondenz</td>
-            {% if r9 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ r9 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="r9_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if r9_wohnen > 99 %}99+{% else %}{{ r9_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="r9_business" class="clickable-badge" data-type="business">
+                <b>{% if r9_business > 99 %}99+{% else %}{{ r9_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+        
+        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        
         <tr>
             <td></td>
             <td><b>{{ frappe.user.full_name() }}</b></td>
-            <td>&nbsp;</td>
+            <td>&nbsp;</td><td>&nbsp;</td>
         </tr>
-        <tr id="p1">
+        
+        <tr>
             <td>P1</td>
             <td>Exklusiv zugewiesene Beratungen</td>
-            {% if p1 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ p1 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="p1_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if p1_wohnen > 99 %}99+{% else %}{{ p1_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="p1_business" class="clickable-badge" data-type="business">
+                <b>{% if p1_business > 99 %}99+{% else %}{{ p1_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="p2">
+
+        <tr>
             <td>P2</td>
             <td>Offene eigene Rückfragen</td>
-            {% if p2 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ p2 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="p2_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if p2_wohnen > 99 %}99+{% else %}{{ p2_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="p2_business" class="clickable-badge" data-type="business">
+                <b>{% if p2_business > 99 %}99+{% else %}{{ p2_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="p3">
+
+        <tr>
             <td>P3</td>
             <td>Beantwortete Rückfragen (Posteingang)</td>
-            {% if p3 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ p3 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="p3_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if p3_wohnen > 99 %}99+{% else %}{{ p3_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="p3_business" class="clickable-badge" data-type="business">
+                <b>{% if p3_business > 99 %}99+{% else %}{{ p3_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr id="p4">
+
+        <tr>
             <td>P4</td>
             <td>Termine</td>
-            {% if p4 > 99 %}
-                <td style="text-align: right;"><b>99+</b></td>
-            {% else %}
-                <td style="text-align: right;"><b>{{ p4 }}</b></td>
-            {% endif %}
+            <td style="text-align: right;" id="p4_wohnen" class="clickable-badge" data-type="wohnen">
+                <b>{% if p4_wohnen > 99 %}99+{% else %}{{ p4_wohnen }}{% endif %}</b>
+            </td>
+            <td style="text-align: right;" id="p4_business" class="clickable-badge" data-type="business">
+                <b>{% if p4_business > 99 %}99+{% else %}{{ p4_business }}{% endif %}</b>
+            </td>
         </tr>
-        <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-        <tr id="rechtsberaterinnen">
+        
+        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+        
+        <tr class="clickable-text">
             <td></td>
-            <td>Liste der Rechtsberater*innen</td>
-            <td style="text-align: right;"><b>&nbsp;</b></td>
+            <td id="rechtsberaterinnen"><a href="#">Liste der Rechtsberater*innen</a></td>
+            <td>&nbsp;</td><td>&nbsp;</td>
         </tr>
-        <tr id="beratungskategorien">
+        <tr class="clickable-text">
             <td></td>
-            <td>Liste der Beratungskategorien</td>
-            <td style="text-align: right;"><b>&nbsp;</b></td>
+            <td id="beratungskategorien"><a href="#">Liste der Beratungskategorien</a></td>
+            <td>&nbsp;</td><td>&nbsp;</td>
         </tr>
-        <tr id="statistik">
+        <tr class="clickable-text">
             <td></td>
-            <td>Statistik</td>
-            <td style="text-align: right;"><b>&nbsp;</b></td>
+            <td id="statistik"><a href="#">Statistik</a></td>
+            <td>&nbsp;</td><td>&nbsp;</td>
         </tr>
     </table>
 </div>
