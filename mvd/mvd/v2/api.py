@@ -327,7 +327,7 @@ def create_beratung(**args):
                     beratungskategorie = '202 - Mietzinserhöhung'
                 if args['topic'] == 'Mietzinssenkung' or args['topic'] == 'mz_senkung':
                     beratungskategorie = '203 - Mietzinssenkung'
-                elif args['topic'] == 'Heiz- und Nebenkosten':
+                elif args['topic'] == 'Anfrage Heiz- und Nebenkosten':
                     beratungskategorie = '300 - Heiz- und Nebenkosten allgemein'
 
             make_appointment = False

@@ -695,6 +695,9 @@ frappe.ui.form.on('Mitgliedschaft', {
         if (frm.doc.keine_e_mail_1) {
             frm.set_value('e_mail_1', '');
         }
+    },
+    get_swisstopo_url: function(frm) {
+        frappe.mvd.get_swisstopo_url(cur_frm.doc.adr_egaid);
     }
 });
 
