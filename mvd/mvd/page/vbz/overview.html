@@ -37,6 +37,14 @@
         </center>
     </div>
 
+    <!-- hidden ausser bei MVZH -->
+    <div class="control-card blue-card" id="beratung_zh" {% if frappe.boot.default_sektion != "MVZH" %} style="display: none;"{% endif %}>
+        <center>
+            <i class="fa fa-calendar-check-o blue-icon"></i>
+            <p>{{ __("Beratung (MVZH)") }}</p>
+        </center>
+    </div>
+
     <!-- hidden ausser bei MVLU -->
     <div class="control-card blue-card" id="beratung_lu" {% if frappe.boot.default_sektion != "MVLU" %} style="display: none;"{% endif %}>
         <center>
@@ -46,7 +54,7 @@
     </div>
 
     <!-- hidden nur bei MVBE -->
-    <div class="control-card blue-card" id="beratung_alle_sektionen" {% if frappe.boot.default_sektion == "MVBE" %} style="display: none;"{% endif %}>
+    <div class="control-card blue-card" id="beratung_alle_sektionen" {% if (frappe.boot.default_sektion == "MVBE") || (frappe.boot.default_sektion == "MVZH") %} style="display: none;"{% endif %}>
         <center>
             <i class="fa fa-calendar-check-o blue-icon"></i>
             <p>{{ __("Beratung") }}</p>
