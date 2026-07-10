@@ -123,7 +123,7 @@
    "fetch_from": null,
    "fetch_if_empty": 0,
    "fieldname": "nc_remote_path",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "hidden": 0,
    "idx": 11,
    "ignore_user_permissions": 0,
