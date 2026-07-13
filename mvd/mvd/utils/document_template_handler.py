@@ -1,20 +1,28 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2026, libracore AG and contributors
 # For license information, please see license.txt
+
 from __future__ import unicode_literals
 import frappe
 import io
 import json
+import hashlib
+from PIL import Image
 from odf.opendocument import load
 from odf.text import P, H
 from odf import draw
 from frappe.utils.file_manager import save_file
-import hashlib
 from urllib.parse import unquote
 
+
 DUMMY_IMAGE_HASHES = {
-    "dmc_platzhalter": frappe.get_value("MVD Settings", "MVD Settings", "dmc_platzhalter_img_hash") or "3a09d60de103913f08a4ee3564612783ce8d4f5c71fb7970b90de7c3ba29feaa"
+    "dmc_platzhalter": frappe.get_value(
+        "MVD Settings",
+        "MVD Settings",
+        "dmc_platzhalter_img_hash"
+    ) or "a4ed9825cf1733f67a7608b3d6847396d9c069e6e333dde6064742a802b35cff"
 }
+
 
 @frappe.whitelist()
 def use_template(template=None, replacements=None, source_doc=None, source_dt=None,
@@ -55,9 +63,9 @@ def use_template(template=None, replacements=None, source_doc=None, source_dt=No
             SELECT `file_url`
             FROM `tabFile`
             WHERE `attached_to_doctype` = 'Dokumentenvorlage'
-            AND `attached_to_name` = %s
+            AND `attached_to_name` = '{0}'
             LIMIT 1
-        """, template, as_dict=True)
+        """.format(template), as_dict=True)
 
         if not attachment:
             frappe.throw("Die Dokumentenvorlage besitzt kein Attachment!")
@@ -123,6 +131,110 @@ def replace_in_text_node(node, replacements) -> None:
         for child in node.childNodes:
             replace_in_text_node(child, replacements)
 
+
+def get_normalized_pixel_hash(image_bytes, normalized_size=(128, 128)):
+    """
+    Erstellt einen SHA-256-Hash ausschliesslich aus normalisierten Bildpixeln.
+    Das Bild wird vor dem Hashen auf eine feste Pixelmatrix
+    skaliert. Dadurch können unterschiedlich grosse Versionen desselben
+    Dummy-Bildes denselben Hash ergeben.
+
+    Transparente Pixel werden auf einen weissen Hintergrund gelegt, damit
+    unterschiedliche interne Transparenzdarstellungen das Resultat möglichst
+    wenig beeinflussen.
+    """
+
+    with Image.open(io.BytesIO(image_bytes)) as image:
+        image = image.convert("RGBA")
+
+        background = Image.new(
+            "RGBA",
+            image.size,
+            (255, 255, 255, 255)
+        )
+        image = Image.alpha_composite(background, image).convert("RGB")
+
+        image = image.resize(
+            normalized_size,
+            Image.Resampling.LANCZOS
+        )
+
+        return hashlib.sha256(image.tobytes()).hexdigest()
+
+
+def get_embedded_image_bytes(doc, image_href):
+    """
+    Liest die Bytes eines eingebetteten ODT-Bildes aus doc.Pictures.
+    """
+
+    if not image_href:
+        return None
+
+    image_path = unquote(image_href)
+
+    while image_path.startswith("./"):
+        image_path = image_path[2:]
+
+    possible_paths = [
+        image_path,
+        "./{0}".format(image_path),
+        "/{0}".format(image_path.lstrip("/"))
+    ]
+
+    embedded_picture = None
+
+    for possible_path in possible_paths:
+        if possible_path in doc.Pictures:
+            embedded_picture = doc.Pictures[possible_path]
+            break
+
+    if embedded_picture is None:
+        return None
+
+    if isinstance(embedded_picture, bytes):
+        return embedded_picture
+
+    if isinstance(embedded_picture, bytearray):
+        return bytes(embedded_picture)
+
+    if isinstance(embedded_picture, tuple):
+        for entry in embedded_picture:
+            if isinstance(entry, bytes):
+                return entry
+
+            if isinstance(entry, bytearray):
+                return bytes(entry)
+
+    return None
+
+
+def replace_image_in_frame(doc, frame, png_bytes):
+    """
+    Ersetzt das Bild innerhalb eines bestehenden ODT-Frames.
+    Die Grösse, Position und Verankerung des Frames bleiben erhalten.
+    """
+
+    href = doc.addPictureFromString(
+        png_bytes,
+        "image/png"
+    )
+
+    images = frame.getElementsByType(draw.Image)
+
+    if images:
+        images[0].setAttribute("href", href)
+    else:
+        image = draw.Image(
+            href=href,
+            type="simple",
+            show="embed",
+            actuate="onLoad"
+        )
+        frame.addElement(image)
+
+    return True
+
+
 def replace_named_image(doc, image_name, png_bytes):
     """
     Ersetzt ein bestehendes Dummy-Bild im ODT.
@@ -130,40 +242,27 @@ def replace_named_image(doc, image_name, png_bytes):
     Das Bild wird in dieser Reihenfolge gesucht:
 
     1. Über den Frame-Namen, wie z.B. bei LibreOffice
-    2. Über den SHA-256-Hash des eingebetteten Dummy-Bildes,
-       beispielsweise bei ONLYOFFICE
+    2. Über den normalisierten Pixel-Hash des eingebetteten Dummy-Bildes,
+       wie z.B. bei ONLYOFFICE
+
+    Der Pixel-Hash ist unabhängig von PNG-Metadaten, Komprimierung sowie
+    der ursprünglichen Bildbreite und Bildhöhe.
     """
 
     frames = doc.getElementsByType(draw.Frame)
 
-    # 1. Suche über den Frame-Namen (z.B. für LibreOffice)
-
+    # 1. Suche über den Frame-Namen, z.B. für LibreOffice
     for frame in frames:
         if frame.getAttribute("name") != image_name:
             continue
 
-        href = doc.addPictureFromString(
-            png_bytes,
-            "image/png"
+        return replace_image_in_frame(
+            doc=doc,
+            frame=frame,
+            png_bytes=png_bytes
         )
 
-        images = frame.getElementsByType(draw.Image)
-
-        if images:
-            images[0].setAttribute("href", href)
-        else:
-            image = draw.Image(
-                href=href,
-                type="simple",
-                show="embed",
-                actuate="onLoad"
-            )
-            frame.addElement(image)
-
-        return True
-    
-    # 2. Suche anhand des Dummy-Bild-Hashes (z.B. für ONLYOFFICE)
-
+    # 2. Suche anhand des normalisierten Dummy-Pixel-Hashes
     expected_dummy_hash = DUMMY_IMAGE_HASHES.get(image_name)
 
     if not expected_dummy_hash:
@@ -178,48 +277,33 @@ def replace_named_image(doc, image_name, png_bytes):
         for image in images:
             image_href = image.getAttribute("href")
 
-            if not image_href:
+            embedded_image_bytes = get_embedded_image_bytes(
+                doc=doc,
+                image_href=image_href
+            )
+
+            if not embedded_image_bytes:
                 continue
 
-            image_path = unquote(image_href)
-
-            while image_path.startswith("./"):
-                image_path = image_path[2:]
-
-            embedded_picture = doc.Pictures.get(image_path)
-
-            if not embedded_picture:
+            try:
+                embedded_image_hash = get_normalized_pixel_hash(
+                    embedded_image_bytes
+                )
+            except Exception:
+                frappe.log_error(
+                    frappe.get_traceback(),
+                    "ODT Dummy Image Pixel Hash"
+                )
                 continue
-
-            if isinstance(embedded_picture, tuple):
-                if len(embedded_picture) < 2:
-                    continue
-
-                embedded_image_bytes = embedded_picture[1]
-
-            elif isinstance(embedded_picture, bytes):
-                embedded_image_bytes = embedded_picture
-
-            else:
-                continue
-
-            embedded_image_hash = hashlib.sha256(
-                embedded_image_bytes
-            ).hexdigest()
 
             if embedded_image_hash != expected_dummy_hash:
                 continue
 
-            # Das Dummy-Bild wurde gefunden.
-            # Es wird durch die vorhandenen DMC-Bytes ersetzt.
-            new_href = doc.addPictureFromString(
-                png_bytes,
-                "image/png"
+            return replace_image_in_frame(
+                doc=doc,
+                frame=frame,
+                png_bytes=png_bytes
             )
-
-            image.setAttribute("href", new_href)
-
-            return True
 
     return False
 
@@ -248,7 +332,7 @@ def replace_images(doc, replacements):
                 (
                     "Bildplatzhalter nicht gefunden: {0}\n"
                     "Frame-Name geprüft: ja\n"
-                    "Dummy-Hash vorhanden: {1}"
+                    "Dummy-Pixel-Hash vorhanden: {1}"
                 ).format(
                     image_name,
                     "ja" if DUMMY_IMAGE_HASHES.get(image_name) else "nein"

@@ -4,3 +4,4 @@ icalendar
 python-docx
 tqdm
 odfpy
+Pillow
