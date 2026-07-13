@@ -17,6 +17,10 @@ class Dokumentenvorlage(Document):
                 if not mapping.field: frappe.throw('Bitte erfassen sie "Feld" in Zeile {idx}'.format(idx=mapping.idx))
             if mapping.replace_with == 'Funktion':
                 mapping.field = None
+                
+                if mapping.function == 'Mail-In DMC':
+                    mapping.platzhalter = 'dmc_platzhalter'
+                
                 if not mapping.function: frappe.throw('Bitte erfassen sie "Funktion" in Zeile {idx}'.format(idx=mapping.idx))
         return
     

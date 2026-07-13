@@ -50,7 +50,9 @@
   "nc_password",
   "nc_verify_ssl",
   "onlyoffice_document_server",
-  "onlyoffice_document_server_jwt"
+  "onlyoffice_document_server_jwt",
+  "section_img_hashes",
+  "dmc_platzhalter_img_hash"
  ],
  "fields": [
   {
@@ -283,6 +285,7 @@
    "label": "Adressvalidierung Anzahl"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_nextcloud",
    "fieldtype": "Section Break",
    "label": "NextCloud"
@@ -312,16 +315,27 @@
   {
    "fieldname": "onlyoffice_document_server",
    "fieldtype": "Data",
-   "label": "OnlyOffice Document Server"
+   "label": "ONLYOFFICE Document Server"
   },
   {
    "fieldname": "onlyoffice_document_server_jwt",
    "fieldtype": "Password",
-   "label": "OnlyOffice Document Server JWT"
+   "label": "ONLYOFFICE Document Server JWT"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_img_hashes",
+   "fieldtype": "Section Break",
+   "label": "Dokumentenvorlagen Bild-Hashes"
+  },
+  {
+   "fieldname": "dmc_platzhalter_img_hash",
+   "fieldtype": "Data",
+   "label": "MailIn-DMC Platzhalter-Bild Hash"
   }
  ],
  "issingle": 1,
- "modified": "2026-07-09 15:31:10.707835",
+ "modified": "2026-07-13 16:04:10.255331",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MVD Settings",

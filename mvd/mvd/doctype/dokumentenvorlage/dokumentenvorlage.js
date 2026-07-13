@@ -28,6 +28,10 @@ frappe.ui.form.on('Dokumentenvorlage', {
             'Go'
             );
         });
+
+        frm.add_custom_button(__("Mail-IN DMC Platzhalter-Bild"), function() {
+            window.open('/assets/mvd/img/dmc_dummy_bild.png', '_blank');
+        }, "Download");
     }
 });
 
