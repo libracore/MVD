@@ -168,6 +168,10 @@ frappe.vbz = {
             frappe.dom.freeze('Öffne Beratungen...');
             frappe.set_route("vbz-beratung");
         });
+        $("#beratung_zh").click(function(){
+            frappe.dom.freeze('Öffne Beratungen...');
+            frappe.set_route("vbz-beratung-mvzh");
+        });
         $("#beratung_alle_sektionen").click(function(){
             frappe.dom.freeze('Öffne Beratungen...');
             frappe.set_route("vbz-beratung-alle-se");

@@ -166,6 +166,28 @@ class Beratung(Document):
         # Markierung dass die zu beratende Person eingetroffen ist entfernen
         self.person_ist_eingetroffen = 0
 
+        # Setze den Typ für MVZH
+        if self.sektion_id == 'MVZH':
+            TYP_MAPPING = {
+                'Privat': 'Wohnen',
+                'Einzelperson': 'Wohnen',
+                'Geschäft': 'Business',
+                'Unternehmen': 'Business'
+            }
+            
+            neuer_typ = None 
+            if self.mv_mitgliedschaft:
+                db_typ = frappe.db.get_value('Mitgliedschaft', self.mv_mitgliedschaft, 'mitgliedtyp_c')
+                neuer_typ = TYP_MAPPING.get(db_typ)
+                
+            elif self.mv_kunde:
+                db_typ = frappe.db.get_value('Kunden', self.mv_kunde, 'kundentyp')
+                neuer_typ = TYP_MAPPING.get(db_typ)
+
+            if not self.typ or neuer_typ is None:
+                self.typ = neuer_typ
+                              
+
     def handle_nextcloud_folder(self):
         from mvd.mvd.utils.nextcloud import new_beratung as create_nextcloud_beratungs_folder
         from mvd.mvd.utils.nextcloud import added_mitglied_to_beratung as move_folder_from_beratung_to_mitglied

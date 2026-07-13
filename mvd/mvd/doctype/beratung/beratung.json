@@ -51,6 +51,7 @@
   "subject",
   "mv_mitgliedschaft",
   "faktura_kunde",
+  "typ",
   "mv_kunde",
   "mv_erb_permission",
   "sektion_id",
@@ -520,9 +521,15 @@
    "label": "RSV Mandat",
    "options": "RSVMandat",
    "read_only": 1
+  },
+  {
+   "fieldname": "typ",
+   "fieldtype": "Select",
+   "label": "Typ",
+   "options": "Wohnen\nBusiness"
   }
  ],
- "modified": "2026-06-17 14:57:05.843495",
+ "modified": "2026-07-09 12:09:09.184404",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

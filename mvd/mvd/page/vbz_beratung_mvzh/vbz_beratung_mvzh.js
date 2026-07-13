@@ -38,179 +38,227 @@ frappe.vbz_beratung_mvzh = {
     },
     add_click_handlers: function(open_datas) {
         //~ frappe.vbz_beratung_mvzh.remove_click_handlers();
+        var sektion = frappe.boot.default_sektion || "MVZH";
 
-        // Define the function to hide elements based on the section
-        function hideElementsBasedOnSection() {
-            let ausgeblendete_elemente = {'MVSH': ['s2','a1','r7','r8','p4']};
-            let sektion = frappe.boot.default_sektion;
+        $("#s1_wohnen").click(function(){
+            frappe.route_options = {"status": 'Eingang', "mv_mitgliedschaft": ['is', 'not set'], "sektion_id": sektion, "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#s1_business").click(function(){
+            frappe.route_options = {"status": 'Eingang', "mv_mitgliedschaft": ['is', 'not set'], "sektion_id": sektion, "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#s6_wohnen").click(function(){
+            frappe.route_options = {"status": ["not in", ["Rückfragen", "Rückfrage: Termin vereinbaren", "Eingang", "Open", "Zusammengeführt"]], "ungelesen": 1, "kontaktperson": ['is', 'not set'], "sektion_id": sektion, "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#s6_business").click(function(){
+            frappe.route_options = {"status": ["not in", ["Rückfragen", "Rückfrage: Termin vereinbaren", "Eingang", "Open", "Zusammengeführt"]], "ungelesen": 1, "kontaktperson": ['is', 'not set'], "sektion_id": sektion, "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#s10_wohnen").click(function(){
+            frappe.call({
+                method: "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_termine_in_zukunft",
+                args: {},
+                callback: function(r) {
+                    var parents = r.message || [];
+                    if (parents.length === 0) parents = [""];
+                    frappe.route_options = {"ungelesen": 1, "sektion_id": sektion, "name": ["in", parents], "typ": "Wohnen"}
+                    frappe.set_route("List", "Beratung", "List");
+                }
+            });
+        });
+        $("#s10_business").click(function(){
+            frappe.call({
+                method: "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_termine_in_zukunft",
+                args: {},
+                callback: function(r) {
+                    var parents = r.message || [];
+                    if (parents.length === 0) parents = [""];
+                    frappe.route_options = {"ungelesen": 1, "sektion_id": sektion, "name": ["in", parents], "typ": "Business"}
+                    frappe.set_route("List", "Beratung", "List");
+                }
+            });
+        });
 
-            if (sektion in ausgeblendete_elemente) {
-                ausgeblendete_elemente[sektion].forEach(element => {
-                    let elementId = `${element}_as`;
-                    document.getElementById(elementId).style.display = 'none';
-                    console.log(`Element ${elementId} hidden`);
-                });
-            }
-        }
+        $("#r_wohnen").click(function(){
+            frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], "sektion_id": sektion, "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r_business").click(function(){
+            frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], "sektion_id": sektion, "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r1_wohnen").click(function(){
+            frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], 'beratung_prio': 'Hoch', "sektion_id": sektion, "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r1_business").click(function(){
+            frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], 'beratung_prio': 'Hoch', "sektion_id": sektion, "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r2_wohnen").click(function(){
+             frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['like', 'Rechtsberatung Pool%'], 'beratung_prio': ['not in', ['Hoch']], "sektion_id": sektion, "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r2_business").click(function(){
+             frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['like', 'Rechtsberatung Pool%'], 'beratung_prio': ['not in', ['Hoch']], "sektion_id": sektion, "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r3_wohnen").click(function(){
+            frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'r3': 1, "sektion_id": sektion, "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r3_business").click(function(){
+            frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'r3': 1, "sektion_id": sektion, "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r4_wohnen").click(function(){
+            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], "sektion_id": sektion, "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r4_business").click(function(){
+            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], "sektion_id": sektion, "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r5_wohnen").click(function(){
+            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['like', 'Rechtsberatung Pool%'], 'ungelesen': 1, "sektion_id": sektion, "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r5_business").click(function(){
+            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['like', 'Rechtsberatung Pool%'], 'ungelesen': 1, "sektion_id": sektion, "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r6_wohnen").click(function(){
+            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'ungelesen': 1, "sektion_id": sektion, "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r6_business").click(function(){
+            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'ungelesen': 1, "sektion_id": sektion, "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r7_wohnen").click(function(){
+            frappe.route_options = {'status': ['!=', 'Closed'], 'hat_termine': 1, "sektion_id": sektion, "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r7_business").click(function(){
+            frappe.route_options = {'status': ['!=', 'Closed'], 'hat_termine': 1, "sektion_id": sektion, "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r8_wohnen").click(function(){
+            frappe.route_options = {'status': 'Closed', 'hat_termine': 1, "sektion_id": sektion, "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r8_business").click(function(){
+            frappe.route_options = {'status': 'Closed', 'hat_termine': 1, "sektion_id": sektion, "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r9_wohnen").click(function(){
+            frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt", "Termin vereinbart", "Rückfrage: Termin vereinbaren"]], "ungelesen": 1, "kontaktperson": ['is', 'set'], "sektion_id": sektion, "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+        $("#r9_business").click(function(){
+            frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt", "Termin vereinbart", "Rückfrage: Termin vereinbaren"]], "ungelesen": 1, "kontaktperson": ['is', 'set'], "sektion_id": sektion, "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
+        });
+     
 
-        // Call the function where needed, for example, in the add_views function
-        hideElementsBasedOnSection();
-                
-        $("#s_as").click(function(){
-            frappe.route_options = {"status": 'Eingang'}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#s1_as").click(function(){
-            frappe.route_options = {"status": 'Eingang', "mv_mitgliedschaft": ['is', 'not set']}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#s2_as").click(function(){
-            frappe.route_options = {"status": ['!=', 'Closed'], "s8": 1}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#s3_as").click(function(){
-            frappe.route_options = {"status": 'Zusammengeführt', "ungelesen": 1}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#s3").click(function(){
-            frappe.route_options = {"status": 'Rückfrage: Termin vereinbaren'}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#s4_as").click(function(){
-            frappe.route_options = {"status": "Rückfragen", "kontaktperson": ['is', 'not set'], "ungelesen": 0}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#s5_as").click(function(){
-            frappe.route_options = {"status": "Rückfragen", "kontaktperson": ['is', 'not set'], "ungelesen": 1}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#a1_as").click(function(){
-            frappe.route_options = {"status": "Open", "kontaktperson": ['like', 'Administration%']}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        // $("#s6_as").click(function(){
-        //     frappe.route_options = {"status": ["not in", ["Rückfragen", "Rückfrage: Termin vereinbaren", "Eingang", "Open", "Zusammengeführt"]], "ungelesen": 1, "kontaktperson": ['is', 'not set']}
-        //     frappe.set_route("List", "Beratung", "List");
-        // });
-        // $("#s7_as").click(function(){
-        //     frappe.route_options = {"status": 'Open', "kontaktperson": ['is', 'not set']}
-        //     frappe.set_route("List", "Beratung", "List");
-        // });
-        
-        $("#r_as").click(function(){
-            frappe.route_options = {"status": 'Open'}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#r1_as").click(function(){
-            frappe.route_options = {"status": 'Open', 'beratung_prio': 'Hoch'}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#r2_as").click(function(){
-            frappe.route_options = {'status': 'Open', 'kontaktperson': ['like','Rechtsberatung Pool%'], 'beratung_prio': ['!=', 'Hoch']}
-            frappe.set_route("List", "Beratung", "List");
-        });
-           $("#r2_bs").click(function(){
-            frappe.route_options = {'status': 'Open', 'kontaktperson': ['like','Rechtsberatung Pool%'], 'beratung_prio': ['!=', 'Hoch'], '_user_tags': ['not like', '%MNE-MVBS%']}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#r3_as").click(function(){
-            frappe.route_options = {'status': 'Open', 'r3': 1}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#r4_as").click(function(){
-            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['is', 'set']}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#r5_as").click(function(){
-            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['is', 'set'], 'ungelesen': 1}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#r6_as").click(function(){
-            frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['not like', 'Rechtsberatung Pool%'], 'kontaktperson': ['is', 'set'], 'ungelesen': 1}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#r7_as").click(function(){
-            frappe.route_options = {'status': ['!=', 'Closed'], 'hat_termine': 1}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#r8_as").click(function(){
-            frappe.route_options = {'status': 'Closed', 'hat_termine': 1}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#r9_as").click(function(){
-            frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt", "Termin vereinbart"]], "ungelesen": 1, "kontaktperson": ['is', 'set']}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#r10_bs").click(function(){
-            frappe.route_options = {'status': ['!=', 'Closed'], '_user_tags': ['like', '%MNE-MVBS%']};
-            frappe.set_route("List", "Beratung");
-        });
-        $("#r11_bs").click(function(){
-            frappe.route_options = {'status': ['!=', 'Closed'], '_user_tags': ['like', '%Mandat-MVBS%']};
-            frappe.set_route("List", "Beratung");
-        });
-        $("#r12_bs").click(function(){
-            frappe.route_options = {'status': ['!=', 'Closed'], '_user_tags': ['like', '%PHF-MVBS%']};
-            frappe.set_route("List", "Beratung");
-        });
-        
-        $("#p1_as").click(function(){
+        $("#p1_wohnen").click(function(){
             frappe.call({
                 'method': "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_user_kontaktperson",
                 'args': {'only_session_user': 1},
                 'async': false,
-                'callback': function(r)
-                {
-                    frappe.route_options = {'status': 'Open', 'kontaktperson': ['in', r.message]}
+                'callback': function(r) {
+                    frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['in', r.message], "sektion_id": sektion, "typ": "Wohnen"}
                     frappe.set_route("List", "Beratung", "List");
                 }
             });
         });
-        $("#p2_as").click(function(){
+        $("#p1_business").click(function(){
+            frappe.call({
+                'method': "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_user_kontaktperson",
+                'args': {'only_session_user': 1},
+                'async': false,
+                'callback': function(r) {
+                    frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['in', r.message], "sektion_id": sektion, "typ": "Business"}
+                    frappe.set_route("List", "Beratung", "List");
+                }
+            });
+        });
+        $("#p2_wohnen").click(function(){
             frappe.call({
                 'method': "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_user_kontaktperson",
                 'args': {},
                 'async': false,
-                'callback': function(r)
-                {
-                    frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['in', r.message], 'ungelesen': 0}
+                'callback': function(r) {
+                    frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['in', r.message], 'ungelesen': 0, "sektion_id": sektion, "typ": "Wohnen"}
                     frappe.set_route("List", "Beratung", "List");
                 }
             });
         });
-        $("#p3_as").click(function(){
+        $("#p2_business").click(function(){
             frappe.call({
                 'method': "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_user_kontaktperson",
                 'args': {},
                 'async': false,
-                'callback': function(r)
-                {
-                    frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['in', r.message], 'ungelesen': 1}
+                'callback': function(r) {
+                    frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['in', r.message], 'ungelesen': 0, "sektion_id": sektion, "typ": "Business"}
                     frappe.set_route("List", "Beratung", "List");
                 }
             });
         });
-        $("#p4_as").click(function(){
+        $("#p3_wohnen").click(function(){
             frappe.call({
                 'method': "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_user_kontaktperson",
                 'args': {},
                 'async': false,
-                'callback': function(r)
-                {
-                    frappe.route_options = {'status': 'Termin vereinbart', 'kontaktperson': ['in', r.message], 'hat_termine': 1}
+                'callback': function(r) {
+                    frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['in', r.message], 'ungelesen': 1, "sektion_id": sektion, "typ": "Wohnen"}
                     frappe.set_route("List", "Beratung", "List");
                 }
             });
         });
-        
-        
-        $("#rechtsberaterinnen_as").click(function(){
+        $("#p3_business").click(function(){
+            frappe.call({
+                'method': "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_user_kontaktperson",
+                'args': {},
+                'async': false,
+                'callback': function(r) {
+                    frappe.route_options = {'status': 'Rückfragen', 'kontaktperson': ['in', r.message], 'ungelesen': 1, "sektion_id": sektion, "typ": "Business"}
+                    frappe.set_route("List", "Beratung", "List");
+                }
+            });
+        });
+        $("#p4_wohnen").click(function(){
+            frappe.call({
+                'method': "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_user_kontaktperson",
+                'args': {},
+                'async': false,
+                'callback': function(r) {
+                    frappe.route_options = {'status': 'Termin vereinbart', 'kontaktperson': ['in', r.message], 'hat_termine': 1, "sektion_id": sektion, "typ": "Wohnen"}
+                    frappe.set_route("List", "Beratung", "List");
+                }
+            });
+        });
+        $("#p4_business").click(function(){
+            frappe.call({
+                'method': "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_user_kontaktperson",
+                'args': {},
+                'async': false,
+                'callback': function(r) {
+                    frappe.route_options = {'status': 'Termin vereinbart', 'kontaktperson': ['in', r.message], 'hat_termine': 1, "sektion_id": sektion, "typ": "Business"}
+                    frappe.set_route("List", "Beratung", "List");
+                }
+            });
+        });
+   
+        $("#rechtsberaterinnen").click(function(){
             frappe.set_route("List", "Termin Kontaktperson", "List");
         });
-        $("#beratungskategorien_as").click(function(){
+        $("#beratungskategorien").click(function(){
             frappe.set_route("List", "Beratungskategorie", "List");
         });
-        $("#statistik_as").click(function(){
+        $("#statistik").click(function(){
             frappe.set_route(["query-report", "Beratungsstatistik"]);
         });
         
