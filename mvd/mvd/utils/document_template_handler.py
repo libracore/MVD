@@ -7,7 +7,7 @@ import frappe
 import io
 import json
 import hashlib
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from odf.opendocument import load
 from odf.text import P, H
 from odf import draw
@@ -131,35 +131,42 @@ def replace_in_text_node(node, replacements) -> None:
         for child in node.childNodes:
             replace_in_text_node(child, replacements)
 
-
 def get_normalized_pixel_hash(image_bytes, normalized_size=(128, 128)):
     """
-    Erstellt einen SHA-256-Hash ausschliesslich aus normalisierten Bildpixeln.
-    Das Bild wird vor dem Hashen auf eine feste Pixelmatrix
-    skaliert. Dadurch können unterschiedlich grosse Versionen desselben
-    Dummy-Bildes denselben Hash ergeben.
-
-    Transparente Pixel werden auf einen weissen Hintergrund gelegt, damit
-    unterschiedliche interne Transparenzdarstellungen das Resultat möglichst
-    wenig beeinflussen.
+    Erstellt einen grössenunabhängigen SHA-256-Hash aus den Bildpixeln.
+    Das Bild wird vor dem Hashen auf 128 x 128 Pixel normalisiert.
     """
 
     with Image.open(io.BytesIO(image_bytes)) as image:
+        image.load()
         image = image.convert("RGBA")
 
+        # Transparenz auf einen weissen Hintergrund reduzieren.
         background = Image.new(
             "RGBA",
             image.size,
             (255, 255, 255, 255)
         )
-        image = Image.alpha_composite(background, image).convert("RGB")
 
-        image = image.resize(
+        normalized_image = Image.alpha_composite(
+            background,
+            image
+        ).convert("RGB")
+
+        # Kompatibel mit alten und neuen Pillow-Versionen.
+        try:
+            resize_filter = Image.Resampling.LANCZOS
+        except AttributeError:
+            resize_filter = Image.LANCZOS
+
+        normalized_image = normalized_image.resize(
             normalized_size,
-            Image.Resampling.LANCZOS
+            resize_filter
         )
 
-        return hashlib.sha256(image.tobytes()).hexdigest()
+        return hashlib.sha256(
+            normalized_image.tobytes()
+        ).hexdigest()
 
 
 def get_embedded_image_bytes(doc, image_href):
@@ -198,12 +205,14 @@ def get_embedded_image_bytes(doc, image_href):
         return bytes(embedded_picture)
 
     if isinstance(embedded_picture, tuple):
-        for entry in embedded_picture:
-            if isinstance(entry, bytes):
-                return entry
+        if len(embedded_picture) >= 2:
+            image_data = embedded_picture[1]
 
-            if isinstance(entry, bytearray):
-                return bytes(entry)
+            if isinstance(image_data, bytes):
+                return image_data
+
+            if isinstance(image_data, bytearray):
+                return bytes(image_data)
 
     return None
 
@@ -289,6 +298,13 @@ def replace_named_image(doc, image_name, png_bytes):
                 embedded_image_hash = get_normalized_pixel_hash(
                     embedded_image_bytes
                 )
+
+            except UnidentifiedImageError:
+                continue
+
+            except OSError:
+                continue
+
             except Exception:
                 frappe.log_error(
                     frappe.get_traceback(),
