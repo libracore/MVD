@@ -3048,8 +3048,8 @@ def validate_member_addresses(limit=0):
                 sql_result = frappe.db.sql("""SELECT name
                                     FROM `tabAmtliches Gebaeudeverzeichnis`
                                     WHERE plz = '{0}'
-                                    AND stn_label = '{2}'
-                                    AND adr_number = '{1}'
+                                    AND stn_label = '{1}'
+                                    AND adr_number = '{2}'
                                     AND wohnort = '{3}'
                                     LIMIT 1
                                     """.format(m.objekt_plz, safe_strasse, safe_full_number, safe_ort), as_dict=True)
@@ -3094,8 +3094,8 @@ def validate_address(doc_id=None, doc_type="Mitgliedschaft", doc=None):
         sql_result = frappe.db.sql("""SELECT com_fosnr
                                FROM `tabAmtliches Gebaeudeverzeichnis`
                                WHERE plz = '{0}'
-                               AND stn_label = '{2}'
-                               AND adr_number = '{1}'
+                               AND stn_label = '{1}'
+                               AND adr_number = '{2}'
                                AND wohnort = '{3}'
                                LIMIT 1
                                """.format(doc.plz, strasse, full_number, ort), as_dict=True)
@@ -3119,8 +3119,8 @@ def validate_address(doc_id=None, doc_type="Mitgliedschaft", doc=None):
         sql_result = frappe.db.sql("""SELECT name, com_fosnr
                                FROM `tabAmtliches Gebaeudeverzeichnis`
                                WHERE plz = '{0}'
-                               AND stn_label = '{2}'
-                               AND adr_number = '{1}'
+                               AND stn_label = '{1}'
+                               AND adr_number = '{2}'
                                AND wohnort = '{3}'
                                LIMIT 1
                                """.format(doc.objekt_plz, strasse, full_number, ort), as_dict=True)
