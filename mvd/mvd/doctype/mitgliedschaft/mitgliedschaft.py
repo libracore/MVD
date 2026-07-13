@@ -3048,11 +3048,11 @@ def validate_member_addresses(limit=0):
                 sql_result = frappe.db.sql("""SELECT name
                                     FROM `tabAmtliches Gebaeudeverzeichnis`
                                     WHERE plz = '{0}'
+                                    AND stn_label = '{2}'
                                     AND adr_number = '{1}'
-                                    AND (stn_label = '{2}' OR stn_label LIKE '{2} /%' OR stn_label LIKE '%/ {2}')
-                                    AND (wohnort = '{3}' OR wohnort LIKE '{3}/%' OR wohnort LIKE '%/{3}')
+                                    AND wohnort = '{3}'
                                     LIMIT 1
-                                    """.format(m.objekt_plz, safe_full_number, safe_strasse, safe_ort), as_dict=True)
+                                    """.format(m.objekt_plz, safe_strasse, safe_full_number, safe_ort), as_dict=True)
                 status = 1 if sql_result else 0
                 adr_egaid = sql_result[0].name if sql_result else None
 
@@ -3094,11 +3094,11 @@ def validate_address(doc_id=None, doc_type="Mitgliedschaft", doc=None):
         sql_result = frappe.db.sql("""SELECT com_fosnr
                                FROM `tabAmtliches Gebaeudeverzeichnis`
                                WHERE plz = '{0}'
+                               AND stn_label = '{2}'
                                AND adr_number = '{1}'
-                               AND (stn_label = '{2}' OR stn_label LIKE '{2} /%' OR stn_label LIKE '%/ {2}')
-                               AND (wohnort = '{3}' OR wohnort LIKE '{3}/%' OR wohnort LIKE '%/{3}')
+                               AND wohnort = '{3}'
                                LIMIT 1
-                               """.format(doc.plz, full_number, strasse, ort), as_dict=True)
+                               """.format(doc.plz, strasse, full_number, ort), as_dict=True)
         if sql_result:
             bfs_nr = sql_result[0].get("com_fosnr")
         if not sql_result:
@@ -3119,11 +3119,11 @@ def validate_address(doc_id=None, doc_type="Mitgliedschaft", doc=None):
         sql_result = frappe.db.sql("""SELECT name, com_fosnr
                                FROM `tabAmtliches Gebaeudeverzeichnis`
                                WHERE plz = '{0}'
+                               AND stn_label = '{2}'
                                AND adr_number = '{1}'
-                               AND (stn_label = '{2}' OR stn_label LIKE '{2} /%' OR stn_label LIKE '%/ {2}')
-                               AND (wohnort = '{3}' OR wohnort LIKE '{3}/%' OR wohnort LIKE '%/{3}')
+                               AND wohnort = '{3}'
                                LIMIT 1
-                               """.format(doc.objekt_plz, full_number, strasse, ort), as_dict=True)
+                               """.format(doc.objekt_plz, strasse, full_number, ort), as_dict=True)
         status = 1 if sql_result else 0
         adr_egaid = sql_result[0].name if sql_result else None
         if sql_result:

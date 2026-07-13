@@ -11,6 +11,7 @@
   "com_fosnr",
   "com_name",
   "com_canton",
+  "bdg_egid",
   "adr_modified",
   "adr_northing",
   "adr_easting"
@@ -72,9 +73,14 @@
    "fieldname": "adr_easting",
    "fieldtype": "Float",
    "label": "Koordinaten Ost"
+  },
+  {
+   "fieldname": "bdg_egid",
+   "fieldtype": "Data",
+   "label": "Eidgen\u00f6ssischer Geb\u00e4udeidentifikator"
   }
  ],
- "modified": "2026-06-24 09:32:01.751598",
+ "modified": "2026-07-13 09:18:21.953182",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Amtliches Gebaeudeverzeichnis",
