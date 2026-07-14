@@ -940,7 +940,7 @@ def get_mailin_dmc(ctx, size=80):
         doc.get("name", False),
         doc.get("doctype", False)
     ]) and ' ' not in doc.get("doctype", ''):
-        return '<img src="https://data.libracore.ch/phpqrcode/api/barcode.php?f=png&s=dmtx&d=mailto:mv+{dn}+{dt}@libracore.io&h={size}&w={size}" />'.format(
+        return '<img src="https://data.libracore.ch/phpqrcode/api/barcode.php?f=png&s=dmtx&d=mailto:mv%2B{dn}%2B{dt}@libracore.io&h={size}&w={size}" />'.format(
             dn=doc.get("name"),
             dt=doc.get("doctype"),
             size=size
