@@ -171,7 +171,7 @@ def get_normalized_pixel_hash(image_bytes, normalized_size=(128, 128)):
 
 def get_embedded_image_bytes(doc, image_href):
     """
-    Liest die Bytes eines eingebetteten ODT-Bildes aus doc.Pictures.
+    Liest die Bytes eines eingebetteten ODT-Bildes aus doc.Pictures
     """
 
     if not image_href:
@@ -245,7 +245,7 @@ def replace_image_in_frame(doc, frame, png_bytes):
 
 def replace_image_element(doc, image, png_bytes):
     """
-    Ersetzt exakt das übergebene draw:image-Element.
+    Ersetzt exakt das übergebene draw:image-Element
     """
 
     new_href = doc.addPictureFromString(
@@ -259,36 +259,43 @@ def replace_image_element(doc, image, png_bytes):
 
 def replace_named_image(doc, image_name, png_bytes):
     """
-    Ersetzt ein bestehendes Dummy-Bild im ODT.
+    Ersetzt alle Vorkommen eines Dummy-Bildes im ODT
 
-    Das Bild wird in dieser Reihenfolge gesucht:
+    Das Bild wird erkannt:
+    1. über den Frame-Namen, z.B. bei LibreOffice
+    2. über den normalisierten Pixel-Hash, z.B. bei ONLYOFFICE
 
-    1. Über den Frame-Namen, wie z.B. bei LibreOffice
-    2. Über den normalisierten Pixel-Hash des eingebetteten Dummy-Bildes,
-       wie z.B. bei ONLYOFFICE
-
-    Der Pixel-Hash ist unabhängig von PNG-Metadaten, Komprimierung sowie
-    der ursprünglichen Bildbreite und Bildhöhe.
+    Es werden bewusst alle Treffer ersetzt, weil dasselbe Bild in einem ODT
+    mehrfach vorkommen kann, beispielsweise in verschiedenen Masterseiten
+    oder Fusszeilen
     """
 
     frames = doc.getElementsByType(draw.Frame)
+    replaced_count = 0
 
-    # 1. Suche über den Frame-Namen, z.B. für LibreOffice
+    # 1. Alle Frames mit passendem Namen ersetzen
     for frame in frames:
         if frame.getAttribute("name") != image_name:
             continue
 
-        return replace_image_in_frame(
+        replace_image_in_frame(
             doc=doc,
             frame=frame,
             png_bytes=png_bytes
         )
 
-    # 2. Suche anhand des normalisierten Dummy-Pixel-Hashes
+        replaced_count += 1
+
+    # Wenn mindestens ein benannter Frame gefunden wurde,
+    # ist keine Hash-Suche mehr notwendig.
+    if replaced_count > 0:
+        return replaced_count
+
+    # 2. Alle Bilder mit passendem Pixel-Hash ersetzen
     expected_dummy_hash = DUMMY_IMAGE_HASHES.get(image_name)
 
     if not expected_dummy_hash:
-        return False
+        return 0
 
     for frame in frames:
         images = frame.getElementsByType(draw.Image)
@@ -312,10 +319,7 @@ def replace_named_image(doc, image_name, png_bytes):
                     embedded_image_bytes
                 )
 
-            except UnidentifiedImageError:
-                continue
-
-            except OSError:
+            except (UnidentifiedImageError, OSError):
                 continue
 
             except Exception:
@@ -328,18 +332,20 @@ def replace_named_image(doc, image_name, png_bytes):
             if embedded_image_hash != expected_dummy_hash:
                 continue
 
-            return replace_image_element(
+            replace_image_element(
                 doc=doc,
                 image=image,
                 png_bytes=png_bytes
             )
 
-    return False
+            replaced_count += 1
+
+    return replaced_count
 
 
 def replace_images(doc, replacements):
     """
-    Ersetzt alle Bild-Platzhalter aus replacements.
+    Ersetzt alle Bild-Platzhalter aus replacements
     """
 
     for old, raw_value in replacements.items():
@@ -347,16 +353,16 @@ def replace_images(doc, replacements):
 
         if replacement_type != "img":
             continue
-
+        
         image_name = old
 
-        replaced = replace_named_image(
+        replaced_count = replace_named_image(
             doc=doc,
             image_name=image_name,
             png_bytes=value
         )
 
-        if not replaced:
+        if replaced_count == 0:
             frappe.log_error(
                 (
                     "Bildplatzhalter nicht gefunden: {0}\n"
