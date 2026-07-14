@@ -378,7 +378,7 @@ def get_freie_termine(vergebene_termin_liste, von, bis, berater_in):
                                   SELECT
                                     CONCAT(`date`, ' ', `from_time`) AS `von`,
                                     CONCAT(`date`, ' ', `to_time`) AS `bis`,
-                                    `art_ort` AS `ort`,
+                                    IFNULL(`art_ort`, 'Keine Ort Angabe') AS `ort`,
                                     `beratungsperson` AS `berater_in`,
                                     NULL AS `von_bis_str`
                                   FROM `tabAPB Zuweisung`
