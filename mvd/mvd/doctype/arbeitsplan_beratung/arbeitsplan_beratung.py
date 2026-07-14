@@ -319,7 +319,7 @@ def get_termin_uebersicht(berater_in, von=None, bis=None):
             `bt`.`von`,
             `bt`.`bis`,
             `bt`.`art`,
-            IFNULL(`bt`.`ort`, 'Keine Ort Angabe'),
+            IFNULL(`bt`.`ort`, 'Keine Ort Angabe') AS `ort`,
             `bt`.`telefonnummer`,
             REPLACE(`mitgl`.`adressblock`, '\n', '<br>') AS `adressblock`,
             `ber`.`sektion_id`,
