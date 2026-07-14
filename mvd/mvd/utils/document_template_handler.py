@@ -243,6 +243,19 @@ def replace_image_in_frame(doc, frame, png_bytes):
 
     return True
 
+def replace_image_element(doc, image, png_bytes):
+    """
+    Ersetzt exakt das übergebene draw:image-Element.
+    """
+
+    new_href = doc.addPictureFromString(
+        png_bytes,
+        "image/png"
+    )
+
+    image.setAttribute("href", new_href)
+
+    return True
 
 def replace_named_image(doc, image_name, png_bytes):
     """
@@ -315,9 +328,9 @@ def replace_named_image(doc, image_name, png_bytes):
             if embedded_image_hash != expected_dummy_hash:
                 continue
 
-            return replace_image_in_frame(
+            return replace_image_element(
                 doc=doc,
-                frame=frame,
+                image=image,
                 png_bytes=png_bytes
             )
 
