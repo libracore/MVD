@@ -5,6 +5,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint
+import re
+from mvd.mvd.utils.nextcloud import NCSettings
+import os
 
 def resave_mitgliedschaft(sinv, event):
     if sinv.mv_mitgliedschaft:
@@ -157,11 +160,6 @@ def sync_file_to_nextcloud(file, event):
     ACHTUNG Konfliktpotenzial
     Unbedingt mvd.mvd.doctype.beratung.beratung.sync_mail_attachements prüfen/abstimmen!
     '''
-    from mvd.mvd.utils.nextcloud import NCSettings
-    import os
-    import frappe
-
-
     def delete_local_file_from_disk(file_doc):
         """
         Löscht die physische Datei eines Frappe File-Dokuments vom lokalen Dateisystem,
@@ -186,6 +184,36 @@ def sync_file_to_nextcloud(file, event):
             return
 
         return
+    
+    def sanitize_windows_filename(filename):
+        '''
+            Sicherstellung Windows-kompatibeler Dateiname
+        '''
+        WINDOWS_RESERVED_NAMES = {
+            "CON", "PRN", "AUX", "NUL",
+            "COM1", "COM2", "COM3", "COM4", "COM5",
+            "COM6", "COM7", "COM8", "COM9",
+            "LPT1", "LPT2", "LPT3", "LPT4", "LPT5",
+            "LPT6", "LPT7", "LPT8", "LPT9",
+        }
+        # Ungültige Zeichen ersetzen
+        filename = re.sub(r'[<>:"/\\|?*#%&{}~\x00-\x1F]', "_", filename)
+
+        # Keine Punkte oder Leerzeichen am Ende
+        filename = filename.rstrip(" .")
+
+        # Leerer Name?
+        if not filename:
+            filename = "_"
+
+        # Reservierte Namen prüfen (ohne Datei-Endung)
+        parts = filename.rsplit(".", 1)
+        basename = parts[0]
+
+        if basename.upper() in WINDOWS_RESERVED_NAMES:
+            filename = "_" + filename
+
+        return filename
     
     sektion = None
     folder_path = None
@@ -229,9 +257,10 @@ def sync_file_to_nextcloud(file, event):
 
     if sektion and folder_path:
         file_content = file.get_content()   # liefert Bytes
+        file_name = sanitize_windows_filename(file.file_name)
         uploaded_files = ncs.upload_files(
             folder_path,
-            [(file.file_name, file_content)]
+            [(file_name, file_content)]
         )
         
         if len(uploaded_files) > 0 and uploaded_files[0]['file_url']:
@@ -242,8 +271,6 @@ def sync_file_to_nextcloud(file, event):
     return
 
 def remove_file_from_nextcloud(file, event):
-    from mvd.mvd.utils.nextcloud import NCSettings
-
     if not file.nc_remote_path:
         return
     
