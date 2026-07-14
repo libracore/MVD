@@ -1,156 +1,282 @@
+<div class="vbz-filter-container">
+    <div class="row">
+        <h1 class="vbz">
+            Beratungsterminübersicht
 
-<div class="row">
-    <h1 class="vbz">Beratungsterminübersicht<span id="datenstand_as" class="pull-right">Datenstand: {{ datenstand_as }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
+            <span
+                id="datenstand_as"
+                class="pull-right"
+            >
+                Datenstand: {{ datenstand_as }}
+            </span>
+
+            <br>
+
+            <span
+                id="reload_info"
+                class="pull-right"
+            >
+                Zum Aktualisieren Webbrowser neuladen
+            </span>
+        </h1>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-3">
+            <p class="free_only"></p>
+            <p class="my_reservations"></p>
+            <p class="termine_heute"></p>
+            <p class="termine_gebucht"></p>
+        </div>
+
+        <div class="col-sm-2">
+            <p class="beratungsort"></p>
+        </div>
+
+        <div class="col-sm-2">
+            <p class="berater_in"></p>
+        </div>
+
+        <div class="col-sm-2">
+            <p class="art"></p>
+        </div>
+
+        <div class="col-sm-2">
+            <p class="beratungstyp"></p>
+        </div>
+
+        <div class="col-sm-1">
+            <!-- Platzhalter -->
+            &nbsp;<br>&nbsp;<br>&nbsp;
+        </div>
+
+        <div class="col-sm-2">
+            <p class="datum"></p>
+        </div>
+
+        <div class="col-sm-2">
+            <p class="sprache"></p>
+        </div>
+
+        <div class="col-sm-2">
+            <p class="fachskill"></p>
+        </div>
+
+        <div class="col-sm-2">
+            <!-- Platzhalter -->
+            &nbsp;<br>&nbsp;<br>&nbsp;
+        </div>
+
+        <div class="col-sm-2">
+            <p class="datum_bis"></p>
+        </div>
+
+        <div class="col-sm-2">
+            <!-- Platzhalter -->
+            &nbsp;<br>&nbsp;<br>&nbsp;
+        </div>
+
+        <div class="col-sm-2">
+            <!-- Platzhalter -->
+            &nbsp;<br>&nbsp;<br>&nbsp;
+        </div>
+
+        <div class="col-sm-2">
+            <!-- Platzhalter -->
+            &nbsp;<br>&nbsp;<br>&nbsp;
+        </div>
+
+        <div class="col-sm-2">
+            <!-- Platzhalter -->
+            &nbsp;<br>&nbsp;<br>&nbsp;
+        </div>
+
+        <div class="col-sm-2">
+            <!-- Platzhalter -->
+            &nbsp;<br>&nbsp;<br>&nbsp;
+        </div>
+    </div>
 </div>
-<div class="row">
-    <div class="col-sm-3">
-        <p class="free_only"></p>
-        <p class="my_reservations"></p>
-        <p class="termine_heute"></p>
-        <p class="termine_gebucht"></p>
+
+<div class="vbz-data-container">
+    <div class="row">
+        <h1 class="vbz">
+            Meine Beratungstermine
+        </h1>
     </div>
-    <div class="col-sm-2">
-        <p class="beratungsort"></p>
+
+    <div class="row">
+        <table id="table_termin_uebersicht">
+            <tr>
+                <th>Berater*in</th>
+                <th>Wunsch Berater*in</th>
+                <th>Datum</th>
+                <th>Von - Bis</th>
+                <th>Art</th>
+                <th>Telefonnummer</th>
+                <th>Ort</th>
+                <th>Status</th>
+                <th>Dokumente</th>
+                <th>Mitglied</th>
+                <th>Beratungskategorien</th>
+                <th>Terminkategorie</th>
+            </tr>
+
+            {% for termin in meine_termine %}
+                {% if "show_placeholder" in termin %}
+                    <tr class="termin-tr">
+                        <td>Keine eigene Beratungstermine</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                {% else %}
+                    <tr
+                        class="termin-tr"
+                        data-beratung="{{ termin.beratung }}"
+                    >
+                        <td>{{ termin.beraterinn }}</td>
+                        <td>{{ termin.wunsch_berater_in }}</td>
+                        <td>
+                            {{ termin.wochentag }}.,
+                            {{ termin.von_date }}
+                        </td>
+                        <td>
+                            {{ termin.von_time }} -
+                            {{ termin.bis_time }}
+                        </td>
+                        <td>{{ termin.art }}</td>
+                        <td>
+                            {% if termin.art == "telefonisch" %}
+                                <a href="tel:{{ termin.telefonnummer }}">
+                                    {{ termin.telefonnummer }}
+                                </a>
+                            {% else %}
+                                ---
+                            {% endif %}
+                        </td>
+                        <td>{{ termin.ort }}</td>
+                        <td>{{ termin.status }}</td>
+                        <td>
+                            <center>
+                                {% if termin.hat_attachement == 1 %}
+                                    <i class="fa fa-folder-open"></i>
+                                {% else %}
+                                    &nbsp;
+                                {% endif %}
+                            </center>
+                        </td>
+                        <td>{{ termin.name_mitglied }}</td>
+                        <td>
+                            {{ termin.beratungskategorie }}
+                            {{ termin.beratungskategorie_2 }}
+                            {{ termin.beratungskategorie_3 }}
+                        </td>
+                        <td>{{ termin.terminkategorie }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
     </div>
-    <div class="col-sm-2">
-        <p class="berater_in"></p>
+
+    <div class="row">
+        <h1 class="vbz">
+            Alle Beratungstermine (freie und vergebene)
+        </h1>
     </div>
-    <div class="col-sm-2">
-        <p class="art"></p>
-    </div>
-    <div class="col-sm-2">
-        <p class="beratungstyp"></p>
-    </div>
-    <div class="col-sm-1">
-        <!-- placeholder -->
-         &nbsp;<br>&nbsp;<br>&nbsp;
-    </div>
-    <div class="col-sm-2">
-        <p class="datum"></p>
-    </div>
-    <div class="col-sm-2">
-        <p class="sprache"></p>
-    </div>
-    <div class="col-sm-2">
-        <p class="fachskill"></p>
-    </div>
-    <div class="col-sm-2">
-        <!-- placeholder -->
-         &nbsp;<br>&nbsp;<br>&nbsp;
-    </div>
-    <div class="col-sm-2">
-        <p class="datum_bis"></p>
-    </div>
-    <div class="col-sm-2">
-        <!-- placeholder -->
-         &nbsp;<br>&nbsp;<br>&nbsp;
-    </div>
-    <div class="col-sm-2">
-        <!-- placeholder -->
-         &nbsp;<br>&nbsp;<br>&nbsp;
-    </div>
-    <div class="col-sm-2">
-        <!-- placeholder -->
-         &nbsp;<br>&nbsp;<br>&nbsp;
-    </div>
-    <div class="col-sm-2">
-        <!-- placeholder -->
-         &nbsp;<br>&nbsp;<br>&nbsp;
-    </div>
-    <div class="col-sm-2">
-        <!-- placeholder -->
-         &nbsp;<br>&nbsp;<br>&nbsp;
-    </div>
-</div>
-<div class="row">
-    <h1 class="vbz">Meine Beratungstermine</h1>
-</div>
-<div class="row">
-    <table id="table_termin_uebersicht">
-        <tr>
-            <th>Berater*in</th>
-            <th>Wunsch Berater*in</th>
-            <th>Datum</th>
-            <th>Von - Bis</th>
-            <th>Art</th>
-            <th>Telefonnummer</th>
-            <th>Ort</th>
-            <th>Status</th>
-            <th>Dokumente</th>
-            <th>Mitglied</th>
-            <th>Beratungskategorien</th>
-            <th>Terminkategorie</th>
-        </tr>
-        {% for termin in meine_termine %}
-            {% if "show_placeholder" in termin %}
-                <tr class="termin-tr">
-                    <td>Keine eigene Beratungstermine</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                </tr>
-            {% else %}
-                <tr class="termin-tr" data-beratung="{{ termin.beratung }}">
+
+    <div class="row">
+        <table id="table_termin_uebersicht">
+            <tr>
+                <th>Berater*in</th>
+                <th>Wunsch Berater*in</th>
+                <th>Datum</th>
+                <th>Von - Bis</th>
+                <th>Art</th>
+                <th>Telefonnummer</th>
+                <th>Ort</th>
+                <th>Status</th>
+                <th>Dokumente</th>
+                <th>Mitglied</th>
+                <th>Beratungskategorien</th>
+                <th>Terminkategorie</th>
+            </tr>
+
+            {% for termin in alle_termine %}
+                <tr
+                    class="
+                        termin-tr
+                        {% if termin.reserved_mark == 1 %}
+                            termin-reserved
+                        {% endif %}
+                        {% if termin.person_ist_eingetroffen == 1 %}
+                            person-eingetroffen
+                        {% endif %}
+                        {% if termin.is_business == 1 %}
+                            business
+                        {% endif %}
+                    "
+                    data-beratung="{{ termin.beratung }}"
+                    data-name_for_reservation="{{ termin.name_for_reservation }}"
+                    data-is_reserved="{% if termin.reserved_mark == 1 %}1{% else %}0{% endif %}"
+                    data-person_ist_eingetroffen="{% if termin.person_ist_eingetroffen == 1 %}1{% else %}0{% endif %}"
+                >
                     <td>{{ termin.beraterinn }}</td>
                     <td>{{ termin.wunsch_berater_in }}</td>
-                    <td>{{ termin.wochentag }}., {{ termin.von_date }}</td>
-                    <td>{{ termin.von_time }} - {{ termin.bis_time }}</td>
+                    <td>
+                        {{ termin.wochentag }}.,
+                        {{ termin.von_date }}
+                    </td>
+                    <td>
+                        {{ termin.von_time }} -
+                        {{ termin.bis_time }}
+                    </td>
                     <td>{{ termin.art }}</td>
-                    <td>{% if termin.art == "telefonisch" %}<a href="tel:{{ termin.telefonnummer }}">{{ termin.telefonnummer }}</a>{% else %}---{% endif %}</td>
+                    <td>
+                        {% if termin.art == "telefonisch" %}
+                            <a href="tel:{{ termin.telefonnummer }}">
+                                {{ termin.telefonnummer }}
+                            </a>
+                        {% else %}
+                            ---
+                        {% endif %}
+                    </td>
                     <td>{{ termin.ort }}</td>
                     <td>{{ termin.status }}</td>
-                    <td><center>{% if termin.hat_attachement == 1 %}<i class="fa fa-folder-open"></i>{% else %}&nbsp;{% endif %}</center></td>
+                    <td>
+                        <center>
+                            {% if termin.hat_attachement == 1 %}
+                                <i class="fa fa-folder-open"></i>
+                            {% else %}
+                                &nbsp;
+                            {% endif %}
+                        </center>
+                    </td>
                     <td>{{ termin.name_mitglied }}</td>
-                    <td>{{ termin.beratungskategorie }} {{ termin.beratungskategorie_2 }} {{ termin.beratungskategorie_3 }}</td>
+                    <td>
+                        {{ termin.beratungskategorie }}
+                        {{ termin.beratungskategorie_2 }}
+                        {{ termin.beratungskategorie_3 }}
+
+                        {% if "is_free" in termin %}
+                            {% if termin.reserved_mark == 1 %}
+                                <i class="fa fa-minus-circle"></i>
+                            {% else %}
+                                <i class="fa fa-plus-circle"></i>
+                            {% endif %}
+                        {% endif %}
+                    </td>
                     <td>{{ termin.terminkategorie }}</td>
                 </tr>
-            {% endif %}
-        {% endfor %}
-    </table>
-</div>
-
-<div class="row">
-    <h1 class="vbz">Alle Beratungstermine (freie und vergebene)</h1>
-</div>
-<div class="row">
-    <table id="table_termin_uebersicht">
-        <tr>
-            <th>Berater*in</th>
-            <th>Wunsch Berater*in</th>
-            <th>Datum</th>
-            <th>Von - Bis</th>
-            <th>Art</th>
-            <th>Telefonnummer</th>
-            <th>Ort</th>
-            <th>Status</th>
-            <th>Dokumente</th>
-            <th>Mitglied</th>
-            <th>Beratungskategorien</th>
-            <th>Terminkategorie</th>
-        </tr>
-        {% for termin in alle_termine %}
-            <tr class="termin-tr {% if termin.reserved_mark == 1 %}termin-reserved{% endif %} {% if termin.person_ist_eingetroffen == 1 %}person-eingetroffen{% endif %} {% if termin.is_business == 1 %}business{% endif %}" data-beratung="{{ termin.beratung }}" data-name_for_reservation="{{ termin.name_for_reservation }}" data-is_reserved="{% if termin.reserved_mark == 1 %}1{% else %}0{% endif %}" data-person_ist_eingetroffen="{% if termin.person_ist_eingetroffen == 1 %}1{% else %}0{% endif %}">
-                <td>{{ termin.beraterinn }}</td>
-                <td>{{ termin.wunsch_berater_in }}</td>
-                <td>{{ termin.wochentag }}., {{ termin.von_date }}</td>
-                <td>{{ termin.von_time }} - {{ termin.bis_time }}</td>
-                <td>{{ termin.art }}</td>
-                <td>{% if termin.art == "telefonisch" %}<a href="tel:{{ termin.telefonnummer }}">{{ termin.telefonnummer }}</a>{% else %}---{% endif %}</td>
-                <td>{{ termin.ort }}</td>
-                <td>{{ termin.status }}</td>
-                <td><center>{% if termin.hat_attachement == 1 %}<i class="fa fa-folder-open"></i>{% else %}&nbsp;{% endif %}</center></td>
-                <td>{{ termin.name_mitglied }}</td>
-                <td>{{ termin.beratungskategorie }} {{ termin.beratungskategorie_2 }} {{ termin.beratungskategorie_3 }}{% if "is_free" in termin %} {% if termin.reserved_mark == 1 %}<i class="fa fa-minus-circle"></i>{% else %}<i class="fa fa-plus-circle"></i>{% endif %}{% endif %}</td>
-                <td>{{ termin.terminkategorie }}</td>
-            </tr>
-        {% endfor %}
-    </table>
+            {% endfor %}
+        </table>
+    </div>
 </div>

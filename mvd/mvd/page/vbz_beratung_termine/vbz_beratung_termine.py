@@ -4,12 +4,9 @@
 
 from __future__ import unicode_literals
 import frappe
-from PyPDF2 import PdfFileWriter
-from frappe.utils.data import add_days, getdate, now, today, now_datetime, get_datetime
-from frappe.boot import get_bootinfo
+from frappe.utils.data import today, now_datetime, get_datetime
 from frappe import _
 from frappe.utils import cint
-import json
 
 no_cache=1
 
@@ -170,7 +167,7 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
                     else:
                         vorname, nachname = "", ""
                     name_mitglied = "{0} {1}".format(vorname or "", nachname or "").strip()
-                    name_mitglied_mit_link = """<a href="{0}" target="_blank">{1}<br>({2})</a>""".format(link, name_mitglied, status_c),
+                    name_mitglied_mit_link = """<a href="{0}" target="_blank">{1}<br>({2})</a>""".format(link, name_mitglied, status_c)
 
                     termin_data = {
                         'von_date': get_datetime(termin.von).strftime('%d.%m.%Y'),
