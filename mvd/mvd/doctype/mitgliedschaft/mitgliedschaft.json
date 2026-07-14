@@ -1481,9 +1481,8 @@
   },
   {
    "fieldname": "adr_egaid",
-   "fieldtype": "Link",
-   "label": "Eidgen\u00f6ssischer Geb\u00e4udeadressidentifikator",
-   "options": "Amtliches Gebaeudeverzeichnis"
+   "fieldtype": "Data",
+   "label": "Eidgen\u00f6ssischer Geb\u00e4udeadressidentifikator"
   },
   {
    "collapsible": 1,
@@ -1503,7 +1502,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-07-07 12:19:15.722827",
+ "modified": "2026-07-14 10:17:55.444444",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",

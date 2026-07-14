@@ -64,10 +64,9 @@ def run_sql_import():
             return
 
         frappe.db.sql("DELETE FROM `tabAmtliches Gebaeudeverzeichnis`")
-        frappe.db.commit()
 
         now_time = frappe.db.escape(frappe.utils.now_datetime())
-        content = io.TextIOWrapper(f, encoding='utf-8-sig')
+        content = io.StringIO(csv_file_content)
         reader = csv.DictReader(content, delimiter=';')
 
         batch = []
@@ -76,11 +75,13 @@ def run_sql_import():
             plz = zip_parts[0] if len(zip_parts) > 0 else ""
             wohnort = zip_parts[1] if len(zip_parts) > 1 else ""
             
-            # Datum sicherer parsen (falls mal ein leeres Feld kommt)
             raw_date = row.get('ADR_MODIFIED')
             if raw_date:
-                d = datetime.strptime(raw_date, '%d.%m.%Y').strftime('%Y-%m-%d')
-                formatted_date = "'{0}'".format(d)
+                try:
+                    d = datetime.strptime(raw_date, '%d.%m.%Y').strftime('%Y-%m-%d')
+                    formatted_date = "'{0}'".format(d)
+                except ValueError:
+                    formatted_date = 'NULL'
             else:
                 formatted_date = 'NULL'
 
@@ -124,7 +125,6 @@ def execute_raw_sql(batch):
         VALUES {0}
     """.format(", ".join(batch))
     frappe.db.sql(query)
-    frappe.db.commit()
 
 @frappe.whitelist()
 def get_swisstopo_url(ADR_EGAID=None):
