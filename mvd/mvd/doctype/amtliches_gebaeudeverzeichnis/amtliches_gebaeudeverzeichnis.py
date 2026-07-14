@@ -85,23 +85,41 @@ def run_sql_import():
             else:
                 formatted_date = 'NULL'
 
-            val = "({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, 'Administrator', 'Administrator', {11}, {12}, 0)".format(
-                                frappe.db.escape(row.get('ADR_EGAID', '')),
-                                frappe.db.escape(row.get('STN_LABEL', '')),
-                                frappe.db.escape(row.get('ADR_NUMBER', '')),
-                                frappe.db.escape(plz),
-                                frappe.db.escape(wohnort),
-                                frappe.db.escape(row.get('COM_FOSNR', '')),
-                                frappe.db.escape(row.get('COM_NAME', '')),
-                                frappe.db.escape(row.get('COM_CANTON', '')),
-                                formatted_date,
-                                row.get('ADR_EASTING') or 0,
-                                row.get('ADR_NORTHING') or 0,
-                                now_time,
-                                now_time
-                            )
-            batch.append(val)
-            if len(batch) >= 5000:
+            stn_label_raw = row.get('STN_LABEL', '')
+            
+            if '/' in stn_label_raw:
+                parts = [p.strip() for p in stn_label_raw.split('/')]
+                
+                if len(parts) == 2:
+                    entries = [
+                        (row.get('ADR_EGAID', '') + '_de', parts[0]),
+                        (row.get('ADR_EGAID', '') + '_fr', parts[1])
+                    ]
+
+                else:
+                    entries = [(row.get('ADR_EGAID', ''), stn_label_raw)]
+            else:
+                entries = [(row.get('ADR_EGAID', ''), stn_label_raw)]
+
+            for egaid, strasse in entries:
+                val = "({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, 'Administrator', 'Administrator', {12}, {13}, 0)".format(
+                                    frappe.db.escape(egaid),
+                                    frappe.db.escape(strasse),
+                                    frappe.db.escape(row.get('ADR_NUMBER', '')),
+                                    frappe.db.escape(plz),
+                                    frappe.db.escape(wohnort),
+                                    frappe.db.escape(row.get('COM_FOSNR', '')),
+                                    frappe.db.escape(row.get('COM_NAME', '')),
+                                    frappe.db.escape(row.get('COM_CANTON', '')),
+                                    frappe.db.escape(row.get('BDG_EGID', '')),
+                                    formatted_date,
+                                    row.get('ADR_EASTING') or 0,
+                                    row.get('ADR_NORTHING') or 0,
+                                    now_time,
+                                    now_time
+                                )
+                batch.append(val)
+            if len(batch) >= 10000:
                 execute_raw_sql(batch)
                 batch = []
                 
@@ -121,7 +139,7 @@ def run_sql_import():
 def execute_raw_sql(batch):
     query = """
         INSERT INTO `tabAmtliches Gebaeudeverzeichnis` 
-        (name, stn_label, adr_number, plz, wohnort, com_fosnr, com_name, com_canton, adr_modified, adr_easting, adr_northing, owner, modified_by, creation, modified, docstatus)
+        (name, stn_label, adr_number, plz, wohnort, com_fosnr, com_name, com_canton, bdg_egid, adr_modified, adr_easting, adr_northing, owner, modified_by, creation, modified, docstatus)
         VALUES {0}
     """.format(", ".join(batch))
     frappe.db.sql(query)
