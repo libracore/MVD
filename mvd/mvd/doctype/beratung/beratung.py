@@ -175,17 +175,16 @@ class Beratung(Document):
                 'Unternehmen': 'Business'
             }
             
-            neuer_typ = None 
+            typ = None 
             if self.mv_mitgliedschaft:
                 db_typ = frappe.db.get_value('Mitgliedschaft', self.mv_mitgliedschaft, 'mitgliedtyp_c')
-                neuer_typ = TYP_MAPPING.get(db_typ)
+                typ = TYP_MAPPING.get(db_typ)
                 
             elif self.mv_kunde:
                 db_typ = frappe.db.get_value('Kunden', self.mv_kunde, 'kundentyp')
-                neuer_typ = TYP_MAPPING.get(db_typ)
+                typ = TYP_MAPPING.get(db_typ)
 
-            if not self.typ or neuer_typ is None:
-                self.typ = neuer_typ
+            self.typ = typ
                               
 
     def handle_nextcloud_folder(self):

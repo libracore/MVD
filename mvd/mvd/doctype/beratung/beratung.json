@@ -526,10 +526,10 @@
    "fieldname": "typ",
    "fieldtype": "Select",
    "label": "Typ",
-   "options": "Wohnen\nBusiness"
+   "options": "\nWohnen\nBusiness"
   }
  ],
- "modified": "2026-07-09 12:09:09.184404",
+ "modified": "2026-07-13 13:37:06.212136",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
