@@ -1675,8 +1675,20 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
         return [
             {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
             {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
-            {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1},
+            {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1,
+                'change': function() {
+                    if (me.dialog.get_value('bar_bezahlt') == 1) {
+                        me.dialog.set_value("zahlungsart", "Barzahlung");
+                    }
+                }
+            },
             {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
+            {'fieldname': 'zahlungsart', 'fieldtype': 'Select', 'label': 'Zahlungsart', 'options': 'Barzahlung\nZahlungsterminal', 'reqd': 0,
+                'hidden': 0,
+                'read_only': 0,
+                'default': 'Barzahlung',
+                'depends_on': 'eval:doc.bar_bezahlt'
+            },
             {'fieldname': 'massendruck', 'fieldtype': 'Check', 'label': 'Für Massendruck vormerken', 'reqd': 0, 'default': 0},
             {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 0, 'hidden': me.settings.manuelle_artikelauswahl ? 0:1},
             {
@@ -1741,6 +1753,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
     }
 
     call_primary_action() {
+        var me = this;
         frappe.dom.freeze('Erstelle Rechnung...');
         frappe.call({
             method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.create_mitgliedschaftsrechnung",
@@ -1759,9 +1772,9 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
                             if (res.message === false) {
                                 clearInterval(merge_refresher);
                                 frappe.dom.unfreeze();
-                                cur_frm.timeline.insert_comment(`Mitgliedschaftsrechnung erstellt${massendruck ? ' (mit Massenlauf Vormerkung)':''}.`);
+                                cur_frm.timeline.insert_comment(`Mitgliedschaftsrechnung erstellt${me.dialog.get_value('massendruck') == 1 ? ' (mit Massenlauf Vormerkung)':''}.`);
                                 cur_frm.reload_doc();
-                                if (massendruck) {
+                                if (me.dialog.get_value('massendruck') == 1) {
                                     frappe.msgprint("Die Rechnung wurde erstellt und für den Massenlauf vorgemerkt, Sie finden sie in den Anhängen.");
                                 } else {
                                     frappe.msgprint("Die Rechnung wurde erstellt, Sie finden sie in den Anhängen.");
@@ -1778,6 +1791,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
         return {
             'mitgliedschaft': cur_frm.doc.name,
             'bezahlt': this.dialog.get_value('bar_bezahlt') == 1 ? true:null,
+            'zahlungsart': this.dialog.get_value('zahlungsart'),
             'attach_as_pdf': true,
             'submit': true,
             'hv_bar_bezahlt': this.dialog.get_value('hv_bar_bezahlt') == 1 ? true:null,
@@ -1793,6 +1807,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
         return {
             'mitgliedschaft': cur_frm.doc.name,
             'bezahlt': this.dialog.get_value('bar_bezahlt') == 1 ? true:null,
+            'zahlungsart': this.dialog.get_value('zahlungsart'),
             'attach_as_pdf': true,
             'submit': true,
             'hv_bar_bezahlt': this.dialog.get_value('hv_bar_bezahlt') == 1 ? true:null,
@@ -2022,7 +2037,19 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
             return [
                 {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
                 {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
-                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0},
+                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0,
+                    'change': function() {
+                        if (me.dialog.get_value('bar_bezahlt') == 1) {
+                            me.dialog.set_value("zahlungsart", "Barzahlung");
+                        }
+                    }
+                },
+                {'fieldname': 'zahlungsart', 'fieldtype': 'Select', 'label': 'Zahlungsart', 'options': 'Barzahlung\nZahlungsterminal', 'reqd': 0,
+                    'hidden': 0,
+                    'read_only': 0,
+                    'default': 'Barzahlung',
+                    'depends_on': 'eval:doc.bar_bezahlt'
+                },
                 {'fieldname': 'ohne_betrag', 'fieldtype': 'Check', 'label': 'Betrag ausblenden', 'reqd': 0, 'default': 0, 'hidden': 0},
                 {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 1, 'read_only': 1},
                 {'fieldname': 'ignore_pricing_rule', 'fieldtype': 'Check', 'label': 'Preisregeln ignorieren', 'reqd': 0, 'default': 0, 'read_only': 0},
@@ -2106,7 +2133,19 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
             return [
                 {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 1},
                 {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
-                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0},
+                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0,
+                    'change': function() {
+                        if (me.dialog.get_value('bar_bezahlt') == 1) {
+                            me.dialog.set_value("zahlungsart", "Barzahlung");
+                        }
+                    }
+                },
+                {'fieldname': 'zahlungsart', 'fieldtype': 'Select', 'label': 'Zahlungsart', 'options': 'Barzahlung\nZahlungsterminal', 'reqd': 0,
+                    'hidden': 0,
+                    'read_only': 0,
+                    'default': 'Barzahlung',
+                    'depends_on': 'eval:doc.bar_bezahlt'
+                },
                 {'fieldname': 'ohne_betrag', 'fieldtype': 'Check', 'label': 'Betrag ausblenden', 'reqd': 0, 'default': 0, 'hidden': 0},
                 {'fieldname': 'eigene_items', 'fieldtype': 'Check', 'label': 'Manuelle Artikel Auswahl', 'reqd': 0, 'default': 1, 'read_only': 1},
                 {'fieldname': 'ignore_pricing_rule', 'fieldtype': 'Check', 'label': 'Preisregeln ignorieren', 'reqd': 0, 'default': 0, 'read_only': 0},
@@ -2209,6 +2248,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
                 'sektion': cur_frm.doc.sektion_id,
                 'mitgliedschaft': cur_frm.doc.name,
                 'bezahlt': this.dialog.get_value('bar_bezahlt') == 1 ? true:null,
+                'zahlungsart': this.dialog.get_value('zahlungsart'),
                 'attach_as_pdf': true,
                 'submit': true,
                 'druckvorlage': this.dialog.get_value('druckvorlage'),
@@ -2221,6 +2261,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
                 'sektion': cur_frm.doc.sektion_id,
                 'kunde': cur_frm.doc.name,
                 'bezahlt': this.dialog.get_value('bar_bezahlt') == 1 ? true:null,
+                'zahlungsart': this.dialog.get_value('zahlungsart'),
                 'attach_as_pdf': true,
                 'submit': true,
                 'druckvorlage': this.dialog.get_value('druckvorlage'),
