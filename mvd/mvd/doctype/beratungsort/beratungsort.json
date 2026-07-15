@@ -8,6 +8,7 @@
  "field_order": [
   "ort",
   "sektion_id",
+  "default_art",
   "infofeld"
  ],
  "fields": [
@@ -30,9 +31,15 @@
    "fieldname": "infofeld",
    "fieldtype": "Small Text",
    "label": "Infofeld Best\u00e4tigungsmail"
+  },
+  {
+   "fieldname": "default_art",
+   "fieldtype": "Select",
+   "label": "Default Art",
+   "options": "\ntelefonisch\npers\u00f6nlich"
   }
  ],
- "modified": "2025-02-26 08:43:42.974054",
+ "modified": "2026-07-15 12:57:22.594424",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratungsort",

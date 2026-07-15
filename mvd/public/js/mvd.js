@@ -1344,6 +1344,14 @@ frappe.mvd.termin_quick_entry = function(config) {
                             },
                             {'fieldname': 'ort', 'fieldtype': 'Select', 'label': __('Ort'), 'options': orte, 'reqd': 1, 'default': '',
                                 'change': function() {
+                                    // Setzen der Termin-Art auf Basis des Defaults gem. gewähltem Ort
+                                    if (d.get_value('ort')) {
+                                        frappe.db.get_value("Beratungsort", d.get_value('ort'), "default_art", (r) => {
+                                            if (r.default_art) {
+                                                d.set_value("art", r.default_art);
+                                            }
+                                        });
+                                    }
                                     // aktualisierung verfügbarkeiten
                                     aktualisiere_verfuegbarkeiten(config, d);
                                 }
