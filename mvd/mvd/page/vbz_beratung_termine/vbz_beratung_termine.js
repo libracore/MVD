@@ -65,8 +65,8 @@ frappe.vbz_beratung_termine = {
                 method: "mvd.mvd.utils.mvd_bootinfo.get_default_sektion"
             });
 
-            this.default_sektion = response.message || null;
-
+            this.default_sektion = response.message[0] || null;
+            
             await this.render_view();
             this.start_polling();
         } catch (error) {
