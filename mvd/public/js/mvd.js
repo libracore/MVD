@@ -1422,7 +1422,7 @@ frappe.mvd.termin_quick_entry = function(config) {
                                     }
                                 },
                                 'change': function() {
-                                    if (d.get_value('kontaktperson')) {
+                                    if (d.get_value('kontaktperson') && localStorage.getItem('selected_termine').length < 1) { // darf nicht ausgeführt werden wenn ein Termin gewählt wird, siehe #1902
                                         frappe.call({
                                             method: "mvd.mvd.doctype.beratung.beratung.get_beratungsorte",
                                             args:{
@@ -1518,12 +1518,9 @@ frappe.mvd.termin_quick_entry = function(config) {
                         },
                         'primary_action_label': __('Erstellen'),
                         'checkbox_clicked': function(cb) {
-                            console.log($(cb).data())
                             var termin = $(cb).data().abpzuweisung;
                             var ort = $(cb).data().ort;
-                            console.log($(cb).data().ort)
                             if (!d.get_value('ort')) {
-                                console.log("Setze ort: ", ort)
                                 d.set_value('ort', ort)
                             }
                             var beratungsperson = $(cb).data().beratungsperson;
