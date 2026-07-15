@@ -717,7 +717,9 @@ frappe.mvd_such_client = {
                                     } else {
                                         if (cur_dialog.fields_dict.status.get_value() == 'Regulär') {
                                             // Zahlungsart
-                                            cur_dialog.fields_dict.zahlungsart.set_value("Barzahlung");
+                                            if (!['Barzahlung', 'Zahlungsterminal'].includes(cur_dialog.fields_dict.zahlungsart.get_value())) {
+                                                cur_dialog.fields_dict.zahlungsart.set_value("Barzahlung");
+                                            }
                                             cur_dialog.fields_dict.zahlungsart.df.hidden = 0;
                                             cur_dialog.fields_dict.zahlungsart.df.read_only = 0;
                                             cur_dialog.fields_dict.zahlungsart.refresh();

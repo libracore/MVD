@@ -1924,7 +1924,16 @@ def sektionswechsel(mitgliedschaft, neue_sektion, zuzug_per, zuzug_info=None):
     #         }
 
 @frappe.whitelist()
-def create_mitgliedschaftsrechnung(mitgliedschaft, mitgliedschaft_obj=False, jahr=None, bezahlt=False, bezahl_datum=None, submit=False, attach_as_pdf=False, ignore_stichtage=False, inkl_hv=True, hv_bar_bezahlt=False, druckvorlage=False, massendruck=False, eigene_items=False, rechnungs_artikel=None, rechnungs_jahresversand=None, geschenk_reset=False, fast_mode=False, as_bg_job=False, zahlungsart=None):
+def create_mitgliedschaftsrechnung(
+    mitgliedschaft, mitgliedschaft_obj=False,
+    jahr=None, bezahlt=False, bezahl_datum=None,
+    submit=False, attach_as_pdf=False,
+    ignore_stichtage=False, inkl_hv=True,
+    hv_bar_bezahlt=False, druckvorlage=False,
+    massendruck=False, eigene_items=False,
+    rechnungs_artikel=None, rechnungs_jahresversand=None,
+    geschenk_reset=False, fast_mode=False,
+    as_bg_job=False, zahlungsart=None):
     if as_bg_job:
         args = {
                 'mitgliedschaft': mitgliedschaft,
