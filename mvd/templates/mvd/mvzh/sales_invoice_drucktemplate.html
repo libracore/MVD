@@ -271,7 +271,7 @@
         <!-- Header -->
         <div id='kopfzeile'>
             {% if seite.kopfzeile %}
-                {% if mitgliedschaft.mitgliedtyp_c == 'Geschäft' %}
+                {% if druckvorlage.mitgliedtyp_c == 'Geschäft' %}
                     <img src="/assets/mvd/img/logo_mvbusiness.png" style="width: 58.1mm;">
                 {% else %}
                     <img src="/assets/mvd/img/logo_mv_zuerich.png" style="width: 58.1mm;">
@@ -324,7 +324,7 @@
                                 {% set posting_date_obj = frappe.utils.getdate(doc.posting_date) %}
                                 {% set jahr_aktuell = doc.mitgliedschafts_jahr | string | replace("20", "", 1) %}
                                 {% set jahr_vorher = (doc.mitgliedschafts_jahr | int - 1) | string | replace("20", "", 1) %}
-                                {% if posting_date_obj.month > 9 or (posting_date_obj.month == 9 and posting_date_obj.day > 15) %}
+                                {% if (posting_date_obj.month > 9 or (posting_date_obj.month == 9 and posting_date_obj.day > 15)) and not doc.name.startswith("RJ") %}
                                     15.09.{{ jahr_vorher }} – 31.12.{{ jahr_aktuell }}
                                 {% else %}
                                     01.01.{{ jahr_aktuell }} – 31.12.{{ jahr_aktuell }}
@@ -337,29 +337,24 @@
                         <td style="width: 50%; text-align: left; padding: 0px !important;">Rechnung ohne MWST</td>
                     </tr>
                 </table>
-                {% if sektion and sektion.referenzblock %}
+                {% if druckvorlage.mitgliedtyp_c == 'Geschäft' %}
                     {{ _(sektion.default_ort, print_language) }}, {{ frappe.utils.get_datetime(doc.posting_date).strftime('%d.%m.%Y') }}<br><br>
-                    {{ sektion.referenzblock }}
+                    MV Business<br>
+                    Baumackerstrasse 24<br>
+                    Postfach<br>
+                    8050 Zürich<br><br>
+                    044 296 90 21<br>
+                    info@mv-business.ch<br>
+                    www.mv-business.ch
                 {% else %}
-                    {% if mitgliedschaft.mitgliedtyp_c == 'Geschäft' %}
-                        {{ _(sektion.default_ort, print_language) }}, {{ frappe.utils.get_datetime(doc.posting_date).strftime('%d.%m.%Y') }}<br><br>
-                        MV Business<br>
-                        Baumackerstrasse 24<br>
-                        Postfach<br>
-                        8050 Zürich<br><br>
-                        044 296 90 21<br>
-                        info@mv-business.ch<br>
-                        www.mv-business.ch
-                    {% else %}
-                        {{ _(sektion.default_ort, print_language) }}, {{ frappe.utils.get_datetime(doc.posting_date).strftime('%d.%m.%Y') }}<br><br>
-                        Mieterinnen- und Mieterverband Zürich<br>
-                        Baumackerstrasse 24<br>
-                        Postfach<br>
-                        8050 Zürich<br><br>
-                        044 296 90 20<br>
-                        info@mvzh.ch<br>
-                        www.mieterverband.ch/zuerich
-                    {% endif %}
+                    {{ _(sektion.default_ort, print_language) }}, {{ frappe.utils.get_datetime(doc.posting_date).strftime('%d.%m.%Y') }}<br><br>
+                    Mieterinnen- und Mieterverband Zürich<br>
+                    Baumackerstrasse 24<br>
+                    Postfach<br>
+                    8050 Zürich<br><br>
+                    044 296 90 20<br>
+                    info@mvzh.ch<br>
+                    www.mieterverband.ch/zuerich
                 {% endif %}
             </div>
         {% endif %}
