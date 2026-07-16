@@ -39,13 +39,8 @@ frappe.vbz_beratung_mvzh = {
     add_click_handlers: function(open_datas) {
         //~ frappe.vbz_beratung_mvzh.remove_click_handlers();
         var sektion = frappe.boot.default_sektion || "MVZH";
-
-        $("#s1_wohnen").click(function(){
-            frappe.route_options = {"status": 'Eingang', "mv_mitgliedschaft": ['is', 'not set'], "sektion_id": sektion, "typ": "Wohnen"}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#s1_business").click(function(){
-            frappe.route_options = {"status": 'Eingang', "mv_mitgliedschaft": ['is', 'not set'], "sektion_id": sektion, "typ": "Business"}
+        $("#s1").click(function(){
+            frappe.route_options = {"status": 'Eingang', "mv_mitgliedschaft": ['is', 'not set'], "faktura_kunde": ['is', 'not set'], "sektion_id": sektion}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s6_wohnen").click(function(){

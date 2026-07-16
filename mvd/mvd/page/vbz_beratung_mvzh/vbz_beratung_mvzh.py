@@ -15,8 +15,7 @@ def get_open_data():
     open_data = {
         'beratung': {
             'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
-            's1_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set'], 'typ': 'Wohnen'}, limit=100, distinct=True)),
-            's1_business': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set'], 'typ': 'Business'}, limit=100, distinct=True)),
+            's1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set'], 'faktura_kunde': ['is', 'not set']}, limit=100, distinct=True)),
             's6_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set'], 'typ': 'Wohnen'}, limit=100, distinct=True)),
             's6_business': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set'], 'typ': 'Business'}, limit=100, distinct=True)),
             's10_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'sektion_id': ['!=', 'MVDF'], 'name': ['in', zukunft_termine], 'typ': 'Wohnen'}, limit=100, distinct=True)),
