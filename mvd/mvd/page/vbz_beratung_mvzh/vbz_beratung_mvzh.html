@@ -4,21 +4,17 @@
 <div class="row">
     <table id="table_beratungs_uebersicht">
         <tr>
+            <td>S1</td>
+            <td>Nicht Mitgliedern zugeordnet</td>
+            <td colspan="2" style="text-align: center;" id="s1" class="clickable-badge">
+                <b>{% if s1 > 99 %}99+{% else %}{{ s1 }}{% endif %}</b>
+            </td>
+        </tr>
+        <tr>
             <th></th>
             <th></th>
             <th style="text-align: right; padding-left: 20px;"><b>Wohnen</b></th>
             <th style="text-align: right; padding-left: 20px;"><b>Business</b></th>
-        </tr>
-        
-        <tr>
-            <td>S1</td>
-            <td>Nicht Mitgliedern zugeordnet</td>
-            <td style="text-align: right;" id="s1_wohnen" class="clickable-badge" data-type="wohnen">
-                <b>{% if s1_wohnen > 99 %}99+{% else %}{{ s1_wohnen }}{% endif %}</b>
-            </td>
-            <td style="text-align: right;" id="s1_business" class="clickable-badge" data-type="business">
-                <b>{% if s1_business > 99 %}99+{% else %}{{ s1_business }}{% endif %}</b>
-            </td>
         </tr>
         
         <tr>
