@@ -15,9 +15,9 @@
   "cb_1",
   "typ",
   "typ_code",
+  "mitgliedtyp",
   "language",
   "sprach_filter",
-  "mahngebuehr",
   "cb_2",
   "mahnstufe",
   "mahnungen_per_mail",
@@ -295,14 +295,15 @@
    "label": "Versende Test E-Mail"
   },
   {
-   "depends_on": "eval:!doc.zahlungserinnerungen",
-   "fieldname": "mahngebuehr",
-   "fieldtype": "Int",
-   "label": "Mahngeb\u00fchr"
+   "depends_on": "eval:doc.typ=='Mitgliedschaft (Jahresrechnung)'&&doc.sektion_id=='MVZH'",
+   "fieldname": "mitgliedtyp",
+   "fieldtype": "Select",
+   "label": "Mitgliedtyp",
+   "options": "Alle\nBusiness\nWohnen"
   }
  ],
  "is_submittable": 1,
- "modified": "2026-03-09 15:39:41.237576",
+ "modified": "2026-08-04 08:52:46.092853",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mahnlauf",

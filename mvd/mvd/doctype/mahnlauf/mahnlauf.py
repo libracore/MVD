@@ -77,6 +77,9 @@ class Mahnlauf(Document):
             return None
     
     def get_anzahl(self):
+        rg_typ_filter = ''
+        business_wohnen_filter = ''
+
         if self.typ == 'Produkte / Dienstleistungen':
             rg_typ_filter = """AND `sinv`.`ist_sonstige_rechnung` = 1"""
         elif self.typ == 'Mitgliedschaft (Jahresrechnung)':
@@ -91,6 +94,11 @@ class Mahnlauf(Document):
                             """
         else:
             frappe.throw("Unbekannter Mahnlauf Typ")
+
+        if self.mitgliedtyp == 'Business':
+            business_wohnen_filter = "AND `mvm`.`mitgliedtyp_c` = 'Geschäft'"
+        if self.mitgliedtyp == 'Wohnen':
+            business_wohnen_filter = "AND `mvm`.`mitgliedtyp_c` = 'Privat'"
         
         if int(self.sprach_filter) == 1:
             rg_typ_filter += """
@@ -115,9 +123,11 @@ class Mahnlauf(Document):
                                         AND `sinv`.`status` != 'Paid'
                                         AND `sinv`.`due_date` <= '{ueberfaellig_seit}'
                                         {rg_typ_filter}
+                                        {business_wohnen_filter}
                                         AND `sinv`.`payment_reminder_level` = {mahnstufe}
                                         AND ((`sinv`.`exclude_from_payment_reminder_until` IS NULL) OR (`sinv`.`exclude_from_payment_reminder_until` < CURDATE()))""".format(sektion_id=self.sektion_id, \
-                                        ueberfaellig_seit=self.ueberfaellig_seit, mahnstufe=int(self.mahnstufe) - 1, rg_typ_filter=rg_typ_filter), as_dict=True)[0].e_mail or 0
+                                        ueberfaellig_seit=self.ueberfaellig_seit, mahnstufe=int(self.mahnstufe) - 1, rg_typ_filter=rg_typ_filter, \
+                                        business_wohnen_filter=business_wohnen_filter), as_dict=True)[0].e_mail or 0
                 alle = frappe.db.sql("""SELECT
                                             COUNT(`sinv`.`name`) AS `qty`
                                         FROM `tabSales Invoice` AS `sinv`
@@ -127,9 +137,11 @@ class Mahnlauf(Document):
                                         AND `sinv`.`status` != 'Paid'
                                         AND `sinv`.`due_date` <= '{ueberfaellig_seit}'
                                         {rg_typ_filter}
+                                        {business_wohnen_filter}
                                         AND `sinv`.`payment_reminder_level` = {mahnstufe}
                                         AND ((`sinv`.`exclude_from_payment_reminder_until` IS NULL) OR (`sinv`.`exclude_from_payment_reminder_until` < CURDATE()))""".format(sektion_id=self.sektion_id, \
-                                        ueberfaellig_seit=self.ueberfaellig_seit, mahnstufe=int(self.mahnstufe) - 1, rg_typ_filter=rg_typ_filter), as_dict=True)[0].qty or 0
+                                        ueberfaellig_seit=self.ueberfaellig_seit, mahnstufe=int(self.mahnstufe) - 1, rg_typ_filter=rg_typ_filter, \
+                                        business_wohnen_filter=business_wohnen_filter), as_dict=True)[0].qty or 0
                 if self.mahnungen_per_mail == 'Nein':
                     return alle, 0, alle
                 else:
@@ -151,9 +163,11 @@ class Mahnlauf(Document):
                                         AND `sinv`.`status` != 'Paid'
                                         AND `sinv`.`due_date` <= '{ueberfaellig_seit}'
                                         {rg_typ_filter}
+                                        {business_wohnen_filter}
                                         AND `sinv`.`payment_reminder_level` = {mahnstufe}
                                         AND ((`sinv`.`exclude_from_payment_reminder_until` IS NULL) OR (`sinv`.`exclude_from_payment_reminder_until` < CURDATE()))""".format(sektion_id=self.sektion_id, \
-                                        ueberfaellig_seit=self.ueberfaellig_seit, mahnstufe=int(self.mahnstufe) - 1, rg_typ_filter=rg_typ_filter), as_dict=True)[0].e_mail or 0
+                                        ueberfaellig_seit=self.ueberfaellig_seit, mahnstufe=int(self.mahnstufe) - 1, rg_typ_filter=rg_typ_filter, \
+                                        business_wohnen_filter=business_wohnen_filter), as_dict=True)[0].e_mail or 0
                 return 0, e_mails, e_mails
         else:
             if int(self.zahlungserinnerungen) != 1:
@@ -213,6 +227,9 @@ class Mahnlauf(Document):
     
 def _get_invoices(mahnlauf):
     ml = frappe.get_doc("Mahnlauf", mahnlauf)
+    rg_typ_filter = ''
+    business_wohnen_filter = ''
+
     if ml.typ == 'Produkte / Dienstleistungen':
         rg_typ_filter = """AND `sinv`.`ist_sonstige_rechnung` = 1"""
     elif ml.typ == 'Mitgliedschaft (Jahresrechnung)':
@@ -227,6 +244,11 @@ def _get_invoices(mahnlauf):
                         """
     else:
         frappe.throw("Unbekannter Mahnlauf Typ")
+
+    if ml.mitgliedtyp == 'Business':
+        business_wohnen_filter = "AND `mvm`.`mitgliedtyp_c` = 'Geschäft'"
+    if ml.mitgliedtyp == 'Wohnen':
+        business_wohnen_filter = "AND `mvm`.`mitgliedtyp_c` = 'Privat'"
     
     if int(ml.sprach_filter) == 1:
         rg_typ_filter += """
@@ -254,9 +276,11 @@ def _get_invoices(mahnlauf):
                             AND `sinv`.`status` != 'Paid'
                             AND `sinv`.`due_date` <= '{ueberfaellig_seit}'
                             {rg_typ_filter}
+                            {business_wohnen_filter}
                             AND `sinv`.`payment_reminder_level` = {mahnstufe}
                             AND ((`sinv`.`exclude_from_payment_reminder_until` IS NULL) OR (`sinv`.`exclude_from_payment_reminder_until` < CURDATE()))""".format(sektion_id=ml.sektion_id, \
-                            ueberfaellig_seit=ml.ueberfaellig_seit, mahnstufe=int(ml.mahnstufe) - 1, rg_typ_filter=rg_typ_filter), as_dict=True)
+                            ueberfaellig_seit=ml.ueberfaellig_seit, mahnstufe=int(ml.mahnstufe) - 1, rg_typ_filter=rg_typ_filter, \
+                            business_wohnen_filter=business_wohnen_filter), as_dict=True)
     
     if len(sinvs) > 0:
         for invoice in sinvs:
