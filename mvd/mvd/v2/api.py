@@ -318,6 +318,28 @@ def create_beratung(**args):
     try:
         create_beratungs_log(error=0, info=1, beratung=None, method='create_beratung', title='Neue Beratung wird duch Website angelegt', json="{0}".format(str(args)))
 
+        # Check for missing parameter
+        if 'mitglied_id' not in args or not args['mitglied_id']:
+            frappe.local.response.http_status_code = 400
+            frappe.local.response.message = "Parameter mitglied_id missing"
+            create_beratungs_log(error=1, info=0, beratung=None, method='new_beratung', title='Missing Parameter', json="Parameter mitglied_id missing\n\n{0}".format(str(args)))
+            return
+        if 'topic' not in args or not args['topic']:
+            frappe.local.response.http_status_code = 400
+            frappe.local.response.message = "Parameter topic missing"
+            create_beratungs_log(error=1, info=0, beratung=None, method='new_beratung', title='Missing Parameter', json="Parameter topic missing\n\n{0}".format(str(args)))
+            return
+        if 'question' not in args or not args['question']:
+            frappe.local.response.http_status_code = 400
+            frappe.local.response.message = "Parameter question missing"
+            create_beratungs_log(error=1, info=0, beratung=None, method='new_beratung', title='Missing Parameter', json="Parameter question missing\n\n{0}".format(str(args)))
+            return
+        if 'email' not in args or not args['email']:
+            frappe.local.response.http_status_code = 400
+            frappe.local.response.message = "Parameter email missing"
+            create_beratungs_log(error=1, info=0, beratung=None, method='new_beratung', title='Missing Parameter', json="Parameter email missing\n\n{0}".format(str(args)))
+            return
+        
         if frappe.db.exists("Mitgliedschaft", args['mitglied_id']):
             sektion = frappe.db.get_value("Mitgliedschaft", args['mitglied_id'], "sektion_id")
             topic = None
