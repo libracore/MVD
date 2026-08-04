@@ -402,7 +402,8 @@ paths:
         --data-raw '{
             "mitglied_id": 1234567,
             "topic": "Mietzinssenkung",
-            "question": "Hallo zusammen<br>meine Frage ist ...."
+            "question": "Hallo zusammen<br>meine Frage ist ....",
+            "email": "example@mail.ch"
         }'
         ```
       requestBody:
@@ -414,6 +415,7 @@ paths:
                 - mitglied_id
                 - topic
                 - question
+                - email
               properties:
                 mitglied_id:
                   type: string
@@ -464,6 +466,16 @@ paths:
                   message:
                     type: string
                     example: "25-08-12-446182"
+        '400':
+          description: Bad Request - Parameter missing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Parameter email missing"
         '404':
           description: Mitglied nicht gefunden
           content:
