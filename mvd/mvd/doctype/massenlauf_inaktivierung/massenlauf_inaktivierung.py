@@ -74,13 +74,14 @@ class MassenlaufInaktivierung(Document):
     def before_submit(self):
         self.status = 'In Arbeit'
         args = {
-            'doc': massenlauf
+            'doc': self.name
         }
         enqueue("mvd.mvd.doctype.massenlauf_inaktivierung.massenlauf_inaktivierung.start_massenlauf_inaktivierung", queue='long', job_name='Massenlauf Inaktivierung {0} {1} ({2})'.format(self.ausschluss, self.sektion_id, self.name), timeout=5000, **args)
 
 def start_massenlauf_inaktivierung(doc):
     errors = []
     commit_count = 0
+    massenlauf = frappe.db.get_doc("Massenlauf Inaktivierung", doc)
     try:
         for mitgliedschaft in doc.mitgliedschaften:
             try:
@@ -88,19 +89,19 @@ def start_massenlauf_inaktivierung(doc):
                 ms = frappe.get_doc("Mitgliedschaft", mitgliedschaft.mv_mitgliedschaft)
                 
                 if ms.status_c in ('Ausschluss', 'Inaktiv'):
-                    doc.add_comment('Comment', text="Mitgliedschaft {0} ist bereits ausgeschlossen repsektive Inaktiv!".format(ms.mitglied_nr))
+                    massenlauf.add_comment('Comment', text="Mitgliedschaft {0} ist bereits ausgeschlossen repsektive Inaktiv!".format(ms.mitglied_nr))
                     continue
                 
                 change_log_row = ms.append('status_change', {})
                 change_log_row.datum = now()
                 change_log_row.status_alt = ms.status_c
                 change_log_row.status_neu = 'Ausschluss'
-                change_log_row.grund = doc.grund
+                change_log_row.grund = massenlauf.grund
                 
-                ms.austritt = doc.ausschluss
+                ms.austritt = massenlauf.ausschluss
                 ms.status_c = 'Ausschluss'
                 alte_infos = ms.wichtig
-                neue_infos = "Ausschluss:\n" + doc.grund + "\n\n"
+                neue_infos = "Ausschluss:\n" + massenlauf.grund + "\n\n"
                 neue_infos = neue_infos + (alte_infos or '')
                 ms.wichtig = neue_infos
                 ms.adressen_gesperrt = 1
@@ -119,7 +120,7 @@ def start_massenlauf_inaktivierung(doc):
                 ms.begruessung_massendruck_dokument = None
                 
                 ms.save()
-                ms.add_comment('Comment', text='Ausschluss vollzogen ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
+                ms.add_comment('Comment', text='Ausschluss vollzogen ({0} {1} ({2}))'.format(massenlauf.ausschluss, massenlauf.sektion_id, massenlauf.name))
 
                 """
                     #1687
@@ -128,11 +129,11 @@ def start_massenlauf_inaktivierung(doc):
                 """
                 rg_massenlauf_log(mitglied=ms.name, sinv=None, vormerkung=0)
 
-                if cint(doc.m_w_retouren_schliessen) ==1:
+                if cint(massenlauf.m_w_retouren_schliessen) ==1:
                     close_open_retouren(ms.name)
                 
-                if doc.rg_storno:
-                    if cint(doc.rg_storno) == 1:
+                if massenlauf.rg_storno:
+                    if cint(massenlauf.rg_storno) == 1:
                         curr_year = getdate(now()).strftime("%Y")
                         
                         # Sales Invoice Storno
@@ -157,11 +158,11 @@ def start_massenlauf_inaktivierung(doc):
                                     for mahnung in linked_mahnung:
                                         mahnung_doc = frappe.get_doc("Mahnung", mahnung.parent)
                                         mahnung_doc.cancel()
-                                        mahnung_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
+                                        mahnung_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(massenlauf.ausschluss, massenlauf.sektion_id, massenlauf.name))
                                 
                                 sinv_doc = frappe.get_doc("Sales Invoice", sinv.name)
                                 sinv_doc.cancel()
-                                sinv_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
+                                sinv_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(massenlauf.ausschluss, massenlauf.sektion_id, massenlauf.name))
                         
                         # Fakultative Rechnung Storno
                         frs = frappe.db.sql("""SELECT
@@ -175,22 +176,22 @@ def start_massenlauf_inaktivierung(doc):
                             for fr in frs:
                                 fr_doc = frappe.get_doc("Fakultative Rechnung", fr.name)
                                 fr_doc.cancel()
-                                fr_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(doc.ausschluss, doc.sektion_id, doc.name))
+                                fr_doc.add_comment('Comment', text='Storniert aufgrund Ausschluss ({0} {1} ({2}))'.format(massenlauf.ausschluss, massenlauf.sektion_id, massenlauf.name))
                 if commit_count >= 10:
                     frappe.db.commit()
                     commit_count = 0
                 
             except Exception as error:
-                frappe.log_error(message="{0}\n{1}\n{2}".format(mitgliedschaft.mv_mitgliedschaft, str(error), frappe.get_traceback()), title="Massenlauf Inaktivierung ({0})".format(doc.name))
+                frappe.log_error(message="{0}\n{1}\n{2}".format(mitgliedschaft.mv_mitgliedschaft, str(error), frappe.get_traceback()), title="Massenlauf Inaktivierung ({0})".format(massenlauf.name))
                 errors.append([mitgliedschaft.mv_mitgliedschaft, str(error), frappe.get_traceback()])
         
-        doc.reload()
-        doc.db_set('status', 'Abgeschlossen', commit=True)
+        massenlauf.reload()
+        massenlauf.db_set('status', 'Abgeschlossen', commit=True)
         if len(errors) > 0:
             for e in errors:
-                doc.add_comment('Comment', text='Fehlgeschlagen: {0} // {1}\n\n{2}'.format(e[0], e[1], e[2]))
+                massenlauf.add_comment('Comment', text='Fehlgeschlagen: {0} // {1}\n\n{2}'.format(e[0], e[1], e[2]))
     except Exception as err:
         failed = True
-        doc.reload()
-        doc.db_set('status', 'Fehlgeschlagen', commit=True)
-        doc.add_comment('Comment', text='{0}'.format(str(err)))
+        massenlauf.reload()
+        massenlauf.db_set('status', 'Fehlgeschlagen', commit=True)
+        massenlauf.add_comment('Comment', text='{0}'.format(str(err)))
