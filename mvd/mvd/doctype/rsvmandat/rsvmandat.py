@@ -84,6 +84,12 @@ class RSVMandat(Document):
                 'rsvmandatsliste': self.rsvmandatsliste
             }
             enqueue("mvd.mvd.doctype.rsvmandatsliste.rsvmandatsliste.update_rsvmandatlise", queue='short', job_name='Update {0}'.format(self.rsvmandatsliste), timeout=5000, **args)
+
+        if self.mv_mitgliedschaft:
+            args = {
+                'mitglied': self.mv_mitgliedschaft
+            }
+            enqueue("mvd.mvd.doctype.siedlungsfall.siedlungsfall.update_mitglied_in_siedlungsfall", queue='short', job_name='Update {0} in Siedlungsfall'.format(self.mv_mitgliedschaft), timeout=5000, **args)
     
     def fetch_document_table(self):
         fetched_documents = []

@@ -93,3 +93,34 @@ def get_letztes_mandat(mitglied):
 
 def format_date(date_string):
     return datetime.fromisoformat(date_string).strftime("%d.%m.%Y")
+
+def update_mitglied_in_siedlungsfall(mitglied):
+    affected_rows = frappe.db.sql(
+        """
+            SELECT `name`
+            FROM `tabSiedlungsfall Mitgliedschaften`
+            WHERE `mv_mitgliedschaft` = '{0}'
+        """.format(mitglied),
+        as_dict=True
+    )
+
+    if len(affected_rows) > 0:
+        letzte_beratung_string = get_letzte_beratung(mitglied)
+        letztes_mandat_string = get_letztes_mandat(mitglied)
+
+        for affected_row in affected_rows:
+            frappe.db.sql(
+                """
+                    UPDATE `tabSiedlungsfall Mitgliedschaften`
+                    SET
+                        `letzte_beratung` = '{letzte_beratung}',
+                        `letztes_mandat` = '{letztes_mandat}'
+                    WHERE `name` = '{id}'
+                """.format(
+                    id=affected_row.name,
+                    letzte_beratung=letzte_beratung_string,
+                    letztes_mandat=letztes_mandat_string
+                )
+            )
+        frappe.db.commit()
+    return

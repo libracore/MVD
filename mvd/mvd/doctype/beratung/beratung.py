@@ -13,6 +13,7 @@ from frappe import _
 from datetime import datetime
 from mvd.mvd.utils import make_api_log
 from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention_kunde
+from frappe.utils.background_jobs import enqueue
 
 class Beratung(Document):
     def validate(self):
@@ -185,7 +186,13 @@ class Beratung(Document):
                 typ = TYP_MAPPING.get(db_typ)
 
             self.typ = typ
-                              
+
+    def on_update(self):
+        if self.mv_mitgliedschaft:
+            args = {
+                'mitglied': self.mv_mitgliedschaft
+            }
+            enqueue("mvd.mvd.doctype.siedlungsfall.siedlungsfall.update_mitglied_in_siedlungsfall", queue='short', job_name='Update {0} in Siedlungsfall'.format(self.mv_mitgliedschaft), timeout=5000, **args)
 
     def handle_nextcloud_folder(self):
         from mvd.mvd.utils.nextcloud import new_beratung as create_nextcloud_beratungs_folder
