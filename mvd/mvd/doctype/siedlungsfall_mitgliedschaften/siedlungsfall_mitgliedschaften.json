@@ -1,0 +1,67 @@
+{
+ "creation": "2026-08-06 12:12:23.685397",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "mv_mitgliedschaft",
+  "mitglied_nr",
+  "mitglied_name",
+  "letzte_beratung",
+  "letztes_mandat",
+  "eintrittsdatum"
+ ],
+ "fields": [
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Mitglied",
+   "options": "Mitgliedschaft",
+   "search_index": 1
+  },
+  {
+   "fieldname": "mitglied_nr",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mitglied Nr.",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mitglied_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mitglied Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "letzte_beratung",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "letzte Beratung",
+   "read_only": 1
+  },
+  {
+   "fieldname": "letztes_mandat",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "letztes Mandat",
+   "read_only": 1
+  },
+  {
+   "fieldname": "eintrittsdatum",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Eintrittsdatum",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-08-06 12:12:23.685397",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Siedlungsfall Mitgliedschaften",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

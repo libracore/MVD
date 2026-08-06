@@ -1,0 +1,151 @@
+{
+ "autoname": "SIDF-.######",
+ "creation": "2026-08-06 12:14:08.574823",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "siedlungsfall_title",
+  "siedlungfall_typ",
+  "creation_date",
+  "abschluss",
+  "verantwortlich_intern",
+  "verantwortlich_extern",
+  "bemerkung",
+  "frist",
+  "verwaltung",
+  "eigentuemer_in",
+  "anz_wohnungen",
+  "ansprechperson",
+  "mv_mitgliedschaft",
+  "thema",
+  "siedlung",
+  "mitgliedschaften",
+  "mandat",
+  "pfad_legacy"
+ ],
+ "fields": [
+  {
+   "fieldname": "siedlungsfall_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Siedlungsfall-Titel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "siedlungfall_typ",
+   "fieldtype": "Select",
+   "label": "Typ Siedlungsfall",
+   "options": "Siedlungen\nMieteraktion\nGruppenmandat"
+  },
+  {
+   "fieldname": "creation_date",
+   "fieldtype": "Date",
+   "label": "Er\u00f6ffnet am"
+  },
+  {
+   "fieldname": "abschluss",
+   "fieldtype": "Date",
+   "label": "Absschluss am"
+  },
+  {
+   "fieldname": "verantwortlich_intern",
+   "fieldtype": "Link",
+   "label": "Verantwortlich intern",
+   "options": "User"
+  },
+  {
+   "fieldname": "verantwortlich_extern",
+   "fieldtype": "Link",
+   "label": "Verantwortlich extern",
+   "options": "Termin Kontaktperson"
+  },
+  {
+   "fieldname": "bemerkung",
+   "fieldtype": "Long Text",
+   "label": "Bemerkung"
+  },
+  {
+   "fieldname": "frist",
+   "fieldtype": "Date",
+   "label": "Frist"
+  },
+  {
+   "fieldname": "verwaltung",
+   "fieldtype": "Text",
+   "label": "Verwaltung"
+  },
+  {
+   "fieldname": "eigentuemer_in",
+   "fieldtype": "Text",
+   "label": "Eigent\u00fcmer*in"
+  },
+  {
+   "fieldname": "anz_wohnungen",
+   "fieldtype": "Int",
+   "label": "Anz. Wohnungen"
+  },
+  {
+   "fieldname": "ansprechperson",
+   "fieldtype": "Data",
+   "label": "Ansprechperson"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "Ansprechperson Mitgliedschaft",
+   "options": "Mitgliedschaft"
+  },
+  {
+   "fieldname": "thema",
+   "fieldtype": "Table MultiSelect",
+   "label": "Thema",
+   "options": "RSV Thema MultiTable"
+  },
+  {
+   "fieldname": "siedlung",
+   "fieldtype": "Link",
+   "label": "Siedlung",
+   "options": "Siedlung"
+  },
+  {
+   "fieldname": "mitgliedschaften",
+   "fieldtype": "Table",
+   "label": "Mitgliedschaften",
+   "options": "Siedlungsfall Mitgliedschaften"
+  },
+  {
+   "fieldname": "mandat",
+   "fieldtype": "Link",
+   "label": "Mandat",
+   "options": "RSVMandatsliste"
+  },
+  {
+   "fieldname": "pfad_legacy",
+   "fieldtype": "Data",
+   "label": "Pfad (legacy)"
+  }
+ ],
+ "modified": "2026-08-06 12:15:56.397256",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Siedlungsfall",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "siedlungsfall_title"
+}

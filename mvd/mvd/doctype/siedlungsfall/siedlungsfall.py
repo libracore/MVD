@@ -1,0 +1,95 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2026, libracore and contributors
+# For license information, please see license.txt
+
+from __future__ import unicode_literals
+import frappe
+from frappe.model.document import Document
+from datetime import datetime
+
+class Siedlungsfall(Document):
+    def before_insert(self):
+        self.get_mitgliedschaften()
+    
+    def get_mitgliedschaften(self, manually=False):
+        if not self.siedlung: return
+
+        if manually: self.mitgliedschaften = []
+
+        affected_adr_egaids = frappe.db.sql(
+            """
+                SELECT `adr_egaid`
+                FROM `tabZugehoerige Gebaeude`
+                WHERE `parent` = '{siedlung}'
+            """.format(siedlung=self.siedlung),
+            as_dict=True
+        )
+
+        for affected_adr_egaid in affected_adr_egaids:
+            mitgliedschaften = frappe.db.sql(
+                """
+                    SELECT
+                        `name`,
+                        `mitglied_nr`,
+                        `eintrittsdatum`,
+                        `vorname_1`,
+                        `nachname_1`
+                    FROM `tabMitgliedschaft`
+                    WHERE `adr_egaid` = '{adr_egaid}'
+                """.format(adr_egaid=affected_adr_egaid.adr_egaid),
+                as_dict=True
+            )
+
+            for mitgliedschaft in mitgliedschaften:
+                mitgl_row = self.append("mitgliedschaften", {})
+                mitgl_row.mv_mitgliedschaft = mitgliedschaft.name
+                mitgl_row.mitglied_nr = mitgliedschaft.mitglied_nr
+                mitgl_row.mitglied_name = "{0} {1}".format(mitgliedschaft.vorname_1, mitgliedschaft.nachname_1)
+                mitgl_row.letzte_beratung = get_letzte_beratung(mitgliedschaft.name)
+                mitgl_row.letztes_mandat = get_letztes_mandat(mitgliedschaft.name)
+                mitgl_row.eintrittsdatum = mitgliedschaft.eintrittsdatum
+
+        if manually:
+            self.save()
+
+def get_letzte_beratung(mitglied):
+    beratungen = frappe.db.sql(
+        """
+            SELECT
+                `start_date`,
+                `beratungskategorie`
+            FROM `tabBeratung`
+            WHERE `mv_mitgliedschaft` = '{0}'
+            ORDER BY `start_date` DESC
+            LIMIT 1
+        """.format(mitglied),
+        as_dict=True
+    )
+
+    if len(beratungen) > 0:
+        return "{0}, {1}".format(format_date(str(beratungen[0].start_date)), beratungen[0].beratungskategorie or '-')
+    
+    return ""
+
+def get_letztes_mandat(mitglied):
+    mandate = frappe.db.sql(
+            """
+                SELECT
+                    `creation`,
+                    `thema`,
+                    `status`
+                FROM `tabRSVMandat`
+                WHERE `mv_mitgliedschaft` = '{0}'
+                ORDER BY `creation` DESC
+                LIMIT 1
+            """.format(mitglied),
+            as_dict=True
+        )
+    
+    if len(mandate) > 0:
+        return "{0}, {1}, {2}".format(format_date(str(mandate[0].creation)), mandate[0].thema or '-', mandate[0].status)
+    
+    return ""
+
+def format_date(date_string):
+    return datetime.fromisoformat(date_string).strftime("%d.%m.%Y")
