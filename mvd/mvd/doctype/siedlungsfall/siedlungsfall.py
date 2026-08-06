@@ -6,10 +6,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from datetime import datetime
+from frappe.utils.data import today
 
 class Siedlungsfall(Document):
     def before_insert(self):
         self.get_mitgliedschaften()
+        self.creation_date = today()
     
     def get_mitgliedschaften(self, manually=False):
         if not self.siedlung: return

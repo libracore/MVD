@@ -7,20 +7,27 @@
  "field_order": [
   "siedlungsfall_title",
   "siedlungfall_typ",
+  "cb_1",
   "creation_date",
   "abschluss",
-  "verantwortlich_intern",
-  "verantwortlich_extern",
-  "bemerkung",
   "frist",
-  "verwaltung",
-  "eigentuemer_in",
-  "anz_wohnungen",
+  "section_kontakte",
+  "verantwortlich_intern",
   "ansprechperson",
+  "verwaltung",
+  "cb_2",
+  "verantwortlich_extern",
   "mv_mitgliedschaft",
-  "thema",
-  "siedlung",
+  "eigentuemer_in",
+  "section",
+  "bemerkung",
   "mitgliedschaften",
+  "section_siedlung",
+  "siedlung",
+  "cb_3",
+  "anz_wohnungen",
+  "section_div",
+  "thema",
   "mandat",
   "pfad_legacy"
  ],
@@ -29,7 +36,7 @@
    "fieldname": "siedlungsfall_title",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Siedlungsfall-Titel",
+   "label": "Siedlungsfall",
    "reqd": 1
   },
   {
@@ -41,7 +48,8 @@
   {
    "fieldname": "creation_date",
    "fieldtype": "Date",
-   "label": "Er\u00f6ffnet am"
+   "label": "Erstellt am",
+   "read_only": 1
   },
   {
    "fieldname": "abschluss",
@@ -62,7 +70,7 @@
   },
   {
    "fieldname": "bemerkung",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "label": "Bemerkung"
   },
   {
@@ -72,12 +80,12 @@
   },
   {
    "fieldname": "verwaltung",
-   "fieldtype": "Text",
+   "fieldtype": "Data",
    "label": "Verwaltung"
   },
   {
    "fieldname": "eigentuemer_in",
-   "fieldtype": "Text",
+   "fieldtype": "Data",
    "label": "Eigent\u00fcmer*in"
   },
   {
@@ -124,9 +132,38 @@
    "fieldname": "pfad_legacy",
    "fieldtype": "Data",
    "label": "Pfad (legacy)"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_kontakte",
+   "fieldtype": "Section Break",
+   "label": "Kontakte"
+  },
+  {
+   "fieldname": "section_siedlung",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_div",
+   "fieldtype": "Section Break"
   }
  ],
- "modified": "2026-08-06 12:15:56.397256",
+ "modified": "2026-08-06 15:17:00.947943",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Siedlungsfall",
