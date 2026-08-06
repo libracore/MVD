@@ -191,7 +191,11 @@
                     {% if mitgliedschaft.hat_solidarmitglied %}<br>{{ mitgliedschaft.vorname_2 }} {{ mitgliedschaft.nachname_2 }}{% endif %}
                 </div>
                 <div id="ausweis-footer">
+                    {% if mitgliedschaft.mitgliedtyp_c == 'Geschäft' %}
+                    <b>Business</b>{{mitgliedschaft.mvb_typ[3:]}}<span id="ausweis-footer-placeholder">...............</span><b>{{ _("Mitglied", print_language) }}:</b> {{ mitgliedschaft.mitglied_nr }}
+                    {% else %}
                         <b>{{ _("Sektion", print_language) }}:</b> {{ mitgliedschaft.sektion_id }}<span id="ausweis-footer-placeholder">...............</span><b>{{ _("Mitglied", print_language) }}:</b> {{ mitgliedschaft.mitglied_nr }}
+                    {% endif %}
                 </div>
             </div>
         {% endif %}
