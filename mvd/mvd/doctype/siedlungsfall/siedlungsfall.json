@@ -29,7 +29,8 @@
   "section_div",
   "thema",
   "mandat",
-  "pfad_legacy"
+  "pfad_legacy",
+  "siedlungsfall_id_legacy"
  ],
  "fields": [
   {
@@ -43,7 +44,7 @@
    "fieldname": "siedlungfall_typ",
    "fieldtype": "Select",
    "label": "Typ Siedlungsfall",
-   "options": "Siedlungen\nMieteraktion\nGruppenmandat"
+   "options": "Siedlungen\nMieteraktionen\nGruppenmandat"
   },
   {
    "fieldname": "creation_date",
@@ -161,9 +162,14 @@
   {
    "fieldname": "section_div",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "siedlungsfall_id_legacy",
+   "fieldtype": "Data",
+   "label": "Siedlungsfall-ID (legacy)"
   }
  ],
- "modified": "2026-08-06 15:17:00.947943",
+ "modified": "2026-08-07 09:54:10.904310",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Siedlungsfall",

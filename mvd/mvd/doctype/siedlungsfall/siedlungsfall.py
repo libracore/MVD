@@ -10,8 +10,9 @@ from frappe.utils.data import today
 
 class Siedlungsfall(Document):
     def before_insert(self):
-        self.get_mitgliedschaften()
-        self.creation_date = today()
+        if not self.flags.from_import:
+            self.get_mitgliedschaften()
+            self.creation_date = today()
     
     def get_mitgliedschaften(self, manually=False):
         if not self.siedlung: return
