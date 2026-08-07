@@ -424,6 +424,139 @@ class NCSettings():
                         "ONLYOFFICE tmp file cleanup failed"
                     )
 
+    def get_nextcloud_remote_path(self, file_id):
+        """
+            Ermittelt den Nextcloud-Pfad anhand einer file_id.
+            Beispiel:
+                file_id = 13759
+                -> /Sektion/Mitglieder/1234/vertrag.pdf
+        """
+
+        url = "{0}/remote.php/dav/".format(
+            self.BASE_ORIGIN.rstrip("/")
+        )
+
+        body = """<?xml version="1.0" encoding="UTF-8"?>
+<d:searchrequest xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns">
+    <d:basicsearch>
+        <d:select>
+            <d:prop>
+                <oc:fileid/>
+                <d:displayname/>
+            </d:prop>
+        </d:select>
+        <d:from>
+            <d:scope>
+                <d:href>/files/{username}</d:href>
+                <d:depth>infinity</d:depth>
+            </d:scope>
+        </d:from>
+        <d:where>
+            <d:eq>
+                <d:prop>
+                    <oc:fileid/>
+                </d:prop>
+                <d:literal>{file_id}</d:literal>
+            </d:eq>
+        </d:where>
+        <d:orderby/>
+    </d:basicsearch>
+</d:searchrequest>
+    """.format(
+            username=self.USERNAME,
+            file_id=file_id
+        )
+
+        resp = requests.request(
+            "SEARCH",
+            url,
+            auth=(self.USERNAME, self.APP_PASS),
+            headers={
+                "Content-Type": "text/xml"
+            },
+            data=body,
+            verify=self.VERIFY_TLS
+        )
+
+        resp.raise_for_status()
+        root = ET.fromstring(resp.content)
+
+        ns = {
+            "d": "DAV:",
+            "oc": "http://owncloud.org/ns",
+        }
+
+        response = root.find("d:response", ns)
+        if response is None:
+            return None
+        
+        href = response.find("d:href", ns)
+        if href is None:
+            return None
+
+        href = urlparse.unquote(href.text)
+
+        # Nextcloud liefert z.B.:
+        # /remote.php/dav/files/xxx@yyy.com/joel/ichbineintest.odt
+
+        marker = "/remote.php/dav/files/"
+
+        if marker not in href:
+            frappe.throw(
+                "Unerwarteter Nextcloud WebDAV Pfad: {0}".format(href)
+            )
+
+        # Alles nach /remote.php/dav/files/
+        path = href.split(marker, 1)[1]
+
+        # Ersten Teil (= Nextcloud Username) entfernen
+        parts = path.split("/", 1)
+
+        if len(parts) < 2:
+            return "/"
+
+        remote_path = parts[1]
+        return "/" + remote_path.strip("/")
+
+    def download_file_to_tmp(self, remote_path):
+        """
+            Lädt eine Nextcloud-Datei nach /tmp.
+            Beispiel:
+                remote_path = /Sektion/Mitglieder/1234/vertrag.pdf
+            Rückgabe:
+                /tmp/vertrag.pdf
+        """
+
+        content = self.download_file(remote_path)
+        filename = posixpath.basename(remote_path)
+        tmp_path = "/tmp/{0}".format(filename)
+
+        with open(tmp_path, "wb") as f:
+            f.write(content)
+
+        return tmp_path
+
+    def download_file_url_to_tmp(self, file_url):
+        """
+            Lädt eine Nextcloud-Datei anhand einer UI-URL nach /tmp.
+            Beispiel:
+                https://cloud.erpnext.swiss/index.php/f/13759
+            Rückgabe:
+                /tmp/vertrag.pdf
+        """
+
+        file_id = file_url.rstrip("/").split("/")[-1]
+
+        if not file_id.isdigit():
+            frappe.throw("Ungültige Nextcloud File URL: {0}".format(file_url))
+
+        remote_path = self.get_nextcloud_remote_path(file_id)
+
+        if not remote_path:
+            frappe.throw("Nextcloud File mit ID {0} wurde nicht gefunden.".format(file_id))
+
+        return self.download_file_to_tmp(remote_path)
+
 # ----------------------------------------
 # ---------- Funktions-Methoden ----------
 # ----------------------------------------

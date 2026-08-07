@@ -13,6 +13,7 @@ from odf.text import P, H
 from odf import draw
 from frappe.utils.file_manager import save_file
 from urllib.parse import unquote
+from mvd.mvd.utils.nextcloud import NCSettings
 
 
 DUMMY_IMAGE_HASHES = {
@@ -84,7 +85,8 @@ def use_template(template=None, replacements=None, source_doc=None, source_dt=No
         )
 
     elif temp.file_base == "Nextcloud":
-        frappe.throw("Diese Funktionalität muss noch ausgebaut werden...")
+        ncs = NCSettings(temp.sektion_id)
+        file_path = ncs.download_file_url_to_tmp(temp.file_path)
 
     if file_path:
         replace_in_odt(
