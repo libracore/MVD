@@ -1,5 +1,5 @@
 {
- "autoname": "SIDF-.######",
+ "autoname": "{sektion_id}.-F-.#####",
  "creation": "2026-08-06 12:14:08.574823",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -7,6 +7,7 @@
  "field_order": [
   "siedlungsfall_title",
   "siedlungfall_typ",
+  "sektion_id",
   "cb_1",
   "creation_date",
   "abschluss",
@@ -167,9 +168,16 @@
    "fieldname": "siedlungsfall_id_legacy",
    "fieldtype": "Data",
    "label": "Siedlungsfall-ID (legacy)"
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
   }
  ],
- "modified": "2026-08-07 09:54:10.904310",
+ "modified": "2026-08-07 13:28:46.269052",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Siedlungsfall",

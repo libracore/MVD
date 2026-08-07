@@ -65,9 +65,11 @@ def get_value(row, value):
     Test:
     sudo bench --site test-libracore.mieterverband.ch execute mvd.mvd.data_import.siedlungs_import.import_siedlungsfaelle --kwargs "{'file_name': 'xyz.csv', 'site_name': 'test-libracore.mieterverband.ch'}"
 '''
-def import_siedlungsfaelle(file_name, site_name='libracore.mieterverband.ch', bench='frappe'):
+def import_siedlungsfaelle(file_name, site_name='libracore.mieterverband.ch', bench='frappe', sektion=False):
     def create_siedlungsfall(row):
         siedlungsfall = frappe.new_doc("Siedlungsfall")
+        if sektion: siedlungsfall.sektion_id = sektion
+        if not sektion: siedlungsfall.sektion_id = get_value(row, 'sektion_id')
         siedlungsfall.flags.from_import = True
         siedlungsfall.siedlungsfall_id_legacy = get_value(row, 'siedlungsfall_id').replace(".0", "")
         siedlungsfall.siedlungsfall_title = get_value(row, 'siedlungsfall_title')
