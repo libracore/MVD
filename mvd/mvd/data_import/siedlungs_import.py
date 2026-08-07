@@ -160,3 +160,4 @@ def import_siedlungsfaelle(file_name, site_name='libracore.mieterverband.ch', be
             add_mitglied(row)
         else:
             create_siedlungsfall(row)
+            frappe.db.commit()
