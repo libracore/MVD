@@ -263,7 +263,10 @@ frappe.ui.form.on('Beratung', {
                                 create_rsv_mandat(frm);
                             }
                         });
-                    });
+                    }, "Dokument erstellen");
+                    frm.add_custom_button(__("Weiter..."), function() {
+                        new mvd_dialoge.open_text_und_dokumentenvorlagen();
+                    }, "Dokument erstellen");
                 }
 
                 // Add BTN E-Mail Rückfrage
