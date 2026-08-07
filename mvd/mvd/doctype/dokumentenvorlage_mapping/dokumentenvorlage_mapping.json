@@ -1,0 +1,59 @@
+{
+ "allow_rename": 1,
+ "autoname": "field:title",
+ "creation": "2026-08-07 13:53:03.137267",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "mapping_tbl"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Bezeichnung",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "mapping_tbl",
+   "fieldtype": "Table",
+   "label": "Dokumentenvorlage Mapping",
+   "options": "Dokumentenvorlage Mapping TBL",
+   "reqd": 1
+  }
+ ],
+ "modified": "2026-08-07 13:53:28.201516",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Dokumentenvorlage Mapping",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All"
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

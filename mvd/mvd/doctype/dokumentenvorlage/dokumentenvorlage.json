@@ -10,6 +10,8 @@
   "sektion_id",
   "file_base",
   "file_path",
+  "section_platzhalter_mapping",
+  "mapping_vorlage",
   "mapping_tbl"
  ],
  "fields": [
@@ -48,9 +50,21 @@
    "fieldtype": "Link",
    "label": "Sektion",
    "options": "Sektion"
+  },
+  {
+   "fieldname": "section_platzhalter_mapping",
+   "fieldtype": "Section Break",
+   "label": "Platzhalter Mapping"
+  },
+  {
+   "description": "Sie k\u00f6nnen hier eine Vorlage verwenden, oder nachfolgend ein eigenes Mapping erstellen. Wenn eine Vorlage hinterlegt ist, wird immer diese verwendet.",
+   "fieldname": "mapping_vorlage",
+   "fieldtype": "Link",
+   "label": "Mapping Vorlage",
+   "options": "Dokumentenvorlage Mapping"
   }
  ],
- "modified": "2026-06-11 10:46:35.550919",
+ "modified": "2026-08-07 14:07:04.595472",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Dokumentenvorlage",

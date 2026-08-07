@@ -25,6 +25,11 @@ class Dokumentenvorlage(Document):
         return
     
     def translate(self):
+        mapping_tbl = self.mapping_tbl
+        if self.mapping_vorlage:
+            mapping_vorlage = frappe.get_doc("Dokumentenvorlage Mapping", self.mapping_vorlage)
+            mapping_tbl = mapping_vorlage.mapping_tbl
+        
         return {
             row.platzhalter: {
                 "doctype": row.d_type,
@@ -33,7 +38,7 @@ class Dokumentenvorlage(Document):
                 "function": row.function
             }
             for row in sorted(
-                self.mapping_tbl,
+                mapping_tbl,
                 key=lambda row: len(row.platzhalter),
                 reverse=True
             )
