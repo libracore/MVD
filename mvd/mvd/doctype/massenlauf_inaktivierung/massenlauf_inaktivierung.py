@@ -81,7 +81,7 @@ class MassenlaufInaktivierung(Document):
 def start_massenlauf_inaktivierung(doc):
     errors = []
     commit_count = 0
-    massenlauf = frappe.db.get_doc("Massenlauf Inaktivierung", doc)
+    massenlauf = frappe.get_doc("Massenlauf Inaktivierung", doc)
     try:
         for mitgliedschaft in massenlauf.mitgliedschaften:
             try:
