@@ -78,8 +78,8 @@ def get_letztes_mandat(mitglied):
     mandate = frappe.db.sql(
             """
                 SELECT
+                    `name`,
                     `creation`,
-                    `thema`,
                     `status`
                 FROM `tabRSVMandat`
                 WHERE `mv_mitgliedschaft` = '{0}'
@@ -90,7 +90,19 @@ def get_letztes_mandat(mitglied):
         )
     
     if len(mandate) > 0:
-        return "{0}, {1}, {2}".format(format_date(str(mandate[0].creation)), mandate[0].thema or '-', mandate[0].status)
+        themen = frappe.db.sql(
+            """
+                SELECT `thema`
+                FROM `tabRSV Thema MultiTable`
+                WHERE `parent` = '{0}'
+            """.format(mandate[0].name),
+            as_dict=True
+        )
+        thema = '-'
+        if len(themen):
+            thema = themen[0].thema
+        
+        return "{0}, {1}, {2}".format(format_date(str(mandate[0].creation)), thema, mandate[0].status)
     
     return ""
 
