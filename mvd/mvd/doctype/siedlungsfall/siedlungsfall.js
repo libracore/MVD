@@ -11,5 +11,8 @@ frappe.ui.form.on('Siedlungsfall', {
                 });
             });
         }
+    },
+    open_legacy_path: function(frm) {
+        window.open(cur_frm.doc.pfad_legacy, '_blank');
     }
 });

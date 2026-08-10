@@ -31,6 +31,7 @@
   "thema",
   "mandat",
   "pfad_legacy",
+  "open_legacy_path",
   "siedlungsfall_id_legacy"
  ],
  "fields": [
@@ -175,9 +176,15 @@
    "label": "Sektion",
    "options": "Sektion",
    "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.pfad_legacy",
+   "fieldname": "open_legacy_path",
+   "fieldtype": "Button",
+   "label": "Pfad \u00f6ffnen"
   }
  ],
- "modified": "2026-08-07 13:28:46.269052",
+ "modified": "2026-08-10 17:42:16.094241",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Siedlungsfall",
