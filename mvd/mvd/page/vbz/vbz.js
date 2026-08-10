@@ -58,6 +58,7 @@ frappe.vbz = {
         $("#einmal_unzustellbar").off("click");
         $("#offene_retouren").off("click");
         $("#retouren_in_bearbeitung").off("click");
+        $("#siedlungsfaelle").off("click");
     },
     add_click_handlers: function(open_datas) {
         frappe.vbz.remove_click_handlers();
@@ -211,7 +212,11 @@ frappe.vbz = {
             frappe.route_options = {"status": "In Bearbeitung"};
             frappe.set_route("List", "Retouren", "List");
         });
-        
+        $("#siedlungsfaelle").click(function(){
+            frappe.route_options = {"status": "Open"};
+            frappe.set_route("List", "Siedlungsfall", "List");
+        });
+
         frappe.dom.unfreeze();
     }
 }

@@ -87,7 +87,7 @@ def import_siedlungsfaelle(file_name, site_name='libracore.mieterverband.ch', be
         siedlungsfall.mv_mitgliedschaft = get_value(row, 'ansprechperson_mitgliedschaft').replace(".0", "")
         siedlungsfall.siedlung = get_value(row, 'siedlung')
         siedlungsfall.mandat = get_value(row, 'mandat')
-        siedlungsfall.pfad = get_value(row, 'pfad')
+        siedlungsfall.pfad_legacy = get_value(row, 'pfad')
         siedlungsfall.thema = add_thema(row)
 
         if get_value(row, 'mitglied_id') and frappe.db.exists("Mitgliedschaft", get_value(row, 'mitglied_id').replace(".0", "")):

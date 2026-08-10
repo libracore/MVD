@@ -275,9 +275,21 @@ def get_data():
             ]
         },
         {
-            "label": _("Adresspflege"),
+            "label": _("Adressen"),
             "icon": "fa fa-cog",
             "items": [
+                {
+                    "type": "doctype",
+                    "name": "Siedlung",
+                    "label": _("Siedlung"),
+                    "description": _("Siedlung")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Amtliches Gebaeudeverzeichnis",
+                    "label": _("Amtliches Gebäudeverzeichnis"),
+                    "description": _("Amtliches Gebäudeverzeichnis")
+                },
                 {
                     "type": "doctype",
                     "name": "Retouren",
