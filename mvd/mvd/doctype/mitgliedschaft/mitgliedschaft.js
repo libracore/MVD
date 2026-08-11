@@ -54,6 +54,19 @@ frappe.ui.form.on('Mitgliedschaft', {
             frm.add_custom_button(__("SP Mitglied Data"), function() {
                 frappe.set_route("Form", "SP Mitglied Data", cur_frm.doc.mitglied_nr);
             }, __("Admin Tools"))
+            frm.add_custom_button(__("Aktualisierung Zahlungsdaten"), function() {
+                frappe.call({
+                    method: "mvd.mvd.doctype.mitgliedschaft.process_utils.update_zahlungsdaten.run",
+                    args: {
+                        'mitglied_id': cur_frm.doc.name
+                    },
+                    freeze: true,
+                    freeze_message: "Bitte warten, die Zahlungsdaten werden aktualisiert...",
+                    'callback': function(response) {
+                        cur_frm.reload_doc();
+                    }
+                });
+            }, __("Admin Tools"))
         }
 
         if (frappe.user.has_role("MV_MA")) {

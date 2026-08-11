@@ -371,10 +371,12 @@ def daily_ampel_korrektur():
     """.format(aktuelles_jahr=aktuelles_jahr), as_dict=True)
     for mitgliedschaft in mitgliedschaften:
         args = {
-            'mv_mitgliedschaft': mitgliedschaft.mitgliedschaft
+            'mitgliedschaft': mitgliedschaft.mitgliedschaft,
+            'db_direct': 1,
+            'need_object_load': 1
         }
-        if not is_job_already_running('Aktualisiere Mitgliedschaft {0}'.format(mitgliedschaft.mitgliedschaft)):
-            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
+        if not is_job_already_running('Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft)):
+            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils.get_ampelfarbe", queue='short', job_name='Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
     
     # Potentiell falsch Grün
     mitgliedschaften = frappe.db.sql("""
@@ -392,10 +394,12 @@ def daily_ampel_korrektur():
     """.format(aktuelles_jahr=aktuelles_jahr), as_dict=True)
     for mitgliedschaft in mitgliedschaften:
         args = {
-            'mv_mitgliedschaft': mitgliedschaft.mitgliedschaft
+            'mitgliedschaft': mitgliedschaft.mitgliedschaft,
+            'db_direct': 1,
+            'need_object_load': 1
         }
-        if not is_job_already_running('Aktualisiere Mitgliedschaft {0}'.format(mitgliedschaft.mitgliedschaft)):
-            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
+        if not is_job_already_running('Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft)):
+            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils.get_ampelfarbe", queue='short', job_name='Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
     
     # Mitgliedschaften die bezahlt haben, aber noch auf dem Status Anmeldung oder Online-Anmeldung stecken bleiben
     mitgliedschaften = frappe.db.sql("""
@@ -413,10 +417,12 @@ def daily_ampel_korrektur():
     """.format(aktuelles_jahr=aktuelles_jahr), as_dict=True)
     for mitgliedschaft in mitgliedschaften:
         args = {
-            'mv_mitgliedschaft': mitgliedschaft.mitgliedschaft
+            'mitgliedschaft': mitgliedschaft.mitgliedschaft,
+            'db_direct': 1,
+            'need_object_load': 1
         }
-        if not is_job_already_running('Aktualisiere Mitgliedschaft {0}'.format(mitgliedschaft.mitgliedschaft)):
-            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
+        if not is_job_already_running('Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft)):
+            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils.get_ampelfarbe", queue='short', job_name='Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
 
 def sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft(show_progress=False):
     from mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data import update
