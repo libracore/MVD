@@ -24,8 +24,7 @@ from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention, get_adres
                                                 get_naechstes_jahr_geschuldet, mahnstopp, create_korrespondenz, \
                                                 sp_updater, get_sektion_code, create_web_login_user
 from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, update_kontakt
-from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_zahlung_mitgliedschaft, check_zahlung_hv, get_ampelfarbe, \
-                                                        set_max_reminder_level, check_folgejahr_regelung
+from mvd.mvd.doctype.mitgliedschaft.finance_utils import get_ampelfarbe, set_max_reminder_level, check_folgejahr_regelung
 from frappe.utils.background_jobs import enqueue
 from mvd.mvd.utils import is_job_already_running, rg_massenlauf_log
 
@@ -77,12 +76,6 @@ class Mitgliedschaft(Document):
             zuzugsdatum = self.zuzug
         
         if not self.flags.from_import:
-            # update Zahlung Mitgliedschaft
-            check_zahlung_mitgliedschaft(self)
-            
-            # update Zahlung HV
-            check_zahlung_hv(self)
-
             # Update max Reminder Level
             set_max_reminder_level(self)
             
@@ -269,6 +262,14 @@ class Mitgliedschaft(Document):
                     'needs_update': 0
                 })
                 new_spmd.insert(ignore_permissions=True)
+
+        # prüfe offene Rechnungen bei sektionswechsel
+        if self.status_c == 'Wegzug':
+            if not is_job_already_running("Cancel SINV / FAK ({0})".format(self.mitglied_nr)):
+                args = {
+                        'mitgliedschaft': self.name
+                    }
+                enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils.cancel_sinv_fak_sektionswechsel", queue='short', job_name="Cancel SINV / FAK ({0})".format(self.mitglied_nr), timeout=2500, **args)
     
     def email_validierung(self, check=False):
         regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'

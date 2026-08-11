@@ -11,118 +11,7 @@ from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen
 from mvd.mvd.doctype.mitgliedschaft.utils import create_korrespondenz, sp_updater
 from frappe.utils.background_jobs import enqueue
 from mvd.mvd.utils import is_job_already_running
-
-def check_zahlung_mitgliedschaft(mitgliedschaft, db_direct=False):
-    '''
-        mitgliedschaft -> Muss immer einem Objekt entsprechen!
-    
-        db_direct -> Ist dieser Parameter gesetzt, so werden die Werte mittels db.set_value direkt in die DB geschrieben.
-        Dadurch können die Werte aktualisiert werden, ohne dass die gesamte Mitgliedschaft gespeichert werden muss (Performance verbesserung).
-    '''
-    
-    noch_kein_eintritt = False
-    if not mitgliedschaft.datum_zahlung_mitgliedschaft:
-        noch_kein_eintritt = True
-    
-    # Muss zwingend vorgängig Commitet werden, damit die aktuellen und benötigten Info's in der DB verfügbar sind
-    # Siehe #1475
-    frappe.db.commit()
-
-    sinvs = frappe.db.sql("""SELECT
-                                `name`,
-                                `is_pos`,
-                                `posting_date`,
-                                `mitgliedschafts_jahr`
-                            FROM `tabSales Invoice`
-                            WHERE `docstatus` = 1
-                            AND `ist_mitgliedschaftsrechnung` = 1
-                            AND `mv_mitgliedschaft` = '{mitgliedschaft}'
-                            AND `status` = 'Paid'
-                            ORDER BY `mitgliedschafts_jahr` DESC""".format(mitgliedschaft=mitgliedschaft.name), as_dict=True)
-    if len(sinvs) > 0:
-        sinv = sinvs[0]
-        sinv_year = cint(sinv.mitgliedschafts_jahr)
-        if sinv.is_pos == 1:
-            # Fallback wenn sinv.mitgliedschafts_jahr == 0
-            if sinv_year < 1:
-                sinv_year = getdate(sinv.posting_date).strftime("%Y")
-            
-            mitgliedschaft.datum_zahlung_mitgliedschaft = sinv.posting_date
-            if db_direct:
-                frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'datum_zahlung_mitgliedschaft', sinv.posting_date)
-        else:
-            pes = frappe.db.sql("""SELECT
-                                        `parent`
-                                    FROM `tabPayment Entry Reference`
-                                    WHERE `reference_doctype` = 'Sales Invoice'
-                                    AND `reference_name` = '{sinv}' 
-                                    AND `docstatus` = 1
-                                    ORDER BY `creation` DESC""".format(sinv=sinv.name), as_dict=True)
-            if len(pes) > 0:
-                pe_reference_date = frappe.db.get_value("Payment Entry", pes[0].parent, 'reference_date')
-                # # Fallback wenn sinv.mitgliedschafts_jahr == 0
-                if sinv_year < 1:
-                    sinv_year = getdate(pe_reference_date).strftime("%Y")
-                
-                mitgliedschaft.datum_zahlung_mitgliedschaft = pe_reference_date
-                if db_direct:
-                    frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'datum_zahlung_mitgliedschaft', pe_reference_date)
-        
-        if mitgliedschaft.bezahltes_mitgliedschaftsjahr < sinv_year:
-            mitgliedschaft.bezahltes_mitgliedschaftsjahr = sinv_year
-            if db_direct:
-                frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'bezahltes_mitgliedschaftsjahr', sinv_year)
-    
-    # Zahldatum = Eintrittsdatum
-    if mitgliedschaft.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in') and mitgliedschaft.bezahltes_mitgliedschaftsjahr > 0:
-        if noch_kein_eintritt:
-            mitgliedschaft.eintrittsdatum = mitgliedschaft.datum_zahlung_mitgliedschaft
-            if db_direct:
-                frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'eintrittsdatum', mitgliedschaft.datum_zahlung_mitgliedschaft)
-    
-    if mitgliedschaft.bezahltes_mitgliedschaftsjahr > 0 and mitgliedschaft.status_c in ('Anmeldung', 'Online-Anmeldung', 'Interessent*in'):
-        # erstelle status change log und Status-Änderung
-        druckvorlage = get_druckvorlagen(sektion=mitgliedschaft.sektion_id, \
-                                            dokument='Begrüssung mit Ausweis', \
-                                            mitgliedtyp=mitgliedschaft.mitgliedtyp_c, \
-                                            language=mitgliedschaft.language)['default_druckvorlage']
-            
-        begruessung_massendruck_dokument = create_korrespondenz(mitgliedschaft=mitgliedschaft.name, \
-                                                                            druckvorlage=druckvorlage, \
-                                                                            titel='Begrüssung (Autom.)')
-        if not db_direct:
-            change_log_row = mitgliedschaft.append('status_change', {})
-            change_log_row.datum = now()
-            change_log_row.status_alt = mitgliedschaft.status_c
-            change_log_row.status_neu = 'Regulär'
-            change_log_row.grund = 'Zahlungseingang'
-            mitgliedschaft.status_c = 'Regulär'
-            
-            # erstellung Begrüssungsschreiben
-            mitgliedschaft.begruessung_massendruck = 1
-            mitgliedschaft.begruessung_via_zahlung = 1
-            mitgliedschaft.begruessung_massendruck_dokument = begruessung_massendruck_dokument
-            
-        else:
-            create_zahlungseingang_change_log_row(mitgliedschaft, mitgliedschaft.status_c)
-            frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'status_c', 'Regulär')
-            frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'begruessung_massendruck', 1)
-            frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'begruessung_via_zahlung', 1)
-            frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'begruessung_massendruck_dokument', begruessung_massendruck_dokument)
-            get_and_set_mitgliednr(mitgliedschaft.name)
-    
-    # prüfe offene Rechnungen bei sektionswechsel
-    if mitgliedschaft.status_c == 'Wegzug':
-        if not is_job_already_running("Cancel SINV / FAK ({0})".format(mitgliedschaft.mitglied_nr)):
-            args = {
-                    'mitgliedschaft': mitgliedschaft.name
-                }
-            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils.cancel_sinv_fak_sektionswechsel", queue='short', job_name="Cancel SINV / FAK ({0})".format(mitgliedschaft.mitglied_nr), timeout=2500, **args)
-    
-    if db_direct:
-        frappe.db.commit()
-    
-    return
+from mvd.mvd.doctype.mitgliedschaft.process_utils.update_zahlungsdaten import run as run_update_zahlungsdaten
 
 def cancel_sinv_fak_sektionswechsel(mitgliedschaft):
     sinvs = frappe.db.sql("""SELECT
@@ -194,7 +83,7 @@ def set_max_reminder_level(mitgliedschaft, db_direct=False):
     
     return
 
-def get_ampelfarbe(mitgliedschaft, db_direct=False):
+def get_ampelfarbe(mitgliedschaft, db_direct=False, need_object_load=False):
     ''' mögliche Ampelfarben:
         - Grün: ampelgruen --> Mitglied kann alle Dienstleistungen beziehen (keine Karenzfristen, keine überfälligen oder offen Rechnungen)
         - Gelb: ampelgelb --> Karenzfristen oder offene Rechnungen
@@ -216,6 +105,9 @@ def get_ampelfarbe(mitgliedschaft, db_direct=False):
                 frappe.db.commit()
         else:
             mitgliedschaft.ampel_farbe = farbe
+
+    if need_object_load:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
 
     inaktive_status = ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in', 'Anmeldung')
     if mitgliedschaft.status_c in inaktive_status:
@@ -260,53 +152,6 @@ def get_ampelfarbe(mitgliedschaft, db_direct=False):
         return _set_ampel('ampelgelb')
     else:
         return _set_ampel('ampelgruen')
-    
-
-def check_zahlung_hv(mitgliedschaft, db_direct=False):
-    '''
-        mitgliedschaft -> Muss immer einem Objekt entsprechen!
-    
-        db_direct -> Ist dieser Parameter gesetzt, so werden die Werte mittels db.set_value direkt in die DB geschrieben.
-        Dadurch können die Werte aktualisiert werden, ohne dass die gesamte Mitgliedschaft gespeichert werden muss (Performance verbesserung).
-    '''
-
-    sinvs = frappe.db.sql("""SELECT
-                                `name`,
-                                `is_pos`,
-                                `posting_date`,
-                                `mitgliedschafts_jahr`
-                            FROM `tabSales Invoice`
-                            WHERE `docstatus` = 1
-                            AND `ist_hv_rechnung` = 1
-                            AND `mv_mitgliedschaft` = '{mvm}'
-                            AND `status` = 'Paid'
-                            ORDER BY `posting_date` DESC""".format(mvm=mitgliedschaft.name), as_dict=True)
-    if len(sinvs) > 0:
-        sinv = sinvs[0]
-        if sinv.is_pos == 1:
-            sinv_year = sinv.mitgliedschafts_jahr if sinv.mitgliedschafts_jahr and sinv.mitgliedschafts_jahr > 0 else getdate(sinv.posting_date).strftime("%Y")
-            mitgliedschaft.datum_hv_zahlung = sinv.posting_date
-            if db_direct:
-                frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'datum_hv_zahlung', sinv.posting_date)
-        else:
-            pes = frappe.db.sql("""SELECT `parent` FROM `tabPayment Entry Reference`
-                                    WHERE `reference_doctype` = 'Sales Invoice'
-                                    AND `reference_name` = '{sinv}' ORDER BY `creation` DESC""".format(sinv=sinv.name), as_dict=True)
-            if len(pes) > 0:
-                pe = frappe.get_doc("Payment Entry", pes[0].parent)
-                sinv_year = sinv.mitgliedschafts_jahr if sinv.mitgliedschafts_jahr and sinv.mitgliedschafts_jahr > 0 else getdate(pe.reference_date).strftime("%Y")
-                mitgliedschaft.datum_hv_zahlung = pe.reference_date
-                if db_direct:
-                    frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'datum_hv_zahlung', pe.reference_date)
-        
-        mitgliedschaft.zahlung_hv = sinv_year
-        if db_direct:
-            frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'zahlung_hv', sinv_year)
-    
-    if db_direct:
-        frappe.db.commit()
-    
-    return
 
 def check_folgejahr_regelung(mitgliedschaft, db_direct=False):
     '''
@@ -382,93 +227,9 @@ def sinv_update(sinv, event):
                     frappe.db.set_value("Sales Invoice", sinv.name, "outstanding_amount", 0.0)
 
     if not update_blocked:
-        if sinv.mv_mitgliedschaft and not is_job_already_running('Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft)):
-            args = {
-                'mv_mitgliedschaft': sinv.mv_mitgliedschaft
-            }
-            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(sinv.mv_mitgliedschaft), timeout=5000, **args)
+        run_update_zahlungsdaten(sinv.mv_mitgliedschaft)
+
     return
-
-def _sinv_update(mv_mitgliedschaft, timestamp_missmatch=0, does_not_exist=0, dead_lock=0):
-    import pymysql
-
-    def get_retry_stats():
-        return "TimeStampMissMatch: {0}\nDoesNotExist: {1}\nDeadLock: {2}".format(timestamp_missmatch, does_not_exist, dead_lock)
-    def get_error_log_description(step, err):
-        return "Mitglied-ID: {0}\nWorkflow-State: {1}\nFehler: {2}\nRetry-Stats:\n{3}\nTraceBack:\n{4}".format(mv_mitgliedschaft, step, str(err), get_retry_stats(), frappe.get_traceback())
-    
-    try:
-        # Speichern der Mitgliedschaft zum triggern der validate() Funktion, diese aktualisiert alle relevanten Informationen rund um das Mitglied
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
-        mitgliedschaft.save(ignore_permissions=True)
-    except frappe.TimestampMismatchError as err:
-        # Möglicher Fehler 1: Zwei Prozesse Bearbeiten/Speichern gleichzeitig -> Konflikt -> Retry
-        # Es werden maximal 3 Versuche zugelassen -> Danach Abbruch & ErrorLog
-        if timestamp_missmatch < 3:
-            timestamp_missmatch += 1
-            if not is_job_already_running('Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft)):
-                frappe.clear_messages()
-                args = {
-                    'mv_mitgliedschaft': mv_mitgliedschaft,
-                    'timestamp_missmatch': timestamp_missmatch,
-                    'does_not_exist': does_not_exist,
-                    'dead_lock': dead_lock
-                }
-                enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft), timeout=5000, **args)
-            pass
-        else:
-            frappe.log_error(get_error_log_description("TimeStampMissMatch", err), '_sinv_update Failed')
-            frappe.clear_messages()
-            pass
-    except frappe.exceptions.DoesNotExistError as err2:
-        # Möglicher Fehler 2: Die Mitgliedschaft existiert noch nicht -> Retry in der Hoffnung dass die Anlage in der Zwischenzeit erfolgt ist
-        # Es werden maximal 3 Versuche zugelassen -> Danach Abbruch & ErrorLog
-        if does_not_exist < 3:
-            does_not_exist += 1
-            if not is_job_already_running('Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft)):
-                frappe.clear_messages()
-                args = {
-                    'mv_mitgliedschaft': mv_mitgliedschaft,
-                    'timestamp_missmatch': timestamp_missmatch,
-                    'does_not_exist': does_not_exist,
-                    'dead_lock': dead_lock
-                }
-                enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft), timeout=5000, **args)
-            pass
-        else:
-            frappe.log_error(get_error_log_description("DoesNotExist", err2), '_sinv_update Failed')
-            frappe.clear_messages()
-            pass
-    except pymysql.err.OperationalError as err3:
-        if err3.args and err3.args[0] == 1205:
-            # Möglicher Fehler 3: Die DB-Tabelle die gespeichert werden soll ist gesperrt -> Retry
-            # Es werden maximal 3 Versuche zugelassen -> Danach Abbruch & ErrorLog
-            if dead_lock < 3:
-                dead_lock += 1
-                if not is_job_already_running('Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft)):
-                    frappe.clear_messages()
-                    args = {
-                        'mv_mitgliedschaft': mv_mitgliedschaft,
-                        'timestamp_missmatch': timestamp_missmatch,
-                        'does_not_exist': does_not_exist,
-                        'dead_lock': dead_lock
-                    }
-                    enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils._sinv_update", queue='short', job_name='Aktualisiere Mitgliedschaft {0}'.format(mv_mitgliedschaft), timeout=5000, **args)
-                pass
-            else:
-                frappe.log_error(get_error_log_description("DeadLock", err3), '_sinv_update Failed')
-                frappe.clear_messages()
-                pass
-        else:
-            # Möglicher Fehler 4: Sonstiger DB-Fehler -> Abbruch & ErrorLog
-            frappe.log_error(get_error_log_description("DB", err3), '_sinv_update Failed')
-            frappe.clear_messages()
-            pass
-    except Exception as err4:
-        # Möglicher Fehler 5: Sonstiger Fehler -> Abbruch & ErrorLog
-        frappe.log_error(get_error_log_description("Unhandled Exception", err4), '_sinv_update Failed')
-        frappe.clear_messages()
-        pass
 
 def check_mitgliedschaft_in_pe(pe):
     if not pe.mv_mitgliedschaft:
