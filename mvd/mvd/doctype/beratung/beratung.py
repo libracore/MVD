@@ -825,7 +825,7 @@ def sync_mail_attachements(file_record, event):
         if file_record.folder == "Home/Attachments":
             # siehe auch sync_attachments_and_beratungs_table
             vorhanden = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `file` = '{fileurl}' AND `parent` = '{beratung}'""".format(\
-                fileurl=file_record.file_url, \
+                fileurl=file_record.file_url.replace("'", "''"), \
                 beratung=file_record.attached_to_name), as_dict=True)[0].qty
             if vorhanden < 1:
                 b = frappe.get_doc("Beratung", file_record.attached_to_name)
