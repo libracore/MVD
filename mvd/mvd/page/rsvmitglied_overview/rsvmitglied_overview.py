@@ -4,13 +4,13 @@
 import frappe
 
 @frappe.whitelist()
-def get_rsvmandat_status_counts():
+def get_rsvmitglied_status_counts():
     return frappe.db.sql(
         """
             SELECT
                 IFNULL(`status`, 'Ohne Status') AS `status`,
                 COUNT(`name`) AS `count`
-            FROM `tabRSVMandat`
+            FROM `tabRSVMitglied`
             GROUP BY `status`
             ORDER BY FIELD(
                 `status`,

@@ -1,7 +1,7 @@
 // Copyright (c) 2026, libracore and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('RSVMandat', {
+frappe.ui.form.on('RSVMitglied', {
     refresh(frm) {
         cur_frm.fields_dict['thema'].get_query = function(doc) {
              return {
@@ -23,8 +23,8 @@ frappe.ui.form.on('RSVMandat', {
         // Eventlistener für den Schlichtungsbehörden Knopf
         frappe.mvd.schlichtungsbehoerde_listener(frm, 'uebersicht_html');
 
-        if (cur_frm.doc.reason_missing_rsvmandatlist) {
-            cur_frm.dashboard.add_comment(cur_frm.doc.reason_missing_rsvmandatlist, 'yellow', true);
+        if (cur_frm.doc.reason_missing_rsvmitgliedlist) {
+            cur_frm.dashboard.add_comment(cur_frm.doc.reason_missing_rsvmitgliedlist, 'yellow', true);
         } else {
             cur_frm.dashboard.clear_comment();
         }
@@ -91,7 +91,7 @@ frappe.ui.form.on('RSVMandat', {
                                 method: "get_or_create_rsv_mandat_list",
                                 doc: frm.doc,
                                 args: {
-                                    force_new_rsvmandatliste: 1
+                                    force_new_rsvmitgliedliste: 1
                                 },
                                 freeze: true,
                                 freeze_message: 'Neuanlage Mandatsliste...',
@@ -154,7 +154,7 @@ function load_html_overview(frm) {
     if (cur_frm.doc.adr_egaid) {
         // Lade Übersicht für die Siedlungsadresse
         frappe.call({
-            method: "mvd.mvd.doctype.rsvmandat.rsvmandat.get_siedlungs_adressen_html",
+            method: "mvd.mvd.doctype.rsvmitglied.rsvmitglied.get_siedlungs_adressen_html",
             args:{
                     'adr_egaid': cur_frm.doc.adr_egaid
             },
@@ -183,7 +183,7 @@ function rsv_mandat_listen_selektion(frm, rsv_mandatliste) {
                         method: "get_or_create_rsv_mandat_list",
                         doc: frm.doc,
                         args: {
-                            force_new_rsvmandatliste: 1
+                            force_new_rsvmitgliedliste: 1
                         },
                         freeze: true,
                         freeze_message: 'Neuanlage Mandatsliste...',

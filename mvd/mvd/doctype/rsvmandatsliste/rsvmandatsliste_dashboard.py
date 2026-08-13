@@ -9,7 +9,7 @@ def get_data():
         'transactions': [
             {
                 'label': _('Verknüpfungen'),
-                'items': ['RSVMandat']
+                'items': ['RSVMitglied']
             }
         ]
     }

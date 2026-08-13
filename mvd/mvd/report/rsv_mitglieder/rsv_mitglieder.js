@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["RSV Mandate"] = {
+frappe.query_reports["RSV Mitglieder"] = {
 	"filters": [
 
 	]

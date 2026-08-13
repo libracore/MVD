@@ -81,7 +81,7 @@ def get_letztes_mandat(mitglied):
                     `name`,
                     `creation`,
                     `status`
-                FROM `tabRSVMandat`
+                FROM `tabRSVMitglied`
                 WHERE `mv_mitgliedschaft` = '{0}'
                 ORDER BY `creation` DESC
                 LIMIT 1

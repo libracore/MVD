@@ -6,5 +6,5 @@ from __future__ import unicode_literals
 # import frappe
 import unittest
 
-class TestRSVMandat(unittest.TestCase):
+class TestRSVMitglied(unittest.TestCase):
 	pass

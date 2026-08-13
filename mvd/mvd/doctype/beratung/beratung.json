@@ -46,7 +46,7 @@
   "raised_by",
   "email_id",
   "mandat",
-  "rsv_mandat",
+  "rsv_mitglied",
   "cb_1",
   "subject",
   "mv_mitgliedschaft",
@@ -516,10 +516,10 @@
   },
   {
    "depends_on": "eval:doc.sektion_id == 'MVZH'",
-   "fieldname": "rsv_mandat",
+   "fieldname": "rsv_mitglied",
    "fieldtype": "Link",
-   "label": "RSV Mandat",
-   "options": "RSVMandat",
+   "label": "RSV Mitglied",
+   "options": "RSVMitglied",
    "read_only": 1
   },
   {
@@ -529,7 +529,7 @@
    "options": "\nWohnen\nBusiness"
   }
  ],
- "modified": "2026-07-13 13:37:06.212136",
+ "modified": "2026-07-15 13:37:06.212136",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",

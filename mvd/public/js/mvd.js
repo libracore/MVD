@@ -2274,10 +2274,10 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
     }
 }
 
-mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
+mvd_dialoge.erstelle_rsv_mitglied = class ErstelleRSVMitglied {
     constructor(opts) {
         this.dialog =  new frappe.ui.Dialog({
-            title: "RSV-Mandat Erstellung",
+            title: "RSV-Mitglied Erstellung",
             fields: this.get_fields(opts),
             primary_action_label: "Erstellen",
             primary_action: () => {
@@ -2346,23 +2346,23 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
         var me = this;
         if (me.dialog.get_value("rsv_mandatliste_new_creation") != 1 && !me.dialog.get_value("rsv_mandatliste") && me.dialog.get_value("mandatslisten_und_siedlungs_sperre") != 1) {
             frappe.call({
-                method: "mvd.mvd.doctype.rsvmandat.rsvmandat.check_for_existing_rsvmandaliste",
+                method: "mvd.mvd.doctype.rsvmitglied.rsvmitglied.check_for_existing_rsvmandaliste",
                 args: me.dialog.get_values(),
                 freeze: true,
-                freeze_message: 'Erstelle RSV-Mandat...',
+                freeze_message: 'Erstelle RSV-Mitglied...',
                 callback: function(existing_rsvmandaliste)
                 {
                     if (!existing_rsvmandaliste.message) {
                         frappe.call({
-                            method: "mvd.mvd.doctype.rsvmandat.rsvmandat.create_rsv_mandat",
+                            method: "mvd.mvd.doctype.rsvmitglied.rsvmitglied.create_rsv_mitglied",
                             args: me.dialog.get_values(),
                             freeze: true,
-                            freeze_message: 'Erstelle RSV-Mandat...',
+                            freeze_message: 'Erstelle RSV-Mitglied...',
                             callback: function(rsv_response)
                             {
-                                frappe.db.set_value(cur_frm.doctype, cur_frm.doc.name, 'rsv_mandat', rsv_response.message);
+                                frappe.db.set_value(cur_frm.doctype, cur_frm.doc.name, 'rsvmitglied', rsv_response.message);
                                 cur_frm.reload_doc();
-                                frappe.msgprint(`Das Mandat (${rsv_response.message}) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
+                                frappe.msgprint(`Das RSV-Mitglied (${rsv_response.message}) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
                             }
                         });
                     } else {
@@ -2377,10 +2377,10 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
             });
         } else {
             frappe.call({
-                method: "mvd.mvd.doctype.rsvmandat.rsvmandat.create_rsv_mandat",
+                method: "mvd.mvd.doctype.rsvmitglied.rsvmitglied.create_rsv_mitglied",
                 args: me.dialog.get_values(),
                 freeze: true,
-                freeze_message: 'Erstelle RSV-Mandat...',
+                freeze_message: 'Erstelle RSV-Mitglied...',
                 callback: function(rsv_response)
                 {
                     frappe.call({
@@ -2396,9 +2396,9 @@ mvd_dialoge.erstelle_rsv_mandat = class ErstelleRSVMandat {
                         freeze_message: 'Erstelle Schadenanzeige...',
                         callback: function(template_response)
                         {
-                            frappe.db.set_value(cur_frm.doctype, cur_frm.doc.name, 'rsv_mandat', rsv_response.message).then(() => {
+                            frappe.db.set_value(cur_frm.doctype, cur_frm.doc.name, 'rsv_mitglied', rsv_response.message).then(() => {
                                 cur_frm.reload_doc();
-                                frappe.msgprint(`Das Mandat (${rsv_response.message}) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
+                                frappe.msgprint(`Das RSV-Mitglied (${rsv_response.message}) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
                             });
                         }
                     });

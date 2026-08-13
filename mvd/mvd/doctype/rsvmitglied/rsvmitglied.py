@@ -20,7 +20,7 @@ from jinja2.runtime import Context
 import json
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_doc_from_ctx
 
-class RSVMandat(Document):
+class RSVMitglied(Document):
     def autoname(self):
         if self.mv_mitgliedschaft:
             vorname = self.vorname if self.vorname else frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1")
@@ -31,10 +31,10 @@ class RSVMandat(Document):
         
         new_name = "{0}_{1}_{2}".format(formatdate(today(), "yy-MM-dd"), vorname, nachname)
 
-        if frappe.db.exists("RSVMandat", new_name):
+        if frappe.db.exists("RSVMitglied", new_name):
             counter = frappe.db.sql(
                 """
-                    SELECT COUNT(`name`) AS `qty` FROM `tabRSVMandat` WHERE `name` LIKE '{0}%'
+                    SELECT COUNT(`name`) AS `qty` FROM `tabRSVMitglied` WHERE `name` LIKE '{0}%'
                 """.format(new_name),
                 as_dict=True
             )[0].qty
@@ -58,32 +58,32 @@ class RSVMandat(Document):
                 self.adr_egaid = gebaeudeverzeichnis_id_and_bfs_nr.get("adr_egaid")
                 self.bfs_nr = gebaeudeverzeichnis_id_and_bfs_nr.get("bfs_nr")
             else:
-                self.reason_missing_rsvmandatlist = "Auf Basis der Adressdaten konnte keine Gebäude ID zugeordnet werden.<br>Eine entsprechende Mandatsliste muss manuell angelegt und verknüpft werden."
+                self.reason_missing_rsvmitgliedlist = "Auf Basis der Adressdaten konnte keine Gebäude ID zugeordnet werden.<br>Eine entsprechende Mandatsliste muss manuell angelegt und verknüpft werden."
         
         if not self.schlichtungsbehoerde:
             self.schlichtungsbehoerde = get_schlichtungsbehoerde(self.bfs_nr)
         
         if not cint(self.mandatslisten_und_siedlungs_sperre) == 1:
             if not self.rsvmandatsliste and self.adr_egaid:
-                self.rsvmandatsliste = self.get_gruppenmandat(force_new_rsvmandatliste=cint(self.force_new_rsvmandatliste))
+                self.rsvmandatsliste = self.get_gruppenmandat(force_new_rsvmitgliedliste=cint(self.force_new_rsvmitgliedliste))
         else:
             # Keine autom. Mandatslisten- und Siedlungsanlage durch after_insert.
             # Wird autom. wieder entfernt, da es nach after_insert keinen Nutzen mehr hat.
             self.mandatslisten_und_siedlungs_sperre = 0
-            self.reason_missing_rsvmandatlist = "Die allfällige autom. Mandatslisten- sowie Siedlungsanlage wurde gesperrt. Diese müssen ggf. manuell angelegt und verknüpft werden."
+            self.reason_missing_rsvmitgliedlist = "Die allfällige autom. Mandatslisten- sowie Siedlungsanlage wurde gesperrt. Diese müssen ggf. manuell angelegt und verknüpft werden."
         
         self.save()
     
     def on_update(self):
         if self.rsvmandatsliste:
-            self.reason_missing_rsvmandatlist = None
+            self.reason_missing_rsvmitgliedlist = None
         
         if self.rsvmandatsliste:
             args = {
-                'rsvmandat': self.name,
+                'rsvmitglied': self.name,
                 'rsvmandatsliste': self.rsvmandatsliste
             }
-            enqueue("mvd.mvd.doctype.rsvmandatsliste.rsvmandatsliste.update_rsvmandatlise", queue='short', job_name='Update {0}'.format(self.rsvmandatsliste), timeout=5000, **args)
+            enqueue("mvd.mvd.doctype.rsvmandatsliste.rsvmandatsliste.update_rsvmitgliedlise", queue='short', job_name='Update {0}'.format(self.rsvmandatsliste), timeout=5000, **args)
 
         if self.mv_mitgliedschaft:
             args = {
@@ -113,7 +113,7 @@ class RSVMandat(Document):
                     #         """
                     #             SELECT `file_url`, `file_name`
                     #             FROM `tabFile`
-                    #             WHERE `attached_to_doctype` = 'RSVMandat'
+                    #             WHERE `attached_to_doctype` = 'RSVMitglied'
                     #             AND `attached_to_name` = '{0}'
                     #             LIMIT 1
                     #         """.format(self.name),
@@ -130,7 +130,7 @@ class RSVMandat(Document):
                 SELECT `bd`.`file` AS `mietvertrag_pfad`
                 FROM `tabBeratung` AS `b`
                 LEFT JOIN `tabBeratungsdateien` AS `bd` ON `b`.`name` = `bd`.`parent`
-                WHERE `b`.`rsv_mandat` = '{0}'
+                WHERE `b`.`rsv_mitglied` = '{0}'
                 AND `bd`.`document_type` = 'Mietvertrag'
             """.format(self.name),
             as_dict=True
@@ -139,20 +139,20 @@ class RSVMandat(Document):
 
         return mietvertrag_pfad[0].mietvertrag_pfad
     
-    def get_gruppenmandat(self, force_new_rsvmandatliste=0, for_lookup=False):
+    def get_gruppenmandat(self, force_new_rsvmitgliedliste=0, for_lookup=False):
         siedlung = get_siedlung(self.adr_egaid)
         if siedlung:
-            rsvmandatsliste = get_gruppenmandat_based_on_siedlung(siedlung, force_new_rsvmandatliste=force_new_rsvmandatliste, for_lookup=for_lookup)
+            rsvmandatsliste = get_gruppenmandat_based_on_siedlung(siedlung, force_new_rsvmitgliedliste=force_new_rsvmitgliedliste, for_lookup=for_lookup)
             if for_lookup:
                 return rsvmandatsliste
             if rsvmandatsliste.get("qty") in [0, 1]:
                 return rsvmandatsliste.get("rsvmandatsliste")
             else:
-                self.reason_missing_rsvmandatlist = "Auf Basis der zutreffenden Siedlung gibt es mehrere Mandatslisten. Bitte wählen Sie die zugehörige manuell aus."
+                self.reason_missing_rsvmitgliedlist = "Auf Basis der zutreffenden Siedlung gibt es mehrere Mandatslisten. Bitte wählen Sie die zugehörige manuell aus."
         else:
             if for_lookup:
                 return "Keine Siedlung gefunden"
-            self.reason_missing_rsvmandatlist = "Auf Basis der Adressdaten konnte keine Siedlung zugeordnet werden.<br>Eine entsprechende Mandatsliste muss manuell angelegt und verknüpft werden."
+            self.reason_missing_rsvmitgliedlist = "Auf Basis der Adressdaten konnte keine Siedlung zugeordnet werden.<br>Eine entsprechende Mandatsliste muss manuell angelegt und verknüpft werden."
         
         return None
     
@@ -174,7 +174,7 @@ class RSVMandat(Document):
         beratung = frappe.db.sql(
             """
                 SELECT `name` FROM `tabBeratung`
-                WHERE `rsv_mandat` = '{0}'
+                WHERE `rsv_mitglied` = '{0}'
             """.format(self.name),
             as_dict=True
         )
@@ -184,8 +184,8 @@ class RSVMandat(Document):
         
         return beratung[0].name
     
-    def get_or_create_rsv_mandat_list(self, force_new_rsvmandatliste=0, for_lookup=False):
-        return self.get_gruppenmandat(force_new_rsvmandatliste=force_new_rsvmandatliste, for_lookup=for_lookup)
+    def get_or_create_rsv_mandat_list(self, force_new_rsvmitgliedliste=0, for_lookup=False):
+        return self.get_gruppenmandat(force_new_rsvmitgliedliste=force_new_rsvmitgliedliste, for_lookup=for_lookup)
 
 
 def resolve_file_path(file_url):
@@ -199,7 +199,7 @@ def resolve_file_path(file_url):
         filename = file_url.replace("/files/", "", 1)
         return frappe.get_site_path("public", "files", filename)
 
-    frappe.error_log("RSVMandat: ZIP CreationUnsupported file_url: {0}".format(file_url), "RSVMandat: ZIP Creation")
+    frappe.error_log("RSVMitglied: ZIP CreationUnsupported file_url: {0}".format(file_url), "RSVMitglied: ZIP Creation")
     return None
 
 
@@ -211,7 +211,7 @@ def create_zip_and_attach(file_urls, doctype, docname, zip_name="documents.zip")
             file_path = resolve_file_path(file_url)
 
             if not os.path.exists(file_path):
-                frappe.error_log("File not found: {0}".format(file_url), "RSVMandat: ZIP Creation")
+                frappe.error_log("File not found: {0}".format(file_url), "RSVMitglied: ZIP Creation")
                 continue
 
             arcname = os.path.basename(file_path)
@@ -296,14 +296,14 @@ def get_siedlung(adr_egaid, no_auto_creation=False):
     
     return create_siedlung(adr_egaid)
 
-def get_gruppenmandat_based_on_siedlung(siedlung, force_new_rsvmandatliste=0, for_lookup=False):
+def get_gruppenmandat_based_on_siedlung(siedlung, force_new_rsvmitgliedliste=0, for_lookup=False):
     def create_gruppenmandat_based_on_siedlung(siedlung):
         new_rsvmandatsliste = frappe.new_doc('RSVMandatsliste')
         new_rsvmandatsliste.siedlung = siedlung
         new_rsvmandatsliste.insert()
         return new_rsvmandatsliste.name
     
-    if force_new_rsvmandatliste == 1:
+    if force_new_rsvmitgliedliste == 1:
         return {
             'qty': 0,
             'rsvmandatsliste': create_gruppenmandat_based_on_siedlung(siedlung)
@@ -347,39 +347,39 @@ def check_for_existing_rsvmandaliste(**kwargs):
     return rsvmandatsliste
 
 @frappe.whitelist()
-def create_rsv_mandat(**kwargs):
-    rsv_mandat = frappe.new_doc("RSVMandat")
-    rsv_mandat.strasse = kwargs.get("strasse", None)
-    rsv_mandat.hausnummer = kwargs.get("hausnummer", None)
-    rsv_mandat.nr_zusatz = kwargs.get("nr_zusatz", None)
-    rsv_mandat.plz = kwargs.get("plz", None)
-    rsv_mandat.ort = kwargs.get("ort", None)
-    rsv_mandat.mv_mitgliedschaft = kwargs.get("mv_mitgliedschaft", None)
-    rsv_mandat.faktura_kunde = kwargs.get("faktura_kunde", None)
+def create_rsv_mitglied(**kwargs):
+    rsv_mitglied = frappe.new_doc("RSVMitglied")
+    rsv_mitglied.strasse = kwargs.get("strasse", None)
+    rsv_mitglied.hausnummer = kwargs.get("hausnummer", None)
+    rsv_mitglied.nr_zusatz = kwargs.get("nr_zusatz", None)
+    rsv_mitglied.plz = kwargs.get("plz", None)
+    rsv_mitglied.ort = kwargs.get("ort", None)
+    rsv_mitglied.mv_mitgliedschaft = kwargs.get("mv_mitgliedschaft", None)
+    rsv_mitglied.faktura_kunde = kwargs.get("faktura_kunde", None)
 
     if kwargs.get("rsv_mandatliste", None):
-        rsv_mandat.rsvmandatsliste = kwargs.get("rsv_mandatliste", None)
+        rsv_mitglied.rsvmandatsliste = kwargs.get("rsv_mandatliste", None)
     
     if kwargs.get("rsv_mandatliste_new_creation", None):
         if cint(kwargs.get("rsv_mandatliste_new_creation", None)) == 1:
-            rsv_mandat.force_new_rsvmandatliste = 1
-            rsv_mandat.rsvmandatsliste = None
+            rsv_mitglied.force_new_rsvmitgliedliste = 1
+            rsv_mitglied.rsvmandatsliste = None
     
     if kwargs.get("mandatslisten_und_siedlungs_sperre", None):
         if cint(kwargs.get("mandatslisten_und_siedlungs_sperre", None)) == 1:
-            rsv_mandat.mandatslisten_und_siedlungs_sperre = 1
+            rsv_mitglied.mandatslisten_und_siedlungs_sperre = 1
     
     if kwargs.get("mandat_typ", None):
-        rsv_mandat.status = kwargs.get("mandat_typ", None)
+        rsv_mitglied.status = kwargs.get("mandat_typ", None)
 
-    rsv_mandat.insert()
-    return rsv_mandat.name
+    rsv_mitglied.insert()
+    return rsv_mitglied.name
 
 ### Jinja-Methoden für die RSV-Mandat E-Mails ###
 @context_decorator
 def rsv_dokumente_fehlende(ctx):
     doc = get_doc_from_ctx(ctx)
-    if doc.get("doctype") == "RSVMandat":
+    if doc.get("doctype") == "RSVMitglied":
         if doc.dokumente:
             document_list_html = ""
             for document in doc.dokumente:
@@ -392,7 +392,7 @@ def rsv_dokumente_fehlende(ctx):
 @context_decorator
 def rsv_dokumente_erhalten(ctx):
     doc = get_doc_from_ctx(ctx)
-    if doc.get("doctype") == "RSVMandat":
+    if doc.get("doctype") == "RSVMitglied":
         if doc.dokumente:
             document_list_html = ""
             for document in doc.dokumente:

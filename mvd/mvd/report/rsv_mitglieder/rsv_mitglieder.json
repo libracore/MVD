@@ -7,14 +7,14 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2026-06-11 09:50:48.738464",
+ "modified": "2026-06-12 09:50:48.738464",
  "modified_by": "Administrator",
  "module": "MVD",
- "name": "RSV Mandate",
+ "name": "RSV Mitglieder",
  "owner": "Administrator",
  "prepared_report": 0,
- "ref_doctype": "RSVMandat",
- "report_name": "RSV Mandate",
+ "ref_doctype": "RSVMitglied",
+ "report_name": "RSV Mitglieder",
  "report_type": "Script Report",
  "roles": [
   {

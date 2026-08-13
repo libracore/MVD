@@ -256,11 +256,11 @@ frappe.ui.form.on('Beratung', {
                 // Add BTN RSV-Mandat
                 if (cur_frm.doc.sektion_id == 'MVZH') {
                     frm.add_custom_button(__("Schadenanzeige"), function() {
-                        frappe.db.get_value('Beratung', cur_frm.doc.name, 'rsv_mandat').then(r => {
-                            if (r.message.rsv_mandat) {
+                        frappe.db.get_value('Beratung', cur_frm.doc.name, 'rsv_mitglied').then(r => {
+                            if (r.message.rsv_mitglied) {
                             frappe.msgprint("Es existiert bereits ein RSV-Mandat für diesen Datensatz.");
                             } else {
-                                create_rsv_mandat(frm);
+                                create_rsv_mitglied(frm);
                             }
                         });
                     }, "Dokument erstellen");
@@ -865,7 +865,7 @@ function create_mandat(frm) {
     d.show();
 }
 
-function create_rsv_mandat(frm) {
+function create_rsv_mitglied(frm) {
     frappe.db.get_value('Mitgliedschaft', cur_frm.doc.mv_mitgliedschaft, [
         'objekt_strasse',
         'objekt_hausnummer',
@@ -878,6 +878,6 @@ function create_rsv_mandat(frm) {
             mv_mitgliedschaft: cur_frm.doc.mv_mitgliedschaft,
             beratung: cur_frm.doc.name
         };
-        new mvd_dialoge.erstelle_rsv_mandat(opts);
+        new mvd_dialoge.erstelle_rsv_mitglied(opts);
     });
 }

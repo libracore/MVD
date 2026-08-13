@@ -13,7 +13,7 @@
   "sektion_id",
   "mv_mitgliedschaft",
   "mitglied_nr",
-  "rsv_mandat",
+  "rsv_mitglied",
   "cb_1",
   "fachskill",
   "language",
@@ -460,14 +460,14 @@
    "options": "Termin Kontaktperson Multi Fachskill"
   },
   {
-   "fieldname": "rsv_mandat",
+   "fieldname": "rsv_mitglied",
    "fieldtype": "Link",
-   "label": "RSV Mandat",
-   "options": "RSVMandat"
+   "label": "RSV Mitglied",
+   "options": "RSVMitglied"
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-06-17 13:02:51.735853",
+ "modified": "2026-06-19 13:02:51.735853",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kunden",

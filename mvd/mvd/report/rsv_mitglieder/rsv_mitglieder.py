@@ -13,7 +13,7 @@ def execute(filters=None):
 def get_columns():
     return[
         {"label": _("Mandat Liste"), "fieldname": "mandat_liste", "fieldtype": "Link", "options": "RSVMandatsliste"},
-        {"label": _("Mandat"), "fieldname": "mandat", "fieldtype": "Link", "options": "RSVMandat"},
+        {"label": _("RSVMitglied"), "fieldname": "mandat", "fieldtype": "Link", "options": "RSVMitglied"},
         {"label": _("Coop Fallnr."), "fieldname": "coop_fallnummer", "fieldtype": "Data"},
         {"label": _("Mitglied seit"), "fieldname": "mitglied_seit", "fieldtype": "Date"},
         {"label": _("Sendung an Coop RSV"), "fieldname": "sendung_an_coop", "fieldtype": "Date"},
@@ -36,7 +36,7 @@ def get_data():
     mandate = frappe.db.sql(
         """
             SELECT *
-            FROM `tabRSVMandat`
+            FROM `tabRSVMitglied`
         """,
         as_dict=True
     )

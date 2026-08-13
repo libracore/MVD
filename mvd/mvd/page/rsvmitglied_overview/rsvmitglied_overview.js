@@ -1,8 +1,8 @@
-frappe.pages['rsvmandat-overview'].on_page_load = function(wrapper) {
+frappe.pages['rsvmitglied-overview'].on_page_load = function(wrapper) {
     var me = this;
     var page = frappe.ui.make_app_page({
         parent: wrapper,
-        title: 'RSV Mandate Übersicht',
+        title: 'RSV Mitglied Übersicht',
         single_column: true
     });
 
@@ -13,7 +13,7 @@ frappe.pages['rsvmandat-overview'].on_page_load = function(wrapper) {
     prepare_page(page);
 };
 
-frappe.pages['rsvmandat-overview'].refresh= function(wrapper){
+frappe.pages['rsvmitglied-overview'].refresh= function(wrapper){
     frappe.dom.unfreeze();
 } 
 
@@ -36,7 +36,7 @@ function prepare_page(page) {
 
 function load_rsv_status_counts() {
     frappe.call({
-        method: 'mvd.mvd.page.rsvmandat_overview.rsvmandat_overview.get_rsvmandat_status_counts',
+        method: 'mvd.mvd.page.rsvmitglied_overview.rsvmitglied_overview.get_rsvmitglied_status_counts',
         callback: function(r) {
             let data = r.message || [];
             let html = '';
@@ -89,7 +89,7 @@ function load_rsv_status_counts() {
             $('.rsv-clickable-card').on('click', function() {
                 let status = $(this).data('status');
                 frappe.route_options = {status: status};
-                frappe.set_route('List', 'RSVMandat');
+                frappe.set_route('List', 'RSVMitglied');
             });
         }
     });

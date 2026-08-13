@@ -7,7 +7,7 @@ frappe.pages['rsvmandatsliste-over'].on_page_load = function(wrapper) {
     });
 
     me.page.set_primary_action('RSV Mandate Übersicht öffnen', () => {
-        frappe.set_route('rsvmandat-overview');
+        frappe.set_route('rsvmitglied-overview');
     });
 
     $(page.body).html(`
@@ -69,7 +69,7 @@ function load_rsvmandatsliste_typ_counts() {
                         </div>
                         <div class="rsv-card-actions">
                             <a href="#" class="rsv-card-link js-show-mandate">
-                                Mandate anzeigen
+                                RSVMitglieder anzeigen
                             </a>
                             <a href="#" class="rsv-card-link js-show-listen">
                                 Mandatslisten anzeigen
@@ -91,7 +91,7 @@ function load_rsvmandatsliste_typ_counts() {
 
                 frappe.route_options = {rsvmandatsliste: ['in', listen]};
 
-                frappe.set_route('List', 'RSVMandat');
+                frappe.set_route('List', 'RSVMitglied');
             });
 
 

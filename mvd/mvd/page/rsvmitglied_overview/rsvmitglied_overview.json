@@ -1,10 +1,10 @@
 {
  "content": null,
- "creation": "2026-05-27 15:21:44.696495",
+ "creation": "2026-06-01 15:21:44.696495",
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2026-05-27 15:21:44.696495",
+ "modified": "2026-06-01 15:21:44.696495",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "rsvmandat-overview",
@@ -15,5 +15,5 @@
  "standard": "Yes",
  "style": null,
  "system_page": 0,
- "title": "RSV Mandate \u00dcbersicht"
+ "title": "RSV Mitglieder \u00dcbersicht"
 }

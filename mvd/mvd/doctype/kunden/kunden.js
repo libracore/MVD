@@ -32,11 +32,11 @@ frappe.ui.form.on('Kunden', {
                 frm.add_custom_button(__("Mitglied (Regulär)"), function() {
                     umwandlung(frm, 'Regulär');
                 }, __("Umwandlung"));
-                // Add BTN RSV-Mandat
+                // Add BTN RSV-Mitglied
                 if (cur_frm.doc.sektion_id != 'MVZH') {
                     frm.add_custom_button(__("Schadenanzeige"), function() {
-                        frappe.db.get_value('Kunden', cur_frm.doc.name, 'rsv_mandat').then(r => {
-                            if (r.message.rsv_mandat) {
+                        frappe.db.get_value('Kunden', cur_frm.doc.name, 'rsv_mitglied').then(r => {
+                            if (r.message.rsv_mitglied) {
                             frappe.msgprint("Es existiert bereits ein RSV-Mandat für diesen Datensatz.");
                             } else {
                                 const opts = {
@@ -47,7 +47,7 @@ frappe.ui.form.on('Kunden', {
                                     objekt_ort: cur_frm.doc.ort,
                                     faktura_kunde: cur_frm.doc.name
                                 };
-                                new mvd_dialoge.erstelle_rsv_mandat(opts);
+                                new mvd_dialoge.erstelle_rsv_mitglied(opts);
                             }
                         });
                     }, __("Erstelle"));

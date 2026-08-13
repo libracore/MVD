@@ -52,7 +52,7 @@ frappe.vbz = {
         $("#beratung").off("click");
         $("#beratung_alle_sektionen").off("click");
         $("#termin").off("click");
-        $("#rsvmandat").off("click");
+        $("#rsvmitglied").off("click");
         $("#mahnung").off("click");
         $("#zweimal_unzustellbar").off("click");
         $("#einmal_unzustellbar").off("click");
@@ -181,9 +181,9 @@ frappe.vbz = {
             frappe.dom.freeze('Öffne Beratungs Terminübersicht...');
             frappe.set_route("vbz_beratung_termine");
         });
-        $("#rsvmandat").click(function(){
+        $("#rsvmitglied").click(function(){
             frappe.dom.freeze('Öffne RSV-Mandat-Übersicht...');
-            frappe.set_route("rsvmandat-overview");
+            frappe.set_route("rsvmitglied-overview");
         });
         $("#todo").click(function(){
             frappe.route_options = {'status': 'Open'};

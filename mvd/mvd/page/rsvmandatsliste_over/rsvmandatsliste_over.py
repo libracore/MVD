@@ -13,7 +13,7 @@ def get_rsvmandatsliste_typ_counts():
                 COUNT(`m`.`name`) AS `mandat_count`,
                 GROUP_CONCAT(DISTINCT `l`.`name`) AS `listen`
             FROM `tabRSVMandatsliste` AS `l`
-            LEFT JOIN `tabRSVMandat` AS `m` ON `m`.`rsvmandatsliste` = `l`.`name`
+            LEFT JOIN `tabRSVMitglied` AS `m` ON `m`.`rsvmandatsliste` = `l`.`name`
             GROUP BY IFNULL(NULLIF(`l`.`typ`, ''), 'Ohne Typ')
             ORDER BY `listen_count` DESC
         """,

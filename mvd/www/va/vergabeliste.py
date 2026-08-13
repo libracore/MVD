@@ -15,7 +15,7 @@ def get_context(context):
 def get_cards():
     def get_card(details):
         if details.typ == 'KGM':
-            qty = frappe.db.count('RSVMandat', filters = dict(rsvmandatsliste=details.name, status='Geprüft'))
+            qty = frappe.db.count('RSVMitglied', filters = dict(rsvmandatsliste=details.name, status='Geprüft'))
         if details.typ == 'EM':
             qty = 1
         
@@ -92,7 +92,7 @@ def get_cards():
                     SELECT
                         m.*,
                         GROUP_CONCAT(t.thema ORDER BY t.idx SEPARATOR ', ') AS themen
-                    FROM `tabRSVMandat` m
+                    FROM `tabRSVMitglied` m
                     LEFT JOIN `tabRSV Thema MultiTable` t
                         ON t.parent = m.name
                     WHERE m.rsvmandatsliste = '{0}'
@@ -113,7 +113,7 @@ def get_cards():
             return return_data
         
         if mandatsliste.typ == 'KGM':
-            qty = frappe.db.count('RSVMandat', filters = dict(rsvmandatsliste=mandatsliste.name, status='Geprüft'))
+            qty = frappe.db.count('RSVMitglied', filters = dict(rsvmandatsliste=mandatsliste.name, status='Geprüft'))
         if mandatsliste.typ == 'EM':
             qty = 1
         

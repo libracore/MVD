@@ -13,6 +13,7 @@
   "open_beratung",
   "cb_1",
   "rsvmandatsliste",
+  "get_or_create_rsv_mandat_list",
   "anwalt",
   "datum_vergabe",
   "datum_pruefung",
@@ -48,7 +49,6 @@
   "schlichtungsbehoerde",
   "entstehung",
   "thema",
-  "get_or_create_rsv_mandat_list",
   "dokumente",
   "create_zip_file",
   "section_workflow_helper",
@@ -354,10 +354,10 @@
    "fieldtype": "HTML"
   }
  ],
- "modified": "2026-08-13 11:35:34.177078",
+ "modified": "2026-08-13 15:51:03.502353",
  "modified_by": "Administrator",
  "module": "MVD",
- "name": "RSVMandat",
+ "name": "RSVMitglied",
  "owner": "Administrator",
  "permissions": [
   {
