@@ -86,7 +86,7 @@ class RSVMandatsliste(Document):
                 self.remove(sprache)
     
     def reset_status(self):
-        # Wird via "Speichern" von RSVMandat getriggert
+        # Wird via "Speichern" von RSVMitglied getriggert
         refs = frappe.db.count("RSVMitglied", {'rsvmandatsliste': self.name}, ['name'])
         if cint(refs) < 2 and self.typ != 'EM':
             self.typ = 'EM'
@@ -95,7 +95,7 @@ class RSVMandatsliste(Document):
         elif cint(refs) > 9 and self.typ != 'GGM':
             self.typ = 'GGM'
 
-def update_rsvmandatlise(rsvmitlgied, rsvmandatsliste):
+def update_rsvmandatlise(rsvmitglied, rsvmandatsliste):
     rsvml = frappe.get_doc("RSVMandatsliste", rsvmandatsliste)
     rsvml.reset_status()
     rsvml.before_save()
