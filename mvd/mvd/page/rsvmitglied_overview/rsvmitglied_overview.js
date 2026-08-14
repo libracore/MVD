@@ -6,7 +6,7 @@ frappe.pages['rsvmitglied-overview'].on_page_load = function(wrapper) {
         single_column: true
     });
 
-    me.page.set_primary_action('RSV-Mandat Übersicht öffnen', () => {
+    me.page.set_primary_action('RSV-Mitglied Übersicht öffnen', () => {
         frappe.set_route('rsvmandat-overview');
     });
 
@@ -22,8 +22,8 @@ function prepare_page(page) {
         <div class="rsv-dashboard">
             <div class="rsv-header">
             <div>
-                <h2>RSV-Mandate Übersicht</h2>
-                <p>Status-Verteilung aller RSV-Mandate</p>
+                <h2>RSV-Mitglieder Übersicht</h2>
+                <p>Status-Verteilung aller RSV-Mitglieder</p>
             </div>
             </div>
             <div class="rsv-status-grid" id="rsv-status-overview"></div>

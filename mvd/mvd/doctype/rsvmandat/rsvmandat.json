@@ -1,6 +1,6 @@
 {
  "allow_rename": 1,
- "autoname": "RSVML-.######",
+ "autoname": "RSV-MA-.######",
  "creation": "2026-08-14 13:51:53.390225",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -111,7 +111,7 @@
    "options": "VA Vergabe TBL"
   }
  ],
- "modified": "2026-08-14 13:51:53.390225",
+ "modified": "2026-08-14 15:09:36.455890",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",
