@@ -1,7 +1,7 @@
 // Copyright (c) 2026, libracore and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('RSVMandatsliste', {
+frappe.ui.form.on('RSVMandat', {
     refresh: function(frm) {
         frm.add_custom_button(__("Vergabeliste"),  function() {
             var domain = window.location.origin;

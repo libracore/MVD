@@ -5,7 +5,7 @@ from frappe import _
 
 def get_data():
     return {
-        'fieldname': 'rsvmandatsliste',
+        'fieldname': 'rsvmandat',
         'transactions': [
             {
                 'label': _('Verknüpfungen'),

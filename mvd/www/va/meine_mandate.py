@@ -20,16 +20,16 @@ def get_context(context):
 def get_cards():
     def get_card(details):
         if details.typ == 'KGM':
-            qty = frappe.db.count('RSVMitglied', filters = dict(rsvmandatsliste=details.name, status='Geprüft'))
+            qty = frappe.db.count('RSVMitglied', filters = dict(rsvmandat=details.name, status='Geprüft'))
         if details.typ == 'EM':
             qty = 1
         
         if qty < 1: return False
 
         card_template = """
-            <article class="case-card" data-mandatsliste="{mandatsliste}" data-mandatslistentyp="{typ}" onclick="show_detail_card('{mandatsliste}')">
+            <article class="case-card" data-mandats"{mandat}" data-mandattyp="{typ}" onclick="show_detail_card('{mandat}')">
                 <div class="badges">
-                    <span class="badge">{mandatsliste}</span>
+                    <span class="badge">{mandat}</span>
                     <span class="badge">{typ}</span>
                     <span class="badge">Anz. Mandate: {qty}</span>
                     <span class="badge open">✔</span>
@@ -42,12 +42,12 @@ def get_cards():
                 </div>
             </article>
         """.format(titel=details.bezeichnung or details.name, kurzbeschrieb=details.kurzbeschrieb or 'Klicken sie hier für mehr Informationen.',
-                   mandatsliste=details.name, typ=details.typ, qty=qty, frist=details.frist or '-')
+                   mandat=details.name, typ=details.typ, qty=qty, frist=details.frist or '-')
 
         return card_template
     
-    def get_detail_card(mandatsliste):
-        def get_einzelmandat_details(mandatsliste):
+    def get_detail_card(mandat):
+        def get_einzelmandat_details(mandat):
             return_data = """"""
 
             einzelmandat_template = """
@@ -100,10 +100,10 @@ def get_cards():
                     FROM `tabRSVMitglied` m
                     LEFT JOIN `tabRSV Thema MultiTable` t
                         ON t.parent = m.name
-                    WHERE m.rsvmandatsliste = '{0}'
+                    WHERE m.rsvmandat = '{0}'
                     AND m.status = 'Geprüft'
                     GROUP BY m.name
-                """.format(mandatsliste.name),
+                """.format(mandat.name),
                 as_dict=True
             )
 
@@ -116,21 +116,21 @@ def get_cards():
                     """.format(einzelmandat.doppelversicherung_bei)
                 
                 return_data += einzelmandat_template.format(beschreibung=einzelmandat.beschreibung or '-', bezirk=einzelmandat.bezirk or '-',
-                                                            loop=loop, thema=einzelmandat.themen or '', frist=mandatsliste.frist or '-',
-                                                            verhandlungsdatum=mandatsliste.verhandlungsdatum or '-', mandat_name=einzelmandat.name,
+                                                            loop=loop, thema=einzelmandat.themen or '', frist=mandat.frist or '-',
+                                                            verhandlungsdatum=mandat.verhandlungsdatum or '-', mandat_name=einzelmandat.name,
                                                             vermieterin=einzelmandat.vermieterin or '-', verwaltung=einzelmandat.verwaltung or '-',
                                                             doppelversicherung=doppelversicherung)
                 loop += 1
             
             return return_data
         
-        if mandatsliste.typ == 'KGM':
-            qty = frappe.db.count('RSVMitglied', filters = dict(rsvmandatsliste=mandatsliste.name, status='Geprüft'))
-        if mandatsliste.typ == 'EM':
+        if mandat.typ == 'KGM':
+            qty = frappe.db.count('RSVMitglied', filters = dict(rsvmandat=mandat.name, status='Geprüft'))
+        if mandat.typ == 'EM':
             qty = 1
         
         detail_card_template = """
-            <section class="detail hidden" data-belongstomandatsliste="{mandatsliste}">
+            <section class="detail hidden" data-belongstomandat="{mandat}">
                 <div class="detail-header">
                     <div>
                         <h2>{titel}</h2>
@@ -143,10 +143,10 @@ def get_cards():
 
                 <div class="interest-box">
                     <label for="message">Fallnummer</label>
-                    <input type="text" id="fallnummer-{mandatsliste}" placeholder="Fallnummer hinzufügen..." value="{fallnummer}"></input>
+                    <input type="text" id="fallnummer-{mandat}" placeholder="Fallnummer hinzufügen..." value="{fallnummer}"></input>
 
                     <div class="actions">
-                        <button class="btn-primary" onclick="add_fallnummer('{mandatsliste}')">Fallnummer speichern</button>
+                        <button class="btn-primary" onclick="add_fallnummer('{mandat}')">Fallnummer speichern</button>
                     </div>
                 </div>
 
@@ -171,14 +171,14 @@ def get_cards():
 
                 {einzelmandat_details}
             </section>
-        """.format(mandatsliste=mandatsliste.name, titel=mandatsliste.bezeichnung or mandatsliste.name,
-                   language=mandatsliste.language or 'Deutsch', qty=qty, typ=mandatsliste.typ, kurzbeschrieb=mandatsliste.kurzbeschrieb or '',
-                   frist=mandatsliste.frist or '-', verhandlungsdatum=mandatsliste.verhandlungsdatum or '-',
-                   einzelmandat_details=get_einzelmandat_details(mandatsliste), fallnummer=mandatsliste.fallnummer)
+        """.format(mandat=mandat.name, titel=mandat.bezeichnung or mandat.name,
+                   language=mandat.language or 'Deutsch', qty=qty, typ=mandat.typ, kurzbeschrieb=mandat.kurzbeschrieb or '',
+                   frist=mandat.frist or '-', verhandlungsdatum=mandat.verhandlungsdatum or '-',
+                   einzelmandat_details=get_einzelmandat_details(mandat), fallnummer=mandat.fallnummer)
 
         return detail_card_template
     
-    mandatslisten = frappe.db.sql(
+    mandate = frappe.db.sql(
         """
             SELECT
                 `name`,
@@ -190,7 +190,7 @@ def get_cards():
                 `frist`,
                 `verhandlungsdatum`,
                 `fallnummer`
-            FROM `tabRSVMandatsliste`
+            FROM `tabRSVMandat`
             WHERE `name` IN (
                 SELECT `parent`
                 FROM `tabVA Vergabe TBL`
@@ -203,11 +203,11 @@ def get_cards():
     
     cards = []
     detail_cards = []
-    for mandatsliste in mandatslisten:
-        card = get_card(mandatsliste)
+    for mandat in mandate:
+        card = get_card(mandat)
         if card:
             cards.append(card)
-            detail_cards.append(get_detail_card(mandatsliste))
+            detail_cards.append(get_detail_card(mandat))
     
     return cards, detail_cards
 
@@ -257,8 +257,8 @@ def resolve_file_path(file_url):
     return None
 
 @frappe.whitelist()
-def add_fallnummer(mandatsliste, fallnummer):
-    ml = frappe.get_doc("RSVMandatsliste", mandatsliste)
+def add_fallnummer(mandat, fallnummer):
+    ml = frappe.get_doc("RSVMandat", mandat)
     ml.fallnummer = fallnummer
     ml.save(ignore_permissions=True)
     return

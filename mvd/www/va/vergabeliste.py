@@ -15,7 +15,7 @@ def get_context(context):
 def get_cards():
     def get_card(details):
         if details.typ == 'KGM':
-            qty = frappe.db.count('RSVMitglied', filters = dict(rsvmandatsliste=details.name, status='Geprüft'))
+            qty = frappe.db.count('RSVMitglied', filters = dict(rsvmandat=details.name, status='Geprüft'))
         if details.typ == 'EM':
             qty = 1
         
@@ -27,9 +27,9 @@ def get_cards():
             va_badge = '<span class="badge open">✔</span>'
 
         card_template = """
-            <article class="case-card" data-mandatsliste="{mandatsliste}" data-mandatslistentyp="{typ}" onclick="show_detail_card('{mandatsliste}')">
+            <article class="case-card" data-mandat="{mandat}" data-mandattyp="{typ}" onclick="show_detail_card('{mandat}')">
                 <div class="badges">
-                    <span class="badge">{mandatsliste}</span>
+                    <span class="badge">{mandat}</span>
                     <span class="badge">{typ}</span>
                     <span class="badge">Anz. Mandate: {qty}</span>
                     {va_badge}
@@ -42,13 +42,13 @@ def get_cards():
                 </div>
             </article>
         """.format(titel=details.bezeichnung or details.name, kurzbeschrieb=details.kurzbeschrieb or 'Klicken sie hier für mehr Informationen.',
-                   mandatsliste=details.name, typ=details.typ, qty=qty, va_badge=va_badge,
+                   mandat=details.name, typ=details.typ, qty=qty, va_badge=va_badge,
                    frist=details.frist or '-')
 
         return card_template
     
-    def get_detail_card(mandatsliste):
-        def get_einzelmandat_details(mandatsliste):
+    def get_detail_card(mandat):
+        def get_einzelmandat_details(mandat):
             return_data = """"""
 
             einzelmandat_template = """
@@ -95,39 +95,39 @@ def get_cards():
                     FROM `tabRSVMitglied` m
                     LEFT JOIN `tabRSV Thema MultiTable` t
                         ON t.parent = m.name
-                    WHERE m.rsvmandatsliste = '{0}'
+                    WHERE m.rsvmandat = '{0}'
                     AND m.status = 'Geprüft'
                     GROUP BY m.name
-                """.format(mandatsliste.name),
+                """.format(mandat.name),
                 as_dict=True
             )
 
             loop = 1
             for einzelmandat in einzelmandate:
                 return_data += einzelmandat_template.format(beschreibung=einzelmandat.beschreibung or '-', bezirk=einzelmandat.bezirk or '-',
-                                                            loop=loop, thema=einzelmandat.themen or '', frist=mandatsliste.frist or '-',
-                                                            verhandlungsdatum=mandatsliste.verhandlungsdatum or '-',
+                                                            loop=loop, thema=einzelmandat.themen or '', frist=mandat.frist or '-',
+                                                            verhandlungsdatum=mandat.verhandlungsdatum or '-',
                                                             vermieterin=einzelmandat.vermieterin or '-', verwaltung=einzelmandat.verwaltung or '-')
                 loop += 1
             
             return return_data
         
-        if mandatsliste.typ == 'KGM':
-            qty = frappe.db.count('RSVMitglied', filters = dict(rsvmandatsliste=mandatsliste.name, status='Geprüft'))
-        if mandatsliste.typ == 'EM':
+        if mandat.typ == 'KGM':
+            qty = frappe.db.count('RSVMitglied', filters = dict(rsvmandat=mandat.name, status='Geprüft'))
+        if mandat.typ == 'EM':
             qty = 1
         
         status_pill = '<span class="status-pill">Offen für Interesse</span>'
         interessiert_btn = 'Ja, ich bin interessiert'
         interessiert_btn_color = 'primary'
-        va_in_list = is_va_already_in_list(mandatsliste.name)
+        va_in_list = is_va_already_in_list(mandat.name)
         if va_in_list:
             status_pill = '<span class="status-pill">Interesse bereits hinterlegt</span>'
             interessiert_btn = 'kein Interesse'
             interessiert_btn_color = 'danger'
 
         detail_card_template = """
-            <section class="detail hidden" data-belongstomandatsliste="{mandatsliste}">
+            <section class="detail hidden" data-belongstomandat="{mandat}">
                 <div class="detail-header">
                     <div>
                         <h2>{titel}</h2>
@@ -163,21 +163,21 @@ def get_cards():
                     <h3>Interesse hinterlegen</h3>
 
                     <label for="message">Nachricht / Bemerkung</label>
-                    <textarea id="message-{mandatsliste}" placeholder="Kurze Bemerkung zu Kapazität, Erfahrung oder Rückfragen..."></textarea>
+                    <textarea id="message-{mandat}" placeholder="Kurze Bemerkung zu Kapazität, Erfahrung oder Rückfragen..."></textarea>
 
                     <div class="actions">
-                        <button class="btn-{interessiert_btn_color}" onclick="take('{mandatsliste}', '{va_in_list}')">{interessiert_btn}</button>
+                        <button class="btn-{interessiert_btn_color}" onclick="take('{mandat}', '{va_in_list}')">{interessiert_btn}</button>
                     </div>
                 </div>
             </section>
-        """.format(mandatsliste=mandatsliste.name, titel=mandatsliste.bezeichnung or mandatsliste.name,
-                   language=mandatsliste.language or 'Deutsch', qty=qty, typ=mandatsliste.typ, kurzbeschrieb=mandatsliste.kurzbeschrieb or '',
-                   frist=mandatsliste.frist or '-', verhandlungsdatum=mandatsliste.verhandlungsdatum or '-', interessiert_btn_color=interessiert_btn_color,
-                   einzelmandat_details=get_einzelmandat_details(mandatsliste), status_pill=status_pill, va_in_list=va_in_list, interessiert_btn=interessiert_btn)
+        """.format(mandat=mandat.name, titel=mandat.bezeichnung or mandat.name,
+                   language=mandat.language or 'Deutsch', qty=qty, typ=mandat.typ, kurzbeschrieb=mandat.kurzbeschrieb or '',
+                   frist=mandat.frist or '-', verhandlungsdatum=mandat.verhandlungsdatum or '-', interessiert_btn_color=interessiert_btn_color,
+                   einzelmandat_details=get_einzelmandat_details(mandat), status_pill=status_pill, va_in_list=va_in_list, interessiert_btn=interessiert_btn)
 
         return detail_card_template
     
-    mandatslisten = frappe.db.sql(
+    mandate = frappe.db.sql(
         """
             SELECT
                 `name`,
@@ -188,7 +188,7 @@ def get_cards():
                 `kurzbeschrieb`,
                 `frist`,
                 `verhandlungsdatum`
-            FROM `tabRSVMandatsliste`
+            FROM `tabRSVMandat`
             WHERE `publikation_per` >= CURDATE() - INTERVAL 7 DAY
             AND `publikation_per` <= CURDATE()
             AND `typ` IN ('EM', 'KGM')
@@ -198,17 +198,17 @@ def get_cards():
     
     cards = []
     detail_cards = []
-    for mandatsliste in mandatslisten:
-        card = get_card(mandatsliste)
+    for mandat in mandate:
+        card = get_card(mandat)
         if card:
             cards.append(card)
-            detail_cards.append(get_detail_card(mandatsliste))
+            detail_cards.append(get_detail_card(mandat))
     
     return cards, detail_cards
 
 @frappe.whitelist()
-def add_va(mandatsliste, bemerkung):
-    ml = frappe.get_doc("RSVMandatsliste", mandatsliste)
+def add_va(mandat, bemerkung):
+    ml = frappe.get_doc("RSVMandat", mandat)
     row = ml.append("va_vergabe", {})
     row.va_user = frappe.session.user
     row.remarks = bemerkung
@@ -216,15 +216,15 @@ def add_va(mandatsliste, bemerkung):
     return
 
 @frappe.whitelist()
-def remove_va(mandatsliste):
-    ml = frappe.get_doc("RSVMandatsliste", mandatsliste)
+def remove_va(mandat):
+    ml = frappe.get_doc("RSVMandat", mandat)
     for va in ml.va_vergabe:
         if va.va_user == frappe.session.user:
             ml.remove(va)
     ml.save(ignore_permissions=True)
     return
 
-def is_va_already_in_list(mandatsliste):
-    qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabVA Vergabe TBL` WHERE `parent` = '{0}' AND `va_user` = '{1}'""".format(mandatsliste, frappe.session.user), as_dict=True)[0].qty
+def is_va_already_in_list(mandat):
+    qty = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabVA Vergabe TBL` WHERE `parent` = '{0}' AND `va_user` = '{1}'""".format(mandat, frappe.session.user), as_dict=True)[0].qty
     if qty > 0: return True
     return False

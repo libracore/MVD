@@ -4,7 +4,7 @@
 import frappe
 
 @frappe.whitelist()
-def get_rsvmandatsliste_typ_counts():
+def get_rsvmandat_typ_counts():
     return frappe.db.sql(
         """
             SELECT
@@ -12,8 +12,8 @@ def get_rsvmandatsliste_typ_counts():
                 COUNT(DISTINCT `l`.`name`) AS `listen_count`,
                 COUNT(`m`.`name`) AS `mandat_count`,
                 GROUP_CONCAT(DISTINCT `l`.`name`) AS `listen`
-            FROM `tabRSVMandatsliste` AS `l`
-            LEFT JOIN `tabRSVMitglied` AS `m` ON `m`.`rsvmandatsliste` = `l`.`name`
+            FROM `tabRSVMandat` AS `l`
+            LEFT JOIN `tabRSVMitglied` AS `m` ON `m`.`rsvmandat` = `l`.`name`
             GROUP BY IFNULL(NULLIF(`l`.`typ`, ''), 'Ohne Typ')
             ORDER BY `listen_count` DESC
         """,

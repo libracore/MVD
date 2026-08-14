@@ -1,8 +1,8 @@
-function show_detail_card(mandatsliste) {
+function show_detail_card(mandat) {
     $('.detail').addClass('hidden');
     $('.case-card.active').removeClass('active');
-    $(`[data-mandatsliste="${mandatsliste}"]`).addClass('active');
-    $(`[data-belongstomandatsliste="${mandatsliste}"]`).removeClass('hidden');
+    $(`[data-mandat="${mandate}"]`).addClass('active');
+    $(`[data-belongstomandat="${mandat}"]`).removeClass('hidden');
 }
 
 function download_zip(mandat) {
@@ -13,13 +13,13 @@ function download_zip(mandat) {
     window.open(url, "_blank");
 }
 
-function add_fallnummer(mandatsliste) {
+function add_fallnummer(mandat) {
     $('main').css('filter', 'blur(5px)');
     frappe.call({
         method: "mvd.www.va.meine_mandate.add_fallnummer",
         args: {
-            mandatsliste: mandatsliste,
-            fallnummer: $(`#fallnummer-${mandatsliste}`).val()
+            mandat: mandat,
+            fallnummer: $(`#fallnummer-${mandat}`).val()
         },
         freeze: true,
         freeze_message: 'Erfasse Fallnummer...',

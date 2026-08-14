@@ -128,8 +128,8 @@
   {
    "fieldname": "mandat",
    "fieldtype": "Link",
-   "label": "Mandat",
-   "options": "RSVMandatsliste"
+   "label": "RSV-Mandat",
+   "options": "RSVMandat"
   },
   {
    "fieldname": "pfad_legacy",
@@ -184,7 +184,7 @@
    "label": "Pfad \u00f6ffnen"
   }
  ],
- "modified": "2026-08-10 17:42:16.094241",
+ "modified": "2026-08-11 17:42:16.094241",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Siedlungsfall",

@@ -1,17 +1,17 @@
-function show_detail_card(mandatsliste) {
+function show_detail_card(mandat) {
     $('.detail').addClass('hidden');
     $('.case-card.active').removeClass('active');
-    $(`[data-mandatsliste="${mandatsliste}"]`).addClass('active');
-    $(`[data-belongstomandatsliste="${mandatsliste}"]`).removeClass('hidden');
+    $(`[data-mandat="${mandat}"]`).addClass('active');
+    $(`[data-belongstomandat="${mandat}"]`).removeClass('hidden');
 }
 
-function take(mandatsliste, va_in_list) {
+function take(mandat, va_in_list) {
     if (va_in_list === 'True') {
         $('main').css('filter', 'blur(5px)');
         frappe.call({
             method: "mvd.www.va.vergabeliste.remove_va",
             args: {
-                mandatsliste: mandatsliste
+                mandat: mandat
             },
             freeze: true,
             freeze_message: 'Entferne Interesse...',
@@ -30,8 +30,8 @@ function take(mandatsliste, va_in_list) {
         frappe.call({
             method: "mvd.www.va.vergabeliste.add_va",
             args: {
-                mandatsliste: mandatsliste,
-                bemerkung: $(`#message-${mandatsliste}`).val()
+                mandat: mandat,
+                bemerkung: $(`#message-${mandat}`).val()
             },
             freeze: true,
             freeze_message: 'Erfasse Interesse...',

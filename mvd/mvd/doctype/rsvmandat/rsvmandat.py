@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import cint
 
-class RSVMandatsliste(Document):
+class RSVMandat(Document):
     def before_save(self):
         already_added_themen = []
         all_themen = []
@@ -16,27 +16,27 @@ class RSVMandatsliste(Document):
         self.set("thema", [])
         self.set("sprachen", [])
         
-        mandate = frappe.db.sql(
+        rsv_mitglieder = frappe.db.sql(
             """
                 SELECT `name`
                 FROM `tabRSVMitglied`
-                WHERE `rsvmandatsliste` = '{0}'
+                WHERE `rsvmandat` = '{0}'
             """.format(self.name),
             as_dict=True
         )
-        for mandat in mandate:
-            # Setzen Werte aus RSVMandatliste in RSVMitglied & Sync Themen
-            frappe.db.set_value("RSVMitglied", mandat.name, "fallnummer", self.fallnummer)
-            frappe.db.set_value("RSVMitglied", mandat.name, "vermieterin", self.vermieterin)
-            frappe.db.set_value("RSVMitglied", mandat.name, "verwaltung", self.verwaltung)
-            frappe.db.set_value("RSVMitglied", mandat.name, "bezirk", self.bezirk)
+        for rsv_mitglied in rsv_mitglieder:
+            # Setzen Werte aus RSVMandat in RSVMitglied & Sync Themen
+            frappe.db.set_value("RSVMitglied", rsv_mitglied.name, "fallnummer", self.fallnummer)
+            frappe.db.set_value("RSVMitglied", rsv_mitglied.name, "vermieterin", self.vermieterin)
+            frappe.db.set_value("RSVMitglied", rsv_mitglied.name, "verwaltung", self.verwaltung)
+            frappe.db.set_value("RSVMitglied", rsv_mitglied.name, "bezirk", self.bezirk)
 
-            all_themen, already_added_themen = self.sync_themen(mandat.name, all_themen, already_added_themen)
+            all_themen, already_added_themen = self.sync_themen(rsv_mitglied.name, all_themen, already_added_themen)
 
         self.sync_sprachen()
     
     def sync_themen(self, rsvmitglied, all_themen, already_added_themen):
-        # Übernehmen aller Themen aus RSVMitglied in RSVMandatliste
+        # Übernehmen aller Themen aus RSVMitglied in RSVMandat
         themen = frappe.db.sql(
             """
                 SELECT `thema`
@@ -68,7 +68,7 @@ class RSVMandatsliste(Document):
             """
                 SELECT `language`
                 FROM `tabRSVMitglied`
-                WHERE `rsvmandatsliste` = '{0}'
+                WHERE `rsvmandat` = '{0}'
             """.format(self.name),
             as_dict=True
         )
@@ -87,7 +87,7 @@ class RSVMandatsliste(Document):
     
     def reset_status(self):
         # Wird via "Speichern" von RSVMitglied getriggert
-        refs = frappe.db.count("RSVMitglied", {'rsvmandatsliste': self.name}, ['name'])
+        refs = frappe.db.count("RSVMitglied", {'rsvmandat': self.name}, ['name'])
         if cint(refs) < 2 and self.typ != 'EM':
             self.typ = 'EM'
         elif cint(refs) >= 2 and cint(refs) <= 9 and self.typ != 'KGM':
@@ -95,8 +95,8 @@ class RSVMandatsliste(Document):
         elif cint(refs) > 9 and self.typ != 'GGM':
             self.typ = 'GGM'
 
-def update_rsvmandatlise(rsvmitglied, rsvmandatsliste):
-    rsvml = frappe.get_doc("RSVMandatsliste", rsvmandatsliste)
+def update_rsvmandat(rsvmitglied, rsvmandat):
+    rsvml = frappe.get_doc("RSVMandat", rsvmandat)
     rsvml.reset_status()
     rsvml.before_save()
     rsvml.save()

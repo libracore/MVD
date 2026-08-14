@@ -12,7 +12,7 @@ def execute(filters=None):
 
 def get_columns():
     return[
-        {"label": _("Mandat Liste"), "fieldname": "mandat_liste", "fieldtype": "Link", "options": "RSVMandatsliste"},
+        {"label": _("Mandat Liste"), "fieldname": "mandat_liste", "fieldtype": "Link", "options": "RSVMandat"},
         {"label": _("RSVMitglied"), "fieldname": "mandat", "fieldtype": "Link", "options": "RSVMitglied"},
         {"label": _("Coop Fallnr."), "fieldname": "coop_fallnummer", "fieldtype": "Data"},
         {"label": _("Mitglied seit"), "fieldname": "mitglied_seit", "fieldtype": "Date"},
@@ -43,7 +43,7 @@ def get_data():
 
     for mandat in mandate:
         return_data.append({
-            'mandat_liste': mandat.rsvmandatsliste,
+            'mandat_liste': mandat.rsvmandat,
             'mandat': mandat.name,
             'coop_fallnummer': mandat.fallnummer,
             'mitglied_seit': mandat.mitglied_seit,
@@ -54,7 +54,7 @@ def get_data():
             'vorname': mandat.vorname,
             'wohnort': "{0} {1}, {2} {3}".format(mandat.strasse, mandat.hausnummer, mandat.plz, mandat.ort),
             'vertrauensanwalt': mandat.anwalt,
-            'gruppenmandat': 1 if mandat.rsvmandatsliste else 0,
+            'gruppenmandat': 1 if mandat.rsvmandat else 0,
             'doppelversicherung': mandat.doppelversicherung,
             'doppelversicherung_bei': mandat.doppelversicherung_bei,
             'unterlagen_bei_ra': mandat.unterlagen_bei_ra,

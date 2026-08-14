@@ -12,8 +12,8 @@
   "status",
   "open_beratung",
   "cb_1",
-  "rsvmandatsliste",
-  "get_or_create_rsv_mandat_list",
+  "rsvmandat",
+  "get_or_create_rsv_mandat",
   "anwalt",
   "datum_vergabe",
   "datum_pruefung",
@@ -55,8 +55,8 @@
   "force_new_rsvmandatliste",
   "adr_egaid",
   "bfs_nr",
-  "reason_missing_rsvmandatlist",
-  "mandatslisten_und_siedlungs_sperre"
+  "reason_missing_rsvmandat",
+  "mandat_und_siedlungs_sperre"
  ],
  "fields": [
   {
@@ -195,10 +195,10 @@
    "label": "force_new_rsvmandatliste"
   },
   {
-   "fieldname": "rsvmandatsliste",
+   "fieldname": "rsvmandat",
    "fieldtype": "Link",
-   "label": "RSV-Mandatsliste",
-   "options": "RSVMandatsliste"
+   "label": "RSV-Mandat",
+   "options": "RSVMandat"
   },
   {
    "fieldname": "schlichtungsbehoerde",
@@ -250,16 +250,16 @@
    "label": "Mitgliedschafts\u00fcbersicht"
   },
   {
-   "fieldname": "reason_missing_rsvmandatlist",
+   "fieldname": "reason_missing_rsvmandat",
    "fieldtype": "Data",
-   "label": "Grund f\u00fcr fehlende RSV-Mandatsliste",
+   "label": "Grund f\u00fcr fehlende RSV-Mandat",
    "length": 300
   },
   {
    "default": "0",
-   "fieldname": "mandatslisten_und_siedlungs_sperre",
+   "fieldname": "mandat_und_siedlungs_sperre",
    "fieldtype": "Check",
-   "label": "mandatslisten_und_siedlungs_sperre"
+   "label": "mandat_und_siedlungs_sperre"
   },
   {
    "default": "0",
@@ -337,10 +337,10 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.rsvmandatsliste",
-   "fieldname": "get_or_create_rsv_mandat_list",
+   "depends_on": "eval:!doc.rsvmandat",
+   "fieldname": "get_or_create_rsv_mandat",
    "fieldtype": "Button",
-   "label": "Mandate \u00fcber Adresse pr\u00fcfen"
+   "label": "RSV-Mandate \u00fcber Adresse pr\u00fcfen"
   },
   {
    "fetch_from": "mv_mitgliedschaft.language",
@@ -354,7 +354,7 @@
    "fieldtype": "HTML"
   }
  ],
- "modified": "2026-08-13 15:51:03.502353",
+ "modified": "2026-08-15 15:51:03.502353",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",

@@ -1,19 +1,19 @@
 {
  "content": null,
- "creation": "2026-05-27 16:01:02.138833",
+ "creation": "2026-08-14 14:25:33.070350",
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2026-05-27 16:01:02.138833",
+ "modified": "2026-08-14 14:25:33.070350",
  "modified_by": "Administrator",
  "module": "MVD",
- "name": "rsvmandatsliste-over",
+ "name": "rsvmandat-overview",
  "owner": "Administrator",
- "page_name": "rsvmandatsliste-overview",
+ "page_name": "rsvmandat-overview",
  "roles": [],
  "script": null,
  "standard": "Yes",
  "style": null,
  "system_page": 0,
- "title": "RSV-Mandatsliste \u00dcbersicht"
+ "title": "RSV-Mandat \u00dcbersicht"
 }

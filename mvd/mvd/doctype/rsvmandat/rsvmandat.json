@@ -1,0 +1,136 @@
+{
+ "allow_rename": 1,
+ "autoname": "RSVML-.######",
+ "creation": "2026-08-14 13:51:53.390225",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "typ",
+  "bezeichnung",
+  "siedlung",
+  "bezirk",
+  "vermieterin",
+  "verwaltung",
+  "thema",
+  "sprachen",
+  "section_va_vergabe",
+  "publikation_per",
+  "frist",
+  "verhandlungsdatum",
+  "language",
+  "fallnummer",
+  "kurzbeschrieb",
+  "va_vergabe"
+ ],
+ "fields": [
+  {
+   "fieldname": "typ",
+   "fieldtype": "Select",
+   "label": "Typ",
+   "options": "EM\nKGM\nGGM"
+  },
+  {
+   "fieldname": "bezeichnung",
+   "fieldtype": "Data",
+   "label": "Bezeichnung"
+  },
+  {
+   "fieldname": "siedlung",
+   "fieldtype": "Link",
+   "label": "Siedlung",
+   "options": "Siedlung"
+  },
+  {
+   "fieldname": "bezirk",
+   "fieldtype": "Data",
+   "label": "Bezirk"
+  },
+  {
+   "fieldname": "vermieterin",
+   "fieldtype": "Data",
+   "label": "Gegenseite (Vermieterin)"
+  },
+  {
+   "fieldname": "verwaltung",
+   "fieldtype": "Data",
+   "label": "Gegenseite (Verwaltung)"
+  },
+  {
+   "fieldname": "thema",
+   "fieldtype": "Table MultiSelect",
+   "label": "Thema",
+   "options": "RSV Thema MultiTable"
+  },
+  {
+   "fieldname": "sprachen",
+   "fieldtype": "Table MultiSelect",
+   "label": "Sprache(n)",
+   "options": "RSV Sprache MultiTable"
+  },
+  {
+   "fieldname": "section_va_vergabe",
+   "fieldtype": "Section Break",
+   "label": "VA Vergabe"
+  },
+  {
+   "fieldname": "publikation_per",
+   "fieldtype": "Date",
+   "label": "Datum Publikation per"
+  },
+  {
+   "fieldname": "frist",
+   "fieldtype": "Data",
+   "label": "Frist"
+  },
+  {
+   "fieldname": "verhandlungsdatum",
+   "fieldtype": "Data",
+   "label": "Verhandlungsdatum"
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Select",
+   "label": "Sprache",
+   "options": "Deutsch\nEnglisch\nFranz\u00f6sisch\nItalienisch\nSonstiges"
+  },
+  {
+   "fieldname": "fallnummer",
+   "fieldtype": "Data",
+   "label": "Fallnummer"
+  },
+  {
+   "fieldname": "kurzbeschrieb",
+   "fieldtype": "Text",
+   "label": "Kurzbeschrieb"
+  },
+  {
+   "fieldname": "va_vergabe",
+   "fieldtype": "Table",
+   "label": "VA Vergabe",
+   "options": "VA Vergabe TBL"
+  }
+ ],
+ "modified": "2026-08-14 13:51:53.390225",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "RSVMandat",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "bezeichnung"
+}

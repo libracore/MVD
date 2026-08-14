@@ -70,35 +70,35 @@ frappe.ui.form.on('RSVMitglied', {
     },
     get_or_create_rsv_mandat_list: function(frm) {
         frappe.call({
-            method: "get_or_create_rsv_mandat_list",
+            method: "get_or_create_rsv_mandat",
             doc: frm.doc,
             args: {
                 for_lookup: 1
             },
             freeze: true,
-            freeze_message: 'Suche zugehörige Mandatslisten...',
+            freeze_message: 'Suche zugehörige RSV-Mandate...',
             callback: function(rsv_mandat_list)
             {
-                var response = rsv_mandat_list.message;
+                var response = rsv_mandat.message;
                 if (response.qty > 0) {
-                    rsv_mandat_listen_selektion(frm, response.rsvmandatsliste);
+                    rsv_mandat_selektion(frm, response.rsvmandat);
                 } else {
                     frappe.confirm(
-                        'Es wurde keine zugehörige RSV Mandatsliste gefunden.<br>Möchten Sie eine neue Anlegen?',
+                        'Es wurde keine zugehörige RSV Mandat gefunden.<br>Möchten Sie ein neues Anlegen?',
                         function(){
                             // on yes
                             frappe.call({
-                                method: "get_or_create_rsv_mandat_list",
+                                method: "get_or_create_rsv_mandat",
                                 doc: frm.doc,
                                 args: {
-                                    force_new_rsvmandatliste: 1
+                                    force_new_rsvmandat: 1
                                 },
                                 freeze: true,
-                                freeze_message: 'Neuanlage Mandatsliste...',
-                                callback: function(rsv_mandat_list)
+                                freeze_message: 'Neuanlage RSV-Mandat...',
+                                callback: function(rsv_mandat)
                                 {
-                                    var response = rsv_mandat_list.message;
-                                    cur_frm.set_value("rsvmandatsliste", response);
+                                    var response = rsv_mandat.message;
+                                    cur_frm.set_value("rsvmandat", response);
                                     cur_frm.save();
                                 }
                             });
@@ -172,25 +172,25 @@ function rsv_mandat_listen_selektion(frm, rsv_mandatliste) {
 
     var d = new frappe.ui.Dialog({
         'fields': [
-            {'fieldname': 'rsv_mandatliste', 'fieldtype': 'Link', 'options': 'RSVMandatsliste', 'label': 'Gefundene RSV-Mandatslisten', 'reqd': 1,
+            {'fieldname': 'rsv_mandat', 'fieldtype': 'Link', 'options': 'RSVMandat', 'label': 'Gefundene RSV-Mandate', 'reqd': 1,
                 'get_query': function() { return { filters: {'name': ['in', filter_names]}}},
-                'description': "Sie können entweder im obigen Feld eine gefundene RSV-Mandatsliste auswählen und verknüpfen, oder nachfolgend eine Neuanlage erzwingen."
+                'description': "Sie können entweder im obigen Feld ein gefundenes RSV-Mandat auswählen und verknüpfen, oder nachfolgend eine Neuanlage erzwingen."
             },
-            {'fieldname': 'neuanlage', 'fieldtype': 'Button', 'label': 'RSV-Mandatsliste Neuanlage',
+            {'fieldname': 'neuanlage', 'fieldtype': 'Button', 'label': 'RSV-Mandat Neuanlage',
                 'click': function() {
                     d.hide();
                     frappe.call({
-                        method: "get_or_create_rsv_mandat_list",
+                        method: "get_or_create_rsv_mandat",
                         doc: frm.doc,
                         args: {
-                            force_new_rsvmandatliste: 1
+                            force_new_rsvmandat: 1
                         },
                         freeze: true,
-                        freeze_message: 'Neuanlage Mandatsliste...',
-                        callback: function(rsv_mandat_list)
+                        freeze_message: 'Neuanlage RSV-Mandat...',
+                        callback: function(rsv_mandat)
                         {
-                            var response = rsv_mandat_list.message;
-                            cur_frm.set_value("rsvmandatsliste", response);
+                            var response = rsv_mandat.message;
+                            cur_frm.set_value("rsvmandat", response);
                             cur_frm.save();
                         }
                     });
@@ -199,7 +199,7 @@ function rsv_mandat_listen_selektion(frm, rsv_mandatliste) {
         ],
         primary_action: function(){
             d.hide();
-            cur_frm.set_value("rsvmandatsliste", d.get_value("rsv_mandatliste"));
+            cur_frm.set_value("rsvmandat", d.get_value("rsv_mandat"));
             cur_frm.save();
         },
         primary_action_label: __('Verknüpfen'),
