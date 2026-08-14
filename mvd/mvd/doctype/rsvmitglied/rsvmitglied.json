@@ -52,7 +52,7 @@
   "dokumente",
   "create_zip_file",
   "section_workflow_helper",
-  "force_new_rsvmandatliste",
+  "force_new_rsvmandat",
   "adr_egaid",
   "bfs_nr",
   "reason_missing_rsvmandat",
@@ -190,9 +190,9 @@
   },
   {
    "default": "0",
-   "fieldname": "force_new_rsvmandatliste",
+   "fieldname": "force_new_rsvmandat",
    "fieldtype": "Check",
-   "label": "force_new_rsvmandatliste"
+   "label": "force_new_rsvmandat"
   },
   {
    "fieldname": "rsvmandat",
@@ -354,7 +354,7 @@
    "fieldtype": "HTML"
   }
  ],
- "modified": "2026-08-15 15:51:03.502353",
+ "modified": "2026-08-15 15:52:03.502353",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",

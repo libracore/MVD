@@ -83,7 +83,7 @@ class RSVMitglied(Document):
                 'rsvmitglied': self.name,
                 'rsvmandat': self.rsvmandat
             }
-            enqueue("mvd.mvd.doctype.rsvmandat.rsvmandat.update_rsvmandatlise", queue='short', job_name='Update {0}'.format(self.rsvmandat), timeout=5000, **args)
+            enqueue("mvd.mvd.doctype.rsvmandat.rsvmandat.update_rsvmandat", queue='short', job_name='Update {0}'.format(self.rsvmandat), timeout=5000, **args)
 
         if self.mv_mitgliedschaft:
             args = {
@@ -152,7 +152,7 @@ class RSVMitglied(Document):
         else:
             if for_lookup:
                 return "Keine Siedlung gefunden"
-            self.reason_missing_rsvmandatlist = "Auf Basis der Adressdaten konnte keine Siedlung zugeordnet werden.<br>Eine entsprechendes RSV-Mandat muss manuell angelegt und verknüpft werden."
+            self.reason_missing_rsvmandat = "Auf Basis der Adressdaten konnte keine Siedlung zugeordnet werden.<br>Eine entsprechendes RSV-Mandat muss manuell angelegt und verknüpft werden."
         
         return None
     
@@ -184,8 +184,8 @@ class RSVMitglied(Document):
         
         return beratung[0].name
     
-    def get_or_create_rsv_mandat_list(self, force_new_rsvmandatliste=0, for_lookup=False):
-        return self.get_gruppenmandat(force_new_rsvmandatliste=force_new_rsvmandatliste, for_lookup=for_lookup)
+    def get_or_create_rsv_mandat(self, force_new_rsvmandat=0, for_lookup=False):
+        return self.get_gruppenmandat(force_new_rsvmandat=force_new_rsvmandat, for_lookup=for_lookup)
 
 
 def resolve_file_path(file_url):
@@ -296,14 +296,14 @@ def get_siedlung(adr_egaid, no_auto_creation=False):
     
     return create_siedlung(adr_egaid)
 
-def get_gruppenmandat_based_on_siedlung(siedlung, force_new_rsvmandatliste=0, for_lookup=False):
+def get_gruppenmandat_based_on_siedlung(siedlung, force_new_rsvmandat=0, for_lookup=False):
     def create_gruppenmandat_based_on_siedlung(siedlung):
         new_rsvmandat = frappe.new_doc('RSVMandat')
         new_rsvmandat.siedlung = siedlung
         new_rsvmandat.insert()
         return new_rsvmandat.name
     
-    if force_new_rsvmandatliste == 1:
+    if force_new_rsvmandat == 1:
         return {
             'qty': 0,
             'rsvmandat': create_gruppenmandat_based_on_siedlung(siedlung)

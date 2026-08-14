@@ -12,8 +12,8 @@ def execute(filters=None):
 
 def get_columns():
     return[
-        {"label": _("Mandat Liste"), "fieldname": "mandat_liste", "fieldtype": "Link", "options": "RSVMandat"},
-        {"label": _("RSVMitglied"), "fieldname": "mandat", "fieldtype": "Link", "options": "RSVMitglied"},
+        {"label": _("Mandat"), "fieldname": "mandat", "fieldtype": "Link", "options": "RSVMandat"},
+        {"label": _("RSVMitglied"), "fieldname": "rsv_mitglied", "fieldtype": "Link", "options": "RSVMitglied"},
         {"label": _("Coop Fallnr."), "fieldname": "coop_fallnummer", "fieldtype": "Data"},
         {"label": _("Mitglied seit"), "fieldname": "mitglied_seit", "fieldtype": "Date"},
         {"label": _("Sendung an Coop RSV"), "fieldname": "sendung_an_coop", "fieldtype": "Date"},
@@ -33,7 +33,7 @@ def get_columns():
 
 def get_data():
     return_data = []
-    mandate = frappe.db.sql(
+    rsv_mitglieder = frappe.db.sql(
         """
             SELECT *
             FROM `tabRSVMitglied`
@@ -41,25 +41,25 @@ def get_data():
         as_dict=True
     )
 
-    for mandat in mandate:
+    for rsv_mitglied in rsv_mitglieder:
         return_data.append({
-            'mandat_liste': mandat.rsvmandat,
-            'mandat': mandat.name,
-            'coop_fallnummer': mandat.fallnummer,
-            'mitglied_seit': mandat.mitglied_seit,
-            'sendung_an_coop': mandat.sendung_an_coop,
-            'mitglied_nr': mandat.mitglied_nr,
-            'kostengutsprache': mandat.kostengutsprache,
-            'nachname': mandat.nachname,
-            'vorname': mandat.vorname,
-            'wohnort': "{0} {1}, {2} {3}".format(mandat.strasse, mandat.hausnummer, mandat.plz, mandat.ort),
-            'vertrauensanwalt': mandat.anwalt,
-            'gruppenmandat': 1 if mandat.rsvmandat else 0,
-            'doppelversicherung': mandat.doppelversicherung,
-            'doppelversicherung_bei': mandat.doppelversicherung_bei,
-            'unterlagen_bei_ra': mandat.unterlagen_bei_ra,
+            'mandat': rsv_mitglied.rsvmandat,
+            'rsv_mitglied': rsv_mitglied.name,
+            'coop_fallnummer': rsv_mitglied.fallnummer,
+            'mitglied_seit': rsv_mitglied.mitglied_seit,
+            'sendung_an_coop': rsv_mitglied.sendung_an_coop,
+            'mitglied_nr': rsv_mitglied.mitglied_nr,
+            'kostengutsprache': rsv_mitglied.kostengutsprache,
+            'nachname': rsv_mitglied.nachname,
+            'vorname': rsv_mitglied.vorname,
+            'wohnort': "{0} {1}, {2} {3}".format(rsv_mitglied.strasse, rsv_mitglied.hausnummer, rsv_mitglied.plz, rsv_mitglied.ort),
+            'vertrauensanwalt': rsv_mitglied.anwalt,
+            'gruppenmandat': 1 if rsv_mitglied.rsvmandat else 0,
+            'doppelversicherung': rsv_mitglied.doppelversicherung,
+            'doppelversicherung_bei': rsv_mitglied.doppelversicherung_bei,
+            'unterlagen_bei_ra': rsv_mitglied.unterlagen_bei_ra,
             'sachbearbeiter': "",
-            'bemerkungen': mandat.notiz
+            'bemerkungen': rsv_mitglied.notiz
         })
     
     return return_data

@@ -7,7 +7,7 @@ frappe.pages['rsvmitglied-overview'].on_page_load = function(wrapper) {
     });
 
     me.page.set_primary_action('RSV-Mandat Übersicht öffnen', () => {
-        frappe.set_route('rsvmandat-over');
+        frappe.set_route('rsvmandat-overview');
     });
 
     prepare_page(page);

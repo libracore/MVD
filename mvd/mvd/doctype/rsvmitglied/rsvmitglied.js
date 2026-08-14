@@ -23,8 +23,8 @@ frappe.ui.form.on('RSVMitglied', {
         // Eventlistener für den Schlichtungsbehörden Knopf
         frappe.mvd.schlichtungsbehoerde_listener(frm, 'uebersicht_html');
 
-        if (cur_frm.doc.reason_missing_rsvmandatlist) {
-            cur_frm.dashboard.add_comment(cur_frm.doc.reason_missing_rsvmandatlist, 'yellow', true);
+        if (cur_frm.doc.reason_missing_rsvmandat) {
+            cur_frm.dashboard.add_comment(cur_frm.doc.reason_missing_rsvmandat, 'yellow', true);
         } else {
             cur_frm.dashboard.clear_comment();
         }
@@ -77,7 +77,7 @@ frappe.ui.form.on('RSVMitglied', {
             },
             freeze: true,
             freeze_message: 'Suche zugehörige RSV-Mandate...',
-            callback: function(rsv_mandat_list)
+            callback: function(rsv_mandat)
             {
                 var response = rsv_mandat.message;
                 if (response.qty > 0) {
@@ -166,8 +166,8 @@ function load_html_overview(frm) {
     }
 }
 
-function rsv_mandat_listen_selektion(frm, rsv_mandatliste) {
-    const input = rsv_mandatliste;
+function rsv_mandat_selektion(frm, rsv_mandatliste) {
+    const input = rsv_mandat;
     const filter_names = Array.isArray(input) ? input.map(({ name }) => name) : [input];
 
     var d = new frappe.ui.Dialog({

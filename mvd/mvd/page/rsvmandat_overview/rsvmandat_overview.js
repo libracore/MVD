@@ -28,7 +28,7 @@ frappe.pages['rsvmandat-overview'].on_page_load = function(wrapper) {
 
 function load_rsvmandat_typ_counts() {
     frappe.call({
-        method: 'mvd.mvd.page.rsvmandat_over.rsvmandat_over.get_rsvmandat_typ_counts',
+        method: 'mvd.mvd.page.rsvmandat_overview.rsvmandat_overview.get_rsvmandat_typ_counts',
         callback: function(r) {
             let data = r.message || [];
             let html = '';
@@ -81,7 +81,7 @@ function load_rsvmandat_typ_counts() {
 
             $('#rsv-mandat-overview').html(html);
 
-            $('.js-show-mandate').on('click', function(e) {
+            $('.js-show-mitglieder').on('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
 
@@ -95,7 +95,7 @@ function load_rsvmandat_typ_counts() {
             });
 
 
-            $('.js-show-listen').on('click', function(e) {
+            $('.js-show-mandate').on('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
 
