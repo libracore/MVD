@@ -11,7 +11,7 @@ def get_rsvmandat_typ_counts():
                 IFNULL(NULLIF(`l`.`typ`, ''), 'Ohne Typ') AS `typ`,
                 COUNT(DISTINCT `l`.`name`) AS `mandat_count`,
                 COUNT(`m`.`name`) AS `mitglied_count`,
-                GROUP_CONCAT(DISTINCT `l`.`name`) AS `listen`
+                GROUP_CONCAT(DISTINCT `l`.`name`) AS `mandate`
             FROM `tabRSVMandat` AS `l`
             LEFT JOIN `tabRSVMitglied` AS `m` ON `m`.`rsvmandat` = `l`.`name`
             GROUP BY IFNULL(NULLIF(`l`.`typ`, ''), 'Ohne Typ')

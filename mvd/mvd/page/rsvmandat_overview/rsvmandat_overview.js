@@ -46,13 +46,13 @@ function load_rsvmandat_typ_counts() {
                 let mitgliedCount = row.mitglied_count || 0;
 
                 let color = typColors[typ] || '#4f46e5';
-                let listen = row.listen ? row.listen.split(',') : [];
+                let mandate = row.mandate ? row.mandate.split(',') : [];
 
                 html += `
                     <div
                         class="rsv-card"
                         data-typ="${frappe.utils.escape_html(typ)}"
-                        data-listen="${encodeURIComponent(JSON.stringify(listen))}"
+                        data-mandate="${encodeURIComponent(JSON.stringify(mandate))}"
                         style="border-left-color: ${color};background: ${color}12;"
                     >
                         <div
@@ -85,11 +85,11 @@ function load_rsvmandat_typ_counts() {
                 e.preventDefault();
                 e.stopPropagation();
 
-                let listen = JSON.parse(decodeURIComponent(
-                    $(this).closest('.rsv-card').attr('data-listen') || '[]'
+                let mandate = JSON.parse(decodeURIComponent(
+                    $(this).closest('.rsv-card').attr('data-mandate') || '[]'
                 ));
 
-                frappe.route_options = {rsvmandat: ['in', listen]};
+                frappe.route_options = {rsvmandat: ['in', mandate]};
 
                 frappe.set_route('List', 'RSVMitglied');
             });
