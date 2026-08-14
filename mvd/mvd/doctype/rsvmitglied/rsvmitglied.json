@@ -5,12 +5,13 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "status",
+  "open_beratung",
   "section_mandat",
   "fallnummer",
   "sendung_an_coop",
   "kostengutsprache",
-  "status",
-  "open_beratung",
+  "gescannte_dokumente",
   "cb_1",
   "rsvmandat",
   "get_or_create_rsv_mandat",
@@ -134,7 +135,8 @@
   {
    "fieldname": "speicherpfad_dokumente",
    "fieldtype": "Data",
-   "label": "Speicherpfad Dokumente"
+   "label": "Speicherpfad Dokumente (Legacy)",
+   "read_only": 1
   },
   {
    "fieldname": "vermieterin",
@@ -352,9 +354,15 @@
   {
    "fieldname": "siedlungs_adressen_html",
    "fieldtype": "HTML"
+  },
+  {
+   "default": "0",
+   "fieldname": "gescannte_dokumente",
+   "fieldtype": "Check",
+   "label": "gescannte Dokumente"
   }
  ],
- "modified": "2026-08-15 15:52:03.502353",
+ "modified": "2026-08-14 15:30:14.342350",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",
@@ -374,5 +382,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }
