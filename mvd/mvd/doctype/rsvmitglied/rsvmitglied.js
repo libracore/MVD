@@ -68,7 +68,7 @@ frappe.ui.form.on('RSVMitglied', {
             }
         });
     },
-    get_or_create_rsv_mandat_list: function(frm) {
+    get_or_create_rsv_mandat: function(frm) {
         frappe.call({
             method: "get_or_create_rsv_mandat",
             doc: frm.doc,
@@ -166,7 +166,7 @@ function load_html_overview(frm) {
     }
 }
 
-function rsv_mandat_selektion(frm, rsv_mandatliste) {
+function rsv_mandat_selektion(frm, rsv_mandat) {
     const input = rsv_mandat;
     const filter_names = Array.isArray(input) ? input.map(({ name }) => name) : [input];
 

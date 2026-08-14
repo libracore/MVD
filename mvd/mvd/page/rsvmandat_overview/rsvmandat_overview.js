@@ -42,8 +42,8 @@ function load_rsvmandat_typ_counts() {
 
             data.forEach(function(row) {
                 let typ = row.typ || 'Ohne Typ';
-                let listenCount = row.listen_count || 0;
                 let mandatCount = row.mandat_count || 0;
+                let mitgliedCount = row.mitglied_count || 0;
 
                 let color = typColors[typ] || '#4f46e5';
                 let listen = row.listen ? row.listen.split(',') : [];
@@ -62,9 +62,9 @@ function load_rsvmandat_typ_counts() {
                             ${frappe.utils.escape_html(typ)}
                         </div>
                         <div class="rsv-card-count">
-                            ${listenCount}
+                            ${mandatCount}
                             <span class="rsv-card-subcount">
-                                (${mandatCount})
+                                (${mitgliedCount})
                             </span>
                         </div>
                         <div class="rsv-card-actions">
