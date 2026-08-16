@@ -21,6 +21,7 @@
   "language",
   "fallnummer",
   "kurzbeschrieb",
+  "notizen",
   "va_vergabe"
  ],
  "fields": [
@@ -97,7 +98,7 @@
   {
    "fieldname": "fallnummer",
    "fieldtype": "Data",
-   "label": "Fallnummer"
+   "label": "Fallnummer Extern"
   },
   {
    "fieldname": "kurzbeschrieb",
@@ -109,9 +110,14 @@
    "fieldtype": "Table",
    "label": "VA Vergabe",
    "options": "VA Vergabe TBL"
+  },
+  {
+   "fieldname": "notizen",
+   "fieldtype": "Text",
+   "label": "Notizen"
   }
  ],
- "modified": "2026-08-14 15:09:36.455890",
+ "modified": "2026-08-16 12:32:41.454416",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",
@@ -132,5 +138,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "bezeichnung"
+ "title_field": "bezeichnung",
+ "track_changes": 1
 }

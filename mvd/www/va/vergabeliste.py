@@ -171,7 +171,7 @@ def get_cards():
                 </div>
             </section>
         """.format(mandat=mandat.name, titel=mandat.bezeichnung or mandat.name,
-                   language=mandat.language or 'Deutsch', qty=qty, typ=mandat.typ, kurzbeschrieb=mandat.kurzbeschrieb or '',
+                   language='TBD', qty=qty, typ=mandat.typ, kurzbeschrieb=mandat.kurzbeschrieb or '',
                    frist=mandat.frist or '-', verhandlungsdatum=mandat.verhandlungsdatum or '-', interessiert_btn_color=interessiert_btn_color,
                    einzelmandat_details=get_einzelmandat_details(mandat), status_pill=status_pill, va_in_list=va_in_list, interessiert_btn=interessiert_btn)
 
@@ -184,7 +184,7 @@ def get_cards():
                 `bezeichnung`,
                 `typ`,
                 `publikation_per`,
-                `language`,
+                -- `language`,
                 `kurzbeschrieb`,
                 `frist`,
                 `verhandlungsdatum`

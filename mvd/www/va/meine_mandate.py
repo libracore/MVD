@@ -172,7 +172,7 @@ def get_cards():
                 {einzelmandat_details}
             </section>
         """.format(mandat=mandat.name, titel=mandat.bezeichnung or mandat.name,
-                   language=mandat.language or 'Deutsch', qty=qty, typ=mandat.typ, kurzbeschrieb=mandat.kurzbeschrieb or '',
+                   language='TBD', qty=qty, typ=mandat.typ, kurzbeschrieb=mandat.kurzbeschrieb or '',
                    frist=mandat.frist or '-', verhandlungsdatum=mandat.verhandlungsdatum or '-',
                    einzelmandat_details=get_einzelmandat_details(mandat), fallnummer=mandat.fallnummer)
 
@@ -185,7 +185,7 @@ def get_cards():
                 `bezeichnung`,
                 `typ`,
                 `publikation_per`,
-                `language`,
+                -- `language`,
                 `kurzbeschrieb`,
                 `frist`,
                 `verhandlungsdatum`,
