@@ -174,7 +174,6 @@ function load_html_overview(frm) {
             },
             callback: function(r)
             {
-                console.log(r.message)
                 cur_frm.set_df_property('rsvmandat_html','options', r.message);
             }
         });

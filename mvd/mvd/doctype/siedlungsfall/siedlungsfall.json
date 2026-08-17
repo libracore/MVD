@@ -27,6 +27,8 @@
   "siedlung",
   "cb_3",
   "anz_wohnungen",
+  "section_siedlungsadressen",
+  "siedlungsadressen",
   "section_div",
   "thema",
   "mandat",
@@ -182,9 +184,19 @@
    "fieldname": "open_legacy_path",
    "fieldtype": "Button",
    "label": "Pfad \u00f6ffnen"
+  },
+  {
+   "depends_on": "eval:doc.siedlung",
+   "fieldname": "section_siedlungsadressen",
+   "fieldtype": "Section Break",
+   "label": "Siedlungsadressen"
+  },
+  {
+   "fieldname": "siedlungsadressen",
+   "fieldtype": "HTML"
   }
  ],
- "modified": "2026-08-11 17:42:16.094241",
+ "modified": "2026-08-17 15:55:06.816543",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Siedlungsfall",

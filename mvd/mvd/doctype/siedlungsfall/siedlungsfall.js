@@ -10,6 +10,17 @@ frappe.ui.form.on('Siedlungsfall', {
                     frappe.show_alert({message:__("Die betroffenen Mitgliedschaften wurden geladen"), indicator:'green'});
                 });
             });
+            // Lade Übersicht für die Siedlungsadressen
+            frappe.call({
+                method: "mvd.mvd.doctype.siedlungsfall.siedlungsfall.get_siedlungsadressen_html",
+                args:{
+                        'siedlung': cur_frm.doc.siedlung
+                },
+                callback: function(r)
+                {
+                    cur_frm.set_df_property('siedlungsadressen','options', r.message);
+                }
+            });
         }
     },
     open_legacy_path: function(frm) {

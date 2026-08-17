@@ -139,3 +139,26 @@ def update_mitglied_in_siedlungsfall(mitglied):
             )
         frappe.db.commit()
     return
+
+@frappe.whitelist()
+def get_siedlungsadressen_html(siedlung):
+    html = ""
+    siedlung_doc = frappe.get_doc("Siedlung", siedlung)
+
+    for siedlungsadresse in siedlung_doc.zugehoerige_gebaeude:
+        address_line = "{0} {1}, {2} {3}".format(siedlungsadresse.get("stn_label"), siedlungsadresse.get("adr_number"), siedlungsadresse.get("plz"), siedlungsadresse.get("wohnort"))
+        html += """
+            <div style="display: flex; padding: 6px 0; border-bottom: 1px solid #e5e5e5;">
+                <div style="width: 35%; font-weight: 600; padding-right: 15px; box-sizing: border-box;">
+                    {adr_egaid}
+                </div>
+                <div style="width: 65%; box-sizing: border-box;">
+                    {address_line}
+                </div>
+            </div>
+        """.format(
+            adr_egaid=siedlungsadresse.get("adr_egaid"),
+            address_line=address_line
+        )
+
+    return html
