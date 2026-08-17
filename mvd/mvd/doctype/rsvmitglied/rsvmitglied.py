@@ -24,11 +24,13 @@ class RSVMitglied(Document):
         if self.mv_mitgliedschaft:
             vorname = self.vorname if self.vorname else frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "vorname_1")
             nachname = self.nachname if self.nachname else frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "nachname_1")
+            mitgl_nr = self.mitglied_nr if self.mitglied_nr else frappe.db.get_value("Mitgliedschaft", self.mv_mitgliedschaft, "mitglied_nr")
         elif self.faktura_kunde:
             vorname = frappe.db.get_value("Kunden", self.faktura_kunde, "vorname")
             nachname = frappe.db.get_value("Kunden", self.faktura_kunde, "nachname")
+            mitgl_nr = self.faktura_kunde
         
-        new_name = "{0}_{1}_{2}".format(formatdate(today(), "yy-MM-dd"), vorname, nachname)
+        new_name = "{0}_{1}_{2}_{3}".format(formatdate(today(), "yy-MM-dd"), mitgl_nr, vorname, nachname)
 
         if frappe.db.exists("RSVMitglied", new_name):
             counter = frappe.db.sql(
@@ -62,13 +64,13 @@ class RSVMitglied(Document):
             else:
                 self.reason_missing_rsvmandat = "Auf Basis der Adressdaten konnte keine Gebäude ID zugeordnet werden.<br>Ein entsprechendes RSV-Mandat muss manuell angelegt und verknüpft werden."
         
-        if not cint(self.mandats_und_siedlungs_sperre) == 1:
+        if not cint(self.mandat_und_siedlungs_sperre) == 1:
             if not self.rsvmandat and self.adr_egaid:
                 self.rsvmandat = self.get_gruppenmandat(force_new_rsvmandat=cint(self.force_new_rsvmandat))
         else:
             # Keine autom. RSV-Mandat- und Siedlungsanlage durch after_insert.
             # Wird autom. wieder entfernt, da es nach after_insert keinen Nutzen mehr hat.
-            self.mandats_und_siedlungs_sperre = 0
+            self.mandat_und_siedlungs_sperre = 0
             self.reason_missing_rsvmandat = "Die allfällige autom. RSV-Mandat- sowie Siedlungsanlage wurde gesperrt. Diese müssen ggf. manuell angelegt und verknüpft werden."
         
         self.save()

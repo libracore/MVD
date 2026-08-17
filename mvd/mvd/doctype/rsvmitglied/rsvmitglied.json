@@ -1,5 +1,5 @@
 {
- "autoname": "RSVM-.######",
+ "autoname": "format:{YY}-{MM}-{DD}_{mitglied_nr}_{vorname}_{nachname}",
  "creation": "2026-05-26 10:48:39.520354",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -366,7 +366,7 @@
    "fieldtype": "HTML"
   }
  ],
- "modified": "2026-08-17 15:20:05.546992",
+ "modified": "2026-08-17 16:20:18.125779",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",
