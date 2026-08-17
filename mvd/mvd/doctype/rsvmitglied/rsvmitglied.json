@@ -70,7 +70,8 @@
   {
    "fieldname": "fallnummer",
    "fieldtype": "Data",
-   "label": "Mandat-Fallnr. (Coop)"
+   "label": "Mandat-Fallnr. (Coop)",
+   "read_only": 1
   },
   {
    "fieldname": "datum_pruefung",
@@ -162,7 +163,8 @@
    "fieldname": "thema",
    "fieldtype": "Table MultiSelect",
    "label": "Thema",
-   "options": "RSV Thema MultiTable"
+   "options": "RSV Thema MultiTable",
+   "read_only": 1
   },
   {
    "fieldname": "bfs_nr",
@@ -364,7 +366,7 @@
    "fieldtype": "HTML"
   }
  ],
- "modified": "2026-08-17 14:58:11.462865",
+ "modified": "2026-08-17 15:20:05.546992",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",
