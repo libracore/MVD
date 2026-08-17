@@ -35,7 +35,8 @@ class Dokumentenvorlage(Document):
                 "doctype": row.d_type,
                 "fieldname": row.field,
                 "replace_with": row.replace_with,
-                "function": row.function
+                "function": row.function,
+                "subject": row.subject
             }
             for row in sorted(
                 mapping_tbl,
@@ -115,7 +116,7 @@ class Dokumentenvorlage(Document):
                 )]
             if replace_with == "Funktion":
                 if replace_function == "Mail-In DMC":
-                    result[placeholder] = ['img', get_dmc_png(doc.doctype, doc.name)]
+                    result[placeholder] = ['img', get_dmc_png(doc.doctype, doc.name, config.get("subject"))]
 
         return result
 
@@ -132,13 +133,13 @@ def get_doc_fields(doctype):
         as_dict=True
     )
 
-def get_dmc_png(dt, dn):
+def get_dmc_png(dt, dn, subject=''):
     url = 'https://data.libracore.ch/phpqrcode/api/barcode.php'
 
     response = requests.get(url, params={
             "f": "png",
             "s": "dmtx",
-            "d": "mailto:mv+{dn}+{dt}@libracore.io".format(dn=dn, dt=dt),
+            "d": "mailto:mv+{dn}+{dt}@libracore.io?subject={subject}".format(dn=dn, dt=dt, subject=subject),
             "h": 80,
             "w": 80,
         }, timeout=10)

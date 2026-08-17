@@ -7,7 +7,8 @@
   "replace_with",
   "d_type",
   "field",
-  "function"
+  "function",
+  "subject"
  ],
  "fields": [
   {
@@ -47,10 +48,16 @@
    "in_list_view": 1,
    "label": "Funktion",
    "options": "Mail-In DMC"
+  },
+  {
+   "depends_on": "eval:doc.replace_with=='Funktion'&&doc.function=='Mail-In DMC'",
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Betreff"
   }
  ],
  "istable": 1,
- "modified": "2026-07-06 11:59:58.015876",
+ "modified": "2026-08-17 15:32:24.677578",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Dokumentenvorlage Mapping TBL",
