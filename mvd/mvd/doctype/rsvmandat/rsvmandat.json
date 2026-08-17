@@ -10,6 +10,7 @@
   "bezeichnung",
   "siedlung",
   "bezirk",
+  "schlichtungsbehoerde",
   "vermieterin",
   "verwaltung",
   "thema",
@@ -18,7 +19,6 @@
   "publikation_per",
   "frist",
   "verhandlungsdatum",
-  "language",
   "fallnummer",
   "kurzbeschrieb",
   "notizen",
@@ -90,12 +90,6 @@
    "label": "Verhandlungsdatum"
   },
   {
-   "fieldname": "language",
-   "fieldtype": "Select",
-   "label": "Sprache",
-   "options": "Deutsch\nEnglisch\nFranz\u00f6sisch\nItalienisch\nSonstiges"
-  },
-  {
    "fieldname": "fallnummer",
    "fieldtype": "Data",
    "label": "Fallnummer Extern"
@@ -115,9 +109,14 @@
    "fieldname": "notizen",
    "fieldtype": "Text",
    "label": "Notizen"
+  },
+  {
+   "fieldname": "schlichtungsbehoerde",
+   "fieldtype": "Data",
+   "label": "Schlichtungsbeh\u00f6rde"
   }
  ],
- "modified": "2026-08-16 12:32:41.454416",
+ "modified": "2026-08-17 14:41:03.856012",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",

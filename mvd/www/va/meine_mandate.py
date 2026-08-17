@@ -5,6 +5,7 @@ import io
 import os
 import zipfile
 from urllib.parse import unquote
+from mvd.mvd.doctype.rsvmandat.rsvmandat import get_rsv_mandat_languages
 
 no_cache = 1
 
@@ -46,7 +47,7 @@ def get_cards():
 
         return card_template
     
-    def get_detail_card(mandat):
+    def get_detail_card(mandat, mandat_sprachen):
         def get_einzelmandat_details(mandat):
             return_data = """"""
 
@@ -172,7 +173,7 @@ def get_cards():
                 {einzelmandat_details}
             </section>
         """.format(mandat=mandat.name, titel=mandat.bezeichnung or mandat.name,
-                   language='TBD', qty=qty, typ=mandat.typ, kurzbeschrieb=mandat.kurzbeschrieb or '',
+                   language=mandat_sprachen, qty=qty, typ=mandat.typ, kurzbeschrieb=mandat.kurzbeschrieb or '',
                    frist=mandat.frist or '-', verhandlungsdatum=mandat.verhandlungsdatum or '-',
                    einzelmandat_details=get_einzelmandat_details(mandat), fallnummer=mandat.fallnummer)
 
@@ -207,7 +208,8 @@ def get_cards():
         card = get_card(mandat)
         if card:
             cards.append(card)
-            detail_cards.append(get_detail_card(mandat))
+            mandat_sprachen = get_rsv_mandat_languages(mandat.name)
+            detail_cards.append(get_detail_card(mandat, mandat_sprachen))
     
     return cards, detail_cards
 

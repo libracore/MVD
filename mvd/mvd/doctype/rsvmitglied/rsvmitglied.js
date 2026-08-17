@@ -18,7 +18,7 @@ frappe.ui.form.on('RSVMitglied', {
              }
         }
 
-        // load html overview
+        // load html overview (Mitglied, Siedlungsadresse & RSV-Mandat)
         load_html_overview(frm);
         // Eventlistener für den Schlichtungsbehörden Knopf
         frappe.mvd.schlichtungsbehoerde_listener(frm, 'uebersicht_html');
@@ -161,6 +161,21 @@ function load_html_overview(frm) {
             callback: function(r)
             {
                 cur_frm.set_df_property('siedlungs_adressen_html','options', r.message);
+            }
+        });
+    }
+
+    if (cur_frm.doc.rsvmandat) {
+        // Lade Übersicht für das RSV-Mandat
+        frappe.call({
+            method: "mvd.mvd.doctype.rsvmitglied.rsvmitglied.get_rsv_mandat_html",
+            args:{
+                    'rsv_mandat': cur_frm.doc.rsvmandat
+            },
+            callback: function(r)
+            {
+                console.log(r.message)
+                cur_frm.set_df_property('rsvmandat_html','options', r.message);
             }
         });
     }

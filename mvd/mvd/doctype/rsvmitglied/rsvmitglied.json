@@ -5,9 +5,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_mandat",
   "status",
   "open_beratung",
-  "section_mandat",
   "fallnummer",
   "sendung_an_coop",
   "kostengutsprache",
@@ -40,6 +40,8 @@
   "zusatz_adresse",
   "nr_zusatz",
   "ort",
+  "section_rsvmandat",
+  "rsvmandat_html",
   "section_fallinformationen",
   "beschreibung",
   "notiz",
@@ -47,8 +49,6 @@
   "vermieterin",
   "verwaltung",
   "bezirk",
-  "schlichtungsbehoerde",
-  "entstehung",
   "thema",
   "dokumente",
   "create_zip_file",
@@ -123,11 +123,13 @@
    "label": "Ort"
   },
   {
+   "description": "Fallbeschreibung in der Externen-Seite <a href=\"/va/meine-mandate\">Meine Mandate</a> sowie <a href=\"/va/vergabeliste\">Vergabeliste</a>",
    "fieldname": "beschreibung",
    "fieldtype": "Long Text",
    "label": "Beschreibung"
   },
   {
+   "description": "Im Report \"RSV Mitglieder\" als \"Bemerkungen\" (RSVMitglied &gt; Report &gt; RSV Mandate)",
    "fieldname": "notiz",
    "fieldtype": "Small Text",
    "label": "Notiz"
@@ -155,11 +157,6 @@
    "fieldtype": "Data",
    "label": "Bezirk",
    "read_only": 1
-  },
-  {
-   "fieldname": "entstehung",
-   "fieldtype": "Small Text",
-   "label": "Entstehung"
   },
   {
    "fieldname": "thema",
@@ -201,11 +198,6 @@
    "fieldtype": "Link",
    "label": "RSV-Mandat",
    "options": "RSVMandat"
-  },
-  {
-   "fieldname": "schlichtungsbehoerde",
-   "fieldtype": "Data",
-   "label": "Schlichtungsbeh\u00f6rde"
   },
   {
    "fieldname": "dokumente",
@@ -360,9 +352,19 @@
    "fieldname": "gescannte_dokumente",
    "fieldtype": "Check",
    "label": "gescannte Dokumente"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_rsvmandat",
+   "fieldtype": "Section Break",
+   "label": "Details aus RSV-Mandat"
+  },
+  {
+   "fieldname": "rsvmandat_html",
+   "fieldtype": "HTML"
   }
  ],
- "modified": "2026-08-14 15:30:14.342350",
+ "modified": "2026-08-17 14:58:11.462865",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",

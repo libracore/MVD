@@ -5,20 +5,19 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-import requests
 from frappe.utils import cint
 from frappe.utils.data import today, formatdate
 from frappe.utils.background_jobs import enqueue
 import os
 import zipfile
 from urllib.parse import unquote
+from mvd.mvd.doctype.druckvorlage.druckvorlage import get_doc_from_ctx
+from html import escape
 try:
     from jinja2 import pass_context as context_decorator
 except ImportError:
     from jinja2 import contextfunction as context_decorator
 from jinja2.runtime import Context
-import json
-from mvd.mvd.doctype.druckvorlage.druckvorlage import get_doc_from_ctx
 
 class RSVMitglied(Document):
     def autoname(self):
@@ -48,6 +47,9 @@ class RSVMitglied(Document):
             self.faktura_kunde_name = "{0} {1}".format(frappe.db.get_value("Kunden", self.faktura_kunde, "vorname"), frappe.db.get_value("Kunden", self.faktura_kunde, "nachname"))
         else:
             self.faktura_kunde_name = None
+
+        if self.rsvmandat:
+            self.fetch_rsv_mandat_themen()
         
         self.fetch_document_table()
     
@@ -59,9 +61,6 @@ class RSVMitglied(Document):
                 self.bfs_nr = gebaeudeverzeichnis_id_and_bfs_nr.get("bfs_nr")
             else:
                 self.reason_missing_rsvmandat = "Auf Basis der Adressdaten konnte keine Gebäude ID zugeordnet werden.<br>Ein entsprechendes RSV-Mandat muss manuell angelegt und verknüpft werden."
-        
-        if not self.schlichtungsbehoerde:
-            self.schlichtungsbehoerde = get_schlichtungsbehoerde(self.bfs_nr)
         
         if not cint(self.mandats_und_siedlungs_sperre) == 1:
             if not self.rsvmandat and self.adr_egaid:
@@ -90,6 +89,16 @@ class RSVMitglied(Document):
                 'mitglied': self.mv_mitgliedschaft
             }
             enqueue("mvd.mvd.doctype.siedlungsfall.siedlungsfall.update_mitglied_in_siedlungsfall", queue='short', job_name='Update {0} in Siedlungsfall'.format(self.mv_mitgliedschaft), timeout=5000, **args)
+
+    def fetch_rsv_mandat_themen(self):
+        rsvmandat = frappe.get_doc("RSVMandat", self.rsvmandat)
+        already_added_themen = []
+        self.thema = []
+
+        for thema in rsvmandat.thema:
+            if thema.thema and thema.thema not in already_added_themen:
+                self.append("thema", {'thema': thema.thema})
+                already_added_themen.append(thema.thema)
     
     def fetch_document_table(self):
         fetched_documents = []
@@ -252,25 +261,6 @@ def get_gebaeudeverzeichnis_id(hausnummer=None, nr_zusatz=None, strasse=None, pl
     
     return None
 
-def get_schlichtungsbehoerde(bfs_nr):
-    # --- EXTERNER API CALL AN MP ---
-    api_url = "https://mp.libracore.ch/api/method/mietrechtspraxis.api.get_arbitration_authority_from_bfs"
-    try:
-        response = requests.get(api_url, params={"bfs_nr": bfs_nr}, timeout=5)
-        if response.status_code == 200:
-            response_json = response.json()
-            aa_data = response_json.get("message") if response_json else None
-            
-            if aa_data and aa_data.get("titel"):
-                return aa_data.get("titel")
-        else:
-            return None
-            
-    except Exception as e:
-        return None
-    
-    return None
-
 def get_siedlung(adr_egaid, no_auto_creation=False):
     def create_siedlung(adr_egaid):
         new_siedlung = frappe.new_doc('Siedlung')
@@ -412,3 +402,281 @@ def get_siedlungs_adressen_html(adr_egaid):
         'ort': adr.wohnort
     }
     return frappe.render_template('templates/includes/siedlungsadresse.html', data)
+
+# ---------------------------------------------------------------------------
+# (Hilfs-) Methoden für die HTML Darstellung der Informationen aus RSV-Mandat
+# ---------------------------------------------------------------------------
+@frappe.whitelist()
+def get_rsv_mandat_html(rsv_mandat):
+    fieldlist = [
+        'typ',
+        'bezeichnung',
+        'siedlung',
+        'bezirk',
+        'schlichtungsbehoerde',
+        'vermieterin',
+        'verwaltung',
+        {
+            'fieldname': 'thema',
+            'value_field': 'thema'
+        },
+        {
+            'fieldname': 'sprachen',
+            'value_field': 'sprache'
+        },
+        'publikation_per',
+        'frist',
+        'verhandlungsdatum',
+        'fallnummer',
+        'kurzbeschrieb',
+        'notizen'
+    ]
+    print("bin da")
+    return get_field_values_html("RSVMandat", rsv_mandat, fieldlist)
+
+def get_field_values_html(doctype, docname, fieldlist):
+    """
+    Erstellt eine HTML-Darstellung ausgewählter Felder eines Frappe-Dokuments.
+
+    fieldlist Beispiele:
+
+        [
+            "first_name",
+            "last_name",
+            "email"
+        ]
+
+    oder gemischt:
+
+        [
+            "first_name",
+            "last_name",
+            {
+                "fieldname": "languages",
+                "value_field": "language"
+            },
+            {
+                "fieldname": "customer_group",
+                "label": "Kundengruppe"
+            }
+        ]
+
+    Unterstützt u.a.:
+    - Data
+    - Link
+    - Select
+    - Date
+    - Datetime
+    - Currency
+    - Float
+    - Int
+    - Check
+    - Text / Small Text / Long Text
+    - Table MultiSelect
+    """
+
+    doc = frappe.get_doc(doctype, docname)
+    meta = frappe.get_meta(doctype)
+
+    rows = []
+
+    for field_config in fieldlist:
+        config = normalize_field_config(field_config)
+
+        fieldname = config["fieldname"]
+        df = meta.get_field(fieldname)
+
+        if not df:
+            continue
+
+        label = config.get("label") or df.label or fieldname
+
+        value = get_field_value_html(
+            doc=doc,
+            df=df,
+            config=config
+        )
+
+        rows.append(
+            """
+            <div style="
+                display: flex;
+                padding: 6px 0;
+                border-bottom: 1px solid #e5e5e5;
+            ">
+                <div style="
+                    width: 35%;
+                    font-weight: 600;
+                    padding-right: 15px;
+                    box-sizing: border-box;
+                ">
+                    {label}
+                </div>
+                <div style="
+                    width: 65%;
+                    box-sizing: border-box;
+                ">
+                    {value}
+                </div>
+            </div>
+            """.format(
+                label=escape(str(label)),
+                value=value
+            )
+        )
+
+    return """
+        <div style="
+            width: 100%;
+            font-size: 13px;
+            line-height: 1.4;
+        ">
+            {rows}
+        </div>
+    """.format(
+        rows="".join(rows)
+    )
+
+
+def normalize_field_config(field_config):
+    # Vereinheitlichung der field_config aka field_list
+
+    if isinstance(field_config, str):
+        return {
+            "fieldname": field_config
+        }
+
+    if isinstance(field_config, dict):
+        if not field_config.get("fieldname"):
+            frappe.throw("fieldname fehlt in fieldlist-Konfiguration.")
+
+        return field_config
+
+    frappe.throw(
+        "Ungültiger Eintrag in fieldlist: {0}".format(field_config)
+    )
+
+
+def get_field_value_html(doc, df, config):
+    if df.fieldtype == "Table MultiSelect":
+        return get_table_multiselect_html(
+            doc=doc,
+            df=df,
+            config=config
+        )
+
+    value = doc.get(df.fieldname)
+
+    if value is None or value == "":
+        return "-"
+
+    if df.fieldtype == "Check":
+        return "Ja" if value else "Nein"
+
+    if df.fieldtype in (
+        "Text",
+        "Small Text",
+        "Long Text",
+        "Text Editor"
+    ):
+        return escape(str(value)).replace("\n", "<br>")
+
+    return format_standard_value(
+        value=value,
+        df=df,
+        doc=doc
+    )
+
+
+def format_standard_value(value, df, doc):
+    try:
+        formatted_value = frappe.format_value(
+            value,
+            df=df,
+            doc=doc
+        )
+    except Exception:
+        formatted_value = value
+
+    if formatted_value is None or formatted_value == "":
+        return "-"
+
+    return escape(str(formatted_value))
+
+
+def get_table_multiselect_html(doc, df, config):
+    """
+    Formatiert ein Table MultiSelect Feld.
+
+    value_field kann explizit angegeben werden:
+
+        {
+            "fieldname": "languages",
+            "value_field": "language"
+        }
+
+    Falls value_field nicht angegeben wird, wird versucht,
+    automatisch das passende Feld im Child-Doctype zu finden.
+    """
+
+    child_rows = doc.get(df.fieldname) or []
+
+    if not child_rows:
+        return "-"
+
+    value_fieldname = config.get("value_field")
+
+    child_meta = frappe.get_meta(df.options)
+
+    if not value_fieldname:
+        value_fieldname = find_table_multiselect_value_field(child_meta)
+
+    if not value_fieldname:
+        return "-"
+
+    child_df = child_meta.get_field(value_fieldname)
+
+    values = []
+
+    for row in child_rows:
+        value = row.get(value_fieldname)
+
+        if value is None or value == "":
+            continue
+
+        if child_df:
+            formatted_value = format_standard_value(
+                value=value,
+                df=child_df,
+                doc=row
+            )
+        else:
+            formatted_value = escape(str(value))
+
+        values.append(formatted_value)
+
+    if not values:
+        return "-"
+
+    separator = config.get("separator", ", ")
+
+    return escape(separator).join(values)
+
+
+def find_table_multiselect_value_field(child_meta):
+    """
+    Versucht automatisch, das relevante Feld eines Table MultiSelect
+    Child-Doctypes zu finden.
+
+    Priorität:
+    1. Link
+    2. Data
+    3. Select
+    """
+
+    for fieldtype in ("Link", "Data", "Select"):
+        for df in child_meta.fields:
+            if df.fieldtype == fieldtype:
+                return df.fieldname
+
+    return None

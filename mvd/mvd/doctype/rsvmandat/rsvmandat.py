@@ -6,84 +6,24 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import cint
+import requests
 
 class RSVMandat(Document):
     def before_save(self):
-        already_added_themen = []
-        all_themen = []
-
-        # Pre-Cleanup
-        self.set("thema", [])
-        self.set("sprachen", [])
-        
         rsv_mitglieder = frappe.db.sql(
             """
-                SELECT `name`
+                SELECT `name`, `bfs_nr`
                 FROM `tabRSVMitglied`
                 WHERE `rsvmandat` = '{0}'
             """.format(self.name),
             as_dict=True
         )
+
         for rsv_mitglied in rsv_mitglieder:
-            # Setzen Werte aus RSVMandat in RSVMitglied & Sync Themen
             frappe.db.set_value("RSVMitglied", rsv_mitglied.name, "fallnummer", self.fallnummer)
-            frappe.db.set_value("RSVMitglied", rsv_mitglied.name, "vermieterin", self.vermieterin)
-            frappe.db.set_value("RSVMitglied", rsv_mitglied.name, "verwaltung", self.verwaltung)
-            frappe.db.set_value("RSVMitglied", rsv_mitglied.name, "bezirk", self.bezirk)
-
-            all_themen, already_added_themen = self.sync_themen(rsv_mitglied.name, all_themen, already_added_themen)
-
-        self.sync_sprachen()
-    
-    def sync_themen(self, rsvmitglied, all_themen, already_added_themen):
-        # Übernehmen aller Themen aus RSVMitglied in RSVMandat
-        themen = frappe.db.sql(
-            """
-                SELECT `thema`
-                FROM `tabRSV Thema MultiTable`
-                WHERE `parent` = '{0}'
-            """.format(rsvmitglied),
-            as_dict=True
-        )
-        
-        # Themen hinzufügen
-        for thema in themen:
-            if thema.thema and thema.thema not in already_added_themen:
-                already_added_themen.append(thema.thema)
-                self.append("thema", {'thema': thema.thema})
-            all_themen.append(thema.thema)
-        
-        # Alte, überflüssige Themen entfernen
-        for thema in self.thema:
-            if thema.thema not in all_themen:
-                self.remove(thema)
-        
-        return all_themen, already_added_themen
-    
-    def sync_sprachen(self):
-        already_added_sprachen = []
-        all_sprachen = []
-        # Übernehmen aller Sprachen aus der entsprechenden Mitgliedschaft/Kunden aus dem zugehörigen RSVMitglied #1876
-        sprachen = frappe.db.sql(
-            """
-                SELECT `language`
-                FROM `tabRSVMitglied`
-                WHERE `rsvmandat` = '{0}'
-            """.format(self.name),
-            as_dict=True
-        )
-        
-        # Sprachen hinzufügen
-        for sprache in sprachen:
-            if sprache.language and sprache.language not in already_added_sprachen:
-                self.append("sprachen", {'sprache': sprache.language})
-                already_added_sprachen.append(sprache.language)
-            all_sprachen.append(sprache.language)
-        
-        # Alte, überflüssige Sprachen entfernen
-        for sprache in self.sprachen:
-            if sprache.sprache not in all_sprachen:
-                self.remove(sprache)
+            # Setzen von Schlichtungsbehörde wenn leer
+            if not self.schlichtungsbehoerde and rsv_mitglied.bfs_nr:
+                self.schlichtungsbehoerde = get_schlichtungsbehoerde(rsv_mitglied.bfs_nr)
     
     def reset_status(self):
         # Wird via "Speichern" von RSVMitglied getriggert
@@ -101,3 +41,36 @@ def update_rsvmandat(rsvmitglied, rsvmandat):
     rsvml.before_save()
     rsvml.save()
     return
+
+def get_rsv_mandat_languages(rsv_mandat):
+    sprachen = frappe.db.sql(
+        """
+            SELECT `sprache`
+            FROM `tabRSV Sprache MultiTable`
+            WHERE `parent` = '{0}'
+        """.format(rsv_mandat),
+        as_dict=True
+    )
+
+    if len(sprachen) < 1: return ''
+
+    return ", ".join(sprache["sprache"] for sprache in sprachen)
+
+def get_schlichtungsbehoerde(bfs_nr):
+    # --- EXTERNER API CALL AN MP ---
+    api_url = "https://mp.libracore.ch/api/method/mietrechtspraxis.api.get_arbitration_authority_from_bfs"
+    try:
+        response = requests.get(api_url, params={"bfs_nr": bfs_nr}, timeout=5)
+        if response.status_code == 200:
+            response_json = response.json()
+            aa_data = response_json.get("message") if response_json else None
+            
+            if aa_data and aa_data.get("titel"):
+                return aa_data.get("titel")
+        else:
+            return None
+            
+    except Exception as e:
+        return None
+    
+    return None
