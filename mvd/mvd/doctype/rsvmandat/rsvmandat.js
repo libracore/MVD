@@ -3,6 +3,15 @@
 
 frappe.ui.form.on('RSVMandat', {
     refresh: function(frm) {
+        // check for TimestampMismatchError and reload
+        if (!frm.doc.__islocal) {
+            frappe.db.get_value(cur_frm.doctype, cur_frm.docname, 'modified').then(r => {
+                if (r.message.modified != cur_frm.doc.modified) {
+                    cur_frm.reload_doc();
+                }
+            });
+        };
+        
         frm.add_custom_button(__("Vergabeliste"),  function() {
             var domain = window.location.origin;
             window.open(`${domain}/va/vergabeliste`, '_blank');
