@@ -54,6 +54,9 @@ class RSVMitglied(Document):
             self.fetch_rsv_mandat_themen()
         
         self.fetch_document_table()
+
+        if self.status == 'Geprüft':
+            self.datum_pruefung = today()
     
     def after_insert(self):
         if not self.adr_egaid:
@@ -498,6 +501,9 @@ def get_field_values_html(doctype, docname, fieldlist):
             config=config
         )
 
+        if not value:
+            continue
+
         rows.append(
             """
             <div style="
@@ -569,7 +575,7 @@ def get_field_value_html(doc, df, config):
     value = doc.get(df.fieldname)
 
     if value is None or value == "":
-        return "-"
+        return False
 
     if df.fieldtype == "Check":
         return "Ja" if value else "Nein"
@@ -623,7 +629,7 @@ def get_table_multiselect_html(doc, df, config):
     child_rows = doc.get(df.fieldname) or []
 
     if not child_rows:
-        return "-"
+        return False
 
     value_fieldname = config.get("value_field")
 

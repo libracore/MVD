@@ -9,18 +9,12 @@
   "status",
   "open_beratung",
   "fallnummer",
-  "sendung_an_coop",
-  "kostengutsprache",
   "gescannte_dokumente",
   "cb_1",
   "rsvmandat",
   "get_or_create_rsv_mandat",
-  "anwalt",
-  "datum_vergabe",
-  "datum_pruefung",
-  "doppelversicherung",
-  "doppelversicherung_bei",
-  "unterlagen_bei_ra",
+  "section_rsvmandat",
+  "rsvmandat_html",
   "section_mitgliedschafts_overview",
   "uebersicht_html",
   "siedlungs_adressen_html",
@@ -40,8 +34,6 @@
   "zusatz_adresse",
   "nr_zusatz",
   "ort",
-  "section_rsvmandat",
-  "rsvmandat_html",
   "section_fallinformationen",
   "beschreibung",
   "notiz",
@@ -52,6 +44,15 @@
   "thema",
   "dokumente",
   "create_zip_file",
+  "section_mandatsvergabe",
+  "anwalt",
+  "datum_vergabe",
+  "datum_pruefung",
+  "doppelversicherung",
+  "doppelversicherung_bei",
+  "unterlagen_bei_ra",
+  "sendung_an_coop",
+  "kostengutsprache",
   "section_workflow_helper",
   "force_new_rsvmandat",
   "adr_egaid",
@@ -126,11 +127,11 @@
   {
    "description": "Fallbeschreibung in der Externen-Seite <a href=\"/va/meine-mandate\">Meine Mandate</a> sowie <a href=\"/va/vergabeliste\">Vergabeliste</a>",
    "fieldname": "beschreibung",
-   "fieldtype": "Long Text",
+   "fieldtype": "Small Text",
    "label": "Beschreibung"
   },
   {
-   "description": "Im Report \"RSV Mitglieder\" als \"Bemerkungen\" (RSVMitglied &gt; Report &gt; RSV Mandate)",
+   "description": "Im Report \"RSV Mitglieder\" als \"Bemerkungen\" (RSVMitglied &gt; Report &gt; RSV Mandate); Interner Verwendungszweck",
    "fieldname": "notiz",
    "fieldtype": "Small Text",
    "label": "Notiz"
@@ -356,7 +357,6 @@
    "label": "gescannte Dokumente"
   },
   {
-   "collapsible": 1,
    "fieldname": "section_rsvmandat",
    "fieldtype": "Section Break",
    "label": "Details aus RSV-Mandat"
@@ -364,9 +364,14 @@
   {
    "fieldname": "rsvmandat_html",
    "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_mandatsvergabe",
+   "fieldtype": "Section Break",
+   "label": "Mandatsvergabe"
   }
  ],
- "modified": "2026-08-17 16:20:18.125779",
+ "modified": "2026-08-18 11:17:10.068401",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",
