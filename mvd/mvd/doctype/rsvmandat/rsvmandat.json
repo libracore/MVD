@@ -9,7 +9,6 @@
   "typ",
   "bezeichnung",
   "siedlung",
-  "bezirk",
   "schlichtungsbehoerde",
   "vermieterin",
   "verwaltung",
@@ -41,11 +40,6 @@
    "fieldtype": "Link",
    "label": "Siedlung",
    "options": "Siedlung"
-  },
-  {
-   "fieldname": "bezirk",
-   "fieldtype": "Data",
-   "label": "Bezirk"
   },
   {
    "fieldname": "vermieterin",
@@ -116,7 +110,7 @@
    "label": "Schlichtungsbeh\u00f6rde"
   }
  ],
- "modified": "2026-08-17 14:41:03.856012",
+ "modified": "2026-08-18 11:00:04.707472",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",

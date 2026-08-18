@@ -72,10 +72,6 @@ def get_cards():
                             <td>Verhandlungsdatum</td>
                             <td>{verhandlungsdatum}</td>
                         </tr>
-                        <tr>
-                            <td>Bezirk</td>
-                            <td>{bezirk}</td>
-                        </tr>
                     </table>
                 </div>
 
@@ -105,7 +101,7 @@ def get_cards():
 
             loop = 1
             for einzelmandat in einzelmandate:
-                return_data += einzelmandat_template.format(beschreibung=einzelmandat.beschreibung or '-', bezirk=einzelmandat.bezirk or '-',
+                return_data += einzelmandat_template.format(beschreibung=einzelmandat.beschreibung or '-'
                                                             loop=loop, thema=einzelmandat.themen or '', frist=mandat.frist or '-',
                                                             verhandlungsdatum=mandat.verhandlungsdatum or '-',
                                                             vermieterin=einzelmandat.vermieterin or '-', verwaltung=einzelmandat.verwaltung or '-')

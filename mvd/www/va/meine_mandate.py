@@ -72,10 +72,6 @@ def get_cards():
                             <td>Verhandlungsdatum</td>
                             <td>{verhandlungsdatum}</td>
                         </tr>
-                        <tr>
-                            <td>Bezirk</td>
-                            <td>{bezirk}</td>
-                        </tr>
                     </table>
                 </div>
 
@@ -116,7 +112,7 @@ def get_cards():
                         <p>⚠️ Doppelversicherung: {0}</p>
                     """.format(einzelmandat.doppelversicherung_bei)
                 
-                return_data += einzelmandat_template.format(beschreibung=einzelmandat.beschreibung or '-', bezirk=einzelmandat.bezirk or '-',
+                return_data += einzelmandat_template.format(beschreibung=einzelmandat.beschreibung or '-',
                                                             loop=loop, thema=einzelmandat.themen or '', frist=mandat.frist or '-',
                                                             verhandlungsdatum=mandat.verhandlungsdatum or '-', mandat_name=einzelmandat.name,
                                                             vermieterin=einzelmandat.vermieterin or '-', verwaltung=einzelmandat.verwaltung or '-',

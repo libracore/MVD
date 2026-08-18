@@ -414,7 +414,6 @@ def get_rsv_mandat_html(rsv_mandat):
         'typ',
         'bezeichnung',
         'siedlung',
-        'bezirk',
         'schlichtungsbehoerde',
         'vermieterin',
         'verwaltung',
