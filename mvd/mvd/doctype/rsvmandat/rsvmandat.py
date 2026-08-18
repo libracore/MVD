@@ -12,7 +12,7 @@ class RSVMandat(Document):
     def before_save(self):
         rsv_mitglieder = frappe.db.sql(
             """
-                SELECT `name`, `bfs_nr`
+                SELECT `name`, `bfs_nr`, `sektion_id`
                 FROM `tabRSVMitglied`
                 WHERE `rsvmandat` = '{0}'
             """.format(self.name),
@@ -24,6 +24,9 @@ class RSVMandat(Document):
             # Setzen von Schlichtungsbehörde wenn leer
             if not self.schlichtungsbehoerde and rsv_mitglied.bfs_nr:
                 self.schlichtungsbehoerde = get_schlichtungsbehoerde(rsv_mitglied.bfs_nr)
+            # Setzen von sektion_id wenn leer
+            if not self.sektion_id and rsv_mitglied.sektion_id:
+                self.sektion_id = rsv_mitglied.sektion_id
     
     def reset_status(self):
         # Wird via "Speichern" von RSVMitglied getriggert

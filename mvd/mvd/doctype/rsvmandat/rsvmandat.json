@@ -14,6 +14,7 @@
   "verwaltung",
   "thema",
   "sprachen",
+  "sektion_id",
   "section_va_vergabe",
   "publikation_per",
   "frist",
@@ -108,9 +109,15 @@
    "fieldname": "schlichtungsbehoerde",
    "fieldtype": "Data",
    "label": "Schlichtungsbeh\u00f6rde"
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
   }
  ],
- "modified": "2026-08-18 11:00:04.707472",
+ "modified": "2026-08-18 12:49:39.734162",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",

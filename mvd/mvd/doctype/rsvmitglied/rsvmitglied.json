@@ -30,6 +30,7 @@
   "nachname",
   "vorname",
   "language",
+  "sektion_id",
   "cb_2",
   "zusatz_adresse",
   "nr_zusatz",
@@ -369,9 +370,16 @@
    "fieldname": "section_mandatsvergabe",
    "fieldtype": "Section Break",
    "label": "Mandatsvergabe"
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.sektion_id",
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
   }
  ],
- "modified": "2026-08-18 11:17:10.068401",
+ "modified": "2026-08-18 12:48:55.193710",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",
