@@ -14,11 +14,11 @@ no_cache=1
 def get_open_data(free_only=0, beratungsort=None, berater_in=None,
                   art=None, datum=None, language=None, fachskill=None,
                   my_reservations_only=0, beratungstyp=None, termine_heute=0,
-                  termine_gebucht=0, datum_bis=None):
+                  termine_gebucht=0, datum_bis=None, chronologische_termine=0):
     alle_termine, meine_termine, anz_eingetroffen = get_alle_beratungs_termine(frappe.session.user, free_only, beratungsort,
                                                                                berater_in, art, datum, language, fachskill,
                                                                                my_reservations_only, beratungstyp, termine_heute,
-                                                                               termine_gebucht, datum_bis)
+                                                                               termine_gebucht, datum_bis, chronologische_termine)
     datasets = {
         'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'datenstand_for_polling': now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
@@ -32,7 +32,7 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
                                berater_in=None, art=None, datum=None,
                                language=None, fachskill=None, my_reservations_only=0,
                                beratungstyp=None, termine_heute=0, termine_gebucht=0,
-                               datum_bis=None):
+                               datum_bis=None, chronologische_termine=0):
     alle = []
     meine = []
     anz_eingetroffen = 0
@@ -310,8 +310,11 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
                     else:
                         if freier_termin.reserved_by == frappe.session.user:
                             alle.append(freier_termin)
-    
-    alle_sortiert = sorted(alle, key = lambda x: (x['sort_date'], x['beraterinn'] or 'ZZZ', x['von_time']))
+
+    if cint(chronologische_termine):
+        alle_sortiert = sorted(alle, key = lambda x: (x['sort_date'], x['von_time'], x['beraterinn'] or 'ZZZ'))
+    else:
+        alle_sortiert = sorted(alle, key = lambda x: (x['sort_date'], x['beraterinn'] or 'ZZZ', x['von_time']))
     
     return alle_sortiert, meine, anz_eingetroffen
 

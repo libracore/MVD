@@ -181,12 +181,17 @@ frappe.vbz_beratung_termine = {
             beratungstyp: this.get_filter_value(
                 "beratungstyp_field",
                 "Beratungstyp"
+            ),
+
+            chronologische_termine: this.get_filter_value(
+                "chronologische_termine_field",
+                "0"
             )
         };
     },
     get_filter_values: function() {
         // Liefert den Filterzustand für den nächsten Datenabruf
-        // Beim allerersten Laden wird für MVZH automatisch free_only = "1" gesetzt
+        // Beim allerersten Laden wird für MVZH automatisch free_only = "1" und chronologische_termine = "1" gesetzt
         if (this.filter_values) {
             return Object.assign({}, this.filter_values);
         }
@@ -199,6 +204,7 @@ frappe.vbz_beratung_termine = {
             this.default_sektion === "MVZH"
         ) {
             filter_values.free_only = "1";
+            filter_values.chronologische_termine = "1";
         }
 
         this.filter_values = Object.assign(
@@ -460,6 +466,14 @@ frappe.vbz_beratung_termine = {
                 fieldname: "beratungstyp",
                 options: "Beratungstyp\nPrivat\nGeschäft",
                 placeholder: "Beratungstyp"
+            },
+            {
+                property_name: "chronologische_termine_field",
+                value_name: "chronologische_termine",
+                parent_selector: ".chronologische_termine",
+                fieldtype: "Check",
+                fieldname: "chronologische_termine",
+                label: "Termine chronologisch sortieren"
             }
         ];
     },
@@ -599,7 +613,8 @@ frappe.vbz_beratung_termine = {
             "language",
             "fachskill",
             "my_reservations_only",
-            "beratungstyp"
+            "beratungstyp",
+            "chronologische_termine"
         ];
 
         return keys.every(function(key) {
