@@ -25,11 +25,26 @@ class Dokumentenvorlage(Document):
         return
     
     def translate(self):
-        mapping_tbl = self.mapping_tbl
+        mapping_by_placeholder = {}
+
+        # 1. Mapping-Vorlage als Basis
         if self.mapping_vorlage:
-            mapping_vorlage = frappe.get_doc("Dokumentenvorlage Mapping", self.mapping_vorlage)
-            mapping_tbl = mapping_vorlage.mapping_tbl
-        
+            mapping_vorlage = frappe.get_doc(
+                "Dokumentenvorlage Mapping",
+                self.mapping_vorlage
+            )
+
+            for row in mapping_vorlage.mapping_tbl:
+                if row.platzhalter:
+                    mapping_by_placeholder[row.platzhalter] = row
+
+        # 2. Lokale Mapping-Tabelle überschreibt gleiche Platzhalter
+        for row in self.mapping_tbl:
+            if row.platzhalter:
+                mapping_by_placeholder[row.platzhalter] = row
+
+        mapping_tbl = mapping_by_placeholder.values()
+
         return {
             row.platzhalter: {
                 "doctype": row.d_type,
@@ -43,7 +58,15 @@ class Dokumentenvorlage(Document):
                 key=lambda row: len(row.platzhalter),
                 reverse=True
             )
-            if row.platzhalter and row.d_type and (row.replace_with == 'Feld' and row.field) or (row.replace_with == 'Funktion' and row.function)
+            if (
+                row.platzhalter
+                and row.d_type
+                and (
+                    (row.replace_with == "Feld" and row.field)
+                    or
+                    (row.replace_with == "Funktion" and row.function)
+                )
+            )
         }
 
     def format_value(self, value, doctype, fieldname):
