@@ -38,11 +38,35 @@ function load_rsv_status_counts() {
     frappe.call({
         method: 'mvd.mvd.page.rsvmitglied_overview.rsvmitglied_overview.get_rsvmitglied_status_counts',
         callback: function(r) {
-            let data = r.message || [];
+            let status_data = r.message.status_counts || [];
+            let new_entries = r.message.neue_rsvmitglieder || 0;
             let html = '';
 
+            // Neue Einträge
+            html += `
+                <div 
+                    class="rsv-card rsv-clickable-card"
+                    data-status="Neue-Einträge"
+                    style="border-left-color: #4f46e5; background: #4f46e512;"
+                >
+                    <div 
+                        class="rsv-card-title"
+                        style="color: #4f46e5;"
+                    >
+                        Neue
+                    </div>
+                    <div class="rsv-card-count">
+                        ${new_entries}
+                    </div>
+                    <div class="rsv-card-footer">
+                        Mandate anzeigen
+                    </div>
+                </div>
+            `;
+
             const statusColors = {
-                'Provisorisch': '#94a3b8',
+                'Provisorisch EM': '#94a3b8',
+                'Provisorisch GM': '#83c5e3',
                 'Vorprüfung': '#0ea5e9',
                 'Geprüft': '#6366f1',
                 'manuelle Vergabe': '#8b5cf6',
@@ -56,7 +80,7 @@ function load_rsv_status_counts() {
                 'Ohne Status': '#6b7280'
             };
 
-            data.forEach(function(row) {
+            status_data.forEach(function(row) {
                 let status = row.status || 'Ohne Status';
                 let count = row.count || 0;
 
@@ -88,8 +112,13 @@ function load_rsv_status_counts() {
 
             $('.rsv-clickable-card').on('click', function() {
                 let status = $(this).data('status');
-                frappe.route_options = {status: status};
-                frappe.set_route('List', 'RSVMitglied');
+                if (status != 'Neue-Einträge') {
+                    frappe.route_options = {status: status};
+                    frappe.set_route('List', 'RSVMitglied');
+                } else {
+                    frappe.route_options = {status: ['in', ['Provisorisch EM','Provisorisch GM']], rsvmandat: ['is', 'not set']};
+                    frappe.set_route('List', 'RSVMitglied');
+                }
             });
         }
     });

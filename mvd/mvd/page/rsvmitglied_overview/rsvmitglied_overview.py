@@ -5,7 +5,7 @@ import frappe
 
 @frappe.whitelist()
 def get_rsvmitglied_status_counts():
-    return frappe.db.sql(
+    status_counts = frappe.db.sql(
         """
             SELECT
                 IFNULL(`status`, 'Ohne Status') AS `status`,
@@ -14,7 +14,8 @@ def get_rsvmitglied_status_counts():
             GROUP BY `status`
             ORDER BY FIELD(
                 `status`,
-                'Provisorisch',
+                'Provisorisch EM',
+                'Provisorisch GM',
                 'Vorprüfung',
                 'Geprüft',
                 'manuelle Vergabe',
@@ -29,3 +30,18 @@ def get_rsvmitglied_status_counts():
         """,
         as_dict=True
     )
+
+    neue_rsvmitglieder = frappe.db.sql(
+        """
+            SELECT COUNT(`name`) AS `count`
+            FROM `tabRSVMitglied`
+            WHERE `status` IN ('Provisorisch EM','Provisorisch GM')
+            AND `rsvmandat` IS NULL
+        """,
+        as_dict=True
+    )
+
+    return {
+        'status_counts': status_counts,
+        'neue_rsvmitglieder': neue_rsvmitglieder[0].count
+    }
