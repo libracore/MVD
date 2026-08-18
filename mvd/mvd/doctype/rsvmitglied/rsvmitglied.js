@@ -3,6 +3,15 @@
 
 frappe.ui.form.on('RSVMitglied', {
     refresh(frm) {
+        // check for TimestampMismatchError and reload
+        if (!frm.doc.__islocal) {
+            frappe.db.get_value(cur_frm.doctype, cur_frm.docname, 'modified').then(r => {
+                if (r.message.modified != cur_frm.doc.modified) {
+                    cur_frm.reload_doc();
+                }
+            });
+        };
+
         cur_frm.fields_dict['thema'].get_query = function(doc) {
              return {
                  filters: {
