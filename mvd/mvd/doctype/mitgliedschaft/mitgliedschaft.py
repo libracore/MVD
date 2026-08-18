@@ -1513,6 +1513,44 @@ def get_uebersicht_html(name):
         if not mandat:
             mandat = False
 
+        rsv_mandate = []
+        rsv_mandate_list = frappe.get_all('RSVMitglied', filters={'mv_mitgliedschaft': name}, fields=['name', 'creation', 'status'], order_by='creation asc')
+        for mnd in rsv_mandate_list:
+            rsv_mandate.append({
+                'name': mnd.name,
+                'datum': mnd.creation.strftime("%d.%m.%Y"),
+                'status': mnd.status
+            })
+        if not rsv_mandate:
+            rsv_mandate = False
+
+        siedlungsfaelle = False
+        siedlungsmandate = False
+        adr_egaid = frappe.db.get_value("Mitgliedschaft", name, "adr_egaid")
+        if adr_egaid:
+            siedlungsfaelle = []
+            siedlungsmandate = []
+            siedlungen = frappe.get_all('Zugehoerige Gebaeude', filters={'adr_egaid': adr_egaid}, fields=['parent'])
+            for siedlung in siedlungen:
+                siedlungsfaelle_list = frappe.get_all('Siedlungsfall', filters={'siedlung': siedlung.parent}, fields=['name', 'creation_date', 'siedlungfall_typ'], order_by='creation asc')
+                for siedlungsfall in siedlungsfaelle_list:
+                    siedlungsfaelle.append({
+                        'name': siedlungsfall.name,
+                        'datum': siedlungsfall.creation_date.strftime("%d.%m.%Y"),
+                        'typ': siedlungsfall.siedlungfall_typ
+                    })
+                siedlungs_mandat_list = frappe.get_all('RSVMandat', filters={'siedlung': siedlung.parent}, fields=['name', 'creation', 'typ'], order_by='creation asc')
+                for siedlungs_mandat in siedlungs_mandat_list:
+                    siedlungsmandate.append({
+                        'name': siedlungs_mandat.name,
+                        'datum': siedlungs_mandat.creation.strftime("%d.%m.%Y"),
+                        'typ': siedlungs_mandat.typ
+                    })
+            if not siedlungsfaelle:
+                siedlungsfaelle = False
+            if not siedlungsmandate:
+                siedlungsmandate = False
+
         data = {
             'kunde_mitglied': kunde_mitglied,
             'kontakt_mitglied': kontakt_mitglied,
@@ -1552,7 +1590,10 @@ def get_uebersicht_html(name):
                 'mitglied_nr': mitgliedschaft.mitglied_nr,
                 'mitglied_id': mitgliedschaft.name,
                 'mandat': mandat,
-                'haftpflicht': haftpflicht
+                'haftpflicht': haftpflicht,
+                'rsv_mandate': rsv_mandate,
+                'siedlungsfaelle': siedlungsfaelle,
+                'siedlungsmandate': siedlungsmandate
             }
         }
         

@@ -150,6 +150,49 @@
             </div>
         </div>
         {% endif %}
+        <!-- Card Mandate, RSV-Mandate und Siedlungsfälle -->
+        <div class="col-sm-12">
+            <div class="address-box">
+                <table style="width: 100%;">
+                    <thead>
+                        <th>RSV-Mandate</th>
+                        <th>Siedlungsmandate</th>
+                        <th>Siedlungsfälle</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                {% if allgemein.rsv_mandate %}
+                                    {% for rsv_mandat in allgemein.rsv_mandate %}
+                                        <a href="/desk#Form/RSVMitglied/{{ rsv_mandat.name }}">{{ rsv_mandat.name }}</a> ({{ frappe.utils.get_datetime(rsv_mandat.datum).strftime('%d.%m.%Y') }})<br>{{ rsv_mandat.status }}<br><br>
+                                    {% endfor %}
+                                {% else %}
+                                    Keine RSV-Mandate
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if allgemein.siedlungsmandate %}
+                                    {% for siedlungsmandat in allgemein.siedlungsmandate %}
+                                        <a href="/desk#Form/RSVMandat/{{ siedlungsmandat.name }}">{{ siedlungsmandat.name }}</a> ({{ frappe.utils.get_datetime(siedlungsmandat.datum).strftime('%d.%m.%Y') }})<br>{{ siedlungsmandat.typ }}<br><br>
+                                    {% endfor %}
+                                {% else %}
+                                    Keine Siedlungsmandate
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if allgemein.siedlungsfaelle %}
+                                    {% for siedlungsfall in allgemein.siedlungsfaelle %}
+                                        <a href="/desk#Form/Siedlungsfall/{{ siedlungsfall.name }}">{{ siedlungsfall.name }}</a> ({{ frappe.utils.get_datetime(siedlungsfall.datum).strftime('%d.%m.%Y') }})<br>{{ siedlungsfall.typ }}<br><br>
+                                    {% endfor %}
+                                {% else %}
+                                    Keine Siedlungsfälle
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 {% endif %}
 <div class="clearfix"></div>
