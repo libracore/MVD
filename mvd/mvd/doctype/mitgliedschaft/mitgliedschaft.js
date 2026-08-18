@@ -2420,6 +2420,9 @@ function render_nextcloud_files_tree(frm) {
             sektion: frm.doc.sektion_id,
             mitglied: frm.doc.name
         },
+        get_label: function(node) {
+            return node.title || node.label;
+        },
         show: true,
         toolbar:  [
             {
@@ -2448,14 +2451,6 @@ function render_nextcloud_files_tree(frm) {
             if (d.data) {
                 const node_data = d.data;
                 if (node_data.type === "file") {
-                    // frappe.msgprint({
-                    //     title: d.name,
-                    //     message: `
-                    //     <div><b>Path:</b> ${node_data.path}</div>
-                    //     <div><b>Size:</b> ${node_data.size ?? ""}</div>
-                    //     <div><b>Type:</b> ${node_data.content_type ?? ""}</div>
-                    //     `
-                    // });
                     window.open(`${node_data.nc_link}&openfile=true`, "_blank", "noopener");
                 }
             }

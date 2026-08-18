@@ -925,17 +925,20 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
             href_el = r.find("d:href", ncs.DAV_NS)
             if href_el is None or not href_el.text:
                 continue
+            
+            href = urlparse.unquote(href_el.text)
 
-            href = href_el.text
+            marker = "/remote.php/dav/files/{user}".format(
+                user=ncs.USERNAME
+            )
 
-            marker = "/remote.php/dav/files/{user}".format(user=urlparse.quote(ncs.USERNAME))
             idx = href.find(marker)
+
             if idx >= 0:
                 rel = href[idx + len(marker):]
             else:
                 rel = href
-
-            rel = urlparse.unquote(rel)
+            
             if not rel.startswith("/"):
                 rel = "/" + rel
 
@@ -995,9 +998,8 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
                 nodes.append({
                     "label": item["name"],
                     "title": item["name"],
-                    "value": item["size"],
+                    "value": item["path"],
                     "expandable": True,
-                    "children": [],
                     "data": d
                 })
             else:
@@ -1015,9 +1017,8 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
                 nodes.append({
                     "label": item["name"],
                     "title": item["name"],
-                    "value": item["size"],
+                    "value": item["path"],
                     "expandable": False,
-                    "children": [],
                     "data": d
                 })
 
