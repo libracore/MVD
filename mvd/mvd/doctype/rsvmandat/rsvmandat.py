@@ -30,13 +30,14 @@ class RSVMandat(Document):
     
     def reset_status(self):
         # Wird via "Speichern" von RSVMitglied getriggert
-        refs = frappe.db.count("RSVMitglied", {'rsvmandat': self.name}, ['name'])
-        if cint(refs) < 2 and self.typ != 'EM':
-            self.typ = 'EM'
-        elif cint(refs) >= 2 and cint(refs) <= 9 and self.typ != 'KGM':
-            self.typ = 'KGM'
-        elif cint(refs) > 9 and self.typ != 'GGM':
-            self.typ = 'GGM'
+        if not self.set_type_manually:
+            refs = frappe.db.count("RSVMitglied", {'rsvmandat': self.name}, ['name'])
+            if cint(refs) < 2 and self.typ != 'EM':
+                self.typ = 'EM'
+            elif cint(refs) >= 2 and cint(refs) <= 9 and self.typ != 'KGM':
+                self.typ = 'KGM'
+            elif cint(refs) > 9 and self.typ != 'GGM':
+                self.typ = 'GGM'
 
 def update_rsvmandat(rsvmitglied, rsvmandat):
     rsvml = frappe.get_doc("RSVMandat", rsvmandat)

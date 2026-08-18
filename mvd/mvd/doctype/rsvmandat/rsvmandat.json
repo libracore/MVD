@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "typ",
+  "set_type_manually",
   "bezeichnung",
   "siedlung",
   "schlichtungsbehoerde",
@@ -115,9 +116,15 @@
    "fieldtype": "Link",
    "label": "Sektion",
    "options": "Sektion"
+  },
+  {
+   "default": "0",
+   "fieldname": "set_type_manually",
+   "fieldtype": "Check",
+   "label": "Typ manuell setzen"
   }
  ],
- "modified": "2026-08-18 12:49:39.734162",
+ "modified": "2026-08-18 13:05:41.175462",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",
