@@ -61,7 +61,12 @@ class Mitgliedschaft(Document):
                                                     FROM `tabMitglied Main Naming`
                                                     WHERE `mitglied_id` = {0}
                                                     LIMIT 1
-                                                    """.format(self.mitglied_id), as_dict=True)[0].mitglied_hash or None
+                                                    """.format(self.mitglied_id), as_dict=True)
+                if len(mitglied_main_naming) > 0:
+                    mitglied_main_naming = mitglied_main_naming[0].mitglied_hash
+                else:
+                    mitglied_main_naming = False
+                
                 if mitglied_main_naming:
                     self.mitglied_hash = mitglied_main_naming
                 else:
