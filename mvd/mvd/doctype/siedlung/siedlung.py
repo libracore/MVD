@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+import re
 
 class Siedlung(Document):
     def after_insert(self):
@@ -17,7 +18,26 @@ class Siedlung(Document):
             )
             self.save()
 
+    def before_save(self):
+        self.sortierung_zugehoerige_gebaeude()
+
     def validate(self):
+        self.duplikat_kontrolle()
+
+    def sortierung_zugehoerige_gebaeude(self):
+        self.zugehoerige_gebaeude.sort(
+            key=lambda row: (
+                natural_sort_key(row.stn_label),
+                natural_sort_key(row.adr_number),
+                natural_sort_key(row.plz)
+            )
+        )
+
+        # idx entsprechend der neuen Reihenfolge setzen
+        for idx, row in enumerate(self.zugehoerige_gebaeude, start=1):
+            row.idx = idx
+
+    def duplikat_kontrolle(self):
         entries = []
         duplikate = []
         for zugehoeriges_gebaeude in self.zugehoerige_gebaeude:
@@ -32,3 +52,22 @@ class Siedlung(Document):
                 title="Siedlung enthält doppelte Adress-Einträge",
                 indicator="orange"
             )
+
+def natural_sort_key(value):
+    """
+    Erzeugt einen Sortierschlüssel für natürliche Sortierung.
+
+    Beispiel:
+    1, 2, 3, 10, 10a, 10b, 20
+    statt:
+    1, 10, 10a, 10b, 2, 20, 3
+    """
+    value = str(value or "").lower()
+
+    return [
+        int(part) if part.isdigit() else part
+        for part in re.split(r"(\d+)", value)
+    ]
+
+
+

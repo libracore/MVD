@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Siedlung', {
-	// refresh: function(frm) {
-
-	// }
+    after_save: function(frm) {
+        frm.reload_doc();
+    }
 });
