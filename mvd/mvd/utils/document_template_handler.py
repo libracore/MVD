@@ -9,8 +9,9 @@ import json
 import hashlib
 from PIL import Image, UnidentifiedImageError
 from odf.opendocument import load
-from odf.text import P, H
+from odf.text import P, H, LineBreak
 from odf import draw
+from odf.element import Text
 from frappe.utils.file_manager import save_file
 from urllib.parse import unquote
 from mvd.mvd.utils.nextcloud import NCSettings
@@ -121,16 +122,73 @@ def replace_in_text_node(node, replacements) -> None:
         for old, raw_value in replacements.items():
             replacement_type, value = normalize_replacement(raw_value)
 
-            if replacement_type == "txt":
-                text = text.replace(
-                    old,
-                    str(value) if value is not None else old
-                )
+            if replacement_type != "txt":
+                continue
+
+            if old not in text:
+                continue
+
+            value = str(value) if value is not None else old
+
+            # Zeilenumbrüche vereinheitlichen
+            value = value.replace("\r\n", "\n").replace("\r", "\n")
+
+            # Kein Zeilenumbruch -> normales Replacement
+            if "\n" not in value:
+                text = text.replace(old, value)
+                continue
+
+            before, after = text.split(old, 1)
+
+            parent = node.parentNode
+
+            # Position des aktuellen Textknotens
+            node_index = parent.childNodes.index(node)
+
+            # Falls danach bereits ein Node vorhanden ist,
+            # diesen als Referenz fürs Einfügen verwenden
+            if node_index + 1 < len(parent.childNodes):
+                next_node = parent.childNodes[node_index + 1]
+            else:
+                next_node = None
+
+            # Bestehenden Textknoten behalten und nur dessen Inhalt ändern
+            node.data = before
+
+            lines = value.split("\n")
+
+            new_nodes = []
+
+            for index, line in enumerate(lines):
+                if index > 0:
+                    new_nodes.append(LineBreak())
+
+                if line:
+                    new_nodes.append(Text(line))
+
+            if after:
+                new_nodes.append(Text(after))
+
+            # Neue Nodes direkt nach dem ursprünglichen Textknoten einfügen
+            if next_node is not None:
+                for new_node in new_nodes:
+                    parent.insertBefore(
+                        new_node,
+                        next_node
+                    )
+            else:
+                for new_node in new_nodes:
+                    if isinstance(new_node, Text):
+                        parent.addText(new_node.data)
+                    else:
+                        parent.addElement(new_node)
+
+            return
 
         node.data = text
 
     if hasattr(node, "childNodes"):
-        for child in node.childNodes:
+        for child in list(node.childNodes):
             replace_in_text_node(child, replacements)
 
 def get_normalized_pixel_hash(image_bytes, normalized_size=(128, 128)):
