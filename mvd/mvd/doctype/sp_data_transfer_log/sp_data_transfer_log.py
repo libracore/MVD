@@ -119,7 +119,11 @@ def transfer_service_plattform_logs(
 
                 try:
                     payload = json.loads(record.json)
-
+                    # Frappe-internes Routing-Feld entfernen.
+                    # Dieses wurde beim ursprünglichen API-Aufruf automatisch
+                    # in api_request aufgenommen und darf beim Replay nicht
+                    # erneut als Request-Parameter gesendet werden.
+                    payload.pop("cmd", None)
                 except Exception as e:
                     raise Exception(
                         "Ungueltiges JSON: {0}".format(e)
