@@ -91,7 +91,7 @@ def digitalrechnung_mapper(mitglied):
             "language": mitglied.language,
             "email": mitglied.rg_e_mail if cint(mitglied.abweichende_rechnungsadresse) == 1 and cint(mitglied.unabhaengiger_debitor) == 1 else mitglied.e_mail_1,
             "sektion_id": mitglied.sektion_id,
-            "hash": mitglied.mitglied_hash
+            "hash": mitglied.mitglied_hash or mitglied.name
         }).insert(ignore_permissions=True)
 
         if cint(mitglied.digitalrechnung) == 1:
