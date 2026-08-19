@@ -1,0 +1,73 @@
+{
+ "creation": "2026-08-19 09:29:01.286787",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sp_record",
+  "http_status",
+  "success",
+  "transfer_date",
+  "transfer_data",
+  "error"
+ ],
+ "fields": [
+  {
+   "fieldname": "sp_record",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "SP Record",
+   "options": "Service Plattform Log",
+   "reqd": 1
+  },
+  {
+   "fieldname": "http_status",
+   "fieldtype": "Int",
+   "label": "HTTP Status"
+  },
+  {
+   "default": "0",
+   "fieldname": "success",
+   "fieldtype": "Check",
+   "label": "Successfully transferred"
+  },
+  {
+   "fieldname": "transfer_date",
+   "fieldtype": "Datetime",
+   "label": "Transfer Date"
+  },
+  {
+   "fieldname": "transfer_data",
+   "fieldtype": "Code",
+   "in_list_view": 1,
+   "label": "Transfer Data",
+   "reqd": 1
+  },
+  {
+   "fieldname": "error",
+   "fieldtype": "Long Text",
+   "label": "Error"
+  }
+ ],
+ "modified": "2026-08-19 09:45:37.567180",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "SP Data Transfer Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
