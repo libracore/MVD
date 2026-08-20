@@ -52,7 +52,7 @@ def get_cards():
 
             einzelmandat_template = """
                 <div class="section">
-                    <h4>Mandat {loop} - {thema}</h4>
+                    <h4>Mandat {loop}</h4>
                     <table style="width: 50%;">
                         {doppelversicherung}
                         <tr>
@@ -60,16 +60,8 @@ def get_cards():
                             <td>{mietpartei}</td>
                         </tr>
                         <tr>
-                            <td>Name Gegenpartei</td>
-                            <td>{verwaltung}</td>
-                        </tr>
-                        <tr>
-                            <td>Frist</td>
-                            <td>{frist}</td>
-                        </tr>
-                        <tr>
-                            <td>Verhandlungsdatum</td>
-                            <td>{verhandlungsdatum}</td>
+                            <td>Mietobjekt</td>
+                            <td>{mietobjekt}</td>
                         </tr>
                     </table>
                 </div>
@@ -91,11 +83,8 @@ def get_cards():
             einzelmandate = frappe.db.sql(
                 """
                     SELECT
-                        m.*,
-                        GROUP_CONCAT(t.thema ORDER BY t.idx SEPARATOR ', ') AS themen
+                        m.*
                     FROM `tabRSVMitglied` m
-                    LEFT JOIN `tabRSV Thema MultiTable` t
-                        ON t.parent = m.name
                     WHERE m.rsvmandat = '{0}'
                     AND m.status = 'Geprüft'
                     GROUP BY m.name
@@ -111,11 +100,13 @@ def get_cards():
                         <p>⚠️ Doppelversicherung: {0}</p>
                     """.format(einzelmandat.doppelversicherung_bei)
                 
-                return_data += einzelmandat_template.format(beschreibung=einzelmandat.beschreibung or '-',
-                                                            loop=loop, thema=einzelmandat.themen or '', frist=mandat.frist or '-',
-                                                            verhandlungsdatum=mandat.verhandlungsdatum or '-', mandat_name=einzelmandat.name,
-                                                            mietpartei="{0} {1}".format(einzelmandat.vorname, einzelmandat.nachname), verwaltung=einzelmandat.verwaltung or '-',
-                                                            doppelversicherung=doppelversicherung)
+                return_data += einzelmandat_template.format(
+                                                        beschreibung=einzelmandat.beschreibung or '-',
+                                                        loop=loop,
+                                                        mandat_name=einzelmandat.name,
+                                                        mietpartei="{0} {1}".format(einzelmandat.vorname, einzelmandat.nachname),
+                                                        doppelversicherung=doppelversicherung
+                                                    )
                 loop += 1
             
             return return_data
@@ -146,48 +137,87 @@ def get_cards():
                     </div>
                 </div>
 
-                <div class="info-grid">
-                    <div class="info-box">
-                        <strong>Anz. Einzelmandate</strong>
-                        {qty}
-                    </div>
-                    <div class="info-box">
-                        <strong>Typ</strong>
-                        {typ}
-                    </div>
-                    <div class="info-box">
-                        <strong>Frist</strong>
-                        {frist}
-                    </div>
-                    <div class="info-box">
-                        <strong>Sprache</strong>
-                        {language}
-                    </div>
+                <div class="section">
+                    <table style="width: 90%;">
+                        <tr>
+                            <td>Anz. Einzelmandate</td>
+                            <td>{qty}</td>
+                        </tr>
+                        <tr>
+                            <td>Typ</td>
+                            <td>{typ}</td>
+                        </tr>
+                        <tr>
+                            <td>Thema</td>
+                            <td>{thema}</td>
+                        </tr>
+                        <tr>
+                            <td>Sprache</td>
+                            <td>{language}</td>
+                        </tr>
+                        <tr>
+                            <td>Gegenseite Vermieterin</td>
+                            <td>{vermieterin}</td>
+                        </tr>
+                        <tr>
+                            <td>Gegenseite Verwaltung</td>
+                            <td>{verwaltung}</td>
+                        </tr>
+                        <tr>
+                            <td>Schlichtungsbehörde</td>
+                            <td>{schlichtungsbehoerde}</td>
+                        </tr>
+                        <tr>
+                            <td>Frist</td>
+                            <td>{frist}</td>
+                        </tr>
+                        <tr>
+                            <td>Verhandlungsdatum</td>
+                            <td>{verhandlungsdatum}</td>
+                        </tr>
+                    </table>
                 </div>
 
                 {einzelmandat_details}
             </section>
-        """.format(mandat=mandat.name, titel=mandat.bezeichnung or mandat.name,
-                   language=mandat_sprachen, qty=qty, typ=mandat.typ, kurzbeschrieb=mandat.kurzbeschrieb or '',
-                   frist=mandat.frist or '-', verhandlungsdatum=mandat.verhandlungsdatum or '-',
-                   einzelmandat_details=get_einzelmandat_details(mandat), fallnummer=mandat.fallnummer)
+        """.format(
+                mandat=mandat.name,
+                titel=mandat.bezeichnung or mandat.name,
+                language=mandat_sprachen,
+                qty=qty,
+                typ=mandat.typ,
+                kurzbeschrieb=mandat.kurzbeschrieb or '',
+                frist=mandat.frist or '-',
+                verhandlungsdatum=mandat.verhandlungsdatum or '-',
+                einzelmandat_details=get_einzelmandat_details(mandat),
+                fallnummer=mandat.fallnummer,
+                thema=,
+                vermieterin=,
+                verwaltung=,
+                schlichtungsbehoerde=
+            )
 
         return detail_card_template
     
     mandate = frappe.db.sql(
         """
             SELECT
-                `name`,
-                `bezeichnung`,
-                `typ`,
-                `publikation_per`,
-                -- `language`,
-                `kurzbeschrieb`,
-                `frist`,
-                `verhandlungsdatum`,
-                `fallnummer`
-            FROM `tabRSVMandat`
-            WHERE `name` IN (
+                m.`name`,
+                m.`bezeichnung`,
+                m.`typ`,
+                m.`publikation_per`,
+                m.`kurzbeschrieb`,
+                m.`frist`,
+                m.`verhandlungsdatum`,
+                m.`fallnummer`,
+                m.`verwaltung`,
+                m.`vermieterin`,
+                m.`schlichtungsbehoerde`,
+                GROUP_CONCAT(t.thema ORDER BY t.idx SEPARATOR ', ') AS `themen`
+            FROM `tabRSVMandat` m
+            LEFT JOIN `tabRSV Thema MultiTable` t
+                ON t.parent = m.name
+            WHERE m.`name` IN (
                 SELECT `parent`
                 FROM `tabVA Vergabe TBL`
                 WHERE `assigned` = 1

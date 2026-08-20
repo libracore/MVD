@@ -92,8 +92,6 @@ def get_cards():
                 return_data += einzelmandat_template.format(
                                     beschreibung=einzelmandat.beschreibung or '-', 
                                     loop=loop,
-                                    frist=mandat.frist or '-',
-                                    verhandlungsdatum=mandat.verhandlungsdatum or '-',
                                     mietobjekt="{0} {1}, {2} {3}".format(einzelmandat.strasse, einzelmandat.hausnummer, einzelmandat.plz, einzelmandat.ort),
                                     mietpartei="{0} {1}".format(einzelmandat.vorname, einzelmandat.nachname)
                                 )
@@ -208,7 +206,6 @@ def get_cards():
                 m.`bezeichnung`,
                 m.`typ`,
                 m.`publikation_per`,
-                -- m.`language`,
                 m.`kurzbeschrieb`,
                 m.`frist`,
                 m.`verhandlungsdatum`,
@@ -219,10 +216,10 @@ def get_cards():
             FROM `tabRSVMandat` m
             LEFT JOIN `tabRSV Thema MultiTable` t
                 ON t.parent = m.name
-            WHERE `publikation_per` >= CURDATE() - INTERVAL 7 DAY
-            AND `publikation_per` <= CURDATE()
-            AND `typ` IN ('EM', 'KGM')
-            ORDER BY `publikation_per` ASC, `typ` ASC
+            WHERE m.`publikation_per` >= CURDATE() - INTERVAL 7 DAY
+            AND m.`publikation_per` <= CURDATE()
+            AND m.`typ` IN ('EM', 'KGM')
+            ORDER BY m.`publikation_per` ASC, `typ` ASC
         """,
         as_dict=True
     )
