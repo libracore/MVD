@@ -13,6 +13,7 @@
   "cb_1",
   "rsvmandat",
   "get_or_create_rsv_mandat",
+  "open_rsv_mandat",
   "section_rsvmandat",
   "rsvmandat_html",
   "section_mitgliedschafts_overview",
@@ -46,8 +47,6 @@
   "dokumente",
   "create_zip_file",
   "section_mandatsvergabe",
-  "anwalt",
-  "datum_vergabe",
   "datum_pruefung",
   "doppelversicherung",
   "doppelversicherung_bei",
@@ -79,19 +78,6 @@
    "fieldname": "datum_pruefung",
    "fieldtype": "Date",
    "label": "Datum Pr\u00fcfung"
-  },
-  {
-   "fieldname": "datum_vergabe",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Datum Vergabe"
-  },
-  {
-   "fieldname": "anwalt",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Anwalt",
-   "options": "Termin Kontaktperson"
   },
   {
    "fieldname": "zusatz_adresse",
@@ -377,9 +363,15 @@
    "fieldtype": "Link",
    "label": "Sektion",
    "options": "Sektion"
+  },
+  {
+   "depends_on": "eval:doc.rsvmandat",
+   "fieldname": "open_rsv_mandat",
+   "fieldtype": "Button",
+   "label": "RSV-Mandat \u00f6ffnen"
   }
  ],
- "modified": "2026-08-18 12:48:55.193710",
+ "modified": "2026-08-20 16:17:54.893808",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",

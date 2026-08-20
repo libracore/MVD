@@ -11,6 +11,21 @@ frappe.ui.form.on('RSVMandat', {
                 }
             });
         };
+
+        cur_frm.fields_dict['thema'].get_query = function(doc) {
+             return {
+                 filters: {
+                     "rsv": 1
+                 }
+             }
+        }
+        cur_frm.fields_dict['anwalt'].get_query = function(doc) {
+             return {
+                 filters: {
+                     "ist_vertrauensanwaeltin": 1
+                 }
+             }
+        }
         
         frm.add_custom_button(__("Vergabeliste"),  function() {
             var domain = window.location.origin;

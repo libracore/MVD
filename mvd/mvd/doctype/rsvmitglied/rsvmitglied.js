@@ -12,21 +12,6 @@ frappe.ui.form.on('RSVMitglied', {
             });
         };
 
-        cur_frm.fields_dict['thema'].get_query = function(doc) {
-             return {
-                 filters: {
-                     "rsv": 1
-                 }
-             }
-        }
-        cur_frm.fields_dict['anwalt'].get_query = function(doc) {
-             return {
-                 filters: {
-                     "ist_vertrauensanwaeltin": 1
-                 }
-             }
-        }
-
         // load html overview (Mitglied, Siedlungsadresse & RSV-Mandat)
         load_html_overview(frm);
         // Eventlistener für den Schlichtungsbehörden Knopf
@@ -76,6 +61,10 @@ frappe.ui.form.on('RSVMitglied', {
                 }
             }
         });
+    },
+    open_rsv_mandat: function(frm) {
+        const url = `/desk#Form/RSVMandat/${cur_frm.doc.rsvmandat}`;
+        window.open(url, '_blank');
     },
     get_or_create_rsv_mandat: function(frm) {
         frappe.call({
