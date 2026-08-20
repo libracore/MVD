@@ -435,7 +435,7 @@ def get_rsv_mandat_html(rsv_mandat):
         'kurzbeschrieb',
         'notizen'
     ]
-    print("bin da")
+    
     return get_field_values_html("RSVMandat", rsv_mandat, fieldlist)
 
 def get_field_values_html(doctype, docname, fieldlist):
