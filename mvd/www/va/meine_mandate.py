@@ -191,10 +191,10 @@ def get_cards():
                 verhandlungsdatum=mandat.verhandlungsdatum or '-',
                 einzelmandat_details=get_einzelmandat_details(mandat),
                 fallnummer=mandat.fallnummer,
-                thema=,
-                vermieterin=,
-                verwaltung=,
-                schlichtungsbehoerde=
+                thema=mandat.themen,
+                vermieterin=mandat.vermieterin,
+                verwaltung=mandat.verwaltung,
+                schlichtungsbehoerde=mandat.schlichtungsbehoerde
             )
 
         return detail_card_template
