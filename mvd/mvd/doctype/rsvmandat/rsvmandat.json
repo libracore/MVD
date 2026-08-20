@@ -6,16 +6,25 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "bezeichnung",
+  "sektion_id",
+  "cb_1",
   "typ",
   "set_type_manually",
-  "bezeichnung",
+  "section_rsv_mitglieder",
+  "rsv_mitglieder_html",
+  "section_siedlung",
   "siedlung",
+  "cb_2",
+  "siedlung_title",
+  "section_siedlung_2",
+  "siedlung_html",
+  "section_1",
   "schlichtungsbehoerde",
+  "thema",
   "vermieterin",
   "verwaltung",
-  "thema",
   "sprachen",
-  "sektion_id",
   "section_va_vergabe",
   "publikation_per",
   "frist",
@@ -116,6 +125,7 @@
   {
    "fieldname": "sektion_id",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Sektion",
    "options": "Sektion"
   },
@@ -135,9 +145,50 @@
    "fieldname": "datum_vergabe",
    "fieldtype": "Date",
    "label": "Datum Vergabe"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_siedlung",
+   "fieldtype": "Section Break",
+   "label": "Siedlung"
+  },
+  {
+   "fieldname": "siedlung_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "siedlung.bezeichnung",
+   "fieldname": "siedlung_title",
+   "fieldtype": "Data",
+   "label": "&nbsp;",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_siedlung_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_rsv_mitglieder",
+   "fieldtype": "Section Break",
+   "label": "RSV-Mitglieder"
+  },
+  {
+   "fieldname": "rsv_mitglieder_html",
+   "fieldtype": "HTML"
   }
  ],
- "modified": "2026-08-20 16:17:14.410621",
+ "modified": "2026-08-20 16:45:14.621279",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",

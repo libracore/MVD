@@ -73,9 +73,9 @@ def get_cards():
                     </p>
                 </div>
                 <div class="section">
-                <div class="actions">
-                        <button class="btn-primary" onclick="download_zip('{mandat_name}')">Daten als Zip-File herunterladen</button>
-                </div>
+                    <div class="actions">
+                            <button class="btn-primary" onclick="download_zip('{mandat_name}')">Daten als Zip-File herunterladen</button>
+                    </div>
                 </div>
                 <hr>
             """

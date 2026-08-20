@@ -35,5 +35,17 @@ frappe.ui.form.on('RSVMandat', {
             var domain = window.location.origin;
             window.open(`${domain}/va/meine-mandate`, '_blank');
         }, "Öffne");
+
+        // Lade Übersicht für die Siedlungsadressen
+        frappe.call({
+            method: "mvd.mvd.doctype.siedlungsfall.siedlungsfall.get_siedlungsadressen_html",
+            args:{
+                    'siedlung': cur_frm.doc.siedlung
+            },
+            callback: function(r)
+            {
+                cur_frm.set_df_property('siedlung_html','options', r.message);
+            }
+        });
     }
 });
