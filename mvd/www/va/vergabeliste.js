@@ -39,7 +39,7 @@ function take(mandat, va_in_list) {
             {
                 frappe.msgprint(`
                     Wir haben dein Interesse registriert.<br><br>
-                    Wir melden uns innerhalb der nächsten 48 Stunden bei dir, falls wir dir eines oder mehrere der Mandate übertragen.<br><br>
+                    Wir melden uns bei dir, falls wir dir eines oder mehrere der Mandate übertragen.<br><br>
                     (Diese Meldung schliesst sich in 5s.)`, `Vielen Dank, ${frappe.session.user}!`);
                 setTimeout(function(){
                     location.reload()

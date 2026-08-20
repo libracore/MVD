@@ -28,9 +28,8 @@ def get_cards():
         if qty < 1: return False
 
         card_template = """
-            <article class="case-card" data-mandats"{mandat}" data-mandattyp="{typ}" onclick="show_detail_card('{mandat}')">
+            <article class="case-card" data-mandat"{mandat}" data-mandattyp="{typ}" onclick="show_detail_card('{mandat}')">
                 <div class="badges">
-                    <span class="badge">{mandat}</span>
                     <span class="badge">{typ}</span>
                     <span class="badge">Anz. Mandate: {qty}</span>
                     <span class="badge open">✔</span>
@@ -58,7 +57,7 @@ def get_cards():
                         {doppelversicherung}
                         <tr>
                             <td>Name Mietpartei</td>
-                            <td>{vermieterin}</td>
+                            <td>{mietpartei}</td>
                         </tr>
                         <tr>
                             <td>Name Gegenpartei</td>
@@ -115,7 +114,7 @@ def get_cards():
                 return_data += einzelmandat_template.format(beschreibung=einzelmandat.beschreibung or '-',
                                                             loop=loop, thema=einzelmandat.themen or '', frist=mandat.frist or '-',
                                                             verhandlungsdatum=mandat.verhandlungsdatum or '-', mandat_name=einzelmandat.name,
-                                                            vermieterin=einzelmandat.vermieterin or '-', verwaltung=einzelmandat.verwaltung or '-',
+                                                            mietpartei="{0} {1}".format(einzelmandat.vorname, einzelmandat.nachname), verwaltung=einzelmandat.verwaltung or '-',
                                                             doppelversicherung=doppelversicherung)
                 loop += 1
             
