@@ -127,39 +127,39 @@ def get_cards():
                 <div class="section">
                     <table style="width: 90%;">
                         <tr>
-                            <td>Anz. Einzelmandate</td>
+                            <td><b>Anz. Einzelmandate</b></td>
                             <td>{qty}</td>
                         </tr>
                         <tr>
-                            <td>Typ</td>
+                            <td><b>Typ</b></td>
                             <td>{typ}</td>
                         </tr>
                         <tr>
-                            <td>Thema</td>
+                            <td><b>Thema</b></td>
                             <td>{thema}</td>
                         </tr>
                         <tr>
-                            <td>Sprache</td>
+                            <td><b>Sprache</b></td>
                             <td>{language}</td>
                         </tr>
                         <tr>
-                            <td>Gegenseite Vermieterin</td>
+                            <td><b>Gegenseite Vermieterin</b></td>
                             <td>{vermieterin}</td>
                         </tr>
                         <tr>
-                            <td>Gegenseite Verwaltung</td>
+                            <td><b>Gegenseite Verwaltung</b></td>
                             <td>{verwaltung}</td>
                         </tr>
                         <tr>
-                            <td>Schlichtungsbehörde</td>
+                            <td><b>Schlichtungsbehörde</b></td>
                             <td>{schlichtungsbehoerde}</td>
                         </tr>
                         <tr>
-                            <td>Frist</td>
+                            <td><b>Frist</b></td>
                             <td>{frist}</td>
                         </tr>
                         <tr>
-                            <td>Verhandlungsdatum</td>
+                            <td><b>Verhandlungsdatum</b></td>
                             <td>{verhandlungsdatum}</td>
                         </tr>
                     </table>
