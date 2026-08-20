@@ -214,7 +214,7 @@ def get_cards():
                 m.`verwaltung`,
                 m.`vermieterin`,
                 m.`schlichtungsbehoerde`,
-                GROUP_CONCAT(t.thema ORDER BY t.idx SEPARATOR ', ') AS `themen`
+                GROUP_CONCAT(t.thema ORDER BY t.idx SEPARATOR '<br>') AS `themen`
             FROM `tabRSVMandat` m
             LEFT JOIN `tabRSV Thema MultiTable` t
                 ON t.parent = m.name
