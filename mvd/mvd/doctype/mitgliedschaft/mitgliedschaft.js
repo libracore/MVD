@@ -2604,7 +2604,7 @@ function mitglied_reaktivieren(frm) {
                 frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
                 frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_alt', 'Inaktiv');
                 frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'status_neu', 'Regulär');
-                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', values.grund);
+                frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'grund', 'Reaktivierung: ' + values.grund);
                 cur_frm.refresh_field('status_change');
                 
                 cur_frm.set_value("status_c", 'Regulär');
