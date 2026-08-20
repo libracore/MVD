@@ -1,7 +1,7 @@
 function show_detail_card(mandat) {
     $('.detail').addClass('hidden');
     $('.case-card.active').removeClass('active');
-    $(`[data-mandat="${mandate}"]`).addClass('active');
+    $(`[data-mandat="${mandat}"]`).addClass('active');
     $(`[data-belongstomandat="${mandat}"]`).removeClass('hidden');
 }
 

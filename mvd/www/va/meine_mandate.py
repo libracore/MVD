@@ -105,7 +105,8 @@ def get_cards():
                                                         loop=loop,
                                                         mandat_name=einzelmandat.name,
                                                         mietpartei="{0} {1}".format(einzelmandat.vorname, einzelmandat.nachname),
-                                                        doppelversicherung=doppelversicherung
+                                                        doppelversicherung=doppelversicherung,
+                                                        mietobjekt="{0} {1}, {2} {3}".format(einzelmandat.strasse, einzelmandat.hausnummer, einzelmandat.plz, einzelmandat.ort)
                                                     )
                 loop += 1
             
@@ -190,7 +191,7 @@ def get_cards():
                 frist=mandat.frist or '-',
                 verhandlungsdatum=mandat.verhandlungsdatum or '-',
                 einzelmandat_details=get_einzelmandat_details(mandat),
-                fallnummer=mandat.fallnummer,
+                fallnummer=mandat.fallnummer or '',
                 thema=mandat.themen,
                 vermieterin=mandat.vermieterin,
                 verwaltung=mandat.verwaltung,
