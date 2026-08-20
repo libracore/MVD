@@ -2597,6 +2597,8 @@ function mitglied_reaktivieren(frm) {
             function(values){
                 cur_frm.set_value("austritt", '');
                 cur_frm.set_value("kuendigung", '');
+                cur_frm.set_value("adressen_gesperrt", 0);
+                cur_frm.set_value("mahnstopp", '');
                 
                 var status_change_log = cur_frm.add_child('status_change');
                 frappe.model.set_value(status_change_log.doctype, status_change_log.name, 'datum', frappe.datetime.get_today());
