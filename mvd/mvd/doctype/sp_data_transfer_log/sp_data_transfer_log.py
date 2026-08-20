@@ -7,9 +7,9 @@ from __future__ import unicode_literals
 import json
 import requests
 import frappe
-
 from frappe.model.document import Document
-from frappe.utils import now
+from frappe.utils import now, cint
+from frappe.utils.background_jobs import enqueue
 
 
 class SPDataTransferLog(Document):
@@ -358,3 +358,26 @@ def get_response_error(response):
         indent=2,
         ensure_ascii=False
     )
+
+@frappe.whitelist()
+def request_transfer_service_plattform_logs(
+    target_url,
+    api_key=None,
+    api_secret=None,
+    from_date=None,
+    limit=None
+    ):
+    if cint(limit) < 1:
+        frappe.throw("Bitte setzen sie ein plausibles Limit.")
+    
+    args = {
+        'target_url': target_url,
+        'api_key': api_key,
+        'api_secret': api_secret,
+        'from_date': from_date,
+        'limit': limit
+    }
+
+    enqueue("mvd.mvd.doctype.sp_data_transfer_log.sp_data_transfer_log.transfer_service_plattform_logs", queue='long', job_name='Transfer Service Plattform Logs', timeout=5000, **args)
+
+    return
