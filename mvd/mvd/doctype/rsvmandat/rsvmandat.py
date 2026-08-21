@@ -118,3 +118,44 @@ def get_schlichtungsbehoerde(bfs_nr):
         return None
     
     return None
+
+@frappe.whitelist()
+def get_rsvmitglieder_html(rsv_mandat):
+    rsv_mitglieder = frappe.db.sql(
+        """
+            SELECT
+                `name`,
+                `mitglied_nr`,
+                `vorname`,
+                `nachname`,
+                `strasse`,
+                `hausnummer`
+            FROM `tabRSVMitglied`
+            WHERE `rsvmandat` = '{0}'
+        """.format(rsv_mandat),
+        as_dict=True
+    )
+
+    rsv_mitglieder_rows = []
+
+    for rsv_mitglied in rsv_mitglieder:
+        rsv_mitglieder_rows.append(
+            """
+                <tr>
+                    <td><a href="/desk#Form/RSVMitglied/{rvs_mitglied_id}">{mitglied_nr}</a></td>
+                    <td>{rvs_mitglied_name}</td>
+                    <td>{rvs_mitglied_address}</td>
+                </tr>
+            """.format(
+                rvs_mitglied_id=rsv_mitglied.name,
+                mitglied_nr=rsv_mitglied.mitglied_nr,
+                rvs_mitglied_name="{0} {1}".format(rsv_mitglied.vorname, rsv_mitglied.nachname),
+                rvs_mitglied_address="{0} {1}".format(rsv_mitglied.strasse, rsv_mitglied.hausnummer)
+            )
+        )
+
+    return """
+            <table style="width: 100%;">
+            {rsv_mitglieder_rows}
+            </table>
+        """.format(rsv_mitglieder_rows="".join(rsv_mitglieder_rows))

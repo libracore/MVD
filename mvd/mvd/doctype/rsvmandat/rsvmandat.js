@@ -3,6 +3,9 @@
 
 frappe.ui.form.on('RSVMandat', {
     refresh: function(frm) {
+        // Ausblenden des Dashboards
+        frm.dashboard.hide();
+
         // check for TimestampMismatchError and reload
         if (!frm.doc.__islocal) {
             frappe.db.get_value(cur_frm.doctype, cur_frm.docname, 'modified').then(r => {
@@ -35,6 +38,18 @@ frappe.ui.form.on('RSVMandat', {
             var domain = window.location.origin;
             window.open(`${domain}/va/meine-mandate`, '_blank');
         }, "Öffne");
+
+        // Lade Übersicht für die RSV-Mitglieder
+        frappe.call({
+            method: "mvd.mvd.doctype.rsvmandat.rsvmandat.get_rsvmitglieder_html",
+            args:{
+                    'rsv_mandat': cur_frm.doc.name
+            },
+            callback: function(r)
+            {
+                cur_frm.set_df_property('rsv_mitglieder_html','options', r.message);
+            }
+        });
 
         // Lade Übersicht für die Siedlungsadressen
         frappe.call({
