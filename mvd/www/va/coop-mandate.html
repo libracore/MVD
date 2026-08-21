@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>Mandate zur Fallübernahme</title>
+  <script>
+        window.frappe = {};
+        frappe.ready_events = [];
+        frappe.ready = function(fn) {
+            frappe.ready_events.push(fn);
+        }
+    </script>
+    <link type="text/css" rel="stylesheet" href="/assets/css/frappe-web-b4.css">
+</head>
+
+<body>
+    <script type="text/javascript" src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/js/frappe-web.min.js"></script>
+    <script type="text/javascript" src="/assets/js/bootstrap-4-web.min.js"></script>
+
+    <main class="page">
+        {{ html_table }}
+
+        <div class="modal fade" id="fallnummer-dialog" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Fallnummer hinterlegen</h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Fallnummer</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="fallnummer"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-dismiss="modal"
+                        >
+                            Abbrechen
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="fallnummer-speichern"
+                        >
+                            Übernehmen
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- csrf_token -->
+</body>
+</html>

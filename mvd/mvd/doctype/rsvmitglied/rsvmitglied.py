@@ -62,6 +62,11 @@ class RSVMitglied(Document):
             self.abschluss_datum = today()
         else:
             self.abschluss_datum = None
+
+        if self.status == 'Abgelehnt':
+            self.abgelehnt_datum = today()
+        else:
+            self.abgelehnt_datum = None
     
     def after_insert(self):
         if not self.adr_egaid:
