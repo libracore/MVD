@@ -53,13 +53,15 @@
   "unterlagen_bei_ra",
   "sendung_an_coop",
   "kostengutsprache",
+  "kostengutsprache_datum",
   "section_workflow_helper",
   "force_new_rsvmandat",
   "adr_egaid",
   "bfs_nr",
   "reason_missing_rsvmandat",
   "mandat_und_siedlungs_sperre",
-  "abschluss_datum"
+  "abschluss_datum",
+  "abgelehnt_datum"
  ],
  "fields": [
   {
@@ -374,9 +376,20 @@
    "fieldname": "abschluss_datum",
    "fieldtype": "Date",
    "label": "Abschlussdatum"
+  },
+  {
+   "depends_on": "eval:doc.kostengutsprache",
+   "fieldname": "kostengutsprache_datum",
+   "fieldtype": "Date",
+   "label": "kostengutsprache Datum"
+  },
+  {
+   "fieldname": "abgelehnt_datum",
+   "fieldtype": "Date",
+   "label": "Abgelehnt am"
   }
  ],
- "modified": "2026-08-21 11:35:53.109442",
+ "modified": "2026-08-21 14:49:35.122540",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",

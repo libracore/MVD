@@ -1,0 +1,152 @@
+.rsv-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.rsv-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: #222;
+}
+
+
+/* Header */
+
+.rsv-table thead th {
+    background-color: #f5f5f5;
+    border: 1px solid #999;
+
+    padding: 6px 5px;
+
+    font-weight: 600;
+    text-align: left;
+    vertical-align: middle;
+
+    white-space: nowrap;
+
+    height: 32px;
+}
+
+
+/* Normale Zellen */
+
+.rsv-table tbody td {
+    border: 1px solid #aaa;
+    padding: 3px 5px;
+    vertical-align: middle;
+    white-space: nowrap;
+
+    height: 24px;
+}
+
+
+/* Mandatszeile */
+
+.rsv-table .mandat-row td {
+    background-color: #eeeeee;
+    border-top: 1px solid #555;
+    border-bottom: 1px solid #555;
+}
+
+
+/* Mandatsnummer etwas hervorheben */
+
+.rsv-table .mandat-row td:nth-child(5) {
+    font-weight: 600;
+}
+
+
+/* Mitgliederzeilen */
+
+.rsv-table .mitglied-row td {
+    background-color: #fff;
+}
+
+
+/* Haken / X */
+
+.rsv-table .status {
+    text-align: center;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+
+/* Spaltenbreiten */
+
+.rsv-table th:nth-child(1),
+.rsv-table td:nth-child(1) {
+    width: 95px;
+}
+
+.rsv-table th:nth-child(2),
+.rsv-table td:nth-child(2) {
+    width: 100px;
+}
+
+.rsv-table th:nth-child(3),
+.rsv-table td:nth-child(3) {
+    width: 80px;
+}
+
+.rsv-table th:nth-child(4),
+.rsv-table td:nth-child(4) {
+    width: 100px;
+}
+
+.rsv-table th:nth-child(5),
+.rsv-table td:nth-child(5) {
+    width: 130px;
+}
+
+.rsv-table th:nth-child(6),
+.rsv-table td:nth-child(6) {
+    width: 140px;
+}
+
+.rsv-table th:nth-child(7),
+.rsv-table td:nth-child(7) {
+    min-width: 180px;
+}
+
+.rsv-table th:nth-child(8),
+.rsv-table td:nth-child(8) {
+    min-width: 290px;
+}
+
+.rsv-table th:nth-child(9),
+.rsv-table td:nth-child(9) {
+    width: 150px;
+}
+
+.kostengutsprache-cell {
+    cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+}
+
+.kostengutsprache-cell:hover {
+    background-color: #999 !important;
+}
+
+.abgelehnt-cell {
+    cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+}
+
+.abgelehnt-cell:hover {
+    background-color: #999 !important;
+}
+
+.fallnummer-cell {
+    cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+}
+
+.fallnummer-cell:hover {
+    background-color: #999 !important;
+}
