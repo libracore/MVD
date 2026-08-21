@@ -146,7 +146,12 @@ def get_siedlungsadressen_html(siedlung):
     siedlung_doc = frappe.get_doc("Siedlung", siedlung)
 
     for siedlungsadresse in siedlung_doc.zugehoerige_gebaeude:
+        adr_egaid = siedlungsadresse.get("adr_egaid")
+        if adr_egaid and adr_egaid != '':
+            adr_egaid = '<a href="/desk#Form/Amtliches Gebaeudeverzeichnis/{adr_egaid}">{adr_egaid}</a>'.format(adr_egaid=adr_egaid)
+        
         address_line = "{0} {1}, {2} {3}".format(siedlungsadresse.get("stn_label"), siedlungsadresse.get("adr_number"), siedlungsadresse.get("plz"), siedlungsadresse.get("wohnort"))
+        
         html += """
             <div style="display: flex; padding: 6px 0; border-bottom: 1px solid #e5e5e5;">
                 <div style="width: 35%; font-weight: 600; padding-right: 15px; box-sizing: border-box;">
@@ -157,7 +162,7 @@ def get_siedlungsadressen_html(siedlung):
                 </div>
             </div>
         """.format(
-            adr_egaid=siedlungsadresse.get("adr_egaid"),
+            adr_egaid=adr_egaid,
             address_line=address_line
         )
 
