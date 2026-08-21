@@ -11,10 +11,6 @@ $(document).on('click', '.abgelehnt-cell', function() {
 $(document).on('click', '.fallnummer-cell', function() {
     const rsvmitglied = $(this).data('rsvmitglied');
     const rsvmandat = $(this).data('rsvmandat');
-    console.log("---");
-    console.log(rsvmitglied);
-    console.log(rsvmandat);
-    console.log("---");
     fallnummer_speichern(rsvmitglied, rsvmandat);
 });
 
@@ -29,12 +25,7 @@ function kostengutsprache_click(rsvmitglied) {
         freeze_message: 'Erteile Kostenfreigabe...',
         callback: function(r)
         {
-            frappe.msgprint(`
-                Wir haben die Kostenfreigabe hinterlegt.<br><br>
-                (Diese Meldung schliesst sich in 5s.)`, `Vielen Dank, ${frappe.session.user}!`);
-            setTimeout(function(){
-                location.reload()
-            }, 3000);
+            location.reload();
         }
     });
 }
@@ -49,12 +40,7 @@ function abgelehnt_click(rsvmitglied) {
         freeze_message: 'Erteile Ablehnung...',
         callback: function(r)
         {
-            frappe.msgprint(`
-                Wir haben die Ablehnung hinterlegt.<br><br>
-                (Diese Meldung schliesst sich in 5s.)`, `Vielen Dank, ${frappe.session.user}!`);
-            setTimeout(function(){
-                location.reload()
-            }, 3000);
+            location.reload();
         }
     });
 }
@@ -93,10 +79,6 @@ $('#fallnummer-speichern').on('click', function() {
         }
     }
 
-    console.log(fallnummer);
-    console.log(rsvmitglied);
-    console.log(rsvmandat);
-
     $('#fallnummer-dialog').modal('hide');
     $('main').css('filter', 'blur(5px)');
     frappe.call({
@@ -106,12 +88,7 @@ $('#fallnummer-speichern').on('click', function() {
         freeze_message: 'Erfasse Fallnummer...',
         callback: function(r)
         {
-            frappe.msgprint(`
-                Wir haben Fallnummer erfasst.<br><br>
-                (Diese Meldung schliesst sich in 5s.)`, `Vielen Dank, ${frappe.session.user}!`);
-            setTimeout(function(){
-                location.reload()
-            }, 3000);
+            location.reload();
         }
     });
 });

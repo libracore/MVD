@@ -28,6 +28,8 @@ def get_content():
                         <th>Mitglied: Name, Vorname</th>
                         <th>Mitglied: Strasse Nr, PLZ Ort (Mietobj.)</th>
                         <th>Mitglied: Eintrittsdatum</th>
+                        <!--<th>Gegenseite (Vermieterin)</th>
+                        <th>Gegenseite (Verwaltung)</th>-->
                     </tr>
                 </thead>
 
@@ -51,7 +53,9 @@ def get_table_content():
             SELECT
                 `name`,
                 `datum_vergabe`,
-                `fallnummer`
+                `fallnummer`,
+                `vermieterin`,
+                `verwaltung`
             FROM `tabRSVMandat`
             WHERE `datum_vergabe` IS NOT NULL
             AND `anwalt` IS NOT NULL
@@ -71,11 +75,15 @@ def get_table_content():
                 <td></td>
                 <td></td>
                 <td></td>
+                <!--<td>{vermieterin}</td>
+                <td>{verwaltung}</td>-->
             </tr>
         """.format(
             name=mandat.name,
             datum_vergabe=formatdate(mandat.datum_vergabe, "dd.MM.yyyy"),
-            fallnummer=mandat.fallnummer or ''
+            fallnummer=mandat.fallnummer or '',
+            vermieterin=mandat.vermieterin,
+            verwaltung=mandat.verwaltung
         )
 
         rsv_mitglieder = frappe.db.sql(
@@ -112,6 +120,8 @@ def get_table_content():
                 kostengutsprache_zelle = '<td class="status">{kostengutsprache}</td>'.format(
                     kostengutsprache=formatdate(rsv_mitglied.kostengutsprache_datum, "dd.MM.yyyy")
                 )
+            elif rsv_mitglied.status == 'Abgelehnt':
+                kostengutsprache_zelle = '<td class="status">-</td>'
 
             abgelehnt_zelle = """
                 <td class="abgelehnt-cell"
@@ -123,6 +133,8 @@ def get_table_content():
                 abgelehnt_zelle = '<td class="status">{abgelehnt_datum}</td>'.format(
                     abgelehnt_datum=formatdate(rsv_mitglied.abgelehnt_datum, "dd.MM.yyyy")
                 )
+            elif cint(rsv_mitglied.kostengutsprache) == 1:
+                abgelehnt_zelle = '<td class="status">-</td>'
 
             table_content += """
                 <tr class="mitglied-row">
@@ -135,6 +147,8 @@ def get_table_content():
                     <td>{nachname}, {vorname}</td>
                     <td>{adresse}</td>
                     <td>{mitglied_seit}</td>
+                    <!--<td></td>
+                    <td></td>-->
                 </tr>
             """.format(
                 rsv_mitglied=rsv_mitglied.name,
