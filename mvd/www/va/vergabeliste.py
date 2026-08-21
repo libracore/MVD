@@ -212,14 +212,27 @@ def get_cards():
                 m.`verwaltung`,
                 m.`vermieterin`,
                 m.`schlichtungsbehoerde`,
-                GROUP_CONCAT(t.thema ORDER BY t.idx SEPARATOR '<br>') AS `themen`
+                GROUP_CONCAT(t.`thema` ORDER BY t.`idx` SEPARATOR '<br>') AS `themen`
             FROM `tabRSVMandat` m
             LEFT JOIN `tabRSV Thema MultiTable` t
-                ON t.parent = m.name
+                ON t.`parent` = m.`name`
             WHERE m.`publikation_per` >= CURDATE() - INTERVAL 7 DAY
-            AND m.`publikation_per` <= CURDATE()
-            AND m.`typ` IN ('EM', 'KGM')
-            ORDER BY m.`publikation_per` ASC, `typ` ASC
+                AND m.`publikation_per` <= CURDATE()
+                AND m.`typ` IN ('EM', 'KGM')
+            GROUP BY
+                m.`name`,
+                m.`bezeichnung`,
+                m.`typ`,
+                m.`publikation_per`,
+                m.`kurzbeschrieb`,
+                m.`frist`,
+                m.`verhandlungsdatum`,
+                m.`verwaltung`,
+                m.`vermieterin`,
+                m.`schlichtungsbehoerde`
+            ORDER BY
+                m.`publikation_per` ASC,
+                m.`typ` ASC
         """,
         as_dict=True
     )
