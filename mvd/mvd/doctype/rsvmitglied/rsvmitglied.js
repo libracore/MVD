@@ -64,7 +64,7 @@ frappe.ui.form.on('RSVMitglied', {
     },
     open_rsv_mandat: function(frm) {
         const url = `/desk#Form/RSVMandat/${cur_frm.doc.rsvmandat}`;
-        window.open(url, '_blank');
+        window.open(url, '_self');
     },
     get_or_create_rsv_mandat: function(frm) {
         frappe.call({

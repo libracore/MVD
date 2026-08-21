@@ -58,7 +58,8 @@
   "adr_egaid",
   "bfs_nr",
   "reason_missing_rsvmandat",
-  "mandat_und_siedlungs_sperre"
+  "mandat_und_siedlungs_sperre",
+  "abschluss_datum"
  ],
  "fields": [
   {
@@ -71,8 +72,7 @@
   {
    "fieldname": "fallnummer",
    "fieldtype": "Data",
-   "label": "Mandat-Fallnr. (Coop)",
-   "read_only": 1
+   "label": "Mandat-Fallnr. (Coop)"
   },
   {
    "fieldname": "datum_pruefung",
@@ -369,9 +369,14 @@
    "fieldname": "open_rsv_mandat",
    "fieldtype": "Button",
    "label": "RSV-Mandat \u00f6ffnen"
+  },
+  {
+   "fieldname": "abschluss_datum",
+   "fieldtype": "Date",
+   "label": "Abschlussdatum"
   }
  ],
- "modified": "2026-08-20 16:17:54.893808",
+ "modified": "2026-08-21 11:35:53.109442",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",

@@ -20,7 +20,6 @@ class RSVMandat(Document):
         )
 
         for rsv_mitglied in rsv_mitglieder:
-            frappe.db.set_value("RSVMitglied", rsv_mitglied.name, "fallnummer", self.fallnummer)
             # Setzen von Schlichtungsbehörde wenn leer
             if not self.schlichtungsbehoerde and rsv_mitglied.bfs_nr:
                 self.schlichtungsbehoerde = get_schlichtungsbehoerde(rsv_mitglied.bfs_nr)

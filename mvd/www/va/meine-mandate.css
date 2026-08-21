@@ -167,6 +167,17 @@ body {
     font-weight: 700;
 }
 
+.status-pill-red {
+    white-space: nowrap;
+    height: fit-content;
+    background: #FDECEF;
+    color: #B4233C;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
 .info-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);

@@ -44,7 +44,7 @@ class RSVMitglied(Document):
         
         self.name = new_name
     
-    def validate(self):
+    def before_save(self):
         if self.faktura_kunde:
             self.faktura_kunde_name = "{0} {1}".format(frappe.db.get_value("Kunden", self.faktura_kunde, "vorname"), frappe.db.get_value("Kunden", self.faktura_kunde, "nachname"))
         else:
@@ -57,6 +57,11 @@ class RSVMitglied(Document):
 
         if self.status == 'Geprüft':
             self.datum_pruefung = today()
+
+        if self.status == 'Abgeschlossen':
+            self.abschluss_datum = today()
+        else:
+            self.abschluss_datum = None
     
     def after_insert(self):
         if not self.adr_egaid:

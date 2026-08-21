@@ -5,7 +5,7 @@ import io
 import os
 import zipfile
 from urllib.parse import unquote
-from mvd.mvd.doctype.rsvmandat.rsvmandat import get_rsv_mandat_languages
+from mvd.mvd.doctype.rsvmandat.rsvmandat import get_rsv_mandat_languages, get_va_from_user
 
 no_cache = 1
 
@@ -28,11 +28,12 @@ def get_cards():
         if qty < 1: return False
 
         card_template = """
-            <article class="case-card" data-mandat"{mandat}" data-mandattyp="{typ}" onclick="show_detail_card('{mandat}')">
+            <article class="case-card" {style} data-mandat"{mandat}" data-mandattyp="{typ}" data-closestatus="{close_status}" onclick="show_detail_card('{mandat}')">
                 <div class="badges">
                     <span class="badge">{typ}</span>
                     <span class="badge">Anz. Mandate: {qty}</span>
                     <span class="badge open">✔</span>
+                    {closed_batch}
                 </div>
                 <h3>{titel}</h3>
                 <p>{kurzbeschrieb}</p>
@@ -41,8 +42,17 @@ def get_cards():
                     <span>Details ansehen</span>
                 </div>
             </article>
-        """.format(titel=details.bezeichnung or details.name, kurzbeschrieb=details.kurzbeschrieb or 'Klicken sie hier für mehr Informationen.',
-                   mandat=details.name, typ=details.typ, qty=qty, frist=details.frist or '-')
+        """.format(
+                titel=details.bezeichnung or details.name,
+                kurzbeschrieb=details.kurzbeschrieb or 'Klicken sie hier für mehr Informationen.',
+                mandat=details.name,
+                typ=details.typ,
+                qty=qty,
+                frist=details.frist or '-',
+                close_status=mandat.get("close_status"),
+                style='style="display: none;"' if cint(mandat.get("close_status")) == 1 else '',
+                closed_batch='<span class="badge urgent">Abgeschlossen</span>' if cint(mandat.get("close_status")) == 1 else ''
+            )
 
         return card_template
     
@@ -53,7 +63,7 @@ def get_cards():
             einzelmandat_template = """
                 <div class="section">
                     <h4>Mandat {loop}</h4>
-                    <table style="width: 50%;">
+                    <table style="width: 90%;">
                         {doppelversicherung}
                         <tr>
                             <td>Name Mietpartei</td>
@@ -62,6 +72,14 @@ def get_cards():
                         <tr>
                             <td>Mietobjekt</td>
                             <td>{mietobjekt}</td>
+                        </tr>
+                        <tr>
+                            <td>RSV-Mitglied Fallnr.</td>
+                            <td>{fallnummer}</td>
+                        </tr>
+                        <tr>
+                            <td>RSV-Mitglied Status</td>
+                            <td>{status}</td>
                         </tr>
                     </table>
                 </div>
@@ -75,6 +93,7 @@ def get_cards():
                 <div class="section">
                     <div class="actions">
                             <button class="btn-primary" onclick="download_zip('{mandat_name}')">Daten als Zip-File herunterladen</button>
+                            {close_rsvmitglied_btn}
                     </div>
                 </div>
                 <hr>
@@ -86,7 +105,7 @@ def get_cards():
                         m.*
                     FROM `tabRSVMitglied` m
                     WHERE m.rsvmandat = '{0}'
-                    AND m.status = 'Geprüft'
+                    -- AND m.status = 'Geprüft'
                     GROUP BY m.name
                 """.format(mandat.name),
                 as_dict=True
@@ -99,6 +118,9 @@ def get_cards():
                     doppelversicherung = """
                         <p>⚠️ Doppelversicherung: {0}</p>
                     """.format(einzelmandat.doppelversicherung_bei)
+                close_rsvmitglied_btn = ''
+                if einzelmandat.status != 'Abgeschlossen':
+                    close_rsvmitglied_btn = """<button class="btn-primary" onclick="close_rsvmitglied('{mandat_name}')">RSV-Mitglied schliessen</button>""".format(mandat_name=einzelmandat.name)
                 
                 return_data += einzelmandat_template.format(
                                                         beschreibung=einzelmandat.beschreibung or '-',
@@ -106,7 +128,10 @@ def get_cards():
                                                         mandat_name=einzelmandat.name,
                                                         mietpartei="{0} {1}".format(einzelmandat.vorname, einzelmandat.nachname),
                                                         doppelversicherung=doppelversicherung,
-                                                        mietobjekt="{0} {1}, {2} {3}".format(einzelmandat.strasse, einzelmandat.hausnummer, einzelmandat.plz, einzelmandat.ort)
+                                                        mietobjekt="{0} {1}, {2} {3}".format(einzelmandat.strasse, einzelmandat.hausnummer, einzelmandat.plz, einzelmandat.ort),
+                                                        fallnummer=einzelmandat.fallnummer,
+                                                        close_rsvmitglied_btn=close_rsvmitglied_btn,
+                                                        status=einzelmandat.status
                                                     )
                 loop += 1
             
@@ -116,6 +141,14 @@ def get_cards():
             qty = frappe.db.count('RSVMitglied', filters = dict(rsvmandat=mandat.name, status='Geprüft'))
         if mandat.typ == 'EM':
             qty = 1
+
+        rsv_mandat_close_btn = ''
+        if cint(mandat.get("close_status")) != 1:
+            rsv_mandat_close_btn = """
+                <div class="actions">
+                    <button class="btn-primary" onclick="close_rsvmandat('{mandat}')">RSV-Mandat schliessen</button>
+                </div>
+            """.format(mandat=mandat.name)
         
         detail_card_template = """
             <section class="detail hidden" data-belongstomandat="{mandat}">
@@ -127,22 +160,20 @@ def get_cards():
                         </p>
                     </div>
                     <span class="status-pill">Mir zugewiesenes Mandat</span>
+                    {closed_batch}
                 </div>
 
-                <div class="interest-box">
-                    <label for="message">Fallnummer</label>
-                    <input type="text" id="fallnummer-{mandat}" placeholder="Fallnummer hinzufügen..." value="{fallnummer}"></input>
-
-                    <div class="actions">
-                        <button class="btn-primary" onclick="add_fallnummer('{mandat}')">Fallnummer speichern</button>
-                    </div>
-                </div>
+                {rsv_mandat_close_btn}
 
                 <div class="section">
                     <table style="width: 90%;">
                         <tr>
                             <td><b>Anz. Einzelmandate</b></td>
                             <td>{qty}</td>
+                        </tr>
+                        <tr>
+                            <td><b>RSV-Mandat Fallnr.</b></td>
+                            <td>{fallnummer}</td>
                         </tr>
                         <tr>
                             <td><b>Typ</b></td>
@@ -195,11 +226,13 @@ def get_cards():
                 thema=mandat.themen,
                 vermieterin=mandat.vermieterin,
                 verwaltung=mandat.verwaltung,
-                schlichtungsbehoerde=mandat.schlichtungsbehoerde
+                schlichtungsbehoerde=mandat.schlichtungsbehoerde,
+                rsv_mandat_close_btn=rsv_mandat_close_btn,
+                closed_batch='<span class="status-pill-red">Abgeschlossen</span>' if cint(mandat.get("close_status")) == 1 else ''
             )
 
         return detail_card_template
-    
+    va_user = get_va_from_user(frappe.session.user)
     mandate = frappe.db.sql(
         """
             SELECT
@@ -210,26 +243,49 @@ def get_cards():
                 m.`kurzbeschrieb`,
                 m.`frist`,
                 m.`verhandlungsdatum`,
-                m.`fallnummer`,
                 m.`verwaltung`,
                 m.`vermieterin`,
                 m.`schlichtungsbehoerde`,
-                GROUP_CONCAT(t.thema ORDER BY t.idx SEPARATOR '<br>') AS `themen`
+                m.`fallnummer`,
+                GROUP_CONCAT(t.`thema` ORDER BY t.`idx` SEPARATOR '<br>') AS `themen`,
+                NULL AS `close_status`
             FROM `tabRSVMandat` m
             LEFT JOIN `tabRSV Thema MultiTable` t
-                ON t.parent = m.name
-            WHERE m.`name` IN (
-                SELECT `parent`
-                FROM `tabVA Vergabe TBL`
-                WHERE `assigned` = 1
-                AND `va_user` = '{user}'
-            )
-        """.format(user=frappe.session.user),
+                ON t.`parent` = m.`name`
+            WHERE m.`anwalt` = '{user}'
+            GROUP BY
+                m.`name`,
+                m.`bezeichnung`,
+                m.`typ`,
+                m.`publikation_per`,
+                m.`kurzbeschrieb`,
+                m.`frist`,
+                m.`verhandlungsdatum`,
+                m.`verwaltung`,
+                m.`vermieterin`,
+                m.`schlichtungsbehoerde`,
+                m.`fallnummer`
+            ORDER BY
+                m.`publikation_per` ASC,
+                m.`typ` ASC
+        """.format(user=va_user),
         as_dict=True
     )
     
     cards = []
     detail_cards = []
+    print(mandate)
+    # Ergänzen der Mandat-Objekte mit Close-Flags
+    for mandat in mandate:
+        mandat['close_status'] = 1 if check_if_is_closed(mandat.name) else 0
+
+    # Sortieren der Mandat-Objekte nach Close-Flags
+    mandate = sorted(
+        mandate,
+        key=lambda x: x.get("close_status") != 0
+    )
+
+    # Verarbeiten der Mandat-Objekte
     for mandat in mandate:
         card = get_card(mandat)
         if card:
@@ -285,8 +341,40 @@ def resolve_file_path(file_url):
     return None
 
 @frappe.whitelist()
-def add_fallnummer(mandat, fallnummer):
-    ml = frappe.get_doc("RSVMandat", mandat)
-    ml.fallnummer = fallnummer
-    ml.save(ignore_permissions=True)
+def close_rsvmitglied(rsv_mitglied):
+    rsvm = frappe.get_doc("RSVMitglied", rsv_mitglied)
+    rsvm.status = 'Abgeschlossen'
+    rsvm.save(ignore_permissions=True)
     return
+
+@frappe.whitelist()
+def close_rsvmandat(rsv_mandat):
+    rsv_mitglieder = frappe.db.sql(
+        """
+            SELECT `name`
+            FROM `tabRSVMitglied`
+            WHERE `rsvmandat` = '{0}'
+        """.format(rsv_mandat),
+        as_dict=True
+    )
+    for rsv_mitglied in rsv_mitglieder:
+        close_rsvmitglied(rsv_mitglied.name)
+
+    return
+
+def check_if_is_closed(rsv_mandat):
+    is_closed = True
+    rsv_mitglieder = frappe.db.sql(
+        """
+            SELECT `status`
+            FROM `tabRSVMitglied`
+            WHERE `rsvmandat` = '{0}'
+        """.format(rsv_mandat),
+        as_dict=True
+    )
+    for rsv_mitglied in rsv_mitglieder:
+        if rsv_mitglied.status != 'Abgeschlossen':
+            is_closed = False
+            break
+
+    return is_closed
