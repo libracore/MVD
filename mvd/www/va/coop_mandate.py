@@ -85,6 +85,7 @@ def get_table_content():
                 WHERE mi.`rsvmandat` = m.`name`
                 AND mi.`status` NOT IN ('Provisorisch EM', 'Provisorisch GM', 'Vorprüfung')
             )
+            ORDER BY `inaktiv` ASC, `datum_va_vergabe` DESC
         """,
         as_dict=True
     )
