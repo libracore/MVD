@@ -57,7 +57,6 @@
     border-bottom: 1px solid #555;
 }
 
-
 /* Mandatsnummer etwas hervorheben */
 
 .rsv-table .mandat-row td:nth-child(5) {
@@ -145,4 +144,8 @@
 .fallnummer-cell:hover,
 .zip-cell:hover {
     background-color: #999 !important;
+}
+
+.inaktiv {
+    color: gray;
 }

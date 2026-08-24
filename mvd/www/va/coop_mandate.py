@@ -62,16 +62,29 @@ def get_table_content():
     mandate = frappe.db.sql(
         """
             SELECT
-                `name`,
-                `datum_va_vergabe`,
-                `fallnummer`,
-                `vermieterin`,
-                `verwaltung`,
-                `anwalt`,
-                `typ`
-            FROM `tabRSVMandat`
+                m.`name`,
+                m.`datum_va_vergabe`,
+                m.`fallnummer`,
+                m.`vermieterin`,
+                m.`verwaltung`,
+                m.`anwalt`,
+                m.`typ`,
+                NOT EXISTS (
+                    SELECT 1
+                    FROM `tabRSVMitglied` mi
+                    WHERE mi.`rsvmandat` = m.`name`
+                    AND IFNULL(mi.`abschluss_datum`, '') = ''
+                    AND IFNULL(mi.`abgelehnt_datum`, '') = ''
+                ) AS `inaktiv`
+            FROM `tabRSVMandat` m
             WHERE `datum_va_vergabe` IS NOT NULL
-            AND `anwalt` IS NOT NULL
+            AND m.`anwalt` IS NOT NULL
+            AND EXISTS (
+                SELECT 1
+                FROM `tabRSVMitglied` mi
+                WHERE mi.`rsvmandat` = m.`name`
+                AND mi.`status` NOT IN ('Provisorisch EM', 'Provisorisch GM', 'Vorprüfung')
+            )
         """,
         as_dict=True
     )
@@ -79,9 +92,10 @@ def get_table_content():
     for mandat in mandate:
         themen = get_themen(mandat.name)
         gruppenmandat = 'Ja' if mandat.typ != "EM" else 'Nein'
+        mandat_inaktiv_class = "inaktiv" if cint(mandat.inaktiv) == 1 else ""
 
         table_content += """
-            <tr class="mandat-row">
+            <tr class="mandat-row {mandat_inaktiv_class}">
                 <td>{datum_va_vergabe}</td>
                 <td></td>
                 <td></td>
@@ -109,7 +123,8 @@ def get_table_content():
             verwaltung=mandat.verwaltung or '',
             themen=themen or '',
             anwalt=mandat.anwalt or '',
-            gruppenmandat=gruppenmandat
+            gruppenmandat=gruppenmandat,
+            mandat_inaktiv_class=mandat_inaktiv_class
         )
 
         rsv_mitglieder = frappe.db.sql(
@@ -131,6 +146,7 @@ def get_table_content():
                     `mitglied_seit`
                 FROM `tabRSVMitglied`
                 WHERE `rsvmandat` = '{mandat}'
+                AND `status` NOT IN ('Provisorisch EM', 'Provisorisch GM', 'Vorprüfung') -- Achtung, Filter-Duplikat in RSV-Mandat Query
             """.format(mandat=mandat.name),
             as_dict=True
         )
@@ -165,7 +181,7 @@ def get_table_content():
             doppelversicherung = get_doppelversicherung(rsv_mitglied.name)
 
             table_content += """
-                <tr class="mitglied-row">
+                <tr class="mitglied-row {mandat_inaktiv_class}">
                     <td><!-- Datum Vergabe --></td>
                     {kostengutsprache_zelle}
                     {abgelehnt_zelle}
@@ -195,7 +211,8 @@ def get_table_content():
                 fallnummer=rsv_mitglied.fallnummer or '',
                 adresse="{0} {1}, {2} {3}".format(rsv_mitglied.strasse, rsv_mitglied.hausnummer, rsv_mitglied.plz, rsv_mitglied.ort),
                 mitglied_seit=formatdate(rsv_mitglied.mitglied_seit, "dd.MM.yyyy"),
-                doppelversicherung=doppelversicherung
+                doppelversicherung=doppelversicherung,
+                mandat_inaktiv_class=mandat_inaktiv_class
             )
 
     return table_content
@@ -230,6 +247,26 @@ def get_doppelversicherung(rsv_mitglied):
         return 'Nein'
 
     return 'Ja {0}'.format("({0})".format(d_v[0].doppelversicherung_bei) if d_v[0].doppelversicherung_bei else '')
+
+def get_inactiv_tag(rsv_mandat):
+    rsv_mitglieder = frappe.db.sql(
+        """
+            SELECT `name`
+            FROM `tabRSVMitglied`
+            WHERE
+                `rsvmandat` = '{0}'
+                AND IFNULL()
+        """.format(),
+        as_dict=True
+    )
+
+
+    is_active = True
+    abschluss = 0
+    for rsv_mitglied in rsv_mitglieder:
+        if rsv_mitglied.abschluss_datum:
+            abschluss += 1
+        
 
 @frappe.whitelist()
 def erteile_kostenfreigabe(rsvmitglied):
