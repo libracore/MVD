@@ -150,3 +150,13 @@
 .fallnummer-cell:hover {
     background-color: #999 !important;
 }
+
+.zip-cell {
+    cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+}
+
+.zip-cell:hover {
+    background-color: #999 !important;
+}

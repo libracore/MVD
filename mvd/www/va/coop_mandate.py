@@ -28,8 +28,15 @@ def get_content():
                         <th>Mitglied: Name, Vorname</th>
                         <th>Mitglied: Strasse Nr, PLZ Ort (Mietobj.)</th>
                         <th>Mitglied: Eintrittsdatum</th>
-                        <!--<th>Gegenseite (Vermieterin)</th>
-                        <th>Gegenseite (Verwaltung)</th>-->
+                        <th>Gegenseite (Vermieterin)</th>
+                        <th>Gegenseite (Verwaltung)</th>
+                        <th>Thema</th>
+                        <th>Vertrauensanwält*in</th>
+                        <th>Gruppenmandat</th>
+                        <th>Doppelversicherung</th>
+                        <th>Sachbearbeiter*in</th>
+                        <th>Bemerkungen</th>
+                        <th>Download</th>
                     </tr>
                 </thead>
 
@@ -55,7 +62,9 @@ def get_table_content():
                 `datum_vergabe`,
                 `fallnummer`,
                 `vermieterin`,
-                `verwaltung`
+                `verwaltung`,
+                `anwalt`,
+                `typ`
             FROM `tabRSVMandat`
             WHERE `datum_vergabe` IS NOT NULL
             AND `anwalt` IS NOT NULL
@@ -64,6 +73,9 @@ def get_table_content():
     )
 
     for mandat in mandate:
+        themen = get_themen(mandat.name)
+        gruppenmandat = 'Ja' if mandat.typ != "EM" else 'Nein'
+
         table_content += """
             <tr class="mandat-row">
                 <td>{datum_vergabe}</td>
@@ -75,15 +87,25 @@ def get_table_content():
                 <td></td>
                 <td></td>
                 <td></td>
-                <!--<td>{vermieterin}</td>
-                <td>{verwaltung}</td>-->
+                <td>{vermieterin}</td>
+                <td>{verwaltung}</td>
+                <td>{themen}</td>
+                <td>{anwalt}</td>
+                <td>{gruppenmandat}</td>
+                <td><!-- Doppelversicherung --></td>
+                <td><!-- Sachbearbeiter*in --></td>
+                <td><!-- Bemerkungen --></td>
+                <td><!-- Download zip --></td>
             </tr>
         """.format(
             name=mandat.name,
             datum_vergabe=formatdate(mandat.datum_vergabe, "dd.MM.yyyy"),
             fallnummer=mandat.fallnummer or '',
-            vermieterin=mandat.vermieterin,
-            verwaltung=mandat.verwaltung
+            vermieterin=mandat.vermieterin or '',
+            verwaltung=mandat.verwaltung or '',
+            themen=themen or '',
+            anwalt=mandat.anwalt or '',
+            gruppenmandat=gruppenmandat
         )
 
         rsv_mitglieder = frappe.db.sql(
@@ -136,19 +158,28 @@ def get_table_content():
             elif cint(rsv_mitglied.kostengutsprache) == 1:
                 abgelehnt_zelle = '<td class="status">-</td>'
 
+            doppelversicherung = get_doppelversicherung(rsv_mitglied.name)
+
             table_content += """
                 <tr class="mitglied-row">
-                    <td></td>
+                    <td><!-- Datum Vergabe --></td>
                     {kostengutsprache_zelle}
                     {abgelehnt_zelle}
                     <td>{abschluss_datum}</td>
-                    <td></td>
+                    <td><!-- RSV-Mandat --></td>
                     <td class="fallnummer-cell" data-rsvmitglied="{rsv_mitglied}">{fallnummer}</td>
                     <td>{nachname}, {vorname}</td>
                     <td>{adresse}</td>
                     <td>{mitglied_seit}</td>
-                    <!--<td></td>
-                    <td></td>-->
+                    <td><!-- Gegenseite Vermiterin --></td>
+                    <td><!-- Gegenseite Verwaltung --></td>
+                    <td><!-- Themen --></td>
+                    <td><!-- Anwalt --></td>
+                    <td><!-- Gruppenmandat --></td>
+                    <td>{doppelversicherung}</td>
+                    <td><!-- Sachbearbeiter*in --></td>
+                    <td><!-- Bemerkungen --></td>
+                    <td class="zip-cell" data-rsvmitglied="{rsv_mitglied}">zip</td>
                 </tr>
             """.format(
                 rsv_mitglied=rsv_mitglied.name,
@@ -159,10 +190,42 @@ def get_table_content():
                 abschluss_datum=formatdate(rsv_mitglied.abschluss_datum, "dd.MM.yyyy") or '',
                 fallnummer=rsv_mitglied.fallnummer or '',
                 adresse="{0} {1}, {2} {3}".format(rsv_mitglied.strasse, rsv_mitglied.hausnummer, rsv_mitglied.plz, rsv_mitglied.ort),
-                mitglied_seit=formatdate(rsv_mitglied.mitglied_seit, "dd.MM.yyyy")
+                mitglied_seit=formatdate(rsv_mitglied.mitglied_seit, "dd.MM.yyyy"),
+                doppelversicherung=doppelversicherung
             )
 
     return table_content
+
+def get_themen(rsv_mandat):
+    themen = frappe.db.sql(
+        """
+            SELECT `thema`
+            FROM `tabRSV Thema MultiTable`
+            WHERE `parent` = '{0}'
+        """.format(rsv_mandat),
+        as_dict=True
+    )
+    if len(themen) < 1:
+        return ''
+
+    return "<br>".join(x.thema for x in themen)
+
+def get_doppelversicherung(rsv_mitglied):
+    d_v = frappe.db.sql(
+        """
+            SELECT
+                `doppelversicherung`,
+                `doppelversicherung_bei`
+            FROM `tabRSVMitglied`
+            WHERE `name` = '{0}'
+        """.format(rsv_mitglied),
+        as_dict=True
+    )
+
+    if len(d_v) < 1 or cint(d_v[0].doppelversicherung) == 0:
+        return 'Nein'
+
+    return 'Ja {0}'.format("({0})".format(d_v[0].doppelversicherung_bei) if d_v[0].doppelversicherung_bei else '')
 
 @frappe.whitelist()
 def erteile_kostenfreigabe(rsvmitglied):

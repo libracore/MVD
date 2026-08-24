@@ -14,6 +14,46 @@ $(document).on('click', '.fallnummer-cell', function() {
     fallnummer_speichern(rsvmitglied, rsvmandat);
 });
 
+$(document).on('click', '.zip-cell', function() {
+    const rsvmitglied = $(this).data('rsvmitglied');
+    download_zip(rsvmitglied);
+});
+
+$('#fallnummer-speichern').on('click', function() {
+    const rsvmitglied = $('#fallnummer-dialog').data('rsvmitglied');
+    const rsvmandat = $('#fallnummer-dialog').data('rsvmandat');
+    const fallnummer = $('#fallnummer').val().trim();
+
+    if (!fallnummer ) {
+        frappe.msgprint('Bitte erfassen sie die Fallnummer');
+        return;
+    }
+    let _args = {}
+    if (rsvmitglied) {
+        _args = {
+            rsvmitglied: rsvmitglied,
+            fallnummer: fallnummer
+        }
+    } else if (rsvmandat) {
+        _args = {
+            rsvmandat: rsvmandat,
+            fallnummer: fallnummer
+        }
+    }
+
+    $('#fallnummer-dialog').modal('hide');
+    $('main').css('filter', 'blur(5px)');
+    frappe.call({
+        method: "mvd.www.va.coop_mandate.add_fallnummer",
+        args: _args,
+        freeze: true,
+        freeze_message: 'Erfasse Fallnummer...',
+        callback: function(r)
+        {
+            location.reload();
+        }
+    });
+});
 
 function kostengutsprache_click(rsvmitglied) {
     frappe.call({
@@ -57,38 +97,15 @@ function fallnummer_speichern(rsvmitglied, rsvmandat) {
         .modal('show');
     }
 }
-$('#fallnummer-speichern').on('click', function() {
-    const rsvmitglied = $('#fallnummer-dialog').data('rsvmitglied');
-    const rsvmandat = $('#fallnummer-dialog').data('rsvmandat');
-    const fallnummer = $('#fallnummer').val().trim();
 
-    if (!fallnummer ) {
-        frappe.msgprint('Bitte erfassen sie die Fallnummer');
-        return;
-    }
-    let _args = {}
-    if (rsvmitglied) {
-        _args = {
-            rsvmitglied: rsvmitglied,
-            fallnummer: fallnummer
-        }
-    } else if (rsvmandat) {
-        _args = {
-            rsvmandat: rsvmandat,
-            fallnummer: fallnummer
-        }
-    }
+function download_zip(rsvmitglied) {
+    _download_zip(rsvmitglied);
+}
 
-    $('#fallnummer-dialog').modal('hide');
-    $('main').css('filter', 'blur(5px)');
-    frappe.call({
-        method: "mvd.www.va.coop_mandate.add_fallnummer",
-        args: _args,
-        freeze: true,
-        freeze_message: 'Erfasse Fallnummer...',
-        callback: function(r)
-        {
-            location.reload();
-        }
-    });
-});
+function _download_zip(rsvmitglied) {
+    const url =
+        "/api/method/mvd.www.va.meine_mandate.download_zip?mandat=" +
+        encodeURIComponent(rsvmitglied);
+
+    window.open(url, "_blank");
+}

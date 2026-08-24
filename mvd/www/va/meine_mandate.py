@@ -274,7 +274,7 @@ def get_cards():
     
     cards = []
     detail_cards = []
-    print(mandate)
+    
     # Ergänzen der Mandat-Objekte mit Close-Flags
     for mandat in mandate:
         mandat['close_status'] = 1 if check_if_is_closed(mandat.name) else 0
@@ -302,8 +302,6 @@ def download_zip(mandat):
     for dokument in m.dokumente:
         if dokument.file_upload:
             file_urls.append(dokument.file_upload)
-
-    print(file_urls)
     
     if len(file_urls) < 1:
         frappe.throw("Zu diesem Mandat gibt es keine Dokumentation.")
