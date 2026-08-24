@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint
+from frappe.utils import cint, formatdate
 import io
 import os
 import zipfile
@@ -31,7 +31,7 @@ def get_cards():
             <article class="case-card" {style} data-mandat"{mandat}" data-mandattyp="{typ}" data-closestatus="{close_status}" onclick="show_detail_card('{mandat}')">
                 <div class="badges">
                     <span class="badge">{typ}</span>
-                    <span class="badge">Anz. Mandate: {qty}</span>
+                    <span class="badge">Anz. Mitglieder: {qty}</span>
                     <span class="badge open">✔</span>
                     {closed_batch}
                 </div>
@@ -44,7 +44,7 @@ def get_cards():
             </article>
         """.format(
                 titel=details.bezeichnung or details.name,
-                kurzbeschrieb=details.kurzbeschrieb or 'Klicken sie hier für mehr Informationen.',
+                kurzbeschrieb=details.kurzbeschrieb or '',
                 mandat=details.name,
                 typ=details.typ,
                 qty=qty,
@@ -62,9 +62,13 @@ def get_cards():
 
             einzelmandat_template = """
                 <div class="section">
-                    <h4>Mandat {loop}</h4>
+                    <h4>Mitglied {loop}</h4>
                     <table style="width: 90%;">
                         {doppelversicherung}
+                        <tr>
+                            <td>Kostengutsprache</td>
+                            <td>{kostengutsprache}</td>
+                        </tr>
                         <tr>
                             <td>Name Mietpartei</td>
                             <td>{mietpartei}</td>
@@ -105,7 +109,6 @@ def get_cards():
                         m.*
                     FROM `tabRSVMitglied` m
                     WHERE m.rsvmandat = '{0}'
-                    -- AND m.status = 'Geprüft'
                     GROUP BY m.name
                 """.format(mandat.name),
                 as_dict=True
@@ -118,9 +121,10 @@ def get_cards():
                     doppelversicherung = """
                         <p>⚠️ Doppelversicherung: {0}</p>
                     """.format(einzelmandat.doppelversicherung_bei)
+                
                 close_rsvmitglied_btn = ''
-                if einzelmandat.status != 'Abgeschlossen':
-                    close_rsvmitglied_btn = """<button class="btn-primary" onclick="close_rsvmitglied('{mandat_name}')">RSV-Mitglied schliessen</button>""".format(mandat_name=einzelmandat.name)
+                # if einzelmandat.status != 'Abgeschlossen':
+                #     close_rsvmitglied_btn = """<button class="btn-primary" onclick="close_rsvmitglied('{mandat_name}')">RSV-Mitglied schliessen</button>""".format(mandat_name=einzelmandat.name)
                 
                 return_data += einzelmandat_template.format(
                                                         beschreibung=einzelmandat.beschreibung or '-',
@@ -131,7 +135,8 @@ def get_cards():
                                                         mietobjekt="{0} {1}, {2} {3}".format(einzelmandat.strasse, einzelmandat.hausnummer, einzelmandat.plz, einzelmandat.ort),
                                                         fallnummer=einzelmandat.fallnummer,
                                                         close_rsvmitglied_btn=close_rsvmitglied_btn,
-                                                        status=einzelmandat.status
+                                                        status=einzelmandat.status,
+                                                        kostengutsprache=formatdate(einzelmandat.kostengutsprache_datum, "dd.MM.yyyy") if cint(einzelmandat.kostengutsprache) == 1 else ''
                                                     )
                 loop += 1
             
@@ -159,7 +164,6 @@ def get_cards():
                         {kurzbeschrieb}
                         </p>
                     </div>
-                    <span class="status-pill">Mir zugewiesenes Mandat</span>
                     {closed_batch}
                 </div>
 

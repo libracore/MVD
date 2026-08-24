@@ -31,7 +31,7 @@ def get_cards():
             <article class="case-card" data-mandat="{mandat}" data-mandattyp="{typ}" onclick="show_detail_card('{mandat}')">
                 <div class="badges">
                     <span class="badge">{typ}</span>
-                    <span class="badge">Anz. Mandate: {qty}</span>
+                    <span class="badge">Anz. Mitglieder: {qty}</span>
                     {va_badge}
                 </div>
                 <h3>{titel}</h3>
@@ -41,7 +41,7 @@ def get_cards():
                     <span>Details ansehen</span>
                 </div>
             </article>
-        """.format(titel=details.bezeichnung or details.name, kurzbeschrieb=details.kurzbeschrieb or 'Klicken sie hier für mehr Informationen.',
+        """.format(titel=details.bezeichnung or details.name, kurzbeschrieb=details.kurzbeschrieb or '',
                    mandat=details.name, typ=details.typ, qty=qty, va_badge=va_badge,
                    frist=details.frist or '-')
 
@@ -53,7 +53,7 @@ def get_cards():
 
             einzelmandat_template = """
                 <div class="section">
-                    <h4>Mandat {loop}</h4>
+                    <h4>Mitglied {loop}</h4>
                     <table style="width: 90%;">
                         <tr>
                             <td>Name Mietpartei</td>

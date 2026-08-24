@@ -38,6 +38,10 @@ frappe.ui.form.on('RSVMandat', {
             var domain = window.location.origin;
             window.open(`${domain}/va/meine-mandate`, '_blank');
         }, "Öffne");
+        frm.add_custom_button(__("Coop-Liste"),  function() {
+            var domain = window.location.origin;
+            window.open(`${domain}/va/coop-mandate`, '_blank');
+        }, "Öffne");
 
         // Lade Übersicht für die RSV-Mitglieder
         frappe.call({
