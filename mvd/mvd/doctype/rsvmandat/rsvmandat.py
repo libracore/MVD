@@ -31,7 +31,7 @@ class RSVMandat(Document):
         found_va_assignment = False
         for va in self.va_vergabe:
             if cint(va.assigned) == 1:
-                self.datum_vergabe = today()
+                self.datum_va_vergabe = today()
                 self.anwalt = get_va_from_user(va.va_user)
                 found_va_assignment = True
         if found_va_assignment:

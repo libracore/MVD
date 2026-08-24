@@ -63,14 +63,14 @@ def get_table_content():
         """
             SELECT
                 `name`,
-                `datum_vergabe`,
+                `datum_va_vergabe`,
                 `fallnummer`,
                 `vermieterin`,
                 `verwaltung`,
                 `anwalt`,
                 `typ`
             FROM `tabRSVMandat`
-            WHERE `datum_vergabe` IS NOT NULL
+            WHERE `datum_va_vergabe` IS NOT NULL
             AND `anwalt` IS NOT NULL
         """,
         as_dict=True
@@ -82,7 +82,7 @@ def get_table_content():
 
         table_content += """
             <tr class="mandat-row">
-                <td>{datum_vergabe}</td>
+                <td>{datum_va_vergabe}</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -103,7 +103,7 @@ def get_table_content():
             </tr>
         """.format(
             name=mandat.name,
-            datum_vergabe=formatdate(mandat.datum_vergabe, "dd.MM.yyyy"),
+            datum_va_vergabe=formatdate(mandat.datum_va_vergabe, "dd.MM.yyyy"),
             fallnummer=mandat.fallnummer or '',
             vermieterin=mandat.vermieterin or '',
             verwaltung=mandat.verwaltung or '',
