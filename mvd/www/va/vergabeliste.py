@@ -80,7 +80,7 @@ def get_cards():
                     SELECT
                         m.*
                     FROM `tabRSVMitglied` m
-                    WHERE m.rsvmandat = '{0}'
+                    WHERE m.rsvmandat = '{0}' -- Achtung, Filter-Duplikat bei RSV-Mandat-Query
                     AND m.status = 'Geprüft'
                     GROUP BY m.name
                 """.format(mandat.name),
@@ -219,6 +219,7 @@ def get_cards():
             WHERE m.`publikation_per` >= CURDATE() - INTERVAL 7 DAY
                 AND m.`publikation_per` <= CURDATE()
                 AND m.`typ` IN ('EM', 'KGM')
+                AND EXISTS (SELECT 1 FROM `tabRSVMitglied` mi WHERE mi.`rsvmandat` = m.`name` AND mi.status = 'Geprüft') -- Achtung, Filter-Duplikat von RSV-Mitglied-Query
             GROUP BY
                 m.`name`,
                 m.`bezeichnung`,
