@@ -236,6 +236,7 @@ def erteile_kostenfreigabe(rsvmitglied):
     rsvm = frappe.get_doc("RSVMitglied", rsvmitglied)
     rsvm.kostengutsprache = 1
     rsvm.kostengutsprache_datum = today()
+    rsvm.status = "Vergeben"
     rsvm.save(ignore_permissions=True)
     return
 
