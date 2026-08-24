@@ -128,7 +128,8 @@ def get_rsvmitglieder_html(rsv_mandat):
                 `vorname`,
                 `nachname`,
                 `strasse`,
-                `hausnummer`
+                `hausnummer`,
+                `status`
             FROM `tabRSVMitglied`
             WHERE `rsvmandat` = '{0}'
         """.format(rsv_mandat),
@@ -141,15 +142,17 @@ def get_rsvmitglieder_html(rsv_mandat):
         rsv_mitglieder_rows.append(
             """
                 <tr>
+                    <td><a href="/desk#Form/RSVMitglied/{rvs_mitglied_id}">{rsv_mitglied_status}</a></td>
                     <td><a href="/desk#Form/RSVMitglied/{rvs_mitglied_id}">{mitglied_nr}</a></td>
-                    <td>{rvs_mitglied_name}</td>
-                    <td>{rvs_mitglied_address}</td>
+                    <td><a href="/desk#Form/RSVMitglied/{rvs_mitglied_id}">{rvs_mitglied_name}</a></td>
+                    <td><a href="/desk#Form/RSVMitglied/{rvs_mitglied_id}">{rvs_mitglied_address}</a></td>
                 </tr>
             """.format(
                 rvs_mitglied_id=rsv_mitglied.name,
                 mitglied_nr=rsv_mitglied.mitglied_nr,
                 rvs_mitglied_name="{0} {1}".format(rsv_mitglied.vorname, rsv_mitglied.nachname),
-                rvs_mitglied_address="{0} {1}".format(rsv_mitglied.strasse, rsv_mitglied.hausnummer)
+                rvs_mitglied_address="{0} {1}".format(rsv_mitglied.strasse, rsv_mitglied.hausnummer),
+                rsv_mitglied_status=rsv_mitglied.status
             )
         )
 
