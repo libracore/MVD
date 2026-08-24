@@ -107,11 +107,18 @@ def get_cards():
         status_pill = '<span class="status-pill">Offen für Interesse</span>'
         interessiert_btn = 'Ja, ich bin interessiert'
         interessiert_btn_color = 'primary'
+        interest_box = """
+            <h3>Interesse hinterlegen</h3>
+            <label for="message">Nachricht / Bemerkung</label>
+            <textarea id="message-{mandat}" placeholder="Kurze Bemerkung zu Kapazität, Erfahrung oder Rückfragen..."></textarea>
+        """.format(mandat=mandat.name)
+
         va_in_list = is_va_already_in_list(mandat.name)
         if va_in_list:
             status_pill = '<span class="status-pill">Interesse bereits hinterlegt</span>'
             interessiert_btn = 'kein Interesse'
             interessiert_btn_color = 'danger'
+            interest_box = ''
         
         detail_card_template = """
             <section class="detail hidden" data-belongstomandat="{mandat}">
@@ -168,10 +175,7 @@ def get_cards():
                 {einzelmandat_details}
 
                 <div class="interest-box">
-                    <h3>Interesse hinterlegen</h3>
-
-                    <label for="message">Nachricht / Bemerkung</label>
-                    <textarea id="message-{mandat}" placeholder="Kurze Bemerkung zu Kapazität, Erfahrung oder Rückfragen..."></textarea>
+                    {interest_box}
 
                     <div class="actions">
                         <button class="btn-{interessiert_btn_color}" onclick="take('{mandat}', '{va_in_list}')">{interessiert_btn}</button>
@@ -194,7 +198,8 @@ def get_cards():
                     status_pill=status_pill,
                     va_in_list=va_in_list,
                     interessiert_btn=interessiert_btn,
-                    thema=mandat.themen or '-'
+                    thema=mandat.themen or '-',
+                    interest_box=interest_box
                 )
 
         return detail_card_template
