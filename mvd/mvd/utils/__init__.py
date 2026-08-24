@@ -96,3 +96,9 @@ def get_nextcloud_authzero_roles(user):
         role_list.append("SSO_NCLC_{0}".format(sektion.for_value))
     
     return role_list
+
+def get_home_page(user):
+    if "rsvmandat_rsv" in frappe.get_roles(user):
+        return "/va/coop-mandate"
+
+    return "/me"

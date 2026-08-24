@@ -109,7 +109,7 @@ home_page = "redirect"
 # }
 
 # Website user home page (by function)
-# get_website_user_home_page = "mvd.utils.get_home_page"
+get_website_user_home_page = "mvd.mvd.utils.get_home_page"
 
 # Generators
 # ----------
