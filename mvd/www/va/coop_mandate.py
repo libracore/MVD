@@ -8,6 +8,10 @@ def get_context(context):
     if frappe.session.user == "Guest":
         frappe.local.flags.redirect_location = "/login"
         raise frappe.Redirect
+
+    if not "rsvmandat_rsv" in frappe.get_roles():
+        frappe.local.flags.redirect_location = "/desk#vbz"
+        raise frappe.Redirect
     
     context.html_table = get_content()
     
