@@ -150,7 +150,7 @@ frappe.vbz_beratung_termine = {
 
             art: this.get_filter_value(
                 "art_field",
-                ""
+                "Art"
             ),
 
             datum: this.get_filter_value(
@@ -171,6 +171,11 @@ frappe.vbz_beratung_termine = {
             fachskill: this.get_filter_value(
                 "fachskill_field",
                 ""
+            ),
+
+            geschaeftsstelle: this.get_filter_value(
+                "geschaeftsstelle_field",
+                "Geschäftsstelle"
             ),
 
             my_reservations_only: this.get_filter_value(
@@ -413,7 +418,7 @@ frappe.vbz_beratung_termine = {
                 parent_selector: ".art",
                 fieldtype: "Select",
                 fieldname: "art",
-                options: "\npersönlich\ntelefonisch",
+                options: "Art\npersönlich\ntelefonisch",
                 placeholder: "Art"
             },
             {
@@ -474,6 +479,15 @@ frappe.vbz_beratung_termine = {
                 fieldtype: "Check",
                 fieldname: "chronologische_termine",
                 label: "Termine chronologisch sortieren"
+            },
+            {
+                property_name: "geschaeftsstelle_field",
+                value_name: "geschaeftsstelle",
+                parent_selector: ".geschaeftsstelle",
+                fieldtype: "Select",
+                fieldname: "geschaeftsstelle",
+                options: "Geschäftsstelle\nZürich\nWinterthur",
+                placeholder: "Geschäftsstelle"
             }
         ];
     },
@@ -614,7 +628,8 @@ frappe.vbz_beratung_termine = {
             "fachskill",
             "my_reservations_only",
             "beratungstyp",
-            "chronologische_termine"
+            "chronologische_termine",
+            "geschaeftsstelle"
         ];
 
         return keys.every(function(key) {

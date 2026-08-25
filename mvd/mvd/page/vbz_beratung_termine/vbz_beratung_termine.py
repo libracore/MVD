@@ -11,14 +11,32 @@ from frappe.utils import cint
 no_cache=1
 
 @frappe.whitelist()
-def get_open_data(free_only=0, beratungsort=None, berater_in=None,
-                  art=None, datum=None, language=None, fachskill=None,
-                  my_reservations_only=0, beratungstyp=None, termine_heute=0,
-                  termine_gebucht=0, datum_bis=None, chronologische_termine=0):
+def get_open_data(
+    free_only=0,
+    beratungsort=None,
+    berater_in=None,
+    art=None,
+    datum=None,
+    language=None,
+    fachskill=None,
+    my_reservations_only=0,
+    beratungstyp=None,
+    termine_heute=0,
+    termine_gebucht=0,
+    datum_bis=None,
+    chronologische_termine=0,
+    geschaeftsstelle=None):
+
+    # Entferne Platzhalter Werte
+    if geschaeftsstelle == "Geschäftsstelle": geschaeftsstelle = None
+    if beratungstyp == "Beratungstyp": beratungstyp = None
+    if art == "Art": art = None
+
     alle_termine, meine_termine, anz_eingetroffen = get_alle_beratungs_termine(frappe.session.user, free_only, beratungsort,
                                                                                berater_in, art, datum, language, fachskill,
                                                                                my_reservations_only, beratungstyp, termine_heute,
-                                                                               termine_gebucht, datum_bis, chronologische_termine)
+                                                                               termine_gebucht, datum_bis, chronologische_termine,
+                                                                               geschaeftsstelle)
     datasets = {
         'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'datenstand_for_polling': now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
@@ -28,11 +46,22 @@ def get_open_data(free_only=0, beratungsort=None, berater_in=None,
     }
     return datasets
 
-def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
-                               berater_in=None, art=None, datum=None,
-                               language=None, fachskill=None, my_reservations_only=0,
-                               beratungstyp=None, termine_heute=0, termine_gebucht=0,
-                               datum_bis=None, chronologische_termine=0):
+def get_alle_beratungs_termine(
+    user, free_only=0,
+    beratungsort=None,
+    berater_in=None,
+    art=None,
+    datum=None,
+    language=None,
+    fachskill=None,
+    my_reservations_only=0,
+    beratungstyp=None,
+    termine_heute=0,
+    termine_gebucht=0,
+    datum_bis=None,
+    chronologische_termine=0,
+    geschaeftsstelle=None):
+
     alle = []
     meine = []
     anz_eingetroffen = 0
@@ -109,6 +138,10 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
             beratungstyp_filter = "AND (`berTer`.`beratungstyp` = 'Privat' OR `berTer`.`beratungstyp` IS NULL)"
         if beratungstyp == "Geschäft":
             beratungstyp_filter = "AND `berTer`.`beratungstyp` = 'Geschäft'"
+
+    geschaeftsstelle_filter = ''
+    if geschaeftsstelle and geschaeftsstelle != '':
+        geschaeftsstelle_filter = "AND (`bo`.`geschaeftsstelle` = '{0}' OR `bo`.`geschaeftsstelle` IS NULL)".format(geschaeftsstelle)
     
     if not cint(my_reservations_only) == 1:
     
@@ -135,6 +168,7 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
                                             `berTer`.`beratungstyp`
                                         FROM `tabBeratung Termin` AS `berTer`
                                         LEFT JOIN `tabBeratung` AS `beratung` ON `berTer`.`parent` = `beratung`.`name`
+                                        LEFT JOIN `tabBeratungsort` AS `bo` ON `berTer`.`ort` = `bo`.`name`
                                         WHERE
                                         {datum_filter}
                                         {beratungsort_filter}
@@ -143,10 +177,18 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
                                         {fachskill_filter}
                                         {sprach_filter}
                                         {beratungstyp_filter}
+                                        {geschaeftsstelle_filter}
                                         ORDER BY `berTer`.`von` DESC
-                                    """.format(datum_filter=datum_filter, beratungsort_filter=beratungsort_filter, berater_in_filter=berater_in_filter, \
-                                                art_filter=art_filter, fachskill_filter=fachskill_filter, sprach_filter=sprach_filter, \
-                                                beratungstyp_filter=beratungstyp_filter), as_dict=True)
+                                    """.format(
+                                            datum_filter=datum_filter,
+                                            beratungsort_filter=beratungsort_filter,
+                                            berater_in_filter=berater_in_filter,
+                                            art_filter=art_filter,
+                                            fachskill_filter=fachskill_filter,
+                                            sprach_filter=sprach_filter,
+                                            beratungstyp_filter=beratungstyp_filter,
+                                            geschaeftsstelle_filter=geschaeftsstelle_filter),
+                                    as_dict=True)
         for termin in alle_termine:
             if not erlaubte_sektionen or termin.sektion_id in erlaubte_sektionen:
                 if not erb_block or termin.berater_in in kontaktperson_multi_user:
@@ -248,6 +290,10 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
         art_filter = ''
         if art and art != '':
             art_filter = "AND (`beratungsort`.`default_art` = '{0}' OR `beratungsort`.`default_art` IS NULL)".format(art)
+
+        geschaeftsstelle_filter = ''
+        if geschaeftsstelle and geschaeftsstelle != '':
+            geschaeftsstelle_filter = "AND (`beratungsort`.`geschaeftsstelle` = '{0}' OR `beratungsort`.`geschaeftsstelle` IS NULL)".format(geschaeftsstelle)
         
         freie_termine = frappe.db.sql("""
                                     SELECT DISTINCT
@@ -286,11 +332,19 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
                                     {sprach_filter}
                                     {beratungstyp_filter}
                                     {art_filter}
-                                    """.format(vergebene_termine="', '".join(vergebene_termin_liste), \
-                                                datum_filter=datum_filter, beratungsort_filter=beratungsort_filter, \
-                                                berater_in_filter=berater_in_filter, fachskill_filter=fachskill_filter, \
-                                                sprach_filter=sprach_filter, beratungstyp_filter=beratungstyp_filter, \
-                                                art_filter=art_filter), as_dict=True)
+                                    {geschaeftsstelle_filter}
+                                    """.format(
+                                        vergebene_termine="', '".join(vergebene_termin_liste),
+                                        datum_filter=datum_filter,
+                                        beratungsort_filter=beratungsort_filter,
+                                        berater_in_filter=berater_in_filter,
+                                        fachskill_filter=fachskill_filter,
+                                        sprach_filter=sprach_filter,
+                                        beratungstyp_filter=beratungstyp_filter,
+                                        art_filter=art_filter,
+                                        geschaeftsstelle_filter=geschaeftsstelle_filter),
+                                    as_dict=True)
+        
         for freier_termin in freie_termine:
             freier_termin.von = frappe.utils.get_datetime(freier_termin.von)
             freier_termin.bis = frappe.utils.get_datetime(freier_termin.bis)
@@ -310,7 +364,7 @@ def get_alle_beratungs_termine(user, free_only=0, beratungsort=None,
                     else:
                         if freier_termin.reserved_by == frappe.session.user:
                             alle.append(freier_termin)
-
+    
     if cint(chronologische_termine):
         alle_sortiert = sorted(alle, key = lambda x: (x['sort_date'], x['von_time'], x['beraterinn'] or 'ZZZ'))
     else:

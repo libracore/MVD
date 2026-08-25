@@ -9,6 +9,7 @@
   "ort",
   "sektion_id",
   "default_art",
+  "geschaeftsstelle",
   "infofeld"
  ],
  "fields": [
@@ -37,9 +38,15 @@
    "fieldtype": "Select",
    "label": "Default Art",
    "options": "\ntelefonisch\npers\u00f6nlich"
+  },
+  {
+   "fieldname": "geschaeftsstelle",
+   "fieldtype": "Select",
+   "label": "Gesch\u00e4ftsstelle",
+   "options": "\nZ\u00fcrich\nWinterthur"
   }
  ],
- "modified": "2026-07-15 12:57:22.594424",
+ "modified": "2026-08-25 13:36:24.809215",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratungsort",
