@@ -1999,6 +1999,186 @@ mvd_dialoge.erstelle_korrespondenz = class ErstelleKorrespondenz {
     }
 }
 
+mvd_dialoge.erstelle_kuendigung = class ErstelleKuendigung {
+    constructor(opts) {
+        this.sektion_settings = opts.sektion_settings;
+        this.dialog =  new frappe.ui.Dialog({
+            title: "Kündigung erfassen",
+            no_submit_on_enter: true,
+            fields: this.get_fields(),
+            primary_action_label: "Erfassen",
+            primary_action: () => {
+                this.dialog.hide();
+                this.call_primary_action();
+            }
+        });
+
+        
+        this.dialog.$wrapper.find(".modal-dialog").css("width", `${opts.modal_width || '50'}%`);
+        this.dialog.$wrapper.find(".modal-dialog").css("min-width", `${opts.modal_min_width || '700'}px`);
+        this.dialog.$wrapper.find(".modal-dialog").css("max-width", `${opts.modal_max_width || '1200'}px`);
+        
+        new mvd_vorlagen_baum.ui.VorlagenBaumNavigator({
+            wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
+            parent_dialog: this.dialog,
+            sektion_id: cur_frm.doc.sektion_id || null, // null zeigt alle an
+            purpose: "druck", // null zeigt alle an (null, email, druck oder dokument)
+            on_select: function(selection, details, row, parent_dialog) {
+                parent_dialog.fields_dict.druckvorlage.set_value(row.druckvorlage || '');
+            }
+        });
+
+        this.dialog.show();
+    }
+
+    get_fields() {
+        var me = this;
+        let sektion_settings = me.sektion_settings;
+        
+        if (sektion_settings) {
+            var kuendigungs_stichtag = frappe.datetime.str_to_obj(sektion_settings.kuendigungs_stichtag);
+            var ks_month = kuendigungs_stichtag.getMonth();
+            var ks_day = kuendigungs_stichtag.getDate();
+            
+            var kuendigungs_referenzdatum = frappe.datetime.str_to_obj(frappe.datetime.now_date());
+            var default_grund = '';
+            var abw_grund = '';
+            
+            cur_frm.doc.status_change.forEach(function(entry) {
+                if (entry.status_neu == 'Online-Kündigung') {
+                    if (entry.grund){
+                        if (entry.grund.includes("Andere Gründe")&&entry.idx == cur_frm.doc.status_change.length) {
+                            default_grund = 'Andere Gründe';
+                            if (entry.grund.split("Andere Gründe: ").length > 1) {
+                                abw_grund = entry.grund.split("Andere Gründe: ")[1];
+                            }
+                            kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
+                        } else if (entry.idx == cur_frm.doc.status_change.length) {
+                            if (entry.grund) {
+                                default_grund = entry.grund;
+                                kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
+                            } else {
+                                default_grund = 'Keine Angabe';
+                                kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
+                            }
+                        }
+                    } else if (entry.idx == cur_frm.doc.status_change.length) {
+                        if (entry.grund) {
+                            default_grund = entry.grund;
+                            kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
+                        } else {
+                            default_grund = 'Keine Angabe';
+                            kuendigungs_referenzdatum = frappe.datetime.str_to_obj(entry.datum);
+                        }
+                    }
+                }
+            });
+            
+            var kuendigungs_referenzdatum_month = kuendigungs_referenzdatum.getMonth();
+            var kuendigungs_referenzdatum_day = kuendigungs_referenzdatum.getDate();
+            
+            var fristgerecht = true;
+            
+            if (kuendigungs_referenzdatum_month > ks_month) {
+                fristgerecht = false;
+            } else {
+                if (kuendigungs_referenzdatum_month == ks_month) {
+                    if (kuendigungs_referenzdatum_day > ks_day) {
+                        fristgerecht = false;
+                    }
+                }
+            }
+            
+            if (fristgerecht) {
+                var field_list = [
+                    {'fieldname': 'kuendigung_am', 'fieldtype': 'Date', 'label': 'Kündigung eingegangen am', 'reqd': 1, 'default': frappe.datetime.now_date()},
+                    {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': cur_frm.doc.kuendigung ? cur_frm.doc.kuendigung:frappe.datetime.year_end()},
+                    {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe\nKeine Angabe', 'default': default_grund, 'change': function() {
+                            if (cur_dialog.fields_dict.grund.get_value() == 'Andere Gründe') {
+                                cur_dialog.fields_dict.abw_grund.df.hidden = 0;
+                                cur_dialog.fields_dict.abw_grund.refresh();
+                            } else {
+                                cur_dialog.fields_dict.abw_grund.df.hidden = 1;
+                                cur_dialog.fields_dict.abw_grund.refresh();
+                            }
+                        }
+                    },
+                    {'fieldname': 'abw_grund', 'fieldtype': 'Data', 'label': 'Andere Gründe', 'hidden': default_grund.includes("Andere Gründe") ? 0:1, 'default': abw_grund},
+                    {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
+                        'get_query': function() {
+                            return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                        }
+                    },
+                    {'fieldname': 'massenlauf', 'fieldtype': 'Check', 'label': 'Für Massenlauf vormerken', 'default': 1},
+                    {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"}
+                ];
+            } else {
+                var field_list = [
+                    {'fieldname': 'html_info', 'fieldtype': 'HTML', 'options': '<p style="color: red;">Achtung: Kündigungsfrist verpasst!</p>'},
+                    {'fieldname': 'kuendigung_am', 'fieldtype': 'Date', 'label': 'Kündigung eingegangen am', 'reqd': 1, 'default': frappe.datetime.now_date()},
+                    {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Kündigung erfolgt per', 'reqd': 1, 'default': frappe.datetime.add_months(frappe.datetime.year_end(), 12), 'read_only': 1},
+                    {'fieldname': 'grund', 'fieldtype': 'Select', 'label': 'Kündigungsgrund', 'reqd': 1, 'options': 'Wohneigentum gekauft habe\nins Altersheim/Genossenschaft umziehe\nkeine Probleme mit dem Vermieter habe\nder Mitgliederbeitrag zu hoch ist\nmit den MV-Dienstleistungen nicht zufrieden bin\nmit den MV-Positionen nicht einverstanden bin\neine andere Rechtsschutzversicherung erworben habe\nAndere Gründe', 'default': default_grund, 'change': function() {
+                            if (cur_dialog.fields_dict.grund.get_value() == 'Andere Gründe') {
+                                cur_dialog.fields_dict.abw_grund.df.hidden = 0;
+                                cur_dialog.fields_dict.abw_grund.refresh();
+                            } else {
+                                cur_dialog.fields_dict.abw_grund.df.hidden = 1;
+                                cur_dialog.fields_dict.abw_grund.refresh();
+                            }
+                        }
+                    },
+                    {'fieldname': 'abw_grund', 'fieldtype': 'Data', 'label': 'Andere Gründe', 'hidden': default_grund.includes("Andere Gründe") ? 0:1, 'default': abw_grund},
+                    {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
+                        'get_query': function() {
+                            return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                        }
+                    },
+                    {'fieldname': 'kulanz', 'fieldtype': 'Check', 'label': 'Kulanz anwenden', 'default': 0, 'change': function() {
+                            if (cur_dialog.fields_dict.kulanz.get_value() == 1) {
+                                cur_dialog.fields_dict.datum.df.read_only = 0;
+                                cur_dialog.fields_dict.datum.refresh();
+                            } else {
+                                cur_dialog.fields_dict.datum.set_value(frappe.datetime.add_months(frappe.datetime.year_end(), 12));
+                                cur_dialog.fields_dict.datum.df.read_only = 1;
+                                cur_dialog.fields_dict.datum.refresh();
+                            }
+                        }
+                    },
+                    {'fieldname': 'massenlauf', 'fieldtype': 'Check', 'label': 'Für Massenlauf vormerken', 'default': 1},
+                    {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"}
+                ];
+            }
+            return field_list
+        }
+    }
+
+    call_primary_action() {
+        var _grund = this.dialog.get_value('grund') ? this.dialog.get_value('grund'):'Ohne Begründung'
+        if (this.dialog.get_value('grund') == 'Andere Gründe') {
+            _grund = this.dialog.get_value('grund') + ": " + this.dialog.get_value('abw_grund');
+        }
+        frappe.call({
+            method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.make_kuendigungs_prozess",
+            args:{
+                    'mitgliedschaft': cur_frm.doc.name,
+                    'kuendigung_am': this.dialog.get_value('kuendigung_am'),
+                    'datum_kuendigung': this.dialog.get_value('datum'),
+                    'massenlauf': this.dialog.get_value('massenlauf'),
+                    'druckvorlage': this.dialog.get_value('druckvorlage'),
+                    'grund': _grund
+            },
+            freeze: true,
+            freeze_message: 'Erstelle Kündigung inkl. Bestätigung...',
+            callback: function(r)
+            {
+                cur_frm.reload_doc();
+                cur_frm.timeline.insert_comment("Kündigung");
+                frappe.msgprint("Die Kündigung wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.<br>Die Kündigungsbestätigung finden Sie in den Anhängen.");
+            }
+        });
+    }
+}
+
 mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
     constructor(opts) {
         this.dt_scope = opts.dt_scope || "Mitgliedschaft";
