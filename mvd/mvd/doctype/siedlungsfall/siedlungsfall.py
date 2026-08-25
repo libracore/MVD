@@ -75,7 +75,7 @@ def get_letzte_beratung(mitglied):
     return ""
 
 def get_letztes_mandat(mitglied):
-    mandate = frappe.db.sql(
+    rsv_mitglieder = frappe.db.sql(
             """
                 SELECT
                     `name`,
@@ -89,20 +89,20 @@ def get_letztes_mandat(mitglied):
             as_dict=True
         )
     
-    if len(mandate) > 0:
+    if len(rsv_mitglieder) > 0:
         themen = frappe.db.sql(
             """
                 SELECT `thema`
                 FROM `tabRSV Thema MultiTable`
                 WHERE `parent` = '{0}'
-            """.format(mandate[0].name),
+            """.format(rsv_mitglieder[0].name),
             as_dict=True
         )
         thema = '-'
         if len(themen):
             thema = themen[0].thema
         
-        return "{0}, {1}, {2}".format(format_date(str(mandate[0].creation)), thema, mandate[0].status)
+        return "{0}, {1}, {2}".format(format_date(str(rsv_mitglieder[0].creation)), thema, rsv_mitglieder[0].status)
     
     return ""
 
