@@ -141,6 +141,8 @@ function load_html_overview(frm) {
                 cur_frm.set_df_property('uebersicht_html','options', r.message);
             }
         });
+    } else {
+        cur_frm.set_df_property('uebersicht_html','options', '<div>&nbsp;</div>');
     }
 
     if (cur_frm.doc.adr_egaid) {
@@ -155,8 +157,10 @@ function load_html_overview(frm) {
                 cur_frm.set_df_property('siedlungs_adressen_html','options', r.message);
             }
         });
+    } else {
+        cur_frm.set_df_property('siedlungs_adressen_html','options', '<div>&nbsp;</div>');
     }
-
+    
     if (cur_frm.doc.rsvmandat) {
         // Lade Übersicht für das RSV-Mandat
         frappe.call({
@@ -169,6 +173,8 @@ function load_html_overview(frm) {
                 cur_frm.set_df_property('rsvmandat_html','options', r.message);
             }
         });
+    } else {
+        cur_frm.set_df_property('rsvmandat_html','options', '<div>&nbsp;</div>');
     }
 }
 
