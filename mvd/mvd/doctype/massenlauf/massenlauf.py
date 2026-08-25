@@ -571,11 +571,13 @@ def beratungstermine(massenlauf):
     try:
         heute = nowdate()
         beratungen = frappe.db.sql("""
-            SELECT DISTINCT termin.parent 
+            SELECT termin.parent 
             FROM `tabBeratung Termin` as termin
             INNER JOIN `tabBeratung` as beratung ON termin.parent = beratung.name
             WHERE DATE(termin.von) = %(heute)s 
             AND beratung.sektion_id = 'MVZH'
+            GROUP BY termin.parent
+            ORDER BY MIN(termin.von) ASC
         """, {"heute": heute}, as_dict=True, debug=True)
         
         output = PdfFileWriter()
