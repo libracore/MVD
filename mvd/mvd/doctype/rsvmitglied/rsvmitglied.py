@@ -74,24 +74,10 @@ class RSVMitglied(Document):
             if gebaeudeverzeichnis_id_and_bfs_nr is not None:
                 self.adr_egaid = gebaeudeverzeichnis_id_and_bfs_nr.get("adr_egaid")
                 self.bfs_nr = gebaeudeverzeichnis_id_and_bfs_nr.get("bfs_nr")
-            else:
-                self.reason_missing_rsvmandat = "Auf Basis der Adressdaten konnte keine Gebäude ID zugeordnet werden.<br>Ein entsprechendes RSV-Mandat muss manuell angelegt und verknüpft werden."
-        
-        if not cint(self.mandat_und_siedlungs_sperre) == 1:
-            if not self.rsvmandat and self.adr_egaid:
-                self.rsvmandat = self.get_gruppenmandat(force_new_rsvmandat=cint(self.force_new_rsvmandat))
-        else:
-            # Keine autom. RSV-Mandat- und Siedlungsanlage durch after_insert.
-            # Wird autom. wieder entfernt, da es nach after_insert keinen Nutzen mehr hat.
-            self.mandat_und_siedlungs_sperre = 0
-            self.reason_missing_rsvmandat = "Die allfällige autom. RSV-Mandat- sowie Siedlungsanlage wurde gesperrt. Diese müssen ggf. manuell angelegt und verknüpft werden."
         
         self.save()
     
     def on_update(self):
-        if self.rsvmandat:
-            self.reason_missing_rsvmandat = None
-        
         if self.rsvmandat:
             args = {
                 'rsvmitglied': self.name,
@@ -171,12 +157,6 @@ class RSVMitglied(Document):
                 return rsvmandat
             if rsvmandat.get("qty") in [0, 1]:
                 return rsvmandat.get("rsvmandat")
-            else:
-                self.reason_missing_rsvmandat = "Auf Basis der zutreffenden Siedlung gibt es mehrere RSV-Mandate. Bitte wählen Sie das zugehörige manuell aus."
-        else:
-            if for_lookup:
-                return "Keine Siedlung gefunden"
-            self.reason_missing_rsvmandat = "Auf Basis der Adressdaten konnte keine Siedlung zugeordnet werden.<br>Eine entsprechendes RSV-Mandat muss manuell angelegt und verknüpft werden."
         
         return None
     
@@ -361,18 +341,6 @@ def create_rsv_mitglied(**kwargs):
     rsv_mitglied.ort = kwargs.get("ort", None)
     rsv_mitglied.mv_mitgliedschaft = kwargs.get("mv_mitgliedschaft", None)
     rsv_mitglied.faktura_kunde = kwargs.get("faktura_kunde", None)
-
-    if kwargs.get("rsv_mandat", None):
-        rsv_mitglied.rsvmandat = kwargs.get("rsv_mandat", None)
-    
-    if kwargs.get("rsv_mandat_new_creation", None):
-        if cint(kwargs.get("rsv_mandat_new_creation", None)) == 1:
-            rsv_mitglied.force_new_rsvmandat = 1
-            rsv_mitglied.rsvmandat = None
-    
-    if kwargs.get("mandat_und_siedlungs_sperre", None):
-        if cint(kwargs.get("mandat_und_siedlungs_sperre", None)) == 1:
-            rsv_mitglied.mandat_und_siedlungs_sperre = 1
     
     if kwargs.get("mandat_typ", None):
         rsv_mitglied.status = kwargs.get("mandat_typ", None)

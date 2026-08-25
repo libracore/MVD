@@ -16,12 +16,6 @@ frappe.ui.form.on('RSVMitglied', {
         load_html_overview(frm);
         // Eventlistener für den Schlichtungsbehörden Knopf
         frappe.mvd.schlichtungsbehoerde_listener(frm, 'uebersicht_html');
-
-        if (cur_frm.doc.reason_missing_rsvmandat) {
-            cur_frm.dashboard.add_comment(cur_frm.doc.reason_missing_rsvmandat, 'yellow', true);
-        } else {
-            cur_frm.dashboard.clear_comment();
-        }
     },
     create_zip_file: function(frm) {
         cur_frm.save().then(() => {

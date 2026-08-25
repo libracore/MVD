@@ -8,6 +8,8 @@
   "section_mandat",
   "status",
   "open_beratung",
+  "abschluss_datum",
+  "abgelehnt_datum",
   "fallnummer",
   "gescannte_dokumente",
   "cb_1",
@@ -55,13 +57,8 @@
   "kostengutsprache",
   "kostengutsprache_datum",
   "section_workflow_helper",
-  "force_new_rsvmandat",
   "adr_egaid",
-  "bfs_nr",
-  "reason_missing_rsvmandat",
-  "mandat_und_siedlungs_sperre",
-  "abschluss_datum",
-  "abgelehnt_datum"
+  "bfs_nr"
  ],
  "fields": [
   {
@@ -163,9 +160,11 @@
    "no_copy": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "section_workflow_helper",
    "fieldtype": "Section Break",
-   "label": "Workflow Helper"
+   "label": "Workflow Helper",
+   "permlevel": 1
   },
   {
    "fieldname": "mv_mitgliedschaft",
@@ -178,12 +177,6 @@
    "fieldtype": "Data",
    "label": "ADR_EGAID",
    "options": "Amtliches Gebaeudeverzeichnis"
-  },
-  {
-   "default": "0",
-   "fieldname": "force_new_rsvmandat",
-   "fieldtype": "Check",
-   "label": "force_new_rsvmandat"
   },
   {
    "fieldname": "rsvmandat",
@@ -234,18 +227,6 @@
    "fieldname": "section_mitgliedschafts_overview",
    "fieldtype": "Section Break",
    "label": "Mitgliedschafts\u00fcbersicht"
-  },
-  {
-   "fieldname": "reason_missing_rsvmandat",
-   "fieldtype": "Data",
-   "label": "Grund f\u00fcr fehlende RSV-Mandat",
-   "length": 300
-  },
-  {
-   "default": "0",
-   "fieldname": "mandat_und_siedlungs_sperre",
-   "fieldtype": "Check",
-   "label": "mandat_und_siedlungs_sperre"
   },
   {
    "default": "0",
@@ -373,6 +354,7 @@
    "label": "RSV-Mandat \u00f6ffnen"
   },
   {
+   "depends_on": "eval:doc.status=='Abgeschlossen'",
    "fieldname": "abschluss_datum",
    "fieldtype": "Date",
    "label": "Abschlussdatum"
@@ -384,12 +366,13 @@
    "label": "kostengutsprache Datum"
   },
   {
+   "depends_on": "eval:doc.status=='Abgelehnt'",
    "fieldname": "abgelehnt_datum",
    "fieldtype": "Date",
    "label": "Abgelehnt am"
   }
  ],
- "modified": "2026-08-21 14:49:35.122540",
+ "modified": "2026-08-25 10:18:43.997376",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",
@@ -405,6 +388,12 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
    "write": 1
   }
  ],

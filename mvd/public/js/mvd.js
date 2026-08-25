@@ -2293,36 +2293,6 @@ mvd_dialoge.erstelle_rsv_mitglied = class ErstelleRSVMitglied {
         var me = this;
         return [
             {'fieldname': 'mandat_typ', 'fieldtype': 'Select', 'label': 'Mandattyp', 'reqd': 1, 'options': 'Provisorisch EM\nProvisorisch GM'},
-            {'fieldname': 'mandat_und_siedlungs_sperre', 'fieldtype': 'Check', 'label': 'Keine Mandats- und Siedlungs-Anlage', 'default': 1, 'read_only': 0, 
-                change: function() {
-                    // Ist ein Hack weil wenn der Default-Wert auf 1 und die Checkbox auf Read-Only gesetzt wird, erkennt das Framework die CB NICHT als gesetzt.
-                    if (me.dialog.get_value('mandat_und_siedlungs_sperre') != 1) {
-                        me.dialog.set_value('mandat_und_siedlungs_sperre', 1);
-                    }
-                }
-            },
-            {'fieldname': 'rsv_mandat', 'fieldtype': 'Link', 'label': 'RSV-Mandat', 'reqd': 0, 'hidden': 1,'options': 'RSVMandat', 'description': 'Wenn hier ein RSV-Mandat ausgewählt wird, so wird das neu zu erstellende RSV-Mitglied diesem hinzugefügt. Wenn explizit ein neues RSV-Mandat angelegt werden, so benutzen Sie bitte nachfolgende Checkbox.',
-                get_query: function() {
-                    if(me.dialog.get_value('rsv_mandat_filter')) {
-                        return { 'filters': { 'siedlung': me.dialog.get_value('rsv_mandat_filter') } };
-                    }
-                }
-            },
-            {'fieldname': 'rsv_mandat_filter', 'fieldtype': 'Data', 'label': 'rsv_mandat_filter', 'reqd': 0, 'hidden': 1},
-            {'fieldname': 'rsv_mandat_new_creation', 'fieldtype': 'Check', 'label': 'RSV-Mandats Neuanlage erzwingen', 'reqd': 0, 'hidden': 1, 
-                change: function() {
-                    if (me.dialog.get_value('rsv_mandat_filter')) {
-                        me.dialog.set_df_property("rsv_mandat", "hidden", 0);
-                        if(me.dialog.get_value('rsv_mandat_new_creation')) {
-                            me.dialog.set_df_property("rsv_mandat", "reqd", 0);
-                        } else {
-                            me.dialog.set_df_property("rsv_mandat", "reqd", 1);
-                        }
-                    } else {
-                        me.dialog.set_df_property("rsv_mandat", "reqd", 0);
-                    }
-                }
-            },
             {'fieldname': 'strasse', 'fieldtype': 'Data', 'label': 'Strasse', 'reqd': 1, 'default': opts.objekt_strasse},
             {'fieldname': 'hausnummer', 'fieldtype': 'Data', 'label': 'Hausnummer', 'reqd': 1, 'default': opts.objekt_hausnummer},
             {'fieldname': 'nr_zusatz', 'fieldtype': 'Data', 'label': 'Hausnummer Zusatz', 'reqd': 0, 'default': opts.objekt_nummer_zu},
@@ -2344,67 +2314,34 @@ mvd_dialoge.erstelle_rsv_mitglied = class ErstelleRSVMitglied {
 
     call_primary_action(opts) {
         var me = this;
-        if (me.dialog.get_value("rsv_mandat_new_creation") != 1 && !me.dialog.get_value("rsv_mandat") && me.dialog.get_value("mandat_und_siedlungs_sperre") != 1) {
-            frappe.call({
-                method: "mvd.mvd.doctype.rsvmitglied.rsvmitglied.check_for_existing_rsvmandat",
-                args: me.dialog.get_values(),
-                freeze: true,
-                freeze_message: 'Erstelle RSV-Mitglied...',
-                callback: function(existing_rsvmandat)
-                {
-                    if (!existing_rsvmandat.message) {
-                        frappe.call({
-                            method: "mvd.mvd.doctype.rsvmitglied.rsvmitglied.create_rsv_mitglied",
-                            args: me.dialog.get_values(),
-                            freeze: true,
-                            freeze_message: 'Erstelle RSV-Mitglied...',
-                            callback: function(rsv_response)
-                            {
-                                frappe.db.set_value(cur_frm.doctype, cur_frm.doc.name, 'rsvmitglied', rsv_response.message);
-                                cur_frm.reload_doc();
-                                frappe.msgprint(`Das RSV-Mitglied (${rsv_response.message}) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
-                            }
+        frappe.call({
+            method: "mvd.mvd.doctype.rsvmitglied.rsvmitglied.create_rsv_mitglied",
+            args: me.dialog.get_values(),
+            freeze: true,
+            freeze_message: 'Erstelle RSV-Mitglied...',
+            callback: function(rsv_response)
+            {
+                frappe.call({
+                    method: "mvd.mvd.utils.document_template_handler.use_template",
+                    args:{
+                            template: me.get_template_from_type(),
+                            source_doc: cur_frm.doc.name,
+                            source_dt: cur_frm.doctype,
+                            save_output_to: [[cur_frm.doctype, cur_frm.doc.name]],
+                            filename: `${me.get_template_from_type()}_${rsv_response.message}.odt`
+                    },
+                    freeze: true,
+                    freeze_message: 'Erstelle Schadenanzeige...',
+                    callback: function(template_response)
+                    {
+                        frappe.db.set_value(cur_frm.doctype, cur_frm.doc.name, 'rsv_mitglied', rsv_response.message).then(() => {
+                            cur_frm.reload_doc();
+                            frappe.msgprint(`Das RSV-Mitglied (${rsv_response.message}) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
                         });
-                    } else {
-                        me.dialog.show();
-                        me.dialog.set_value("rsv_mandat_filter", existing_rsvmandat.message)
-                        me.dialog.set_df_property("rsv_mandat", "hidden", 0);
-                        me.dialog.set_df_property("rsv_mandat", "reqd", 1);
-                        me.dialog.set_df_property("rsv_mandat_new_creation", "hidden", 0);
-                        frappe.msgprint('Bitte das neue Feld "RSV-Mandat" beachten!')
                     }
-                }
-            });
-        } else {
-            frappe.call({
-                method: "mvd.mvd.doctype.rsvmitglied.rsvmitglied.create_rsv_mitglied",
-                args: me.dialog.get_values(),
-                freeze: true,
-                freeze_message: 'Erstelle RSV-Mitglied...',
-                callback: function(rsv_response)
-                {
-                    frappe.call({
-                        method: "mvd.mvd.utils.document_template_handler.use_template",
-                        args:{
-                                template: me.get_template_from_type(),
-                                source_doc: cur_frm.doc.name,
-                                source_dt: cur_frm.doctype,
-                                save_output_to: [[cur_frm.doctype, cur_frm.doc.name]],
-                                filename: `${me.get_template_from_type()}_${rsv_response.message}.odt`
-                        },
-                        freeze: true,
-                        freeze_message: 'Erstelle Schadenanzeige...',
-                        callback: function(template_response)
-                        {
-                            frappe.db.set_value(cur_frm.doctype, cur_frm.doc.name, 'rsv_mitglied', rsv_response.message).then(() => {
-                                cur_frm.reload_doc();
-                                frappe.msgprint(`Das RSV-Mitglied (${rsv_response.message}) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
-                            });
-                        }
-                    });
-                }
-            });
-        }
+                });
+            }
+        });
     }
 }
 
