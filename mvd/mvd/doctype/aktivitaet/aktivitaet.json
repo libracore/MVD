@@ -1,0 +1,245 @@
+{
+ "creation": "2026-08-27 11:30:07.808900",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "datum",
+  "erfasser",
+  "import_datenquelle",
+  "import_zeile",
+  "import_verarbeitet",
+  "typ",
+  "art",
+  "termin",
+  "prioritaet",
+  "zustaendig",
+  "erledigt",
+  "erledigt_datum",
+  "mitglied_nr",
+  "mv_mitgliedschaft",
+  "sektion_id",
+  "dokument_intern",
+  "pfad_legacy",
+  "dokument",
+  "erfasst_datum",
+  "geaendert_datum",
+  "sachverhalt",
+  "empfehlung",
+  "fristbeginn",
+  "k_aus_der_beratung",
+  "k_anfangsmietzins",
+  "k_spezialkategorie",
+  "k_mietzinssenkung",
+  "k_maengel",
+  "k_nebenkosten",
+  "k_kuendigung",
+  "k_mietzinserhoehung",
+  "k_forderung",
+  "k_andere",
+  "fallergebnisse"
+ ],
+ "fields": [
+  {
+   "fieldname": "datum",
+   "fieldtype": "Date",
+   "label": "Datum"
+  },
+  {
+   "fieldname": "erfasser",
+   "fieldtype": "Data",
+   "label": "Erfasser"
+  },
+  {
+   "fieldname": "import_datenquelle",
+   "fieldtype": "Data",
+   "label": "Import Datenquelle"
+  },
+  {
+   "fieldname": "import_zeile",
+   "fieldtype": "Int",
+   "label": "Import Zeile"
+  },
+  {
+   "fieldname": "import_verarbeitet",
+   "fieldtype": "Int",
+   "label": "Import Verarbeitet"
+  },
+  {
+   "fieldname": "typ",
+   "fieldtype": "Data",
+   "label": "Typ"
+  },
+  {
+   "fieldname": "art",
+   "fieldtype": "Data",
+   "label": "Kontakt-Art"
+  },
+  {
+   "fieldname": "termin",
+   "fieldtype": "Date",
+   "label": "Termin"
+  },
+  {
+   "fieldname": "prioritaet",
+   "fieldtype": "Data",
+   "label": "Priorit\u00e4t"
+  },
+  {
+   "fieldname": "zustaendig",
+   "fieldtype": "Link",
+   "label": "Zust\u00e4ndig",
+   "options": "User"
+  },
+  {
+   "default": "0",
+   "fieldname": "erledigt",
+   "fieldtype": "Check",
+   "label": "Erledigt"
+  },
+  {
+   "fieldname": "erledigt_datum",
+   "fieldtype": "Date",
+   "label": "Erledigt Datum"
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.mitglied_nr",
+   "fieldname": "mitglied_nr",
+   "fieldtype": "Data",
+   "label": "Mitgliedernummer"
+  },
+  {
+   "fieldname": "mv_mitgliedschaft",
+   "fieldtype": "Link",
+   "label": "MitgliederID",
+   "options": "Mitgliedschaft"
+  },
+  {
+   "fetch_from": "mv_mitgliedschaft.sektion_id",
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
+  },
+  {
+   "fieldname": "dokument_intern",
+   "fieldtype": "Data",
+   "label": "Dokument intern"
+  },
+  {
+   "fieldname": "pfad_legacy",
+   "fieldtype": "Data",
+   "label": "Basis-Pfad"
+  },
+  {
+   "fieldname": "erfasst_datum",
+   "fieldtype": "Date",
+   "label": "Erfasst Datum"
+  },
+  {
+   "fieldname": "geaendert_datum",
+   "fieldtype": "Date",
+   "label": "Ge\u00e4ndert Datum"
+  },
+  {
+   "fieldname": "sachverhalt",
+   "fieldtype": "Data",
+   "label": "Sachverhalt"
+  },
+  {
+   "fieldname": "empfehlung",
+   "fieldtype": "Data",
+   "label": "Empfehlung"
+  },
+  {
+   "fieldname": "fristbeginn",
+   "fieldtype": "Data",
+   "label": "Fristbeginn"
+  },
+  {
+   "fieldname": "k_aus_der_beratung",
+   "fieldtype": "Data",
+   "label": "K-aus der Beratung"
+  },
+  {
+   "fieldname": "k_anfangsmietzins",
+   "fieldtype": "Data",
+   "label": "K-Anfangsmietzins"
+  },
+  {
+   "fieldname": "k_spezialkategorie",
+   "fieldtype": "Data",
+   "label": "K-Spezialkategorie"
+  },
+  {
+   "fieldname": "k_mietzinssenkung",
+   "fieldtype": "Data",
+   "label": "K-Mietzinssenkung"
+  },
+  {
+   "fieldname": "k_maengel",
+   "fieldtype": "Data",
+   "label": "K-M\u00e4ngel"
+  },
+  {
+   "fieldname": "k_nebenkosten",
+   "fieldtype": "Data",
+   "label": "K-Nebenkosten"
+  },
+  {
+   "fieldname": "k_kuendigung",
+   "fieldtype": "Data",
+   "label": "K-K\u00fcndigung"
+  },
+  {
+   "fieldname": "k_mietzinserhoehung",
+   "fieldtype": "Data",
+   "label": "K-Mietzinserh\u00f6hung"
+  },
+  {
+   "fieldname": "k_forderung",
+   "fieldtype": "Data",
+   "label": "K-Forderung"
+  },
+  {
+   "fieldname": "k_andere",
+   "fieldtype": "Data",
+   "label": "K-Andere"
+  },
+  {
+   "fieldname": "fallergebnisse",
+   "fieldtype": "Data",
+   "label": "Fallergebnisse"
+  },
+  {
+   "fieldname": "dokument",
+   "fieldtype": "Data",
+   "label": "Dokument"
+  }
+ ],
+ "modified": "2026-08-27 12:00:27.275015",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Aktivitaet",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "All"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
