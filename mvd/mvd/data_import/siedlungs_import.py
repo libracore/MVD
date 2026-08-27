@@ -8,6 +8,7 @@ import pandas as pd
 from tqdm import tqdm
 from mvd.mvd.doctype.siedlungsfall.siedlungsfall import get_letzte_beratung, get_letztes_mandat
 from frappe.utils.data import getdate
+import re
 
 '''
     Import Siedlungen
@@ -137,7 +138,7 @@ def import_siedlungsfaelle(file_name, site_name='libracore.mieterverband.ch', be
     def add_thema(siedlungsfall, row):
         themen = get_value(row, 'beratungskategorie')
         if themen and themen != '':
-            splittet_themen = themen.split(", ")
+            splittet_themen = re.split(r',\s*(?=\d+\s*-\s*)', themen)
             for thema in splittet_themen:
                 thema_row = siedlungsfall.append("thema", {})
                 thema_row.thema = thema
