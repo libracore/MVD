@@ -31,6 +31,7 @@
   "siedlungsadressen",
   "section_div",
   "thema",
+  "kat_legacy",
   "mandat",
   "pfad_legacy",
   "open_legacy_path",
@@ -194,9 +195,15 @@
   {
    "fieldname": "siedlungsadressen",
    "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "kat_legacy",
+   "fieldtype": "Data",
+   "label": "Kat. (legacy)",
+   "read_only": 1
   }
  ],
- "modified": "2026-08-17 15:55:06.816543",
+ "modified": "2026-08-27 15:33:14.318748",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Siedlungsfall",

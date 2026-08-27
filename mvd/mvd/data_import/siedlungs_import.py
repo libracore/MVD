@@ -88,7 +88,9 @@ def import_siedlungsfaelle(file_name, site_name='libracore.mieterverband.ch', be
         siedlungsfall.siedlung = get_value(row, 'siedlung')
         siedlungsfall.mandat = get_value(row, 'mandat')
         siedlungsfall.pfad_legacy = get_value(row, 'pfad')
-        siedlungsfall.thema = add_thema(row)
+        siedlungsfall.kat_legacy = get_value(row, 'kat_legacy')
+        
+        siedlungsfall = add_thema(siedlungsfall, row)
 
         if get_value(row, 'mitglied_id') and frappe.db.exists("Mitgliedschaft", get_value(row, 'mitglied_id').replace(".0", "")):
             mitgl_row = siedlungsfall.append("mitgliedschaften", {})
@@ -132,9 +134,15 @@ def import_siedlungsfaelle(file_name, site_name='libracore.mieterverband.ch', be
                 return kontaktperson[0].parent
         return ""
     
-    def add_thema(row):
-        # TBD wenn wirklich benötigt
-        return ''
+    def add_thema(siedlungsfall, row):
+        themen = get_value(row, 'beratungskategorie')
+        if themen and themen != '':
+            splittet_themen = themen.split(", ")
+            for thema in splittet_themen:
+                thema_row = siedlungsfall.append("thema", {})
+                thema_row.thema = thema
+            
+        return siedlungsfall
     
     def add_mitglied(row):
         if get_value(row, 'mitglied_id') and frappe.db.exists("Mitgliedschaft", get_value(row, 'mitglied_id').replace(".0", "")):
