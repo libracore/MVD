@@ -148,7 +148,7 @@
   },
   {
    "fieldname": "empfehlung",
-   "fieldtype": "Data",
+   "fieldtype": "Long Text",
    "label": "Empfehlung"
   },
   {
@@ -217,7 +217,7 @@
    "label": "Dokument"
   }
  ],
- "modified": "2026-08-27 14:27:40.194033",
+ "modified": "2026-08-27 21:36:57.143563",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Aktivitaet",
