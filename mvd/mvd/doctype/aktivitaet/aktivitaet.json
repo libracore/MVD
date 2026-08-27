@@ -213,11 +213,11 @@
   },
   {
    "fieldname": "dokument",
-   "fieldtype": "Data",
+   "fieldtype": "Long Text",
    "label": "Dokument"
   }
  ],
- "modified": "2026-08-27 14:04:50.068657",
+ "modified": "2026-08-27 14:27:40.194033",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Aktivitaet",
