@@ -19,6 +19,13 @@ import re
     sudo bench --site test-libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_aktivitaet.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'test-libracore.mieterverband.ch'}"
     Multi-Bench VM:
     bench execute mvd.mvd.data_import.mvzh_aktivitaet.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'mvd', 'bench': 'mvd'}"
+
+    Hinweis
+    --------
+    Vor der ersten Nutzung Index setzen!
+    ALTER TABLE `tabAktivitaet`
+    ADD INDEX `idx_import_datenquelle_zeile`
+    (`import_datenquelle`, `import_zeile`);
 '''
 def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='frappe', skip_missing_users=False, create_missing_users=False):
     # display all coloumns for error handling
