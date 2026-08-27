@@ -55,7 +55,10 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
 
     print("Starte Import...")
     for index, row in tqdm(df.iterrows(), desc="Import Aktivität", unit=" Aktivitäten", total=len(df.index)):
-        if get_value(row, 'Erfasser') not in missing_users:
+        if (
+            get_value(row, 'Erfasser') not in missing_users
+            and not frappe.db.exists("Aktivitaet", {'import_datenquelle': file_name, 'import_zeile': cint(index) + 2})
+        ):
             new_aktivitaet = frappe.new_doc("Aktivitaet")
             new_aktivitaet.datum = getdate(get_value(row, "Datum"))
             new_aktivitaet.erfasser = get_value(row, "Erfasser")
@@ -64,7 +67,7 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
             new_aktivitaet.import_verarbeitet = 0
             new_aktivitaet.typ = get_value(row, "Typ")
             new_aktivitaet.art = get_value(row, "Kontakt-Art")
-            new_aktivitaet.termin = get_value(row, "Termin")
+            new_aktivitaet.termin = getdate(get_value(row, "Termin"))
             new_aktivitaet.prioritaet = get_value(row, "Priorität")
             new_aktivitaet.zustaendig = get_user(get_value(row, "Zuständig"))
             new_aktivitaet.erledigt = get_true_false_flag(get_value(row, "Erledigt"))
