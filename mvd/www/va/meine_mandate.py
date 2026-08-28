@@ -20,8 +20,9 @@ def get_context(context):
 
 def get_cards():
     def get_card(details):
+        qty = 0
         if details.typ == 'KGM':
-            qty = frappe.db.count('RSVMitglied', filters = dict(rsvmandat=details.name, status='Geprüft'))
+            qty = frappe.db.count('RSVMitglied', filters = dict(rsvmandat=details.name, status='Vergeben'))
         if details.typ == 'EM':
             qty = 1
         
