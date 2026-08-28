@@ -219,3 +219,13 @@ function rsv_mandat_selektion(frm, rsv_mandat) {
     });
     d.show();
 }
+
+frappe.ui.form.on('RSV Mandat Dokumente', {
+    inhalt_gepr: function(frm, cdt, cdn) {
+        const row = locals[cdt][cdn];
+
+        if (row.inhalt_gepr) {
+            frappe.model.set_value(cdt, cdn, 'formal_gepr', 1);
+        }
+    }
+});
