@@ -179,7 +179,14 @@
   "nc_base_folder",
   "nc_mitglied_base_folder",
   "nc_mitglied_beratung_base_folder",
-  "nc_beratung_base_folder"
+  "nc_beratung_base_folder",
+  "section_rsv",
+  "rsv_auto_email_enabled",
+  "rsv_mail_template_va",
+  "rsv_mail_template_mitglied",
+  "rsv_team_cc",
+  "rsv_absender_name",
+  "rsv_absender_account"
  ],
  "fields": [
   {
@@ -743,62 +750,74 @@
   {
    "fieldname": "pw_oeff_mo_vm",
    "fieldtype": "Data",
-   "label": "pw_oeff_mo_vm"
+   "label": "pw_oeff_mo_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_oeff_mo_nm",
    "fieldtype": "Data",
-   "label": "pw_oeff_mo_nm"
+   "label": "pw_oeff_mo_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_oeff_di_vm",
    "fieldtype": "Data",
-   "label": "pw_oeff_di_vm"
+   "label": "pw_oeff_di_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_oeff_di_nm",
    "fieldtype": "Data",
-   "label": "pw_oeff_di_nm"
+   "label": "pw_oeff_di_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_oeff_mi_vm",
    "fieldtype": "Data",
-   "label": "pw_oeff_mi_vm"
+   "label": "pw_oeff_mi_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_oeff_mi_nm",
    "fieldtype": "Data",
-   "label": "pw_oeff_mi_nm"
+   "label": "pw_oeff_mi_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_oeff_do_vm",
    "fieldtype": "Data",
-   "label": "pw_oeff_do_vm"
+   "label": "pw_oeff_do_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_oeff_do_nm",
    "fieldtype": "Data",
-   "label": "pw_oeff_do_nm"
+   "label": "pw_oeff_do_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_oeff_fr_vm",
    "fieldtype": "Data",
-   "label": "pw_oeff_fr_vm"
+   "label": "pw_oeff_fr_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_oeff_fr_nm",
    "fieldtype": "Data",
-   "label": "pw_oeff_fr_nm"
+   "label": "pw_oeff_fr_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_oeff_sa_vm",
    "fieldtype": "Data",
-   "label": "pw_oeff_sa_vm"
+   "label": "pw_oeff_sa_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_oeff_sa_nm",
    "fieldtype": "Data",
-   "label": "pw_oeff_sa_nm"
+   "label": "pw_oeff_sa_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_colb2",
@@ -835,32 +854,38 @@
   {
    "fieldname": "pw_tb_oeff_mo_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_oeff_mo_vm"
+   "label": "pw_tb_oeff_mo_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_oeff_di_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_oeff_di_vm"
+   "label": "pw_tb_oeff_di_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_oeff_mi_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_oeff_mi_vm"
+   "label": "pw_tb_oeff_mi_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_oeff_do_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_oeff_do_vm"
+   "label": "pw_tb_oeff_do_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_oeff_fr_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_oeff_fr_vm"
+   "label": "pw_tb_oeff_fr_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_oeff_sa_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_oeff_sa_vm"
+   "label": "pw_tb_oeff_sa_vm",
+   "length": 20
   },
   {
    "collapsible": 1,
@@ -875,32 +900,38 @@
   {
    "fieldname": "pw_tb_oeff_mo_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_oeff_mo_nm"
+   "label": "pw_tb_oeff_mo_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_oeff_di_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_oeff_di_nm"
+   "label": "pw_tb_oeff_di_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_oeff_mi_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_oeff_mi_nm"
+   "label": "pw_tb_oeff_mi_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_oeff_do_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_oeff_do_nm"
+   "label": "pw_tb_oeff_do_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_oeff_fr_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_oeff_fr_nm"
+   "label": "pw_tb_oeff_fr_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_oeff_sa_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_oeff_sa_nm"
+   "label": "pw_tb_oeff_sa_nm",
+   "length": 20
   },
   {
    "collapsible": 1,
@@ -911,32 +942,38 @@
   {
    "fieldname": "pw_tb_mg_oeff_mo_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_mg_oeff_mo_vm"
+   "label": "pw_tb_mg_oeff_mo_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_mg_oeff_di_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_mg_oeff_di_vm"
+   "label": "pw_tb_mg_oeff_di_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_mg_oeff_mi_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_mg_oeff_mi_vm"
+   "label": "pw_tb_mg_oeff_mi_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_mg_oeff_do_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_mg_oeff_do_vm"
+   "label": "pw_tb_mg_oeff_do_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_mg_oeff_fr_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_mg_oeff_fr_vm"
+   "label": "pw_tb_mg_oeff_fr_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_mg_oeff_sa_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_mg_oeff_sa_vm"
+   "label": "pw_tb_mg_oeff_sa_vm",
+   "length": 20
   },
   {
    "fieldname": "column_break_136",
@@ -945,32 +982,38 @@
   {
    "fieldname": "pw_tb_mg_oeff_mo_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_mg_oeff_mo_nm"
+   "label": "pw_tb_mg_oeff_mo_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_mg_oeff_di_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_mg_oeff_di_nm"
+   "label": "pw_tb_mg_oeff_di_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_mg_oeff_mi_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_mg_oeff_mi_nm"
+   "label": "pw_tb_mg_oeff_mi_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_mg_oeff_do_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_mg_oeff_do_nm"
+   "label": "pw_tb_mg_oeff_do_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_mg_oeff_fr_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_mg_oeff_fr_nm"
+   "label": "pw_tb_mg_oeff_fr_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_mg_oeff_sa_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_mg_oeff_sa_nm"
+   "label": "pw_tb_mg_oeff_sa_nm",
+   "length": 20
   },
   {
    "collapsible": 1,
@@ -981,32 +1024,38 @@
   {
    "fieldname": "pw_tb_nmg_oeff_mo_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_nmg_oeff_mo_vm"
+   "label": "pw_tb_nmg_oeff_mo_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_nmg_oeff_di_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_nmg_oeff_di_vm"
+   "label": "pw_tb_nmg_oeff_di_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_nmg_oeff_mi_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_nmg_oeff_mi_vm"
+   "label": "pw_tb_nmg_oeff_mi_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_nmg_oeff_do_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_nmg_oeff_do_vm"
+   "label": "pw_tb_nmg_oeff_do_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_nmg_oeff_fr_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_nmg_oeff_fr_vm"
+   "label": "pw_tb_nmg_oeff_fr_vm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_nmg_oeff_sa_vm",
    "fieldtype": "Data",
-   "label": "pw_tb_nmg_oeff_sa_vm"
+   "label": "pw_tb_nmg_oeff_sa_vm",
+   "length": 20
   },
   {
    "fieldname": "column_break_150",
@@ -1015,32 +1064,38 @@
   {
    "fieldname": "pw_tb_nmg_oeff_mo_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_nmg_oeff_mo_nm"
+   "label": "pw_tb_nmg_oeff_mo_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_nmg_oeff_di_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_nmg_oeff_di_nm"
+   "label": "pw_tb_nmg_oeff_di_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_nmg_oeff_mi_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_nmg_oeff_mi_nm"
+   "label": "pw_tb_nmg_oeff_mi_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_nmg_oeff_do_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_nmg_oeff_do_nm"
+   "label": "pw_tb_nmg_oeff_do_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_nmg_oeff_fr_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_nmg_oeff_fr_nm"
+   "label": "pw_tb_nmg_oeff_fr_nm",
+   "length": 20
   },
   {
    "fieldname": "pw_tb_nmg_oeff_sa_nm",
    "fieldtype": "Data",
-   "label": "pw_tb_nmg_oeff_sa_nm"
+   "label": "pw_tb_nmg_oeff_sa_nm",
+   "length": 20
   },
   {
    "collapsible": 1,
@@ -1139,9 +1194,54 @@
    "fieldtype": "Link",
    "label": "POS Profil f\u00fcr Terminalzahlungen",
    "options": "POS Profile"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_rsv",
+   "fieldtype": "Section Break",
+   "label": "RSV"
+  },
+  {
+   "default": "0",
+   "fieldname": "rsv_auto_email_enabled",
+   "fieldtype": "Check",
+   "label": "Autom. Email Best\u00e4tigung"
+  },
+  {
+   "depends_on": "eval:doc.rsv_auto_email_enabled",
+   "fieldname": "rsv_mail_template_va",
+   "fieldtype": "Link",
+   "label": "E-Mail-Vorlage VA",
+   "options": "Email Template"
+  },
+  {
+   "depends_on": "eval:doc.rsv_auto_email_enabled",
+   "fieldname": "rsv_mail_template_mitglied",
+   "fieldtype": "Link",
+   "label": "E-Mail-Vorlage Mitglied",
+   "options": "Email Template"
+  },
+  {
+   "depends_on": "eval:doc.rsv_auto_email_enabled",
+   "fieldname": "rsv_team_cc",
+   "fieldtype": "Data",
+   "label": "CC Adresse f\u00fcr RSV-Team"
+  },
+  {
+   "depends_on": "eval:doc.rsv_auto_email_enabled",
+   "fieldname": "rsv_absender_name",
+   "fieldtype": "Data",
+   "label": "RSV Absender Name"
+  },
+  {
+   "depends_on": "eval:doc.rsv_auto_email_enabled",
+   "fieldname": "rsv_absender_account",
+   "fieldtype": "Link",
+   "label": "RSV Absender Account",
+   "options": "Email Account"
   }
  ],
- "modified": "2026-05-29 13:54:50.638438",
+ "modified": "2026-08-28 15:46:27.421808",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, formatdate, today
+from frappe.core.doctype.communication.email import make
+from frappe import sendmail
+from frappe.utils.jinja import render_template
 
 no_cache = 1
 
@@ -280,6 +283,7 @@ def erteile_kostenfreigabe(rsvmitglied):
     rsvm.kostengutsprache_datum = today()
     rsvm.status = "Vergeben"
     rsvm.save(ignore_permissions=True)
+    tirgger_emails(rsvmitglied, rsvm.rsvmandat, rsvm.sektion_id)
     return
 
 @frappe.whitelist()
@@ -303,3 +307,178 @@ def add_fallnummer(fallnummer=None, rsvmandat=None, rsvmitglied=None):
         rsvm.save(ignore_permissions=True)
 
     return
+
+def tirgger_emails(rsvmitglied, rsvmandat, sektion):
+    def is_email_enabled():
+        return cint(frappe.db.get_value(
+            "Sektion",
+            sektion,
+            "rsv_auto_email_enabled"
+        ))
+
+    def get_templates():
+        return frappe.db.get_values(
+            "Sektion",
+            sektion,
+            fieldname=["rsv_mail_template_va", "rsv_mail_template_mitglied"],
+            as_dict=True
+        )[0]
+
+    def get_email_addresses():
+        return {
+            'va': get_va_mail(),
+            'mitglied': get_mitglied_mail(),
+            'cc': get_cc_mail()
+        }
+
+    def get_va_mail():
+        va = frappe.db.get_value(
+            "RSVMandat",
+            rsvmandat,
+            'anwalt'
+        )
+        if not va: return None
+
+        users = frappe.db.sql(
+            """
+                SELECT `user`
+                FROM `tabTermin Kontaktperson Multi User`
+                WHERE `parent` = '{0}'
+                LIMIT 1
+            """.format(va),
+            as_dict=True
+        )
+        if len(users) < 1: return None
+
+        return users[0].user
+
+    def get_mitglied_mail():
+        return frappe.db.get_value(
+            "Mitgliedschaft",
+            frappe.db.get_value(
+                "RSVMitglied",
+                rsvmitglied,
+                "mv_mitgliedschaft"
+            ),
+            "e_mail_1"
+        )
+
+    def get_cc_mail():
+        return frappe.db.get_value(
+            "Sektion",
+            sektion,
+            'rsv_team_cc'
+        )
+
+    def get_absender():
+        return {
+            "account": frappe.db.get_value(
+                "Sektion",
+                sektion,
+                "rsv_absender_account"
+            ),
+            "name": frappe.db.get_value(
+                "Sektion",
+                sektion,
+                "rsv_absender_name"
+            )
+        }
+
+    def render_mail_template(template):
+        context = dict(frappe.get_doc("RSVMitglied", rsvmitglied).as_dict())
+        temp = frappe.get_doc("Email Template", template)
+        subject = render_template(temp.subject, context)
+        message = render_template(temp.response, context)
+        return subject, message
+
+    if not is_email_enabled(): return
+
+    templates = get_templates()
+    mail_addresses = get_email_addresses()
+    absender = get_absender()
+
+    # Send VA Mail
+    print(mail_addresses.get("va"), templates.get("rsv_mail_template_va"))
+    if mail_addresses.get("va") and templates.get("rsv_mail_template_va"):
+        va_betreff, va_message = render_mail_template(templates.get("rsv_mail_template_va"))
+        send_mail_to(
+            [mail_addresses.get("va")],
+            mail_addresses.get("cc") if mail_addresses.get("cc") else '',
+            va_betreff,
+            va_message,
+            rsvmitglied,
+            absender.get("name"),
+            absender.get("account")
+        )
+
+    # Send Mitglied Mail
+    if mail_addresses.get("mitglied") and templates.get("rsv_mail_template_mitglied"):
+        mitgl_betreff, mitgl_message = render_mail_template(templates.get("rsv_mail_template_mitglied"))
+        send_mail_to(
+            [mail_addresses.get("mitglied")],
+            '',
+            mitgl_betreff,
+            mitgl_message,
+            rsvmitglied,
+            absender.get("name"),
+            absender.get("account")
+        )
+
+    return
+
+def send_mail_to(recipient, cc, betreff, message, rsvmitglied, absender_name, absender_account):
+    try:
+        comm = make(
+            recipients=recipient,
+            cc=cc,
+            sender=absender_account,
+            subject=betreff,
+            content=message,
+            doctype='RSVMitglied',
+            name=rsvmitglied,
+            attachments=[],
+            send_email=False,
+            sender_full_name=absender_name
+        )["name"]
+        
+        sendmail(
+            recipients=recipient,
+            sender=absender_account,
+            subject=betreff,
+            message=message,
+            as_markdown=False,
+            delayed=True,
+            reference_doctype='RSVMitglied',
+            reference_name=rsvmitglied,
+            unsubscribe_method=None,
+            unsubscribe_params=None,
+            unsubscribe_message=None,
+            attachments=[],
+            content=None,
+            doctype='RSVMitglied',
+            name=rsvmitglied,
+            reply_to=absender_account,
+            cc=cc,
+            bcc=[],
+            message_id=frappe.get_value("Communication", comm, "message_id"),
+            in_reply_to=None,
+            send_after=None,
+            expose_recipients=None,
+            send_priority=1,
+            communication=comm,
+            retry=1,
+            now=None,
+            read_receipt=None,
+            is_notification=False,
+            inline_images=None,
+            template=None,
+            args={},
+            header=None,
+            print_letterhead=False
+        )
+        
+        return 1
+    except Exception as err:
+        # Mail konnte nicht erstellt werden. Error-log und Überspringen...
+        frappe.log_error("{0}\n\n{1}".format(err, frappe.utils.get_traceback() or ''), 'Serien Email Queue Error')
+        return False
