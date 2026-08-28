@@ -340,7 +340,7 @@
   {
    "fieldname": "pos_barzahlung",
    "fieldtype": "Link",
-   "label": "POS Profil f\u00fcr Barzahlungen",
+   "label": "POS Profil f\u00fcr Zahlungen vor Ort",
    "options": "POS Profile"
   },
   {
@@ -1241,7 +1241,7 @@
    "options": "Email Account"
   }
  ],
- "modified": "2026-08-28 15:46:27.421808",
+ "modified": "2026-08-28 15:47:27.421808",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

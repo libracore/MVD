@@ -769,7 +769,7 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False,
                 'allocated_amount': betrag
             }
         ],
-        'reference_no': 'Barzahlung {0}'.format(sinv.name) if bar else 'EZS-Zahlung {0}'.format(sinv.name),
+        'reference_no': 'Zahlung vor Ort {0}'.format(sinv.name) if bar else 'EZS-Zahlung {0}'.format(sinv.name),
         'reference_date': datum or today()
     }).insert()
     

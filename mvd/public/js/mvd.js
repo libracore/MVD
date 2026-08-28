@@ -1675,14 +1675,14 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
         return [
             {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
             {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
-            {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1,
+            {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Zahlung vor Ort', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1,
                 'change': function() {
                     if (me.dialog.get_value('bar_bezahlt') == 1) {
                         me.dialog.set_value("zahlungsart", "Barzahlung");
                     }
                 }
             },
-            {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Barzahlung', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
+            {'fieldname': 'hv_bar_bezahlt', 'fieldtype': 'Check', 'label': 'HV Zahlung vor Ort', 'reqd': 0, 'default': 0, 'depends_on': 'eval:doc.bar_bezahlt==1'},
             {'fieldname': 'zahlungsart', 'fieldtype': 'Select', 'label': 'Zahlungsart', 'options': 'Barzahlung\nZahlungsterminal', 'reqd': 0,
                 'hidden': 0,
                 'read_only': 0,
@@ -2217,7 +2217,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
             return [
                 {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
                 {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
-                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0,
+                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Zahlung vor Ort', 'reqd': 0, 'default': 0, 'hidden': 0,
                     'change': function() {
                         if (me.dialog.get_value('bar_bezahlt') == 1) {
                             me.dialog.set_value("zahlungsart", "Barzahlung");
@@ -2313,7 +2313,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
             return [
                 {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 1},
                 {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
-                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Barzahlung', 'reqd': 0, 'default': 0, 'hidden': 0,
+                {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Zahlung vor Ort', 'reqd': 0, 'default': 0, 'hidden': 0,
                     'change': function() {
                         if (me.dialog.get_value('bar_bezahlt') == 1) {
                             me.dialog.set_value("zahlungsart", "Barzahlung");
