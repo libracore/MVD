@@ -23,6 +23,7 @@ def get_content():
             <table class="rsv-table">
                 <thead>
                     <tr>
+                        <th>Typ</th>
                         <th>Erstellung</th>
                         <th>Kostengutsprache</th>
                         <th>Ablehnen</th>
@@ -97,6 +98,7 @@ def get_table_content():
 
         table_content += """
             <tr class="mandat-row {mandat_inaktiv_class}">
+                <td>{typ}</td>
                 <td>{datum_va_vergabe}</td>
                 <td></td>
                 <td></td>
@@ -125,7 +127,8 @@ def get_table_content():
             themen=themen or '',
             anwalt=mandat.anwalt or '',
             gruppenmandat=gruppenmandat,
-            mandat_inaktiv_class=mandat_inaktiv_class
+            mandat_inaktiv_class=mandat_inaktiv_class,
+            typ=mandat.typ
         )
 
         rsv_mitglieder = frappe.db.sql(
@@ -183,6 +186,7 @@ def get_table_content():
 
             table_content += """
                 <tr class="mitglied-row {mandat_inaktiv_class}">
+                    <td><!-- Typ --></td>
                     <td><!-- Datum Vergabe --></td>
                     {kostengutsprache_zelle}
                     {abgelehnt_zelle}
