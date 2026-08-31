@@ -43,6 +43,7 @@
   {
    "fieldname": "datum",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Datum"
   },
   {
@@ -68,6 +69,8 @@
   {
    "fieldname": "typ",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Typ"
   },
   {
@@ -217,7 +220,7 @@
    "label": "Dokument"
   }
  ],
- "modified": "2026-08-27 21:36:57.143563",
+ "modified": "2026-08-31 15:19:54.738206",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Aktivitaet",
