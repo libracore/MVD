@@ -151,7 +151,7 @@
 </div>
 
 <div class="row">
-    <div class="control-card orange-card" id="handbuch">
+    <div class="control-card orange-card"  {% if frappe.boot.default_sektion != "MVZH" %} id="handbuch" {% else %} id="handbuch_mvzh" {% endif %}>
         <center>
             <i class="fa fa-book orange-icon"></i>
             <p>{{ __("Handbuch") }}</p>
