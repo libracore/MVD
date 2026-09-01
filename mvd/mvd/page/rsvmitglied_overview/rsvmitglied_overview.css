@@ -68,3 +68,31 @@
 .rsv-clickable-card:hover .rsv-card-footer {
     color: #4f46e5;
 }
+
+.rsv-linklist {
+    padding-top: 2em;
+}
+
+.rsv-linklist ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.rsv-linklist li {
+    margin-bottom: 6px;
+}
+
+.rsv-linklist .indicator {
+    font-weight: normal;
+}
+
+.rsv-linklist a {
+    color: #36414c;
+    text-decoration: none;
+}
+
+.rsv-linklist a:hover {
+    color: #5e64ff;
+    text-decoration: underline;
+}

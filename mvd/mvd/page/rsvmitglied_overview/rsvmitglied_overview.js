@@ -27,6 +27,11 @@ function prepare_page(page) {
             </div>
             </div>
             <div class="rsv-status-grid" id="rsv-status-overview"></div>
+            <div class="rsv-linklist">
+                <ul>
+                    <li><span class="indicator blue"><a href="/desk#List/RSVMandat/Report/Mandatsvergabe">Mandatsvergabe</a></span></li>
+                </ul>
+            </div>
         </div>
     `);
 
