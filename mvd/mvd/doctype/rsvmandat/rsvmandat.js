@@ -30,6 +30,10 @@ frappe.ui.form.on('RSVMandat', {
              }
         }
         
+        // Hinweis: bewusst dupliziert (statt frappe.mvd.add_va_open_buttons zu nutzen) in rsvmandat.js
+        // und rsvmitglied.js: Änderungen an DocType-Controller-JS werden clientseitig im localStorage
+        // gecacht (Schlüssel "_doctype:<DocType>", versioniert über modified-Zeitstempel des DocType-
+        // Datensatzes) und über einen Aufruf in mvd.js liess sich das zuverlässig nicht auflösen.
         frm.add_custom_button(__("Vergabeliste"),  function() {
             var domain = window.location.origin;
             window.open(`${domain}/va/vergabeliste`, '_blank');

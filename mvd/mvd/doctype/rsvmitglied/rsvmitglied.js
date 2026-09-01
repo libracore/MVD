@@ -16,6 +16,23 @@ frappe.ui.form.on('RSVMitglied', {
         load_html_overview(frm);
         // Eventlistener für den Schlichtungsbehörden Knopf
         frappe.mvd.schlichtungsbehoerde_listener(frm, 'uebersicht_html');
+        // "Öffne"-Buttons zu den VA-Extranet-Seiten
+        // Hinweis: bewusst dupliziert (statt frappe.mvd.add_va_open_buttons zu nutzen) in rsvmandat.js
+        // und rsvmitglied.js: Änderungen an DocType-Controller-JS werden clientseitig im localStorage
+        // gecacht (Schlüssel "_doctype:<DocType>", versioniert über modified-Zeitstempel des DocType-
+        // Datensatzes) und über einen Aufruf in mvd.js liess sich das zuverlässig nicht auflösen.
+        frm.add_custom_button(__("Vergabeliste"),  function() {
+            var domain = window.location.origin;
+            window.open(`${domain}/va/vergabeliste`, '_blank');
+        }, "Öffne");
+        frm.add_custom_button(__("Meine-Mandate"),  function() {
+            var domain = window.location.origin;
+            window.open(`${domain}/va/meine-mandate`, '_blank');
+        }, "Öffne");
+        frm.add_custom_button(__("Coop-Liste"),  function() {
+            var domain = window.location.origin;
+            window.open(`${domain}/va/coop-mandate`, '_blank');
+        }, "Öffne");
     },
     create_zip_file: function(frm) {
         cur_frm.save().then(() => {
