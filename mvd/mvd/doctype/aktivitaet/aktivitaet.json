@@ -43,7 +43,6 @@
   {
    "fieldname": "datum",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Datum"
   },
   {
@@ -67,6 +66,7 @@
    "label": "Import Verarbeitet"
   },
   {
+   "bold": 1,
    "fieldname": "typ",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -103,7 +103,9 @@
   {
    "fieldname": "erledigt_datum",
    "fieldtype": "Date",
-   "label": "Erledigt Datum"
+   "in_list_view": 1,
+   "label": "Erledigt Datum",
+   "search_index": 1
   },
   {
    "fetch_from": "mv_mitgliedschaft.mitglied_nr",
@@ -220,7 +222,7 @@
    "label": "Dokument"
   }
  ],
- "modified": "2026-08-31 15:19:54.738206",
+ "modified": "2026-09-01 16:41:48.335169",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Aktivitaet",
@@ -243,6 +245,6 @@
    "role": "All"
   }
  ],
- "sort_field": "modified",
+ "sort_field": "erledigt_datum",
  "sort_order": "DESC"
 }
