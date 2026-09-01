@@ -1,54 +1,127 @@
+/* Brand-Font (liegt in mvd/public/font/, serviert unter /assets/mvd/font/) */
+@font-face {
+    font-family: 'TWKEverett';
+    src: url('/assets/mvd/font/TWKEverett_Regular_web.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'TWKEverett';
+    src: url('/assets/mvd/font/TWKEverett_Bold_web.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Offizielle Design-Tokens (Mieterverband Redesign, Quelle: www.mieterverband.ch) */
+:root {
+    --font-base: 'TWKEverett', system-ui, Arial, sans-serif;
+
+    /* Fluide Schriftgrößen wie auf mieterverband.ch */
+    --fs-h1: clamp(2rem, 1.6479rem + 1.5023vw, 3rem);
+    --fs-h2: clamp(1.875rem, 1.743rem + 0.5634vw, 2.25rem);
+    --fs-h3: clamp(1.75rem, 1.64rem + 0.4695vw, 2.0625rem);
+    --fs-h5: clamp(1.1rem, 1.0378rem + 0.2652vw, 1.25rem);
+    --fs-base: clamp(1rem, 0.956rem + 0.1878vw, 1.125rem);
+    --fs-small: 0.9rem;
+    --fs-x-small: 0.8rem;
+
+    --color-brand: #003A62;
+    --color-brand-80: #336181;
+    --color-brand-60: #6689A1;
+    --color-brand-20: #CCD8E0;
+    --color-brand-10: #E5ECF0;
+
+    --color-secondary: #219D84;
+    --color-secondary-40: #A6D8CE;
+    --color-secondary-20: #D3EBE6;
+    --color-secondary-10: #E9F5F3;
+
+    --color-cta: #E5702B;
+    --color-cta-hover: #EA8D55;
+
+    --color-border: #CCD8E0;
+    --bg-page: #fff;
+    --bg-bright: #F2F5F7;
+    --bg-tint-blue: #E5EBEF;
+
+    --color-error: #D42643;
+    --color-error-bg: #FFEDEE;
+
+    --text-strong: #003A62;
+    --text-body: #333;
+    --text-muted: #6689A1;
+
+    /* Flach & rahmen-basiert wie die Referenzseite */
+    --radius-sm: 5px;
+    --radius-md: 8px;
+    --radius-pill: 9999px;
+
+    --shadow-card: 0 0 11px 0 rgba(0, 34, 62, .08);
+}
+
 body {
     margin: 0;
-    font-family: Inter, Arial, sans-serif;
-    background: #f5f7fb;
-    color: #1f2937;
+    font-family: var(--font-base);
+    font-size: var(--fs-base);
+    background: var(--bg-page);
+    color: var(--text-body);
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+    font-weight: 400;
+    color: var(--text-strong);
+    line-height: 1.2;
 }
 
 .page {
     max-width: 1180px;
-    margin: 40px auto;
+    margin: 56px auto;
     padding: 0 24px;
 }
 
+/* Editorialer Hero (kein Gradient-Kasten, wie auf mieterverband.ch) */
 .hero {
-    background: linear-gradient(135deg, #1f3a5f, #2f5f8f);
-    color: white;
-    border-radius: 18px;
-    padding: 32px;
-    margin-bottom: 24px;
+    padding: 0 0 32px;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .hero h1 {
-    margin: 0 0 8px;
-    font-size: 30px;
+    margin: 0 0 16px;
+    font-size: var(--fs-h1);
 }
 
 .hero p {
     margin: 0;
-    opacity: .9;
-    max-width: 700px;
+    color: var(--text-muted);
+    font-size: var(--fs-base);
+    max-width: 65ch;
 }
 
 .filters {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
-    background: white;
+    background: var(--bg-bright);
     padding: 16px;
-    border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
-    margin-bottom: 24px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: 32px;
 }
 
 .filters input,
 .filters select {
-    border: 1px solid #d8dee9;
-    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
     padding: 11px 12px;
-    font-size: 14px;
+    font-size: var(--fs-small);
     background: white;
     min-width: 170px;
+    font-family: inherit;
 }
 
 .layout {
@@ -60,8 +133,8 @@ body {
 .list,
 .detail {
     background: white;
-    border-radius: 18px;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
 }
 
 .list {
@@ -69,8 +142,9 @@ body {
 }
 
 .case-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
+    position: relative;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
     padding: 16px;
     margin-bottom: 12px;
     cursor: pointer;
@@ -79,9 +153,13 @@ body {
 
 .case-card:hover,
 .case-card.active {
-    border-color: #2f5f8f;
-    background: #f7fbff;
-    transform: translateY(-1px);
+    border-color: var(--color-brand);
+    box-shadow: var(--shadow-card);
+}
+
+/* Farb-Akzent links wie die Marken-Flags auf der Website */
+.case-card.active {
+    border-left: 3px solid var(--color-secondary);
 }
 
 .badges {
@@ -92,42 +170,42 @@ body {
 }
 
 .badge {
-    font-size: 12px;
-    padding: 5px 8px;
-    border-radius: 999px;
-    background: #eef2f7;
-    color: #475569;
-    font-weight: 600;
+    font-size: var(--fs-x-small);
+    padding: 5px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--color-brand-10);
+    color: var(--color-brand);
+    font-weight: 700;
 }
 
 .badge.urgent {
-    background: #fff1f2;
-    color: #be123c;
+    background: var(--color-error-bg);
+    color: var(--color-error);
 }
 
 .badge.open {
-    background: #ecfdf5;
-    color: #047857;
+    background: var(--color-secondary-10);
+    color: var(--color-secondary);
 }
 
 .case-card h3 {
     margin: 0 0 8px;
-    font-size: 17px;
-    color: #111827;
+    font-size: var(--fs-h5);
+    font-weight: 700;
 }
 
 .case-card p {
     margin: 0 0 12px;
-    font-size: 14px;
-    line-height: 1.45;
-    color: #64748b;
+    font-size: var(--fs-small);
+    line-height: 1.55;
+    color: var(--text-body);
 }
 
 .case-footer {
     display: flex;
     justify-content: space-between;
-    font-size: 13px;
-    color: #64748b;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
 }
 
 .hidden {
@@ -135,121 +213,89 @@ body {
 }
 
 .detail {
-    padding: 28px;
+    padding: 32px;
 }
 
 .detail-header {
     display: flex;
     justify-content: space-between;
     gap: 20px;
-    margin-bottom: 22px;
+    margin-bottom: 24px;
 }
 
 .detail h2 {
     margin: 0 0 8px;
-    font-size: 26px;
+    font-size: var(--fs-h3);
 }
 
 .detail-subtitle {
     margin: 0;
-    color: #64748b;
+    color: var(--text-muted);
     line-height: 1.5;
 }
 
-.status-pill {
-    white-space: nowrap;
-    height: fit-content;
-    background: #ecfdf5;
-    color: #047857;
-    padding: 8px 12px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 700;
-}
-
+.status-pill,
 .status-pill-red {
     white-space: nowrap;
     height: fit-content;
-    background: #FDECEF;
-    color: #B4233C;
-    padding: 8px 12px;
-    border-radius: 999px;
-    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-small);
     font-weight: 700;
 }
 
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin: 24px 0;
+.status-pill {
+    background: var(--color-secondary);
+    color: white;
 }
 
-.info-box {
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 14px;
-}
-
-.info-box strong {
-    display: block;
-    font-size: 12px;
-    color: #64748b;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: .04em;
+/* "Abgeschlossen"-Kennzeichnung, in Anlehnung an .badge.urgent */
+.status-pill-red {
+    background: var(--color-error-bg);
+    color: var(--color-error);
 }
 
 .section {
-    margin-top: 24px;
+    margin-top: 28px;
 }
 
 .section h4 {
     margin: 0 0 10px;
-    font-size: 15px;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: #475569;
+    font-size: var(--fs-h5);
+    font-weight: 700;
+    color: var(--color-brand);
 }
 
 .section p,
 .section li {
-    color: #374151;
-    line-height: 1.65;
-    font-size: 15px;
+    color: var(--text-body);
+    line-height: 1.7;
+    font-size: var(--fs-base);
 }
 
-.interest-box {
-    margin-top: 28px;
-    padding: 20px;
-    border-radius: 16px;
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
+/* Detail-Tabellen (RSV-Mandat / RSV-Mitglied Angaben) */
+.section table {
+    border-collapse: collapse;
 }
 
-textarea,
-.interest-box select {
-    width: 100%;
-    box-sizing: border-box;
-    border: 1px solid #d8dee9;
-    border-radius: 12px;
-    padding: 12px;
-    font-size: 14px;
-    margin-top: 8px;
-    margin-bottom: 14px;
-    font-family: inherit;
+.section table td {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: var(--fs-small);
+    color: var(--text-body);
+    vertical-align: top;
 }
 
-textarea {
-    min-height: 110px;
-    resize: vertical;
+.section table td:first-child {
+    padding-right: 24px;
+    color: var(--text-muted);
+    white-space: nowrap;
 }
 
-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: #374151;
+.section hr {
+    margin: 28px 0 0;
+    border: none;
+    border-top: 1px solid var(--color-border);
 }
 
 .actions {
@@ -259,51 +305,74 @@ label {
     margin-top: 8px;
 }
 
-button {
-    border: 0;
-    border-radius: 12px;
-    padding: 12px 16px;
+button,
+.btn {
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 12px 20px;
     font-weight: 700;
     cursor: pointer;
-    font-size: 14px;
+    font-size: var(--fs-small);
+    font-family: inherit;
+    transition: .15s ease;
 }
 
+/* Outline-Sekundär wie die tertiären Buttons der Website */
 .btn-secondary {
-    background: #eef2f7;
-    color: #334155;
+    background: white;
+    border-color: var(--color-secondary);
+    color: var(--color-secondary);
 }
 
+.btn-secondary:hover {
+    background: var(--color-secondary-10);
+}
+
+/* Orange CTA = primär */
 .btn-primary {
-    background: #1f3a5f;
+    background: var(--color-cta);
+    border-color: var(--color-cta);
     color: white;
 }
 
 .btn-primary:hover {
-    background: #162b46;
+    background: var(--color-cta-hover);
+    border-color: var(--color-cta-hover);
+}
+
+/* Fragen-Dialog (Bootstrap-Modal) an die Tokens angleichen */
+.modal-content {
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+}
+
+.modal-title {
+    color: var(--text-strong);
+    font-weight: 700;
+}
+
+.form-control {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+}
+
+.form-group label {
+    font-size: var(--fs-small);
+    font-weight: 700;
+    color: var(--text-strong);
 }
 
 @media (max-width: 900px) {
     .layout {
     grid-template-columns: 1fr;
     }
-
-    .info-grid {
-    grid-template-columns: repeat(2, 1fr);
-    }
 }
 
 @media (max-width: 560px) {
     .page {
-    margin: 20px auto;
+    margin: 28px auto;
     padding: 0 14px;
-    }
-
-    .hero {
-    padding: 24px;
-    }
-
-    .info-grid {
-    grid-template-columns: 1fr;
     }
 
     .detail-header {
