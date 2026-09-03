@@ -29,7 +29,7 @@ def get_cards():
         if qty < 1: return False
 
         card_template = """
-            <article class="case-card" {style} data-mandat"{mandat}" data-mandattyp="{typ}" data-closestatus="{close_status}" onclick="show_detail_card('{mandat}')">
+            <article class="case-card" {style} data-mandat="{mandat}" data-mandattyp="{typ}" data-closestatus="{close_status}" onclick="show_detail_card('{mandat}')">
                 <div class="badges">
                     <span class="badge">{typ}</span>
                     <span class="badge">Anz. Mitglieder: {qty}</span>
