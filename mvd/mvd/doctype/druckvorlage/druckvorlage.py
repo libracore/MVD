@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_url_to_form, get_url
+from frappe.utils import get_url_to_form, get_url, format_datetime
 from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention, get_anredekonvention_kunde
 try:
     from jinja2 import pass_context as context_decorator
@@ -843,3 +843,17 @@ def get_jahresrechnung_jahr(ctx):
                 return frappe.utils.get_datetime(mahnung.sales_invoices[0].posting_date).strftime('%d.%m.%Y') + ' (Restbetrag)'
     
     return '---'
+
+### Kontexte für die Wohnungsabgabe ###
+@context_decorator
+def get_wohnungsabgabe_termin_daten(ctx):
+    doc = get_doc_from_ctx(ctx)
+    if doc.get("doctype") == "Wohnungsabgabe":
+        termin_str = ""
+        if doc.get("termin"):
+            termin_str = format_datetime(doc.termin, "dd.MM.yyyy 'um' H:mm")
+        strasse = doc.get("strasse_nummer_zusatz") or ""
+        ort = doc.get("ort") or ""
+        adresse = "{0}, {1}".format(strasse, ort).strip(", ")
+        return "{0} in {1}".format(termin_str, adresse).strip()
+    return ""
