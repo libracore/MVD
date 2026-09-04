@@ -587,6 +587,11 @@ def mahnstopp(mitgliedschaft, mahnstopp):
     SQL_SAFE_UPDATES_true = frappe.db.sql("""SET SQL_SAFE_UPDATES=1""", as_list=True)
     frappe.db.commit()
 
+'''
+    ------------------------------------------------
+    #2029: Pre-One-MVZH (Wird NACH GO-LIFE UMGEBAUT)
+    ------------------------------------------------
+'''
 def sp_updater(mitgliedschaft):
     # sende neuanlage/update an sp wenn letzter bearbeiter nich SP
     if mitgliedschaft.letzte_bearbeitung_von == 'User':
@@ -596,12 +601,22 @@ def sp_updater(mitgliedschaft):
         else:
             # sende update an SP
             send_mvm_to_sp(mitgliedschaft, True)
-            # special case sektionswechsel nach ZH
-            # if mitgliedschaft.wegzug_zu == 'MVZH' and mitgliedschaft.status_c == 'Wegzug':
-            #     send_mvm_sektionswechsel(mitgliedschaft)
+            if cint(frappe.db.get_single_value('Service Plattform API', 'pre_one_aktivierung')) == 1:
+                # special case sektionswechsel nach ZH
+                if mitgliedschaft.wegzug_zu == 'MVZH' and mitgliedschaft.status_c == 'Wegzug':
+                    send_mvm_sektionswechsel(mitgliedschaft)
 
+'''
+    ------------------------------------------------
+    #2029: Pre-One-MVZH (Wird NACH GO-LIFE UMGEBAUT)
+    ------------------------------------------------
+'''
 def send_mvm_to_sp(mitgliedschaft, update):
-    if str(get_sektion_code(mitgliedschaft.sektion_id)) not in ('ZH', 'M+W-Abo'):
+    sperrliste = ['M+W-Abo']
+    if cint(frappe.db.get_single_value('Service Plattform API', 'pre_one_aktivierung')) == 1:
+        sperrliste = ['MVZH', 'M+W-Abo']
+    
+    if mitgliedschaft.sektion_id not in sperrliste:
         if not cint(frappe.db.get_single_value('Service Plattform API', 'queue')) == 1:
             from mvd.mvd.service_plattform.api import update_mvm
             prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
@@ -610,14 +625,22 @@ def send_mvm_to_sp(mitgliedschaft, update):
         else:
             create_sp_queue(mitgliedschaft, update)
 
-# def send_mvm_sektionswechsel(mitgliedschaft):
-#     from mvd.mvd.service_plattform.api import sektionswechsel
-#     prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
-#     neue_sektion = ''
-#     if mitgliedschaft.wegzug_zu == 'MVZH':
-#         neue_sektion = 'ZH'
-#     sektionswechsel(prepared_mvm, neue_sektion)
-#     frappe.log_error(str(prepared_mvm), "MVZH Sektionswechsel an SP gesendet")
+'''
+    ------------------------------------------------
+    #2029: Pre-One-MVZH (Wird NACH GO-LIFE ENTFERNT)
+    ------------------------------------------------
+'''
+def send_mvm_sektionswechsel(mitgliedschaft):
+    from mvd.mvd.service_plattform.api import sektionswechsel
+    if cint(frappe.db.get_single_value('Service Plattform API', 'pre_one_aktivierung')) == 1:
+        prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
+        neue_sektion = ''
+        if mitgliedschaft.wegzug_zu == 'MVZH':
+            neue_sektion = 'ZH'
+        sektionswechsel(prepared_mvm, neue_sektion)
+        frappe.log_error(str(prepared_mvm), "MVZH Sektionswechsel an SP gesendet")
+    else:
+        return
 
 def get_sektion_code(sektion):
     sektionen = frappe.db.sql("""SELECT `sektion_c` FROM `tabSektion` WHERE `name` = '{sektion}'""".format(sektion=sektion), as_dict=True)

@@ -20,6 +20,7 @@
   "json_error_log",
   "emailberatung_test",
   "emailberatung_testtoken",
+  "pre_one_aktivierung",
   "section_queue_sp_erp",
   "flush_limit_eingehend",
   "sp_incoming_immediately_executing",
@@ -193,10 +194,16 @@
    "fieldname": "cron_flush_limit",
    "fieldtype": "Data",
    "label": "Cron Flush Limit"
+  },
+  {
+   "default": "0",
+   "fieldname": "pre_one_aktivierung",
+   "fieldtype": "Check",
+   "label": "Pre-One Aktivierung"
   }
  ],
  "issingle": 1,
- "modified": "2025-11-27 15:39:15.154387",
+ "modified": "2026-09-04 14:57:27.248691",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Service Plattform API",

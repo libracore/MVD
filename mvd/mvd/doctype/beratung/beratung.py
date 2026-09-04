@@ -1174,6 +1174,11 @@ def get_tel_for_termin(mitgliedschaft=None, faktura_kunde=None):
     
     return ''
 
+'''
+    ------------------------------------------------
+    #2029: Pre-One-MVZH (Wird NACH GO-LIFE ENTFERNT)
+    ------------------------------------------------
+'''
 def send_to_sp():
     '''
     Diese Mthode sendet alle entsprechend markierten Beratungen an die SP.
@@ -1185,45 +1190,46 @@ def send_to_sp():
     from frappe.utils.data import get_datetime_str
     from mvd.mvd.utils.daily_jobs import set_trigger_sp_api
 
-    set_trigger_sp_api_triggered = set_trigger_sp_api()
+    if cint(frappe.db.get_single_value('Service Plattform API', 'pre_one_aktivierung')) == 1:
+        set_trigger_sp_api_triggered = set_trigger_sp_api()
 
-    if not int(frappe.db.get_single_value('Service Plattform API', 'send_beratung_to_sp_unterbrechen')) == 1:
-        try:
-            beratungen = frappe.db.sql("""SELECT `name` FROM `tabBeratung` WHERE `trigger_api` = 1""", as_dict=True)
-            for ber in beratungen:
-                beratung = frappe.get_doc("Beratung", ber.name)
-                if beratung.sektion_id == 'MVZH':
-                    mitgliedschaft = frappe.get_doc("Mitgliedschaft", beratung.mv_mitgliedschaft)
-                    prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
-                    dokumente = []
-                    files = frappe.db.sql("""SELECT `name`, `file_name` FROM `tabFile` WHERE `attached_to_name` = '{0}'""".format(beratung.name), as_dict=True)
-                    for dok in files:
-                        dok_data = {
-                            "beratungDokumentId": dok.name,
-                            "name": dok.file_name,
-                            "datum": get_datetime_str(beratung.start_date).replace(" ", "T"),
-                            "typ": str(dok.file_name.split(".")[len(dok.file_name.split(".")) - 1])
+        if not int(frappe.db.get_single_value('Service Plattform API', 'send_beratung_to_sp_unterbrechen')) == 1:
+            try:
+                beratungen = frappe.db.sql("""SELECT `name` FROM `tabBeratung` WHERE `trigger_api` = 1""", as_dict=True)
+                for ber in beratungen:
+                    beratung = frappe.get_doc("Beratung", ber.name)
+                    if beratung.sektion_id == 'MVZH':
+                        mitgliedschaft = frappe.get_doc("Mitgliedschaft", beratung.mv_mitgliedschaft)
+                        prepared_mvm = prepare_mvm_for_sp(mitgliedschaft)
+                        dokumente = []
+                        files = frappe.db.sql("""SELECT `name`, `file_name` FROM `tabFile` WHERE `attached_to_name` = '{0}'""".format(beratung.name), as_dict=True)
+                        for dok in files:
+                            dok_data = {
+                                "beratungDokumentId": dok.name,
+                                "name": dok.file_name,
+                                "datum": get_datetime_str(beratung.start_date).replace(" ", "T"),
+                                "typ": str(dok.file_name.split(".")[len(dok.file_name.split(".")) - 1])
+                            }
+                            dokumente.append(dok_data)
+                            
+                        json_to_send = {
+                            "beratungId": beratung.name,
+                            "mitglied": prepared_mvm,
+                            "datumEingang": get_datetime_str(beratung.start_date).replace(" ", "T"),
+                            "beratungskategorie": 'Mietzinserhöhung' if beratung.beratungskategorie == '202 - Mietzinserhöhung' else 'Mietzinssenkung' if beratung.beratungskategorie == '203 - Mietzinssenkung' else 'Allgemeine Anfrage',
+                            "telefonPrivatMobil": beratung.telefon_privat_mobil,
+                            "email": beratung.raised_by,
+                            "anderesMietobjekt": beratung.anderes_mietobjekt,
+                            "frage": beratung.frage,
+                            "datumBeginnFrist": get_datetime_str(beratung.datum_mietzinsanzeige).replace(" ", "T") if beratung.datum_mietzinsanzeige else get_datetime_str(beratung.start_date).replace(" ", "T"),
+                            "dokumente": dokumente
                         }
-                        dokumente.append(dok_data)
                         
-                    json_to_send = {
-                        "beratungId": beratung.name,
-                        "mitglied": prepared_mvm,
-                        "datumEingang": get_datetime_str(beratung.start_date).replace(" ", "T"),
-                        "beratungskategorie": 'Mietzinserhöhung' if beratung.beratungskategorie == '202 - Mietzinserhöhung' else 'Mietzinssenkung' if beratung.beratungskategorie == '203 - Mietzinssenkung' else 'Allgemeine Anfrage',
-                        "telefonPrivatMobil": beratung.telefon_privat_mobil,
-                        "email": beratung.raised_by,
-                        "anderesMietobjekt": beratung.anderes_mietobjekt,
-                        "frage": beratung.frage,
-                        "datumBeginnFrist": get_datetime_str(beratung.datum_mietzinsanzeige).replace(" ", "T") if beratung.datum_mietzinsanzeige else get_datetime_str(beratung.start_date).replace(" ", "T"),
-                        "dokumente": dokumente
-                    }
+                        create_beratungs_log(error=0, info=1, beratung=beratung.name, method='send_to_sp', title='Beratung an SP gesendet', json="{0}".format(str(json_to_send)))
+                        send_beratung(json_to_send, beratung.name)
                     
-                    create_beratungs_log(error=0, info=1, beratung=beratung.name, method='send_to_sp', title='Beratung an SP gesendet', json="{0}".format(str(json_to_send)))
-                    send_beratung(json_to_send, beratung.name)
-                
-                # remove mark for SP API
-                frappe.db.set_value("Beratung", beratung.name, 'trigger_api', 0, update_modified=False)
-        except Exception as err:
-            # allgemeiner Fehler
-            create_beratungs_log(error=1, info=0, beratung=None, method='send_to_sp', title='Exception', json="{0}".format(str(err)))
+                    # remove mark for SP API
+                    frappe.db.set_value("Beratung", beratung.name, 'trigger_api', 0, update_modified=False)
+            except Exception as err:
+                # allgemeiner Fehler
+                create_beratungs_log(error=1, info=0, beratung=None, method='send_to_sp', title='Exception', json="{0}".format(str(err)))
