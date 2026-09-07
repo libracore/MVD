@@ -74,7 +74,8 @@ jenv = {
         "get_jahresrechnung_jahr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_jahresrechnung_jahr",
         "get_beratungs_daten:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungs_daten",
         "get_mandat_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mandat_link",
-        "get_beratung_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratung_link"
+        "get_beratung_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratung_link",
+        "get_wohnungsabgabe_termin_daten:mvd.mvd.doctype.druckvorlage.druckvorlage.get_wohnungsabgabe_termin_daten"
     ]
 }
 
