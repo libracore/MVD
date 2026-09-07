@@ -9,14 +9,15 @@
  "fields": [
   {
    "fieldname": "textvorlage",
-   "fieldtype": "Long Text",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Textvorlage",
+   "options": "Textvorlagen",
    "reqd": 1
   }
  ],
  "istable": 1,
- "modified": "2026-06-01 15:12:49.990441",
+ "modified": "2026-09-07 13:06:11.336438",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Textvorlagen TBL",

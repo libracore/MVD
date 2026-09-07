@@ -311,7 +311,6 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
     }
 
     load_details(node_name, auto_open_children) {
-        console.log(cur_frm);
         frappe.call({
             method: "mvd.mvd.utils.vorlagen_baum.vorlagen_baum.get_node_details",
             args: {
@@ -446,11 +445,13 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
                 selected_row = (details.dokumentenvorlagen || [])[row_index] || null;
             } else if (selection_type === "textvorlage") {
                 selected_row = (details.textvorlagen || [])[row_index] || null;
-                this.copy_to_clipboard(selection_name);
-                frappe.show_alert({
-                    message: __("Textvorlage wurde in die Zwischenablage kopiert."),
-                    indicator: "green"
-                });
+                if (selected_row) {
+                    this.copy_to_clipboard(selected_row.text || "");
+                    frappe.show_alert({
+                        message: __("Textvorlage wurde in die Zwischenablage kopiert."),
+                        indicator: "green"
+                    });
+                }
             }
 
             this.trigger_item_select({
@@ -640,48 +641,102 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
         `;
 
         if (!rows.length) {
-            html += `<div class="text-muted">Keine Textvorlagen vorhanden.</div></div>`;
+            html += `
+                <div class="text-muted">
+                    Keine Textvorlagen vorhanden.
+                </div>
+            </div>
+            `;
             return html;
         }
 
         rows.forEach((row, idx) => {
-            const value = row.textvorlage || "";
+            const name = row.textvorlage || "";
+            const label = row.titel || name;
+            const text = row.text || "";
+
             html += `
                 <div class="vb-selectable-item"
-                     data-selection-type="textvorlage"
-                     data-selection-doctype="Textvorlage"
-                     data-selection-name="${frappe.utils.escape_html(value)}"
-                     data-row-index="${idx}"
-                     style="padding:10px; border:1px solid #e1e4e8; border-radius:6px; margin-bottom:8px; background:#fafbfc;">
-                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
-                        <div style="font-weight:500;">
-                            ${frappe.utils.escape_html(value)}
+                    data-selection-type="textvorlage"
+                    data-selection-doctype="Textvorlagen"
+                    data-selection-name="${frappe.utils.escape_html(name)}"
+                    data-row-index="${idx}"
+                    style="
+                        padding:10px;
+                        border:1px solid #e1e4e8;
+                        border-radius:6px;
+                        margin-bottom:8px;
+                        background:#fafbfc;
+                    ">
+
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        gap:10px;
+                        align-items:flex-start;
+                    ">
+
+                        <div style="flex:1; min-width:0;">
+
+                            ${this.render_link_row(
+                                "Textvorlagen",
+                                name,
+                                label
+                            )}
+
+                            ${
+                                text
+                                    ? `
+                                        <div class="text-muted"
+                                            style="
+                                                margin-top:6px;
+                                                font-size:12px;
+                                                white-space:pre-wrap;
+                                                overflow:hidden;
+                                                display:-webkit-box;
+                                                -webkit-line-clamp:3;
+                                                -webkit-box-orient:vertical;
+                                            ">
+                                            ${frappe.utils.escape_html(text)}
+                                        </div>
+                                    `
+                                    : ""
+                            }
+
                         </div>
+
                         <div style="white-space:nowrap;">
-                            <button class="btn btn-xs btn-primary vb-item-select-btn">Kopieren</button>
+                            <button
+                                class="btn btn-xs btn-primary vb-item-select-btn">
+                                Kopieren
+                            </button>
                         </div>
+
                     </div>
                 </div>
             `;
         });
 
         html += `</div>`;
+
         return html;
     }
 
-    render_link_row(doctype, value) {
+    render_link_row(doctype, value, label=null) {
         if (!value) {
             return `<div class="text-muted">kein Eintrag</div>`;
         }
 
+        label = label || value;
+
         return `
             <div>
                 <a href="#"
-                   class="vb-doc-link"
-                   data-doctype="${frappe.utils.escape_html(doctype)}"
-                   data-name="${frappe.utils.escape_html(value)}"
-                   style="font-weight:500;">
-                    ${frappe.utils.escape_html(value)}
+                class="vb-doc-link"
+                data-doctype="${frappe.utils.escape_html(doctype)}"
+                data-name="${frappe.utils.escape_html(value)}"
+                style="font-weight:500;">
+                    ${frappe.utils.escape_html(label)}
                 </a>
             </div>
         `;

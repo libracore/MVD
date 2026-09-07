@@ -379,12 +379,14 @@ frappe.mvd.MailComposer = Class.extend({
             wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
             parent_dialog: this.dialog,
             sektion_id: cur_frm.doc.sektion_id || null, // null zeigt alle an
-            purpose: "email", // null zeigt alle an (null, email, druck oder dokument)
+            purpose: ["Text", "email"], // null zeigt alle an (null, email, druck, dokument oder Text)
             on_select: function(selection, details, row, parent_dialog) {
                 console.log("Auswahl:", selection);
                 console.log("Knoten-Details:", details);
                 console.log("Child-Row:", row);
-                parent_dialog.fields_dict.email_template.set_value(row.email_template || '');
+                if (selection.selection_type != "textvorlage") {
+                    parent_dialog.fields_dict.email_template.set_value(row.email_template || '');
+                }
             }
         });
     },
@@ -1661,7 +1663,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
             wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
             parent_dialog: this.dialog,
             sektion_id: cur_frm.doc.sektion_id || null, // null zeigt alle an
-            purpose: "druck", // null zeigt alle an (null, email, druck oder dokument)
+            purpose: ["Text", "druck"], // null zeigt alle an (null, email, druck, dokument oder Text)
             on_select: function(selection, details, row, parent_dialog) {
                 parent_dialog.fields_dict.druckvorlage.set_value(row.druckvorlage || '');
             }
@@ -1844,7 +1846,7 @@ mvd_dialoge.erstelle_spenden_rechnung = class ErstelleSpendenRechnung {
             wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
             parent_dialog: this.dialog,
             sektion_id: cur_frm.doc.sektion_id || null, // null zeigt alle an
-            purpose: "druck", // null zeigt alle an (null, email, druck oder dokument)
+            purpose: ["Text", "druck"], // null zeigt alle an (null, email, druck, dokument oder Text)
             on_select: function(selection, details, row, parent_dialog) {
                 parent_dialog.fields_dict.druckvorlage.set_value(row.druckvorlage || '');
             }
@@ -1904,7 +1906,7 @@ mvd_dialoge.erstelle_hv_rechnung = class ErstelleHvRechnung {
             wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
             parent_dialog: this.dialog,
             sektion_id: cur_frm.doc.sektion_id || null, // null zeigt alle an
-            purpose: "druck", // null zeigt alle an (null, email, druck oder dokument)
+            purpose: ["Text", "druck"], // null zeigt alle an (null, email, druck, dokument oder Text)
             on_select: function(selection, details, row, parent_dialog) {
                 parent_dialog.fields_dict.druckvorlage.set_value(row.druckvorlage || '');
             }
@@ -1963,7 +1965,7 @@ mvd_dialoge.erstelle_korrespondenz = class ErstelleKorrespondenz {
             wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
             parent_dialog: this.dialog,
             sektion_id: cur_frm.doc.sektion_id || null, // null zeigt alle an
-            purpose: "druck", // null zeigt alle an (null, email, druck oder dokument)
+            purpose: ["Text", "druck"], // null zeigt alle an (null, email, druck, dokument oder Text)
             on_select: function(selection, details, row, parent_dialog) {
                 parent_dialog.fields_dict.druckvorlage.set_value(row.druckvorlage || '');
             }
@@ -2022,7 +2024,7 @@ mvd_dialoge.erstelle_kuendigung = class ErstelleKuendigung {
             wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
             parent_dialog: this.dialog,
             sektion_id: cur_frm.doc.sektion_id || null, // null zeigt alle an
-            purpose: "druck", // null zeigt alle an (null, email, druck oder dokument)
+            purpose: ["Text", "druck"], // null zeigt alle an (null, email, druck, dokument oder Text)
             on_select: function(selection, details, row, parent_dialog) {
                 parent_dialog.fields_dict.druckvorlage.set_value(row.druckvorlage || '');
             }
@@ -2202,7 +2204,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
             wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
             parent_dialog: this.dialog,
             sektion_id: cur_frm.doc.sektion_id || null, // null zeigt alle an
-            purpose: "druck", // null zeigt alle an (null, email, druck oder dokument)
+            purpose: ["Text", "druck"], // null zeigt alle an (null, email, druck, dokument oder Text)
             on_select: function(selection, details, row, parent_dialog) {
                 parent_dialog.fields_dict.druckvorlage.set_value(row.druckvorlage || '');
             }
@@ -2548,7 +2550,7 @@ mvd_dialoge.open_text_und_dokumentenvorlagen = class OpenTextUndDokumentenVorlag
             wrapper: this.dialog.fields_dict.vorlagenbaum_html.$wrapper,
             parent_dialog: this.dialog,
             sektion_id: cur_frm ? cur_frm.doc.sektion_id:this.get_default_sektion() || null,
-            purpose: ["Text", "dokument"],
+            purpose: ["Text", "dokument"], // null zeigt alle an (null, email, druck, dokument oder Text)
             on_select: function(selection, details, row, parent_dialog) {
                 if (parent_dialog) {
                     parent_dialog.hide();
