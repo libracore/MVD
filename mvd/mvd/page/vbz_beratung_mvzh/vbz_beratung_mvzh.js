@@ -84,21 +84,42 @@ frappe.vbz_beratung_mvzh = {
             frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], "sektion_id": sektion, "typ": "Business"}
             frappe.set_route("List", "Beratung", "List");
         });
+        // R1/R2 enthalten seit #2021  R9. 
+        // ODER über verschiedene Felder und lässt sich nicht als Listen-Filter umsetzen,
+        // darum werden die Namen serverseitig geholt (wie S10).
+        var route_zeile = function(zeile, typ) {
+            frappe.call({
+                method: "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_beratungen_der_zeile",
+                args: {'zeile': zeile, 'typ': typ},
+                callback: function(r) {
+                    if (!r.message) {
+                        // Kein Resultat vom Server (z.B. Methode nach einem Deploy noch nicht geladen).
+                        // Lieber sagen als eine leere Liste mit unsinnigem Filter zeigen.
+                        frappe.msgprint(__('Die Liste konnte nicht geladen werden. Bitte Seite neu laden; falls es bleibt, wurde der Server nach dem letzten Update noch nicht neu gestartet.'));
+                        return;
+                    }
+                    var namen = r.message;
+                    if (namen.length === 0) {
+                        frappe.show_alert({message: __('Keine Einträge in dieser Zeile.'), indicator: 'blue'});
+                        return;
+                    }
+                    frappe.route_options = {"name": ["in", namen], "typ": typ}
+                    frappe.set_route("List", "Beratung", "List");
+                }
+            });
+        };
+
         $("#r1_wohnen").click(function(){
-            frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], 'beratung_prio': 'Hoch', "sektion_id": sektion, "typ": "Wohnen"}
-            frappe.set_route("List", "Beratung", "List");
+            route_zeile('r1', 'Wohnen');
         });
         $("#r1_business").click(function(){
-            frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], 'beratung_prio': 'Hoch', "sektion_id": sektion, "typ": "Business"}
-            frappe.set_route("List", "Beratung", "List");
+            route_zeile('r1', 'Business');
         });
         $("#r2_wohnen").click(function(){
-             frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['like', 'Rechtsberatung Pool%'], 'beratung_prio': ['not in', ['Hoch']], "sektion_id": sektion, "typ": "Wohnen"}
-            frappe.set_route("List", "Beratung", "List");
+            route_zeile('r2', 'Wohnen');
         });
         $("#r2_business").click(function(){
-             frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['like', 'Rechtsberatung Pool%'], 'beratung_prio': ['not in', ['Hoch']], "sektion_id": sektion, "typ": "Business"}
-            frappe.set_route("List", "Beratung", "List");
+            route_zeile('r2', 'Business');
         });
         $("#r3_wohnen").click(function(){
             frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'r3': 1, "sektion_id": sektion, "typ": "Wohnen"}
@@ -146,14 +167,6 @@ frappe.vbz_beratung_mvzh = {
         });
         $("#r8_business").click(function(){
             frappe.route_options = {'status': 'Closed', 'hat_termine': 1, "sektion_id": sektion, "typ": "Business"}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#r9_wohnen").click(function(){
-            frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt", "Termin vereinbart", "Rückfrage: Termin vereinbaren"]], "ungelesen": 1, "kontaktperson": ['is', 'set'], "sektion_id": sektion, "typ": "Wohnen"}
-            frappe.set_route("List", "Beratung", "List");
-        });
-        $("#r9_business").click(function(){
-            frappe.route_options = {"status": ["not in", ["Rückfragen", "Open", "Zusammengeführt", "Termin vereinbart", "Rückfrage: Termin vereinbaren"]], "ungelesen": 1, "kontaktperson": ['is', 'set'], "sektion_id": sektion, "typ": "Business"}
             frappe.set_route("List", "Beratung", "List");
         });
      
