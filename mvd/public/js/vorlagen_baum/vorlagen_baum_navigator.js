@@ -467,6 +467,32 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
     copy_to_clipboard(text) {
         text = text || "";
 
+        // Vorlagen können HTML enthalten (Feld ist Long Text, der Inhalt also roher Markup-String).
+        // Solche Vorlagen zusätzlich als text/html in die Zwischenablage legen, damit sie in
+        // Outlook/Word/dem Frappe-Editor formatiert statt als Quelltext eingefügt werden.
+        // Reine Textvorlagen bleiben unverändert Text (sonst gingen die Zeilenumbrüche verloren).
+        const is_html = /<[a-z][\s\S]*>/i.test(text);
+
+        if (!is_html) {
+            this.copy_plain_text(text);
+            return;
+        }
+
+        const plain = $("<div>").html(text).text();
+
+        if (navigator.clipboard && window.ClipboardItem) {
+            const item = new ClipboardItem({
+                "text/html": new Blob([text], { type: "text/html" }),
+                "text/plain": new Blob([plain], { type: "text/plain" })
+            });
+            navigator.clipboard.write([item]).catch(() => this.copy_rich_text_fallback(text));
+            return;
+        }
+
+        this.copy_rich_text_fallback(text);
+    }
+
+    copy_plain_text(text) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text);
             return;
@@ -476,6 +502,26 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
         $("body").append($temp);
         $temp.val(text).select();
         document.execCommand("copy");
+        $temp.remove();
+    }
+
+    copy_rich_text_fallback(html) {
+        // Ältere Browser bzw. wenn die Clipboard-API nicht darf: Auswahl in einem
+        // contenteditable-Element kopieren – execCommand übernimmt die Formatierung mit.
+        const $temp = $('<div contenteditable="true">')
+            .css({ position: "fixed", left: "-9999px", top: "0", opacity: 0 })
+            .html(html);
+        $("body").append($temp);
+
+        const range = document.createRange();
+        range.selectNodeContents($temp[0]);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        document.execCommand("copy");
+
+        selection.removeAllRanges();
         $temp.remove();
     }
 
