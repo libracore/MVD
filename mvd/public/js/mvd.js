@@ -384,7 +384,9 @@ frappe.mvd.MailComposer = Class.extend({
                 console.log("Auswahl:", selection);
                 console.log("Knoten-Details:", details);
                 console.log("Child-Row:", row);
-                parent_dialog.fields_dict.email_template.set_value(row.email_template || '');
+                if (selection.selection_type != "textvorlage") {
+                    parent_dialog.fields_dict.email_template.set_value(row.email_template || '');
+                }
             }
         });
     },
