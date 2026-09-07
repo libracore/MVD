@@ -479,18 +479,28 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
             return;
         }
 
-        const plain = $("<div>").html(text).text();
+        const plain = this.html_to_plain_text(text);
 
         if (navigator.clipboard && window.ClipboardItem) {
             const item = new ClipboardItem({
                 "text/html": new Blob([text], { type: "text/html" }),
                 "text/plain": new Blob([plain], { type: "text/plain" })
             });
-            navigator.clipboard.write([item]).catch(() => this.copy_rich_text_fallback(text));
+            navigator.clipboard.write([item]).catch(() => this.copy_rich_text_fallback(text, plain));
             return;
         }
 
-        this.copy_rich_text_fallback(text);
+        this.copy_rich_text_fallback(text, plain);
+    }
+
+    html_to_plain_text(html) {
+        // Bewusst DOMParser statt $("<div>").html(...): das erzeugte Dokument ist inert,
+        // d.h. Skripte laufen nicht und Ressourcen (z.B. <img src> -> onerror) werden nicht geladen.
+        try {
+            return new DOMParser().parseFromString(html, "text/html").body.textContent || "";
+        } catch (e) {
+            return html;
+        }
     }
 
     copy_plain_text(text) {
@@ -506,12 +516,21 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
         $temp.remove();
     }
 
-    copy_rich_text_fallback(html) {
-        // Ältere Browser bzw. wenn die Clipboard-API nicht darf: Auswahl in einem
-        // contenteditable-Element kopieren – execCommand übernimmt die Formatierung mit.
-        const $temp = $('<div contenteditable="true">')
-            .css({ position: "fixed", left: "-9999px", top: "0", opacity: 0 })
-            .html(html);
+    copy_rich_text_fallback(html, plain) {
+        // Ältere Browser bzw. wenn die Clipboard-API nicht darf.
+        // Wichtig: Der Vorlagen-Inhalt wird NICHT ins DOM geschrieben – ein contenteditable
+        // mit .html(vorlage) würde <script> bzw. onerror-Handler aus der Vorlage ausführen.
+        // Stattdessen wird nur ein harmloser Platzhalter selektiert und der eigentliche
+        // Inhalt im copy-Event direkt in die Zwischenablage geschrieben.
+        const handler = (e) => {
+            e.clipboardData.setData("text/html", html);
+            e.clipboardData.setData("text/plain", plain);
+            e.preventDefault();
+        };
+
+        const $temp = $("<span>")
+            .text(" ")
+            .css({ position: "fixed", left: "-9999px", top: "0", opacity: 0 });
         $("body").append($temp);
 
         const range = document.createRange();
@@ -520,10 +539,14 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
         selection.removeAllRanges();
         selection.addRange(range);
 
-        document.execCommand("copy");
-
-        selection.removeAllRanges();
-        $temp.remove();
+        document.addEventListener("copy", handler);
+        try {
+            document.execCommand("copy");
+        } finally {
+            document.removeEventListener("copy", handler);
+            selection.removeAllRanges();
+            $temp.remove();
+        }
     }
 
     render_email_section(rows) {
