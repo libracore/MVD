@@ -81,7 +81,8 @@ jenv = {
         "get_mahngebuehr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mahngebuehr",
         "rsv_dokumente_fehlende:mvd.mvd.doctype.rsvmitglied.rsvmitglied.rsv_dokumente_fehlende",
         "rsv_dokumente_erhalten:mvd.mvd.doctype.rsvmitglied.rsvmitglied.rsv_dokumente_erhalten",
-        "get_mailin_dmc:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mailin_dmc"
+        "get_mailin_dmc:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mailin_dmc",
+        "get_wohnungsabgabe_termin_daten:mvd.mvd.doctype.druckvorlage.druckvorlage.get_wohnungsabgabe_termin_daten"
     ]
 }
 
