@@ -36,3 +36,4 @@ mvd.patches.v17_0_0.mark_mahnungen_as_created
 mvd.patches.v17_0_0.alvd_region_mitgl_corr
 mvd.patches.v17_0_0.migrate_beratungskategorie_to_beratungstyp
 mvd.patches.1916.add_index
+mvd.patches.issue_2033.vorlagenbaum_mail_zu_text
