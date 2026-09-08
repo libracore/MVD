@@ -139,6 +139,13 @@ frappe.ui.form.on('Mitgliedschaft', {
                 frm.add_custom_button(__("Beratungs Termin"),  function() {
                     erstelle_beratung(frm);
                 }, __("Erstelle"));
+
+                // Add BTN RSV-Mandat
+                if (cur_frm.doc.sektion_id == 'MVZH') {
+                    frm.add_custom_button(__("RSV-Mitglied-Mandat"), function() {
+                        create_rsv_mitglied(frm);
+                    }, "Erstelle");
+                }
                 
                 if ((!['Gestorben', 'Anmeldung', 'Online-Anmeldung'].includes(cur_frm.doc.status_c))&&(!cur_frm.doc.kuendigung)) {
                     frm.add_custom_button(__("Sektionswechsel"),  function() {
@@ -2299,4 +2306,17 @@ function render_nextcloud_files_tree(frm) {
             }
         }
     });
+}
+
+function create_rsv_mitglied(frm) {
+    const opts = {
+        objekt_strasse: frm.doc.objekt_strasse,
+        objekt_hausnummer: frm.doc.objekt_hausnummer,
+        objekt_nummer_zu: frm.doc.objekt_nummer_zu,
+        objekt_plz: frm.doc.objekt_plz,
+        objekt_ort: frm.doc.objekt_ort,
+        mv_mitgliedschaft: frm.doc.name,
+        beratung: null
+    };
+    new mvd_dialoge.erstelle_rsv_mitglied(opts);
 }

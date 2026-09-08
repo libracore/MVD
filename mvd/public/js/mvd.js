@@ -2516,10 +2516,15 @@ mvd_dialoge.erstelle_rsv_mitglied = class ErstelleRSVMitglied {
                     freeze_message: 'Erstelle Schadenanzeige...',
                     callback: function(template_response)
                     {
-                        frappe.db.set_value(cur_frm.doctype, cur_frm.doc.name, 'rsv_mitglied', rsv_response.message).then(() => {
+                        if (opts.beratung) {
+                            frappe.db.set_value(cur_frm.doctype, cur_frm.doc.name, 'rsv_mitglied', rsv_response.message).then(() => {
+                                cur_frm.reload_doc();
+                                frappe.msgprint(`Das RSV-Mitglied (<a href="/desk#Form/RSVMitglied/${rsv_response.message}">${rsv_response.message}</a>) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
+                            });
+                        } else {
                             cur_frm.reload_doc();
-                            frappe.msgprint(`Das RSV-Mitglied (${rsv_response.message}) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
-                        });
+                            frappe.msgprint(`Das RSV-Mitglied (<a href="/desk#Form/RSVMitglied/${rsv_response.message}">${rsv_response.message}</a>) wurde erstellt. Bitte Schadenanzeige herunterladen, öffnen, ergänzen, drucken und vom Mitglied unterschreiben und durch Administation einscannen lassen.`);
+                        }
                     }
                 });
             }
