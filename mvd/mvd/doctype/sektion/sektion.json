@@ -1242,14 +1242,14 @@
    "options": "Email Account"
   },
   {
-   "default": "0",
-   "description": "0: deaktiviert<br>\n1: ab 1 Tag nach Schliessung; neue Beratung<br>\n2: ab 2 Tagen nach Schliessung; neue Beratung<br>\netc.",
+   "default": "-1",
+   "description": "-1: deaktiviert<br>\n0: sofort; jede Antwort auf eine geschlossene Beratung erzeugt eine neue Beratung<br>\n1: ab 1 Tag nach Schliessung; neue Beratung<br>\n2: ab 2 Tagen nach Schliessung; neue Beratung<br>\netc.",
    "fieldname": "create_new_beratung_from_mail_after_days",
    "fieldtype": "Int",
    "label": "Neue Beratung aus E-Mail nach Tagen"
   }
  ],
- "modified": "2026-09-08 14:01:51.118109",
+ "modified": "2026-09-08 22:50:51.118109",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
