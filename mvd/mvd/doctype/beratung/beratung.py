@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils.data import today, now, getdate, get_datetime
+from frappe.utils.data import today, now, getdate, get_datetime, add_to_date
 import json
 from bs4 import BeautifulSoup
 from frappe.utils import cint
@@ -634,34 +634,189 @@ def raise_xxx(code, title, message, error_log_title='SP API Error!'):
         }
     }]
 
+def _should_create_new_beratung_from_mail(beratung):
+    """
+        Diese Methode prüft, ob eine eingehende Mail auf eine geschlossene Beratung eine neue Beratung erzeugen soll
+    """
+
+    if beratung.status != 'Closed':
+        return False
+
+    if not beratung.sektion_id:
+        return False
+
+    create_after_days = cint(
+        frappe.db.get_value(
+            "Sektion",
+            beratung.sektion_id,
+            "create_new_beratung_from_mail_after_days"
+        )
+    )
+
+    # 0 = Feature deaktiviert
+    if create_after_days <= 0:
+        return False
+
+    if not beratung.geschlossen_am:
+        return False
+
+    geschlossen_am = getdate(beratung.geschlossen_am)
+    heute = getdate(today())
+
+    closed_days = (heute - geschlossen_am).days
+
+    return closed_days >= create_after_days
+
+
+def _create_beratung_from_communication(communication, old_beratung):
+    """
+        Erstellt aus einer eingehenden Communication eine neue Beratung
+    """
+
+    sektion_id = None
+
+    if communication.email_account:
+        sektion_id = frappe.db.get_value(
+            "Email Account",
+            communication.email_account,
+            "sektion_id"
+        )
+
+    # Fallback:
+    # Bei einer Antwort auf eine alte Beratung; dieselbe Sektion verwenden
+    if not sektion_id:
+        sektion_id = old_beratung.sektion_id
+
+    new_beratung = frappe.get_doc({
+        "doctype": "Beratung",
+        "sektion_id": sektion_id,
+        "start_date": today(),
+        "raised_by": communication.sender,
+        "raised_by_name": communication.sender_full_name,
+        "notiz": communication.content
+    })
+
+    new_beratung.insert(ignore_permissions=True)
+
+    return new_beratung
+
+
+def _relink_communication_to_beratung(communication, beratung):
+    """
+        Hängt die bereits angelegte eingehende Communication von der alten
+        auf die neu angelegte Beratung um.
+
+        Es wird absichtlich direkt in der DB aktualisiert, damit durch ein
+        communication.save() nicht erneut Hooks ausgelöst werden.
+    """
+
+    frappe.db.set_value(
+        "Communication",
+        communication.name,
+        {
+            "reference_doctype": "Beratung",
+            "reference_name": beratung.name
+        },
+        update_modified=False
+    )
+
+    communication.reference_doctype = "Beratung"
+    communication.reference_name = beratung.name
+
+
+def _add_mail_split_comments(old_beratung, new_beratung):
+    frappe.get_doc({
+        "doctype": "Comment",
+        "comment_type": "Info",
+        "reference_doctype": "Beratung",
+        "reference_name": old_beratung.name,
+        "content": "Aufgrund einer neuen E-Mail wurde automatisch die neue Beratung <a href='#Form/Beratung/{0}'>{1}</a> erstellt".format(new_beratung.name, frappe.bold(new_beratung.name)),
+    }).insert(ignore_permissions=True)
+
+    frappe.get_doc({
+        "doctype": "Comment",
+        "comment_type": "Info",
+        "reference_doctype": "Beratung",
+        "reference_name": new_beratung.name,
+        "content": "Diese Beratung wurde aufgrund einer neuen E-Mail zur geschlossenen Beratung <a href='#Form/Beratung/{0}'>{1}</a> automatisch erstellt".format(old_beratung.name, frappe.bold(old_beratung.name)),
+    }).insert(ignore_permissions=True)
+
+
 def check_communication(self, event):
-    from frappe.utils.data import get_datetime, add_to_date
     communication = self
     if communication.sent_or_received == 'Received':
         if communication.reference_doctype == 'Beratung':
             beratung = frappe.get_doc("Beratung", communication.reference_name)
-            if frappe.db.count("Communication", {'reference_doctype': 'Beratung', 'reference_name': communication.reference_name}) < 2:
-                time_stamp_communication = add_to_date(get_datetime(communication.creation), minutes=-1, as_datetime=True)
+
+            if _should_create_new_beratung_from_mail(beratung):
+                new_beratung = _create_beratung_from_communication(
+                    communication=communication,
+                    old_beratung=beratung
+                )
+
+                _relink_communication_to_beratung(
+                    communication=communication,
+                    beratung=new_beratung
+                )
+
+                _add_mail_split_comments(
+                    old_beratung=beratung,
+                    new_beratung=new_beratung
+                )
+
+                return
+            
+            if frappe.db.count(
+                "Communication",
+                {
+                    'reference_doctype': 'Beratung',
+                    'reference_name': communication.reference_name
+                }
+            ) < 2:
+
+                time_stamp_communication = add_to_date(
+                    get_datetime(communication.creation),
+                    minutes=-1,
+                    as_datetime=True
+                )
+
                 time_stamp_beratung = get_datetime(beratung.creation)
+
                 if time_stamp_communication < time_stamp_beratung:
                     if not beratung.notiz:
                         beratung.notiz = communication.content
+
                     if not beratung.sektion_id:
-                        beratung.sektion_id = frappe.db.get_value("Email Account", communication.email_account, 'sektion_id')
+                        beratung.sektion_id = frappe.db.get_value(
+                            "Email Account",
+                            communication.email_account,
+                            'sektion_id'
+                        )
+
                     if not beratung.raised_by_name:
                         beratung.raised_by_name = communication.sender_full_name
+
                     if not beratung.raised_by:
                         beratung.raised_by = communication.sender
+
                     beratung.save()
+
                 else:
                     beratung.ungelesen = 1
                     beratung.save()
+
             else:
                 beratung.ungelesen = 1
                 beratung.save()
+
         elif communication.reference_doctype == 'Issue':
+
             #1212
-            issue = frappe.get_doc("Issue", communication.reference_name)
+            issue = frappe.get_doc(
+                "Issue",
+                communication.reference_name
+            )
+
             issue.ungelesene_email = 1
             issue.save()
 
