@@ -84,43 +84,26 @@ frappe.vbz_beratung_mvzh = {
             frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], "sektion_id": sektion, "typ": "Business"}
             frappe.set_route("List", "Beratung", "List");
         });
-        // R1/R2 enthalten seit #2021  R9. 
-        // ODER über verschiedene Felder und lässt sich nicht als Listen-Filter umsetzen,
-        // darum werden die Namen serverseitig geholt (wie S10).
-        var route_zeile = function(zeile, typ) {
-            frappe.call({
-                method: "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_beratungen_der_zeile",
-                args: {'zeile': zeile, 'typ': typ},
-                callback: function(r) {
-                    if (!r.message) {
-                        // Kein Resultat vom Server (z.B. Methode nach einem Deploy noch nicht geladen).
-                        // Lieber sagen als eine leere Liste mit unsinnigem Filter zeigen.
-                        frappe.msgprint(__('Die Liste konnte nicht geladen werden. Bitte Seite neu laden; falls es bleibt, wurde der Server nach dem letzten Update noch nicht neu gestartet.'));
-                        return;
-                    }
-                    var namen = r.message;
-                    if (namen.length === 0) {
-                        frappe.show_alert({message: __('Keine Einträge in dieser Zeile.'), indicator: 'blue'});
-                        return;
-                    }
-                    frappe.route_options = {"name": ["in", namen], "typ": typ}
-                    frappe.set_route("List", "Beratung", "List");
-                }
-            });
-        };
-
+        // R1 + R2 teilen die Zeile R (offen/in Arbeit) nach Priorität auf.
         $("#r1_wohnen").click(function(){
-            route_zeile('r1', 'Wohnen');
+            frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], 'beratung_prio': 'Hoch', "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
         });
         $("#r1_business").click(function(){
-            route_zeile('r1', 'Business');
+            frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], 'beratung_prio': 'Hoch', "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
         });
         $("#r2_wohnen").click(function(){
-            route_zeile('r2', 'Wohnen');
+            frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], 'beratung_prio': ['not in', ['Hoch']], "typ": "Wohnen"}
+            frappe.set_route("List", "Beratung", "List");
         });
         $("#r2_business").click(function(){
-            route_zeile('r2', 'Business');
+            frappe.route_options = {"status": ['in', ['Open', 'In Arbeit']], 'beratung_prio': ['not in', ['Hoch']], "typ": "Business"}
+            frappe.set_route("List", "Beratung", "List");
         });
+        /* Zeilen R3-R8 sind im Template nicht mehr vorhanden -> Handler deaktiviert.
+           Beim Reaktivieren auch die Abfragen in der .py und die Zeilen in der .html wieder einkommentieren.
+
         $("#r3_wohnen").click(function(){
             frappe.route_options = {'status': ['in', ['Open', 'In Arbeit']], 'r3': 1, "sektion_id": sektion, "typ": "Wohnen"}
             frappe.set_route("List", "Beratung", "List");
@@ -169,7 +152,8 @@ frappe.vbz_beratung_mvzh = {
             frappe.route_options = {'status': 'Closed', 'hat_termine': 1, "sektion_id": sektion, "typ": "Business"}
             frappe.set_route("List", "Beratung", "List");
         });
-     
+        */
+
 
         $("#p1_wohnen").click(function(){
             frappe.call({
@@ -193,6 +177,9 @@ frappe.vbz_beratung_mvzh = {
                 }
             });
         });
+        /* Zeilen P2-P4 sind im Template nicht mehr vorhanden -> Handler deaktiviert.
+           Beim Reaktivieren auch get_p2/get_p3/get_p4 in der .py und die Zeilen in der .html wieder einkommentieren.
+
         $("#p2_wohnen").click(function(){
             frappe.call({
                 'method': "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_user_kontaktperson",
@@ -259,7 +246,8 @@ frappe.vbz_beratung_mvzh = {
                 }
             });
         });
-   
+        */
+
         $("#rechtsberaterinnen").click(function(){
             frappe.set_route("List", "Termin Kontaktperson", "List");
         });
