@@ -21,15 +21,8 @@ import re
     bench execute mvd.mvd.data_import.mvzh_aktivitaet.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'site1.local', 'bench': 'frappe', 'create_missing_users':1}"
     Multi-Bench VM:
     bench execute mvd.mvd.data_import.mvzh_aktivitaet.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'mvd', 'bench': 'mvd'}"
-
-    Hinweis
-    --------
-    Vor der ersten Nutzung Index setzen!
-    ALTER TABLE `tabAktivitaet`
-    ADD INDEX `idx_import_datenquelle_zeile`
-    (`import_datenquelle`, `import_zeile`);
 '''
-def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='frappe', skip_missing_users=False, create_missing_users=False):
+def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='frappe', primary_id="objekt_id", skip_missing_users=False, create_missing_users=False):
     # display all coloumns for error handling
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
     # read csv
@@ -64,53 +57,61 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
 
     print("Starte Import...")
     for index, row in tqdm(df.iterrows(), desc="Import Aktivität", unit=" Aktivitäten", total=len(df.index)):
-        if (
-            get_value(row, 'Erfasser') not in missing_users
-            and not frappe.db.exists("Aktivitaet", {'import_datenquelle': file_name, 'import_zeile': cint(index) + 2})
-        ):
-            new_aktivitaet = frappe.new_doc("Aktivitaet")
-            new_aktivitaet.datum = getdate(get_value(row, "Datum"))
-            new_aktivitaet.erfasser = get_value(row, "Erfasser")
-            new_aktivitaet.import_datenquelle = file_name
-            new_aktivitaet.import_zeile = cint(index) + 2
-            new_aktivitaet.import_verarbeitet = 0
-            new_aktivitaet.typ = get_value(row, "Typ")
-            new_aktivitaet.art = get_value(row, "Kontakt-Art")
-            new_aktivitaet.termin = getdate(get_value(row, "Termin"))
-            new_aktivitaet.prioritaet = get_value(row, "Priorität")
-            new_aktivitaet.zustaendig = get_user(get_value(row, "Zuständig"))
-            new_aktivitaet.erledigt = get_true_false_flag(get_value(row, "Erledigt"))
-            new_aktivitaet.erledigt_datum = getdate(get_value(row, "Erledigt Datum"))
-            # new_aktivitaet.mitglied_nr --> wird direkt aus verknüpfter Mitgliedschaft gefeched
-            new_aktivitaet.mv_mitgliedschaft = get_value(row, "MitgliederID")
-            # new_aktivitaet.sektion_id --> wird direkt aus verknüpfter Mitgliedschaft gefeched
-            new_aktivitaet.titel = get_value(row, "Titel")
-            new_aktivitaet.dokument_intern = get_value(row, "Dokument intern")
-            new_aktivitaet.pfad_legacy = get_value(row, "Basis-Pfad")
-            new_aktivitaet.dokument = get_value(row, "Dokument")
-            new_aktivitaet.erfasst_datum = getdate(get_value(row, "Erfasst Datum"))
-            new_aktivitaet.geaendert_datum = getdate(get_value(row, "Geändert Datum"))
-            new_aktivitaet.sachverhalt = get_value(row, "Sachverhalt")
-            new_aktivitaet.empfehlung = get_value(row, "Empfehlung")
-            new_aktivitaet.fristbeginn = get_value(row, "Fristbeginn")
-            new_aktivitaet.k_aus_der_beratung = get_value(row, "K-aus der Beratung")
-            new_aktivitaet.k_anfangsmietzins = get_value(row, "K-Anfangsmietzins")
-            new_aktivitaet.k_spezialkategorie = get_value(row, "K-Spezialkategorie")
-            new_aktivitaet.k_mietzinssenkung = get_value(row, "K-Mietzinssenkung")
-            new_aktivitaet.k_maengel = get_value(row, "K-Mängel")
-            new_aktivitaet.k_nebenkosten = get_value(row, "K-Nebenkosten")
-            new_aktivitaet.k_kuendigung = get_value(row, "K-Kündigung")
-            new_aktivitaet.k_mietzinserhoehung = get_value(row, "K-Mietzinserhöhung")
-            new_aktivitaet.k_forderung = get_value(row, "K-Forderung")
-            new_aktivitaet.k_andere = get_value(row, "K-Andere")
-            new_aktivitaet.fallergebnisse = get_value(row, "Fallergebnisse")
+        if get_value(row, 'Erfasser') not in missing_users:
+            update =  False
+            if frappe.db.exists("Aktivitaet", get_value(row, primary_id)):
+                aktivitaet = frappe.get_doc("Aktivitaet", get_value(row, primary_id))
+                update = True
+            else:
+                aktivitaet = frappe.new_doc("Aktivitaet")
+                aktivitaet.objekt_id = get_value(row, primary_id)
+            
+            aktivitaet.datum = getdate(get_value(row, "Datum"))
+            aktivitaet.erfasser = get_value(row, "Erfasser")
+            aktivitaet.import_datenquelle = file_name
+            aktivitaet.import_zeile = cint(index) + 2
+            aktivitaet.import_verarbeitet = 0
+            aktivitaet.typ = get_value(row, "Typ")
+            aktivitaet.art = get_value(row, "Kontakt-Art")
+            aktivitaet.termin = getdate(get_value(row, "Termin"))
+            aktivitaet.prioritaet = get_value(row, "Priorität")
+            aktivitaet.zustaendig = get_user(get_value(row, "Zuständig"))
+            aktivitaet.erledigt = get_true_false_flag(get_value(row, "Erledigt"))
+            aktivitaet.erledigt_datum = getdate(get_value(row, "Erledigt Datum"))
+            # aktivitaet.mitglied_nr --> wird direkt aus verknüpfter Mitgliedschaft gefeched
+            aktivitaet.mv_mitgliedschaft = get_value(row, "MitgliederID")
+            # aktivitaet.sektion_id --> wird direkt aus verknüpfter Mitgliedschaft gefeched
+            aktivitaet.titel = get_value(row, "Titel")
+            aktivitaet.dokument_intern = get_value(row, "Dokument intern")
+            aktivitaet.pfad_legacy = get_value(row, "Basis-Pfad")
+            aktivitaet.dokument = get_value(row, "Dokument")
+            aktivitaet.erfasst_datum = getdate(get_value(row, "Erfasst Datum"))
+            aktivitaet.geaendert_datum = getdate(get_value(row, "Geändert Datum"))
+            aktivitaet.sachverhalt = get_value(row, "Sachverhalt")
+            aktivitaet.empfehlung = get_value(row, "Empfehlung")
+            aktivitaet.fristbeginn = get_value(row, "Fristbeginn")
+            aktivitaet.k_aus_der_beratung = get_value(row, "K-aus der Beratung")
+            aktivitaet.k_anfangsmietzins = get_value(row, "K-Anfangsmietzins")
+            aktivitaet.k_spezialkategorie = get_value(row, "K-Spezialkategorie")
+            aktivitaet.k_mietzinssenkung = get_value(row, "K-Mietzinssenkung")
+            aktivitaet.k_maengel = get_value(row, "K-Mängel")
+            aktivitaet.k_nebenkosten = get_value(row, "K-Nebenkosten")
+            aktivitaet.k_kuendigung = get_value(row, "K-Kündigung")
+            aktivitaet.k_mietzinserhoehung = get_value(row, "K-Mietzinserhöhung")
+            aktivitaet.k_forderung = get_value(row, "K-Forderung")
+            aktivitaet.k_andere = get_value(row, "K-Andere")
+            aktivitaet.fallergebnisse = get_value(row, "Fallergebnisse")
 
-            new_aktivitaet.insert()
+            if update:
+                aktivitaet.save()
+            else:
+                aktivitaet.insert()
+
             frappe.db.commit()
 
-            frappe.db.set_value("Aktivitaet", new_aktivitaet.name, 'owner', new_aktivitaet.zustaendig)
-            frappe.db.set_value("Aktivitaet", new_aktivitaet.name, 'creation', new_aktivitaet.erfasst_datum)
-            frappe.db.set_value("Aktivitaet", new_aktivitaet.name, 'modified', new_aktivitaet.geaendert_datum)
+            frappe.db.set_value("Aktivitaet", aktivitaet.name, 'owner', aktivitaet.zustaendig)
+            frappe.db.set_value("Aktivitaet", aktivitaet.name, 'creation', aktivitaet.erfasst_datum)
+            frappe.db.set_value("Aktivitaet", aktivitaet.name, 'modified', aktivitaet.geaendert_datum)
             frappe.db.commit()
 
 def get_value(row, value):
