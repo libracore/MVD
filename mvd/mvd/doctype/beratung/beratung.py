@@ -654,7 +654,7 @@ def _should_create_new_beratung_from_mail(beratung):
         beratung.sektion_id,
         "enable_new_beratung_from_mail_after_days"
     )) != 1:
-        return
+        return False
 
     create_after_days = cint(frappe.db.get_value(
         "Sektion",
