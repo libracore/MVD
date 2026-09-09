@@ -645,23 +645,24 @@ def _should_create_new_beratung_from_mail(beratung):
     if not beratung.sektion_id:
         return False
 
-    create_after_days = frappe.db.get_value(
+    if not beratung.geschlossen_am:
+        return False
+
+    # Prüfung ob Feature deaktiviert
+    if cint(frappe.db.get_value(
+        "Sektion",
+        beratung.sektion_id,
+        "enable_new_beratung_from_mail_after_days"
+    )) != 1:
+        return
+
+    create_after_days = cint(frappe.db.get_value(
         "Sektion",
         beratung.sektion_id,
         "create_new_beratung_from_mail_after_days"
-    )
-
-    # Nicht gesetzt (z.B. Altdaten) = Feature deaktiviert.
-    # Sonst: -1 (oder kleiner) = deaktiviert, 0 = sofort, 1 = ab 1 Tag nach Schliessung, usw.
-    if create_after_days is None or create_after_days == "":
-        return False
-
-    create_after_days = cint(create_after_days)
+    ))
 
     if create_after_days < 0:
-        return False
-
-    if not beratung.geschlossen_am:
         return False
 
     geschlossen_am = getdate(beratung.geschlossen_am)

@@ -88,6 +88,7 @@
   "template_bestaetigung_kontaktperson",
   "template_bestaetigung_mitglied",
   "template_suche_vertrauensanwaeltin",
+  "enable_new_beratung_from_mail_after_days",
   "create_new_beratung_from_mail_after_days",
   "section_mzr",
   "mzr_email",
@@ -1242,14 +1243,20 @@
    "options": "Email Account"
   },
   {
-   "default": "-1",
-   "description": "-1: deaktiviert<br>\n0: sofort; jede Antwort auf eine geschlossene Beratung erzeugt eine neue Beratung<br>\n1: ab 1 Tag nach Schliessung; neue Beratung<br>\n2: ab 2 Tagen nach Schliessung; neue Beratung<br>\netc.",
+   "default": "0",
+   "description": "0: sofort; jede Antwort auf eine geschlossene Beratung erzeugt eine neue Beratung<br>\n1: ab 1 Tag nach Schliessung; neue Beratung<br>\n2: ab 2 Tagen nach Schliessung; neue Beratung<br>\netc.",
    "fieldname": "create_new_beratung_from_mail_after_days",
    "fieldtype": "Int",
+   "label": "Nach Tagen"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_new_beratung_from_mail_after_days",
+   "fieldtype": "Check",
    "label": "Neue Beratung aus E-Mail nach Tagen"
   }
  ],
- "modified": "2026-09-08 22:50:51.118109",
+ "modified": "2026-09-09 09:33:50.601079",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
