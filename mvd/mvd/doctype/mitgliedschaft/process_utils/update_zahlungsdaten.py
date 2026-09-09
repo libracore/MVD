@@ -86,9 +86,23 @@ def mitgliedschaft(mitglied_id):
 
     def get_and_set_mitgliednr():
         from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new_number
+        from mvd.mvd.utils.nextcloud import handle_mitgliedschafts_folder
         try:
             mitglied_nr = create_new_number(id=mitglied_id)['nr']
             frappe.db.set_value("Mitgliedschaft", mitglied_id, 'mitglied_nr', mitglied_nr)
+            # Anlage/Verschiebung/Zusammenführung von NextCloud Mitgliedschafts- und Interessenten-Ordner
+            handle_mitgliedschafts_folder(
+                frappe.db.get_value(
+                    "Mitgliedschaft",
+                    mitglied_id,
+                    [
+                        "sektion_id",
+                        "name",
+                        "mitglied_nr"
+                    ],
+                    as_dict=True
+                )
+            )
         except Exception as err:
             frappe.log_error("Mitgliednummer für Mitglied {0} konnte nicht bezogen werden".format(mitglied_id), 'get_and_set_mitgliednr')
             pass

@@ -182,6 +182,7 @@
   "nc_mitglied_base_folder",
   "nc_mitglied_beratung_base_folder",
   "nc_beratung_base_folder",
+  "nc_interessenten_base_folder",
   "section_rsv",
   "rsv_auto_email_enabled",
   "rsv_mail_template_va",
@@ -1254,9 +1255,16 @@
    "fieldname": "enable_new_beratung_from_mail_after_days",
    "fieldtype": "Check",
    "label": "Neue Beratung aus E-Mail nach Tagen"
+  },
+  {
+   "depends_on": "eval:doc.nc_enabled",
+   "description": "z.B. Interessenten<br>\n(Der Sektions Basisordner dient als Root)",
+   "fieldname": "nc_interessenten_base_folder",
+   "fieldtype": "Data",
+   "label": "Interessent*innen Basisordner"
   }
  ],
- "modified": "2026-09-09 09:33:50.601079",
+ "modified": "2026-09-09 13:04:12.484272",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

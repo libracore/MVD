@@ -27,7 +27,7 @@ from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, upda
 from mvd.mvd.doctype.mitgliedschaft.finance_utils import get_ampelfarbe, set_max_reminder_level, check_folgejahr_regelung
 from frappe.utils.background_jobs import enqueue
 from mvd.mvd.utils import is_job_already_running, rg_massenlauf_log
-from mvd.mvd.utils.nextcloud import new_mitgliedschaft as create_nextcloud_mitgliedschaft_folder
+from mvd.mvd.utils.nextcloud import handle_mitgliedschafts_folder
 
 class Mitgliedschaft(Document):
     def set_new_name(self):
@@ -74,6 +74,10 @@ class Mitgliedschaft(Document):
                     frappe.log_error("Mitglied: {0}".format(self.mitglied_id), 'Missing Mitglied-Hash')
 
         return
+
+    def after_insert(self):
+        # Anlage NextCloud Mitgliedschafts- oder Interessenten-Ordner
+        handle_mitgliedschafts_folder(self)
     
     def validate(self):
         # Hotfix ISS-2024-60 / #942
@@ -213,11 +217,6 @@ class Mitgliedschaft(Document):
             if cint(self.web_login_user_created) != 1:
                 create_web_login_user(self.mitglied_nr)
                 self.web_login_user_created = 1
-            
-            # NextCloud Mitgliedschafts-Ordner erstellen
-            old_doc = self.get_doc_before_save()
-            if (not old_doc or (not old_doc.mitglied_nr or old_doc.mitglied_nr == "MV") or self.flags.force_nextcloud_creation):
-                create_nextcloud_mitgliedschaft_folder(self)
         
         # Lösche alle Einträge wenn das Solidarmitglied entfernt wird
         if not self.hat_solidarmitglied:
