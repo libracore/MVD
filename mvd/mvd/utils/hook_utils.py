@@ -223,16 +223,27 @@ def sync_file_to_nextcloud(file, event):
 
     if file.attached_to_doctype == 'Mitgliedschaft':
         mitglied_nr = frappe.db.get_value("Mitgliedschaft", file.attached_to_name, "mitglied_nr")
-        if not mitglied_nr or mitglied_nr == "MV":
-            return
-        
         sektion = frappe.db.get_value("Mitgliedschaft", file.attached_to_name, "sektion_id")
         ncs = NCSettings(sektion)
 
         if not ncs.IS_ENABLED:
             return
-        
-        folder_path = "{0}/{1}".format(ncs.BASE_MITGLIED, mitglied_nr)
+
+        folder_path = None
+
+        if not mitglied_nr or mitglied_nr == "MV":
+            folder_path = "{0}/{1}".format(
+                    ncs.BASE_INTERESSENT,
+                    file.attached_to_name
+                )
+        else:
+            folder_path = "{0}/{1}".format(
+                ncs.BASE_MITGLIED,
+                mitglied_nr
+            )
+
+        if not folder_path:
+            return
     
     if file.attached_to_doctype == 'Beratung':
         beratung = frappe.get_doc("Beratung", file.attached_to_name)
