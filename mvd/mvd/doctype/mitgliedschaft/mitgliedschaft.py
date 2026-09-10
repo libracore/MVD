@@ -3084,14 +3084,17 @@ def _disable_web_login(mitglied_nr):
         if frappe.db.exists("User", "{0}@login.ch".format(mitglied_nr)):
             frappe.db.set_value("User", "{0}@login.ch".format(mitglied_nr), "enabled", 0)
 
-def validate_member_addresses(limit=0):
+def validate_member_addresses(limit=0, sektion=None):
     if limit == 0:
         limit = frappe.get_value("MVD Settings", "MVD Settings", "adressvalidierung_anzahl")
 
     four_months_ago = frappe.utils.add_months(frappe.utils.today(), -4)
     if limit != 0:
+        filters = {"adressvalidierung_manuell": 0}
+        if sektion:
+            filters['sektion_id'] = sektion
         members = frappe.get_all("Mitgliedschaft", 
-            filters={"adressvalidierung_manuell": 0},
+            filters=filters,
             or_filters=[["adressvalidierung_datum", "<", four_months_ago],
                         ["adressvalidierung_datum", "is", "not set"]
                         ],
