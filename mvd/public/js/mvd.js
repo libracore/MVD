@@ -2177,7 +2177,7 @@ mvd_dialoge.erstelle_kuendigung = class ErstelleKuendigung {
             {
                 cur_frm.reload_doc();
                 cur_frm.timeline.insert_comment("Kündigung");
-                frappe.msgprint("Die Kündigung wurde per " + frappe.datetime.obj_to_user(values.datum) + " erfasst.<br>Die Kündigungsbestätigung finden Sie in den Anhängen.");
+                frappe.msgprint("Die Kündigung wurde per " + this.dialog.get_value('datum') + " erfasst.<br>Die Kündigungsbestätigung finden Sie in den Anhängen.");
             }
         });
     }
