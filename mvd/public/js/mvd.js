@@ -2004,6 +2004,7 @@ mvd_dialoge.erstelle_korrespondenz = class ErstelleKorrespondenz {
 mvd_dialoge.erstelle_kuendigung = class ErstelleKuendigung {
     constructor(opts) {
         this.sektion_settings = opts.sektion_settings;
+        this.druckvorlagen = opts.druckvorlagen;
         this.dialog =  new frappe.ui.Dialog({
             title: "Kündigung erfassen",
             no_submit_on_enter: true,
@@ -2036,6 +2037,7 @@ mvd_dialoge.erstelle_kuendigung = class ErstelleKuendigung {
     get_fields() {
         var me = this;
         let sektion_settings = me.sektion_settings;
+        let druckvorlagen = me.druckvorlagen;
         
         if (sektion_settings) {
             var kuendigungs_stichtag = frappe.datetime.str_to_obj(sektion_settings.kuendigungs_stichtag);

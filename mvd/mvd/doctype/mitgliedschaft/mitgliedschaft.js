@@ -844,8 +844,24 @@ function kuendigung(frm) {
             },
             'callback': function(response) {
                 var sektion_settings = response.message;
-                new mvd_dialoge.erstelle_kuendigung({
-                    sektion_settings: sektion_settings
+                frappe.call({
+                    method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+                    args:{
+                            'sektion': cur_frm.doc.sektion_id,
+                            'dokument': 'Kündigung',
+                            'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                            'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                            'language': cur_frm.doc.language
+                    },
+                    async: false,
+                    callback: function(res)
+                    {
+                        var druckvorlagen = res.message;
+                        new mvd_dialoge.erstelle_kuendigung({
+                            sektion_settings: sektion_settings,
+                            druckvorlagen: druckvorlagen
+                        });
+                    }
                 });
             }
         });
