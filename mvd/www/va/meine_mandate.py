@@ -318,7 +318,7 @@ def download_zip(mandat):
             file_path = resolve_file_path(file_url)
 
             if not os.path.exists(file_path):
-                frappe.log_error(f"File not found: {file_url}", "ZIP Creation")
+                frappe.log_error("File not found: {file_url}".format(file_url=file_url), "ZIP Creation")
                 continue
 
             zipf.write(file_path, os.path.basename(file_path))
