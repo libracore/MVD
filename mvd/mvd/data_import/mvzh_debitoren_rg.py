@@ -31,6 +31,8 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
     print("Starte Import...")
     for index, row in tqdm(df.iterrows(), desc="Import Debitoren", unit=" Debitoren", total=len(df.index)):
         if frappe.db.exists("Mitgliedschaft", get_value(row, 'MitgliederID')):
+            if frappe.db.exists("Sales Invoice", {"mvzh_sinv_nr": get_value(row, 'Rechnungsnummer')}): continue
+            
             mitglied = frappe.get_doc("Mitgliedschaft", get_value(row, 'MitgliederID'))
             sinv = frappe.new_doc("Sales Invoice")
             # sinv.title = "Yves Roth Fotograf"
@@ -45,7 +47,7 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
             sinv.company = "MV Zürich"
             sinv.posting_date = getdate(get_value(row, 'Rechnungsdatum'))
             sinv.set_posting_time = 1
-            sinv.due_date = getdate("2026-01-01")
+            sinv.due_date = getdate("2026-01-01") if "2025" in get_value(row, 'Rechnungsdatum') else getdate("2027-01-01")
             sinv.delivery_date = None
             sinv.payment_reminder_level = 0
             sinv.exclude_from_payment_reminder_until = None
