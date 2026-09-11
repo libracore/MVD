@@ -2274,53 +2274,60 @@ var setup_phone_formatters = function(frm) {
 
 
 function render_nextcloud_files_tree(frm) {
-    var $wrapper = $(frm.fields_dict.nextcloud_html.wrapper);
-    const $tree_el = $wrapper.find(".nextcloud-tree");
-    $tree_el.empty();
+    frappe.db.get_value('Sektion', cur_frm.doc.sektion_id, 'nc_enabled')
+    .then(r => {
+        if (r.message.nc_enabled != 1) {
+            return;
+        }
+        
+        var $wrapper = $(frm.fields_dict.nextcloud_html.wrapper);
+        const $tree_el = $wrapper.find(".nextcloud-tree");
+        $tree_el.empty();
 
-    frm._nextcloud_tree = new frappe.ui.Tree({
-        parent: $tree_el,
-        label: "Files",
-        method: "mvd.mvd.utils.nextcloud.list_children_tree",
-        args: {
-            sektion: frm.doc.sektion_id,
-            mitglied: frm.doc.name
-        },
-        get_label: function(node) {
-            return node.title || node.label;
-        },
-        show: true,
-        toolbar:  [
-            {
-                label:__("In NextCloud öffnen"),
-                condition: function(node) {
-                    const d = node.data || node;
-                    if (d.data) {
-                        if (d.data.type === "folder") {
-                            return true
+        frm._nextcloud_tree = new frappe.ui.Tree({
+            parent: $tree_el,
+            label: "Files",
+            method: "mvd.mvd.utils.nextcloud.list_children_tree",
+            args: {
+                sektion: frm.doc.sektion_id,
+                mitglied: frm.doc.name
+            },
+            get_label: function(node) {
+                return node.title || node.label;
+            },
+            show: true,
+            toolbar:  [
+                {
+                    label:__("In NextCloud öffnen"),
+                    condition: function(node) {
+                        const d = node.data || node;
+                        if (d.data) {
+                            if (d.data.type === "folder") {
+                                return true
+                            }
                         }
+                        return false
+                    },
+                    click: function(node) {
+                        const d = node.data || node;
+                        if (d.data) {
+                            window.open(d.data.nc_link, "_blank", "noopener");
+                        }
+                    },
+                    btnClass: "hidden-xs",
+                    dont_trigger_refresh: true
+                }
+            ],
+            on_click(node) {
+                const d = node.data || node;
+                if (d.data) {
+                    const node_data = d.data;
+                    if (node_data.type === "file") {
+                        window.open(`${node_data.nc_link}&openfile=true`, "_blank", "noopener");
                     }
-                    return false
-                },
-                click: function(node) {
-                    const d = node.data || node;
-                    if (d.data) {
-                        window.open(d.data.nc_link, "_blank", "noopener");
-                    }
-                },
-                btnClass: "hidden-xs",
-                dont_trigger_refresh: true
-            }
-        ],
-        on_click(node) {
-            const d = node.data || node;
-            if (d.data) {
-                const node_data = d.data;
-                if (node_data.type === "file") {
-                    window.open(`${node_data.nc_link}&openfile=true`, "_blank", "noopener");
                 }
             }
-        }
+        });
     });
 }
 

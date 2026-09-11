@@ -14,6 +14,9 @@ from datetime import datetime
 from mvd.mvd.utils import make_api_log
 from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention_kunde
 from frappe.utils.background_jobs import enqueue
+from mvd.mvd.utils.nextcloud import new_beratung as create_nextcloud_beratungs_folder
+from mvd.mvd.utils.nextcloud import added_mitglied_to_beratung as move_folder_from_beratung_to_mitglied
+from mvd.mvd.utils.nextcloud import changed_mitglied_in_beratung as move_folder_from_mitglied_to_mitglied
 
 class Beratung(Document):
     def validate(self):
@@ -195,9 +198,9 @@ class Beratung(Document):
             enqueue("mvd.mvd.doctype.siedlungsfall.siedlungsfall.update_mitglied_in_siedlungsfall", queue='short', job_name='Update {0} in Siedlungsfall'.format(self.mv_mitgliedschaft), timeout=5000, **args)
 
     def handle_nextcloud_folder(self):
-        from mvd.mvd.utils.nextcloud import new_beratung as create_nextcloud_beratungs_folder
-        from mvd.mvd.utils.nextcloud import added_mitglied_to_beratung as move_folder_from_beratung_to_mitglied
-        from mvd.mvd.utils.nextcloud import changed_mitglied_in_beratung as move_folder_from_mitglied_to_mitglied
+        nc_enabled = cint(frappe.db.get_value('Sektion', self.sektion_id, 'nc_enabled')) if self.sektion_id else 0
+        if nc_enabled != 1: return
+
         old_doc = self.get_doc_before_save()
         if not old_doc or self.flags.force_nextcloud_creation:
             # Neu angelegte Beratung
