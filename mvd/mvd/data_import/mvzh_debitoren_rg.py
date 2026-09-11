@@ -70,7 +70,7 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
             sinv.sektion_id = "MVZH"
             sinv.sektions_code = "33"
             sinv.mitgliedschafts_jahr = 2026
-            sinv.druckvorlage = "Jahresrechnung_Privat-MVZH"
+            sinv.druckvorlage = "Jahresrechnung Wohnen-MVZH" if "Wohnen" in get_value(row, 'Mitgliedertyp') else "Jahresrechnung MV Business-MVZH" if "Business" in get_value(row, 'Mitgliedertyp') else "Jahresrechnung Wohnen-MVZH"
             sinv.zugehoerige_fr = None
             sinv.rechnungs_jahresversand = None
             sinv.mrj = None
