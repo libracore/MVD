@@ -31,6 +31,9 @@ class NCSettings():
         mvd_settings                = frappe.get_doc("MVD Settings", "MVD Settings")
         sektion_settings            = frappe.get_doc("Sektion", sektion)
         self.IS_ENABLED             = True if cint(sektion_settings.nc_enabled) == 1 else False
+
+        if not self.IS_ENABLED: return
+
         self.BASE_SEKTION           = sektion_settings.nc_base_folder or sektion_settings.name
         self.BASE_MITGLIED          = "{0}/{1}".format(self.BASE_SEKTION, sektion_settings.nc_mitglied_base_folder or "Mitglieder")
         self.BASE_MITGLIED_BERATUNG = "{0}/{1}/<platzhalter>/{2}".format(self.BASE_SEKTION, sektion_settings.nc_mitglied_base_folder or "Mitglieder", sektion_settings.nc_mitglied_beratung_base_folder or "Beratungen")
