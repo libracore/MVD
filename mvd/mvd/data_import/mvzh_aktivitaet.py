@@ -22,7 +22,7 @@ import re
     Multi-Bench VM:
     bench execute mvd.mvd.data_import.mvzh_aktivitaet.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'mvd', 'bench': 'mvd'}"
 '''
-def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='frappe', skip_missing_users=False, create_missing_users=False):
+def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='frappe', skip_missing_users=False, create_missing_users=False, ignore_update=False):
     # display all coloumns for error handling
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
     # read csv
@@ -65,6 +65,8 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
 
             update =  False
             if frappe.db.exists("Aktivitaet", get_value(row, 'Eintrag-ID-Aktitaet')):
+                if ignore_update: continue
+                
                 aktivitaet = frappe.get_doc("Aktivitaet", get_value(row, 'Eintrag-ID-Aktitaet'))
                 update = True
             else:
