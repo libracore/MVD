@@ -22,7 +22,7 @@ import re
     Multi-Bench VM:
     bench execute mvd.mvd.data_import.mvzh_aktivitaet.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'mvd', 'bench': 'mvd'}"
 '''
-def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='frappe', primary_id="objekt_id", skip_missing_users=False, create_missing_users=False):
+def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='frappe', skip_missing_users=False, create_missing_users=False):
     # display all coloumns for error handling
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
     # read csv
@@ -59,14 +59,14 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
     for index, row in tqdm(df.iterrows(), desc="Import Aktivität", unit=" Aktivitäten", total=len(df.index)):
         if get_value(row, 'Erfasser') not in missing_users:
             update =  False
-            if frappe.db.exists("Aktivitaet", get_value(row, primary_id)):
-                aktivitaet = frappe.get_doc("Aktivitaet", get_value(row, primary_id))
+            if frappe.db.exists("Aktivitaet", get_value(row, 'Eintrag-ID-Aktitaet')):
+                aktivitaet = frappe.get_doc("Aktivitaet", get_value(row, 'Eintrag-ID-Aktitaet'))
                 update = True
             else:
                 aktivitaet = frappe.new_doc("Aktivitaet")
-                aktivitaet.objekt_id = get_value(row, primary_id)
+                aktivitaet.objekt_id = get_value(row, 'Eintrag-ID-Aktitaet')
             
-            aktivitaet.datum = getdate(get_value(row, "Datum"))
+            aktivitaet.datum = getdate(get_value(row, "datum"))
             aktivitaet.erfasser = get_value(row, "Erfasser")
             aktivitaet.import_datenquelle = file_name
             aktivitaet.import_zeile = cint(index) + 2
@@ -79,7 +79,7 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
             aktivitaet.erledigt = get_true_false_flag(get_value(row, "Erledigt"))
             aktivitaet.erledigt_datum = getdate(get_value(row, "Erledigt Datum"))
             # aktivitaet.mitglied_nr --> wird direkt aus verknüpfter Mitgliedschaft gefeched
-            aktivitaet.mv_mitgliedschaft = get_value(row, "MitgliederID")
+            aktivitaet.mv_mitgliedschaft = get_value(row, "mv_mitgliedschaft")
             # aktivitaet.sektion_id --> wird direkt aus verknüpfter Mitgliedschaft gefeched
             aktivitaet.titel = get_value(row, "Titel")
             aktivitaet.dokument_intern = get_value(row, "Dokument intern")
