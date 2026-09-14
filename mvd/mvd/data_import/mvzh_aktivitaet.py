@@ -55,9 +55,14 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
         print("Nachfolgende User wurden erstellt:")
         print(createt_missing_users)
 
+    skipped_aktivitaeten = []
     print("Starte Import...")
     for index, row in tqdm(df.iterrows(), desc="Import Aktivität", unit=" Aktivitäten", total=len(df.index)):
         if get_value(row, 'Erfasser') not in missing_users:
+            if not get_value(row, 'Eintrag-ID-Aktitaet') or get_value(row, 'Eintrag-ID-Aktitaet') == '':
+                skipped_aktivitaeten.append(row)
+                continue
+
             update =  False
             if frappe.db.exists("Aktivitaet", get_value(row, 'Eintrag-ID-Aktitaet')):
                 aktivitaet = frappe.get_doc("Aktivitaet", get_value(row, 'Eintrag-ID-Aktitaet'))
@@ -113,6 +118,12 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
             frappe.db.set_value("Aktivitaet", aktivitaet.name, 'creation', aktivitaet.erfasst_datum)
             frappe.db.set_value("Aktivitaet", aktivitaet.name, 'modified', aktivitaet.geaendert_datum)
             frappe.db.commit()
+
+    if len(skipped_aktivitaeten) > 0:
+        frappe.log_error(str(skipped_aktivitaeten), "Aktivitäten Import Skippings")
+        frappe.db.commit()
+        print("Aktivitäten Import Skippings")
+        print(skipped_aktivitaeten)
 
 def get_value(row, value):
     value = row[value]
