@@ -14,13 +14,13 @@ import re
     Import offene Debitoren (Rechnugen) MVZH
     -----------------
     Prod:
-    sudo bench --site libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_debitoren_rg.import_from_file --kwargs "{'file_name': 'xyz.csv'}"
+    sudo bench --site libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_one.mvzh_debitoren_rg.import_from_file --kwargs "{'file_name': 'xyz.csv'}"
     Test:
-    sudo bench --site test-libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_debitoren_rg.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'test-libracore.mieterverband.ch'}"
+    sudo bench --site test-libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_one.mvzh_debitoren_rg.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'test-libracore.mieterverband.ch'}"
     Alte Dev VM (Oracle):
-    bench execute mvd.mvd.data_import.mvzh_debitoren_rg.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'site1.local', 'bench': 'frappe', 'create_missing_users':1}"
+    bench execute mvd.mvd.data_import.mvzh_one.mvzh_debitoren_rg.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'site1.local', 'bench': 'frappe', 'create_missing_users':1}"
     Multi-Bench VM:
-    bench execute mvd.mvd.data_import.mvzh_debitoren_rg.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'mvd', 'bench': 'mvd'}"
+    bench execute mvd.mvd.data_import.mvzh_one.mvzh_debitoren_rg.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'mvd', 'bench': 'mvd'}"
 '''
 def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='frappe'):
     # display all coloumns for error handling

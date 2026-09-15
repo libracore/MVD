@@ -14,9 +14,9 @@ import re
     Import Siedlungen
     -----------------
     Prod:
-    sudo bench --site libracore.mieterverband.ch execute mvd.mvd.data_import.siedlungs_import.import_siedlungen --kwargs "{'file_name': 'xyz.csv'}"
+    sudo bench --site libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_one.siedlungs_import.import_siedlungen --kwargs "{'file_name': 'xyz.csv'}"
     Test:
-    sudo bench --site test-libracore.mieterverband.ch execute mvd.mvd.data_import.siedlungs_import.import_siedlungen --kwargs "{'file_name': 'xyz.csv', 'site_name': 'test-libracore.mieterverband.ch'}"
+    sudo bench --site test-libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_one.siedlungs_import.import_siedlungen --kwargs "{'file_name': 'xyz.csv', 'site_name': 'test-libracore.mieterverband.ch'}"
 '''
 def import_siedlungen(file_name, site_name='libracore.mieterverband.ch', bench='frappe'):
     def create_siedlung(row):
@@ -62,9 +62,9 @@ def get_value(row, value):
     Import Siedlungsfälle
     -----------------
     Prod:
-    sudo bench --site libracore.mieterverband.ch execute mvd.mvd.data_import.siedlungs_import.import_siedlungsfaelle --kwargs "{'file_name': 'xyz.csv'}"
+    sudo bench --site libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_one.siedlungs_import.import_siedlungsfaelle --kwargs "{'file_name': 'xyz.csv'}"
     Test:
-    sudo bench --site test-libracore.mieterverband.ch execute mvd.mvd.data_import.siedlungs_import.import_siedlungsfaelle --kwargs "{'file_name': 'xyz.csv', 'site_name': 'test-libracore.mieterverband.ch'}"
+    sudo bench --site test-libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_one.siedlungs_import.import_siedlungsfaelle --kwargs "{'file_name': 'xyz.csv', 'site_name': 'test-libracore.mieterverband.ch'}"
 '''
 def import_siedlungsfaelle(file_name, site_name='libracore.mieterverband.ch', bench='frappe', sektion=False):
     def create_siedlungsfall(row):
