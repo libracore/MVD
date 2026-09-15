@@ -2277,6 +2277,7 @@ function render_nextcloud_files_tree(frm) {
     frappe.db.get_value('Sektion', cur_frm.doc.sektion_id, 'nc_enabled')
     .then(r => {
         if (r.message.nc_enabled != 1) {
+            cur_frm.set_df_property('section_nextcloud', 'hidden', 1);
             return;
         }
         
