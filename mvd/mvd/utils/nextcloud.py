@@ -591,26 +591,26 @@ class NCSettings():
 
         return False
 
-def merge_folder(self, src_folder_path, dst_folder_path):
-    """
-        Führt den Inhalt eines Quellordners mit einem bestehenden Zielordner zusammen.
-        - Unterordner werden rekursiv zusammengeführt
-        - Dateien werden verschoben
-        - Bestehende Dateien mit gleichem Namen werden NICHT überschrieben
-        - Der Quellordner wird nach erfolgreichem Merge gelöscht
-    """
+    def merge_folder(self, src_folder_path, dst_folder_path):
+        """
+            Führt den Inhalt eines Quellordners mit einem bestehenden Zielordner zusammen.
+            - Unterordner werden rekursiv zusammengeführt
+            - Dateien werden verschoben
+            - Bestehende Dateien mit gleichem Namen werden NICHT überschrieben
+            - Der Quellordner wird nach erfolgreichem Merge gelöscht
+        """
 
-    src_folder_path = src_folder_path.strip("/")
-    dst_folder_path = dst_folder_path.strip("/")
+        src_folder_path = src_folder_path.strip("/")
+        dst_folder_path = dst_folder_path.strip("/")
 
-    # Zielordner sicherstellen
-    self.ensure_folder(dst_folder_path)
+        # Zielordner sicherstellen
+        self.ensure_folder(dst_folder_path)
 
-    def get_children(session, folder_path):
-        folder_path = "/" + folder_path.strip("/")
-        url = self.join_webdav_path(folder_path)
+        def get_children(session, folder_path):
+            folder_path = "/" + folder_path.strip("/")
+            url = self.join_webdav_path(folder_path)
 
-        body = """<?xml version="1.0"?>
+            body = """<?xml version="1.0"?>
 <d:propfind xmlns:d="DAV:">
     <d:prop>
         <d:resourcetype/>
@@ -618,128 +618,155 @@ def merge_folder(self, src_folder_path, dst_folder_path):
 </d:propfind>
 """
 
-        resp = session.request(
-            "PROPFIND",
-            url,
-            headers={
-                "Depth": "1",
-                "Content-Type": "application/xml"
-            },
-            data=body,
-            verify=self.VERIFY_TLS
-        )
-
-        if resp.status_code != 207:
-            resp.raise_for_status()
-
-        root = ET.fromstring(resp.text)
-        responses = root.findall("d:response", self.DAV_NS)
-
-        children = []
-
-        # Erste Response ist normalerweise der abgefragte Ordner selbst
-        for response in responses[1:]:
-            href_el = response.find("d:href", self.DAV_NS)
-
-            if href_el is None or not href_el.text:
-                continue
-
-            href = urlparse.unquote(href_el.text)
-
-            marker = "/remote.php/dav/files/{0}".format(self.USERNAME)
-
-            idx = href.find(marker)
-
-            if idx >= 0:
-                remote_path = href[idx + len(marker):]
-            else:
-                remote_path = href
-
-            remote_path = "/" + remote_path.strip("/")
-
-            prop = response.find("d:propstat/d:prop", self.DAV_NS)
-            if prop is None:
-                continue
-
-            resource_type = prop.find("d:resourcetype", self.DAV_NS)
-
-            is_dir = (
-                resource_type is not None
-                and resource_type.find("d:collection", self.DAV_NS) is not None
+            resp = session.request(
+                "PROPFIND",
+                url,
+                headers={
+                    "Depth": "1",
+                    "Content-Type": "application/xml"
+                },
+                data=body,
+                verify=self.VERIFY_TLS
             )
 
-            children.append({
-                "path": remote_path,
-                "name": posixpath.basename(remote_path),
-                "is_dir": is_dir
-            })
+            if resp.status_code != 207:
+                resp.raise_for_status()
 
-        return children
+            root = ET.fromstring(resp.text)
+            responses = root.findall("d:response", self.DAV_NS)
 
-    def resource_exists(session, remote_path):
-        remote_path = "/" + remote_path.strip("/")
-        url = self.join_webdav_path(remote_path)
+            children = []
 
-        resp = session.request(
-            "PROPFIND",
-            url,
-            headers={"Depth": "0"},
-            verify=self.VERIFY_TLS
-        )
+            # Erste Response ist normalerweise der abgefragte Ordner selbst
+            for response in responses[1:]:
+                href_el = response.find("d:href", self.DAV_NS)
 
-        if resp.status_code == 207:
-            return True
+                if href_el is None or not href_el.text:
+                    continue
 
-        if resp.status_code == 404:
+                href = urlparse.unquote(href_el.text)
+
+                marker = "/remote.php/dav/files/{0}".format(self.USERNAME)
+
+                idx = href.find(marker)
+
+                if idx >= 0:
+                    remote_path = href[idx + len(marker):]
+                else:
+                    remote_path = href
+
+                remote_path = "/" + remote_path.strip("/")
+
+                prop = response.find("d:propstat/d:prop", self.DAV_NS)
+                if prop is None:
+                    continue
+
+                resource_type = prop.find("d:resourcetype", self.DAV_NS)
+
+                is_dir = (
+                    resource_type is not None
+                    and resource_type.find("d:collection", self.DAV_NS) is not None
+                )
+
+                children.append({
+                    "path": remote_path,
+                    "name": posixpath.basename(remote_path),
+                    "is_dir": is_dir
+                })
+
+            return children
+
+        def resource_exists(session, remote_path):
+            remote_path = "/" + remote_path.strip("/")
+            url = self.join_webdav_path(remote_path)
+
+            resp = session.request(
+                "PROPFIND",
+                url,
+                headers={"Depth": "0"},
+                verify=self.VERIFY_TLS
+            )
+
+            if resp.status_code == 207:
+                return True
+
+            if resp.status_code == 404:
+                return False
+
+            resp.raise_for_status()
+
             return False
 
-        resp.raise_for_status()
+        def delete_folder(session, folder_path):
+            folder_path = "/" + folder_path.strip("/")
+            url = self.join_webdav_path(folder_path)
 
-        return False
-
-    def delete_folder(session, folder_path):
-        folder_path = "/" + folder_path.strip("/")
-        url = self.join_webdav_path(folder_path)
-
-        resp = session.delete(
-            url,
-            verify=self.VERIFY_TLS
-        )
-
-        if resp.status_code not in (200, 204, 404):
-            resp.raise_for_status()
-
-    def merge(session, src_path, dst_path):
-        children = get_children(session, src_path)
-
-        for child in children:
-            src_child = child["path"]
-
-            dst_child = posixpath.join(
-                "/",
-                dst_path.strip("/"),
-                child["name"]
+            resp = session.delete(
+                url,
+                verify=self.VERIFY_TLS
             )
 
-            if child["is_dir"]:
-                # Ziel-Unterordner existiert bereits:
-                # Inhalte rekursiv zusammenführen
-                if resource_exists(session, dst_child):
-                    merge(
-                        session,
-                        src_child,
-                        dst_child
-                    )
+            if resp.status_code not in (200, 204, 404):
+                resp.raise_for_status()
 
-                    # Quell-Unterordner ist danach leer
-                    delete_folder(
-                        session,
-                        src_child
-                    )
+        def merge(session, src_path, dst_path):
+            children = get_children(session, src_path)
+
+            for child in children:
+                src_child = child["path"]
+
+                dst_child = posixpath.join(
+                    "/",
+                    dst_path.strip("/"),
+                    child["name"]
+                )
+
+                if child["is_dir"]:
+                    # Ziel-Unterordner existiert bereits:
+                    # Inhalte rekursiv zusammenführen
+                    if resource_exists(session, dst_child):
+                        merge(
+                            session,
+                            src_child,
+                            dst_child
+                        )
+
+                        # Quell-Unterordner ist danach leer
+                        delete_folder(
+                            session,
+                            src_child
+                        )
+
+                    else:
+                        # Ziel-Unterordner existiert noch nicht:
+                        # kompletten Ordner direkt verschieben
+                        src_url = self.join_webdav_path(src_child)
+                        dst_url = self.join_webdav_path(dst_child)
+
+                        resp = session.request(
+                            "MOVE",
+                            src_url,
+                            headers={
+                                "Destination": dst_url,
+                                "Overwrite": "F"
+                            },
+                            verify=self.VERIFY_TLS
+                        )
+
+                        if resp.status_code not in (201, 204):
+                            resp.raise_for_status()
 
                 else:
-                    # Ziel-Unterordner existiert noch nicht:
-                    # kompletten Ordner direkt verschieben
+                    # Datei mit gleichem Namen darf nicht überschrieben werden
+                    if resource_exists(session, dst_child):
+                        frappe.throw(
+                            "Nextcloud Merge nicht möglich: "
+                            "Datei '{0}' existiert bereits im Zielordner '{1}'.".format(
+                                child["name"],
+                                dst_path
+                            )
+                        )
+
                     src_url = self.join_webdav_path(src_child)
                     dst_url = self.join_webdav_path(dst_child)
 
@@ -756,47 +783,20 @@ def merge_folder(self, src_folder_path, dst_folder_path):
                     if resp.status_code not in (201, 204):
                         resp.raise_for_status()
 
-            else:
-                # Datei mit gleichem Namen darf nicht überschrieben werden
-                if resource_exists(session, dst_child):
-                    frappe.throw(
-                        "Nextcloud Merge nicht möglich: "
-                        "Datei '{0}' existiert bereits im Zielordner '{1}'.".format(
-                            child["name"],
-                            dst_path
-                        )
-                    )
+        with requests.Session() as s:
+            s.auth = (self.USERNAME, self.APP_PASS)
 
-                src_url = self.join_webdav_path(src_child)
-                dst_url = self.join_webdav_path(dst_child)
+            merge(
+                s,
+                src_folder_path,
+                dst_folder_path
+            )
 
-                resp = session.request(
-                    "MOVE",
-                    src_url,
-                    headers={
-                        "Destination": dst_url,
-                        "Overwrite": "F"
-                    },
-                    verify=self.VERIFY_TLS
-                )
-
-                if resp.status_code not in (201, 204):
-                    resp.raise_for_status()
-
-    with requests.Session() as s:
-        s.auth = (self.USERNAME, self.APP_PASS)
-
-        merge(
-            s,
-            src_folder_path,
-            dst_folder_path
-        )
-
-        # Nach erfolgreichem Merge ist der Source-Ordner leer
-        delete_folder(
-            s,
-            src_folder_path
-        )
+            # Nach erfolgreichem Merge ist der Source-Ordner leer
+            delete_folder(
+                s,
+                src_folder_path
+            )
 
 # ----------------------------------------
 # ---------- Funktions-Methoden ----------
