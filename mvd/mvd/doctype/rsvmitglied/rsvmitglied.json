@@ -58,7 +58,13 @@
   "kostengutsprache_datum",
   "section_workflow_helper",
   "adr_egaid",
-  "bfs_nr"
+  "bfs_nr",
+  "section_import",
+  "import_verantwortlich",
+  "anwalt",
+  "vertec_id_mandat",
+  "import_vers_adresse",
+  "data_60"
  ],
  "fields": [
   {
@@ -66,7 +72,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Provisorisch EM\nProvisorisch GM\nVorpr\u00fcfung\nGepr\u00fcft\nmanuelle Vergabe\nEingereicht\nVergeben\nAbgelehnt\nAbgeschlossen\nR\u00fcckzug\nkeine Antwort\nDoppelversicherung"
+   "options": "Provisorisch EM\nProvisorisch GM\nVorpr\u00fcfung\nGepr\u00fcft\nmanuelle Vergabe\nEingereicht\nVergeben\nAbgelehnt\nAbgeschlossen\nR\u00fcckzug\nkeine Antwort\nDoppelversicherung\nProvisorisch"
   },
   {
    "fieldname": "fallnummer",
@@ -370,9 +376,39 @@
    "fieldname": "abgelehnt_datum",
    "fieldtype": "Date",
    "label": "Abgelehnt am"
+  },
+  {
+   "fieldname": "section_import",
+   "fieldtype": "Section Break",
+   "label": "Import"
+  },
+  {
+   "fieldname": "import_verantwortlich",
+   "fieldtype": "Data",
+   "label": "import_verantwortlich"
+  },
+  {
+   "fieldname": "anwalt",
+   "fieldtype": "Link",
+   "label": "Anw\u00e4lt*in (VA)",
+   "options": "Termin Kontaktperson"
+  },
+  {
+   "fieldname": "vertec_id_mandat",
+   "fieldtype": "Data",
+   "label": "vertec_id_mandat"
+  },
+  {
+   "fieldname": "import_vers_adresse",
+   "fieldtype": "Data",
+   "label": "import_vers_adresse"
+  },
+  {
+   "fieldname": "data_60",
+   "fieldtype": "Data"
   }
  ],
- "modified": "2026-09-01 10:04:12.659721",
+ "modified": "2026-09-15 17:01:22.282293",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",
