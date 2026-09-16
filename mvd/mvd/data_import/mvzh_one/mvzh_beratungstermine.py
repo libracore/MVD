@@ -109,14 +109,14 @@ def get_termin_referenz(row):
                 AND `from_time` LIKE '{2}%'
                 AND `to_time` LIKE '{3}%'
                 AND `beratungsperson` = '{4}'
-            """.format(
-                art_ort,
-                date,
-                from_time,
-                to_time,
-                beratungsperson
-            )
-    print(query)
+    """.format(
+        art_ort,
+        date,
+        from_time,
+        to_time,
+        beratungsperson
+    )
+    
     referenzen = frappe.db.sql(
         query,
         as_dict=True
