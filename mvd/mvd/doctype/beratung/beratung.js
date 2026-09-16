@@ -38,7 +38,7 @@ frappe.ui.form.on('Beratung', {
             if (cur_frm.doc.gesperrt_von != frappe.session.user) {
                 gesperrt = true;
                 setze_read_only(frm);
-                var confirm_message = "Die Beratung wurde vor weniger als 5 Stinden <b>(" + cur_frm.doc.gesperrt_am + ")</b> durch <b>" + cur_frm.doc.gesperrt_von + "</b> geöffnet. Dadurch ist die Bearbeitung gesperrt.<br><br>Wollen Sie in der Gesperrten Ansicht weiterfahren?";
+                var confirm_message = "Die Beratung wurde vor weniger als 5 Stunden <b>(" + cur_frm.doc.gesperrt_am + ")</b> durch <b>" + cur_frm.doc.gesperrt_von + "</b> geöffnet. Dadurch ist die Bearbeitung gesperrt.<br><br>Wollen Sie in der Gesperrten Ansicht weiterfahren?";
                 frappe.confirm(confirm_message,
                 () => {
                     // yes -> do nothing
