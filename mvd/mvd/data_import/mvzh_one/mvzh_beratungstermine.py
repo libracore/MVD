@@ -6,9 +6,6 @@ from __future__ import unicode_literals
 import frappe
 import pandas as pd
 from tqdm import tqdm
-from frappe.utils.data import getdate
-from frappe.utils import cint
-import re
 from datetime import datetime
 
 '''
