@@ -2315,7 +2315,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
             ]
         } else {
             return [
-                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 1},
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
                 {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
                 {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Zahlung vor Ort', 'reqd': 0, 'default': 0, 'hidden': 0,
                     'change': function() {
