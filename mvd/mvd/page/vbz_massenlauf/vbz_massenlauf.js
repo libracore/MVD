@@ -37,6 +37,8 @@ frappe.vbz_massenlauf = {
                         'begruessung_online': eval(r.message.begruessung_online_massenlauf),
                         'mahnungen': eval(r.message.mahnung_massenlauf),
                         'beratungstermine': eval(r.message.beratungstermine_massenlauf),
+                        'beratungstermine_morgen': eval(r.message.beratungstermine_massenlauf_morgen),
+                        'beratungstermine_nachmittag': eval(r.message.beratungstermine_massenlauf_nachmittag),
                         'begruessung_bezahlt': eval(r.message.begruessung_bezahlt_massenlauf)
                     }))
                     frappe.vbz_massenlauf.add_click_handlers(eval(r.message));
@@ -142,8 +144,8 @@ frappe.vbz_massenlauf = {
             }
         });
         $("#beratungstermine_print").click(function(){
-            if (!frappe.user.has_role("MV_RB")||frappe.user.has_role("System Manager")) {
-                frappe.vbz_massenlauf.execute_beratungstermine_massenlauf();
+            if (!frappe.user.has_role("MV_RB") || frappe.user.has_role("System Manager")) {
+                frappe.vbz_massenlauf.beratungstermine_massenlauf();
             } else {
                 frappe.msgprint("Sie haben eine Read-Only Rolle und sind zur Ausführung dieser Aktion nicht berechtigt.");
             }
@@ -386,15 +388,35 @@ frappe.vbz_massenlauf = {
             }
         });
     },
-    execute_beratungstermine_massenlauf: function(sektion) {
+    beratungstermine_massenlauf: function() {
+        frappe.prompt([
+            {
+                'fieldname': 'halbtag', 
+                'fieldtype': 'Select', 
+                'label': 'Halbtag', 
+                'options': ['ganzer Tag', 'Morgen', 'Nachmittag'],
+                'default': 'ganzer Tag',
+                'reqd': 1
+            }  
+        ],
+        function(values){
+            frappe.vbz_massenlauf.execute_beratungstermine_massenlauf(values.halbtag);
+        },
+        'Tageszeit auswählen',
+        'Massenlauf starten'
+        );
+    },
+    execute_beratungstermine_massenlauf: function(halbtag) {
         frappe.dom.freeze('Vorbereitung Massenlauf...');
         frappe.call({
             method: "mvd.mvd.page.vbz_massenlauf.vbz_massenlauf.beratungstermine_massenlauf",
+            args: {
+                'halbtag': halbtag
+            },
             freeze: true,
             freeze_message: 'Vorbereitung Massenlauf...',
             async: false,
-            callback: function(r)
-            {
+            callback: function(r) {
                 frappe.dom.unfreeze();
                 frappe.set_route("Form", "Massenlauf", r.message);
             }

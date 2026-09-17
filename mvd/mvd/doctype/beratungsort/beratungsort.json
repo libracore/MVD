@@ -10,7 +10,8 @@
   "sektion_id",
   "default_art",
   "geschaeftsstelle",
-  "infofeld"
+  "infofeld",
+  "kommt_auf_deckblatt"
  ],
  "fields": [
   {
@@ -44,9 +45,15 @@
    "fieldtype": "Select",
    "label": "Gesch\u00e4ftsstelle",
    "options": "\nZ\u00fcrich\nWinterthur"
+  },
+  {
+   "default": "0",
+   "fieldname": "kommt_auf_deckblatt",
+   "fieldtype": "Check",
+   "label": "Kommt auf Deckblatt"
   }
  ],
- "modified": "2026-08-25 13:36:24.809215",
+ "modified": "2026-09-17 08:13:49.345617",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratungsort",

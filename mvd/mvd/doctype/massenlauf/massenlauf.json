@@ -37,7 +37,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Typ",
-   "options": "Mahnung\nK\u00fcndigung\nZuzug\nBegr\u00fcssung durch Bezahlung\nBegr\u00fcssung Online\nKorrespondenz\nRechnung\nBeratungstermine",
+   "options": "Mahnung\nK\u00fcndigung\nZuzug\nBegr\u00fcssung durch Bezahlung\nBegr\u00fcssung Online\nKorrespondenz\nRechnung\nBeratungstermine\nBeratungstermine Morgen\nBeratungstermine Nachmittag",
    "read_only": 1,
    "reqd": 1
   },
@@ -62,7 +62,7 @@
    "read_only": 1
   }
  ],
- "modified": "2026-06-18 15:01:15.832628",
+ "modified": "2026-09-17 10:17:57.861568",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Massenlauf",
