@@ -15,7 +15,7 @@ def get_open_data():
             'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
             's_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang'}, limit=100, distinct=True)),
             's1_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set']}, limit=100, distinct=True)),
-            's2_as': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 's8': 1}, limit=100, distinct=True)),
+            's2_as': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Closed', 'Zusammengeführt']], 's8': 1}, limit=100, distinct=True)),
             's3_as': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'status': 'Zusammengeführt'}, limit=100, distinct=True)),
             's4_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 0}, limit=100, distinct=True)),
             's5_as': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 1}, limit=100, distinct=True)),

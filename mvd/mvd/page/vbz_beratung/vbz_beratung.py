@@ -21,7 +21,7 @@ def get_open_data():
             's5': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Rückfragen', 'kontaktperson': ['is', 'not set'], 'ungelesen': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's6': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's7': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'kontaktperson': ['is', 'not set'], 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
-            's8': len(frappe.get_list('Beratung', fields='name', filters={'status': ['!=', 'Closed'], 's8': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
+            's8': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Closed', 'Zusammengeführt']], 's8': 1, 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's9': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'status': 'Zusammengeführt', 'sektion_id': ['!=', 'MVDF']}, limit=100, distinct=True)),
             's10': len(frappe.get_list('Beratung', fields='name', filters={
                 'ungelesen': 1, 
