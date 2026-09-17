@@ -81,6 +81,22 @@ def verarbeitung_massenlauf(massenlauf):
         }
         enqueue("mvd.mvd.doctype.massenlauf.massenlauf.beratungstermine", queue='long', job_name='Verarbeite Massenlauf {0}'.format(massenlauf.name), timeout=5000, **args)
         return 1
+    
+    if massenlauf.typ == 'Beratungstermine Morgen':
+        args = {
+            'massenlauf': massenlauf.name,
+            'halbtag': 'Morgen'
+        }
+        enqueue("mvd.mvd.doctype.massenlauf.massenlauf.beratungstermine", queue='long', job_name='Verarbeite Massenlauf {0}'.format(massenlauf.name), timeout=5000, **args)
+        return 1
+    
+    if massenlauf.typ == 'Beratungstermine Nachmittag':
+        args = {
+            'massenlauf': massenlauf.name,
+            'halbtag': 'Nachmittag'
+        }
+        enqueue("mvd.mvd.doctype.massenlauf.massenlauf.beratungstermine", queue='long', job_name='Verarbeite Massenlauf {0}'.format(massenlauf.name), timeout=5000, **args)
+        return 1
 
 def mahnung(massenlauf, sektion):
     try:
@@ -567,20 +583,26 @@ def rechnung(massenlauf, sektion):
         massenlauf.error = str(err)
         massenlauf.save(ignore_permissions=True)
 
-def beratungstermine(massenlauf):
+def beratungstermine(massenlauf, halbtag=None):
     try:
         heute = nowdate()
+        zeit_filter = ""
+        if halbtag == "Morgen":
+            zeit_filter = " AND TIME(termin.von) < '12:00:00'"
+        elif halbtag == "Nachmittag":
+            zeit_filter = " AND TIME(termin.von) >= '12:00:00'"
         beratungen = frappe.db.sql("""
             SELECT termin.parent 
             FROM `tabBeratung Termin` as termin
             INNER JOIN `tabBeratung` as beratung ON termin.parent = beratung.name
             INNER JOIN `tabBeratungsort` as ort ON termin.ort = ort.name
-            WHERE DATE(termin.von) = %(heute)s 
+            WHERE DATE(termin.von) = '{heute}' 
             AND beratung.sektion_id = 'MVZH'
             AND ort.kommt_auf_deckblatt = 1
+            {zeit_filter}
             GROUP BY termin.parent
             ORDER BY MIN(termin.von) ASC
-        """, {"heute": heute}, as_dict=True, debug=True)
+        """.format(heute=heute, zeit_filter=zeit_filter), as_dict=True, debug=True)
         
         output = PdfFileWriter()
         

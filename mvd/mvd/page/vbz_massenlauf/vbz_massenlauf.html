@@ -82,7 +82,7 @@
             {% if beratungstermine.qty > 99 %}
                 <td>99+</td>
             {% else %}
-                <td>{{ beratungstermine.qty }}</td>
+                <td>{{ beratungstermine.qty }} (M:{{beratungstermine_morgen.qty}} / N: {{beratungstermine_nachmittag.qty}})</td>
             {% endif %}
             <td></td>
             <td>{% if beratungstermine.qty > 0 %}<i id="beratungstermine_print" class="fa fa-file"></i>{% endif %}</td>
