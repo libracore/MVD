@@ -22,7 +22,7 @@ def delete(site_name=None, file_name=None, bench=None, limit=0):
     # read csv
     df = pd.read_csv('/home/frappe/{bench}-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name, bench=bench), sep=",", dtype=str, keep_default_na=False)
     sperrliste = []
-    for row in df.iterrows():
+    for index, row in df.iterrows():
         sperrliste.append(get_value(row, 'Beratungs-ID Homepage'))
 
     limit_filter = ''
