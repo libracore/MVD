@@ -65,7 +65,7 @@ frappe.vbz_beratung_alle_se = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s2_as").click(function(){
-            frappe.route_options = {"status": ['!=', 'Closed'], "s8": 1}
+            frappe.route_options = {'status': ['not in', ['Closed', 'Zusammengeführt']], "s8": 1}
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s3_as").click(function(){
