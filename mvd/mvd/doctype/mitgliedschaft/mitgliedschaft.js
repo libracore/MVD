@@ -1494,8 +1494,28 @@ function erstelle_normale_rechnung(frm) {
                     },
                     'callback': function(settings_response) {
                         var settings = settings_response.message;
-                        new mvd_dialoge.erstelle_mitgliedschafts_rechnung({
-                            settings: settings
+                        var dokument = 'Anmeldung mit EZ';
+                        if (cur_frm.doc.status_c == 'Interessent*in') {
+                            dokument = 'Interessent*Innenbrief mit EZ';
+                        }
+                        frappe.call({
+                            method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+                            args:{
+                                    'sektion': cur_frm.doc.sektion_id,
+                                    'dokument': dokument,
+                                    'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                                    'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                                    'language': cur_frm.doc.language
+                            },
+                            async: false,
+                            callback: function(res)
+                            {
+                                var druckvorlagen = res.message;
+                                new mvd_dialoge.erstelle_mitgliedschafts_rechnung({
+                                    settings: settings,
+                                    druckvorlagen: druckvorlagen
+                                });
+                            }
                         });
                     }
                 });

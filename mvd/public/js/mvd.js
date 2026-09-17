@@ -1641,6 +1641,7 @@ frappe.provide("mvd_dialoge");
 mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRechnung {
     constructor(opts) {
         this.settings = opts.settings;
+        this.druckvorlagen = opts.druckvorlagen;
         this.folgejahr = opts.folgejahr || false;
         this.jahr = opts.jahr || 0;
         this.dialog =  new frappe.ui.Dialog({
@@ -1674,8 +1675,13 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
 
     get_fields() {
         var me = this;
+        let druckvorlagen = me.druckvorlagen;
         return [
-            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
+            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0,
+                'get_query': function() {
+                    return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                }
+            },
             {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
             {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Zahlung vor Ort', 'reqd': 0, 'default': 0, 'hidden': cur_frm.doc.status_c != 'Online-Anmeldung' ? 0:1,
                 'change': function() {
