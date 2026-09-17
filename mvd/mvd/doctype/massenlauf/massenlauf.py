@@ -574,8 +574,10 @@ def beratungstermine(massenlauf):
             SELECT termin.parent 
             FROM `tabBeratung Termin` as termin
             INNER JOIN `tabBeratung` as beratung ON termin.parent = beratung.name
+            INNER JOIN `tabBeratungsort` as ort ON termin.ort = ort.name
             WHERE DATE(termin.von) = %(heute)s 
             AND beratung.sektion_id = 'MVZH'
+            AND ort.kommt_auf_deckblatt = 1
             GROUP BY termin.parent
             ORDER BY MIN(termin.von) ASC
         """, {"heute": heute}, as_dict=True, debug=True)
