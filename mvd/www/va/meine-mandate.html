@@ -65,20 +65,50 @@
                     </div>
 
                     <div class="modal-body">
+
                         <div class="form-group">
-                            <label>Frage 1</label>
-                            <textarea class="form-control" id="frage-1" rows="3" required></textarea>
+                            <label for="verfahrensinstanz">
+                                Verfahrensinstanz?
+                            </label>
+                            <select class="form-control" id="verfahrensinstanz" required>
+                                <option value="">Bitte auswählen</option>
+                                <option value="1">1. Schlichtungsbehörde</option>
+                                <option value="2">2. Mietgericht</option>
+                                <option value="3">3. Obergericht</option>
+                                <option value="4">4. Bundesgericht</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
-                            <label>Frage 2</label>
-                            <textarea class="form-control" id="frage-2" rows="3" required></textarea>
+                            <label for="feedback">
+                                Feedback
+                                <span id="feedback-required" class="text-danger" style="display: none;">*</span>
+                            </label>
+                            <textarea
+                                class="form-control"
+                                id="feedback"
+                                rows="4"
+                            ></textarea>
+                            <small
+                                id="feedback-hinweis"
+                                class="form-text text-muted"
+                                style="display: none;"
+                            >
+                                Bei einer Verfahrensinstanz ab Mietgericht ist ein Feedback erforderlich.
+                            </small>
                         </div>
 
                         <div class="form-group">
-                            <label>Frage 3</label>
-                            <textarea class="form-control" id="frage-3" rows="3" required></textarea>
+                            <label for="abschluss-datei">
+                                Datei
+                            </label>
+                            <input
+                                type="file"
+                                class="form-control-file"
+                                id="abschluss-datei"
+                            >
                         </div>
+
                     </div>
 
                     <div class="modal-footer">

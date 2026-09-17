@@ -351,7 +351,20 @@ def close_rsvmitglied(rsv_mitglied):
     return
 
 @frappe.whitelist()
-def close_rsvmandat(rsv_mandat):
+def close_rsvmandat(rsv_mandat, verfahrensinstanz, feedback=None):
+    if not verfahrensinstanz:
+        frappe.throw("Bitte eine Verfahrensinstanz auswählen.")
+
+    if int(verfahrensinstanz) > 1 and not feedback:
+        frappe.throw(
+            "Bei dieser Verfahrensinstanz ist ein Feedback erforderlich."
+        )
+
+    mandat = frappe.get_doc("RSVMandat", rsv_mandat)
+    mandat.verfahrensinstanz = verfahrensinstanz
+    mandat.feedback = feedback
+    mandat.save()
+
     rsv_mitglieder = frappe.db.sql(
         """
             SELECT `name`
@@ -363,7 +376,7 @@ def close_rsvmandat(rsv_mandat):
     for rsv_mitglied in rsv_mitglieder:
         close_rsvmitglied(rsv_mitglied.name)
 
-    return
+    return True
 
 def check_if_is_closed(rsv_mandat):
     is_closed = True

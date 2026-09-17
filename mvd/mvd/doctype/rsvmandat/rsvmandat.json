@@ -34,7 +34,10 @@
   "notizen",
   "va_vergabe",
   "anwalt",
-  "datum_va_vergabe"
+  "datum_va_vergabe",
+  "section_rsvmandat_abschluss",
+  "verfahrensinstanz",
+  "feedback"
  ],
  "fields": [
   {
@@ -186,9 +189,24 @@
    "fieldname": "datum_va_vergabe",
    "fieldtype": "Date",
    "label": "Datum Vergabe Anw\u00e4lt*in"
+  },
+  {
+   "fieldname": "section_rsvmandat_abschluss",
+   "fieldtype": "Section Break",
+   "label": "RSV-Mandat Abschluss"
+  },
+  {
+   "fieldname": "verfahrensinstanz",
+   "fieldtype": "Data",
+   "label": "Verfahrensinstanz"
+  },
+  {
+   "fieldname": "feedback",
+   "fieldtype": "Data",
+   "label": "Feedback"
   }
  ],
- "modified": "2026-09-02 00:14:27.765698",
+ "modified": "2026-09-17 13:22:20.167410",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",
