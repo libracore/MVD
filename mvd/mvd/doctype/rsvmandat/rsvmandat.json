@@ -202,11 +202,11 @@
   },
   {
    "fieldname": "feedback",
-   "fieldtype": "Data",
+   "fieldtype": "Text",
    "label": "Feedback"
   }
  ],
- "modified": "2026-09-17 13:22:20.167410",
+ "modified": "2026-09-17 13:38:07.477191",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",
