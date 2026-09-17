@@ -23,7 +23,7 @@
   "per_post",
   "mitglied_hash",
   "section_references",
-  "mitglied",
+  "mitglied_id",
   "sektion_id",
   "section_technical_stuff",
   "quelle",
@@ -101,12 +101,6 @@
    "fieldname": "ip",
    "fieldtype": "Data",
    "label": "IP"
-  },
-  {
-   "fieldname": "mitglied",
-   "fieldtype": "Link",
-   "label": "Mitglied",
-   "options": "Mitgliedschaft"
   },
   {
    "fieldname": "strasse",
@@ -231,9 +225,15 @@
    "fieldname": "veraltete_daten_section",
    "fieldtype": "Section Break",
    "label": "Veraltete Daten"
+  },
+  {
+   "fieldname": "mitglied_id",
+   "fieldtype": "Link",
+   "label": "Mitglied ID",
+   "options": "Mitgliedschaft"
   }
  ],
- "modified": "2026-06-01 09:44:23.771821",
+ "modified": "2026-09-17 15:35:01.674962",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Kampagne",

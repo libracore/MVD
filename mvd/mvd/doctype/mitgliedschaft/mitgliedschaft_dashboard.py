@@ -10,7 +10,7 @@ def get_data():
         'heatmap_message': _('Diese Heatmap zeigt alle Interaktionen mit dieser Mitgliedschaft im vergangenen Jahr'),
         'fieldname': 'mv_mitgliedschaft',
         "non_standard_fieldnames": {
-			'Kampagne': 'mitglied',
+			'Kampagne': 'mitglied_id',
             'PayrexxWebhooks': 'mitglied_id',
 		},
         'transactions': [
