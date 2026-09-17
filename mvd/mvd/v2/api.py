@@ -299,6 +299,9 @@ def kampagne(**kwargs):
             if "cmd" in kwargs:
                 del kwargs["cmd"]
             kwargs['doctype'] = "Kampagne"
+            if not kwargs.get("id"):
+                kwargs["id"] = frappe.generate_hash(txt="", length=10)
+
             frappe.local.response.update({
                 "data": frappe.get_doc(kwargs).insert().as_dict()
             })

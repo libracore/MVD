@@ -791,9 +791,49 @@ components:
           type: string
           description: "Source/origin of the subscription (tracking where the user came from)"
           example: "https://kampagenseite1.mieterverband.ch/formular1"
-        mitglied:
+        ip:
           type: string
-          description: "Member ID assigned after successful member association (heuristically populated: e-mail)"
+          description: "IP address of the subscriber"
+          example: "192.168.1.1"
+        strasse:
+          type: string
+          description: "Street name (required for extended member assignment via erweiterte_zuordnung)"
+          example: "Musterstrasse"
+        strasse_nummer:
+          type: string
+          description: "House/street number"
+          example: "12a"
+        ort:
+          type: string
+          description: "City/Location"
+          example: "Zürich"
+        pledge_anz:
+          type: integer
+          description: "Number of pledges/signatures"
+          example: 1
+        per_post:
+          type: integer
+          enum: [0, 1]
+          description: "Flag indicating if postal communication is preferred (0=No, 1=Yes)"
+          default: 0
+        initiative25_1:
+          type: string
+          description: "Custom initiative field 1"
+        initiative25_2:
+          type: string
+          description: "Custom initiative field 2"
+        initiative25_3:
+          type: string
+          description: "Custom initiative field 3"
+        initiative25_4:
+          type: string
+          description: "Custom initiative field 4"
+        initiative25_5:
+          type: string
+          description: "Custom initiative field 5"
+        mitglied_id:
+          type: string
+          description: "Member ID assigned after successful member association (heuristically populated via email/hash or extended assignment)"
           readOnly: true
         sektion_id:
           type: string

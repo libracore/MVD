@@ -14,26 +14,6 @@ class Kampagne(Document):
     def before_insert(self):
         if not self.id:
             self.id = frappe.generate_hash(txt="", length=10)
-        
-        # Normalize newsletter_names to comma-separated string
-        names = []
-
-        if isinstance(self.newsletter_names, list):
-            names = self.newsletter_names
-        elif isinstance(self.newsletter_names, str):
-            try:
-                # Try to parse JSON string to list
-                parsed = json.loads(self.newsletter_names)
-                if isinstance(parsed, list):
-                    names = parsed
-                else:
-                    names = self.newsletter_names.split(",")
-            except Exception:
-                # fallback: assume comma-separated
-                names = self.newsletter_names.split(",")
-
-        cleaned_list = [n.strip().replace(" ", "") for n in names if isinstance(n, str)]
-        self.newsletter_names = ",".join(cleaned_list)
 
     def after_insert(self):
         """
@@ -76,6 +56,27 @@ class Kampagne(Document):
             }
             send_kampagne_to_sp(sp_data, id=self.name)
 
+    def validate(self):
+        """Normalisiert newsletter_names zu einem kommagetrennten String ohne Leerzeichen."""
+        if not self.newsletter_names:
+            return
+
+        names = []
+        if isinstance(self.newsletter_names, list):
+            names = self.newsletter_names
+        elif isinstance(self.newsletter_names, str):
+            try:
+                parsed = json.loads(self.newsletter_names)
+                if isinstance(parsed, list):
+                    names = parsed
+                else:
+                    names = self.newsletter_names.split(",")
+            except Exception:
+                names = self.newsletter_names.split(",")
+
+        cleaned_list = [n.strip().replace(" ", "") for n in names if isinstance(n, str) and n.strip()]
+        self.newsletter_names = ",".join(cleaned_list)
+        
 @frappe.whitelist()
 def erweiterte_zuordnung():
     """
@@ -88,7 +89,7 @@ def erweiterte_zuordnung():
     # Nur Kampagnen ohne Mitglied abrufen
     kampagnen = frappe.get_all(
         "Kampagne",
-        filters={"mitglied": ["is", "not set"]},
+        filters={"mitglied_id": ["is", "not set"]},
         fields=[
             "name", "email", "mitglied_hash", "zip_code",
             "last_name", "first_name", "strasse", "ort", "strasse_nummer"
@@ -108,7 +109,7 @@ def erweiterte_zuordnung():
             if mitglied_info:
                 if isinstance(mitglied_info, tuple):
                     mitglied_id, sektion_id = mitglied_info
-                    frappe.db.set_value("Kampagne", k.name, "mitglied", mitglied_id)
+                    frappe.db.set_value("Kampagne", k.name, "mitglied_id", mitglied_id)
                     frappe.db.set_value("Kampagne", k.name, "sektion_id", sektion_id)
                     assigned += 1
 
