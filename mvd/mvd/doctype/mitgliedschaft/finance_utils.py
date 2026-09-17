@@ -218,7 +218,7 @@ def sinv_update(sinv, event):
                     frappe.db.set_value("Sales Invoice Payment", payments[0]["name"], "base_amount", total_amount)
                     frappe.db.set_value("Sales Invoice", sinv.name, "outstanding_amount", 0.0)
 
-    if not update_blocked:
+    if not update_blocked and sinv.mv_mitgliedschaft:
         run_update_zahlungsdaten(sinv.mv_mitgliedschaft)
 
     return
