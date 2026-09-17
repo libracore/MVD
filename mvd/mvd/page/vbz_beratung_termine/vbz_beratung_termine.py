@@ -232,7 +232,8 @@ def get_alle_beratungs_termine(
                         'name_for_reservation': '---',
                         'person_ist_eingetroffen': termin.person_ist_eingetroffen,
                         'is_business': 1 if termin.beratungstyp == "Geschäft" else 0,
-                        'terminkategorie': termin.terminkategorie
+                        'terminkategorie': termin.terminkategorie,
+                        'sektion_id': termin.sektion_id
                     }
                     if cint(termin.person_ist_eingetroffen) == 1:
                         anz_eingetroffen += 1
@@ -321,6 +322,7 @@ def get_alle_beratungs_termine(
                                         1 AS `is_free`,
                                         `zuw`.`name` AS `name_for_reservation`,
                                         `zuw`.`beratungstyp`,
+                                        NULL AS `sektion_id`,
                                         NULL AS `is_business`
                                     FROM `tabAPB Zuweisung` AS `zuw`
                                     LEFT JOIN `tabBeratungsort` AS `beratungsort` ON `zuw`.`art_ort` = `beratungsort`.`name`

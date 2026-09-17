@@ -733,16 +733,23 @@ frappe.vbz_beratung_termine = {
 
         const $row = $(event.currentTarget);
         const beratung = $row.attr("data-beratung");
+        const sektion = $row.attr("data-sektion");
 
         if (!beratung) {
             return;
         }
 
         if (beratung !== "---") {
-            this.handle_existing_beratung(
-                $row,
-                beratung
-            );
+            if (sektion == 'MVZH') {
+                this.handle_existing_beratung(
+                    $row,
+                    beratung
+                );
+            } else {
+                this.open_beratung_in_new_tab(
+                    beratung
+                );
+            }
 
             return;
         }
