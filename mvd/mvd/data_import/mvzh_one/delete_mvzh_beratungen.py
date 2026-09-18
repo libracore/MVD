@@ -53,7 +53,7 @@ def delete(site_name=None, file_name=None, bench=None, limit=0):
                     SELECT `name` FROM `tabFile`
                     WHERE `attached_to_doctype` = 'Beratung'
                     AND `attached_to_name` = '{0}'
-                """.format(beratung.name),
+                """.format(beratung.name.replace("'", "''")),
                 as_dict=True
             )
             for file in files:
