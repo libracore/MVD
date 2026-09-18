@@ -410,11 +410,32 @@ frappe.ui.form.on('Mitgliedschaft', {
         render_nextcloud_files_tree(frm);
     },
     open_nextcloud_root: function(frm) {
-        frappe.db.get_value('MVD Settings', { name: 'MVD Settings' }, 'nc_host')
-        .then(mvd_settings => {
-            frappe.db.get_value('Sektion', { name: cur_frm.doc.sektion_id }, ['nc_base_folder', 'nc_mitglied_base_folder'])
-            .then(sektion_settings => {
-                window.open(`${mvd_settings.message.nc_host}/apps/files/files?dir=/${sektion_settings.message.nc_base_folder}/${sektion_settings.message.nc_mitglied_base_folder}/${cur_frm.doc.mitglied_nr}`, "_blank", "noopener");
+        frappe.db.get_value(
+            'MVD Settings',
+            {name: 'MVD Settings'},
+            'nc_host'
+        ).then(mvd_settings => {
+            frappe.db.get_value(
+                'Sektion',
+                {name: frm.doc.sektion_id},
+                ['nc_base_folder', 'nc_mitglied_base_folder']
+            ).then(sektion_settings => {
+                const mitglied_nr = (frm.doc.mitglied_nr || '').trim();
+                if (!mitglied_nr || mitglied_nr === 'MV') {
+                    frappe.msgprint(__('Keine gültige Mitgliednummer vorhanden.'));
+                    return;
+                }
+
+                const mitglied_group = mitglied_nr.substring(0, 7);
+                const path = [
+                    sektion_settings.message.nc_base_folder,
+                    sektion_settings.message.nc_mitglied_base_folder,
+                    mitglied_group,
+                    mitglied_nr
+                ].join('/');
+
+                const url = `${mvd_settings.message.nc_host}/apps/files/files?dir=/${encodeURIComponent(path)}`;
+                window.open(url, "_blank", "noopener");
             });
         });
     },

@@ -28,29 +28,83 @@ class NCSettings():
             self.IS_ENABLED = False
             return
         
-        mvd_settings                = frappe.get_doc("MVD Settings", "MVD Settings")
-        sektion_settings            = frappe.get_doc("Sektion", sektion)
-        self.IS_ENABLED             = True if cint(sektion_settings.nc_enabled) == 1 else False
+        mvd_settings                  = frappe.get_doc("MVD Settings", "MVD Settings")
+        sektion_settings              = frappe.get_doc("Sektion", sektion)
+        self.IS_ENABLED               = True if cint(sektion_settings.nc_enabled) == 1 else False
 
         if not self.IS_ENABLED: return
 
-        self.BASE_SEKTION           = sektion_settings.nc_base_folder or sektion_settings.name
-        self.BASE_MITGLIED          = "{0}/{1}".format(self.BASE_SEKTION, sektion_settings.nc_mitglied_base_folder or "Mitglieder")
-        self.BASE_MITGLIED_BERATUNG = "{0}/{1}/<platzhalter>/{2}".format(self.BASE_SEKTION, sektion_settings.nc_mitglied_base_folder or "Mitglieder", sektion_settings.nc_mitglied_beratung_base_folder or "Beratungen")
-        self.BASE_BERATUNG          = "{0}/{1}".format(self.BASE_SEKTION, sektion_settings.nc_beratung_base_folder or "Beratungen")
-        self.BASE_INTERESSENT          = "{0}/{1}".format(self.BASE_SEKTION, sektion_settings.nc_interessenten_base_folder or "Interessenten")
+        self.BASE_SEKTION             = sektion_settings.nc_base_folder or sektion_settings.name
+        self.BASE_MITGLIED            = "{0}/{1}".format(self.BASE_SEKTION, sektion_settings.nc_mitglied_base_folder or "Mitglieder")
+        self.MITGLIED_BERATUNG_FOLDER = sektion_settings.nc_mitglied_beratung_base_folder or "Beratungen"
+        self.BASE_BERATUNG            = "{0}/{1}".format(self.BASE_SEKTION, sektion_settings.nc_beratung_base_folder or "Beratungen")
+        self.BASE_INTERESSENT         = "{0}/{1}".format(self.BASE_SEKTION, sektion_settings.nc_interessenten_base_folder or "Interessenten")
 
-        self.BASE_ORIGIN            = mvd_settings.nc_host
-        self.USERNAME               = mvd_settings.nc_user
-        self.WEBDAV_BASE            = "{0}/remote.php/dav/files/{1}".format(self.BASE_ORIGIN, urlparse.quote(self.USERNAME))
-        self.APP_PASS               = get_decrypted_password("MVD Settings", "MVD Settings", 'nc_password', False)
-        self.VERIFY_TLS             = True if cint(mvd_settings.nc_verify_ssl) else False
+        self.BASE_ORIGIN              = mvd_settings.nc_host
+        self.USERNAME                 = mvd_settings.nc_user
+        self.WEBDAV_BASE              = "{0}/remote.php/dav/files/{1}".format(self.BASE_ORIGIN, urlparse.quote(self.USERNAME))
+        self.APP_PASS                 = get_decrypted_password("MVD Settings", "MVD Settings", 'nc_password', False)
+        self.VERIFY_TLS               = True if cint(mvd_settings.nc_verify_ssl) else False
 
-        self.DAV_NS                 = {
-                                        "d": "DAV:",
-                                        "oc": "http://owncloud.org/ns",
-                                        "nc": "http://nextcloud.org/ns",
-                                    }
+        self.DAV_NS                   = {
+                                          "d": "DAV:",
+                                          "oc": "http://owncloud.org/ns",
+                                          "nc": "http://nextcloud.org/ns",
+                                      }
+
+    def get_mitglied_group(self, mitglied_nr):
+        """
+        Ermittelt den Gruppenordner anhand der ersten 7 Zeichen der Mitgliednummer
+        Beispiel:
+            MV03712836 -> MV03712
+        """
+        if not mitglied_nr:
+            return None
+
+        mitglied_nr = str(mitglied_nr).strip()
+
+        if not mitglied_nr or mitglied_nr == "MV":
+            return None
+
+        return mitglied_nr[:7]
+
+
+    def get_mitglied_path(self, mitglied_nr):
+        if not mitglied_nr:
+            return None
+
+        mitglied_nr = str(mitglied_nr).strip()
+
+        if not mitglied_nr or mitglied_nr == "MV":
+            return None
+
+        gruppe = self.get_mitglied_group(mitglied_nr)
+
+        if not gruppe:
+            return None
+
+        return "{0}/{1}/{2}".format(
+            self.BASE_MITGLIED,
+            gruppe,
+            mitglied_nr
+        )
+
+    def get_mitglied_beratung_path(self, mitglied_nr):
+        """
+        Liefert den Beratungs-Basisordner eines Mitglieds
+        Beispiel:
+            MV03712836
+            -> MVZH/Mitglieder/MV03712/MV03712836/Beratungen
+        """
+        mitglied_path = self.get_mitglied_path(mitglied_nr)
+
+        if not mitglied_path:
+            return None
+
+        return "{0}/{1}".format(
+            mitglied_path,
+            self.MITGLIED_BERATUNG_FOLDER
+        )
 
     def ensure_folder(self, folder_path):
         '''
@@ -126,7 +180,7 @@ class NCSettings():
         1. Upload einer lokalen Datei:
         with open("/tmp/vertrag.pdf", "rb") as f:
             upload_files(
-                f"{ncs.BASE_MITGLIED}/{mitglied.mitglied_nr}",
+                ncs.get_mitglied_path(mitglied.mitglied_nr),
                 [("vertrag.pdf", f.read())]
             )
         
@@ -134,7 +188,7 @@ class NCSettings():
         file_doc = frappe.get_doc("File", file_id)
         content = file_doc.get_content()   # liefert Bytes
         upload_files(
-            f"{ncs.BASE_MITGLIED}/{mitglied.mitglied_nr}",
+            ncs.get_mitglied_path(mitglied.mitglied_nr),
             [(file_doc.file_name, content)]
         )
         """
@@ -177,7 +231,7 @@ class NCSettings():
     def download_file(self, remote_path):
         """
         Lädt eine Datei aus der Nextcloud per WebDAV herunter
-        remote_path z.B.: /Sektion/Mitglieder/1234/datei.pdf
+        remote_path z.B.: /Sektion/Mitglieder/MV03712/MV03712836/datei.pdf
         """
         remote_path = "/" + remote_path.strip("/")
         url = self.join_webdav_path(remote_path)
@@ -801,7 +855,7 @@ class NCSettings():
 # ----------------------------------------
 # ---------- Funktions-Methoden ----------
 # ----------------------------------------
-def handle_mitgliedschafts_folder(mitglied, move=False):
+def handle_mitgliedschafts_folder(mitglied):
     # Initialisiere globale Settings-Klasse
     sektion = mitglied.get("sektion_id")
     # global ncs
@@ -816,8 +870,7 @@ def handle_mitgliedschafts_folder(mitglied, move=False):
         mitglied.get("name")
     )
 
-    mitglied_path = "{0}/{1}".format(
-        ncs.BASE_MITGLIED,
+    mitglied_path = ncs.get_mitglied_path(
         mitglied.get("mitglied_nr")
     )
 
@@ -863,9 +916,13 @@ def new_beratung(beratung):
     if mitglied_nr and mitglied_nr != "MV":
         # Erstelle Sektions-Mitgliedschafts-Beratungs-Ordner (& Basis Ordner falls nicht vorhanden)
         try:
-            base_mitglied_beratung = ncs.BASE_MITGLIED_BERATUNG.replace("<platzhalter>", mitglied_nr)
-            ncs.ensure_folder("{0}/{1}".format(base_mitglied_beratung, beratung.name))
-            # ensure_folder("{0}/{1}/{2}".format(ncs.BASE_MITGLIED, mitglied_nr, beratung.name))
+            base_mitglied_beratung = ncs.get_mitglied_beratung_path(mitglied_nr)
+            ncs.ensure_folder(
+                "{0}/{1}".format(
+                    base_mitglied_beratung,
+                    beratung.name
+                )
+            )
         except Exception as err:
             frappe.log_error(str(err), "NextCloud: new_beratung > ensure_folder (mit Mitglied)")
     else:
@@ -890,7 +947,7 @@ def added_mitglied_to_beratung(beratung):
         if mitglied_nr and mitglied_nr != "MV":
             # Verschiebe Sektions-Beratungs-Oder zu Sektions-Mitgliedschafts-Beratungs-Oder (wird erstellt wenn nicht vorhanden)
             try:
-                base_mitglied_beratung = ncs.BASE_MITGLIED_BERATUNG.replace("<platzhalter>", mitglied_nr)
+                base_mitglied_beratung = ncs.get_mitglied_beratung_path(mitglied_nr)
                 ncs.move_folder("{0}/{1}".format(ncs.BASE_BERATUNG, beratung.name), "{0}/{1}".format(base_mitglied_beratung, beratung.name))
             except Exception as err:
                 frappe.log_error(str(err), "NextCloud: added_mitglied_to_beratung > move_folder")
@@ -907,15 +964,19 @@ def changed_mitglied_in_beratung(beratung, old_id, new_id):
     
     old_mitglied_nr = frappe.db.get_value("Mitgliedschaft", old_id, "mitglied_nr")
     new_mitglied_nr = frappe.db.get_value("Mitgliedschaft", new_id, "mitglied_nr")
-    if new_mitglied_nr and new_mitglied_nr != "MV":
+    if (
+        old_mitglied_nr
+        and old_mitglied_nr != "MV"
+        and new_mitglied_nr
+        and new_mitglied_nr != "MV"
+    ):
         # Verschiebe Sektions-Beratungs-Oder zu Sektions-Mitgliedschafts-Beratungs-Oder (wird erstellt wenn nicht vorhanden)
         try:
-            old_base_mitglied_beratung = ncs.BASE_MITGLIED_BERATUNG.replace("<platzhalter>", old_mitglied_nr)
-            new_base_mitglied_beratung = ncs.BASE_MITGLIED_BERATUNG.replace("<platzhalter>", new_mitglied_nr)
+            old_base_mitglied_beratung = ncs.get_mitglied_beratung_path(old_mitglied_nr)
+            new_base_mitglied_beratung = ncs.get_mitglied_beratung_path(new_mitglied_nr)
             ncs.move_folder("{0}/{1}".format(old_base_mitglied_beratung, beratung.name), "{0}/{1}".format(new_base_mitglied_beratung, beratung.name))
         except Exception as err:
             frappe.log_error(str(err), "NextCloud: changed_mitglied_in_beratung > move_folder")
-
 
 
 """
@@ -955,7 +1016,15 @@ def list_all_files_tree(sektion=None, mitglied=None):
     
     root_folder_path = '{0}'.format(ncs.BASE_SEKTION)
     if mitglied:
-        root_folder_path = '{0}/{1}'.format(ncs.BASE_MITGLIED, frappe.db.get_value("Mitgliedschaft", mitglied, "mitglied_nr"))
+        mitglied_nr = frappe.db.get_value(
+            "Mitgliedschaft",
+            mitglied,
+            "mitglied_nr"
+        )
+
+        root_folder_path = ncs.get_mitglied_path(
+            mitglied_nr
+        )
     
     root_folder_path = (root_folder_path or "").strip("/")
     start_path = "/" + root_folder_path if root_folder_path else "/"
@@ -1133,9 +1202,14 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
     # Root Pfad ermitteln
     root_folder_path = ncs.BASE_SEKTION
     if mitglied:
-        root_folder_path = '{0}/{1}'.format(
-            (ncs.BASE_MITGLIED or "").strip("/"),
-            frappe.db.get_value("Mitgliedschaft", mitglied, "mitglied_nr")
+        mitglied_nr = frappe.db.get_value(
+            "Mitgliedschaft",
+            mitglied,
+            "mitglied_nr"
+        )
+
+        root_folder_path = ncs.get_mitglied_path(
+            mitglied_nr
         )
 
     root_folder_path = (root_folder_path or "").strip("/")
