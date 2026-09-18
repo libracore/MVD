@@ -852,6 +852,24 @@ class NCSettings():
                 src_folder_path
             )
 
+    def _get_mitglied_ui_url(self, mitglied_nr):
+        """
+        Liefert die vollständige Nextcloud-UI-URL zum Mitgliedsordner.
+
+        Beispiel:
+            MV03712836
+            -> https://cloud.example.ch/apps/files/files?dir=%2FMVZH%2FMitglieder%2FMV03712%2FMV03712836
+        """
+        mitglied_path = self.get_mitglied_path(mitglied_nr)
+
+        if not mitglied_path:
+            return None
+
+        return "{0}/apps/files/files?dir={1}".format(
+            self.BASE_ORIGIN.rstrip("/"),
+            urlparse.quote("/" + mitglied_path.strip("/"), safe="")
+        )
+
 # ----------------------------------------
 # ---------- Funktions-Methoden ----------
 # ----------------------------------------
@@ -1386,3 +1404,13 @@ def convert_nextcloud_files_to_pdf(files, sektion, dt=None, dn=None):
         )
         convertet_files.append(result.get("erpnext_file_name"))
     return convertet_files
+
+@frappe.whitelist()
+def get_mitglied_ui_url(sektion=None, mitglied_nr=None):
+    if not mitglied_nr or not sektion:
+        return
+
+    ncs = NCSettings(sektion)
+    url = ncs._get_mitglied_ui_url(mitglied_nr)
+
+    return url
