@@ -423,7 +423,7 @@ frappe.ui.form.on('Mitgliedschaft', {
         }
 
         frappe.call({
-            method: 'mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_mitglied_ui_url',
+            method: 'mvd.mvd.utils.nextcloud.get_mitglied_ui_url',
             args: {
                 sektion: frm.doc.sektion_id,
                 mitglied_nr: mitglied_nr
