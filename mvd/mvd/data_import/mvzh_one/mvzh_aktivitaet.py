@@ -416,7 +416,7 @@ def import_from_file(
             ),
             "mitglied_nr": get_value(
                 row,
-                "Mitgliednummer"
+                "Mitgliedernummer"
             )
         })
 
