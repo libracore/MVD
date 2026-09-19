@@ -233,11 +233,11 @@
   },
   {
    "fieldname": "titel",
-   "fieldtype": "Data",
+   "fieldtype": "Text",
    "label": "Titel"
   }
  ],
- "modified": "2026-09-19 11:12:37.283266",
+ "modified": "2026-09-19 17:17:43.021274",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Aktivitaet",

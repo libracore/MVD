@@ -33,7 +33,7 @@ BATCH_SIZE = 1000
     VM:
     bench execute \
     mvd.mvd.data_import.mvzh_one.mvzh_aktivitaet.import_from_file \
-    --kwargs "{'file_name': 'xyz.csv', 'site_name': 'mvd', 'bench': 'mvd'}"
+    --kwargs "{'file_name': 'aktivitaeten_import.csv', 'site_name': 'mvd', 'bench': 'mvd'}"
 '''
 def import_from_file(
     file_name,
@@ -288,7 +288,7 @@ def import_from_file(
         # -----------------------------------------------------
 
         batch.append({
-            "name": frappe.generate_hash(length=10),
+            "name": objekt_id,
             "creation": creation,
             "modified": modified,
             "modified_by": "Administrator",
