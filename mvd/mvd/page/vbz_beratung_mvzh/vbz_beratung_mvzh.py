@@ -10,7 +10,7 @@ from frappe.utils.pdf import get_file_data_from_writer
 
 @frappe.whitelist()
 def get_open_data():
-    zukunft_termine = frappe.db.sql_list("SELECT DISTINCT parent FROM `tabBeratung Termin` WHERE `von` > %s", now_datetime())
+    # zukunft_termine = frappe.db.sql_list("SELECT DISTINCT parent FROM `tabBeratung Termin` WHERE `von` > %s", now_datetime())
 
     open_data = {
         'beratung': {
@@ -18,8 +18,10 @@ def get_open_data():
             's1': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Eingang', 'mv_mitgliedschaft': ['is', 'not set'], 'faktura_kunde': ['is', 'not set']}, limit=100, distinct=True)),
             's6_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set'], 'typ': 'Wohnen'}, limit=100, distinct=True)),
             's6_business': len(frappe.get_list('Beratung', fields='name', filters={'status': ['not in', ['Rückfragen', 'Rückfrage: Termin vereinbaren', 'Eingang', 'Open', 'Zusammengeführt']], 'ungelesen': 1, 'kontaktperson': ['is', 'not set'], 'typ': 'Business'}, limit=100, distinct=True)),
-            's10_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'sektion_id': ['!=', 'MVDF'], 'name': ['in', zukunft_termine], 'typ': 'Wohnen'}, limit=100, distinct=True)),
-            's10_business': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'sektion_id': ['!=', 'MVDF'], 'name': ['in', zukunft_termine], 'typ': 'Business'}, limit=100, distinct=True)),
+            # 's10_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'sektion_id': ['!=', 'MVDF'], 'name': ['in', zukunft_termine], 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            # 's10_business': len(frappe.get_list('Beratung', fields='name', filters={'ungelesen': 1, 'sektion_id': ['!=', 'MVDF'], 'name': ['in', zukunft_termine], 'typ': 'Business'}, limit=100, distinct=True)),
+            's10_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Termin vereinbart','ungelesen': 1, 'typ': 'Wohnen'}, limit=100, distinct=True)),
+            's10_business': len(frappe.get_list('Beratung', fields='name', filters={'status': 'Termin vereinbart','ungelesen': 1, 'typ': 'Business'}, limit=100, distinct=True)),
             'r_wohnen': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'typ': 'Wohnen'}, limit=100, distinct=True)),
             'r_business': len(frappe.get_list('Beratung', fields='name', filters={'status': ['in', ['Open', 'In Arbeit']], 'typ': 'Business'}, limit=100, distinct=True)),
             # R1 + R2 teilen die Zeile R (offen/in Arbeit) nach Priorität auf.

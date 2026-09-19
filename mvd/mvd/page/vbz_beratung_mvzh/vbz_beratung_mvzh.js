@@ -52,28 +52,32 @@ frappe.vbz_beratung_mvzh = {
             frappe.set_route("List", "Beratung", "List");
         });
         $("#s10_wohnen").click(function(){
-            frappe.call({
-                method: "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_termine_in_zukunft",
-                args: {},
-                callback: function(r) {
-                    var parents = r.message || [];
-                    if (parents.length === 0) parents = [""];
-                    frappe.route_options = {"ungelesen": 1, "sektion_id": sektion, "name": ["in", parents], "typ": "Wohnen"}
-                    frappe.set_route("List", "Beratung", "List");
-                }
-            });
+            frappe.route_options = {"status": ["in", ["Termin vereinbart"]], "ungelesen": 1, "sektion_id": sektion, "typ": "Wohnen"};
+            frappe.set_route("List", "Beratung", "List");
+            // frappe.call({
+            //     method: "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_termine_in_zukunft",
+            //     args: {},
+            //     callback: function(r) {
+            //         var parents = r.message || [];
+            //         if (parents.length === 0) parents = [""];
+            //         frappe.route_options = {"ungelesen": 1, "sektion_id": sektion, "name": ["in", parents], "typ": "Wohnen"}
+            //         frappe.set_route("List", "Beratung", "List");
+            //     }
+            // });
         });
         $("#s10_business").click(function(){
-            frappe.call({
-                method: "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_termine_in_zukunft",
-                args: {},
-                callback: function(r) {
-                    var parents = r.message || [];
-                    if (parents.length === 0) parents = [""];
-                    frappe.route_options = {"ungelesen": 1, "sektion_id": sektion, "name": ["in", parents], "typ": "Business"}
-                    frappe.set_route("List", "Beratung", "List");
-                }
-            });
+            frappe.route_options = {"status": ["in", ["Termin vereinbart"]], "ungelesen": 1, "sektion_id": sektion, "typ": "Business"};
+            frappe.set_route("List", "Beratung", "List");
+            // frappe.call({
+            //     method: "mvd.mvd.page.vbz_beratung_mvzh.vbz_beratung_mvzh.get_termine_in_zukunft",
+            //     args: {},
+            //     callback: function(r) {
+            //         var parents = r.message || [];
+            //         if (parents.length === 0) parents = [""];
+            //         frappe.route_options = {"ungelesen": 1, "sektion_id": sektion, "name": ["in", parents], "typ": "Business"}
+            //         frappe.set_route("List", "Beratung", "List");
+            //     }
+            // });
         });
 
         $("#r_wohnen").click(function(){
