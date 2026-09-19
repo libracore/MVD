@@ -262,7 +262,7 @@ def sync_file_to_nextcloud(file, event):
             mitglied_nr = frappe.db.get_value("Mitgliedschaft", beratung.mv_mitgliedschaft, "mitglied_nr")
         
         if mitglied_nr and mitglied_nr != "MV":
-            folder_path = "{0}/{1}".format(ncs.BASE_MITGLIED_BERATUNG.replace("<platzhalter>", mitglied_nr), beratung.name)
+            folder_path = ncs.get_mitglied_path(mitglied_nr)
         else:
             folder_path = "{0}/{1}".format(ncs.BASE_BERATUNG, beratung.name)
 
