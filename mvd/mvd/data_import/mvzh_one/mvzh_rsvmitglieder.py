@@ -38,8 +38,7 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
         else:
             rsvm = frappe.new_doc("RSVMitglied")
         
-        status = get_value(row, 'status')
-        rsvm.status = status if status and status != '' else "manuelle Vergabe" # Alle mit "manuelle Vergabe" waren im CSV leer und müssen händisch korrigiert werden!
+        rsvm.status = get_value(row, 'status')
         rsvm.abschluss_datum = parse_csv_datetime(get_value(row, 'abschluss_datum'))
         rsvm.abgelehnt_datum = parse_csv_datetime(get_value(row, 'abgelehnt_datum'))
         rsvm.fallnummer = get_value(row, 'fallnummer')
@@ -103,18 +102,4 @@ def get_value(row, value):
     return value.strip()
 
 def parse_csv_datetime(value):
-    if not value or value == '':
-        return None
-
-    value = value.strip().strip('"').strip()
-
-    if not value:
-        return None
-
-    fmt = "%m/%d/%Y"
-    try:
-        return datetime.strptime(value, fmt)
-    except ValueError:
-        pass
-
-    return None
+    return getdate(value)

@@ -72,7 +72,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Provisorisch EM\nProvisorisch GM\nVorpr\u00fcfung\nGepr\u00fcft\nmanuelle Vergabe\nEingereicht\nVergeben\nAbgelehnt\nAbgeschlossen\nR\u00fcckzug\nkeine Antwort\nDoppelversicherung\nProvisorisch"
+   "options": "\nProvisorisch EM\nProvisorisch GM\nVorpr\u00fcfung\nGepr\u00fcft\nmanuelle Vergabe\nEingereicht\nVergeben\nAbgelehnt\nAbgeschlossen\nR\u00fcckzug\nkeine Antwort\nDoppelversicherung\nProvisorisch"
   },
   {
    "fieldname": "fallnummer",
@@ -408,7 +408,7 @@
    "fieldtype": "Data"
   }
  ],
- "modified": "2026-09-15 17:01:22.282293",
+ "modified": "2026-09-19 18:43:26.236628",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",
