@@ -7,6 +7,7 @@ import frappe
 import pandas as pd
 from tqdm import tqdm
 from datetime import datetime
+from frappe.utils import get_datetime
 
 '''
     Import Beratungstermine MVZH
@@ -100,10 +101,10 @@ def get_berater_in(value):
 
 def get_termin_referenz(row):
     art_ort = "{0} (MVZH)".format(get_value(row, "ort"))
-    from_dt = parse_csv_datetime(get_value(row, "von"))
+    from_dt = get_datetime(get_value(row, "von"))
     date = from_dt.strftime("%Y-%m-%d")
     from_time = from_dt.strftime("%H:%M:%S")
-    to_dt = parse_csv_datetime(get_value(row, "bis"))
+    to_dt = get_datetime(get_value(row, "bis"))
     to_time = to_dt.strftime("%H:%M:%S")
     beratungsperson = get_berater_in(get_value(row, "kontaktperson"))
     query = """
