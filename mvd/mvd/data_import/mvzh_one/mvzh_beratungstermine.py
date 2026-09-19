@@ -28,6 +28,7 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
 
     print("Starte Import...")
     failed = []
+    erfasst = {}
     for index, row in tqdm(df.iterrows(), desc="Import Beratungstermin", unit=" Termine", total=len(df.index)):
         beratungskanal = get_value(row, "beratungskanal")
         berater_in = get_berater_in(get_value(row, "kontaktperson"))
@@ -40,20 +41,24 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
             failed.append([str(row), "abp_referenz nicht gefunden"])
             continue
 
-        beratung = frappe.get_doc({
-            "doctype": "Beratung",
-            "sektion_id": "MVZH",
-            "mv_mitgliedschaft": get_value(row, "mv_mitgliedschaft"),
-            "faktura_kunde": None,
-            "kontaktperson": berater_in,
-            "notiz": "Terminnotiz:<br>{0}".format(get_value(row, "notiz")),
-            "beratungskanal": beratungskanal
-        })
-        beratung.insert()
+        if get_value(row, "Kunde-ID") in erfasst:
+            beratung = frappe.get_doc("Beratung", erfasst[get_value(row, "Kunde-ID")])
+        else:
+            beratung = frappe.get_doc({
+                "doctype": "Beratung",
+                "sektion_id": "MVZH",
+                "mv_mitgliedschaft": get_value(row, "mv_mitgliedschaft"),
+                "faktura_kunde": None,
+                "kontaktperson": berater_in,
+                "notiz": "Terminnotiz:<br>{0}".format(get_value(row, "notiz")),
+                "beratungskanal": beratungskanal
+            })
+            beratung.insert()
+            erfasst[get_value(row, "Kunde-ID")] = beratung.name
 
         termin_row = beratung.append('termin', {})
-        termin_row.von = parse_csv_datetime(get_value(row, "von"))
-        termin_row.bis = parse_csv_datetime(get_value(row, "bis"))
+        termin_row.von = get_value(row, "von")
+        termin_row.bis = get_value(row, "bis")
         termin_row.art = beratungskanal if beratungskanal != "Telefon" else "telefonisch"
         termin_row.ort = get_value(row, "ort")
         termin_row.berater_in = berater_in
