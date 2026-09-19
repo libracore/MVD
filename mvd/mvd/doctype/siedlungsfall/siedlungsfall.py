@@ -62,16 +62,28 @@ def get_letzte_beratung(mitglied):
                 `start_date`,
                 `beratungskategorie`
             FROM `tabBeratung`
-            WHERE `mv_mitgliedschaft` = '{0}'
+            WHERE `mv_mitgliedschaft` = %s
             ORDER BY `start_date` DESC
             LIMIT 1
-        """.format(mitglied),
+        """,
+        (mitglied,),
         as_dict=True
     )
 
-    if len(beratungen) > 0:
-        return "{0}, {1}".format(format_date(str(beratungen[0].start_date)), beratungen[0].beratungskategorie or '-')
-    
+    if beratungen:
+        beratung = beratungen[0]
+
+        datum = (
+            beratung.start_date.strftime("%d.%m.%Y")
+            if beratung.start_date
+            else "-"
+        )
+
+        return "{0}, {1}".format(
+            datum,
+            beratung.beratungskategorie or "-"
+        )
+
     return ""
 
 def get_letztes_mandat(mitglied):
