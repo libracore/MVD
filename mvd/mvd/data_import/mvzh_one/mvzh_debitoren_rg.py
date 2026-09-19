@@ -27,7 +27,7 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
     # read csv
     df = pd.read_csv('/home/frappe/{bench}-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name, bench=bench), sep=";", dtype=str, keep_default_na=False)
-
+    failed = []
     print("Starte Import...")
     for index, row in tqdm(df.iterrows(), desc="Import Debitoren", unit=" Debitoren", total=len(df.index)):
         if frappe.db.exists("Mitgliedschaft", get_value(row, 'MitgliederID')):
@@ -206,9 +206,15 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
             item.dn_detail = None
             item.cost_center = "Main - MVZH"
 
-            sinv.insert(ignore_permissions=True)
-            sinv.submit()
-            frappe.db.commit()
+            try:
+                sinv.insert(ignore_permissions=True)
+                sinv.submit()
+                frappe.db.commit()
+            except Exception as err:
+                failed.append([get_value(row, 'Rechnungsnummer'), str(err)])
+    if len(failed) > 0:
+        print(failed)
+        frappe.log_error(str(failed), "mvzh_debitoren_rg fails")
 
 def get_value(row, value):
     value = row[value]
