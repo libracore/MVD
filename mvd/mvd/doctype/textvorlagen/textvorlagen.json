@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "titel",
+  "sektion_id",
   "text"
  ],
  "fields": [
@@ -23,9 +24,16 @@
    "in_list_view": 1,
    "label": "Text",
    "reqd": 1
+  },
+  {
+   "fieldname": "sektion_id",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion",
+   "reqd": 1
   }
  ],
- "modified": "2026-09-07 12:55:43.324538",
+ "modified": "2026-09-19 15:26:36.669541",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Textvorlagen",
