@@ -1024,11 +1024,20 @@ def remove_comments(comments):
     return True
 
 def sync_mail_attachements(file_record, event):
+    communication_belongs_to_beratung = False
     if file_record.attached_to_doctype == 'Communication':
         communication = file_record.attached_to_name
         if frappe.db.get_value("Communication", communication, 'sent_or_received') == 'Received':
             if frappe.db.get_value("Communication", communication, 'reference_doctype') == 'Beratung':
-                beratung = frappe.db.get_value("Communication", communication, 'reference_name')
+                communication_belongs_to_beratung = frappe.db.get_value("Communication", communication, 'reference_name')
+            else:
+                com = frappe.get_doc("Communication", communication)
+                for tl in com.timeline_links:
+                    if tl.link_doctype == 'Beratung':
+                        communication_belongs_to_beratung = tl.link_name
+            
+            if communication_belongs_to_beratung:
+                beratung = communication_belongs_to_beratung
                 # check for -zip and delete if neccessary
                 no_zip = True
                 if ".zip" in file_record.file_url:
