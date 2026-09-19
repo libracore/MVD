@@ -153,7 +153,9 @@ def import_from_file(
             `k_mietzinserhoehung`,
             `k_forderung`,
             `k_andere`,
-            `fallergebnisse`
+            `fallergebnisse`,
+            `sektion_id`,
+            `zustaendig_legacy`
         )
         VALUES
         (
@@ -197,7 +199,9 @@ def import_from_file(
             %(k_mietzinserhoehung)s,
             %(k_forderung)s,
             %(k_andere)s,
-            %(fallergebnisse)s
+            %(fallergebnisse)s,
+            %(sektion_id)s,
+            %(zustaendig_legacy)s
         )
     """
 
@@ -402,6 +406,11 @@ def import_from_file(
             "fallergebnisse": get_value(
                 row,
                 "Fallergebnisse"
+            ),
+            "sektion_id": "MVZH",
+            "zustaendig_legacy": get_value(
+                row,
+                "Zuständig"
             )
         })
 

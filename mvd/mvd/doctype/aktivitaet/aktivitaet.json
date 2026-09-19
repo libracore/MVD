@@ -40,7 +40,8 @@
   "k_forderung",
   "k_andere",
   "fallergebnisse",
-  "titel"
+  "titel",
+  "zustaendig_legacy"
  ],
  "fields": [
   {
@@ -235,9 +236,14 @@
    "fieldname": "titel",
    "fieldtype": "Text",
    "label": "Titel"
+  },
+  {
+   "fieldname": "zustaendig_legacy",
+   "fieldtype": "Data",
+   "label": "zustaendig_legacy"
   }
  ],
- "modified": "2026-09-19 17:17:43.021274",
+ "modified": "2026-09-19 17:37:10.265670",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Aktivitaet",
