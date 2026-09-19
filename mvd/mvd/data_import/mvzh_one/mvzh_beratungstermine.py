@@ -25,7 +25,7 @@ def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='f
     # display all coloumns for error handling
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
     # read csv
-    df = pd.read_csv('/home/frappe/{bench}-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name, bench=bench), sep=",", dtype=str, keep_default_na=False)
+    df = pd.read_csv('/home/frappe/{bench}-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name, bench=bench), sep=";", dtype=str, keep_default_na=False)
 
     print("Starte Import...")
     failed = []
