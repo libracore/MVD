@@ -7,7 +7,11 @@ import frappe
 import io
 import json
 import hashlib
-from PIL import Image, UnidentifiedImageError
+from PIL import Image
+try:
+    from PIL import UnidentifiedImageError
+except ImportError:
+    UnidentifiedImageError = IOError
 from odf.opendocument import load
 from odf.text import P, H, LineBreak
 from odf import draw
