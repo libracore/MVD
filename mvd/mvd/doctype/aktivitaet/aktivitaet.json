@@ -39,7 +39,8 @@
   "k_mietzinserhoehung",
   "k_forderung",
   "k_andere",
-  "fallergebnisse"
+  "fallergebnisse",
+  "titel"
  ],
  "fields": [
   {
@@ -229,9 +230,14 @@
    "label": "Objekt ID",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "titel",
+   "fieldtype": "Data",
+   "label": "Titel"
   }
  ],
- "modified": "2026-09-08 11:14:24.466642",
+ "modified": "2026-09-19 11:12:37.283266",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Aktivitaet",

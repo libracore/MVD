@@ -8,163 +8,481 @@ import pandas as pd
 from tqdm import tqdm
 from frappe.utils.data import getdate
 from frappe.utils import cint
-import re
+
+
+BATCH_SIZE = 1000
+
 
 '''
     Import Aktivitäten MVZH
-    -----------------
+    -----------------------
+
+    ACHTUNG:
+    tabAktivitaet wird vor dem Import vollständig geleert!
+
     Prod:
-    sudo bench --site libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_one.mvzh_aktivitaet.import_from_file --kwargs "{'file_name': 'xyz.csv'}"
+    sudo bench --site libracore.mieterverband.ch execute \
+    mvd.mvd.data_import.mvzh_one.mvzh_aktivitaet.import_from_file \
+    --kwargs "{'file_name': 'xyz.csv'}"
+
     Test:
-    sudo bench --site test-libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_one.mvzh_aktivitaet.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'test-libracore.mieterverband.ch'}"
-    Alte Dev VM (Oracle):
-    bench execute mvd.mvd.data_import.mvzh_one.mvzh_aktivitaet.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'site1.local', 'bench': 'frappe', 'create_missing_users':1}"
-    Multi-Bench VM:
-    bench execute mvd.mvd.data_import.mvzh_one.mvzh_aktivitaet.import_from_file --kwargs "{'file_name': 'xyz.csv', 'site_name': 'mvd', 'bench': 'mvd'}"
+    sudo bench --site test-libracore.mieterverband.ch execute \
+    mvd.mvd.data_import.mvzh_one.mvzh_aktivitaet.import_from_file \
+    --kwargs "{'file_name': 'xyz.csv', 'site_name': 'test-libracore.mieterverband.ch'}"
+
+    VM:
+    bench execute \
+    mvd.mvd.data_import.mvzh_one.mvzh_aktivitaet.import_from_file \
+    --kwargs "{'file_name': 'xyz.csv', 'site_name': 'mvd', 'bench': 'mvd'}"
 '''
-def import_from_file(file_name, site_name='libracore.mieterverband.ch', bench='frappe', skip_missing_users=False, create_missing_users=False, ignore_update=False):
-    # display all coloumns for error handling
-    pd.set_option('display.max_rows', None, 'display.max_columns', None)
-    # read csv
-    df = pd.read_csv('/home/frappe/{bench}-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name, bench=bench), sep=";", dtype=str, keep_default_na=False)
+def import_from_file(
+    file_name,
+    site_name='libracore.mieterverband.ch',
+    bench='frappe'
+):
+    # ---------------------------------------------------------
+    # CSV laden
+    # ---------------------------------------------------------
 
-    # Step 1: Check if user exists
-    print("Prüfe Existenz aller User...")
-    missing_users = []
-    createt_missing_users = []
-    checked_users = []
-    for index, row in tqdm(df.iterrows(), desc="Prüfe User", unit=" User", total=len(df.index)):
-        if get_value(row, 'Erfasser') not in checked_users:
-            checked_users.append(get_value(row, 'Erfasser'))
-            if not frappe.db.exists("User", {'full_name': get_value(row, 'Erfasser')}):
-                if not create_missing_users:
-                    missing_users.append(get_value(row, 'Erfasser'))
-                else:
-                    create_user(row)
-                    createt_missing_users.append(get_value(row, 'Erfasser'))
+    file_path = (
+        '/home/frappe/{bench}-bench/sites/'
+        '{site_name}/private/files/{file_name}'
+    ).format(
+        bench=bench,
+        site_name=site_name,
+        file_name=file_name
+    )
 
-    if len(missing_users) > 0:
-        print("Nachfolgende User wurden nicht gefunden:")
-        print(missing_users)
-        if not skip_missing_users:
-            return
-        else:
-            print("Setze Import fort und überspringe fehlende Users...")
+    print("Lese CSV...")
 
-    if len(createt_missing_users) > 0:
-        print("Nachfolgende User wurden erstellt:")
-        print(createt_missing_users)
+    df = pd.read_csv(
+        file_path,
+        sep=";",
+        dtype=str,
+        keep_default_na=False
+    )
 
-    skipped_aktivitaeten = []
-    print("Starte Import...")
-    for index, row in tqdm(df.iterrows(), desc="Import Aktivität", unit=" Aktivitäten", total=len(df.index)):
-        if get_value(row, 'Erfasser') not in missing_users:
-            if not get_value(row, 'Eintrag-ID-Aktitaet') or get_value(row, 'Eintrag-ID-Aktitaet') == '':
-                skipped_aktivitaeten.append(row)
-                continue
+    print("CSV enthält {0} Zeilen.".format(len(df.index)))
 
-            update =  False
-            if frappe.db.exists("Aktivitaet", get_value(row, 'Eintrag-ID-Aktitaet')):
-                if ignore_update: continue
+    # ---------------------------------------------------------
+    # User Mapping laden
+    #
+    # CSV:
+    #   "Max Muster"
+    #
+    # DB:
+    #   "max.muster@example.ch"
+    # ---------------------------------------------------------
 
-                aktivitaet = frappe.get_doc("Aktivitaet", get_value(row, 'Eintrag-ID-Aktitaet'))
-                update = True
-            else:
-                aktivitaet = frappe.new_doc("Aktivitaet")
-                aktivitaet.objekt_id = get_value(row, 'Eintrag-ID-Aktitaet')
-            
-            aktivitaet.datum = getdate(get_value(row, "datum"))
-            aktivitaet.erfasser = get_value(row, "Erfasser")
-            aktivitaet.import_datenquelle = file_name
-            aktivitaet.import_zeile = cint(index) + 2
-            aktivitaet.import_verarbeitet = 0
-            aktivitaet.typ = get_value(row, "Typ")
-            aktivitaet.art = get_value(row, "Kontakt-Art")
-            aktivitaet.termin = getdate(get_value(row, "Termin"))
-            aktivitaet.prioritaet = get_value(row, "Priorität")
-            aktivitaet.zustaendig = get_user(get_value(row, "Zuständig"))
-            aktivitaet.erledigt = get_true_false_flag(get_value(row, "Erledigt"))
-            aktivitaet.erledigt_datum = getdate(get_value(row, "Erledigt Datum"))
-            # aktivitaet.mitglied_nr --> wird direkt aus verknüpfter Mitgliedschaft gefeched
-            aktivitaet.mv_mitgliedschaft = get_value(row, "mv_mitgliedschaft")
-            # aktivitaet.sektion_id --> wird direkt aus verknüpfter Mitgliedschaft gefeched
-            aktivitaet.titel = get_value(row, "Titel")
-            aktivitaet.dokument_intern = get_value(row, "Dokument intern")
-            aktivitaet.pfad_legacy = get_value(row, "Basis-Pfad")
-            aktivitaet.dokument = get_value(row, "Dokument")
-            aktivitaet.erfasst_datum = getdate(get_value(row, "Erfasst Datum"))
-            aktivitaet.geaendert_datum = getdate(get_value(row, "Geändert Datum"))
-            aktivitaet.sachverhalt = get_value(row, "Sachverhalt")
-            aktivitaet.empfehlung = get_value(row, "Empfehlung")
-            aktivitaet.fristbeginn = get_value(row, "Fristbeginn")
-            aktivitaet.k_aus_der_beratung = get_value(row, "K-aus der Beratung")
-            aktivitaet.k_anfangsmietzins = get_value(row, "K-Anfangsmietzins")
-            aktivitaet.k_spezialkategorie = get_value(row, "K-Spezialkategorie")
-            aktivitaet.k_mietzinssenkung = get_value(row, "K-Mietzinssenkung")
-            aktivitaet.k_maengel = get_value(row, "K-Mängel")
-            aktivitaet.k_nebenkosten = get_value(row, "K-Nebenkosten")
-            aktivitaet.k_kuendigung = get_value(row, "K-Kündigung")
-            aktivitaet.k_mietzinserhoehung = get_value(row, "K-Mietzinserhöhung")
-            aktivitaet.k_forderung = get_value(row, "K-Forderung")
-            aktivitaet.k_andere = get_value(row, "K-Andere")
-            aktivitaet.fallergebnisse = get_value(row, "Fallergebnisse")
+    print("Lade User-Mapping...")
 
-            if update:
-                aktivitaet.save()
-            else:
-                aktivitaet.insert()
+    user_mapping = {}
 
-            frappe.db.commit()
+    users = frappe.db.sql("""
+        SELECT
+            `name`,
+            `full_name`
+        FROM `tabUser`
+        WHERE `enabled` = 1
+    """, as_dict=True)
 
-            frappe.db.set_value("Aktivitaet", aktivitaet.name, 'owner', aktivitaet.zustaendig)
-            frappe.db.set_value("Aktivitaet", aktivitaet.name, 'creation', aktivitaet.erfasst_datum)
-            frappe.db.set_value("Aktivitaet", aktivitaet.name, 'modified', aktivitaet.geaendert_datum)
-            frappe.db.commit()
+    for user in users:
+        if user.full_name:
+            user_mapping[user.full_name] = user.name
 
-    if len(skipped_aktivitaeten) > 0:
-        frappe.log_error("Anz. skipped: {0}\n\nDetails:\n{1}".format(len(skipped_aktivitaeten), str(skipped_aktivitaeten)), "Aktivitäten Import Skippings")
-        frappe.db.commit()
-        print("Aktivitäten Import Skippings: {0}".format(len(skipped_aktivitaeten)))
+    print(
+        "{0} aktive User geladen.".format(
+            len(user_mapping)
+        )
+    )
 
-def get_value(row, value):
-    value = row[value]
-    return value.strip()
+    # ---------------------------------------------------------
+    # Tabelle leeren
+    # ---------------------------------------------------------
 
-def get_user(zustaendig):
-    return frappe.db.exists("User", {'full_name': zustaendig, 'enabled': 1})
+    print("Leere tabAktivitaet...")
 
-def get_true_false_flag(flag):
-    if flag == "True": return 1
-    return 0
+    frappe.db.sql("""TRUNCATE TABLE `tabAktivitaet`""")
 
-def create_user(row):
-    new_user = frappe.new_doc("User")
-    new_user.enabled = 0
-    new_user.email = "{0}@not.found".format(sanitize_string(get_value(row, 'Erfasser')))
-    new_user.first_name = get_value(row, 'Erfasser').split(" ")[0]
-    new_user.last_name = get_value(row, 'Erfasser').split(" ")[1] if len(get_value(row, 'Erfasser').split(" ")) > 1 else ''
-    new_user.send_welcome_email = 0
-    new_user.insert()
+    print("tabAktivitaet wurde geleert.")
+
+    # ---------------------------------------------------------
+    # INSERT SQL
+    # ---------------------------------------------------------
+
+    sql = """
+        INSERT INTO `tabAktivitaet`
+        (
+            `name`,
+            `creation`,
+            `modified`,
+            `modified_by`,
+            `owner`,
+            `docstatus`,
+            `idx`,
+            `objekt_id`,
+            `datum`,
+            `erfasser`,
+            `import_datenquelle`,
+            `import_zeile`,
+            `import_verarbeitet`,
+            `typ`,
+            `art`,
+            `termin`,
+            `prioritaet`,
+            `zustaendig`,
+            `erledigt`,
+            `erledigt_datum`,
+            `mv_mitgliedschaft`,
+            `titel`,
+            `dokument_intern`,
+            `pfad_legacy`,
+            `dokument`,
+            `erfasst_datum`,
+            `geaendert_datum`,
+            `sachverhalt`,
+            `empfehlung`,
+            `fristbeginn`,
+            `k_aus_der_beratung`,
+            `k_anfangsmietzins`,
+            `k_spezialkategorie`,
+            `k_mietzinssenkung`,
+            `k_maengel`,
+            `k_nebenkosten`,
+            `k_kuendigung`,
+            `k_mietzinserhoehung`,
+            `k_forderung`,
+            `k_andere`,
+            `fallergebnisse`
+        )
+        VALUES
+        (
+            %(name)s,
+            %(creation)s,
+            %(modified)s,
+            %(modified_by)s,
+            %(owner)s,
+            %(docstatus)s,
+            %(idx)s,
+            %(objekt_id)s,
+            %(datum)s,
+            %(erfasser)s,
+            %(import_datenquelle)s,
+            %(import_zeile)s,
+            %(import_verarbeitet)s,
+            %(typ)s,
+            %(art)s,
+            %(termin)s,
+            %(prioritaet)s,
+            %(zustaendig)s,
+            %(erledigt)s,
+            %(erledigt_datum)s,
+            %(mv_mitgliedschaft)s,
+            %(titel)s,
+            %(dokument_intern)s,
+            %(pfad_legacy)s,
+            %(dokument)s,
+            %(erfasst_datum)s,
+            %(geaendert_datum)s,
+            %(sachverhalt)s,
+            %(empfehlung)s,
+            %(fristbeginn)s,
+            %(k_aus_der_beratung)s,
+            %(k_anfangsmietzins)s,
+            %(k_spezialkategorie)s,
+            %(k_mietzinssenkung)s,
+            %(k_maengel)s,
+            %(k_nebenkosten)s,
+            %(k_kuendigung)s,
+            %(k_mietzinserhoehung)s,
+            %(k_forderung)s,
+            %(k_andere)s,
+            %(fallergebnisse)s
+        )
+    """
+
+    # ---------------------------------------------------------
+    # Import
+    # ---------------------------------------------------------
+
+    print(
+        "Starte Import mit Batch Size {0}..."
+        .format(BATCH_SIZE)
+    )
+
+    batch = []
+    imported = 0
+    skipped = 0
+
+    for index, row in tqdm(
+        df.iterrows(),
+        desc="Import Aktivität",
+        unit=" Aktivitäten",
+        total=len(df.index)
+    ):
+        objekt_id = get_value(
+            row,
+            "Eintrag-ID-Aktitaet"
+        )
+
+        # Ohne Objekt-ID überspringen
+        if not objekt_id:
+            skipped += 1
+            continue
+
+        # -----------------------------------------------------
+        # User auflösen
+        # -----------------------------------------------------
+
+        zustaendig_name = get_value(
+            row,
+            "Zuständig"
+        )
+
+        zustaendig = user_mapping.get(
+            zustaendig_name
+        )
+
+        # -----------------------------------------------------
+        # Datum
+        # -----------------------------------------------------
+
+        datum = parse_date(
+            get_value(row, "datum")
+        )
+
+        termin = parse_date(
+            get_value(row, "Termin")
+        )
+
+        erledigt_datum = parse_date(
+            get_value(row, "Erledigt Datum")
+        )
+
+        erfasst_datum = parse_date(
+            get_value(row, "Erfasst Datum")
+        )
+
+        geaendert_datum = parse_date(
+            get_value(row, "Geändert Datum")
+        )
+
+        # -----------------------------------------------------
+        # Systemfelder
+        # -----------------------------------------------------
+
+        creation = erfasst_datum
+
+        modified = (
+            geaendert_datum
+            or erfasst_datum
+        )
+
+        owner = (
+            zustaendig
+            or "Administrator"
+        )
+
+        # -----------------------------------------------------
+        # Datensatz
+        # -----------------------------------------------------
+
+        batch.append({
+            "name": frappe.generate_hash(length=10),
+            "creation": creation,
+            "modified": modified,
+            "modified_by": "Administrator",
+            "owner": owner,
+            "docstatus": 0,
+            "idx": 0,
+            "objekt_id": objekt_id,
+            "datum": datum,
+            "erfasser": get_value(
+                row,
+                "Erfasser"
+            ),
+            "import_datenquelle": file_name,
+            "import_zeile": cint(index) + 2,
+            "import_verarbeitet": 0,
+            "typ": get_value(
+                row,
+                "Typ"
+            ),
+            "art": get_value(
+                row,
+                "Kontakt-Art"
+            ),
+            "termin": termin,
+            "prioritaet": get_value(
+                row,
+                "Priorität"
+            ),
+            "zustaendig": zustaendig,
+            "erledigt": get_true_false_flag(
+                get_value(
+                    row,
+                    "Erledigt"
+                )
+            ),
+            "erledigt_datum": erledigt_datum,
+            "mv_mitgliedschaft": get_value(
+                row,
+                "mv_mitgliedschaft"
+            ),
+            "titel": get_value(
+                row,
+                "Titel"
+            ),
+            "dokument_intern": get_value(
+                row,
+                "Dokument intern"
+            ),
+            "pfad_legacy": get_value(
+                row,
+                "Basis-Pfad"
+            ),
+            "dokument": get_value(
+                row,
+                "Dokument"
+            ),
+            "erfasst_datum": erfasst_datum,
+            "geaendert_datum": geaendert_datum,
+            "sachverhalt": get_value(
+                row,
+                "Sachverhalt"
+            ),
+            "empfehlung": get_value(
+                row,
+                "Empfehlung"
+            ),
+            "fristbeginn": get_value(
+                row,
+                "Fristbeginn"
+            ),
+            "k_aus_der_beratung": get_value(
+                row,
+                "K-aus der Beratung"
+            ),
+            "k_anfangsmietzins": get_value(
+                row,
+                "K-Anfangsmietzins"
+            ),
+            "k_spezialkategorie": get_value(
+                row,
+                "K-Spezialkategorie"
+            ),
+            "k_mietzinssenkung": get_value(
+                row,
+                "K-Mietzinssenkung"
+            ),
+            "k_maengel": get_value(
+                row,
+                "K-Mängel"
+            ),
+            "k_nebenkosten": get_value(
+                row,
+                "K-Nebenkosten"
+            ),
+            "k_kuendigung": get_value(
+                row,
+                "K-Kündigung"
+            ),
+            "k_mietzinserhoehung": get_value(
+                row,
+                "K-Mietzinserhöhung"
+            ),
+            "k_forderung": get_value(
+                row,
+                "K-Forderung"
+            ),
+            "k_andere": get_value(
+                row,
+                "K-Andere"
+            ),
+            "fallergebnisse": get_value(
+                row,
+                "Fallergebnisse"
+            )
+        })
+
+        # -----------------------------------------------------
+        # Batch schreiben
+        # -----------------------------------------------------
+
+        if len(batch) >= BATCH_SIZE:
+            insert_batch(sql, batch)
+
+            imported += len(batch)
+            batch = []
+
+    # ---------------------------------------------------------
+    # Restlicher Batch
+    # ---------------------------------------------------------
+
+    if batch:
+        insert_batch(sql, batch)
+
+        imported += len(batch)
+
     frappe.db.commit()
-    return
 
-def sanitize_string(value):
-    if not value:
+    # ---------------------------------------------------------
+    # Ergebnis
+    # ---------------------------------------------------------
+
+    print("===================================")
+    print("Import abgeschlossen")
+    print("===================================")
+    print(
+        "CSV Zeilen:   {0}".format(
+            len(df.index)
+        )
+    )
+    print(
+        "Importiert:   {0}".format(
+            imported
+        )
+    )
+    print(
+        "Übersprungen: {0}".format(
+            skipped
+        )
+    )
+    print("===================================")
+
+
+def insert_batch(sql, batch):
+    frappe.db._cursor.executemany(
+        sql,
+        batch
+    )
+
+    frappe.db.commit()
+
+
+def get_value(row, field):
+    value = row[field]
+
+    if value is None:
         return ""
 
-    replacements = {
-        "ä": "ae",
-        "Ä": "Ae",
-        "ö": "oe",
-        "Ö": "Oe",
-        "ü": "ue",
-        "Ü": "Ue",
-        "ß": "ss",
-    }
+    return value.strip()
 
-    for old, new in replacements.items():
-        value = value.replace(old, new)
 
-    value = re.sub(r"[^a-zA-Z0-9]+", "_", value)
+def parse_date(value):
+    if not value:
+        return None
 
-    return value.strip("_")
+    value = value.strip()
+
+    if not value:
+        return None
+
+    return getdate(value)
+
+
+def get_true_false_flag(flag):
+    if flag == "True":
+        return 1
+
+    return 0
