@@ -409,34 +409,6 @@ frappe.ui.form.on('Mitgliedschaft', {
         // render NextCloud-Files-Tree
         render_nextcloud_files_tree(frm);
     },
-    open_nextcloud_root: function(frm) {
-        const mitglied_nr = (frm.doc.mitglied_nr || '').trim();
-
-        if (!mitglied_nr || mitglied_nr === 'MV') {
-            frappe.msgprint(__('Keine gültige Mitgliednummer vorhanden.'));
-            return;
-        }
-
-        if (!frm.doc.sektion_id) {
-            frappe.msgprint(__('Keine Sektion vorhanden.'));
-            return;
-        }
-
-        frappe.call({
-            method: 'mvd.mvd.utils.nextcloud.get_mitglied_ui_url',
-            args: {
-                sektion: frm.doc.sektion_id,
-                mitglied_nr: mitglied_nr
-            },
-            callback: function(r) {
-                if (r.message) {
-                    window.open(r.message, '_blank', 'noopener');
-                } else {
-                    frappe.msgprint(__('Nextcloud-URL konnte nicht ermittelt werden.'));
-                }
-            }
-        });
-    },
     m_und_w: function(frm) {
         if (![0, 1].includes(cur_frm.doc.m_und_w)) {
             if (!frappe.user.has_role("System Manager")) {
@@ -2313,7 +2285,7 @@ var setup_phone_formatters = function(frm) {
 
 
 function render_nextcloud_files_tree(frm) {
-    frappe.db.get_value('Sektion', cur_frm.doc.sektion_id, 'nc_enabled')
+    return frappe.db.get_value('Sektion', cur_frm.doc.sektion_id, 'nc_enabled')
     .then(r => {
         if (r.message.nc_enabled != 1) {
             cur_frm.set_df_property('section_nextcloud', 'hidden', 1);
@@ -2368,7 +2340,92 @@ function render_nextcloud_files_tree(frm) {
                 }
             }
         });
+
+        const $toolbar = $wrapper.find(".nextcloud-toolbar");
+
+        $toolbar.empty();
+
+        $toolbar.css({
+            display: "flex",
+            gap: "5px",
+            "align-items": "center",
+            "margin-bottom": "10px"
+        });
+
+        $('<button type="button" class="btn btn-xs btn-default"><i class="fa fa-folder-open"></i> Alle Ordner öffnen</button>')
+            .appendTo($toolbar)
+            .on("click", function() {
+                render_nextcloud_files_tree(frm).then(function() {
+                    return expand_all_nextcloud_folders(frm);
+                });
+            });
+
+        $('<button type="button" class="btn btn-xs btn-default"><i class="fa fa-external-link"></i> NextCloud öffnen</button>')
+            .appendTo($toolbar)
+            .on("click", function() {
+                open_nextcloud_root(frm);
+            });
     });
+}
+
+function expand_all_nextcloud_folders(frm) {
+    const tree = frm._nextcloud_tree;
+
+    if (!tree || !tree.root_node) {
+        return;
+    }
+
+    function get_children(node) {
+        return Object.values(tree.nodes).filter(function(child) {
+            const parent_label =
+                child.data && child.data.parent_label
+                    ? child.data.parent_label
+                    : child.parent_label;
+
+            return parent_label === node.label;
+        });
+    }
+
+    function expand_recursive(node) {
+        return new Promise(function(resolve) {
+            // Datei / Leaf
+            if (!node.expandable) {
+                resolve();
+                return;
+            }
+
+            function process_node() {
+                // Ordner visuell öffnen
+                if (!node.expanded) {
+                    tree.expand_node(node, false);
+                }
+
+                const children = get_children(node);
+
+                Promise.all(
+                    children.map(function(child) {
+                        return expand_recursive(child);
+                    })
+                ).then(resolve);
+            }
+
+            // Children noch nicht von Nextcloud geladen
+            if (!node.loaded) {
+                tree.load_children(node);
+
+                const wait = setInterval(function() {
+                    if (node.loaded) {
+                        clearInterval(wait);
+                        process_node();
+                    }
+                }, 50);
+            } else {
+                process_node();
+            }
+        });
+    }
+
+    return expand_recursive(tree.root_node);
 }
 
 function create_rsv_mitglied(frm) {
@@ -2383,3 +2440,32 @@ function create_rsv_mitglied(frm) {
     };
     new mvd_dialoge.erstelle_rsv_mitglied(opts);
 }
+
+function open_nextcloud_root(frm) {
+        const mitglied_nr = (frm.doc.mitglied_nr || '').trim();
+
+        if (!mitglied_nr || mitglied_nr === 'MV') {
+            frappe.msgprint(__('Keine gültige Mitgliednummer vorhanden.'));
+            return;
+        }
+
+        if (!frm.doc.sektion_id) {
+            frappe.msgprint(__('Keine Sektion vorhanden.'));
+            return;
+        }
+
+        frappe.call({
+            method: 'mvd.mvd.utils.nextcloud.get_mitglied_ui_url',
+            args: {
+                sektion: frm.doc.sektion_id,
+                mitglied_nr: mitglied_nr
+            },
+            callback: function(r) {
+                if (r.message) {
+                    window.open(r.message, '_blank', 'noopener');
+                } else {
+                    frappe.msgprint(__('Nextcloud-URL konnte nicht ermittelt werden.'));
+                }
+            }
+        });
+    }
