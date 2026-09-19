@@ -35,7 +35,9 @@
   "mandat",
   "pfad_legacy",
   "open_legacy_path",
-  "siedlungsfall_id_legacy"
+  "siedlungsfall_id_legacy",
+  "verantwortlich_intern_legacy",
+  "verantwortlich_extern_legacy"
  ],
  "fields": [
   {
@@ -49,7 +51,7 @@
    "fieldname": "siedlungfall_typ",
    "fieldtype": "Select",
    "label": "Typ Siedlungsfall",
-   "options": "Siedlungen\nMieteraktionen\nGruppenmandat"
+   "options": "\nSiedlungen\nMieteraktionen\nGruppenmandat"
   },
   {
    "fieldname": "creation_date",
@@ -201,9 +203,19 @@
    "fieldtype": "Data",
    "label": "Kat. (legacy)",
    "read_only": 1
+  },
+  {
+   "fieldname": "verantwortlich_intern_legacy",
+   "fieldtype": "Data",
+   "label": "verantwortlich_intern (legacy)"
+  },
+  {
+   "fieldname": "verantwortlich_extern_legacy",
+   "fieldtype": "Data",
+   "label": "verantwortlich_extern (legacy)"
   }
  ],
- "modified": "2026-08-27 15:33:14.318748",
+ "modified": "2026-09-19 11:50:54.070717",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Siedlungsfall",

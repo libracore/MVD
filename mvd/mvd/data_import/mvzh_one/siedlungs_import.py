@@ -77,8 +77,10 @@ def import_siedlungsfaelle(file_name, site_name='libracore.mieterverband.ch', be
         siedlungsfall.siedlungfall_typ = get_value(row, 'siedlungfall_typ')
         siedlungsfall.creation_date = getdate(get_value(row, 'creation'))
         if get_value(row, 'abschluss'): siedlungsfall.abschluss = getdate(get_value(row, 'abschluss'))
-        siedlungsfall.verantwortlich_intern = get_user_from_fullname(row)
+        siedlungsfall.verantwortlich_intern = get_user_from_fullname(row, 'verantwortlich_intern')
         siedlungsfall.verantwortlich_extern = get_termin_kontaktperson(row)
+        siedlungsfall.verantwortlich_intern_legacy = get_value(row, 'verantwortlich_intern')
+        siedlungsfall.verantwortlich_extern_legacy = get_value(row, 'verantwortlich_extern')
         siedlungsfall.bemerkung = get_value(row, 'bemerkung')
         siedlungsfall.frist = get_value(row, 'frist')
         siedlungsfall.verwaltung = get_value(row, 'verwaltung')
@@ -107,12 +109,12 @@ def import_siedlungsfaelle(file_name, site_name='libracore.mieterverband.ch', be
         siedlungsfall.insert()
         return
     
-    def get_user_from_fullname(row):
+    def get_user_from_fullname(row, field):
         user = frappe.db.sql(
             """
                 SELECT `name` FROM `tabUser`
                 WHERE `full_name` = '{0}'
-            """.format(get_value(row, 'verantwortlich_intern')),
+            """.format(get_value(row, field)),
             as_dict=True
         )
         if len(user) > 0:
@@ -120,7 +122,7 @@ def import_siedlungsfaelle(file_name, site_name='libracore.mieterverband.ch', be
         return ""
     
     def get_termin_kontaktperson(row):
-        user = get_user_from_fullname(row)
+        user = get_user_from_fullname(row, 'verantwortlich_extern')
         if user:
             kontaktperson = frappe.db.sql(
                 """
