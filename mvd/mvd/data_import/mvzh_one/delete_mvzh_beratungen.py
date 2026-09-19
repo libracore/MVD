@@ -33,7 +33,7 @@ def delete(site_name=None, file_name=None, bench=None, limit=0):
     query = """
         SELECT `name` FROM `tabBeratung`
         WHERE `sektion_id` = 'MVZH'
-        AND `creation` < CURDATE()
+        AND `creation` < '2026-09-18 18:00:00'
         AND `name` NOT IN ({0})
         ORDER BY `creation` ASC
         {1}
