@@ -155,7 +155,8 @@ def import_from_file(
             `k_andere`,
             `fallergebnisse`,
             `sektion_id`,
-            `zustaendig_legacy`
+            `zustaendig_legacy`,
+            `mitglied_nr`
         )
         VALUES
         (
@@ -201,7 +202,8 @@ def import_from_file(
             %(k_andere)s,
             %(fallergebnisse)s,
             %(sektion_id)s,
-            %(zustaendig_legacy)s
+            %(zustaendig_legacy)s,
+            %(mitglied_nr)s
         )
     """
 
@@ -411,6 +413,10 @@ def import_from_file(
             "zustaendig_legacy": get_value(
                 row,
                 "Zuständig"
+            ),
+            "mitglied_nr": get_value(
+                row,
+                "Mitgliednummer"
             )
         })
 
