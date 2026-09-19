@@ -398,6 +398,9 @@ class NCSettings():
                 algorithm="HS256"
             )
 
+            if isinstance(token, bytes):
+                token = token.decode("utf-8")
+
             payload = payload_without_token.copy()
             payload["token"] = token
 
