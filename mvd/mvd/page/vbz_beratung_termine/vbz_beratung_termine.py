@@ -32,15 +32,13 @@ def get_open_data(
     if beratungstyp == "Beratungstyp": beratungstyp = None
     if art == "Art": art = None
 
-    alle_termine, meine_termine, anz_eingetroffen = get_alle_beratungs_termine(frappe.session.user, free_only, beratungsort,
+    alle_termine, meine_termine = get_alle_beratungs_termine(frappe.session.user, free_only, beratungsort,
                                                                                berater_in, art, datum, language, fachskill,
                                                                                my_reservations_only, beratungstyp, termine_heute,
                                                                                termine_gebucht, datum_bis, chronologische_termine,
                                                                                geschaeftsstelle)
     datasets = {
         'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
-        'datenstand_for_polling': now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
-        'anz_eingetroffen_for_polling': anz_eingetroffen,
         'alle_termine': alle_termine,
         'meine_termine': meine_termine
     }
@@ -64,7 +62,6 @@ def get_alle_beratungs_termine(
 
     alle = []
     meine = []
-    anz_eingetroffen = 0
     vergebene_termin_liste = []
     kontaktperson_multi_user = get_kontaktperson_multi_user(user)
     erb_block = True if "MV_ERB" in frappe.get_roles() else False
@@ -189,23 +186,129 @@ def get_alle_beratungs_termine(
                                             beratungstyp_filter=beratungstyp_filter,
                                             geschaeftsstelle_filter=geschaeftsstelle_filter),
                                     as_dict=True)
+        # --------------------------------------------------------------------------
+        # Daten fuer alle Termine gesammelt laden.
+        #
+        # Vorher wurden Beratungsdateien, Mitgliedschaften und Kunden innerhalb
+        # der Schleife einzeln aus der DB gelesen. Bei 100 Terminen konnten dadurch
+        # >100 zusaetzliche Queries entstehen.
+        # --------------------------------------------------------------------------
+
+        beratung_namen = list(set([
+            termin.parent
+            for termin in alle_termine
+            if termin.parent
+        ]))
+
+        mitgliedschaft_namen = list(set([
+            termin.mv_mitgliedschaft
+            for termin in alle_termine
+            if termin.mv_mitgliedschaft
+        ]))
+
+        kunden_namen = list(set([
+            termin.faktura_kunde
+            for termin in alle_termine
+            if termin.faktura_kunde
+        ]))
+
+
+        # Beratungen mit Attachments
+        beratungen_mit_attachment = set()
+
+        if beratung_namen:
+            placeholders = ", ".join(["%s"] * len(beratung_namen))
+
+            rows = frappe.db.sql("""
+                SELECT DISTINCT `parent`
+                FROM `tabBeratungsdateien`
+                WHERE `parent` IN ({0})
+            """.format(placeholders), tuple(beratung_namen))
+
+            beratungen_mit_attachment = set([
+                row[0] for row in rows
+            ])
+
+
+        # Mitgliedschaften
+        mitgliedschaften = {}
+
+        if mitgliedschaft_namen:
+            placeholders = ", ".join(["%s"] * len(mitgliedschaft_namen))
+
+            rows = frappe.db.sql("""
+                SELECT
+                    `name`,
+                    `vorname_1`,
+                    `nachname_1`,
+                    `status_c`
+                FROM `tabMitgliedschaft`
+                WHERE `name` IN ({0})
+            """.format(placeholders), tuple(mitgliedschaft_namen), as_dict=True)
+
+            mitgliedschaften = dict([
+                (row.name, row)
+                for row in rows
+            ])
+
+
+        # Kunden
+        kunden = {}
+
+        if kunden_namen:
+            placeholders = ", ".join(["%s"] * len(kunden_namen))
+
+            rows = frappe.db.sql("""
+                SELECT
+                    `name`,
+                    `vorname`,
+                    `nachname`
+                FROM `tabKunden`
+                WHERE `name` IN ({0})
+            """.format(placeholders), tuple(kunden_namen), as_dict=True)
+
+            kunden = dict([
+                (row.name, row)
+                for row in rows
+            ])
+        
         for termin in alle_termine:
+            termin_data = None
             if not erlaubte_sektionen or termin.sektion_id in erlaubte_sektionen:
                 if not erb_block or termin.berater_in in kontaktperson_multi_user:
-                    hat_attachement = 1 if frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabBeratungsdateien` WHERE `parent` = '{termin}'""".format(termin=termin.parent), as_dict=True)[0].qty > 0 else 0
-                    
+                    hat_attachement = (
+                        1 if termin.parent in beratungen_mit_attachment else 0
+                    )
+
+                    vorname = ""
+                    nachname = ""
+                    status_c = ""
+                    link = "#"
+
                     if termin.mv_mitgliedschaft:
-                        m_daten = frappe.db.get_value("Mitgliedschaft", termin.mv_mitgliedschaft, ["vorname_1", "nachname_1", "status_c"], as_dict=True)
+                        m_daten = mitgliedschaften.get(
+                            termin.mv_mitgliedschaft
+                        )
+
                         vorname = m_daten.get("vorname_1") if m_daten else ""
                         nachname = m_daten.get("nachname_1") if m_daten else ""
                         status_c = m_daten.get("status_c") if m_daten else ""
-                        link = "/desk#Form/Mitgliedschaft/{0}".format(termin.mv_mitgliedschaft)
+
+                        link = "/desk#Form/Mitgliedschaft/{0}".format(
+                            termin.mv_mitgliedschaft
+                        )
                     elif termin.faktura_kunde:
-                        k_daten = frappe.db.get_value("Kunden", termin.faktura_kunde, ["vorname", "nachname"], as_dict=True)
+                        k_daten = kunden.get(
+                            termin.faktura_kunde
+                        )
+
                         vorname = k_daten.get("vorname") if k_daten else ""
                         nachname = k_daten.get("nachname") if k_daten else ""
                         status_c = "Kunde"
-                        link = "/desk#Form/Kunden/{0}".format(termin.faktura_kunde)
+
+                        link = "/desk#Form/Kunden/{0}".format(
+                            termin.faktura_kunde
+                        )
                     else:
                         vorname, nachname = "", ""
                     name_mitglied = "{0} {1}".format(vorname or "", nachname or "").strip()
@@ -235,12 +338,10 @@ def get_alle_beratungs_termine(
                         'terminkategorie': termin.terminkategorie,
                         'sektion_id': termin.sektion_id
                     }
-                    if cint(termin.person_ist_eingetroffen) == 1:
-                        anz_eingetroffen += 1
                     
                     if not cint(free_only) == 1:
                         alle.append(termin_data)
-            if termin.berater_in in kontaktperson_multi_user:
+            if termin_data and termin.berater_in in kontaktperson_multi_user:
                 meine.append(termin_data)
             if termin.abp_referenz:
                 vergebene_termin_liste.append(termin.abp_referenz)
@@ -322,10 +423,11 @@ def get_alle_beratungs_termine(
                                         1 AS `is_free`,
                                         `zuw`.`name` AS `name_for_reservation`,
                                         `zuw`.`beratungstyp`,
-                                        NULL AS `sektion_id`,
+                                        `kp`.`sektion_id` AS `sektion_id`,
                                         NULL AS `is_business`
                                     FROM `tabAPB Zuweisung` AS `zuw`
                                     LEFT JOIN `tabBeratungsort` AS `beratungsort` ON `zuw`.`art_ort` = `beratungsort`.`name`
+                                    LEFT JOIN `tabTermin Kontaktperson` AS `kp` ON `zuw`.`beratungsperson` = `kp`.`name`
                                     WHERE `zuw`.`name` NOT IN ('{vergebene_termine}')
                                     {datum_filter}
                                     {beratungsort_filter}
@@ -355,7 +457,6 @@ def get_alle_beratungs_termine(
             freier_termin.bis_time = get_datetime(freier_termin.bis).strftime('%H:%M')
             freier_termin.wochentag = _(get_datetime(freier_termin.von).strftime('%A'))[:2]
             freier_termin.sort_date = frappe.utils.getdate(freier_termin.von)
-            freier_termin.sektion_id = frappe.db.get_value("Termin Kontaktperson", freier_termin.beraterinn, "sektion_id")
             freier_termin.is_business = 1 if freier_termin.beratungstyp == "Geschäft" else 0
         
         for freier_termin in freie_termine:
@@ -372,7 +473,7 @@ def get_alle_beratungs_termine(
     else:
         alle_sortiert = sorted(alle, key = lambda x: (x['sort_date'], x['beraterinn'] or 'ZZZ', x['von_time']))
     
-    return alle_sortiert, meine, anz_eingetroffen
+    return alle_sortiert, meine
 
 def get_kontaktperson_multi_user(user):
     kontaktperson_multi_user = frappe.db.sql("""SELECT `parent`
@@ -419,3 +520,41 @@ def remove_reservation(termin):
 def person_ist_eingetroffen(beratung):
     frappe.db.set_value("Beratung", beratung, 'person_ist_eingetroffen', 1, update_modified=False)
     return
+
+@frappe.whitelist()
+def get_polling_state():
+    """
+    Sehr günstiger Endpoint für das 2-Sekunden-Polling.
+
+    Wichtig:
+    person_ist_eingetroffen() verwendet update_modified=False.
+    Deshalb reicht MAX(modified) von tabBeratung alleine nicht aus.
+    Die Anzahl eingetroffener Personen wird separat berücksichtigt.
+    """
+
+    state = frappe.db.sql("""
+        SELECT
+            (SELECT MAX(`modified`)
+             FROM `tabBeratung`) AS `beratung_modified`,
+
+            (SELECT MAX(`modified`)
+             FROM `tabBeratung Termin`) AS `termin_modified`,
+
+            (SELECT MAX(`modified`)
+             FROM `tabAPB Zuweisung`) AS `zuweisung_modified`,
+
+            (SELECT MAX(`modified`)
+             FROM `tabBeratungsdateien`) AS `dateien_modified`,
+
+            (SELECT COUNT(`name`)
+             FROM `tabBeratung`
+             WHERE `person_ist_eingetroffen` = 1) AS `anz_eingetroffen`
+    """, as_dict=True)[0]
+
+    return {
+        "beratung_modified": str(state.beratung_modified or ""),
+        "termin_modified": str(state.termin_modified or ""),
+        "zuweisung_modified": str(state.zuweisung_modified or ""),
+        "dateien_modified": str(state.dateien_modified or ""),
+        "anz_eingetroffen": state.anz_eingetroffen or 0
+    }

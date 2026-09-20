@@ -26,19 +26,15 @@ frappe.vbz_beratung_termine = {
     is_mutating: false, // Sperre für schreibende Aktionen wie Reservationen oder als "eingetroffen" markieren
     poll_timer: null, // ID des aktuell geplanten Polling-Timers
     poll_interval: 2000, // Polling-Intervall in ms
-    last_data_signature: null, // Signatur der zuletzt tatsächlich gerenderten Daten
     filter_is_active: false, // Flag ob gerade ein Filter-Control aktiv bedient wird
-    pending_poll_result: null, // Zwischenspeicher für ein Polling-Resultat während einer aktiven Filtereingabe
 
     /*
-        Vergleichswerte der zuletzt gerenderten, gefilterten Ergebnismenge.
-        Beim Polling werden diese Werte mit einem neuen Aufruf von
-        get_open_data() unter identischen Filtern verglichen.
-     */
-    polling_state: {
-        datenstand: null,
-        anz_eingetroffen: null
-    },
+        Signatur des zuletzt bekannten DB-Zustands.
+        Wird alle 2 Sekunden über den günstigen
+        get_polling_state()-Endpoint geprüft.
+        Nur bei einer Änderung wird get_open_data() neu geladen.
+    */
+    polling_state: null,
     initialize: async function(page) {
         this.page = page;
 
@@ -51,14 +47,9 @@ frappe.vbz_beratung_termine = {
         this.is_loading = false;
         this.reload_requested = false;
         this.is_mutating = false;
-        this.last_data_signature = null;
         this.filter_is_active = false;
-        this.pending_poll_result = null;
 
-        this.polling_state = {
-            datenstand: null,
-            anz_eingetroffen: null
-        };
+        this.polling_state = null;
 
         try {
             const response = await this.call({
@@ -264,6 +255,8 @@ frappe.vbz_beratung_termine = {
                 filter_values
             );
 
+            await this.update_polling_state();
+
             if (is_initial_render) {
                 this.first_load = false;
             }
@@ -349,20 +342,6 @@ frappe.vbz_beratung_termine = {
 
         // Click-Handler für Terminzeilen
         this.add_click_handlers();
-
-        // Speichern der Polling-Vergleichswerte
-        this.polling_state.datenstand =
-            data.datenstand_for_polling;
-
-        this.polling_state.anz_eingetroffen =
-            data.anz_eingetroffen_for_polling;
-
-        // Signatur des dargestellten Inhalts speichern
-        this.last_data_signature =
-            this.get_data_signature(data);
-
-        // Reset eines ggf. vorgemerkten Polling-Resultat
-        this.pending_poll_result = null;
     },
     reload_view: function() {
         return this.render_view();
@@ -637,19 +616,6 @@ frappe.vbz_beratung_termine = {
                 String(values_b[key] || "");
         });
     },
-    get_data_signature: function(data) {
-        // Erstellt eine Vergleichssignatur
-        if (!data) {
-            return "";
-        }
-
-        const comparable_data = Object.assign({}, data);
-
-        delete comparable_data.datenstand_for_polling;
-        delete comparable_data.anz_eingetroffen_for_polling;
-
-        return JSON.stringify(comparable_data);
-    },
     add_filter_focus_handlers: function() {
         // Registriert Fokus-Handler für alle Filter-Controls
         const $main = $(this.page.main);
@@ -689,21 +655,6 @@ frappe.vbz_beratung_termine = {
                     this.filter_is_active =
                         still_inside_page &&
                         still_inside_filter;
-                    
-                    if (
-                        !this.filter_is_active &&
-                        this.pending_poll_result
-                    ) {
-                        const pending =
-                            this.pending_poll_result;
-
-                        this.pending_poll_result = null;
-
-                        this.render_result(
-                            pending.data,
-                            pending.filter_values
-                        );
-                    }
                 }, 100);
             }
         );
@@ -971,51 +922,38 @@ frappe.vbz_beratung_termine = {
         }
     },
     poll_once: async function() {
-        // Prüft ob sich die DB-Daten und "sichtbaren"-Daten unterscheiden
-        const filter_values = this.get_filter_values();
-
         const response = await this.call({
-            method: "mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.get_open_data",
-
-            args: filter_values
+            method: "mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.get_polling_state"
         });
 
         if (!response.message) {
             return;
         }
 
-        const new_signature =
-            this.get_data_signature(
-                response.message
-            );
-
-        //Daten sind unverändert
-        if (
-            new_signature ===
-            this.last_data_signature
-        ) {
-            return;
-        }
-
-        // Zwischenspeicherung der neuen Daten bis Filtereingabe beendet
-        if (this.filter_is_active) {
-            this.pending_poll_result = {
-                data: response.message,
-
-                filter_values: Object.assign(
-                    {},
-                    filter_values
-                )
-            };
-
-            return;
-        }
-
-        // Aktualisieren der Daten
-        this.render_result(
-            response.message,
-            filter_values
+        const new_state = JSON.stringify(
+            response.message
         );
+
+        if (!this.polling_state) {
+            this.polling_state = new_state;
+            return;
+        }
+
+        if (new_state === this.polling_state) {
+            return;
+        }
+
+        // Während Filtereingabe nichts machen.
+        // polling_state bewusst NICHT aktualisieren.
+        // Dadurch erkennt der nächste Poll die Änderung erneut.
+        if (this.filter_is_active) {
+            return;
+        }
+
+        // Jetzt übernehmen.
+        this.polling_state = new_state;
+
+        await this.render_view();
     },
     handle_error: function(error, message) {
         console.error(message, error);
@@ -1025,5 +963,18 @@ frappe.vbz_beratung_termine = {
             indicator: "red",
             message: message
         });
+    },
+    update_polling_state: async function() {
+        const response = await this.call({
+            method: "mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.get_polling_state"
+        });
+
+        if (!response.message) {
+            return;
+        }
+
+        this.polling_state = JSON.stringify(
+            response.message
+        );
     }
 };
