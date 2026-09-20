@@ -77,7 +77,7 @@ TOLERANZ_SEKUNDEN = 120
 
 
 def korrigiere(sektion=None, von=None, bis=None, start_von=None, start_bis=None,
-               min_diff=1, max_diff=1, beratungen=None, nur_systembenutzer=True,
+               min_diff=1, max_diff=None, beratungen=None, nur_systembenutzer=True,
                zusatz_bedingung=None, toleranz=TOLERANZ_SEKUNDEN,
                rename=True, sp_versendete_umbenennen=False,
                dry_run=True, limit=None):
@@ -86,7 +86,10 @@ def korrigiere(sektion=None, von=None, bis=None, start_von=None, start_bis=None,
     :param von / bis: Zeitraum des Maildatums (yyyy-mm-dd)
     :param start_von / start_bis: Zeitraum des bisherigen start_date
     :param min_diff / max_diff: Abweichung in Tagen, die korrigiert wird.
-        1/1 = nur der Mitternachtsfall.
+        Standard: min_diff=1, max_diff=None - also jede Abweichung ab einem Tag
+        ohne Obergrenze. Damit werden auch Mails erfasst, die erst Tage oder
+        Wochen spaeter abgeholt wurden. max_diff=1 schraenkt auf den
+        Mitternachtsfall ein.
     :param beratungen: Liste konkreter Beratungs-Namen
     :param nur_systembenutzer: nur Beratungen mit owner = 'Administrator', also
         die vom Mailabruf angelegten
@@ -111,6 +114,7 @@ def korrigiere(sektion=None, von=None, bis=None, start_von=None, start_bis=None,
 
     print("Kandidaten: %d  (dry_run=%s, rename=%s)"
           % (len(kandidaten), bool(dry_run), bool(rename)))
+    _zeige_verteilung(kandidaten)
 
     protokoll = []
     datum_ok = rename_ok = uebersprungen = fehler = 0
@@ -219,6 +223,42 @@ def korrigiere(sektion=None, von=None, bis=None, start_von=None, start_bis=None,
             "fehler": fehler, "protokoll": pfad}
 
 
+def _zeige_verteilung(kandidaten):
+    """
+    Verteilung der Abweichung in Tagen. Ohne max_diff koennen auch Mails mit
+    kaputtem oder absichtlich falschem Date-Header dabei sein - grosse
+    Abweichungen sollen deshalb vor einem scharfen Lauf ins Auge fallen.
+    """
+    if not kandidaten:
+        return
+
+    gruppen = {"1 Tag": 0, "2-7 Tage": 0, "8-30 Tage": 0, "31-365 Tage": 0,
+               "ueber ein Jahr": 0}
+    groesste = None
+    for kandidat in kandidaten:
+        tage = (kandidat.start_date - kandidat.mail_datum).days
+        if tage <= 1:
+            gruppen["1 Tag"] += 1
+        elif tage <= 7:
+            gruppen["2-7 Tage"] += 1
+        elif tage <= 30:
+            gruppen["8-30 Tage"] += 1
+        elif tage <= 365:
+            gruppen["31-365 Tage"] += 1
+        else:
+            gruppen["ueber ein Jahr"] += 1
+        if groesste is None or tage > groesste[0]:
+            groesste = (tage, kandidat.name, kandidat.mail_datum)
+
+    print("Abweichung:")
+    for bezeichnung, anzahl in gruppen.items():
+        if anzahl:
+            print("  %-16s %d" % (bezeichnung, anzahl))
+    if groesste:
+        print("  groesste: %d Tage (%s, Maildatum %s)"
+              % (groesste[0], groesste[1], groesste[2]))
+
+
 def zeige(**kwargs):
     """Probelauf: wie korrigiere(), schreibt aber garantiert nichts."""
     kwargs["dry_run"] = True
@@ -226,7 +266,7 @@ def zeige(**kwargs):
 
 
 def finde(sektion=None, von=None, bis=None, start_von=None, start_bis=None,
-          min_diff=1, max_diff=1, beratungen=None, nur_systembenutzer=True,
+          min_diff=1, max_diff=None, beratungen=None, nur_systembenutzer=True,
           zusatz_bedingung=None, toleranz=TOLERANZ_SEKUNDEN, limit=None):
     """
     Liefert die Kandidaten samt der Mail, die sie erzeugt hat.
@@ -236,12 +276,17 @@ def finde(sektion=None, von=None, bis=None, start_von=None, start_bis=None,
     Beratung liegt. Das Datum kommt aus `communication_date` dieser Mail.
     """
     bedingungen = [
-        "DATEDIFF(b.`start_date`, DATE(c.`communication_date`)) "
-        "BETWEEN %(min_diff)s AND %(max_diff)s",
+        "DATEDIFF(b.`start_date`, DATE(c.`communication_date`)) >= %(min_diff)s",
         "TIMESTAMPDIFF(SECOND, b.`creation`, c.`creation`) BETWEEN 0 AND %(toleranz)s",
     ]
-    werte = {"min_diff": cint(min_diff), "max_diff": cint(max_diff),
-             "toleranz": cint(toleranz)}
+    werte = {"min_diff": cint(min_diff), "toleranz": cint(toleranz)}
+
+    # Ohne max_diff gibt es keine Obergrenze: auch Mails, die erst Tage oder
+    # Wochen spaeter abgeholt wurden, werden korrigiert.
+    if max_diff is not None:
+        bedingungen.append(
+            "DATEDIFF(b.`start_date`, DATE(c.`communication_date`)) <= %(max_diff)s")
+        werte["max_diff"] = cint(max_diff)
 
     if sektion:
         if isinstance(sektion, (list, tuple, set)):

@@ -101,7 +101,7 @@ Alle Parameter sind kombinierbar.
 | `sektion` | `'MVZH'` oder `['MVBE','MVLU']` | Sektion oder Liste von Sektionen |
 | `von` / `bis` | `'2023-06-01'` / `'2023-12-31'` | Zeitraum des **Maildatums** |
 | `start_von` / `start_bis` | `'2024-01-01'` | Zeitraum des bisherigen `start_date` |
-| `min_diff` / `max_diff` | `1` / `5` | Abweichung in Tagen. Standard 1/1 = nur der Mitternachtsfall |
+| `min_diff` / `max_diff` | `1` / `30` | Abweichung in Tagen. Standard: ab 1 Tag, **ohne Obergrenze** |
 | `beratungen` | `['26-09-19-438039']` | nur diese Beratungen |
 | `limit` | `50` | Tranchengrösse |
 | `rename` | `False` | nur das Datum korrigieren, **nicht** umbenennen |
@@ -143,6 +143,39 @@ korrigiere(sektion='MVBE', zusatz_bedingung=\"c.sender LIKE '%@gmail.com'\", dry
 | `...beratung_startdate.korrigiere` | macht die Arbeit, Standard `dry_run=True` |
 | `...beratung_startdate.zeige` | identisch, erzwingt aber den Probelauf |
 | `...beratung_startdate.finde` | liefert nur die Kandidatenliste, ohne Protokoll |
+
+## Grosse Abweichungen
+
+Standardmässig gibt es **keine Obergrenze** für die Abweichung. Das ist Absicht:
+korrigiert werden soll nicht nur der Mitternachtsfall, sondern auch Mails, die
+erst Tage oder Wochen später abgeholt wurden. Auf dem Testsystem entfallen rund
+ein Drittel der Fälle auf eine Abweichung von mehr als einem Tag – mit einer
+Begrenzung auf einen Tag würde man sie übersehen.
+
+Die Kehrseite: Ohne Obergrenze landen auch Mails im Ergebnis, deren `Date`-Header
+weit zurückliegt, weil alte Korrespondenz nachträglich ins Postfach eingeliefert
+oder weitergeleitet wurde. Der Befehl würde das Fall-Eröffnungsdatum dann Jahre
+zurücksetzen, was fachlich meist nicht gewollt ist.
+
+Deshalb gibt jeder Lauf eine Verteilung aus:
+
+```
+Kandidaten: 941  (dry_run=True, rename=True)
+Abweichung:
+  1 Tag            663
+  2-7 Tage         260
+  8-30 Tage        15
+  31-365 Tage      2
+  ueber ein Jahr   1
+  groesste: 1168 Tage (24-07-11-339074, Maildatum 2021-04-30)
+```
+
+Bewährtes Vorgehen:
+
+1. `max_diff=30` scharf laufen lassen – das deckt Mitternachtsfälle und
+   nachgefütterte Mails ab.
+2. Den Rest (in der Regel eine Handvoll) im Probelauf mit `min_diff=31` ansehen
+   und einzeln entscheiden, etwa über `beratungen=[...]`.
 
 ## Was genau passiert
 
