@@ -112,6 +112,7 @@
    "options": "Termin Kontaktperson"
   },
   {
+   "bold": 1,
    "default": "Today",
    "fieldname": "start_date",
    "fieldtype": "Date",
@@ -529,7 +530,7 @@
    "options": "\nWohnen\nBusiness"
   }
  ],
- "modified": "2026-07-15 13:37:06.212136",
+ "modified": "2026-09-20 23:30:22.940648",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
