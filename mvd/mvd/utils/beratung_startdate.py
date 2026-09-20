@@ -67,6 +67,7 @@ import re
 import frappe
 from frappe.model.rename_doc import rename_doc
 from frappe.utils import cint
+from tqdm import tqdm
 
 # Namensmuster gemaess autoname format:{YY}-{MM}-{DD}-{###}
 NAME_PATTERN = re.compile(r"^(\d{2})-(\d{2})-(\d{2})-(\d+)$")
@@ -119,7 +120,7 @@ def korrigiere(sektion=None, von=None, bis=None, start_von=None, start_bis=None,
     protokoll = []
     datum_ok = rename_ok = uebersprungen = fehler = 0
 
-    for kandidat in kandidaten:
+    for kandidat in tqdm(kandidaten, desc="Mutiere Kandidaten", unit=" Kandidaten", total=len(kandidaten)):
         eintrag = {
             "beratung_alt": kandidat.name,
             "beratung_neu": "",
