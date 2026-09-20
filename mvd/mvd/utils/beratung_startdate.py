@@ -373,6 +373,19 @@ def finde(sektion=None, von=None, bis=None, start_von=None, start_bis=None,
 
     kandidaten = frappe.db.sql(sql, werte, as_dict=True)
 
+    # Absicherung fuer den Massenabruf: haetten zwei Mails derselben Beratung
+    # exakt dieselbe `creation`, lieferte der Join zwei Zeilen fuer eine
+    # Beratung und sie wuerde doppelt verarbeitet. Kommt im Bestand nicht vor,
+    # ist hier aber billig auszuschliessen.
+    gesehen = set()
+    eindeutig = []
+    for kandidat in kandidaten:
+        if kandidat.name in gesehen:
+            continue
+        gesehen.add(kandidat.name)
+        eindeutig.append(kandidat)
+    kandidaten = eindeutig
+
     # Kennzeichnen, welche Beratungen bereits an die Service Plattform
     # gemeldet wurden. Bewusst als eine einzelne Abfrage und nicht als
     # korrelierte Unterabfrage: `tabBeratungs Log` hat keinen Index auf
