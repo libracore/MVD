@@ -235,9 +235,7 @@ frappe.vbz_beratung_termine = {
         try {
             const response = await this.call({
                 method: "mvd.mvd.page.vbz_beratung_termine.vbz_beratung_termine.get_open_data",
-                args: filter_values,
-                freeze: true,
-                freeze_message: "Lade Beratungsterminübersicht..."
+                args: filter_values
             });
 
             if (!response.message) {
