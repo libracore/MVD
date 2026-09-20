@@ -676,6 +676,26 @@ def _should_create_new_beratung_from_mail(beratung):
     return closed_days >= create_after_days
 
 
+def _get_mail_eingangsdatum(communication):
+    """
+        Liefert das Eingangsdatum einer eingehenden E-Mail (Date-Header der Mail,
+        gespeichert in Communication.communication_date) fuer das Beratungs-Feld
+        start_date ("Eingang/Eroeffnung Fall").
+
+        Ohne diese Ableitung wuerde start_date auf dem Default "Today" stehen,
+        also auf dem Zeitpunkt des Postfach-Abrufs statt auf dem tatsaechlichen
+        Eingang der Mail (relevant bei Abruf ueber Mitternacht sowie beim
+        Nachziehen aelterer Mails).
+
+        Fallback auf heute, falls die Mail kein (brauchbares) Datum mitbringt.
+    """
+
+    if communication.communication_date:
+        return getdate(communication.communication_date)
+
+    return getdate(today())
+
+
 def _create_beratung_from_communication(communication, old_beratung):
     """
         Erstellt aus einer eingehenden Communication eine neue Beratung
@@ -698,7 +718,7 @@ def _create_beratung_from_communication(communication, old_beratung):
     new_beratung = frappe.get_doc({
         "doctype": "Beratung",
         "sektion_id": sektion_id,
-        "start_date": today(),
+        "start_date": _get_mail_eingangsdatum(communication),
         "raised_by": communication.sender,
         "raised_by_name": communication.sender_full_name,
         "notiz": communication.content
@@ -791,6 +811,15 @@ def check_communication(self, event):
                 time_stamp_beratung = get_datetime(beratung.creation)
 
                 if time_stamp_communication < time_stamp_beratung:
+                    # Die Beratung wurde durch diese Mail (Email Account ->
+                    # "Anhaengen an" = Beratung) automatisch erzeugt. Frappe
+                    # setzt dabei kein Datum, womit start_date auf dem Default
+                    # "Today" (= Abrufzeitpunkt) steht. Hier wird stattdessen
+                    # das Eingangsdatum der Mail uebernommen.
+                    eingangsdatum = _get_mail_eingangsdatum(communication)
+                    if getdate(beratung.start_date) != eingangsdatum:
+                        beratung.start_date = eingangsdatum
+
                     if not beratung.notiz:
                         beratung.notiz = communication.content
 
