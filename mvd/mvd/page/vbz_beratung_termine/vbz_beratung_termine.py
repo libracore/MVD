@@ -62,7 +62,6 @@ def get_alle_beratungs_termine(
 
     alle = []
     meine = []
-    vergebene_termin_liste = []
     kontaktperson_multi_user = get_kontaktperson_multi_user(user)
     erb_block = True if "MV_ERB" in frappe.get_roles() else False
     if erb_block:
@@ -343,8 +342,6 @@ def get_alle_beratungs_termine(
                         alle.append(termin_data)
             if termin_data and termin.berater_in in kontaktperson_multi_user:
                 meine.append(termin_data)
-            if termin.abp_referenz:
-                vergebene_termin_liste.append(termin.abp_referenz)
         if len(meine) < 1:
             meine.append({'show_placeholder': 1})
     else:
@@ -428,7 +425,11 @@ def get_alle_beratungs_termine(
                                     FROM `tabAPB Zuweisung` AS `zuw`
                                     LEFT JOIN `tabBeratungsort` AS `beratungsort` ON `zuw`.`art_ort` = `beratungsort`.`name`
                                     LEFT JOIN `tabTermin Kontaktperson` AS `kp` ON `zuw`.`beratungsperson` = `kp`.`name`
-                                    WHERE `zuw`.`name` NOT IN ('{vergebene_termine}')
+                                    WHERE NOT EXISTS (
+                                        SELECT 1
+                                        FROM `tabBeratung Termin` AS `vergeben`
+                                        WHERE `vergeben`.`abp_referenz` = `zuw`.`name`
+                                    )
                                     {datum_filter}
                                     {beratungsort_filter}
                                     {berater_in_filter}
@@ -438,7 +439,6 @@ def get_alle_beratungs_termine(
                                     {art_filter}
                                     {geschaeftsstelle_filter}
                                     """.format(
-                                        vergebene_termine="', '".join(vergebene_termin_liste),
                                         datum_filter=datum_filter,
                                         beratungsort_filter=beratungsort_filter,
                                         berater_in_filter=berater_in_filter,
