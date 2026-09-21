@@ -119,6 +119,40 @@ frappe.ui.form.on('RSVMitglied', {
                 }
             }
         });
+    },
+    email_an_coop_senden: function(frm) {
+        if (frm.is_new()) {
+            frappe.msgprint(__('Bitte speichern Sie das Dokument zuerst, bevor Sie die E-Mail versenden.'));
+            return;
+        }
+        frappe.call({
+            method: 'mvd.mvd.doctype.rsvmitglied.rsvmitglied.get_coop_email_data',
+            args: {
+                "docname": frm.doc.name
+            },
+            freeze: true,
+            freeze_message: __('E-Mail-Daten werden geladen (ZIP wird erstellt)...'),
+            callback: function(r) {
+                if (!r.exc && r.message) {
+                    var mail_data = r.message;   
+                    new frappe.mvd.MailComposer({
+                        doc: frm.doc,
+                        frm: frm,
+                        subject: mail_data.subject,      
+                        recipients: mail_data.recipients, 
+                        cc: mail_data.cc,
+                        attach_document_print: false,
+                        txt: mail_data.content,     
+                        email_template: '', 
+                        last_email: '',                   
+                        is_a_reply: false,                
+                        sender: mail_data.sender                        
+                    });
+                    frm.set_value('sendung_an_coop', 1);
+                    frm.save();
+                }
+            }
+        });
     }
 });
 

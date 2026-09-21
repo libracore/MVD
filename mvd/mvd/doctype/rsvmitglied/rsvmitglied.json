@@ -54,6 +54,7 @@
   "doppelversicherung_bei",
   "unterlagen_bei_ra",
   "sendung_an_coop",
+  "email_an_coop_senden",
   "kostengutsprache",
   "kostengutsprache_datum",
   "section_workflow_helper",
@@ -406,9 +407,14 @@
   {
    "fieldname": "data_60",
    "fieldtype": "Data"
+  },
+  {
+   "fieldname": "email_an_coop_senden",
+   "fieldtype": "Button",
+   "label": "Email an Coop senden"
   }
  ],
- "modified": "2026-09-19 18:43:26.236628",
+ "modified": "2026-09-21 09:45:09.722470",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",
