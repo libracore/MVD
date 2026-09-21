@@ -99,7 +99,7 @@ def update_based_on_scheduler():
             SELECT
                 `name` AS `id`
             FROM `tabSP Mitglied Data`
-            WHERE IFNULL(`needs_update`, 0) = 1
+            WHERE `needs_update` = 1
         """,
         as_dict=True
     )
