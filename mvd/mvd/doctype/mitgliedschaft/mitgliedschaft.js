@@ -2442,30 +2442,23 @@ function create_rsv_mitglied(frm) {
 }
 
 function open_nextcloud_root(frm) {
-        const mitglied_nr = (frm.doc.mitglied_nr || '').trim();
-
-        if (!mitglied_nr || mitglied_nr === 'MV') {
-            frappe.msgprint(__('Keine gültige Mitgliednummer vorhanden.'));
-            return;
-        }
-
-        if (!frm.doc.sektion_id) {
-            frappe.msgprint(__('Keine Sektion vorhanden.'));
-            return;
-        }
-
-        frappe.call({
-            method: 'mvd.mvd.utils.nextcloud.get_mitglied_ui_url',
-            args: {
-                sektion: frm.doc.sektion_id,
-                mitglied_nr: mitglied_nr
-            },
-            callback: function(r) {
-                if (r.message) {
-                    window.open(r.message, '_blank', 'noopener');
-                } else {
-                    frappe.msgprint(__('Nextcloud-URL konnte nicht ermittelt werden.'));
-                }
-            }
-        });
+    if (!frm.doc.sektion_id) {
+        frappe.msgprint(__('Keine Sektion vorhanden.'));
+        return;
     }
+
+    frappe.call({
+        method: 'mvd.mvd.utils.nextcloud.get_mitglied_ui_url',
+        args: {
+            sektion: frm.doc.sektion_id,
+            mitgliedschaft: frm.doc.name
+        },
+        callback: function(r) {
+            if (r.message) {
+                window.open(r.message, '_blank', 'noopener');
+            } else {
+                frappe.msgprint(__('Nextcloud-URL konnte nicht ermittelt werden.'));
+            }
+        }
+    });
+}

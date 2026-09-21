@@ -89,6 +89,56 @@ class NCSettings():
             mitglied_nr
         )
 
+    def get_interessent_path(self, mitgliedschaft):
+        """
+        Liefert den Nextcloud-Pfad eines Interessenten
+        Beispiel:
+            Mitgliedschaft 123456
+            -> MVZH/Interessenten/123456
+        """
+        if not mitgliedschaft:
+            return None
+
+        if isinstance(mitgliedschaft, str):
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+
+        if not mitgliedschaft.name:
+            return None
+
+        return "{0}/{1}".format(
+            self.BASE_INTERESSENT,
+            mitgliedschaft.name
+        )
+
+
+    def get_mitgliedschaft_path(self, mitgliedschaft):
+        """
+        Liefert abhängig von der Mitgliedschaft den korrekten Nextcloud-Pfad
+        Reguläres Mitglied:
+            MV03712836
+            -> MVZH/Mitglieder/MV03712/MV03712836
+        Interessent*in:
+            status_c = Interessent*in
+            mitglied_nr = MV
+            -> MVZH/Interessenten/<Mitgliedschaft>
+        """
+        if not mitgliedschaft:
+            return None
+
+        if isinstance(mitgliedschaft, str):
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+
+        mitglied_nr = (mitgliedschaft.get("mitglied_nr") or "").strip()
+        status = mitgliedschaft.get("status_c")
+
+        if status == "Interessent*in" and mitglied_nr == "MV":
+            return self.get_interessent_path(mitgliedschaft)
+
+        if mitglied_nr and mitglied_nr != "MV":
+            return self.get_mitglied_path(mitglied_nr)
+
+        return None
+
     def get_mitglied_beratung_path(self, mitglied_nr):
         """
         Liefert den Beratungs-Basisordner eines Mitglieds
@@ -886,14 +936,8 @@ def handle_mitgliedschafts_folder(mitglied):
     if not ncs.IS_ENABLED:
         return
 
-    interessent_path = "{0}/{1}".format(
-        ncs.BASE_INTERESSENT,
-        mitglied.get("name")
-    )
-
-    mitglied_path = ncs.get_mitglied_path(
-        mitglied.get("mitglied_nr")
-    )
+    interessent_path = ncs.get_interessent_path(mitglied)
+    mitglied_path = ncs.get_mitglied_path(mitglied.get("mitglied_nr"))
 
     # Erstelle Sektions-Mitgliedschafts-Odner falls nicht vorhanden
     # oder verschiebe und umbenenne Sektions-Interessenten-Oder zu Sektions-Mitgliedschafts-Odner
@@ -914,11 +958,17 @@ def handle_mitgliedschafts_folder(mitglied):
             frappe.log_error(str(err), "NextCloud: new_mitgliedschaft > ensure_folder")
 
     # Erstelle Sektions-Interessenten-Oder falls nicht vorhanden
-    if not mitglied.get("mitglied_nr") or mitglied.get("mitglied_nr") == "MV":
+    if (
+        mitglied.get("status_c") == "Interessent*in"
+        and mitglied.get("mitglied_nr") == "MV"
+    ):
         try:
             ncs.ensure_folder(interessent_path)
         except Exception as err:
-            frappe.log_error(str(err), "NextCloud: new_mitgliedschaft > ensure_folder")
+            frappe.log_error(
+                str(err),
+                "NextCloud: new_mitgliedschaft > ensure_folder"
+            )
 
 def new_beratung(beratung):
     # Initialisiere globale Settings-Klasse
@@ -1037,15 +1087,7 @@ def list_all_files_tree(sektion=None, mitglied=None):
     
     root_folder_path = '{0}'.format(ncs.BASE_SEKTION)
     if mitglied:
-        mitglied_nr = frappe.db.get_value(
-            "Mitgliedschaft",
-            mitglied,
-            "mitglied_nr"
-        )
-
-        root_folder_path = ncs.get_mitglied_path(
-            mitglied_nr
-        )
+        root_folder_path = ncs.get_mitgliedschaft_path(mitglied)
     
     root_folder_path = (root_folder_path or "").strip("/")
     start_path = "/" + root_folder_path if root_folder_path else "/"
@@ -1223,15 +1265,7 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
     # Root Pfad ermitteln
     root_folder_path = ncs.BASE_SEKTION
     if mitglied:
-        mitglied_nr = frappe.db.get_value(
-            "Mitgliedschaft",
-            mitglied,
-            "mitglied_nr"
-        )
-
-        root_folder_path = ncs.get_mitglied_path(
-            mitglied_nr
-        )
+        root_folder_path = ncs.get_mitgliedschaft_path(mitglied)
 
     root_folder_path = (root_folder_path or "").strip("/")
     start_path = "/" + root_folder_path if root_folder_path else "/"
@@ -1409,11 +1443,21 @@ def convert_nextcloud_files_to_pdf(files, sektion, dt=None, dn=None):
     return convertet_files
 
 @frappe.whitelist()
-def get_mitglied_ui_url(sektion=None, mitglied_nr=None):
-    if not mitglied_nr or not sektion:
+def get_mitglied_ui_url(sektion=None, mitglied_nr=None, mitgliedschaft=None):
+    if not sektion:
         return
 
     ncs = NCSettings(sektion)
-    url = ncs._get_mitglied_ui_url(mitglied_nr)
 
-    return url
+    if mitgliedschaft:
+        path = ncs.get_mitgliedschaft_path(mitgliedschaft)
+    else:
+        path = ncs.get_mitglied_path(mitglied_nr)
+
+    if not path:
+        return
+
+    return "{0}/apps/files/files?dir={1}".format(
+        ncs.BASE_ORIGIN.rstrip("/"),
+        urlparse.quote("/" + path.strip("/"), safe="")
+    )
