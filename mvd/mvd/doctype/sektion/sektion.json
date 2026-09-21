@@ -91,10 +91,6 @@
   "template_bestaetigung_kontaktperson",
   "template_bestaetigung_mitglied",
   "template_suche_vertrauensanwaeltin",
-  "template_bestaetigung_rsv",
-  "rsv_email_absender",
-  "e_mail_rsv",
-  "mandat_zip_passwort",
   "section_mzr",
   "mzr_email",
   "mzr_strasse",
@@ -194,7 +190,11 @@
   "rsv_mail_template_mitglied",
   "rsv_team_cc",
   "rsv_absender_name",
-  "rsv_absender_account"
+  "rsv_absender_account",
+  "template_bestaetigung_rsv",
+  "rsv_email_absender",
+  "e_mail_rsv",
+  "mandat_zip_passwort"
  ],
  "fields": [
   {
@@ -1296,7 +1296,7 @@
    "label": "Mandat ZIP Passwort"
   }
  ],
- "modified": "2026-09-14 11:19:34.474733",
+ "modified": "2026-09-21 15:41:03.112845",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

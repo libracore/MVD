@@ -784,13 +784,25 @@ def get_coop_email_data(docname):
     
     doc.get_rsvmitglied_zip_attachment()
 
+    # Zwei Download-Links: verschluesseltes ZIP (oeffentlich, Passwort aus Sektion)
+    # und unverschluesseltes ZIP im /private/-Bereich (Zugriff ueber ERPNext-Login/Berechtigungen)
+    zip_links = []
+    if doc.zip_file_verschluesselt:
+        zip_links.append(
+            '<a href="{0}">Download der Anlagen als ZIP (verschlüsselt)</a>'.format(
+                get_url(doc.zip_file_verschluesselt)
+            )
+        )
+    if doc.zip_file:
+        zip_links.append(
+            '<a href="{0}">Download der Anlagen als ZIP (Login)</a>'.format(
+                get_url(doc.zip_file)
+            )
+        )
+
     zip_link_html = ""
-    zip_file_path = doc.zip_file_verschluesselt or doc.zip_file
-    
-    if zip_file_path:
-        zip_url = get_url(zip_file_path)
-        zip_link_html = '<br><br><a href="{0}">Download der Anlagen als ZIP</a>'.format(zip_url)
-        zip_link_html = """<br><br><a href="{0}">Download der Anlagen als ZIP</a> """.format(zip_url)
+    if zip_links:
+        zip_link_html = "<br><br>" + "<br>".join(zip_links)
 
     full_message = template_bestaetigung_rsv.get("message") + anzahl_info_html + zip_link_html
     
