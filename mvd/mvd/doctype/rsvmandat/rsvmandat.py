@@ -28,26 +28,26 @@ class RSVMandat(Document):
                 self.sektion_id = rsv_mitglied.sektion_id
         # Neu wird der Status Eingereicht vergeben, wenn das Email an die Coop gesendet wird.
         # Vergeben an VA
-        # found_va_assignment = False
-        # for va in self.va_vergabe:
-        #     if cint(va.assigned) == 1:
-        #         self.datum_va_vergabe = today()
-        #         self.anwalt = get_va_from_user(va.va_user)
-        #         found_va_assignment = True
-        # if found_va_assignment:
-        #     if not self.anwalt: frappe.throw("Der VA konnte nicht gefunden werden.")
-        #     for rsv_mitglied in rsv_mitglieder:
-        #         wrong_status = []
-        #         if frappe.db.get_value("RSVMitglied", rsv_mitglied.name, "status") == 'Geprüft':
-        #             frappe.db.set_value("RSVMitglied", rsv_mitglied.name, "status", "Eingereicht")
-        #         else:
-        #             wrong_status.append(rsv_mitglied.name)
-        #     if len(wrong_status) > 0:
-        #         frappe.msgprint(
-        #             msg="Durch die Vergabe des RSV-Mandats hat das System bei allen zugehörigen RSV-Mitgliedern den Status von Geprüft auf Eingereicht geändert, ausser bei nachfolgenden da deren Status widererwartend nicht Geprüft war:{0}".format("<br>".join(wrong_status)),
-        #             title="RSV-Mitglieder mit unerwarteten Statis",
-        #             indicator="orange"
-        #         )
+        found_va_assignment = False
+        for va in self.va_vergabe:
+            if cint(va.assigned) == 1:
+                self.datum_va_vergabe = today()
+                self.anwalt = get_va_from_user(va.va_user)
+                found_va_assignment = True
+        if found_va_assignment:
+            if not self.anwalt: frappe.throw("Der VA konnte nicht gefunden werden.")
+            # for rsv_mitglied in rsv_mitglieder:
+            #     wrong_status = []
+            #     if frappe.db.get_value("RSVMitglied", rsv_mitglied.name, "status") == 'Geprüft':
+            #         frappe.db.set_value("RSVMitglied", rsv_mitglied.name, "status", "Eingereicht")
+            #     else:
+            #         wrong_status.append(rsv_mitglied.name)
+            # if len(wrong_status) > 0:
+            #     frappe.msgprint(
+            #         msg="Durch die Vergabe des RSV-Mandats hat das System bei allen zugehörigen RSV-Mitgliedern den Status von Geprüft auf Eingereicht geändert, ausser bei nachfolgenden da deren Status widererwartend nicht Geprüft war:{0}".format("<br>".join(wrong_status)),
+            #         title="RSV-Mitglieder mit unerwarteten Statis",
+            #         indicator="orange"
+            #     )
     
     def reset_status(self):
         # Wird via "Speichern" von RSVMitglied getriggert
@@ -60,23 +60,23 @@ class RSVMandat(Document):
             elif cint(refs) > 9 and self.typ != 'GGM':
                 self.typ = 'GGM'
 
-# def get_va_from_user(va_user):
-#     va = frappe.db.sql(
-#             """
-#                 SELECT `parent`
-#                 FROM `tabTermin Kontaktperson Multi User`
-#                 WHERE `user` = '{0}'
-#                 AND `parent` IN (
-#                     SELECT `name`
-#                     FROM `tabTermin Kontaktperson`
-#                     WHERE `ist_vertrauensanwaeltin` = '1'
-#                 )
-#             """.format(va_user),
-#             as_dict=True
-#         )
-#     if len(va) > 0:
-#         return va[0].parent
-#     return ''
+def get_va_from_user(va_user):
+    va = frappe.db.sql(
+            """
+                SELECT `parent`
+                FROM `tabTermin Kontaktperson Multi User`
+                WHERE `user` = '{0}'
+                AND `parent` IN (
+                    SELECT `name`
+                    FROM `tabTermin Kontaktperson`
+                    WHERE `ist_vertrauensanwaeltin` = '1'
+                )
+            """.format(va_user),
+            as_dict=True
+        )
+    if len(va) > 0:
+        return va[0].parent
+    return ''
 
 def update_rsvmandat(rsvmitglied, rsvmandat):
     rsvml = frappe.get_doc("RSVMandat", rsvmandat)

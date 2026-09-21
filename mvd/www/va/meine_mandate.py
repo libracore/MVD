@@ -303,30 +303,13 @@ def get_cards():
 @frappe.whitelist()
 def download_zip(mandat):
     m = frappe.get_doc("RSVMitglied", mandat)
-    file_urls = []
-    for dokument in m.dokumente:
-        if dokument.file_upload:
-            file_urls.append(dokument.file_upload)
-    
-    if len(file_urls) < 1:
-        frappe.throw("Zu diesem Mandat gibt es keine Dokumentation.")
-    
-    zip_buffer = io.BytesIO()
+    file_path = resolve_file_path(m.zip_file)
 
-    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
-        for file_url in file_urls:
-            file_path = resolve_file_path(file_url)
+    with open(file_path, "rb") as f:
+        file_content = f.read()
 
-            if not os.path.exists(file_path):
-                frappe.log_error("File not found: {file_url}".format(file_url=file_url), "ZIP Creation")
-                continue
-
-            zipf.write(file_path, os.path.basename(file_path))
-
-    zip_buffer.seek(0)
-
-    frappe.local.response.filename = "{0}.zip".format(mandat)
-    frappe.local.response.filecontent = zip_buffer.getvalue()
+    frappe.local.response.filename = os.path.basename(file_path)
+    frappe.local.response.filecontent = file_content
     frappe.local.response.type = "download"
 
 def resolve_file_path(file_url):
@@ -340,7 +323,6 @@ def resolve_file_path(file_url):
         filename = file_url.replace("/files/", "", 1)
         return frappe.get_site_path("public", "files", filename)
 
-    frappe.error_log("Page va/meine-mandate: ZIP CreationUnsupported file_url: {0}".format(file_url), "Page va/meine-mandate: ZIP Creation")
     return None
 
 @frappe.whitelist()

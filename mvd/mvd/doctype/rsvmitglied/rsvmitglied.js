@@ -148,7 +148,7 @@ frappe.ui.form.on('RSVMitglied', {
                         is_a_reply: false,                
                         sender: mail_data.sender                        
                     });
-                    frm.set_value('sendung_an_coop', 1);
+                    frm.set_value('sendung_an_coop', frappe.datetime.now_datetime());
                     frm.save();
                 }
             }

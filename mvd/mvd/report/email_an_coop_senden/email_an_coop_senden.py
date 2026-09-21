@@ -12,6 +12,7 @@ def execute(filters=None):
         { "label": _("Vorname"), "fieldname": "vorname", "fieldtype": "Data", "width": 120},
         { "label": _("Nachname"), "fieldname": "nachname", "fieldtype": "Data", "width": 120},
         { "label": _("RSV Mandat"), "fieldname": "rsvmandat", "fieldtype": "Link", "options": "RSVMandat", "width": 150},
+        {"label": _("Mandat Typ"), "fieldname": "typ", "fieldtype": "Data", "width": 130},
         { "label": _("Anwält*in"), "fieldname": "anwalt", "fieldtype": "Link", "options": "Termin Kontaktperson", "width": 160},
         { "label": _("Aktion"), "fieldname": "action_button", "fieldtype": "Data", "width": 180}
     ]
@@ -23,17 +24,18 @@ def execute(filters=None):
             m.vorname,
             m.nachname,
             m.rsvmandat,
+            rm.typ,
             rm.anwalt
         FROM 
             `tabRSVMitglied` m
         INNER JOIN 
             `tabRSVMandat` rm ON m.rsvmandat = rm.name
         WHERE 
-            (m.sendung_an_coop = 0 OR m.sendung_an_coop IS NULL)
+            m.sendung_an_coop IS NULL
             AND rm.anwalt IS NOT NULL 
             AND rm.anwalt != ''
         ORDER BY 
-            m.modified DESC
+            m.rsvmandat ASC
     """, as_dict=True)
 
     for row in data:

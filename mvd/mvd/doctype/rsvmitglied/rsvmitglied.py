@@ -14,6 +14,7 @@ from frappe.utils.file_manager import get_file_path
 from frappe.core.doctype.communication.email import make
 from frappe.utils.password import get_decrypted_password
 from frappe import sendmail
+from frappe.utils import now
 import pyzipper
 import io
 import os
@@ -62,9 +63,6 @@ class RSVMitglied(Document):
             self.fetch_rsv_mandat_themen()
         
         self.fetch_document_table()
-        
-        if self.sendung_an_coop:
-            self.status = 'Eingereicht'
 
         if self.status == 'Geprüft':
             self.datum_pruefung = today()
@@ -178,12 +176,14 @@ class RSVMitglied(Document):
                 file_urls.append(dokument.file_upload)
         
         if len(file_urls) > 0:
-            zip_url = create_zip_and_attach(
+            file_url = create_zip_and_attach(
                 file_urls=file_urls,
                 doctype=self.doctype,
                 docname=self.name,
                 zip_name="Dokumente_{0}.zip".format(self.name)
             )
+            self.db_set("zip_file", file_url)
+            return file_url
     
     def open_beratung(self):
         beratung = frappe.db.sql(
@@ -204,17 +204,20 @@ class RSVMitglied(Document):
 
     def get_rsvmitglied_zip_attachment(self):
         """
-        Sammelt alle angehängten Dateien des Mitglieds, verpackt sie in ein 
-        passwortgeschütztes ZIP-Archiv und generiert einen unerratbaren Dateinamen.
+        Sammelt alle im Feld 'dokumente' hinterlegten Dateien des Mitglieds, 
+        verpackt sie in ein passwortgeschütztes ZIP-Archiv und generiert einen 
+        unerratbaren Dateinamen.
         """
-        # Alle angehängten Dateien des Mitglieds laden
-        files = frappe.get_all("File", filters={
-            "attached_to_doctype": "RSVMitglied",
-            "attached_to_name": self.name
-        }, fields=["file_name", "file_url", "file_size"])
+        self.create_zip()
 
-        if not files:
+        file_urls = []
+        for dokument in self.dokumente:
+            if dokument.file_upload:
+                file_urls.append(dokument.file_upload)
+
+        if not file_urls:
             return None
+
         # Passwort aus der Sektion laden
         sektion_id = frappe.db.get_value("RSVMandat", self.rsvmandat, "sektion_id")
         zip_password = None
@@ -223,21 +226,42 @@ class RSVMitglied(Document):
         if not zip_password:
             frappe.log_error("Kein ZIP-Passwort in der Sektion MVZH hinterlegt.", "RSVMitglied ZIP Error")
             return None              
+
         # ZIP-Erstellung mit AES-Verschlüsselung
         zip_buffer = io.BytesIO()
         with pyzipper.AESZipFile(zip_buffer, "w", compression=pyzipper.ZIP_DEFLATED, encryption=pyzipper.WZ_AES) as zip_file:
             zip_file.setpassword(zip_password.encode('utf-8'))
-            for f in files:
+            for file_url in file_urls:
                 try:
-                    full_path = resolve_file_path(f.file_url)
+                    full_path = resolve_file_path(file_url)
+                    # Dateinamen aus der URL extrahieren (z.B. /files/beispiel.pdf -> beispiel.pdf)
+                    file_name = file_url.split('/')[-1]
                     with open(full_path, "rb") as content:
-                        zip_file.writestr(f.file_name, content.read())
+                        zip_file.writestr(file_name, content.read())
                 except Exception as e:
-                    frappe.log_error("Fehler beim Zippen von {0}: {1}".format(f.file_name, str(e)))
+                    frappe.log_error("Fehler beim Zippen von {0}: {1}".format(file_url, str(e)))
+
         random_hash = frappe.generate_hash(length=32)
+        encrypted_filename = "Anlagen_{0}.zip".format(random_hash)
+        enc_file_path = frappe.get_site_path("public", "files", encrypted_filename)
+        with open(enc_file_path, "wb") as f:
+            f.write(zip_buffer.getvalue())
+
+        enc_file_doc = frappe.get_doc({
+            "doctype": "File",
+            "file_name": encrypted_filename,
+            "file_url": "/files/{0}".format(encrypted_filename),
+            "is_private": 0,
+            "attached_to_doctype": self.doctype,
+            "attached_to_name": self.name
+        })
+        enc_file_doc.insert(ignore_permissions=True)
+        frappe.db.commit()
+
+        self.db_set("zip_file_verschluesselt", enc_file_doc.file_url)
         
         return {
-            "fname": "Anlagen_{0}.zip".format(random_hash),
+            "fname": encrypted_filename,
             "fcontent": zip_buffer.getvalue()
         }
     
@@ -252,7 +276,7 @@ def resolve_file_path(file_url):
         filename = file_url.replace("/files/", "", 1)
         return frappe.get_site_path("public", "files", filename)
 
-    frappe.error_log("RSVMitglied: ZIP CreationUnsupported file_url: {0}".format(file_url), "RSVMitglied: ZIP Creation")
+    frappe.log_error("RSVMitglied: ZIP CreationUnsupported file_url: {0}".format(file_url), "RSVMitglied: ZIP Creation")
     return None
 
 
@@ -264,7 +288,7 @@ def create_zip_and_attach(file_urls, doctype, docname, zip_name="documents.zip")
             file_path = resolve_file_path(file_url)
 
             if not os.path.exists(file_path):
-                frappe.error_log("File not found: {0}".format(file_url), "RSVMitglied: ZIP Creation")
+                frappe.log_error("File not found: {0}".format(file_url), "RSVMitglied: ZIP Creation")
                 continue
 
             arcname = os.path.basename(file_path)
@@ -758,19 +782,14 @@ def get_coop_email_data(docname):
         
     template_bestaetigung_rsv = get_email_template(template_bestaetigung_rsv_name, {"doc": doc})
     
-    zip_data = doc.get_rsvmitglied_zip_attachment()
+    doc.get_rsvmitglied_zip_attachment()
+
     zip_link_html = ""
-    if zip_data:
-        zip_file_doc = frappe.get_doc({
-            "doctype": "File",
-            "file_name": zip_data["fname"],
-            "attached_to_doctype": "RSVMitglied",
-            "attached_to_name": doc.name,
-            "content": zip_data["fcontent"],
-            "is_private": 0
-        })
-        zip_file_doc.insert(ignore_permissions=True)
-        zip_url = get_url(zip_file_doc.file_url)
+    zip_file_path = doc.zip_file_verschluesselt or doc.zip_file
+    
+    if zip_file_path:
+        zip_url = get_url(zip_file_path)
+        zip_link_html = '<br><br><a href="{0}">Download der Anlagen als ZIP</a>'.format(zip_url)
         zip_link_html = """<br><br><a href="{0}">Download der Anlagen als ZIP</a> """.format(zip_url)
 
     full_message = template_bestaetigung_rsv.get("message") + anzahl_info_html + zip_link_html
@@ -820,6 +839,9 @@ def send_coop_email_custom(docname, recipients, cc, subject, content):
         message_id=frappe.get_value("Communication", comm, "message_id"),
         now=True
     )
-    doc.db_set("sendung_an_coop", 1)
+    doc.db_set({
+            "sendung_an_coop": now(),
+            "status": "Eingereicht"
+        })
     
     return True
