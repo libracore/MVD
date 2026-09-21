@@ -156,6 +156,24 @@ class NCSettings():
             self.MITGLIED_BERATUNG_FOLDER
         )
 
+    def get_mitgliedschaft_beratung_path(self, mitgliedschaft):
+        """
+        Liefert den Beratungs-Basisordner einer Mitgliedschaft
+        Reguläres Mitglied:
+            MVZH/Mitglieder/MV03712/MV03712836/Beratungen
+        Interessent*in:
+            MVZH/Interessenten/<Mitgliedschaft>/Beratungen
+        """
+        mitgliedschaft_path = self.get_mitgliedschaft_path(mitgliedschaft)
+
+        if not mitgliedschaft_path:
+            return None
+
+        return "{0}/{1}".format(
+            mitgliedschaft_path,
+            self.MITGLIED_BERATUNG_FOLDER
+        )
+
     def ensure_folder(self, folder_path):
         '''
         Hilfsfunktion zur sicherstellung dass der Zielordner in der Nextcloud existiert.
@@ -973,81 +991,119 @@ def handle_mitgliedschafts_folder(mitglied):
 def new_beratung(beratung):
     # Initialisiere globale Settings-Klasse
     sektion = beratung.sektion_id
-    # global ncs
     ncs = NCSettings(sektion)
 
     # DoNothing wenn NextCloud in der Sektion deaktiviert
     if not ncs.IS_ENABLED:
         return
-    
-    mitglied_nr = None
+
+    # Beratung mit Mitgliedschaft
     if beratung.mv_mitgliedschaft:
-        mitglied_nr = frappe.db.get_value("Mitgliedschaft", beratung.mv_mitgliedschaft, "mitglied_nr")
-    
-    if mitglied_nr and mitglied_nr != "MV":
-        # Erstelle Sektions-Mitgliedschafts-Beratungs-Ordner (& Basis Ordner falls nicht vorhanden)
         try:
-            base_mitglied_beratung = ncs.get_mitglied_beratung_path(mitglied_nr)
-            ncs.ensure_folder(
+            base_mitglied_beratung = ncs.get_mitgliedschaft_beratung_path(beratung.mv_mitgliedschaft)
+
+            if base_mitglied_beratung:
+                ncs.ensure_folder(
+                    "{0}/{1}".format(
+                        base_mitglied_beratung,
+                        beratung.name
+                    )
+                )
+                return
+
+        except Exception as err:
+            frappe.log_error(
+                str(err),
+                "NextCloud: new_beratung > ensure_folder (mit Mitgliedschaft)"
+            )
+            return
+
+    # Beratung ohne Mitgliedschaft
+    try:
+        ncs.ensure_folder(
+            "{0}/{1}".format(
+                ncs.BASE_BERATUNG,
+                beratung.name
+            )
+        )
+    except Exception as err:
+        frappe.log_error(
+            str(err),
+            "NextCloud: new_beratung > ensure_folder (ohne Mitgliedschaft)"
+        )
+
+def added_mitglied_to_beratung(beratung):
+    # Initialisiere globale Settings-Klasse
+    sektion = beratung.sektion_id
+    ncs = NCSettings(sektion)
+
+    # DoNothing wenn NextCloud in der Sektion deaktiviert
+    if not ncs.IS_ENABLED:
+        return
+
+    if beratung.mv_mitgliedschaft:
+        try:
+            base_mitglied_beratung = ncs.get_mitgliedschaft_beratung_path(
+                beratung.mv_mitgliedschaft
+            )
+
+            if not base_mitglied_beratung:
+                return
+
+            # Verschiebe Sektions-Beratungs-Ordner zum
+            # Beratungs-Ordner der Mitgliedschaft
+            ncs.move_folder(
+                "{0}/{1}".format(
+                    ncs.BASE_BERATUNG,
+                    beratung.name
+                ),
                 "{0}/{1}".format(
                     base_mitglied_beratung,
                     beratung.name
                 )
             )
-        except Exception as err:
-            frappe.log_error(str(err), "NextCloud: new_beratung > ensure_folder (mit Mitglied)")
-    else:
-        # Erstelle Sektions-Beratungs-Ordner (& Basis Ordner falls nicht vorhanden)
-        try:
-            ncs.ensure_folder("{0}/{1}".format(ncs.BASE_BERATUNG, beratung.name))
-        except Exception as err:
-            frappe.log_error(str(err), "NextCloud: new_beratung > ensure_folder (ohne Mitglied)")
 
-def added_mitglied_to_beratung(beratung):
-    # Initialisiere globale Settings-Klasse
-    sektion = beratung.sektion_id
-    # global ncs
-    ncs = NCSettings(sektion)
-
-    # DoNothing wenn NextCloud in der Sektion deaktiviert
-    if not ncs.IS_ENABLED:
-        return
-    
-    if beratung.mv_mitgliedschaft:
-        mitglied_nr = frappe.db.get_value("Mitgliedschaft", beratung.mv_mitgliedschaft, "mitglied_nr")
-        if mitglied_nr and mitglied_nr != "MV":
-            # Verschiebe Sektions-Beratungs-Oder zu Sektions-Mitgliedschafts-Beratungs-Oder (wird erstellt wenn nicht vorhanden)
-            try:
-                base_mitglied_beratung = ncs.get_mitglied_beratung_path(mitglied_nr)
-                ncs.move_folder("{0}/{1}".format(ncs.BASE_BERATUNG, beratung.name), "{0}/{1}".format(base_mitglied_beratung, beratung.name))
-            except Exception as err:
-                frappe.log_error(str(err), "NextCloud: added_mitglied_to_beratung > move_folder")
+        except Exception as err:
+            frappe.log_error(
+                str(err),
+                "NextCloud: added_mitglied_to_beratung > move_folder"
+            )
 
 def changed_mitglied_in_beratung(beratung, old_id, new_id):
     # Initialisiere globale Settings-Klasse
     sektion = beratung.sektion_id
-    # global ncs
     ncs = NCSettings(sektion)
 
     # DoNothing wenn NextCloud in der Sektion deaktiviert
     if not ncs.IS_ENABLED:
         return
-    
-    old_mitglied_nr = frappe.db.get_value("Mitgliedschaft", old_id, "mitglied_nr")
-    new_mitglied_nr = frappe.db.get_value("Mitgliedschaft", new_id, "mitglied_nr")
-    if (
-        old_mitglied_nr
-        and old_mitglied_nr != "MV"
-        and new_mitglied_nr
-        and new_mitglied_nr != "MV"
-    ):
-        # Verschiebe Sektions-Beratungs-Oder zu Sektions-Mitgliedschafts-Beratungs-Oder (wird erstellt wenn nicht vorhanden)
-        try:
-            old_base_mitglied_beratung = ncs.get_mitglied_beratung_path(old_mitglied_nr)
-            new_base_mitglied_beratung = ncs.get_mitglied_beratung_path(new_mitglied_nr)
-            ncs.move_folder("{0}/{1}".format(old_base_mitglied_beratung, beratung.name), "{0}/{1}".format(new_base_mitglied_beratung, beratung.name))
-        except Exception as err:
-            frappe.log_error(str(err), "NextCloud: changed_mitglied_in_beratung > move_folder")
+
+    if not old_id or not new_id:
+        return
+
+    try:
+        old_base_mitglied_beratung = ncs.get_mitgliedschaft_beratung_path(old_id)
+        new_base_mitglied_beratung = ncs.get_mitgliedschaft_beratung_path(new_id)
+
+        if not old_base_mitglied_beratung or not new_base_mitglied_beratung:
+            return
+
+        ncs.move_folder(
+            "{0}/{1}".format(
+                old_base_mitglied_beratung,
+                beratung.name
+            ),
+            "{0}/{1}".format(
+                new_base_mitglied_beratung,
+                beratung.name
+            )
+        )
+
+    except Exception as err:
+        frappe.log_error(
+            str(err),
+            "NextCloud: changed_mitglied_in_beratung > move_folder"
+        )
 
 
 """

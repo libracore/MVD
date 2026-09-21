@@ -184,7 +184,7 @@ def sync_file_to_nextcloud(file, event):
             return
 
         return
-    
+
     def sanitize_windows_filename(filename):
         '''
             Sicherstellung Windows-kompatibeler Dateiname
@@ -196,6 +196,7 @@ def sync_file_to_nextcloud(file, event):
             "LPT1", "LPT2", "LPT3", "LPT4", "LPT5",
             "LPT6", "LPT7", "LPT8", "LPT9",
         }
+
         # Ungültige Zeichen ersetzen
         filename = re.sub(r'[<>:"/\\|?*#%&{}~\x00-\x1F]', "_", filename)
 
@@ -214,71 +215,112 @@ def sync_file_to_nextcloud(file, event):
             filename = "_" + filename
 
         return filename
-    
+
     sektion = None
     folder_path = None
 
-    # liegt bereits auf der Nextcloud -> Abbruch
-    if file.nc_remote_path: return
+    # Liegt bereits auf der Nextcloud -> Abbruch
+    if file.nc_remote_path:
+        return
 
+    # -------------------------------------------------------------------------
+    # File gehört direkt zu einer Mitgliedschaft
+    # -------------------------------------------------------------------------
     if file.attached_to_doctype == 'Mitgliedschaft':
-        mitglied_nr = frappe.db.get_value("Mitgliedschaft", file.attached_to_name, "mitglied_nr")
-        sektion = frappe.db.get_value("Mitgliedschaft", file.attached_to_name, "sektion_id")
+        mitgliedschaft = frappe.get_doc(
+            "Mitgliedschaft",
+            file.attached_to_name
+        )
+
+        sektion = mitgliedschaft.sektion_id
+
+        if not sektion:
+            return
+
         ncs = NCSettings(sektion)
 
         if not ncs.IS_ENABLED:
             return
 
-        folder_path = None
-
-        if not mitglied_nr or mitglied_nr == "MV":
-            folder_path = "{0}/{1}".format(
-                    ncs.BASE_INTERESSENT,
-                    file.attached_to_name
-                )
-        else:
-            folder_path = "{0}/{1}".format(
-                ncs.BASE_MITGLIED,
-                mitglied_nr
-            )
+        # Zentrale Pfadermittlung:
+        # - Mitglied       -> Mitglieder/<Gruppe>/<Mitgliednummer>
+        # - Interessent*in -> Interessenten/<Mitgliedschaft>
+        folder_path = ncs.get_mitgliedschaft_path(
+            mitgliedschaft
+        )
 
         if not folder_path:
             return
-    
+
+    # -------------------------------------------------------------------------
+    # File gehört zu einer Beratung
+    # -------------------------------------------------------------------------
     if file.attached_to_doctype == 'Beratung':
-        beratung = frappe.get_doc("Beratung", file.attached_to_name)
+        beratung = frappe.get_doc(
+            "Beratung",
+            file.attached_to_name
+        )
+
         sektion = beratung.sektion_id
 
         if not sektion:
             return
-        
+
         ncs = NCSettings(sektion)
+
         if not ncs.IS_ENABLED:
             return
-        
-        mitglied_nr = None
-        
-        if beratung.mv_mitgliedschaft:
-            mitglied_nr = frappe.db.get_value("Mitgliedschaft", beratung.mv_mitgliedschaft, "mitglied_nr")
-        
-        if mitglied_nr and mitglied_nr != "MV":
-            folder_path = ncs.get_mitglied_path(mitglied_nr)
-        else:
-            folder_path = "{0}/{1}".format(ncs.BASE_BERATUNG, beratung.name)
 
+        # Beratung mit Mitgliedschaft
+        if beratung.mv_mitgliedschaft:
+            base_mitglied_beratung = ncs.get_mitgliedschaft_beratung_path(
+                beratung.mv_mitgliedschaft
+            )
+
+            if not base_mitglied_beratung:
+                return
+
+            folder_path = "{0}/{1}".format(
+                base_mitglied_beratung,
+                beratung.name
+            )
+
+        # Beratung ohne Mitgliedschaft
+        else:
+            folder_path = "{0}/{1}".format(
+                ncs.BASE_BERATUNG,
+                beratung.name
+            )
+
+    # -------------------------------------------------------------------------
+    # File auf Nextcloud hochladen
+    # -------------------------------------------------------------------------
     if sektion and folder_path:
-        file_content = file.get_content()   # liefert Bytes
+        file_content = file.get_content()  # liefert Bytes
         file_name = sanitize_windows_filename(file.file_name)
+
         uploaded_files = ncs.upload_files(
             folder_path,
             [(file_name, file_content)]
         )
-        
+
         if len(uploaded_files) > 0 and uploaded_files[0]['file_url']:
             delete_local_file_from_disk(file)
-            frappe.db.set_value("File", file.name, "file_url", uploaded_files[0]['file_url'])
-            frappe.db.set_value("File", file.name, "nc_remote_path", uploaded_files[0]['remote_path'])
-        
+
+            frappe.db.set_value(
+                "File",
+                file.name,
+                "file_url",
+                uploaded_files[0]['file_url']
+            )
+
+            frappe.db.set_value(
+                "File",
+                file.name,
+                "nc_remote_path",
+                uploaded_files[0]['remote_path']
+            )
+
     return
 
 def remove_file_from_nextcloud(file, event):
