@@ -26,7 +26,7 @@ class RSVMandat(Document):
             # Setzen von sektion_id wenn leer
             if not self.sektion_id and rsv_mitglied.sektion_id:
                 self.sektion_id = rsv_mitglied.sektion_id
-
+        # Neu wird der Status Eingereicht vergeben, wenn das Email an die Coop gesendet wird.
         # Vergeben an VA
         found_va_assignment = False
         for va in self.va_vergabe:
@@ -36,18 +36,18 @@ class RSVMandat(Document):
                 found_va_assignment = True
         if found_va_assignment:
             if not self.anwalt: frappe.throw("Der VA konnte nicht gefunden werden.")
-            for rsv_mitglied in rsv_mitglieder:
-                wrong_status = []
-                if frappe.db.get_value("RSVMitglied", rsv_mitglied.name, "status") == 'Geprüft':
-                    frappe.db.set_value("RSVMitglied", rsv_mitglied.name, "status", "Eingereicht")
-                else:
-                    wrong_status.append(rsv_mitglied.name)
-            if len(wrong_status) > 0:
-                frappe.msgprint(
-                    msg="Durch die Vergabe des RSV-Mandats hat das System bei allen zugehörigen RSV-Mitgliedern den Status von Geprüft auf Eingereicht geändert, ausser bei nachfolgenden da deren Status widererwartend nicht Geprüft war:{0}".format("<br>".join(wrong_status)),
-                    title="RSV-Mitglieder mit unerwarteten Statis",
-                    indicator="orange"
-                )
+            # for rsv_mitglied in rsv_mitglieder:
+            #     wrong_status = []
+            #     if frappe.db.get_value("RSVMitglied", rsv_mitglied.name, "status") == 'Geprüft':
+            #         frappe.db.set_value("RSVMitglied", rsv_mitglied.name, "status", "Eingereicht")
+            #     else:
+            #         wrong_status.append(rsv_mitglied.name)
+            # if len(wrong_status) > 0:
+            #     frappe.msgprint(
+            #         msg="Durch die Vergabe des RSV-Mandats hat das System bei allen zugehörigen RSV-Mitgliedern den Status von Geprüft auf Eingereicht geändert, ausser bei nachfolgenden da deren Status widererwartend nicht Geprüft war:{0}".format("<br>".join(wrong_status)),
+            #         title="RSV-Mitglieder mit unerwarteten Statis",
+            #         indicator="orange"
+            #     )
     
     def reset_status(self):
         # Wird via "Speichern" von RSVMitglied getriggert
