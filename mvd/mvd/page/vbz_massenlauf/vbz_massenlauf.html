@@ -77,7 +77,8 @@
             <td>{% if mahnungen.qty > 0 %}<i id="mahnungen_qty" class="fa fa-eye"></i>{% endif %}</td>
             <td>{% if mahnungen.qty > 0 %}<i id="mahnungen_print" class="fa fa-file"></i>{% endif %}</td>
         </tr>
-        <tr>
+        <!-- START nur für MVZH -->
+        <tr {% if frappe.boot.default_sektion != "MVZH" %} style="display: none;"{% endif %}>
             <td>Heutige Beratungstermine</td>
             {% if beratungstermine.qty > 99 %}
                 <td>99+</td>
@@ -87,6 +88,7 @@
             <td></td>
             <td>{% if beratungstermine.qty > 0 %}<i id="beratungstermine_print" class="fa fa-file"></i>{% endif %}</td>
         </tr>
+        <!-- ENDE nur für MVZH -->
         <tr>
             <td id="alle_massenlaeufe">Alle Massenläufe</td>
             <td></td>
