@@ -33,6 +33,25 @@ frappe.ui.form.on('RSVMitglied', {
             var domain = window.location.origin;
             window.open(`${domain}/va/coop-mandate`, '_blank');
         }, "Öffne");
+
+        if (frm.doc.rsvmandat) {
+            frappe.db.get_value(
+                'RSVMandat',
+                frm.doc.rsvmandat,
+                'anwalt',
+                function(r) {
+                    if (
+                        !frm.doc.sendung_an_coop &&
+                        r.anwalt &&
+                        r.anwalt != ''
+                    ) {
+                        frm.add_custom_button(__("E-Mail an Coop senden"),  function() {
+                            frm.trigger('email_an_coop_senden');
+                        }).addClass('btn-primary');
+                    }
+                }
+            );
+        }
     },
     create_zip_file: function(frm) {
         cur_frm.save().then(() => {
@@ -134,25 +153,28 @@ frappe.ui.form.on('RSVMitglied', {
             freeze_message: __('E-Mail-Daten werden geladen (ZIP wird erstellt)...'),
             callback: function(r) {
                 if (!r.exc && r.message) {
-                    var mail_data = r.message;   
+                    var mail_data = r.message;
                     new frappe.mvd.MailComposer({
                         doc: frm.doc,
                         frm: frm,
-                        subject: mail_data.subject,      
+                        subject: mail_data.subject,
                         recipients: mail_data.recipients, 
                         cc: mail_data.cc,
                         attach_document_print: false,
-                        txt: mail_data.content,     
+                        txt: mail_data.content,
                         email_template: '', 
-                        last_email: '',                   
-                        is_a_reply: false,                
-                        sender: mail_data.sender                        
+                        last_email: '',
+                        is_a_reply: false,
+                        sender: mail_data.sender
                     });
-                    frm.set_value('sendung_an_coop', frappe.datetime.now_datetime());
-                    frm.save();
+                    frm.reload_doc();
                 }
             }
         });
+    },
+    open_mitglied: function(frm) {
+        const url = `/desk#Form/Mitgliedschaft/${frm.doc.mv_mitgliedschaft}`;
+        window.open(url, '_blank');
     }
 });
 

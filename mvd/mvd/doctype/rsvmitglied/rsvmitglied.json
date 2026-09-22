@@ -8,6 +8,7 @@
   "section_mandat",
   "status",
   "open_beratung",
+  "open_mitglied",
   "abschluss_datum",
   "abgelehnt_datum",
   "fallnummer",
@@ -425,9 +426,14 @@
    "fieldtype": "Attach",
    "label": "Zip File verschluesselt",
    "read_only": 1
+  },
+  {
+   "fieldname": "open_mitglied",
+   "fieldtype": "Button",
+   "label": "Zugeh\u00f6riges Mitglied \u00f6ffnen"
   }
  ],
- "modified": "2026-09-21 14:47:53.309314",
+ "modified": "2026-09-22 16:23:21.976404",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",

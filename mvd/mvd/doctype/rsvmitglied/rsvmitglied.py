@@ -259,7 +259,9 @@ class RSVMitglied(Document):
         frappe.db.commit()
 
         self.db_set("zip_file_verschluesselt", enc_file_doc.file_url)
-        
+
+        self.db_set("sendung_an_coop", now())
+
         return {
             "fname": encrypted_filename,
             "fcontent": zip_buffer.getvalue()
