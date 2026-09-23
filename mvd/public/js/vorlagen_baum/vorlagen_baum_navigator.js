@@ -12,7 +12,7 @@ frappe.provide("mvd_vorlagen_baum.ui");
 mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
     constructor(opts) {
         this.wrapper = opts.wrapper;
-        this.sektion_id = opts.sektion_id || this.get_default_sektion() || null;
+        this.sektion_id = opts.sektion_id || null;
         this.purpose = this.normalize_purpose(opts.purpose || null);
         this.on_select = opts.on_select || function() {};
         this.parent_dialog = opts.parent_dialog || null;
@@ -21,7 +21,32 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
         this.path = [];
         this.is_search_mode = false;
 
-        this.make();
+        // Verbesserung aus #2125
+        this.wrapper.hide();
+        if (this.sektion_id) {
+            this.init();
+        } else {
+            this.get_default_sektion().then((sektion_id) => {
+                this.sektion_id = sektion_id;
+                this.init();
+            });
+        }
+    }
+
+    init() {
+        if (this.sektion_id) {
+            frappe.db.get_value(
+                "Vorlagen Baum",
+                { sektion_id: this.sektion_id },
+                "name",
+                (row) => {
+                    if (row && row.name) {
+                        this.make();
+                        this.wrapper.show();
+                    }
+                }
+            );
+        }
     }
 
     normalize_purpose(purpose) {
@@ -766,12 +791,14 @@ mvd_vorlagen_baum.ui.VorlagenBaumNavigator = class VorlagenBaumNavigator {
     }
 
     get_default_sektion() {
-        frappe.call({
-            method: "mvd.mvd.utils.mvd_bootinfo.get_default_sektion",
-            callback: (r) => {
-                if (r.message) return r.message
-                return null
+        return frappe.call({
+            method: "mvd.mvd.utils.mvd_bootinfo.get_default_sektion"
+        }).then((r) => {
+            // Die Serverfunktion liefert [sektion_id, mehrere_sektionen].
+            if (r.message[0] != '') {
+                return r.message[0];
             }
+            return null;
         });
     }
 };
