@@ -130,8 +130,7 @@ frappe.ui.form.on('Mitgliedschaft', {
                 }
             }
             
-            if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
-                
+            if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))) {
                 frm.add_custom_button(__("Beratung"),  function() {
                     erstelle_beratung_only(frm);
                 }, __("Erstelle"));
@@ -146,7 +145,9 @@ frappe.ui.form.on('Mitgliedschaft', {
                         create_rsv_mitglied(frm);
                     }, "Erstelle");
                 }
-                
+            }
+
+            if ((!['Wegzug', 'Ausschluss', 'Online-Kündigung'].includes(cur_frm.doc.status_c))&&(cur_frm.doc.validierung_notwendig == 0)) {
                 if ((!['Gestorben', 'Anmeldung', 'Online-Anmeldung'].includes(cur_frm.doc.status_c))&&(!cur_frm.doc.kuendigung)) {
                     frm.add_custom_button(__("Sektionswechsel"),  function() {
                         if (cur_frm.doc.mitgliedtyp_c == 'Geschäft') {
