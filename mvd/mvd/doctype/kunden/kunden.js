@@ -193,8 +193,22 @@ function firmenrechnungsempfaenger_mandatory(frm) {
 
 function erstelle_rechnung_sonstiges(frm) {
     if (frappe.user.has_role("MV_MA")) {
-        new mvd_dialoge.erstelle_sonstiges_rechnung({
-            dt_scope: "Faktura-Kunde"
+        frappe.call({
+            method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+            args:{
+                    'sektion': cur_frm.doc.sektion_id,
+                    'dokument': 'Rechnung (Sonstiges)',
+                    'language': cur_frm.doc.language
+            },
+            async: false,
+            callback: function(r)
+            {
+                var druckvorlagen = r.message
+                new mvd_dialoge.erstelle_sonstiges_rechnung({
+                    dt_scope: "Faktura-Kunde",
+                    druckvorlagen: druckvorlagen
+                });
+            }
         });
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");

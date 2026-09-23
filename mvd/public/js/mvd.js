@@ -1832,6 +1832,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
 
 mvd_dialoge.erstelle_spenden_rechnung = class ErstelleSpendenRechnung {
     constructor(opts) {
+        this.druckvorlagen = opts.druckvorlagen;
         this.dialog =  new frappe.ui.Dialog({
             title: "Spenden-Rechnungs Erstellung",
             no_submit_on_enter: true,
@@ -1863,9 +1864,14 @@ mvd_dialoge.erstelle_spenden_rechnung = class ErstelleSpendenRechnung {
 
     get_fields() {
         var me = this;
+        let druckvorlagen = me.druckvorlagen;
         return [
             {'fieldname': 'betrag', 'fieldtype': 'Currency', 'label': 'Vorgeschlagener Betrag', 'reqd': 1, 'default': 0.0},
-            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
+            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0,
+                'get_query': function() {
+                    return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                }
+            },
             {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
         ]
     }
@@ -1892,6 +1898,7 @@ mvd_dialoge.erstelle_spenden_rechnung = class ErstelleSpendenRechnung {
 
 mvd_dialoge.erstelle_hv_rechnung = class ErstelleHvRechnung {
     constructor(opts) {
+        this.druckvorlagen = opts.druckvorlagen;
         this.dialog =  new frappe.ui.Dialog({
             title: "HV-Rechnungs Erstellung",
             no_submit_on_enter: true,
@@ -1923,8 +1930,13 @@ mvd_dialoge.erstelle_hv_rechnung = class ErstelleHvRechnung {
 
     get_fields() {
         var me = this;
+        let druckvorlagen = me.druckvorlagen;
         return [
-            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
+            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0,
+                'get_query': function() {
+                    return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                }
+            },
             {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
         ]
     }
@@ -1951,6 +1963,7 @@ mvd_dialoge.erstelle_hv_rechnung = class ErstelleHvRechnung {
 
 mvd_dialoge.erstelle_korrespondenz = class ErstelleKorrespondenz {
     constructor(opts) {
+        this.druckvorlagen = opts.druckvorlagen;
         this.dialog =  new frappe.ui.Dialog({
             title: "Korrespondenz Erstellung",
             no_submit_on_enter: true,
@@ -1982,9 +1995,14 @@ mvd_dialoge.erstelle_korrespondenz = class ErstelleKorrespondenz {
 
     get_fields() {
         var me = this;
+        let druckvorlagen = me.druckvorlagen;
         return [
             {'fieldname': 'titel', 'fieldtype': 'Data', 'label': 'Titel', 'reqd': 1},
-            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage', 'read_only': 0},
+            {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 0, 'options': 'Druckvorlage', 'read_only': 0,
+                'get_query': function() {
+                    return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                }
+            },
             {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
         ]
     }
@@ -2192,6 +2210,7 @@ mvd_dialoge.erstelle_kuendigung = class ErstelleKuendigung {
 mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
     constructor(opts) {
         this.dt_scope = opts.dt_scope || "Mitgliedschaft";
+        this.druckvorlagen = opts.druckvorlagen;
         this.dialog =  new frappe.ui.Dialog({
             title: "Rechnungs Erstellung (Sonstiges)",
             no_submit_on_enter: true,
@@ -2223,9 +2242,14 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
 
     get_fields() {
         var me = this;
+        let druckvorlagen = me.druckvorlagen;
         if (me.dt_scope == "Mitgliedschaft") {
             return [
-                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0,
+                    'get_query': function() {
+                        return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                    }
+                },
                 {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
                 {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Zahlung vor Ort', 'reqd': 0, 'default': 0, 'hidden': 0,
                     'change': function() {
@@ -2321,7 +2345,11 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
             ]
         } else {
             return [
-                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0},
+                {'fieldname': 'druckvorlage', 'fieldtype': 'Link', 'label': 'Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage', 'read_only': 0,
+                    'get_query': function() {
+                        return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
+                    }
+                },
                 {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"},
                 {'fieldname': 'bar_bezahlt', 'fieldtype': 'Check', 'label': 'Zahlung vor Ort', 'reqd': 0, 'default': 0, 'hidden': 0,
                     'change': function() {
