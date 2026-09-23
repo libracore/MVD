@@ -1554,10 +1554,26 @@ function erstelle_folgejahr_rechnung(frm, jahr) {
         },
         'callback': function(settings_response) {
             var settings = settings_response.message;
-            new mvd_dialoge.erstelle_mitgliedschafts_rechnung({
-                settings: settings,
-                folgejahr: true,
-                jahr: jahr
+            frappe.call({
+                method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+                args:{
+                        'sektion': cur_frm.doc.sektion_id,
+                        'dokument': dokument,
+                        'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                        'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                        'language': cur_frm.doc.language
+                },
+                async: false,
+                callback: function(res)
+                {
+                    var druckvorlagen = res.message;
+                    new mvd_dialoge.erstelle_mitgliedschafts_rechnung({
+                        settings: settings,
+                        druckvorlagen: druckvorlagen,
+                        folgejahr: true,
+                        jahr: jahr
+                    });
+                }
             });
         }
     });
@@ -1572,7 +1588,24 @@ function setze_read_only(frm) {
 
 function erstelle_spenden_rechnung(frm) {
     if (frappe.user.has_role("MV_MA")) {
-        new mvd_dialoge.erstelle_spenden_rechnung({});
+        frappe.call({
+            method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+            args:{
+                    'sektion': cur_frm.doc.sektion_id,
+                    'dokument': 'Spende mit EZ',
+                    'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                    'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                    'language': cur_frm.doc.language
+            },
+            async: false,
+            callback: function(res)
+            {
+                var druckvorlagen = res.message;
+                new mvd_dialoge.erstelle_spenden_rechnung({
+                    druckvorlagen: druckvorlagen
+                });
+            }
+        });
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
     }
@@ -1646,7 +1679,24 @@ function override_default_email_dialog(frm) {
 
 function erstelle_hv_rechnung(frm) {
     if (frappe.user.has_role("MV_MA")) {
-        new mvd_dialoge.erstelle_hv_rechnung({});
+        frappe.call({
+            method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+            args:{
+                    'sektion': cur_frm.doc.sektion_id,
+                    'dokument': 'HV mit EZ',
+                    'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                    'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                    'language': cur_frm.doc.language
+            },
+            async: false,
+            callback: function(res)
+            {
+                var druckvorlagen = res.message;
+                new mvd_dialoge.erstelle_hv_rechnung({
+                    druckvorlagen: druckvorlagen
+                });
+            }
+        });
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
     }
@@ -1654,7 +1704,24 @@ function erstelle_hv_rechnung(frm) {
 
 function erstelle_korrespondenz(frm) {
     if (frappe.user.has_role("MV_MA")) {
-        new mvd_dialoge.erstelle_korrespondenz({});
+        frappe.call({
+            method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+            args:{
+                    'sektion': cur_frm.doc.sektion_id,
+                    'dokument': 'Korrespondenz',
+                    //'mitgliedtyp': cur_frm.doc.mitgliedtyp_c,
+                    'reduzierte_mitgliedschaft': cur_frm.doc.reduzierte_mitgliedschaft,
+                    'language': cur_frm.doc.language
+            },
+            async: false,
+            callback: function(res)
+            {
+                var druckvorlagen = res.message;
+                new mvd_dialoge.erstelle_korrespondenz({
+                    druckvorlagen: druckvorlagen
+                });
+            }
+        });
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
     }
@@ -2078,8 +2145,22 @@ function sektionswechsel_vervollstaendigen(frm) {
 
 function erstelle_rechnung_sonstiges(frm) {
     if (frappe.user.has_role("MV_MA")) {
-        new mvd_dialoge.erstelle_sonstiges_rechnung({
-            dt_scope: "Mitgliedschaft"
+        frappe.call({
+            method: "mvd.mvd.doctype.druckvorlage.druckvorlage.get_druckvorlagen",
+            args:{
+                    'sektion': cur_frm.doc.sektion_id,
+                    'dokument': 'Rechnung (Sonstiges)',
+                    'language': cur_frm.doc.language
+            },
+            async: false,
+            callback: function(r)
+            {
+                var druckvorlagen = r.message
+                new mvd_dialoge.erstelle_sonstiges_rechnung({
+                    dt_scope: "Mitgliedschaft",
+                    druckvorlagen: druckvorlagen
+                });
+            }
         });
     } else {
         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
