@@ -49,7 +49,7 @@
             {% else %}
                 {% set ausweisjahr = mitgliedschaft.bezahltes_mitgliedschaftsjahr %}
             {% endif %}
-            <div id='ausweis'>
+            <div id='ausweis' style="color: #003A62;">
                 <b>{{ _("Mitgliederausweis", print_language) }} {{ ausweisjahr }}</b>
                 <div id='ausweis-content'>
                     {% if mitgliedschaft.kundentyp == 'Unternehmen' %}{{ mitgliedschaft.firma }}<br>{% endif %}
