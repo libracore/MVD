@@ -222,33 +222,33 @@
         <!-- ---------------------------------------------------------------------------------------- -->
         <!-- QRR (HV) Daten -->
         <!-- ---------------------------------------------------------------------------------------- -->
-        {% set hv_fr = frappe.get_all('Fakultative Rechnung', filters={'docstatus': 1, 'sales_invoice': doc.name, 'status': 'Unpaid', 'mv_mitgliedschaft': mitgliedschaft.name, 'typ': 'HV'}, fields=['name', 'qrr_referenz', 'betrag', 'status']) %}
-        {% if hv_fr|length > 0 %}
-            {% if hv_fr[0].status == 'Unpaid' %}
-                {% set hv_qrr_message = hv_fr[0].name + " // " + _("Haftpflichtversicherung", print_language) + " // " + mitglied_nr %}
-                {% set hv_qrr = {
-                    'top_position': '382mm',
-                    'iban': bankkonto.iban or '',
-                    'reference': hv_fr[0].qrr_referenz,
-                    'reference_type': 'QRR',
-                    'currency': doc.currency,
-                    'amount': "{:,.2f}".format(hv_fr[0].betrag).replace(",", "'"),
-                    'message': hv_qrr_message,
-                    'additional_information': ' ',
-                    'receiver_name': receiver_name,
-                    'receiver_street': receiver_street,
-                    'receiver_number': receiver_number,
-                    'receiver_country': receiver_country,
-                    'receiver_pincode': receiver_pincode,
-                    'receiver_town': _(receiver_town, print_language or 'de'),
-                    'payer_name': payer_name,
-                    'payer_street': payer_street,
-                    'payer_number': payer_number,
-                    'payer_country': payer_country,
-                    'payer_pincode': payer_pincode,
-                    'payer_town': payer_town,
-                    'language': print_language or 'de'
-                } %}
+            {% set hv_fr = frappe.get_all('Fakultative Rechnung', filters={'docstatus': 1, 'sales_invoice': doc.name, 'status': 'Unpaid', 'mv_mitgliedschaft': mitgliedschaft.name, 'typ': 'HV'}, fields=['name', 'qrr_referenz', 'betrag', 'status']) %}
+            {% if hv_fr|length > 0 %}
+                {% if hv_fr[0].status == 'Unpaid' %}
+                    {% set hv_qrr_message = hv_fr[0].name + " // " + _("Haftpflichtversicherung", print_language) + " // " + mitglied_nr %}
+                    {% set hv_qrr = {
+                        'top_position': '382mm',
+                        'iban': bankkonto.iban or '',
+                        'reference': hv_fr[0].qrr_referenz,
+                        'reference_type': 'QRR',
+                        'currency': doc.currency,
+                        'amount': "{:,.2f}".format(hv_fr[0].betrag).replace(",", "'"),
+                        'message': hv_qrr_message,
+                        'additional_information': ' ',
+                        'receiver_name': receiver_name,
+                        'receiver_street': receiver_street,
+                        'receiver_number': receiver_number,
+                        'receiver_country': receiver_country,
+                        'receiver_pincode': receiver_pincode,
+                        'receiver_town': _(receiver_town, print_language or 'de'),
+                        'payer_name': payer_name,
+                        'payer_street': payer_street,
+                        'payer_number': payer_number,
+                        'payer_country': payer_country,
+                        'payer_pincode': payer_pincode,
+                        'payer_town': payer_town,
+                        'language': print_language or 'de'
+                    } %}
             {% endif %}
         {% endif %}
         <!-- ---------------------------------------------------------------------------------------- -->
@@ -418,11 +418,11 @@
                     <div id='ausweis-rueckseite'></div>
                     <div id="ausweis-rueckseite-zusatz">&nbsp;</div>
                     <br><br><div id="content-{{seite.idx }}">{{ replace_mv_keywords(pre_rendered_inhalt_rueckseite, mitgliedschaft, sinv=sales_invoice) }}</div>
-                    {% endif %}
-               {% endif %}
+                {% endif %}
+            {% endif %}
         {% endif %}
 
-
+        
         <style>
             #content-{{seite.idx }} {
                 margin-left: 26mm;
@@ -432,40 +432,50 @@
                 line-height: 13.5pt !important;
                 clear: both;
                 overflow-y: hidden !important;
-                {% if not seite.einzahlungsschein %}
-                    {% if seite.adressblock or seite.referenzblock %}
-                        {% if seite.fusszeile %}
-                            min-height: 168.5mm;
-                            max-height: 168.5mm;
-                        {% else %}
-                            min-height: 197mm;
-                            max-height: 197mm;
-                        {% endif %}
+                {% if seite.ausweis %}
+                    {% if not seite.einzahlungsschein %}
+                        min-height: 110mm !important;
+                        max-height: 110mm !important;
                     {% else %}
-                        {% if seite.seitenzahlen %}
-                            min-height: 231mm;
-                            max-height: 231mm;
-                        {% else %}
-                            min-height: 233mm;
-                            max-height: 233mm;
-                        {% endif %}
+                        min-height: 40mm !important;
+                        max-height: 40mm !important;
                     {% endif %}
                 {% else %}
-                    {% if seite.adressblock or seite.referenzblock %}
-                        {% if seite.seitenzahlen %}
-                            min-height: 93mm;
-                            max-height: 93mm;
+                    {% if not seite.einzahlungsschein %}
+                        {% if seite.adressblock or seite.referenzblock %}
+                            {% if seite.fusszeile %}
+                                min-height: 168.5mm;
+                                max-height: 168.5mm;
+                            {% else %}
+                                min-height: 197mm;
+                                max-height: 197mm;
+                            {% endif %}
                         {% else %}
-                            min-height: 95mm;
-                            max-height: 95mm;
+                            {% if seite.seitenzahlen %}
+                                min-height: 231mm;
+                                max-height: 231mm;
+                            {% else %}
+                                min-height: 233mm;
+                                max-height: 233mm;
+                            {% endif %}
                         {% endif %}
                     {% else %}
-                        {% if seite.seitenzahlen %}
-                            min-height: 137.5mm;
-                            max-height: 137.5mm;
+                        {% if seite.adressblock or seite.referenzblock %}
+                            {% if seite.seitenzahlen %}
+                                min-height: 93mm;
+                                max-height: 93mm;
+                            {% else %}
+                                min-height: 95mm;
+                                max-height: 95mm;
+                            {% endif %}
                         {% else %}
-                            min-height: 140mm;
-                            max-height: 140mm;
+                            {% if seite.seitenzahlen %}
+                                min-height: 137.5mm;
+                                max-height: 137.5mm;
+                            {% else %}
+                                min-height: 140mm;
+                                max-height: 140mm;
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 {% endif %}
