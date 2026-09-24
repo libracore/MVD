@@ -78,7 +78,7 @@ class RSVMitglied(Document):
             self.abgelehnt_datum = None
     
     def after_insert(self):
-        if not self.adr_egaid:
+        if not self.bfs_nr or not self.adr_egaid:
             gebaeudeverzeichnis_id_and_bfs_nr = get_gebaeudeverzeichnis_id(hausnummer=self.hausnummer, nr_zusatz=self.nr_zusatz, strasse=self.strasse, plz=self.plz, ort=self.ort)
             if gebaeudeverzeichnis_id_and_bfs_nr is not None:
                 self.adr_egaid = gebaeudeverzeichnis_id_and_bfs_nr.get("adr_egaid")
@@ -92,8 +92,7 @@ class RSVMitglied(Document):
                 'rsvmitglied': self.name,
                 'rsvmandat': self.rsvmandat
             }
-            enqueue("mvd.mvd.doctype.rsvmandat.rsvmandat.update_rsvmandat", queue='short', job_name='Update {0}'.format(self.rsvmandat), timeout=5000, **args)
-
+            enqueue("mvd.mvd.doctype.rsvmandat.rsvmandat.update_rsvmandat", queue='short', job_name='Update {0}'.format(self.rsvmandat), timeout=5000, enqueue_after_commit=True, **args)
         if self.mv_mitgliedschaft:
             args = {
                 'mitglied': self.mv_mitgliedschaft
