@@ -192,15 +192,15 @@
         
         <!-- Mitglieder Ausweis -->
         {% if seite.ausweis and mitgliedschaft %}
-            <div id='ausweis'>
-                <b>{{ _("Mitgliederausweis", print_language) }} {{ mitgliedschaft.bezahltes_mitgliedschaftsjahr }}</b>
-                <div id='ausweis-content'>
+            <div id='ausweis' style="color: #003A62 !important;">
+                <b style="color: #003A62 !important;">{{ _("Mitgliederausweis", print_language) }} {{ mitgliedschaft.bezahltes_mitgliedschaftsjahr }}</b>
+                <div id='ausweis-content' style="color: #003A62 !important;">
                     {% if mitgliedschaft.kundentyp == 'Unternehmen' %}{{ mitgliedschaft.firma }}<br>{% endif %}
                     {{ mitgliedschaft.vorname_1 }} {{ mitgliedschaft.nachname_1 }}
                     {% if mitgliedschaft.hat_solidarmitglied %}<br>{{ mitgliedschaft.vorname_2 }} {{ mitgliedschaft.nachname_2 }}{% endif %}
                 </div>
-                <div id="ausweis-footer">
-                        <b>{{ _("Sektion", print_language) }}:</b> {{ mitgliedschaft.sektion_id }}<span id="ausweis-footer-placeholder">...............</span><b>{{ _("Mitglied", print_language) }}:</b> {{ mitgliedschaft.mitglied_nr }}
+                <div id="ausweis-footer" style="color: #003A62 !important;">
+                    <b style="color: #003A62 !important;">{{ _("Sektion", print_language) }}:</b> <span style="color: #003A62 !important;">{{ mitgliedschaft.sektion_id }}</span><span id="ausweis-footer-placeholder">...............</span><b style="color: #003A62 !important;">{{ _("Mitglied", print_language) }}:</b> <span style="color: #003A62 !important;">{{ mitgliedschaft.mitglied_nr }}</span>
                 </div>
             </div>
         {% endif %}
