@@ -84,12 +84,13 @@
   "hinweis_mietzinsrechner_erhoehung",
   "default_terminbest_hinweis_de",
   "default_terminbest_hinweis_fr",
+  "enable_new_beratung_from_mail_after_days",
+  "create_new_beratung_from_mail_after_days",
+  "section_mandate",
   "visierende_person",
   "template_bestaetigung_kontaktperson",
   "template_bestaetigung_mitglied",
   "template_suche_vertrauensanwaeltin",
-  "enable_new_beratung_from_mail_after_days",
-  "create_new_beratung_from_mail_after_days",
   "section_mzr",
   "mzr_email",
   "mzr_strasse",
@@ -189,7 +190,11 @@
   "rsv_mail_template_mitglied",
   "rsv_team_cc",
   "rsv_absender_name",
-  "rsv_absender_account"
+  "rsv_absender_account",
+  "template_bestaetigung_rsv",
+  "rsv_email_absender",
+  "e_mail_rsv",
+  "mandat_zip_passwort"
  ],
  "fields": [
   {
@@ -1262,9 +1267,36 @@
    "fieldname": "nc_interessenten_base_folder",
    "fieldtype": "Data",
    "label": "Interessent*innen Basisordner"
+  },
+  {
+   "fieldname": "template_bestaetigung_rsv",
+   "fieldtype": "Link",
+   "label": "Template Bestaetigung RSV",
+   "options": "Email Template"
+  },
+  {
+   "fieldname": "e_mail_rsv",
+   "fieldtype": "Data",
+   "label": "Email RSV"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_mandate",
+   "fieldtype": "Section Break",
+   "label": "Mandate"
+  },
+  {
+   "fieldname": "rsv_email_absender",
+   "fieldtype": "Data",
+   "label": "RSV E-Mail Absender"
+  },
+  {
+   "fieldname": "mandat_zip_passwort",
+   "fieldtype": "Password",
+   "label": "Mandat ZIP Passwort"
   }
  ],
- "modified": "2026-09-09 13:04:12.484272",
+ "modified": "2026-09-21 15:41:03.112845",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
