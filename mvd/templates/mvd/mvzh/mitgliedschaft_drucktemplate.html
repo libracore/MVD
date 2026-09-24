@@ -290,40 +290,46 @@
                 line-height: 13.5pt !important;
                 clear: both;
                 overflow-y: hidden !important;
-                {% if not seite.einzahlungsschein %}
-                    {% if seite.adressblock or seite.referenzblock %}
-                        {% if seite.fusszeile %}
-                            min-height: 168.5mm;
-                            max-height: 168.5mm;
-                        {% else %}
-                            min-height: 197mm;
-                            max-height: 197mm;
-                        {% endif %}
-                    {% else %}
-                        {% if seite.seitenzahlen %}
-                            min-height: 211.5mm;
-                            max-height: 211.5mm;
-                        {% else %}
-                            min-height: 240mm;
-                            max-height: 240mm;
-                        {% endif %}
-                    {% endif %}
+
+                {% if seite.ausweis %}
+                    min-height: 110mm !important;
+                    max-height: 110mm !important;
                 {% else %}
-                    {% if seite.adressblock or seite.referenzblock %}
-                        {% if seite.fusszeile %}
-                            min-height: 63.5mm;
-                            max-height: 63.5mm;
+                    {% if not seite.einzahlungsschein %}
+                        {% if seite.adressblock or seite.referenzblock %}
+                            {% if seite.fusszeile %}
+                                min-height: 168.5mm;
+                                max-height: 168.5mm;
+                            {% else %}
+                                min-height: 197mm;
+                                max-height: 197mm;
+                            {% endif %}
                         {% else %}
-                            min-height: 92mm;
-                            max-height: 92mm;
+                            {% if seite.seitenzahlen %}
+                                min-height: 211.5mm;
+                                max-height: 211.5mm;
+                            {% else %}
+                                min-height: 240mm;
+                                max-height: 240mm;
+                            {% endif %}
                         {% endif %}
                     {% else %}
-                        {% if seite.seitenzahlen %}
-                            min-height: 133.5mm;
-                            max-height: 133.5mm;
+                        {% if seite.adressblock or seite.referenzblock %}
+                            {% if seite.fusszeile %}
+                                min-height: 63.5mm;
+                                max-height: 63.5mm;
+                            {% else %}
+                                min-height: 92mm;
+                                max-height: 92mm;
+                            {% endif %}
                         {% else %}
-                            min-height: 135mm;
-                            max-height: 135mm;
+                            {% if seite.seitenzahlen %}
+                                min-height: 133.5mm;
+                                max-height: 133.5mm;
+                            {% else %}
+                                min-height: 135mm;
+                                max-height: 135mm;
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 {% endif %}
