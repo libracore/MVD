@@ -41,7 +41,9 @@
   "k_andere",
   "fallergebnisse",
   "titel",
-  "zustaendig_legacy"
+  "zustaendig_legacy",
+  "section_nextcloud",
+  "nextcloud_html"
  ],
  "fields": [
   {
@@ -241,9 +243,19 @@
    "fieldname": "zustaendig_legacy",
    "fieldtype": "Data",
    "label": "zustaendig_legacy"
+  },
+  {
+   "fieldname": "section_nextcloud",
+   "fieldtype": "Section Break",
+   "label": "NextCloud"
+  },
+  {
+   "fieldname": "nextcloud_html",
+   "fieldtype": "HTML",
+   "options": "<div class=\"nextcloud-toolbar\" style=\"margin-bottom: 10px;\"></div>\n<div class=\"nextcloud-tree\"></div>"
   }
  ],
- "modified": "2026-09-19 17:37:10.265670",
+ "modified": "2026-09-25 09:41:18.890558",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Aktivitaet",

@@ -404,11 +404,11 @@ frappe.ui.form.on('Mitgliedschaft', {
         setup_phone_formatters(frm);
 
         // render NextCloud-Files-Tree
-        render_nextcloud_files_tree(frm);
+        frappe.mvd.render_nextcloud_files_tree(frm);
     },
     refresh_files_tree: function(frm) {
         // render NextCloud-Files-Tree
-        render_nextcloud_files_tree(frm);
+        frappe.mvd.render_nextcloud_files_tree(frm);
     },
     m_und_w: function(frm) {
         if (![0, 1].includes(cur_frm.doc.m_und_w)) {
@@ -2366,150 +2366,6 @@ var setup_phone_formatters = function(frm) {
 };
 
 
-function render_nextcloud_files_tree(frm) {
-    return frappe.db.get_value('Sektion', cur_frm.doc.sektion_id, 'nc_enabled')
-    .then(r => {
-        if (r.message.nc_enabled != 1) {
-            cur_frm.set_df_property('section_nextcloud', 'hidden', 1);
-            return;
-        }
-        
-        var $wrapper = $(frm.fields_dict.nextcloud_html.wrapper);
-        const $tree_el = $wrapper.find(".nextcloud-tree");
-        $tree_el.empty();
-
-        frm._nextcloud_tree = new frappe.ui.Tree({
-            parent: $tree_el,
-            label: "Files",
-            method: "mvd.mvd.utils.nextcloud.list_children_tree",
-            args: {
-                sektion: frm.doc.sektion_id,
-                mitglied: frm.doc.name
-            },
-            get_label: function(node) {
-                return node.title || node.label;
-            },
-            show: true,
-            toolbar:  [
-                {
-                    label:__("In NextCloud öffnen"),
-                    condition: function(node) {
-                        const d = node.data || node;
-                        if (d.data) {
-                            if (d.data.type === "folder") {
-                                return true
-                            }
-                        }
-                        return false
-                    },
-                    click: function(node) {
-                        const d = node.data || node;
-                        if (d.data) {
-                            window.open(d.data.nc_link, "_blank", "noopener");
-                        }
-                    },
-                    btnClass: "hidden-xs",
-                    dont_trigger_refresh: true
-                }
-            ],
-            on_click(node) {
-                const d = node.data || node;
-                if (d.data) {
-                    const node_data = d.data;
-                    if (node_data.type === "file") {
-                        window.open(`${node_data.nc_link}&openfile=true`, "_blank", "noopener");
-                    }
-                }
-            }
-        });
-
-        const $toolbar = $wrapper.find(".nextcloud-toolbar");
-
-        $toolbar.empty();
-
-        $toolbar.css({
-            display: "flex",
-            gap: "5px",
-            "align-items": "center",
-            "margin-bottom": "10px"
-        });
-
-        $('<button type="button" class="btn btn-xs btn-default"><i class="fa fa-folder-open"></i> Alle Ordner öffnen</button>')
-            .appendTo($toolbar)
-            .on("click", function() {
-                render_nextcloud_files_tree(frm).then(function() {
-                    return expand_all_nextcloud_folders(frm);
-                });
-            });
-
-        $('<button type="button" class="btn btn-xs btn-default"><i class="fa fa-external-link"></i> NextCloud öffnen</button>')
-            .appendTo($toolbar)
-            .on("click", function() {
-                open_nextcloud_root(frm);
-            });
-    });
-}
-
-function expand_all_nextcloud_folders(frm) {
-    const tree = frm._nextcloud_tree;
-
-    if (!tree || !tree.root_node) {
-        return;
-    }
-
-    function get_children(node) {
-        return Object.values(tree.nodes).filter(function(child) {
-            const parent_label =
-                child.data && child.data.parent_label
-                    ? child.data.parent_label
-                    : child.parent_label;
-
-            return parent_label === node.label;
-        });
-    }
-
-    function expand_recursive(node) {
-        return new Promise(function(resolve) {
-            // Datei / Leaf
-            if (!node.expandable) {
-                resolve();
-                return;
-            }
-
-            function process_node() {
-                // Ordner visuell öffnen
-                if (!node.expanded) {
-                    tree.expand_node(node, false);
-                }
-
-                const children = get_children(node);
-
-                Promise.all(
-                    children.map(function(child) {
-                        return expand_recursive(child);
-                    })
-                ).then(resolve);
-            }
-
-            // Children noch nicht von Nextcloud geladen
-            if (!node.loaded) {
-                tree.load_children(node);
-
-                const wait = setInterval(function() {
-                    if (node.loaded) {
-                        clearInterval(wait);
-                        process_node();
-                    }
-                }, 50);
-            } else {
-                process_node();
-            }
-        });
-    }
-
-    return expand_recursive(tree.root_node);
-}
-
 function create_rsv_mitglied(frm) {
     const opts = {
         objekt_strasse: frm.doc.objekt_strasse,
@@ -2521,26 +2377,4 @@ function create_rsv_mitglied(frm) {
         beratung: null
     };
     new mvd_dialoge.erstelle_rsv_mitglied(opts);
-}
-
-function open_nextcloud_root(frm) {
-    if (!frm.doc.sektion_id) {
-        frappe.msgprint(__('Keine Sektion vorhanden.'));
-        return;
-    }
-
-    frappe.call({
-        method: 'mvd.mvd.utils.nextcloud.get_mitglied_ui_url',
-        args: {
-            sektion: frm.doc.sektion_id,
-            mitgliedschaft: frm.doc.name
-        },
-        callback: function(r) {
-            if (r.message) {
-                window.open(r.message, '_blank', 'noopener');
-            } else {
-                frappe.msgprint(__('Nextcloud-URL konnte nicht ermittelt werden.'));
-            }
-        }
-    });
 }
