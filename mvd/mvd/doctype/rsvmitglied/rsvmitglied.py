@@ -260,6 +260,7 @@ class RSVMitglied(Document):
         self.db_set("zip_file_verschluesselt", enc_file_doc.file_url)
 
         self.db_set("sendung_an_coop", now())
+        self.db_set("status", "Eingereicht")
 
         return {
             "fname": encrypted_filename,
