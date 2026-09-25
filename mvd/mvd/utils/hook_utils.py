@@ -219,8 +219,8 @@ def sync_file_to_nextcloud(file, event):
     sektion = None
     folder_path = None
 
-    # Liegt bereits auf der Nextcloud -> Abbruch
-    if file.nc_remote_path:
+    # Liegt bereits auf der Nextcloud oder soll zwingend lokal gehalten werden -> Abbruch
+    if file.nc_remote_path or file.flags.keep_local_for_rsv_zip:
         return
 
     # -------------------------------------------------------------------------
@@ -293,6 +293,17 @@ def sync_file_to_nextcloud(file, event):
             )
 
     # -------------------------------------------------------------------------
+    # File gehört zu einem RSV-Fall
+    # -------------------------------------------------------------------------
+    if file.attached_to_doctype == 'RSVMitglied':
+        rsvmitglied = frappe.get_doc('RSVMitglied', file.attached_to_name)
+        sektion = rsvmitglied.sektion_id
+        ncs = NCSettings(sektion)
+        if not ncs.IS_ENABLED:
+            return
+        folder_path = ncs.get_rsvmitglied_path(rsvmitglied)
+
+    # -------------------------------------------------------------------------
     # File auf Nextcloud hochladen
     # -------------------------------------------------------------------------
     if sektion and folder_path:
@@ -320,6 +331,10 @@ def sync_file_to_nextcloud(file, event):
                 "nc_remote_path",
                 uploaded_files[0]['remote_path']
             )
+            if file.attached_to_doctype == 'RSVMitglied':
+                # Der Upload-Dialog muss bereits die neue URL erhalten
+                file.file_url = uploaded_files[0]['file_url']
+                file.nc_remote_path = uploaded_files[0]['remote_path']
 
     return
 
@@ -334,6 +349,8 @@ def remove_file_from_nextcloud(file, event):
     
     if file.attached_to_doctype == 'Beratung':
         sektion = frappe.db.get_value("Beratung", file.attached_to_name, "sektion_id")
+    if file.attached_to_doctype == 'RSVMitglied':
+        sektion = frappe.db.get_value("RSVMitglied", file.attached_to_name, "sektion_id")
     
     if sektion:
         ncs = NCSettings(sektion)
@@ -341,4 +358,13 @@ def remove_file_from_nextcloud(file, event):
         if not ncs.IS_ENABLED:
             return
         
-        ncs.delete_file(file.nc_remote_path)
+        remote_path = file.nc_remote_path
+        if file.attached_to_doctype == 'RSVMitglied':
+            # File-ID bleibt auch nach einem Umzug des Mitgliedschaftsordners stabil
+            file_id = (file.file_url or '').rstrip('/').split('/')[-1]
+            if not file_id.isdigit():
+                frappe.throw("Die Nextcloud-Datei besitzt keine gültige File-ID.")
+            remote_path = ncs.get_nextcloud_remote_path(file_id)
+            if not remote_path:
+                return
+        ncs.delete_file(remote_path)

@@ -22,6 +22,8 @@
   "section_mitgliedschafts_overview",
   "uebersicht_html",
   "siedlungs_adressen_html",
+  "section_nextcloud",
+  "nextcloud_html",
   "section_mitgliedschaft",
   "strasse",
   "hausnummer",
@@ -71,6 +73,16 @@
   "data_60"
  ],
  "fields": [
+  {
+   "fieldname": "section_nextcloud",
+   "fieldtype": "Section Break",
+   "label": "NextCloud"
+  },
+  {
+   "fieldname": "nextcloud_html",
+   "fieldtype": "HTML",
+   "options": "<div class=\"nextcloud-toolbar\" style=\"margin-bottom: 10px;\"></div>\n<div class=\"nextcloud-tree\"></div>"
+  },
   {
    "fieldname": "status",
    "fieldtype": "Select",
@@ -433,7 +445,7 @@
    "label": "Zugeh\u00f6riges Mitglied \u00f6ffnen"
   }
  ],
- "modified": "2026-09-22 16:23:21.976404",
+ "modified": "2026-09-25 13:35:27.924211",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",

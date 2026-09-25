@@ -3,6 +3,7 @@
 
 frappe.ui.form.on('RSVMitglied', {
     refresh(frm) {
+        frappe.mvd.render_nextcloud_files_tree(frm);
         // check for TimestampMismatchError and reload
         if (!frm.doc.__islocal) {
             frappe.db.get_value(cur_frm.doctype, cur_frm.docname, 'modified').then(r => {

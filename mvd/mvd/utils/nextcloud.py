@@ -174,6 +174,17 @@ class NCSettings():
             self.MITGLIED_BERATUNG_FOLDER
         )
 
+    def get_rsvmitglied_path(self, rsvmitglied):
+        """RSV-Fall unter der Mitgliedschaft oder direkt unter der Sektion."""
+        if isinstance(rsvmitglied, str):
+            rsvmitglied = frappe.get_doc("RSVMitglied", rsvmitglied)
+        base_path = self.BASE_SEKTION
+        if rsvmitglied.get("mv_mitgliedschaft"):
+            base_path = self.get_mitgliedschaft_path(rsvmitglied.mv_mitgliedschaft)
+        if not base_path or not rsvmitglied.name:
+            return None
+        return "{0}/RSV/{1}".format(base_path, rsvmitglied.name)
+
     def ensure_folder(self, folder_path):
         '''
         Hilfsfunktion zur sicherstellung dass der Zielordner in der Nextcloud existiert.
@@ -203,7 +214,7 @@ class NCSettings():
             path = "/" + path
         return self.WEBDAV_BASE + path
 
-    def move_folder(self, src_folder_path, dst_folder_path):
+    def move_folder(self, src_folder_path, dst_folder_path, overwrite=True):
         """
         Verschiebt einen Ordner (inkl. aller enthaltenen Dateien/Unterordner)
         von src_folder_path nach dst_folder_path in der Nextcloud
@@ -230,7 +241,7 @@ class NCSettings():
             s.auth = (self.USERNAME, self.APP_PASS)
             headers = {
                 "Destination": dst_url,
-                "Overwrite": "T" # überschreiben, falls Ziel schon existiert
+                "Overwrite": "T" if overwrite else "F"
             }
             resp = s.request("MOVE", src_url, headers=headers, verify=self.VERIFY_TLS)
 
@@ -988,6 +999,34 @@ def handle_mitgliedschafts_folder(mitglied):
                 "NextCloud: new_mitgliedschaft > ensure_folder"
             )
 
+def handle_rsvmitglied_folder(rsvmitglied):
+    """Ordner anlegen; Änderungen der Mitgliedschaft oder Sektion nachvollziehen."""
+    ncs = NCSettings(rsvmitglied.get("sektion_id"))
+    old_doc = rsvmitglied.get_doc_before_save()
+    old_ncs = None
+    if old_doc:
+        old_ncs = ncs if old_doc.get("sektion_id") == rsvmitglied.get("sektion_id") else NCSettings(old_doc.get("sektion_id"))
+    old_path = old_ncs.get_rsvmitglied_path(old_doc) if old_ncs and old_ncs.IS_ENABLED else None
+    new_path = ncs.get_rsvmitglied_path(rsvmitglied) if ncs.IS_ENABLED else None
+
+    if old_path and old_path != new_path and old_ncs.folder_exists(old_path):
+        if not new_path:
+            frappe.throw("Der bestehende Nextcloud-Ordner benötigt eine gültige Zielsektion und Mitgliedschaft.")
+        # Bestehende Zielordner niemals überschreiben.
+        old_ncs.move_folder(old_path, new_path, overwrite=False)
+        files = frappe.get_all("File", filters={
+            "attached_to_doctype": "RSVMitglied", "attached_to_name": rsvmitglied.name
+        }, fields=["name", "nc_remote_path"])
+        prefix = "/" + old_path.strip("/") + "/"
+        for file in files:
+            if file.nc_remote_path and ("/" + file.nc_remote_path.lstrip("/")).startswith(prefix):
+                remote_path = "/" + file.nc_remote_path.lstrip("/")
+                frappe.db.set_value("File", file.name, "nc_remote_path",
+                    "/" + new_path.strip("/") + "/" + remote_path[len(prefix):])
+    elif new_path:
+        ncs.ensure_folder(new_path)
+
+
 def new_beratung(beratung):
     # Initialisiere globale Settings-Klasse
     sektion = beratung.sektion_id
@@ -1111,7 +1150,7 @@ def changed_mitglied_in_beratung(beratung, old_id, new_id):
     Soll nicht für die frappe-Tree-View genutzt werden, da dafür die nachfolgende Lazy-Children-Methode (list_children_tree) angedacht ist
 """
 @frappe.whitelist()
-def list_all_files_tree(sektion=None, mitglied=None):
+def list_all_files_tree(sektion=None, mitglied=None, rsvmitglied=None):
     """
     Beispiel Ordner:
         {
@@ -1128,6 +1167,11 @@ def list_all_files_tree(sektion=None, mitglied=None):
             'fileid': '315'
         }
     """
+    if rsvmitglied:
+        rsvmitglied = frappe.get_doc("RSVMitglied", rsvmitglied)
+        rsvmitglied.check_permission("read")
+        sektion = rsvmitglied.sektion_id
+        mitglied = None
     # Initialisiere Settings-Klasse
     if mitglied and not sektion:
         sektion = frappe.db.get_value("Mitgliedschaft", mitglied, "sektion_id") or None
@@ -1144,6 +1188,10 @@ def list_all_files_tree(sektion=None, mitglied=None):
     root_folder_path = '{0}'.format(ncs.BASE_SEKTION)
     if mitglied:
         root_folder_path = ncs.get_mitgliedschaft_path(mitglied)
+    if rsvmitglied:
+        root_folder_path = ncs.get_rsvmitglied_path(rsvmitglied)
+        if not root_folder_path:
+            return []
     
     root_folder_path = (root_folder_path or "").strip("/")
     start_path = "/" + root_folder_path if root_folder_path else "/"
@@ -1297,13 +1345,19 @@ def list_all_files_tree(sektion=None, mitglied=None):
         return _build_node_for_folder(s, start_path)
 
 @frappe.whitelist()
-def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=None, **kwargs):
+def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=None, rsvmitglied=None, **kwargs):
     """
     Lazy-Loader für frappe.ui.Tree
     Liefert direkte Children (Depth:1) eines Ordners als Tree-Nodes
     parent_path: absoluter Pfad ab root (z.B. "/MVZH/Mitglieder/12345")
     """
 
+    if rsvmitglied:
+        rsvmitglied = frappe.get_doc("RSVMitglied", rsvmitglied)
+        rsvmitglied.check_permission("read")
+        sektion = rsvmitglied.sektion_id
+        mitglied = None
+    
     # Sektion ermitteln
     if mitglied and not sektion:
         sektion = frappe.db.get_value("Mitgliedschaft", mitglied, "sektion_id") or None
@@ -1322,6 +1376,10 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
     root_folder_path = ncs.BASE_SEKTION
     if mitglied:
         root_folder_path = ncs.get_mitgliedschaft_path(mitglied)
+    if rsvmitglied:
+        root_folder_path = ncs.get_rsvmitglied_path(rsvmitglied)
+        if not root_folder_path:
+            return []
 
     root_folder_path = (root_folder_path or "").strip("/")
     start_path = "/" + root_folder_path if root_folder_path else "/"
@@ -1336,6 +1394,10 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
     if not folder_abs_path.startswith("/"):
         folder_abs_path = "/" + folder_abs_path
     folder_abs_path = folder_abs_path.rstrip("/") or "/"
+    if rsvmitglied:
+        folder_abs_path = posixpath.normpath(folder_abs_path)
+        if folder_abs_path != start_path and not folder_abs_path.startswith(start_path + "/"):
+            frappe.throw("Der Ordner liegt ausserhalb dieses RSV-Falls.", frappe.PermissionError)
     
     def _propfind_children(session, folder_abs_path):
         url = ncs.join_webdav_path(folder_abs_path)
@@ -1489,9 +1551,28 @@ def convert_nextcloud_files_to_pdf(files, sektion, dt=None, dn=None):
     ncs = NCSettings(sektion=sektion)
     for file in files:
         f = frappe.get_doc("File", file)
-        result = ncs.convert_nextcloud_file_to_pdf_with_onlyoffice(
-            source_path=f.nc_remote_path,
-            target_path=f.nc_remote_path.replace(f.file_name, "PDF/{0}".format(f.file_name.replace(".odt", ".pdf").replace(".docx", ".pdf"))),
+        file_ncs = ncs
+        source_path = f.nc_remote_path
+        if f.attached_to_doctype == "RSVMitglied":
+            f.check_permission("read")
+            rsvmitglied = frappe.get_doc("RSVMitglied", f.attached_to_name)
+            rsvmitglied.check_permission("write")
+            file_ncs = NCSettings(rsvmitglied.sektion_id)
+            if not file_ncs.IS_ENABLED:
+                frappe.throw("Nextcloud ist für diesen RSV-Fall nicht aktiviert.")
+            file_id = (f.file_url or '').rstrip('/').split('/')[-1]
+            if not file_id.isdigit():
+                frappe.throw("Die Nextcloud-Datei besitzt keine gültige File-ID.")
+            source_path = file_ncs.get_nextcloud_remote_path(file_id)
+            if not source_path:
+                frappe.throw("Die Nextcloud-Datei wurde nicht gefunden.")
+        target_path = source_path.replace(f.file_name, "PDF/{0}".format(f.file_name.replace(".odt", ".pdf").replace(".docx", ".pdf")))
+        if f.attached_to_doctype == "RSVMitglied":
+            target_path = posixpath.join(posixpath.dirname(source_path), "PDF",
+                posixpath.splitext(posixpath.basename(source_path))[0] + ".pdf")
+        result = file_ncs.convert_nextcloud_file_to_pdf_with_onlyoffice(
+            source_path=source_path,
+            target_path=target_path,
             dt=dt,
             dn=dn
         )
@@ -1499,13 +1580,21 @@ def convert_nextcloud_files_to_pdf(files, sektion, dt=None, dn=None):
     return convertet_files
 
 @frappe.whitelist()
-def get_mitglied_ui_url(sektion=None, mitglied_nr=None, mitgliedschaft=None):
+def get_mitglied_ui_url(sektion=None, mitglied_nr=None, mitgliedschaft=None, rsvmitglied=None):
+    if rsvmitglied:
+        rsvmitglied = frappe.get_doc("RSVMitglied", rsvmitglied)
+        rsvmitglied.check_permission("read")
+        sektion = rsvmitglied.sektion_id
     if not sektion:
         return
 
     ncs = NCSettings(sektion)
+    if not ncs.IS_ENABLED:
+        return
 
-    if mitgliedschaft:
+    if rsvmitglied:
+        path = ncs.get_rsvmitglied_path(rsvmitglied)
+    elif mitgliedschaft:
         path = ncs.get_mitgliedschaft_path(mitgliedschaft)
     else:
         path = ncs.get_mitglied_path(mitglied_nr)
