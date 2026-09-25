@@ -1559,6 +1559,7 @@ function aktualisiere_verfuegbarkeiten(config, dialog) {
         args:{
             'sektion': config.sektion_id,
             'datum': dialog.get_value('von'),
+            'beraterin': dialog.get_value('kontaktperson')||'',
             'ort': dialog.get_value('ort')||'',
             'marked': localStorage.getItem('selected_termine'),
             'short_results': dialog.get_value('short_results'),
