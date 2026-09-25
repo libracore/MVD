@@ -736,11 +736,28 @@ def fr_bez_bar(fr, datum):
     return
 
 @frappe.whitelist()
-def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False, betrag=False):
+def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False, betrag=False, zahlungsart=None):
     sinv = frappe.get_doc("Sales Invoice", sinv)
     betrag = float(betrag)
     if betrag > sinv.outstanding_amount:
         frappe.throw("Der Bezahlte Betrag darf die ausstehende Summe nicht überschreiten")
+    terminal_payment = None
+    if zahlungsart == 'Zahlungsterminal':
+        if 'MV_RW' not in frappe.get_roles():
+            frappe.throw("Sie haben keine Berechtigung zur Ausführung dieser Aktion.")
+        sinv.check_permission('read')
+        if sinv.docstatus != 1 or betrag <= 0:
+            frappe.throw("Bitte wählen Sie eine gebuchte Rechnung und einen positiven Zahlungsbetrag.")
+        sektion = frappe.get_doc("Sektion", sinv.sektion_id)
+        pos_profile_name = sektion.pos_zahlungsterminal or sektion.pos_barzahlung
+        if not pos_profile_name:
+            frappe.throw("Bitte hinterlegen Sie in der Sektion ein POS-Profil für Zahlungsterminal oder Barzahlung.")
+        pos_profile = frappe.get_doc("POS Profile", pos_profile_name)
+        if pos_profile.company != sinv.company:
+            frappe.throw("Das POS-Profil muss zur Firma der Rechnung gehören.")
+        if not pos_profile.payments or not pos_profile.payments[0].mode_of_payment or not pos_profile.payments[0].account:
+            frappe.throw("Bitte hinterlegen Sie im POS-Profil eine Zahlungsart mit Konto.")
+        terminal_payment = pos_profile.payments[0]
     if hv:
         hv_sinv = create_unpaid_sinv(hv, betrag=10)['sinv']
     
@@ -771,7 +788,12 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False,
         ],
         'reference_no': 'Zahlung vor Ort {0}'.format(sinv.name) if bar else 'EZS-Zahlung {0}'.format(sinv.name),
         'reference_date': datum or today()
-    }).insert()
+    })
+    if terminal_payment:
+        payment_entry_record.mode_of_payment = terminal_payment.mode_of_payment
+        payment_entry_record.paid_to = terminal_payment.account
+        payment_entry_record.reference_no = 'Zahlungsterminal {0}'.format(sinv.name)
+    payment_entry_record.insert()
     
     if hv:
         hv_sinv = frappe.get_doc("Sales Invoice", hv_sinv)
