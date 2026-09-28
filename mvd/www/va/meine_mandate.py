@@ -11,7 +11,7 @@ no_cache = 1
 
 def get_context(context):
     if frappe.session.user == "Guest":
-        frappe.local.flags.redirect_location = "/login"
+        frappe.local.flags.redirect_location = "/login?redirect-to=/va/meine-mandate"
         raise frappe.Redirect
     
     context.card_lists, context.detail_cards = get_cards()
