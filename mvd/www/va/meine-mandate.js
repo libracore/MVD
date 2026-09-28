@@ -1,9 +1,4 @@
-function show_detail_card(mandat) {
-    $('.detail').addClass('hidden');
-    $('.case-card.active').removeClass('active');
-    $(`[data-mandat="${mandat}"]`).addClass('active');
-    $(`[data-belongstomandat="${mandat}"]`).removeClass('hidden');
-}
+// show_detail_card() liegt jetzt in mvd/public/js/va-base.js (gemeinsam mit den anderen VA-Seiten).
 
 function download_zip(mandat) {
     _download_zip(mandat);
@@ -49,6 +44,12 @@ $('#mandate-filter').on('change', function() {
     } else {
         $('[data-closestatus]').show();
     }
+
+    // Einspaltig steht die Detailansicht in der Liste - die einer
+    // ausgefilterten Karte muss darum mit ausgeblendet werden.
+    $('.case-card').filter(':hidden').each(function() {
+        va_detail_for($(this).attr('data-mandat')).addClass('hidden');
+    });
 });
 
 function close_rsvmandat(rsv_mandat) {

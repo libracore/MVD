@@ -23,7 +23,7 @@ function prepare_page(page) {
             <div class="rsv-header">
             <div>
                 <h2>RSV-Mitglieder Übersicht</h2>
-                <p>Status-Verteilung aller RSV-Mitglieder</p>
+                <!--<p>Status-Verteilung aller RSV-Mitglieder</p>-->
             </div>
             </div>
             <div class="rsv-status-grid" id="rsv-status-overview"></div>

@@ -80,6 +80,9 @@ body {
     background: var(--bg-page);
     color: var(--text-body);
     line-height: 1.6;
+    /* Lange Komposita (z.B. "Nebenkostenabrechnung") duerfen auf schmalen
+       Screens umbrechen, statt die Seite seitlich hinauszuschieben. */
+    overflow-wrap: break-word;
 }
 
 h1, h2, h3, h4 {
@@ -139,6 +142,12 @@ h1, h2, h3, h4 {
     display: grid;
     grid-template-columns: 380px 1fr;
     gap: 24px;
+}
+
+/* Ohne min-width:0 waechst eine Grid-Spalte auf die min-content-Breite ihres
+   Inhalts an und schiebt die Seite seitlich ueber den Rand hinaus. */
+.layout > * {
+    min-width: 0;
 }
 
 .list,
@@ -299,6 +308,7 @@ h1, h2, h3, h4 {
     font-size: var(--fs-small);
     color: var(--text-body);
     vertical-align: top;
+    overflow-wrap: break-word;
 }
 
 .section table td:first-child {
@@ -415,19 +425,130 @@ button,
 
 /* ------------------------------------------------------------ Responsive */
 
+/*
+ * Bis 900px ist alles einspaltig. Es gibt dann keine rechte Spalte mehr -
+ * die Detailansicht wird per va-base.js direkt unter die angetippte Karte
+ * in die Liste geschoben und bekommt hier das passende Aussehen.
+ */
 @media (max-width: 900px) {
     .layout {
-    grid-template-columns: 1fr;
+        grid-template-columns: 1fr;
+    }
+
+    /* Titel duerfen einspaltig sauber getrennt werden (<html lang="de">). */
+    .detail h2,
+    .case-card h3,
+    .section h4 {
+        hyphens: auto;
+    }
+
+    /* Der Platzhalter ("Mandat links waehlen") ergibt einspaltig keinen Sinn. */
+    .detail.platzhalter {
+        display: none;
+    }
+
+    /* Detailansicht als aufgeklappter Teil der Karte (Akkordeon-Optik) */
+    .detail-inline {
+        margin: -4px 0 16px;
+        padding: 20px 16px;
+        border-color: var(--color-brand);
+        border-left: 3px solid var(--color-secondary);
+        box-shadow: var(--shadow-card);
+    }
+
+    .filters input,
+    .filters select {
+        width: 100%;
+        min-width: 0;
     }
 }
 
 @media (max-width: 560px) {
     .page {
-    margin: 28px auto;
-    padding: 0 14px;
+        margin: 28px auto;
+        padding: 0 16px;
+    }
+
+    .hero {
+        padding-bottom: 24px;
+        margin-bottom: 28px;
+    }
+
+    .list {
+        padding: 10px;
+    }
+
+    .case-card {
+        padding: 14px;
+    }
+
+    .case-footer {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .detail,
+    .detail-inline {
+        padding: 20px 16px;
     }
 
     .detail-header {
-    flex-direction: column;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    /* Kleiner als --fs-h3: sonst passt ein langes Kompositum wie
+       "Nebenkostenabrechnung" nicht in eine Zeile und wird hart getrennt. */
+    .detail h2 {
+        font-size: 1.375rem;
+    }
+
+    .interest-box {
+        padding: 16px;
+    }
+
+    /* Buttons untereinander und ueber die volle Breite - mit dem Finger
+       besser zu treffen als nebeneinander. */
+    .actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .actions button,
+    .actions .btn {
+        width: 100%;
+    }
+
+    /*
+     * Angaben-Tabellen: Label ueber Wert statt nebeneinander, sonst wird
+     * die Wertspalte zu schmal. Das width:90% aus den Templates steht
+     * inline am <table> und laesst sich nur mit !important ueberschreiben.
+     */
+    .section table {
+        width: 100% !important;
+    }
+
+    .section table,
+    .section tbody,
+    .section tr,
+    .section td {
+        display: block;
+    }
+
+    .section table td {
+        padding: 0;
+        border-bottom: none;
+    }
+
+    .section table td:first-child {
+        padding-top: 10px;
+        padding-right: 0;
+        white-space: normal;
+    }
+
+    .section table td:last-child {
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--color-border);
     }
 }

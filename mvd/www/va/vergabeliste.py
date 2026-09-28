@@ -222,8 +222,8 @@ def get_cards():
             LEFT JOIN `tabRSV Thema MultiTable` t
                 ON t.`parent` = m.`name`
             WHERE
-                NOW() >= m.`publikation_per` + INTERVAL 12 HOUR
-                AND NOW() <  m.`publikation_per` + INTERVAL 7 DAY + INTERVAL 12 HOUR
+                NOW() >= m.`publikation_per` + INTERVAL 15 HOUR
+                AND NOW() <  m.`publikation_per` + INTERVAL 7 DAY + INTERVAL 15 HOUR
                 AND m.`typ` IN ('EM', 'KGM')
                 AND EXISTS (SELECT 1 FROM `tabRSVMitglied` mi WHERE mi.`rsvmandat` = m.`name` AND mi.status = 'Geprüft') -- Achtung, Filter-Duplikat von RSV-Mitglied-Query
             GROUP BY
