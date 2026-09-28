@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from datetime import datetime
+import datetime
 from frappe.utils.data import today
 
 class Siedlungsfall(Document):
@@ -114,12 +114,32 @@ def get_letztes_mandat(mitglied):
         if len(themen):
             thema = themen[0].thema
         
-        return "{0}, {1}, {2}".format(format_date(str(rsv_mitglieder[0].creation)), thema, rsv_mitglieder[0].status)
+        return "{0}, {1}, {2}".format(format_date(rsv_mitglieder[0].creation), thema, rsv_mitglieder[0].status)
     
     return ""
 
-def format_date(date_string):
-    return datetime.fromisoformat(date_string).strftime("%d.%m.%Y")
+def format_date(value):
+    """Gibt ein Datum/einen Zeitstempel als dd.mm.yyyy zurück.
+
+    Ohne datetime.fromisoformat: >= py 3.7,
+    
+    Akzeptiert date/datetime oder einen ISO-String (YYYY-MM-DD...).
+    KEIN dateutil/getdate auf Strings: "01.09.2026" = als 9. Januar,
+    weil dateutil Monat-zuerst interpretiert ?!!?
+    """
+    if not value:
+        return "-"
+    if isinstance(value, (datetime.date, datetime.datetime)):
+        date = value
+    else:
+        try:
+            date = datetime.datetime.strptime(str(value)[:10], "%Y-%m-%d")
+        except ValueError:
+            return "-"
+    if date.year < 1900:
+        # 0001-01-01 = "leeres" Datum in MariaDB/Frappe
+        return "-"
+    return date.strftime("%d.%m.%Y")
 
 def update_mitglied_in_siedlungsfall(mitglied):
     affected_rows = frappe.db.sql(

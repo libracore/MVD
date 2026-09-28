@@ -117,7 +117,7 @@ function bezahlt_mit_ezs(frm, hv_check) {
     }
 }
 
-function bezahlt_in_bar(frm, hv_check) {
+function bezahlt_in_bar(frm, hv_check, zahlungsart=null) {
     if (frappe.user.has_role("MV_RW")) {
         if (hv_check) {
             frappe.prompt([
@@ -127,9 +127,9 @@ function bezahlt_in_bar(frm, hv_check) {
             ],
             function(values){
                 if (values.hv) {
-                    erstelle_zahlung(hv_check, false, values.datum, values.betrag);
+                    erstelle_zahlung(hv_check, false, values.datum, values.betrag, zahlungsart);
                 } else {
-                    erstelle_zahlung(false, false, values.datum, values.betrag);
+                    erstelle_zahlung(false, false, values.datum, values.betrag, zahlungsart);
                 }
             },
             'Zahlungsdetails',
@@ -141,7 +141,7 @@ function bezahlt_in_bar(frm, hv_check) {
                 {'fieldname': 'betrag', 'fieldtype': 'Currency', 'label': 'Betrag (exkl. HV)', 'reqd': 1, 'default': cur_frm.doc.outstanding_amount}
             ],
             function(values){
-                erstelle_zahlung(false, false, values.datum, values.betrag);
+                erstelle_zahlung(false, false, values.datum, values.betrag, zahlungsart);
             },
             'Zahlungsdetails',
             'Ausführen'
@@ -173,6 +173,9 @@ function check_for_hv(frm) {
                 frm.add_custom_button(__("Bezahlt in Bar"), function() {
                     bezahlt_in_bar(frm, r.message[0].name);
                 });
+                frm.add_custom_button(__("Bezahlt mit Zahlungsterminal"), function() {
+                    bezahlt_in_bar(frm, r.message[0].name, 'Zahlungsterminal');
+                });
             } else {
                 frm.add_custom_button(__("Bezahlt mit EZS"), function() {
                     bezahlt_mit_ezs(frm, false);
@@ -180,12 +183,15 @@ function check_for_hv(frm) {
                 frm.add_custom_button(__("Bezahlt in Bar"), function() {
                     bezahlt_in_bar(frm, false);
                 });
+                frm.add_custom_button(__("Bezahlt mit Zahlungsterminal"), function() {
+                    bezahlt_in_bar(frm, false, 'Zahlungsterminal');
+                });
             }
         }
     });
 }
 
-function erstelle_zahlung(hv, ezs, datum=false, betrag=false) {
+function erstelle_zahlung(hv, ezs, datum=false, betrag=false, zahlungsart=null) {
     var args;
     if (ezs) {
         if (hv) {
@@ -221,6 +227,9 @@ function erstelle_zahlung(hv, ezs, datum=false, betrag=false) {
                 'betrag': betrag
             }
         }
+    }
+    if (zahlungsart) {
+        args.zahlungsart = zahlungsart;
     }
     frappe.call({
         method:"mvd.mvd.doctype.camt_import.utils.sinv_bez_mit_ezs_oder_bar",
