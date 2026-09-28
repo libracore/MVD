@@ -1,9 +1,4 @@
-function show_detail_card(mandat) {
-    $('.detail').addClass('hidden');
-    $('.case-card.active').removeClass('active');
-    $(`[data-mandat="${mandat}"]`).addClass('active');
-    $(`[data-belongstomandat="${mandat}"]`).removeClass('hidden');
-}
+// show_detail_card() liegt jetzt in mvd/public/js/va-base.js (gemeinsam mit den anderen VA-Seiten).
 
 function take(mandat, va_in_list) {
     if (va_in_list === 'True') {
