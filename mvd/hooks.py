@@ -253,9 +253,13 @@ scheduler_events = {
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "mvd.event.get_events"
-# }
+override_whitelisted_methods = {
+    "frappe.www.login.login_via_auth0": "mvd.mvd.utils.va_login.login_via_auth0"
+}
+
+extend_website_page_controller_context = {
+    "frappe.www.login": "mvd.mvd.utils.va_login"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
