@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import cint, today
+from frappe.utils import cint, today, escape_html
 import requests
 
 class RSVMandat(Document):
@@ -138,26 +138,38 @@ def get_rsvmitglieder_html(rsv_mandat):
 
     rsv_mitglieder_rows = []
 
+    # Ganze Zeile ist der Link (vorher vier einzelne <a> pro Zeile) - so ist
+    # sichtbar und anklickbar, dass die Zeile auf das RSV-Mitglied fuehrt.
+    row_template = """
+                <a class="mvd-list-row" href="/desk#Form/RSVMitglied/{rsv_mitglied_id}">
+                    <span class="mvd-list-tag" title="{status}">{status}</span>
+                    <span class="mvd-list-cell mvd-list-id">{mitglied_nr}</span>
+                    <span class="mvd-list-cell mvd-list-main" title="{name}">{name}</span>
+                    <span class="mvd-list-cell mvd-list-sub" title="{address}">{address}</span>
+                </a>
+        """
+
     for rsv_mitglied in rsv_mitglieder:
+        name = " ".join([p for p in [rsv_mitglied.vorname, rsv_mitglied.nachname] if p]) or "-"
+        address = " ".join([p for p in [rsv_mitglied.strasse, rsv_mitglied.hausnummer] if p]) or "-"
+
         rsv_mitglieder_rows.append(
-            """
-                <tr>
-                    <td><a href="/desk#Form/RSVMitglied/{rvs_mitglied_id}">{rsv_mitglied_status}</a></td>
-                    <td><a href="/desk#Form/RSVMitglied/{rvs_mitglied_id}">{mitglied_nr}</a></td>
-                    <td><a href="/desk#Form/RSVMitglied/{rvs_mitglied_id}">{rvs_mitglied_name}</a></td>
-                    <td><a href="/desk#Form/RSVMitglied/{rvs_mitglied_id}">{rvs_mitglied_address}</a></td>
-                </tr>
-            """.format(
-                rvs_mitglied_id=rsv_mitglied.name,
-                mitglied_nr=rsv_mitglied.mitglied_nr,
-                rvs_mitglied_name="{0} {1}".format(rsv_mitglied.vorname, rsv_mitglied.nachname),
-                rvs_mitglied_address="{0} {1}".format(rsv_mitglied.strasse, rsv_mitglied.hausnummer),
-                rsv_mitglied_status=rsv_mitglied.status
+            row_template.format(
+                rsv_mitglied_id=escape_html(rsv_mitglied.name),
+                mitglied_nr=escape_html(rsv_mitglied.mitglied_nr or "-"),
+                name=escape_html(name),
+                address=escape_html(address),
+                status=escape_html(rsv_mitglied.status or "-")
             )
         )
 
+    if not rsv_mitglieder_rows:
+        rsv_mitglieder_rows.append(
+            """<div class="mvd-list-empty">Keine RSV-Mitglieder erfasst.</div>"""
+        )
+
     return """
-            <table style="width: 100%;">
+            <div class="mvd-list">
             {rsv_mitglieder_rows}
-            </table>
+            </div>
         """.format(rsv_mitglieder_rows="".join(rsv_mitglieder_rows))

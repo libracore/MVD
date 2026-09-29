@@ -454,6 +454,7 @@ def rsv_dokumente_erhalten(ctx):
 def get_siedlungs_adressen_html(adr_egaid):
     adr = frappe.get_doc("Amtliches Gebaeudeverzeichnis", adr_egaid)
     data = {
+        'adr_egaid': adr_egaid,
         'strasse': adr.stn_label,
         'nummer': adr.adr_number,
         'plz': adr.plz,
