@@ -1,13 +1,11 @@
-<div class="clearfix"></div>
-<div class="row">
-    <!-- Card Allgemein -->
-    <div class="col-sm-12">
-        <div class="address-box">
-            <p><b>Siedlungsadresse</b></p>
-            <p>
-                {{ strasse }} {{ nummer }}<br>
-                {{ plz }} {{ ort }}
-            </p>
-        </div>
-    </div>
+{#
+    Siedlungsadresse eines RSV-Mitglieds - gleiche Zeilenoptik wie die
+    RSV-Mitglieder- und Siedlungsadressen-Listen (.mvd-list in mvd.css).
+#}
+<div class="mvd-list">
+    <a class="mvd-list-row" href="/desk#Form/Amtliches Gebaeudeverzeichnis/{{ adr_egaid }}">
+        <span class="mvd-list-cell mvd-list-id">{{ adr_egaid }}</span>
+        <span class="mvd-list-cell mvd-list-main">{{ strasse }} {{ nummer }}</span>
+        <span class="mvd-list-cell mvd-list-sub">{{ plz }} {{ ort }}</span>
+    </a>
 </div>

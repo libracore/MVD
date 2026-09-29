@@ -225,6 +225,12 @@ def get_cards():
                 NOW() >= m.`publikation_per` + INTERVAL 15 HOUR
                 AND NOW() <  m.`publikation_per` + INTERVAL 7 DAY + INTERVAL 15 HOUR
                 AND m.`typ` IN ('EM', 'KGM')
+                -- Bereits an eine Anwaeltin/einen Anwalt vergeben: nicht mehr
+                -- zur Fallübernahme anbieten
+                AND NOT (
+                    COALESCE(m.`anwalt`, '') != ''
+                    AND m.`datum_va_vergabe` IS NOT NULL
+                )
                 AND EXISTS (SELECT 1 FROM `tabRSVMitglied` mi WHERE mi.`rsvmandat` = m.`name` AND mi.status = 'Geprüft') -- Achtung, Filter-Duplikat von RSV-Mitglied-Query
             GROUP BY
                 m.`name`,

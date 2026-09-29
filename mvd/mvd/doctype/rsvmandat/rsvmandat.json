@@ -20,20 +20,25 @@
   "section_siedlung_2",
   "siedlung_html",
   "section_1",
-  "schlichtungsbehoerde",
   "thema",
   "vermieterin",
-  "verwaltung",
-  "sprachen",
-  "section_va_vergabe",
-  "publikation_per",
   "frist",
-  "verhandlungsdatum",
   "fallnummer",
+  "col_1_column",
+  "schlichtungsbehoerde",
+  "verwaltung",
+  "verhandlungsdatum",
+  "sprachen",
+  "section_beschrieb_und_notizen",
   "kurzbeschrieb",
   "notizen",
+  "section_va_x",
+  "section_va_vergabe",
+  "publikation_per",
   "va_vergabe",
+  "section_vergabe",
   "anwalt",
+  "col_2",
   "datum_va_vergabe",
   "section_rsvmandat_abschluss",
   "verfahrensinstanz",
@@ -204,9 +209,32 @@
    "fieldname": "feedback",
    "fieldtype": "Text",
    "label": "Feedback"
+  },
+  {
+   "fieldname": "col_1_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_vergabe",
+   "fieldtype": "Section Break",
+   "label": "Vergabe"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_beschrieb_und_notizen",
+   "fieldtype": "Section Break",
+   "label": "Beschrieb und Notizen"
+  },
+  {
+   "fieldname": "section_va_x",
+   "fieldtype": "Section Break"
   }
  ],
- "modified": "2026-09-17 13:38:07.477191",
+ "modified": "2026-09-29 10:07:20.171611",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",

@@ -98,10 +98,11 @@ h1, h2, h3, h4 {
 }
 
 /* Editorialer Hero (kein Gradient-Kasten, wie auf mieterverband.ch) */
+/* Ohne eigene Trennlinie: die Unterkante der Tab-Leiste (.va-nav) darunter
+   ist die Linie, zwei direkt uebereinander wirken unruhig. */
 .hero {
-    padding: 0 0 32px;
-    margin-bottom: 40px;
-    border-bottom: 1px solid var(--color-border);
+    padding: 0;
+    margin-bottom: 28px;
 }
 
 .hero h1 {
@@ -114,6 +115,65 @@ h1, h2, h3, h4 {
     color: var(--text-muted);
     font-size: var(--fs-base);
     max-width: 65ch;
+}
+
+/* ------------------------------------------------- Seiten-Navigation */
+
+/* Klassische Tabs: sie sitzen auf der Grundlinie der Leiste, der aktive
+   Tab deckt sie mit seiner Markierung ab und haengt so am Inhalt darunter. */
+.va-nav {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.va-tabs {
+    display: flex;
+    gap: 8px;
+}
+
+.va-tab {
+    padding: 12px 28px;
+    font-size: var(--fs-small);
+    font-weight: 700;
+    color: var(--text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    transition: .15s ease;
+}
+
+.va-tab:hover {
+    color: var(--color-brand);
+    border-bottom-color: var(--color-brand-20);
+    text-decoration: none;
+}
+
+.va-tab.active {
+    color: var(--color-brand);
+    border-bottom-color: var(--color-secondary);
+}
+
+/* Kein Tab, sondern ein tertiaerer Button: helle Flaeche, Navy-Text. */
+.btn-logout {
+    display: inline-block;
+    margin-bottom: 8px;
+    background: var(--bg-tint-blue);
+    border-color: var(--color-brand-20);
+    color: var(--color-brand);
+    text-decoration: none;
+}
+
+.btn-logout:hover {
+    background: var(--color-brand-10);
+    border-color: var(--color-brand-60);
+    color: var(--color-brand);
+    text-decoration: none;
 }
 
 .filters {
@@ -485,6 +545,32 @@ button,
     .case-footer {
         flex-wrap: wrap;
         gap: 4px;
+    }
+
+    /* Tabs und Logout passen nebeneinander nicht mehr in eine Zeile.
+       Der Logout kommt nach oben, die Tableiste direkt ueber den Inhalt -
+       darum wandert die Grundlinie von .va-nav auf .va-tabs. */
+    .va-nav {
+        border-bottom: none;
+        gap: 8px;
+    }
+
+    .va-tabs {
+        order: 2;
+        flex: 1 1 100%;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .va-tab {
+        flex: 1;
+        padding: 12px 10px;
+        text-align: center;
+    }
+
+    .btn-logout {
+        order: 1;
+        margin-left: auto;
+        margin-bottom: 0;
     }
 
     .detail,

@@ -21,19 +21,22 @@
    "fieldname": "plz",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "PLZ"
+   "label": "PLZ",
+   "search_index": 1
   },
   {
    "fieldname": "wohnort",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Wohnort"
+   "label": "Wohnort",
+   "search_index": 1
   },
   {
    "fieldname": "stn_label",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Strasse"
+   "label": "Strasse",
+   "search_index": 1
   },
   {
    "fieldname": "adr_number",
@@ -80,7 +83,7 @@
    "label": "Eidgen\u00f6ssischer Geb\u00e4udeidentifikator"
   }
  ],
- "modified": "2026-07-14 10:52:29.200171",
+ "modified": "2026-09-29 09:56:18.276408",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Amtliches Gebaeudeverzeichnis",

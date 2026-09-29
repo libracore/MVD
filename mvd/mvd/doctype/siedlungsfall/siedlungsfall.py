@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 import datetime
 from frappe.utils.data import today
+from frappe.utils import escape_html
 
 class Siedlungsfall(Document):
     def before_insert(self):
@@ -174,28 +175,46 @@ def update_mitglied_in_siedlungsfall(mitglied):
 
 @frappe.whitelist()
 def get_siedlungsadressen_html(siedlung):
-    html = ""
+    """Adressliste einer Siedlung als klickbare Zeilen (siehe .mvd-list in mvd.css)."""
     siedlung_doc = frappe.get_doc("Siedlung", siedlung)
 
+    # Gleicher Zeilenaufbau wie die RSV-Mitglieder-Liste: Schluessel, Haupt-
+    # angabe, Zusatz. Ohne ADR_EGAID gibt es kein Ziel - dann keine Zeile,
+    # die faelschlich nach Link aussieht.
+    row_template = """
+            <{tag} class="mvd-list-row"{href}>
+                <span class="mvd-list-cell mvd-list-id">{adr_egaid}</span>
+                <span class="mvd-list-cell mvd-list-main" title="{strasse}">{strasse}</span>
+                <span class="mvd-list-cell mvd-list-sub" title="{ort}">{ort}</span>
+            </{tag}>
+    """
+
+    rows = []
+
     for siedlungsadresse in siedlung_doc.zugehoerige_gebaeude:
-        adr_egaid = siedlungsadresse.get("adr_egaid")
-        if adr_egaid and adr_egaid != '':
-            adr_egaid = '<a href="/desk#Form/Amtliches Gebaeudeverzeichnis/{adr_egaid}">{adr_egaid}</a>'.format(adr_egaid=adr_egaid)
-        
-        address_line = "{0} {1}, {2} {3}".format(siedlungsadresse.get("stn_label"), siedlungsadresse.get("adr_number"), siedlungsadresse.get("plz"), siedlungsadresse.get("wohnort"))
-        
-        html += """
-            <div style="display: flex; padding: 6px 0; border-bottom: 1px solid #e5e5e5;">
-                <div style="width: 35%; font-weight: 600; padding-right: 15px; box-sizing: border-box;">
-                    {adr_egaid}
-                </div>
-                <div style="width: 65%; box-sizing: border-box;">
-                    {address_line}
-                </div>
-            </div>
-        """.format(
-            adr_egaid=adr_egaid,
-            address_line=address_line
+        adr_egaid = siedlungsadresse.get("adr_egaid") or ""
+
+        strasse = " ".join([p for p in [siedlungsadresse.get("stn_label"),
+                                        siedlungsadresse.get("adr_number")] if p]) or "-"
+        ort = " ".join([p for p in [siedlungsadresse.get("plz"),
+                                    siedlungsadresse.get("wohnort")] if p]) or "-"
+
+        rows.append(
+            row_template.format(
+                tag="a" if adr_egaid else "div",
+                href=' href="/desk#Form/Amtliches Gebaeudeverzeichnis/{0}"'.format(
+                    escape_html(adr_egaid)) if adr_egaid else "",
+                adr_egaid=escape_html(adr_egaid or "-"),
+                strasse=escape_html(strasse),
+                ort=escape_html(ort)
+            )
         )
 
-    return html
+    if not rows:
+        rows.append("""<div class="mvd-list-empty">Keine Adressen hinterlegt.</div>""")
+
+    return """
+        <div class="mvd-list">
+        {rows}
+        </div>
+    """.format(rows="".join(rows))
