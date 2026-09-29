@@ -1,5 +1,10 @@
 window.onload = function afterWebPageLoad() { 
-    if ((window.location.href.indexOf("/#login") > -1)||(window.location.href.indexOf("/login#login") > -1)) {
+    // Query-Parameter wie redirect-to duerfen die Login-Erkennung nicht beeinflussen.
+    var login_path = window.location.pathname;
+    var login_hash = window.location.hash;
+    if (((login_path === "/login" || login_path === "/login/") &&
+            (login_hash === "" || login_hash === "#login")) ||
+            (login_path === "/" && login_hash === "#login")) {
         $("#login_email").parent().parent().css("display","none");
         $(".social-logins h6").css("display","none");
         $(".forgot-password-message").css("display","none");
@@ -15,7 +20,7 @@ window.onload = function afterWebPageLoad() {
         
         try {
             // Login Toggler
-            locals.login_toggler = 01
+            locals.login_toggler = 1;
             $($(".text-muted.small.col-sm-6.col-12")[0]).on("click", function(){
                 login_toggler();
             });
