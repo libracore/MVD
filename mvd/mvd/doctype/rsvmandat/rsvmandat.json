@@ -37,8 +37,8 @@
   "publikation_per",
   "va_vergabe",
   "section_vergabe",
-  "col_2",
   "anwalt",
+  "col_2",
   "datum_va_vergabe",
   "section_rsvmandat_abschluss",
   "verfahrensinstanz",
@@ -234,7 +234,7 @@
    "fieldtype": "Section Break"
   }
  ],
- "modified": "2026-09-29 09:20:25.427902",
+ "modified": "2026-09-29 10:07:20.171611",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMandat",
