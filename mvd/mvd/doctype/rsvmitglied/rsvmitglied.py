@@ -260,9 +260,6 @@ class RSVMitglied(Document):
 
         self.db_set("zip_file_verschluesselt", enc_file_doc.file_url)
 
-        self.db_set("sendung_an_coop", now())
-        self.db_set("status", "Eingereicht")
-
         return {
             "fname": encrypted_filename,
             "fcontent": zip_buffer.getvalue()
@@ -878,9 +875,25 @@ def send_coop_email_custom(docname, recipients, cc, subject, content):
         message_id=frappe.get_value("Communication", comm, "message_id"),
         now=True
     )
-    doc.db_set({
-            "sendung_an_coop": now(),
-            "status": "Eingereicht"
-        })
+    set_coop_email_gesendet(doc)
     
     return True
+
+@frappe.whitelist()
+def mark_coop_email_sent(docname):
+    """
+    Wird vom Formular aufgerufen, nachdem die E-Mail an die Coop ueber den
+    MailComposer erfolgreich verschickt wurde (#2151).
+    """
+    doc = frappe.get_doc("RSVMitglied", docname)
+    doc.check_permission("write")
+    set_coop_email_gesendet(doc)
+    return True
+
+def set_coop_email_gesendet(doc):
+    # Erst nach dem tatsaechlichen Versand setzen - nicht schon beim Vorbereiten
+    # der E-Mail, sonst sieht ein abgebrochener Versand wie gesendet aus (#2151).
+    doc.db_set({
+        "sendung_an_coop": now(),
+        "status": "Eingereicht"
+    })
