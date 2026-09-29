@@ -291,6 +291,12 @@ def get_data():
                     "description": _("Amtliches Gebäudeverzeichnis")
                 },
                 {
+                    "type": "page",
+                    "name": "gebaeude-suche",
+                    "label": _("Suche im Amtl. Gebäudeverz."),
+                    "description": _("Suche im Amtlichen Gebäudeverzeichnis")
+                },
+                {
                     "type": "doctype",
                     "name": "Retouren",
                     "label": _("Retouren"),

@@ -2654,12 +2654,12 @@ frappe.mvd.get_swisstopo_url = function(ADR_EGAID) {
     });
 }
 
-// Gemeinsame Nextcloud-Ansicht für Mitgliedschaft und Aktivitaet.
+// Gemeinsame Nextcloud-Ansicht für Mitgliedschaft, Aktivitaet und RSVMitglied.
 frappe.provide('frappe.mvd');
 frappe.mvd.render_nextcloud_files_tree = function(frm) {
-    const mitglied = frm.doc.doctype === 'Mitgliedschaft'
-        ? (frm.is_new() ? null : frm.doc.name) : frm.doc.mv_mitgliedschaft;
+    const mitglied = frm.doc.doctype === 'Mitgliedschaft' ? (frm.is_new() ? null : frm.doc.name) : frm.doc.mv_mitgliedschaft;
     const sektion = frm.doc.sektion_id;
+    const rsvmitglied = frm.doc.doctype === 'RSVMitglied' && !frm.is_new() ? frm.doc.name : null;
     const request_id = (frm._nextcloud_request_id || 0) + 1;
     frm._nextcloud_request_id = request_id;
     if (!frm.fields_dict.nextcloud_html) {
@@ -2669,7 +2669,7 @@ frappe.mvd.render_nextcloud_files_tree = function(frm) {
     $wrapper.find('.nextcloud-tree, .nextcloud-toolbar').empty();
     frm._nextcloud_tree = null;
     frm.set_df_property('section_nextcloud', 'hidden', 1);
-    if (!mitglied || !sektion) {
+    if ((!mitglied && !rsvmitglied) || !sektion || (frm.doc.doctype === 'RSVMitglied' && frm.is_new())) {
         return Promise.resolve();
     }
     return frappe.db.get_value('Sektion', sektion, 'nc_enabled')
@@ -2688,7 +2688,8 @@ frappe.mvd.render_nextcloud_files_tree = function(frm) {
             method: "mvd.mvd.utils.nextcloud.list_children_tree",
             args: {
                 sektion: sektion,
-                mitglied: mitglied
+                mitglied: mitglied,
+                rsvmitglied: rsvmitglied
             },
             get_label: function(node) {
                 return node.title || node.label;
@@ -2749,7 +2750,7 @@ frappe.mvd.render_nextcloud_files_tree = function(frm) {
         $('<button type="button" class="btn btn-xs btn-default"><i class="fa fa-external-link"></i> NextCloud öffnen</button>')
             .appendTo($toolbar)
             .on("click", function() {
-                frappe.mvd.open_nextcloud_root(sektion, mitglied);
+                frappe.mvd.open_nextcloud_root(sektion, mitglied, rsvmitglied);
             });
     });
 };
@@ -2814,8 +2815,8 @@ frappe.mvd.expand_all_nextcloud_folders = function(frm) {
     return expand_recursive(tree.root_node);
 };
 
-frappe.mvd.open_nextcloud_root = function(sektion, mitglied) {
-    if (!sektion || !mitglied) {
+frappe.mvd.open_nextcloud_root = function(sektion, mitglied, rsvmitglied) {
+    if (!sektion || (!mitglied && !rsvmitglied)) {
         frappe.msgprint(__('Keine Sektion oder Mitgliedschaft vorhanden.'));
         return;
     }
@@ -2824,7 +2825,8 @@ frappe.mvd.open_nextcloud_root = function(sektion, mitglied) {
         method: 'mvd.mvd.utils.nextcloud.get_mitglied_ui_url',
         args: {
             sektion: sektion,
-            mitgliedschaft: mitglied
+            mitgliedschaft: mitglied,
+            rsvmitglied: rsvmitglied
         },
         callback: function(r) {
             if (r.message) {

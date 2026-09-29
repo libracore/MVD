@@ -154,6 +154,11 @@ frappe.vbz_beratung_termine = {
                 ""
             ),
 
+            datumsbereich_strikt: this.get_filter_value(
+                "datumsbereich_strikt_field",
+                "0"
+            ),
+
             language: this.get_filter_value(
                 "language_field",
                 ""
@@ -415,6 +420,14 @@ frappe.vbz_beratung_termine = {
                 placeholder: "Datum bis"
             },
             {
+                property_name: "datumsbereich_strikt_field",
+                value_name: "datumsbereich_strikt",
+                parent_selector: ".datumsbereich_strikt",
+                fieldtype: "Check",
+                fieldname: "datumsbereich_strikt",
+                label: "Datumsbereich strikt anwenden"
+            },
+            {
                 property_name: "language_field",
                 value_name: "language",
                 parent_selector: ".sprache",
@@ -601,6 +614,7 @@ frappe.vbz_beratung_termine = {
             "art",
             "datum",
             "datum_bis",
+            "datumsbereich_strikt",
             "language",
             "fachskill",
             "my_reservations_only",

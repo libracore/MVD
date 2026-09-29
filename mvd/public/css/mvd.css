@@ -14,3 +14,110 @@
 .file-browser-list.border.rounded {
     visibility: hidden !important;
 }
+/* ---------------------------------------------------------------------
+ * Klickbare Zeilenlisten in HTML-Feldern
+ * (RSV-Mitglieder und Siedlungsadressen in RSVMandat / RSVMitglied /
+ * Siedlungsfall). Eine Zeile = ein Link auf den zugehoerigen Datensatz.
+ *
+ * Bewusst ruhig: eine feine Trennlinie statt Tabellenrahmen, gedaempfte
+ * Sekundaertexte, neutrale Status-Labels ohne Ampelfarben. Das einzige
+ * Klick-Signal sind Zeiger, Hover-Flaeche und Chevron - und die gibt es
+ * nur auf Zeilen, die wirklich ein Ziel haben.
+ * ------------------------------------------------------------------ */
+
+.mvd-list {
+    border: 1px solid #e2e6e9;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.mvd-list-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 12px;
+    border-top: 1px solid #edf0f2;
+    color: inherit;
+    font-size: 13px;
+    line-height: 1.5;
+    text-decoration: none;
+}
+
+.mvd-list-row:first-child {
+    border-top: none;
+}
+
+a.mvd-list-row {
+    cursor: pointer;
+    transition: background-color .12s ease;
+}
+
+a.mvd-list-row:hover,
+a.mvd-list-row:focus {
+    background: #f4f6f8;
+    color: inherit;
+    text-decoration: none;
+}
+
+a.mvd-list-row::after {
+    content: "\203A";
+    margin-left: auto;
+    padding-left: 8px;
+    color: #c2c9cf;
+    font-size: 16px;
+    line-height: 1;
+}
+
+a.mvd-list-row:hover::after {
+    color: #6c757d;
+}
+
+/* Spalten: alle kuerzen statt umbrechen, damit die Zeilenhoehe ruhig bleibt */
+.mvd-list-cell {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Schluesselspalte links (Mitgliednr., ADR_EGAID): nie kuerzen - eine halbe
+   Nummer ist wertlos. min-width haelt die Kante gerade, wenn Werte kurz sind. */
+.mvd-list-id {
+    flex: 0 0 auto;
+    min-width: 96px;
+    color: #8d959b;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Hauptangabe (Name, Strasse) */
+.mvd-list-main {
+    flex: 1 1 40%;
+    font-weight: 600;
+}
+
+/* Zusatzangabe (Adresse, Ort) */
+.mvd-list-sub {
+    flex: 1 1 40%;
+    color: #8d959b;
+}
+
+/* Neutrales Status-Label - ebenfalls ungekuerzt, min-width fuer die Kante */
+.mvd-list-tag {
+    flex: 0 0 auto;
+    min-width: 116px;
+    white-space: nowrap;
+    padding: 2px 9px;
+    border-radius: 10px;
+    background: #f0f2f4;
+    color: #5c666e;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.mvd-list-empty {
+    padding: 10px 12px;
+    color: #8d959b;
+    font-size: 13px;
+}

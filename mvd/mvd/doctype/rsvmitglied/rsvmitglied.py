@@ -19,9 +19,10 @@ import pyzipper
 import io
 import os
 import zipfile
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_doc_from_ctx
 from html import escape
+from mvd.mvd.utils.nextcloud import NCSettings, handle_rsvmitglied_folder
 try:
     from jinja2 import pass_context as context_decorator
 except ImportError:
@@ -87,6 +88,7 @@ class RSVMitglied(Document):
         self.save()
     
     def on_update(self):
+        handle_rsvmitglied_folder(self)
         if self.rsvmandat:
             args = {
                 'rsvmitglied': self.name,
@@ -232,11 +234,8 @@ class RSVMitglied(Document):
             zip_file.setpassword(zip_password.encode('utf-8'))
             for file_url in file_urls:
                 try:
-                    full_path = resolve_file_path(file_url)
-                    # Dateinamen aus der URL extrahieren (z.B. /files/beispiel.pdf -> beispiel.pdf)
-                    file_name = file_url.split('/')[-1]
-                    with open(full_path, "rb") as content:
-                        zip_file.writestr(file_name, content.read())
+                    file_name, content = get_rsv_file_content(file_url, self)
+                    zip_file.writestr(file_name, content)
                 except Exception as e:
                     frappe.log_error("Fehler beim Zippen von {0}: {1}".format(file_url, str(e)))
 
@@ -254,6 +253,8 @@ class RSVMitglied(Document):
             "attached_to_doctype": self.doctype,
             "attached_to_name": self.name
         })
+        # Öffentlicher Versandlink muss weiterhin ohne Nextcloud-Login funktionieren.
+        enc_file_doc.flags.keep_local_for_rsv_zip = True
         enc_file_doc.insert(ignore_permissions=True)
         frappe.db.commit()
 
@@ -267,6 +268,28 @@ class RSVMitglied(Document):
             "fcontent": zip_buffer.getvalue()
         }
     
+def get_rsv_file_content(file_url, rsvmitglied):
+    """Lokale Dokumente und Nextcloud-Dateien für beide ZIP-Varianten lesen."""
+    if file_url.startswith(('https://', 'http://')):
+        ncs = NCSettings(rsvmitglied.get('sektion_id'))
+        if not ncs.IS_ENABLED:
+            frappe.throw("Nextcloud ist für diesen RSV-Fall nicht aktiviert.")
+        parsed = urlparse(file_url)
+        origin = urlparse(ncs.BASE_ORIGIN)
+        file_id = parsed.path.rstrip('/').split('/')[-1]
+        if (parsed.scheme, parsed.netloc) != (origin.scheme, origin.netloc) or not file_id.isdigit():
+            frappe.throw("Ungültige Nextcloud-Datei: {0}".format(file_url))
+        remote_path = ncs.get_nextcloud_remote_path(file_id)
+        if not remote_path:
+            frappe.throw("Die Nextcloud-Datei wurde nicht gefunden: {0}".format(file_url))
+        return os.path.basename(remote_path), ncs.download_file(remote_path)
+    file_path = resolve_file_path(file_url)
+    if not file_path or not os.path.isfile(file_path):
+        frappe.throw("Datei nicht gefunden: {0}".format(file_url))
+    with open(file_path, 'rb') as content:
+        return os.path.basename(file_path), content.read()
+
+
 def resolve_file_path(file_url):
     file_url = unquote(file_url)
 
@@ -284,17 +307,17 @@ def resolve_file_path(file_url):
 
 def create_zip_and_attach(file_urls, doctype, docname, zip_name="documents.zip"):
     zip_path = frappe.get_site_path("private", "files", zip_name)
+    rsvmitglied = frappe.get_doc(doctype, docname)
 
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for file_url in file_urls:
-            file_path = resolve_file_path(file_url)
-
-            if not os.path.exists(file_path):
-                frappe.log_error("File not found: {0}".format(file_url), "RSVMitglied: ZIP Creation")
-                continue
-
-            arcname = os.path.basename(file_path)
-            zipf.write(file_path, arcname)
+            if not file_url.startswith(('https://', 'http://')):
+                file_path = resolve_file_path(file_url)
+                if not file_path or not os.path.exists(file_path):
+                    frappe.log_error("File not found: {0}".format(file_url), "RSVMitglied: ZIP Creation")
+                    continue
+            file_name, content = get_rsv_file_content(file_url, rsvmitglied)
+            zipf.writestr(file_name, content)
 
     file_doc = frappe.get_doc({
         "doctype": "File",
@@ -305,6 +328,7 @@ def create_zip_and_attach(file_urls, doctype, docname, zip_name="documents.zip")
         "attached_to_name": docname
     })
 
+    file_doc.flags.keep_local_for_rsv_zip = True
     file_doc.insert(ignore_permissions=True)
     frappe.db.commit()
 
@@ -454,6 +478,7 @@ def rsv_dokumente_erhalten(ctx):
 def get_siedlungs_adressen_html(adr_egaid):
     adr = frappe.get_doc("Amtliches Gebaeudeverzeichnis", adr_egaid)
     data = {
+        'adr_egaid': adr_egaid,
         'strasse': adr.stn_label,
         'nummer': adr.adr_number,
         'plz': adr.plz,

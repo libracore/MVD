@@ -25,7 +25,8 @@ def get_open_data(
     termine_gebucht=0,
     datum_bis=None,
     chronologische_termine=0,
-    geschaeftsstelle=None):
+    geschaeftsstelle=None,
+    datumsbereich_strikt=0):
 
     # Entferne Platzhalter Werte
     if geschaeftsstelle == "Geschäftsstelle": geschaeftsstelle = None
@@ -36,7 +37,7 @@ def get_open_data(
                                                                                berater_in, art, datum, language, fachskill,
                                                                                my_reservations_only, beratungstyp, termine_heute,
                                                                                termine_gebucht, datum_bis, chronologische_termine,
-                                                                               geschaeftsstelle)
+                                                                               geschaeftsstelle, datumsbereich_strikt)
     datasets = {
         'datenstand_as': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'alle_termine': alle_termine,
@@ -58,7 +59,8 @@ def get_alle_beratungs_termine(
     termine_gebucht=0,
     datum_bis=None,
     chronologische_termine=0,
-    geschaeftsstelle=None):
+    geschaeftsstelle=None,
+    datumsbereich_strikt=0):
 
     alle = []
     meine = []
@@ -104,6 +106,10 @@ def get_alle_beratungs_termine(
             `berTer`.`von` >= '{datum_von} 00:00:00'
             AND `berTer`.`von` <= '{datum_von} 23:59:59'
         """.format(datum_von=datum_von)
+    elif cint(datumsbereich_strikt):
+        datum_filter = "`berTer`.`von` >= '{0} 00:00:00'".format(datum_von)
+        if datum_bis:
+            datum_filter += " AND `berTer`.`von` <= '{0} 23:59:59'".format(datum_bis)
     else:
         if (datum_bis):
             datum_filter = """
@@ -385,6 +391,8 @@ def get_alle_beratungs_termine(
             datum_filter = """
                 AND `zuw`.`date` >= '{datum_von}'
             """.format(datum_von=datum_von)
+            if cint(datumsbereich_strikt) and datum_bis:
+                datum_filter += " AND `zuw`.`date` <= '{0}'".format(datum_bis)
         
         art_filter = ''
         if art and art != '':
