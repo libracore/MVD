@@ -241,11 +241,11 @@
         font-size: 9.5pt !important;
         line-height: 13.5pt !important;
         clear: both;
-        overflow-y: hidden !important;
-        min-height: 168.5mm;
-        max-height: 168.5mm;
+        margin-top: 5mm;
+        min-height: auto;
+        max-height: none;
     }
-    /* Weil die Artikeltabelle zu lang wird und der EZ darüber liegen würde, muss ein Dirty Hack angewendet werden */
+    
     #content-1-no-limit {
         margin-left: 26mm;
         min-width: 161.5mm;
@@ -253,9 +253,9 @@
         font-size: 9.5pt !important;
         line-height: 13.5pt !important;
         clear: both;
-        overflow-y: hidden !important;
-        min-height: 168.5mm;
-        max-height: 168.5mm;
+        margin-top: 5mm;
+        min-height: auto;
+        max-height: none;
     }
 
     #dirty-hack-1 {
@@ -315,10 +315,20 @@
     <!-- Weil die Artikeltabelle zu lang wird und der EZ darüber liegen würde, muss ein Dirty Hack angewendet werden-->
     <div id='content-1-no-limit'>
         <h1>Quittung</h1><br><br>
+        {% if zahlungsdatum %}
+            <p style="margin-bottom: 10px;">
+                <b>Zahlungsdatum:</b> {{ frappe.utils.get_datetime(zahlungsdatum).strftime('%d.%m.%Y') }}
+            </p>
+        {% endif %}
         {{ replace_mv_keywords('%%QUITTUNGTABELLE%%', mitgliedschaft, sinv=sales_invoice) }}</div>
 {% else %}
     <div id='content-1'>
         <h1>Quittung</h1><br><br>
+        {% if zahlungsdatum %}
+            <p style="margin-bottom: 10px;">
+                <b>Zahlungsdatum:</b> {{ frappe.utils.get_datetime(zahlungsdatum).strftime('%d.%m.%Y') }}
+            </p>
+        {% endif %}
         {{ replace_mv_keywords('%%QUITTUNGTABELLE%%', mitgliedschaft, sinv=sales_invoice) }}</div>
 {% endif %}
 
