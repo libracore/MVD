@@ -208,8 +208,8 @@ frappe.ui.form.on('Mitgliedschaft', {
                     }, __("Erstelle"));
                 }
                 
-                if (!['Gestorben'].includes(cur_frm.doc.status_c)) {
-                    frm.add_custom_button(__("Korrespondenz"),  function() {
+                if (!['Gestorben'].includes(cur_frm.doc.status_c) || cur_frm.doc.sektion_id === 'MVZH') { // MVZH möchte nach dem erfassen des Todesfalls noch eine Korrespondenz erstellen
+                    frm.add_custom_button(__("Korrespondenz"), function() {
                         erstelle_korrespondenz(frm);
                     }, __("Erstelle"));
                 }
