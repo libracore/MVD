@@ -2162,23 +2162,59 @@ mvd_dialoge.erstelle_kuendigung = class ErstelleKuendigung {
                             return { 'filters': { 'name': ['in', eval(druckvorlagen.alle_druckvorlagen)] } };
                         }
                     },
-                    {'fieldname': 'kulanz', 'fieldtype': 'Check', 'label': 'Kulanz anwenden', 'default': 0, 'change': function() {
-                            if (cur_dialog.fields_dict.kulanz.get_value() == 1) {
-                                cur_dialog.fields_dict.datum.df.read_only = 0;
-                                cur_dialog.fields_dict.datum.refresh();
-                            } else {
-                                cur_dialog.fields_dict.datum.set_value(frappe.datetime.add_months(frappe.datetime.year_end(), 12));
-                                cur_dialog.fields_dict.datum.df.read_only = 1;
-                                cur_dialog.fields_dict.datum.refresh();
-                            }
-                        }
-                    },
                     {'fieldname': 'massenlauf', 'fieldtype': 'Check', 'label': 'Für Massenlauf vormerken', 'default': 1},
                     {'fieldtype': "HTML", 'fieldname': "vorlagenbaum_html"}
                 ];
             }
+            if (fristgerecht) {
+                field_list.unshift({'fieldname': 'html_info', 'fieldtype': 'HTML', 'hidden': 1,
+                    'options': '<p style="color: red;">Achtung: Kündigungsfrist verpasst!</p>'});
+            }
+            var datum_index = field_list.findIndex(function(field) {
+                return field.fieldname == 'datum';
+            });
+            field_list.splice(datum_index + 1, 0, {
+                'fieldname': 'kulanz', 'fieldtype': 'Check', 'label': 'Kulanz anwenden',
+                'default': 0, 'hidden': fristgerecht ? 1 : 0,
+                'change': function() {
+                    me.pruefe_kuendigungsfrist();
+                }
+            });
+            field_list.find(function(field) {
+                return field.fieldname == 'kuendigung_am';
+            }).change = function() {
+                me.pruefe_kuendigungsfrist();
+            };
             return field_list
         }
+    }
+
+    pruefe_kuendigungsfrist() {
+        if (!this.dialog || !this.dialog.get_value('kuendigung_am')) {
+            return;
+        }
+        var eingangsdatum = frappe.datetime.str_to_obj(this.dialog.get_value('kuendigung_am'));
+        var stichtag = frappe.datetime.str_to_obj(this.sektion_settings.kuendigungs_stichtag);
+        var fristgerecht = eingangsdatum.getMonth() < stichtag.getMonth() ||
+            (eingangsdatum.getMonth() == stichtag.getMonth() && eingangsdatum.getDate() <= stichtag.getDate());
+        var fields = this.dialog.fields_dict;
+        var kulanz = !fristgerecht && fields.kulanz.get_value() == 1;
+        var datum = fields.datum.get_value();
+        fields.html_info.df.hidden = fristgerecht ? 1 : 0;
+        fields.html_info.refresh();
+        fields.kulanz.df.hidden = fristgerecht ? 1 : 0;
+        fields.kulanz.value = kulanz ? 1 : 0;
+        fields.kulanz.refresh();
+        fields.kulanz.set_input(kulanz ? 1 : 0);
+        fields.datum.df.read_only = !fristgerecht && !kulanz ? 1 : 0;
+        if (!kulanz) {
+            datum = fristgerecht ?
+                (cur_frm.doc.kuendigung || frappe.datetime.year_end()) :
+                frappe.datetime.add_months(frappe.datetime.year_end(), 12);
+        }
+        fields.datum.value = datum;
+        fields.datum.refresh();
+        fields.datum.set_input(datum);
     }
 
     call_primary_action() {
