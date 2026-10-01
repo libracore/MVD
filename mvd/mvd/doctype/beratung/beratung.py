@@ -721,7 +721,8 @@ def _create_beratung_from_communication(communication, old_beratung):
         "start_date": _get_mail_eingangsdatum(communication),
         "raised_by": communication.sender,
         "raised_by_name": communication.sender_full_name,
-        "notiz": communication.content
+        "notiz": communication.content,
+        "mv_mitgliedschaft": old_beratung.mv_mitgliedschaft
     })
 
     new_beratung.insert(ignore_permissions=True)
