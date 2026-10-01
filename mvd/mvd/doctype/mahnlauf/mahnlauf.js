@@ -23,7 +23,11 @@ frappe.ui.form.on('Mahnlauf', {
             cur_frm.set_df_property('ueberfaellig_seit', 'read_only', 0);
         }
 
-        if ((cur_frm.doc.docstatus == 1)&&(cur_frm.doc.mahnungen_erstellt != 1)) {
+        if (frm.doc.fehlerhaft == 1) {
+            frm.set_intro('Die Mahnungserstellung ist fehlgeschlagen. Bereits erstellte Mahnungen können vorhanden sein. Bitte den Fehler prüfen.', 'red');
+        }
+
+        if ((cur_frm.doc.docstatus == 1)&&(cur_frm.doc.mahnungen_erstellt != 1)&&(cur_frm.doc.fehlerhaft != 1)) {
             frappe.dom.freeze('Bitte warten, die Mahnungserstellung wird geprüft...');
             var jobname = 'Mahnlauf ' + cur_frm.doc.name + ' (Erstellung)';
             let mahnung_refresher = setInterval(mahnung_refresher_handler, 3000, jobname);
