@@ -19,7 +19,10 @@ def suche(suchparameter, goto_list=False):
     
     filters_list = []
     faktura_filters_list = []
-    
+
+    # Gelöschte Mitgliedschaften werden von der Suche ausgeschlossen
+    filters_list.append("""(`deleted_by_admin` = 0)""")
+
     # allgemein
     if suchparameter["sektion_id"]:
         query_string = """`sektion_id` = '{sektion_id}'""".format(sektion_id=suchparameter["sektion_id"])
