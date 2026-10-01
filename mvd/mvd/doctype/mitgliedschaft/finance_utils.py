@@ -266,9 +266,23 @@ def get_and_set_mitgliednr(mitgliedId):
 def quittung_drucken(sales_invoice):
     sinv = frappe.get_doc("Sales Invoice", sales_invoice)
 
+    payment_entry_name = frappe.db.get_value(
+        "Payment Entry Reference",
+        {"reference_doctype": "Sales Invoice", "reference_name": sales_invoice, "docstatus": 1},
+        "parent"
+    )
+
+    if payment_entry_name:
+        zahlungsdatum = frappe.db.get_value("Payment Entry", payment_entry_name, "posting_date")
+    else:
+        zahlungsdatum = None
+
     html = frappe.render_template(
         'templates/mvd/mvzh/quittung.html',
-        {"doc": sinv}
+        {
+            "doc": sinv,
+            "zahlungsdatum": zahlungsdatum
+        }
     )
 
     pdf = get_pdf(html)
