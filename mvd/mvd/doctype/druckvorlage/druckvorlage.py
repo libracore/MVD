@@ -703,6 +703,18 @@ def get_jahr_haftpflicht(ctx):
     return '---'
 
 @context_decorator
+def get_bezahltes_mitgliedschaftsjahr(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        return mitgliedschaft.bezahltes_mitgliedschaftsjahr   
+    return '---'
+
+@context_decorator
 def get_versichertes_objekt(ctx):
     doc = get_doc_from_ctx(ctx)
     mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)

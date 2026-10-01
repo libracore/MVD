@@ -64,6 +64,7 @@ jenv = {
         "get_austritt_per:mvd.mvd.doctype.druckvorlage.druckvorlage.get_austritt_per",
         "get_eintrittsdatum:mvd.mvd.doctype.druckvorlage.druckvorlage.get_eintrittsdatum",
         "get_jahr_haftpflicht:mvd.mvd.doctype.druckvorlage.druckvorlage.get_jahr_haftpflicht",
+        "get_bezahltes_mitgliedschaftsjahr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_bezahltes_mitgliedschaftsjahr",
         "get_versichertes_objekt:mvd.mvd.doctype.druckvorlage.druckvorlage.get_versichertes_objekt",
         "get_versichertes_objekt_ort:mvd.mvd.doctype.druckvorlage.druckvorlage.get_versichertes_objekt_ort",
         "get_geschaeftstyp:mvd.mvd.doctype.druckvorlage.druckvorlage.get_geschaeftstyp",
