@@ -22,6 +22,7 @@ class ArbeitsplanBeratung(Document):
         self.validate_date()
         self.validate_overlapping()
         self.validate_sections()
+        self.validate_einteilung_dates()
     
     def validate_date(self):
         if self.to_date < self.from_date:
@@ -81,7 +82,37 @@ class ArbeitsplanBeratung(Document):
                 )
             
             frappe.msgprint(msg, title=_("Abweichende Sektionen"), indicator="orange", alert=False)
-  
+
+    def validate_einteilung_dates(self):
+        """Prüft, ob alle Termine im Zeitraum des Arbeitsplans liegen."""
+        if not self.einteilung or not self.from_date or not self.to_date:
+            return
+
+        from_date = getdate(self.from_date)
+        to_date = getdate(self.to_date)
+        ungueltige_termine = []
+
+        for row in self.einteilung:
+            if not row.date:
+                continue
+            row_date = getdate(row.date)
+            if row_date < from_date or row_date > to_date:
+                ungueltige_termine.append({
+                    "idx": row.idx or "",
+                    "date": row_date.strftime('%d.%m.%Y'),
+                    "beratungsperson": row.beratungsperson
+                })
+
+        if ungueltige_termine:
+            msg = _("<b>Folgende Termine liegen ausserhalb des Gültigkeitszeitraums ({0} – {1}):</b><br><br>").format(
+                from_date.strftime('%d.%m.%Y'),
+                to_date.strftime('%d.%m.%Y')
+            )
+            for t in ungueltige_termine:
+                msg += _("• Zeile {0}: {1} - {2}<br>").format(t["idx"], t["date"], t["beratungsperson"])
+
+            frappe.throw(msg, title=_("Termin ausserhalb Zeitraum"))
+
     def get_personen(self, einzel, person):
         def get_beratungspersonen(weekday, sektion):
             person_query = ''
