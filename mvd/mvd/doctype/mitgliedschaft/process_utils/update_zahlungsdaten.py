@@ -289,7 +289,7 @@ def get_ampelfarbe(mitgliedschaft, db_direct=False, need_object_load=False):
     ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintrittsdatum), karenzfrist_in_d)
     
     karenzfrist_abgelaufen = True
-    if getdate() < ablauf_karenzfrist and cint(mitgliedschaft.zahlung_hv) > 0:
+    if getdate() < ablauf_karenzfrist:
         karenzfrist_abgelaufen = False
 
     if not aktuelles_jahr_bezahlt:

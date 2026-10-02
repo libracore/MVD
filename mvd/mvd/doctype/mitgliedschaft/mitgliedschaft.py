@@ -24,7 +24,8 @@ from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention, get_adres
                                                 get_naechstes_jahr_geschuldet, mahnstopp, create_korrespondenz, \
                                                 sp_updater, get_sektion_code, create_web_login_user
 from mvd.mvd.doctype.mitgliedschaft.kontakt_handling import create_kontakt, update_kontakt
-from mvd.mvd.doctype.mitgliedschaft.finance_utils import get_ampelfarbe, set_max_reminder_level, check_folgejahr_regelung
+from mvd.mvd.doctype.mitgliedschaft.finance_utils import set_max_reminder_level, check_folgejahr_regelung
+from mvd.mvd.doctype.mitgliedschaft.process_utils.update_zahlungsdaten import get_ampelfarbe
 from frappe.utils.background_jobs import enqueue
 from mvd.mvd.utils import is_job_already_running, rg_massenlauf_log
 from mvd.mvd.utils.nextcloud import handle_mitgliedschafts_folder

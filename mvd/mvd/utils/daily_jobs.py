@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils.data import today, getdate, now
-from mvd.mvd.doctype.mitgliedschaft.finance_utils import get_ampelfarbe
+from mvd.mvd.doctype.mitgliedschaft.process_utils.update_zahlungsdaten import get_ampelfarbe
 from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
 from datetime import datetime
@@ -376,7 +376,7 @@ def daily_ampel_korrektur():
             'need_object_load': 1
         }
         if not is_job_already_running('Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft)):
-            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils.get_ampelfarbe", queue='short', job_name='Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
+            enqueue("mvd.mvd.doctype.mitgliedschaft.process_utils.update_zahlungsdaten.get_ampelfarbe", queue='short', job_name='Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
     
     # Potentiell falsch Grün
     mitgliedschaften = frappe.db.sql("""
@@ -399,7 +399,7 @@ def daily_ampel_korrektur():
             'need_object_load': 1
         }
         if not is_job_already_running('Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft)):
-            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils.get_ampelfarbe", queue='short', job_name='Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
+            enqueue("mvd.mvd.doctype.mitgliedschaft.process_utils.update_zahlungsdaten.get_ampelfarbe", queue='short', job_name='Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
     
     # Mitgliedschaften die bezahlt haben, aber noch auf dem Status Anmeldung oder Online-Anmeldung stecken bleiben
     mitgliedschaften = frappe.db.sql("""
@@ -422,7 +422,7 @@ def daily_ampel_korrektur():
             'need_object_load': 1
         }
         if not is_job_already_running('Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft)):
-            enqueue("mvd.mvd.doctype.mitgliedschaft.finance_utils.get_ampelfarbe", queue='short', job_name='Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
+            enqueue("mvd.mvd.doctype.mitgliedschaft.process_utils.update_zahlungsdaten.get_ampelfarbe", queue='short', job_name='Aktualisiere Ampel für {0}'.format(mitgliedschaft.mitgliedschaft), timeout=5000, **args)
 
 def sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft(show_progress=False):
     from mvd.mvd.doctype.sp_mitglied_data.sp_mitglied_data import update
