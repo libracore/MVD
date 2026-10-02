@@ -84,67 +84,6 @@ def set_max_reminder_level(mitgliedschaft, db_direct=False):
     
     return
 
-def get_ampelfarbe(mitgliedschaft, db_direct=False, need_object_load=False):
-    ''' mögliche Ampelfarben:
-        - Grün: ampelgruen --> Mitglied kann alle Dienstleistungen beziehen (keine Karenzfristen, keine überfälligen oder offen Rechnungen)
-        - Gelb: ampelgelb --> Karenzfristen oder offene Rechnungen
-        - Rot: ampelrot --> überfällige offene Rechnungen
-        ---------------------------------------------------------
-        mitgliedschaft -> Muss immer einem Objekt entsprechen!
-    
-        db_direct -> Ist dieser Parameter gesetzt, so werden die Werte mittels db.set_value direkt in die DB geschrieben.
-        Dadurch können die Werte aktualisiert werden, ohne dass die gesamte Mitgliedschaft gespeichert werden muss (Performance verbesserung).
-    '''
-    def _set_ampel(farbe):
-        if db_direct:
-            if mitgliedschaft.ampel_farbe != farbe:
-                frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'ampel_farbe', farbe)
-                frappe.db.commit()
-        else:
-            mitgliedschaft.ampel_farbe = farbe
-
-    if need_object_load:
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
-
-    inaktive_status = ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in', 'Anmeldung')
-    if mitgliedschaft.status_c in inaktive_status:
-        return _set_ampel('ampelrot')
-
-    aktuelles_jahr = datetime.date.today().year
-
-    aktuelles_jahr_bezahlt = cint(mitgliedschaft.bezahltes_mitgliedschaftsjahr) >= aktuelles_jahr
-    ueberfaellig = 0
-    offen = 0
-
-    karenzfrist_in_d = frappe.db.get_value("Sektion", mitgliedschaft.sektion_id, "karenzfrist") or 30
-    ablauf_karenzfrist = add_days(getdate(mitgliedschaft.eintrittsdatum), karenzfrist_in_d)
-    
-    karenzfrist_abgelaufen = True
-    if getdate() < ablauf_karenzfrist and cint(mitgliedschaft.zahlung_hv) > 0:
-        karenzfrist_abgelaufen = False
-
-    if not aktuelles_jahr_bezahlt:
-        rechnungen = frappe.db.sql("""
-            SELECT 
-                IFNULL(SUM(CASE WHEN `due_date` < CURDATE() THEN `outstanding_amount` ELSE 0 END), 0) AS ueberfaellig,
-                IFNULL(SUM(CASE WHEN `due_date` >= CURDATE() THEN `outstanding_amount` ELSE 0 END), 0) AS offen
-            FROM `tabSales Invoice` 
-            WHERE `mv_mitgliedschaft` = '{mitgliedschaft}'
-            AND `ist_mitgliedschaftsrechnung` = 1
-            AND `docstatus` = 1
-        """.format(mitgliedschaft=mitgliedschaft.name), as_dict=True)
-
-        if rechnungen:
-            ueberfaellig = rechnungen[0].ueberfaellig
-            offen = rechnungen[0].offen
-
-    if ueberfaellig > 0:
-        return _set_ampel('ampelrot')
-    elif offen > 0 or not karenzfrist_abgelaufen:
-        return _set_ampel('ampelgelb')
-    else:
-        return _set_ampel('ampelgruen')
-
 def check_folgejahr_regelung(mitgliedschaft, db_direct=False):
     '''
         mitgliedschaft -> Muss immer einem Objekt entsprechen!
