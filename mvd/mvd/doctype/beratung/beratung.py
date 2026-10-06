@@ -977,6 +977,9 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
             sektion_id = frappe.db.get_value("Kunden", faktura_kunde, 'sektion_id')
         
         termin_block_data = json.loads(termin_block_data)
+        # Berater*in und Ort kommen vom gebuchten Slot, nicht aus dem Dialog (#2168)
+        slot_berater_in, slot_orte = get_berater_in_und_orte_aus_slots(termin_block_data)
+        berater_in = slot_berater_in or berater_in
         if not beratung:
             # erstelle neue Beratung
             beratung = frappe.get_doc({
@@ -994,7 +997,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
                 row.von = "{0} {1}".format(termin['date'], termin['von'])
                 row.bis = "{0} {1}".format(termin['date'], termin['bis'])
                 row.art = art
-                row.ort = ort
+                row.ort = slot_orte.get(termin['referenz'], ort)
                 row.berater_in = berater_in
                 row.telefonnummer = telefonnummer
                 row.abp_referenz = termin['referenz']
@@ -1013,7 +1016,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
                 row.von = "{0} {1}".format(termin['date'], termin['von'])
                 row.bis = "{0} {1}".format(termin['date'], termin['bis'])
                 row.art = art
-                row.ort = ort
+                row.ort = slot_orte.get(termin['referenz'], ort)
                 row.berater_in = berater_in
                 row.telefonnummer = telefonnummer
                 row.abp_referenz = termin['referenz']
@@ -1336,9 +1339,27 @@ def get_termin_block_data(abp_zuweisungen):
             'von': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'from_time'),
             'bis': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'to_time'),
             'date': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'date'),
-            'beratungstyp': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'beratungstyp')
+            'beratungstyp': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'beratungstyp'),
+            'beratungsperson': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'beratungsperson')
         })
+    # wirft, wenn die Slots zu unterschiedlichen Berater*innen gehören
+    get_berater_in_und_orte_aus_slots(return_data)
     return return_data
+
+def get_berater_in_und_orte_aus_slots(termin_block_data):
+    berater_in = None
+    orte = {}
+    for termin in termin_block_data:
+        slot = frappe.db.get_value("APB Zuweisung", termin['referenz'], ['beratungsperson', 'art_ort'], as_dict=True)
+        if not slot:
+            continue
+        if slot.beratungsperson:
+            if berater_in and berater_in != slot.beratungsperson:
+                frappe.throw("Die gewählten Termine gehören zu unterschiedlichen Berater*innen ({0} / {1}). Bitte nur Termine einer Person wählen.".format(berater_in, slot.beratungsperson))
+            berater_in = slot.beratungsperson
+        if slot.art_ort:
+            orte[termin['referenz']] = slot.art_ort
+    return berater_in, orte
 
 def check_doppelbuchung(abp_zuweisung):
     return frappe.db.sql("""
