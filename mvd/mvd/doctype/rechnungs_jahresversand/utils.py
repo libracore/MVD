@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.csvutils import to_csv as make_csv
 from frappe.utils.data import now, add_days, today
-from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price
+from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price, get_mitgliedschafts_artikel_geschaeft
 from frappe.utils.background_jobs import enqueue
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 from frappe.utils import cint
@@ -55,7 +55,8 @@ def create_invoices_as_json(jahresversand):
                                                 `adresse_mitglied`,
                                                 `rg_kontakt`,
                                                 `bezahltes_mitgliedschaftsjahr`,
-                                                `mitgliedtyp_c`
+                                                `mitgliedtyp_c`,
+                                                `mvb_typ`
                                             FROM `tabMitgliedschaft`
                                             WHERE `sektion_id` = '{sektion_id}'
                                             AND `status_c` = 'Regulär'
@@ -107,6 +108,11 @@ def create_invoices_as_json(jahresversand):
                         contact = mitgliedschaft.rg_kontakt
                     
                     item = copy.deepcopy(item_defaults.get(mitgliedschaft.mitgliedtyp_c))
+                    if mitgliedschaft.mitgliedtyp_c == 'Geschäft':
+                        artikel_geschaeft = get_mitgliedschafts_artikel_geschaeft(sektion, mitgliedschaft.mvb_typ)
+                        if artikel_geschaeft != item[0]["item_code"]:
+                            item[0]["item_code"] = artikel_geschaeft
+                            item[0]["rate"] = get_item_price(artikel_geschaeft).get("price")
                     if cint(mitgliedschaft.reduzierte_mitgliedschaft) == 1 and mitgliedschaft.reduzierter_betrag > 0:
                         item[0]["rate"] = mitgliedschaft.reduzierter_betrag
                     

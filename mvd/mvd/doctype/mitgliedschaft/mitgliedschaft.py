@@ -16,6 +16,7 @@ from frappe.utils.data import add_days, getdate, now, today
 from frappe.utils.pdf import get_file_data_from_writer
 from mvd.mvd.service_plattform.request_worker import mvm_neuanlage, mvm_update
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
+from mvd.mvd.utils.manuelle_rechnungs_items import get_mitgliedschafts_artikel_geschaeft
 from mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung import create_hv_fr
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_druckvorlagen, replace_mv_keywords
 from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new_id, create_new_number
@@ -501,7 +502,7 @@ class Mitgliedschaft(Document):
             'rate': self.reduzierter_betrag,
             'items': [
                 {
-                    'item_code': sektion.mitgliedschafts_artikel if self.mitgliedtyp_c == 'Privat' else sektion.mitgliedschafts_artikel_geschaeft
+                    'item_code': sektion.mitgliedschafts_artikel if self.mitgliedtyp_c == 'Privat' else get_mitgliedschafts_artikel_geschaeft(sektion, self.mvb_typ)
                 }
             ]
         })
@@ -521,7 +522,7 @@ class Mitgliedschaft(Document):
             pr.customer = customer
             pr.valid_upto = self.reduzierung_bis
             pr.rate = self.reduzierter_betrag
-            pr.items[0].item_code = sektion.mitgliedschafts_artikel if self.mitgliedtyp_c == 'Privat' else sektion.mitgliedschafts_artikel_geschaeft
+            pr.items[0].item_code = sektion.mitgliedschafts_artikel if self.mitgliedtyp_c == 'Privat' else get_mitgliedschafts_artikel_geschaeft(sektion, self.mvb_typ)
             pr.save(ignore_permissions=True)
             return
         else:
@@ -2050,13 +2051,14 @@ def create_mitgliedschaftsrechnung(
                 item.append({"item_code": sektion.mitgliedschafts_artikel_beitritt,"qty": 1, "cost_center": company.cost_center})
         
         if mitgliedschaft.mitgliedtyp_c == 'Geschäft':
-            item = [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center}]
+            artikel_geschaeft = get_mitgliedschafts_artikel_geschaeft(sektion, mitgliedschaft.mvb_typ)
+            item = [{"item_code": artikel_geschaeft,"qty": 1, "cost_center": company.cost_center}]
             # prüfe gratis ab stichtag
             gratis_ab = getdate(getdate(today()).strftime("%Y") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%m") + "-" + getdate(sektion.gratis_bis_ende_jahr).strftime("%d"))
             if getdate(today()) >= gratis_ab:
                 item = [
                     {"item_code": sektion.mitgliedschafts_artikel_gratis,"qty": 1, "cost_center": company.cost_center},
-                    {"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center}
+                    {"item_code": artikel_geschaeft,"qty": 1, "cost_center": company.cost_center}
                 ]
                 jahr = cint(getdate(today()).strftime("%Y")) + 1
             # prüfe Beitrittsgebühr

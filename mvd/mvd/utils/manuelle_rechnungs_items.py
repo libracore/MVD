@@ -36,3 +36,18 @@ def get_item_price(item, customer_customer=None):
         "price": price,
         "description": description,
     }
+
+# Sektionen, die für MV Business Mini (`mvb_typ` = 'MvbMini') einen eigenen Mitgliedschaftsartikel verrechnen
+MVB_MINI_ARTIKEL = {
+    'MVZH': 'MVZH-MM'
+}
+
+def get_mitgliedschafts_artikel_geschaeft(sektion, mvb_typ=None):
+    '''
+        Gibt den Mitgliedschaftsartikel für Geschäftsmitgliedschaften zurück.
+        Standard ist `mitgliedschafts_artikel_geschaeft` der Sektion (MVXX-MG),
+        bei MV Business Mini der Artikel gemäss MVB_MINI_ARTIKEL.
+    '''
+    if mvb_typ == 'MvbMini' and sektion.name in MVB_MINI_ARTIKEL:
+        return MVB_MINI_ARTIKEL[sektion.name]
+    return sektion.mitgliedschafts_artikel_geschaeft
