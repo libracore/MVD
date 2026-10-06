@@ -1471,13 +1471,15 @@ frappe.mvd.termin_quick_entry = function(config) {
                                     console.log(r.message)
                                     if (r.message) {
                                         var termin_block_data = r.message;
+                                        // Berater*in gem. gebuchtem Slot, nicht gem. Dialogfeld (#2168)
+                                        var berater_in = termin_block_data[0].beratungsperson || d.get_value('kontaktperson');
                                         d.hide();
 
                                         var kwargs = Object.assign({
                                             'termin_block_data': termin_block_data,
                                             'art': d.get_value('art'),
                                             'ort': d.get_value('ort'),
-                                            'berater_in': d.get_value('kontaktperson'),
+                                            'berater_in': berater_in,
                                             'telefonnummer': d.get_value('telefonnummer'),
                                             'notiz': d.get_value('notiz'),
                                             'wunsch_berater_in': d.get_value('wunsch_berater_in'),
@@ -1502,7 +1504,7 @@ frappe.mvd.termin_quick_entry = function(config) {
                                                     localStorage.setItem("termin_block_art", d.get_value('art'));
                                                     localStorage.setItem("termin_block_ort", d.get_value('ort'));
                                                     localStorage.setItem("termin_block_tel", d.get_value('telefonnummer')||'');
-                                                    localStorage.setItem("termin_block_berater_in", d.get_value('kontaktperson')||'');
+                                                    localStorage.setItem("termin_block_berater_in", berater_in||'');
                                                     
                                                     if (cur_frm && cur_frm.doc.name == r.message) {
                                                         cur_frm.reload_doc();
@@ -1522,18 +1524,31 @@ frappe.mvd.termin_quick_entry = function(config) {
                         'checkbox_clicked': function(cb) {
                             var termin = $(cb).data().abpzuweisung;
                             var ort = $(cb).data().ort;
-                            if (!d.get_value('ort')) {
-                                d.set_value('ort', ort)
-                            }
                             var beratungsperson = $(cb).data().beratungsperson;
-                            if (!d.get_value('kontaktperson')) {
-                                d.set_value('kontaktperson', beratungsperson)
-                            }
                             if (localStorage.getItem('selected_termine').includes(`-${termin}`)) {
                                 localStorage.setItem('selected_termine', localStorage.getItem('selected_termine').replace(`-${termin}`, ''));
-                                
+                                if (localStorage.getItem('selected_termine').length < 1) {
+                                    // letzter Termin abgewählt: Berater*in und Ort wieder freigeben (#2168)
+                                    d.set_value('kontaktperson', '');
+                                    d.set_value('ort', '');
+                                }
                             } else {
                                 var marks = localStorage.getItem('selected_termine')
+                                if (marks.length > 0 && d.selected_beratungsperson != beratungsperson) {
+                                    // weitere Termine nur bei derselben Berater*in (#2168)
+                                    cb.checked = false;
+                                    frappe.msgprint("Dieser Termin gehört zu einer anderen Berater*in als der bereits gewählte Termin.");
+                                    return;
+                                }
+                                // Berater*in und Ort immer vom gewählten Termin übernehmen (#2168)
+                                if (d.get_value('kontaktperson') != beratungsperson) {
+                                    d.set_value('kontaktperson', beratungsperson)
+                                }
+                                if (marks.length < 1 && d.get_value('ort') != ort) {
+                                    d.set_df_property('ort', 'options', orte);
+                                    d.set_value('ort', ort)
+                                }
+                                d.selected_beratungsperson = beratungsperson;
                                 localStorage.setItem('selected_termine', `${marks}-${termin}`);
                             }
                             if (localStorage.getItem('selected_termine').length > 0) {
@@ -1554,6 +1569,9 @@ frappe.mvd.termin_quick_entry = function(config) {
 };
 // Hilfsfunktion für: frappe.mvd.termin_quick_entry
 function aktualisiere_verfuegbarkeiten(config, dialog) {
+    // nur die Antwort der jüngsten Abfrage anzeigen, überholte verwerfen (#2168)
+    dialog.verfuegbarkeiten_abfrage = (dialog.verfuegbarkeiten_abfrage || 0) + 1;
+    var abfrage = dialog.verfuegbarkeiten_abfrage;
     frappe.call({
         method: "mvd.mvd.doctype.arbeitsplan_beratung.arbeitsplan_beratung.zeige_verfuegbarkeiten",
         args:{
@@ -1570,6 +1588,9 @@ function aktualisiere_verfuegbarkeiten(config, dialog) {
             'beratungstyp': dialog.get_value('typ')
         },
         callback: function(r) {
+            if (abfrage != dialog.verfuegbarkeiten_abfrage) {
+                return;
+            }
             if (r.message) {
                 // anzeigen der Verfügbarkeiten
                 dialog.set_df_property('verfuegbarkeiten_html', 'options', r.message);
