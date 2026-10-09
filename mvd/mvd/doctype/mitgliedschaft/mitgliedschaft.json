@@ -796,6 +796,7 @@
    "default": "0",
    "fieldname": "m_und_w_pdf",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "M+W als PDF"
   },
   {
@@ -975,6 +976,7 @@
    "default": "0",
    "fieldname": "statuten_ok",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Statuten ok"
   },
   {
@@ -1490,7 +1492,7 @@
   }
  ],
  "icon": "fa fa-tag",
- "modified": "2026-09-19 15:48:14.361127",
+ "modified": "2026-10-09 15:37:55.252308",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mitgliedschaft",
