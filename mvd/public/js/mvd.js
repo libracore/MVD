@@ -840,7 +840,7 @@ frappe.mvd.MailComposer = Class.extend({
                 $(repl(`
                     <p class="checkbox">
                         <label>
-                            <span><input type="checkbox" data-file-name="${f.file_name}"></input></span>
+                            <span><input type="checkbox" data-file-name="${f.name}"></input></span>
                             <span class="small">${f.file_name}</span>
                             <a href="${f.file_url}" target="_blank" class="text-muted small">
                                 <i class="fa fa-share" style="vertical-align: middle; margin-left: 3px;"></i>
