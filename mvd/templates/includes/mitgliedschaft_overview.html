@@ -165,7 +165,7 @@
                             <td>
                                 {% if allgemein.rsv_mandate %}
                                     {% for rsv_mandat in allgemein.rsv_mandate %}
-                                        <a href="/desk#Form/RSVMitglied/{{ rsv_mandat.name }}">{{ rsv_mandat.name }}</a> ({{ frappe.utils.get_datetime(rsv_mandat.datum).strftime('%d.%m.%Y') }})<br>{{ rsv_mandat.status }}<br><br>
+                                        <a href="/desk#Form/RSVMitglied/{{ rsv_mandat.name }}">{{ rsv_mandat.name }}</a> ({{ rsv_mandat.datum }})<br>{{ rsv_mandat.status }}<br><br>
                                     {% endfor %}
                                 {% else %}
                                     Keine RSV-Mandate
@@ -174,7 +174,7 @@
                             <td>
                                 {% if allgemein.siedlungsmandate %}
                                     {% for siedlungsmandat in allgemein.siedlungsmandate %}
-                                        <a href="/desk#Form/RSVMandat/{{ siedlungsmandat.name }}">{{ siedlungsmandat.name }}</a> ({{ frappe.utils.get_datetime(siedlungsmandat.datum).strftime('%d.%m.%Y') }})<br>{{ siedlungsmandat.typ }}<br><br>
+                                        <a href="/desk#Form/RSVMandat/{{ siedlungsmandat.name }}">{{ siedlungsmandat.name }}</a> ({{ siedlungsmandat.datum }})<br>{{ siedlungsmandat.typ }}<br><br>
                                     {% endfor %}
                                 {% else %}
                                     Keine Siedlungsmandate
@@ -183,7 +183,7 @@
                             <td>
                                 {% if allgemein.siedlungsfaelle %}
                                     {% for siedlungsfall in allgemein.siedlungsfaelle %}
-                                        <a href="/desk#Form/Siedlungsfall/{{ siedlungsfall.name }}">{{ siedlungsfall.name }}</a> ({{ frappe.utils.get_datetime(siedlungsfall.datum).strftime('%d.%m.%Y') }})<br>{{ siedlungsfall.typ }}<br><br>
+                                        <a href="/desk#Form/Siedlungsfall/{{ siedlungsfall.name }}">{{ siedlungsfall.name }}</a> ({{ siedlungsfall.datum }})<br>{{ siedlungsfall.typ }}<br><br>
                                     {% endfor %}
                                 {% else %}
                                     Keine Siedlungsfälle
