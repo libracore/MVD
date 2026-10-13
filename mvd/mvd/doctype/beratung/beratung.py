@@ -978,8 +978,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
         
         termin_block_data = json.loads(termin_block_data)
         # Berater*in und Ort kommen vom gebuchten Slot, nicht aus dem Dialog (#2168)
-        slot_berater_in, slot_orte = get_berater_in_und_orte_aus_slots(termin_block_data)
-        berater_in = slot_berater_in or berater_in
+        berater_in, slot_orte = get_berater_in_und_orte_aus_slots(termin_block_data)
         if not beratung:
             # erstelle neue Beratung
             beratung = frappe.get_doc({
@@ -997,7 +996,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
                 row.von = "{0} {1}".format(termin['date'], termin['von'])
                 row.bis = "{0} {1}".format(termin['date'], termin['bis'])
                 row.art = art
-                row.ort = slot_orte.get(termin['referenz'], ort)
+                row.ort = slot_orte[termin['referenz']]
                 row.berater_in = berater_in
                 row.telefonnummer = telefonnummer
                 row.abp_referenz = termin['referenz']
@@ -1016,7 +1015,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
                 row.von = "{0} {1}".format(termin['date'], termin['von'])
                 row.bis = "{0} {1}".format(termin['date'], termin['bis'])
                 row.art = art
-                row.ort = slot_orte.get(termin['referenz'], ort)
+                row.ort = slot_orte[termin['referenz']]
                 row.berater_in = berater_in
                 row.telefonnummer = telefonnummer
                 row.abp_referenz = termin['referenz']
@@ -1327,38 +1326,49 @@ def get_termin_mail_txt(von, bis, art, ort, telefonnummer, mitgliedschaft=None, 
 
 @frappe.whitelist()
 def get_termin_block_data(abp_zuweisungen):
+    if not isinstance(abp_zuweisungen, str) or not abp_zuweisungen:
+        frappe.throw("Bitte wählen Sie mindestens einen Termin aus.")
     if abp_zuweisungen.startswith("-"):
         abp_zuweisungen = abp_zuweisungen.replace("-", "", 1)
     return_data = []
     for abp_zuweisung in abp_zuweisungen.split("-"):
+        if not abp_zuweisung:
+            frappe.throw("Die Terminauswahl enthält eine ungültige Slot-Referenz. Bitte wählen Sie die Termine erneut aus.")
         if check_doppelbuchung(abp_zuweisung) > 0:
             frappe.throw("Der gewählte Termin wurde in der Zwischenzeit leider bereits gebucht.")
-        
+
+        slot = frappe.db.get_value("APB Zuweisung", abp_zuweisung, ['from_time', 'to_time', 'date', 'beratungstyp', 'beratungsperson'], as_dict=True)
+        if not slot:
+            frappe.throw("Ein gewählter Termin existiert nicht mehr. Bitte wählen Sie die Termine erneut aus.")
         return_data.append({
             'referenz': abp_zuweisung,
-            'von': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'from_time'),
-            'bis': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'to_time'),
-            'date': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'date'),
-            'beratungstyp': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'beratungstyp'),
-            'beratungsperson': frappe.db.get_value("APB Zuweisung", abp_zuweisung, 'beratungsperson')
+            'von': slot.from_time,
+            'bis': slot.to_time,
+            'date': slot.date,
+            'beratungstyp': slot.beratungstyp,
+            'beratungsperson': slot.beratungsperson
         })
-    # wirft, wenn die Slots zu unterschiedlichen Berater*innen gehören
+    # Prüft Existenz, Berater*in und Ort für alle gewählten Slots.
     get_berater_in_und_orte_aus_slots(return_data)
     return return_data
 
 def get_berater_in_und_orte_aus_slots(termin_block_data):
+    if not isinstance(termin_block_data, list) or not termin_block_data:
+        frappe.throw("Bitte wählen Sie mindestens einen Termin aus.")
     berater_in = None
     orte = {}
     for termin in termin_block_data:
+        if not isinstance(termin, dict) or not isinstance(termin.get('referenz'), str) or not termin['referenz']:
+            frappe.throw("Die Terminauswahl enthält eine ungültige Slot-Referenz. Bitte wählen Sie die Termine erneut aus.")
         slot = frappe.db.get_value("APB Zuweisung", termin['referenz'], ['beratungsperson', 'art_ort'], as_dict=True)
         if not slot:
-            continue
-        if slot.beratungsperson:
-            if berater_in and berater_in != slot.beratungsperson:
-                frappe.throw("Die gewählten Termine gehören zu unterschiedlichen Berater*innen ({0} / {1}). Bitte nur Termine einer Person wählen.".format(berater_in, slot.beratungsperson))
-            berater_in = slot.beratungsperson
-        if slot.art_ort:
-            orte[termin['referenz']] = slot.art_ort
+            frappe.throw("Ein gewählter Termin existiert nicht mehr. Bitte wählen Sie die Termine erneut aus.")
+        if not slot.beratungsperson or not slot.art_ort:
+            frappe.throw("Bei einem gewählten Termin fehlt die Berater*in oder der Ort. Bitte korrigieren Sie den Arbeitsplan.")
+        if berater_in and berater_in != slot.beratungsperson:
+            frappe.throw("Die gewählten Termine gehören zu unterschiedlichen Berater*innen ({0} / {1}). Bitte nur Termine einer Person wählen.".format(berater_in, slot.beratungsperson))
+        berater_in = slot.beratungsperson
+        orte[termin['referenz']] = slot.art_ort
     return berater_in, orte
 
 def check_doppelbuchung(abp_zuweisung):
