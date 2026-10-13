@@ -1300,7 +1300,6 @@ frappe.mvd.termin_quick_entry = function(config) {
         create_kwargs: object     // z.B. {'mitgliedschaft': 'MV...'} oder {'faktura_kunde': 'K-...', 'mitgliedschaft': '...'}
     }
     */
-    localStorage.setItem('selected_termine', '');
     frappe.call({
         'method': "mvd.mvd.doctype.beratung.beratung.get_beratungsorte",
         'args': {
@@ -1325,6 +1324,7 @@ frappe.mvd.termin_quick_entry = function(config) {
                     var defaultArt = config.sektion_id == 'MVBE' ? 'telefonisch' : 'persönlich';
                     var d = new frappe.ui.Dialog({
                         'title': __('Termin erstellen'),
+                        'selected_termine': [],
                         'fields': [
                             {'fieldname': 'beratung', 'fieldtype': 'Link', 'label': __('Für Beratung'), 'options': 'Beratung', 'reqd': 0, 'hidden': !config.beratung_source ? 1:0, 'default': config.beratung_source ? config.beratung_source:'', 'read_only': config.beratung_source ? 1:0,
                                 'get_query': function() {
@@ -1424,14 +1424,18 @@ frappe.mvd.termin_quick_entry = function(config) {
                                     }
                                 },
                                 'change': function() {
-                                    if (d.get_value('kontaktperson') && localStorage.getItem('selected_termine').length < 1) { // darf nicht ausgeführt werden wenn ein Termin gewählt wird, siehe #1902
+                                    if (d.get_value('kontaktperson') && d.selected_termine.length < 1) { // darf nicht ausgeführt werden wenn ein Termin gewählt wird, siehe #1902
+                                        var kontaktperson = d.get_value('kontaktperson');
                                         frappe.call({
                                             method: "mvd.mvd.doctype.beratung.beratung.get_beratungsorte",
                                             args:{
                                                 'sektion': config.sektion_id,
-                                                'kontakt': d.get_value('kontaktperson')
+                                                'kontakt': kontaktperson
                                             },
                                             callback: function(r) {
+                                                if (d.selected_termine.length > 0 || d.get_value('kontaktperson') != kontaktperson) {
+                                                    return;
+                                                }
                                                 if (r.message) {
                                                     // hinterlegen von Orten auf Basis Kontakt
                                                     var orte_kontaktbasis = " \n" + r.message.ort_string;
@@ -1461,50 +1465,56 @@ frappe.mvd.termin_quick_entry = function(config) {
                             {'fieldname': 'verfuegbarkeiten_titel', 'fieldtype': 'HTML', 'options': '<h4>Berater*innen Verfügbarkeiten</h4>'},
                             {'fieldname': 'verfuegbarkeiten_html', 'fieldtype': 'HTML', 'label': '', 'options': verfuegbarkeiten_html}
                         ],
-                        'primary_action': function() {
+                        'primary_action': function(values) {
+                            if (d.selected_termine.length < 1) {
+                                frappe.msgprint("Bitte wählen Sie mindestens einen Termin aus.");
+                                return;
+                            }
                             frappe.call({
                                 method: "mvd.mvd.doctype.beratung.beratung.get_termin_block_data",
                                 args:{
-                                    'abp_zuweisungen': localStorage.getItem('selected_termine')
+                                    'abp_zuweisungen': d.selected_termine.join('-')
                                 },
                                 callback: function(r) {
                                     console.log(r.message)
-                                    if (r.message) {
+                                    if (r.message && r.message.length > 0) {
                                         var termin_block_data = r.message;
                                         // Berater*in gem. gebuchtem Slot, nicht gem. Dialogfeld (#2168)
-                                        var berater_in = termin_block_data[0].beratungsperson || d.get_value('kontaktperson');
+                                        var berater_in = termin_block_data[0].beratungsperson;
                                         d.hide();
 
                                         var kwargs = Object.assign({
                                             'termin_block_data': termin_block_data,
-                                            'art': d.get_value('art'),
-                                            'ort': d.get_value('ort'),
+                                            'art': values.art,
+                                            'ort': values.ort,
                                             'berater_in': berater_in,
-                                            'telefonnummer': d.get_value('telefonnummer'),
-                                            'notiz': d.get_value('notiz'),
-                                            'wunsch_berater_in': d.get_value('wunsch_berater_in'),
-                                            'fachskill': d.get_value('fachskills')||'',
-                                            'sprache': d.get_value('sprache')||'',
+                                            'telefonnummer': values.telefonnummer,
+                                            'notiz': values.notiz,
+                                            'wunsch_berater_in': values.wunsch_berater_in,
+                                            'fachskill': values.fachskills||'',
+                                            'sprache': values.sprache||'',
                                         }, config.create_kwargs);
 
-                                        if (d.get_value('neue_beratung') != 1) {
-                                            kwargs['beratung'] = d.get_value('beratung');
+                                        if (values.neue_beratung != 1) {
+                                            kwargs['beratung'] = values.beratung;
                                         }
                                         
                                         frappe.call({
                                             method: "mvd.mvd.doctype.beratung.beratung.create_neue_beratung",
                                             args: kwargs,
                                             freeze: true,
-                                            freeze_message: d.get_value('neue_beratung') == 1 ? 'Erstelle Beratung und Termin...':'Erstelle Termin...',
+                                            freeze_message: values.neue_beratung == 1 ? 'Erstelle Beratung und Termin...':'Erstelle Termin...',
                                             callback: function(r)
                                             {
                                                 if (r.message) {
-                                                    localStorage.setItem("trigger_termin_mail", "1");
-                                                    localStorage.setItem("termin_block_data", JSON.stringify(termin_block_data));
-                                                    localStorage.setItem("termin_block_art", d.get_value('art'));
-                                                    localStorage.setItem("termin_block_ort", d.get_value('ort'));
-                                                    localStorage.setItem("termin_block_tel", d.get_value('telefonnummer')||'');
-                                                    localStorage.setItem("termin_block_berater_in", berater_in||'');
+                                                    // Maildaten nur in diesem Tab und für die gebuchte Beratung übergeben.
+                                                    sessionStorage.setItem("mvd_termin_mail:" + r.message, JSON.stringify({
+                                                        termin_block_data: termin_block_data,
+                                                        art: kwargs.art,
+                                                        ort: kwargs.ort,
+                                                        telefonnummer: kwargs.telefonnummer || '',
+                                                        berater_in: berater_in
+                                                    }));
                                                     
                                                     if (cur_frm && cur_frm.doc.name == r.message) {
                                                         cur_frm.reload_doc();
@@ -1525,33 +1535,36 @@ frappe.mvd.termin_quick_entry = function(config) {
                             var termin = $(cb).data().abpzuweisung;
                             var ort = $(cb).data().ort;
                             var beratungsperson = $(cb).data().beratungsperson;
-                            if (localStorage.getItem('selected_termine').includes(`-${termin}`)) {
-                                localStorage.setItem('selected_termine', localStorage.getItem('selected_termine').replace(`-${termin}`, ''));
-                                if (localStorage.getItem('selected_termine').length < 1) {
+                            var index = d.selected_termine.indexOf(termin);
+                            if (index > -1) {
+                                d.selected_termine.splice(index, 1);
+                                if (d.selected_termine.length < 1) {
                                     // letzter Termin abgewählt: Berater*in und Ort wieder freigeben (#2168)
+                                    d.selected_beratungsperson = null;
                                     d.set_value('kontaktperson', '');
                                     d.set_value('ort', '');
                                 }
                             } else {
-                                var marks = localStorage.getItem('selected_termine')
-                                if (marks.length > 0 && d.selected_beratungsperson != beratungsperson) {
+                                if (d.selected_termine.length > 0 && d.selected_beratungsperson != beratungsperson) {
                                     // weitere Termine nur bei derselben Berater*in (#2168)
                                     cb.checked = false;
                                     frappe.msgprint("Dieser Termin gehört zu einer anderen Berater*in als der bereits gewählte Termin.");
                                     return;
                                 }
+                                var erster_termin = d.selected_termine.length < 1;
+                                // Auswahl vor den Feldänderungen setzen, damit deren Abfragen den aktuellen Stand verwenden
+                                d.selected_termine.push(termin);
+                                d.selected_beratungsperson = beratungsperson;
                                 // Berater*in und Ort immer vom gewählten Termin übernehmen (#2168)
                                 if (d.get_value('kontaktperson') != beratungsperson) {
                                     d.set_value('kontaktperson', beratungsperson)
                                 }
-                                if (marks.length < 1 && d.get_value('ort') != ort) {
+                                if (erster_termin && d.get_value('ort') != ort) {
                                     d.set_df_property('ort', 'options', orte);
                                     d.set_value('ort', ort)
                                 }
-                                d.selected_beratungsperson = beratungsperson;
-                                localStorage.setItem('selected_termine', `${marks}-${termin}`);
                             }
-                            if (localStorage.getItem('selected_termine').length > 0) {
+                            if (d.selected_termine.length > 0) {
                                 d.set_df_property("ort", "read_only", 1);
                                 d.set_df_property("kontaktperson", "read_only", 1);
                             } else {
@@ -1579,7 +1592,7 @@ function aktualisiere_verfuegbarkeiten(config, dialog) {
             'datum': dialog.get_value('von'),
             'beraterin': dialog.get_value('kontaktperson')||'',
             'ort': dialog.get_value('ort')||'',
-            'marked': localStorage.getItem('selected_termine'),
+            'marked': dialog.selected_termine.join('-'),
             'short_results': dialog.get_value('short_results'),
             'art': dialog.get_value('art')||'',
             'fachskill': dialog.get_value('fachskills')||'',
