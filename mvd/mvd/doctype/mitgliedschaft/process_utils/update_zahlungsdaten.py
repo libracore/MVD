@@ -24,6 +24,11 @@ from mvd.mvd.doctype.mitgliedschaft.utils import create_korrespondenz
     Das Beitrittsdatum (bei einem Beitritt durch Bezahlung) entspricht dem ersten Zahlungsdatum.
 """
 
+
+# Status, bei denen die Ampel immer rot ist (wird auch von den Korrektur-Jobs in daily_jobs.py verwendet)
+AMPEL_IMMER_ROT_STATUS = ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')
+
+
 @frappe.whitelist()
 def run(mitglied_id):
     mitgliedschaft(mitglied_id)
@@ -275,8 +280,7 @@ def get_ampelfarbe(mitgliedschaft, db_direct=False, need_object_load=False):
     if need_object_load:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
 
-    inaktive_status = ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in', 'Anmeldung')
-    if mitgliedschaft.status_c in inaktive_status:
+    if mitgliedschaft.status_c in AMPEL_IMMER_ROT_STATUS:
         return _set_ampel('ampelrot')
 
     aktuelles_jahr = datetime.date.today().year

@@ -10,7 +10,7 @@ from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
 import copy
 from frappe.utils.data import now, add_days, today, add_to_date
-from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price
+from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price, get_mitgliedschafts_artikel_geschaeft
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 from PyPDF2 import PdfFileWriter
 from frappe.utils.pdf import get_file_data_from_writer
@@ -342,6 +342,11 @@ def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_d
             contact = mitgliedschaft.rg_kontakt
         
         item = copy.deepcopy(item_defaults.get(mitgliedschaft.mitgliedtyp_c))
+        if mitgliedschaft.mitgliedtyp_c == 'Geschäft':
+            artikel_geschaeft = get_mitgliedschafts_artikel_geschaeft(sektion, mitgliedschaft.mvb_typ)
+            if artikel_geschaeft != item[0]["item_code"]:
+                item[0]["item_code"] = artikel_geschaeft
+                item[0]["rate"] = get_item_price(artikel_geschaeft).get("price")
         if cint(mitgliedschaft.reduzierte_mitgliedschaft) == 1 and mitgliedschaft.reduzierter_betrag > 0:
             item[0]["rate"] = mitgliedschaft.reduzierter_betrag
         
