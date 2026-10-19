@@ -604,6 +604,12 @@ def send_mails(mrj, test=False):
             email_vorlage = sinv.druckvorlage_digitalrechnung
         subject_txt = frappe.db.get_value("Druckvorlage", email_vorlage, "e_mail_betreff")
         message_txt = frappe.db.get_value("Druckvorlage", email_vorlage, "e_mail_text")
+        try:
+            subject_txt, message_txt = render_jinja_mail_texte(subject_txt, message_txt, sinv.sinv_name)
+        except Exception:
+            # Fehlerhaftes Jinja in der Vorlage: Mail überspringen statt den ganzen Lauf abzubrechen
+            frappe.log_error("{0}\n\nRechnung: {1}\nVorlage: {2}".format(frappe.get_traceback(), sinv.sinv_name, email_vorlage), "MRJ: Jinja-Fehler in E-Mail-Vorlage")
+            continue
         subject = replace_mv_keywords(subject_txt, sinv.mitglied)
         message = replace_mv_keywords(message_txt, sinv.mitglied)
         if len(attachments) > 0 and recipient:
@@ -632,6 +638,21 @@ def send_mails(mrj, test=False):
         frappe.db.commit()
 
     return
+
+def render_jinja_mail_texte(subject_txt, message_txt, sinv_name):
+    # Jinja nur rendern, wenn die Vorlage welches enthält (spart pro Mail das Laden der Rechnung)
+    def hat_jinja(txt):
+        return bool(txt) and ('{{' in txt or '{%' in txt)
+
+    if not hat_jinja(subject_txt) and not hat_jinja(message_txt):
+        return subject_txt, message_txt
+
+    context = {'doc': frappe.get_doc("Sales Invoice", sinv_name)}
+    if hat_jinja(subject_txt):
+        subject_txt = frappe.render_template(subject_txt, context)
+    if hat_jinja(message_txt):
+        message_txt = frappe.render_template(message_txt, context)
+    return subject_txt, message_txt
 
 def get_csv(mrj=None, bg_job=True):
     jahresversand = frappe.get_doc("Mitglied RG Jahreslauf", mrj)
