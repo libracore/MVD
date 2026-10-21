@@ -2,6 +2,49 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Mitglied RG Jahreslauf', {
+    refresh: function(frm) {
+        if (!frm.is_new() && !frm.is_dirty() && frappe.user.has_role('System Manager') &&
+            ['PDFs erstellt', 'Test E-Mails versendet', 'E-Mails versendet',
+             'Abgeschlossen', 'Abgebrochen', 'Fehlgeschlagen'].includes(frm.doc.status)) {
+            frm.add_custom_button(frm.doc.pdf_recreation_documents ? 'PDF-Neuerstellung fortsetzen' : 'PDFs neu erstellen', function() {
+                const recreate_pdfs = function(pdf_type = 'Alle PDFs') {
+                    frm.call('recreate_pdfs', {preview: 1, pdf_type: pdf_type}).then(r => {
+                        const summary = r.message;
+                        if (!summary.documents && !summary.resume) {
+                            frappe.msgprint('Für diese Auswahl wurden keine Jahreslauf-PDFs an gebuchten Rechnungen gefunden.');
+                            return;
+                        }
+                        const action = summary.resume ?
+                            'Die PDF-Neuerstellung wird mit ' + summary.documents + ' verbleibenden Dokumenten fortgesetzt. Die gespeicherte Auswahl bleibt bestehen.' :
+                            'Auswahl: ' + pdf_type + '<br>' + summary.files + ' bestehende Jahreslauf-PDFs von ' + summary.documents +
+                            ' Dokumenten werden mit der aktuellen Druckvorlage ersetzt, einschliesslich bezahlter Rechnungen.' +
+                            '<br><br>Bitte prüfen Sie zuerst die korrigierte Vorlage anhand einer Rechnung.';
+                        frappe.confirm(
+                            action +
+                            '<br>Rechnungen und Versandmarkierungen bleiben unverändert. Es werden keine E-Mails versendet.' +
+                            (summary.resume ? '<br><br>Neuerstellung jetzt fortsetzen?' : '<br><br>PDFs jetzt neu erstellen?'),
+                            function() {
+                                frm.call('recreate_pdfs', {preview: 0, pdf_type: pdf_type}).then(() => {
+                                    frappe.msgprint('Die PDF-Neuerstellung wurde gestartet.');
+                                    frm.reload_doc();
+                                });
+                            }
+                        );
+                    });
+                };
+                if (frm.doc.pdf_recreation_documents) {
+                    recreate_pdfs();
+                } else {
+                    frappe.prompt([
+                        {fieldname: 'pdf_type', fieldtype: 'Select', label: 'PDFs neu erstellen für',
+                         options: 'Alle PDFs\nFakultative Rechnung\nMitgliedschaftsrechnung', default: 'Alle PDFs', reqd: 1}
+                    ], function(values) {
+                        recreate_pdfs(values.pdf_type);
+                    }, 'Auswahl der PDFs', 'Weiter');
+                }
+            });
+        }
+    },
     start_rg: function(frm) {
         frm.call('check_start_rg', {}).then(r => {
             if (r.message > 0) {
@@ -39,6 +82,17 @@ frappe.ui.form.on('Mitglied RG Jahreslauf', {
         });
     },
     stop_pdf: function(frm) {
+        if (frm.doc.status === 'Erstelle PDFs neu') {
+            frappe.call({
+                method: 'mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.stop_pdf_recreation',
+                args: {mrj: frm.doc.name},
+                callback: function() {
+                    frappe.msgprint('Die PDF-Neuerstellung wird nach dem aktuellen Beleg gestoppt. Sie kann später fortgesetzt werden.');
+                    frm.reload_doc();
+                }
+            });
+            return;
+        }
         frm.call('stop_pdf', {}).then(r => {
             frappe.msgprint("Der PDF Erstellungsprozess wurde abgebrochen")
             cur_frm.reload_doc();
