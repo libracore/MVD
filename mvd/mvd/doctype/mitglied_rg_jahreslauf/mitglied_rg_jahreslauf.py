@@ -9,6 +9,7 @@ from frappe.model.naming import make_autoname
 from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
 import copy
+import json
 from frappe.utils.data import now, add_days, today, add_to_date
 from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price, get_mitgliedschafts_artikel_geschaeft
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
@@ -63,6 +64,7 @@ class MitgliedRGJahreslauf(Document):
         return mail_accounts
     
     def start_rg(self):
+        check_pdf_recreation(self.name)
         self.status = "In Warteschlange"
         self.save()
     
@@ -71,14 +73,46 @@ class MitgliedRGJahreslauf(Document):
         self.save()
     
     def create_pdf(self):
+        check_pdf_recreation(self.name)
         self.status = "Erstelle PDFs"
         self.save()
-    
+
+    def recreate_pdfs(self, preview=1, pdf_type="Alle PDFs"):
+        check_pdf_recreation(self.name, allow_pending=True)
+        jahreslauf = frappe.get_doc(self.doctype, self.name)
+
+        if jahreslauf.status not in ("PDFs erstellt", "Test E-Mails versendet", "E-Mails versendet",
+                                     "Abgeschlossen", "Abgebrochen", "Fehlgeschlagen"):
+            frappe.throw("Die PDF-Neuerstellung ist nur bei einem gestoppten oder abgeschlossenen Lauf möglich.")
+
+        for job in ("Erstellung Rechnungen", "Erstellung PDF", "Versende Test E-Mails", "Versende E-Mails"):
+            if is_job_already_running("{0} {1}".format(job, self.name)):
+                frappe.throw("Für diesen Jahreslauf ist noch ein Auftrag aktiv. Bitte warten Sie, bis dieser beendet ist.")
+
+        resume = bool(jahreslauf.pdf_recreation_documents)
+        # Bei Wiederaufnahme bleibt die gespeicherte Auswahl unverändert
+        documents = (json.loads(jahreslauf.pdf_recreation_documents)[cint(jahreslauf.pdf_recreation_index):] if resume else get_pdf_recreation_documents(self.name, pdf_type=pdf_type))
+        summary = {"documents": len(documents), "files": sum(len(doc["files"]) for doc in documents), "resume": resume}
+
+        if not cint(preview) and (documents or resume):
+            if not resume:
+                jahreslauf.pdf_recreation_documents = json.dumps(documents)
+                jahreslauf.pdf_recreation_index = 0
+                jahreslauf.pdf_recreation_file = None
+
+            jahreslauf.status = "Erstelle PDFs neu"
+            jahreslauf.save()
+            jahreslauf.add_comment('Comment', text="PDF-Neuerstellung gestartet/fortgesetzt: {0} verbleibende Belege, {1} bisherige PDFs.".format(
+                summary["documents"], summary["files"])
+            )
+        return summary
+
     def stop_pdf(self):
         self.status = "Abgebrochen"
         self.save()
     
     def send_test_mails(self, sender_account=None, mail_account=None, qty=0, test_mail_mitglied=None):
+        check_pdf_recreation(self.name)
         if not mail_account:
             frappe.throw("Die Auswahl des Mailaccounts ist fehlgeschlagen")
         
@@ -91,6 +125,7 @@ class MitgliedRGJahreslauf(Document):
         self.save()
     
     def send_mails(self, mail_from_sektion=0, mail_account=None):
+        check_pdf_recreation(self.name)
         if mail_from_sektion == 0 and not mail_account:
             frappe.throw("Die Auswahl des Mailaccounts ist fehlgeschlagen")
         
@@ -128,13 +163,16 @@ def mrj_worker():
                 }
                 enqueue("mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.create_invoices", queue='long', job_name='Erstellung Rechnungen {0}'.format(ready_to_run[0].name), timeout=23500, **args)
         else:
-            ready_for_pdf = frappe.db.sql("""SELECT `name` FROM `tabMitglied RG Jahreslauf` WHERE `status` = 'Erstelle PDFs'""", as_dict=True)
+            ready_for_pdf = frappe.db.sql("""SELECT `name`, `status` FROM `tabMitglied RG Jahreslauf` WHERE `status` IN ('Erstelle PDFs', 'Erstelle PDFs neu')""", as_dict=True)
             if len(ready_for_pdf) > 0:
-                if not is_job_already_running('Erstellung PDF {0}'.format(ready_for_pdf[0].name)):
+                recreate = ready_for_pdf[0].status == 'Erstelle PDFs neu'
+                job_name = ('PDF Neuerstellung {0}' if recreate else 'Erstellung PDF {0}').format(ready_for_pdf[0].name)
+                if not is_job_already_running(job_name):
                     args = {
                         'mrj': ready_for_pdf[0].name
                     }
-                    enqueue("mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.create_pdfs", queue='long', job_name='Erstellung PDF {0}'.format(ready_for_pdf[0].name), timeout=23500, **args)
+                    method = 'recreate_pdf_attachments' if recreate else 'create_pdfs'
+                    enqueue("mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.{0}".format(method), queue='long', job_name=job_name, timeout=23500, **args)
             else:
                 ready_for_test_mail = frappe.db.sql("""SELECT `name` FROM `tabMitglied RG Jahreslauf` WHERE `status` = 'Versende Test E-Mails'""", as_dict=True)
                 if len(ready_for_test_mail) > 0:
@@ -159,6 +197,128 @@ def mrj_worker():
 # ---------------------------------------------------
 def get_stop_time(mrj):
     return add_to_date(None, minutes=cint(frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "durchlaufszeit")), as_datetime=True)
+
+def check_pdf_recreation(mrj, allow_pending=False):
+    if is_job_already_running('PDF Neuerstellung {0}'.format(mrj)):
+        frappe.throw("Für diesen Jahreslauf werden die PDFs gerade neu erstellt. Bitte warten Sie, bis der Auftrag beendet ist.")
+
+    state = frappe.db.get_value("Mitglied RG Jahreslauf", mrj, ["status", "pdf_recreation_documents"], as_dict=True)
+    if state and (state.status == 'Erstelle PDFs neu' or (state.pdf_recreation_documents and not allow_pending)):
+        frappe.throw("Bitte schliessen Sie zuerst die PDF-Neuerstellung dieses Jahreslaufs ab.")
+
+@frappe.whitelist()
+def stop_pdf_recreation(mrj):
+    frappe.db.sql("""UPDATE `tabMitglied RG Jahreslauf`
+                     SET status = 'Abgebrochen', modified = %s, modified_by = %s
+                     WHERE name = %s AND status = 'Erstelle PDFs neu'""", (now(), frappe.session.user, mrj))
+
+def get_pdf_recreation_documents(mrj, pdf_type="Alle PDFs"):
+    if pdf_type not in ("Alle PDFs", "Fakultative Rechnung", "Mitgliedschaftsrechnung"):
+        frappe.throw("Bitte wählen Sie Alle PDFs, Fakultative Rechnung oder Mitgliedschaftsrechnung.")
+
+    queries = []
+    if pdf_type in ("Alle PDFs", "Mitgliedschaftsrechnung"):
+        queries.append("""
+        SELECT
+            file.name,
+            file.file_name,
+            file.attached_to_doctype,
+            file.attached_to_name
+        FROM `tabFile` file
+        INNER JOIN `tabSales Invoice` sinv ON file.attached_to_name = sinv.name
+        WHERE file.attached_to_doctype = 'Sales Invoice'
+        AND sinv.mrj = %s AND sinv.docstatus = 1
+        """)
+    if pdf_type in ("Alle PDFs", "Fakultative Rechnung"):
+        queries.append("""
+        SELECT
+            file.name,
+            file.file_name,
+            file.attached_to_doctype,
+            file.attached_to_name
+        FROM `tabFile` file
+        INNER JOIN `tabFakultative Rechnung` fak ON file.attached_to_name = fak.name
+        INNER JOIN `tabSales Invoice` sinv ON fak.sales_invoice = sinv.name
+        WHERE file.attached_to_doctype = 'Fakultative Rechnung'
+        AND sinv.mrj = %s AND sinv.docstatus = 1 AND fak.docstatus = 1
+        """)
+    files = frappe.db.sql(" UNION ALL ".join(queries), (mrj,) * len(queries), as_dict=True)
+
+    documents = {}
+    for file in files:
+        if not (file.file_name or '').startswith('MRJ-{0}_'.format(file.attached_to_name)):
+            continue
+        if not file.file_name.lower().endswith('.pdf'):
+            continue
+
+        key = (file.attached_to_doctype, file.attached_to_name)
+        if key not in documents:
+            documents[key] = {"doctype": key[0], "name": key[1], "files": []}
+
+        documents[key]["files"].append(file.name)
+
+    return [documents[key] for key in sorted(documents)]
+
+def recreate_pdf_attachments(mrj):
+    jahreslauf = frappe.get_doc("Mitglied RG Jahreslauf", mrj)
+    if jahreslauf.status != 'Erstelle PDFs neu':
+        return
+    try:
+        documents = json.loads(jahreslauf.pdf_recreation_documents)
+        stop_time = get_stop_time(mrj)
+
+        for index in range(cint(jahreslauf.pdf_recreation_index), len(documents)):
+            if frappe.db.get_value("Mitglied RG Jahreslauf", mrj, "status") != 'Erstelle PDFs neu':
+                return
+
+            document = documents[index]
+            # Eine stornierte sinv behält sein bisheriges PDF
+            if frappe.db.get_value(document["doctype"], document["name"], "docstatus") == 1:
+                # Nach einem Abbruch zwischen Speichern und Löschen den vorhandenen Ersatz verwenden
+                if not jahreslauf.pdf_recreation_file or not frappe.db.exists("File", jahreslauf.pdf_recreation_file):
+                    print_format = ('Automatisierte Mitgliedschaftsrechnung' if document["doctype"] == 'Sales Invoice' else 'Fakultative Rechnung')
+                    output = frappe.get_print(document["doctype"], document["name"], print_format, as_pdf=True, output=PdfFileWriter(), ignore_zugferd=True)
+                    filename = 'MRJ-{0}_{1}.pdf'.format(document["name"], now().replace(' ', '_').replace(':', '-'))
+                    replacement = frappe.get_doc({
+                        "doctype": "File", "file_name": filename, "folder": "Home/Attachments",
+                        "is_private": 1, "content": get_file_data_from_writer(output),
+                        "attached_to_doctype": document["doctype"], "attached_to_name": document["name"]
+                    })
+                    replacement.flags.ignore_duplicate_entry_error = True
+                    replacement.save(ignore_permissions=True)
+                    # Ersatz und Wiederaufnahmepunkt speichern, bevor alte Dateien gelöscht werden
+                    jahreslauf.pdf_recreation_file = replacement.name
+                    frappe.db.set_value(jahreslauf.doctype, mrj, "pdf_recreation_file", replacement.name)
+                    frappe.db.commit()
+                for file in document["files"]:
+                    frappe.delete_doc("File", file, ignore_permissions=True)
+                if document["doctype"] == 'Sales Invoice':
+                    frappe.db.set_value("Sales Invoice", document["name"], "mrj_pdf_erstellt", 1)
+
+            jahreslauf.pdf_recreation_file = None
+            frappe.db.set_value(jahreslauf.doctype, mrj, {"pdf_recreation_index": index + 1, "pdf_recreation_file": None})
+            frappe.db.commit()
+
+            if add_to_date(None, minutes=0, as_datetime=True) > stop_time:
+                # Status bleibt aktiv, der mrj_worker setzt ab dem gespeicherten Index fort
+                return
+
+        # Einen gleichzeitig ausgelösten manuellen Stopp nicht mit dem Abschluss überschreiben
+        status = frappe.db.sql("""SELECT status FROM `tabMitglied RG Jahreslauf` WHERE name = %s FOR UPDATE""", (mrj,))[0][0]
+        if status == 'Erstelle PDFs neu':
+            frappe.db.set_value(jahreslauf.doctype, mrj, {
+                "status": "PDFs erstellt", "pdf_recreation_documents": None,
+                "pdf_recreation_index": 0, "pdf_recreation_file": None
+            })
+            jahreslauf.add_comment('Comment', text="Die PDF-Neuerstellung ist abgeschlossen. Es wurden keine E-Mails versendet.")
+        frappe.db.commit()
+    except Exception:
+        frappe.db.rollback()
+        frappe.log_error(frappe.get_traceback(), "MRJ: PDF-Neuerstellung fehlgeschlagen")
+        frappe.db.set_value(jahreslauf.doctype, mrj, "status", "Fehlgeschlagen")
+        jahreslauf.add_comment('Comment', text="Die PDF-Neuerstellung ist fehlgeschlagen. Details siehe Fehlerprotokoll. Sie kann ab dem gespeicherten Fortschritt fortgesetzt werden.")
+        frappe.db.commit()
+        raise
 
 # ---------------------------------------------------
 # Create Methods
