@@ -381,20 +381,35 @@ def replace_mv_keywords(txt, mitgliedschaft, mahnung=False, idx=False, sinv=Fals
         txt = txt.replace(key_word['key_word'], key_word['value'])
     return txt
 
-def get_item_table(sinv, quittung=False):
-    def get_payment_txt(mode_of_payment):
-        payment_txt = {
-            'Cash': "Abzüglich Zahlung in Bar",
-            'Credit Card': "Abzüglich Zahlung mit Karte"
-        }
-        if not mode_of_payment or mode_of_payment == '':
-            return "Abzüglich Zahlung"
+def get_payment_txt(mode_of_payment=None, reference_no=None, camt_import=None):
+    '''
+        Text der Zahlungszeile auf der Quittung
+    '''
+    payment_txt = {
+        'Cash': "Abzüglich Zahlung in Bar",
+        'Credit Card': "Abzüglich Zahlung mit Karte",
+        'EZS': "Abzüglich Zahlung mit Einzahlungsschein",
+        'Bank': "Ihre Banküberweisung"
+    }
+    # 1. Referenz der Buttons in der Ausgangsrechnung (sinv_bez_mit_ezs_oder_bar) – verlaesslicher als die Zahlungsart,
+    #    da der Zahlungsterminal-Button ohne Terminal-POS-Profil auf das Bar-Profil (Cash) zurueckfaellt
+    reference_no = reference_no or ''
+    if reference_no.startswith('Zahlungsterminal'):
+        return payment_txt['Credit Card']
+    if reference_no.startswith('Zahlung vor Ort') or reference_no.startswith('Barzahlung'):
+        return payment_txt['Cash']
+    if reference_no.startswith('EZS-Zahlung'):
+        return payment_txt['EZS']
+    # 2. erfasste Zahlungsart (z. B. POS-Rechnungen)
+    if mode_of_payment in payment_txt:
+        return payment_txt[mode_of_payment]
+    # 3. Bankzahlung aus CAMT-Import
+    if camt_import:
+        return payment_txt['Bank']
+    return "Abzüglich Zahlung"
 
-        try:
-            return payment_txt[mode_of_payment]
-        except:
-            return "Abzüglich Zahlung"
-    
+def get_item_table(sinv, quittung=False):
+
     taxes = {}
     for tax in sinv.taxes:
         taxes[tax.description] = 0
@@ -463,21 +478,27 @@ def get_item_table(sinv, quittung=False):
             # Suche nach Payment Records
             payments = frappe.db.sql(
                 """
-                    SELECT `allocated_amount`
-                    FROM `tabPayment Entry Reference`
-                    WHERE `reference_name` = '{sinv_name}'
-                    AND `docstatus` = 1
+                    SELECT
+                        `per`.`allocated_amount`,
+                        `pe`.`mode_of_payment`,
+                        `pe`.`reference_no`,
+                        `pe`.`camt_import`
+                    FROM `tabPayment Entry Reference` AS `per`
+                    JOIN `tabPayment Entry` AS `pe` ON `pe`.`name` = `per`.`parent`
+                    WHERE `per`.`reference_name` = '{sinv_name}'
+                    AND `per`.`docstatus` = 1
                 """.format(sinv_name=sinv.name),
                 as_dict=True
             )
             for payment in payments:
+                zahlungsart = get_payment_txt(payment.mode_of_payment, payment.reference_no, payment.camt_import)
                 table += """
                     <tr>
-                        <td colspan="2" style="text-align: left;">Ihre Banküberweisung</td>
+                        <td colspan="2" style="text-align: left;">{zahlungsart}</td>
                         <td style="text-align: right;">Fr.</td>
                         <td style="text-align: right;">{amount}</td>
                         <td></td>
-                    </tr>""".format(amount="{:,.2f}".format(payment.allocated_amount).replace(",", "'"))
+                    </tr>""".format(zahlungsart=zahlungsart, amount="{:,.2f}".format(payment.allocated_amount).replace(",", "'"))
         
         table += """
             <tr style="border-bottom: 1px solid black; border-top: 1px solid black;">
