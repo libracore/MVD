@@ -290,7 +290,7 @@
 <!-- Referenzblock -->
 <div id='referenzblock'>
     {% if mitgliedschaft.mitgliedtyp_c == 'Geschäft' %}
-        {{ _(sektion.default_ort, print_language) }}, {{ frappe.utils.get_datetime(doc.posting_date).strftime('%d.%m.%Y') }}<br><br>
+        {{ _(sektion.default_ort, print_language) }}, {{ frappe.utils.get_datetime(frappe.utils.nowdate()).strftime('%d.%m.%Y') }}<br><br>
         MV Business<br>
         Baumackerstrasse 24<br>
         Postfach<br>
@@ -299,7 +299,7 @@
         info@mv-business.ch<br>
         www.mv-business.ch
     {% else %}
-        {{ _(sektion.default_ort, print_language) }}, {{ frappe.utils.get_datetime(doc.posting_date).strftime('%d.%m.%Y') }}<br><br>
+        {{ _(sektion.default_ort, print_language) }}, {{ frappe.utils.get_datetime(frappe.utils.nowdate()).strftime('%d.%m.%Y') }}<br><br>
         Mieterinnen- und Mieterverband Zürich<br>
         Baumackerstrasse 24<br>
         Postfach<br>
