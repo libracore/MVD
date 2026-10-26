@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_url_to_form, get_url, cint, format_datetime
-from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention, get_anredekonvention_kunde
+from mvd.mvd.doctype.mitgliedschaft.utils import get_anredekonvention, get_anredekonvention_kunde, get_adressblock
 try:
     from jinja2 import pass_context as context_decorator
 except ImportError:
@@ -596,6 +596,20 @@ def get_vorname_nachname(ctx):
 
         return voller_name if voller_name else "---"
     
+    return '---'
+
+@context_decorator
+def get_formatted_adressblock(ctx):
+    doc = get_doc_from_ctx(ctx)
+    mv_mitgliedschaft = doc.get("mv_mitgliedschaft", False)
+    if doc.doctype == "Mitgliedschaft":
+        mitgliedschaft = doc
+    elif mv_mitgliedschaft:
+        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mv_mitgliedschaft)
+    if mitgliedschaft:
+        block = get_adressblock(mitgliedschaft)
+        return block.replace("\n", "<br>") if block else '---'
+
     return '---'
 
 @context_decorator
