@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.email.email_body import get_message_id
 from frappe.utils import cint, flt, getdate
 import re
 from mvd.mvd.utils.nextcloud import NCSettings
@@ -218,6 +219,22 @@ def send_zahlungsbestaetigungen(pe):
                 subject = replace_mv_keywords(subject, mitglied_doc)
                 message = replace_mv_keywords(message, mitglied_doc)
 
+            # Erstellung Kommunikation damit das Mail in der Timeline der Sales Invoice angezeigt wird
+            communication = frappe.get_doc({
+                'doctype': 'Communication',
+                'communication_type': 'Communication',
+                'communication_medium': 'Email',
+                'sent_or_received': 'Sent',
+                'sender': sender.serien_email_absender_adresse,
+                'sender_full_name': sender.serien_email_absender_name,
+                'recipients': recipient,
+                'subject': subject,
+                'content': message,
+                'reference_doctype': 'Sales Invoice',
+                'reference_name': sinv.name,
+                'message_id': get_message_id().strip(' <>')
+            }).insert(ignore_permissions=True)
+
             frappe.sendmail(
                 sender='{0} <{1}>'.format(sender.serien_email_absender_name or '', sender.serien_email_absender_adresse),
                 recipients=[recipient],
@@ -225,7 +242,9 @@ def send_zahlungsbestaetigungen(pe):
                 subject=subject,
                 reply_to=sender.serien_email_absender_adresse,
                 reference_doctype='Sales Invoice',
-                reference_name=sinv.name
+                reference_name=sinv.name,
+                communication=communication.name,
+                message_id=communication.message_id
             )
         except Exception:
             frappe.log_error('{0}\n\nZahlung: {1}\nRechnung: {2}\nVorlage: {3}'.format(frappe.get_traceback(), pe.name, sinv.name, regel.e_mail_vorlage), 'Zahlungsbestätigung per Mail failed')
