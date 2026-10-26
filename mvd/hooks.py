@@ -55,6 +55,7 @@ jenv = {
         "get_last_open_sinv:mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_last_open_sinv",
         "get_anrede:mvd.mvd.doctype.druckvorlage.druckvorlage.get_anrede",
         "get_vorname_nachname:mvd.mvd.doctype.druckvorlage.druckvorlage.get_vorname_nachname",
+        "get_formatted_adressblock:mvd.mvd.doctype.druckvorlage.druckvorlage.get_formatted_adressblock",
         "get_anrede_beschenkte:mvd.mvd.doctype.druckvorlage.druckvorlage.get_anrede_beschenkte",
         "get_anrede_schenkende:mvd.mvd.doctype.druckvorlage.druckvorlage.get_anrede_schenkende",
         "get_mitgliedernummer:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mitgliedernummer",
