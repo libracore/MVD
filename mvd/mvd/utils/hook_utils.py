@@ -4,7 +4,8 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint
+from frappe.email.email_body import get_message_id
+from frappe.utils import cint, flt, getdate
 import re
 from mvd.mvd.utils.nextcloud import NCSettings
 import os
@@ -109,43 +110,144 @@ def check_manual_address(sinv, event):
         sinv.manuelle_adresse = '{0}\n{1}{2} {3}\n{4}-{5} {6}'.format(sinv.ma_name, "{0}\n".format(sinv.ma_adressen_zusatzzeile) if sinv.ma_adressen_zusatzzeile else '', sinv.ma_strasse, sinv.ma_nummer, sinv.ma_laendercode, sinv.ma_plz, sinv.ma_ort)
 
 def pe_after_submit_hooks(pe, event):
-    def get_recipient(mitglied):
-        abw_debitor = 0
-        abw_rg_adr = frappe.db.get_value("Mitgliedschaft", mitglied, "abweichende_rechnungsadresse") or 0
-        if abw_rg_adr:
-            abw_debitor = frappe.db.get_value("Mitgliedschaft", mitglied, "unabhaengiger_debitor") or 0
-        if abw_debitor == 1:
-            return frappe.db.get_value("Mitgliedschaft", mitglied, "rg_e_mail") or None
-        
-        return frappe.db.get_value("Mitgliedschaft", mitglied, "e_mail_1") or None
-    
-    
     from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_mitgliedschaft_in_pe
     check_mitgliedschaft_in_pe(pe)
-    
-    return 
-    # Bestätigungs Mail wenn Zahlung aus MRJ-2026
-    # Vorübergehend deaktiviert!
-    for sinv in pe.references:
-        if frappe.db.get_value("Sales Invoice", sinv.reference_name, "status") == "Paid":
-            if frappe.db.get_value("Sales Invoice", sinv.reference_name, "mrj") and \
-            'MRJ-2026' in frappe.db.get_value("Sales Invoice", sinv.reference_name, "mrj"):
-                mail_txt = """
-                    Guten Tag
-                    Wir haben Ihre Zahlung per {0} erhalten - Danke, dass Sie sich für die digitale Zahlung entschieden haben! Das spart Zeit und schont erst noch die Umwelt. Damit verlängert sich Ihre Mitgliedschaft beim Mieterinnen- und Mieterverband bis zum 31. Dezember 2026. Sollten Sie dennoch eine Papierrechnung erhalten, betrachten Sie bitte diese als gegenstandslos.<br><br>
-                    Als Mitglied erhalten Sie eine umfassende mietrechtliche Beratung durch Ihre Sektion und finden auf der Webseite mieterverband.ch hilfreiche Informationen, Merkblätter, Vorlagen und Checklisten zu allen Fragen rund um das Mieten und Wohnen. Zudem stärken Sie mit Ihrer Mitgliedschaft die Interessenvertretung der Mieter*innen in der Schweiz.<br><br>
-                    Besten Dank für Ihr Vertrauen!<br><br>
-                    Mit freundlichen Grüssen Ihr Mieterinnen- und Mieterverband
-                """.format(frappe.utils.get_datetime(pe.posting_date).strftime('%d.%m.%Y'))
+    send_zahlungsbestaetigungen(pe)
 
-                recipient = get_recipient(frappe.db.get_value("Sales Invoice", sinv.reference_name, "mv_mitgliedschaft"))
-                
-                if recipient:
-                    frappe.sendmail(sender="{0} <{1}>".format(frappe.get_value("Sektion", pe.sektion_id, "serien_email_absender_name"), frappe.db.get_value("Sektion", pe.sektion_id, "serien_email_absender_adresse")),
-                        recipients=[recipient],
-                        message=mail_txt,
-                        subject="Zahlungsbestätigung",
-                        reply_to=frappe.db.get_value("Sektion", pe.sektion_id, "serien_email_absender_adresse"))
+def send_zahlungsbestaetigungen(pe):
+    if pe.payment_type != 'Receive' or not pe.posting_date:
+        return
+    zahlungsdatum = getdate(pe.posting_date)
+
+    # Alle referenzierten Rechnungen
+    rechnungsnamen = list(set(
+        row.reference_name for row in pe.references
+        if row.reference_doctype == 'Sales Invoice' and row.reference_name and flt(row.allocated_amount) > 0
+    ))
+    if not rechnungsnamen:
+        return
+
+    # Alle relevanten Daten der referenzierten Rechnungen
+    rechnungen = frappe.get_all(
+        'Sales Invoice',
+        filters={
+            'name': ['in', rechnungsnamen],
+            'docstatus': 1,
+            'status': 'Paid'
+        },
+        fields=['name', 'sektion_id', 'mrj', 'mv_mitgliedschaft']
+    )
+    sektionen = list(set(row.sektion_id for row in rechnungen if row.sektion_id))
+    if not sektionen:
+        return
+
+    # Alle sektionsspezifischen E-Mail Regeln
+    regeln = frappe.get_all(
+        'Zahlungsbestaetigung per Mail',
+        filters={
+            'parent': ['in', sektionen],
+            'parenttype': 'Sektion',
+            'parentfield': 'zahlungsbestaetigung_per_mail',
+            'e_mail_ausloesen_bis': ['>=', zahlungsdatum]
+        },
+        fields=['parent', 'aus_mrj', 'e_mail_vorlage'],
+        order_by='e_mail_ausloesen_bis asc, idx asc'
+    )
+
+    passende_regeln = {}
+    for regel in regeln:
+        key = (regel.parent, bool(cint(regel.aus_mrj)))
+        # Der früheste passende Stichtag gewinnt, bei gleichem Datum der erste Eintrag
+        if key not in passende_regeln:
+            passende_regeln[key] = regel
+
+    absender = {}
+    vorlagen = {}
+    mitglieder = {}
+    mitglied_dokumente = {}
+    for sinv in rechnungen:
+        regel = passende_regeln.get((sinv.sektion_id, bool(sinv.mrj)))
+        if not regel or not regel.e_mail_vorlage or not sinv.mv_mitgliedschaft:
+            # Keine passende Regel, kein Email Template oder keine Mitgliedschaft -> skip
+            continue
+
+        if sinv.mv_mitgliedschaft not in mitglieder:
+            mitglieder[sinv.mv_mitgliedschaft] = frappe.db.get_value('Mitgliedschaft', sinv.mv_mitgliedschaft, ['abweichende_rechnungsadresse', 'unabhaengiger_debitor', 'rg_e_mail', 'e_mail_1'], as_dict=True)
+        mitglied = mitglieder[sinv.mv_mitgliedschaft]
+        if not mitglied:
+            # Keine Mitgliedschaft -> skip
+            continue
+
+        recipient = mitglied.rg_e_mail if cint(mitglied.abweichende_rechnungsadresse) and cint(mitglied.unabhaengiger_debitor) == 1 else mitglied.e_mail_1
+        if not recipient:
+            # Kein Empfänger -> Skip
+            continue
+
+        if regel.e_mail_vorlage not in vorlagen:
+            vorlagen[regel.e_mail_vorlage] = frappe.db.get_value('Email Template', regel.e_mail_vorlage, ['sektion_id', 'subject', 'response'], as_dict=True)
+        vorlage = vorlagen[regel.e_mail_vorlage]
+        if not vorlage or vorlage.sektion_id != sinv.sektion_id or not vorlage.response:
+            # Kein passendes E-Mail Template -> skip
+            continue
+
+        if sinv.sektion_id not in absender:
+            absender[sinv.sektion_id] = frappe.db.get_value('Sektion', sinv.sektion_id, ['serien_email_absender_name', 'serien_email_absender_adresse'], as_dict=True)
+        sender = absender[sinv.sektion_id]
+        if not sender or not sender.serien_email_absender_adresse:
+            # Kein Absender -> Skip
+            continue
+
+        try:
+            subject = vorlage.subject or 'Zahlungsbestätigung'
+            message = vorlage.response
+
+            # Anwendung Jinja wenn vorhanden
+            if any('{{' in text or '{%' in text for text in (subject, message)):
+                rechnung = frappe.get_doc('Sales Invoice', sinv.name)
+                context = dict(rechnung.as_dict(), doc=rechnung, payment_entry=pe)
+                if '{{' in subject or '{%' in subject:
+                    subject = frappe.render_template(subject, context)
+                if '{{' in message or '{%' in message:
+                    message = frappe.render_template(message, context)
+            
+            # Anwendung MV Platzhalter wenn vorhanden
+            if '%%' in subject or '%%' in message:
+                from mvd.mvd.doctype.druckvorlage.druckvorlage import replace_mv_keywords
+                if sinv.mv_mitgliedschaft not in mitglied_dokumente:
+                    mitglied_dokumente[sinv.mv_mitgliedschaft] = frappe.get_doc('Mitgliedschaft', sinv.mv_mitgliedschaft)
+                mitglied_doc = mitglied_dokumente[sinv.mv_mitgliedschaft]
+                subject = replace_mv_keywords(subject, mitglied_doc)
+                message = replace_mv_keywords(message, mitglied_doc)
+
+            # Erstellung Kommunikation damit das Mail in der Timeline der Sales Invoice angezeigt wird
+            communication = frappe.get_doc({
+                'doctype': 'Communication',
+                'communication_type': 'Communication',
+                'communication_medium': 'Email',
+                'sent_or_received': 'Sent',
+                'sender': sender.serien_email_absender_adresse,
+                'sender_full_name': sender.serien_email_absender_name,
+                'recipients': recipient,
+                'subject': subject,
+                'content': message,
+                'reference_doctype': 'Sales Invoice',
+                'reference_name': sinv.name,
+                'message_id': get_message_id().strip(' <>')
+            }).insert(ignore_permissions=True)
+
+            frappe.sendmail(
+                sender='{0} <{1}>'.format(sender.serien_email_absender_name or '', sender.serien_email_absender_adresse),
+                recipients=[recipient],
+                message=message,
+                subject=subject,
+                reply_to=sender.serien_email_absender_adresse,
+                reference_doctype='Sales Invoice',
+                reference_name=sinv.name,
+                communication=communication.name,
+                message_id=communication.message_id
+            )
+        except Exception:
+            frappe.log_error('{0}\n\nZahlung: {1}\nRechnung: {2}\nVorlage: {3}'.format(frappe.get_traceback(), pe.name, sinv.name, regel.e_mail_vorlage), 'Zahlungsbestätigung per Mail failed')
 
 def email_queue_after_insert_hook(queue, event):
     remove_admin_and_guest_mails(queue, event)

@@ -67,6 +67,8 @@
   "serien_email_absender_adresse",
   "serien_email_absender_name",
   "serien_email_footer",
+  "section_zahlungsbestaetigung_per_mail",
+  "zahlungsbestaetigung_per_mail",
   "section_e_mail",
   "kuendigungs_bestaetigung_de",
   "kuendigungs_bestaetigung_fr",
@@ -621,6 +623,18 @@
    "fieldname": "serien_email_footer",
    "fieldtype": "HTML Editor",
    "label": "E-Mail Footer"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_zahlungsbestaetigung_per_mail",
+   "fieldtype": "Section Break",
+   "label": "Zahlungsbest\u00e4tigung per Mail"
+  },
+  {
+   "fieldname": "zahlungsbestaetigung_per_mail",
+   "fieldtype": "Table",
+   "label": "Zahlungsbest\u00e4tigung per Mail",
+   "options": "Zahlungsbestaetigung per Mail"
   },
   {
    "fieldname": "default_terminbest_hinweis_de",
@@ -1296,7 +1310,7 @@
    "label": "Mandat ZIP Passwort"
   }
  ],
- "modified": "2026-09-21 15:41:03.112845",
+ "modified": "2026-10-22 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

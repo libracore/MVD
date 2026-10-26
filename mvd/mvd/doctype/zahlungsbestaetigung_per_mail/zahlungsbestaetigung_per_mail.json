@@ -1,0 +1,48 @@
+{
+ "creation": "2026-10-22 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "aus_mrj",
+  "e_mail_ausloesen_bis",
+  "e_mail_vorlage"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "default": "0",
+   "fieldname": "aus_mrj",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Aus MRJ"
+  },
+  {
+   "columns": 3,
+   "description": "Das Zahlungsdatum muss sp\u00e4testens auf diesen Stichtag fallen (inklusive).",
+   "fieldname": "e_mail_ausloesen_bis",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "E-Mail ausl\u00f6sen bis",
+   "reqd": 1
+  },
+  {
+   "columns": 5,
+   "fieldname": "e_mail_vorlage",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "E-Mail-Vorlage",
+   "options": "Email Template",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-10-22 00:00:02.000000",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Zahlungsbestaetigung per Mail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
