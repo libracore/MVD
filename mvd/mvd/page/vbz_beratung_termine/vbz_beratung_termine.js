@@ -192,7 +192,11 @@ frappe.vbz_beratung_termine = {
     },
     get_filter_values: function() {
         // Liefert den Filterzustand für den nächsten Datenabruf
-        // Beim allerersten Laden wird für MVZH automatisch free_only = "1" und chronologische_termine = "1" gesetzt
+        // Beim allerersten Laden gelten nachfolgende Defaults:
+        // - für MVZH:
+        // -- freie/reservierte und chronologische Termine
+        // - für MVBE:
+        // -- nur heutige Termine
         if (this.filter_values) {
             return Object.assign({}, this.filter_values);
         }
@@ -206,6 +210,11 @@ frappe.vbz_beratung_termine = {
         ) {
             filter_values.free_only = "1";
             filter_values.chronologische_termine = "1";
+        } else if (
+            this.first_load &&
+            this.default_sektion === "MVBE"
+        ) {
+            filter_values.termine_heute = "1";
         }
 
         this.filter_values = Object.assign(
