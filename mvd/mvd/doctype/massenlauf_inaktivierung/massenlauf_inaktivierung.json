@@ -12,6 +12,8 @@
   "cb_1",
   "grund",
   "status",
+  "fortschritt",
+  "letzte_aktivitaet",
   "m_w_retouren_schliessen",
   "section_hinweis",
   "hinweis",
@@ -107,6 +109,22 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
+   "fieldname": "fortschritt",
+   "fieldtype": "Data",
+   "label": "Fortschritt",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "letzte_aktivitaet",
+   "fieldtype": "Datetime",
+   "label": "Letzte Aktivität",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
    "default": "1",
    "fieldname": "rg_storno",
    "fieldtype": "Check",
@@ -143,7 +161,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2024-01-10 09:44:26.305590",
+ "modified": "2026-10-28 13:30:35.000000",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Massenlauf Inaktivierung",
