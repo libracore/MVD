@@ -111,7 +111,11 @@ class ArbeitsplanBeratung(Document):
             for t in ungueltige_termine:
                 msg += _("• Zeile {0}: {1} - {2}<br>").format(t["idx"], t["date"], t["beratungsperson"])
 
-            frappe.throw(msg, title=_("Termin ausserhalb Zeitraum"))
+            frappe.msgprint(
+                msg, 
+                title=_("Termin ausserhalb Zeitraum"), 
+                indicator="orange"
+            )
 
     def get_personen(self, einzel, person):
         def get_beratungspersonen(weekday, sektion):

@@ -793,6 +793,9 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False,
         payment_entry_record.mode_of_payment = terminal_payment.mode_of_payment
         payment_entry_record.paid_to = terminal_payment.account
         payment_entry_record.reference_no = 'Zahlungsterminal {0}'.format(sinv.name)
+    elif bar:
+        # Zahlungsart fuer die Quittung festhalten (das Konto paid_to bleibt unveraendert)
+        payment_entry_record.mode_of_payment = get_bar_mode_of_payment(sinv.sektion_id)
     payment_entry_record.insert()
     
     if hv:
@@ -810,6 +813,14 @@ def sinv_bez_mit_ezs_oder_bar(sinv, ezs=False, bar=False, hv=False, datum=False,
         payment_entry_record.save()
     
     payment_entry_record.submit()
+
+def get_bar_mode_of_payment(sektion_id):
+    pos_profile_name = frappe.db.get_value("Sektion", sektion_id, "pos_barzahlung")
+    if pos_profile_name:
+        pos_profile = frappe.get_doc("POS Profile", pos_profile_name)
+        if pos_profile.payments and pos_profile.payments[0].mode_of_payment:
+            return pos_profile.payments[0].mode_of_payment
+    return 'Cash'
 
 @frappe.whitelist()
 def mit_folgejahr_ausgleichen(pe):
