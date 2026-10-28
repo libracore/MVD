@@ -19,9 +19,66 @@
   "strasse",
   "nummer",
   "plz",
-  "ort"
+  "ort",
+  "section_verarbeitung",
+  "verarbeitungsstatus",
+  "verarbeitungsschritt",
+  "verarbeitungsfehler",
+  "ausschluss_vollzogen",
+  "ausschluss_begonnen"
  ],
  "fields": [
+  {
+   "fieldname": "section_verarbeitung",
+   "fieldtype": "Section Break",
+   "label": "Verarbeitung"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "verarbeitungsstatus",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Verarbeitungsstatus",
+   "no_copy": 1,
+   "options": "\nIn Arbeit\nAbgeschlossen\nÜbersprungen\nFehlgeschlagen",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "verarbeitungsschritt",
+   "fieldtype": "Small Text",
+   "label": "Verarbeitungsschritt",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "verarbeitungsfehler",
+   "fieldtype": "Long Text",
+   "label": "Verarbeitungsfehler",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "ausschluss_vollzogen",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Ausschluss gespeichert",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "ausschluss_begonnen",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Ausschluss begonnen",
+   "no_copy": 1,
+   "read_only": 1
+  },
   {
    "fieldname": "mv_mitgliedschaft",
    "fieldtype": "Link",
@@ -123,7 +180,7 @@
   }
  ],
  "istable": 1,
- "modified": "2022-09-07 10:42:58.268549",
+ "modified": "2026-10-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Massenlauf Inaktivierung Mitgliedschaften",
