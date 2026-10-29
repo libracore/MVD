@@ -214,7 +214,7 @@ def quittung_drucken(sales_invoice):
     if payment_entry_name:
         zahlungsdatum = frappe.db.get_value("Payment Entry", payment_entry_name, "posting_date")
     else:
-        zahlungsdatum = None
+        zahlungsdatum = sinv.posting_date
 
     html = frappe.render_template(
         'templates/mvd/mvzh/quittung.html',
