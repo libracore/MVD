@@ -1002,7 +1002,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
                 row.abp_referenz = termin['referenz']
                 row.notiz = notiz
                 row.wunsch_berater_in = wunsch_berater_in.replace("({0})".format(sektion_id), "") if wunsch_berater_in else ''
-                row.fachskill = ", ".join(item["fachskill"] for item in json.loads(fachskill))
+                row.fachskill = ", ".join(item["fachskill"] for item in json.loads(fachskill or "[]"))
                 row.language = sprache
                 row.beratungstyp = termin['beratungstyp']
             
@@ -1021,7 +1021,7 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
                 row.abp_referenz = termin['referenz']
                 row.notiz = notiz
                 row.wunsch_berater_in = wunsch_berater_in.replace("({0})".format(sektion_id), "") if wunsch_berater_in else ''
-                row.fachskill = ", ".join(item["fachskill"] for item in json.loads(fachskill))
+                row.fachskill = ", ".join(item["fachskill"] for item in json.loads(fachskill or "[]"))
                 row.language = sprache
                 row.beratungstyp = termin['beratungstyp']
             
