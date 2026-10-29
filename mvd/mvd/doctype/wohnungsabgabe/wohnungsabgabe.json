@@ -35,6 +35,7 @@
   "vermieter_in",
   "section_auftrag",
   "auftrag_typ",
+  "auftrag_typ_manuell",
   "auftrag_beschreibung",
   "section_tarife",
   "tarif_01",
@@ -294,7 +295,7 @@
    "fieldname": "auftrag_typ",
    "fieldtype": "Select",
    "label": "Auftrag Typ",
-   "options": "Abgabe\n\u00dcbernahme neue Wohnung\nM\u00e4ngel bei Antritt\nErstellen Zustandsbericht"
+   "options": "Abgabe\n\u00dcbernahme neue Wohnung\nM\u00e4ngel bei Antritt\nErstellen Zustandsbericht\nManuelle Eingabe"
   },
   {
    "description": "z.B. 3\u00bd Zimmer Wohnung, 7. Stock",
@@ -358,9 +359,15 @@
    "fieldname": "geschaefstraum_nach_aufwand",
    "fieldtype": "Check",
    "label": "Geschaeftsraum nach Aufwand"
+  },
+  {
+   "depends_on": "eval:doc.auftrag_typ == 'Manuelle Eingabe'",
+   "fieldname": "auftrag_typ_manuell",
+   "fieldtype": "Data",
+   "label": "Auftrag Typ (Manuell)"
   }
  ],
- "modified": "2026-10-29 16:29:55.487346",
+ "modified": "2026-10-29 17:06:19.758258",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
