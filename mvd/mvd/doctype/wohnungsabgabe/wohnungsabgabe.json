@@ -294,7 +294,7 @@
    "fieldname": "auftrag_typ",
    "fieldtype": "Select",
    "label": "Auftrag Typ",
-   "options": "Abgabe\n\u00dcbernahme/M\u00e4ngel bei Antritt\nErstellen Zustandsbericht"
+   "options": "Abgabe\n\u00dcbernahme neue Wohnung\nM\u00e4ngel bei Antritt\nErstellen Zustandsbericht"
   },
   {
    "description": "z.B. 3\u00bd Zimmer Wohnung, 7. Stock",
@@ -360,7 +360,7 @@
    "label": "Geschaeftsraum nach Aufwand"
   }
  ],
- "modified": "2026-09-07 10:46:22.918772",
+ "modified": "2026-10-29 16:29:55.487346",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",
