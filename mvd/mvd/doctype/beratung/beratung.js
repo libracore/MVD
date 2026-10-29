@@ -349,52 +349,53 @@ frappe.ui.form.on('Beratung', {
                 setze_read_only(frm);
             }
 
-            // trigger Termin-Bestätigungs-Mail wenn neuer Termin über Mitgliedschaft erstellt
-            if (localStorage.getItem("trigger_termin_mail")) {
-                if (localStorage.getItem("trigger_termin_mail") == '1') {
-                    localStorage.setItem("trigger_termin_mail", "");
-                    var termin_block_data = JSON.parse(localStorage.getItem("termin_block_data"));
-                    var termin_block_art = localStorage.getItem("termin_block_art");
-                    var termin_block_ort = localStorage.getItem("termin_block_ort");
-                    var termin_block_tel = localStorage.getItem("termin_block_tel");
-                    var termin_block_berater_in = localStorage.getItem("termin_block_berater_in");
-                    var vons = [];
-                    var bises = [];
-                    
-                    termin_block_data.forEach(function(entry) {
-                        vons.push(`${entry['date']} ${entry['von']}`)
-                        bises.push(`${entry['date']} ${entry['bis']}`)
-                    })
+            // Termin-Bestätigungs-Mail nur im buchenden Tab und für die passende Beratung öffnen.
+            var termin_mail_key = "mvd_termin_mail:" + frm.doc.name;
+            var termin_mail_data = sessionStorage.getItem(termin_mail_key);
+            if (termin_mail_data) {
+                sessionStorage.removeItem(termin_mail_key);
+                var termin_mail = JSON.parse(termin_mail_data);
+                var termin_block_data = termin_mail.termin_block_data;
+                var termin_block_art = termin_mail.art;
+                var termin_block_ort = termin_mail.ort;
+                var termin_block_tel = termin_mail.telefonnummer;
+                var termin_block_berater_in = termin_mail.berater_in;
+                var vons = [];
+                var bises = [];
 
-                    frappe.db.get_value("Sektion", cur_frm.doc.sektion_id, 'default_terminbestaetigung_email_template').then(function(value){
-                        if (value.message.default_terminbestaetigung_email_template) {
-                            cur_frm['default_terminbestaetigung_email_template'] = value.message.default_terminbestaetigung_email_template;
-                            frappe.mvd.new_mail(cur_frm);
-                            cur_frm['default_terminbestaetigung_email_template'] = false;
-                        } else {
-                            frappe.call({
-                                method: "mvd.mvd.doctype.beratung.beratung.get_termin_mail_txt",
-                                args:{
-                                    'von': vons,
-                                    'bis': bises,
-                                    'art': termin_block_art,
-                                    'ort': termin_block_ort,
-                                    'telefonnummer': termin_block_tel,
-                                    'mitgliedschaft': cur_frm.doc.mv_mitgliedschaft,
-                                    'faktura_kunde': cur_frm.doc.faktura_kunde,
-                                    'berater_in': termin_block_berater_in || ''
-                                },
-                                callback: function(r) {
-                                    if (r.message) {
-                                        frappe.mvd.new_mail(cur_frm, "", false, r.message.mail_txt, r.message.subject);
-                                    } else {
-                                        frappe.mvd.new_mail(cur_frm);
-                                    }
+                termin_block_data.forEach(function(entry) {
+                    vons.push(`${entry['date']} ${entry['von']}`)
+                    bises.push(`${entry['date']} ${entry['bis']}`)
+                })
+
+                frappe.db.get_value("Sektion", frm.doc.sektion_id, 'default_terminbestaetigung_email_template').then(function(value){
+                    if (value.message.default_terminbestaetigung_email_template) {
+                        frm['default_terminbestaetigung_email_template'] = value.message.default_terminbestaetigung_email_template;
+                        frappe.mvd.new_mail(frm);
+                        frm['default_terminbestaetigung_email_template'] = false;
+                    } else {
+                        frappe.call({
+                            method: "mvd.mvd.doctype.beratung.beratung.get_termin_mail_txt",
+                            args:{
+                                'von': vons,
+                                'bis': bises,
+                                'art': termin_block_art,
+                                'ort': termin_block_ort,
+                                'telefonnummer': termin_block_tel,
+                                'mitgliedschaft': frm.doc.mv_mitgliedschaft,
+                                'faktura_kunde': frm.doc.faktura_kunde,
+                                'berater_in': termin_block_berater_in || ''
+                            },
+                            callback: function(r) {
+                                if (r.message) {
+                                    frappe.mvd.new_mail(frm, "", false, r.message.mail_txt, r.message.subject);
+                                } else {
+                                    frappe.mvd.new_mail(frm);
                                 }
-                            });
-                        }
-                    });
-                }
+                            }
+                        });
+                    }
+                });
             }
         }
         
