@@ -196,6 +196,7 @@ class Beratung(Document):
                 'mitglied': self.mv_mitgliedschaft
             }
             enqueue("mvd.mvd.doctype.siedlungsfall.siedlungsfall.update_mitglied_in_siedlungsfall", queue='short', job_name='Update {0} in Siedlungsfall'.format(self.mv_mitgliedschaft), timeout=5000, **args)
+        self.check_ungelesen_status()
 
     def handle_nextcloud_folder(self):
         nc_enabled = cint(frappe.db.get_value('Sektion', self.sektion_id, 'nc_enabled')) if self.sektion_id else 0
@@ -450,6 +451,18 @@ class Beratung(Document):
         reserved_dates = frappe.db.sql("""SELECT `name` FROM `tabAPB Zuweisung` WHERE `reserved_by` = '{0}'""".format(frappe.session.user), as_dict=True)
         for reserved_date in reserved_dates:
             frappe.db.set_value("APB Zuweisung", reserved_date.name, {'reserved': 0, 'reserved_by': None})
+
+    def check_ungelesen_status(self):
+        old_doc = self.get_doc_before_save()
+        if old_doc and cint(old_doc.ungelesen) == 1 and cint(self.ungelesen) == 0:
+            user_name = frappe.utils.get_fullname(frappe.session.user) or frappe.session.user
+            frappe.get_doc({
+                "doctype": "Comment",
+                "comment_type": "Info",
+                "reference_doctype": "Beratung",
+                "reference_name": self.name,
+                "content": " - E-Mail als gelesen markiert durch {0} ({1})".format(frappe.bold(user_name), frappe.session.user)
+            }).insert(ignore_permissions=True)
 
 @frappe.whitelist()
 def verknuepfen(beratung, verknuepfung):
