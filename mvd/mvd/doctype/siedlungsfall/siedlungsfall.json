@@ -14,7 +14,6 @@
   "frist",
   "section_kontakte",
   "verantwortlich_intern",
-  "ansprechperson",
   "verwaltung",
   "cb_2",
   "verantwortlich_extern",
@@ -100,11 +99,6 @@
    "fieldname": "anz_wohnungen",
    "fieldtype": "Int",
    "label": "Anz. Wohnungen"
-  },
-  {
-   "fieldname": "ansprechperson",
-   "fieldtype": "Data",
-   "label": "Ansprechperson"
   },
   {
    "fieldname": "mv_mitgliedschaft",
@@ -215,7 +209,7 @@
    "label": "verantwortlich_extern (legacy)"
   }
  ],
- "modified": "2026-09-19 11:50:54.070717",
+ "modified": "2026-10-29 14:45:57.225604",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Siedlungsfall",
