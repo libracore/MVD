@@ -38,6 +38,14 @@ def run(dry_run=True):
             AND fr.`docstatus` = 1 AND fr.`status` = 'Unpaid'
         ORDER BY fr.`creation`, fr.`name`
     ''', (SEKTION, STICHTAG), as_dict=True)
+    if dry_run:
+        return {
+            'sektion_id': SEKTION,
+            'stichtag_exklusiv': STICHTAG,
+            'anz_sales_invoices': len(sinvs),
+            'anz_frs': len(frs)
+        }
+
     result = {
         'dry_run': dry_run,
         'sektion_id': SEKTION,
@@ -59,9 +67,6 @@ def run(dry_run=True):
         'fehler': [],
         'zahlungsdaten_geleert': 0
     }
-    if dry_run:
-        return result
-
     # Zuerst FR stornieren, damit unlink_fr keine fremden/neuen FR verändert
     # und keinen Zwischenstand innerhalb eines Rechnungsstornos committet.
     for doctype, rows in (('Fakultative Rechnung', frs), ('Sales Invoice', sinvs)):
