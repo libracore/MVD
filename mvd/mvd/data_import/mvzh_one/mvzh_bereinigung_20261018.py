@@ -8,6 +8,7 @@ Aufruf über bench execute:
 Erstellt = creation, strikt vor 18.10.2026 (00:00 Uhr).
 Gebuchte, teilbezahlte Sales Invoices mit positivem Restbetrag sind offen.
 Entwürfe, bezahlte Rechnungen und Gutschriften werden nicht storniert.
+Fakultative Rechnungen werden nur mit vorhandener verknüpfter Sales Invoice storniert.
 Erfolgreiche Stornos werden einzeln bestätigt; Fehler stehen im Ergebnis.
 Bestehende Frappe-Hooks können Teiländerungen bereits vorher bestätigen.
 """
@@ -29,9 +30,14 @@ def run(dry_run=True):
     sinvs = frappe.get_all('Sales Invoice',
         filters=dict(filters, outstanding_amount=['>', 0], is_return=0),
         fields=['name'], order_by='creation, name')
-    frs = frappe.get_all('Fakultative Rechnung',
-        filters=dict(filters, status='Unpaid'),
-        fields=['name'], order_by='creation, name')
+    frs = frappe.db.sql('''
+        SELECT fr.`name`
+        FROM `tabFakultative Rechnung` fr
+        INNER JOIN `tabSales Invoice` sinv ON sinv.`name` = fr.`sales_invoice`
+        WHERE fr.`sektion_id` = %s AND fr.`creation` < %s
+            AND fr.`docstatus` = 1 AND fr.`status` = 'Unpaid'
+        ORDER BY fr.`creation`, fr.`name`
+    ''', (SEKTION, STICHTAG), as_dict=True)
     result = {
         'dry_run': dry_run,
         'sektion_id': SEKTION,
@@ -108,7 +114,8 @@ def _is_open_target(document):
         return False
     if document.doctype == 'Sales Invoice':
         return not cint(document.is_return) and flt(document.outstanding_amount) > 0
-    return document.status == 'Unpaid'
+    return (document.status == 'Unpaid' and bool(document.sales_invoice)
+        and bool(frappe.db.exists('Sales Invoice', document.sales_invoice)))
 
 
 def _check_membership(invoice):
