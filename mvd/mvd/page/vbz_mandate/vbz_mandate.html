@@ -1,0 +1,33 @@
+<div class="row">
+    <h1 class="vbz">Mandate<span id="datenstand" class="pull-right">Datenstand: {{ datenstand }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
+</div>
+<div class="row">
+    <table id="table_mandat_uebersicht">
+        <tr>
+            <th><b>Status</b></th>
+            <th style="text-align: right;" title="Rechtsschutzversicherung"><b>RSV</b></th>
+            <th style="text-align: right;" title="Solidaritätsfonds"><b>S</b></th>
+            {% if hat_ohne_typ %}
+            <th style="text-align: right;"><b>ohne Typ</b></th>
+            {% endif %}
+        </tr>
+        {% for row in status_liste %}
+        <tr {% if row.status && row.summe %}class="mandat-status" data-status="{{ frappe.utils.escape_html(row.status) }}"{% endif %}>
+            <td>{{ row.status ? frappe.utils.escape_html(row.status) : "(ohne Status)" }}</td>
+            <td {% if row.status && row.rsv %}class="mandat-anzahl" data-typ="Rechtsschutzversicherung"{% endif %} style="text-align: right;"><b>{{ row.rsv }}</b></td>
+            <td {% if row.status && row.s %}class="mandat-anzahl" data-typ="Solidaritätsfonds"{% endif %} style="text-align: right;"><b>{{ row.s }}</b></td>
+            {% if hat_ohne_typ %}
+            <td {% if row.status && row.ohne_typ %}class="mandat-anzahl" data-typ=""{% endif %} style="text-align: right;"><b>{{ row.ohne_typ }}</b></td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+        <tr {% if total.summe %}class="mandat-status" data-alle="1"{% endif %}>
+            <td><b>Total</b></td>
+            <td {% if total.rsv %}class="mandat-anzahl" data-typ="Rechtsschutzversicherung"{% endif %} style="text-align: right;"><b>{{ total.rsv }}</b></td>
+            <td {% if total.s %}class="mandat-anzahl" data-typ="Solidaritätsfonds"{% endif %} style="text-align: right;"><b>{{ total.s }}</b></td>
+            {% if hat_ohne_typ %}
+            <td {% if total.ohne_typ %}class="mandat-anzahl" data-typ=""{% endif %} style="text-align: right;"><b>{{ total.ohne_typ }}</b></td>
+            {% endif %}
+        </tr>
+    </table>
+</div>

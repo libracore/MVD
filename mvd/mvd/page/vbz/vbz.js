@@ -190,7 +190,8 @@ frappe.vbz = {
             frappe.set_route("rsvmitglied-overview");
         });
         $("#mandat").click(function(){
-            frappe.set_route("List", "Mandat", "List");
+            frappe.dom.freeze('Öffne Mandat-Übersicht...');
+            frappe.set_route("vbz-mandate");
         });
         $("#todo").click(function(){
             frappe.route_options = {'status': 'Open'};
