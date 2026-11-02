@@ -75,6 +75,13 @@
         </center>
     </div>
 
+    <div class="control-card blue-card" id="mandat" {% if frappe.boot.default_sektion != "MVBE" %} style="display: none;"{% endif %}>
+        <center>
+            <i class="fa fa-briefcase blue-icon"></i>
+            <p>{{ __("Mandate") }}</p>
+        </center>
+    </div>
+
     <div class="control-card blue-card" id="siedlungsfaelle" {% if frappe.boot.default_sektion != "MVZH" %} style="display: none;"{% endif %}>
         <center>
             <i class="fa fa-cubes blue-icon"></i>

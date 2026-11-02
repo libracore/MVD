@@ -53,6 +53,7 @@ frappe.vbz = {
         $("#beratung_alle_sektionen").off("click");
         $("#termin").off("click");
         $("#rsvmitglied").off("click");
+        $("#mandat").off("click");
         $("#mahnung").off("click");
         $("#zweimal_unzustellbar").off("click");
         $("#einmal_unzustellbar").off("click");
@@ -187,6 +188,9 @@ frappe.vbz = {
         $("#rsvmitglied").click(function(){
             frappe.dom.freeze('Öffne RSV-Mandat-Übersicht...');
             frappe.set_route("rsvmitglied-overview");
+        });
+        $("#mandat").click(function(){
+            frappe.set_route("List", "Mandat", "List");
         });
         $("#todo").click(function(){
             frappe.route_options = {'status': 'Open'};
