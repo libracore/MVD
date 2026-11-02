@@ -227,7 +227,8 @@ frappe.ui.form.on('Beratung', {
                         if (frm.doc.mandat) {
                             frappe.msgprint("Es existiert bereits ein Mandat für diesen Datensatz.");
                         } else {
-                            create_mandat(frm);
+                            // Dialog: mvd/mvd/doctype/mandat/mandat_erstellen.js (via hooks.py)
+                            frappe.mvd.mandat.erstellen(frm);
                         }
                     });
                 }
@@ -792,57 +793,6 @@ function erstelle_todo(frm) {
             )
         }
     });
-}
-
-function create_mandat(frm) {
-    let d = new frappe.ui.Dialog({
-        title: 'Mandat erstellen',
-        fields: [
-            {'fieldname': 'berater_in', 'fieldtype': 'Link', 'label': 'Vertrauensanwält*in', 'reqd': 0, 'options': 'Termin Kontaktperson', 'default': frm.doc.kontaktperson},
-            {'fieldname': 'typ', 'fieldtype': 'Select', 'label': 'Typ', 'options': "Rechtsschutzversicherung\nSolidaritätsfonds"},
-            {'fieldname': 'datum', 'fieldtype': 'Date', 'label': 'Fertigstellen bis', 'reqd': 0},
-            {'fieldname': 'bemerkung', 'fieldtype': 'Small Text', 'label': 'Bemerkungen'},
-            {'fieldname': 'persoenliche_bemerkung', 'fieldtype': 'Small Text', 'label': 'Persönliche Bemerkung'}
-        ],
-        primary_action_label: 'Erstellen',
-        primary_action: function(values) {
-            if (values.berater_in && values.berater_in.toLowerCase().includes('pool')) {
-                frappe.msgprint({
-                    title: __('Ungültige Auswahl'),
-                    indicator: 'red',
-                    message: __('Pool darf nicht als Vertrauensanwält*in ausgewählt werden.')
-                });
-                return;
-            }
-
-            frappe.call({
-                "method": "create_mandat",
-                "doc": frm.doc,
-                "args": {
-                    "berater_in": values.berater_in,
-                    "typ": values.typ,
-                    "fertigstellen_bis": values.datum,
-                    "bemerkung": values.bemerkung,
-                    "persoenliche_bemerkung": values.persoenliche_bemerkung
-                },
-                "callback": function(r) {
-                    d.hide();
-                    cur_frm.reload_doc();
-                    frappe.msgprint(`Das Mandat (${r.message}) wurde erstellt.`);
-                }
-            });
-        }
-    });
-    // Filter für das Link-Feld im Dialog setzen
-    d.get_field('berater_in').get_query = function() {
-        return {
-            filters: [
-                ['Termin Kontaktperson', 'name', 'not like', '%pool%']
-            ]
-        };
-    };
-
-    d.show();
 }
 
 function create_rsv_mitglied(frm) {
