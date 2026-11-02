@@ -36,7 +36,8 @@ doctype_js = {
     "Role" : "public/js/custom_scripts/role.js",
     "Payment Entry" : "public/js/custom_scripts/payment_entry.js",
     "Communication" : "public/js/custom_scripts/communication.js",
-    "Issue" : "public/js/custom_scripts/issue.js"
+    "Issue" : "public/js/custom_scripts/issue.js",
+    "Beratung" : "mvd/doctype/mandat/mandat_erstellen.js"
 }
 doctype_list_js = {
     "Error Log" : "public/js/custom_scripts/error_log_list.js",

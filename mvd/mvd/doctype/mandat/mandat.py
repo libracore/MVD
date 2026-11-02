@@ -14,7 +14,7 @@ from frappe.model.naming import make_autoname
 from frappe.email.doctype.email_template.email_template import get_email_template
 from frappe.utils.pdf import get_pdf
 from frappe import attach_print
-from frappe.utils import get_url_to_form, get_url
+from frappe.utils import get_url_to_form, get_url, escape_html
 from frappe.utils.file_manager import get_file_path
 
 class Mandat(Document):
@@ -36,8 +36,11 @@ class Mandat(Document):
 
         if not self.kontaktperson:
             self.status = "Unzugewiesen"
-        
-        elif not self.is_new():
+
+        elif self.is_new():
+            self.status = "Vorgemerkt"
+
+        else:
             old_doc = self.get_doc_before_save()
             if old_doc and not old_doc.kontaktperson and self.kontaktperson:
                 self.status = "Vorgemerkt"
@@ -53,22 +56,42 @@ class Mandat(Document):
                 self.db_set("bestaetigungs_email_gesendet", 1)
 
 @frappe.whitelist()
-def create_mandat(sektion, beratung, mitglied, beratungskategorie, beratungskategorie_2, beratungskategorie_3, berater_in, typ, fertigstellen_bis, bemerkung, persoenliche_bemerkung):
+def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenliche_bemerkung=None):
+    from mvd.mvd.doctype.beratung.beratung import uebernahme
+
+    if "MV_Mandat" not in frappe.get_roles():
+        frappe.throw(frappe._("Keine Berechtigung zum Erstellen von Mandaten."), frappe.PermissionError)
+
+    beratung = frappe.get_doc("Beratung", beratung)
+    if not beratung.has_permission("read"):
+        frappe.throw(frappe._("Keine Berechtigung für diese Beratung."), frappe.PermissionError)
+
+    if beratung.mandat:
+        frappe.throw(frappe._("Es existiert bereits ein Mandat für diesen Datensatz."))
+
+    if not beratung.beratungskategorie:
+        frappe.throw(frappe._("Bitte zuerst in der Beratung die Beratungskategorie setzen und speichern."))
+
+    # Persönliche Bemerkung darf nur die VA selbst setzen
+    if persoenliche_bemerkung and (not berater_in or berater_in != uebernahme(beratung.name, frappe.session.user)):
+        frappe.throw(frappe._("Eine persönliche Bemerkung kann nur erfassen, wer das Mandat selbst übernimmt."))
+
     mandat = frappe.new_doc("Mandat")
 
-    mandat.mv_mitgliedschaft = mitglied
-    mandat.sektion_id = sektion
-    mandat.beratung = beratung
-    mandat.beratungskategorie = beratungskategorie
-    mandat.beratungskategorie_2 = beratungskategorie_2
-    mandat.beratungskategorie_3 = beratungskategorie_3
+    mandat.mv_mitgliedschaft = beratung.mv_mitgliedschaft
+    mandat.sektion_id = beratung.sektion_id
+    mandat.beratung = beratung.name
+    mandat.beratungskategorie = beratung.beratungskategorie
+    mandat.beratungskategorie_2 = beratung.beratungskategorie_2
+    mandat.beratungskategorie_3 = beratung.beratungskategorie_3
     mandat.kontaktperson = berater_in
     mandat.typ = typ
-    mandat.fertigstellen_bis = fertigstellen_bis
     mandat.bemerkung = bemerkung
     mandat.persoenliche_bemerkung = persoenliche_bemerkung
 
     mandat.insert(ignore_permissions=True)
+
+    frappe.db.set_value("Beratung", beratung.name, "mandat", mandat.name)
 
     return mandat.name
 
@@ -154,6 +177,13 @@ def send_confirmation_email(mandat):
                     zip_url = get_url(zip_file_doc.file_url)
                     zip_link_html = """<a href="{0}">Download alle Anlagen als ZIP</a> """.format(zip_url)
 
+            persoenliche_bemerkung_html = ""
+            if mandat.persoenliche_bemerkung:
+                persoenliche_bemerkung_html = """
+                    <br><br>
+                    <p><b>Persönliche Bemerkung:</b><br>{0}</p>
+                """.format(escape_html(mandat.persoenliche_bemerkung).replace("\n", "<br>"))
+
             footer_links = """
                 <br><br>
                 <hr>
@@ -166,7 +196,7 @@ def send_confirmation_email(mandat):
                 </p>
             """.format(link_beratung, mandat.beratung,link_mandat, mandat.name, link_mitglied, mitglied_label, zip_link_html)
             
-            full_message = rendered_berater.get("message") + footer_links
+            full_message = rendered_berater.get("message") + persoenliche_bemerkung_html + footer_links
             comm = make(
                 recipients=recipients,
                 sender=absender_format,
