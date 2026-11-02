@@ -36,7 +36,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Unzugewiesen\nVorgemerkt\nGesuch eingereicht\nGutsprache\nAbgelehnt\nAbgeschlossen",
+   "options": "Unzugewiesen\nVorgemerkt\nGesuch eingereicht\nGutsprache\nAbgelehnt\nAbgeschlossen\nR\u00fcckzug\nGel\u00f6scht",
    "reqd": 1
   },
   {
@@ -142,7 +142,7 @@
    "label": "Fall verfolgen"
   }
  ],
- "modified": "2026-06-11 10:03:51.576415",
+ "modified": "2026-11-02 12:46:02.803071",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",
