@@ -17,9 +17,7 @@
   "mv_mitgliedschaft",
   "cb_2",
   "beratung",
-  "beratungskategorie",
-  "beratungskategorie_2",
-  "beratungskategorie_3",
+  "thema",
   "bestaetigungs_email_gesendet",
   "section_bemerkungen",
   "bemerkung",
@@ -119,25 +117,10 @@
    "label": "Pers\u00f6nliche Bemerkung"
   },
   {
-   "fieldname": "beratungskategorie",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Beratungskategorie",
-   "options": "Beratungskategorie"
-  },
-  {
-   "depends_on": "eval:doc.beratungskategorie",
-   "fieldname": "beratungskategorie_2",
-   "fieldtype": "Link",
-   "label": "(2) Beratungskategorie",
-   "options": "Beratungskategorie"
-  },
-  {
-   "depends_on": "eval:doc.beratungskategorie_2",
-   "fieldname": "beratungskategorie_3",
-   "fieldtype": "Link",
-   "label": "(3) Beratungskategorie",
-   "options": "Beratungskategorie"
+   "fieldname": "thema",
+   "fieldtype": "Table MultiSelect",
+   "label": "Thema",
+   "options": "RSV Thema MultiTable"
   },
   {
    "fieldname": "fertigstellen_bis",
@@ -172,7 +155,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2026-11-02 17:52:59.437453",
+ "modified": "2026-11-02 18:00:20.311578",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",

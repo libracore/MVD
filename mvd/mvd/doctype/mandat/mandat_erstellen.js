@@ -36,12 +36,23 @@ frappe.mvd.mandat.erstellen = function(frm) {
             'user': frappe.session.user
         },
         callback: function(r) {
-            frappe.mvd.mandat.erstellen_dialog(frm, r.message || null);
+            let eigene_va = r.message || null;
+            // Nur Beratungskategorien vorschlagen, die es noch gibt (Altdaten enthalten gelöschte)
+            let kategorien = [frm.doc.beratungskategorie, frm.doc.beratungskategorie_2, frm.doc.beratungskategorie_3]
+                .filter((k, i, a) => k && a.indexOf(k) === i);
+            frappe.db.get_list('Beratungskategorie', {'filters': {'name': ['in', kategorien]}, 'fields': ['name'], 'limit': 3}).then(vorhanden => {
+                let namen = vorhanden.map(k => k.name);
+                let themen = kategorien.filter(k => namen.includes(k));
+                // Meta der Thema-Tabelle wird vom Table-MultiSelect-Feld im Dialog benötigt
+                frappe.model.with_doctype('RSV Thema MultiTable', function() {
+                    frappe.mvd.mandat.erstellen_dialog(frm, eigene_va, themen);
+                });
+            });
         }
     });
 };
 
-frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va) {
+frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen) {
     // Vorbelegung: selbst Berater*in der Beratung -> übernehmen; keine eigene VA -> nicht übernehmen
     let uebernahme_default = '';
     if (eigene_va && frm.doc.kontaktperson == eigene_va) {
@@ -54,7 +65,8 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va) {
         title: 'Mandat erstellen',
         fields: [
             {'fieldname': 'prozess_html', 'fieldtype': 'HTML', 'options': '<div class="alert alert-info">Platzhalter: Hier folgt die Beschreibung des Mandats-Prozesses.</div>'},
-            {'fieldname': 'beratungskategorie', 'fieldtype': 'Read Only', 'label': 'Beratungskategorie', 'default': frm.doc.beratungskategorie},
+            {'fieldname': 'thema', 'fieldtype': 'Table MultiSelect', 'label': 'Thema', 'options': 'RSV Thema MultiTable', 'reqd': 1,
+             'description': 'Vorgeschlagen aus den Beratungskategorien der Beratung.'},
             {'fieldname': 'uebernahme', 'fieldtype': 'Select', 'label': 'Übernahme', 'reqd': 1,
              'options': ['', frappe.mvd.mandat.UEBERNEHMEN, frappe.mvd.mandat.NICHT_UEBERNEHMEN].join('\n'), 'default': uebernahme_default,
              'change': function() {
@@ -84,7 +96,8 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va) {
                     "berater_in": uebernehmen ? eigene_va : null,
                     "typ": values.typ,
                     "bemerkung": values.bemerkung,
-                    "persoenliche_bemerkung": uebernehmen ? values.persoenliche_bemerkung : null
+                    "persoenliche_bemerkung": uebernehmen ? values.persoenliche_bemerkung : null,
+                    "thema": (values.thema || []).map(row => row.thema).filter(thema => thema)
                 },
                 "callback": function(r) {
                     d.hide();
@@ -94,6 +107,9 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va) {
             });
         }
     });
+
+    // Themen mit den Beratungskategorien der Beratung vorbelegen
+    d.set_value('thema', (themen || []).map(k => ({'thema': k})));
 
     d.show();
 };
