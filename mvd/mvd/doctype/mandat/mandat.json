@@ -5,8 +5,9 @@
  "engine": "InnoDB",
  "field_order": [
   "section_mandat",
-  "status",
   "sektion_id",
+  "status",
+  "thema",
   "cb_1",
   "typ",
   "fertigstellen_bis",
@@ -17,7 +18,6 @@
   "mv_mitgliedschaft",
   "cb_2",
   "beratung",
-  "thema",
   "bestaetigungs_email_gesendet",
   "section_bemerkungen",
   "bemerkung",
@@ -72,6 +72,7 @@
   {
    "fieldname": "sektion_id",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Sektion",
    "options": "Sektion"
   },
@@ -155,7 +156,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2026-11-02 18:00:20.311578",
+ "modified": "2026-11-02 18:15:38.410311",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",
