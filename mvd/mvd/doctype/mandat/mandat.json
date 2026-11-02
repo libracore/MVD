@@ -6,20 +6,24 @@
  "field_order": [
   "section_mandat",
   "status",
-  "fertigstellen_bis",
+  "sektion_id",
   "cb_1",
   "typ",
+  "fertigstellen_bis",
+  "kontaktperson",
+  "section_uebersicht",
+  "uebersicht_html",
   "section_verknuepfungen",
-  "sektion_id",
   "mv_mitgliedschaft",
+  "cb_2",
   "beratung",
   "beratungskategorie",
   "beratungskategorie_2",
   "beratungskategorie_3",
-  "kontaktperson",
   "bestaetigungs_email_gesendet",
-  "cb_2",
+  "section_bemerkungen",
   "bemerkung",
+  "column_break_20",
   "persoenliche_bemerkung",
   "section_verwaltung",
   "visum",
@@ -51,6 +55,16 @@
    "in_standard_filter": 1,
    "label": "Typ",
    "options": "\nRechtsschutzversicherung\nSolidarit\u00e4tsfonds"
+  },
+  {
+   "depends_on": "eval:doc.mv_mitgliedschaft",
+   "fieldname": "section_uebersicht",
+   "fieldtype": "Section Break",
+   "label": "\u00dcbersicht Mitglied"
+  },
+  {
+   "fieldname": "uebersicht_html",
+   "fieldtype": "HTML"
   },
   {
    "fieldname": "section_verknuepfungen",
@@ -87,6 +101,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "F\u00fcr alle sichtbar, die das Mandat sehen. Wird nicht an die VA gemailt.",
    "fieldname": "bemerkung",
    "fieldtype": "Small Text",
    "label": "Bemerkung"
@@ -98,6 +113,7 @@
    "label": "Bestaetigungs Email gesendet"
   },
   {
+   "description": "Wird in der Best\u00e4tigungsmail an die VA mitgeschickt (nur Typ Rechtsschutzversicherung). Beim Erstellen aus der Beratung nur erfassbar, wenn man das Mandat selbst \u00fcbernimmt.",
    "fieldname": "persoenliche_bemerkung",
    "fieldtype": "Small Text",
    "label": "Pers\u00f6nliche Bemerkung"
@@ -126,6 +142,7 @@
   {
    "fieldname": "fertigstellen_bis",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "Fertigstellen bis"
   },
   {
@@ -144,9 +161,18 @@
    "fieldname": "fall_verfolgen",
    "fieldtype": "Check",
    "label": "Fall verfolgen"
+  },
+  {
+   "fieldname": "section_bemerkungen",
+   "fieldtype": "Section Break",
+   "label": "Bemerkungen"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2026-11-02 12:57:28.031956",
+ "modified": "2026-11-02 17:52:59.437453",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",
