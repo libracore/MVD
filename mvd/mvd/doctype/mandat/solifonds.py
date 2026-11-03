@@ -373,7 +373,7 @@ def _sende_liste(sektion_id, rolle, status, betreff):
     zeilen = "".join("<tr><td><a href='{0}'>{1}</a></td><td>{2}</td><td>{3}</td><td>{4}</td><td>{5}</td><td>{6}</td></tr>".format(
         get_url_to_form("Mandat", m.name), m.name, escape_html(m.status), escape_html(m.mv_mitgliedschaft or ""),
         escape_html(m.solifonds_art or ""), escape_html(m.kontaktperson or "–"),
-        frappe.utils.format_date(m.gesuch_eingereicht_am) if m.gesuch_eingereicht_am else "") for m in mandate)
+        frappe.utils.formatdate(m.gesuch_eingereicht_am) if m.gesuch_eingereicht_am else "") for m in mandate)
     inhalt = """<p>{0}</p>
         <table border="1" cellpadding="6" style="border-collapse: collapse">
         <tr><th>Mandat</th><th>Status</th><th>Mitglied</th><th>Art</th><th>VA</th><th>Eingereicht</th></tr>{1}</table>
