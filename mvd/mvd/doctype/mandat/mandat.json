@@ -12,6 +12,31 @@
   "typ",
   "fertigstellen_bis",
   "kontaktperson",
+  "section_solifonds",
+  "solifonds_art",
+  "kostendach",
+  "solifonds_begruendung",
+  "cb_solifonds",
+  "kriterium_notlage",
+  "kriterium_vermoegenseinbussen",
+  "kriterium_erfolgsaussichten",
+  "kriterium_finanzielle_notlage",
+  "kriterium_keine_rs_deckung",
+  "gesuch_eingereicht_am",
+  "gesuch_eingereicht_von",
+  "section_vorpruefung",
+  "vorpruefung_ok",
+  "vorpruefung_begruendung",
+  "cb_vorpruefung",
+  "vorgeprueft_am",
+  "vorgeprueft_von",
+  "section_entscheid",
+  "entscheid_bemerkung",
+  "cb_entscheid",
+  "entscheid_durch",
+  "entscheid_datum",
+  "section_vorstand",
+  "vorstand_stimmen",
   "section_uebersicht",
   "uebersicht_html",
   "section_verknuepfungen",
@@ -39,7 +64,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Unzugewiesen\nVorgemerkt\nGesuch eingereicht\nGutsprache\nAbgelehnt\nAbgeschlossen\nR\u00fcckzug\nGel\u00f6scht",
+   "options": "Unzugewiesen\nVorgemerkt\nGesuch eingereicht\nVorgepr\u00fcft\nAntrag Vorstand\nGutsprache\nAbgelehnt\nAbgeschlossen\nR\u00fcckzug\nGel\u00f6scht",
    "reqd": 1
   },
   {
@@ -53,6 +78,157 @@
    "in_standard_filter": 1,
    "label": "Typ",
    "options": "\nRechtsschutzversicherung\nSolidarit\u00e4tsfonds"
+  },
+  {
+   "depends_on": "eval:doc.typ=='Solidarit\u00e4tsfonds'",
+   "fieldname": "section_solifonds",
+   "fieldtype": "Section Break",
+   "label": "Solidarit\u00e4tsfonds"
+  },
+  {
+   "description": "mangels Rechtsschutzdeckung: Kostendach CHF 3'000 pro Instanz, Entscheid GL \u00b7 aus ideellen Gr\u00fcnden: Kostendach CHF 8'000 (2 Instanzen), Entscheid Vorstand",
+   "fieldname": "solifonds_art",
+   "fieldtype": "Select",
+   "label": "Art des Antrags",
+   "options": "\nmangels Rechtsschutzdeckung\naus ideellen Gr\u00fcnden"
+  },
+  {
+   "fieldname": "kostendach",
+   "fieldtype": "Currency",
+   "label": "Kostendach (CHF)",
+   "read_only": 1
+  },
+  {
+   "description": "Erscheint im PDF f\u00fcr das Mitglied. Ohne Personendaten \u2013 wird dem Vorstand anonymisiert angezeigt.",
+   "fieldname": "solifonds_begruendung",
+   "fieldtype": "Text",
+   "label": "Begr\u00fcndung"
+  },
+  {
+   "fieldname": "cb_solifonds",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.typ=='Solidarit\u00e4tsfonds' && doc.solifonds_art=='mangels Rechtsschutzdeckung'",
+   "fieldname": "kriterium_notlage",
+   "fieldtype": "Check",
+   "label": "Mietrechtliche Notlage"
+  },
+  {
+   "depends_on": "eval:doc.typ=='Solidarit\u00e4tsfonds' && doc.solifonds_art=='mangels Rechtsschutzdeckung'",
+   "fieldname": "kriterium_vermoegenseinbussen",
+   "fieldtype": "Check",
+   "label": "Drohende oder eingetretene Verm\u00f6genseinbussen"
+  },
+  {
+   "depends_on": "eval:doc.typ=='Solidarit\u00e4tsfonds' && doc.solifonds_art=='mangels Rechtsschutzdeckung'",
+   "fieldname": "kriterium_erfolgsaussichten",
+   "fieldtype": "Check",
+   "label": "Erfolgsaussichten im Verfahren"
+  },
+  {
+   "depends_on": "eval:doc.typ=='Solidarit\u00e4tsfonds' && doc.solifonds_art=='mangels Rechtsschutzdeckung'",
+   "fieldname": "kriterium_finanzielle_notlage",
+   "fieldtype": "Check",
+   "label": "Glaubhaft gemachte finanzielle Notlage"
+  },
+  {
+   "depends_on": "eval:doc.typ=='Solidarit\u00e4tsfonds' && doc.solifonds_art=='mangels Rechtsschutzdeckung'",
+   "fieldname": "kriterium_keine_rs_deckung",
+   "fieldtype": "Check",
+   "label": "Glaubhaft fehlende Rechtsschutzdeckung ausserhalb MVB"
+  },
+  {
+   "fieldname": "gesuch_eingereicht_am",
+   "fieldtype": "Datetime",
+   "label": "Gesuch eingereicht am",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gesuch_eingereicht_von",
+   "fieldtype": "Link",
+   "label": "Gesuch eingereicht von",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.typ=='Solidarit\u00e4tsfonds' && doc.gesuch_eingereicht_am",
+   "fieldname": "section_vorpruefung",
+   "fieldtype": "Section Break",
+   "label": "Vorpr\u00fcfung"
+  },
+  {
+   "fieldname": "vorpruefung_ok",
+   "fieldtype": "Check",
+   "label": "Zweckbestimmungen und Voraussetzungen gem. Reglement erf\u00fcllt",
+   "read_only": 1
+  },
+  {
+   "description": "Ohne Personendaten \u2013 wird dem Vorstand anonymisiert angezeigt.",
+   "fieldname": "vorpruefung_begruendung",
+   "fieldtype": "Small Text",
+   "label": "Begr\u00fcndung Vorpr\u00fcfung",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_vorpruefung",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vorgeprueft_am",
+   "fieldtype": "Datetime",
+   "label": "Vorgepr\u00fcft am",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vorgeprueft_von",
+   "fieldtype": "Link",
+   "label": "Vorgepr\u00fcft von",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.typ=='Solidarit\u00e4tsfonds' && doc.vorgeprueft_am",
+   "fieldname": "section_entscheid",
+   "fieldtype": "Section Break",
+   "label": "Entscheid"
+  },
+  {
+   "description": "Ohne Personendaten \u2013 wird dem Vorstand anonymisiert angezeigt.",
+   "fieldname": "entscheid_bemerkung",
+   "fieldtype": "Small Text",
+   "label": "Bemerkung zum Entscheid",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_entscheid",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "entscheid_durch",
+   "fieldtype": "Select",
+   "label": "Entscheid durch",
+   "options": "\nGL\nVorstand",
+   "read_only": 1
+  },
+  {
+   "fieldname": "entscheid_datum",
+   "fieldtype": "Date",
+   "label": "Entscheiddatum",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.typ=='Solidarit\u00e4tsfonds' && (doc.vorstand_stimmen || []).length",
+   "fieldname": "section_vorstand",
+   "fieldtype": "Section Break",
+   "label": "Vorstandsabstimmung"
+  },
+  {
+   "fieldname": "vorstand_stimmen",
+   "fieldtype": "Table",
+   "label": "Stimmen",
+   "options": "Mandat Vorstand Stimme",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.mv_mitgliedschaft",
@@ -156,7 +332,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2026-11-02 18:15:38.410311",
+ "modified": "2026-11-02 18:47:19.245190",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",

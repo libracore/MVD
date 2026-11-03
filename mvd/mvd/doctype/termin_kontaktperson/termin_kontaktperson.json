@@ -9,6 +9,7 @@
   "kontakt",
   "sektion_id",
   "ist_vertrauensanwaeltin",
+  "ist_vorstand",
   "user",
   "languages",
   "fachskill",
@@ -78,6 +79,13 @@
    "label": "Ist Vertrauensanw\u00e4lt*in"
   },
   {
+   "default": "0",
+   "description": "Erh\u00e4lt die Abstimmungslinks f\u00fcr Solidarit\u00e4tsfonds-Antr\u00e4ge an den Vorstand.",
+   "fieldname": "ist_vorstand",
+   "fieldtype": "Check",
+   "label": "Vorstand"
+  },
+  {
    "fieldname": "languages",
    "fieldtype": "Table MultiSelect",
    "label": "Language",
@@ -90,7 +98,7 @@
    "options": "Termin Kontaktperson Multi Fachskill"
   }
  ],
- "modified": "2026-05-29 11:23:01.858466",
+ "modified": "2026-11-02 18:47:19.245634",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Termin Kontaktperson",

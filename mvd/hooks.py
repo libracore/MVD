@@ -208,6 +208,7 @@ scheduler_events = {
         "mvd.mvd.doctype.postretouren_log.postretouren_log.start_post_retouren_process",
         # "mvd.mvd.utils.daily_jobs.rechnungs_jahresversand",
         "mvd.mvd.utils.daily_jobs.daily_ampel_korrektur",
+        "mvd.mvd.doctype.mandat.solifonds.sende_solifonds_listen",
         "mvd.mvd.utils.daily_jobs.sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft",
         "mvd.mvd.v2.web_auth.reset_hash_cleanup",
         "mvd.mvd.utils.daily_jobs.execute_address_changes",

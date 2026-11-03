@@ -8,8 +8,27 @@ frappe.provide('frappe.mvd.mandat');
 
 frappe.mvd.mandat.UEBERNEHMEN = 'Ich übernehme das Mandat';
 frappe.mvd.mandat.NICHT_UEBERNEHMEN = 'Ich kann das Mandat nicht übernehmen';
+frappe.mvd.mandat.SOLIFONDS = 'Solidaritätsfonds';
+frappe.mvd.mandat.MANGELS_RS = 'mangels Rechtsschutzdeckung';
+
+// Kriterien gemäss Antragsformular Punkt 2, nur bei "mangels Rechtsschutzdeckung"
+frappe.mvd.mandat.KRITERIEN = [
+    ['kriterium_notlage', 'Mietrechtliche Notlage'],
+    ['kriterium_vermoegenseinbussen', 'Drohende oder eingetretene Vermögenseinbussen'],
+    ['kriterium_erfolgsaussichten', 'Erfolgsaussichten im Verfahren'],
+    ['kriterium_finanzielle_notlage', 'Glaubhaft gemachte finanzielle Notlage'],
+    ['kriterium_keine_rs_deckung', 'Glaubhaft fehlende Rechtsschutzdeckung ausserhalb MVB']
+];
 
 frappe.mvd.mandat.erstellen = function(frm) {
+    if (!frm.doc.mv_mitgliedschaft) {
+        frappe.msgprint({
+            title: __('Kein Mitglied'),
+            indicator: 'red',
+            message: __('Ein Mandat ist nur für Beratungen mit Mitglied möglich. Bitte zuerst die Beratung einem Mitglied zuordnen und speichern.')
+        });
+        return;
+    }
     if (!frm.doc.beratungskategorie) {
         frappe.msgprint({
             title: __('Beratungskategorie fehlt'),
@@ -61,6 +80,9 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen) {
         uebernahme_default = frappe.mvd.mandat.NICHT_UEBERNEHMEN;
     }
 
+    let ist_solifonds = `eval:doc.typ=="${frappe.mvd.mandat.SOLIFONDS}"`;
+    let ist_mangels_rs = `eval:doc.typ=="${frappe.mvd.mandat.SOLIFONDS}" && doc.solifonds_art=="${frappe.mvd.mandat.MANGELS_RS}"`;
+
     let d = new frappe.ui.Dialog({
         title: 'Mandat erstellen',
         fields: [
@@ -82,12 +104,27 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen) {
             },
             {'fieldname': 'seki_hinweis', 'fieldtype': 'HTML', 'options': '<p class="text-muted">Das Sekretariat bemüht sich um eine geeignete VA.</p>', 'depends_on': `eval:doc.uebernahme=="${frappe.mvd.mandat.NICHT_UEBERNEHMEN}"`},
             {'fieldname': 'typ', 'fieldtype': 'Select', 'label': 'Typ', 'reqd': 1, 'options': "Rechtsschutzversicherung\nSolidaritätsfonds", 'default': 'Rechtsschutzversicherung'},
+            {'fieldname': 'solifonds_art', 'fieldtype': 'Select', 'label': 'Antrag auf Kostengutsprache',
+             'options': ['', frappe.mvd.mandat.MANGELS_RS, 'aus ideellen Gründen'].join('\n'), 'depends_on': ist_solifonds,
+             'description': "mangels Rechtsschutzdeckung (Karenzfrist, Geschäfts-/Kollektivmitglied): Kostendach CHF 3'000 pro Instanz, Entscheid GL · aus ideellen Gründen / Rechtssicherheit: Kostendach CHF 8'000 (2 Instanzen), Entscheid Vorstand"},
+            {'fieldname': 'kriterien_html', 'fieldtype': 'HTML', 'options': '<p class="text-muted">Geprüfte Kriterien (Antragsformular Punkt 2)</p>', 'depends_on': ist_mangels_rs}
+        ].concat(frappe.mvd.mandat.KRITERIEN.map(k => (
+            {'fieldname': k[0], 'fieldtype': 'Check', 'label': k[1], 'depends_on': ist_mangels_rs}
+        ))).concat([
+            {'fieldname': 'solifonds_begruendung', 'fieldtype': 'Small Text', 'label': 'Begründung', 'depends_on': ist_solifonds,
+             'description': 'Erscheint im PDF für das Mitglied. Ohne Personendaten – wird dem Vorstand anonymisiert angezeigt. Darf bei der Vorerfassung leer bleiben («keine Musse»), ist zum Einreichen aber Pflicht.'},
             {'fieldname': 'bemerkung', 'fieldtype': 'Small Text', 'label': 'Bemerkungen', 'description': 'Wird im Mandat gespeichert und ist für alle sichtbar, die das Mandat sehen. Wird nicht an die VA gemailt.'},
-            {'fieldname': 'persoenliche_bemerkung', 'fieldtype': 'Small Text', 'label': 'Persönliche Bemerkung', 'depends_on': `eval:doc.uebernahme=="${frappe.mvd.mandat.UEBERNEHMEN}"`, 'description': 'Wird im Mandat gespeichert und in der Bestätigungsmail an die VA mitgeschickt (nur Typ Rechtsschutzversicherung).'}
-        ],
+            {'fieldname': 'persoenliche_bemerkung', 'fieldtype': 'Small Text', 'label': 'Persönliche Bemerkung', 'depends_on': `eval:doc.uebernahme=="${frappe.mvd.mandat.UEBERNEHMEN}"`, 'description': 'Wird im Mandat gespeichert und in der Bestätigungsmail an die VA mitgeschickt (nur Typ Rechtsschutzversicherung).'},
+            {'fieldname': 'fall_verfolgen', 'fieldtype': 'Check', 'label': 'Fall verfolgen'}
+        ]),
         primary_action_label: 'Erstellen',
         primary_action: function(values) {
             let uebernehmen = values.uebernahme == frappe.mvd.mandat.UEBERNEHMEN;
+            let solifonds = values.typ == frappe.mvd.mandat.SOLIFONDS;
+            if (solifonds && !values.solifonds_art) {
+                frappe.msgprint(__('Bitte wählen, worauf sich der Antrag auf Kostengutsprache stützt.'));
+                return;
+            }
 
             frappe.call({
                 "method": "mvd.mvd.doctype.mandat.mandat.create_mandat",
@@ -97,7 +134,11 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen) {
                     "typ": values.typ,
                     "bemerkung": values.bemerkung,
                     "persoenliche_bemerkung": uebernehmen ? values.persoenliche_bemerkung : null,
-                    "thema": (values.thema || []).map(row => row.thema).filter(thema => thema)
+                    "thema": (values.thema || []).map(row => row.thema).filter(thema => thema),
+                    "fall_verfolgen": values.fall_verfolgen ? 1 : 0,
+                    "solifonds_art": solifonds ? values.solifonds_art : null,
+                    "solifonds_begruendung": solifonds ? values.solifonds_begruendung : null,
+                    "kriterien": solifonds ? frappe.mvd.mandat.KRITERIEN.map(k => k[0]).filter(k => values[k]) : []
                 },
                 "callback": function(r) {
                     d.hide();

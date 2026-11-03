@@ -14,8 +14,21 @@ from frappe.model.naming import make_autoname
 from frappe.email.doctype.email_template.email_template import get_email_template
 from frappe.utils.pdf import get_pdf
 from frappe import attach_print
-from frappe.utils import get_url_to_form, get_url, escape_html
+from frappe.utils import get_url_to_form, get_url, escape_html, cint
 from frappe.utils.file_manager import get_file_path
+
+SOLIFONDS_KOSTENDACH = {
+    "mangels Rechtsschutzdeckung": 3000,
+    "aus ideellen Gründen": 8000
+}
+
+SOLIFONDS_KRITERIEN = [
+    "kriterium_notlage",
+    "kriterium_vermoegenseinbussen",
+    "kriterium_erfolgsaussichten",
+    "kriterium_finanzielle_notlage",
+    "kriterium_keine_rs_deckung"
+]
 
 class Mandat(Document):
     def autoname(self):
@@ -33,6 +46,9 @@ class Mandat(Document):
                 msg=frappe._("Pool ist als Vertrauensanwält*in nicht erlaubt. Bitte korrigieren."),
                 title=frappe._("Ungültige Kontaktperson")
             )
+
+        if self.typ == "Solidaritätsfonds":
+            self.kostendach = SOLIFONDS_KOSTENDACH.get(self.solifonds_art) or 0
 
         if not self.kontaktperson:
             self.status = "Unzugewiesen"
@@ -56,7 +72,8 @@ class Mandat(Document):
                 self.db_set("bestaetigungs_email_gesendet", 1)
 
 @frappe.whitelist()
-def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenliche_bemerkung=None, thema=None):
+def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenliche_bemerkung=None, thema=None,
+                  fall_verfolgen=0, solifonds_art=None, solifonds_begruendung=None, kriterien=None):
     from mvd.mvd.doctype.beratung.beratung import uebernahme
 
     if "MV_Mandat" not in frappe.get_roles():
@@ -68,6 +85,9 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
 
     if beratung.mandat:
         frappe.throw(frappe._("Es existiert bereits ein Mandat für diesen Datensatz."))
+
+    if not beratung.mv_mitgliedschaft:
+        frappe.throw(frappe._("Ein Mandat ist nur für Beratungen mit Mitglied möglich. Bitte zuerst die Beratung einem Mitglied zuordnen und speichern."))
 
     if not beratung.beratungskategorie:
         frappe.throw(frappe._("Bitte zuerst in der Beratung die Beratungskategorie setzen und speichern."))
@@ -90,6 +110,17 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     mandat.typ = typ
     mandat.bemerkung = bemerkung
     mandat.persoenliche_bemerkung = persoenliche_bemerkung
+    mandat.fall_verfolgen = cint(fall_verfolgen)
+
+    if typ == "Solidaritätsfonds":
+        mandat.solifonds_art = solifonds_art
+        # "keine Musse": Begründung darf bei der Vorerfassung leer sein, Pflicht erst beim Einreichen
+        mandat.solifonds_begruendung = solifonds_begruendung
+        # Kriterien gibt es nur bei "mangels Rechtsschutzdeckung"
+        if solifonds_art == "mangels Rechtsschutzdeckung":
+            gewaehlt = frappe.parse_json(kriterien) if kriterien else []
+            for kriterium in SOLIFONDS_KRITERIEN:
+                mandat.set(kriterium, 1 if kriterium in gewaehlt else 0)
 
     mandat.insert(ignore_permissions=True)
 
@@ -358,6 +389,10 @@ def update_mandat_status_nach_email(doc, method):
         "link_doctype": "Mandat",
         "link_name": mandat_name,
     })
+
+    # Beim Solidaritätsfonds steuert der Ablauf (Einreichen, Vorprüfung, GL) den Status
+    if frappe.db.get_value("Mandat", mandat_name, "typ") == "Solidaritätsfonds":
+        return
 
     if anzahl_emails == 1:
         frappe.db.set_value("Mandat", mandat_name, "status", "Gesuch eingereicht")
