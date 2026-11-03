@@ -299,6 +299,13 @@ def abstimmung_starten(doc):
             _("Dieser Link ist persönlich und nur für Sie gültig."))
         _sende_mail(doc, empfaenger, _("Solifonds: Abstimmung Vorstand ({0})").format(doc.name), inhalt,
             mit_kommunikation=False)
+        # Verlauf: an wen der Link ging, ohne den Link selbst
+        if empfaenger:
+            _kommentar(doc, _("Abstimmungslink per E-Mail an {0} (Vorstand) verschickt: {1}").format(
+                escape_html(stimme.kontaktperson), escape_html(", ".join(empfaenger))))
+        else:
+            _kommentar(doc, _("Kein Abstimmungslink an {0} (Vorstand): keine E-Mail-Adresse hinterlegt.").format(
+                escape_html(stimme.kontaktperson)))
 
 def get_abstimmung_stand(doc):
     ja = len([s for s in doc.vorstand_stimmen if s.stimme == "Ja"])
