@@ -5,10 +5,10 @@
     Nur mit dem damaligen Kommentar markierte, stornierte Rechnungen mit
     creation >= 18.09.2026 und creation < 18.10.2026 werden berücksichtigt.
 
-    Vorschau (nur lesen, keine Änderungen):
+    Vorschau (Anzahl):
         bench --site libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_one.mvzh_wiederherstellung_20260918.run
 
-    Vorschau mit einzelnen Belegen und Blockierungsgründen:
+    Vollständige Vorschau mit Fortschritt, einzelnen Belegen und Blockierungsgründen:
         bench --site libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_one.mvzh_wiederherstellung_20260918.run --kwargs "{'details': True}"
 
     Live Run:
@@ -44,13 +44,18 @@ def run(dry_run=True, details=False):
         'von_inklusive': VON,
         'bis_exklusive': BIS,
         'anz_sales_invoices': len(candidates['Sales Invoice']),
-        'anz_frs': len(candidates['Fakultative Rechnung']),
+        'anz_frs': len(candidates['Fakultative Rechnung'])
+    }
+    if dry_run and not cint(details):
+        return result
+
+    result.update({
         'bereit': 0,
         'bereits_berichtigt': 0,
         'blockiert': 0,
         'wiederhergestellt': 0,
         'fehler': 0
-    }
+    })
     rows = []
     available = {}
     key = 'skip_mitgliedschaft_zahlungsdaten'
@@ -60,7 +65,7 @@ def run(dry_run=True, details=False):
     try:
         # sinv zuerst, danach die fak's
         for doctype in DOCTYPES:
-            for row in tqdm(candidates[doctype], desc='MVZH: {0}'.format(doctype), unit=' Rechnung', disable=dry_run):
+            for row in tqdm(candidates[doctype], desc='MVZH: {0}'.format(doctype), unit=' Rechnung'):
                 item = {'doctype': doctype, 'name': row.name}
                 try:
                     if not dry_run:
