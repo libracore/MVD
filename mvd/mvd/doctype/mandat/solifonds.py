@@ -77,7 +77,8 @@ def _absender(sektion_id):
     return "{0} <{1}>".format(sektion.get("legacy_mail_absende_name") or "Mieterverband",
         sektion.get("legacy_mail_absender_mail"))
 
-def _sende_mail(doc, empfaenger, betreff, inhalt, attachments=None, mit_kommunikation=True):
+def _sende_mail(doc, empfaenger, betreff, inhalt, dateien=None, mit_kommunikation=True):
+    # dateien: Namen von File-Dokumenten; sie erscheinen als Anhang der Mail und der Communication
     if not empfaenger:
         frappe.log_error("Keine Empfänger*innen für «{0}» (Mandat {1}).".format(betreff, doc.name), "Solifonds Mail")
         return
@@ -93,6 +94,7 @@ def _sende_mail(doc, empfaenger, betreff, inhalt, attachments=None, mit_kommunik
         content=inhalt,
         doctype="Mandat",
         name=doc.name,
+        attachments=dateien or [],
         send_email=False
     )["name"]
     sendmail(
@@ -100,7 +102,7 @@ def _sende_mail(doc, empfaenger, betreff, inhalt, attachments=None, mit_kommunik
         sender=absender,
         subject=betreff,
         content=inhalt,
-        attachments=attachments or [],
+        attachments=[{"fid": f} for f in (dateien or [])],
         reference_doctype="Mandat",
         reference_name=doc.name,
         unsubscribe_method=None,
@@ -242,15 +244,22 @@ def _entscheid_setzen(doc, entscheid, durch):
 
 def gutsprache_mail(doc):
     # Info an die VA, nicht ans Mitglied; das Mitglied unterschreibt das Formular bei der VA
-    attachments = [frappe.attach_print("Mandat", doc.name, print_format=PRINT_FORMAT,
-        file_name="Kostengutsprache_{0}".format(doc.name))]
+    # PDF als private Datei am Mandat ablegen, damit es im Mandat und in der Communication als Anhang erscheint
+    pdf = frappe.get_doc({
+        "doctype": "File",
+        "file_name": "Kostengutsprache_{0}.pdf".format(doc.name),
+        "attached_to_doctype": "Mandat",
+        "attached_to_name": doc.name,
+        "content": frappe.get_print("Mandat", doc.name, print_format=PRINT_FORMAT, as_pdf=True),
+        "is_private": 1
+    }).insert(ignore_permissions=True)
     inhalt = "<p>{0}</p><p>{1}</p><p><a href='{2}'>{3}</a></p>".format(
         _("Für das Mandat wurde eine Kostengutsprache aus dem Solidaritätsfonds erteilt (Kostendach CHF {0}).").format(
             frappe.format_value(doc.kostendach, {"fieldtype": "Currency"})),
         _("Im Anhang das Formular «Kostengutsprache Solidaritätsfonds». Bitte vom Mitglied unterschreiben lassen."),
         get_url_to_form("Mandat", doc.name), doc.name)
     _sende_mail(doc, get_va_empfaenger(doc),
-        _("Kostengutsprache Solidaritätsfonds: {0}").format(doc.name), inhalt, attachments)
+        _("Kostengutsprache Solidaritätsfonds: {0}").format(doc.name), inhalt, [pdf.name])
 
 def ablehnung_mail(doc):
     # Ablehnung geht nur an die Vorprüfung, weder an die VA noch ans Mitglied
