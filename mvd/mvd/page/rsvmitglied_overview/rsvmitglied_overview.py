@@ -50,7 +50,20 @@ def get_rsvmitglied_status_counts():
         as_dict=True
     )
 
+    dringende_rsvmitglieder = frappe.db.sql(
+        """
+            SELECT COUNT(`name`) AS `count`
+            FROM `tabRSVMitglied`
+            WHERE `status` IN ({angez_status})
+            AND `dringend` = 1
+        """.format(angez_status=', '.join(['%s'] * len(angezeigte_status))),
+        tuple(angezeigte_status),
+        as_dict=True
+    )
+
     return {
         'status_counts': status_counts,
-        'neue_rsvmitglieder': neue_rsvmitglieder[0].count
+        'neue_rsvmitglieder': neue_rsvmitglieder[0].count,
+        'dringende_rsvmitglieder': dringende_rsvmitglieder[0].count,
+        'angezeigte_status': angezeigte_status
     }
