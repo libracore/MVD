@@ -34,12 +34,12 @@
         </section>
         {% else %}
         <section>
-            <p class="hinweis">Antrag auf Kostengutsprache aus dem Solidaritätsfonds · Fall {{ fall }}</p>
-            <h1>{{ art }}</h1>
+            <p class="hinweis">Antrag auf Kostengutsprache aus dem Solidaritätsfonds · Fall {{ fall | e }}</p>
+            <h1>{{ art | e }}</h1>
             <p class="hinweis">Anonymisiert – keine Personen- oder Adressdaten.</p>
             <dl class="row">
                 <dt class="col-sm-4">Kostendach</dt><dd class="col-sm-8">CHF {{ kostendach }}</dd>
-                <dt class="col-sm-4">Thema</dt><dd class="col-sm-8">{{ themen }}</dd>
+                <dt class="col-sm-4">Thema</dt><dd class="col-sm-8">{{ themen | e }}</dd>
             </dl>
             {% if begruendung %}<h2 class="h5">Begründung</h2><p class="text">{{ begruendung | e }}</p>{% endif %}
             {% if vorpruefung %}<h2 class="h5">Vorprüfung</h2><p class="text">{{ vorpruefung | e }}</p>{% endif %}
@@ -58,7 +58,7 @@
                 </div>
                 <p id="meldung" class="hinweis" role="status"></p>
             {% else %}
-                <p>Die Abstimmung ist abgeschlossen (Status: {{ status }}).{% if meine_stimme %} Ihre Stimme: «{{ meine_stimme }}».{% endif %}</p>
+                <p>Die Abstimmung ist abgeschlossen (Status: {{ status | e }}).{% if meine_stimme %} Ihre Stimme: «{{ meine_stimme }}».{% endif %}</p>
             {% endif %}
             <p class="hinweis">Stand: {{ stand.ja + stand.nein + stand.enthaltung }} von {{ stand.total }} Stimmen abgegeben · Ja {{ stand.ja }} · Nein {{ stand.nein }} · Enthaltung {{ stand.enthaltung }}. Es gilt die einfache Mehrheit der abgegebenen Stimmen; die Geschäftsleitung schliesst die Abstimmung ab.</p>
         </section>

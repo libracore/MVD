@@ -7,9 +7,10 @@
 # Antrag Vorstand -> (Abstimmung, Abschluss durch GL) -> Gutsprache | Abgelehnt
 
 from __future__ import unicode_literals
+import hashlib
 import frappe
 from frappe import _
-from frappe.utils import cint, now_datetime, today, get_url, get_url_to_form, escape_html
+from frappe.utils import cint, now_datetime, today, get_url, get_url_to_form, escape_html, strip_html
 from frappe.core.doctype.communication.email import make
 from frappe import sendmail
 
@@ -76,11 +77,15 @@ def _absender(sektion_id):
     return "{0} <{1}>".format(sektion.get("legacy_mail_absende_name") or "Mieterverband",
         sektion.get("legacy_mail_absender_mail"))
 
-def _sende_mail(doc, empfaenger, betreff, inhalt, attachments=None):
+def _sende_mail(doc, empfaenger, betreff, inhalt, attachments=None, mit_kommunikation=True):
     if not empfaenger:
         frappe.log_error("Keine Empfänger*innen für «{0}» (Mandat {1}).".format(betreff, doc.name), "Solifonds Mail")
         return
     absender = _absender(doc.sektion_id)
+    if not mit_kommunikation:
+        # Keine Communication: sie stünde in der Timeline des Mandats und wäre für alle mit Leserecht sichtbar
+        sendmail(recipients=empfaenger, sender=absender, subject=betreff, content=inhalt, delayed=True)
+        return
     comm = make(
         recipients=empfaenger,
         sender=absender,
@@ -271,11 +276,15 @@ def abstimmung_starten(doc):
     if not vorstand:
         frappe.throw(_("In der Sektion {0} ist keine Kontaktperson mit «Vorstand» erfasst.").format(doc.sektion_id))
 
+    # Im Mandat steht nur der Hash des Tokens; der Token selbst steht nur im Link der Mail
+    tokens = {}
     doc.set("vorstand_stimmen", [])
     for person in vorstand:
+        token = frappe.generate_hash(length=32)
+        tokens[person.name] = token
         doc.append("vorstand_stimmen", {
             "kontaktperson": person.name,
-            "token": frappe.generate_hash(length=32)
+            "token": _token_hash(token)
         })
     doc.save(ignore_permissions=True)
 
@@ -283,12 +292,13 @@ def abstimmung_starten(doc):
         empfaenger = [u for u in frappe.db.sql_list("""
             SELECT `user` FROM `tabTermin Kontaktperson Multi User` WHERE `parent` = %s
         """, stimme.kontaktperson) if u]
-        link = get_url("/solifonds-abstimmung?token={0}".format(stimme.token))
+        link = get_url("/solifonds-abstimmung?token={0}".format(tokens[stimme.kontaktperson]))
         inhalt = "<p>{0}</p><p><a href='{1}'>{2}</a></p><p>{3}</p>".format(
             _("Die Geschäftsleitung beantragt eine Kostengutsprache aus dem Solidaritätsfonds. Bitte stimmen Sie über den anonymisierten Fall ab."),
             link, _("Zur Abstimmung"),
             _("Dieser Link ist persönlich und nur für Sie gültig."))
-        _sende_mail(doc, empfaenger, _("Solifonds: Abstimmung Vorstand ({0})").format(doc.name), inhalt)
+        _sende_mail(doc, empfaenger, _("Solifonds: Abstimmung Vorstand ({0})").format(doc.name), inhalt,
+            mit_kommunikation=False)
 
 def get_abstimmung_stand(doc):
     ja = len([s for s in doc.vorstand_stimmen if s.stimme == "Ja"])
@@ -324,10 +334,13 @@ def abstimmung_abschliessen(mandat, patt_entscheid=None):
     _entscheid_setzen(doc, entscheid, durch)
     return {"status": doc.status, "stand": stand}
 
+def _token_hash(token):
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
 def get_stimme_per_token(token):
     if not token or len(token) < 32:
         return None
-    name = frappe.db.get_value("Mandat Vorstand Stimme", {"token": token, "parenttype": "Mandat"}, "name")
+    name = frappe.db.get_value("Mandat Vorstand Stimme", {"token": _token_hash(token), "parenttype": "Mandat"}, "name")
     return frappe.get_doc("Mandat Vorstand Stimme", name) if name else None
 
 @frappe.whitelist(allow_guest=True)
@@ -340,6 +353,8 @@ def abstimmen(token, stimme, kommentar=None):
     if frappe.db.get_value("Mandat", zeile.parent, "status") != "Antrag Vorstand":
         frappe.throw(_("Die Abstimmung ist abgeschlossen."))
 
+    # Kommentar kommt ohne Login: kein HTML, Länge begrenzt
+    kommentar = strip_html(kommentar or "").strip()[:2000]
     frappe.db.set_value("Mandat Vorstand Stimme", zeile.name, {
         "stimme": stimme,
         "kommentar": kommentar,
