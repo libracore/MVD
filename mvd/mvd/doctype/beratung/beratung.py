@@ -359,9 +359,16 @@ class Beratung(Document):
         file_attachments = frappe.db.sql("""SELECT `name` FROM `tabFile` WHERE `attached_to_doctype` = 'Beratung' AND `attached_to_name` = '{docname}'""".format(\
                             docname=self.name), as_dict=True)
         for attachment in file_attachments:
-            attachment_copy = deepcopy(frappe.get_doc("File", attachment.name))
+            attachment_copy = frappe.copy_doc(frappe.get_doc("File", attachment.name))
             attachment_copy.attached_to_name = replicated_beratung.name
-            frappe.get_doc(attachment_copy).insert()
+            try:
+                attachment_copy.insert()
+            except frappe.DuplicateEntryError:
+                # Die File-Validierung hat denselben Anhang bereits am Ziel gefunden.
+                # Andere DuplicateEntryErrors (z.B. aus Hooks) weiterreichen.
+                if not attachment_copy.get('duplicate_entry'):
+                    raise
+                frappe.clear_last_message()
             
 
         frappe.get_doc({

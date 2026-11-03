@@ -70,6 +70,55 @@ def entferne_nicht_eingelesene_zahlungen(camt_import):
     qty = frappe.db.get_value('CAMT Import', camt_import, 'nicht_eingelesene_zahlungen_qty') - 1
     frappe.db.set_value('CAMT Import', camt_import, 'nicht_eingelesene_zahlungen_qty', qty)
 
+def bereinige_nachgeladene_zahlung(camt_import, transaction_id):
+    """
+        Sicherstellung, dass nachgeladene Files bereits aufgetretene Fehler statistisch nicht doppelt behandeln,
+        sprich weder doppelt dazuzählen noch abziehen
+    """
+    daten = frappe.db.get_value('CAMT Import', camt_import, [
+        'nicht_eingelesene_zahlungen',
+        'nicht_eingelesene_zahlungen_qty',
+        'fehlgeschlagenes_auslesen',
+        'fehlgeschlagenes_auslesen_qty'
+    ], as_dict=True)
+    updates = {}
+    markierung = 'Nachgeladen: '
+
+    # Bereits vorhandene Zahlungen (Bankreferenzen) die als nicht eingelesen erfasst wurden
+    zeilen = (daten['nicht_eingelesene_zahlungen'] or '').splitlines()
+    for index, zeile in enumerate(zeilen):
+        if zeile.startswith(markierung):
+            continue
+
+        # Bankreferenz am Ende vor Datum/Betrag vergleichen, da der Zahlungszweck Klammern stehen könnte
+        referenz_teil = zeile.rpartition('): ')[0]
+        if referenz_teil.endswith(' ({0}'.format(transaction_id)):
+            zeilen[index] = markierung + zeile
+            updates['nicht_eingelesene_zahlungen'] = '\n'.join(zeilen)
+            updates['nicht_eingelesene_zahlungen_qty'] = max(0, (daten['nicht_eingelesene_zahlungen_qty'] or 0) - 1)
+            break
+
+    # Insert-Fehler (z.B. DB-Sperren)
+    separator = '-----------------------------'
+    fehler = (daten['fehlgeschlagenes_auslesen'] or '').split(separator)
+    erledigt = 0
+    for index, eintrag in enumerate(fehler):
+        if not eintrag.strip() or eintrag.lstrip().startswith(markierung):
+            continue
+
+        transaction = BeautifulSoup(eintrag, 'lxml').find('txdtls')
+        referenz = transaction.find('acctsvcrref') if transaction else None
+        if referenz is not None and referenz.get_text() == transaction_id:
+            fehler[index] = '\n{0}{1}\n{2}'.format(markierung, transaction_id, eintrag)
+            erledigt += 1
+
+    if erledigt:
+        updates['fehlgeschlagenes_auslesen'] = separator.join(fehler)
+        updates['fehlgeschlagenes_auslesen_qty'] = max(0, (daten['fehlgeschlagenes_auslesen_qty'] or 0) - erledigt)
+
+    if updates:
+        frappe.db.set_value('CAMT Import', camt_import, updates)
+
 def erfasse_fehlgeschlagenes_auslesen(transaction, err, camt_import):
     fehlgeschlagenes_auslesen = frappe.db.get_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen')
     qty = frappe.db.get_value('CAMT Import', camt_import, 'fehlgeschlagenes_auslesen_qty') + 1

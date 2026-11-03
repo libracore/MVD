@@ -940,6 +940,8 @@ def reset_camt(camt):
     camt_import.guthaben_qty = 0
     camt_import.ausgelesene_zahlungen = ''
     camt_import.eingelesene_zahlungen = ''
+    camt_import.fehlgeschlagenes_auslesen = ''
+    camt_import.nicht_eingelesene_zahlungen = ''
     camt_import.camt_taxen = 0
     camt_import.camt_amount = 0
     camt_import.save()
@@ -989,7 +991,7 @@ def erstelle_zahlung(date, to_account, received_amount, transaction_id, remarks,
         # erfasse eingelesene Zahlung in CAMT-Import
         erfasse_eingelesene_zahlungen(qrr, transaction_id, date, received_amount, camt_import)
         if nachladen:
-            entferne_nicht_eingelesene_zahlungen(camt_import)
+            bereinige_nachgeladene_zahlung(camt_import, transaction_id)
         return
     else:
         # erfasse nicht eingelesene Zahlung in CAMT-Import
