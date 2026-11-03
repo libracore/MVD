@@ -305,6 +305,7 @@ def abstimmung_abschliessen(mandat, patt_entscheid=None):
 
     # Einfache Mehrheit der abgegebenen Stimmen (Enthaltungen zählen nicht)
     stand = get_abstimmung_stand(doc)
+    durch = "Vorstand"
     if stand["ja"] > stand["nein"]:
         entscheid = "Gutsprache"
     elif stand["nein"] > stand["ja"]:
@@ -314,11 +315,13 @@ def abstimmung_abschliessen(mandat, patt_entscheid=None):
         if patt_entscheid not in ("Gutsprache", "Abgelehnt"):
             return {"patt": 1, "stand": stand}
         entscheid = patt_entscheid
-        _kommentar(doc, _("Patt in der Vorstandsabstimmung, Entscheid durch GL."))
+        durch = "GL"
 
     _kommentar(doc, _("Vorstandsabstimmung abgeschlossen: Ja {0}, Nein {1}, Enthaltung {2}, offen {3}.").format(
         stand["ja"], stand["nein"], stand["enthaltung"], stand["offen"]))
-    _entscheid_setzen(doc, entscheid, "Vorstand")
+    if durch == "GL":
+        _kommentar(doc, _("Patt in der Vorstandsabstimmung, Entscheid durch GL."))
+    _entscheid_setzen(doc, entscheid, durch)
     return {"status": doc.status, "stand": stand}
 
 def get_stimme_per_token(token):
