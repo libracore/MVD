@@ -3,6 +3,10 @@
 
 frappe.ui.form.on('Mandat', {
     refresh: function(frm) {
+        // Mitgliedschaftsübersicht wie in der Beratung
+        load_html_overview(frm);
+        frappe.mvd.schlichtungsbehoerde_listener(frm, 'uebersicht_html');
+
         // Pool darf nicht zugeordnet werden
         frm.set_query('kontaktperson', function() {
             return {
@@ -47,6 +51,9 @@ frappe.ui.form.on('Mandat', {
             });
         }
     },
+    mv_mitgliedschaft: function(frm) {
+        load_html_overview(frm);
+    },
     email_1: function(frm) {
         open_mandat_email(frm, 'mandat_email_1');
     },
@@ -57,6 +64,21 @@ frappe.ui.form.on('Mandat', {
         open_mandat_email(frm, 'mandat_email_3');
     }
 });
+
+function load_html_overview(frm) {
+    if (frm.doc.mv_mitgliedschaft) {
+        frappe.call({
+            method: "mvd.mvd.doctype.mitgliedschaft.mitgliedschaft.get_uebersicht_html",
+            args:{
+                    'name': frm.doc.mv_mitgliedschaft
+            },
+            callback: function(r)
+            {
+                frm.set_df_property('uebersicht_html', 'options', r.message);
+            }
+        });
+    }
+}
 
 function open_mandat_email(frm, template_prefix) {
     if (!frm.doc.kontaktperson) {

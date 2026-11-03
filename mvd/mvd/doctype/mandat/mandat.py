@@ -56,7 +56,7 @@ class Mandat(Document):
                 self.db_set("bestaetigungs_email_gesendet", 1)
 
 @frappe.whitelist()
-def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenliche_bemerkung=None):
+def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenliche_bemerkung=None, thema=None):
     from mvd.mvd.doctype.beratung.beratung import uebernahme
 
     if "MV_Mandat" not in frappe.get_roles():
@@ -81,9 +81,11 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     mandat.mv_mitgliedschaft = beratung.mv_mitgliedschaft
     mandat.sektion_id = beratung.sektion_id
     mandat.beratung = beratung.name
-    mandat.beratungskategorie = beratung.beratungskategorie
-    mandat.beratungskategorie_2 = beratung.beratungskategorie_2
-    mandat.beratungskategorie_3 = beratung.beratungskategorie_3
+    # Themen aus dem Dialog; ohne Angabe die Beratungskategorien der Beratung
+    themen = frappe.parse_json(thema) if thema else get_beratungskategorien(beratung)
+    for _thema in themen:
+        if _thema and _thema not in [t.thema for t in mandat.get("thema")]:
+            mandat.append("thema", {"thema": _thema})
     mandat.kontaktperson = berater_in
     mandat.typ = typ
     mandat.bemerkung = bemerkung
@@ -94,6 +96,14 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     frappe.db.set_value("Beratung", beratung.name, "mandat", mandat.name)
 
     return mandat.name
+
+def get_beratungskategorien(beratung):
+    kategorien = []
+    for kategorie in (beratung.beratungskategorie, beratung.beratungskategorie_2, beratung.beratungskategorie_3):
+        # gelöschte Beratungskategorien (Altdaten) auslassen
+        if kategorie and kategorie not in kategorien and frappe.db.exists("Beratungskategorie", kategorie):
+            kategorien.append(kategorie)
+    return kategorien
 
 def send_confirmation_email(mandat):
     try:

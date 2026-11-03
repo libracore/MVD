@@ -1,0 +1,29 @@
+#page-vbz-mandate {
+    background-color: #e6ebef;
+}
+
+#page-vbz-mandate h1.vbz {
+    font-weight: bold;
+    padding-left: 15px;
+}
+
+#page-vbz-mandate #datenstand,
+#page-vbz-mandate #reload_info {
+    font-weight: normal !important;
+    font-size: 15px !important;
+}
+
+#table_mandat_uebersicht {
+    margin-left: 10em;
+    width: 50%;
+}
+
+#table_mandat_uebersicht tr.mandat-status:hover {
+    background-color: #219D84;
+    cursor: pointer;
+}
+
+#table_mandat_uebersicht td.mandat-anzahl:hover {
+    background-color: #106E7A;
+    color: #fff;
+}
