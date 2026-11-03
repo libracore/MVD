@@ -9,6 +9,9 @@ frappe.ui.form.on('Mandat', {
         load_html_overview(frm);
         frappe.mvd.schlichtungsbehoerde_listener(frm, 'uebersicht_html');
 
+        // «Fall verfolgen» ist nur für GL und Vorprüfung
+        frm.toggle_display('fall_verfolgen', frappe.user.has_role(['MV_Solifonds_GL', 'MV_Solifonds_Vorpruefung']));
+
         // Ablauf Solidaritätsfonds (#2183)
         if (!frm.is_new() && frm.doc.typ == 'Solidaritätsfonds') {
             add_solifonds_buttons(frm);

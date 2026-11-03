@@ -30,6 +30,9 @@ SOLIFONDS_KRITERIEN = [
     "kriterium_keine_rs_deckung"
 ]
 
+def darf_fall_verfolgen():
+    return bool({"MV_Solifonds_GL", "MV_Solifonds_Vorpruefung"} & set(frappe.get_roles()))
+
 class Mandat(Document):
     def autoname(self):
         jahr = datetime.date.today().year
@@ -40,6 +43,12 @@ class Mandat(Document):
         self.name = make_autoname("{0}-{1}-.#".format(sektion, jahr))
 
     def before_save(self):
+        # «Fall verfolgen» dürfen nur GL und Vorprüfung ändern
+        if not darf_fall_verfolgen() and not frappe.flags.in_patch:
+            alt = 0 if self.is_new() else cint(frappe.db.get_value("Mandat", self.name, "fall_verfolgen"))
+            if cint(self.fall_verfolgen) != alt:
+                frappe.throw(frappe._("«Fall verfolgen» können nur Geschäftsleitung und Vorprüfung setzen."))
+
         if self.kontaktperson and "pool" in self.kontaktperson.lower():
             self.kontaktperson = None
             frappe.throw(
@@ -110,7 +119,8 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     mandat.typ = typ
     mandat.bemerkung = bemerkung
     mandat.persoenliche_bemerkung = persoenliche_bemerkung
-    mandat.fall_verfolgen = cint(fall_verfolgen)
+    # «Fall verfolgen» setzen nur GL und Vorprüfung
+    mandat.fall_verfolgen = cint(fall_verfolgen) if darf_fall_verfolgen() else 0
 
     if typ == "Solidaritätsfonds":
         mandat.solifonds_art = solifonds_art
