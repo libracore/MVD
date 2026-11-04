@@ -530,7 +530,7 @@
    "options": "\nWohnen\nBusiness"
   }
  ],
- "modified": "2026-09-20 23:30:22.940648",
+ "modified": "2026-11-04 15:08:44.956449",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Beratung",
@@ -547,11 +547,6 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
-  },
-  {
-   "email": 1,
-   "read": 1,
-   "role": "Guest"
   },
   {
    "create": 1,
