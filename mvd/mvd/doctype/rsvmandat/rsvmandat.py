@@ -65,13 +65,13 @@ def get_va_from_user(va_user):
             """
                 SELECT `parent`
                 FROM `tabTermin Kontaktperson Multi User`
-                WHERE `user` = '{0}'
+                WHERE `user` = %s
                 AND `parent` IN (
                     SELECT `name`
                     FROM `tabTermin Kontaktperson`
                     WHERE `ist_vertrauensanwaeltin` = '1'
                 )
-            """.format(va_user),
+            """, (va_user,),
             as_dict=True
         )
     if len(va) > 0:
