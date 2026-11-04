@@ -2,6 +2,16 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Wohnungsabgabe', {
+    setup: function(frm) {
+        // nur aktive Fachpersonen der Sektion des Auftrags
+        frm.set_query("expert_in", function(doc) {
+            var filters = {'disabled': 0};
+            if (doc.sektion_id) {
+                filters['sektion_id'] = doc.sektion_id;
+            }
+            return {'filters': filters};
+        });
+    },
     refresh: function(frm) {
         override_default_email_dialog(frm);
     },
