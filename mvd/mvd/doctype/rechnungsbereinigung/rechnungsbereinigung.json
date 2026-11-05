@@ -1,0 +1,32 @@
+{
+ "doctype": "DocType",
+ "name": "Rechnungsbereinigung",
+ "module": "MVD",
+ "autoname": "format:RB-{YY}-{MM}-{#####}",
+ "engine": "InnoDB",
+ "track_changes": 1,
+ "field_order": ["company", "status", "uebersicht", "anzahl", "offen", "freigegeben", "bereinigt", "blockiert", "zurueckgestellt", "verarbeitet", "durchfuehrung", "gestartet_von", "gestartet_am", "beendet_am", "fehler", "report", "job_token", "job_auswahl"],
+ "fields": [
+  {"fieldname": "company", "fieldtype": "Link", "options": "Company", "label": "Firma", "description": "Leer lassen, um alle Firmen zu prüfen.", "in_list_view": 1},
+  {"fieldname": "status", "fieldtype": "Select", "label": "Status", "options": "Neu\nWartet auf Prüfung\nPrüfung läuft\nBereit\nWartet auf Bereinigung\nBereinigung läuft\nFehler", "default": "Neu", "read_only": 1, "in_list_view": 1, "in_standard_filter": 1},
+  {"fieldname": "uebersicht", "fieldtype": "Section Break", "label": "Übersicht"},
+  {"fieldname": "anzahl", "fieldtype": "Int", "label": "Fälle insgesamt", "read_only": 1, "in_list_view": 1},
+  {"fieldname": "offen", "fieldtype": "Int", "label": "Offen / prüfbar", "read_only": 1},
+  {"fieldname": "freigegeben", "fieldtype": "Int", "label": "Freigegeben", "read_only": 1, "in_list_view": 1},
+  {"fieldname": "bereinigt", "fieldtype": "Int", "label": "Bereinigt", "read_only": 1, "in_list_view": 1},
+  {"fieldname": "blockiert", "fieldtype": "Int", "label": "Blockiert", "read_only": 1},
+  {"fieldname": "zurueckgestellt", "fieldtype": "Int", "label": "Zurückgestellt", "read_only": 1},
+  {"fieldname": "verarbeitet", "fieldtype": "Int", "label": "Im letzten Bereinigungslauf verarbeitet", "read_only": 1},
+  {"fieldname": "durchfuehrung", "fieldtype": "Section Break", "label": "Durchführung"},
+  {"fieldname": "gestartet_von", "fieldtype": "Link", "options": "User", "label": "Prüfung gestartet von", "read_only": 1},
+  {"fieldname": "gestartet_am", "fieldtype": "Datetime", "label": "Prüfung gestartet am", "read_only": 1},
+  {"fieldname": "beendet_am", "fieldtype": "Datetime", "label": "Zuletzt beendet am", "read_only": 1},
+  {"fieldname": "fehler", "fieldtype": "Long Text", "label": "Fehler", "read_only": 1},
+  {"fieldname": "report", "fieldtype": "Data", "label": "Prüfbericht", "read_only": 1, "hidden": 1},
+  {"fieldname": "job_token", "fieldtype": "Data", "label": "Auftragskennung", "read_only": 1, "hidden": 1},
+  {"fieldname": "job_auswahl", "fieldtype": "Long Text", "label": "Auftragsauswahl", "read_only": 1, "hidden": 1}
+ ],
+ "permissions": [{"role": "System Manager", "read": 1, "write": 1, "create": 1, "report": 1, "export": 1}],
+ "sort_field": "creation",
+ "sort_order": "DESC"
+}
