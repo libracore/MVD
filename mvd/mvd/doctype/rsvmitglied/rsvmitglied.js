@@ -17,6 +17,9 @@ frappe.ui.form.on('RSVMitglied', {
         load_html_overview(frm);
         // Eventlistener für den Schlichtungsbehörden Knopf
         frappe.mvd.schlichtungsbehoerde_listener(frm, 'uebersicht_html');
+        // E-Mail-Button überschreiben, um E_mail vorauszufüllen
+        override_rsv_email_dialog(frm);
+
         // "Öffne"-Buttons zu den VA-Extranet-Seiten
         // Hinweis: bewusst dupliziert (statt frappe.mvd.add_va_open_buttons zu nutzen) in rsvmandat.js
         // und rsvmitglied.js: Änderungen an DocType-Controller-JS werden clientseitig im localStorage
@@ -305,6 +308,39 @@ function rsv_mandat_selektion(frm, rsv_mandat) {
         title: __('Suchresultate')
     });
     d.show();
+}
+
+function override_rsv_email_dialog(frm) {
+    // Standard-Klick-Events auf E-Mail-Buttons entfernen
+    $("[data-label='Email']").parent().off("click");
+    $("[data-label='E-Mail']").parent().off("click");
+    $(".btn.btn-default.btn-new-email.btn-xs").off("click");
+
+    const open_rsv_mail_composer = function() {
+        if (frm.doc.mv_mitgliedschaft) {
+            // Hole e_mail_1 aus dem verlinkten Mitgliedschafts-Dokument
+            frappe.db.get_value('Mitgliedschaft', frm.doc.mv_mitgliedschaft, 'e_mail_1').then(r => {
+                var email = (r && r.message && r.message.e_mail_1) || '';
+                new frappe.mvd.MailComposer({
+                    doc: frm.doc,
+                    frm: frm,
+                    recipients: email,
+                    is_a_reply: false
+                });
+            });
+        } else {
+            new frappe.mvd.MailComposer({
+                doc: frm.doc,
+                frm: frm,
+                recipients: '',
+                is_a_reply: false
+            });
+        }
+    };
+
+    $("[data-label='Email']").parent().click(open_rsv_mail_composer);
+    $("[data-label='E-Mail']").parent().click(open_rsv_mail_composer);
+    $(".btn.btn-default.btn-new-email.btn-xs").click(open_rsv_mail_composer);
 }
 
 frappe.ui.form.on('RSV Mandat Dokumente', {
