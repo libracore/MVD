@@ -3233,7 +3233,7 @@ def validate_address(doc_id=None, doc_type="Mitgliedschaft", doc=None):
     
     return {"success": True, "bfs_nr": bfs_nr}
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def get_arbitration_authority_with_validation(doc_id, doc_type="Mitgliedschaft"):
     validation_res = validate_address(doc_id, doc_type)
     
