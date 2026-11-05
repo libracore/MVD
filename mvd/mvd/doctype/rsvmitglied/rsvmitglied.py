@@ -40,7 +40,7 @@ class RSVMitglied(Document):
             nachname = frappe.db.get_value("Kunden", self.faktura_kunde, "nachname")
             mitgl_nr = self.faktura_kunde
         
-        new_name = "{0}_{1}_{2}_{3}".format(formatdate(today(), "yy-MM-dd"), mitgl_nr, vorname, nachname)
+        new_name = "{0}_{1}_{2}_{3}".format(formatdate(today(), "yy-MM-dd"), mitgl_nr, nachname, vorname)
 
         if frappe.db.exists("RSVMitglied", new_name):
             counter = frappe.db.sql(
