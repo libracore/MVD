@@ -40,6 +40,23 @@ def _check_status(doc, *status):
     if doc.status not in status:
         frappe.throw(_("Diese Aktion ist im Status «{0}» nicht möglich.").format(doc.status))
 
+def get_fehlende_kriterien(doc):
+    """#2218: Bei «mangels Rechtsschutzdeckung» müssen alle Kriterien erfüllt sein (kumulativ).
+    Gibt die Bezeichnungen der fehlenden Kriterien zurück (leer = in Ordnung)."""
+    from mvd.mvd.doctype.mandat.mandat import SOLIFONDS_KRITERIEN
+    if doc.solifonds_art != "mangels Rechtsschutzdeckung":
+        return []
+    meta = frappe.get_meta("Mandat")
+    return [_(meta.get_label(k)) for k in SOLIFONDS_KRITERIEN if not cint(doc.get(k))]
+
+
+def _check_kriterien(doc):
+    fehlend = get_fehlende_kriterien(doc)
+    if fehlend:
+        frappe.throw(_("Bei «mangels Rechtsschutzdeckung» müssen alle Kriterien erfüllt sein (kumulativ). Es fehlt noch: {0}").format(
+            ", ".join(fehlend)), title=_("Kriterien nicht erfüllt"))
+
+
 def _kommentar(doc, text):
     doc.add_comment("Info", text)
 
@@ -138,6 +155,7 @@ def gesuch_einreichen(mandat):
         fehlend.append(_("Begründung"))
     if fehlend:
         frappe.throw(_("Vor dem Einreichen fehlt noch: {0}").format(", ".join(fehlend)))
+    _check_kriterien(doc)
 
     doc.status = "Gesuch eingereicht"
     doc.gesuch_eingereicht_am = now_datetime()
@@ -156,6 +174,7 @@ def vorpruefung_abschliessen(mandat, vorpruefung_ok, begruendung=None):
     _check_rolle(ROLLE_VORPRUEFUNG)
     doc = _get_mandat(mandat)
     _check_status(doc, "Gesuch eingereicht")
+    _check_kriterien(doc)
     if not cint(vorpruefung_ok):
         frappe.throw(_("Die Voraussetzungen gemäss Reglement müssen bestätigt sein. Sonst das Gesuch an die VA zurückweisen."))
 

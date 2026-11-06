@@ -107,7 +107,7 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen) {
             {'fieldname': 'solifonds_art', 'fieldtype': 'Select', 'label': 'Antrag auf Kostengutsprache',
              'options': ['', frappe.mvd.mandat.MANGELS_RS, 'aus ideellen Gründen'].join('\n'), 'depends_on': ist_solifonds,
              'description': "mangels Rechtsschutzdeckung (Karenzfrist, Geschäfts-/Kollektivmitglied): Kostendach CHF 3'000 pro Instanz, Entscheid GL · aus ideellen Gründen / Rechtssicherheit: Kostendach CHF 8'000 (2 Instanzen), Entscheid Vorstand"},
-            {'fieldname': 'kriterien_html', 'fieldtype': 'HTML', 'options': '<p class="text-muted">Geprüfte Kriterien (Antragsformular Punkt 2)</p>', 'depends_on': ist_mangels_rs}
+            {'fieldname': 'kriterien_html', 'fieldtype': 'HTML', 'options': '<p class="text-muted">Geprüfte Kriterien (Antragsformular Punkt 2). <b>Alle Kriterien müssen erfüllt sein (kumulativ).</b> Bei der Vorerfassung («keine Musse») dürfen sie noch offen sein; zum Einreichen sind alle Pflicht.</p>', 'depends_on': ist_mangels_rs}
         ].concat(frappe.mvd.mandat.KRITERIEN.map(k => (
             {'fieldname': k[0], 'fieldtype': 'Check', 'label': k[1], 'depends_on': ist_mangels_rs}
         ))).concat([
