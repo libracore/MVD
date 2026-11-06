@@ -30,6 +30,9 @@ SOLIFONDS_KRITERIEN = [
     "kriterium_keine_rs_deckung"
 ]
 
+# Diese Status sind auch ohne Vertrauensanwält*in erlaubt und werden von der Automatik nicht überschrieben (#2207)
+STATUS_OHNE_VA_MOEGLICH = ("Rückzug", "Gelöscht")
+
 def darf_fall_verfolgen():
     return bool({"MV_Solifonds_GL", "MV_Solifonds_Vorpruefung"} & set(frappe.get_roles()))
 
@@ -59,7 +62,11 @@ class Mandat(Document):
         if self.typ == "Solidaritätsfonds":
             self.kostendach = SOLIFONDS_KOSTENDACH.get(self.solifonds_art) or 0
 
-        if not self.kontaktperson:
+        # Automatik Unzugewiesen/Vorgemerkt; Rückzug und Gelöscht gehen auch ohne VA und bleiben stehen (#2207)
+        if self.status in STATUS_OHNE_VA_MOEGLICH:
+            pass
+
+        elif not self.kontaktperson:
             self.status = "Unzugewiesen"
 
         elif self.is_new():
