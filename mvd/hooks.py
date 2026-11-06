@@ -145,6 +145,14 @@ on_login = "mvd.mvd.utils.mvd_bootinfo.login_check"
     # ~ "ToDo": "mvd.mvd.utils.hook_utils.todo_permissions"
 # ~ }
 
+# #2206: Vertrauensanwält*innen sehen nur ihre eigenen Mandate
+permission_query_conditions = {
+    "Mandat": "mvd.mvd.doctype.mandat.mandat_permissions.get_permission_query_conditions"
+}
+has_permission = {
+    "Mandat": "mvd.mvd.doctype.mandat.mandat_permissions.has_permission"
+}
+
 # Document Events
 # ---------------
 # Hook on document methods and events

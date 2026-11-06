@@ -2,6 +2,9 @@
     <div class="row">
         <h1 class="vbz">
             Beratungsterminübersicht
+            {% if frappe.model.can_read("Mandat") %}
+            <a href="#vbz-mandate" class="btn btn-default btn-sm" style="margin-left: 15px; vertical-align: middle;">Mandate</a>
+            {% endif %}
 
             <span
                 id="datenstand_as"

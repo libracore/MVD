@@ -1509,7 +1509,7 @@ def get_uebersicht_html(name):
                 'datum': mnd.datum.strftime("%d.%m.%Y"),
                 'status': ''
             })
-        mandate = frappe.get_all('Mandat', filters={'mv_mitgliedschaft': name}, fields=['name', 'creation', 'status'], order_by='creation asc')
+        mandate = frappe.get_all('Mandat', filters=get_mandat_filter_fuer_uebersicht(name), fields=['name', 'creation', 'status'], order_by='creation asc')
         for mnd in mandate:
             mandat.append({
                 'name': mnd.name,
@@ -1638,7 +1638,7 @@ def get_uebersicht_html(name):
                 'datum': mnd.datum.strftime("%d.%m.%Y"),
                 'status': ''
             })
-        mandate_unval = frappe.get_all('Mandat', filters={'mv_mitgliedschaft': name}, fields=['name', 'creation', 'status'], order_by='creation asc')
+        mandate_unval = frappe.get_all('Mandat', filters=get_mandat_filter_fuer_uebersicht(name), fields=['name', 'creation', 'status'], order_by='creation asc')
         for mnd in mandate_unval:
             mandat_unval.append({
                 'name': mnd.name,
@@ -2799,6 +2799,15 @@ def get_beratungen_dashboard(mitgliedschaft):
         'anz_termine': anz_termine,
         'ungelesen_qty': ungelesen_qty
     }
+
+def get_mandat_filter_fuer_uebersicht(mitgliedschaft):
+    # #2206: Vertrauensanwält*innen sehen in der Übersicht nur ihre eigenen Mandate
+    from mvd.mvd.doctype.mandat.mandat_permissions import get_va_kontaktpersonen
+    filters = {'mv_mitgliedschaft': mitgliedschaft}
+    kontaktpersonen = get_va_kontaktpersonen()
+    if kontaktpersonen is not None:
+        filters['kontaktperson'] = ['in', kontaktpersonen or ['__keine_kontaktperson__']]
+    return filters
 
 @frappe.whitelist()
 def get_mandat_dashboard(mitgliedschaft):

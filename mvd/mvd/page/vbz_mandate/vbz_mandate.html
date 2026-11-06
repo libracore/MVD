@@ -1,5 +1,5 @@
 <div class="row">
-    <h1 class="vbz">Mandate<span id="datenstand" class="pull-right">Datenstand: {{ datenstand }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
+    <h1 class="vbz">{{ ist_va ? "Meine Mandate" : "Mandate" }}<span id="datenstand" class="pull-right">Datenstand: {{ datenstand }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
 </div>
 <div class="row">
     <table id="table_mandat_uebersicht">
@@ -31,3 +31,35 @@
         </tr>
     </table>
 </div>
+{% if ist_va %}
+<div class="row meine-mandate">
+    <h2>Meine offenen Mandate <span class="text-muted">({{ meine_mandate.length }})</span></h2>
+    {% if meine_mandate.length %}
+    <table class="table table-condensed" id="table_meine_mandate">
+        <tr>
+            <th>Mandat</th>
+            <th>Mitglied-Nr.</th>
+            <th>Name</th>
+            <th title="RSV = Rechtsschutzversicherung, S = Solidaritätsfonds">Typ</th>
+            <th>Status</th>
+            <th>Fertigstellen bis</th>
+            <th>Erstellt</th>
+        </tr>
+        {% for m in meine_mandate %}
+        <tr>
+            <td><a href="#Form/Mandat/{{ encodeURIComponent(m.name) }}">{{ frappe.utils.escape_html(m.name) }}</a></td>
+            <td>{{ frappe.utils.escape_html(m.mitglied_nr || "") }}</td>
+            <td>{{ frappe.utils.escape_html(m.mitglied_name || "") }}</td>
+            <td>{{ m.typ_kurz }}</td>
+            <td>{{ frappe.utils.escape_html(m.status || "") }}</td>
+            <td>{{ m.fertigstellen_bis ? frappe.datetime.str_to_user(m.fertigstellen_bis) : "" }}</td>
+            <td>{{ frappe.datetime.str_to_user(m.creation).split(" ")[0] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="text-muted">Keine offenen Mandate.</p>
+    {% endif %}
+    <p class="text-muted">Erledigte Mandate (Abgeschlossen, Abgelehnt, Rückzug, Gelöscht) über die Zahlen in der Tabelle oben.</p>
+</div>
+{% endif %}

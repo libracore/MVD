@@ -5,6 +5,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils.data import now_datetime
+from mvd.mvd.doctype.mandat.mandat_permissions import get_va_kontaktpersonen
+
+# Status, in denen ein Mandat für die VA erledigt ist (nicht in «Meine offenen Mandate»)
+ERLEDIGT = ['Abgeschlossen', 'Abgelehnt', 'Rückzug', 'Gelöscht']
 
 TYP_SPALTEN = {
     'Rechtsschutzversicherung': 'rsv',
@@ -31,9 +35,35 @@ def get_status_uebersicht():
         for spalte in total:
             total[spalte] += werte[spalte]
 
+    ist_va = get_va_kontaktpersonen() is not None
     return {
         'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
+        'ist_va': ist_va,
+        'meine_mandate': get_meine_mandate(status_optionen) if ist_va else [],
         'status_liste': status_liste,
         'total': dict(total, summe=sum(total.values())),
         'hat_ohne_typ': total['ohne_typ'] > 0
     }
+
+
+def get_meine_mandate(status_optionen):
+    # #2206: offene Mandate der Vertrauensanwält*in (Einschränkung über mandat_permissions, get_list)
+    mandate = frappe.get_list('Mandat',
+        filters={'status': ['not in', ERLEDIGT]},
+        fields=['name', 'status', 'typ', 'mv_mitgliedschaft', 'fertigstellen_bis', 'creation'],
+        order_by='creation asc', limit_page_length=0)
+
+    mitglieder = {}
+    ids = list(set(m.mv_mitgliedschaft for m in mandate if m.mv_mitgliedschaft))
+    if ids:
+        for mg in frappe.get_all('Mitgliedschaft', filters={'name': ['in', ids]},
+                fields=['name', 'mitglied_nr', 'vorname_1', 'nachname_1', 'firma']):
+            name = " ".join(x for x in (mg.vorname_1, mg.nachname_1) if x) or mg.firma or ''
+            mitglieder[mg.name] = {'mitglied_nr': mg.mitglied_nr or mg.name, 'mitglied_name': name}
+
+    reihenfolge = dict((status, i) for i, status in enumerate(status_optionen))
+    for m in mandate:
+        m.update(mitglieder.get(m.mv_mitgliedschaft, {'mitglied_nr': m.mv_mitgliedschaft or '', 'mitglied_name': ''}))
+        m.typ_kurz = TYP_SPALTEN.get(m.typ, '').upper() or '–'
+    mandate.sort(key=lambda m: (reihenfolge.get(m.status, len(reihenfolge)), m.creation))
+    return mandate
