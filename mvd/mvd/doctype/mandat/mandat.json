@@ -41,6 +41,7 @@
   "uebersicht_html",
   "section_verknuepfungen",
   "mv_mitgliedschaft",
+  "mitglied_nr",
   "cb_2",
   "beratung",
   "bestaetigungs_email_gesendet",
@@ -259,6 +260,14 @@
    "options": "Mitgliedschaft"
   },
   {
+   "fetch_from": "mv_mitgliedschaft.mitglied_nr",
+   "fieldname": "mitglied_nr",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Mitglied-Nr.",
+   "read_only": 1
+  },
+  {
    "fieldname": "beratung",
    "fieldtype": "Link",
    "label": "Beratung",
@@ -332,7 +341,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2026-11-02 18:47:19.245190",
+ "modified": "2026-11-07 00:37:09.115662",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",
@@ -351,6 +360,7 @@
    "write": 1
   }
  ],
+ "search_fields": "mitglied_nr",
  "sort_field": "modified",
  "sort_order": "DESC",
  "title_field": "kontaktperson",
