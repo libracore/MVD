@@ -7,7 +7,9 @@
   "section_mandat",
   "sektion_id",
   "status",
-  "thema",
+  "beratungskategorie",
+  "beratungskategorie_2",
+  "beratungskategorie_3",
   "cb_1",
   "typ",
   "fertigstellen_bis",
@@ -303,10 +305,26 @@
    "label": "Pers\u00f6nliche Bemerkung"
   },
   {
-   "fieldname": "thema",
-   "fieldtype": "Table MultiSelect",
-   "label": "Thema",
-   "options": "RSV Thema MultiTable"
+   "fieldname": "beratungskategorie",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Beratungskategorie",
+   "options": "Beratungskategorie"
+  },
+  {
+   "depends_on": "eval:doc.beratungskategorie",
+   "fieldname": "beratungskategorie_2",
+   "fieldtype": "Link",
+   "label": "(2) Beratungskategorie",
+   "options": "Beratungskategorie"
+  },
+  {
+   "depends_on": "eval:doc.beratungskategorie_2",
+   "fieldname": "beratungskategorie_3",
+   "fieldtype": "Link",
+   "label": "(3) Beratungskategorie",
+   "options": "Beratungskategorie"
   },
   {
    "fieldname": "fertigstellen_bis",
@@ -341,7 +359,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2026-11-07 00:37:09.115662",
+ "modified": "2026-11-07 01:08:21.600762",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",

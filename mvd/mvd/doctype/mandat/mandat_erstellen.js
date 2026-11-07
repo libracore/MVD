@@ -62,10 +62,7 @@ frappe.mvd.mandat.erstellen = function(frm) {
             frappe.db.get_list('Beratungskategorie', {'filters': {'name': ['in', kategorien]}, 'fields': ['name'], 'limit': 3}).then(vorhanden => {
                 let namen = vorhanden.map(k => k.name);
                 let themen = kategorien.filter(k => namen.includes(k));
-                // Meta der Thema-Tabelle wird vom Table-MultiSelect-Feld im Dialog benötigt
-                frappe.model.with_doctype('RSV Thema MultiTable', function() {
-                    frappe.mvd.mandat.erstellen_dialog(frm, eigene_va, themen);
-                });
+                frappe.mvd.mandat.erstellen_dialog(frm, eigene_va, themen);
             });
         }
     });
@@ -87,8 +84,10 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen) {
         title: 'Mandat erstellen',
         fields: [
             {'fieldname': 'prozess_html', 'fieldtype': 'HTML', 'options': '<div class="alert alert-info">Platzhalter: Hier folgt die Beschreibung des Mandats-Prozesses.</div>'},
-            {'fieldname': 'thema', 'fieldtype': 'Table MultiSelect', 'label': 'Thema', 'options': 'RSV Thema MultiTable', 'reqd': 1,
-             'description': 'Vorgeschlagen aus den Beratungskategorien der Beratung.'},
+            {'fieldname': 'beratungskategorie', 'fieldtype': 'Link', 'label': 'Beratungskategorie', 'options': 'Beratungskategorie', 'reqd': 1,
+             'description': 'Aus der Beratung übernommen, änderbar.'},
+            {'fieldname': 'beratungskategorie_2', 'fieldtype': 'Link', 'label': '(2) Beratungskategorie', 'options': 'Beratungskategorie', 'depends_on': 'eval:doc.beratungskategorie'},
+            {'fieldname': 'beratungskategorie_3', 'fieldtype': 'Link', 'label': '(3) Beratungskategorie', 'options': 'Beratungskategorie', 'depends_on': 'eval:doc.beratungskategorie_2'},
             {'fieldname': 'uebernahme', 'fieldtype': 'Select', 'label': 'Übernahme', 'reqd': 1,
              'options': ['', frappe.mvd.mandat.UEBERNEHMEN, frappe.mvd.mandat.NICHT_UEBERNEHMEN].join('\n'), 'default': uebernahme_default,
              'change': function() {
@@ -135,7 +134,7 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen) {
                     "typ": values.typ,
                     "bemerkung": values.bemerkung,
                     "persoenliche_bemerkung": uebernehmen ? values.persoenliche_bemerkung : null,
-                    "thema": (values.thema || []).map(row => row.thema).filter(thema => thema),
+                    "beratungskategorien": [values.beratungskategorie, values.beratungskategorie_2, values.beratungskategorie_3].filter(k => k),
                     "fall_verfolgen": values.fall_verfolgen ? 1 : 0,
                     "solifonds_art": solifonds ? values.solifonds_art : null,
                     "solifonds_begruendung": solifonds ? values.solifonds_begruendung : null,
@@ -150,8 +149,12 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen) {
         }
     });
 
-    // Themen mit den Beratungskategorien der Beratung vorbelegen
-    d.set_value('thema', (themen || []).map(k => ({'thema': k})));
+    // Beratungskategorien (1)-(3) aus der Beratung vorbelegen
+    d.set_values({
+        'beratungskategorie': (themen || [])[0] || '',
+        'beratungskategorie_2': (themen || [])[1] || '',
+        'beratungskategorie_3': (themen || [])[2] || ''
+    });
 
     d.show();
 };

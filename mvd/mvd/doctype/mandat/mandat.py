@@ -59,6 +59,9 @@ class Mandat(Document):
                 title=frappe._("Ungültige Kontaktperson")
             )
 
+        # #2208: Hierarchie wie in der Beratung – (2) nur mit (1), (3) nur mit (2); Lücken aufrücken
+        set_beratungskategorien(self, [self.get(f) for f in KATEGORIE_FELDER])
+
         if self.typ == "Solidaritätsfonds":
             self.kostendach = SOLIFONDS_KOSTENDACH.get(self.solifonds_art) or 0
 
@@ -88,7 +91,7 @@ class Mandat(Document):
                 self.db_set("bestaetigungs_email_gesendet", 1)
 
 @frappe.whitelist()
-def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenliche_bemerkung=None, thema=None,
+def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenliche_bemerkung=None, beratungskategorien=None,
                   fall_verfolgen=0, solifonds_art=None, solifonds_begruendung=None, kriterien=None):
     from mvd.mvd.doctype.beratung.beratung import uebernahme
 
@@ -117,11 +120,9 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     mandat.mv_mitgliedschaft = beratung.mv_mitgliedschaft
     mandat.sektion_id = beratung.sektion_id
     mandat.beratung = beratung.name
-    # Themen aus dem Dialog; ohne Angabe die Beratungskategorien der Beratung
-    themen = frappe.parse_json(thema) if thema else get_beratungskategorien(beratung)
-    for _thema in themen:
-        if _thema and _thema not in [t.thema for t in mandat.get("thema")]:
-            mandat.append("thema", {"thema": _thema})
+    # #2208: Beratungskategorien (1)-(3) wie in der Beratung; aus dem Dialog (änderbar), sonst 1:1 aus der Beratung
+    kategorien = frappe.parse_json(beratungskategorien) if beratungskategorien else get_beratungskategorien(beratung)
+    set_beratungskategorien(mandat, kategorien)
     mandat.kontaktperson = berater_in
     mandat.typ = typ
     mandat.bemerkung = bemerkung
@@ -144,6 +145,20 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     frappe.db.set_value("Beratung", beratung.name, "mandat", mandat.name)
 
     return mandat.name
+
+KATEGORIE_FELDER = ("beratungskategorie", "beratungskategorie_2", "beratungskategorie_3")
+
+def set_beratungskategorien(mandat, kategorien):
+    # Reihenfolge bleibt, leere und doppelte fallen weg, höchstens drei
+    liste = []
+    for kategorie in kategorien or []:
+        if kategorie and kategorie not in liste:
+            liste.append(kategorie)
+    for i, feld in enumerate(KATEGORIE_FELDER):
+        mandat.set(feld, liste[i] if i < len(liste) else None)
+
+def get_beratungskategorien_text(mandat):
+    return ", ".join(k for k in (mandat.get(f) for f in KATEGORIE_FELDER) if k)
 
 def get_beratungskategorien(beratung):
     kategorien = []

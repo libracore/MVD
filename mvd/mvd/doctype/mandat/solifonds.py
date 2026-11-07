@@ -447,7 +447,7 @@ def get_dashboard():
     mandate = frappe.get_list("Mandat",
         filters={"typ": TYP, "status": ["not in", ["Abgeschlossen", "Rückzug", "Gelöscht"]]},
         fields=["name", "status", "sektion_id", "mv_mitgliedschaft", "mitglied_nr", "solifonds_art", "kostendach",
-                "kontaktperson", "gesuch_eingereicht_am", "vorgeprueft_am", "entscheid_datum", "creation"],
+                "kontaktperson", "beratungskategorie", "beratungskategorie_2", "beratungskategorie_3", "gesuch_eingereicht_am", "vorgeprueft_am", "entscheid_datum", "creation"],
         order_by="creation asc", limit_page_length=500)
 
     stimmen = {}
@@ -460,12 +460,7 @@ def get_dashboard():
             schluessel = {"Ja": "ja", "Nein": "nein", "Enthaltung": "enthaltung"}.get(s.stimme, "offen")
             stand[schluessel] += 1
 
-    themen = {}
-    if mandate:
-        for t in frappe.get_all("RSV Thema MultiTable",
-                filters={"parent": ["in", [m.name for m in mandate]], "parenttype": "Mandat"},
-                fields=["parent", "thema"], order_by="idx asc"):
-            themen.setdefault(t.parent, []).append(t.thema)
+    from mvd.mvd.doctype.mandat.mandat import get_beratungskategorien_text
 
     # #2215: Mitglied-Nr. und Name statt Mitgliedschafts-ID
     namen_mitglieder = {}
@@ -477,6 +472,6 @@ def get_dashboard():
 
     for m in mandate:
         m.stand = stimmen.get(m.name)
-        m.themen = ", ".join(themen.get(m.name, []))
+        m.themen = get_beratungskategorien_text(m)
         m.mitglied_name = namen_mitglieder.get(m.mv_mitgliedschaft, "")
     return mandate

@@ -27,7 +27,8 @@ def get_context(context):
     context.status = mandat.status
     context.art = mandat.solifonds_art or ""
     context.kostendach = frappe.utils.fmt_money(mandat.kostendach or 0, precision=0)
-    context.themen = ", ".join([t.thema for t in mandat.get("thema") if t.thema])
+    from mvd.mvd.doctype.mandat.mandat import get_beratungskategorien_text
+    context.themen = get_beratungskategorien_text(mandat)
     context.begruendung = mandat.solifonds_begruendung or ""
     context.vorpruefung = mandat.vorpruefung_begruendung or ""
     context.stellungnahme_gl = mandat.entscheid_bemerkung or ""
