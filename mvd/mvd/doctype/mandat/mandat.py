@@ -193,7 +193,9 @@ def send_confirmation_email(mandat):
             link_mandat = get_url_to_form("Mandat", mandat.name)
             if mandat.mv_mitgliedschaft:
                 link_mitglied = get_url_to_form("Mitgliedschaft", mandat.mv_mitgliedschaft)
-                mitglied_label = str(mandat.mv_mitgliedschaft)
+                # #2209: zusätzlich die Mitglied-Nr. (MV…)
+                mitglied_nr = mandat.mitglied_nr or frappe.db.get_value("Mitgliedschaft", mandat.mv_mitgliedschaft, "mitglied_nr")
+                mitglied_label = "{0} ({1})".format(mandat.mv_mitgliedschaft, mitglied_nr) if mitglied_nr else str(mandat.mv_mitgliedschaft)
             else:
                 link_mitglied = "#"
                 mitglied_label = "Keine Mitgliedschaft verknüpft"
@@ -249,10 +251,11 @@ def send_confirmation_email(mandat):
                     <b>Interne Links für Berater:</b><br>
                     - <a href="{0}">Direkt zur Beratung: {1}</a><br>
                     - <a href="{2}">Direkt zum Mandat: {3}</a><br>
-                    - <a href="{4}">Zur Mitgliedschaft: {5}</a><br>
-                    - {6}
+                    - <a href="{4}">Zur Mitgliedschaft: {5}</a>{6}
                 </p>
-            """.format(link_beratung, mandat.beratung,link_mandat, mandat.name, link_mitglied, mitglied_label, zip_link_html)
+            """.format(link_beratung, mandat.beratung, link_mandat, mandat.name, link_mitglied, escape_html(mitglied_label),
+                       # #2216: Zeile «Anlagen» nur, wenn es Anlagen gibt (sonst blieb ein einzelner Strich stehen)
+                       "<br>\n                    - {0}".format(zip_link_html) if zip_link_html else "")
             
             full_message = rendered_berater.get("message") + persoenliche_bemerkung_html + footer_links
             comm = make(
