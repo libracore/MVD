@@ -354,7 +354,13 @@ def get_beratung_zip_attachment(beratung_id):
 
 
 @frappe.whitelist()
-def suche_vertrauensanwaeltin(mandat_id, sektion_id):
+def suche_vertrauensanwaeltin(mandat_id, sektion_id=None):
+    # Nur wer das Mandat lesen darf; Sektion aus dem Mandat, nicht vom Client
+    mandat = frappe.get_doc("Mandat", mandat_id)
+    if not mandat.has_permission("read"):
+        frappe.throw(frappe._("Keine Berechtigung für dieses Mandat."), frappe.PermissionError)
+    sektion_id = mandat.sektion_id
+
     anwaelte = frappe.db.get_all("Termin Kontaktperson", 
         filters={"ist_vertrauensanwaeltin": 1, "sektion_id": sektion_id}, 
         fields=["name"]
@@ -377,6 +383,14 @@ def suche_vertrauensanwaeltin(mandat_id, sektion_id):
     visierende_person = frappe.db.get_value("Sektion", sektion_id, "visierende_person")
 
     subject = "Neues unzugewiesenes Mandat verfügbar: {0}".format(mandat_id)
+    if mandat.typ == "Solidaritätsfonds":
+        # #2219: Hinweis auf den Solidaritätsfonds (Art des Antrags, Kostendach)
+        hinweis = ["Solidaritätsfonds"]
+        if mandat.solifonds_art:
+            hinweis.append(mandat.solifonds_art)
+        if mandat.kostendach:
+            hinweis.append("Kostendach CHF {0}".format(frappe.utils.fmt_money(mandat.kostendach, precision=0)))
+        subject = "Neues unzugewiesenes Mandat verfügbar ({0}): {1}".format(", ".join(hinweis), mandat_id)
 
     email_template = frappe.db.get_value("Sektion", sektion_id, "template_suche_vertrauensanwaeltin")
 
