@@ -200,7 +200,7 @@ frappe.vbz_beratung = {
                 'async': false,
                 'callback': function(r)
                 {
-                    frappe.route_options = {'status': 'Vormerkung', 'kontaktperson': ['in', r.message], "sektion_id": sektion}
+                    frappe.route_options = {'status': 'Vorgemerkt', 'kontaktperson': ['in', r.message], "sektion_id": sektion}
                     frappe.set_route("List", "Mandat", "List");
                 }
             });

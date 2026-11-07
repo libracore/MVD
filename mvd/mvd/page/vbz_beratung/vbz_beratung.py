@@ -109,7 +109,7 @@ def get_p5(user):
                                                 WHERE `user` = '{user}'
                                                 AND `parent` NOT LIKE 'Rechtsberatung Pool (%)'
                                             )
-                                            AND `status` = 'Vormerkung'
+                                            AND `status` = 'Vorgemerkt'
                                             AND `sektion_id` != 'MVDF'""".format(user=user), as_dict=True)[0].qty
     return p5_qty or 0
 
