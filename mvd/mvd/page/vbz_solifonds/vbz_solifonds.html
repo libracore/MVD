@@ -20,7 +20,7 @@
         {% for m in gruppe.mandate %}
         <tr>
             <td><a href="#Form/Mandat/{{ encodeURIComponent(m.name) }}">{{ frappe.utils.escape_html(m.name) }}</a></td>
-            <td>{{ frappe.utils.escape_html(m.mv_mitgliedschaft || "") }}</td>
+            <td>{{ frappe.utils.escape_html(m.mitglied_nr || m.mv_mitgliedschaft || "") }}{% if m.mitglied_name %}<br><span class="text-muted">{{ frappe.utils.escape_html(m.mitglied_name) }}</span>{% endif %}</td>
             <td>{{ frappe.utils.escape_html(m.solifonds_art || "") }}</td>
             <td>{{ frappe.utils.escape_html(m.themen || "") }}</td>
             <td>{{ m.kontaktperson ? frappe.utils.escape_html(m.kontaktperson) : "–" }}</td>

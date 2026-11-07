@@ -446,7 +446,7 @@ def get_dashboard():
     # Sektionstrennung über User Permissions (get_list)
     mandate = frappe.get_list("Mandat",
         filters={"typ": TYP, "status": ["not in", ["Abgeschlossen", "Rückzug", "Gelöscht"]]},
-        fields=["name", "status", "sektion_id", "mv_mitgliedschaft", "solifonds_art", "kostendach",
+        fields=["name", "status", "sektion_id", "mv_mitgliedschaft", "mitglied_nr", "solifonds_art", "kostendach",
                 "kontaktperson", "gesuch_eingereicht_am", "vorgeprueft_am", "entscheid_datum", "creation"],
         order_by="creation asc", limit_page_length=500)
 
@@ -467,7 +467,16 @@ def get_dashboard():
                 fields=["parent", "thema"], order_by="idx asc"):
             themen.setdefault(t.parent, []).append(t.thema)
 
+    # #2215: Mitglied-Nr. und Name statt Mitgliedschafts-ID
+    namen_mitglieder = {}
+    ids = list(set(m.mv_mitgliedschaft for m in mandate if m.mv_mitgliedschaft))
+    if ids:
+        for mg in frappe.get_all("Mitgliedschaft", filters={"name": ["in", ids]},
+                fields=["name", "vorname_1", "nachname_1", "firma"]):
+            namen_mitglieder[mg.name] = " ".join(x for x in (mg.vorname_1, mg.nachname_1) if x) or mg.firma or ""
+
     for m in mandate:
         m.stand = stimmen.get(m.name)
         m.themen = ", ".join(themen.get(m.name, []))
+        m.mitglied_name = namen_mitglieder.get(m.mv_mitgliedschaft, "")
     return mandate
