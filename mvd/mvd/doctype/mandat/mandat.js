@@ -9,8 +9,9 @@ frappe.ui.form.on('Mandat', {
         load_html_overview(frm);
         frappe.mvd.schlichtungsbehoerde_listener(frm, 'uebersicht_html');
 
-        // «Fall verfolgen» ist nur für GL und Vorprüfung
-        frm.toggle_display('fall_verfolgen', frappe.user.has_role(['MV_Solifonds_GL', 'MV_Solifonds_Vorpruefung']));
+        // «Fall verfolgen» sehen alle, setzen nur GL und Vorprüfung; Visum (nur RSV) setzt nur die GL (#2210)
+        frm.set_df_property('fall_verfolgen', 'read_only', frappe.user.has_role(['MV_Solifonds_GL', 'MV_Solifonds_Vorpruefung']) ? 0 : 1);
+        frm.set_df_property('visum', 'read_only', frappe.user.has_role('MV_Solifonds_GL') ? 0 : 1);
 
         // Ablauf Solidaritätsfonds (#2183)
         if (!frm.is_new() && frm.doc.typ == 'Solidaritätsfonds') {

@@ -14,7 +14,7 @@ from frappe.model.naming import make_autoname
 from frappe.email.doctype.email_template.email_template import get_email_template
 from frappe.utils.pdf import get_pdf
 from frappe import attach_print
-from frappe.utils import get_url_to_form, get_url, escape_html, cint
+from frappe.utils import get_url_to_form, get_url, escape_html, cint, now_datetime
 from frappe.utils.file_manager import get_file_path
 
 SOLIFONDS_KOSTENDACH = {
@@ -36,6 +36,10 @@ STATUS_OHNE_VA_MOEGLICH = ("Rückzug", "Gelöscht")
 def darf_fall_verfolgen():
     return bool({"MV_Solifonds_GL", "MV_Solifonds_Vorpruefung"} & set(frappe.get_roles()))
 
+def darf_visieren():
+    # #2210: Visum setzt und entfernt nur die GL
+    return "MV_Solifonds_GL" in frappe.get_roles()
+
 class Mandat(Document):
     def autoname(self):
         jahr = datetime.date.today().year
@@ -51,6 +55,8 @@ class Mandat(Document):
             alt = 0 if self.is_new() else cint(frappe.db.get_value("Mandat", self.name, "fall_verfolgen"))
             if cint(self.fall_verfolgen) != alt:
                 frappe.throw(frappe._("«Fall verfolgen» können nur Geschäftsleitung und Vorprüfung setzen."))
+
+        self.pruefe_visum()
 
         if self.kontaktperson and "pool" in self.kontaktperson.lower():
             self.kontaktperson = None
@@ -80,7 +86,27 @@ class Mandat(Document):
             if old_doc and not old_doc.kontaktperson and self.kontaktperson:
                 self.status = "Vorgemerkt"
 
+    def pruefe_visum(self):
+        # #2210: Visum nur bei RSV und nur durch die GL; wer und wann wird festgehalten
+        alt = 0 if self.is_new() else cint(frappe.db.get_value("Mandat", self.name, "visum"))
+        if cint(self.visum) == alt or frappe.flags.in_patch:
+            return
+        if not darf_visieren():
+            frappe.throw(frappe._("Das Visum kann nur die Geschäftsleitung setzen oder entfernen."))
+        if cint(self.visum) and self.typ == "Solidaritätsfonds":
+            frappe.throw(frappe._("Ein Visum gibt es nur bei Mandaten Rechtsschutzversicherung."))
+        if cint(self.visum):
+            self.visiert_von = frappe.session.user
+            self.visiert_am = now_datetime()
+        else:
+            self.visiert_von = None
+            self.visiert_am = None
+        self.flags.visum_geaendert = True
+
     def on_update(self):
+        if self.flags.visum_geaendert:
+            self.add_comment("Info", frappe._("Mandat visiert.") if cint(self.visum) else frappe._("Visum entfernt."))
+
         # Bestätigungs-Email senden
         if (self.typ == "Rechtsschutzversicherung" and 
             self.kontaktperson and 

@@ -53,6 +53,8 @@
   "persoenliche_bemerkung",
   "section_verwaltung",
   "visum",
+  "visiert_von",
+  "visiert_am",
   "fall_verfolgen"
  ],
  "fields": [
@@ -339,12 +341,30 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.typ!='Solidarit\u00e4tsfonds'",
+   "description": "Nur bei Rechtsschutzversicherung. Setzen und entfernen kann nur die Gesch\u00e4ftsleitung (Rolle MV_Solifonds_GL).",
    "fieldname": "visum",
    "fieldtype": "Check",
    "label": "Visum"
   },
   {
+   "depends_on": "eval:doc.typ!='Solidarit\u00e4tsfonds' && doc.visum",
+   "fieldname": "visiert_von",
+   "fieldtype": "Link",
+   "label": "Visiert von",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.typ!='Solidarit\u00e4tsfonds' && doc.visum",
+   "fieldname": "visiert_am",
+   "fieldtype": "Datetime",
+   "label": "Visiert am",
+   "read_only": 1
+  },
+  {
    "default": "0",
+   "description": "Setzen k\u00f6nnen Gesch\u00e4ftsleitung und Vorpr\u00fcfung (Rollen MV_Solifonds_GL, MV_Solifonds_Vorpruefung).",
    "fieldname": "fall_verfolgen",
    "fieldtype": "Check",
    "label": "Fall verfolgen"
@@ -359,7 +379,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2026-11-07 01:08:21.600762",
+ "modified": "2026-11-08 22:39:11.848641",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",
