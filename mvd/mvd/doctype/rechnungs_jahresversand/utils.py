@@ -305,7 +305,8 @@ def get_csv_header():
         'bezahlt_von_firma',
         'bezahlt_von_name',
         'spezielles',
-        'digitalrechnung_url'
+        'digitalrechnung_url',
+        'Rechnungs-Nr.'
     ]
     return header
 
@@ -480,6 +481,9 @@ def get_csv_rows(jahresversand, mitgliedschaft, rechnung, hv, mitgliederzeile=No
         if mitgliedschaft.mitglied_hash:
             digitalrechnung_url = 'https://libracore.mieterverband.ch/digitalrechnung?hash={0}'.format(mitgliedschaft.mitglied_hash)
         row_data.append(digitalrechnung_url)
+        # Achtung, im JSON steht nur die prognostierte SINV-ID, nach dem Verbuchen ist es der Name
+        rechnungs_nr = rechnung.get("renaming_series") or rechnung.get("name") or ''
+        row_data.append(rechnungs_nr)
 
         data.append(row_data)
 
@@ -584,6 +588,7 @@ def get_csv_rows(jahresversand, mitgliedschaft, rechnung, hv, mitgliederzeile=No
                     row_data.append('Unabhängiger Debitor')
 
             row_data.append(digitalrechnung_url)
+            row_data.append(rechnungs_nr)
             data.append(row_data)
     return data
 
