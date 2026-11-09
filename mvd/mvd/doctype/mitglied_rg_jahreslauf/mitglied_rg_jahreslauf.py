@@ -881,7 +881,8 @@ def get_csv(mrj=None, bg_job=True, recipient_group="Alle"):
                 'bezahlt_von_firma',
                 'bezahlt_von_name',
                 'spezielles',
-                'digitalrechung_url'
+                'digitalrechung_url',
+                'mvb_typ'
             ]
             data.append(header)
             
@@ -1079,6 +1080,7 @@ def get_csv(mrj=None, bg_job=True, recipient_group="Alle"):
                         row_data.append('https://service.mieterverband.ch/digitalrechnung?hash={0}'.format(mitgliedschaft.mitglied_hash))
                     else:
                         row_data.append('')
+                    row_data.append(mitgliedschaft.mvb_typ or '')
                     
                     data.append(row_data)
                     
@@ -1182,6 +1184,8 @@ def get_csv(mrj=None, bg_job=True, recipient_group="Alle"):
                             else:
                                 row_data.append('Unabhängiger Debitor')
 
+                        row_data.append('')  # Digitalrechnung URL
+                        row_data.append(mitgliedschaft.mvb_typ or '')
                         data.append(row_data)
 
             csv_file = make_csv(data)
