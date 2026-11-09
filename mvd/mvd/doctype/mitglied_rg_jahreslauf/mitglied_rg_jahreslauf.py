@@ -140,8 +140,8 @@ class MitgliedRGJahreslauf(Document):
         self.status = "Abgebrochen"
         self.save()
     
-    def create_csv(self):
-        get_csv(self.name)
+    def create_csv(self, recipient_group="Alle"):
+        get_csv(self.name, recipient_group=recipient_group)
 
 # ---------------------------------------------------
 # Background Worker Method
@@ -814,7 +814,10 @@ def render_jinja_mail_texte(subject_txt, message_txt, sinv_name):
         message_txt = frappe.render_template(message_txt, context)
     return subject_txt, message_txt
 
-def get_csv(mrj=None, bg_job=True):
+def get_csv(mrj=None, bg_job=True, recipient_group="Alle"):
+    if recipient_group not in ("Nur Digitalrechnungsempfänger", "Nur Mitglieder ohne Digitalrechnung", "Alle"):
+        frappe.throw("Bitte wählen Sie eine gültige Empfängergruppe für den CSV-Export.")
+
     jahresversand = frappe.get_doc("Mitglied RG Jahreslauf", mrj)
     try:
         if bg_job:
@@ -822,7 +825,8 @@ def get_csv(mrj=None, bg_job=True):
             frappe.db.commit()
             args = {
                 'mrj': mrj,
-                'bg_job': False
+                'bg_job': False,
+                'recipient_group': recipient_group
             }
             enqueue("mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.get_csv", queue='long', job_name='CSV Neugenerierung {0}'.format(mrj), timeout=6000, **args)
             return
@@ -896,7 +900,8 @@ def get_csv(mrj=None, bg_job=True):
                 # ------------------------------------------------------------------------------------
                 # ------------------------------------------------------------------------------------
                 '''
-                    Geschenkmitgliedschaften, Gratis Mitgliedschaften sowie Digitalrechnungsempfänger werden NICHT berücksichtigt
+                    Geschenkmitgliedschaften und Gratis Mitgliedschaften werden NICHT berücksichtigt.
+                    Digitalrechnungsempfänger werden gemäss Empfängerauswahl berücksichtigt.
                 '''
                 # ------------------------------------------------------------------------------------
                 skip = False
@@ -904,7 +909,10 @@ def get_csv(mrj=None, bg_job=True):
                     skip = True
                 if mitgliedschaft.reduzierte_mitgliedschaft and not mitgliedschaft.reduzierter_betrag > 0:
                     skip = True
-                if cint(mitgliedschaft.digitalrechnung) == 1:
+                digitalrechnung = cint(mitgliedschaft.digitalrechnung) == 1
+                if recipient_group == "Nur Digitalrechnungsempfänger" and not digitalrechnung:
+                    skip = True
+                if recipient_group == "Nur Mitglieder ohne Digitalrechnung" and digitalrechnung:
                     skip = True
                 # ------------------------------------------------------------------------------------
                 # ------------------------------------------------------------------------------------

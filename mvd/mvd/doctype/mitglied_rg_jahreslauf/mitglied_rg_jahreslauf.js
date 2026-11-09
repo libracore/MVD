@@ -163,9 +163,15 @@ frappe.ui.form.on('Mitglied RG Jahreslauf', {
         });
     },
     create_csv: function(frm) {
-        frm.call('create_csv', {}).then(r => {
-            frappe.msgprint("Das CSV wird erstellt...")
-            cur_frm.reload_doc();
-        });
+        frappe.prompt([
+            {fieldname: 'recipient_group', fieldtype: 'Select', label: 'CSV exportieren für',
+             options: 'Nur Digitalrechnungsempfänger\nNur Mitglieder ohne Digitalrechnung\nAlle',
+             default: 'Alle', reqd: 1}
+        ], function(values) {
+            frm.call('create_csv', {recipient_group: values.recipient_group}).then(r => {
+                frappe.msgprint("Das CSV wird erstellt...")
+                frm.reload_doc();
+            });
+        }, 'Empfängerauswahl für CSV-Export', 'CSV generieren');
     }
 });
