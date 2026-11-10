@@ -882,7 +882,8 @@ def get_csv(mrj=None, bg_job=True, recipient_group="Alle"):
                 'bezahlt_von_name',
                 'spezielles',
                 'digitalrechung_url',
-                'mvb_typ'
+                'mvb_typ',
+                'Rechnungs-Nr.'
             ]
             data.append(header)
             
@@ -1081,6 +1082,8 @@ def get_csv(mrj=None, bg_job=True, recipient_group="Alle"):
                     else:
                         row_data.append('')
                     row_data.append(mitgliedschaft.mvb_typ or '')
+                    rechnungs_nr = sinv.get("renaming_series") or sinv.get("name") or ''
+                    row_data.append(rechnungs_nr)
                     
                     data.append(row_data)
                     
@@ -1186,6 +1189,7 @@ def get_csv(mrj=None, bg_job=True, recipient_group="Alle"):
 
                         row_data.append('')  # Digitalrechnung URL
                         row_data.append(mitgliedschaft.mvb_typ or '')
+                        row_data.append(rechnungs_nr)
                         data.append(row_data)
 
             csv_file = make_csv(data)
