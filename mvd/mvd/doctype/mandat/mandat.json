@@ -14,6 +14,7 @@
   "typ",
   "fertigstellen_bis",
   "kontaktperson",
+  "kostengutsprache_am",
   "section_solifonds",
   "solifonds_art",
   "kostendach",
@@ -59,7 +60,9 @@
   "visum",
   "visiert_von",
   "visiert_am",
-  "fall_verfolgen"
+  "fall_verfolgen",
+  "section_statusverlauf",
+  "statusverlauf"
  ],
  "fields": [
   {
@@ -73,7 +76,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Unzugewiesen\nVorgemerkt\nGesuch eingereicht\nVorgepr\u00fcft\nAntrag Vorstand\nGutsprache\nAbgelehnt\nAbgeschlossen\nR\u00fcckzug\nGel\u00f6scht",
+   "options": "Unzugewiesen\nNicht vergeben\nVorgemerkt\nGesuch eingereicht\nVorgepr\u00fcft\nAntrag Vorstand\nLaufend (RSV)\nLaufend (Solifonds)\nAbgelehnt\nAbgeschlossen\nR\u00fcckzug\nGel\u00f6scht",
    "reqd": 1
   },
   {
@@ -86,7 +89,9 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Typ",
-   "options": "\nRechtsschutzversicherung\nSolidarit\u00e4tsfonds"
+   "options": "Rechtsschutzversicherung\nSolidarit\u00e4tsfonds",
+   "reqd": 1,
+   "default": "Rechtsschutzversicherung"
   },
   {
    "depends_on": "eval:doc.typ=='Solidarit\u00e4tsfonds'",
@@ -402,9 +407,30 @@
   {
    "fieldname": "column_break_20",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kostengutsprache_am",
+   "fieldtype": "Datetime",
+   "label": "Kostengutsprache am",
+   "read_only": 1,
+   "depends_on": "kostengutsprache_am",
+   "description": "Wird beim ersten Wechsel auf \u00abLaufend (RSV)\u00bb bzw. \u00abLaufend (Solifonds)\u00bb gesetzt."
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_statusverlauf",
+   "fieldtype": "Section Break",
+   "label": "Statusverlauf"
+  },
+  {
+   "fieldname": "statusverlauf",
+   "fieldtype": "Table",
+   "label": "Statusverlauf",
+   "options": "Statusaenderung",
+   "read_only": 1
   }
  ],
- "modified": "2026-11-09 14:40:25.912689",
+ "modified": "2026-11-10 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",

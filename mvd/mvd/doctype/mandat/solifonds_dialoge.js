@@ -15,8 +15,8 @@ frappe.mvd.solifonds.entscheid_dialog = function(mandat, callback) {
         title: __('Entscheid Geschäftsleitung'),
         fields: [
             {'fieldname': 'entscheid', 'fieldtype': 'Select', 'label': __('Entscheid'), 'reqd': 1,
-             'options': ['', 'Gutsprache', 'Antrag Vorstand', 'Abgelehnt'],
-             'description': __('Gutsprache: Mail mit PDF an die VA · Antrag Vorstand: Abstimmungslinks an den Vorstand · Abgelehnt: Info an die Vorprüfung')},
+             'options': ['', 'Kostengutsprache', 'Antrag Vorstand', 'Abgelehnt'],
+             'description': __('Kostengutsprache: Status «Laufend (Solifonds)», Mail mit PDF an die VA · Antrag Vorstand: Abstimmungslinks an den Vorstand · Abgelehnt: Info an die Vorprüfung')},
             {'fieldname': 'bemerkung', 'fieldtype': 'Small Text', 'label': __('Bemerkung zum Entscheid'), 'description': frappe.mvd.solifonds.OHNE_PERSONENDATEN}
         ],
         primary_action_label: __('Entscheiden'),
@@ -42,7 +42,7 @@ frappe.mvd.solifonds.abstimmung_abschliessen = function(mandat, callback, patt_e
             if (r.message && r.message.patt) {
                 let s = r.message.stand;
                 frappe.prompt([{'fieldname': 'entscheid', 'fieldtype': 'Select', 'label': __('Entscheid GL'), 'reqd': 1,
-                        'options': ['', 'Gutsprache', 'Abgelehnt']}],
+                        'options': ['', 'Kostengutsprache', 'Abgelehnt']}],
                     function(values) {
                         frappe.mvd.solifonds.abstimmung_abschliessen(mandat, callback, values.entscheid);
                     },

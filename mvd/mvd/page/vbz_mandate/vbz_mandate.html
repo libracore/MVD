@@ -33,7 +33,7 @@
 </div>
 {% if ist_va %}
 <div class="row meine-mandate">
-    <h2>Meine offenen Mandate <span class="text-muted">({{ meine_mandate.length }})</span></h2>
+    <h2>Meine Mandate <span class="text-muted">({{ meine_mandate_offen }} offen, {{ meine_mandate.length }} total)</span></h2>
     {% if meine_mandate.length %}
     <table class="table table-condensed" id="table_meine_mandate">
         <tr>
@@ -46,7 +46,7 @@
             <th>Erstellt</th>
         </tr>
         {% for m in meine_mandate %}
-        <tr>
+        <tr {% if m.erledigt %}class="text-muted"{% endif %}>
             <td><a href="#Form/Mandat/{{ encodeURIComponent(m.name) }}">{{ frappe.utils.escape_html(m.name) }}</a></td>
             <td>{{ frappe.utils.escape_html(m.mitglied_nr || "") }}</td>
             <td>{{ frappe.utils.escape_html(m.mitglied_name || "") }}</td>
@@ -58,8 +58,7 @@
         {% endfor %}
     </table>
     {% else %}
-    <p class="text-muted">Keine offenen Mandate.</p>
+    <p class="text-muted">Keine Mandate.</p>
     {% endif %}
-    <p class="text-muted">Erledigte Mandate (Abgeschlossen, Abgelehnt, Rückzug, Gelöscht) über die Zahlen in der Tabelle oben.</p>
 </div>
 {% endif %}

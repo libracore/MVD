@@ -212,7 +212,7 @@ frappe.vbz_beratung = {
                 'async': false,
                 'callback': function(r)
                 {
-                    frappe.route_options = {'status': ['in', ['Gesuch eingereicht', 'Gutsprache']], 'kontaktperson': ['in', r.message], "sektion_id": sektion}
+                    frappe.route_options = {'status': ['in', ['Gesuch eingereicht', 'Vorgeprüft', 'Antrag Vorstand', 'Laufend (RSV)', 'Laufend (Solifonds)']], 'kontaktperson': ['in', r.message], "sektion_id": sektion}
                     frappe.set_route("List", "Mandat", "List");
                 }
             });

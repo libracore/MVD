@@ -20,7 +20,7 @@ frappe.vbz_solifonds = {
         {'status': 'Gesuch eingereicht', 'titel': 'Bei der Vorprüfung', 'datum_feld': 'gesuch_eingereicht_am', 'datum_label': 'Eingereicht'},
         {'status': 'Vorgemerkt', 'titel': 'Noch nicht eingereicht', 'datum_feld': 'creation', 'datum_label': 'Erstellt'},
         {'status': 'Unzugewiesen', 'titel': 'VA-Suche läuft (Sekretariat)', 'datum_feld': 'creation', 'datum_label': 'Erstellt'},
-        {'status': 'Gutsprache', 'titel': 'Gutsprache erteilt', 'datum_feld': 'entscheid_datum', 'datum_label': 'Entscheid'},
+        {'status': 'Laufend (Solifonds)', 'titel': 'Laufend (Kostengutsprache erteilt)', 'datum_feld': 'entscheid_datum', 'datum_label': 'Entscheid'},
         {'status': 'Abgelehnt', 'titel': 'Abgelehnt', 'datum_feld': 'entscheid_datum', 'datum_label': 'Entscheid'}
     ],
     laden: function(wrapper) {

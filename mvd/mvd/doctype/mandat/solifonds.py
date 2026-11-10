@@ -2,9 +2,11 @@
 # Copyright (c) 2026, libracore and contributors
 # For license information, please see license.txt
 
-# Ablauf Solidaritätsfonds (#2183):
-# Vorgemerkt -> Gesuch eingereicht -> Vorgeprüft -> Gutsprache | Antrag Vorstand | Abgelehnt
-# Antrag Vorstand -> (Abstimmung, Abschluss durch GL) -> Gutsprache | Abgelehnt
+# Ablauf Solidaritätsfonds (#2183, Status #2205):
+# Vorgemerkt -> Gesuch eingereicht -> Vorgeprüft -> Laufend (Solifonds) | Antrag Vorstand | Abgelehnt
+# Antrag Vorstand -> (Abstimmung, Abschluss durch GL) -> Laufend (Solifonds) | Abgelehnt
+# Laufend (Solifonds) -> Abgeschlossen (Knopf, mandat_status.status_aendern)
+# Jeder Statuswechsel läuft über _status_setzen und landet im Statusverlauf.
 
 from __future__ import unicode_literals
 import hashlib
@@ -13,6 +15,7 @@ from frappe import _
 from frappe.utils import cint, now_datetime, today, get_url, get_url_to_form, escape_html, strip_html
 from frappe.core.doctype.communication.email import make
 from frappe import sendmail
+from mvd.mvd.doctype.mandat.mandat_status import LAUFEND_SOLIFONDS, QUELLE_KNOPF
 
 TYP = "Solidaritätsfonds"
 ROLLE_VORPRUEFUNG = "MV_Solifonds_Vorpruefung"
@@ -56,6 +59,15 @@ def _check_kriterien(doc):
         frappe.throw(_("Bei «mangels Rechtsschutzdeckung» müssen alle Kriterien erfüllt sein (kumulativ). Es fehlt noch: {0}").format(
             ", ".join(fehlend)), title=_("Kriterien nicht erfüllt"))
 
+
+# Entscheid «Kostengutsprache» (früher «Gutsprache») ergibt den Status «Laufend (Solifonds)»
+KOSTENGUTSPRACHE = ("Kostengutsprache", "Gutsprache")
+
+def _status_setzen(doc, status, bemerkung=None):
+    # #2205: Statuswechsel über einen Knopf; Quelle und Bemerkung für den Statusverlauf
+    doc.status = status
+    doc.flags.status_quelle = QUELLE_KNOPF
+    doc.flags.status_bemerkung = strip_html(bemerkung or "").strip() or None
 
 def _kommentar(doc, text):
     doc.add_comment("Info", text)
@@ -157,7 +169,7 @@ def gesuch_einreichen(mandat):
         frappe.throw(_("Vor dem Einreichen fehlt noch: {0}").format(", ".join(fehlend)))
     _check_kriterien(doc)
 
-    doc.status = "Gesuch eingereicht"
+    _status_setzen(doc, "Gesuch eingereicht")
     doc.gesuch_eingereicht_am = now_datetime()
     doc.gesuch_eingereicht_von = frappe.session.user
     doc.save(ignore_permissions=True)
@@ -182,7 +194,7 @@ def vorpruefung_abschliessen(mandat, vorpruefung_ok, begruendung=None):
     doc.vorpruefung_begruendung = begruendung
     doc.vorgeprueft_am = now_datetime()
     doc.vorgeprueft_von = frappe.session.user
-    doc.status = "Vorgeprüft"
+    _status_setzen(doc, "Vorgeprüft", begruendung)
     doc.save(ignore_permissions=True)
     _kommentar(doc, _("Vorprüfung abgeschlossen, an GL weitergeleitet."))
     return doc.status
@@ -195,7 +207,7 @@ def an_va_zurueckweisen(mandat, grund):
     if not (grund or "").strip():
         frappe.throw(_("Bitte einen Grund angeben."))
 
-    doc.status = "Vorgemerkt"
+    _status_setzen(doc, "Vorgemerkt", _("An VA zurückgewiesen: {0}").format(grund))
     doc.gesuch_eingereicht_am = None
     doc.gesuch_eingereicht_von = None
     doc.save(ignore_permissions=True)
@@ -216,7 +228,7 @@ def vorpruefung_zuruecknehmen(mandat):
     doc.vorpruefung_ok = 0
     doc.vorgeprueft_am = None
     doc.vorgeprueft_von = None
-    doc.status = "Gesuch eingereicht"
+    _status_setzen(doc, "Gesuch eingereicht", _("Vorprüfung zurückgenommen"))
     doc.save(ignore_permissions=True)
     _kommentar(doc, _("Vorprüfung zurückgenommen."))
     return doc.status
@@ -232,12 +244,12 @@ def gl_entscheid(mandat, entscheid, bemerkung=None):
     doc = _get_mandat(mandat)
     _check_status(doc, "Vorgeprüft")
     # Die GL wählt bei beiden Arten frei (statutarische Vorgaben: siehe Doku, nicht im Code erzwungen)
-    if entscheid not in ("Gutsprache", "Antrag Vorstand", "Abgelehnt"):
+    if entscheid not in KOSTENGUTSPRACHE + ("Antrag Vorstand", "Abgelehnt"):
         frappe.throw(_("Unbekannter Entscheid."))
 
     doc.entscheid_bemerkung = bemerkung
     if entscheid == "Antrag Vorstand":
-        doc.status = "Antrag Vorstand"
+        _status_setzen(doc, "Antrag Vorstand", bemerkung)
         doc.save(ignore_permissions=True)
         _kommentar(doc, _("Antrag an den Vorstand gestellt."))
         abstimmung_starten(doc)
@@ -246,12 +258,14 @@ def gl_entscheid(mandat, entscheid, bemerkung=None):
     return doc.status
 
 def _entscheid_setzen(doc, entscheid, durch):
-    doc.status = entscheid
+    kostengutsprache = entscheid in KOSTENGUTSPRACHE
+    status = LAUFEND_SOLIFONDS if kostengutsprache else entscheid
+    _status_setzen(doc, status, _("Entscheid {0}").format(durch))
     doc.entscheid_durch = durch
     doc.entscheid_datum = today()
     doc.save(ignore_permissions=True)
-    _kommentar(doc, _("Entscheid {0}: {1}").format(durch, entscheid))
-    if entscheid == "Gutsprache":
+    _kommentar(doc, _("Entscheid {0}: {1}").format(durch, "Kostengutsprache" if kostengutsprache else entscheid))
+    if kostengutsprache:
         gutsprache_mail(doc)
     else:
         ablehnung_mail(doc)
@@ -352,12 +366,12 @@ def abstimmung_abschliessen(mandat, patt_entscheid=None):
     stand = get_abstimmung_stand(doc)
     durch = "Vorstand"
     if stand["ja"] > stand["nein"]:
-        entscheid = "Gutsprache"
+        entscheid = "Kostengutsprache"
     elif stand["nein"] > stand["ja"]:
         entscheid = "Abgelehnt"
     else:
         # Bei Patt entscheidet die GL
-        if patt_entscheid not in ("Gutsprache", "Abgelehnt"):
+        if patt_entscheid not in KOSTENGUTSPRACHE + ("Abgelehnt",):
             return {"patt": 1, "stand": stand}
         entscheid = patt_entscheid
         durch = "GL"
@@ -445,7 +459,7 @@ def get_dashboard():
     _check_rolle(ROLLE_GL)
     # Sektionstrennung über User Permissions (get_list)
     mandate = frappe.get_list("Mandat",
-        filters={"typ": TYP, "status": ["not in", ["Abgeschlossen", "Rückzug", "Gelöscht"]]},
+        filters={"typ": TYP, "status": ["not in", ["Abgeschlossen", "Rückzug", "Gelöscht", "Nicht vergeben"]]},
         fields=["name", "status", "sektion_id", "mv_mitgliedschaft", "mitglied_nr", "solifonds_art", "kostendach",
                 "kontaktperson", "beratungskategorie", "beratungskategorie_2", "beratungskategorie_3", "gesuch_eingereicht_am", "vorgeprueft_am", "entscheid_datum", "creation"],
         order_by="creation asc", limit_page_length=500)

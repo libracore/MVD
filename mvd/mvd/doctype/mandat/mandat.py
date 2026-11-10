@@ -17,6 +17,7 @@ from frappe.email.doctype.email_template.email_template import get_email_templat
 from frappe.utils.pdf import get_pdf
 from frappe import attach_print
 from frappe.utils import get_url_to_form, get_url, escape_html, cint, now_datetime, strip_html
+from mvd.mvd.doctype.mandat.mandat_status import status_vor_speichern, set_status, RSV, QUELLE_AUTOMATIK
 
 SOLIFONDS_KOSTENDACH = {
     "mangels Rechtsschutzdeckung": 3000,
@@ -30,9 +31,6 @@ SOLIFONDS_KRITERIEN = [
     "kriterium_finanzielle_notlage",
     "kriterium_keine_rs_deckung"
 ]
-
-# Diese Status sind auch ohne Vertrauensanwält*in erlaubt und werden von der Automatik nicht überschrieben (#2207)
-STATUS_OHNE_VA_MOEGLICH = ("Rückzug", "Gelöscht")
 
 def darf_fall_verfolgen():
     return bool({"MV_Solifonds_GL", "MV_Solifonds_Vorpruefung"} & set(frappe.get_roles()))
@@ -72,20 +70,8 @@ class Mandat(Document):
         if self.typ == "Solidaritätsfonds":
             self.kostendach = SOLIFONDS_KOSTENDACH.get(self.solifonds_art) or 0
 
-        # Automatik Unzugewiesen/Vorgemerkt; Rückzug und Gelöscht gehen auch ohne VA und bleiben stehen (#2207)
-        if self.status in STATUS_OHNE_VA_MOEGLICH:
-            pass
-
-        elif not self.kontaktperson:
-            self.status = "Unzugewiesen"
-
-        elif self.is_new():
-            self.status = "Vorgemerkt"
-
-        else:
-            old_doc = self.get_doc_before_save()
-            if old_doc and not old_doc.kontaktperson and self.kontaktperson:
-                self.status = "Vorgemerkt"
+        # #2205: Status-Regeln, Automatik Unzugewiesen/Vorgemerkt (nur vor dem Einreichen, #2207) und Statusverlauf
+        status_vor_speichern(self)
 
     def pruefe_visum(self):
         # #2210: Visum nur bei RSV und nur durch die GL; wer und wann wird festgehalten
@@ -151,7 +137,7 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     kategorien = frappe.parse_json(beratungskategorien) if beratungskategorien else get_beratungskategorien(beratung)
     set_beratungskategorien(mandat, kategorien)
     mandat.kontaktperson = berater_in
-    mandat.typ = typ
+    mandat.typ = typ or RSV
     mandat.bemerkung = bemerkung
     mandat.persoenliche_bemerkung = persoenliche_bemerkung
     # «Fall verfolgen» setzen nur GL und Vorprüfung
@@ -532,8 +518,9 @@ def update_mandat_status_nach_email(doc, method):
     if frappe.db.get_value("Mandat", mandat_name, "typ") == "Solidaritätsfonds":
         return
 
-    if anzahl_emails == 1:
-        frappe.db.set_value("Mandat", mandat_name, "status", "Gesuch eingereicht")
+    # #2205: nur aus «Vorgemerkt» (mit VA); Status und Statusverlauf gemeinsam
+    if anzahl_emails == 1 and frappe.db.get_value("Mandat", mandat_name, "status") == "Vorgemerkt":
+        set_status("Mandat", mandat_name, "Gesuch eingereicht", QUELLE_AUTOMATIK, "Erste E-Mail eingegangen")
         frappe.get_doc({
             "doctype": "Comment",
             "comment_type": "Info",

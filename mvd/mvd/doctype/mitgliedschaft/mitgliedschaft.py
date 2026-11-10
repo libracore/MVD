@@ -2811,7 +2811,11 @@ def get_mandat_filter_fuer_uebersicht(mitgliedschaft):
 
 @frappe.whitelist()
 def get_mandat_dashboard(mitgliedschaft):
-    anz_offen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMandat` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` NOT IN ('Ablehnung (Geschlossen)', 'Abgeschlossen')""".format(mitgliedschaft=mitgliedschaft), as_dict=True)[0].qty
+    # #2205: offen = nicht erledigt (Abgeschlossen, Abgelehnt, Rückzug, Gelöscht, Nicht vergeben)
+    from mvd.mvd.doctype.mandat.mandat_status import ERLEDIGT
+    anz_offen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMandat`
+        WHERE `mv_mitgliedschaft` = %(mitgliedschaft)s AND `status` NOT IN %(erledigt)s""",
+        {"mitgliedschaft": mitgliedschaft, "erledigt": ERLEDIGT}, as_dict=True)[0].qty
 
     return anz_offen
 

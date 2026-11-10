@@ -6,9 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils.data import now_datetime
 from mvd.mvd.doctype.mandat.mandat_permissions import get_va_kontaktpersonen
-
-# Status, in denen ein Mandat für die VA erledigt ist (nicht in «Meine offenen Mandate»)
-ERLEDIGT = ['Abgeschlossen', 'Abgelehnt', 'Rückzug', 'Gelöscht']
+from mvd.mvd.doctype.mandat.mandat_status import ERLEDIGT
 
 TYP_SPALTEN = {
     'Rechtsschutzversicherung': 'rsv',
@@ -36,10 +34,12 @@ def get_status_uebersicht():
             total[spalte] += werte[spalte]
 
     ist_va = get_va_kontaktpersonen() is not None
+    meine_mandate = get_meine_mandate(status_optionen) if ist_va else []
     return {
         'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'ist_va': ist_va,
-        'meine_mandate': get_meine_mandate(status_optionen) if ist_va else [],
+        'meine_mandate': meine_mandate,
+        'meine_mandate_offen': len([m for m in meine_mandate if not m.erledigt]),
         'status_liste': status_liste,
         'total': dict(total, summe=sum(total.values())),
         'hat_ohne_typ': total['ohne_typ'] > 0
@@ -47,9 +47,9 @@ def get_status_uebersicht():
 
 
 def get_meine_mandate(status_optionen):
-    # #2206: offene Mandate der Vertrauensanwält*in (Einschränkung über mandat_permissions, get_list)
+    # #2206: Mandate der Vertrauensanwält*in (Einschränkung über mandat_permissions, get_list)
+    # #2205: alle zugewiesenen, egal welcher Status; offene zuerst, erledigte danach
     mandate = frappe.get_list('Mandat',
-        filters={'status': ['not in', ERLEDIGT]},
         fields=['name', 'status', 'typ', 'mv_mitgliedschaft', 'fertigstellen_bis', 'creation'],
         order_by='creation asc', limit_page_length=0)
 
@@ -65,5 +65,6 @@ def get_meine_mandate(status_optionen):
     for m in mandate:
         m.update(mitglieder.get(m.mv_mitgliedschaft, {'mitglied_nr': m.mv_mitgliedschaft or '', 'mitglied_name': ''}))
         m.typ_kurz = TYP_SPALTEN.get(m.typ, '').upper() or '–'
-    mandate.sort(key=lambda m: (reihenfolge.get(m.status, len(reihenfolge)), m.creation))
+        m.erledigt = 1 if m.status in ERLEDIGT else 0
+    mandate.sort(key=lambda m: (m.erledigt, reihenfolge.get(m.status, len(reihenfolge)), m.creation))
     return mandate
