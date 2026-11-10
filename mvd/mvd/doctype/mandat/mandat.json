@@ -39,6 +39,10 @@
   "entscheid_datum",
   "section_vorstand",
   "vorstand_stimmen",
+  "section_mietobjekt",
+  "mietobjekt",
+  "cb_mietobjekt",
+  "schlichtungsbehoerde",
   "section_uebersicht",
   "uebersicht_html",
   "section_verknuepfungen",
@@ -236,6 +240,27 @@
    "read_only": 1
   },
   {
+   "fieldname": "section_mietobjekt",
+   "fieldtype": "Section Break",
+   "label": "Mietobjekt"
+  },
+  {
+   "description": "Beim Erstellen aus der Objektadresse der Mitgliedschaft \u00fcbernommen.",
+   "fieldname": "mietobjekt",
+   "fieldtype": "Small Text",
+   "label": "Mietobjekt"
+  },
+  {
+   "fieldname": "cb_mietobjekt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Beim Erstellen \u00fcber das amtliche Geb\u00e4udeverzeichnis ermittelt. Leer, wenn die Adresse dort nicht gefunden wurde.",
+   "fieldname": "schlichtungsbehoerde",
+   "fieldtype": "Small Text",
+   "label": "Zust\u00e4ndige Schlichtungsbeh\u00f6rde"
+  },
+  {
    "depends_on": "eval:doc.mv_mitgliedschaft",
    "fieldname": "section_uebersicht",
    "fieldtype": "Section Break",
@@ -379,7 +404,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2026-11-08 22:39:11.848641",
+ "modified": "2026-11-09 14:40:25.912689",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Mandat",

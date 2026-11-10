@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import io
 import zipfile
+import requests
 import frappe
 from frappe.model.document import Document
 from frappe.core.doctype.communication.email import make
@@ -14,7 +15,7 @@ from frappe.model.naming import make_autoname
 from frappe.email.doctype.email_template.email_template import get_email_template
 from frappe.utils.pdf import get_pdf
 from frappe import attach_print
-from frappe.utils import get_url_to_form, get_url, escape_html, cint, now_datetime
+from frappe.utils import get_url_to_form, get_url, escape_html, cint, now_datetime, strip_html
 from frappe.utils.file_manager import get_file_path
 
 SOLIFONDS_KOSTENDACH = {
@@ -166,11 +167,67 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
             for kriterium in SOLIFONDS_KRITERIEN:
                 mandat.set(kriterium, 1 if kriterium in gewaehlt else 0)
 
+    # #2213: Mietobjekt und zuständige Schlichtungsbehörde übernehmen
+    if beratung.mv_mitgliedschaft:
+        mandat.mietobjekt, mandat.schlichtungsbehoerde = get_mietobjekt_und_schlichtungsbehoerde(beratung.mv_mitgliedschaft)
+
     mandat.insert(ignore_permissions=True)
 
     frappe.db.set_value("Beratung", beratung.name, "mandat", mandat.name)
 
     return mandat.name
+
+def get_mietobjekt_und_schlichtungsbehoerde(mitgliedschaft):
+    # #2213: Objektadresse der Mitgliedschaft als Text und die zuständige Schlichtungsbehörde.
+    # Ohne Treffer im Gebäudeverzeichnis oder ohne Antwort von mp.libracore.ch bleibt die Behörde leer.
+    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import validate_address
+    m = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, [
+        "name", "objekt_zusatz_adresse", "objekt_strasse", "objekt_hausnummer", "objekt_nummer_zu",
+        "objekt_plz", "objekt_ort"], as_dict=True)
+    if not m:
+        return None, None
+    zeilen = [
+        m.objekt_zusatz_adresse,
+        " ".join(x for x in (m.objekt_strasse, "{0}{1}".format(m.objekt_hausnummer or "", m.objekt_nummer_zu or "")) if x),
+        " ".join(x for x in (m.objekt_plz, m.objekt_ort) if x)
+    ]
+    mietobjekt = "\n".join(z for z in zeilen if z) or None
+
+    # validate_address mit doc statt doc_id schreibt nichts in die Mitgliedschaft
+    validierung = validate_address(doc=frappe._dict(m))
+    behoerde = None
+    if validierung.get("success") and validierung.get("bfs_nr"):
+        behoerde = get_schlichtungsbehoerde_adresse(validierung.get("bfs_nr"))
+    return mietobjekt, behoerde
+
+def get_schlichtungsbehoerde_adresse(bfs_nr):
+    try:
+        response = requests.get("https://mp.libracore.ch/api/method/mietrechtspraxis.api.get_arbitration_authority_from_bfs",
+            params={"bfs_nr": bfs_nr}, timeout=5)
+        daten = (response.json() or {}).get("message") if response.status_code == 200 else None
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "Mandat: Schlichtungsbehörde nicht abrufbar")
+        return None
+    if not daten or not daten.get("aa_address_html"):
+        return None
+    # «Name, Region, Strasse, PLZ Ort» -> eine Zeile pro Teil
+    return "\n".join(t.strip() for t in strip_html(daten.get("aa_address_html")).split(",") if t.strip()) or None
+
+@frappe.whitelist()
+def schlichtungsbehoerde_ermitteln(mandat):
+    doc = frappe.get_doc("Mandat", mandat)
+    if not doc.has_permission("write"):
+        frappe.throw(frappe._("Keine Berechtigung für dieses Mandat."), frappe.PermissionError)
+    if not doc.mv_mitgliedschaft:
+        frappe.throw(frappe._("Das Mandat hat kein Mitglied."))
+    mietobjekt, behoerde = get_mietobjekt_und_schlichtungsbehoerde(doc.mv_mitgliedschaft)
+    if not behoerde:
+        frappe.throw(frappe._("Die Schlichtungsbehörde konnte nicht ermittelt werden: Die Objektadresse wurde im amtlichen Gebäudeverzeichnis nicht gefunden oder mp.libracore.ch antwortet nicht."))
+    doc.schlichtungsbehoerde = behoerde
+    if not doc.mietobjekt:
+        doc.mietobjekt = mietobjekt
+    doc.save()
+    return behoerde
 
 KATEGORIE_FELDER = ("beratungskategorie", "beratungskategorie_2", "beratungskategorie_3")
 

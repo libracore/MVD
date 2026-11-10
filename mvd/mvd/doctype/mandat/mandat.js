@@ -13,6 +13,18 @@ frappe.ui.form.on('Mandat', {
         frm.set_df_property('fall_verfolgen', 'read_only', frappe.user.has_role(['MV_Solifonds_GL', 'MV_Solifonds_Vorpruefung']) ? 0 : 1);
         frm.set_df_property('visum', 'read_only', frappe.user.has_role('MV_Solifonds_GL') ? 0 : 1);
 
+        // #2213: Schlichtungsbehörde nachträglich ermitteln, falls sie beim Erstellen nicht gefunden wurde
+        if (!frm.is_new() && frm.doc.mv_mitgliedschaft && !frm.doc.schlichtungsbehoerde) {
+            frm.add_custom_button(__('Schlichtungsbehörde ermitteln'), function() {
+                frappe.call({
+                    method: 'mvd.mvd.doctype.mandat.mandat.schlichtungsbehoerde_ermitteln',
+                    args: {'mandat': frm.doc.name},
+                    freeze: true,
+                    callback: function() { frm.reload_doc(); }
+                });
+            });
+        }
+
         // Ablauf Solidaritätsfonds (#2183)
         if (!frm.is_new() && frm.doc.typ == 'Solidaritätsfonds') {
             add_solifonds_buttons(frm);
