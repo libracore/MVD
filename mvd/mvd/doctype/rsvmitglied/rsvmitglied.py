@@ -813,13 +813,15 @@ def get_coop_email_data(docname):
     zip_links = []
     if doc.zip_file_verschluesselt:
         zip_links.append(
-            '<a href="{0}">Download der Anlagen als ZIP (verschlüsselt)</a>'.format(
+            '<a href="{0}">Download der Anlagen als ZIP (verschlüsselt)</a>'
+            ' – für die Coop Rechtsschutzversicherung'.format(
                 get_url(doc.zip_file_verschluesselt)
             )
         )
     if doc.zip_file:
         zip_links.append(
-            '<a href="{0}">Download der Anlagen als ZIP (Login)</a>'.format(
+            '<a href="{0}">Download der Anlagen als ZIP (Login)</a>'
+            ' – für Vertrauensanwält:innen (Achtung: Man muss bereits im Libracore eingeloggt sein)'.format(
                 get_url(doc.zip_file)
             )
         )
