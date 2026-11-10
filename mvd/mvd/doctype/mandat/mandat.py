@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import io
 import zipfile
 import requests
+from six.moves.urllib.parse import quote
 import frappe
 from frappe.model.document import Document
 from frappe.core.doctype.communication.email import make
@@ -16,7 +17,6 @@ from frappe.email.doctype.email_template.email_template import get_email_templat
 from frappe.utils.pdf import get_pdf
 from frappe import attach_print
 from frappe.utils import get_url_to_form, get_url, escape_html, cint, now_datetime, strip_html
-from frappe.utils.file_manager import get_file_path
 
 SOLIFONDS_KOSTENDACH = {
     "mangels Rechtsschutzdeckung": 3000,
@@ -315,25 +315,11 @@ def send_confirmation_email(mandat):
                 file_doc.insert(ignore_permissions=True)
                 attachments.append({"fid": file_doc.name})
             
-            zip_data = get_beratung_zip_attachment(mandat.beratung)
+            # #2214: statt ZIP-Datei ein Link; das ZIP entsteht erst beim Abruf (Login und Leserecht aufs Mandat nötig)
             zip_link_html = ""
-            if zip_data:
-                zip_file_doc = frappe.get_doc({
-                    "doctype": "File",
-                    "file_name": zip_data["fname"],
-                    "attached_to_doctype": "Mandat",
-                    "attached_to_name": mandat.name,
-                    "content": zip_data["fcontent"],
-                    "is_private": 1
-                })
-                zip_file_doc.insert(ignore_permissions=True)
-                # Falls ZIP kleiner als 8 MB hängen wir es dem Email an
-                if len(zip_data["fcontent"]) <= 8 * 1024 * 1024:
-                    attachments.append({"fid": zip_file_doc.name})
-                    zip_link_html = "Alle Anlagen: Als ZIP-Datei im Anhang"
-                else:
-                    zip_url = get_url(zip_file_doc.file_url)
-                    zip_link_html = """<a href="{0}">Download alle Anlagen als ZIP</a> """.format(zip_url)
+            if mandat.beratung and frappe.db.count("File", {"attached_to_doctype": "Beratung", "attached_to_name": mandat.beratung}):
+                zip_link_html = """<a href="{0}">Alle Anlagen der Beratung als ZIP herunterladen</a> (Anmeldung in Libracore nötig)""".format(
+                    get_anlagen_zip_url(mandat.name))
 
             persoenliche_bemerkung_html = ""
             if mandat.persoenliche_bemerkung:
@@ -427,11 +413,32 @@ def send_confirmation_email(mandat):
         return False
 
 
+def get_anlagen_zip_url(mandat):
+    return get_url("/api/method/mvd.mvd.doctype.mandat.mandat.download_anlagen?mandat={0}".format(quote(mandat)))
+
+@frappe.whitelist(allow_guest=True)
+def download_anlagen(mandat):
+    # #2214: Anlagen der Beratung als ZIP, erst beim Abruf erzeugt. allow_guest nur, um Gäste zum Login umzuleiten.
+    if frappe.session.user == "Guest":
+        frappe.local.response["type"] = "redirect"
+        frappe.local.response["location"] = "/login?redirect-to={0}".format(
+            quote("/api/method/mvd.mvd.doctype.mandat.mandat.download_anlagen?mandat={0}".format(quote(mandat))))
+        return
+    doc = frappe.get_doc("Mandat", mandat)
+    if not doc.has_permission("read"):
+        frappe.throw(frappe._("Keine Berechtigung für dieses Mandat."), frappe.PermissionError)
+    zip_data = get_beratung_zip_attachment(doc.beratung) if doc.beratung else None
+    if not zip_data:
+        frappe.throw(frappe._("Zu diesem Mandat gibt es keine Anlagen."))
+    frappe.local.response.filename = zip_data["fname"]
+    frappe.local.response.filecontent = zip_data["fcontent"]
+    frappe.local.response.type = "download"
+
 def get_beratung_zip_attachment(beratung_id):
     files = frappe.get_all("File", filters={
         "attached_to_doctype": "Beratung",
         "attached_to_name": beratung_id
-    }, fields=["file_name", "file_url", "file_size"])
+    }, fields=["name", "file_name", "file_url", "file_size"])
 
     if not files:
         return None
@@ -440,9 +447,8 @@ def get_beratung_zip_attachment(beratung_id):
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
         for f in files:
             try:
-                file_path = get_file_path(f.file_name) if not f.file_url.startswith('/') else f.file_url.lstrip('/')
-                full_path = frappe.get_site_path(file_path)
-                
+                # get_full_path kennt öffentliche (/files) und private (/private/files) Dateien
+                full_path = frappe.get_doc("File", f.name).get_full_path()
                 with open(full_path, "rb") as content:
                     zip_file.writestr(f.file_name, content.read())
             except Exception as e:
