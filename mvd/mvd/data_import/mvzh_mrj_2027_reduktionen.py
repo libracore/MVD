@@ -15,6 +15,8 @@ Gezielte Korrektur des MVZH-Jahreslaufs MRJ-2027-3 (kein Migrationspatch).
 Erwartet als erste Excel-Spalte:
 Mitglied-Nr ohne MV; aktives Tabellenblatt (.xls: erstes Blatt), mit Kopfzeile.
 Dateipfad: absoluter Dateisystempfad oder /private/files/... der gewählten Site.
+Mehrere MVZH-Mitgliedschaften derselben Nummer werden nur bei einer eindeutig
+zugeordneten, nicht stornierten Rechnung dieses Jahreslaufs aufgelöst.
 
 Vorschau (keine Schreibzugriffe):
     bench --site libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_mrj_2027_reduktionen.run \
@@ -77,11 +79,10 @@ def run(file_path, dry_run=True, has_header=True):
                 if row.get('grund'):
                     raise Blockiert(row['grund'])
                 names = by_number.get(row['mitglied_nr'], [])
-                if len(names) != 1:
-                    raise Blockiert('Erwartet genau eine MVZH-Mitgliedschaft, gefunden: {0}.'.format(len(names)))
-                if not dry_run:
-                    frappe.db.sql('SELECT name FROM `tabMitgliedschaft` WHERE name = %s FOR UPDATE', (names[0],))
-                member = frappe.get_doc('Mitgliedschaft', names[0])
+                member_name = _select_member_name(names, lock=not dry_run)
+                if len(names) > 1:
+                    entry.update(auswahl_ueber_rechnung=True, anzahl_mitgliedschaften=len(names))
+                member = frappe.get_doc('Mitgliedschaft', member_name)
                 if member.sektion_id != SEKTION or member.mitglied_nr != row['mitglied_nr']:
                     raise Blockiert('Mitgliedschaft wurde zwischenzeitlich geändert.')
                 entry['mitgliedschaft'] = member.name
@@ -200,6 +201,27 @@ def _target(member):
     if not math.isfinite(target) or target <= 0:
         raise Blockiert('Bestehender abweichender Beitrag ist ungültig oder gratis; manuell prüfen.')
     return target, not enabled
+
+
+def _select_member_name(names, lock=False):
+    if not names:
+        raise Blockiert('Erwartet genau eine MVZH-Mitgliedschaft, gefunden: 0.')
+    placeholders = ', '.join(['%s'] * len(names))
+    if lock:
+        # Immer zuerst die Mitgliedschaften sperren, danach die Rechnungen.
+        frappe.db.sql('SELECT name FROM `tabMitgliedschaft` WHERE name IN ({0}) '
+            'ORDER BY name FOR UPDATE'.format(placeholders), tuple(sorted(names)))
+    if len(names) == 1:
+        return names[0]
+    invoices = frappe.db.sql('''SELECT name, mv_mitgliedschaft FROM `tabSales Invoice`
+        WHERE mrj = %s AND mv_mitgliedschaft IN ({0}) AND docstatus < 2
+        ORDER BY name{1}'''.format(placeholders, ' FOR UPDATE' if lock else ''),
+        (MRJ,) + tuple(names), as_dict=True)
+    if len(invoices) != 1:
+        raise Blockiert('Zu {0} MVZH-Mitgliedschaften wurden insgesamt {1} aktive Rechnungen '
+            'im Jahreslauf {2} gefunden; erwartet genau eine. Mitgliedschaften: {3}.'.format(
+                len(names), len(invoices), MRJ, ', '.join(sorted(names))))
+    return invoices[0].mv_mitgliedschaft
 
 
 def _get_invoice(member, lock=False):
