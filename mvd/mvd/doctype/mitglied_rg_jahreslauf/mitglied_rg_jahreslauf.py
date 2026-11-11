@@ -838,6 +838,8 @@ def get_csv(mrj=None, bg_job=True, recipient_group="Alle"):
             as_dict=True
         )
 
+        csv_neu = 0
+        csv_unveraendert = 0
         for mrj_sektions_selektion in mrj_sektions_selektionen:
             data = []
             header = [
@@ -1205,9 +1207,19 @@ def get_csv(mrj=None, bg_job=True, recipient_group="Alle"):
                 "attached_to_name": mrj
             })
             
-            _file.save()
+            try:
+                _file.save()
+            except frappe.DuplicateEntryError:
+                # Nur diese Selektion überspringen; weitere CSVs können durch
+                # Rechnungskorrekturen inzwischen andere Inhalte haben.
+                csv_unveraendert += 1
+                jahresversand.add_comment('Comment', text='CSV für {0} ist unverändert und bereits vorhanden.'.format(
+                    mrj_sektions_selektion.name))
+                continue
+            csv_neu += 1
             
-        jahresversand.add_comment('Comment', text='CSV erstellt.')
+        jahresversand.add_comment('Comment', text='CSV erstellt: {0} neu, {1} unverändert.'.format(
+            csv_neu, csv_unveraendert))
         frappe.db.commit()
         
         return 'done'
