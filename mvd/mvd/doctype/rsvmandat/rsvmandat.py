@@ -78,11 +78,26 @@ def get_va_from_user(va_user):
         return va[0].parent
     return ''
 
+def get_authorized_rsvmandat(rsv_mandat):
+    # Da das Web-Portal die Mandate direkt mittels SQL ausliest, dient diese Methode als Casespezifische Prüfung
+    # der Berechtigungen. Somit können alle Folgeprozesse `ignore_permissions=True` verwenden.
+    if frappe.session.user == 'Guest' or not rsv_mandat:
+        frappe.throw("Kein Zugriff auf dieses RSV-Mandat.", frappe.PermissionError)
+
+    mandat = frappe.get_doc("RSVMandat", rsv_mandat)
+    va = get_va_from_user(frappe.session.user)
+    if not va or mandat.anwalt != va:
+        # Falls der Aufruf nicht von einem VA mit Mandatszuordnung ausgeführt wurde,
+        # z.B. durch einen Systemmanager, werden als Fallback die normalen Berechtigungen geprüft.
+        mandat.check_permission("write")
+
+    return mandat
+
 def update_rsvmandat(rsvmitglied, rsvmandat):
     rsvml = frappe.get_doc("RSVMandat", rsvmandat)
     rsvml.reset_status()
     rsvml.before_save()
-    rsvml.save()
+    rsvml.save(ignore_permissions=True)
     return
 
 def get_rsv_mandat_languages(rsv_mandat):

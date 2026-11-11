@@ -123,12 +123,10 @@ $('#fragen-speichern').on('click', function() {
 function upload_file(file, rsv_mandat, verfahrensinstanz, feedback) {
     const form_data = new FormData();
     form_data.append('file', file);
-    form_data.append('doctype', 'RSVMandat');
-    form_data.append('docname', rsv_mandat);
-    form_data.append('is_private', 1);
+    form_data.append('rsv_mandat', rsv_mandat);
 
     $.ajax({
-        url: '/api/method/upload_file',
+        url: '/api/method/mvd.www.va.meine_mandate.upload_abschluss_file',
         type: 'POST',
         data: form_data,
         processData: false,

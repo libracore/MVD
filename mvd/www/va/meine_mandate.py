@@ -5,7 +5,7 @@ import io
 import os
 import zipfile
 from urllib.parse import unquote
-from mvd.mvd.doctype.rsvmandat.rsvmandat import get_rsv_mandat_languages, get_va_from_user
+from mvd.mvd.doctype.rsvmandat.rsvmandat import get_authorized_rsvmandat, get_rsv_mandat_languages, get_va_from_user
 
 no_cache = 1
 
@@ -328,12 +328,36 @@ def resolve_file_path(file_url):
 @frappe.whitelist()
 def close_rsvmitglied(rsv_mitglied):
     rsvm = frappe.get_doc("RSVMitglied", rsv_mitglied)
+    get_authorized_rsvmandat(rsvm.rsvmandat)
+    _close_rsvmitglied(rsvm)
+    return
+
+def _close_rsvmitglied(rsvm):
     rsvm.status = 'Abgeschlossen'
     rsvm.save(ignore_permissions=True)
-    return
+
+@frappe.whitelist()
+def upload_abschluss_file(rsv_mandat):
+    mandat = get_authorized_rsvmandat(rsv_mandat)
+    file = frappe.request.files.get('file')
+    if not file or not file.filename:
+        frappe.throw("Bitte eine Datei auswählen.")
+
+    file_doc = frappe.get_doc({
+        "doctype": "File",
+        "attached_to_doctype": "RSVMandat",
+        "attached_to_name": mandat.name,
+        "folder": "Home",
+        "file_name": file.filename,
+        "is_private": 1,
+        "content": file.stream.read()
+    })
+    file_doc.save(ignore_permissions=True)
+    return file_doc
 
 @frappe.whitelist()
 def close_rsvmandat(rsv_mandat, verfahrensinstanz, feedback=None):
+    mandat = get_authorized_rsvmandat(rsv_mandat)
     if not verfahrensinstanz:
         frappe.throw("Bitte eine Verfahrensinstanz auswählen.")
 
@@ -342,21 +366,20 @@ def close_rsvmandat(rsv_mandat, verfahrensinstanz, feedback=None):
             "Bei dieser Verfahrensinstanz ist ein Feedback erforderlich."
         )
 
-    mandat = frappe.get_doc("RSVMandat", rsv_mandat)
     mandat.verfahrensinstanz = verfahrensinstanz
     mandat.feedback = feedback
-    mandat.save()
+    mandat.save(ignore_permissions=True)
 
     rsv_mitglieder = frappe.db.sql(
         """
             SELECT `name`
             FROM `tabRSVMitglied`
-            WHERE `rsvmandat` = '{0}'
-        """.format(rsv_mandat),
+            WHERE `rsvmandat` = %s
+        """, (mandat.name,),
         as_dict=True
     )
     for rsv_mitglied in rsv_mitglieder:
-        close_rsvmitglied(rsv_mitglied.name)
+        _close_rsvmitglied(frappe.get_doc("RSVMitglied", rsv_mitglied.name))
 
     return True
 
