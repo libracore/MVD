@@ -14,10 +14,11 @@ Gezielte Korrektur des MVZH-Jahreslaufs MRJ-2027-3 (kein Migrationspatch).
 
 Erwartet als erste Excel-Spalte:
 Mitglied-Nr ohne MV; aktives Tabellenblatt (.xls: erstes Blatt), mit Kopfzeile.
+Dateipfad: absoluter Dateisystempfad oder /private/files/... der gewählten Site.
 
 Vorschau (keine Schreibzugriffe):
     bench --site libracore.mieterverband.ch execute mvd.mvd.data_import.mvzh_mrj_2027_reduktionen.run \
-        --kwargs '{"file_path":"/absoluter/pfad/reduktionen.xlsx"}'
+        --kwargs '{"file_path":"/private/files/MVZH_Reduzierte_korrekturpatch_20261111_1100.xlsx"}'
 
 Korrektur nach Prüfung der Vorschau, gleicher Aufruf mit "dry_run": False
 Ohne Kopfzeile zusätzlich "has_header": False
@@ -128,6 +129,9 @@ def run(file_path, dry_run=True, has_header=True):
 
 def _read_members(file_path, has_header):
     from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file, read_xls_file_from_attached_file
+
+    if file_path.startswith('/private/files/'):
+        file_path = frappe.get_site_path(file_path.lstrip('/'))
 
     extension = os.path.splitext(file_path)[1].lower()
     if extension == '.xlsx':
