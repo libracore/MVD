@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from mvd.mvd.utils.rechnungs_bankkonto import set_lauf_bankkonto
 from frappe.model.document import Document
 from frappe.utils.csvutils import to_csv as make_csv
 from frappe.utils.data import now, getdate, add_days, today
@@ -12,6 +13,8 @@ from mvd.mvd.doctype.rechnungs_jahresversand.utils import get_csv_header, get_cs
 
 class RechnungsJahresversand(Document):
     def validate(self):
+        if self.docstatus == 0:
+            set_lauf_bankkonto(self)
         if not self.jahr:
             self.jahr = int(getdate(now()).strftime("%Y")) + 1
         if not self.counter or self.counter == 0:

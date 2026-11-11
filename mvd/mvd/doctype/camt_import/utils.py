@@ -71,6 +71,7 @@ def create_unpaid_sinv(fak, betrag):
             "ist_spenden_rechnung": 0 if fak_doc.typ == 'HV' else 1,
             "mv_mitgliedschaft": fak_doc.mv_mitgliedschaft,
             "company": sektion.company,
+            "rechnungs_bankkonto": fak_doc.get("rechnungs_bankkonto"),
             "cost_center": company.cost_center,
             "customer": customer,
             "customer_address": address,

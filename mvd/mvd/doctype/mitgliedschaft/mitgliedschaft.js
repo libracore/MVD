@@ -1367,7 +1367,8 @@ function erstelle_geschenk_rechnung(frm) {
                     callback: function(r)
                     {
                         var druckvorlagen = r.message
-                        frappe.prompt([
+                        var bankkonto_dialog = frappe.prompt([
+                            frappe.mvd.rechnungs_bankkonto_feld(),
                             {'fieldname': 'rg_druckvorlage', 'fieldtype': 'Link', 'label': 'Rechnungs Druckvorlage', 'reqd': 1, 'options': 'Druckvorlage',
                                 'get_query': function() {
                                     return { 'filters': {
@@ -1395,6 +1396,7 @@ function erstelle_geschenk_rechnung(frm) {
                                         'attach_as_pdf': true,
                                         'submit': true,
                                         'druckvorlage': values.rg_druckvorlage,
+                                        'rechnungs_bankkonto': values.rechnungs_bankkonto,
                                         'geschenk_reset': true
                                 },
                                 freeze: true,
@@ -1428,7 +1430,8 @@ function erstelle_geschenk_rechnung(frm) {
                         },
                         'Rechnungs/Korrespondenz Erstellung',
                         'Erstellen'
-                        )
+                        );
+                        frappe.mvd.bankkonto_dialog(bankkonto_dialog, cur_frm.doc.sektion_id);
                     }
                 });
             } else {

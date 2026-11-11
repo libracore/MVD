@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from mvd.mvd.utils.rechnungs_bankkonto import set_lauf_bankkonto
 from frappe.model.document import Document
 from frappe.utils import cint
 from frappe.utils.data import add_days, today, now
@@ -11,6 +12,11 @@ from frappe.utils.csvutils import to_csv as make_csv
 
 class Spendenversand(Document):
     def validate(self):
+        if self.docstatus == 0 and not cint(self.data_only):
+            if cint(self.sektionsspezifisch) and self.sektion_id:
+                set_lauf_bankkonto(self)
+            else:
+                self.rechnungs_bankkonto = None
         if int(self.sektionsspezifisch) == 1 and not self.sektion_id:
             frappe.throw("Bitte wählen Sie eine Sektion aus.")
         if int(self.sprachspezifisch) == 1 and not self.sprache:
@@ -90,6 +96,7 @@ def spenden_versand(doc, debug=False):
                         'betrag': 0.00,
                         'posting_date': today(),
                         'company': sektion.company,
+                        'rechnungs_bankkonto': doc.rechnungs_bankkonto if cint(doc.sektionsspezifisch) else None,
                         'druckvorlage': '',
                         'spenden_versand': doc.name
                     })

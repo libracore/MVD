@@ -17,6 +17,7 @@ app_license = "MIT"
 # include js, css files in header of desk.html
 app_include_css = "/assets/mvd/css/mvd.css"
 app_include_js = [
+    "/assets/mvd/js/rechnungs_bankkonto.js",
     "/assets/mvd/js/mvd.js",
     "/assets/mvd/js/vorlagen_baum/vorlagen_baum_navigator.js"
 ]
@@ -151,10 +152,14 @@ on_login = "mvd.mvd.utils.mvd_bootinfo.login_check"
 
 doc_events = {
     "Sales Invoice": {
+        "before_insert": "mvd.mvd.utils.rechnungs_bankkonto.set_rechnungs_bankkonto",
         "before_cancel": "mvd.mvd.utils.hook_utils.unlink_fr",
         "after_insert": "mvd.mvd.utils.hook_utils.relink_fr",
         "on_change": "mvd.mvd.doctype.mitgliedschaft.finance_utils.sinv_update",
-        "validate": "mvd.mvd.utils.hook_utils.check_manual_address"
+        "validate": [
+            "mvd.mvd.utils.hook_utils.check_manual_address",
+            "mvd.mvd.utils.rechnungs_bankkonto.validate_rechnungs_bankkonto"
+        ]
     },
     "Payment Entry": {
         "on_submit": "mvd.mvd.utils.hook_utils.pe_after_submit_hooks"

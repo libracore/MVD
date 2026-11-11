@@ -1682,7 +1682,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
         this.dialog =  new frappe.ui.Dialog({
             title: "Rechnungs Erstellung",
             no_submit_on_enter: true,
-            fields: this.get_fields(),
+            fields: [frappe.mvd.rechnungs_bankkonto_feld()].concat(this.get_fields()),
             primary_action_label: "Erstellen",
             primary_action: () => {
                 this.dialog.hide();
@@ -1705,6 +1705,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
             }
         });
 
+        frappe.mvd.bankkonto_dialog(this.dialog, cur_frm.doc.sektion_id);
         this.dialog.show();
     }
 
@@ -1838,6 +1839,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
             'attach_as_pdf': true,
             'submit': true,
             'hv_bar_bezahlt': this.dialog.get_value('hv_bar_bezahlt') == 1 ? true:null,
+            'rechnungs_bankkonto': this.dialog.get_value('rechnungs_bankkonto'),
             'druckvorlage': this.dialog.get_value('druckvorlage'),
             'massendruck': this.dialog.get_value('massendruck') == 1 ? true:null,
             'eigene_items': this.dialog.get_value('eigene_items'),
@@ -1854,6 +1856,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
             'attach_as_pdf': true,
             'submit': true,
             'hv_bar_bezahlt': this.dialog.get_value('hv_bar_bezahlt') == 1 ? true:null,
+            'rechnungs_bankkonto': this.dialog.get_value('rechnungs_bankkonto'),
             'druckvorlage': this.dialog.get_value('druckvorlage'),
             'massendruck': this.dialog.get_value('massendruck') == 1 ? true:null,
             'ignore_stichtage': true,
@@ -1871,7 +1874,7 @@ mvd_dialoge.erstelle_spenden_rechnung = class ErstelleSpendenRechnung {
         this.dialog =  new frappe.ui.Dialog({
             title: "Spenden-Rechnungs Erstellung",
             no_submit_on_enter: true,
-            fields: this.get_fields(),
+            fields: [frappe.mvd.rechnungs_bankkonto_feld()].concat(this.get_fields()),
             primary_action_label: "Erstellen",
             primary_action: () => {
                 this.dialog.hide();
@@ -1894,6 +1897,7 @@ mvd_dialoge.erstelle_spenden_rechnung = class ErstelleSpendenRechnung {
             }
         });
 
+        frappe.mvd.bankkonto_dialog(this.dialog, cur_frm.doc.sektion_id);
         this.dialog.show();
     }
 
@@ -1917,6 +1921,7 @@ mvd_dialoge.erstelle_spenden_rechnung = class ErstelleSpendenRechnung {
             args:{
                     'mitgliedschaft': cur_frm.doc.name,
                     'betrag_spende': this.dialog.get_value('betrag'),
+                    'rechnungs_bankkonto': this.dialog.get_value('rechnungs_bankkonto'),
                     'druckvorlage': this.dialog.get_value('druckvorlage')
             },
             freeze: true,
@@ -1937,7 +1942,7 @@ mvd_dialoge.erstelle_hv_rechnung = class ErstelleHvRechnung {
         this.dialog =  new frappe.ui.Dialog({
             title: "HV-Rechnungs Erstellung",
             no_submit_on_enter: true,
-            fields: this.get_fields(),
+            fields: [frappe.mvd.rechnungs_bankkonto_feld()].concat(this.get_fields()),
             primary_action_label: "Erstellen",
             primary_action: () => {
                 this.dialog.hide();
@@ -1960,6 +1965,7 @@ mvd_dialoge.erstelle_hv_rechnung = class ErstelleHvRechnung {
             }
         });
 
+        frappe.mvd.bankkonto_dialog(this.dialog, cur_frm.doc.sektion_id);
         this.dialog.show();
     }
 
@@ -1981,6 +1987,7 @@ mvd_dialoge.erstelle_hv_rechnung = class ErstelleHvRechnung {
             method: "mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung.create_hv_fr",
             args:{
                     'mitgliedschaft': cur_frm.doc.name,
+                    'rechnungs_bankkonto': this.dialog.get_value('rechnungs_bankkonto'),
                     'druckvorlage': this.dialog.get_value('druckvorlage'),
                     'asap_print': true
             },
@@ -2285,7 +2292,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
         this.dialog =  new frappe.ui.Dialog({
             title: "Rechnungs Erstellung (Sonstiges)",
             no_submit_on_enter: true,
-            fields: this.get_fields(),
+            fields: [frappe.mvd.rechnungs_bankkonto_feld()].concat(this.get_fields()),
             primary_action_label: "Erstellen",
             primary_action: () => {
                 this.dialog.hide();
@@ -2308,6 +2315,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
             }
         });
 
+        frappe.mvd.bankkonto_dialog(this.dialog, cur_frm.doc.sektion_id, true);
         this.dialog.show();
     }
 
@@ -2540,6 +2548,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
                 'zahlungsart': this.dialog.get_value('zahlungsart'),
                 'attach_as_pdf': true,
                 'submit': true,
+                'rechnungs_bankkonto': this.dialog.get_value('rechnungs_bankkonto'),
                 'druckvorlage': this.dialog.get_value('druckvorlage'),
                 'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
                 'ohne_betrag': this.dialog.get_value('ohne_betrag') == 1 ? true:null,
@@ -2553,6 +2562,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
                 'zahlungsart': this.dialog.get_value('zahlungsart'),
                 'attach_as_pdf': true,
                 'submit': true,
+                'rechnungs_bankkonto': this.dialog.get_value('rechnungs_bankkonto'),
                 'druckvorlage': this.dialog.get_value('druckvorlage'),
                 'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
                 'ohne_betrag': this.dialog.get_value('ohne_betrag') == 1 ? true:null,

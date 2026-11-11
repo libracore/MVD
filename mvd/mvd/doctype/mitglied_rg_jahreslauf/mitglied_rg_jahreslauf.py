@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from mvd.mvd.utils.rechnungs_bankkonto import get_rechnungs_bankkonto
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 from frappe.utils.background_jobs import enqueue
@@ -350,7 +351,8 @@ def create_invoices(mrj):
                                 `druckvorlage_email`,
                                 `druckvorlage_digitalrechnung`,
                                 `sinv_date`,
-                                `due_date_days`
+                                `due_date_days`,
+                                `rechnungs_bankkonto`
                              FROM `tabMRJ Sektions Selektion` WHERE `status` = 'Rechnungsdaten in Arbeit'
                              AND `mrj` = '{0}'""".format(mrj), as_dict=True)
     if len(pausiert) > 0:
@@ -374,7 +376,8 @@ def create_invoices(mrj):
                                         `druckvorlage_email`,
                                         `druckvorlage_digitalrechnung`,
                                         `sinv_date`,
-                                        `due_date_days`
+                                        `due_date_days`,
+                                        `rechnungs_bankkonto`
                                     FROM `tabMRJ Sektions Selektion` WHERE `status` = 'Bereit zur Ausführung'
                                     AND `mrj` = '{0}'""".format(mrj), as_dict=True)
         if len(ready_to_run) > 0:
@@ -446,6 +449,7 @@ def create_invoices(mrj):
 
     sektion = frappe.get_doc("Sektion", sektions_selektion.sektion_id)
     company = frappe.get_doc("Company", sektion.company)
+    rechnungs_bankkonto = get_rechnungs_bankkonto(company.name, sektions_selektion.rechnungs_bankkonto)
     sinv_date = sektions_selektion.sinv_date
     due_date_days = cint(sektions_selektion.due_date_days) or 30
     due_date = add_days(sinv_date, due_date_days)
@@ -456,7 +460,7 @@ def create_invoices(mrj):
     for mitglied in mitglieder:
         aktuelle_uhrzeit = add_to_date(None, minutes=0, as_datetime=True)
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied)
-        create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, sektions_selektion.bezugsjahr, sektions_selektion.druckvorlage, sektions_selektion.druckvorlage_hv, sektions_selektion.druckvorlage_email, sektions_selektion.druckvorlage_digitalrechnung, mrj, sektions_selektion.name)
+        create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, sektions_selektion.bezugsjahr, sektions_selektion.druckvorlage, sektions_selektion.druckvorlage_hv, sektions_selektion.druckvorlage_email, sektions_selektion.druckvorlage_digitalrechnung, mrj, sektions_selektion.name, rechnungs_bankkonto=rechnungs_bankkonto)
         if aktuelle_uhrzeit > stop_time:
             # autom. stoppzeit erreicht, prozess unterbrechen
             breaked_loop = True
@@ -473,7 +477,7 @@ def create_invoices(mrj):
         frappe.db.commit()
         return
 
-def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, jahr, druckvorlage_rg, druckvorlage_hv, druckvorlage_email, druckvorlage_digitalrechnung, mrj, sektions_selektion):
+def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, jahr, druckvorlage_rg, druckvorlage_hv, druckvorlage_email, druckvorlage_digitalrechnung, mrj, sektions_selektion, rechnungs_bankkonto=None):
     # ------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------
     '''
@@ -517,6 +521,7 @@ def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_d
             "ist_mitgliedschaftsrechnung": 1,
             "mv_mitgliedschaft": mitgliedschaft.name,
             "company": sektion.company,
+            "rechnungs_bankkonto": get_rechnungs_bankkonto(company.name, rechnungs_bankkonto),
             "cost_center": company.cost_center,
             "customer": customer,
             "customer_address": address,
@@ -555,6 +560,7 @@ def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_d
                 'betrag': sektion.betrag_hv,
                 'posting_date': today(),
                 'company': sektion.company,
+                'rechnungs_bankkonto': sinv.rechnungs_bankkonto,
                 'druckvorlage': druckvorlage_hv if druckvorlage_hv else '',
                 'bezugsjahr': jahr,
                 'spenden_versand': '',

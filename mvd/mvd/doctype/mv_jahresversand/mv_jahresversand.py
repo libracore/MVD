@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from mvd.mvd.utils.rechnungs_bankkonto import set_lauf_bankkonto
 from frappe.model.document import Document
 from frappe.utils.data import now
 from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import create_mitgliedschaftsrechnung
@@ -14,6 +15,8 @@ from frappe.desk.form.load import get_attachments
 
 class MVJahresversand(Document):
     def validate(self):
+        if self.docstatus == 0:
+            set_lauf_bankkonto(self)
         if self.start_on and not self.end_on:
             args = {'jahresversand': self.name}
             enqueue("mvd.mvd.doctype.mv_jahresversand.mv_jahresversand.create_invoices", queue='long', job_name='Jahresversand {sektion_id} {jahr}'.format(sektion_id=self.sektion_id, jahr=self.jahr), timeout=5000, **args)
@@ -61,7 +64,7 @@ def create_invoices(jahresversand):
     jahresversand = frappe.get_doc("MV Jahresversand", jahresversand)
     mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `sektion_id` = '{sektion_id}' AND `status_c` = 'Regulär'""".format(sektion_id=jahresversand.sektion_id), as_dict=True)
     for mitgliedschaft in mitgliedschaften:
-        sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name)
+        sinv = create_mitgliedschaftsrechnung(mitgliedschaft.name, rechnungs_bankkonto=jahresversand.rechnungs_bankkonto)
         row = jahresversand.append('invoices', {})
         row.mv_mitgliedschaft = mitgliedschaft.name
         row.sales_invoice = sinv

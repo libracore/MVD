@@ -7,6 +7,7 @@
  "field_order": [
   "sektion_id",
   "jahr",
+  "rechnungs_bankkonto",
   "download_draft",
   "cb_1",
   "start",
@@ -79,10 +80,19 @@
    "fieldname": "download_draft",
    "fieldtype": "Button",
    "label": "Download Entwurfsdaten"
+  },
+  {
+   "fieldname": "rechnungs_bankkonto",
+   "fieldtype": "Link",
+   "label": "Rechnungs-Bankkonto",
+   "options": "Account",
+   "description": "Empf\u00e4ngerkonto f\u00fcr den QR-Zahlteil. Vorgabe: Standard-Bankkonto des Unternehmens.",
+   "allow_on_submit": 0,
+   "no_copy": 0
   }
  ],
  "is_submittable": 1,
- "modified": "2022-02-23 10:41:22.195953",
+ "modified": "2026-11-11 14:11:10.068524",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MV Jahresversand",

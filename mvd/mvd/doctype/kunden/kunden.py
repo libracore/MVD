@@ -743,7 +743,7 @@ def get_party_gle_currency(party_type, party, company):
         regenerate_if_none=True)
 
 @frappe.whitelist()
-def anlage_prozess(anlage_daten, status):
+def anlage_prozess(anlage_daten, status, rechnungs_bankkonto=None):
     if isinstance(anlage_daten, str):
         anlage_daten = json.loads(anlage_daten)
     
@@ -841,7 +841,7 @@ def anlage_prozess(anlage_daten, status):
         # Rechnung
         bezahlt = True
         hv_bar_bezahlt = False
-        sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage='', massendruck=False)
+        sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=bezahlt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bar_bezahlt, druckvorlage='', massendruck=False, rechnungs_bankkonto=rechnungs_bankkonto)
     elif status == 'Interessent*in':
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft.name)
         mitgliedschaft.interessent_innenbrief_mit_ez = 1

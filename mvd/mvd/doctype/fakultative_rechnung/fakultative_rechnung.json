@@ -17,6 +17,7 @@
   "renaming_series",
   "cb_1",
   "company",
+  "rechnungs_bankkonto",
   "sales_invoice",
   "qrr_referenz",
   "naming_series",
@@ -204,10 +205,19 @@
    "fieldtype": "Data",
    "label": "MVZH Sinv IBAN",
    "read_only": 1
+  },
+  {
+   "fieldname": "rechnungs_bankkonto",
+   "fieldtype": "Link",
+   "label": "Rechnungs-Bankkonto",
+   "options": "Account",
+   "description": "Empf\u00e4ngerkonto f\u00fcr den QR-Zahlteil. Vorgabe: Standard-Bankkonto des Unternehmens.",
+   "allow_on_submit": 0,
+   "no_copy": 0
   }
  ],
  "is_submittable": 1,
- "modified": "2025-11-18 13:10:21.433844",
+ "modified": "2026-11-11 14:11:10.068524",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Fakultative Rechnung",

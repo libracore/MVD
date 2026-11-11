@@ -356,7 +356,7 @@ class WebshopOrder(Document):
         self.save()
         return
 
-    def create_sinv(self):
+    def create_sinv(self, rechnungs_bankkonto=None):
         item_json = json.loads(self.artikel_json)
         items_list = []
         for item in item_json['items']:
@@ -370,6 +370,7 @@ class WebshopOrder(Document):
         
         sinv = frappe.get_doc({
             'doctype': 'Sales Invoice',
+            'rechnungs_bankkonto': rechnungs_bankkonto,
             'company': 'MVD',
             'customer': frappe.db.get_value("Kunden", self.faktura_kunde, "kunde_kunde"),
             'customer_group': frappe.db.get_value("Customer", frappe.db.get_value("Kunden", self.faktura_kunde, "kunde_kunde"), "customer_group"),

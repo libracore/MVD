@@ -155,11 +155,11 @@ def get_default_druckvorlage(sektion, language):
 def get_mahnungs_qrrs(mahnung):
     mahnung = frappe.get_doc("Mahnung", mahnung)
     sektion = frappe.get_doc("Sektion", mahnung.sektion_id)
-    bankkonto = frappe.get_doc("Account", sektion.account)
     druckvorlage = frappe.get_doc("Druckvorlage", mahnung.druckvorlage)
     qrrs = []
     for _sinv in mahnung.sales_invoices:
         sinv = frappe.get_doc("Sales Invoice", _sinv.sales_invoice)
+        bankkonto = frappe.get_doc("Account", sinv.get("rechnungs_bankkonto") or sektion.account)
         
         # receiver
         if sinv.company_address:

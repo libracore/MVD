@@ -19,25 +19,29 @@ frappe.ui.form.on('Webshop Order', {
                         if (cur_frm.is_dirty()) {
                             frappe.msgprint("Bitte speichern Sie zuerst");
                         } else {
-                            frappe.call({
-                                method:"create_sinv",
-                                doc: frm.doc,
-                                freeze: true,
-                                freeze_message: __("Erstelle Lieferschein..."),
-                                callback: function(r) {
-                                    cur_frm.reload_doc();
-                                    frappe.confirm(
-                                        'Der Lieferschein wurde erstellt.<br>Möchten Sie diesen öffnen?',
-                                        function(){
-                                            // on yes
-                                            frappe.set_route("Form", "Sales Invoice", r.message);
-                                        },
-                                        function(){
-                                            // on no
-                                        }
-                                    )
-                                }
-                            });
+                            var bankkonto_dialog = frappe.prompt([frappe.mvd.rechnungs_bankkonto_feld()], function(values) {
+                                frappe.call({
+                                    method:"create_sinv",
+                                    doc: frm.doc,
+                                    args: {rechnungs_bankkonto: values.rechnungs_bankkonto},
+                                    freeze: true,
+                                    freeze_message: __("Erstelle Lieferschein..."),
+                                    callback: function(r) {
+                                        cur_frm.reload_doc();
+                                        frappe.confirm(
+                                            'Der Lieferschein wurde erstellt.<br>Möchten Sie diesen öffnen?',
+                                            function(){
+                                                // on yes
+                                                frappe.set_route("Form", "Sales Invoice", r.message);
+                                            },
+                                            function(){
+                                                // on no
+                                            }
+                                        )
+                                    }
+                                });
+                            }, 'Rechnungs-Bankkonto', 'Erstellen');
+                            frappe.mvd.bankkonto_dialog(bankkonto_dialog, 'MVD');
                         }
                     }).addClass("btn-success");
                 } else {
@@ -46,25 +50,29 @@ frappe.ui.form.on('Webshop Order', {
                         if (cur_frm.is_dirty()) {
                             frappe.msgprint("Bitte speichern Sie zuerst");
                         } else {
-                            frappe.call({
-                                method:"create_sinv",
-                                doc: frm.doc,
-                                freeze: true,
-                                freeze_message: __("Erstelle Rechnung..."),
-                                callback: function(r) {
-                                    cur_frm.reload_doc();
-                                    frappe.confirm(
-                                        'Die Rechnung wurde erstellt.<br>Möchten Sie diesen öffnen?',
-                                        function(){
-                                            // on yes
-                                            frappe.set_route("Form", "Sales Invoice", r.message);
-                                        },
-                                        function(){
-                                            // on no
-                                        }
-                                    )
-                                }
-                            });
+                            var bankkonto_dialog = frappe.prompt([frappe.mvd.rechnungs_bankkonto_feld()], function(values) {
+                                frappe.call({
+                                    method:"create_sinv",
+                                    doc: frm.doc,
+                                    args: {rechnungs_bankkonto: values.rechnungs_bankkonto},
+                                    freeze: true,
+                                    freeze_message: __("Erstelle Rechnung..."),
+                                    callback: function(r) {
+                                        cur_frm.reload_doc();
+                                        frappe.confirm(
+                                            'Die Rechnung wurde erstellt.<br>Möchten Sie diesen öffnen?',
+                                            function(){
+                                                // on yes
+                                                frappe.set_route("Form", "Sales Invoice", r.message);
+                                            },
+                                            function(){
+                                                // on no
+                                            }
+                                        )
+                                    }
+                                });
+                            }, 'Rechnungs-Bankkonto', 'Erstellen');
+                            frappe.mvd.bankkonto_dialog(bankkonto_dialog, 'MVD');
                         }
                     }).addClass("btn-success");
                 }

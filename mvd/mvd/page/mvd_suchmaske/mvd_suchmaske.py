@@ -335,7 +335,7 @@ def anlage_prozess(anlage_daten, druckvorlage=False, massendruck=False, faktura=
                 massendruck = True
             else:
                 massendruck = False
-            sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=mitglied_bezahlt, bezahl_datum=eintritt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck, zahlungsart=zahlungsart)
+            sinv = create_mitgliedschaftsrechnung(mitgliedschaft=mitgliedschaft.name, bezahlt=mitglied_bezahlt, bezahl_datum=eintritt, submit=True, attach_as_pdf=True, hv_bar_bezahlt=hv_bezahlt, druckvorlage=druckvorlage, massendruck=massendruck, zahlungsart=zahlungsart, rechnungs_bankkonto=anlage_daten.get("rechnungs_bankkonto"))
         else:
             if anlage_daten["status"] == 'Interessent*in':
                 # erstelle ABL für Interessent*Innenbrief mit EZ

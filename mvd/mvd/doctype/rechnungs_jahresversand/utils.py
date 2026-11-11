@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from mvd.mvd.utils.rechnungs_bankkonto import get_rechnungs_bankkonto
 from frappe.model.document import Document
 from frappe.utils.csvutils import to_csv as make_csv
 from frappe.utils.data import now, add_days, today
@@ -27,6 +28,7 @@ def create_invoices_as_json(jahresversand):
         sinv_list = []
         sektion = frappe.get_doc("Sektion", jahresversand_doc.sektion_id)
         company = frappe.get_doc("Company", sektion.company)
+        rechnungs_bankkonto = get_rechnungs_bankkonto(company.name, jahresversand_doc.rechnungs_bankkonto)
         due_date = add_days(today(), 30)
         item_defaults = {
             'Privat': [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel).get("price")}],
@@ -121,6 +123,7 @@ def create_invoices_as_json(jahresversand):
                         "ist_mitgliedschaftsrechnung": 1,
                         "mv_mitgliedschaft": mitgliedschaft.name,
                         "company": sektion.company,
+                        "rechnungs_bankkonto": rechnungs_bankkonto,
                         "cost_center": company.cost_center,
                         "customer": customer,
                         "customer_address": address,
@@ -154,6 +157,7 @@ def create_invoices_as_json(jahresversand):
                         'betrag': sektion.betrag_hv,
                         'posting_date': today(),
                         'company': sektion.company,
+                        'rechnungs_bankkonto': rechnungs_bankkonto,
                         'druckvorlage': '',
                         'bezugsjahr': jahresversand_doc.jahr,
                         'spenden_versand': '',
@@ -217,6 +221,8 @@ def create_invoices_from_json(jahresversand):
                     if sinv_doc.get("esr_reference") in already_created:
                         skip = True
                 if not skip:
+                    if not sinv_doc.get("rechnungs_bankkonto"):
+                        sinv_doc["rechnungs_bankkonto"] = jahresversand_doc.rechnungs_bankkonto
                     sinv = frappe.get_doc(sinv_doc)
                     sinv.insert(ignore_permissions=True)
                     
@@ -229,6 +235,8 @@ def create_invoices_from_json(jahresversand):
                     fr = frappe.get_doc(json.loads(invoice[1]))
                     if fr.sales_invoice != sinv.name:
                         fr.sales_invoice = sinv.name
+                    if not fr.get("rechnungs_bankkonto"):
+                        fr.rechnungs_bankkonto = sinv.rechnungs_bankkonto
                     fr.insert(ignore_permissions=True)
                     
                     fr.docstatus = 1

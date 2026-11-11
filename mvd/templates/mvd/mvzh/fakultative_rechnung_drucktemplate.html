@@ -7,6 +7,7 @@
 {% set sales_invoice = doc.sales_invoice or False %}
 {% set mitgliedschaft = frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft) %}
 {% set sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id) %}
+{% set bankkonto = frappe.get_doc("Account", doc.get("rechnungs_bankkonto") or sektion.account) %}
 {% if test_druckvorlage %}
     {% set druckvorlage = frappe.get_doc("Druckvorlage", test_druckvorlage) %}
 {% else %}
@@ -152,7 +153,7 @@
             {% endif %}
         {% endif %}
     {% endif %}
-    {% set bankkonto = frappe.get_doc("Account", sektion.account) %}
+
 {% else %}
     {% set receiver_name = False %}
     {% set receiver_street = False %}

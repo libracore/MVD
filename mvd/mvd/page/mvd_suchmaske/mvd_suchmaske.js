@@ -800,8 +800,17 @@ frappe.mvd_such_client = {
                             },
                             {'fieldname': 'mvb_typ', 'fieldtype': 'Select', 'label': 'MVB Typ', 'reqd': 0, 'hidden': 1, 'options': '\nMvbMini\nMvbStandard'},
                             {'fieldname': 'language', 'fieldtype': 'Link', 'label': 'Sprache', 'reqd': 1, 'hidden': 0, 'options': 'Language', 'default': cur_page.page.search_fields.language.get_value()||'de'},
-                            {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'hidden': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value()},
-                            {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 0, 'read_only': 0},
+                            {'fieldname': 'sektion_id', 'fieldtype': 'Link', 'label': 'Sektion', 'reqd': 1, 'hidden': 1, 'options': 'Sektion', 'default': cur_page.page.search_fields.sektion_id.get_value(),
+                                change: function() {
+                                    if (d) frappe.mvd.set_bankkonto_vorgabe(d, {sektion: d.get_value('sektion_id')}, true);
+                                }
+                            },
+                            frappe.mvd.rechnungs_bankkonto_feld({reqd: 0, depends_on: 'eval:doc.autom_rechnung'}),
+                            {'fieldname': 'autom_rechnung', 'fieldtype': 'Check', 'label': 'Rechnung autom. erzeugen', 'reqd': 0, 'default': 0, 'read_only': 0,
+                                change: function() {
+                                    if (d) d.set_df_property('rechnungs_bankkonto', 'reqd', d.get_value('autom_rechnung') ? 1 : 0);
+                                }
+                            },
                             {'fieldname': 'inkl_hv', 'fieldtype': 'Check', 'label': 'inkl. HV', 'reqd': 0, 'default': 0, 'hidden': 0, 'depends_on': 'eval:doc.autom_rechnung'},
                             {'fieldname': 'zahlungsart', 'fieldtype': 'Select', 'label': 'Zahlungsart', 'options': 'Unbezahlt\nBarzahlung\nZahlungsterminal', 'reqd': 0,
                                 'hidden': 0,
@@ -965,11 +974,12 @@ frappe.mvd_such_client = {
                         'Neuanlage',
                         'Anlage'
                         );
+                        frappe.mvd.bankkonto_dialog(d, d.get_value('sektion_id'));
                         if (d) {
-                        frappe.mvd.apply_phone_format(d.fields_dict.telefon);
-                        frappe.mvd.apply_phone_format(d.fields_dict.telefon_g);
-                        frappe.mvd.apply_phone_format(d.fields_dict.telefon_m);
-                    }
+                            frappe.mvd.apply_phone_format(d.fields_dict.telefon);
+                            frappe.mvd.apply_phone_format(d.fields_dict.telefon_g);
+                            frappe.mvd.apply_phone_format(d.fields_dict.telefon_m);
+                        }
                     } else {
                         frappe.msgprint("Sie haben keine Berechtigung zur Ausführung dieser Aktion.");
                     }
