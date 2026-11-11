@@ -163,7 +163,7 @@ paths:
   /mvd.mvd.v2.api.get_member_annual_invoices:
     get:
       summary: Get Member Annual Invoice
-      description: Returns a list of annual membership invoices for a given membership ID.
+      description: Returns a list of annual membership invoices for a given membership ID with a posting date on or before the current date in the system time zone.
       parameters:
         - name: id
           in: query
