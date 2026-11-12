@@ -161,6 +161,14 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
 
     frappe.db.set_value("Beratung", beratung.name, "mandat", mandat.name)
 
+    # #2238: im Verlauf der Beratung festhalten (wer und wann zeigt der Eintrag selbst)
+    if mandat.kontaktperson:
+        uebernahme_text = frappe._("übernommen von {0}").format(escape_html(mandat.kontaktperson))
+    else:
+        uebernahme_text = frappe._("nicht übernommen, das Sekretariat sucht eine Vertrauensanwält*in")
+    beratung.add_comment("Info", frappe._("Mandat {0} erstellt (Typ: {1}), {2}.").format(
+        '<a href="#Form/Mandat/{0}">{0}</a>'.format(escape_html(mandat.name)), escape_html(mandat.typ), uebernahme_text))
+
     return mandat.name
 
 def get_mietobjekt_und_schlichtungsbehoerde(mitgliedschaft):
