@@ -1705,7 +1705,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
             }
         });
 
-        frappe.mvd.bankkonto_dialog(this.dialog, cur_frm.doc.sektion_id);
+        frappe.mvd.initialisiere_rechnungs_bankkonto(this.dialog, cur_frm.doc.sektion_id);
         this.dialog.show();
     }
 
@@ -1897,7 +1897,7 @@ mvd_dialoge.erstelle_spenden_rechnung = class ErstelleSpendenRechnung {
             }
         });
 
-        frappe.mvd.bankkonto_dialog(this.dialog, cur_frm.doc.sektion_id);
+        frappe.mvd.initialisiere_rechnungs_bankkonto(this.dialog, cur_frm.doc.sektion_id);
         this.dialog.show();
     }
 
@@ -1965,7 +1965,7 @@ mvd_dialoge.erstelle_hv_rechnung = class ErstelleHvRechnung {
             }
         });
 
-        frappe.mvd.bankkonto_dialog(this.dialog, cur_frm.doc.sektion_id);
+        frappe.mvd.initialisiere_rechnungs_bankkonto(this.dialog, cur_frm.doc.sektion_id);
         this.dialog.show();
     }
 
@@ -2315,7 +2315,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
             }
         });
 
-        frappe.mvd.bankkonto_dialog(this.dialog, cur_frm.doc.sektion_id, true);
+        frappe.mvd.initialisiere_rechnungs_bankkonto(this.dialog, cur_frm.doc.sektion_id, true);
         this.dialog.show();
     }
 

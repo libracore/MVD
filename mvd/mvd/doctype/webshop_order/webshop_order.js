@@ -41,7 +41,7 @@ frappe.ui.form.on('Webshop Order', {
                                     }
                                 });
                             }, 'Rechnungs-Bankkonto', 'Erstellen');
-                            frappe.mvd.bankkonto_dialog(bankkonto_dialog, 'MVD');
+                            frappe.mvd.initialisiere_rechnungs_bankkonto(bankkonto_dialog, 'MVD');
                         }
                     }).addClass("btn-success");
                 } else {
@@ -72,7 +72,7 @@ frappe.ui.form.on('Webshop Order', {
                                     }
                                 });
                             }, 'Rechnungs-Bankkonto', 'Erstellen');
-                            frappe.mvd.bankkonto_dialog(bankkonto_dialog, 'MVD');
+                            frappe.mvd.initialisiere_rechnungs_bankkonto(bankkonto_dialog, 'MVD');
                         }
                     }).addClass("btn-success");
                 }

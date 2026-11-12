@@ -1431,7 +1431,7 @@ function erstelle_geschenk_rechnung(frm) {
                         'Rechnungs/Korrespondenz Erstellung',
                         'Erstellen'
                         );
-                        frappe.mvd.bankkonto_dialog(bankkonto_dialog, cur_frm.doc.sektion_id);
+                        frappe.mvd.initialisiere_rechnungs_bankkonto(bankkonto_dialog, cur_frm.doc.sektion_id);
                     }
                 });
             } else {

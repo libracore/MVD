@@ -974,7 +974,7 @@ frappe.mvd_such_client = {
                         'Neuanlage',
                         'Anlage'
                         );
-                        frappe.mvd.bankkonto_dialog(d, d.get_value('sektion_id'));
+                        frappe.mvd.initialisiere_rechnungs_bankkonto(d, d.get_value('sektion_id'));
                         if (d) {
                             frappe.mvd.apply_phone_format(d.fields_dict.telefon);
                             frappe.mvd.apply_phone_format(d.fields_dict.telefon_g);

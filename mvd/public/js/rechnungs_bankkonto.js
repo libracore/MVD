@@ -65,7 +65,7 @@ frappe.mvd.set_bankkonto_vorgabe = function(holder, args, reset, vorbelegen) {
     });
 };
 
-frappe.mvd.bankkonto_dialog = function(dialog, sektion, aus_druckvorlage) {
+frappe.mvd.initialisiere_rechnungs_bankkonto = function(dialog, sektion, aus_druckvorlage) {
     frappe.mvd.set_bankkonto_vorgabe(dialog, {sektion: sektion});
     if (aus_druckvorlage) {
         dialog.fields_dict.druckvorlage.df.change = function() {

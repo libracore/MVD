@@ -302,7 +302,7 @@ function umwandlung(frm, status) {
         var dialog = frappe.prompt([frappe.mvd.rechnungs_bankkonto_feld()], function(values) {
             umwandeln(values.rechnungs_bankkonto);
         }, 'Rechnungs-Bankkonto', 'Umwandeln');
-        frappe.mvd.bankkonto_dialog(dialog, frm.doc.sektion_id);
+        frappe.mvd.initialisiere_rechnungs_bankkonto(dialog, frm.doc.sektion_id);
     } else {
         umwandeln();
     }
