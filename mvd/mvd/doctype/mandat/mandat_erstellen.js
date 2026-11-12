@@ -85,8 +85,11 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen) {
         fields: [
             {'fieldname': 'prozess_html', 'fieldtype': 'HTML', 'options': '<div class="alert alert-info">Platzhalter: Hier folgt die Beschreibung des Mandats-Prozesses.</div>'},
             {'fieldname': 'beratungskategorie', 'fieldtype': 'Link', 'label': 'Beratungskategorie', 'options': 'Beratungskategorie', 'reqd': 1,
-             'description': 'Aus der Beratung übernommen, änderbar.'},
-            {'fieldname': 'beratungskategorie_2', 'fieldtype': 'Link', 'label': '(2) Beratungskategorie', 'options': 'Beratungskategorie', 'depends_on': 'eval:doc.beratungskategorie'},
+             'description': 'Aus der Beratung übernommen, änderbar.',
+             // Link-Felder setzen den Wert erst nach der Prüfung auf dem Server – danach (2)/(3) sofort ein-/ausblenden
+             'change': () => d.refresh_dependency()},
+            {'fieldname': 'beratungskategorie_2', 'fieldtype': 'Link', 'label': '(2) Beratungskategorie', 'options': 'Beratungskategorie', 'depends_on': 'eval:doc.beratungskategorie',
+             'change': () => d.refresh_dependency()},
             {'fieldname': 'beratungskategorie_3', 'fieldtype': 'Link', 'label': '(3) Beratungskategorie', 'options': 'Beratungskategorie', 'depends_on': 'eval:doc.beratungskategorie_2'},
             {'fieldname': 'uebernahme', 'fieldtype': 'Select', 'label': 'Übernahme', 'reqd': 1,
              'options': ['', frappe.mvd.mandat.UEBERNEHMEN, frappe.mvd.mandat.NICHT_UEBERNEHMEN].join('\n'), 'default': uebernahme_default,
