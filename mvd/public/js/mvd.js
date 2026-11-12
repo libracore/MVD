@@ -321,7 +321,8 @@ frappe.mvd.new_mail = function(cur_frm, last_email='', kuendigungsmail=false, de
     var default_sender;
     var subject = default_subject || __(cur_frm.meta.name) + ': ' + cur_frm.docname;
     var txt_string = '';
-    
+    var prefilled_salutation = '';
+
     if (cur_frm.doctype == 'Beratung') {
         recpts = cur_frm.doc.raised_by || cur_frm.doc.email_id;
         default_sender = frappe.boot.default_beratungs_sender || '';
@@ -334,7 +335,8 @@ frappe.mvd.new_mail = function(cur_frm, last_email='', kuendigungsmail=false, de
         recpts = cur_frm.doc.e_mail_1 || '';
         if (!kuendigungsmail) {
             subject = 'Ihre Mitgliedschaft: ' + cur_frm.doc.mitglied_nr;
-            txt_string = '<div>' + cur_frm.doc.briefanrede + '</div>';
+            prefilled_salutation = cur_frm.doc.briefanrede || '';
+            txt_string = '<div>' + prefilled_salutation + '</div>';
         } else {
             subject = kuendigungsmail.subject;
             txt_string = kuendigungsmail.email_body;
@@ -364,7 +366,8 @@ frappe.mvd.new_mail = function(cur_frm, last_email='', kuendigungsmail=false, de
         sender: default_sender,
         last_email: last_email ? last_email:'',
         is_a_reply: last_email ? true:false,
-        save_mail_txt_as_draft: cur_frm.doctype == 'Beratung' ? true:false
+        save_mail_txt_as_draft: cur_frm.doctype == 'Beratung' ? true:false,
+        prefilled_salutation: prefilled_salutation
     });
 }
 
@@ -597,6 +600,21 @@ frappe.mvd.MailComposer = Class.extend({
                 var subject_field = me.dialog.fields_dict.subject;
                 var content = content_field.get_value() || "";
                 var subject = subject_field.get_value() || "";
+
+                // vorbefüllte Anrede wieder entfernen, da die Vorlagen ihre eigene Anrede mitbringt
+                if (me.prefilled_salutation) {
+                    var salutation = me.prefilled_salutation.trim();
+                    var tmp = document.createElement('div');
+                    tmp.innerHTML = content;
+                    var blocks = tmp.querySelectorAll('p, div');
+                    for (var i = 0; i < blocks.length; i++) {
+                        if (blocks[i].textContent.trim() === salutation) {
+                            blocks[i].remove();
+                            break;
+                        }
+                    }
+                    content = tmp.innerHTML;
+                }
 
                 var parts = content.split('<!-- salutation-ends -->');
 
