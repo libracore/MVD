@@ -45,12 +45,18 @@ frappe.ui.form.on('Mandat', {
 
         if (!frm.is_new() && !frm.doc.kontaktperson) {
             frm.add_custom_button(__('Suche Vertrauensanwält*in'), function() {
-                
+                // #2211: Mit Verfahrenssprache zuerst fragen, ob nur VAs mit dieser Sprache angeschrieben werden
+                frappe.mvd.mandat.frage_sprache(frm, suche_va);
+            });
+        }
+
+        function suche_va(nur_sprache) {
                 frappe.call({
                     method: 'mvd.mvd.doctype.mandat.mandat.suche_vertrauensanwaeltin',
                     args: {
                         "mandat_id": frm.doc.name,
-                        "sektion_id": frm.doc.sektion_id
+                        "sektion_id": frm.doc.sektion_id,
+                        "nur_sprache": nur_sprache ? 1 : 0
                     },
                     freeze: true,
                     callback: function(r) {
@@ -74,8 +80,6 @@ frappe.ui.form.on('Mandat', {
                         }
                     }
                 });
-
-            });
         }
     },
     mv_mitgliedschaft: function(frm) {
@@ -94,6 +98,42 @@ frappe.ui.form.on('Mandat', {
         open_mandat_email(frm, 'mandat_email_3');
     }
 });
+
+// ---------------------------------------------------------------------------
+// #2211: «Suche Vertrauensanwält*in» – auf die Verfahrenssprache einschränken?
+// ---------------------------------------------------------------------------
+
+frappe.provide('frappe.mvd.mandat');
+frappe.mvd.mandat.SPRACHNAMEN = {'de': 'Deutsch', 'fr': 'Französisch'};
+
+frappe.mvd.mandat.frage_sprache = function(frm, weiter) {
+    // Ohne Verfahrenssprache gibt es nichts zu fragen: an alle VAs der Sektion
+    if (!frm.doc.sprache) {
+        weiter(false);
+        return;
+    }
+    let name = frappe.mvd.mandat.SPRACHNAMEN[frm.doc.sprache] || frm.doc.sprache;
+    let d = new frappe.ui.Dialog({
+        title: __('Suche Vertrauensanwält*in'),
+        fields: [{'fieldname': 'frage', 'fieldtype': 'HTML', 'options':
+            `<p>Verfahrenssprache: <b>${frappe.utils.escape_html(name)}</b></p>` +
+            `<p>Nur Vertrauensanwält*innen anschreiben, die diese Sprache haben?</p>` +
+            `<p class="text-muted small">Vertrauensanwält*innen ohne eingetragene Sprache werden immer angeschrieben.</p>`}],
+        primary_action_label: __('Ja, nur {0}', [name]),
+        primary_action: function() {
+            d.hide();
+            weiter(true);
+        }
+    });
+    // «Nein» als eigener Knopf; Schliessen (×) bricht ab
+    $(`<button class="btn btn-default btn-sm" style="margin-right: 5px;">${__('Nein, alle')}</button>`)
+        .insertBefore(d.get_primary_btn())
+        .on('click', function() {
+            d.hide();
+            weiter(false);
+        });
+    d.show();
+};
 
 // ---------------------------------------------------------------------------
 // #2205: Status-Konzept (Regeln serverseitig in mandat_status.py)

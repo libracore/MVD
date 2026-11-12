@@ -40,3 +40,4 @@ mvd.patches.issue_2033.vorlagenbaum_mail_zu_text
 mvd.patches.issue_2183.solifonds_rollen
 mvd.patches.issue_2209.mitglied_nr_nachtragen
 mvd.patches.issue_2205.status_konzept
+mvd.patches.issue_2211.sprache_aus_mitgliedschaft

@@ -10,6 +10,7 @@ frappe.mvd.mandat.UEBERNEHMEN = 'Ich übernehme das Mandat';
 frappe.mvd.mandat.NICHT_UEBERNEHMEN = 'Ich kann das Mandat nicht übernehmen';
 frappe.mvd.mandat.SOLIFONDS = 'Solidaritätsfonds';
 frappe.mvd.mandat.MANGELS_RS = 'mangels Rechtsschutzdeckung';
+frappe.mvd.mandat.SPRACHNAMEN = {'de': 'Deutsch', 'fr': 'Französisch'};
 
 // Kriterien gemäss Antragsformular Punkt 2, nur bei "mangels Rechtsschutzdeckung"
 frappe.mvd.mandat.KRITERIEN = [
@@ -59,16 +60,20 @@ frappe.mvd.mandat.erstellen = function(frm) {
             // Nur Beratungskategorien vorschlagen, die es noch gibt (Altdaten enthalten gelöschte)
             let kategorien = [frm.doc.beratungskategorie, frm.doc.beratungskategorie_2, frm.doc.beratungskategorie_3]
                 .filter((k, i, a) => k && a.indexOf(k) === i);
-            frappe.db.get_list('Beratungskategorie', {'filters': {'name': ['in', kategorien]}, 'fields': ['name'], 'limit': 3}).then(vorhanden => {
+            Promise.all([
+                frappe.db.get_list('Beratungskategorie', {'filters': {'name': ['in', kategorien]}, 'fields': ['name'], 'limit': 3}),
+                // #2211: Verfahrenssprache aus der Mitgliedschaft vorbelegen
+                frappe.xcall('mvd.mvd.doctype.mandat.mandat.get_mitglied_sprache', {'beratung': frm.doc.name})
+            ]).then(([vorhanden, sprache]) => {
                 let namen = vorhanden.map(k => k.name);
                 let themen = kategorien.filter(k => namen.includes(k));
-                frappe.mvd.mandat.erstellen_dialog(frm, eigene_va, themen);
+                frappe.mvd.mandat.erstellen_dialog(frm, eigene_va, themen, sprache);
             });
         }
     });
 };
 
-frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen) {
+frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
     // Vorbelegung: selbst Berater*in der Beratung -> übernehmen; keine eigene VA -> nicht übernehmen
     let uebernahme_default = '';
     if (eigene_va && frm.doc.kontaktperson == eigene_va) {
@@ -105,6 +110,9 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen) {
              }
             },
             {'fieldname': 'seki_hinweis', 'fieldtype': 'HTML', 'options': '<p class="text-muted">Das Sekretariat bemüht sich um eine geeignete VA.</p>', 'depends_on': `eval:doc.uebernahme=="${frappe.mvd.mandat.NICHT_UEBERNEHMEN}"`},
+            {'fieldname': 'sprache', 'fieldtype': 'Select', 'label': 'Verfahrenssprache', 'options': ['', 'de', 'fr'].join('\n'), 'default': sprache || '',
+             'description': 'de = Deutsch, fr = Französisch. ' + (sprache ? `Aus der Mitgliedschaft übernommen (${frappe.mvd.mandat.SPRACHNAMEN[sprache]}), änderbar.`
+                 : 'In der Mitgliedschaft ist keine Sprache hinterlegt.')},
             {'fieldname': 'typ', 'fieldtype': 'Select', 'label': 'Typ', 'reqd': 1, 'options': "Rechtsschutzversicherung\nSolidaritätsfonds", 'default': 'Rechtsschutzversicherung'},
             {'fieldname': 'solifonds_art', 'fieldtype': 'Select', 'label': 'Antrag auf Kostengutsprache',
              'options': ['', frappe.mvd.mandat.MANGELS_RS, 'aus ideellen Gründen'].join('\n'), 'depends_on': ist_solifonds,
@@ -135,6 +143,7 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen) {
                     "beratung": frm.doc.name,
                     "berater_in": uebernehmen ? eigene_va : null,
                     "typ": values.typ,
+                    "sprache": values.sprache || null,
                     "bemerkung": values.bemerkung,
                     "persoenliche_bemerkung": uebernehmen ? values.persoenliche_bemerkung : null,
                     "beratungskategorien": [values.beratungskategorie, values.beratungskategorie_2, values.beratungskategorie_3].filter(k => k),

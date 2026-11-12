@@ -105,7 +105,7 @@ class Mandat(Document):
 
 @frappe.whitelist()
 def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenliche_bemerkung=None, beratungskategorien=None,
-                  fall_verfolgen=0, solifonds_art=None, solifonds_begruendung=None, kriterien=None):
+                  fall_verfolgen=0, solifonds_art=None, solifonds_begruendung=None, kriterien=None, sprache=None):
     from mvd.mvd.doctype.beratung.beratung import uebernahme
 
     if "MV_Mandat" not in frappe.get_roles():
@@ -138,6 +138,12 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     set_beratungskategorien(mandat, kategorien)
     mandat.kontaktperson = berater_in
     mandat.typ = typ or RSV
+    # #2211: Verfahrenssprache (nur de/fr) aus dem Dialog (änderbar), sonst aus der Mitgliedschaft
+    if sprache and sprache not in VERFAHRENSSPRACHEN:
+        frappe.throw(frappe._("Als Verfahrenssprache sind nur Deutsch (de) und Französisch (fr) möglich."))
+    if not sprache:
+        sprache = frappe.db.get_value("Mitgliedschaft", beratung.mv_mitgliedschaft, "language")
+    mandat.sprache = sprache if sprache in VERFAHRENSSPRACHEN else None
     mandat.bemerkung = bemerkung
     mandat.persoenliche_bemerkung = persoenliche_bemerkung
     # «Fall verfolgen» setzen nur GL und Vorprüfung
@@ -454,8 +460,37 @@ def get_beratung_zip_attachment(beratung_id):
     }
 
 
+VERFAHRENSSPRACHEN = ("de", "fr")
+SPRACHNAMEN = {"de": "Deutsch", "fr": "Französisch"}
+
+def sprachname(sprache):
+    if not sprache:
+        return ""
+    return SPRACHNAMEN.get(sprache) or frappe.db.get_value("Language", sprache, "language_name") or sprache
+
 @frappe.whitelist()
-def suche_vertrauensanwaeltin(mandat_id, sektion_id=None):
+def get_mitglied_sprache(beratung):
+    # #2211: Vorbelegung «Verfahrenssprache» im Dialog «Mandat erstellen»
+    beratung = frappe.get_doc("Beratung", beratung)
+    if not beratung.has_permission("read"):
+        frappe.throw(frappe._("Keine Berechtigung für diese Beratung."), frappe.PermissionError)
+    if not beratung.mv_mitgliedschaft:
+        return None
+    sprache = frappe.db.get_value("Mitgliedschaft", beratung.mv_mitgliedschaft, "language")
+    return sprache if sprache in VERFAHRENSSPRACHEN else None
+
+def filter_va_nach_sprache(kontaktpersonen, sprache):
+    # #2211: VAs mit dieser Sprache; wer noch keine Sprache eingetragen hat, gilt für alle Sprachen
+    if not kontaktpersonen:
+        return []
+    mit_sprachen = {}
+    for z in frappe.db.get_all("Termin Kontaktperson Multi Language",
+            filters={"parent": ["in", kontaktpersonen], "parenttype": "Termin Kontaktperson"}, fields=["parent", "language"]):
+        mit_sprachen.setdefault(z.parent, set()).add(z.language)
+    return [k for k in kontaktpersonen if k not in mit_sprachen or sprache in mit_sprachen[k]]
+
+@frappe.whitelist()
+def suche_vertrauensanwaeltin(mandat_id, sektion_id=None, nur_sprache=0):
     # Nur wer das Mandat lesen darf; Sektion aus dem Mandat, nicht vom Client
     mandat = frappe.get_doc("Mandat", mandat_id)
     if not mandat.has_permission("read"):
@@ -470,6 +505,11 @@ def suche_vertrauensanwaeltin(mandat_id, sektion_id=None):
         frappe.throw("Es wurden keine Kontaktpersonen mit dem Status 'Vertrauensanwält*in' gefunden.")
     
     anwaelte_liste = [d.name for d in anwaelte]
+    if cint(nur_sprache) and mandat.sprache:
+        anwaelte_liste = filter_va_nach_sprache(anwaelte_liste, mandat.sprache)
+        if not anwaelte_liste:
+            frappe.throw(frappe._("Keine Vertrauensanwält*in der Sektion hat die Sprache «{0}». Es wurde keine Mail vorbereitet. "
+                "Mit «Nein» wird an alle Vertrauensanwält*innen geschrieben.").format(sprachname(mandat.sprache)))
     raw_recipients = frappe.db.get_all("Termin Kontaktperson Multi User", 
         filters={"parent": ["in", anwaelte_liste]}, 
         fields=["user"]
