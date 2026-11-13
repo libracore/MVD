@@ -40,7 +40,7 @@ class RSVMitglied(Document):
             nachname = frappe.db.get_value("Kunden", self.faktura_kunde, "nachname")
             mitgl_nr = self.faktura_kunde
         
-        new_name = "{0}_{1}_{2}_{3}".format(formatdate(today(), "yy-MM-dd"), mitgl_nr, vorname, nachname)
+        new_name = "{0}_{1}_{2}_{3}".format(nachname, vorname, mitgl_nr, formatdate(today(), "dd.MM.yy"))
 
         if frappe.db.exists("RSVMitglied", new_name):
             counter = frappe.db.sql(
@@ -813,13 +813,15 @@ def get_coop_email_data(docname):
     zip_links = []
     if doc.zip_file_verschluesselt:
         zip_links.append(
-            '<a href="{0}">Download der Anlagen als ZIP (verschlüsselt)</a>'.format(
+            '<a href="{0}">Download der Anlagen als ZIP (verschlüsselt)</a>'
+            ' – für die Coop Rechtsschutzversicherung'.format(
                 get_url(doc.zip_file_verschluesselt)
             )
         )
     if doc.zip_file:
         zip_links.append(
-            '<a href="{0}">Download der Anlagen als ZIP (Login)</a>'.format(
+            '<a href="{0}">Download der Anlagen als ZIP (Login)</a>'
+            ' – für Vertrauensanwält:innen (Achtung: Man muss bereits im Libracore eingeloggt sein)'.format(
                 get_url(doc.zip_file)
             )
         )

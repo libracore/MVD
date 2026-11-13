@@ -5,6 +5,8 @@ let clicked = false;
 
 frappe.ui.form.on('CAMT Import', {
     refresh: function(frm) {
+        zeige_camt_fehler(frm);
+
         // hidding Version 1 of CAMT Importer
         if (cur_frm.doc.version_1) {
             cur_frm.set_df_property('section_steuerung','hidden', 1);
@@ -41,17 +43,29 @@ frappe.ui.form.on('CAMT Import', {
                 aktualisiere_camt_uebersicht(frm);
             }
             cur_frm.set_df_property('html_report','options', cur_frm.doc.report);
+        } else {
+            ['account', 'sektion_id', 'camt_file'].forEach(field => frm.set_df_property(field, 'read_only', 0));
+            frm.set_df_property('html_report', 'options', '');
         }
+
+        frappe.mvd.aktualisiere_verrechnungs_buttons(frm);
+        frappe.mvd.aktualisiere_bankkonto_button(frm);
+        aktualisiere_matching_button(frm);
+        aktualisiere_verbuchen_button(frm);
+        ueberwache_camt_reset(frm);
+        ueberwache_camt_verarbeitung(frm);
         
         if (frappe.user.has_role("System Manager")) {
             frm.add_custom_button(__("Manuelle Status Änderung"), function() {
                 change_state_manual(frm);
             }).addClass("btn-warning")
         }
-        if (frappe.user.has_role("System Manager")) {
+        if (frappe.user.has_role("System Manager") && frm.doc.status !== 'In Verarbeitung') {
             frm.add_custom_button(__("CAMT Reset"), function() {
                 frappe.confirm(
-                    'Der komplette CAMT Import wird zurückgesetzt, wollen Sie fortfahren?',
+                    'Alle Zahlungen, Firmenverrechnungen und zuordbar erzeugte Belege dieses CAMT-Imports werden storniert und gelöscht. ' +
+                    'Mitgliedsdaten werden, soweit zuverlässig möglich, wiederhergestellt. Andernfalls erhalten Sie einen Hinweis. ' +
+                    'Bereits versendete E-Mails und externe Aktionen können nicht zurückgeholt werden. CAMT-Import zurücksetzen?',
                     function(){
                         // on yes
                         reset_camt(frm);
@@ -74,12 +88,7 @@ frappe.ui.form.on('CAMT Import', {
         setTimeout(() => { clicked = false; }, 2000);
 
         if (cur_frm.doc.account) {
-            if (cur_frm.is_dirty()) {
-                cur_frm.save();
-                import_payments(frm, 1, 0, 0, 1);
-            } else {
-                import_payments(frm, 1, 0, 0, 1);
-            }
+            import_payments(frm, 1, 0, 0, 1);
         } else {
             frappe.msgprint("Bitte zuerst eine Sektion / ein Account auswählen");
         }
@@ -91,12 +100,7 @@ frappe.ui.form.on('CAMT Import', {
         setTimeout(() => { clicked = false; }, 2000);
 
         if (cur_frm.doc.account) {
-            if (cur_frm.is_dirty()) {
-                cur_frm.save();
-                import_payments(frm, 1, 0, 0, 0);
-            } else {
-                import_payments(frm, 1, 0, 0, 0);
-            }
+            import_payments(frm, 1, 0, 0, 0);
         } else {
             frappe.msgprint("Bitte zuerst eine Sektion / ein Account auswählen");
         }
@@ -108,12 +112,7 @@ frappe.ui.form.on('CAMT Import', {
         setTimeout(() => { clicked = false; }, 2000);
 
         if (cur_frm.doc.account) {
-            if (cur_frm.is_dirty()) {
-                cur_frm.save();
-                import_payments(frm, 0, 1, 0, 0);
-            } else {
-                import_payments(frm, 0, 1, 0, 0);
-            }
+            import_payments(frm, 0, 1, 0, 0);
         } else {
             frappe.msgprint("Bitte zuerst eine Sektion / ein Account auswählen");
         }
@@ -125,12 +124,7 @@ frappe.ui.form.on('CAMT Import', {
         setTimeout(() => { clicked = false; }, 2000);
         
         if (cur_frm.doc.account) {
-            if (cur_frm.is_dirty()) {
-                cur_frm.save();
-                import_payments(frm, 0, 0, 1, 0);
-            } else {
-                import_payments(frm, 0, 0, 1, 0);
-            }
+            import_payments(frm, 0, 0, 1, 0);
         } else {
             frappe.msgprint("Bitte zuerst eine Sektion / ein Account auswählen");
         }
@@ -150,19 +144,6 @@ frappe.ui.form.on('CAMT Import', {
         }
         frappe.set_route("List", "Payment Entry");
     },
-    //~ close_camt_import: function(frm) {
-        //~ frappe.confirm(
-            //~ 'Es wurden nicht alle Zahlungen zugewiesen/verbucht, möchten Sie den CAMT Import trotzdem schliessen?',
-            //~ function(){
-                //~ // on yes
-                //~ cur_frm.set_value("status", "Closed");
-                //~ cur_frm.save();
-            //~ },
-            //~ function(){
-                //~ // on no
-            //~ }
-        //~ )
-    //~ },
     aktualisiere_camt_uebersicht: function(frm) {
         aktualisiere_camt_uebersicht(frm);
     },
@@ -170,55 +151,6 @@ frappe.ui.form.on('CAMT Import', {
         frappe.route_options = {"camt_import": cur_frm.doc.name}
         frappe.set_route("List", "Payment Entry");
     },
-    //~ show_unsubmitted_payments: function(frm) {
-        //~ frappe.route_options = {
-            //~ "camt_import": cur_frm.doc.name,
-            //~ "docstatus": 0
-        //~ }
-        //~ frappe.set_route("List", "Payment Entry");
-    //~ },
-    //~ show_submitted_payments: function(frm) {
-        //~ frappe.route_options = {
-            //~ "camt_import": cur_frm.doc.name,
-            //~ "docstatus": 1
-        //~ }
-        //~ frappe.set_route("List", "Payment Entry");
-    //~ },
-    //~ show_matched_payments: function(frm) {
-        //~ frappe.route_options = {
-            //~ "camt_import": cur_frm.doc.name,
-            //~ "camt_status": ['!=', 'Nicht zugewiesen']
-        //~ }
-        //~ frappe.set_route("List", "Payment Entry");
-    //~ },
-    //~ show_canceled_payments: function(frm) {
-        //~ frappe.route_options = {
-            //~ "camt_import": cur_frm.doc.name,
-            //~ "docstatus": 2
-        //~ }
-        //~ frappe.set_route("List", "Payment Entry");
-    //~ },
-    //~ show_doppelte_mitgliedschaft: function(frm) {
-        //~ frappe.route_options = {
-            //~ "camt_import": cur_frm.doc.name,
-            //~ "camt_status": 'Doppelte Mitgliedschafts-Zahlung'
-        //~ }
-        //~ frappe.set_route("List", "Payment Entry");
-    //~ },
-    //~ show_wegzuege: function(frm) {
-        //~ frappe.route_options = {
-            //~ "camt_import": cur_frm.doc.name,
-            //~ "camt_status": 'Wegzug'
-        //~ }
-        //~ frappe.set_route("List", "Payment Entry");
-    //~ },
-    //~ show_underpaid: function(frm) {
-        //~ frappe.route_options = {
-            //~ "camt_import": cur_frm.doc.name,
-            //~ "camt_status": 'Unterbezahlt'
-        //~ }
-        //~ frappe.set_route("List", "Payment Entry");
-    //~ },
     show_zugewiesen_unverbucht: function(frm) {
         frappe.route_options = {
             "camt_import": cur_frm.doc.name,
@@ -228,53 +160,81 @@ frappe.ui.form.on('CAMT Import', {
         frappe.set_route("List", "Payment Entry");
     },
     zahlungen_nachladen: function(frm) {
-        cur_frm.set_value("status", "In Verarbeitung");
-        cur_frm.save().then(function(){
-            frappe.call({
-                method: 'mvd.mvd.doctype.camt_import.camt_import.lese_camt_file',
-                args: {
-                    'file_path': cur_frm.doc.camt_file,
-                    'camt_import': cur_frm.doc.name,
-                    'einlesen': 0,
-                    'matchen': 0,
-                    'verbuchen': 0,
-                    'all_in_one': 0,
-                    'nachladen': 1
-                },
-                callback: function(r) {
-                    frappe.msgprint("Der CAMT-Import wurde gestartet.<br>Sie können den Fortschritt <a href='/desk#background_jobs'>hier</a> verfolgen.");
-                }
-            });
-        });
+        import_payments(frm, 0, 0, 0, 0, 1);
     }
 });
 
-function import_payments(frm, einlesen, matchen, verbuchen, all_in_one) {
-    cur_frm.set_value("status", "In Verarbeitung");
-    cur_frm.save().then(function(){
+function aktualisiere_matching_button(frm) {
+    frm.set_df_property('zahlungen_matchen', 'depends_on', function(doc) {
+        return doc.camt_file && doc.account && doc.sektion_id &&
+            ['Zahlungen eingelesen', 'Zahlungen zugeordnet'].includes(doc.status) &&
+            doc.__onload && doc.__onload.hat_zahlungen_zum_matchen;
+    });
+    frm.layout.refresh_dependency();
+}
+
+function aktualisiere_verbuchen_button(frm) {
+    frm.set_df_property('zahlungen_verbuchen', 'depends_on', function(doc) {
+        return doc.camt_file && doc.account && doc.sektion_id && doc.status === 'Zahlungen zugeordnet' &&
+            doc.__onload && doc.__onload.hat_offene_rechnungs_matches;
+    });
+    frm.layout.refresh_dependency();
+    frm.remove_custom_button(__('Zahlungen verbuchen'));
+
+    if (frm.doc.__islocal || frm.doc.version_1 || frm.is_dirty() || frm.doc.status !== 'Verarbeitet' ||
+        !frm.doc.camt_file || !frm.doc.account || !frm.doc.sektion_id ||
+        !frm.doc.__onload || !frm.doc.__onload.hat_offene_rechnungs_matches) return;
+    
+    frm.add_custom_button(__('Zahlungen verbuchen'), () => frm.trigger('zahlungen_verbuchen'));
+}
+
+function zeige_camt_fehler(frm) {
+    if (frm.doc.status !== 'Failed') {
+        frm.set_intro('');
+        return;
+    }
+
+    const details = frm.doc.errors || 'Der CAMT-Import ist fehlgeschlagen. Es wurde keine Fehlerursache gespeichert. Bitte prüfen Sie die Quelldatei.';
+    const esc = value => frappe.utils.escape_html(String(value));
+    frm.set_intro(esc(details.split('\n')[0]), 'red');
+
+    if (frm.doc.errors) {
+        frm.add_custom_button('Fehlerdetails', function() {
+            frappe.msgprint({title: 'CAMT-Verarbeitungsfehler', indicator: 'red', message: '<pre style="white-space:pre-wrap">' + esc(details) + '</pre>'});
+        });
+    }
+}
+
+function import_payments(frm, einlesen, matchen, verbuchen, all_in_one, nachladen) {
+    beende_camt_reset_ueberwachung(frm);
+    beende_camt_verarbeitung_ueberwachung(frm);
+
+    const saved = frm.is_dirty() || frm.doc.__islocal ? frm.save() : Promise.resolve();
+
+    saved.then(function(){
         frappe.call({
             method: 'mvd.mvd.doctype.camt_import.camt_import.lese_camt_file',
             args: {
-                'file_path': cur_frm.doc.camt_file,
-                'camt_import': cur_frm.doc.name,
+                'file_path': frm.doc.camt_file,
+                'camt_import': frm.doc.name,
                 'einlesen': einlesen,
                 'matchen': matchen,
                 'verbuchen': verbuchen,
                 'all_in_one': all_in_one,
-                'nachladen': 0
+                'nachladen': nachladen || 0
             },
             callback: function(r) {
-                //~ frappe.dom.freeze('Bitte warten, die Zahlungen werden importiert...');
-                //~ let import_refresher = setInterval(import_refresh_handler, 3000);
-                //~ function import_refresh_handler() {
-                    //~ if (cur_frm.doc.status == 'In Verarbeitung') {
-                        //~ cur_frm.reload_doc();
-                    //~ } else {
-                        //~ clearInterval(import_refresher);
-                        //~ frappe.dom.unfreeze();
-                        //~ aktualisiere_camt_uebersicht(frm);
-                    //~ }
-                //~ }
+                frm.reload_doc();
+
+                if (r.message && r.message.status === 'Failed') {
+                    frappe.msgprint({title: 'CAMT-Import fehlgeschlagen', indicator: 'red', message: frappe.utils.escape_html(r.message.message)});
+                    return;
+                }
+
+                if (r.message && r.message.progress_token) {
+                    verfolge_camt_verarbeitung(frm, r.message.progress_token);
+                    return;
+                }
                 frappe.msgprint("Der CAMT-Import wurde gestartet.<br>Sie können den Fortschritt <a href='/desk#background_jobs'>hier</a> verfolgen.");
             }
         });
@@ -282,8 +242,6 @@ function import_payments(frm, einlesen, matchen, verbuchen, all_in_one) {
 }
 
 function aktualisiere_camt_uebersicht(frm) {
-    //~ cur_frm.set_value("status", "In Verarbeitung");
-    //~ cur_frm.save().then(function(){
     if (!cur_frm.doc.version_1) {
         frappe.call({
             method: 'mvd.mvd.doctype.camt_import.camt_import.aktualisiere_camt_uebersicht',
@@ -299,7 +257,6 @@ function aktualisiere_camt_uebersicht(frm) {
     } else {
         frappe.msgprint("Dieser Datensatz wurde mit einer vorgänger Version des CAMT Importers erzeugt.", "Diese Funktion steht leider nicht zur Verfügung");
     }
-    //~ });
 }
 
 function change_state_manual(frm) {
@@ -316,15 +273,190 @@ function change_state_manual(frm) {
 }
 
 function reset_camt(frm) {
+    beende_camt_verarbeitung_ueberwachung(frm);
+
     frappe.call({
         method: 'mvd.mvd.doctype.camt_import.utils.reset_camt',
         args: {
-            'camt': cur_frm.doc.name
+            'camt': frm.doc.name
         },
         freeze: true,
-        freeze_message: 'Entferne Zahlungen...',
+        freeze_message: 'Starte CAMT Reset...',
         callback: function(r) {
-            cur_frm.reload_doc();
+            frm.reload_doc();
+            const result = r.message;
+            if (result.status === 'queued' || result.status === 'running') {
+                verfolge_camt_reset(frm, result.token);
+            } else {
+                zeige_reset_ergebnis(result);
+            }
         }
     });
+}
+
+function zeige_reset_ergebnis(result) {
+    const esc = value => frappe.utils.escape_html(String(value));
+    frappe.msgprint('CAMT-Import zurückgesetzt.' + (result ? ' Entfernte Belege: ' + esc(result.geloeschte_belege) + (result.hinweise.length ? '<br><br>Bitte prüfen:<br>' + result.hinweise.map(esc).join('<br>') : '') + '<br><br>' + esc(result.externe_aktionen) : ''));
+}
+
+function ueberwache_camt_reset(frm) {
+    if (['Zahlungen eingelesen', 'Zahlungen zugeordnet', 'Verarbeitet', 'Closed'].includes(frm.doc.status)) {
+        beende_camt_reset_ueberwachung(frm);
+        return;
+    }
+
+    if (frm.doc.status !== 'In Verarbeitung' || !frm.doc.reset_protokoll) return;
+
+    try {
+        const job = JSON.parse(frm.doc.reset_protokoll).reset_auftrag;
+        if (job && ['queued', 'running'].includes(job.status)) verfolge_camt_reset(frm, job.token);
+    } catch (e) {
+        // Ein älteres/ungültiges Rücksetzprotokoll, dies darf die übrige Formularanzeige nicht blockieren...
+    }
+}
+
+function beende_camt_reset_ueberwachung(frm) {
+    if (frm.__camt_reset_watch) {
+        frm.__camt_reset_finished = frm.__camt_reset_watch;
+        frm.__camt_reset_watch = null;
+        frm.set_intro('');
+    }
+}
+
+function setze_camt_fortschritt_hinweis(frm, message) {
+    frm.set_intro('');
+    if (message) frm.set_intro(message, 'blue');
+}
+
+function verfolge_camt_reset(frm, token) {
+    if (frm.__camt_reset_finished === token) return;
+    if (frm.__camt_reset_watch === token) return;
+
+    frm.__camt_reset_watch = token;
+    const name = frm.doc.name;
+    const esc = value => frappe.utils.escape_html(String(value));
+
+    setze_camt_fortschritt_hinweis(frm, 'CAMT Reset läuft im Hintergrund. Der Fortschritt wird hier aktualisiert.');
+
+    function aktuell() {
+        if (frm.doc.name !== name) {
+            if (frm.__camt_reset_watch === token) frm.__camt_reset_watch = null;
+            return false;
+        }
+        return frm.__camt_reset_watch === token;
+    }
+
+    function poll() {
+        if (!aktuell()) return;
+
+        frappe.call({
+            method: 'mvd.mvd.doctype.camt_import.reset_jobs.status',
+            args: {camt: name, token: token},
+            error: function() { if (aktuell()) frm.__camt_reset_watch = null; },
+            callback: function(r) {
+                if (!aktuell()) return;
+
+                const state = r.message;
+                if (state.status === 'queued' || state.status === 'running') {
+                    setze_camt_fortschritt_hinweis(frm, esc(state.message || 'CAMT Reset läuft im Hintergrund.') + ' (' + esc(state.percent || 0) + ' %)');
+                    setTimeout(poll, 3000);
+                    return;
+                }
+
+                frm.__camt_reset_finished = token;
+                frm.__camt_reset_watch = null;
+                frm.set_intro('');
+
+                if (state.status === 'veraltet') return;
+
+                frm.reload_doc();
+                if (state.status === 'done') zeige_reset_ergebnis(state.result);
+                if (state.status === 'failed') {
+                    frappe.msgprint({title: 'CAMT Reset fehlgeschlagen', indicator: 'red', message: esc(state.error || 'Bitte prüfen Sie die Fehlerdetails im CAMT-Import.')});
+                }
+            }
+        });
+    }
+
+    poll();
+}
+
+function ueberwache_camt_verarbeitung(frm) {
+    const job = frm.doc.__onload && frm.doc.__onload.verarbeitung_auftrag;
+    if (job && job.token) verfolge_camt_verarbeitung(frm, job.token);
+}
+
+function beende_camt_verarbeitung_ueberwachung(frm) {
+    if (frm.__camt_verarbeitung_watch) {
+        frm.__camt_verarbeitung_finished = frm.__camt_verarbeitung_watch;
+        frm.__camt_verarbeitung_watch = null;
+        frm.set_intro('');
+    }
+}
+
+function verfolge_camt_verarbeitung(frm, token) {
+    if (frm.__camt_verarbeitung_finished === token || frm.__camt_verarbeitung_watch === token) return;
+
+    beende_camt_reset_ueberwachung(frm);
+
+    frm.__camt_verarbeitung_watch = token;
+    const name = frm.doc.name;
+    const esc = value => frappe.utils.escape_html(String(value));
+
+    setze_camt_fortschritt_hinweis(frm, 'CAMT-Verarbeitung wartet auf einen Hintergrund-Worker.');
+
+    function aktuell() {
+        if (frm.doc.name !== name) {
+            if (frm.__camt_verarbeitung_watch === token) frm.__camt_verarbeitung_watch = null;
+            return false;
+        }
+        return frm.__camt_verarbeitung_watch === token;
+    }
+
+    function poll() {
+        if (!aktuell()) return;
+
+        frappe.call({
+            method: 'mvd.mvd.doctype.camt_import.fortschritt.status',
+            args: {camt: name, token: token},
+            error: function() {
+                if (aktuell()) {
+                    setze_camt_fortschritt_hinweis(frm, 'Fortschritt vorübergehend nicht verfügbar. Die Verarbeitung läuft im Hintergrund weiter.');
+                    setTimeout(poll, 5000);
+                }
+            },
+            callback: function(r) {
+                if (!aktuell()) return;
+
+                const state = r.message;
+                if (state.status === 'queued' || state.status === 'running') {
+                    const count = state.total == null ? '' : ': ' + esc(state.done || 0) + ' / ' + esc(state.total);
+                    setze_camt_fortschritt_hinweis(frm, esc(state.schritt || 'CAMT-Verarbeitung') + count + ' (' + esc(state.percent || 0) + ' %) – ' + esc(state.message || 'Verarbeite Zahlungen.'));
+                    setTimeout(poll, 3000);
+                    return;
+                }
+
+                frm.__camt_verarbeitung_finished = token;
+                frm.__camt_verarbeitung_watch = null;
+                frm.set_intro('');
+
+                if (state.status === 'weiter') {
+                    verfolge_camt_verarbeitung(frm, state.next_token);
+                    return;
+                }
+
+                if (state.status === 'veraltet') return;
+
+                frm.reload_doc();
+                if (state.status === 'failed') {
+                    frappe.msgprint({title: 'CAMT-Import fehlgeschlagen', indicator: 'red', message: esc(state.error || 'Bitte prüfen Sie die Fehlerdetails im CAMT-Import.')});
+                }
+                if (state.status === 'paused') {
+                    frappe.msgprint({title: 'CAMT-Verarbeitung angehalten', indicator: 'orange', message: esc(state.message)});
+                }
+            }
+        });
+    }
+    
+    poll();
 }

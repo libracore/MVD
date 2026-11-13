@@ -45,7 +45,31 @@ function load_rsv_status_counts() {
         callback: function(r) {
             let status_data = r.message.status_counts || [];
             let new_entries = r.message.neue_rsvmitglieder || 0;
+            let urgent_entries = r.message.dringende_rsvmitglieder || 0;
+            let angezeigte_status = r.message.angezeigte_status || [];
             let html = '';
+
+            // Dringende Einträge (#2199)
+            html += `
+                <div
+                    class="rsv-card rsv-clickable-card"
+                    data-status="Dringende-Einträge"
+                    style="border-left-color: #dc2626; background: #dc262612;"
+                >
+                    <div
+                        class="rsv-card-title"
+                        style="color: #dc2626;"
+                    >
+                        Dringend
+                    </div>
+                    <div class="rsv-card-count">
+                        ${urgent_entries}
+                    </div>
+                    <div class="rsv-card-footer">
+                        Mandate anzeigen
+                    </div>
+                </div>
+            `;
 
             // Neue Einträge
             html += `
@@ -117,7 +141,10 @@ function load_rsv_status_counts() {
 
             $('.rsv-clickable-card').on('click', function() {
                 let status = $(this).data('status');
-                if (status != 'Neue-Einträge') {
+                if (status == 'Dringende-Einträge') {
+                    frappe.route_options = {status: ['in', angezeigte_status], dringend: 1};
+                    frappe.set_route('List', 'RSVMitglied');
+                } else if (status != 'Neue-Einträge') {
                     frappe.route_options = {status: status};
                     frappe.set_route('List', 'RSVMitglied');
                 } else {

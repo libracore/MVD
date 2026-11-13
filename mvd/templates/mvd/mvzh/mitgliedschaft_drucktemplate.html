@@ -24,6 +24,7 @@
     {% set affected_sinv = frappe.get_doc("Sales Invoice", affected_sinv) %}
 {% endif %}
 {% if affected_sinv %}
+    {% set bankkonto = frappe.get_doc("Account", affected_sinv.get("rechnungs_bankkonto") or sektion.account) %}
     <!-- payer details -->
     {% if affected_sinv.customer_address %}
         {% set pay_addr = frappe.get_doc("Address", affected_sinv.customer_address) %}
@@ -69,7 +70,7 @@
                 {% endif %}
             {% endif %}
         {% endif %}
-        {% set bankkonto = frappe.get_doc("Account", sektion.account) %}
+
     {% else %}
         {% set payer_name = False %}
         {% set payer_street = False %}

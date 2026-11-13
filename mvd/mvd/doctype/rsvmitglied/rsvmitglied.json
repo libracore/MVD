@@ -7,6 +7,7 @@
  "field_order": [
   "section_mandat",
   "status",
+  "dringend",
   "open_beratung",
   "open_mitglied",
   "abschluss_datum",
@@ -443,9 +444,18 @@
    "fieldname": "open_mitglied",
    "fieldtype": "Button",
    "label": "Zugeh\u00f6riges Mitglied \u00f6ffnen"
+  },
+  {
+   "default": "0",
+   "description": "Markiert das RSV-Mitglied in der Liste und in der RSV-\u00dcbersicht rot.",
+   "fieldname": "dringend",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Dringend"
   }
  ],
- "modified": "2026-09-25 13:35:27.924211",
+ "modified": "2026-11-03 23:00:00.000000",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "RSVMitglied",

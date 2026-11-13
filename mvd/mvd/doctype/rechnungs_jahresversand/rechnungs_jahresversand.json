@@ -10,6 +10,7 @@
   "sektion_id",
   "jahr",
   "druckvorlage",
+  "rechnungs_bankkonto",
   "anz_rechnungen",
   "cb_1",
   "status",
@@ -209,10 +210,19 @@
    "fieldtype": "Int",
    "label": "Anzahl Rechnungen",
    "read_only": 1
+  },
+  {
+   "fieldname": "rechnungs_bankkonto",
+   "fieldtype": "Link",
+   "label": "Rechnungs-Bankkonto",
+   "options": "Account",
+   "description": "Empf\u00e4ngerkonto f\u00fcr den QR-Zahlteil. Vorgabe: Standard-Bankkonto des Unternehmens.",
+   "allow_on_submit": 0,
+   "no_copy": 0
   }
  ],
  "is_submittable": 1,
- "modified": "2024-11-01 14:15:56.736467",
+ "modified": "2026-11-11 14:11:10.068524",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Rechnungs Jahresversand",

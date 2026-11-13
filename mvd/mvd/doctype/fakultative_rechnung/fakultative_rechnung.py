@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from mvd.mvd.utils.rechnungs_bankkonto import get_rechnungs_bankkonto, set_rechnungs_bankkonto, validate_rechnungs_bankkonto
 from frappe.model.document import Document
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 from frappe.utils.data import add_days, today, getdate, now
@@ -11,6 +12,12 @@ from PyPDF2 import PdfFileWriter
 from frappe.utils.pdf import get_file_data_from_writer
 
 class FakultativeRechnung(Document):
+    def before_insert(self):
+        set_rechnungs_bankkonto(self)
+
+    def validate(self):
+        validate_rechnungs_bankkonto(self)
+
     def before_submit(self):
         self.qrr_referenz = get_qrr_reference(fr=self.name)
     
@@ -19,7 +26,12 @@ class FakultativeRechnung(Document):
             frappe.throw("Bezahlte Fakultative Rechnungen können nicht storniert werden.")
 
 @frappe.whitelist()
-def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, bezahl_datum=None, betrag_spende=False, druckvorlage='', asap_print=False, bezugsjahr=0, spendenlauf_referenz=None, zahlungsart=None):
+def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, bezahl_datum=None, betrag_spende=False, druckvorlage='', asap_print=False, bezugsjahr=0, spendenlauf_referenz=None, zahlungsart=None, rechnungs_bankkonto=None):
+    mitgliedschaft_doc = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
+    sektion = frappe.get_cached_doc("Sektion", mitgliedschaft_doc.sektion_id)
+    if not rechnungs_bankkonto and sales_invoice:
+        rechnungs_bankkonto = frappe.get_value("Sales Invoice", sales_invoice, "rechnungs_bankkonto")
+    rechnungs_bankkonto = get_rechnungs_bankkonto(sektion.company, rechnungs_bankkonto)
     if not betrag_spende:
         cancel_old_hv_fr(mitgliedschaft)
         """
@@ -33,8 +45,7 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, bezahl_datum
             else:
                 bezugsjahr = int(getdate(today()).strftime("%Y"))
         # -------------------------------------------------------------------------------------------------------------
-    mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitgliedschaft)
-    sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
+    mitgliedschaft = mitgliedschaft_doc
     
     fr = frappe.get_doc({
         "doctype": "Fakultative Rechnung",
@@ -47,6 +58,7 @@ def create_hv_fr(mitgliedschaft, sales_invoice=None, bezahlt=False, bezahl_datum
         'betrag': betrag_spende or sektion.betrag_hv,
         'posting_date': today(),
         'company': sektion.company,
+        'rechnungs_bankkonto': rechnungs_bankkonto,
         'druckvorlage': druckvorlage,
         'bezugsjahr': bezugsjahr,
         'spenden_versand': spendenlauf_referenz
@@ -122,6 +134,7 @@ def create_paid_sinv(fr, mitgliedschaft, sektion, bezahl_datum=None, zahlungsart
         "ist_spenden_rechnung": 0 if fr.typ == 'HV' else 1,
         "mv_mitgliedschaft": fr.mv_mitgliedschaft,
         "company": sektion.company,
+        "rechnungs_bankkonto": fr.get("rechnungs_bankkonto"),
         "cost_center": company.cost_center,
         "customer": customer,
         "customer_address": address,
@@ -190,6 +203,7 @@ def create_unpaid_sinv(fr, betrag=False):
         "ist_spenden_rechnung": 0 if fr.typ == 'HV' else 1,
         "mv_mitgliedschaft": fr.mv_mitgliedschaft,
         "company": sektion.company,
+        "rechnungs_bankkonto": fr.get("rechnungs_bankkonto"),
         "cost_center": company.cost_center,
         "customer": customer,
         "customer_address": address,

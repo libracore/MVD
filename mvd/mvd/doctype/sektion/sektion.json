@@ -42,6 +42,10 @@
   "account",
   "zwischen_konto",
   "kulanz_konto",
+  "section_firmenverrechnung",
+  "firmenverrechnung_verbindlichkeitskonto",
+  "cb_firmenverrechnung",
+  "firmenverrechnung_forderungskonto",
   "section_fusszeile",
   "fz_links",
   "cb_2",
@@ -417,6 +421,32 @@
    "fieldtype": "Link",
    "label": "Kulanz Konto",
    "options": "Account"
+  },
+  {
+   "fieldname": "section_firmenverrechnung",
+   "fieldtype": "Section Break",
+   "label": "Firmenverrechnung",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "firmenverrechnung_verbindlichkeitskonto",
+   "fieldtype": "Link",
+   "label": "Standard-Verbindlichkeitskonto",
+   "options": "Account",
+   "depends_on": "eval:doc.company",
+   "description": "Passivkonto der Sektionsfirma. Vorschlag, wenn diese Sektion die Importsektion ist."
+  },
+  {
+   "fieldname": "cb_firmenverrechnung",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "firmenverrechnung_forderungskonto",
+   "fieldtype": "Link",
+   "label": "Standard-Forderungskonto",
+   "options": "Account",
+   "depends_on": "eval:doc.company",
+   "description": "Aktivkonto der Sektionsfirma. Vorschlag, wenn diese Sektion die Rechnungssektion ist."
   },
   {
    "fieldname": "mitgliedschafts_artikel_beitritt",
@@ -1310,7 +1340,7 @@
    "label": "Mandat ZIP Passwort"
   }
  ],
- "modified": "2026-10-22 00:00:00.000000",
+ "modified": "2026-11-12 14:10:00.000000",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

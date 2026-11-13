@@ -52,8 +52,7 @@ frappe.mvd.mandat.erstellen = function(frm) {
     frappe.call({
         method: "mvd.mvd.doctype.beratung.beratung.uebernahme",
         args: {
-            'beratung': frm.doc.name,
-            'user': frappe.session.user
+            'beratung': frm.doc.name
         },
         callback: function(r) {
             let eigene_va = r.message || null;

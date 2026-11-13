@@ -158,6 +158,12 @@ def get_data():
                     "name": "PayrexxWebhooks",
                     "label": _("PayrexxWebhooks"),
                     "description": _("PayrexxWebhooks")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Rechnungsbereinigung",
+                    "label": _("Rechnungs Saldobereinigung"),
+                    "description": _("Verwaiste Rechnungen prüfen, freigeben und bereinigen")
                 }
             ]
         },

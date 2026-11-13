@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from mvd.mvd.utils.rechnungs_bankkonto import get_rechnungs_bankkonto
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 from frappe.utils.background_jobs import enqueue
@@ -140,8 +141,8 @@ class MitgliedRGJahreslauf(Document):
         self.status = "Abgebrochen"
         self.save()
     
-    def create_csv(self):
-        get_csv(self.name)
+    def create_csv(self, recipient_group="Alle"):
+        get_csv(self.name, recipient_group=recipient_group)
 
 # ---------------------------------------------------
 # Background Worker Method
@@ -350,7 +351,8 @@ def create_invoices(mrj):
                                 `druckvorlage_email`,
                                 `druckvorlage_digitalrechnung`,
                                 `sinv_date`,
-                                `due_date_days`
+                                `due_date_days`,
+                                `rechnungs_bankkonto`
                              FROM `tabMRJ Sektions Selektion` WHERE `status` = 'Rechnungsdaten in Arbeit'
                              AND `mrj` = '{0}'""".format(mrj), as_dict=True)
     if len(pausiert) > 0:
@@ -374,7 +376,8 @@ def create_invoices(mrj):
                                         `druckvorlage_email`,
                                         `druckvorlage_digitalrechnung`,
                                         `sinv_date`,
-                                        `due_date_days`
+                                        `due_date_days`,
+                                        `rechnungs_bankkonto`
                                     FROM `tabMRJ Sektions Selektion` WHERE `status` = 'Bereit zur Ausführung'
                                     AND `mrj` = '{0}'""".format(mrj), as_dict=True)
         if len(ready_to_run) > 0:
@@ -446,6 +449,7 @@ def create_invoices(mrj):
 
     sektion = frappe.get_doc("Sektion", sektions_selektion.sektion_id)
     company = frappe.get_doc("Company", sektion.company)
+    rechnungs_bankkonto = get_rechnungs_bankkonto(company.name, sektions_selektion.rechnungs_bankkonto)
     sinv_date = sektions_selektion.sinv_date
     due_date_days = cint(sektions_selektion.due_date_days) or 30
     due_date = add_days(sinv_date, due_date_days)
@@ -456,7 +460,7 @@ def create_invoices(mrj):
     for mitglied in mitglieder:
         aktuelle_uhrzeit = add_to_date(None, minutes=0, as_datetime=True)
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied)
-        create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, sektions_selektion.bezugsjahr, sektions_selektion.druckvorlage, sektions_selektion.druckvorlage_hv, sektions_selektion.druckvorlage_email, sektions_selektion.druckvorlage_digitalrechnung, mrj, sektions_selektion.name)
+        create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, sektions_selektion.bezugsjahr, sektions_selektion.druckvorlage, sektions_selektion.druckvorlage_hv, sektions_selektion.druckvorlage_email, sektions_selektion.druckvorlage_digitalrechnung, mrj, sektions_selektion.name, rechnungs_bankkonto=rechnungs_bankkonto)
         if aktuelle_uhrzeit > stop_time:
             # autom. stoppzeit erreicht, prozess unterbrechen
             breaked_loop = True
@@ -473,7 +477,7 @@ def create_invoices(mrj):
         frappe.db.commit()
         return
 
-def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, jahr, druckvorlage_rg, druckvorlage_hv, druckvorlage_email, druckvorlage_digitalrechnung, mrj, sektions_selektion):
+def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, jahr, druckvorlage_rg, druckvorlage_hv, druckvorlage_email, druckvorlage_digitalrechnung, mrj, sektions_selektion, rechnungs_bankkonto=None):
     # ------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------
     '''
@@ -517,6 +521,7 @@ def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_d
             "ist_mitgliedschaftsrechnung": 1,
             "mv_mitgliedschaft": mitgliedschaft.name,
             "company": sektion.company,
+            "rechnungs_bankkonto": get_rechnungs_bankkonto(company.name, rechnungs_bankkonto),
             "cost_center": company.cost_center,
             "customer": customer,
             "customer_address": address,
@@ -555,6 +560,7 @@ def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_d
                 'betrag': sektion.betrag_hv,
                 'posting_date': today(),
                 'company': sektion.company,
+                'rechnungs_bankkonto': sinv.rechnungs_bankkonto,
                 'druckvorlage': druckvorlage_hv if druckvorlage_hv else '',
                 'bezugsjahr': jahr,
                 'spenden_versand': '',
@@ -814,7 +820,10 @@ def render_jinja_mail_texte(subject_txt, message_txt, sinv_name):
         message_txt = frappe.render_template(message_txt, context)
     return subject_txt, message_txt
 
-def get_csv(mrj=None, bg_job=True):
+def get_csv(mrj=None, bg_job=True, recipient_group="Alle"):
+    if recipient_group not in ("Nur Digitalrechnungsempfänger", "Nur Mitglieder ohne Digitalrechnung", "Alle"):
+        frappe.throw("Bitte wählen Sie eine gültige Empfängergruppe für den CSV-Export.")
+
     jahresversand = frappe.get_doc("Mitglied RG Jahreslauf", mrj)
     try:
         if bg_job:
@@ -822,7 +831,8 @@ def get_csv(mrj=None, bg_job=True):
             frappe.db.commit()
             args = {
                 'mrj': mrj,
-                'bg_job': False
+                'bg_job': False,
+                'recipient_group': recipient_group
             }
             enqueue("mvd.mvd.doctype.mitglied_rg_jahreslauf.mitglied_rg_jahreslauf.get_csv", queue='long', job_name='CSV Neugenerierung {0}'.format(mrj), timeout=6000, **args)
             return
@@ -834,6 +844,8 @@ def get_csv(mrj=None, bg_job=True):
             as_dict=True
         )
 
+        csv_neu = 0
+        csv_unveraendert = 0
         for mrj_sektions_selektion in mrj_sektions_selektionen:
             data = []
             header = [
@@ -877,7 +889,9 @@ def get_csv(mrj=None, bg_job=True):
                 'bezahlt_von_firma',
                 'bezahlt_von_name',
                 'spezielles',
-                'digitalrechung_url'
+                'digitalrechung_url',
+                'mvb_typ',
+                'Rechnungs-Nr.'
             ]
             data.append(header)
             
@@ -896,7 +910,8 @@ def get_csv(mrj=None, bg_job=True):
                 # ------------------------------------------------------------------------------------
                 # ------------------------------------------------------------------------------------
                 '''
-                    Geschenkmitgliedschaften, Gratis Mitgliedschaften sowie Digitalrechnungsempfänger werden NICHT berücksichtigt
+                    Geschenkmitgliedschaften und Gratis Mitgliedschaften werden NICHT berücksichtigt.
+                    Digitalrechnungsempfänger werden gemäss Empfängerauswahl berücksichtigt.
                 '''
                 # ------------------------------------------------------------------------------------
                 skip = False
@@ -904,7 +919,10 @@ def get_csv(mrj=None, bg_job=True):
                     skip = True
                 if mitgliedschaft.reduzierte_mitgliedschaft and not mitgliedschaft.reduzierter_betrag > 0:
                     skip = True
-                if cint(mitgliedschaft.digitalrechnung) == 1:
+                digitalrechnung = cint(mitgliedschaft.digitalrechnung) == 1
+                if recipient_group == "Nur Digitalrechnungsempfänger" and not digitalrechnung:
+                    skip = True
+                if recipient_group == "Nur Mitglieder ohne Digitalrechnung" and digitalrechnung:
                     skip = True
                 # ------------------------------------------------------------------------------------
                 # ------------------------------------------------------------------------------------
@@ -1071,6 +1089,9 @@ def get_csv(mrj=None, bg_job=True):
                         row_data.append('https://service.mieterverband.ch/digitalrechnung?hash={0}'.format(mitgliedschaft.mitglied_hash))
                     else:
                         row_data.append('')
+                    row_data.append(mitgliedschaft.mvb_typ or '')
+                    rechnungs_nr = sinv.get("renaming_series") or sinv.get("name") or ''
+                    row_data.append(rechnungs_nr)
                     
                     data.append(row_data)
                     
@@ -1174,6 +1195,9 @@ def get_csv(mrj=None, bg_job=True):
                             else:
                                 row_data.append('Unabhängiger Debitor')
 
+                        row_data.append('')  # Digitalrechnung URL
+                        row_data.append(mitgliedschaft.mvb_typ or '')
+                        row_data.append(rechnungs_nr)
                         data.append(row_data)
 
             csv_file = make_csv(data)
@@ -1189,9 +1213,19 @@ def get_csv(mrj=None, bg_job=True):
                 "attached_to_name": mrj
             })
             
-            _file.save()
+            try:
+                _file.save()
+            except frappe.DuplicateEntryError:
+                # Nur diese Selektion überspringen; weitere CSVs können durch
+                # Rechnungskorrekturen inzwischen andere Inhalte haben.
+                csv_unveraendert += 1
+                jahresversand.add_comment('Comment', text='CSV für {0} ist unverändert und bereits vorhanden.'.format(
+                    mrj_sektions_selektion.name))
+                continue
+            csv_neu += 1
             
-        jahresversand.add_comment('Comment', text='CSV erstellt.')
+        jahresversand.add_comment('Comment', text='CSV erstellt: {0} neu, {1} unverändert.'.format(
+            csv_neu, csv_unveraendert))
         frappe.db.commit()
         
         return 'done'

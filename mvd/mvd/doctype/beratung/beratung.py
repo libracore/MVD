@@ -872,29 +872,30 @@ def check_communication(self, event):
             issue.save()
 
 @frappe.whitelist()
-def uebernahme(beratung, user):
+def uebernahme(beratung, user=None):
+    # user wird bewusst ignoriert (#2198): es darf nur die eigene Kontaktperson ermittelt werden
+    user = frappe.session.user
     kontaktpersonen = frappe.db.sql("""
                                         SELECT
-                                            `parent`
-                                        FROM `tabTermin Kontaktperson Multi User`
-                                        WHERE `parent` IN (
-                                            SELECT
-                                                `parent`
-                                            FROM `tabTermin Kontaktperson Multi User`
-                                            WHERE `user` = '{user}'
-                                            AND `idx` = 1
+                                            kp.`name`
+                                        FROM `tabTermin Kontaktperson` kp
+                                        JOIN `tabTermin Kontaktperson Multi User` mu
+                                            ON mu.`parent` = kp.`name`
+                                            AND mu.`idx` = 1
+                                        WHERE mu.`user` = %(user)s
+                                        AND NOT EXISTS (
+                                            SELECT 1
+                                            FROM `tabTermin Kontaktperson Multi User` x
+                                            WHERE x.`parent` = kp.`name`
+                                            AND x.`user` != %(user)s
                                         )
-                                        AND `parent` NOT IN (
-                                            SELECT
-                                                `parent`
-                                            FROM `tabTermin Kontaktperson Multi User`
-                                            WHERE `user` != '{user}'
-                                        )
-                                    """.format(user=user), as_dict=True)
-    if len(kontaktpersonen) > 0:
-        return kontaktpersonen[0].parent
-    else:
-        return False
+                                        ORDER BY kp.`ist_vertrauensanwaeltin` DESC, kp.`name`
+                                    """, {'user': user}, as_dict=True)
+    # VA bevorzugt; nur Kontaktpersonen, die der User selbst lesen darf (sonst sperrt er sich aus dem Mandat aus)
+    for kp in kontaktpersonen:
+        if frappe.has_permission("Termin Kontaktperson", "read", doc=kp.name):
+            return kp.name
+    return False
 
 @frappe.whitelist()
 def merge(slave, master):

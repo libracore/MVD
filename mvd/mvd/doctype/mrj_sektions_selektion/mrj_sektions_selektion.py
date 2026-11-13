@@ -4,11 +4,14 @@
 
 from __future__ import unicode_literals
 import frappe
+from mvd.mvd.utils.rechnungs_bankkonto import set_lauf_bankkonto
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 
 class MRJSektionsSelektion(Document):
     def validate(self):
+        if self.docstatus == 0:
+            set_lauf_bankkonto(self)
         if self.docstatus == 0:
             if frappe.db.get_value("Mitglied RG Jahreslauf", self.mrj, "status") != "Warte auf Sektions Selektionen":
                 frappe.throw("Der übergeordnete Mitglied RG Jahreslauf Prozess wurde bereits gestartet.<br>Leider ist es nicht mehr möglich dazugehörige Sektions Selektionen vorzunehmen.")

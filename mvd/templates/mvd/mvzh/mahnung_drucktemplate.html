@@ -29,6 +29,7 @@
         <!-- QRR Daten für Mitgliedschafts QRR -->
         <!-- ---------------------------------------------------------------------------------------- -->
         {% set sinv = frappe.get_doc("Sales Invoice", mahnung.sales_invoices[0].sales_invoice) %}
+        {% set bankkonto = frappe.get_doc("Account", sinv.get("rechnungs_bankkonto") or sektion.account) %}
         <!-- payer details -->
         {% if sinv.customer_address %}
             {% set pay_addr = frappe.get_doc("Address", sinv.customer_address) %}
@@ -74,7 +75,7 @@
                     {% endif %}
                 {% endif %}
             {% endif %}
-            {% set bankkonto = frappe.get_doc("Account", sektion.account) %}
+
         {% else %}
             {% set payer_name = False %}
             {% set payer_street = False %}

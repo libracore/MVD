@@ -266,9 +266,9 @@
   },
   {
    "fieldname": "expert_in",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Expert*in",
-   "options": "\nBaumeler, Markus\nEgger, Martin\nFretz, Markus\nFuhrer, Peter\nGerspacher Marina\nGuldimann, Ursula\nHofer, Werner\nKofmel, Urban\nMerz, David\nSch\u00e4rer, Mark\nTschanz, Roland\nWagner, Susanne"
+   "options": "Wohnungsabgabe Fachperson"
   },
   {
    "fieldname": "vermieter_in",
@@ -367,7 +367,7 @@
    "label": "Auftrag Typ (Manuell)"
   }
  ],
- "modified": "2026-10-29 17:06:19.758258",
+ "modified": "2026-11-03 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Wohnungsabgabe",

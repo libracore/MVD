@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2022, libracore AG and contributors
+# Copyright (c) 2022 - 2026, libracore AG and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -59,8 +59,11 @@ def unlink_fr(sinv, event):
         if len(hv_fr) > 1:
             frappe.throw("Es gibt mehere FR-Rechnungen zu dieser Rechnung. Bitte kontaktieren Sie den Support.")
         else:
+            from mvd.mvd.doctype.camt_import.reset_protokoll import merke_vorzustand
+            merke_vorzustand('Fakultative Rechnung', hv_fr[0].name, ['sales_invoice', 'modified', 'modified_by'])
             update_fr = frappe.db.sql("""UPDATE `tabFakultative Rechnung` SET `sales_invoice` = '' WHERE `name` = '{hv_fr}'""".format(hv_fr=hv_fr[0].name), as_list=True)
-            frappe.db.commit()
+            if not frappe.flags.get('camt_reset_kontext') and not frappe.flags.get('camt_reset_in_arbeit'):
+                frappe.db.commit()
             sinv.zugehoerige_fr = hv_fr=hv_fr[0].name
 
 def relink_fr(sinv, event):
@@ -72,8 +75,11 @@ def relink_fr(sinv, event):
             skip = True
     if not skip:
         if sinv.zugehoerige_fr:
+            from mvd.mvd.doctype.camt_import.reset_protokoll import merke_vorzustand
+            merke_vorzustand('Fakultative Rechnung', sinv.zugehoerige_fr, ['sales_invoice', 'modified', 'modified_by'])
             update_fr = frappe.db.sql("""UPDATE `tabFakultative Rechnung` SET `sales_invoice` = '{sinv}' WHERE `name` = '{hv_fr}'""".format(sinv=sinv.name, hv_fr=sinv.zugehoerige_fr), as_list=True)
-            frappe.db.commit()
+            if not frappe.flags.get('camt_reset_kontext') and not frappe.flags.get('camt_reset_in_arbeit'):
+                frappe.db.commit()
             sinv.zugehoerige_fr = None
 
 def remove_admin_and_guest_mails(self, event):
@@ -110,9 +116,20 @@ def check_manual_address(sinv, event):
         sinv.manuelle_adresse = '{0}\n{1}{2} {3}\n{4}-{5} {6}'.format(sinv.ma_name, "{0}\n".format(sinv.ma_adressen_zusatzzeile) if sinv.ma_adressen_zusatzzeile else '', sinv.ma_strasse, sinv.ma_nummer, sinv.ma_laendercode, sinv.ma_plz, sinv.ma_ort)
 
 def pe_after_submit_hooks(pe, event):
+    try:
+        if pe.get('camt_verrechnung_rechnung'):
+            return
+        
+        pe_zahlungsfolgeprozesse(pe)
+    finally:
+        from mvd.mvd.doctype.camt_import.reset_protokoll import beende_zahlung
+        beende_zahlung(pe)
+
+def pe_zahlungsfolgeprozesse(pe, zahlungsbestaetigung=True):
     from mvd.mvd.doctype.mitgliedschaft.finance_utils import check_mitgliedschaft_in_pe
     check_mitgliedschaft_in_pe(pe)
-    send_zahlungsbestaetigungen(pe)
+    if zahlungsbestaetigung:
+        send_zahlungsbestaetigungen(pe)
 
 def send_zahlungsbestaetigungen(pe):
     if pe.payment_type != 'Receive' or not pe.posting_date:
@@ -124,6 +141,10 @@ def send_zahlungsbestaetigungen(pe):
         row.reference_name for row in pe.references
         if row.reference_doctype == 'Sales Invoice' and row.reference_name and flt(row.allocated_amount) > 0
     ))
+    # Bei Firmenverrechnungen trägt der Journal Entry den buchhalterischen Rechnungsbezug.
+    if pe.docstatus == 1 and pe.get('camt_verrechnung_rechnung') and flt(pe.paid_amount) > 0:
+        rechnungsnamen.append(pe.camt_verrechnung_rechnung)
+        rechnungsnamen = list(set(rechnungsnamen))
     if not rechnungsnamen:
         return
 

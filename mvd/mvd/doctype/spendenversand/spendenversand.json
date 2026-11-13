@@ -7,6 +7,7 @@
   "section_allgemein",
   "sektionsspezifisch",
   "sektion_id",
+  "rechnungs_bankkonto",
   "inkl_gesperrt",
   "keine_kuendigungen",
   "data_only",
@@ -169,10 +170,20 @@
    "fieldname": "data_only",
    "fieldtype": "Check",
    "label": "Nur Daten exportieren - Keine RG Erstellung"
+  },
+  {
+   "fieldname": "rechnungs_bankkonto",
+   "fieldtype": "Link",
+   "label": "Rechnungs-Bankkonto",
+   "options": "Account",
+   "description": "Bei sektions\u00fcbergreifenden L\u00e4ufen wird das Standard-Bankkonto je Unternehmen verwendet.",
+   "allow_on_submit": 0,
+   "no_copy": 0,
+   "depends_on": "eval:doc.sektionsspezifisch && !doc.data_only"
   }
  ],
  "is_submittable": 1,
- "modified": "2025-04-22 16:13:20.989096",
+ "modified": "2026-11-11 14:11:10.068524",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Spendenversand",

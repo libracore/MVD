@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2021-2024, libracore and contributors
+# Copyright (c) 2021-2026, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -157,7 +157,10 @@ def sinv_update(sinv, event):
                     frappe.db.set_value("Sales Invoice Payment", payments[0]["name"], "base_amount", total_amount)
                     frappe.db.set_value("Sales Invoice", sinv.name, "outstanding_amount", 0.0)
 
-    if not update_blocked and sinv.mv_mitgliedschaft:
+    if (
+        not update_blocked and sinv.mv_mitgliedschaft
+        and not frappe.flags.get('skip_mitgliedschaft_zahlungsdaten')
+    ):
         run_update_zahlungsdaten(sinv.mv_mitgliedschaft)
 
     return
@@ -167,7 +170,8 @@ def check_mitgliedschaft_in_pe(pe):
         mitgliedschaft = suche_nach_mitgliedschaft(pe.party)
         if mitgliedschaft:
             frappe.db.sql("""UPDATE `tabPayment Entry` SET `mv_mitgliedschaft` = '{mitgliedschaft}' WHERE `name` = '{pe}'""".format(mitgliedschaft=mitgliedschaft, pe=pe.name), as_list=True)
-            frappe.db.commit()
+            if not frappe.flags.get('camt_reset_kontext'):
+                frappe.db.commit()
 
 def suche_nach_mitgliedschaft(customer):
     mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `kunde_mitglied` = '{customer}' OR `rg_kunde` = '{customer}'""".format(customer=customer), as_list=True)

@@ -24,6 +24,7 @@
     <!-- ---------------------------------------------------------------------------------------- -->
     {% if doc.doctype == 'Sales Invoice' %}
         {% set sales_invoice = doc.name %}
+        {% set sektion = frappe.get_doc("Sektion", doc.sektion_id) %}
         {% if doc.mv_mitgliedschaft or doc.mv_kunde %}
             {% if doc.mv_mitgliedschaft %}
                 {% set mitgliedschaft = frappe.get_doc("Mitgliedschaft", doc.mv_mitgliedschaft) %}
@@ -74,6 +75,7 @@
         <!-- ---------------------------------------------------------------------------------------- -->
         <!-- QRR Daten für Mitgliedschafts QRR -->
         <!-- ---------------------------------------------------------------------------------------- -->
+        {% set bankkonto = frappe.get_doc("Account", doc.get("rechnungs_bankkonto") or sektion.account) %}
         <!-- payer details -->
         {% if doc.manuelle_adresseingabe == 1 and doc.manuelle_adresse %}
             {% set payer_name = doc.ma_name %}
@@ -82,7 +84,7 @@
             {% set payer_pincode = doc.ma_plz %}
             {% set payer_town = doc.ma_ort %}
             {% set payer_country = doc.ma_laendercode %}
-            {% set bankkonto = frappe.get_doc("Account", sektion.account) %}
+
         {% else %}
             {% if doc.customer_address %}
                 {% set pay_addr = frappe.get_doc("Address", doc.customer_address) %}
@@ -128,7 +130,7 @@
                         {% endif %}
                     {% endif %}
                 {% endif %}
-                {% set bankkonto = frappe.get_doc("Account", sektion.account) %}
+
             {% else %}
                 {% set payer_name = False %}
                 {% set payer_street = False %}
@@ -222,13 +224,14 @@
         <!-- ---------------------------------------------------------------------------------------- -->
         <!-- QRR (HV) Daten -->
         <!-- ---------------------------------------------------------------------------------------- -->
-            {% set hv_fr = frappe.get_all('Fakultative Rechnung', filters={'docstatus': 1, 'sales_invoice': doc.name, 'status': 'Unpaid', 'mv_mitgliedschaft': mitgliedschaft.name, 'typ': 'HV'}, fields=['name', 'qrr_referenz', 'betrag', 'status']) %}
+            {% set hv_fr = frappe.get_all('Fakultative Rechnung', filters={'docstatus': 1, 'sales_invoice': doc.name, 'status': 'Unpaid', 'mv_mitgliedschaft': mitgliedschaft.name, 'typ': 'HV'}, fields=['name', 'qrr_referenz', 'betrag', 'status', 'rechnungs_bankkonto']) %}
             {% if hv_fr|length > 0 %}
                 {% if hv_fr[0].status == 'Unpaid' %}
+                    {% set hv_bankkonto = frappe.get_doc("Account", hv_fr[0].rechnungs_bankkonto or doc.get("rechnungs_bankkonto") or sektion.account) %}
                     {% set hv_qrr_message = hv_fr[0].name + " // " + _("Haftpflichtversicherung", print_language) + " // " + mitglied_nr %}
                     {% set hv_qrr = {
                         'top_position': '382mm',
-                        'iban': bankkonto.iban or '',
+                        'iban': hv_bankkonto.iban or '',
                         'reference': hv_fr[0].qrr_referenz,
                         'reference_type': 'QRR',
                         'currency': doc.currency,

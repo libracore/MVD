@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from mvd.mvd.utils.rechnungs_bankkonto import get_rechnungs_bankkonto
 import json
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
 from frappe.utils.data import add_days, getdate, now, today
@@ -12,7 +13,7 @@ from frappe.utils.pdf import get_file_data_from_writer
 from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 
 @frappe.whitelist()
-def create_rechnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, kunde=False, druckvorlage=False, bezahlt=False, submit=False, attach_as_pdf=False, mv_mitgliedschaft=None, ohne_betrag=False, ignore_pricing_rule=False):
+def create_rechnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, kunde=False, druckvorlage=False, bezahlt=False, submit=False, attach_as_pdf=False, mv_mitgliedschaft=None, ohne_betrag=False, ignore_pricing_rule=False, rechnungs_bankkonto=None):
     if druckvorlage:
         sektion = frappe.get_doc("Druckvorlage", druckvorlage).sektion_id
     sektion = frappe.get_doc("Sektion", sektion)
@@ -67,6 +68,7 @@ def create_rechnung_sonstiges(sektion, rechnungs_artikel, mitgliedschaft=False, 
         "mv_mitgliedschaft": mitgliedschaft.name if mitgliedschaft else mv_mitgliedschaft if mv_mitgliedschaft else None,
         "mv_kunde": kunde.name if kunde else None,
         "company": sektion.company,
+        "rechnungs_bankkonto": get_rechnungs_bankkonto(company.name, rechnungs_bankkonto),
         "cost_center": company.cost_center,
         "customer": customer,
         "customer_address": address,

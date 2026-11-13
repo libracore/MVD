@@ -218,7 +218,8 @@ def get_member_annual_invoices(id):
     "Sales Invoice",
     filters={
         "mv_mitgliedschaft": id,
-        "ist_mitgliedschaftsrechnung": 1},
+        "ist_mitgliedschaftsrechnung": 1,
+        "posting_date": ["<=", today()]},
     fields=['name', 'mitgliedschafts_jahr', 'grand_total', 'due_date', 'status', 'payment_reminder_level', 'outstanding_amount']
 )
 

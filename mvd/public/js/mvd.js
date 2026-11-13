@@ -321,7 +321,8 @@ frappe.mvd.new_mail = function(cur_frm, last_email='', kuendigungsmail=false, de
     var default_sender;
     var subject = default_subject || __(cur_frm.meta.name) + ': ' + cur_frm.docname;
     var txt_string = '';
-    
+    var prefilled_salutation = '';
+
     if (cur_frm.doctype == 'Beratung') {
         recpts = cur_frm.doc.raised_by || cur_frm.doc.email_id;
         default_sender = frappe.boot.default_beratungs_sender || '';
@@ -334,7 +335,8 @@ frappe.mvd.new_mail = function(cur_frm, last_email='', kuendigungsmail=false, de
         recpts = cur_frm.doc.e_mail_1 || '';
         if (!kuendigungsmail) {
             subject = 'Ihre Mitgliedschaft: ' + cur_frm.doc.mitglied_nr;
-            txt_string = '<div>' + cur_frm.doc.briefanrede + '</div>';
+            prefilled_salutation = cur_frm.doc.briefanrede || '';
+            txt_string = '<div>' + prefilled_salutation + '</div>';
         } else {
             subject = kuendigungsmail.subject;
             txt_string = kuendigungsmail.email_body;
@@ -364,7 +366,8 @@ frappe.mvd.new_mail = function(cur_frm, last_email='', kuendigungsmail=false, de
         sender: default_sender,
         last_email: last_email ? last_email:'',
         is_a_reply: last_email ? true:false,
-        save_mail_txt_as_draft: cur_frm.doctype == 'Beratung' ? true:false
+        save_mail_txt_as_draft: cur_frm.doctype == 'Beratung' ? true:false,
+        prefilled_salutation: prefilled_salutation
     });
 }
 
@@ -597,6 +600,21 @@ frappe.mvd.MailComposer = Class.extend({
                 var subject_field = me.dialog.fields_dict.subject;
                 var content = content_field.get_value() || "";
                 var subject = subject_field.get_value() || "";
+
+                // vorbefüllte Anrede wieder entfernen, da die Vorlagen ihre eigene Anrede mitbringt
+                if (me.prefilled_salutation) {
+                    var salutation = me.prefilled_salutation.trim();
+                    var tmp = document.createElement('div');
+                    tmp.innerHTML = content;
+                    var blocks = tmp.querySelectorAll('p, div');
+                    for (var i = 0; i < blocks.length; i++) {
+                        if (blocks[i].textContent.trim() === salutation) {
+                            blocks[i].remove();
+                            break;
+                        }
+                    }
+                    content = tmp.innerHTML;
+                }
 
                 var parts = content.split('<!-- salutation-ends -->');
 
@@ -1682,7 +1700,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
         this.dialog =  new frappe.ui.Dialog({
             title: "Rechnungs Erstellung",
             no_submit_on_enter: true,
-            fields: this.get_fields(),
+            fields: [frappe.mvd.rechnungs_bankkonto_feld()].concat(this.get_fields()),
             primary_action_label: "Erstellen",
             primary_action: () => {
                 this.dialog.hide();
@@ -1705,6 +1723,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
             }
         });
 
+        frappe.mvd.initialisiere_rechnungs_bankkonto(this.dialog, cur_frm.doc.sektion_id);
         this.dialog.show();
     }
 
@@ -1838,6 +1857,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
             'attach_as_pdf': true,
             'submit': true,
             'hv_bar_bezahlt': this.dialog.get_value('hv_bar_bezahlt') == 1 ? true:null,
+            'rechnungs_bankkonto': this.dialog.get_value('rechnungs_bankkonto'),
             'druckvorlage': this.dialog.get_value('druckvorlage'),
             'massendruck': this.dialog.get_value('massendruck') == 1 ? true:null,
             'eigene_items': this.dialog.get_value('eigene_items'),
@@ -1854,6 +1874,7 @@ mvd_dialoge.erstelle_mitgliedschafts_rechnung = class ErstelleMitgliedschaftsRec
             'attach_as_pdf': true,
             'submit': true,
             'hv_bar_bezahlt': this.dialog.get_value('hv_bar_bezahlt') == 1 ? true:null,
+            'rechnungs_bankkonto': this.dialog.get_value('rechnungs_bankkonto'),
             'druckvorlage': this.dialog.get_value('druckvorlage'),
             'massendruck': this.dialog.get_value('massendruck') == 1 ? true:null,
             'ignore_stichtage': true,
@@ -1871,7 +1892,7 @@ mvd_dialoge.erstelle_spenden_rechnung = class ErstelleSpendenRechnung {
         this.dialog =  new frappe.ui.Dialog({
             title: "Spenden-Rechnungs Erstellung",
             no_submit_on_enter: true,
-            fields: this.get_fields(),
+            fields: [frappe.mvd.rechnungs_bankkonto_feld()].concat(this.get_fields()),
             primary_action_label: "Erstellen",
             primary_action: () => {
                 this.dialog.hide();
@@ -1894,6 +1915,7 @@ mvd_dialoge.erstelle_spenden_rechnung = class ErstelleSpendenRechnung {
             }
         });
 
+        frappe.mvd.initialisiere_rechnungs_bankkonto(this.dialog, cur_frm.doc.sektion_id);
         this.dialog.show();
     }
 
@@ -1917,6 +1939,7 @@ mvd_dialoge.erstelle_spenden_rechnung = class ErstelleSpendenRechnung {
             args:{
                     'mitgliedschaft': cur_frm.doc.name,
                     'betrag_spende': this.dialog.get_value('betrag'),
+                    'rechnungs_bankkonto': this.dialog.get_value('rechnungs_bankkonto'),
                     'druckvorlage': this.dialog.get_value('druckvorlage')
             },
             freeze: true,
@@ -1937,7 +1960,7 @@ mvd_dialoge.erstelle_hv_rechnung = class ErstelleHvRechnung {
         this.dialog =  new frappe.ui.Dialog({
             title: "HV-Rechnungs Erstellung",
             no_submit_on_enter: true,
-            fields: this.get_fields(),
+            fields: [frappe.mvd.rechnungs_bankkonto_feld()].concat(this.get_fields()),
             primary_action_label: "Erstellen",
             primary_action: () => {
                 this.dialog.hide();
@@ -1960,6 +1983,7 @@ mvd_dialoge.erstelle_hv_rechnung = class ErstelleHvRechnung {
             }
         });
 
+        frappe.mvd.initialisiere_rechnungs_bankkonto(this.dialog, cur_frm.doc.sektion_id);
         this.dialog.show();
     }
 
@@ -1981,6 +2005,7 @@ mvd_dialoge.erstelle_hv_rechnung = class ErstelleHvRechnung {
             method: "mvd.mvd.doctype.fakultative_rechnung.fakultative_rechnung.create_hv_fr",
             args:{
                     'mitgliedschaft': cur_frm.doc.name,
+                    'rechnungs_bankkonto': this.dialog.get_value('rechnungs_bankkonto'),
                     'druckvorlage': this.dialog.get_value('druckvorlage'),
                     'asap_print': true
             },
@@ -2285,7 +2310,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
         this.dialog =  new frappe.ui.Dialog({
             title: "Rechnungs Erstellung (Sonstiges)",
             no_submit_on_enter: true,
-            fields: this.get_fields(),
+            fields: [frappe.mvd.rechnungs_bankkonto_feld()].concat(this.get_fields()),
             primary_action_label: "Erstellen",
             primary_action: () => {
                 this.dialog.hide();
@@ -2308,6 +2333,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
             }
         });
 
+        frappe.mvd.initialisiere_rechnungs_bankkonto(this.dialog, cur_frm.doc.sektion_id, true);
         this.dialog.show();
     }
 
@@ -2540,6 +2566,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
                 'zahlungsart': this.dialog.get_value('zahlungsart'),
                 'attach_as_pdf': true,
                 'submit': true,
+                'rechnungs_bankkonto': this.dialog.get_value('rechnungs_bankkonto'),
                 'druckvorlage': this.dialog.get_value('druckvorlage'),
                 'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
                 'ohne_betrag': this.dialog.get_value('ohne_betrag') == 1 ? true:null,
@@ -2553,6 +2580,7 @@ mvd_dialoge.erstelle_sonstiges_rechnung = class ErstelleSonstigesRechnung {
                 'zahlungsart': this.dialog.get_value('zahlungsart'),
                 'attach_as_pdf': true,
                 'submit': true,
+                'rechnungs_bankkonto': this.dialog.get_value('rechnungs_bankkonto'),
                 'druckvorlage': this.dialog.get_value('druckvorlage'),
                 'rechnungs_artikel': this.dialog.get_value('rechnungs_artikel'),
                 'ohne_betrag': this.dialog.get_value('ohne_betrag') == 1 ? true:null,

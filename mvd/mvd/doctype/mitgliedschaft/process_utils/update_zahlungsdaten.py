@@ -29,8 +29,33 @@ from mvd.mvd.doctype.mitgliedschaft.utils import create_korrespondenz
 AMPEL_IMMER_ROT_STATUS = ('Gestorben', 'Wegzug', 'Ausschluss', 'Inaktiv', 'Interessent*in', 'Anmeldung', 'Online-Anmeldung')
 
 
+def get_bankzahlungsdatum(sinv):
+    # Firmenverrechnungen begleichen die Rechnung über einen Journal Entry der Zielfirma.
+    dates = frappe.db.sql("""
+        SELECT zahlungsdatum FROM (
+            SELECT pe.reference_date AS zahlungsdatum, ref.creation
+            FROM `tabPayment Entry Reference` ref
+            INNER JOIN `tabPayment Entry` pe ON pe.name = ref.parent
+            WHERE ref.reference_doctype = 'Sales Invoice' AND ref.reference_name = %s
+              AND pe.docstatus = 1
+            UNION ALL
+            SELECT pe.reference_date AS zahlungsdatum, ref.creation
+            FROM `tabJournal Entry Account` ref
+            INNER JOIN `tabJournal Entry` je ON je.name = ref.parent
+            INNER JOIN `tabPayment Entry` pe ON pe.name = je.camt_verrechnung_zahlung
+            WHERE ref.reference_type = 'Sales Invoice' AND ref.reference_name = %s
+              AND je.docstatus = 1 AND pe.docstatus = 1
+              AND ref.credit_in_account_currency > 0
+        ) zahlungen ORDER BY creation DESC LIMIT 1
+    """, (sinv, sinv), as_dict=True)
+
+    return dates[0].zahlungsdatum if dates else None
+
+
 @frappe.whitelist()
 def run(mitglied_id):
+    from mvd.mvd.doctype.camt_import.reset_protokoll import merke_mitglied
+    merke_mitglied(mitglied_id)
     mitgliedschaft(mitglied_id)
     hv(mitglied_id)
     get_ampelfarbe(mitglied_id, db_direct=True, need_object_load=True)
@@ -57,23 +82,7 @@ def mitgliedschaft(mitglied_id):
         return sinv[0] if sinv else None
 
     def get_pe_reference_date(sinv):
-        pe = frappe.db.sql(
-            """
-                SELECT
-                    `parent`
-                FROM `tabPayment Entry Reference`
-                WHERE `reference_doctype` = 'Sales Invoice'
-                AND `reference_name` = '{sinv}' 
-                AND `docstatus` = 1
-                ORDER BY `creation` DESC
-                LIMIT 1
-            """.format(sinv=sinv),
-            as_dict=True
-        )
-        if not pe:
-            return None
-
-        return frappe.db.get_value("Payment Entry", pe[0].parent, 'reference_date') or None
+        return get_bankzahlungsdatum(sinv)
 
     def create_zahlungseingang_change_log_row():
         idx = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabStatus Change` WHERE `parent` = '{0}'""".format(mitglied_id), as_dict=True)[0].qty + 1
@@ -91,8 +100,11 @@ def mitgliedschaft(mitglied_id):
         return
 
     def get_and_set_mitgliednr():
+        from mvd.mvd.doctype.camt_import.reset_protokoll import merke_nummer
         from mvd.mvd.doctype.mitglied_main_naming.mitglied_main_naming import create_new_number
         from mvd.mvd.utils.nextcloud import handle_mitgliedschafts_folder
+        merke_nummer(mitglied_id)
+        
         try:
             mitglied_nr = create_new_number(id=mitglied_id)['nr']
             frappe.db.set_value("Mitgliedschaft", mitglied_id, 'mitglied_nr', mitglied_nr)
@@ -208,23 +220,7 @@ def hv(mitglied_id):
         return sinv[0] if sinv else None
 
     def get_pe_reference_date(sinv):
-        pe = frappe.db.sql(
-            """
-                SELECT
-                    `parent`
-                FROM `tabPayment Entry Reference`
-                WHERE `reference_doctype` = 'Sales Invoice'
-                AND `reference_name` = '{sinv}' 
-                AND `docstatus` = 1
-                ORDER BY `creation` DESC
-                LIMIT 1
-            """.format(sinv=sinv),
-            as_dict=True
-        )
-        if not pe:
-            return None
-
-        return frappe.db.get_value("Payment Entry", pe[0].parent, 'reference_date') or None
+        return get_bankzahlungsdatum(sinv)
 
     sinv = get_highest_hv_jahr_sinv()
     if not sinv:
@@ -273,7 +269,8 @@ def get_ampelfarbe(mitgliedschaft, db_direct=False, need_object_load=False):
         if db_direct:
             if mitgliedschaft.ampel_farbe != farbe:
                 frappe.db.set_value("Mitgliedschaft", mitgliedschaft.name, 'ampel_farbe', farbe)
-                frappe.db.commit()
+                if not frappe.flags.get('camt_reset_kontext'):
+                    frappe.db.commit()
         else:
             mitgliedschaft.ampel_farbe = farbe
 

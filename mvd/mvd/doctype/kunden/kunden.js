@@ -278,23 +278,34 @@ function pincode_lookup(pincode, field) {
 }
 
 function umwandlung(frm, status) {
-    frappe.call({
-        'method': "mvd.mvd.doctype.kunden.kunden.anlage_prozess",
-        'args':{
-                'anlage_daten': frm.doc,
-                'status': status
-        },
-        'freeze': true,
-        'freeze_message': 'Wandle um zu ' + status + '...',
-        'callback': function(r)
-        {
-            if (r.message) {
-                cur_frm.set_value("mv_mitgliedschaft", r.message);
-                cur_frm.save();
-                frappe.set_route("Form", "Mitgliedschaft", r.message);
+    var umwandeln = function(rechnungs_bankkonto) {
+        frappe.call({
+            'method': "mvd.mvd.doctype.kunden.kunden.anlage_prozess",
+            'args':{
+                    'anlage_daten': frm.doc,
+                    'status': status,
+                    'rechnungs_bankkonto': rechnungs_bankkonto
+            },
+            'freeze': true,
+            'freeze_message': 'Wandle um zu ' + status + '...',
+            'callback': function(r)
+            {
+                if (r.message) {
+                    cur_frm.set_value("mv_mitgliedschaft", r.message);
+                    cur_frm.save();
+                    frappe.set_route("Form", "Mitgliedschaft", r.message);
+                }
             }
-        }
-    });
+        });
+    };
+    if (status === 'Regulär') {
+        var dialog = frappe.prompt([frappe.mvd.rechnungs_bankkonto_feld()], function(values) {
+            umwandeln(values.rechnungs_bankkonto);
+        }, 'Rechnungs-Bankkonto', 'Umwandeln');
+        frappe.mvd.initialisiere_rechnungs_bankkonto(dialog, frm.doc.sektion_id);
+    } else {
+        umwandeln();
+    }
 }
 
 function daten_aus_mitgl_bez(frm, status) {
