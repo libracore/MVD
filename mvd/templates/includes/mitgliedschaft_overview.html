@@ -53,7 +53,7 @@
                         {% endif %}
                         <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
                         {% if allgemein.mandat %}
-                            <br><b>Mandat:</b> {% for m in allgemein.mandat %}{% if m.name %}<a href="#" onclick="frappe.set_route('Form', 'Mandat', '{{ m.name }}'); return false;">{{ m.datum }}{% if m.status %} ({{ m.status }}){% endif %}</a>{% else %}{{ m.datum }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+                            <br><b>Mandat:</b> {% for m in allgemein.mandat %}{% if m.name %}<a href="#Form/Mandat/{{ m.name }}">{{ m.datum }}{% if m.status %} ({{ m.status }}){% endif %}</a>{% else %}{{ m.datum }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
                         {% endif %}
                         {% if allgemein.bezahltes_mitgliedschaftsjahr %}
                             <br><b>Bezahltes Mitgliedschaftsjahr:</b> {{ allgemein.bezahltes_mitgliedschaftsjahr }}
@@ -121,7 +121,7 @@
                         {% endif %}
                         <b>Ablauf Karenzfrist:</b> {{ frappe.utils.get_datetime(allgemein.ablauf_karenzfrist).strftime('%d.%m.%Y') }}
                         {% if allgemein.mandat %}
-                            <br><b>Mandat:</b> {% for m in allgemein.mandat %}{% if m.name %}<a href="#" onclick="frappe.set_route('Form', 'Mandat', '{{ m.name }}'); return false;">{{ m.datum }}{% if m.status %} ({{ m.status }}){% endif %}</a>{% else %}{{ m.datum }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+                            <br><b>Mandat:</b> {% for m in allgemein.mandat %}{% if m.name %}<a href="#Form/Mandat/{{ m.name }}">{{ m.datum }}{% if m.status %} ({{ m.status }}){% endif %}</a>{% else %}{{ m.datum }}{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
                         {% endif %}
                         {% if allgemein.bezahltes_mitgliedschaftsjahr %}
                             <br><b>Bezahltes Mitgliedschaftsjahr:</b> {{ allgemein.bezahltes_mitgliedschaftsjahr }}
