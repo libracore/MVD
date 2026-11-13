@@ -5,6 +5,15 @@
 
 frappe.ui.form.on('Mandat', {
     refresh: function(frm) {
+        // Solifonds nach dem Einreichen: «nur RB» darf nur noch ansehen (Server: mandat_permissions.ist_rb_gesperrt);
+        // möglich bleiben Abschliessen, Rückzug und Anhänge
+        if (rb_gesperrt(frm)) {
+            frm.set_read_only();
+            frm.refresh_fields();
+            frm.disable_save();
+            frm.set_intro(__('Das Solifonds-Gesuch ist eingereicht: Du kannst das Mandat nur noch ansehen. Möglich sind noch Anhänge sowie «Abschliessen» und «Rückzug» (Status).'), 'blue');
+        }
+
         // Mitgliedschaftsübersicht wie in der Beratung
         load_html_overview(frm);
         frappe.mvd.schlichtungsbehoerde_listener(frm, 'uebersicht_html');
@@ -18,7 +27,7 @@ frappe.ui.form.on('Mandat', {
         add_status_buttons(frm);
 
         // #2213: Schlichtungsbehörde nachträglich ermitteln, falls sie beim Erstellen nicht gefunden wurde
-        if (!frm.is_new() && frm.doc.mv_mitgliedschaft && !frm.doc.schlichtungsbehoerde) {
+        if (!frm.is_new() && frm.doc.mv_mitgliedschaft && !frm.doc.schlichtungsbehoerde && frm.perm[0].write) {
             frm.add_custom_button(__('Schlichtungsbehörde ermitteln'), function() {
                 frappe.call({
                     method: 'mvd.mvd.doctype.mandat.mandat.schlichtungsbehoerde_ermitteln',
@@ -190,8 +199,14 @@ function status_call(frm, status, bemerkung) {
     });
 }
 
+function rb_gesperrt(frm) {
+    return !frm.is_new() && !!(frm.doc.__onload && frm.doc.__onload.rb_gesperrt);
+}
+
 function add_status_buttons(frm) {
-    if (frm.is_new() || !frm.perm[0].write) {
+    // «nur RB» nach dem Einreichen: Formular schreibgeschützt, aber Abschliessen/Rückzug bleiben
+    let nur_rb = rb_gesperrt(frm);
+    if (frm.is_new() || !(frm.perm[0].write || nur_rb)) {
         return;
     }
     let gruppe = __('Status');
@@ -217,7 +232,7 @@ function add_status_buttons(frm) {
         }, gruppe);
     }
     ms.JEDERZEIT.forEach(function(ziel) {
-        if (status == ziel) {
+        if (status == ziel || (nur_rb && ziel != 'Rückzug')) {
             return;
         }
         frm.add_custom_button(__(ziel), function() {

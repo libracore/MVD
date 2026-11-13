@@ -151,7 +151,17 @@ def set_status(doctype, name, status, quelle, bemerkung=None, parentfield="statu
 @frappe.whitelist()
 def status_aendern(mandat, status, bemerkung=None):
     """Knöpfe im Mandat: «Nicht vergeben» (beide Typen), beim Solifonds «Abschliessen», «Rückzug», «Gelöscht»."""
-    doc = frappe.get_doc("Mandat", mandat)
+    # Solifonds nach dem Einreichen: «nur RB» darf noch abschliessen und Rückzug setzen (mandat_permissions).
+    # Das Flag gilt nur für diesen Aufruf, danach wieder weg (sonst wirkte es in derselben Anfrage weiter).
+    from mvd.mvd.doctype.mandat.mandat_permissions import RB_STATUS
+    frappe.flags.mandat_rb_status = status in RB_STATUS
+    try:
+        return _status_aendern(frappe.get_doc("Mandat", mandat), status, bemerkung)
+    finally:
+        frappe.flags.mandat_rb_status = False
+
+
+def _status_aendern(doc, status, bemerkung):
     if not doc.has_permission("write"):
         frappe.throw(_("Keine Berechtigung für dieses Mandat."), frappe.PermissionError)
 

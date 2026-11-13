@@ -40,6 +40,11 @@ def darf_visieren():
     return "MV_Solifonds_GL" in frappe.get_roles()
 
 class Mandat(Document):
+    def onload(self):
+        # Solifonds nach dem Einreichen: Formular für «nur RB» schreibgeschützt (mandat.js)
+        from mvd.mvd.doctype.mandat.mandat_permissions import ist_rb_gesperrt
+        self.set_onload("rb_gesperrt", ist_rb_gesperrt(self))
+
     def autoname(self):
         jahr = datetime.date.today().year
         if self.mv_mitgliedschaft:
