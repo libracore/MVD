@@ -42,8 +42,9 @@ def darf_visieren():
 class Mandat(Document):
     def onload(self):
         # Solifonds nach dem Einreichen: Formular für «nur RB» schreibgeschützt (mandat.js)
-        from mvd.mvd.doctype.mandat.mandat_permissions import ist_rb_gesperrt
+        from mvd.mvd.doctype.mandat.mandat_permissions import ist_rb_gesperrt, ist_nur_rb
         self.set_onload("rb_gesperrt", ist_rb_gesperrt(self))
+        self.set_onload("nur_rb", ist_nur_rb())
 
     def autoname(self):
         jahr = datetime.date.today().year
@@ -61,6 +62,7 @@ class Mandat(Document):
                 frappe.throw(frappe._("«Fall verfolgen» können nur Geschäftsleitung und Vorprüfung setzen."))
 
         self.pruefe_visum()
+        self.pruefe_verknuepfung()
 
         if self.kontaktperson and "pool" in self.kontaktperson.lower():
             self.kontaktperson = None
@@ -77,6 +79,21 @@ class Mandat(Document):
 
         # #2205: Status-Regeln, Automatik Unzugewiesen/Vorgemerkt (nur vor dem Einreichen, #2207) und Statusverlauf
         status_vor_speichern(self)
+
+    def pruefe_verknuepfung(self):
+        # Mitglied und Beratung legt create_mandat fest; ändern darf sie danach nur System Manager.
+        # «Bestätigungs-E-Mail gesendet» setzt das System (db_set); von Hand nicht durch «nur RB».
+        if self.is_new() or frappe.flags.in_patch:
+            return
+        from mvd.mvd.doctype.mandat.mandat_permissions import ist_nur_rb
+        alt = frappe.db.get_value("Mandat", self.name, ["mv_mitgliedschaft", "beratung", "bestaetigungs_email_gesendet"],
+                                  as_dict=True) or {}
+        if "System Manager" not in frappe.get_roles():
+            for feld, label in (("mv_mitgliedschaft", "Mitglied"), ("beratung", "Beratung")):
+                if (self.get(feld) or None) != (alt.get(feld) or None):
+                    frappe.throw(frappe._("«{0}» kann nur ein System Manager ändern.").format(frappe._(label)))
+        if cint(self.bestaetigungs_email_gesendet) != cint(alt.get("bestaetigungs_email_gesendet")) and ist_nur_rb():
+            frappe.throw(frappe._("«Bestätigungs-E-Mail gesendet» kann die Rechtsberatung nicht ändern."))
 
     def pruefe_visum(self):
         # #2210: Visum nur bei RSV und nur durch die GL; wer und wann wird festgehalten

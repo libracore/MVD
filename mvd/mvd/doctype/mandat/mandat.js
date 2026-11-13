@@ -21,6 +21,12 @@ frappe.ui.form.on('Mandat', {
         // «Fall verfolgen» sehen alle, setzen nur GL und Vorprüfung; Visum (nur RSV) setzt nur die GL (#2210)
         frm.set_df_property('fall_verfolgen', 'read_only', frappe.user.has_role(['MV_Solifonds_GL', 'MV_Solifonds_Vorpruefung']) ? 0 : 1);
         frm.set_df_property('visum', 'read_only', frappe.user.has_role('MV_Solifonds_GL') ? 0 : 1);
+        // Mitglied und Beratung kommen aus create_mandat; ändern nur System Manager
+        ['mv_mitgliedschaft', 'beratung'].forEach(function(f) {
+            frm.set_df_property(f, 'read_only', (frm.is_new() || frappe.user.has_role('System Manager')) ? 0 : 1);
+        });
+        // «Bestätigungs-E-Mail gesendet» setzt das System; «nur RB» darf es nicht ändern
+        frm.set_df_property('bestaetigungs_email_gesendet', 'read_only', (frm.doc.__onload || {}).nur_rb ? 1 : 0);
 
         // #2205: Status, Typ und VA je nach Status; Knöpfe für Nicht vergeben / Abschliessen / Rückzug / Gelöscht
         setup_status_felder(frm);
