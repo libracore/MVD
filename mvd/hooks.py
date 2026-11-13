@@ -147,6 +147,14 @@ on_login = "mvd.mvd.utils.mvd_bootinfo.login_check"
     # ~ "ToDo": "mvd.mvd.utils.hook_utils.todo_permissions"
 # ~ }
 
+# #2206: Vertrauensanwält*innen sehen nur ihre eigenen Mandate
+permission_query_conditions = {
+    "Mandat": "mvd.mvd.doctype.mandat.mandat_permissions.get_permission_query_conditions"
+}
+has_permission = {
+    "Mandat": "mvd.mvd.doctype.mandat.mandat_permissions.has_permission"
+}
+
 # Document Events
 # ---------------
 # Hook on document methods and events
@@ -231,6 +239,7 @@ scheduler_events = {
         "mvd.mvd.doctype.postretouren_log.postretouren_log.start_post_retouren_process",
         # "mvd.mvd.utils.daily_jobs.rechnungs_jahresversand",
         "mvd.mvd.utils.daily_jobs.daily_ampel_korrektur",
+        "mvd.mvd.doctype.mandat.solifonds.sende_solifonds_listen",
         "mvd.mvd.utils.daily_jobs.sp_mitglied_data_check_jahr_bezahlt_mitgliedschaft",
         "mvd.mvd.v2.web_auth.reset_hash_cleanup",
         "mvd.mvd.utils.daily_jobs.execute_address_changes",

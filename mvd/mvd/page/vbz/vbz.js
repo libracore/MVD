@@ -54,6 +54,7 @@ frappe.vbz = {
         $("#termin").off("click");
         $("#rsvmitglied").off("click");
         $("#mandat").off("click");
+        $("#solifonds").off("click");
         $("#mahnung").off("click");
         $("#zweimal_unzustellbar").off("click");
         $("#einmal_unzustellbar").off("click");
@@ -188,6 +189,10 @@ frappe.vbz = {
         $("#rsvmitglied").click(function(){
             frappe.dom.freeze('Öffne RSV-Mandat-Übersicht...');
             frappe.set_route("rsvmitglied-overview");
+        });
+        $("#solifonds").click(function(){
+            frappe.dom.freeze('Öffne Solidaritätsfonds...');
+            frappe.set_route("vbz-solifonds");
         });
         $("#mandat").click(function(){
             frappe.dom.freeze('Öffne Mandat-Übersicht...');

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Solidaritätsfonds – Abstimmung Vorstand</title>
+  <script>
+        window.frappe = {};
+        frappe.ready_events = [];
+        frappe.ready = function(fn) {
+            frappe.ready_events.push(fn);
+        }
+    </script>
+    <link type="text/css" rel="stylesheet" href="/assets/css/frappe-web-b4.css">
+    <style>
+        body { background: #F2F5F7; }
+        .abstimmung { max-width: 860px; margin: 0 auto; padding: 32px 16px; }
+        .abstimmung section { background: #fff; border-radius: 6px; padding: 24px; margin-bottom: 24px; }
+        .abstimmung .text { white-space: pre-wrap; }
+        .abstimmung .hinweis { color: #666; font-size: 14px; }
+        .abstimmung .btn { min-height: 44px; margin: 0 8px 8px 0; }
+    </style>
+</head>
+<body>
+    <script type="text/javascript" src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/assets/js/frappe-web.min.js"></script>
+    <script type="text/javascript" src="/assets/js/bootstrap-4-web.min.js"></script>
+    <main class="abstimmung">
+        {% if ungueltig %}
+        <section>
+            <h1>Link ungültig</h1>
+            <p>Dieser Abstimmungslink ist nicht (mehr) gültig.</p>
+        </section>
+        {% else %}
+        <section>
+            <p class="hinweis">Antrag auf Kostengutsprache aus dem Solidaritätsfonds · Fall {{ fall | e }}</p>
+            <h1>{{ art | e }}</h1>
+            <p class="hinweis">Anonymisiert – keine Personen- oder Adressdaten.</p>
+            <dl class="row">
+                <dt class="col-sm-4">Kostendach</dt><dd class="col-sm-8">CHF {{ kostendach }}</dd>
+                <dt class="col-sm-4">Thema</dt><dd class="col-sm-8">{{ themen | e }}</dd>
+            </dl>
+            {% if begruendung %}<h2 class="h5">Begründung</h2><p class="text">{{ begruendung | e }}</p>{% endif %}
+            {% if vorpruefung %}<h2 class="h5">Vorprüfung</h2><p class="text">{{ vorpruefung | e }}</p>{% endif %}
+            {% if stellungnahme_gl %}<h2 class="h5">Stellungnahme Geschäftsleitung</h2><p class="text">{{ stellungnahme_gl | e }}</p>{% endif %}
+        </section>
+        <section>
+            <h2 class="h4">Ihre Stimme</h2>
+            {% if offen %}
+                {% if meine_stimme %}<p>Ihre Stimme <strong>«{{ meine_stimme }}»</strong> ist erfasst. Sie können sie ändern, solange die Abstimmung läuft.</p>{% endif %}
+                <label for="kommentar">Kommentar (optional, nur für die Geschäftsleitung sichtbar)</label>
+                <textarea id="kommentar" class="form-control" rows="3">{{ mein_kommentar | e }}</textarea>
+                <div style="margin-top: 16px">
+                    <button class="btn btn-primary stimme" data-stimme="Ja">Zustimmen</button>
+                    <button class="btn btn-danger stimme" data-stimme="Nein">Ablehnen</button>
+                    <button class="btn btn-secondary stimme" data-stimme="Enthaltung">Enthaltung</button>
+                </div>
+                <p id="meldung" class="hinweis" role="status"></p>
+            {% else %}
+                <p>Die Abstimmung ist abgeschlossen (Status: {{ status | e }}).{% if meine_stimme %} Ihre Stimme: «{{ meine_stimme }}».{% endif %}</p>
+            {% endif %}
+            <p class="hinweis">Stand: {{ stand.ja + stand.nein + stand.enthaltung }} von {{ stand.total }} Stimmen abgegeben · Ja {{ stand.ja }} · Nein {{ stand.nein }} · Enthaltung {{ stand.enthaltung }}. Es gilt die einfache Mehrheit der abgegebenen Stimmen; die Geschäftsleitung schliesst die Abstimmung ab.</p>
+        </section>
+        <p class="hinweis">Sie erhalten diesen persönlichen Link, weil Sie als Kontaktperson mit der Eigenschaft «Vorstand» erfasst sind. Bitte nicht weiterleiten.</p>
+        {% endif %}
+    </main>
+    {% if not ungueltig and offen %}
+    <script>
+        frappe.ready(function() {
+            $('.stimme').on('click', function() {
+                var stimme = $(this).attr('data-stimme');
+                $('.stimme').prop('disabled', true);
+                frappe.call({
+                    method: 'mvd.mvd.doctype.mandat.solifonds.abstimmen',
+                    args: {
+                        token: {{ token | tojson }},
+                        stimme: stimme,
+                        kommentar: $('#kommentar').val()
+                    },
+                    callback: function(r) {
+                        if (!r.exc) {
+                            $('#meldung').text('Danke – Ihre Stimme «' + stimme + '» ist erfasst.');
+                            setTimeout(function() { window.location.reload(); }, 1200);
+                        }
+                    },
+                    always: function() {
+                        $('.stimme').prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

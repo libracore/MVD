@@ -82,6 +82,13 @@
         </center>
     </div>
 
+    <div class="control-card blue-card" id="solifonds" {% if frappe.boot.default_sektion != "MVBE" || !frappe.user.has_role(["MV_Solifonds_GL", "MV_Solifonds_Vorpruefung"]) %} style="display: none;"{% endif %}>
+        <center>
+            <i class="fa fa-balance-scale blue-icon"></i>
+            <p>{{ __("Solifonds") }}</p>
+        </center>
+    </div>
+
     <div class="control-card blue-card" id="siedlungsfaelle" {% if frappe.boot.default_sektion != "MVZH" %} style="display: none;"{% endif %}>
         <center>
             <i class="fa fa-cubes blue-icon"></i>

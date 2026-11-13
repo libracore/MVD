@@ -5,11 +5,42 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils.data import now_datetime
+from mvd.mvd.doctype.mandat.mandat_permissions import get_va_kontaktpersonen
+from mvd.mvd.doctype.mandat.mandat_status import ERLEDIGT
 
 TYP_SPALTEN = {
     'Rechtsschutzversicherung': 'rsv',
     'Solidaritätsfonds': 's'
 }
+
+# ---------------------------------------------------------------------------
+# Konfiguration der Seite: welche Abschnitte, in welcher Reihenfolge, aufgeklappt oder zu
+# ---------------------------------------------------------------------------
+# Abschnitte (Schlüssel -> Titel). Die Inhalte stehen in vbz_mandate.html ({% if a.key == "…" %}).
+ABSCHNITTE = {
+    'uebersicht': 'Übersicht nach Status',
+    'meine_offen': 'Meine offenen Mandate',
+    'meine_erledigt': 'Meine erledigten Mandate',
+}
+
+# Ansichten je Rolle: die ERSTE passende Zeile gilt.
+#   wer:        'va' (Vertrauensanwält*in, sieht nur eigene Mandate), ein Rollenname (z. B. 'MV_Solifonds_GL') oder '*' (alle übrigen)
+#   abschnitte: Liste (Abschnitt, aufgeklappt) in der gewünschten Reihenfolge; nicht aufgeführte Abschnitte erscheinen nicht.
+# «meine_offen» / «meine_erledigt» gibt es nur für VAs (sonst wären es alle Mandate der Sektion).
+ANSICHTEN = [
+    ('va', [('meine_offen', True), ('meine_erledigt', False)]),
+    ('*', [('uebersicht', True)]),
+]
+
+
+def get_ansicht(ist_va):
+    rollen = set(frappe.get_roles())
+    for wer, abschnitte in ANSICHTEN:
+        if wer == '*' or (wer == 'va' and ist_va) or wer in rollen:
+            return [{'key': key, 'titel': ABSCHNITTE[key], 'offen': 1 if offen else 0}
+                    for key, offen in abschnitte
+                    if key in ABSCHNITTE and (ist_va or not key.startswith('meine_'))]
+    return []
 
 @frappe.whitelist()
 def get_status_uebersicht():
@@ -31,9 +62,39 @@ def get_status_uebersicht():
         for spalte in total:
             total[spalte] += werte[spalte]
 
+    ist_va = get_va_kontaktpersonen() is not None
+    meine_mandate = get_meine_mandate(status_optionen) if ist_va else []
     return {
         'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
+        'ist_va': ist_va,
+        'abschnitte': get_ansicht(ist_va),
+        'meine_offen': [m for m in meine_mandate if not m.erledigt],
+        'meine_erledigt': [m for m in meine_mandate if m.erledigt],
         'status_liste': status_liste,
         'total': dict(total, summe=sum(total.values())),
         'hat_ohne_typ': total['ohne_typ'] > 0
     }
+
+
+def get_meine_mandate(status_optionen):
+    # #2206: Mandate der Vertrauensanwält*in (Einschränkung über mandat_permissions, get_list)
+    # #2205: alle zugewiesenen, egal welcher Status; offene zuerst, erledigte danach
+    mandate = frappe.get_list('Mandat',
+        fields=['name', 'status', 'typ', 'mv_mitgliedschaft', 'fertigstellen_bis', 'creation'],
+        order_by='creation asc', limit_page_length=0)
+
+    mitglieder = {}
+    ids = list(set(m.mv_mitgliedschaft for m in mandate if m.mv_mitgliedschaft))
+    if ids:
+        for mg in frappe.get_all('Mitgliedschaft', filters={'name': ['in', ids]},
+                fields=['name', 'mitglied_nr', 'vorname_1', 'nachname_1', 'firma']):
+            name = " ".join(x for x in (mg.vorname_1, mg.nachname_1) if x) or mg.firma or ''
+            mitglieder[mg.name] = {'mitglied_nr': mg.mitglied_nr or mg.name, 'mitglied_name': name}
+
+    reihenfolge = dict((status, i) for i, status in enumerate(status_optionen))
+    for m in mandate:
+        m.update(mitglieder.get(m.mv_mitgliedschaft, {'mitglied_nr': m.mv_mitgliedschaft or '', 'mitglied_name': ''}))
+        m.typ_kurz = TYP_SPALTEN.get(m.typ, '').upper() or '–'
+        m.erledigt = 1 if m.status in ERLEDIGT else 0
+    mandate.sort(key=lambda m: (m.erledigt, reihenfolge.get(m.status, len(reihenfolge)), m.creation))
+    return mandate

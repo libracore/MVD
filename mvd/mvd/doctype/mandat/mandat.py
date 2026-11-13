@@ -5,6 +5,8 @@
 from __future__ import unicode_literals
 import io
 import zipfile
+import requests
+from six.moves.urllib.parse import quote
 import frappe
 from frappe.model.document import Document
 from frappe.core.doctype.communication.email import make
@@ -14,10 +16,41 @@ from frappe.model.naming import make_autoname
 from frappe.email.doctype.email_template.email_template import get_email_template
 from frappe.utils.pdf import get_pdf
 from frappe import attach_print
-from frappe.utils import get_url_to_form, get_url, escape_html
-from frappe.utils.file_manager import get_file_path
+from frappe.utils import get_url_to_form, get_url, escape_html, cint, now_datetime, strip_html
+from mvd.mvd.doctype.mandat.mandat_status import status_vor_speichern, set_status, RSV, QUELLE_AUTOMATIK
+
+SOLIFONDS_KOSTENDACH = {
+    "mangels Rechtsschutzdeckung": 3000,
+    "aus ideellen Gründen": 8000
+}
+
+SOLIFONDS_KRITERIEN = [
+    "kriterium_notlage",
+    "kriterium_vermoegenseinbussen",
+    "kriterium_erfolgsaussichten",
+    "kriterium_finanzielle_notlage",
+    "kriterium_keine_rs_deckung"
+]
+
+def darf_fall_verfolgen():
+    return bool({"MV_Solifonds_GL", "MV_Solifonds_Vorpruefung"} & set(frappe.get_roles()))
+
+def darf_visieren():
+    # #2210: Visum setzt und entfernt nur die GL
+    return "MV_Solifonds_GL" in frappe.get_roles()
 
 class Mandat(Document):
+    def onload(self):
+        # Solifonds nach dem Einreichen: Formular für «nur RB» schreibgeschützt (mandat.js)
+        from mvd.mvd.doctype.mandat.mandat_permissions import ist_rb_gesperrt, ist_nur_rb
+        self.set_onload("rb_gesperrt", ist_rb_gesperrt(self))
+        self.set_onload("nur_rb", ist_nur_rb())
+        # Status-Hinweis oben im Formular (mandat.js, status_hinweis): eigene VA? CC-Adresse fürs Einreichen bei der Coop
+        from mvd.mvd.doctype.mandat.solifonds import _ist_va_von_mandat
+        self.set_onload("ist_va", _ist_va_von_mandat(self))
+        if self.typ != "Solidaritätsfonds" and self.status == "Vorgemerkt":
+            self.set_onload("cc_adresse", get_cc_adresse(self))
+
     def autoname(self):
         jahr = datetime.date.today().year
         if self.mv_mitgliedschaft:
@@ -27,6 +60,15 @@ class Mandat(Document):
         self.name = make_autoname("{0}-{1}-.#".format(sektion, jahr))
 
     def before_save(self):
+        # «Fall verfolgen» dürfen nur GL und Vorprüfung ändern
+        if not darf_fall_verfolgen() and not frappe.flags.in_patch:
+            alt = 0 if self.is_new() else cint(frappe.db.get_value("Mandat", self.name, "fall_verfolgen"))
+            if cint(self.fall_verfolgen) != alt:
+                frappe.throw(frappe._("«Fall verfolgen» können nur Geschäftsleitung und Vorprüfung setzen."))
+
+        self.pruefe_visum()
+        self.pruefe_verknuepfung()
+
         if self.kontaktperson and "pool" in self.kontaktperson.lower():
             self.kontaktperson = None
             frappe.throw(
@@ -34,18 +76,51 @@ class Mandat(Document):
                 title=frappe._("Ungültige Kontaktperson")
             )
 
-        if not self.kontaktperson:
-            self.status = "Unzugewiesen"
+        # #2208: Hierarchie wie in der Beratung – (2) nur mit (1), (3) nur mit (2); Lücken aufrücken
+        set_beratungskategorien(self, [self.get(f) for f in KATEGORIE_FELDER])
 
-        elif self.is_new():
-            self.status = "Vorgemerkt"
+        if self.typ == "Solidaritätsfonds":
+            self.kostendach = SOLIFONDS_KOSTENDACH.get(self.solifonds_art) or 0
 
+        # #2205: Status-Regeln, Automatik Unzugewiesen/Vorgemerkt (nur vor dem Einreichen, #2207) und Statusverlauf
+        status_vor_speichern(self)
+
+    def pruefe_verknuepfung(self):
+        # Mitglied und Beratung legt create_mandat fest; ändern darf sie danach nur System Manager.
+        # «Bestätigungs-E-Mail gesendet» setzt das System (db_set); von Hand nicht durch «nur RB».
+        if self.is_new() or frappe.flags.in_patch:
+            return
+        from mvd.mvd.doctype.mandat.mandat_permissions import ist_nur_rb
+        alt = frappe.db.get_value("Mandat", self.name, ["mv_mitgliedschaft", "beratung", "bestaetigungs_email_gesendet"],
+                                  as_dict=True) or {}
+        if "System Manager" not in frappe.get_roles():
+            for feld, label in (("mv_mitgliedschaft", "Mitglied"), ("beratung", "Beratung")):
+                if (self.get(feld) or None) != (alt.get(feld) or None):
+                    frappe.throw(frappe._("«{0}» kann nur ein System Manager ändern.").format(frappe._(label)))
+        if cint(self.bestaetigungs_email_gesendet) != cint(alt.get("bestaetigungs_email_gesendet")) and ist_nur_rb():
+            frappe.throw(frappe._("«Bestätigungs-E-Mail gesendet» kann die Rechtsberatung nicht ändern."))
+
+    def pruefe_visum(self):
+        # #2210: Visum nur bei RSV und nur durch die GL; wer und wann wird festgehalten
+        alt = 0 if self.is_new() else cint(frappe.db.get_value("Mandat", self.name, "visum"))
+        if cint(self.visum) == alt or frappe.flags.in_patch:
+            return
+        if not darf_visieren():
+            frappe.throw(frappe._("Das Visum kann nur die Geschäftsleitung setzen oder entfernen."))
+        if cint(self.visum) and self.typ == "Solidaritätsfonds":
+            frappe.throw(frappe._("Ein Visum gibt es nur bei Mandaten Rechtsschutzversicherung."))
+        if cint(self.visum):
+            self.visiert_von = frappe.session.user
+            self.visiert_am = now_datetime()
         else:
-            old_doc = self.get_doc_before_save()
-            if old_doc and not old_doc.kontaktperson and self.kontaktperson:
-                self.status = "Vorgemerkt"
+            self.visiert_von = None
+            self.visiert_am = None
+        self.flags.visum_geaendert = True
 
     def on_update(self):
+        if self.flags.visum_geaendert:
+            self.add_comment("Info", frappe._("Mandat visiert.") if cint(self.visum) else frappe._("Visum entfernt."))
+
         # Bestätigungs-Email senden
         if (self.typ == "Rechtsschutzversicherung" and 
             self.kontaktperson and 
@@ -56,7 +131,8 @@ class Mandat(Document):
                 self.db_set("bestaetigungs_email_gesendet", 1)
 
 @frappe.whitelist()
-def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenliche_bemerkung=None, thema=None):
+def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenliche_bemerkung=None, beratungskategorien=None,
+                  fall_verfolgen=0, solifonds_art=None, solifonds_begruendung=None, kriterien=None, sprache=None):
     from mvd.mvd.doctype.beratung.beratung import uebernahme
 
     if "MV_Mandat" not in frappe.get_roles():
@@ -66,8 +142,14 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     if not beratung.has_permission("read"):
         frappe.throw(frappe._("Keine Berechtigung für diese Beratung."), frappe.PermissionError)
 
-    if beratung.mandat:
+    # Doppelklick / mehrere Anfragen gleichzeitig: Beratung bis zum Ende der Transaktion sperren und den
+    # aktuellen Stand lesen (FOR UPDATE liest den zuletzt gespeicherten Wert, nicht den Stand vom Anfang der Anfrage)
+    aktuelles_mandat = frappe.db.sql("SELECT `mandat` FROM `tabBeratung` WHERE `name` = %s FOR UPDATE", beratung.name)
+    if beratung.mandat or (aktuelles_mandat and aktuelles_mandat[0][0]):
         frappe.throw(frappe._("Es existiert bereits ein Mandat für diesen Datensatz."))
+
+    if not beratung.mv_mitgliedschaft:
+        frappe.throw(frappe._("Ein Mandat ist nur für Beratungen mit Mitglied möglich. Bitte zuerst die Beratung einem Mitglied zuordnen und speichern."))
 
     if not beratung.beratungskategorie:
         frappe.throw(frappe._("Bitte zuerst in der Beratung die Beratungskategorie setzen und speichern."))
@@ -81,21 +163,120 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     mandat.mv_mitgliedschaft = beratung.mv_mitgliedschaft
     mandat.sektion_id = beratung.sektion_id
     mandat.beratung = beratung.name
-    # Themen aus dem Dialog; ohne Angabe die Beratungskategorien der Beratung
-    themen = frappe.parse_json(thema) if thema else get_beratungskategorien(beratung)
-    for _thema in themen:
-        if _thema and _thema not in [t.thema for t in mandat.get("thema")]:
-            mandat.append("thema", {"thema": _thema})
+    # #2208: Beratungskategorien (1)-(3) wie in der Beratung; aus dem Dialog (änderbar), sonst 1:1 aus der Beratung
+    kategorien = frappe.parse_json(beratungskategorien) if beratungskategorien else get_beratungskategorien(beratung)
+    set_beratungskategorien(mandat, kategorien)
     mandat.kontaktperson = berater_in
-    mandat.typ = typ
+    mandat.typ = typ or RSV
+    # #2211: Verfahrenssprache (nur de/fr) aus dem Dialog (änderbar), sonst aus der Mitgliedschaft
+    if sprache and sprache not in VERFAHRENSSPRACHEN:
+        frappe.throw(frappe._("Als Verfahrenssprache sind nur Deutsch (de) und Französisch (fr) möglich."))
+    if not sprache:
+        sprache = frappe.db.get_value("Mitgliedschaft", beratung.mv_mitgliedschaft, "language")
+    mandat.sprache = sprache if sprache in VERFAHRENSSPRACHEN else None
     mandat.bemerkung = bemerkung
     mandat.persoenliche_bemerkung = persoenliche_bemerkung
+    # «Fall verfolgen» setzen nur GL und Vorprüfung
+    mandat.fall_verfolgen = cint(fall_verfolgen) if darf_fall_verfolgen() else 0
+
+    if typ == "Solidaritätsfonds":
+        mandat.solifonds_art = solifonds_art
+        # Begründung schon beim Erstellen Pflicht (früher erst beim Einreichen), damit gleich eingereicht werden kann
+        if not (solifonds_begruendung or "").strip():
+            frappe.throw(frappe._("Bitte eine Begründung für das Solifonds-Gesuch erfassen."))
+        mandat.solifonds_begruendung = solifonds_begruendung
+        # Kriterien gibt es nur bei "mangels Rechtsschutzdeckung"
+        if solifonds_art == "mangels Rechtsschutzdeckung":
+            gewaehlt = frappe.parse_json(kriterien) if kriterien else []
+            for kriterium in SOLIFONDS_KRITERIEN:
+                mandat.set(kriterium, 1 if kriterium in gewaehlt else 0)
+            # #2218: alle Kriterien (kumulativ) schon beim Erstellen Pflicht, nicht erst beim Einreichen
+            from mvd.mvd.doctype.mandat.solifonds import _check_kriterien
+            _check_kriterien(mandat)
+
+    # #2213: Mietobjekt und zuständige Schlichtungsbehörde übernehmen
+    if beratung.mv_mitgliedschaft:
+        mandat.mietobjekt, mandat.schlichtungsbehoerde = get_mietobjekt_und_schlichtungsbehoerde(beratung.mv_mitgliedschaft)
 
     mandat.insert(ignore_permissions=True)
 
     frappe.db.set_value("Beratung", beratung.name, "mandat", mandat.name)
 
+    # #2238: im Verlauf der Beratung festhalten (wer und wann zeigt der Eintrag selbst)
+    if mandat.kontaktperson:
+        uebernahme_text = frappe._("übernommen von {0}").format(escape_html(mandat.kontaktperson))
+    else:
+        uebernahme_text = frappe._("nicht übernommen, das Sekretariat sucht eine Vertrauensanwält*in")
+    beratung.add_comment("Info", frappe._("Mandat {0} erstellt (Typ: {1}), {2}.").format(
+        '<a href="#Form/Mandat/{0}">{0}</a>'.format(escape_html(mandat.name)), escape_html(mandat.typ), uebernahme_text))
+
     return mandat.name
+
+def get_mietobjekt_und_schlichtungsbehoerde(mitgliedschaft):
+    # #2213: Objektadresse der Mitgliedschaft als Text und die zuständige Schlichtungsbehörde.
+    # Ohne Treffer im Gebäudeverzeichnis oder ohne Antwort von mp.libracore.ch bleibt die Behörde leer.
+    from mvd.mvd.doctype.mitgliedschaft.mitgliedschaft import validate_address
+    m = frappe.db.get_value("Mitgliedschaft", mitgliedschaft, [
+        "name", "objekt_zusatz_adresse", "objekt_strasse", "objekt_hausnummer", "objekt_nummer_zu",
+        "objekt_plz", "objekt_ort"], as_dict=True)
+    if not m:
+        return None, None
+    zeilen = [
+        m.objekt_zusatz_adresse,
+        " ".join(x for x in (m.objekt_strasse, "{0}{1}".format(m.objekt_hausnummer or "", m.objekt_nummer_zu or "")) if x),
+        " ".join(x for x in (m.objekt_plz, m.objekt_ort) if x)
+    ]
+    mietobjekt = "\n".join(z for z in zeilen if z) or None
+
+    # validate_address mit doc statt doc_id schreibt nichts in die Mitgliedschaft
+    validierung = validate_address(doc=frappe._dict(m))
+    behoerde = None
+    if validierung.get("success") and validierung.get("bfs_nr"):
+        behoerde = get_schlichtungsbehoerde_adresse(validierung.get("bfs_nr"))
+    return mietobjekt, behoerde
+
+def get_schlichtungsbehoerde_adresse(bfs_nr):
+    try:
+        response = requests.get("https://mp.libracore.ch/api/method/mietrechtspraxis.api.get_arbitration_authority_from_bfs",
+            params={"bfs_nr": bfs_nr}, timeout=5)
+        daten = (response.json() or {}).get("message") if response.status_code == 200 else None
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "Mandat: Schlichtungsbehörde nicht abrufbar")
+        return None
+    if not daten or not daten.get("aa_address_html"):
+        return None
+    # «Name, Region, Strasse, PLZ Ort» -> eine Zeile pro Teil
+    return "\n".join(t.strip() for t in strip_html(daten.get("aa_address_html")).split(",") if t.strip()) or None
+
+@frappe.whitelist()
+def schlichtungsbehoerde_ermitteln(mandat):
+    doc = frappe.get_doc("Mandat", mandat)
+    if not doc.has_permission("write"):
+        frappe.throw(frappe._("Keine Berechtigung für dieses Mandat."), frappe.PermissionError)
+    if not doc.mv_mitgliedschaft:
+        frappe.throw(frappe._("Das Mandat hat kein Mitglied."))
+    mietobjekt, behoerde = get_mietobjekt_und_schlichtungsbehoerde(doc.mv_mitgliedschaft)
+    if not behoerde:
+        frappe.throw(frappe._("Die Schlichtungsbehörde konnte nicht ermittelt werden: Die Objektadresse wurde im amtlichen Gebäudeverzeichnis nicht gefunden oder mp.libracore.ch antwortet nicht."))
+    doc.schlichtungsbehoerde = behoerde
+    if not doc.mietobjekt:
+        doc.mietobjekt = mietobjekt
+    doc.save()
+    return behoerde
+
+KATEGORIE_FELDER = ("beratungskategorie", "beratungskategorie_2", "beratungskategorie_3")
+
+def set_beratungskategorien(mandat, kategorien):
+    # Reihenfolge bleibt, leere und doppelte fallen weg, höchstens drei
+    liste = []
+    for kategorie in kategorien or []:
+        if kategorie and kategorie not in liste:
+            liste.append(kategorie)
+    for i, feld in enumerate(KATEGORIE_FELDER):
+        mandat.set(feld, liste[i] if i < len(liste) else None)
+
+def get_beratungskategorien_text(mandat):
+    return ", ".join(k for k in (mandat.get(f) for f in KATEGORIE_FELDER) if k)
 
 def get_beratungskategorien(beratung):
     kategorien = []
@@ -104,6 +285,21 @@ def get_beratungskategorien(beratung):
         if kategorie and kategorie not in kategorien and frappe.db.exists("Beratungskategorie", kategorie):
             kategorien.append(kategorie)
     return kategorien
+
+def get_cc_adresse(mandat):
+    """CC-Adresse fürs Einreichen bei der Coop, genau wie in der Bestätigungs-E-Mail an die VA
+    (Email Template der Sektion, z. B. «mv+Mandat+MVBE-2026-1@libracore.io»). None, wenn nicht ermittelbar."""
+    import re
+    template = frappe.db.get_value("Sektion", mandat.sektion_id, "template_bestaetigung_kontaktperson")
+    if not template:
+        return None
+    try:
+        text = strip_html(get_email_template(template, {"doc": mandat}).get("message") or "")
+    except Exception:
+        return None
+    treffer = re.search(r"[\w.\-]+\+Mandat\+{0}@[\w.\-]+".format(re.escape(mandat.name)), text)
+    return treffer.group(0) if treffer else None
+
 
 def send_confirmation_email(mandat):
     try:
@@ -145,7 +341,9 @@ def send_confirmation_email(mandat):
             link_mandat = get_url_to_form("Mandat", mandat.name)
             if mandat.mv_mitgliedschaft:
                 link_mitglied = get_url_to_form("Mitgliedschaft", mandat.mv_mitgliedschaft)
-                mitglied_label = str(mandat.mv_mitgliedschaft)
+                # #2209: zusätzlich die Mitglied-Nr. (MV…)
+                mitglied_nr = mandat.mitglied_nr or frappe.db.get_value("Mitgliedschaft", mandat.mv_mitgliedschaft, "mitglied_nr")
+                mitglied_label = "{0} ({1})".format(mandat.mv_mitgliedschaft, mitglied_nr) if mitglied_nr else str(mandat.mv_mitgliedschaft)
             else:
                 link_mitglied = "#"
                 mitglied_label = "Keine Mitgliedschaft verknüpft"
@@ -167,25 +365,11 @@ def send_confirmation_email(mandat):
                 file_doc.insert(ignore_permissions=True)
                 attachments.append({"fid": file_doc.name})
             
-            zip_data = get_beratung_zip_attachment(mandat.beratung)
+            # #2214: statt ZIP-Datei ein Link; das ZIP entsteht erst beim Abruf (Login und Leserecht aufs Mandat nötig)
             zip_link_html = ""
-            if zip_data:
-                zip_file_doc = frappe.get_doc({
-                    "doctype": "File",
-                    "file_name": zip_data["fname"],
-                    "attached_to_doctype": "Mandat",
-                    "attached_to_name": mandat.name,
-                    "content": zip_data["fcontent"],
-                    "is_private": 1
-                })
-                zip_file_doc.insert(ignore_permissions=True)
-                # Falls ZIP kleiner als 8 MB hängen wir es dem Email an
-                if len(zip_data["fcontent"]) <= 8 * 1024 * 1024:
-                    attachments.append({"fid": zip_file_doc.name})
-                    zip_link_html = "Alle Anlagen: Als ZIP-Datei im Anhang"
-                else:
-                    zip_url = get_url(zip_file_doc.file_url)
-                    zip_link_html = """<a href="{0}">Download alle Anlagen als ZIP</a> """.format(zip_url)
+            if mandat.beratung and frappe.db.count("File", {"attached_to_doctype": "Beratung", "attached_to_name": mandat.beratung}):
+                zip_link_html = """<a href="{0}">Alle Anlagen der Beratung als ZIP herunterladen</a> (Anmeldung in Libracore nötig)""".format(
+                    get_anlagen_zip_url(mandat.name))
 
             persoenliche_bemerkung_html = ""
             if mandat.persoenliche_bemerkung:
@@ -201,10 +385,11 @@ def send_confirmation_email(mandat):
                     <b>Interne Links für Berater:</b><br>
                     - <a href="{0}">Direkt zur Beratung: {1}</a><br>
                     - <a href="{2}">Direkt zum Mandat: {3}</a><br>
-                    - <a href="{4}">Zur Mitgliedschaft: {5}</a><br>
-                    - {6}
+                    - <a href="{4}">Zur Mitgliedschaft: {5}</a>{6}
                 </p>
-            """.format(link_beratung, mandat.beratung,link_mandat, mandat.name, link_mitglied, mitglied_label, zip_link_html)
+            """.format(link_beratung, mandat.beratung, link_mandat, mandat.name, link_mitglied, escape_html(mitglied_label),
+                       # #2216: Zeile «Anlagen» nur, wenn es Anlagen gibt (sonst blieb ein einzelner Strich stehen)
+                       "<br>\n                    - {0}".format(zip_link_html) if zip_link_html else "")
             
             full_message = rendered_berater.get("message") + persoenliche_bemerkung_html + footer_links
             comm = make(
@@ -278,11 +463,32 @@ def send_confirmation_email(mandat):
         return False
 
 
+def get_anlagen_zip_url(mandat):
+    return get_url("/api/method/mvd.mvd.doctype.mandat.mandat.download_anlagen?mandat={0}".format(quote(mandat)))
+
+@frappe.whitelist(allow_guest=True)
+def download_anlagen(mandat):
+    # #2214: Anlagen der Beratung als ZIP, erst beim Abruf erzeugt. allow_guest nur, um Gäste zum Login umzuleiten.
+    if frappe.session.user == "Guest":
+        frappe.local.response["type"] = "redirect"
+        frappe.local.response["location"] = "/login?redirect-to={0}".format(
+            quote("/api/method/mvd.mvd.doctype.mandat.mandat.download_anlagen?mandat={0}".format(quote(mandat))))
+        return
+    doc = frappe.get_doc("Mandat", mandat)
+    if not doc.has_permission("read"):
+        frappe.throw(frappe._("Keine Berechtigung für dieses Mandat."), frappe.PermissionError)
+    zip_data = get_beratung_zip_attachment(doc.beratung) if doc.beratung else None
+    if not zip_data:
+        frappe.throw(frappe._("Zu diesem Mandat gibt es keine Anlagen."))
+    frappe.local.response.filename = zip_data["fname"]
+    frappe.local.response.filecontent = zip_data["fcontent"]
+    frappe.local.response.type = "download"
+
 def get_beratung_zip_attachment(beratung_id):
     files = frappe.get_all("File", filters={
         "attached_to_doctype": "Beratung",
         "attached_to_name": beratung_id
-    }, fields=["file_name", "file_url", "file_size"])
+    }, fields=["name", "file_name", "file_url", "file_size"])
 
     if not files:
         return None
@@ -291,9 +497,8 @@ def get_beratung_zip_attachment(beratung_id):
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
         for f in files:
             try:
-                file_path = get_file_path(f.file_name) if not f.file_url.startswith('/') else f.file_url.lstrip('/')
-                full_path = frappe.get_site_path(file_path)
-                
+                # get_full_path kennt öffentliche (/files) und private (/private/files) Dateien
+                full_path = frappe.get_doc("File", f.name).get_full_path()
                 with open(full_path, "rb") as content:
                     zip_file.writestr(f.file_name, content.read())
             except Exception as e:
@@ -305,8 +510,43 @@ def get_beratung_zip_attachment(beratung_id):
     }
 
 
+VERFAHRENSSPRACHEN = ("de", "fr")
+SPRACHNAMEN = {"de": "Deutsch", "fr": "Französisch"}
+
+def sprachname(sprache):
+    if not sprache:
+        return ""
+    return SPRACHNAMEN.get(sprache) or frappe.db.get_value("Language", sprache, "language_name") or sprache
+
 @frappe.whitelist()
-def suche_vertrauensanwaeltin(mandat_id, sektion_id):
+def get_mitglied_sprache(beratung):
+    # #2211: Vorbelegung «Verfahrenssprache» im Dialog «Mandat erstellen»
+    beratung = frappe.get_doc("Beratung", beratung)
+    if not beratung.has_permission("read"):
+        frappe.throw(frappe._("Keine Berechtigung für diese Beratung."), frappe.PermissionError)
+    if not beratung.mv_mitgliedschaft:
+        return None
+    sprache = frappe.db.get_value("Mitgliedschaft", beratung.mv_mitgliedschaft, "language")
+    return sprache if sprache in VERFAHRENSSPRACHEN else None
+
+def filter_va_nach_sprache(kontaktpersonen, sprache):
+    # #2211: VAs mit dieser Sprache; wer noch keine Sprache eingetragen hat, gilt für alle Sprachen
+    if not kontaktpersonen:
+        return []
+    mit_sprachen = {}
+    for z in frappe.db.get_all("Termin Kontaktperson Multi Language",
+            filters={"parent": ["in", kontaktpersonen], "parenttype": "Termin Kontaktperson"}, fields=["parent", "language"]):
+        mit_sprachen.setdefault(z.parent, set()).add(z.language)
+    return [k for k in kontaktpersonen if k not in mit_sprachen or sprache in mit_sprachen[k]]
+
+@frappe.whitelist()
+def suche_vertrauensanwaeltin(mandat_id, sektion_id=None, nur_sprache=0):
+    # Nur wer das Mandat lesen darf; Sektion aus dem Mandat, nicht vom Client
+    mandat = frappe.get_doc("Mandat", mandat_id)
+    if not mandat.has_permission("read"):
+        frappe.throw(frappe._("Keine Berechtigung für dieses Mandat."), frappe.PermissionError)
+    sektion_id = mandat.sektion_id
+
     anwaelte = frappe.db.get_all("Termin Kontaktperson", 
         filters={"ist_vertrauensanwaeltin": 1, "sektion_id": sektion_id}, 
         fields=["name"]
@@ -315,6 +555,11 @@ def suche_vertrauensanwaeltin(mandat_id, sektion_id):
         frappe.throw("Es wurden keine Kontaktpersonen mit dem Status 'Vertrauensanwält*in' gefunden.")
     
     anwaelte_liste = [d.name for d in anwaelte]
+    if cint(nur_sprache) and mandat.sprache:
+        anwaelte_liste = filter_va_nach_sprache(anwaelte_liste, mandat.sprache)
+        if not anwaelte_liste:
+            frappe.throw(frappe._("Keine Vertrauensanwält*in der Sektion hat die Sprache «{0}». Es wurde keine Mail vorbereitet. "
+                "Mit «Nein» wird an alle Vertrauensanwält*innen geschrieben.").format(sprachname(mandat.sprache)))
     raw_recipients = frappe.db.get_all("Termin Kontaktperson Multi User", 
         filters={"parent": ["in", anwaelte_liste]}, 
         fields=["user"]
@@ -329,6 +574,14 @@ def suche_vertrauensanwaeltin(mandat_id, sektion_id):
     visierende_person = frappe.db.get_value("Sektion", sektion_id, "visierende_person")
 
     subject = "Neues unzugewiesenes Mandat verfügbar: {0}".format(mandat_id)
+    if mandat.typ == "Solidaritätsfonds":
+        # #2219: Hinweis auf den Solidaritätsfonds (Art des Antrags, Kostendach)
+        hinweis = ["Solidaritätsfonds"]
+        if mandat.solifonds_art:
+            hinweis.append(mandat.solifonds_art)
+        if mandat.kostendach:
+            hinweis.append("Kostendach CHF {0}".format(frappe.utils.fmt_money(mandat.kostendach, precision=0)))
+        subject = "Neues unzugewiesenes Mandat verfügbar ({0}): {1}".format(", ".join(hinweis), mandat_id)
 
     email_template = frappe.db.get_value("Sektion", sektion_id, "template_suche_vertrauensanwaeltin")
 
@@ -359,8 +612,13 @@ def update_mandat_status_nach_email(doc, method):
         "link_name": mandat_name,
     })
 
-    if anzahl_emails == 1:
-        frappe.db.set_value("Mandat", mandat_name, "status", "Gesuch eingereicht")
+    # Beim Solidaritätsfonds steuert der Ablauf (Einreichen, Vorprüfung, GL) den Status
+    if frappe.db.get_value("Mandat", mandat_name, "typ") == "Solidaritätsfonds":
+        return
+
+    # #2205: nur aus «Vorgemerkt» (mit VA); Status und Statusverlauf gemeinsam
+    if anzahl_emails == 1 and frappe.db.get_value("Mandat", mandat_name, "status") == "Vorgemerkt":
+        set_status("Mandat", mandat_name, "Gesuch eingereicht", QUELLE_AUTOMATIK, "Erste E-Mail eingegangen")
         frappe.get_doc({
             "doctype": "Comment",
             "comment_type": "Info",

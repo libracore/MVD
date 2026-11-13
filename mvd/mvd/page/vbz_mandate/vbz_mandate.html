@@ -1,7 +1,11 @@
 <div class="row">
-    <h1 class="vbz">Mandate<span id="datenstand" class="pull-right">Datenstand: {{ datenstand }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
+    <h1 class="vbz">{{ ist_va ? "Meine Mandate" : "Mandate" }}{% if frappe.user.has_role(["System Manager", "MV_RB", "MV_MA", "MV_RW", "MV_GL"]) %}<a href="#vbz_beratung_termine" class="btn btn-default btn-sm" style="margin-left: 15px; vertical-align: middle;">Termine/Beratungen</a>{% endif %}<span id="datenstand" class="pull-right">Datenstand: {{ datenstand }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
 </div>
-<div class="row">
+{% for a in abschnitte %}
+{% let liste = a.key == "meine_offen" ? meine_offen : (a.key == "meine_erledigt" ? meine_erledigt : null); %}
+<details class="row vbz-abschnitt" data-abschnitt="{{ a.key }}" {% if a.offen %}open{% endif %}>
+    <summary><h2>{{ a.titel }} <span class="text-muted">({{ liste ? liste.length : total.summe }})</span></h2></summary>
+    {% if a.key == "uebersicht" %}
     <table id="table_mandat_uebersicht">
         <tr>
             <th><b>Status</b></th>
@@ -30,4 +34,34 @@
             {% endif %}
         </tr>
     </table>
-</div>
+    {% endif %}
+    {% if liste %}
+    {% if liste.length %}
+    <table class="table table-condensed table-meine-mandate">
+        <tr>
+            <th>Mandat</th>
+            <th>Mitglied-Nr.</th>
+            <th>Name</th>
+            <th title="RSV = Rechtsschutzversicherung, S = Solidaritätsfonds">Typ</th>
+            <th>Status</th>
+            <th>Fertigstellen bis</th>
+            <th>Erstellt</th>
+        </tr>
+        {% for m in liste %}
+        <tr {% if m.erledigt %}class="text-muted"{% endif %}>
+            <td><a href="#Form/Mandat/{{ encodeURIComponent(m.name) }}">{{ frappe.utils.escape_html(m.name) }}</a></td>
+            <td>{{ frappe.utils.escape_html(m.mitglied_nr || "") }}</td>
+            <td>{{ frappe.utils.escape_html(m.mitglied_name || "") }}</td>
+            <td>{{ m.typ_kurz }}</td>
+            <td>{{ frappe.utils.escape_html(m.status || "") }}</td>
+            <td>{{ m.fertigstellen_bis ? frappe.datetime.str_to_user(m.fertigstellen_bis) : "" }}</td>
+            <td>{{ frappe.datetime.str_to_user(m.creation).split(" ")[0] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="text-muted">Keine Mandate.</p>
+    {% endif %}
+    {% endif %}
+</details>
+{% endfor %}

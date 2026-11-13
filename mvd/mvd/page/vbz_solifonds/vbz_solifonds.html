@@ -1,0 +1,42 @@
+<div class="row">
+    <h1 class="vbz">Solidaritätsfonds<span id="datenstand" class="pull-right">Datenstand: {{ datenstand }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
+</div>
+{% for gruppe in gruppen %}
+<details class="row solifonds-gruppe" data-status="{{ gruppe.status }}" {% if gruppe.offen %}open{% endif %}>
+    <summary><h2>{{ gruppe.titel }} <span class="text-muted">({{ gruppe.mandate.length }})</span></h2></summary>
+    {% if gruppe.mandate.length %}
+    <table class="table table-condensed solifonds-tabelle">
+        <tr>
+            <th>Mandat</th>
+            <th>Mitglied</th>
+            <th>Art</th>
+            <th>Thema</th>
+            <th>VA</th>
+            <th style="text-align: right;">Kostendach</th>
+            <th>{{ gruppe.datum_label }}</th>
+            {% if gruppe.status == "Antrag Vorstand" %}<th>Abstimmung</th>{% endif %}
+            {% if gruppe.aktion %}<th></th>{% endif %}
+        </tr>
+        {% for m in gruppe.mandate %}
+        <tr>
+            <td><a href="#Form/Mandat/{{ encodeURIComponent(m.name) }}">{{ frappe.utils.escape_html(m.name) }}</a></td>
+            <td>{{ frappe.utils.escape_html(m.mitglied_nr || m.mv_mitgliedschaft || "") }}{% if m.mitglied_name %}<br><span class="text-muted">{{ frappe.utils.escape_html(m.mitglied_name) }}</span>{% endif %}</td>
+            <td>{{ frappe.utils.escape_html(m.solifonds_art || "") }}</td>
+            <td>{{ frappe.utils.escape_html(m.themen || "") }}</td>
+            <td>{{ m.kontaktperson ? frappe.utils.escape_html(m.kontaktperson) : "–" }}</td>
+            <td style="text-align: right;">{{ m.kostendach ? format_currency(m.kostendach, "CHF") : "" }}</td>
+            <td>{{ m[gruppe.datum_feld] ? frappe.datetime.str_to_user(m[gruppe.datum_feld]).split(" ")[0] : "" }}</td>
+            {% if gruppe.status == "Antrag Vorstand" %}
+            <td>{% if m.stand %}Ja {{ m.stand.ja }} · Nein {{ m.stand.nein }} · Enth. {{ m.stand.enthaltung }} · offen {{ m.stand.offen }}{% endif %}</td>
+            {% endif %}
+            {% if gruppe.aktion %}
+            <td style="text-align: right;"><button class="btn btn-xs btn-primary solifonds-aktion" data-aktion="{{ gruppe.aktion }}" data-mandat="{{ frappe.utils.escape_html(m.name) }}">{{ gruppe.aktion_label }}</button></td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="text-muted">Keine Gesuche.</p>
+    {% endif %}
+</details>
+{% endfor %}

@@ -1,0 +1,65 @@
+{
+ "creation": "2026-11-02 18:47:19.000000",
+ "docstatus": 0,
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "kontaktperson",
+  "stimme",
+  "abgestimmt_am",
+  "kommentar",
+  "token"
+ ],
+ "fields": [
+  {
+   "fieldname": "kontaktperson",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vorstand",
+   "options": "Termin Kontaktperson",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stimme",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Stimme",
+   "options": "\nJa\nNein\nEnthaltung",
+   "read_only": 1
+  },
+  {
+   "fieldname": "abgestimmt_am",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Abgestimmt am",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kommentar",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Kommentar",
+   "read_only": 1
+  },
+  {
+   "fieldname": "token",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Token (Hash)",
+   "read_only": 1,
+   "unique": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2026-11-03 08:32:48.973486",
+ "modified_by": "Administrator",
+ "module": "MVD",
+ "name": "Mandat Vorstand Stimme",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

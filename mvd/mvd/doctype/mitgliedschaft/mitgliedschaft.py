@@ -1510,7 +1510,7 @@ def get_uebersicht_html(name):
                 'datum': mnd.datum.strftime("%d.%m.%Y"),
                 'status': ''
             })
-        mandate = frappe.get_all('Mandat', filters={'mv_mitgliedschaft': name}, fields=['name', 'creation', 'status'], order_by='creation asc')
+        mandate = frappe.get_all('Mandat', filters=get_mandat_filter_fuer_uebersicht(name), fields=['name', 'creation', 'status'], order_by='creation asc')
         for mnd in mandate:
             mandat.append({
                 'name': mnd.name,
@@ -1639,7 +1639,7 @@ def get_uebersicht_html(name):
                 'datum': mnd.datum.strftime("%d.%m.%Y"),
                 'status': ''
             })
-        mandate_unval = frappe.get_all('Mandat', filters={'mv_mitgliedschaft': name}, fields=['name', 'creation', 'status'], order_by='creation asc')
+        mandate_unval = frappe.get_all('Mandat', filters=get_mandat_filter_fuer_uebersicht(name), fields=['name', 'creation', 'status'], order_by='creation asc')
         for mnd in mandate_unval:
             mandat_unval.append({
                 'name': mnd.name,
@@ -2807,9 +2807,22 @@ def get_beratungen_dashboard(mitgliedschaft):
         'ungelesen_qty': ungelesen_qty
     }
 
+def get_mandat_filter_fuer_uebersicht(mitgliedschaft):
+    # #2206: Vertrauensanwält*innen sehen in der Übersicht nur ihre eigenen Mandate
+    from mvd.mvd.doctype.mandat.mandat_permissions import get_va_kontaktpersonen
+    filters = {'mv_mitgliedschaft': mitgliedschaft}
+    kontaktpersonen = get_va_kontaktpersonen()
+    if kontaktpersonen is not None:
+        filters['kontaktperson'] = ['in', kontaktpersonen or ['__keine_kontaktperson__']]
+    return filters
+
 @frappe.whitelist()
 def get_mandat_dashboard(mitgliedschaft):
-    anz_offen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMandat` WHERE `mv_mitgliedschaft` = '{mitgliedschaft}' AND `status` NOT IN ('Ablehnung (Geschlossen)', 'Abgeschlossen')""".format(mitgliedschaft=mitgliedschaft), as_dict=True)[0].qty
+    # #2205: offen = nicht erledigt (Abgeschlossen, Abgelehnt, Rückzug, Gelöscht, Nicht vergeben)
+    from mvd.mvd.doctype.mandat.mandat_status import ERLEDIGT
+    anz_offen = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabMandat`
+        WHERE `mv_mitgliedschaft` = %(mitgliedschaft)s AND `status` NOT IN %(erledigt)s""",
+        {"mitgliedschaft": mitgliedschaft, "erledigt": ERLEDIGT}, as_dict=True)[0].qty
 
     return anz_offen
 

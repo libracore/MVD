@@ -1,0 +1,49 @@
+#page-vbz-solifonds {
+    background-color: #e6ebef;
+}
+
+#page-vbz-solifonds h1.vbz {
+    font-weight: bold;
+    padding-left: 15px;
+}
+
+#page-vbz-solifonds #datenstand,
+#page-vbz-solifonds #reload_info {
+    font-weight: normal !important;
+    font-size: 15px !important;
+}
+
+#page-vbz-solifonds .solifonds-gruppe {
+    margin: 0 15px 24px 15px;
+}
+
+#page-vbz-solifonds .solifonds-gruppe h2 {
+    display: inline-block;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Aufklappbare Gruppen (Reihenfolge/aufgeklappt: ANSICHTEN in vbz_solifonds.js) */
+#page-vbz-solifonds .solifonds-gruppe > summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+#page-vbz-solifonds .solifonds-gruppe > summary::-webkit-details-marker {
+    display: none;
+}
+
+#page-vbz-solifonds .solifonds-gruppe > summary h2::before {
+    content: "▸";
+    display: inline-block;
+    width: 1em;
+    color: #6689A1;
+}
+
+#page-vbz-solifonds .solifonds-gruppe[open] > summary h2::before {
+    content: "▾";
+}
+
+#page-vbz-solifonds .solifonds-tabelle {
+    background-color: #fff;
+}
