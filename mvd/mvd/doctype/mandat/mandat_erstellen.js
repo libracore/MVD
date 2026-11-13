@@ -179,7 +179,7 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
                 "callback": function(r) {
                     d.hide();
                     frm.reload_doc();
-                    frappe.msgprint(`Das Mandat (${r.message}) wurde erstellt.`);
+                    frappe.mvd.mandat.rueckmeldung(frm, r.message, values, uebernehmen, solifonds);
                 }
             });
         }
@@ -212,4 +212,64 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
 
     d.show();
     pflicht_markieren();
+};
+
+// Rückmeldung nach dem Erstellen: was jetzt zu tun ist (RSV übernommen: bei der Coop einreichen;
+// Solifonds: gleich einreichen? – Später / Ja)
+frappe.mvd.mandat.rueckmeldung = function(frm, mandat, values, uebernehmen, solifonds) {
+    let link = `<a href="#Form/Mandat/${encodeURIComponent(mandat)}">${frappe.utils.escape_html(mandat)}</a>`;
+    if (!uebernehmen) {
+        frappe.msgprint({
+            title: __('Mandat erstellt'),
+            indicator: 'blue',
+            message: __('Das Mandat {0} ist erstellt (Status «Unzugewiesen»). Das Sekretariat sucht eine Vertrauensanwält*in.', [link])
+        });
+    } else if (!solifonds) {
+        frappe.msgprint({
+            title: __('Mandat erstellt'),
+            indicator: 'green',
+            message: __('Das Mandat {0} ist erstellt (Status «Vorgemerkt»), die Infos werden dir per E-Mail geschickt.', [link]) +
+                '<br><br><b>' + __('Bitte das Gesuch mit der in der E-Mail angegebenen CC-Adresse bei der Coop Rechtsschutzversicherung einreichen.') +
+                '</b> ' + __('Dann wird das Mandat automatisch als «Gesuch eingereicht» markiert.')
+        });
+    } else if (!(values.solifonds_begruendung || '').trim()) {
+        // Ohne Begründung lehnt «Gesuch einreichen» ab – gar nicht erst fragen
+        frappe.msgprint({
+            title: __('Mandat erstellt'),
+            indicator: 'orange',
+            message: __('Das Mandat {0} ist erstellt (Status «Vorgemerkt»).', [link]) + '<br><br>' +
+                __('Zum Einreichen fehlt noch die Begründung. Bitte im Mandat ergänzen und dann «Solidaritätsfonds → Gesuch einreichen».')
+        });
+    } else {
+        let f = new frappe.ui.Dialog({
+            title: __('Mandat erstellt'),
+            fields: [{'fieldname': 'text', 'fieldtype': 'HTML', 'options':
+                '<p>' + __('Das Mandat {0} ist erstellt (Status «Vorgemerkt»).', [link]) + '</p>' +
+                '<p><b>' + __('Soll das Solifonds-Gesuch jetzt zur Vorprüfung eingereicht werden?') + '</b></p>' +
+                '<p class="text-muted">' + __('Mit «Später» bleibt es vorgemerkt; einreichen dann im Mandat über «Solidaritätsfonds → Gesuch einreichen».') + '</p>'}],
+            primary_action_label: __('Ja, jetzt einreichen'),
+            primary_action: function() {
+                f.get_primary_btn().prop('disabled', true);
+                frappe.call({
+                    method: 'mvd.mvd.doctype.mandat.solifonds.gesuch_einreichen',
+                    args: {'mandat': mandat},
+                    freeze: true,
+                    always: () => f.get_primary_btn().prop('disabled', false),
+                    callback: function() {
+                        f.hide();
+                        frappe.msgprint({
+                            title: __('Gesuch eingereicht'),
+                            indicator: 'green',
+                            message: __('Das Solifonds-Gesuch {0} ist zur Vorprüfung eingereicht (Status «Gesuch eingereicht»).', [link])
+                        });
+                    }
+                });
+            }
+        });
+        // «Später» als eigener Knopf links vom Primärknopf (secondary_action liefe in v12 bei jedem Schliessen)
+        $(`<button class="btn btn-default btn-sm" style="margin-right: 5px;">${__('Später')}</button>`)
+            .insertBefore(f.get_primary_btn())
+            .on('click', () => f.hide());
+        f.show();
+    }
 };
