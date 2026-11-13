@@ -150,8 +150,17 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
                 }
             }
 
+            // Mehrfachklick: Knopf bis zur Antwort sperren (Server prüft zusätzlich)
+            let btn = d.get_primary_btn();
+            if (btn.prop('disabled')) {
+                return;
+            }
+            btn.prop('disabled', true);
             frappe.call({
                 "method": "mvd.mvd.doctype.mandat.mandat.create_mandat",
+                "freeze": true,
+                "freeze_message": __('Mandat wird erstellt …'),
+                "always": () => btn.prop('disabled', false),
                 "args": {
                     "beratung": frm.doc.name,
                     "berater_in": uebernehmen ? eigene_va : null,

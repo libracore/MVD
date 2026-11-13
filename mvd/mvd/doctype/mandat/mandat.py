@@ -115,7 +115,10 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     if not beratung.has_permission("read"):
         frappe.throw(frappe._("Keine Berechtigung für diese Beratung."), frappe.PermissionError)
 
-    if beratung.mandat:
+    # Doppelklick / mehrere Anfragen gleichzeitig: Beratung bis zum Ende der Transaktion sperren und den
+    # aktuellen Stand lesen (FOR UPDATE liest den zuletzt gespeicherten Wert, nicht den Stand vom Anfang der Anfrage)
+    aktuelles_mandat = frappe.db.sql("SELECT `mandat` FROM `tabBeratung` WHERE `name` = %s FOR UPDATE", beratung.name)
+    if beratung.mandat or (aktuelles_mandat and aktuelles_mandat[0][0]):
         frappe.throw(frappe._("Es existiert bereits ein Mandat für diesen Datensatz."))
 
     if not beratung.mv_mitgliedschaft:
