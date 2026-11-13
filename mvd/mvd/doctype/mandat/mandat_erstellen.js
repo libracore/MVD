@@ -124,6 +124,7 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
             {'fieldname': k[0], 'fieldtype': 'Check', 'label': k[1], 'depends_on': ist_mangels_rs, 'change': () => pflicht_markieren()}
         ))).concat([
             {'fieldname': 'solifonds_begruendung', 'fieldtype': 'Small Text', 'label': 'Begründung', 'depends_on': ist_solifonds,
+             'change': () => pflicht_markieren(),
              'description': 'Erscheint im PDF für das Mitglied. Ohne Personendaten – wird dem Vorstand anonymisiert angezeigt.'},
             {'fieldname': 'bemerkung', 'fieldtype': 'Small Text', 'label': 'Bemerkungen', 'description': 'Wird im Mandat gespeichert und ist für alle sichtbar, die das Mandat sehen. Wird nicht an die VA gemailt.'},
             {'fieldname': 'persoenliche_bemerkung', 'fieldtype': 'Small Text', 'label': 'Persönliche Bemerkung', 'depends_on': `eval:doc.uebernahme=="${frappe.mvd.mandat.UEBERNEHMEN}"`, 'description': 'Wird im Mandat gespeichert und in der Bestätigungsmail an die VA mitgeschickt (nur Typ Rechtsschutzversicherung).'},
@@ -136,6 +137,10 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
             let solifonds = values.typ == frappe.mvd.mandat.SOLIFONDS;
             if (solifonds && !values.solifonds_art) {
                 frappe.msgprint(__('Bitte wählen, worauf sich der Antrag auf Kostengutsprache stützt.'));
+                return;
+            }
+            if (solifonds && !(values.solifonds_begruendung || '').trim()) {
+                frappe.msgprint(__('Bitte eine Begründung für das Solifonds-Gesuch erfassen.'));
                 return;
             }
             // #2218: bei «mangels Rechtsschutzdeckung» alle Kriterien Pflicht (kumulativ)
@@ -185,7 +190,7 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
         }
     });
 
-    // Pflicht je nach Typ/Antrag (v12 kennt kein mandatory_depends_on): «Antrag auf Kostengutsprache» bei Solidaritätsfonds,
+    // Pflicht je nach Typ/Antrag (v12 kennt kein mandatory_depends_on): «Antrag auf Kostengutsprache» und Begründung bei Solidaritätsfonds,
     // die Kriterien bei «mangels Rechtsschutzdeckung». reqd nur setzen, solange das Feld sichtbar ist – sonst blockiert der
     // Dialog wegen eines ausgeblendeten Felds. Checkboxen markiert Frappe nicht (0 gilt nicht als leer), darum selbst rot.
     function pflicht_markieren() {
@@ -194,6 +199,9 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
         let art = d.get_field('solifonds_art');
         if (cint(art.df.reqd) != cint(solifonds)) {
             d.set_df_property('solifonds_art', 'reqd', solifonds ? 1 : 0);
+        }
+        if (cint(d.get_field('solifonds_begruendung').df.reqd) != cint(solifonds)) {
+            d.set_df_property('solifonds_begruendung', 'reqd', solifonds ? 1 : 0);
         }
         frappe.mvd.mandat.KRITERIEN.forEach(k => {
             let feld = d.get_field(k[0]);
@@ -232,15 +240,8 @@ frappe.mvd.mandat.rueckmeldung = function(frm, mandat, values, uebernehmen, soli
                 '<br><br><b>' + __('Bitte das Gesuch mit der in der E-Mail angegebenen CC-Adresse bei der Coop Rechtsschutzversicherung einreichen.') +
                 '</b> ' + __('Dann wird das Mandat automatisch als «Gesuch eingereicht» markiert.')
         });
-    } else if (!(values.solifonds_begruendung || '').trim()) {
-        // Ohne Begründung lehnt «Gesuch einreichen» ab – gar nicht erst fragen
-        frappe.msgprint({
-            title: __('Mandat erstellt'),
-            indicator: 'orange',
-            message: __('Das Mandat {0} ist erstellt (Status «Vorgemerkt»).', [link]) + '<br><br>' +
-                __('Zum Einreichen fehlt noch die Begründung. Bitte im Mandat ergänzen und dann «Solidaritätsfonds → Gesuch einreichen».')
-        });
     } else {
+        // Solifonds selbst übernommen: Begründung ist beim Erstellen Pflicht, darum kann gleich eingereicht werden
         let f = new frappe.ui.Dialog({
             title: __('Mandat erstellt'),
             fields: [{'fieldname': 'text', 'fieldtype': 'HTML', 'options':

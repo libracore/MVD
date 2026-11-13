@@ -154,7 +154,9 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
 
     if typ == "Solidaritätsfonds":
         mandat.solifonds_art = solifonds_art
-        # "keine Musse": Begründung darf bei der Vorerfassung leer sein, Pflicht erst beim Einreichen
+        # Begründung schon beim Erstellen Pflicht (früher erst beim Einreichen), damit gleich eingereicht werden kann
+        if not (solifonds_begruendung or "").strip():
+            frappe.throw(frappe._("Bitte eine Begründung für das Solifonds-Gesuch erfassen."))
         mandat.solifonds_begruendung = solifonds_begruendung
         # Kriterien gibt es nur bei "mangels Rechtsschutzdeckung"
         if solifonds_art == "mangels Rechtsschutzdeckung":
