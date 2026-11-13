@@ -117,7 +117,7 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
             {'fieldname': 'solifonds_art', 'fieldtype': 'Select', 'label': 'Antrag auf Kostengutsprache',
              'options': ['', frappe.mvd.mandat.MANGELS_RS, 'aus ideellen Gründen'].join('\n'), 'depends_on': ist_solifonds,
              'description': "mangels Rechtsschutzdeckung (Karenzfrist, Geschäfts-/Kollektivmitglied): Kostendach CHF 3'000 pro Instanz, Entscheid GL · aus ideellen Gründen / Rechtssicherheit: Kostendach CHF 8'000 (2 Instanzen), Entscheid Vorstand"},
-            {'fieldname': 'kriterien_html', 'fieldtype': 'HTML', 'options': '<p class="text-muted">Geprüfte Kriterien (Antragsformular Punkt 2). <b>Alle Kriterien müssen erfüllt sein (kumulativ).</b> Bei der Vorerfassung («keine Musse») dürfen sie noch offen sein; zum Einreichen sind alle Pflicht.</p>', 'depends_on': ist_mangels_rs}
+            {'fieldname': 'kriterien_html', 'fieldtype': 'HTML', 'options': '<p class="text-muted">Geprüfte Kriterien (Antragsformular Punkt 2). <b>Alle Kriterien müssen erfüllt sein (kumulativ)</b> und angekreuzt werden, sonst kann das Mandat nicht erstellt werden.</p>', 'depends_on': ist_mangels_rs}
         ].concat(frappe.mvd.mandat.KRITERIEN.map(k => (
             {'fieldname': k[0], 'fieldtype': 'Check', 'label': k[1], 'depends_on': ist_mangels_rs}
         ))).concat([
@@ -135,6 +135,19 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
             if (solifonds && !values.solifonds_art) {
                 frappe.msgprint(__('Bitte wählen, worauf sich der Antrag auf Kostengutsprache stützt.'));
                 return;
+            }
+            // #2218: bei «mangels Rechtsschutzdeckung» alle Kriterien Pflicht (kumulativ)
+            if (solifonds && values.solifonds_art == frappe.mvd.mandat.MANGELS_RS) {
+                let fehlend = frappe.mvd.mandat.KRITERIEN.filter(k => !values[k[0]]).map(k => k[1]);
+                if (fehlend.length) {
+                    frappe.msgprint({
+                        title: __('Kriterien nicht erfüllt'),
+                        indicator: 'red',
+                        message: __('Bei «mangels Rechtsschutzdeckung» müssen alle Kriterien erfüllt sein (kumulativ). Es fehlt noch:') +
+                            '<ul>' + fehlend.map(f => '<li>' + f + '</li>').join('') + '</ul>'
+                    });
+                    return;
+                }
             }
 
             frappe.call({

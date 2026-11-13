@@ -158,6 +158,9 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
             gewaehlt = frappe.parse_json(kriterien) if kriterien else []
             for kriterium in SOLIFONDS_KRITERIEN:
                 mandat.set(kriterium, 1 if kriterium in gewaehlt else 0)
+            # #2218: alle Kriterien (kumulativ) schon beim Erstellen Pflicht, nicht erst beim Einreichen
+            from mvd.mvd.doctype.mandat.solifonds import _check_kriterien
+            _check_kriterien(mandat)
 
     # #2213: Mietobjekt und zuständige Schlichtungsbehörde übernehmen
     if beratung.mv_mitgliedschaft:
