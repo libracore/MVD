@@ -27,3 +27,36 @@
     background-color: #106E7A;
     color: #fff;
 }
+
+/* Aufklappbare Abschnitte (Reihenfolge/aufgeklappt: ANSICHTEN in vbz_mandate.py) */
+#page-vbz-mandate .vbz-abschnitt {
+    margin: 0 0 15px 0;
+    padding: 0 15px;
+}
+
+#page-vbz-mandate .vbz-abschnitt > summary {
+    cursor: pointer;
+    list-style: none;
+    margin-left: 15px;
+}
+
+#page-vbz-mandate .vbz-abschnitt > summary::-webkit-details-marker {
+    display: none;
+}
+
+#page-vbz-mandate .vbz-abschnitt > summary h2::before {
+    content: "▸";
+    display: inline-block;
+    width: 1em;
+    color: #6689A1;
+}
+
+#page-vbz-mandate .vbz-abschnitt[open] > summary h2::before {
+    content: "▾";
+}
+
+#page-vbz-mandate .vbz-abschnitt > summary h2 {
+    display: inline-block;
+    margin: 10px 0;
+    font-size: 20px;
+}

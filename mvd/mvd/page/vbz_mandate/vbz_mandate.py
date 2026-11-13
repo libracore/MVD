@@ -13,6 +13,35 @@ TYP_SPALTEN = {
     'Solidaritätsfonds': 's'
 }
 
+# ---------------------------------------------------------------------------
+# Konfiguration der Seite: welche Abschnitte, in welcher Reihenfolge, aufgeklappt oder zu
+# ---------------------------------------------------------------------------
+# Abschnitte (Schlüssel -> Titel). Die Inhalte stehen in vbz_mandate.html ({% if a.key == "…" %}).
+ABSCHNITTE = {
+    'uebersicht': 'Übersicht nach Status',
+    'meine_offen': 'Meine offenen Mandate',
+    'meine_erledigt': 'Meine erledigten Mandate',
+}
+
+# Ansichten je Rolle: die ERSTE passende Zeile gilt.
+#   wer:        'va' (Vertrauensanwält*in, sieht nur eigene Mandate), ein Rollenname (z. B. 'MV_Solifonds_GL') oder '*' (alle übrigen)
+#   abschnitte: Liste (Abschnitt, aufgeklappt) in der gewünschten Reihenfolge; nicht aufgeführte Abschnitte erscheinen nicht.
+# «meine_offen» / «meine_erledigt» gibt es nur für VAs (sonst wären es alle Mandate der Sektion).
+ANSICHTEN = [
+    ('va', [('meine_offen', True), ('meine_erledigt', False)]),
+    ('*', [('uebersicht', True)]),
+]
+
+
+def get_ansicht(ist_va):
+    rollen = set(frappe.get_roles())
+    for wer, abschnitte in ANSICHTEN:
+        if wer == '*' or (wer == 'va' and ist_va) or wer in rollen:
+            return [{'key': key, 'titel': ABSCHNITTE[key], 'offen': 1 if offen else 0}
+                    for key, offen in abschnitte
+                    if key in ABSCHNITTE and (ist_va or not key.startswith('meine_'))]
+    return []
+
 @frappe.whitelist()
 def get_status_uebersicht():
     # Eine Abfrage; Sektionstrennung über User Permissions (get_list)
@@ -38,8 +67,9 @@ def get_status_uebersicht():
     return {
         'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'ist_va': ist_va,
-        'meine_mandate': meine_mandate,
-        'meine_mandate_offen': len([m for m in meine_mandate if not m.erledigt]),
+        'abschnitte': get_ansicht(ist_va),
+        'meine_offen': [m for m in meine_mandate if not m.erledigt],
+        'meine_erledigt': [m for m in meine_mandate if m.erledigt],
         'status_liste': status_liste,
         'total': dict(total, summe=sum(total.values())),
         'hat_ohne_typ': total['ohne_typ'] > 0
