@@ -23,6 +23,16 @@ frappe.vbz_solifonds = {
         {'status': 'Laufend (Solifonds)', 'titel': 'Laufend (Kostengutsprache erteilt)', 'datum_feld': 'entscheid_datum', 'datum_label': 'Entscheid'},
         {'status': 'Abgelehnt', 'titel': 'Abgelehnt', 'datum_feld': 'entscheid_datum', 'datum_label': 'Entscheid'}
     ],
+    // Vorprüfung (ohne GL-Rolle): zuerst, was auf die Vorprüfung wartet; Aktionen der GL nicht anbieten
+    GRUPPEN_VORPRUEFUNG: [
+        {'status': 'Gesuch eingereicht', 'titel': 'Wartet auf Vorprüfung', 'datum_feld': 'gesuch_eingereicht_am', 'datum_label': 'Eingereicht'},
+        {'status': 'Vorgeprüft', 'titel': 'Vorgeprüft, wartet auf Entscheid GL', 'datum_feld': 'vorgeprueft_am', 'datum_label': 'Vorgeprüft'},
+        {'status': 'Antrag Vorstand', 'titel': 'Abstimmung Vorstand läuft', 'datum_feld': 'vorgeprueft_am', 'datum_label': 'Vorgeprüft'},
+        {'status': 'Vorgemerkt', 'titel': 'Noch nicht eingereicht', 'datum_feld': 'creation', 'datum_label': 'Erstellt'},
+        {'status': 'Unzugewiesen', 'titel': 'VA-Suche läuft (Sekretariat)', 'datum_feld': 'creation', 'datum_label': 'Erstellt'},
+        {'status': 'Laufend (Solifonds)', 'titel': 'Laufend (Kostengutsprache erteilt)', 'datum_feld': 'entscheid_datum', 'datum_label': 'Entscheid'},
+        {'status': 'Abgelehnt', 'titel': 'Abgelehnt', 'datum_feld': 'entscheid_datum', 'datum_label': 'Entscheid'}
+    ],
     laden: function(wrapper) {
         frappe.call({
             'method': frappe.mvd.solifonds.METHOD + 'get_dashboard',
@@ -30,7 +40,8 @@ frappe.vbz_solifonds = {
             'freeze_message': 'Lade Solidaritätsfonds...',
             'callback': function(r) {
                 let mandate = r.message || [];
-                let gruppen = frappe.vbz_solifonds.GRUPPEN.map(g => Object.assign({}, g, {
+                let vorlage = frappe.user.has_role('MV_Solifonds_GL') ? frappe.vbz_solifonds.GRUPPEN : frappe.vbz_solifonds.GRUPPEN_VORPRUEFUNG;
+                let gruppen = vorlage.map(g => Object.assign({}, g, {
                     'mandate': mandate.filter(m => m.status == g.status)
                 }));
                 let $body = $(wrapper).find('.layout-main-section');

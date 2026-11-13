@@ -456,7 +456,9 @@ def _sende_liste(sektion_id, rolle, status, betreff):
 
 @frappe.whitelist()
 def get_dashboard():
-    _check_rolle(ROLLE_GL)
+    # Übersicht für GL und Vorprüfung (Kachel Solifonds in der Verarbeitungszentrale)
+    if not {ROLLE_GL, ROLLE_VORPRUEFUNG} & set(frappe.get_roles()):
+        frappe.throw(_("Diese Übersicht ist der Geschäftsleitung und der Vorprüfung vorbehalten."), frappe.PermissionError)
     # Sektionstrennung über User Permissions (get_list)
     mandate = frappe.get_list("Mandat",
         filters={"typ": TYP, "status": ["not in", ["Abgeschlossen", "Rückzug", "Gelöscht", "Nicht vergeben"]]},
