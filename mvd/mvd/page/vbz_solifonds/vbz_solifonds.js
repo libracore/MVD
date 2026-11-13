@@ -13,26 +13,38 @@ frappe.pages['vbz-solifonds'].refresh = function(wrapper) {
 }
 
 frappe.vbz_solifonds = {
-    // Reihenfolge: was auf die GL wartet zuerst
-    GRUPPEN: [
-        {'status': 'Vorgeprüft', 'titel': 'Wartet auf Entscheid GL', 'datum_feld': 'vorgeprueft_am', 'datum_label': 'Vorgeprüft', 'aktion': 'entscheid', 'aktion_label': 'Entscheiden'},
-        {'status': 'Antrag Vorstand', 'titel': 'Abstimmung Vorstand läuft', 'datum_feld': 'vorgeprueft_am', 'datum_label': 'Vorgeprüft', 'aktion': 'abstimmung', 'aktion_label': 'Abstimmung abschliessen'},
-        {'status': 'Gesuch eingereicht', 'titel': 'Bei der Vorprüfung', 'datum_feld': 'gesuch_eingereicht_am', 'datum_label': 'Eingereicht'},
-        {'status': 'Vorgemerkt', 'titel': 'Noch nicht eingereicht', 'datum_feld': 'creation', 'datum_label': 'Erstellt'},
-        {'status': 'Unzugewiesen', 'titel': 'VA-Suche läuft (Sekretariat)', 'datum_feld': 'creation', 'datum_label': 'Erstellt'},
-        {'status': 'Laufend (Solifonds)', 'titel': 'Laufend (Kostengutsprache erteilt)', 'datum_feld': 'entscheid_datum', 'datum_label': 'Entscheid'},
-        {'status': 'Abgelehnt', 'titel': 'Abgelehnt', 'datum_feld': 'entscheid_datum', 'datum_label': 'Entscheid'}
+    // Gruppen (je Status eine aufklappbare Tabelle). aktion: Knopf in der Zeile, nur für die GL (Server prüft zusätzlich).
+    GRUPPEN: {
+        'Gesuch eingereicht': {'titel': 'Wartet auf Vorprüfung', 'datum_feld': 'gesuch_eingereicht_am', 'datum_label': 'Eingereicht'},
+        'Vorgeprüft': {'titel': 'Vorgeprüft, wartet auf Entscheid GL', 'datum_feld': 'vorgeprueft_am', 'datum_label': 'Vorgeprüft', 'aktion': 'entscheid', 'aktion_label': 'Entscheiden'},
+        'Antrag Vorstand': {'titel': 'Abstimmung Vorstand läuft', 'datum_feld': 'vorgeprueft_am', 'datum_label': 'Vorgeprüft', 'aktion': 'abstimmung', 'aktion_label': 'Abstimmung abschliessen'},
+        'Vorgemerkt': {'titel': 'Noch nicht eingereicht', 'datum_feld': 'creation', 'datum_label': 'Erstellt'},
+        'Unzugewiesen': {'titel': 'VA-Suche läuft (Sekretariat)', 'datum_feld': 'creation', 'datum_label': 'Erstellt'},
+        'Nicht vergeben': {'titel': 'Nicht vergeben (keine VA gefunden)', 'datum_feld': 'creation', 'datum_label': 'Erstellt'},
+        'Laufend (Solifonds)': {'titel': 'Laufend (Kostengutsprache erteilt)', 'datum_feld': 'entscheid_datum', 'datum_label': 'Entscheid'},
+        'Abgelehnt': {'titel': 'Abgelehnt', 'datum_feld': 'entscheid_datum', 'datum_label': 'Entscheid'}
+    },
+    // Ansichten je Rolle: die ERSTE passende Zeile gilt (Rollenname oder '*').
+    // Liste [Status, aufgeklappt] in der gewünschten Reihenfolge; nicht aufgeführte Gruppen erscheinen nicht.
+    ANSICHTEN: [
+        ['MV_Solifonds_GL', [['Vorgeprüft', true], ['Antrag Vorstand', true], ['Gesuch eingereicht', false], ['Vorgemerkt', false],
+            ['Unzugewiesen', false], ['Nicht vergeben', false], ['Laufend (Solifonds)', false], ['Abgelehnt', false]]],
+        ['MV_Solifonds_Vorpruefung', [['Gesuch eingereicht', true], ['Vorgeprüft', false], ['Antrag Vorstand', false], ['Vorgemerkt', false],
+            ['Unzugewiesen', false], ['Nicht vergeben', false], ['Laufend (Solifonds)', false], ['Abgelehnt', false]]],
+        ['*', [['Vorgeprüft', true], ['Antrag Vorstand', true], ['Gesuch eingereicht', true], ['Vorgemerkt', false],
+            ['Unzugewiesen', false], ['Nicht vergeben', false], ['Laufend (Solifonds)', false], ['Abgelehnt', false]]]
     ],
-    // Vorprüfung (ohne GL-Rolle): zuerst, was auf die Vorprüfung wartet; Aktionen der GL nicht anbieten
-    GRUPPEN_VORPRUEFUNG: [
-        {'status': 'Gesuch eingereicht', 'titel': 'Wartet auf Vorprüfung', 'datum_feld': 'gesuch_eingereicht_am', 'datum_label': 'Eingereicht'},
-        {'status': 'Vorgeprüft', 'titel': 'Vorgeprüft, wartet auf Entscheid GL', 'datum_feld': 'vorgeprueft_am', 'datum_label': 'Vorgeprüft'},
-        {'status': 'Antrag Vorstand', 'titel': 'Abstimmung Vorstand läuft', 'datum_feld': 'vorgeprueft_am', 'datum_label': 'Vorgeprüft'},
-        {'status': 'Vorgemerkt', 'titel': 'Noch nicht eingereicht', 'datum_feld': 'creation', 'datum_label': 'Erstellt'},
-        {'status': 'Unzugewiesen', 'titel': 'VA-Suche läuft (Sekretariat)', 'datum_feld': 'creation', 'datum_label': 'Erstellt'},
-        {'status': 'Laufend (Solifonds)', 'titel': 'Laufend (Kostengutsprache erteilt)', 'datum_feld': 'entscheid_datum', 'datum_label': 'Entscheid'},
-        {'status': 'Abgelehnt', 'titel': 'Abgelehnt', 'datum_feld': 'entscheid_datum', 'datum_label': 'Entscheid'}
-    ],
+    get_ansicht: function() {
+        let zeile = frappe.vbz_solifonds.ANSICHTEN.find(a => a[0] == '*' || frappe.user.has_role(a[0]));
+        let gl = frappe.user.has_role('MV_Solifonds_GL');
+        return (zeile ? zeile[1] : []).filter(g => frappe.vbz_solifonds.GRUPPEN[g[0]]).map(g => {
+            let gruppe = Object.assign({'status': g[0], 'offen': g[1] ? 1 : 0}, frappe.vbz_solifonds.GRUPPEN[g[0]]);
+            if (!gl) {
+                delete gruppe.aktion;
+            }
+            return gruppe;
+        });
+    },
     laden: function(wrapper) {
         frappe.call({
             'method': frappe.mvd.solifonds.METHOD + 'get_dashboard',
@@ -40,8 +52,7 @@ frappe.vbz_solifonds = {
             'freeze_message': 'Lade Solidaritätsfonds...',
             'callback': function(r) {
                 let mandate = r.message || [];
-                let vorlage = frappe.user.has_role('MV_Solifonds_GL') ? frappe.vbz_solifonds.GRUPPEN : frappe.vbz_solifonds.GRUPPEN_VORPRUEFUNG;
-                let gruppen = vorlage.map(g => Object.assign({}, g, {
+                let gruppen = frappe.vbz_solifonds.get_ansicht().map(g => Object.assign({}, g, {
                     'mandate': mandate.filter(m => m.status == g.status)
                 }));
                 let $body = $(wrapper).find('.layout-main-section');

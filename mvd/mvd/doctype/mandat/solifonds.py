@@ -461,7 +461,7 @@ def get_dashboard():
         frappe.throw(_("Diese Übersicht ist der Geschäftsleitung und der Vorprüfung vorbehalten."), frappe.PermissionError)
     # Sektionstrennung über User Permissions (get_list)
     mandate = frappe.get_list("Mandat",
-        filters={"typ": TYP, "status": ["not in", ["Abgeschlossen", "Rückzug", "Gelöscht", "Nicht vergeben"]]},
+        filters={"typ": TYP, "status": ["not in", ["Abgeschlossen", "Rückzug", "Gelöscht"]]},
         fields=["name", "status", "sektion_id", "mv_mitgliedschaft", "mitglied_nr", "solifonds_art", "kostendach",
                 "kontaktperson", "beratungskategorie", "beratungskategorie_2", "beratungskategorie_3", "gesuch_eingereicht_am", "vorgeprueft_am", "entscheid_datum", "creation"],
         order_by="creation asc", limit_page_length=500)

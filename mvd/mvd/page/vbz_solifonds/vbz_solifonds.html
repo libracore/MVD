@@ -2,8 +2,8 @@
     <h1 class="vbz">Solidaritätsfonds<span id="datenstand" class="pull-right">Datenstand: {{ datenstand }}</span><br><span id="reload_info" class="pull-right">Zum Aktualisieren Webbrowser neuladen</span></h1>
 </div>
 {% for gruppe in gruppen %}
-<div class="row solifonds-gruppe">
-    <h2>{{ gruppe.titel }} <span class="text-muted">({{ gruppe.mandate.length }})</span></h2>
+<details class="row solifonds-gruppe" data-status="{{ gruppe.status }}" {% if gruppe.offen %}open{% endif %}>
+    <summary><h2>{{ gruppe.titel }} <span class="text-muted">({{ gruppe.mandate.length }})</span></h2></summary>
     {% if gruppe.mandate.length %}
     <table class="table table-condensed solifonds-tabelle">
         <tr>
@@ -38,5 +38,5 @@
     {% else %}
     <p class="text-muted">Keine Gesuche.</p>
     {% endif %}
-</div>
+</details>
 {% endfor %}
