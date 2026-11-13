@@ -113,13 +113,15 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
             {'fieldname': 'sprache', 'fieldtype': 'Select', 'label': 'Verfahrenssprache', 'options': ['', 'de', 'fr'].join('\n'), 'default': sprache || '',
              'description': 'de = Deutsch, fr = Französisch. ' + (sprache ? `Aus der Mitgliedschaft übernommen (${frappe.mvd.mandat.SPRACHNAMEN[sprache]}), änderbar.`
                  : 'In der Mitgliedschaft ist keine Sprache hinterlegt.')},
-            {'fieldname': 'typ', 'fieldtype': 'Select', 'label': 'Typ', 'reqd': 1, 'options': "Rechtsschutzversicherung\nSolidaritätsfonds", 'default': 'Rechtsschutzversicherung'},
+            {'fieldname': 'typ', 'fieldtype': 'Select', 'label': 'Typ', 'reqd': 1, 'options': "Rechtsschutzversicherung\nSolidaritätsfonds", 'default': 'Rechtsschutzversicherung',
+             'change': () => pflicht_markieren()},
             {'fieldname': 'solifonds_art', 'fieldtype': 'Select', 'label': 'Antrag auf Kostengutsprache',
              'options': ['', frappe.mvd.mandat.MANGELS_RS, 'aus ideellen Gründen'].join('\n'), 'depends_on': ist_solifonds,
+             'change': () => pflicht_markieren(),
              'description': "mangels Rechtsschutzdeckung (Karenzfrist, Geschäfts-/Kollektivmitglied): Kostendach CHF 3'000 pro Instanz, Entscheid GL · aus ideellen Gründen / Rechtssicherheit: Kostendach CHF 8'000 (2 Instanzen), Entscheid Vorstand"},
             {'fieldname': 'kriterien_html', 'fieldtype': 'HTML', 'options': '<p class="text-muted">Geprüfte Kriterien (Antragsformular Punkt 2). <b>Alle Kriterien müssen erfüllt sein (kumulativ)</b> und angekreuzt werden, sonst kann das Mandat nicht erstellt werden.</p>', 'depends_on': ist_mangels_rs}
         ].concat(frappe.mvd.mandat.KRITERIEN.map(k => (
-            {'fieldname': k[0], 'fieldtype': 'Check', 'label': k[1], 'depends_on': ist_mangels_rs}
+            {'fieldname': k[0], 'fieldtype': 'Check', 'label': k[1], 'depends_on': ist_mangels_rs, 'change': () => pflicht_markieren()}
         ))).concat([
             {'fieldname': 'solifonds_begruendung', 'fieldtype': 'Small Text', 'label': 'Begründung', 'depends_on': ist_solifonds,
              'description': 'Erscheint im PDF für das Mitglied. Ohne Personendaten – wird dem Vorstand anonymisiert angezeigt.'},
@@ -183,6 +185,24 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
         }
     });
 
+    // Pflicht je nach Typ/Antrag (v12 kennt kein mandatory_depends_on): «Antrag auf Kostengutsprache» bei Solidaritätsfonds,
+    // die Kriterien bei «mangels Rechtsschutzdeckung». reqd nur setzen, solange das Feld sichtbar ist – sonst blockiert der
+    // Dialog wegen eines ausgeblendeten Felds. Checkboxen markiert Frappe nicht (0 gilt nicht als leer), darum selbst rot.
+    function pflicht_markieren() {
+        let solifonds = d.get_value('typ') == frappe.mvd.mandat.SOLIFONDS;
+        let mangels_rs = solifonds && d.get_value('solifonds_art') == frappe.mvd.mandat.MANGELS_RS;
+        let art = d.get_field('solifonds_art');
+        if (cint(art.df.reqd) != cint(solifonds)) {
+            d.set_df_property('solifonds_art', 'reqd', solifonds ? 1 : 0);
+        }
+        frappe.mvd.mandat.KRITERIEN.forEach(k => {
+            let feld = d.get_field(k[0]);
+            feld.df.reqd = mangels_rs ? 1 : 0;
+            feld.$wrapper.toggleClass('has-error', mangels_rs && !d.get_value(k[0]));
+            feld.$wrapper.find('label').toggleClass('bold', mangels_rs);
+        });
+    }
+
     // Beratungskategorien (1)-(3) aus der Beratung vorbelegen
     d.set_values({
         'beratungskategorie': (themen || [])[0] || '',
@@ -191,4 +211,5 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
     });
 
     d.show();
+    pflicht_markieren();
 };
