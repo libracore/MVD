@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2022-2024, libracore AG and contributors
+# Copyright (c) 2022-2026, libracore AG and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -10,9 +10,14 @@ import six
 from frappe.utils.data import add_days, today, getdate
 from mvd.mvd.doctype.camt_import.helpers import *
 from frappe.utils import cint
+from mvd.mvd.doctype.camt_import.reset_protokoll import mit_protokoll, merke_vorzustand
+from mvd.mvd.doctype.camt_import.einlese_cache import einlese_cache, leere_einlese_cache
+from mvd.mvd.doctype.camt_import.fortschritt import melden as melde_fortschritt
 
 QRR_SINVS = {}
+
 def preload_qrr_sinvs():
+    QRR_SINVS.clear()
     sinvs = frappe.db.sql("""SELECT
                                 `name` AS `sinv`,
                                 `customer`,
@@ -21,6 +26,7 @@ def preload_qrr_sinvs():
                                 `outstanding_amount`,
                                 `sektion_id` AS `sektion`,
                                 `company`,
+                                `rechnungs_bankkonto`,
                                 REPLACE(`esr_reference`, ' ', '') AS `esr_reference`
                             FROM `tabSales Invoice`
                             WHERE `docstatus` = 1
@@ -28,16 +34,32 @@ def preload_qrr_sinvs():
     for sinv in sinvs:
         QRR_SINVS[sinv.esr_reference] = sinv
 
-def create_unpaid_sinv(fak, betrag):
+def create_unpaid_sinv(fak, betrag, camt_import=None, commit=True, bankkonto_abweichung_erlaubt=False):
     """
     Diese Funktion wandelt durch den Zahlungsdatensatz gefundene Fakultative Rechnungen in Sales Invoices um
     """
     fak_doc = frappe.get_doc("Fakultative Rechnung", fak)
     if fak_doc.status == 'Unpaid':
+        abweichung = get_matching_abweichung(fak_doc, camt_import)
+        if abweichung and (not bankkonto_abweichung_erlaubt or any(
+                row['feld'] != 'Bankkonto' for row in abweichung['matching_abweichungen'])):
+            return abweichung
+        
+        merke_vorzustand('Fakultative Rechnung', fak_doc.name, ['status', 'bezahlt_via', 'modified', 'modified_by'])
         # umwandlung Fakultative Rechnung in Sales Invoice
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", fak_doc.mv_mitgliedschaft)
         sektion = frappe.get_doc("Sektion", mitgliedschaft.sektion_id)
         company = frappe.get_doc("Company", sektion.company)
+
+        if camt_import is not None and sektion.company != camt_import.company:
+            return get_matching_abweichung({
+                'doctype': 'Fakultative Rechnung',
+                'name': fak_doc.name,
+                'company': sektion.company,
+                'sektion_id': fak_doc.sektion_id,
+                'rechnungs_bankkonto': fak_doc.get('rechnungs_bankkonto')
+            }, camt_import)
+        
         if not mitgliedschaft.rg_kunde:
             customer = mitgliedschaft.kunde_mitglied
             contact = mitgliedschaft.kontakt_mitglied
@@ -71,7 +93,7 @@ def create_unpaid_sinv(fak, betrag):
             "ist_spenden_rechnung": 0 if fak_doc.typ == 'HV' else 1,
             "mv_mitgliedschaft": fak_doc.mv_mitgliedschaft,
             "company": sektion.company,
-            "rechnungs_bankkonto": fak_doc.get("rechnungs_bankkonto"),
+            "rechnungs_bankkonto": get_matching_bankkonto(fak_doc) if camt_import is not None else fak_doc.get("rechnungs_bankkonto"),
             "cost_center": company.cost_center,
             "customer": customer,
             "customer_address": address,
@@ -95,7 +117,8 @@ def create_unpaid_sinv(fak, betrag):
         fak_doc.bezahlt_via = sinv.name
         fak_doc.save(ignore_permissions=True)
 
-        frappe.db.commit()
+        if commit:
+            frappe.db.commit()
         
         return {
                 'sinv': sinv.name,
@@ -104,17 +127,24 @@ def create_unpaid_sinv(fak, betrag):
                 'mv_kunde': sinv.mv_kunde,
                 'outstanding_amount': sinv.outstanding_amount,
                 'sektion': sinv.sektion_id,
-                'company': sinv.company
+                'company': sinv.company,
+                'rechnungs_bankkonto': sinv.get('rechnungs_bankkonto')
             }
     else:
         # Fakultative Rechnung wurde bereits beglichen -> erzeuge ungebuchte, aber zugewiesene Zahlung
         return False
 
+@mit_protokoll
 def zahlungen_einlesen(camt_file, camt_import, nachladen=False):
+    with einlese_cache(camt_import):
+        return _zahlungen_einlesen(camt_file, camt_import, nachladen=nachladen)
+
+def _zahlungen_einlesen(camt_file, camt_import, nachladen=False):
     """
     Diese Funktion list das CAMT-File aus und erzeugt für alle darin enthaltenen Eingangszahlungen einen Payment Entry
     """
     camt_import = frappe.get_doc("CAMT Import", camt_import)
+    pruefe_camt_iban(camt_file, camt_import)
     account = camt_import.account
     sektion = camt_import.sektion_id
     company = camt_import.company
@@ -122,6 +152,10 @@ def zahlungen_einlesen(camt_file, camt_import, nachladen=False):
     commit_counter = 1
     
     transaction_entries = camt_file.find_all('ntry')
+    total = sum(1 for transaction in camt_file.find_all('txdtls') if transaction.find('cdtdbtind') and transaction.find('cdtdbtind').get_text() == 'CRDT')
+    done = 0
+    schritt = 'Nachladen' if nachladen else 'Einlesen'
+    melde_fortschritt(camt_import.name, schritt, done, total)
     
     # Set/Reset CAMT Base Data
     frappe.db.set_value('CAMT Import', camt_import.name, 'camt_file_datum', frappe.utils.get_datetime(camt_file.document.bktocstmrdbtcdtntfctn.grphdr.credttm.get_text().split("T")[0]).strftime('%Y-%m-%d'))
@@ -137,6 +171,7 @@ def zahlungen_einlesen(camt_file, camt_import, nachladen=False):
         entry_currency = entry_soup.amt['ccy']
         for transaction in transactions:
             transaction_soup = BeautifulSoup(six.text_type(transaction), 'lxml')
+            ist_gutschrift = bool(transaction_soup.find('cdtdbtind') and transaction_soup.find('cdtdbtind').get_text() == 'CRDT')
             try:
                 unique_reference = transaction_soup.refs.acctsvcrref.get_text()
                 amount = float(transaction_soup.amt.get_text())
@@ -221,6 +256,7 @@ def zahlungen_einlesen(camt_file, camt_import, nachladen=False):
                     
                     if commit_counter == 100:
                         frappe.db.commit()
+                        leere_einlese_cache(camt_import.name)
                         commit_counter = 1
                     else:
                         commit_counter += 1
@@ -229,92 +265,116 @@ def zahlungen_einlesen(camt_file, camt_import, nachladen=False):
                 # Zahlung konnte nicht ausgelesen werden, entsprechender Errorlog im CAMT-File wird erzeugt
                 erfasse_fehlgeschlagenes_auslesen(six.text_type(transaction), e, camt_import.name)
                 pass
+            finally:
+                if ist_gutschrift:
+                    done += 1
+                    melde_fortschritt(camt_import.name, schritt, done, total)
     
+    melde_fortschritt(camt_import.name, schritt, done, total, 'Schliesse Rücksetzprotokoll ab.')
     camt_status_update(camt_import.name, 'Zahlungen eingelesen - verbuche Matches')
     frappe.db.commit()
     return
 
+def weise_rechnung_zu(pe, sinv_lookup_data, camt_import, double_payment_control, ignore_permissions=True):
+    received_amount = pe.received_amount
+    pe.party = sinv_lookup_data.get('customer')
+    pe.mv_mitgliedschaft = sinv_lookup_data.get('mv_mitgliedschaft')
+    pe.mv_kunde = sinv_lookup_data.get('mv_kunde')
+
+    row = pe.append('references', {})
+    row.reference_doctype = 'Sales Invoice'
+    row.reference_name = sinv_lookup_data.get('sinv')
+
+    if sinv_lookup_data.get('sinv') not in double_payment_control:
+        double_payment_control[sinv_lookup_data.get('sinv')] = received_amount
+        double_payment = False
+    else:
+        if (double_payment_control[sinv_lookup_data.get('sinv')] + received_amount) <= sinv_lookup_data.get('outstanding_amount'):
+            double_payment_control[sinv_lookup_data.get('sinv')] = double_payment_control[sinv_lookup_data.get('sinv')] + received_amount
+            double_payment = False
+        else:
+            double_payment = True
+
+    if (received_amount <= sinv_lookup_data.get('outstanding_amount')) and not double_payment:
+        pe.camt_status = 'Rechnungs Match'
+        row.allocated_amount = pe.paid_amount
+    else:
+        # Bevor die Rechnnung als überbezahlt angeschaut wird, wird geprüft ob es ggf. zur Rechnung Mahnungen inkl. Mahngebühren gibt
+        offene_mahnung = get_mahnungen(sinv_lookup_data.get('sinv'), sinv_lookup_data.get('mv_mitgliedschaft'), sinv_lookup_data.get('mv_kunde'))
+        if offene_mahnung:
+            if (received_amount == (sinv_lookup_data.get('outstanding_amount') + offene_mahnung.get("reminder_charge"))):
+                # Erstellung, verknüpfung und Begleichung der offenen Mahnungebühr via neue SINV
+                if ignore_permissions:
+                    mahngebuehr_sinv = create_sinv_from_sinv(sinv_lookup_data.get('sinv'), offene_mahnung.get("reminder_charge"))
+                else:
+                    mahngebuehr_sinv = create_sinv_from_sinv(sinv_lookup_data.get('sinv'), offene_mahnung.get("reminder_charge"), ignore_permissions=False)
+                pe.camt_status = 'Rechnungs Match'
+                row.allocated_amount = sinv_lookup_data.get('outstanding_amount')
+                sec_row = pe.append('references', {})
+                sec_row.reference_doctype = 'Sales Invoice'
+                sec_row.reference_name = mahngebuehr_sinv
+                sec_row.allocated_amount = offene_mahnung.get("reminder_charge")
+            else:
+                # Trotz gefundener Mahnung inkl. Mahngebühren überbezahlt
+                offene_mahnung = False
+
+        if not offene_mahnung:
+            if not double_payment:
+                pe.camt_status = 'Überbezahlt'
+                row.allocated_amount = sinv_lookup_data.get('outstanding_amount')
+            else:
+                pe.camt_status = 'Überbezahlt'
+                bereits_erfasste_zahlungen = double_payment_control[sinv_lookup_data.get('sinv')]
+                sinv_outstanding = sinv_lookup_data.get('outstanding_amount')
+                diff = sinv_outstanding - bereits_erfasste_zahlungen
+                row.allocated_amount = diff if diff > 0 else 0
+            camt_ueberzahlung_update(camt_import)
+
+    pe.save(ignore_permissions=ignore_permissions)
+    erfasse_rg_match(camt_import)
+
+def get_zahlungen_zum_matchen(camt_import, nur_erster=False):
+    query = """
+            SELECT pe.name,
+            pe.remarks,
+            pe.received_amount
+            FROM `tabPayment Entry` pe
+            LEFT JOIN `tabPayment Entry Reference` ref
+                ON ref.parent = pe.name AND ref.parenttype = 'Payment Entry'
+            WHERE pe.camt_import = %s
+            AND pe.docstatus = 0
+            AND ref.parent IS NULL
+            AND (`mv_mitgliedschaft` IS NULL OR `mv_mitgliedschaft` = '')
+            AND (`mv_kunde` IS NULL OR `mv_kunde` = '')
+            """
+    if nur_erster:
+        query += ' LIMIT 1'
+    return frappe.db.sql(query, (camt_import,), as_dict=True)
+
+@mit_protokoll
 def zahlungen_matchen(camt_import):
+    camt_import_doc = frappe.get_doc("CAMT Import", camt_import)
     preload_qrr_sinvs()
-    payment_entries = frappe.db.sql("""
-                                    SELECT `name`,
-                                    `remarks`,
-                                    `received_amount`
-                                    FROM `tabPayment Entry`
-                                    WHERE `camt_import` = '{camt_import}'
-                                    AND `docstatus` = 0
-                                    AND (`mv_mitgliedschaft` IS NULL OR `mv_mitgliedschaft` = '')
-                                    AND (`mv_kunde` IS NULL OR `mv_kunde` = '')""".format(camt_import=camt_import), as_dict=True)
+    payment_entries = get_zahlungen_zum_matchen(camt_import)
     commit_counter = 1
     double_payment_control = {}
-    for payment_entry in payment_entries:
+    matching_abweichungen = []
+    melde_fortschritt(camt_import, 'Matchen', 0, len(payment_entries))
+
+    for index, payment_entry in enumerate(payment_entries):
         transaction_reference = payment_entry.remarks.split(", ")[0].replace("QRR: ", "")
         received_amount = payment_entry.received_amount
         if len(transaction_reference) > 26:
-            sinv_lookup_data = sinv_lookup(transaction_reference, received_amount, QRR_SINVS)
-            if sinv_lookup_data:
+            sinv_lookup_data = sinv_lookup(transaction_reference, received_amount, QRR_SINVS, camt_import=camt_import_doc)
+            if sinv_lookup_data and sinv_lookup_data.get('matching_abweichungen'):
+                eintrag = dict(sinv_lookup_data)
+                eintrag['payment_entry'] = payment_entry.name
+                matching_abweichungen.append(eintrag)
+            elif sinv_lookup_data:
                 pe = frappe.get_doc("Payment Entry", payment_entry.name)
-                pe.party = sinv_lookup_data.get('customer')
-                pe.mv_mitgliedschaft = sinv_lookup_data.get('mv_mitgliedschaft')
-                pe.mv_kunde = sinv_lookup_data.get('mv_kunde')
-                    
-                row = pe.append('references', {})
-                row.reference_doctype = 'Sales Invoice'
-                row.reference_name = sinv_lookup_data.get('sinv')
-                
-                if sinv_lookup_data.get('sinv') not in double_payment_control:
-                    double_payment_control[sinv_lookup_data.get('sinv')] = received_amount
-                    double_payment = False
-                else:
-                    if (double_payment_control[sinv_lookup_data.get('sinv')] + received_amount) <= sinv_lookup_data.get('outstanding_amount'):
-                        double_payment_control[sinv_lookup_data.get('sinv')] = double_payment_control[sinv_lookup_data.get('sinv')] + received_amount
-                        double_payment = False
-                    else:
-                        double_payment = True
-
-                if (received_amount <= sinv_lookup_data.get('outstanding_amount')) and not double_payment:
-                    pe.camt_status = 'Rechnungs Match'
-                    row.allocated_amount = pe.paid_amount
-                else:
-                    # Bevor die Rechnnung als überbezahlt angeschaut wird, wird geprüft ob es ggf. zur Rechnung Mahnungen inkl. Mahngebühren gibt
-                    offene_mahnung = get_mahnungen(sinv_lookup_data.get('sinv'), sinv_lookup_data.get('mv_mitgliedschaft'), sinv_lookup_data.get('mv_kunde'))
-                    if offene_mahnung:
-                        if (received_amount == (sinv_lookup_data.get('outstanding_amount') + offene_mahnung.get("reminder_charge"))):
-                            # Erstellung, verknüpfung und Begleichung der offenen Mahnungebühr via neue SINV
-                            mahngebuehr_sinv = create_sinv_from_sinv(sinv_lookup_data.get('sinv'), offene_mahnung.get("reminder_charge"))
-                            pe.camt_status = 'Rechnungs Match'
-                            row.allocated_amount = sinv_lookup_data.get('outstanding_amount')
-                            sec_row = pe.append('references', {})
-                            sec_row.reference_doctype = 'Sales Invoice'
-                            sec_row.reference_name = mahngebuehr_sinv
-                            sec_row.allocated_amount = offene_mahnung.get("reminder_charge")
-                        else:
-                            # Trotz gefundener Mahnung inkl. Mahngebühren überbezahlt
-                            offene_mahnung = False
-                    
-                    if not offene_mahnung:
-                        if not double_payment:
-                            pe.camt_status = 'Überbezahlt'
-                            row.allocated_amount = sinv_lookup_data.get('outstanding_amount')
-                        else:
-                            pe.camt_status = 'Überbezahlt'
-                            bereits_erfasste_zahlungen = double_payment_control[sinv_lookup_data.get('sinv')]
-                            sinv_outstanding = sinv_lookup_data.get('outstanding_amount')
-                            diff = sinv_outstanding - bereits_erfasste_zahlungen
-                            row.allocated_amount = diff if diff > 0 else 0
-                        camt_ueberzahlung_update(camt_import)
-                
-                # see #1101
-                if pe.sektion_id != sinv_lookup_data.get('sektion'):
-                    pe.sektion_id = sinv_lookup_data.get('sektion')
-                    pe.company = sinv_lookup_data.get('company')
-                    pe.paid_to = frappe.db.get_value('Sektion', pe.sektion_id, 'account')
-                    pe.paid_from = frappe.db.get_value('Company', pe.company, 'default_receivable_account')
-                
-                pe.save(ignore_permissions=True)
-                erfasse_rg_match(camt_import)
+                weise_rechnung_zu(pe, sinv_lookup_data, camt_import, double_payment_control)
             else:
-                # Könnte Doppelzahlung sein - versuche Zahlung zuzuweisen
+                # Könnte Doppelzahlung sein
                 mitgliedschaft = suche_mitgliedschaft_aus_pe(payment_entry.name, mitglied_only=True)
                 if mitgliedschaft:
                     mitgliedschaft_data = mitgliedschaft_zuweisen(mitgliedschaft=mitgliedschaft)
@@ -325,25 +385,45 @@ def zahlungen_matchen(camt_import):
                     pe.save(ignore_permissions=True)
                 
         if commit_counter == 100:
+            frappe.db.set_value('CAMT Import', camt_import, 'matching_abweichungen', json.dumps(matching_abweichungen, ensure_ascii=False))
             frappe.db.commit()
             commit_counter = 1
         else:
             commit_counter += 1
+        melde_fortschritt(camt_import, 'Matchen', index + 1, len(payment_entries))
+    
+    frappe.db.set_value('CAMT Import', camt_import, 'matching_abweichungen', json.dumps(matching_abweichungen, ensure_ascii=False))
+    melde_fortschritt(camt_import, 'Matchen', len(payment_entries), len(payment_entries), 'Schliesse Rücksetzprotokoll ab.')
     frappe.db.commit()
-    return
 
+    return matching_abweichungen
+
+def get_rechnungs_matches_zum_verbuchen(camt_import, nur_erster=False):
+    """Ungebuchte Rechnungstreffer mit Referenz für Buchungslauf und Button."""
+    query = """
+        SELECT
+            `name`
+        FROM `tabPayment Entry`
+        WHERE `docstatus` = 0
+        AND `camt_import` = %s
+        AND `camt_status` = 'Rechnungs Match'
+        AND EXISTS (SELECT 1 FROM `tabPayment Entry Reference` ref
+            WHERE ref.parent = `tabPayment Entry`.name
+            AND ref.parenttype = 'Payment Entry')
+    """
+    if nur_erster:
+        query += ' LIMIT 1'
+    return frappe.db.sql(query, (camt_import,), as_dict=True)
+
+@mit_protokoll
 def verbuche_matches(camt_import):
     """
     Diese Funktion verbucht alle Payment Entries mit dem Status 'Rechnungs Match' welche einer Sales Invoice zugeordnet werden konnten
     """
-    pes = frappe.db.sql("""SELECT
-                                `name`
-                            FROM `tabPayment Entry`
-                            WHERE `docstatus` = 0
-                            AND `camt_import` = '{camt_import}'
-                            AND `camt_status` = 'Rechnungs Match'""".format(camt_import=camt_import), as_dict=True)
+    pes = get_rechnungs_matches_zum_verbuchen(camt_import)
     
-    for pe in pes:
+    melde_fortschritt(camt_import, 'Verbuchen', 0, len(pes))
+    for index, pe in enumerate(pes):
         pe_doc = frappe.get_doc("Payment Entry", pe.name)
         if len(pe_doc.references) > 0:
             sinv_doc = frappe.get_doc("Sales Invoice", pe_doc.references[0].reference_name)
@@ -360,7 +440,9 @@ def verbuche_matches(camt_import):
             pe_doc.submit()
             frappe.db.commit()
             camt_gebuchte_zahlung_update(camt_import)
+        melde_fortschritt(camt_import, 'Verbuchen', index + 1, len(pes))
     
+    melde_fortschritt(camt_import, 'Verbuchen', len(pes), len(pes), 'Schliesse Rücksetzprotokoll ab.')
     camt_status_update(camt_import, 'Verarbeitet')
     frappe.db.commit()
     return
@@ -557,6 +639,7 @@ def mitgliedschaft_zuweisen(mitgliedschaft, faktura=False, pe_sektion=None):
                 }
 
 @frappe.whitelist()
+@mit_protokoll
 def mit_spende_ausgleichen(pe, spendenlauf_referenz=None):
     payment_entry = frappe.get_doc("Payment Entry", pe)
     mitgliedschaft = payment_entry.mv_mitgliedschaft
@@ -603,6 +686,7 @@ def rueckzahlung(pe):
     return
 
 @frappe.whitelist()
+@mit_protokoll
 def als_hv_verbuchen(pe):
     payment_entry = frappe.get_doc("Payment Entry", pe)
     mitgliedschaft = payment_entry.mv_mitgliedschaft
@@ -824,6 +908,7 @@ def get_bar_mode_of_payment(sektion_id):
     return 'Cash'
 
 @frappe.whitelist()
+@mit_protokoll
 def mit_folgejahr_ausgleichen(pe):
     payment_entry = frappe.get_doc("Payment Entry", pe)
     try:
@@ -883,6 +968,7 @@ def reopen_sinv_as_admin(sinv):
     return
 
 @frappe.whitelist()
+@mit_protokoll
 def kulanz_ausgleich(pe):
     payment_entry = frappe.get_doc("Payment Entry", pe)
     pe = frappe.copy_doc(payment_entry)
@@ -912,55 +998,19 @@ def kulanz_ausgleich(pe):
 
 @frappe.whitelist()
 def reset_camt(camt):
-    payments = frappe.db.sql("""SELECT `name` FROM `tabPayment Entry` WHERE `camt_import` = '{camt}'""".format(camt=camt), as_dict=True)
-    for payment in payments:
-        pe = frappe.get_doc("Payment Entry", payment.name)
-        if pe.docstatus == 0:
-            pe.delete()
-        elif pe.docstatus == 1:
-            pe.cancel()
-            pe.delete()
-        elif pe.docstatus == 2:
-            pe.delete()
-    
-    camt_import = frappe.get_doc("CAMT Import", camt)
-    camt_import.ausgelesene_zahlungen_qty = 0
-    camt_import.eingelesene_zahlungen_qty = 0
-    camt_import.rg_match_qty = 0
-    camt_import.verbuchte_zahlung_qty = 0
-    camt_import.stornierte_zahlungen_qty = 0
-    camt_import.fehlgeschlagenes_auslesen_qty = 0
-    camt_import.nicht_eingelesene_zahlungen_qty = 0
-    camt_import.anz_unmatched_payments = 0
-    camt_import.zugewiesen_unverbucht_qty = 0
-    camt_import.hv_qty = 0
-    camt_import.produkte_qty = 0
-    camt_import.ueberzahlung_qty = 0
-    camt_import.mitgliedschaften_qty = 0
-    camt_import.spenden_qty = 0
-    camt_import.guthaben_qty = 0
-    camt_import.ausgelesene_zahlungen = ''
-    camt_import.eingelesene_zahlungen = ''
-    camt_import.fehlgeschlagenes_auslesen = ''
-    camt_import.nicht_eingelesene_zahlungen = ''
-    camt_import.camt_taxen = 0
-    camt_import.camt_amount = 0
-    camt_import.save()
-    frappe.db.commit()
-    aktualisiere_camt_uebersicht(camt_import.name)
+    from mvd.mvd.doctype.camt_import.reset_jobs import starten
+    return starten(camt)
 
 def erstelle_zahlung(date, to_account, received_amount, transaction_id, remarks, company, sektion, qrr, camt_import, nachladen=False):
     """
     Diese Funktion erzeugt einen Payment Entry, insofern noch kein Payment Entry mit der selben Transaktions-ID der Bank vorhanden ist
+    Firma, Sektion und Bankkonto werden aus dem CAMT-Import übernommen
     """
     # get default customer
     customer = get_default_customer(sektion)
     mitgliedschaft = None
     mv_kunde = None
     payment_match_status = 'Nicht zugewiesen'
-    
-    if sektion:
-        to_account = frappe.db.get_value('Sektion', sektion, 'account')
     
     # erstelle Zahlung wenn noch nicht vorhanden
     if not frappe.db.exists('Payment Entry', {'reference_no': transaction_id}):

@@ -39,3 +39,5 @@ mvd.patches.1916.add_index
 mvd.patches.issue_2033.vorlagenbaum_mail_zu_text
 mvd.patches.issue_2193.mandat_beratungskategorien_zu_thema
 mvd.patches.issue_wohnungsabgabe_fachperson.expert_in_zu_fachperson
+mvd.patches.camt_import_performance
+mvd.patches.camt_reference_no_index

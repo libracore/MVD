@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2021-2024, libracore and contributors
+# Copyright (c) 2021-2026, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -22,7 +22,9 @@ def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=F
             "titel": titel
         })
         new_korrespondenz.insert(ignore_permissions=True)
-        frappe.db.commit()
+        if not frappe.flags.get('camt_reset_kontext'):
+            frappe.db.commit()
+        
         return new_korrespondenz.name
     else:
         druckvorlage = frappe.get_doc("Druckvorlage", druckvorlage)
@@ -67,7 +69,9 @@ def create_korrespondenz(mitgliedschaft, titel, druckvorlage=False, massenlauf=F
             new_korrespondenz.mitgliedschafts_jahr_manuell = 1
             new_korrespondenz.mitgliedschafts_jahr = bezugsjahr
         new_korrespondenz.insert(ignore_permissions=True)
-        frappe.db.commit()
+
+        if not frappe.flags.get('camt_reset_kontext'):
+            frappe.db.commit()
         
         if attach_as_pdf:
             # add doc signature to allow print

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2024, libracore and contributors
+# Copyright (c) 2024 - 2026, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -136,7 +136,9 @@ def create_new_number(id=None):
         mmn = frappe.get_doc("Mitglied Main Naming", mitglied_main_naming)
         mmn.set_new_number()
         mmn.save(ignore_permissions=True)
-        frappe.db.commit()
+
+        if not frappe.flags.get('camt_reset_kontext'):
+            frappe.db.commit()
 
         return {
             'id': mmn.mitglied_id,

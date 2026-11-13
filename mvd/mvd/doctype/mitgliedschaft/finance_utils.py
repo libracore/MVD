@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2021-2024, libracore and contributors
+# Copyright (c) 2021-2026, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -170,7 +170,8 @@ def check_mitgliedschaft_in_pe(pe):
         mitgliedschaft = suche_nach_mitgliedschaft(pe.party)
         if mitgliedschaft:
             frappe.db.sql("""UPDATE `tabPayment Entry` SET `mv_mitgliedschaft` = '{mitgliedschaft}' WHERE `name` = '{pe}'""".format(mitgliedschaft=mitgliedschaft, pe=pe.name), as_list=True)
-            frappe.db.commit()
+            if not frappe.flags.get('camt_reset_kontext'):
+                frappe.db.commit()
 
 def suche_nach_mitgliedschaft(customer):
     mitgliedschaften = frappe.db.sql("""SELECT `name` FROM `tabMitgliedschaft` WHERE `kunde_mitglied` = '{customer}' OR `rg_kunde` = '{customer}'""".format(customer=customer), as_list=True)

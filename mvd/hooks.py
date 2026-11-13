@@ -18,6 +18,7 @@ app_license = "MIT"
 app_include_css = "/assets/mvd/css/mvd.css"
 app_include_js = [
     "/assets/mvd/js/rechnungs_bankkonto.js",
+    "/assets/mvd/js/camt_utils.js",
     "/assets/mvd/js/mvd.js",
     "/assets/mvd/js/vorlagen_baum/vorlagen_baum_navigator.js"
 ]
@@ -151,6 +152,9 @@ on_login = "mvd.mvd.utils.mvd_bootinfo.login_check"
 # Hook on document methods and events
 
 doc_events = {
+    "*": {
+        "after_insert": "mvd.mvd.doctype.camt_import.reset_protokoll.protokolliere_neuen_beleg"
+    },
     "Sales Invoice": {
         "before_insert": "mvd.mvd.utils.rechnungs_bankkonto.set_rechnungs_bankkonto",
         "before_cancel": "mvd.mvd.utils.hook_utils.unlink_fr",
@@ -162,7 +166,21 @@ doc_events = {
         ]
     },
     "Payment Entry": {
+        "before_validate": "mvd.mvd.doctype.camt_import.einlese_cache.vor_validierung",
+        "before_submit": [
+            "mvd.mvd.doctype.camt_import.verrechnung.pruefe_verrechnungsbeleg",
+            "mvd.mvd.doctype.camt_import.reset_protokoll.beginne_zahlung"
+        ],
+        "before_cancel": [
+            "mvd.mvd.doctype.camt_import.verrechnung.pruefe_verrechnungsbeleg",
+            "mvd.mvd.doctype.camt_import.reset_protokoll.beginne_zahlung"
+        ],
+        "on_cancel": "mvd.mvd.doctype.camt_import.reset_protokoll.beende_zahlung",
         "on_submit": "mvd.mvd.utils.hook_utils.pe_after_submit_hooks"
+    },
+    "Journal Entry": {
+        "before_submit": "mvd.mvd.doctype.camt_import.verrechnung.pruefe_verrechnungsbeleg",
+        "before_cancel": "mvd.mvd.doctype.camt_import.verrechnung.pruefe_verrechnungsbeleg"
     },
     "ToDo": {
         "on_update": "mvd.mvd.utils.hook_utils.todo_permissions"
