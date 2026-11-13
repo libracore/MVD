@@ -45,6 +45,11 @@ class Mandat(Document):
         from mvd.mvd.doctype.mandat.mandat_permissions import ist_rb_gesperrt, ist_nur_rb
         self.set_onload("rb_gesperrt", ist_rb_gesperrt(self))
         self.set_onload("nur_rb", ist_nur_rb())
+        # Status-Hinweis oben im Formular (mandat.js, status_hinweis): eigene VA? CC-Adresse fürs Einreichen bei der Coop
+        from mvd.mvd.doctype.mandat.solifonds import _ist_va_von_mandat
+        self.set_onload("ist_va", _ist_va_von_mandat(self))
+        if self.typ != "Solidaritätsfonds" and self.status == "Vorgemerkt":
+            self.set_onload("cc_adresse", get_cc_adresse(self))
 
     def autoname(self):
         jahr = datetime.date.today().year
@@ -280,6 +285,21 @@ def get_beratungskategorien(beratung):
         if kategorie and kategorie not in kategorien and frappe.db.exists("Beratungskategorie", kategorie):
             kategorien.append(kategorie)
     return kategorien
+
+def get_cc_adresse(mandat):
+    """CC-Adresse fürs Einreichen bei der Coop, genau wie in der Bestätigungs-E-Mail an die VA
+    (Email Template der Sektion, z. B. «mv+Mandat+MVBE-2026-1@libracore.io»). None, wenn nicht ermittelbar."""
+    import re
+    template = frappe.db.get_value("Sektion", mandat.sektion_id, "template_bestaetigung_kontaktperson")
+    if not template:
+        return None
+    try:
+        text = strip_html(get_email_template(template, {"doc": mandat}).get("message") or "")
+    except Exception:
+        return None
+    treffer = re.search(r"[\w.\-]+\+Mandat\+{0}@[\w.\-]+".format(re.escape(mandat.name)), text)
+    return treffer.group(0) if treffer else None
+
 
 def send_confirmation_email(mandat):
     try:

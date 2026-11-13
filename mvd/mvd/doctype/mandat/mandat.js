@@ -11,8 +11,9 @@ frappe.ui.form.on('Mandat', {
             frm.set_read_only();
             frm.refresh_fields();
             frm.disable_save();
-            frm.set_intro(__('Das Solifonds-Gesuch ist eingereicht: Du kannst das Mandat nur noch ansehen. Möglich sind noch Anhänge sowie «Abschliessen» und «Rückzug» (Status).'), 'blue');
         }
+        // Hinweis oben: was jetzt ansteht, je nach Status und Rolle
+        status_hinweis(frm);
 
         // Mitgliedschaftsübersicht wie in der Beratung
         load_html_overview(frm);
@@ -203,6 +204,126 @@ function status_call(frm, status, bemerkung) {
         freeze: true,
         callback: function() { frm.reload_doc(); }
     });
+}
+
+// ---------------------------------------------------------------------------
+// Status-Hinweis oben im Formular: was steht jetzt an, und für wen?
+// Rollen: VA = eigene VA des Mandats oder «nur RB»; vp = Vorprüfung; gl = Solifonds-GL; sonst «andere» (Sekretariat, MA).
+// Farben: yellow = du bist dran, blue = Info, green = erledigt, red = abgelehnt.
+// Texte synchron halten mit dem Handbuch (Dokumentation Mandate MVBE, Abschnitt «Hinweis oben im Mandat»).
+// ---------------------------------------------------------------------------
+
+frappe.mvd.mandat_status.DRAN = '<b>' + __('Du bist dran:') + '</b> ';
+frappe.mvd.mandat_status.NUR_ANSEHEN = __('Du kannst das Mandat nur noch ansehen. Möglich sind noch Anhänge sowie «Abschliessen» und «Rückzug» (Status).');
+
+function status_hinweis(frm) {
+    if (frm.is_new()) {
+        return;
+    }
+    let h = status_hinweis_text(frm);
+    if (!h) {
+        return;
+    }
+    let text = h[0];
+    // «nur RB» nach dem Einreichen: was noch geht (bei erledigten Mandaten nicht mehr nötig)
+    if (rb_gesperrt(frm)) {
+        if (['Gesuch eingereicht', 'Vorgeprüft', 'Antrag Vorstand'].includes(frm.doc.status)) {
+            text += ' ' + frappe.mvd.mandat_status.NUR_ANSEHEN;
+        } else if (frm.doc.status == 'Laufend (Solifonds)') {
+            text += ' ' + __('Sonst kannst du das Mandat nur noch ansehen und Anhänge hinzufügen.');
+        }
+    }
+    frm.set_intro(text, h[1]);
+    // Knopf «Kopieren» bei der CC-Adresse
+    $(frm.wrapper).find('.mandat-cc-kopieren').off('click').on('click', function() {
+        frappe.utils.copy_to_clipboard($(this).attr('data-adresse'));
+        return false;
+    });
+}
+
+function status_hinweis_text(frm) {
+    let onload = frm.doc.__onload || {};
+    let va = !!(onload.ist_va || onload.nur_rb);
+    let vp = frappe.user.has_role('MV_Solifonds_Vorpruefung');
+    let gl = frappe.user.has_role('MV_Solifonds_GL');
+    let solifonds = frm.doc.typ == 'Solidaritätsfonds';
+    let dran = frappe.mvd.mandat_status.DRAN;
+
+    switch (frm.doc.status) {
+        case 'Unzugewiesen':
+            return [__('Noch keine Vertrauensanwält*in. Über <b>Suche Vertrauensanwält*in</b> anfragen oder die VA direkt eintragen. Findet sich keine: <b>Status → Nicht vergeben</b>.'), 'blue'];
+        case 'Nicht vergeben':
+            return [__('Keine Vertrauensanwält*in gefunden. Wird doch noch eine VA eingetragen, steht das Mandat wieder auf «Vorgemerkt».'), 'blue'];
+        case 'Vorgemerkt':
+            if (!va) {
+                return [solifonds ? __('Wartet auf das Einreichen durch die Vertrauensanwält*in.')
+                    : __('Wartet darauf, dass die Vertrauensanwält*in das Gesuch bei der Coop einreicht.'), 'blue'];
+            }
+            if (solifonds) {
+                let grund = rueckweisung(frm);
+                return [(grund ? __('Von der Vorprüfung zurückgewiesen: «{0}».', [frappe.utils.escape_html(grund)]) + ' ' : '') +
+                    dran + __('Begründung und Kriterien prüfen, dann <b>Solidaritätsfonds → Gesuch einreichen</b>.'), 'yellow'];
+            }
+            return [dran + __('Gesuch bei der Coop einreichen, mit dieser Adresse im CC:') + ' ' + cc_html(onload.cc_adresse) +
+                '<br>' + __('Kommt die Mail an, wechselt der Status automatisch auf «Gesuch eingereicht».'), 'yellow'];
+        case 'Gesuch eingereicht':
+            if (!solifonds) {
+                return [__('Wartet auf den Entscheid der Coop. Bei Deckung bzw. Kostengutsprache «Laufend (RSV)», am Ende «Abgeschlossen» (Feld Status).'), 'blue'];
+            }
+            if (vp) {
+                return [dran + __('<b>Vorprüfung abschliessen</b> (Häkchen «Reglement erfüllt») oder <b>An VA zurückweisen</b> (Menü Solidaritätsfonds).'), 'yellow'];
+            }
+            return [__('Das Solifonds-Gesuch ist eingereicht und wartet auf die Vorprüfung.'), 'blue'];
+        case 'Vorgeprüft':
+            if (gl) {
+                return [dran + __('<b>Solidaritätsfonds → Entscheid GL</b>: Kostengutsprache, Ablehnung oder Antrag an den Vorstand.'), 'yellow'];
+            }
+            if (vp) {
+                return [__('Vorgeprüft, wartet auf den Entscheid der Geschäftsleitung. Bei Bedarf <b>Vorprüfung zurücknehmen</b>.'), 'blue'];
+            }
+            return [__('Vorgeprüft, wartet auf den Entscheid der Geschäftsleitung.'), 'blue'];
+        case 'Antrag Vorstand':
+            if (gl) {
+                return [dran + __('Der Vorstand stimmt per E-Mail ab. Danach <b>Solidaritätsfonds → Abstimmung abschliessen</b> (bei Patt entscheidet die GL).'), 'yellow'];
+            }
+            return [__('Antrag an den Vorstand: Der Vorstand stimmt per E-Mail ab.'), 'blue'];
+        case 'Laufend (RSV)':
+            if (va) {
+                return [__('Ist der Fall erledigt, Status auf «Abgeschlossen» setzen (Feld Status).'), 'blue'];
+            }
+            return [__('Laufend, die Vertrauensanwält*in führt den Fall.') + (frappe.user.has_role('MV_Solifonds_GL') ? ' ' + __('Visum möglich (Häkchen «Visum»).') : ''), 'blue'];
+        case 'Laufend (Solifonds)':
+            if (va) {
+                return [__('Kostengutsprache erteilt, das PDF kam per E-Mail. Formular vom Mitglied unterschreiben lassen. Ist der Fall erledigt: <b>Status → Abschliessen</b>.'), 'blue'];
+            }
+            return [__('Kostengutsprache erteilt, die Vertrauensanwält*in führt den Fall.'), 'blue'];
+        case 'Abgelehnt':
+            return [__('Abgelehnt (Endstatus). Möglich ist nur noch «Rückzug»') + (va ? '' : ' ' + __('oder «Gelöscht»')) + '.', 'red'];
+        case 'Abgeschlossen':
+        case 'Rückzug':
+        case 'Gelöscht':
+            return [__('Erledigt (Status «{0}»).', [__(frm.doc.status)]), 'green'];
+    }
+    return null;
+}
+
+// Grund der letzten Rückweisung durch die Vorprüfung, falls das Mandat deswegen wieder auf «Vorgemerkt» steht
+function rueckweisung(frm) {
+    let v = frm.doc.statusverlauf || [];
+    let letzte = v.length ? v[v.length - 1] : null;
+    if (letzte && letzte.von_status == 'Gesuch eingereicht' && letzte.nach_status == 'Vorgemerkt') {
+        return letzte.bemerkung || '';
+    }
+    return '';
+}
+
+function cc_html(adresse) {
+    if (!adresse) {
+        return __('siehe Bestätigungs-E-Mail');
+    }
+    let a = frappe.utils.escape_html(adresse);
+    return `<code style="user-select: all;">${a}</code> <button class="btn btn-default btn-xs mandat-cc-kopieren" data-adresse="${a}" ` +
+        `title="${__('In die Zwischenablage kopieren')}"><i class="fa fa-copy"></i> ${__('Kopieren')}</button>`;
 }
 
 function rb_gesperrt(frm) {
