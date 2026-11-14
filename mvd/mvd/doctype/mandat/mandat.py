@@ -43,13 +43,22 @@ class Mandat(Document):
     def onload(self):
         # Solifonds nach dem Einreichen: Formular für «nur RB» schreibgeschützt (mandat.js)
         from mvd.mvd.doctype.mandat.mandat_permissions import ist_rb_gesperrt, ist_nur_rb
-        self.set_onload("rb_gesperrt", ist_rb_gesperrt(self))
-        self.set_onload("nur_rb", ist_nur_rb())
-        # Status-Hinweis oben im Formular (mandat.js, status_hinweis): eigene VA? CC-Adresse fürs Einreichen bei der Coop
         from mvd.mvd.doctype.mandat.solifonds import _ist_va_von_mandat
-        self.set_onload("ist_va", _ist_va_von_mandat(self))
+        from mvd.mvd.doctype.mandat.mandat_hinweise import get_hinweis
+        rb_gesperrt = ist_rb_gesperrt(self)
+        nur_rb = ist_nur_rb()
+        ist_va = _ist_va_von_mandat(self)
+        self.set_onload("rb_gesperrt", rb_gesperrt)
+        self.set_onload("nur_rb", nur_rb)
+        self.set_onload("ist_va", ist_va)
+        # Hinweis oben im Formular (Texte in mandat_hinweise.py, #2241); CC-Adresse fürs Einreichen bei der Coop
+        cc_adresse = None
         if self.typ != "Solidaritätsfonds" and self.status == "Vorgemerkt":
-            self.set_onload("cc_adresse", get_cc_adresse(self))
+            cc_adresse = get_cc_adresse(self)
+            self.set_onload("cc_adresse", cc_adresse)
+        if not self.is_new():
+            self.set_onload("hinweis", get_hinweis(self, ist_va=ist_va, nur_rb=nur_rb,
+                rb_gesperrt=rb_gesperrt, cc_adresse=cc_adresse))
 
     def autoname(self):
         jahr = datetime.date.today().year
