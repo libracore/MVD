@@ -60,3 +60,10 @@
     margin: 10px 0;
     font-size: 20px;
 }
+
+/* Listen je Status (#2243) */
+#page-vbz-mandate .table-meine-mandate {
+    background-color: #fff;
+    margin: 0 15px 10px 15px;
+    width: calc(100% - 30px);
+}
