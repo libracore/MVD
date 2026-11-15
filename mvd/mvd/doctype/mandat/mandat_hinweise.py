@@ -45,34 +45,38 @@ HINWEISE = [
     ("Vorgemerkt", "RSV", "*", None, "blue",
      "Wartet darauf, dass die Vertrauensanwält*in das Gesuch bei der Coop einreicht."),
 
+    ("Gesuch eingereicht", "RSV", "va", None, "blue",
+     "Wartet auf den Entscheid der Coop. Erteilt sie Deckung bzw. Kostengutsprache, setzt du den Status auf "
+     "<b>«Laufend (RSV)»</b> (Feld Status)."),
     ("Gesuch eingereicht", "RSV", "gl", "nicht_visiert", "yellow",
      "{dran}Gesuch prüfen und <b>visieren</b> (Häkchen «Visum»). Will die Geschäftsleitung den Fall weiter im Auge behalten, "
-     "zusätzlich <b>«Fall verfolgen»</b> setzen.<br>"
-     "Wartet auf den Entscheid der Coop. Bei Deckung bzw. Kostengutsprache «Laufend (RSV)», am Ende «Abgeschlossen» (Feld Status)."),
+     "zusätzlich <b>«Fall verfolgen»</b> setzen.<br>" + "Wartet auf den Entscheid der Coop. Danach setzt die Vertrauensanwält*in den Status."),
     ("Gesuch eingereicht", "RSV", "*", None, "blue",
-     "Wartet auf den Entscheid der Coop. Bei Deckung bzw. Kostengutsprache «Laufend (RSV)», am Ende «Abgeschlossen» (Feld Status)."),
+     "Wartet auf den Entscheid der Coop. Danach setzt die Vertrauensanwält*in den Status."),
     ("Gesuch eingereicht", "Solifonds", "vp", None, "yellow",
-     "{dran}<b>Vorprüfung abschliessen</b> (Häkchen «Reglement erfüllt») oder <b>An VA zurückweisen</b> (Menü Solidaritätsfonds)."),
+     "{dran}Gesuch prüfen. Passt es: <b>Solidaritätsfonds → Vorprüfung abschliessen</b> und bestätigen, dass die Voraussetzungen "
+     "gemäss Reglement erfüllt sind. Sonst: <b>Solidaritätsfonds → An VA zurückweisen</b> (mit Grund)."),
     ("Gesuch eingereicht", "Solifonds", "*", None, "blue",
      "Das Solifonds-Gesuch ist eingereicht und wartet auf die Vorprüfung."),
 
     ("Vorgeprüft", "*", "gl", None, "yellow",
      "{dran}<b>Solidaritätsfonds → Entscheid GL</b>: Kostengutsprache, Ablehnung oder Antrag an den Vorstand."),
     ("Vorgeprüft", "*", "vp", None, "blue",
-     "Vorgeprüft, wartet auf den Entscheid der Geschäftsleitung. Bei Bedarf <b>Vorprüfung zurücknehmen</b>."),
+     "Vorgeprüft, wartet auf den Entscheid der Geschäftsleitung. Bei Bedarf <b>Solidaritätsfonds → Vorprüfung zurücknehmen</b>."),
     ("Vorgeprüft", "*", "*", None, "blue",
      "Vorgeprüft, wartet auf den Entscheid der Geschäftsleitung."),
 
     ("Antrag Vorstand", "*", "gl", None, "yellow",
-     "{dran}Der Vorstand stimmt per E-Mail ab. Danach <b>Solidaritätsfonds → Abstimmung abschliessen</b> "
-     "(bei Patt entscheidet die GL)."),
+     "{dran}Der Vorstand stimmt über den persönlichen Link in seiner E-Mail ab; den Stand siehst du unten im Abschnitt «Vorstand». "
+     "Danach <b>Solidaritätsfonds → Abstimmung abschliessen</b> (bei Patt entscheidet die GL)."),
     ("Antrag Vorstand", "*", "*", None, "blue",
-     "Antrag an den Vorstand: Der Vorstand stimmt per E-Mail ab."),
+     "Antrag an den Vorstand: Die Abstimmung läuft."),
 
     ("Laufend (RSV)", "*", "va", None, "blue",
      "Ist der Fall erledigt, Status auf «Abgeschlossen» setzen (Feld Status)."),
-    ("Laufend (RSV)", "*", "gl", None, "blue",
-     "Laufend, die Vertrauensanwält*in führt den Fall. Visum möglich (Häkchen «Visum»)."),
+    ("Laufend (RSV)", "*", "gl", "nicht_visiert", "yellow",
+     "{dran}Mandat prüfen und <b>visieren</b> (Häkchen «Visum»). Will die Geschäftsleitung den Fall weiter im Auge behalten, "
+     "zusätzlich <b>«Fall verfolgen»</b> setzen.<br>Laufend, die Vertrauensanwält*in führt den Fall."),
     ("Laufend (RSV)", "*", "*", None, "blue",
      "Laufend, die Vertrauensanwält*in führt den Fall."),
 
@@ -83,13 +87,13 @@ HINWEISE = [
      "Kostengutsprache erteilt, die Vertrauensanwält*in führt den Fall."),
 
     ("Abgelehnt", "*", "va", None, "red",
-     "Abgelehnt (Endstatus). Möglich ist nur noch «Rückzug»."),
+     "Das Gesuch wurde abgelehnt. Weiter bearbeitet wird es nicht; möglich ist nur noch der Status «Rückzug»."),
     ("Abgelehnt", "*", "*", None, "red",
-     "Abgelehnt (Endstatus). Möglich ist nur noch «Rückzug» oder «Gelöscht»."),
+     "Das Gesuch wurde abgelehnt. Weiter bearbeitet wird es nicht; möglich ist nur noch der Status «Rückzug» bzw. «Gelöscht»."),
 
     ("Abgeschlossen", "*", "*", None, "green", "Erledigt (Status «{status}»)."),
     ("Rückzug", "*", "*", None, "green", "Erledigt (Status «{status}»)."),
-    ("Gelöscht", "*", "*", None, "green", "Erledigt (Status «{status}»)."),
+    ("Gelöscht", "*", "*", None, "green", "Gelöscht – das Mandat wird nicht weiter bearbeitet."),
 ]
 
 # Zusatz für «nur RB», wenn das Solifonds-Mandat nach dem Einreichen gesperrt ist (#2206), je Status
