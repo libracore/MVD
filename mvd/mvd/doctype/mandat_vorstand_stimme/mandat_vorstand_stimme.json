@@ -8,7 +8,6 @@
   "vorstand_name",
   "email",
   "user",
-  "kontaktperson",
   "stimme",
   "abgestimmt_am",
   "kommentar",
@@ -34,14 +33,6 @@
    "fieldtype": "Link",
    "label": "Benutzer",
    "options": "User",
-   "read_only": 1
-  },
-  {
-   "depends_on": "kontaktperson",
-   "fieldname": "kontaktperson",
-   "fieldtype": "Link",
-   "label": "Kontaktperson (alt)",
-   "options": "Termin Kontaktperson",
    "read_only": 1
   },
   {
