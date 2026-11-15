@@ -39,3 +39,21 @@ frappe.ui.form.on('Sektion', {
         }
     }
 });
+
+frappe.ui.form.on('Sektion Vorstand', {
+    // Benutzer gewählt: Name und E-Mail übernehmen, wenn noch leer
+    user: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (!row.user) {
+            return;
+        }
+        frappe.db.get_value('User', row.user, ['full_name', 'email'], function(u) {
+            if (u && !row.vorstand_name) {
+                frappe.model.set_value(cdt, cdn, 'vorstand_name', u.full_name);
+            }
+            if (u && !row.email) {
+                frappe.model.set_value(cdt, cdn, 'email', u.email);
+            }
+        });
+    }
+});

@@ -309,45 +309,41 @@ def ablehnung_mail(doc):
 # ---------------------------------------------------------------------------
 
 def get_vorstand(sektion_id):
-    return frappe.get_all("Termin Kontaktperson",
-        filters={"ist_vorstand": 1, "disabled": 0, "sektion_id": sektion_id},
-        fields=["name"])
+    """Aktive Einträge der Tabelle «Vorstand» in der Sektion (Abschnitt Mandate)."""
+    return frappe.get_all("Sektion Vorstand",
+        filters={"parent": sektion_id, "parenttype": "Sektion", "parentfield": "vorstand", "aktiv": 1},
+        fields=["vorstand_name", "email", "user"], order_by="idx asc")
 
 def abstimmung_starten(doc):
-    vorstand = get_vorstand(doc.sektion_id)
+    vorstand = [p for p in get_vorstand(doc.sektion_id) if (p.email or "").strip()]
     if not vorstand:
-        frappe.throw(_("In der Sektion {0} ist keine Kontaktperson mit «Vorstand» erfasst.").format(doc.sektion_id))
+        frappe.throw(_("In der Sektion {0} ist im Abschnitt «Mandate» kein aktiver Vorstand mit E-Mail erfasst.").format(doc.sektion_id))
 
     # Im Mandat steht nur der Hash des Tokens; der Token selbst steht nur im Link der Mail
-    tokens = {}
+    tokens = []
     doc.set("vorstand_stimmen", [])
     for person in vorstand:
         token = frappe.generate_hash(length=32)
-        tokens[person.name] = token
+        tokens.append(token)
         doc.append("vorstand_stimmen", {
-            "kontaktperson": person.name,
+            "vorstand_name": person.vorstand_name,
+            "email": person.email.strip(),
+            "user": person.user,
             "token": _token_hash(token)
         })
     doc.save(ignore_permissions=True)
 
-    for stimme in doc.vorstand_stimmen:
-        empfaenger = [u for u in frappe.db.sql_list("""
-            SELECT `user` FROM `tabTermin Kontaktperson Multi User` WHERE `parent` = %s
-        """, stimme.kontaktperson) if u]
-        link = get_url("/solifonds-abstimmung?token={0}".format(tokens[stimme.kontaktperson]))
+    for stimme, token in zip(doc.vorstand_stimmen, tokens):
+        link = get_url("/solifonds-abstimmung?token={0}".format(token))
         inhalt = "<p>{0}</p><p><a href='{1}'>{2}</a></p><p>{3}</p>".format(
             _("Die Geschäftsleitung beantragt eine Kostengutsprache aus dem Solidaritätsfonds. Bitte stimmen Sie über den anonymisierten Fall ab."),
             link, _("Zur Abstimmung"),
             _("Dieser Link ist persönlich und nur für Sie gültig."))
-        _sende_mail(doc, empfaenger, _("Solifonds: Abstimmung Vorstand ({0})").format(doc.name), inhalt,
+        _sende_mail(doc, [stimme.email], _("Solifonds: Abstimmung Vorstand ({0})").format(doc.name), inhalt,
             mit_kommunikation=False)
         # Verlauf: an wen der Link ging, ohne den Link selbst
-        if empfaenger:
-            _kommentar(doc, _("Abstimmungslink per E-Mail an {0} (Vorstand) verschickt: {1}").format(
-                escape_html(stimme.kontaktperson), escape_html(", ".join(empfaenger))))
-        else:
-            _kommentar(doc, _("Kein Abstimmungslink an {0} (Vorstand): keine E-Mail-Adresse hinterlegt.").format(
-                escape_html(stimme.kontaktperson)))
+        _kommentar(doc, _("Abstimmungslink per E-Mail an {0} (Vorstand) verschickt: {1}").format(
+            escape_html(stimme.vorstand_name), escape_html(stimme.email)))
 
 def get_abstimmung_stand(doc):
     ja = len([s for s in doc.vorstand_stimmen if s.stimme == "Ja"])
