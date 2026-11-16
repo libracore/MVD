@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from datetime import date, timedelta
-from frappe.utils.data import getdate
+from frappe.utils.data import escape_html, getdate
 from frappe import _
 import json
 from frappe.utils import cint
@@ -283,15 +283,18 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
     while von_datum <= bis_datum:
         if von_datum.strftime('%A') not in ['Saturday', 'Sunday']:
             zugeteilte_beratungspersonen = frappe.db.sql("""
-                                                            SELECT *
+                                                            SELECT `tabAPB Zuweisung`.*,
+                                                                COALESCE(NULLIF(`reserviert_von`.`full_name`, ''), `tabAPB Zuweisung`.`reserved_by`) AS `reserved_by_name`
                                                             FROM `tabAPB Zuweisung`
+                                                            LEFT JOIN `tabUser` AS `reserviert_von`
+                                                                ON `reserviert_von`.`name` = `tabAPB Zuweisung`.`reserved_by`
                                                             WHERE `date` = '{von_datum}'
-                                                            AND `name` NOT IN (
+                                                            AND `tabAPB Zuweisung`.`name` NOT IN (
                                                                 SELECT `abp_referenz`
                                                                 FROM `tabBeratung Termin`
                                                                 WHERE `abp_referenz` IS NOT NULL
                                                             )
-                                                            AND `parent` IN (
+                                                            AND `tabAPB Zuweisung`.`parent` IN (
                                                                 SELECT `name`
                                                                 FROM `tabArbeitsplan Beratung`
                                                                 WHERE `sektion_id` = '{sektion}'
@@ -321,6 +324,11 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
             if len(zugeteilte_beratungspersonen) > 0:
                 zugeteilte_beratungspersonen_liste = []
                 for zugeteilte_beratungsperson in zugeteilte_beratungspersonen:
+                    proforma_reservation = ""
+                    if cint(zugeteilte_beratungsperson.reserved) == 1:
+                        proforma_reservation = "📌 "
+                        if zugeteilte_beratungsperson.reserved_by_name:
+                            proforma_reservation += "({0}) ".format(escape_html(zugeteilte_beratungsperson.reserved_by_name))
                     x = {
                         'ort': zugeteilte_beratungsperson.art_ort.replace("({sektion})".format(sektion=sektion), ""),
                         'ort_mit_sektion': zugeteilte_beratungsperson.art_ort,
@@ -329,7 +337,7 @@ def zeige_verfuegbarkeiten(sektion, datum, beraterin=None, ort=None, marked=None
                         'beratungsperson': zugeteilte_beratungsperson.beratungsperson.replace("({sektion})".format(sektion=sektion), ""),
                         'beratungsperson_mit_sektion': zugeteilte_beratungsperson.beratungsperson,
                         'name': zugeteilte_beratungsperson.name,
-                        'proforma_reservation': "📌 " if cint(zugeteilte_beratungsperson.reserved) == 1 else ""
+                        'proforma_reservation': proforma_reservation
                     }
                     zugeteilte_beratungspersonen_liste.append(x)
                 sorted_list = sorted(zugeteilte_beratungspersonen_liste, key = lambda x: (x['ort'], x['from_time'], x['beratungsperson']))
