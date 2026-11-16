@@ -5,7 +5,7 @@
 
 Alle Texte stehen in HINWEISE. Der Server wählt in Mandat.onload den passenden Hinweis aus
 (__onload.hinweis), mandat.js zeigt ihn nur an.
-Texte synchron halten mit dem Handbuch (Dokumentation Mandate MVBE, Abschnitt «Hinweis oben im Mandat»).
+Texte synchron halten mit dem Handbuch (Wiki «MVBE Mandate (Dokumentation)», Page-ID 292880515, Abschnitt «Hinweis oben im Mandat»).
 """
 
 from __future__ import unicode_literals
