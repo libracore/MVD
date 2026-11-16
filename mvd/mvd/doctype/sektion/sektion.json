@@ -200,7 +200,8 @@
   "template_bestaetigung_rsv",
   "rsv_email_absender",
   "e_mail_rsv",
-  "mandat_zip_passwort"
+  "mandat_zip_passwort",
+  "vorstand"
  ],
  "fields": [
   {
@@ -1338,9 +1339,16 @@
    "fieldname": "mandat_zip_passwort",
    "fieldtype": "Password",
    "label": "Mandat ZIP Passwort"
+  },
+  {
+   "description": "Gilt allgemein, u. a. f\u00fcr die Abstimmungen \u00fcber Solifonds-Antr\u00e4ge (Abstimmungslink an alle aktiven Eintr\u00e4ge).",
+   "fieldname": "vorstand",
+   "fieldtype": "Table",
+   "label": "Vorstand",
+   "options": "Sektion Vorstand"
   }
  ],
- "modified": "2026-11-12 14:10:00.000000",
+ "modified": "2026-11-15 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils.data import now_datetime
 from mvd.mvd.doctype.mandat.mandat_permissions import get_va_kontaktpersonen
-from mvd.mvd.doctype.mandat.mandat_status import ERLEDIGT
+from mvd.mvd.doctype.mandat.mandat_status import ERLEDIGT, RSV
 
 TYP_SPALTEN = {
     'Rechtsschutzversicherung': 'rsv',
@@ -14,32 +14,56 @@ TYP_SPALTEN = {
 }
 
 # ---------------------------------------------------------------------------
-# Konfiguration der Seite: welche Abschnitte, in welcher Reihenfolge, aufgeklappt oder zu
+# Konfiguration der Seite: welche Abschnitte, in welcher Reihenfolge, aufgeklappt oder zu (#2239, #2243)
 # ---------------------------------------------------------------------------
-# Abschnitte (Schlüssel -> Titel). Die Inhalte stehen in vbz_mandate.html ({% if a.key == "…" %}).
+# Feste Abschnitte (Schlüssel -> Titel). Dazu kommt je Status ein Abschnitt «status:<Status>» mit der Liste der Mandate.
 ABSCHNITTE = {
     'uebersicht': 'Übersicht nach Status',
+    'zu_visieren': 'Zu visierende Mandate',
     'meine_offen': 'Meine offenen Mandate',
     'meine_erledigt': 'Meine erledigten Mandate',
 }
 
+# «Zu visierende Mandate»: RSV-Mandate ohne Visum in diesen Status (nur für die GL, sie setzt das Visum)
+VISUM_STATUS = ('Gesuch eingereicht', 'Laufend (RSV)')
+
 # Ansichten je Rolle: die ERSTE passende Zeile gilt.
 #   wer:        'va' (Vertrauensanwält*in, sieht nur eigene Mandate), ein Rollenname (z. B. 'MV_Solifonds_GL') oder '*' (alle übrigen)
 #   abschnitte: Liste (Abschnitt, aufgeklappt) in der gewünschten Reihenfolge; nicht aufgeführte Abschnitte erscheinen nicht.
-# «meine_offen» / «meine_erledigt» gibt es nur für VAs (sonst wären es alle Mandate der Sektion).
+#               'status:<Status>' = Liste der Mandate in diesem Status, 'status:*' = alle übrigen Status (Reihenfolge wie im Feld Status)
+# «meine_offen» / «meine_erledigt» gibt es nur für VAs (sonst wären es alle Mandate der Sektion),
+# «zu_visieren» nur für die GL (Rolle MV_Solifonds_GL). Es erscheinen nur Mandate, auf die Zugriff besteht (get_list).
 ANSICHTEN = [
     ('va', [('meine_offen', True), ('meine_erledigt', False)]),
-    ('*', [('uebersicht', True)]),
+    ('MV_Solifonds_GL', [('zu_visieren', True), ('uebersicht', True), ('status:*', False)]),
+    ('*', [('uebersicht', True), ('status:Unzugewiesen', True), ('status:*', False)]),
 ]
 
 
-def get_ansicht(ist_va):
+def get_ansicht(ist_va, status_optionen=None):
+    """Abschnitte [{key, titel, offen, status?}] der ersten passenden Zeile in ANSICHTEN."""
     rollen = set(frappe.get_roles())
+    status_optionen = status_optionen or []
     for wer, abschnitte in ANSICHTEN:
-        if wer == '*' or (wer == 'va' and ist_va) or wer in rollen:
-            return [{'key': key, 'titel': ABSCHNITTE[key], 'offen': 1 if offen else 0}
-                    for key, offen in abschnitte
-                    if key in ABSCHNITTE and (ist_va or not key.startswith('meine_'))]
+        if not (wer == '*' or (wer == 'va' and ist_va) or wer in rollen):
+            continue
+        genannt = set(key[len('status:'):] for key, offen in abschnitte if key.startswith('status:') and key != 'status:*')
+        ergebnis = []
+        for key, offen in abschnitte:
+            if key == 'status:*':
+                ergebnis += [{'key': 'status:' + st, 'titel': st, 'offen': 1 if offen else 0, 'status': st}
+                             for st in status_optionen if st not in genannt]
+            elif key.startswith('status:'):
+                st = key[len('status:'):]
+                if st in status_optionen:
+                    ergebnis.append({'key': key, 'titel': st, 'offen': 1 if offen else 0, 'status': st})
+            elif key in ABSCHNITTE:
+                if key.startswith('meine_') and not ist_va:
+                    continue
+                if key == 'zu_visieren' and 'MV_Solifonds_GL' not in rollen:
+                    continue
+                ergebnis.append({'key': key, 'titel': ABSCHNITTE[key], 'offen': 1 if offen else 0})
+        return ergebnis
     return []
 
 @frappe.whitelist()
@@ -63,24 +87,33 @@ def get_status_uebersicht():
             total[spalte] += werte[spalte]
 
     ist_va = get_va_kontaktpersonen() is not None
-    meine_mandate = get_meine_mandate(status_optionen) if ist_va else []
+    abschnitte = get_ansicht(ist_va, status_optionen)
+    # Listen nur laden, wenn ein Abschnitt sie braucht
+    mandate = get_mandate(status_optionen) if any(a['key'] != 'uebersicht' for a in abschnitte) else []
+    for a in abschnitte:
+        if a['key'] == 'meine_offen':
+            a['liste'] = [m for m in mandate if not m.erledigt]
+        elif a['key'] == 'meine_erledigt':
+            a['liste'] = [m for m in mandate if m.erledigt]
+        elif a['key'] == 'zu_visieren':
+            a['liste'] = [m for m in mandate if m.typ == RSV and not m.visum and m.status in VISUM_STATUS]
+        elif a.get('status'):
+            a['liste'] = [m for m in mandate if m.status == a['status']]
     return {
         'datenstand': now_datetime().strftime("%d.%m.%Y %H:%M:%S"),
         'ist_va': ist_va,
-        'abschnitte': get_ansicht(ist_va),
-        'meine_offen': [m for m in meine_mandate if not m.erledigt],
-        'meine_erledigt': [m for m in meine_mandate if m.erledigt],
+        'abschnitte': abschnitte,
         'status_liste': status_liste,
         'total': dict(total, summe=sum(total.values())),
         'hat_ohne_typ': total['ohne_typ'] > 0
     }
 
 
-def get_meine_mandate(status_optionen):
-    # #2206: Mandate der Vertrauensanwält*in (Einschränkung über mandat_permissions, get_list)
-    # #2205: alle zugewiesenen, egal welcher Status; offene zuerst, erledigte danach
+def get_mandate(status_optionen):
+    # Nur Mandate, auf die Zugriff besteht: get_list prüft User Permissions (Sektion) und die VA-Einschränkung (#2206)
+    # #2205: offene zuerst, erledigte danach; innerhalb nach Status, dann nach Erstellung
     mandate = frappe.get_list('Mandat',
-        fields=['name', 'status', 'typ', 'mv_mitgliedschaft', 'fertigstellen_bis', 'creation'],
+        fields=['name', 'status', 'typ', 'mv_mitgliedschaft', 'kontaktperson', 'visum', 'fertigstellen_bis', 'creation'],
         order_by='creation asc', limit_page_length=0)
 
     mitglieder = {}
