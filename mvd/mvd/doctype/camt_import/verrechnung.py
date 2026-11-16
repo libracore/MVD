@@ -6,15 +6,12 @@ from __future__ import unicode_literals
 import hashlib
 import json
 import frappe
-from frappe.utils import flt
+from frappe.utils import flt, cint
 from frappe.utils.background_jobs import enqueue
 from mvd.mvd.doctype.camt_import.helpers import get_matching_bankkonto, get_matching_abweichung, get_default_customer
 from mvd.mvd.doctype.camt_import.reset_protokoll import mit_protokoll, generation, ist_aktuell, erfassen, markiere_beleg
 
 def _zugriff(camt_import, schreiben=False):
-    if not set(frappe.get_roles()).intersection(['System Manager', 'MV_RW', 'MV_GL']):
-        frappe.throw('Sie haben keine Berechtigung für Firmenverrechnungen.', frappe.PermissionError)
-    
     if schreiben and frappe.local.request.method != 'POST':
         frappe.throw('Diese Aktion muss als POST-Anfrage ausgeführt werden.', frappe.PermissionError)
     
@@ -83,7 +80,6 @@ def _konto(name, company, currency, root_type=None, account_type=None):
         frappe.throw('Bitte wählen Sie beide Verrechnungskonten aus.')
     
     account = frappe.get_cached_doc('Account', name)
-    account.check_permission('read')
     if account.company != company or account.is_group or account.disabled or account.docstatus == 2:
         frappe.throw('Das Konto {0} muss ein aktives Einzelkonto der Firma {1} sein.'.format(name, company))
     
@@ -113,9 +109,7 @@ def _kontext(camt, payment_entry, sperren=False):
         frappe.db.sql('SELECT name FROM `tab{0}` WHERE name=%s FOR UPDATE'.format(doctype), (entry['reference_name'],))
     
     pe = frappe.get_doc('Payment Entry', payment_entry)
-    pe.check_permission('write')
     target = frappe.get_doc(doctype, entry['reference_name'])
-    target.check_permission('read')
 
     if pe.camt_import != camt.name or pe.docstatus != 0 or pe.payment_type != 'Receive':
         frappe.throw('Es kann nur eine ungebuchte Eingangszahlung dieses CAMT-Imports verrechnet werden.')
@@ -131,11 +125,16 @@ def _kontext(camt, payment_entry, sperren=False):
     
     if target.company == camt.company:
         frappe.throw('Diese Aktion ist für Zahlungen zwischen unterschiedlichen Firmen vorgesehen.')
+
+    # Auch ohne allgemeines Rechnungsrecht bleibt die Aktion auf den tatsächlich
+    # passenden Zahlungstreffer beschränkt; die gespeicherte Abweichung allein genügt nicht.
+    reference = target.esr_reference if doctype == 'Sales Invoice' else target.qrr_referenz
+    payment_reference = (pe.remarks or '').split(', ')[0].replace('QRR: ', '')
+    if not reference or reference.replace(' ', '') != payment_reference.replace(' ', ''):
+        frappe.throw('Die Zahlungsreferenz stimmt nicht mehr mit der Rechnung überein. Bitte matchen Sie die Zahlungen erneut.')
     
     source_company = frappe.get_cached_doc('Company', camt.company)
     target_company = frappe.get_cached_doc('Company', target.company)
-    source_company.check_permission('read')
-    target_company.check_permission('read')
     currency = source_company.default_currency
 
     if target_company.default_currency != currency or (target.get('currency') or currency) != currency:
@@ -212,6 +211,28 @@ def kandidaten(camt_import):
 
     return _kandidaten(camt)
 
+
+@frappe.whitelist()
+def suche_verrechnungskonten(doctype, txt, searchfield, start, page_len, filters):
+    if doctype != 'Account' or not isinstance(filters, dict) or filters.get('kontoart') not in ('verbindlichkeit', 'forderung'):
+        frappe.throw('Ungültige Kontenauswahl für die Firmenverrechnung.')
+    camt = _zugriff(filters.get('camt_import'))
+    pe, target, info = _kontext(camt, filters.get('payment_entry'))
+    source = filters['kontoart'] == 'verbindlichkeit'
+    return frappe.db.sql("""
+        SELECT name FROM `tabAccount`
+        WHERE company=%s
+        AND root_type=%s
+        AND is_group=0
+        AND disabled=0
+        AND docstatus<2
+        AND IFNULL(account_type, '') NOT IN ('Bank', 'Cash', 'Receivable', 'Payable')
+        AND (IFNULL(account_currency, '')='' OR account_currency=%s)
+        AND name LIKE %s ORDER BY name LIMIT %s, %s
+    """,
+    (info['source_company'] if source else info['target_company'], 'Liability' if source else 'Asset',
+    info['currency'], '%' + (txt or '') + '%', max(0, cint(start)), min(50, max(1, cint(page_len)))))
+
 def _standard_verrechnungskonto(sektion, field, company, currency, root_type):
     if not sektion:
         return None
@@ -236,17 +257,6 @@ def _kandidaten(camt, nur_erster=False):
     for row in entries:
         try:
             pe, target, info = _kontext(camt, row['payment_entry'])
-            pe.check_permission('submit')
-            journal = frappe.get_doc({'doctype': 'Journal Entry', 'company': target.company})
-            journal.check_permission('create')
-            journal.check_permission('submit')
-
-            if target.doctype == 'Fakultative Rechnung':
-                target.check_permission('write')
-                invoice = frappe.get_doc({'doctype': 'Sales Invoice', 'company': target.company, 'sektion_id': target.sektion_id, 'customer': info['customer']})
-                invoice.check_permission('create')
-                invoice.check_permission('submit')
-            
             if not nur_erster:
                 info['default_verbindlichkeit'] = _standard_verrechnungskonto(info['source_section'], 'firmenverrechnung_verbindlichkeitskonto', info['source_company'], info['currency'], 'Liability')
                 info['default_forderung'] = _standard_verrechnungskonto(info['target_section'], 'firmenverrechnung_forderungskonto', info['target_company'], info['currency'], 'Asset')
@@ -353,7 +363,7 @@ def buchen_alle(camt_import, zahlungen, token):
             if item['reference_doctype'] == 'Fakultative Rechnung':
                 converted[reference] = result['sales_invoice']
             
-        _aktualisiere_report(camt.name)
+        _aktualisiere_report(camt.name, nach_verbuchung=True)
 
         return {
             'buchungen': results,
@@ -381,18 +391,12 @@ def buchen(camt_import, payment_entry, verbindlichkeit, forderung, token):
     if plan['token'] != token:
         frappe.throw('Die Daten haben sich seit der Vorschau geändert. Bitte erstellen Sie eine neue Vorschau.')
     
-    pe.check_permission('submit')
     old_skip = frappe.flags.get('skip_mitgliedschaft_zahlungsdaten')
     old_guard = frappe.flags.get('camt_verrechnung_in_arbeit')
     frappe.flags.skip_mitgliedschaft_zahlungsdaten = True
     frappe.flags.camt_verrechnung_in_arbeit = pe.name
     try:
         if target.doctype == 'Fakultative Rechnung':
-            target.check_permission('write')
-            permission_doc = frappe.get_doc({'doctype': 'Sales Invoice', 'company': target.company, 'sektion_id': target.sektion_id, 'customer': plan['customer']})
-            permission_doc.check_permission('create')
-            permission_doc.check_permission('submit')
-
             from mvd.mvd.doctype.camt_import.utils import create_unpaid_sinv
             data = create_unpaid_sinv(target.name, plan['amount'], camt_import=frappe._dict(company=target.company, sektion_id=target.sektion_id, account=get_matching_bankkonto(target)), commit=False)
 
@@ -427,9 +431,8 @@ def buchen(camt_import, payment_entry, verbindlichkeit, forderung, token):
                 }
             ]
         })
-        journal.check_permission('create')
-        journal.check_permission('submit')
-        journal.insert()
+
+        journal.insert(ignore_permissions=True)
 
         pe.camt_verrechnung_journal = journal.name
         pe.camt_verrechnung_rechnung = target.name
@@ -443,7 +446,7 @@ def buchen(camt_import, payment_entry, verbindlichkeit, forderung, token):
         deduction.cost_center = plan['source_cost_center']
 
         pe.camt_status = 'Verbucht'
-        pe.save()
+        pe.save(ignore_permissions=True)
         pe.submit()
         journal.submit()
 
@@ -459,7 +462,7 @@ def buchen(camt_import, payment_entry, verbindlichkeit, forderung, token):
         pe.add_comment('Comment', text='Firmenverrechnung: Gegenbuchung {0}, Rechnung {1}.'.format(journal.name, target.name))
 
         if not frappe.flags.get('camt_verrechnung_sammellauf'):
-            _aktualisiere_report(camt.name)
+            _aktualisiere_report(camt.name, nach_verbuchung=True)
 
         _folgeprozesse(pe.name, rechnung_beglichen=rechnung_beglichen, camt_import=camt.name)
 
@@ -521,17 +524,14 @@ def _storno_kontext(camt, payment_entry, sperren=False):
         frappe.db.sql('SELECT name FROM `tabPayment Entry` WHERE name=%s FOR UPDATE', (payment_entry,))
     
     pe = frappe.get_doc('Payment Entry', payment_entry)
-    pe.check_permission('cancel')
     if pe.camt_import != camt.name or pe.docstatus != 1 or not pe.get('camt_verrechnung_journal'):
         frappe.throw('Diese Zahlung ist keine gebuchte Firmenverrechnung dieses CAMT-Imports.')
     
     journal = frappe.get_doc('Journal Entry', pe.camt_verrechnung_journal)
-    journal.check_permission('cancel')
     if journal.docstatus != 1 or journal.get('camt_verrechnung_zahlung') != pe.name:
         frappe.throw('Die verknüpften Belege passen nicht zusammen.')
     
     target = frappe.get_doc('Sales Invoice', pe.camt_verrechnung_rechnung)
-    target.check_permission('read')
     if target.docstatus != 1:
         frappe.throw('Die verknüpfte Rechnung ist nicht mehr gebucht. Bitte prüfen Sie die Belege vor dem Storno.')
     
@@ -545,7 +545,6 @@ def _storno_kontext(camt, payment_entry, sperren=False):
     replacement.mv_mitgliedschaft = None
     replacement.mv_kunde = None
     replacement.amended_from = pe.name
-    replacement.check_permission('create')
 
     return pe, journal, target, replacement
 
@@ -560,6 +559,8 @@ def stornieren(camt_import, payment_entry):
     frappe.flags.camt_verrechnung_in_arbeit = pe.name
     try:
         markiere_beleg('Sales Invoice', target.name)
+        pe.flags.ignore_permissions = True
+        journal.flags.ignore_permissions = True
         pe.db_set('camt_verrechnung_journal', None)
 
         journal.cancel()
@@ -567,7 +568,7 @@ def stornieren(camt_import, payment_entry):
 
         pe.db_set('camt_verrechnung_journal', journal.name)
 
-        replacement.insert()
+        replacement.insert(ignore_permissions=True)
 
         entry = get_matching_abweichung(target, camt)
         entry['payment_entry'] = replacement.name
@@ -596,8 +597,10 @@ def stornieren(camt_import, payment_entry):
         frappe.flags.skip_mitgliedschaft_zahlungsdaten = old_skip
         frappe.flags.camt_verrechnung_in_arbeit = old_guard
 
-def _aktualisiere_report(camt_import):
+def _aktualisiere_report(camt_import, nach_verbuchung=False):
     from mvd.mvd.doctype.camt_import.helpers import aktualisiere_camt_uebersicht
+    if nach_verbuchung:
+        frappe.db.set_value('CAMT Import', camt_import, 'status', 'Verarbeitet')
     aktualisiere_camt_uebersicht(camt_import)
 
 def aktualisiere_folgeprozesse(payment_entry, rechnung_beglichen=False, reset_generation=None):

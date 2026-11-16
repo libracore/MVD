@@ -7,6 +7,7 @@ import hashlib
 import json
 import frappe
 from frappe.utils import flt
+from erpnext.accounts.utils import get_balance_on
 from mvd.mvd.doctype.camt_import.helpers import get_matching_bankkonto, get_matching_abweichung
 from mvd.mvd.doctype.camt_import.reset_protokoll import mit_protokoll, markiere_beleg
 from mvd.mvd.doctype.camt_import.verrechnung import _zugriff, _eintraege, _eintrag, _offene_eintraege, _konto, _aktualisiere_report
@@ -31,9 +32,7 @@ def _kontext(camt, payment_entry, sperren=False):
         frappe.db.sql('SELECT name FROM `tab{0}` WHERE name=%s FOR UPDATE'.format(doctype), (entry['reference_name'],))
     
     pe = frappe.get_doc('Payment Entry', payment_entry)
-    pe.check_permission('write')
     target = frappe.get_doc(doctype, entry['reference_name'])
-    target.check_permission('read')
 
     if pe.camt_import != camt.name or pe.docstatus != 0 or pe.payment_type != 'Receive':
         frappe.throw('Es kann nur eine ungebuchte Eingangszahlung dieses CAMT-Imports zugeordnet werden.')
@@ -122,17 +121,12 @@ def zuordnen(camt_import, payment_entry, bankkonto_quelle, token):
         frappe.throw('Bitte wählen Sie das Bankkonto aus dem CAMT-Import oder aus der Rechnung.')
     
     if bankkonto_quelle == 'Rechnung' and not info['rechnungskonto_verfuegbar']:
-        frappe.throw('Das Rechnungskonto fehlt oder ist kein zugängliches aktives Bankkonto derselben Firma und Währung.')
+        frappe.throw('Das Rechnungskonto fehlt oder ist kein aktives Bankkonto derselben Firma und Währung.')
     
     account = info['import_bankkonto'] if bankkonto_quelle == 'CAMT-Import' else info['rechnungs_bankkonto']
     markiere_beleg('Payment Entry', pe.name)
 
     if target.doctype == 'Fakultative Rechnung':
-        target.check_permission('write')
-        invoice = frappe.get_doc({'doctype': 'Sales Invoice', 'company': target.company, 'sektion_id': target.sektion_id})
-        invoice.check_permission('create')
-        invoice.check_permission('submit')
-
         # Nur den Bankvergleich freigeben. Firma und Sektion werden weiterhin geprüft
         # die erzeugte Rechnung behält das Konto der ursprünglichen FAK
         data = create_unpaid_sinv(target.name, pe.received_amount, camt_import=camt, commit=False, bankkonto_abweichung_erlaubt=True)
@@ -164,10 +158,10 @@ def zuordnen(camt_import, payment_entry, bankkonto_quelle, token):
     """, (target.name, pe.name))[0][0]
 
     pe.paid_to = account
-    pe.paid_to_account_currency = None
-    pe.paid_to_account_balance = None
+    pe.paid_to_account_currency = info['currency']
+    pe.paid_to_account_balance = get_balance_on(account, date=pe.posting_date, cost_center=pe.get('cost_center'), ignore_account_permission=True)
 
-    weise_rechnung_zu(pe, data, camt.name, {target.name: flt(reserved)} if reserved else {}, ignore_permissions=False)
+    weise_rechnung_zu(pe, data, camt.name, {target.name: flt(reserved)} if reserved else {}, ignore_permissions=True)
 
     pe.add_comment('Comment', text='Bankkonto manuell gewählt: {0} ({1}); Rechnung {2}.'.format(account, bankkonto_quelle, target.name))
     entries = [row for row in _eintraege(camt) if row['payment_entry'] != pe.name]

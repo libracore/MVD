@@ -31,14 +31,14 @@ frappe.mvd.aktualisiere_verrechnungs_buttons = function(frm) {
     frappe.mvd.camt_aktions_button(frm, 'firmenverrechnung', __('Firmenverrechnung'), null);
     frappe.mvd.camt_aktions_button(frm, 'firmenverrechnung_stornieren', __('Firmenverrechnung stornieren'), null);
     if (frm.doc.__islocal || frm.is_dirty() || frm.doc.status === 'In Verarbeitung' ||
-        !['System Manager', 'MV_RW', 'MV_GL'].some(role => frappe.user.has_role(role))) return;
+        !frm.has_perm('write')) return;
     const name = frm.doc.name;
     frappe.call({
         method: 'mvd.mvd.doctype.camt_import.verrechnung.verfuegbare_aktionen',
         args: {camt_import: name},
         callback: function(r) {
             if (frm.__camt_verrechnung_request !== request || frm.doc.name !== name ||
-                frm.is_dirty() || frm.doc.status === 'In Verarbeitung') return;
+                frm.is_dirty() || frm.doc.status === 'In Verarbeitung' || !frm.has_perm('write')) return;
             if (r.message && r.message.verrechnen) {
                 frappe.mvd.camt_aktions_button(frm, 'firmenverrechnung', __('Firmenverrechnung'),
                     () => frappe.mvd.camt_verrechnung(frm));
@@ -57,6 +57,7 @@ frappe.mvd.camt_verrechnung = function(frm) {
         return;
     }
     const method = 'mvd.mvd.doctype.camt_import.verrechnung.';
+    const konto_query = (row, art) => ({query: method + 'suche_verrechnungskonten', filters: {camt_import: frm.doc.name, payment_entry: row.payment_entry, kontoart: art}});
     const esc = value => frappe.utils.escape_html(String(value == null ? '' : value));
     const link = (doctype, name) => '<a href="/desk#Form/' + encodeURIComponent(doctype) + '/' +
         encodeURIComponent(name) + '">' + esc(name) + '</a>';
@@ -88,13 +89,11 @@ frappe.mvd.camt_verrechnung = function(frm) {
                     {fieldname: 'verbindlichkeit', fieldtype: 'Link', options: 'Account', reqd: 1,
                         label: 'Verbindlichkeitskonto der Importfirma gegenüber der Rechnungsfirma',
                         description: 'Passiv-Bilanzkonto ohne Debitoren- oder Kreditorentyp.',
-                        get_query: () => ({filters: {company: selected().source_company, root_type: 'Liability',
-                            is_group: 0, disabled: 0, account_type: ['not in', ['Bank', 'Cash', 'Receivable', 'Payable']]}})},
+                        get_query: () => konto_query(selected(), 'verbindlichkeit')},
                     {fieldname: 'forderung', fieldtype: 'Link', options: 'Account', reqd: 1,
                         label: 'Forderungskonto der Rechnungsfirma gegenüber der Importfirma',
                         description: 'Aktiv-Bilanzkonto ohne Debitoren- oder Kreditorentyp.',
-                        get_query: () => ({filters: {company: selected().target_company, root_type: 'Asset',
-                            is_group: 0, disabled: 0, account_type: ['not in', ['Bank', 'Cash', 'Receivable', 'Payable']]}})}
+                        get_query: () => konto_query(selected(), 'forderung')}
                 ],
                 primary_action_label: 'Vorschau anzeigen',
                 primary_action: function(values) {
@@ -144,7 +143,7 @@ frappe.mvd.camt_verrechnung = function(frm) {
                         const current_partner = (source ? selected_row.target_section : selected_row.source_section) ||
                             (source ? selected_row.target_company : selected_row.source_company);
                         const manual = section === current_section && partner === current_partner ? dialog.get_value(role) : '';
-                        group_keys[key] = {fieldname: 'konto_' + groups.length, company: company,
+                        group_keys[key] = {fieldname: 'konto_' + groups.length, company: company, payment_entry: row.payment_entry,
                             section: section, partner: partner, role: role, root_type: source ? 'Liability' : 'Asset',
                             value: manual || row['default_' + role] || ''};
                         groups.push(group_keys[key]);
@@ -162,8 +161,7 @@ frappe.mvd.camt_verrechnung = function(frm) {
                 groups.forEach(group => fields.push({fieldname: group.fieldname, fieldtype: 'Link', options: 'Account', reqd: 1,
                     label: (group.role === 'verbindlichkeit' ? 'Verbindlichkeitskonto: ' : 'Forderungskonto: ') +
                         group.section + ' gegenüber ' + group.partner,
-                    get_query: () => ({filters: {company: group.company, root_type: group.root_type,
-                        is_group: 0, disabled: 0, account_type: ['not in', ['Bank', 'Cash', 'Receivable', 'Payable']]}})}));
+                    get_query: () => konto_query(group, group.role)}));
                 const batch = new frappe.ui.Dialog({title: 'Alle Firmenverrechnungen vorbereiten',
                     no_submit_on_enter: true, fields: fields, primary_action_label: 'Gemeinsame Vorschau anzeigen',
                     primary_action: function(values) {
@@ -276,14 +274,14 @@ frappe.mvd.aktualisiere_bankkonto_button = function(frm) {
     frm.remove_custom_button(__('Bankkonto zuordnen'));
     frappe.mvd.camt_aktions_button(frm, 'bankkonto', __('Bankkonto zuordnen'), null);
     if (frm.doc.__islocal || frm.is_dirty() || frm.doc.status === 'In Verarbeitung' ||
-        !['System Manager', 'MV_RW', 'MV_GL'].some(role => frappe.user.has_role(role))) return;
+        !frm.has_perm('write')) return;
     const name = frm.doc.name;
     frappe.call({
         method: 'mvd.mvd.doctype.camt_import.bankkonto_zuordnung.verfuegbar',
         args: {camt_import: name},
         callback: function(r) {
             if (frm.__camt_bankkonto_request !== request || frm.doc.name !== name ||
-                frm.is_dirty() || frm.doc.status === 'In Verarbeitung') return;
+                frm.is_dirty() || frm.doc.status === 'In Verarbeitung' || !frm.has_perm('write')) return;
             if (r.message) {
                 frappe.mvd.camt_aktions_button(frm, 'bankkonto', __('Bankkonto zuordnen'),
                     () => frappe.mvd.camt_bankkonto_zuordnen(frm));
@@ -316,7 +314,7 @@ frappe.mvd.camt_bankkonto_zuordnen = function(frm) {
                 '<br>Firma / Sektion: ' + esc(row.company) + ' / ' + esc(row.sektion) + '</p>' +
                 '<p>Bankkonto aus CAMT-Import: <b>' + esc(row.import_bankkonto) + '</b><br>' +
                 'Bankkonto aus Rechnung: <b>' + esc(row.rechnungs_bankkonto || 'nicht hinterlegt') + '</b></p>' +
-                (!row.rechnungskonto_verfuegbar ? '<p>Das Rechnungskonto ist nicht verfügbar. Es muss ein aktives, zugängliches Bankkonto derselben Firma und Währung sein.</p>' : '') +
+                (!row.rechnungskonto_verfuegbar ? '<p>Das Rechnungskonto ist nicht verfügbar. Es muss ein aktives Bankkonto derselben Firma und Währung sein.</p>' : '') +
                 '<p>Die Auswahl bestimmt das Eingangskonto der Zahlung. Bei Auswahl des Rechnungskontos wird der Eingang dort gebucht. ' +
                 'Es wird kein Bankübertrag erfasst. Die Rechnung bleibt unverändert.</p>');
             dialog.set_df_property('bankkonto_quelle', 'options', row.rechnungskonto_verfuegbar ?
