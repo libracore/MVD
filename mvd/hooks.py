@@ -225,6 +225,7 @@ doc_events = {
 # ---------------
 scheduler_events = {
     "daily": [
+        "mvd.mvd.utils.mail_drafts.cleanup_old_drafts",
         "mvd.mvd.utils.daily_jobs.create_daily_snap",
         "mvd.mvd.utils.daily_jobs.check_and_run_yearly_snap",
         "mvd.mvd.utils.daily_jobs.reset_geschenk_mitgliedschaften",

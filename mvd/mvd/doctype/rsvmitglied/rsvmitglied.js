@@ -170,19 +170,7 @@ frappe.ui.form.on('RSVMitglied', {
                         last_email: '',
                         is_a_reply: false,
                         sender: mail_data.sender,
-                        // Sendung an Coop und Status erst setzen, wenn die E-Mail
-                        // raus ist - Abbrechen: alles unveraendert (#2151)
-                        success: function() {
-                            frappe.call({
-                                method: 'mvd.mvd.doctype.rsvmitglied.rsvmitglied.mark_coop_email_sent',
-                                args: {
-                                    "docname": frm.doc.name
-                                },
-                                callback: function() {
-                                    frm.reload_doc();
-                                }
-                            });
-                        }
+                        send_context: 'coop'
                     });
                     frm.reload_doc();
                 }
