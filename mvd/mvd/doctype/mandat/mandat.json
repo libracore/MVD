@@ -340,7 +340,7 @@
    "label": "Bestaetigungs Email gesendet"
   },
   {
-   "description": "Wird in der Best\u00e4tigungsmail an die VA mitgeschickt. Beim Erstellen aus der Beratung nur erfassbar, wenn man das Mandat selbst \u00fcbernimmt.",
+   "description": "Wird in der Mail an die VA mitgeschickt (RSV: Best\u00e4tigung bei der Zuweisung, Solidarit\u00e4tsfonds: Kostengutsprache). Beim Erstellen aus der Beratung nur erfassbar, wenn man das Mandat selbst \u00fcbernimmt.",
    "fieldname": "persoenliche_bemerkung",
    "fieldtype": "Small Text",
    "label": "Pers\u00f6nliche Bemerkung"

@@ -151,8 +151,9 @@ class Mandat(Document):
         if self.flags.visum_geaendert:
             self.add_comment("Info", frappe._("Mandat visiert.") if cint(self.visum) else frappe._("Visum entfernt."))
 
-        # Bestätigungs-Email senden
-        if (self.typ in ("Rechtsschutzversicherung", "Solidaritätsfonds") and
+        # Bestätigungs-Email an die VA bei Zuweisung – nur RSV. Beim Solidaritätsfonds bekommt die VA ihre Mail
+        # erst mit der Kostengutsprache (solifonds.gutsprache_mail, Vorlage «Template Kostengutsprache Solifonds»; #2253)
+        if (self.typ == "Rechtsschutzversicherung" and
             self.kontaktperson and 
             not self.bestaetigungs_email_gesendet):
         
@@ -342,7 +343,6 @@ def send_confirmation_email(mandat):
         
         sektion_data = frappe.db.get_value("Sektion", mandat.sektion_id, 
             ["template_bestaetigung_kontaktperson",
-             "template_bestaetigung_kontaktperson_solifonds",
              "template_bestaetigung_mitglied",
              "mandat_absender_mail",
              "legacy_mail_absende_name",
@@ -364,16 +364,14 @@ def send_confirmation_email(mandat):
         )
 
         # --- 1. EMAIL AN BERATER (mit CC und Attachment) ---
-        ist_solifonds = mandat.typ == "Solidaritätsfonds"
-        template_berater = sektion_data.get(
-            "template_bestaetigung_kontaktperson_solifonds" if ist_solifonds else "template_bestaetigung_kontaktperson")
+        template_berater = sektion_data.get("template_bestaetigung_kontaktperson")
 
         if not recipients:
             frappe.log_error("Keine Empfänger für Kontaktperson {0} gefunden.".format(mandat.kontaktperson), "Mandat Email Error")
             email_sent = False
         elif not template_berater:
-            frappe.log_error("In Sektion {0} unter Mandat: Kein Template für Kontaktperson{1} hinterlegt.".format(
-                mandat.sektion_id, " (Solifonds)" if ist_solifonds else ""), "Mandat Email Error")
+            frappe.log_error("In Sektion {0} unter Mandat: Kein Template für Kontaktperson hinterlegt.".format(
+                mandat.sektion_id), "Mandat Email Error")
             email_sent = False
         else:
             rendered_berater = get_email_template(template_berater, {"doc": mandat})

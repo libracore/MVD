@@ -1233,10 +1233,10 @@
    "options": "Email Template"
   },
   {
-   "description": "Best\u00e4tigungs-Mail an die VA nach Zuweisung eines Solifonds-Mandats.",
+   "description": "Mail an die VA bei erteilter Kostengutsprache (mit PDF). Kann mit {% if doc.sprache == \"fr\" %} zweisprachig sein. Ohne Eintrag: eingebauter Text (de/fr). Bei der Zuweisung geht beim Solidarit\u00e4tsfonds keine Mail raus (#2253).",
    "fieldname": "template_bestaetigung_kontaktperson_solifonds",
    "fieldtype": "Link",
-   "label": "Template Best\u00e4tigung Kontaktperson Solifonds",
+   "label": "Template Kostengutsprache Solifonds (an VA)",
    "options": "Email Template"
   },
   {
