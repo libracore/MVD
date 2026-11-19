@@ -295,13 +295,31 @@ def gutsprache_mail(doc):
         "content": frappe.get_print("Mandat", doc.name, print_format=PRINT_FORMAT, as_pdf=True),
         "is_private": 1
     }).insert(ignore_permissions=True)
-    inhalt = "<p>{0}</p><p>{1}</p><p><a href='{2}'>{3}</a></p>".format(
-        _("Für das Mandat wurde eine Kostengutsprache aus dem Solidaritätsfonds erteilt (Kostendach CHF {0}).").format(
-            frappe.format_value(doc.kostendach, {"fieldtype": "Currency"})),
-        _("Im Anhang das Formular «Kostengutsprache Solidaritätsfonds». Bitte vom Mitglied unterschreiben lassen."),
-        get_url_to_form("Mandat", doc.name), doc.name)
-    _sende_mail(doc, get_va_empfaenger(doc),
-        _("Kostengutsprache Solidaritätsfonds: {0}").format(doc.name), inhalt, [pdf.name])
+    # Sprache nach der Verfahrenssprache des Mandats (nicht nach dem auslösenden User), darum ohne _()
+    text = GUTSPRACHE_TEXTE["fr" if doc.sprache == "fr" else "de"]
+    # Link aufs ZIP mit den Anlagen der Beratung, wie in der Bestätigungs-Mail (nur wenn es Anlagen gibt)
+    zip_html = ""
+    if doc.beratung and frappe.db.count("File", {"attached_to_doctype": "Beratung", "attached_to_name": doc.beratung}):
+        from mvd.mvd.doctype.mandat.mandat import get_anlagen_zip_url
+        zip_html = "<p><a href='{0}'>{1}</a></p>".format(get_anlagen_zip_url(doc.name), text["zip"])
+    inhalt = "<p>{0}</p><p>{1}</p>{2}<p><a href='{3}'>{4}</a></p>".format(
+        text["erteilt"], text["anhang"], zip_html, get_url_to_form("Mandat", doc.name), doc.name)
+    _sende_mail(doc, get_va_empfaenger(doc), text["betreff"].format(doc.name), inhalt, [pdf.name])
+
+GUTSPRACHE_TEXTE = {
+    "de": {
+        "betreff": "Kostengutsprache Solidaritätsfonds: {0}",
+        "erteilt": "Für das Mandat wurde eine Kostengutsprache aus dem Solidaritätsfonds erteilt.",
+        "anhang": "Im Anhang das Formular «Kostengutsprache Solidaritätsfonds». Bitte vom Mitglied unterschreiben lassen.",
+        "zip": "Alle Anlagen der Beratung als ZIP herunterladen (Anmeldung in Libracore nötig)"
+    },
+    "fr": {
+        "betreff": "Garantie de prise en charge des frais – Fonds de solidarité: {0}",
+        "erteilt": "Une prise en charge des frais par le Fonds de solidarité a été accordée pour ce mandat.",
+        "anhang": "Tu trouveras en pièce jointe le formulaire « Garantie de prise en charge des frais – Fonds de solidarité ». Merci de le faire signer par le membre.",
+        "zip": "Télécharger toutes les pièces jointes de la consultation (ZIP, connexion à Libracore nécessaire)"
+    }
+}
 
 def ablehnung_mail(doc):
     # Ablehnung geht nur an die Vorprüfung, weder an die VA noch ans Mitglied

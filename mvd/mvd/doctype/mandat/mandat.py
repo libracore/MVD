@@ -88,6 +88,11 @@ class Mandat(Document):
         # #2208: Hierarchie wie in der Beratung – (2) nur mit (1), (3) nur mit (2); Lücken aufrücken
         set_beratungskategorien(self, [self.get(f) for f in KATEGORIE_FELDER])
 
+        # Beratungskategorie lässt sich ändern, aber nicht entfernen (alte Mandate ohne Kategorie bleiben speicherbar)
+        if not self.beratungskategorie and not self.is_new() and not frappe.flags.in_patch \
+                and frappe.db.get_value("Mandat", self.name, "beratungskategorie"):
+            frappe.throw(frappe._("Die Beratungskategorie kann geändert, aber nicht entfernt werden."))
+
         if self.typ == "Solidaritätsfonds":
             self.kostendach = SOLIFONDS_KOSTENDACH.get(self.solifonds_art) or 0
 
