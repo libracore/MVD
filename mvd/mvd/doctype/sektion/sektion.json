@@ -96,6 +96,7 @@
   "mandat_absender_mail",
   "visierende_person",
   "template_bestaetigung_kontaktperson",
+  "template_bestaetigung_kontaktperson_solifonds",
   "template_bestaetigung_mitglied",
   "template_suche_vertrauensanwaeltin",
   "section_mzr",
@@ -1232,6 +1233,13 @@
    "options": "Email Template"
   },
   {
+   "description": "Best\u00e4tigungs-Mail an die VA nach Zuweisung eines Solifonds-Mandats.",
+   "fieldname": "template_bestaetigung_kontaktperson_solifonds",
+   "fieldtype": "Link",
+   "label": "Template Best\u00e4tigung Kontaktperson Solifonds",
+   "options": "Email Template"
+  },
+  {
    "fieldname": "template_bestaetigung_mitglied",
    "fieldtype": "Link",
    "label": "Template Best\u00e4tigung Mitglied",
@@ -1356,7 +1364,7 @@
    "options": "Sektion Vorstand"
   }
  ],
- "modified": "2026-11-19 10:00:00.000000",
+ "modified": "2026-11-19 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",
