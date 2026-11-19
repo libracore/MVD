@@ -28,8 +28,8 @@ frappe.ui.form.on('Mandat', {
         });
         // «Bestätigungs-E-Mail gesendet» setzt das System; «nur RB» darf es nicht ändern
         frm.set_df_property('bestaetigungs_email_gesendet', 'read_only', (frm.doc.__onload || {}).nur_rb ? 1 : 0);
-        // Beratungskategorie: ändern ja, entfernen nein (Server prüft in before_save)
-        frm.toggle_reqd('beratungskategorie', !!frm.doc.beratungskategorie);
+        // #2265: mindestens eine Beratungskategorie ist Pflicht (Server prüft in before_save)
+        frm.toggle_reqd('beratungskategorie', true);
         // Ein Mandat braucht eine Beratung (Server prüft in before_save)
         frm.toggle_reqd('beratung', frm.is_new() || !!frm.doc.beratung);
 

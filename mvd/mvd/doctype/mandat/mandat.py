@@ -96,10 +96,10 @@ class Mandat(Document):
         # #2208: Hierarchie wie in der Beratung – (2) nur mit (1), (3) nur mit (2); Lücken aufrücken
         set_beratungskategorien(self, [self.get(f) for f in KATEGORIE_FELDER])
 
-        # Beratungskategorie lässt sich ändern, aber nicht entfernen (alte Mandate ohne Kategorie bleiben speicherbar)
-        if not self.beratungskategorie and not self.is_new() and not frappe.flags.in_patch \
-                and frappe.db.get_value("Mandat", self.name, "beratungskategorie"):
-            frappe.throw(frappe._("Die Beratungskategorie kann geändert, aber nicht entfernt werden."))
+        # #2265: Mindestens eine Beratungskategorie ist Pflicht – auch beim Bearbeiten alter Mandate ohne Kategorie
+        if not self.beratungskategorie and not frappe.flags.in_patch:
+            frappe.throw(frappe._("Ein Mandat braucht mindestens eine Beratungskategorie. Bitte die Beratungskategorie setzen."),
+                title=frappe._("Beratungskategorie fehlt"))
 
         if self.typ == "Solidaritätsfonds":
             self.kostendach = SOLIFONDS_KOSTENDACH.get(self.solifonds_art) or 0
@@ -197,6 +197,9 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     # #2208: Beratungskategorien (1)-(3) wie in der Beratung; aus dem Dialog (änderbar), sonst 1:1 aus der Beratung
     kategorien = frappe.parse_json(beratungskategorien) if beratungskategorien else get_beratungskategorien(beratung)
     set_beratungskategorien(mandat, kategorien)
+    if not mandat.beratungskategorie:
+        # #2265: auch wenn im Dialog alle Kategorien geleert wurden
+        frappe.throw(frappe._("Ein Mandat braucht mindestens eine Beratungskategorie."), title=frappe._("Beratungskategorie fehlt"))
     mandat.kontaktperson = berater_in
     mandat.typ = typ or RSV
     # #2211: Verfahrenssprache (nur de/fr) aus dem Dialog (änderbar), sonst aus der Mitgliedschaft
