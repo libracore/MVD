@@ -249,6 +249,27 @@ frappe.ui.form.on('Beratung', {
                     }, "Dokument erstellen");
                 }
 
+                // Add BTN Gutschein (nur MVLU)
+                if (cur_frm.doc.sektion_id == 'MVLU') {
+                    frm.add_custom_button(__("Gutschein erstellen"), function() {
+                        frappe.call({
+                            method: "mvd.mvd.utils.document_template_handler.use_template",
+                            args: {
+                                template: 'Gutschein',
+                                source_doc: cur_frm.doc.name,
+                                source_dt: cur_frm.doctype,
+                                save_output_to: [[cur_frm.doctype, cur_frm.doc.name]],
+                                filename: `Gutschein_${cur_frm.doc.name}.odt`
+                            },
+                            freeze: true,
+                            freeze_message: 'Erstelle Gutschein...',
+                            callback: function(template_response) {
+                                cur_frm.reload_doc();
+                            }
+                        });
+                    });
+                }
+
                 // Add BTN E-Mail Rückfrage
                 frm.add_custom_button(__("E-Mail Rückfrage"),  function() {
                     cur_frm.set_value("status", "Rückfragen");
