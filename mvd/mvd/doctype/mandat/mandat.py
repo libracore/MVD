@@ -424,7 +424,7 @@ def send_confirmation_email(mandat):
                 <br><br>
                 <hr>
                 <p style="font-size: 12px; color: #555;">
-                    <b>Interne Links für Berater:</b><br>
+                    <b>Interne Links:</b><br>
                     - <a href="{0}">Direkt zur Beratung: {1}</a><br>
                     - <a href="{2}">Direkt zum Mandat: {3}</a><br>
                     - <a href="{4}">Zur Mitgliedschaft: {5}</a>{6}

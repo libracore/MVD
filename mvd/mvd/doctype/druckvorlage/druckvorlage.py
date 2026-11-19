@@ -925,6 +925,23 @@ def get_beratung_link(ctx):
     return '---'
 
 @context_decorator
+def get_anlagen_zip_link(ctx, sprache=None):
+    # #2264: Link aufs ZIP mit den Anlagen der Beratung (wie in der Bestätigungsmail), z. B. für «Suche Vertrauensanwält*in».
+    # Leer, wenn es keine Anlagen gibt. Herunterladen kann nur, wer angemeldet ist und das Mandat lesen darf.
+    # sprache="fr": Linktext französisch (für den französischen Teil einer zweisprachigen Vorlage)
+    doc = get_doc_from_ctx(ctx)
+    if not doc or doc.get("doctype") != "Mandat" or not doc.get("beratung"):
+        return ''
+    if not frappe.db.count("File", {"attached_to_doctype": "Beratung", "attached_to_name": doc.get("beratung")}):
+        return ''
+    from mvd.mvd.doctype.mandat.mandat import get_anlagen_zip_url
+    if sprache == "fr":
+        text = "Télécharger toutes les pièces jointes de la consultation (ZIP, connexion à Libracore nécessaire)"
+    else:
+        text = "Alle Anlagen der Beratung als ZIP herunterladen (Anmeldung in Libracore nötig)"
+    return '<a href="{0}">{1}</a>'.format(get_anlagen_zip_url(doc.get("name")), text)
+
+@context_decorator
 def get_rechnungsbetrag(ctx):
     doc = get_doc_from_ctx(ctx)
 

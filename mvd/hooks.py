@@ -83,6 +83,7 @@ jenv = {
         "get_beratungs_daten:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratungs_daten",
         "get_mandat_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mandat_link",
         "get_beratung_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_beratung_link",
+        "get_anlagen_zip_link:mvd.mvd.doctype.druckvorlage.druckvorlage.get_anlagen_zip_link",
         "get_mahngebuehr:mvd.mvd.doctype.druckvorlage.druckvorlage.get_mahngebuehr",
         "rsv_dokumente_fehlende:mvd.mvd.doctype.rsvmitglied.rsvmitglied.rsv_dokumente_fehlende",
         "rsv_dokumente_erhalten:mvd.mvd.doctype.rsvmitglied.rsvmitglied.rsv_dokumente_erhalten",
