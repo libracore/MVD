@@ -87,7 +87,11 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
     let d = new frappe.ui.Dialog({
         title: 'Mandat erstellen',
         fields: [
-            {'fieldname': 'prozess_html', 'fieldtype': 'HTML', 'options': '<div class="alert alert-info">Platzhalter: Hier folgt die Beschreibung des Mandats-Prozesses.</div>'},
+            {'fieldname': 'prozess_html', 'fieldtype': 'HTML', 'options': `<div style="background-color: #f5f7fa; border: 1px solid #d1d8dd; border-radius: 4px; color: #36414c; padding: 12px 15px; margin-bottom: 15px;">
+                <p>Hier kannst du ein Mandat für die Übernahme eines Rechtsschutzfalls oder ein Unterstützungsgesuch an den Solidaritätsfonds erstellen. Du kannst das Mandat direkt selbst übernehmen oder festhalten, dass du es nicht selbst bearbeitest. In jedem Fall kannst du zusätzlich einige kurze Notizen zum Fall erfassen.</p>
+                <p><b>Rechtsschutz:</b> Bei einer Selbstübernahme erhältst du per E-Mail die wichtigsten Informationen zur Einreichung des Gesuchs bei der Coop Rechtsschutzversicherung. Bitte kennzeichne das Mandat manuell als abgeschlossen, sobald du den Fall beendet hast.</p>
+                <p style="margin-bottom: 0"><b>Solidaritätsfonds:</b> Die Voraussetzungen für eine Unterstützung durch den Solidaritätsfonds sind im hier <a href="https://www.mieterverband.ch/upd_fm_media/sektionen/mv-bern/statuten-und-regelmente/reglement-solidaritaetsfonds.pdf/" target="_blank" rel="noopener noreferrer">verlinkten Reglement</a> detailliert aufgeführt. Um das Gesuch einzureichen, musst du anschliessend das erstellte Mandat öffnen. Das Gesuch wird daraufhin automatisch eingereicht. Der zuständige Vertrauensanwalt bzw. die zuständige Vertrauensanwältin wird über den Genehmigungsentscheid informiert.</p>
+            </div>`},
             {'fieldname': 'beratungskategorie', 'fieldtype': 'Link', 'label': 'Beratungskategorie', 'options': 'Beratungskategorie', 'reqd': 1,
              'description': 'Aus der Beratung übernommen, änderbar.',
              // Link-Felder setzen den Wert erst nach der Prüfung auf dem Server – danach (2)/(3) sofort ein-/ausblenden
