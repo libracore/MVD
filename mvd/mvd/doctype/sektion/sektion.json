@@ -93,6 +93,7 @@
   "enable_new_beratung_from_mail_after_days",
   "create_new_beratung_from_mail_after_days",
   "section_mandate",
+  "mandat_absender_mail",
   "visierende_person",
   "template_bestaetigung_kontaktperson",
   "template_bestaetigung_mitglied",
@@ -1331,6 +1332,13 @@
    "label": "Mandate"
   },
   {
+   "description": "Absender-Adresse f\u00fcr alle Mandats-Mails (inkl. Solifonds).",
+   "fieldname": "mandat_absender_mail",
+   "fieldtype": "Data",
+   "label": "Mandat E-Mail Absender Adresse",
+   "options": "Email"
+  },
+  {
    "fieldname": "rsv_email_absender",
    "fieldtype": "Data",
    "label": "RSV E-Mail Absender"
@@ -1348,7 +1356,7 @@
    "options": "Sektion Vorstand"
   }
  ],
- "modified": "2026-11-15 10:00:00.000000",
+ "modified": "2026-11-19 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

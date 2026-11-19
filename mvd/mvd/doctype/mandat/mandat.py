@@ -322,16 +322,23 @@ def send_confirmation_email(mandat):
         sektion_data = frappe.db.get_value("Sektion", mandat.sektion_id, 
             ["template_bestaetigung_kontaktperson", 
              "template_bestaetigung_mitglied",
-             "legacy_mail_absender_mail", 
+             "mandat_absender_mail",
              "legacy_mail_absende_name",
-             "pw_email"], as_dict=True)
-        
+             "pw_email"], as_dict=True) or {}
+
+        if not sektion_data.get("mandat_absender_mail"):
+            msg = "In Sektion {0} unter Mandate ist keine Absender-E-Mail hinterlegt. Die Bestätigungs-E-Mail für Mandat {1} wurde nicht versendet.".format(
+                mandat.sektion_id, mandat.name)
+            frappe.log_error(msg, "Mandat Email Error")
+            frappe.msgprint(msg, title="Keine Absender-E-Mail", indicator="orange")
+            return False
+
         mitglied_email = frappe.db.get_value("Mitgliedschaft", mandat.mv_mitgliedschaft, "e_mail_1")
 
         # Absender definieren
         absender_format = "{0} <{1}>".format(
-            sektion_data.get("legacy_mail_absende_name") or "Mieterverband", 
-            sektion_data.get("legacy_mail_absender_mail")
+            sektion_data.get("legacy_mail_absende_name") or "Mieterverband",
+            sektion_data.get("mandat_absender_mail")
         )
 
         # --- 1. EMAIL AN BERATER (mit CC und Attachment) ---
