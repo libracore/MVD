@@ -83,6 +83,7 @@ class Mandat(Document):
                 frappe.throw(frappe._("«Fall verfolgen» können nur Geschäftsleitung und Vorprüfung setzen."))
 
         self.pruefe_visum()
+        self.pruefe_beratung()
         self.pruefe_verknuepfung()
 
         if self.kontaktperson and "pool" in self.kontaktperson.lower():
@@ -105,6 +106,14 @@ class Mandat(Document):
 
         # #2205: Status-Regeln, Automatik Unzugewiesen/Vorgemerkt (nur vor dem Einreichen, #2207) und Statusverlauf
         status_vor_speichern(self)
+
+    def pruefe_beratung(self):
+        # Ein Mandat gehört immer zu einer Beratung (entsteht über create_mandat; Bestätigungsmail und Anlagen brauchen sie).
+        # Neue Mandate nur mit Beratung, und sie lässt sich nicht entfernen; alte Mandate ohne Beratung bleiben speicherbar.
+        if self.beratung or frappe.flags.in_patch:
+            return
+        if self.is_new() or frappe.db.get_value("Mandat", self.name, "beratung"):
+            frappe.throw(frappe._("Ein Mandat braucht eine Beratung. Mandate bitte aus der Beratung erstellen (Knopf «Mandat»)."))
 
     def pruefe_verknuepfung(self):
         # Mitglied und Beratung legt create_mandat fest; ändern darf sie danach nur System Manager.
@@ -663,6 +672,9 @@ def update_mandat_status_nach_email(doc, method):
         visierende_person = frappe.db.get_value("Sektion", sektion_id, "visierende_person")
 
         if visierende_person:
+            # Absender wie bei allen Mandats-Mails (Sektion → Mandate); ohne Eintrag der Standard-Absender
+            from mvd.mvd.doctype.mandat.solifonds import _absender
+            absender = _absender(sektion_id)
             recipients = [visierende_person]
             link_mandat = get_url_to_form("Mandat", mandat_name)
             subject = "Neue Nachricht in Mandat : {0}".format(mandat_name)
@@ -676,6 +688,7 @@ def update_mandat_status_nach_email(doc, method):
             
             comm = make(
                 recipients=recipients,
+                sender=absender,
                 subject=subject,
                 content=content,
                 doctype='Mandat',
@@ -685,6 +698,7 @@ def update_mandat_status_nach_email(doc, method):
 
             sendmail(
                 recipients=recipients,
+                sender=absender,
                 subject=subject,
                 content=content,
                 reference_doctype='Mandat',

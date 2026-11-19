@@ -30,6 +30,8 @@ frappe.ui.form.on('Mandat', {
         frm.set_df_property('bestaetigungs_email_gesendet', 'read_only', (frm.doc.__onload || {}).nur_rb ? 1 : 0);
         // Beratungskategorie: ändern ja, entfernen nein (Server prüft in before_save)
         frm.toggle_reqd('beratungskategorie', !!frm.doc.beratungskategorie);
+        // Ein Mandat braucht eine Beratung (Server prüft in before_save)
+        frm.toggle_reqd('beratung', frm.is_new() || !!frm.doc.beratung);
 
         // #2205: Status, Typ und VA je nach Status; Knöpfe für Nicht vergeben / Abschliessen / Rückzug / Gelöscht
         setup_status_felder(frm);
