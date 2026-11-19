@@ -1557,19 +1557,22 @@ frappe.mvd.termin_quick_entry = function(config) {
                         },
                         'primary_action_label': __('Erstellen'),
                         'checkbox_clicked': function(cb) {
-                            var termin = $(cb).data().abpzuweisung;
-                            var ort = $(cb).data().ort;
-                            var beratungsperson = $(cb).data().beratungsperson;
+                            var termin = $(cb).attr('data-abpzuweisung');
+                            var ort = $(cb).attr('data-ort');
+                            var beratungsperson = $(cb).attr('data-beratungsperson');
                             var index = d.selected_termine.indexOf(termin);
-                            if (index > -1) {
-                                d.selected_termine.splice(index, 1);
+                            // Den sichtbaren Checkbox-Zustand übernehmen, nicht die interne Auswahl umkehren
+                            if (!cb.checked) {
+                                if (index > -1) {
+                                    d.selected_termine.splice(index, 1);
+                                }
                                 if (d.selected_termine.length < 1) {
                                     // letzter Termin abgewählt: Berater*in und Ort wieder freigeben (#2168)
                                     d.selected_beratungsperson = null;
                                     d.set_value('kontaktperson', '');
                                     d.set_value('ort', '');
                                 }
-                            } else {
+                            } else if (index < 0) {
                                 if (d.selected_termine.length > 0 && d.selected_beratungsperson != beratungsperson) {
                                     // weitere Termine nur bei derselben Berater*in (#2168)
                                     cb.checked = false;
@@ -1632,6 +1635,11 @@ function aktualisiere_verfuegbarkeiten(config, dialog) {
             if (r.message) {
                 // anzeigen der Verfügbarkeiten
                 dialog.set_df_property('verfuegbarkeiten_html', 'options', r.message);
+                // Während der Abfrage kann sich die Auswahl ändern, ohne eine neue Abfrage auszulösen.
+                // Deshalb die Häkchen immer aus der aktuellen Dialogauswahl übernehmen.
+                dialog.fields_dict.verfuegbarkeiten_html.$wrapper.find('input[data-abpzuweisung]').each(function() {
+                    this.checked = dialog.selected_termine.indexOf($(this).attr('data-abpzuweisung')) > -1;
+                });
             } else {
                 // keine freien Beratungspersonen
                 dialog.set_df_property('verfuegbarkeiten_html', 'options', '<p>Leider sind <b>keine</b> Berater*in verfügbar</p>');

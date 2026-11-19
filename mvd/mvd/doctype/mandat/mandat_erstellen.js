@@ -87,7 +87,11 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
     let d = new frappe.ui.Dialog({
         title: 'Mandat erstellen',
         fields: [
-            {'fieldname': 'prozess_html', 'fieldtype': 'HTML', 'options': '<div class="alert alert-info">Platzhalter: Hier folgt die Beschreibung des Mandats-Prozesses.</div>'},
+            {'fieldname': 'prozess_html', 'fieldtype': 'HTML', 'options': `<div style="background-color: #f5f7fa; border: 1px solid #d1d8dd; border-radius: 4px; color: #36414c; padding: 12px 15px; margin-bottom: 15px;">
+                <p>Hier kannst du ein Mandat für die Übernahme eines Rechtsschutzfalls oder ein Unterstützungsgesuch an den Solidaritätsfonds erstellen. Du kannst das Mandat direkt selbst übernehmen oder festhalten, dass du es nicht selbst bearbeitest. In jedem Fall kannst du zusätzlich einige kurze Notizen zum Fall erfassen.</p>
+                <p><b>Rechtsschutz:</b> Bei einer Selbstübernahme erhältst du per E-Mail die wichtigsten Informationen zur Einreichung des Gesuchs bei der Coop Rechtsschutzversicherung. Bitte kennzeichne das Mandat manuell als abgeschlossen, sobald du den Fall beendet hast.</p>
+                <p style="margin-bottom: 0"><b>Solidaritätsfonds:</b> Die Voraussetzungen für eine Unterstützung durch den Solidaritätsfonds sind im hier <a href="https://www.mieterverband.ch/upd_fm_media/sektionen/mv-bern/statuten-und-regelmente/reglement-solidaritaetsfonds.pdf/" target="_blank" rel="noopener noreferrer">verlinkten Reglement</a> detailliert aufgeführt. Um das Gesuch einzureichen, musst du anschliessend das erstellte Mandat öffnen. Das Gesuch wird daraufhin automatisch eingereicht. Der zuständige Vertrauensanwalt bzw. die zuständige Vertrauensanwältin wird über den Genehmigungsentscheid informiert.</p>
+            </div>`},
             {'fieldname': 'beratungskategorie', 'fieldtype': 'Link', 'label': 'Beratungskategorie', 'options': 'Beratungskategorie', 'reqd': 1,
              'description': 'Aus der Beratung übernommen, änderbar.',
              // Link-Felder setzen den Wert erst nach der Prüfung auf dem Server – danach (2)/(3) sofort ein-/ausblenden
@@ -117,7 +121,7 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
             {'fieldname': 'solifonds_art', 'fieldtype': 'Select', 'label': 'Antrag auf Kostengutsprache',
              'options': ['', frappe.mvd.mandat.MANGELS_RS, 'aus ideellen Gründen'].join('\n'), 'depends_on': ist_solifonds,
              'change': () => pflicht_markieren(),
-             'description': "mangels Rechtsschutzdeckung (Karenzfrist, Geschäfts-/Kollektivmitglied): Kostendach CHF 3'000 pro Instanz, Entscheid GL · aus ideellen Gründen / Rechtssicherheit: Kostendach CHF 8'000 (2 Instanzen), Entscheid Vorstand"},
+             'description': "mangels Rechtsschutzdeckung (Karenzfrist, Geschäfts-/Kollektivmitglied): Kostendach CHF 3'000 pro Instanz, Entscheid GL<br>aus ideellen Gründen / Rechtssicherheit: Kostendach CHF 8'000 (2 Instanzen; für das Schlichtungsverfahren maximal CHF 3'000), Entscheid GL oder Vorstand"},
             {'fieldname': 'kriterien_html', 'fieldtype': 'HTML', 'options': '<p class="text-muted">Geprüfte Kriterien (Antragsformular Punkt 2). <b>Alle Kriterien müssen erfüllt sein (kumulativ)</b> und angekreuzt werden, sonst kann das Mandat nicht erstellt werden.</p>', 'depends_on': ist_mangels_rs}
         ].concat(frappe.mvd.mandat.KRITERIEN.map(k => (
             {'fieldname': k[0], 'fieldtype': 'Check', 'label': k[1], 'depends_on': ist_mangels_rs, 'change': () => pflicht_markieren()}
@@ -126,7 +130,7 @@ frappe.mvd.mandat.erstellen_dialog = function(frm, eigene_va, themen, sprache) {
              'change': () => pflicht_markieren(),
              'description': 'Erscheint im PDF für das Mitglied. Ohne Personendaten – wird dem Vorstand anonymisiert angezeigt.'},
             {'fieldname': 'bemerkung', 'fieldtype': 'Small Text', 'label': 'Bemerkungen', 'description': 'Wird im Mandat gespeichert und ist für alle sichtbar, die das Mandat sehen. Wird nicht an die VA gemailt.'},
-            {'fieldname': 'persoenliche_bemerkung', 'fieldtype': 'Small Text', 'label': 'Persönliche Bemerkung', 'depends_on': `eval:doc.uebernahme=="${frappe.mvd.mandat.UEBERNEHMEN}"`, 'description': 'Wird im Mandat gespeichert und in der Bestätigungsmail an die VA mitgeschickt (nur Typ Rechtsschutzversicherung).'},
+            {'fieldname': 'persoenliche_bemerkung', 'fieldtype': 'Small Text', 'label': 'Persönliche Bemerkung', 'depends_on': `eval:doc.uebernahme=="${frappe.mvd.mandat.UEBERNEHMEN}"`, 'description': 'Wird im Mandat gespeichert und in der Bestätigungsmail an die VA mitgeschickt.'},
             // «Fall verfolgen» ist nur für GL und Vorprüfung
             {'fieldname': 'fall_verfolgen', 'fieldtype': 'Check', 'label': 'Fall verfolgen', 'hidden': frappe.user.has_role(['MV_Solifonds_GL', 'MV_Solifonds_Vorpruefung']) ? 0 : 1}
         ]),
