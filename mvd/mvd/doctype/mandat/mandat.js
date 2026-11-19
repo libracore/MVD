@@ -97,6 +97,13 @@ frappe.ui.form.on('Mandat', {
                     }
                 });
         }
+        // #2257: VA sieht ein fremdes, unzugewiesenes Mandat nur zum Lesen (Server sperrt das Speichern ohnehin)
+        if (!frm.is_new() && (frm.doc.__onload || {}).va_nur_lesen) {
+            frm.set_read_only();
+            frm.refresh_fields();
+            frm.disable_save();
+            frm.clear_custom_buttons();
+        }
     },
     mv_mitgliedschaft: function(frm) {
         load_html_overview(frm);

@@ -13,6 +13,10 @@
 #
 # Wer eine der AUSNAHME_ROLLEN hat, sieht weiterhin alle Mandate (Sektion über User Permission).
 #
+# #2257: Mandate im Status «Unzugewiesen» dürfen alle VAs lesen (nicht schreiben) – sonst führt der Link aus
+# der Mail «Suche Vertrauensanwält*in» zu «Keine Berechtigung». Massgebend ist der gespeicherte Status;
+# die Sektion schränkt wie überall die User Permission ein. Selbst übernehmen: #2258.
+#
 # Solifonds ab «Gesuch eingereicht»: Wer nur Rechtsberatung ist (MV_RB ohne eine der WEITERE_ROLLEN), darf das
 # Mandat nur noch ansehen. Ausnahmen: die Knöpfe «Abschliessen» und «Rückzug» (RB_STATUS) und Anhänge hochladen.
 # Kommentare und E-Mails aus dem Mandat gehen weiterhin (brauchen kein Schreibrecht). Weist die Vorprüfung das
@@ -28,6 +32,8 @@ WEITERE_ROLLEN = {"System Manager", "MV_MA", "MV_GL", "MV_Solifonds_GL", "MV_Sol
 # Status, die «nur RB» auch nach dem Einreichen per Knopf setzen darf
 RB_STATUS = ("Abgeschlossen", "Rückzug")
 SCHREIBEN = ("write", "delete", "submit", "cancel", "amend")
+# #2257: für alle VAs lesbar
+FUER_VA_LESBAR = "Unzugewiesen"
 
 
 def get_va_kontaktpersonen(user=None):
@@ -65,8 +71,17 @@ def get_permission_query_conditions(user=None):
     kontaktpersonen = get_va_kontaktpersonen(user)
     if kontaktpersonen is None:
         return ""
-    return "`tabMandat`.`kontaktperson` IN ({0})".format(
-        ", ".join(frappe.db.escape(kp, percent=False) for kp in kontaktpersonen))
+    return "(`tabMandat`.`kontaktperson` IN ({0}) OR `tabMandat`.`status` = {1})".format(
+        ", ".join(frappe.db.escape(kp, percent=False) for kp in kontaktpersonen),
+        frappe.db.escape(FUER_VA_LESBAR, percent=False))
+
+
+def ist_va_nur_lesen(doc, user=None):
+    """#2257: VA sieht ein fremdes, unzugewiesenes Mandat – nur lesen (Formular schreibgeschützt, keine Knöpfe)."""
+    kontaktpersonen = get_va_kontaktpersonen(user)
+    if kontaktpersonen is None or doc.get("__islocal") or not doc.get("name"):
+        return False
+    return doc.get("kontaktperson") not in kontaktpersonen
 
 
 def ist_nur_rb(user=None):
@@ -103,4 +118,9 @@ def has_permission(doc, ptype=None, user=None):
     if ptype == "create" or doc.get("__islocal") or not doc.get("name"):
         # Neue Mandate entstehen über create_mandat (Beratung, eigene Prüfung); hier nicht blockieren
         return None
-    return True if doc.get("kontaktperson") in kontaktpersonen else False
+    if doc.get("kontaktperson") in kontaktpersonen:
+        return True
+    # #2257: unzugewiesene Mandate nur lesen (gespeicherter Status, nicht der im Formular)
+    if ptype not in SCHREIBEN and frappe.db.get_value("Mandat", doc.get("name"), "status") == FUER_VA_LESBAR:
+        return True
+    return False
