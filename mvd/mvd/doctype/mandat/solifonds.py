@@ -297,14 +297,29 @@ def gutsprache_mail(doc):
     }).insert(ignore_permissions=True)
     # Sprache nach der Verfahrenssprache des Mandats (nicht nach dem auslösenden User), darum ohne _()
     text = GUTSPRACHE_TEXTE["fr" if doc.sprache == "fr" else "de"]
+    betreff = text["betreff"].format(doc.name)
+    haupttext = "<p>{0}</p><p>{1}</p>".format(text["erteilt"], text["anhang"])
+    # #2253: Text aus der Vorlage der Sektion (Sektion → Template Kostengutsprache Solifonds), falls eingetragen;
+    # die Vorlage kann mit {% if doc.sprache == "fr" %} zweisprachig sein
+    vorlage = frappe.db.get_value("Sektion", doc.sektion_id, "template_bestaetigung_kontaktperson_solifonds")
+    if vorlage:
+        from frappe.email.doctype.email_template.email_template import get_email_template
+        gerendert = get_email_template(vorlage, {"doc": doc})
+        haupttext = gerendert.get("message") or haupttext
+        if gerendert.get("subject"):
+            betreff = gerendert.get("subject") if doc.name in gerendert.get("subject") else "{0}: {1}".format(
+                gerendert.get("subject"), doc.name)
+    if doc.persoenliche_bemerkung:
+        haupttext += "<p><b>{0}</b><br>{1}</p>".format(
+            "Remarque personnelle :" if doc.sprache == "fr" else "Persönliche Bemerkung:", _text_html(doc.persoenliche_bemerkung))
     # Link aufs ZIP mit den Anlagen der Beratung, wie in der Bestätigungs-Mail (nur wenn es Anlagen gibt)
     zip_html = ""
     if doc.beratung and frappe.db.count("File", {"attached_to_doctype": "Beratung", "attached_to_name": doc.beratung}):
         from mvd.mvd.doctype.mandat.mandat import get_anlagen_zip_url
         zip_html = "<p><a href='{0}'>{1}</a></p>".format(get_anlagen_zip_url(doc.name), text["zip"])
-    inhalt = "<p>{0}</p><p>{1}</p>{2}<p><a href='{3}'>{4}</a></p>".format(
-        text["erteilt"], text["anhang"], zip_html, get_url_to_form("Mandat", doc.name), doc.name)
-    _sende_mail(doc, get_va_empfaenger(doc), text["betreff"].format(doc.name), inhalt, [pdf.name])
+    inhalt = "{0}{1}<p><a href='{2}'>{3}</a></p>".format(
+        haupttext, zip_html, get_url_to_form("Mandat", doc.name), doc.name)
+    _sende_mail(doc, get_va_empfaenger(doc), betreff, inhalt, [pdf.name])
 
 GUTSPRACHE_TEXTE = {
     "de": {

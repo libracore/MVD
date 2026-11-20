@@ -86,10 +86,14 @@ def get_status_uebersicht():
         for spalte in total:
             total[spalte] += werte[spalte]
 
-    ist_va = get_va_kontaktpersonen() is not None
+    va_kontaktpersonen = get_va_kontaktpersonen()
+    ist_va = va_kontaktpersonen is not None
     abschnitte = get_ansicht(ist_va, status_optionen)
     # Listen nur laden, wenn ein Abschnitt sie braucht
     mandate = get_mandate(status_optionen) if any(a['key'] != 'uebersicht' for a in abschnitte) else []
+    if ist_va:
+        # #2257: VAs dürfen unzugewiesene Mandate lesen (Link aus der Mail); «Meine Mandate» zeigt trotzdem nur die eigenen (#2250)
+        mandate = [m for m in mandate if m.kontaktperson in va_kontaktpersonen]
     for a in abschnitte:
         if a['key'] == 'meine_offen':
             a['liste'] = [m for m in mandate if not m.erledigt]

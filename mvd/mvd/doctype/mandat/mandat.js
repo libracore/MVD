@@ -28,8 +28,10 @@ frappe.ui.form.on('Mandat', {
         });
         // «Bestätigungs-E-Mail gesendet» setzt das System; «nur RB» darf es nicht ändern
         frm.set_df_property('bestaetigungs_email_gesendet', 'read_only', (frm.doc.__onload || {}).nur_rb ? 1 : 0);
-        // Beratungskategorie: ändern ja, entfernen nein (Server prüft in before_save)
-        frm.toggle_reqd('beratungskategorie', !!frm.doc.beratungskategorie);
+        // #2265: mindestens eine Beratungskategorie ist Pflicht (Server prüft in before_save)
+        frm.toggle_reqd('beratungskategorie', true);
+        // Ein Mandat braucht eine Beratung (Server prüft in before_save)
+        frm.toggle_reqd('beratung', frm.is_new() || !!frm.doc.beratung);
 
         // #2205: Status, Typ und VA je nach Status; Knöpfe für Nicht vergeben / Abschliessen / Rückzug / Gelöscht
         setup_status_felder(frm);
@@ -52,11 +54,12 @@ frappe.ui.form.on('Mandat', {
             add_solifonds_buttons(frm);
         }
 
-        // Pool darf nicht zugeordnet werden
+        // Pool darf nicht zugeordnet werden, deaktivierte Kontaktpersonen auch nicht
         frm.set_query('kontaktperson', function() {
             return {
                 filters: [
-                    ['Termin Kontaktperson', 'name', 'not like', '%pool%']
+                    ['Termin Kontaktperson', 'name', 'not like', '%pool%'],
+                    ['Termin Kontaktperson', 'disabled', '!=', 1]
                 ]
             };
         });
@@ -98,6 +101,13 @@ frappe.ui.form.on('Mandat', {
                         }
                     }
                 });
+        }
+        // #2257: VA sieht ein fremdes, unzugewiesenes Mandat nur zum Lesen (Server sperrt das Speichern ohnehin)
+        if (!frm.is_new() && (frm.doc.__onload || {}).va_nur_lesen) {
+            frm.set_read_only();
+            frm.refresh_fields();
+            frm.disable_save();
+            frm.clear_custom_buttons();
         }
     },
     mv_mitgliedschaft: function(frm) {

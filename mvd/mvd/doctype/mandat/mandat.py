@@ -42,7 +42,7 @@ def darf_visieren():
 class Mandat(Document):
     def onload(self):
         # Solifonds nach dem Einreichen: Formular für «nur RB» schreibgeschützt (mandat.js)
-        from mvd.mvd.doctype.mandat.mandat_permissions import ist_rb_gesperrt, ist_nur_rb
+        from mvd.mvd.doctype.mandat.mandat_permissions import ist_rb_gesperrt, ist_nur_rb, ist_va_nur_lesen
         from mvd.mvd.doctype.mandat.solifonds import _ist_va_von_mandat
         from mvd.mvd.doctype.mandat.mandat_hinweise import get_hinweis
         rb_gesperrt = ist_rb_gesperrt(self)
@@ -51,12 +51,19 @@ class Mandat(Document):
         self.set_onload("rb_gesperrt", rb_gesperrt)
         self.set_onload("nur_rb", nur_rb)
         self.set_onload("ist_va", ist_va)
+        va_nur_lesen = ist_va_nur_lesen(self)
+        self.set_onload("va_nur_lesen", va_nur_lesen)
         # Hinweis oben im Formular (Texte in mandat_hinweise.py, #2241); CC-Adresse fürs Einreichen bei der Coop
         cc_adresse = None
         if self.typ != "Solidaritätsfonds" and self.status == "Vorgemerkt":
             cc_adresse = get_cc_adresse(self)
             self.set_onload("cc_adresse", cc_adresse)
-        if not self.is_new():
+        if va_nur_lesen:
+            # #2257: fremdes, unzugewiesenes Mandat – die VA kann es nur ansehen (selbst übernehmen: #2258)
+            self.set_onload("hinweis", {"farbe": "blue", "text": frappe._(
+                "Dieses Mandat sucht noch eine Vertrauensanwält*in. Du kannst es nur ansehen. "
+                "Wer es übernehmen möchte, meldet sich beim Sekretariat der Sektion.")})
+        elif not self.is_new():
             self.set_onload("hinweis", get_hinweis(self, ist_va=ist_va, nur_rb=nur_rb,
                 rb_gesperrt=rb_gesperrt, cc_adresse=cc_adresse))
 
@@ -76,6 +83,7 @@ class Mandat(Document):
                 frappe.throw(frappe._("«Fall verfolgen» können nur Geschäftsleitung und Vorprüfung setzen."))
 
         self.pruefe_visum()
+        self.pruefe_beratung()
         self.pruefe_verknuepfung()
 
         if self.kontaktperson and "pool" in self.kontaktperson.lower():
@@ -88,16 +96,24 @@ class Mandat(Document):
         # #2208: Hierarchie wie in der Beratung – (2) nur mit (1), (3) nur mit (2); Lücken aufrücken
         set_beratungskategorien(self, [self.get(f) for f in KATEGORIE_FELDER])
 
-        # Beratungskategorie lässt sich ändern, aber nicht entfernen (alte Mandate ohne Kategorie bleiben speicherbar)
-        if not self.beratungskategorie and not self.is_new() and not frappe.flags.in_patch \
-                and frappe.db.get_value("Mandat", self.name, "beratungskategorie"):
-            frappe.throw(frappe._("Die Beratungskategorie kann geändert, aber nicht entfernt werden."))
+        # #2265: Mindestens eine Beratungskategorie ist Pflicht – auch beim Bearbeiten alter Mandate ohne Kategorie
+        if not self.beratungskategorie and not frappe.flags.in_patch:
+            frappe.throw(frappe._("Ein Mandat braucht mindestens eine Beratungskategorie. Bitte die Beratungskategorie setzen."),
+                title=frappe._("Beratungskategorie fehlt"))
 
         if self.typ == "Solidaritätsfonds":
             self.kostendach = SOLIFONDS_KOSTENDACH.get(self.solifonds_art) or 0
 
         # #2205: Status-Regeln, Automatik Unzugewiesen/Vorgemerkt (nur vor dem Einreichen, #2207) und Statusverlauf
         status_vor_speichern(self)
+
+    def pruefe_beratung(self):
+        # Ein Mandat gehört immer zu einer Beratung (entsteht über create_mandat; Bestätigungsmail und Anlagen brauchen sie).
+        # Neue Mandate nur mit Beratung, und sie lässt sich nicht entfernen; alte Mandate ohne Beratung bleiben speicherbar.
+        if self.beratung or frappe.flags.in_patch:
+            return
+        if self.is_new() or frappe.db.get_value("Mandat", self.name, "beratung"):
+            frappe.throw(frappe._("Ein Mandat braucht eine Beratung. Mandate bitte aus der Beratung erstellen (Knopf «Mandat»)."))
 
     def pruefe_verknuepfung(self):
         # Mitglied und Beratung legt create_mandat fest; ändern darf sie danach nur System Manager.
@@ -135,8 +151,9 @@ class Mandat(Document):
         if self.flags.visum_geaendert:
             self.add_comment("Info", frappe._("Mandat visiert.") if cint(self.visum) else frappe._("Visum entfernt."))
 
-        # Bestätigungs-Email senden
-        if (self.typ in ("Rechtsschutzversicherung", "Solidaritätsfonds") and
+        # Bestätigungs-Email an die VA bei Zuweisung – nur RSV. Beim Solidaritätsfonds bekommt die VA ihre Mail
+        # erst mit der Kostengutsprache (solifonds.gutsprache_mail, Vorlage «Template Kostengutsprache Solifonds»; #2253)
+        if (self.typ == "Rechtsschutzversicherung" and
             self.kontaktperson and 
             not self.bestaetigungs_email_gesendet):
         
@@ -180,6 +197,9 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     # #2208: Beratungskategorien (1)-(3) wie in der Beratung; aus dem Dialog (änderbar), sonst 1:1 aus der Beratung
     kategorien = frappe.parse_json(beratungskategorien) if beratungskategorien else get_beratungskategorien(beratung)
     set_beratungskategorien(mandat, kategorien)
+    if not mandat.beratungskategorie:
+        # #2265: auch wenn im Dialog alle Kategorien geleert wurden
+        frappe.throw(frappe._("Ein Mandat braucht mindestens eine Beratungskategorie."), title=frappe._("Beratungskategorie fehlt"))
     mandat.kontaktperson = berater_in
     mandat.typ = typ or RSV
     # #2211: Verfahrenssprache (nur de/fr) aus dem Dialog (änderbar), sonst aus der Mitgliedschaft
@@ -326,7 +346,6 @@ def send_confirmation_email(mandat):
         
         sektion_data = frappe.db.get_value("Sektion", mandat.sektion_id, 
             ["template_bestaetigung_kontaktperson",
-             "template_bestaetigung_kontaktperson_solifonds",
              "template_bestaetigung_mitglied",
              "mandat_absender_mail",
              "legacy_mail_absende_name",
@@ -348,16 +367,14 @@ def send_confirmation_email(mandat):
         )
 
         # --- 1. EMAIL AN BERATER (mit CC und Attachment) ---
-        ist_solifonds = mandat.typ == "Solidaritätsfonds"
-        template_berater = sektion_data.get(
-            "template_bestaetigung_kontaktperson_solifonds" if ist_solifonds else "template_bestaetigung_kontaktperson")
+        template_berater = sektion_data.get("template_bestaetigung_kontaktperson")
 
         if not recipients:
             frappe.log_error("Keine Empfänger für Kontaktperson {0} gefunden.".format(mandat.kontaktperson), "Mandat Email Error")
             email_sent = False
         elif not template_berater:
-            frappe.log_error("In Sektion {0} unter Mandat: Kein Template für Kontaktperson{1} hinterlegt.".format(
-                mandat.sektion_id, " (Solifonds)" if ist_solifonds else ""), "Mandat Email Error")
+            frappe.log_error("In Sektion {0} unter Mandat: Kein Template für Kontaktperson hinterlegt.".format(
+                mandat.sektion_id), "Mandat Email Error")
             email_sent = False
         else:
             rendered_berater = get_email_template(template_berater, {"doc": mandat})
@@ -407,7 +424,7 @@ def send_confirmation_email(mandat):
                 <br><br>
                 <hr>
                 <p style="font-size: 12px; color: #555;">
-                    <b>Interne Links für Berater:</b><br>
+                    <b>Interne Links:</b><br>
                     - <a href="{0}">Direkt zur Beratung: {1}</a><br>
                     - <a href="{2}">Direkt zum Mandat: {3}</a><br>
                     - <a href="{4}">Zur Mitgliedschaft: {5}</a>{6}
@@ -572,8 +589,9 @@ def suche_vertrauensanwaeltin(mandat_id, sektion_id=None, nur_sprache=0):
         frappe.throw(frappe._("Keine Berechtigung für dieses Mandat."), frappe.PermissionError)
     sektion_id = mandat.sektion_id
 
-    anwaelte = frappe.db.get_all("Termin Kontaktperson", 
-        filters={"ist_vertrauensanwaeltin": 1, "sektion_id": sektion_id}, 
+    # Deaktivierte Kontaktpersonen werden nicht angeschrieben
+    anwaelte = frappe.db.get_all("Termin Kontaktperson",
+        filters={"ist_vertrauensanwaeltin": 1, "sektion_id": sektion_id, "disabled": ["!=", 1]},
         fields=["name"]
     )
     if not anwaelte:
@@ -585,12 +603,15 @@ def suche_vertrauensanwaeltin(mandat_id, sektion_id=None, nur_sprache=0):
         if not anwaelte_liste:
             frappe.throw(frappe._("Keine Vertrauensanwält*in der Sektion hat die Sprache «{0}». Es wurde keine Mail vorbereitet. "
                 "Mit «Nein» wird an alle Vertrauensanwält*innen geschrieben.").format(sprachname(mandat.sprache)))
-    raw_recipients = frappe.db.get_all("Termin Kontaktperson Multi User", 
-        filters={"parent": ["in", anwaelte_liste]}, 
+    raw_recipients = frappe.db.get_all("Termin Kontaktperson Multi User",
+        filters={"parent": ["in", anwaelte_liste]},
         fields=["user"]
     )
-    
-    recipients_list = list(set([d.user for d in raw_recipients if d.user]))
+
+    # Nur aktive Benutzerkonten; Reihenfolge stabil
+    users = set(d.user for d in raw_recipients if d.user)
+    aktiv = set(u.name for u in frappe.db.get_all("User", filters={"name": ["in", list(users)], "enabled": 1}, fields=["name"])) if users else set()
+    recipients_list = sorted(users & aktiv)
     if not recipients_list:
         frappe.throw("Es wurden keine Vertrauensanwält*innen mit hinterlegter E-Mail-Adresse gefunden.")
         
@@ -656,6 +677,9 @@ def update_mandat_status_nach_email(doc, method):
         visierende_person = frappe.db.get_value("Sektion", sektion_id, "visierende_person")
 
         if visierende_person:
+            # Absender wie bei allen Mandats-Mails (Sektion → Mandate); ohne Eintrag der Standard-Absender
+            from mvd.mvd.doctype.mandat.solifonds import _absender
+            absender = _absender(sektion_id)
             recipients = [visierende_person]
             link_mandat = get_url_to_form("Mandat", mandat_name)
             subject = "Neue Nachricht in Mandat : {0}".format(mandat_name)
@@ -669,6 +693,7 @@ def update_mandat_status_nach_email(doc, method):
             
             comm = make(
                 recipients=recipients,
+                sender=absender,
                 subject=subject,
                 content=content,
                 doctype='Mandat',
@@ -678,6 +703,7 @@ def update_mandat_status_nach_email(doc, method):
 
             sendmail(
                 recipients=recipients,
+                sender=absender,
                 subject=subject,
                 content=content,
                 reference_doctype='Mandat',
