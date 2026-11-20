@@ -118,9 +118,7 @@ def fixing_wrong_data(manual=False):
         mitgliedschaften = frappe.db.sql(
             """
                 SELECT
-                    spx.ref_nr,
-                    spx.mitgliedId,
-                    spx.status
+                    spx.ref_nr
                 FROM (
                     SELECT
                         sp.`name` AS ref_nr,
@@ -140,7 +138,20 @@ def fixing_wrong_data(manual=False):
                     ON m.`mitglied_nr` = spx.ref_nr
                     AND m.`status_c` = spx.status
                     AND m.`mitglied_id` = spx.mitgliedId
-                WHERE m.`mitglied_nr` IS NULL;
+                WHERE m.`mitglied_nr` IS NULL
+
+                UNION
+
+                SELECT
+                    m.`mitglied_nr` AS ref_nr
+                FROM `tabMitgliedschaft` m
+                JOIN `tabSP Mitglied Data` sp ON sp.`name` = m.`mitglied_nr`
+                JOIN `tabSektion` s ON s.`name` = m.`sektion_id`
+                WHERE m.`status_c` <> 'Inaktiv'
+                AND m.`sektion_id` LIKE 'MV%'
+                AND NOT (
+                    TRIM(s.`sektion_c`) <=> JSON_UNQUOTE(JSON_EXTRACT(sp.`json`, '$.sektionCode'))
+                );
             """,
             as_dict=True
         )
