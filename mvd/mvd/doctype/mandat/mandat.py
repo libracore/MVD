@@ -589,8 +589,9 @@ def suche_vertrauensanwaeltin(mandat_id, sektion_id=None, nur_sprache=0):
         frappe.throw(frappe._("Keine Berechtigung für dieses Mandat."), frappe.PermissionError)
     sektion_id = mandat.sektion_id
 
-    anwaelte = frappe.db.get_all("Termin Kontaktperson", 
-        filters={"ist_vertrauensanwaeltin": 1, "sektion_id": sektion_id}, 
+    # Deaktivierte Kontaktpersonen werden nicht angeschrieben
+    anwaelte = frappe.db.get_all("Termin Kontaktperson",
+        filters={"ist_vertrauensanwaeltin": 1, "sektion_id": sektion_id, "disabled": ["!=", 1]},
         fields=["name"]
     )
     if not anwaelte:
@@ -602,12 +603,15 @@ def suche_vertrauensanwaeltin(mandat_id, sektion_id=None, nur_sprache=0):
         if not anwaelte_liste:
             frappe.throw(frappe._("Keine Vertrauensanwält*in der Sektion hat die Sprache «{0}». Es wurde keine Mail vorbereitet. "
                 "Mit «Nein» wird an alle Vertrauensanwält*innen geschrieben.").format(sprachname(mandat.sprache)))
-    raw_recipients = frappe.db.get_all("Termin Kontaktperson Multi User", 
-        filters={"parent": ["in", anwaelte_liste]}, 
+    raw_recipients = frappe.db.get_all("Termin Kontaktperson Multi User",
+        filters={"parent": ["in", anwaelte_liste]},
         fields=["user"]
     )
-    
-    recipients_list = list(set([d.user for d in raw_recipients if d.user]))
+
+    # Nur aktive Benutzerkonten; Reihenfolge stabil
+    users = set(d.user for d in raw_recipients if d.user)
+    aktiv = set(u.name for u in frappe.db.get_all("User", filters={"name": ["in", list(users)], "enabled": 1}, fields=["name"])) if users else set()
+    recipients_list = sorted(users & aktiv)
     if not recipients_list:
         frappe.throw("Es wurden keine Vertrauensanwält*innen mit hinterlegter E-Mail-Adresse gefunden.")
         

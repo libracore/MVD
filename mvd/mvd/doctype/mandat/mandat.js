@@ -54,11 +54,12 @@ frappe.ui.form.on('Mandat', {
             add_solifonds_buttons(frm);
         }
 
-        // Pool darf nicht zugeordnet werden
+        // Pool darf nicht zugeordnet werden, deaktivierte Kontaktpersonen auch nicht
         frm.set_query('kontaktperson', function() {
             return {
                 filters: [
-                    ['Termin Kontaktperson', 'name', 'not like', '%pool%']
+                    ['Termin Kontaktperson', 'name', 'not like', '%pool%'],
+                    ['Termin Kontaktperson', 'disabled', '!=', 1]
                 ]
             };
         });
