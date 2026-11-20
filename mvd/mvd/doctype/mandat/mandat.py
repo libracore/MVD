@@ -88,6 +88,11 @@ class Mandat(Document):
         # #2208: Hierarchie wie in der Beratung – (2) nur mit (1), (3) nur mit (2); Lücken aufrücken
         set_beratungskategorien(self, [self.get(f) for f in KATEGORIE_FELDER])
 
+        # Beratungskategorie lässt sich ändern, aber nicht entfernen (alte Mandate ohne Kategorie bleiben speicherbar)
+        if not self.beratungskategorie and not self.is_new() and not frappe.flags.in_patch \
+                and frappe.db.get_value("Mandat", self.name, "beratungskategorie"):
+            frappe.throw(frappe._("Die Beratungskategorie kann geändert, aber nicht entfernt werden."))
+
         if self.typ == "Solidaritätsfonds":
             self.kostendach = SOLIFONDS_KOSTENDACH.get(self.solifonds_art) or 0
 
@@ -131,7 +136,7 @@ class Mandat(Document):
             self.add_comment("Info", frappe._("Mandat visiert.") if cint(self.visum) else frappe._("Visum entfernt."))
 
         # Bestätigungs-Email senden
-        if (self.typ == "Rechtsschutzversicherung" and 
+        if (self.typ in ("Rechtsschutzversicherung", "Solidaritätsfonds") and
             self.kontaktperson and 
             not self.bestaetigungs_email_gesendet):
         
@@ -320,28 +325,39 @@ def send_confirmation_email(mandat):
         recipients = [d.user for d in raw_recipients if d.user]
         
         sektion_data = frappe.db.get_value("Sektion", mandat.sektion_id, 
-            ["template_bestaetigung_kontaktperson", 
+            ["template_bestaetigung_kontaktperson",
+             "template_bestaetigung_kontaktperson_solifonds",
              "template_bestaetigung_mitglied",
-             "legacy_mail_absender_mail", 
+             "mandat_absender_mail",
              "legacy_mail_absende_name",
-             "pw_email"], as_dict=True)
-        
+             "pw_email"], as_dict=True) or {}
+
+        if not sektion_data.get("mandat_absender_mail"):
+            msg = "In Sektion {0} unter Mandate ist keine Absender-E-Mail hinterlegt. Die Bestätigungs-E-Mail für Mandat {1} wurde nicht versendet.".format(
+                mandat.sektion_id, mandat.name)
+            frappe.log_error(msg, "Mandat Email Error")
+            frappe.msgprint(msg, title="Keine Absender-E-Mail", indicator="orange")
+            return False
+
         mitglied_email = frappe.db.get_value("Mitgliedschaft", mandat.mv_mitgliedschaft, "e_mail_1")
 
         # Absender definieren
         absender_format = "{0} <{1}>".format(
-            sektion_data.get("legacy_mail_absende_name") or "Mieterverband", 
-            sektion_data.get("legacy_mail_absender_mail")
+            sektion_data.get("legacy_mail_absende_name") or "Mieterverband",
+            sektion_data.get("mandat_absender_mail")
         )
 
         # --- 1. EMAIL AN BERATER (mit CC und Attachment) ---
-        template_berater = sektion_data.get("template_bestaetigung_kontaktperson")
+        ist_solifonds = mandat.typ == "Solidaritätsfonds"
+        template_berater = sektion_data.get(
+            "template_bestaetigung_kontaktperson_solifonds" if ist_solifonds else "template_bestaetigung_kontaktperson")
 
         if not recipients:
             frappe.log_error("Keine Empfänger für Kontaktperson {0} gefunden.".format(mandat.kontaktperson), "Mandat Email Error")
             email_sent = False
         elif not template_berater:
-            frappe.log_error("In Sektion {0} unter Mandat: Kein Template für Kontaktperson hinterlegt.".format(mandat.sektion_id), "Mandat Email Error")
+            frappe.log_error("In Sektion {0} unter Mandat: Kein Template für Kontaktperson{1} hinterlegt.".format(
+                mandat.sektion_id, " (Solifonds)" if ist_solifonds else ""), "Mandat Email Error")
             email_sent = False
         else:
             rendered_berater = get_email_template(template_berater, {"doc": mandat})

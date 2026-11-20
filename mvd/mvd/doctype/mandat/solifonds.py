@@ -100,11 +100,15 @@ def get_va_empfaenger(doc):
 
 def _absender(sektion_id):
     sektion = frappe.db.get_value("Sektion", sektion_id,
-        ["legacy_mail_absender_mail", "legacy_mail_absende_name"], as_dict=True) or {}
-    if not sektion.get("legacy_mail_absender_mail"):
+        ["mandat_absender_mail", "legacy_mail_absende_name"], as_dict=True) or {}
+    if not sektion.get("mandat_absender_mail"):
         return None
     return "{0} <{1}>".format(sektion.get("legacy_mail_absende_name") or "Mieterverband",
-        sektion.get("legacy_mail_absender_mail"))
+        sektion.get("mandat_absender_mail"))
+
+def _fehlender_absender_msg(sektion_id, betreff, mandat=None):
+    return "In Sektion {0} unter Mandate ist keine Absender-E-Mail hinterlegt. «{1}»{2} wurde nicht versendet.".format(
+        sektion_id, betreff, " (Mandat {0})".format(mandat) if mandat else "")
 
 def _sende_mail(doc, empfaenger, betreff, inhalt, dateien=None, mit_kommunikation=True):
     # dateien: Namen von File-Dokumenten; sie erscheinen als Anhang der Mail und der Communication
@@ -112,6 +116,11 @@ def _sende_mail(doc, empfaenger, betreff, inhalt, dateien=None, mit_kommunikatio
         frappe.log_error("Keine Empfänger*innen für «{0}» (Mandat {1}).".format(betreff, doc.name), "Solifonds Mail")
         return
     absender = _absender(doc.sektion_id)
+    if not absender:
+        msg = _fehlender_absender_msg(doc.sektion_id, betreff, doc.name)
+        frappe.log_error(msg, "Solifonds Mail")
+        frappe.msgprint(msg, title="Keine Absender-E-Mail", indicator="orange")
+        return
     if not mit_kommunikation:
         # Keine Communication: sie stünde in der Timeline des Mandats und wäre für alle mit Leserecht sichtbar
         sendmail(recipients=empfaenger, sender=absender, subject=betreff, content=inhalt, delayed=True)
@@ -286,13 +295,31 @@ def gutsprache_mail(doc):
         "content": frappe.get_print("Mandat", doc.name, print_format=PRINT_FORMAT, as_pdf=True),
         "is_private": 1
     }).insert(ignore_permissions=True)
-    inhalt = "<p>{0}</p><p>{1}</p><p><a href='{2}'>{3}</a></p>".format(
-        _("Für das Mandat wurde eine Kostengutsprache aus dem Solidaritätsfonds erteilt (Kostendach CHF {0}).").format(
-            frappe.format_value(doc.kostendach, {"fieldtype": "Currency"})),
-        _("Im Anhang das Formular «Kostengutsprache Solidaritätsfonds». Bitte vom Mitglied unterschreiben lassen."),
-        get_url_to_form("Mandat", doc.name), doc.name)
-    _sende_mail(doc, get_va_empfaenger(doc),
-        _("Kostengutsprache Solidaritätsfonds: {0}").format(doc.name), inhalt, [pdf.name])
+    # Sprache nach der Verfahrenssprache des Mandats (nicht nach dem auslösenden User), darum ohne _()
+    text = GUTSPRACHE_TEXTE["fr" if doc.sprache == "fr" else "de"]
+    # Link aufs ZIP mit den Anlagen der Beratung, wie in der Bestätigungs-Mail (nur wenn es Anlagen gibt)
+    zip_html = ""
+    if doc.beratung and frappe.db.count("File", {"attached_to_doctype": "Beratung", "attached_to_name": doc.beratung}):
+        from mvd.mvd.doctype.mandat.mandat import get_anlagen_zip_url
+        zip_html = "<p><a href='{0}'>{1}</a></p>".format(get_anlagen_zip_url(doc.name), text["zip"])
+    inhalt = "<p>{0}</p><p>{1}</p>{2}<p><a href='{3}'>{4}</a></p>".format(
+        text["erteilt"], text["anhang"], zip_html, get_url_to_form("Mandat", doc.name), doc.name)
+    _sende_mail(doc, get_va_empfaenger(doc), text["betreff"].format(doc.name), inhalt, [pdf.name])
+
+GUTSPRACHE_TEXTE = {
+    "de": {
+        "betreff": "Kostengutsprache Solidaritätsfonds: {0}",
+        "erteilt": "Für das Mandat wurde eine Kostengutsprache aus dem Solidaritätsfonds erteilt.",
+        "anhang": "Im Anhang das Formular «Kostengutsprache Solidaritätsfonds». Bitte vom Mitglied unterschreiben lassen.",
+        "zip": "Alle Anlagen der Beratung als ZIP herunterladen (Anmeldung in Libracore nötig)"
+    },
+    "fr": {
+        "betreff": "Garantie de prise en charge des frais – Fonds de solidarité: {0}",
+        "erteilt": "Une prise en charge des frais par le Fonds de solidarité a été accordée pour ce mandat.",
+        "anhang": "Tu trouveras en pièce jointe le formulaire « Garantie de prise en charge des frais – Fonds de solidarité ». Merci de le faire signer par le membre.",
+        "zip": "Télécharger toutes les pièces jointes de la consultation (ZIP, connexion à Libracore nécessaire)"
+    }
+}
 
 def ablehnung_mail(doc):
     # Ablehnung geht nur an die Vorprüfung, weder an die VA noch ans Mitglied
@@ -442,6 +469,9 @@ def _sende_liste(sektion_id, rolle, status, betreff):
         get_url("/desk#vbz-solifonds"), _("Zum Solifonds-Dashboard"))
 
     absender = _absender(sektion_id)
+    if not absender:
+        frappe.log_error(_fehlender_absender_msg(sektion_id, betreff), "Solifonds Mail")
+        return
     sendmail(recipients=empfaenger, sender=absender,
         subject="{0} ({1})".format(betreff, len(mandate)), content=inhalt, delayed=True)
 
