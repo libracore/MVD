@@ -107,7 +107,8 @@ frappe.ui.form.on('Mandat', {
                                 email_template: mail_data.email_template,       
                                 last_email: '',                   
                                 is_a_reply: false,                
-                                sender: current_user_sender                        
+                                sender: current_user_sender,
+                                load_draft: entwurf_nur_mit_vorlage(mail_data.email_template)
                             });
                         }
                     }
@@ -193,6 +194,18 @@ frappe.mvd.mandat_status.darf_nach_abgelehnt_aendern = function() {
     return frappe.user.has_role(['MV_GL', 'System Manager']);
 };
 
+// Der MailComposer hat pro Person und Mandat nur EINEN Entwurf (Suche VA, Vormerkung, … teilen ihn).
+// Für load_draft: einen Entwurf nur wiederherstellen, wenn er mit derselben Vorlage begonnen wurde – sonst frisch öffnen
+// (z. B. Vormerkung nach einer Suche VA, deren Entwurf noch liegt).
+function entwurf_nur_mit_vorlage(vorlage) {
+    return function() {
+        return frappe.mvd.MailComposer.prototype.load_draft.call(this).then(function(entwurf) {
+            let felder = (entwurf && entwurf.state && entwurf.state.fields) || {};
+            return (entwurf && (felder.email_template || '') === (vorlage || '')) ? entwurf : null;
+        });
+    };
+}
+
 // Solifonds: Mail-Dialog «Vormerkung» an die zugewiesene VA (Empfänger*innen, Betreff und Vorlage vom Server)
 function vormerkung_mail_dialog(frm) {
     frappe.call({
@@ -213,6 +226,7 @@ function vormerkung_mail_dialog(frm) {
                 last_email: '',
                 is_a_reply: false,
                 sender: frappe.session.user_fullname + ' <' + frappe.session.user + '>',
+                load_draft: entwurf_nur_mit_vorlage(r.message.email_template),
                 // Die Vorlage überschreibt den Betreff; Mandatsnummer anhängen, falls sie fehlt (wie bei den automatischen Mails).
                 // Der Dialog entsteht erst asynchron, darum hier statt nach dem Erstellen.
                 setup_email_template: function() {
