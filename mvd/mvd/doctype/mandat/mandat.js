@@ -173,6 +173,14 @@ frappe.mvd.mandat_status.STATUS_RSV = ['Unzugewiesen', 'Nicht vergeben', 'Vorgem
 frappe.mvd.mandat_status.VOR_EINREICHUNG = ['Unzugewiesen', 'Nicht vergeben', 'Vorgemerkt'];
 frappe.mvd.mandat_status.JEDERZEIT = ['Rückzug', 'Gelöscht'];
 frappe.mvd.mandat_status.METHOD = 'mvd.mvd.doctype.mandat.mandat_status.status_aendern';
+// #2269: gleiche Regeln wie mandat_status.py (NUR_AUTOMATIK, ROLLEN_LOESCHEN, ROLLEN_NACH_ABGELEHNT)
+frappe.mvd.mandat_status.NUR_AUTOMATIK = ['Unzugewiesen', 'Vorgemerkt'];
+frappe.mvd.mandat_status.darf_loeschen = function() {
+    return frappe.user.has_role(['MV_MA', 'MV_GL', 'System Manager']);
+};
+frappe.mvd.mandat_status.darf_nach_abgelehnt_aendern = function() {
+    return frappe.user.has_role(['MV_GL', 'System Manager']);
+};
 
 function setup_status_felder(frm) {
     let ms = frappe.mvd.mandat_status;
@@ -187,13 +195,23 @@ function setup_status_felder(frm) {
         // Solifonds: Status nur über die Knöpfe
         frm.set_df_property('status', 'read_only', 1);
     } else {
-        // RSV: von Hand wählbar, nur RSV-Status; «Nicht vergeben» über den Knopf (Bemerkung Pflicht)
+        // RSV: von Hand wählbar, nur RSV-Status; «Nicht vergeben» über den Knopf (Bemerkung Pflicht).
+        // «Unzugewiesen»/«Vorgemerkt» setzt die Automatik (VA ja/nein), «Gelöscht» nur MV_MA/MV_GL,
+        // aus «Abgelehnt» nur «Rückzug»/«Gelöscht» – ausser für die Geschäftsleitung (MV_GL).
+        // Der aktuelle Status bleibt immer in der Liste.
+        let gespeichert = frm.doc.status;
         let optionen = ms.STATUS_RSV.filter(function(s) {
-            if (s == 'Nicht vergeben') {
-                return frm.doc.status == s;
+            if (s == gespeichert) {
+                return true;
             }
-            if (frm.doc.status == 'Abgelehnt') {
-                return s == 'Abgelehnt' || ms.JEDERZEIT.includes(s);
+            if (s == 'Nicht vergeben' || ms.NUR_AUTOMATIK.includes(s)) {
+                return false;
+            }
+            if (s == 'Gelöscht' && !ms.darf_loeschen()) {
+                return false;
+            }
+            if (gespeichert == 'Abgelehnt' && !ms.darf_nach_abgelehnt_aendern()) {
+                return ms.JEDERZEIT.includes(s);
             }
             return true;
         });
@@ -266,7 +284,7 @@ function add_status_buttons(frm) {
         }, gruppe);
     }
     ms.JEDERZEIT.forEach(function(ziel) {
-        if (status == ziel || (nur_rb && ziel != 'Rückzug')) {
+        if (status == ziel || (nur_rb && ziel != 'Rückzug') || (ziel == 'Gelöscht' && !ms.darf_loeschen())) {
             return;
         }
         frm.add_custom_button(__(ziel), function() {
