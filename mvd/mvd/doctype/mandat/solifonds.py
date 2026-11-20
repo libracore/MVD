@@ -245,7 +245,26 @@ def gesuch_einreichen(mandat):
     doc.gesuch_eingereicht_von = frappe.session.user
     doc.save(ignore_permissions=True)
     _kommentar(doc, _("Solifonds-Gesuch eingereicht."))
+    einreichen_mail(doc)
     return doc.status
+
+def einreichen_mail(doc):
+    """Info an die Vorprüfung der Sektion, sobald ein Gesuch eingereicht ist (auch erneut nach einer Rückweisung).
+    Absender wie alle Solifonds-Mails: Sektion → Mandat E-Mail Absender Adresse. Die nächtliche Liste bleibt."""
+    empfaenger = get_users_mit_rolle(ROLLE_VORPRUEFUNG, doc.sektion_id)
+    eingereicht_von = frappe.db.get_value("User", doc.gesuch_eingereicht_von, "full_name") or doc.gesuch_eingereicht_von
+    zeilen = [
+        (_("Mandat"), "<a href='{0}'>{1}</a>".format(get_url_to_form("Mandat", doc.name), doc.name)),
+        (_("Art des Antrags"), escape_html(doc.solifonds_art or "")),
+        (_("Vertrauensanwält*in"), escape_html(doc.kontaktperson or "")),
+        (_("Eingereicht von"), escape_html(eingereicht_von or "")),
+        (_("Begründung"), _text_html(doc.solifonds_begruendung)),
+    ]
+    inhalt = "<p>{0}</p><table cellpadding='4'>{1}</table><p><a href='{2}'>{3}</a></p>".format(
+        _("Ein Solifonds-Gesuch wartet auf die Vorprüfung."),
+        "".join("<tr><td><b>{0}</b></td><td>{1}</td></tr>".format(k, v) for k, v in zeilen),
+        get_url_to_form("Mandat", doc.name), _("Zum Mandat"))
+    _sende_mail(doc, empfaenger, _("Solifonds-Gesuch zur Vorprüfung: {0}").format(doc.name), inhalt)
 
 
 # ---------------------------------------------------------------------------
