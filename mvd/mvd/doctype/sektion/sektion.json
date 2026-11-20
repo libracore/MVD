@@ -96,6 +96,7 @@
   "mandat_absender_mail",
   "visierende_person",
   "template_bestaetigung_kontaktperson",
+  "template_vormerkung_solifonds",
   "template_bestaetigung_kontaktperson_solifonds",
   "template_bestaetigung_mitglied",
   "template_suche_vertrauensanwaeltin",
@@ -1233,7 +1234,14 @@
    "options": "Email Template"
   },
   {
-   "description": "Mail an die VA bei erteilter Kostengutsprache (mit PDF). Kann mit {% if doc.sprache == \"fr\" %} zweisprachig sein. Ohne Eintrag: eingebauter Text (de/fr). Bei der Zuweisung geht beim Solidarit\u00e4tsfonds keine Mail raus (#2253).",
+   "description": "Mail an die VA, wenn ihr ein Solifonds-Mandat zugewiesen wird oder sie es sich vormerkt. Nicht, wenn das Gesuch beim Erstellen gleich eingereicht wird. Ohne Eintrag geht keine Mail raus.",
+   "fieldname": "template_vormerkung_solifonds",
+   "fieldtype": "Link",
+   "label": "Template Vormerkung Solifonds (an VA)",
+   "options": "Email Template"
+  },
+  {
+   "description": "Mail an die VA bei erteilter Kostengutsprache (mit PDF). Kann mit {% if doc.sprache == \"fr\" %} zweisprachig sein. Ohne Eintrag: eingebauter Text (de/fr) (#2253).",
    "fieldname": "template_bestaetigung_kontaktperson_solifonds",
    "fieldtype": "Link",
    "label": "Template Kostengutsprache Solifonds (an VA)",
@@ -1364,7 +1372,7 @@
    "options": "Sektion Vorstand"
   }
  ],
- "modified": "2026-11-19 14:00:00.000000",
+ "modified": "2026-11-20 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "Sektion",

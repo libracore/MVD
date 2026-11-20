@@ -156,6 +156,68 @@ def _text_html(text):
 
 
 # ---------------------------------------------------------------------------
+# 0. Vormerkung: Info an die VA (Vorlage der Sektion «Template Vormerkung Solifonds»)
+# ---------------------------------------------------------------------------
+
+def vormerkung_mail(doc):
+    """Info an die VA, wenn sie sich ein Solifonds-Mandat beim Erstellen selbst vormerkt und es nicht gleich einreicht
+    (vormerkung_mail_senden). Bei einer Zuweisung durch andere öffnet das Formular stattdessen den Mail-Dialog
+    (vormerkung_mail_daten). Ohne Vorlage in der Sektion geht keine Mail raus."""
+    vorlage = frappe.db.get_value("Sektion", doc.sektion_id, "template_vormerkung_solifonds")
+    if not vorlage:
+        frappe.log_error("In Sektion {0} unter Mandate ist kein «Template Vormerkung Solifonds» hinterlegt. "
+                         "Die Vormerkungs-Mail für Mandat {1} wurde nicht versendet.".format(doc.sektion_id, doc.name),
+                         "Solifonds Mail")
+        return
+    from frappe.email.doctype.email_template.email_template import get_email_template
+    gerendert = get_email_template(vorlage, {"doc": doc})
+    betreff = gerendert.get("subject") or "Vormerkung Solidaritätsfonds"
+    if doc.name not in betreff:
+        betreff = "{0}: {1}".format(betreff, doc.name)
+    _sende_mail(doc, get_va_empfaenger(doc), betreff, gerendert.get("message") or "")
+
+@frappe.whitelist()
+def vormerkung_mail_daten(mandat):
+    """Für den Mail-Dialog nach der Zuweisung einer VA (mandat.js after_save): Empfänger*innen (aktive Benutzerkonten
+    der VA), Betreff und Vorlage der Sektion. Abgeschickt wird im Dialog von Hand."""
+    doc = _get_mandat(mandat)
+    if not doc.has_permission("write"):
+        frappe.throw(_("Keine Berechtigung für dieses Mandat."), frappe.PermissionError)
+    if not doc.kontaktperson:
+        frappe.throw(_("Das Mandat hat keine Vertrauensanwält*in."))
+    va = get_va_empfaenger(doc)
+    aktiv = [u.name for u in frappe.db.get_all("User", filters={"name": ["in", va], "enabled": 1}, fields=["name"])] if va else []
+    if not aktiv:
+        frappe.throw(_("Die Vertrauensanwält*in {0} hat kein aktives Benutzerkonto. Es wurde keine Mail vorbereitet.").format(
+            escape_html(doc.kontaktperson)))
+    vorlage = frappe.db.get_value("Sektion", doc.sektion_id, "template_vormerkung_solifonds") or ""
+    if not vorlage:
+        frappe.msgprint(_("In der Sektion ist kein «Template Vormerkung Solifonds» hinterlegt. Der Mail-Text ist darum leer."),
+                        indicator="orange")
+    return {
+        "recipients": ", ".join(sorted(aktiv)),
+        "subject": "Vormerkung Solidaritätsfonds: {0}".format(doc.name),
+        "email_template": vorlage
+    }
+
+@frappe.whitelist()
+def vormerkung_mail_senden(mandat):
+    """Aus dem Dialog nach dem Erstellen: Das Gesuch wird nicht gleich eingereicht («Später» oder Dialog
+    geschlossen), also bekommt die VA die Vormerkungs-Mail. Nur einmal und nur im Status «Vorgemerkt»."""
+    doc = _get_mandat(mandat)
+    if not (_ist_va_von_mandat(doc) or "MV_Mandat" in frappe.get_roles()):
+        frappe.throw(_("Keine Berechtigung für dieses Mandat."), frappe.PermissionError)
+    if doc.status != "Vorgemerkt" or not doc.kontaktperson:
+        return False
+    # Schon eine Mail zum Mandat verschickt (z. B. Dialog doppelt geschlossen): nicht nochmals
+    if frappe.db.count("Communication", {"reference_doctype": "Mandat", "reference_name": doc.name,
+                                         "communication_type": "Communication"}):
+        return False
+    vormerkung_mail(doc)
+    return True
+
+
+# ---------------------------------------------------------------------------
 # 1. Einreichen (VA oder Beratung)
 # ---------------------------------------------------------------------------
 

@@ -151,8 +151,11 @@ class Mandat(Document):
         if self.flags.visum_geaendert:
             self.add_comment("Info", frappe._("Mandat visiert.") if cint(self.visum) else frappe._("Visum entfernt."))
 
-        # Bestätigungs-Email an die VA bei Zuweisung – nur RSV. Beim Solidaritätsfonds bekommt die VA ihre Mail
-        # erst mit der Kostengutsprache (solifonds.gutsprache_mail, Vorlage «Template Kostengutsprache Solifonds»; #2253)
+        # Solidaritätsfonds: keine automatische Mail bei der Zuweisung. Das Formular öffnet danach den Mail-Dialog
+        # mit der Vorlage «Template Vormerkung Solifonds» (mandat.js after_save, solifonds.vormerkung_mail_daten).
+        # Übernimmt die VA beim Erstellen selbst, entscheidet der Dialog danach (solifonds.vormerkung_mail_senden).
+
+        # Bestätigungs-Email an die VA bei Zuweisung – nur RSV
         if (self.typ == "Rechtsschutzversicherung" and
             self.kontaktperson and 
             not self.bestaetigungs_email_gesendet):
@@ -232,6 +235,8 @@ def create_mandat(beratung, berater_in=None, typ=None, bemerkung=None, persoenli
     if beratung.mv_mitgliedschaft:
         mandat.mietobjekt, mandat.schlichtungsbehoerde = get_mietobjekt_und_schlichtungsbehoerde(beratung.mv_mitgliedschaft)
 
+    # Solifonds selbst übernommen: Ob die Vormerkungs-Mail rausgeht, entscheidet der Dialog danach
+    # (gleich einreichen = keine Mail; «Später» = solifonds.vormerkung_mail_senden)
     mandat.insert(ignore_permissions=True)
 
     frappe.db.set_value("Beratung", beratung.name, "mandat", mandat.name)

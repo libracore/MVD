@@ -4,7 +4,18 @@
 {% include "mvd/mvd/doctype/mandat/solifonds_dialoge.js" %}
 
 frappe.ui.form.on('Mandat', {
+    after_save: function(frm) {
+        // Solifonds: VA zugewiesen (Mandat «Vorgemerkt») -> Mail-Dialog mit der Vorlage «Template Vormerkung Solifonds»;
+        // abgeschickt wird von Hand. after_save läuft vor refresh, _va_gespeichert ist also noch der Stand vor dem Speichern.
+        if (frm.doc.typ == 'Solidaritätsfonds' && frm.doc.status == 'Vorgemerkt' && frm.doc.kontaktperson
+                && frm.doc.kontaktperson !== frm._va_gespeichert) {
+            vormerkung_mail_dialog(frm);
+        }
+    },
     refresh: function(frm) {
+        // VA beim Laden bzw. nach dem Speichern merken (für after_save: VA neu zugewiesen?)
+        frm._va_gespeichert = frm.is_new() ? null : (frm.doc.kontaktperson || null);
+
         // Solifonds nach dem Einreichen: «nur RB» darf nur noch ansehen (Server: mandat_permissions.ist_rb_gesperrt);
         // möglich bleiben Abschliessen, Rückzug und Anhänge
         if (rb_gesperrt(frm)) {
@@ -181,6 +192,47 @@ frappe.mvd.mandat_status.darf_loeschen = function() {
 frappe.mvd.mandat_status.darf_nach_abgelehnt_aendern = function() {
     return frappe.user.has_role(['MV_GL', 'System Manager']);
 };
+
+// Solifonds: Mail-Dialog «Vormerkung» an die zugewiesene VA (Empfänger*innen, Betreff und Vorlage vom Server)
+function vormerkung_mail_dialog(frm) {
+    frappe.call({
+        method: 'mvd.mvd.doctype.mandat.solifonds.vormerkung_mail_daten',
+        args: {'mandat': frm.doc.name},
+        callback: function(r) {
+            if (r.exc || !r.message) return;
+            new frappe.mvd.MailComposer({
+                doc: frm.doc,
+                frm: frm,
+                title: __('Info an die VA: Vormerkung Solifonds'),
+                subject: r.message.subject,
+                recipients: r.message.recipients,
+                cc: '',
+                attach_document_print: false,
+                txt: '',
+                email_template: r.message.email_template,
+                last_email: '',
+                is_a_reply: false,
+                sender: frappe.session.user_fullname + ' <' + frappe.session.user + '>',
+                // Die Vorlage überschreibt den Betreff; Mandatsnummer anhängen, falls sie fehlt (wie bei den automatischen Mails).
+                // Der Dialog entsteht erst asynchron, darum hier statt nach dem Erstellen.
+                setup_email_template: function() {
+                    let composer = this;
+                    frappe.mvd.MailComposer.prototype.setup_email_template.call(composer);
+                    let df = composer.dialog.fields_dict.email_template.df;
+                    let vorlage_onchange = df.onchange;
+                    df.onchange = function() {
+                        return Promise.resolve(vorlage_onchange && vorlage_onchange.apply(this, arguments)).then(function() {
+                            let betreff = composer.dialog.get_value('subject') || '';
+                            if (betreff.indexOf(frm.doc.name) === -1) {
+                                return composer.dialog.set_value('subject', (betreff || 'Vormerkung Solidaritätsfonds') + ': ' + frm.doc.name);
+                            }
+                        });
+                    };
+                }
+            });
+        }
+    });
+}
 
 function setup_status_felder(frm) {
     let ms = frappe.mvd.mandat_status;
