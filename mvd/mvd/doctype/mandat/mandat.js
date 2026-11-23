@@ -107,7 +107,8 @@ frappe.ui.form.on('Mandat', {
                                 email_template: mail_data.email_template,       
                                 last_email: '',                   
                                 is_a_reply: false,                
-                                sender: current_user_sender,
+                                // Absender der Sektion (Mandate); ohne Eintrag wie bisher
+                                sender: mail_data.sender || current_user_sender,
                                 load_draft: entwurf_nur_mit_vorlage(mail_data.email_template)
                             });
                         }
@@ -231,7 +232,8 @@ function vormerkung_mail_dialog(frm) {
                 email_template: r.message.email_template,
                 last_email: '',
                 is_a_reply: false,
-                sender: frappe.session.user_fullname + ' <' + frappe.session.user + '>',
+                // Absender der Sektion (Mandate); ohne Eintrag wie bisher
+                sender: r.message.sender || (frappe.session.user_fullname + ' <' + frappe.session.user + '>'),
                 load_draft: entwurf_nur_mit_vorlage(r.message.email_template, kontaktperson),
                 get_draft_state: function() {
                     let entwurf = frappe.mvd.MailComposer.prototype.get_draft_state.call(this);
@@ -405,14 +407,18 @@ function open_mandat_email(frm, template_prefix) {
                 var recipient = r.message.user[0].user;
                 var email_template = template_prefix + '-' + frm.doc.sektion_id;
 
-                new frappe.mvd.MailComposer({
-                    doc: frm.doc,
-                    frm: frm,
-                    subject: __('Mandat') + ': ' + frm.docname,
-                    recipients: recipient,
-                    attach_document_print: false,
-                    txt: '',
-                    email_template: email_template
+                // Absender der Sektion (Mandate) vorschlagen, nicht das erste Mailkonto der Person
+                frappe.xcall('mvd.mvd.doctype.mandat.mandat.get_mandat_absender', {'mandat': frm.doc.name}).then(function(absender) {
+                    new frappe.mvd.MailComposer({
+                        doc: frm.doc,
+                        frm: frm,
+                        subject: __('Mandat') + ': ' + frm.docname,
+                        recipients: recipient,
+                        attach_document_print: false,
+                        txt: '',
+                        email_template: email_template,
+                        sender: absender || undefined
+                    });
                 });
             } else {
                 frappe.msgprint(__("Keine/r Benutzer*in für die/den ausgewählte/n Berater*in gefunden."));

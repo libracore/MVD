@@ -197,7 +197,9 @@ def vormerkung_mail_daten(mandat):
     return {
         "recipients": ", ".join(sorted(aktiv)),
         "subject": "Vormerkung Solidaritätsfonds: {0}".format(doc.name),
-        "email_template": vorlage
+        "email_template": vorlage,
+        # Absender wie bei allen Mandats-Mails (Sektion → Mandate), nicht das erste Mailkonto der Person
+        "sender": _absender(doc.sektion_id) or ''
     }
 
 @frappe.whitelist()
