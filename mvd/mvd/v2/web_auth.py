@@ -80,7 +80,7 @@ def get_mitglied_nummer(user):
                                     SELECT
                                         `mitglied_nr`
                                     FROM `tabMitgliedschaft`
-                                    WHERE `e_mail_1` = '{0}'
+                                    WHERE `e_mail_1` = %(email)s
                                     AND `status_c` NOT IN ('Inaktiv', 'Ausschluss')
                                     ORDER BY
                                     CASE
@@ -92,7 +92,7 @@ def get_mitglied_nummer(user):
                                         ELSE 6
                                     END,
                                     `status_c`
-                                    """.format(user), as_dict=True)
+                                    """, {"email": user}, as_dict=True)
     if len(mitgliedschaften) != 1:
         return False
     
@@ -116,22 +116,26 @@ def check_credentials(user, pwd, clear=False):
                              SELECT `name`, `password`
                              FROM `__Auth`
                              WHERE `doctype` = 'User'
-                             AND `name` = '{user}'
+                             AND `name` = %(user)s
                              AND `fieldname` = 'password'
-                             AND `encrypted` = 0""".format(user=user), as_dict=True)
+                             AND `encrypted` = 0""", {"user": user}, as_dict=True)
         if not auth or auth[0].password != pwd:
             return failed_login()
         else:
             return success_data(auth[0].name)
 
 def check_hash_based_credentials(reset_hash):
+    if not isinstance(reset_hash, str) or not reset_hash:
+        return failed_login()
     potential_user = frappe.db.sql("""
                                     SELECT `name`
                                    FROM `tabUser`
-                                   WHERE `reset_password_key` = "{0}"
-                                   AND `name` LIKE '%@login.ch'
-    """.format(reset_hash), as_dict=True)
+                                   WHERE `reset_password_key` = %(reset_hash)s
+                                   AND `name` LIKE %(member_pattern)s
+    """, {"reset_hash": reset_hash, "member_pattern": "%@login.ch"}, as_dict=True)
     if len(potential_user) == 1:
+        if cint(frappe.db.get_value("User", potential_user[0].name, "enabled")) != 1:
+            return failed_login()
         if check_reset_hash_expiry(potential_user[0].name):
             try:
                 return success_data(potential_user[0].name)
@@ -143,6 +147,8 @@ def check_hash_based_credentials(reset_hash):
         return failed_login()
 
 def update_pwd(user, reset_hash, pwd, clear):
+    if not isinstance(reset_hash, str) or not reset_hash:
+        return invalid_reset_hash()
     user_doc = None
     if user:
         try:
@@ -153,18 +159,20 @@ def update_pwd(user, reset_hash, pwd, clear):
         potential_user = frappe.db.sql("""
                                     SELECT `name`
                                    FROM `tabUser`
-                                   WHERE `reset_password_key` = "{0}"
-                                   AND `name` LIKE '%@login.ch'
-        """.format(reset_hash), as_dict=True)
+                                   WHERE `reset_password_key` = %(reset_hash)s
+                                   AND `name` LIKE %(member_pattern)s
+        """, {"reset_hash": reset_hash, "member_pattern": "%@login.ch"}, as_dict=True)
         if len(potential_user) == 1:
-            if check_reset_hash_expiry(potential_user[0].name):
-                user_doc = frappe.get_doc("User", potential_user[0].name)
-            else:
-                return expired_reset_hash()
+            user_doc = frappe.get_doc("User", potential_user[0].name)
     
     if not user_doc: return unknown_user()
+    if cint(user_doc.enabled) != 1:
+        return unknown_user()
 
     if user_doc.reset_password_key == reset_hash:
+        # Auch bei expliziter Benutzerangabe muss der Reset-Token gültig sein.
+        if not check_reset_hash_expiry(user_doc.name):
+            return expired_reset_hash()
         if clear:
             if is_password_strength(user_doc, pwd):
                 from frappe.utils.password import update_password
@@ -180,11 +188,11 @@ def update_pwd(user, reset_hash, pwd, clear):
             frappe.db.sql("""
                             UPDATE
                             `__Auth`
-                            SET `password` = '{pwd}'
+                            SET `password` = %(pwd)s
                             WHERE `doctype` = 'User'
-                            AND `name` = '{user}'
+                            AND `name` = %(user)s
                             AND `fieldname` = 'password'
-                            AND `encrypted` = 0""".format(user=user_doc.name, pwd=pwd))
+                            AND `encrypted` = 0""", {"user": user_doc.name, "pwd": pwd})
             user_doc.reset_password_key = ''
             user_doc.save(ignore_permissions=True)
             frappe.db.commit()
@@ -258,17 +266,17 @@ def generate_reset_hash(user, email, hash_only=False):
         hash_only_success_info(key)
 
 def check_reset_hash_expiry(user):
-    reset_hash_hours = frappe.db.get_value("MVD Settings", "MVD Settings", 'reset_hash_hours') or 24
+    reset_hash_hours = cint(frappe.db.get_value("MVD Settings", "MVD Settings", 'reset_hash_hours') or 24)
     active_reset_hash = frappe.db.sql("""
         SELECT COUNT(`name`) AS `qty`
         FROM `tabPWD Reset Hash Expiry`
-        WHERE `creation` >= NOW() - INTERVAL {0} HOUR
-        AND `user` = '{1}'
-    """.format(reset_hash_hours, user), as_dict=True)[0].qty
+        WHERE `creation` >= NOW() - INTERVAL %(hours)s HOUR
+        AND `user` = %(user)s
+    """, {"hours": reset_hash_hours, "user": user}, as_dict=True)[0].qty
     return True if active_reset_hash > 0 else False
 
 def delete_reset_hash_expiry(user):
-    frappe.db.sql("""DELETE FROM `tabPWD Reset Hash Expiry` WHERE `user` = '{0}'""".format(user))
+    frappe.db.sql("""DELETE FROM `tabPWD Reset Hash Expiry` WHERE `user` = %(user)s""", {"user": user})
     frappe.db.commit()
     return
 
@@ -281,12 +289,12 @@ def create_reset_hash_expiry(user):
     return
 
 def reset_hash_cleanup():
-    reset_hash_hours = frappe.db.get_value("MVD Settings", "MVD Settings", 'reset_hash_hours') or 24
+    reset_hash_hours = cint(frappe.db.get_value("MVD Settings", "MVD Settings", 'reset_hash_hours') or 24)
     active_reset_hash = frappe.db.sql("""
         DELETE
         FROM `tabPWD Reset Hash Expiry`
-        WHERE `creation` < NOW() - INTERVAL {0} HOUR;
-    """.format(reset_hash_hours))
+        WHERE `creation` < NOW() - INTERVAL %(hours)s HOUR;
+    """, {"hours": reset_hash_hours})
     frappe.db.commit()
 
 '''
