@@ -451,9 +451,15 @@ frappe.mvd.MailComposer = Class.extend({
                 account.enable_outgoing
         })
         if(frappe.boot.email_accounts && email_accounts.length > 1) {
+            var sender_options = email_accounts.map(function(e) { return e.email_id; });
+            // Vorgegebener Absender (z. B. Mandats-Absender der Sektion) zuoberst, auch wenn er kein eigenes Mailkonto ist;
+            // sonst wählte die Auswahl stillschweigend das erste Konto
+            if (this.sender && sender_options.indexOf(this.sender) === -1) {
+                sender_options = [this.sender].concat(sender_options);
+            }
             fields = [
                 {label: __("From"), fieldtype: "Select", reqd: 1, fieldname: "sender",
-                    options: email_accounts.map(function(e) { return e.email_id; }) }
+                    options: sender_options }
             ].concat(fields);
         } else {
             if (this.sender) {

@@ -56,11 +56,17 @@ HINWEISE = [
     ("Gesuch eingereicht", "Solifonds", "vp", None, "yellow",
      "{dran}Gesuch prüfen. Passt es: <b>Solidaritätsfonds → Vorprüfung abschliessen</b> und bestätigen, dass die Voraussetzungen "
      "gemäss Reglement erfüllt sind. Sonst: <b>Solidaritätsfonds → An VA zurückweisen</b> (mit Grund)."),
+    # #2274: Die GL sieht, was die Vorprüfung tun sollte, und kann es selbst erledigen
+    ("Gesuch eingereicht", "Solifonds", "gl", None, "blue",
+     "Wartet auf die Vorprüfung. Die Vorprüfung prüft das Gesuch: Passt es, <b>Solidaritätsfonds → Vorprüfung abschliessen</b> "
+     "und bestätigen, dass die Voraussetzungen gemäss Reglement erfüllt sind; sonst <b>Solidaritätsfonds → An VA zurückweisen</b> "
+     "(mit Grund).<br>Die Geschäftsleitung kann das auch selbst erledigen, z. B. wenn die Vorprüfung abwesend ist."),
     ("Gesuch eingereicht", "Solifonds", "*", None, "blue",
      "Das Solifonds-Gesuch ist eingereicht und wartet auf die Vorprüfung."),
 
     ("Vorgeprüft", "*", "gl", None, "yellow",
-     "{dran}<b>Solidaritätsfonds → Entscheid GL</b>: Kostengutsprache, Ablehnung oder Antrag an den Vorstand."),
+     "{dran}<b>Solidaritätsfonds → Entscheid GL</b>: Kostengutsprache, Ablehnung oder Antrag an den Vorstand. "
+     "Bei Bedarf zurück an die Vorprüfung: <b>Solidaritätsfonds → Vorprüfung zurücknehmen</b>."),
     ("Vorgeprüft", "*", "vp", None, "blue",
      "Vorgeprüft, wartet auf den Entscheid der Geschäftsleitung. Bei Bedarf <b>Solidaritätsfonds → Vorprüfung zurücknehmen</b>."),
     ("Vorgeprüft", "*", "*", None, "blue",

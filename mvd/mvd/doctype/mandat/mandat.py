@@ -640,8 +640,23 @@ def suche_vertrauensanwaeltin(mandat_id, sektion_id=None, nur_sprache=0):
         "recipients": recipients_string,
         "subject": subject,
         "email_template": email_template or '',
-        "cc": visierende_person or ''
+        "cc": visierende_person or '',
+        # Absender wie bei allen Mandats-Mails (Sektion → Mandate), nicht das erste Mailkonto der Person
+        "sender": get_mandat_absender_text(sektion_id)
     }
+
+def get_mandat_absender_text(sektion_id):
+    """«Name <Adresse>» aus Sektion → Mandat E-Mail Absender Adresse; leer, wenn nicht eingetragen."""
+    from mvd.mvd.doctype.mandat.solifonds import _absender
+    return _absender(sektion_id) or ''
+
+@frappe.whitelist()
+def get_mandat_absender(mandat):
+    """Für die Mail-Dialoge im Mandat: Absender der Sektion als Vorschlag für «Von»."""
+    doc = frappe.get_doc("Mandat", mandat)
+    if not doc.has_permission("read"):
+        frappe.throw(frappe._("Keine Berechtigung für dieses Mandat."), frappe.PermissionError)
+    return get_mandat_absender_text(doc.sektion_id)
 
 
 def update_mandat_status_nach_email(doc, method):

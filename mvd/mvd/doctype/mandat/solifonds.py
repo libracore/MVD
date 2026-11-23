@@ -35,6 +35,17 @@ def _get_mandat(mandat):
         frappe.throw(_("Keine Berechtigung für dieses Mandat."), frappe.PermissionError)
     return doc
 
+# #2274: Die Aufgaben der Vorprüfung darf auch die GL erledigen (z. B. bei Abwesenheit der Vorprüfung)
+ROLLEN_VORPRUEFUNG = (ROLLE_VORPRUEFUNG, ROLLE_GL)
+
+def _check_rolle_vorpruefung():
+    if not set(ROLLEN_VORPRUEFUNG) & set(frappe.get_roles()):
+        frappe.throw(_("Diese Aktion ist der Vorprüfung und der Geschäftsleitung vorbehalten."), frappe.PermissionError)
+
+def _durch_gl():
+    # Für Kommentare: erledigt die GL eine Aufgabe der Vorprüfung, steht das dabei
+    return "" if ROLLE_VORPRUEFUNG in frappe.get_roles() else " " + _("(durch die Geschäftsleitung)")
+
 def _check_rolle(rolle):
     if rolle not in frappe.get_roles():
         frappe.throw(_("Diese Aktion ist der Rolle {0} vorbehalten.").format(rolle), frappe.PermissionError)
@@ -197,7 +208,9 @@ def vormerkung_mail_daten(mandat):
     return {
         "recipients": ", ".join(sorted(aktiv)),
         "subject": "Vormerkung Solidaritätsfonds: {0}".format(doc.name),
-        "email_template": vorlage
+        "email_template": vorlage,
+        # Absender wie bei allen Mandats-Mails (Sektion → Mandate), nicht das erste Mailkonto der Person
+        "sender": _absender(doc.sektion_id) or ''
     }
 
 @frappe.whitelist()
@@ -273,7 +286,7 @@ def einreichen_mail(doc):
 
 @frappe.whitelist()
 def vorpruefung_abschliessen(mandat, vorpruefung_ok, begruendung=None):
-    _check_rolle(ROLLE_VORPRUEFUNG)
+    _check_rolle_vorpruefung()
     doc = _get_mandat(mandat)
     _check_status(doc, "Gesuch eingereicht")
     _check_kriterien(doc)
@@ -286,12 +299,12 @@ def vorpruefung_abschliessen(mandat, vorpruefung_ok, begruendung=None):
     doc.vorgeprueft_von = frappe.session.user
     _status_setzen(doc, "Vorgeprüft", begruendung)
     doc.save(ignore_permissions=True)
-    _kommentar(doc, _("Vorprüfung abgeschlossen, an GL weitergeleitet."))
+    _kommentar(doc, _("Vorprüfung abgeschlossen, an GL weitergeleitet.") + _durch_gl())
     return doc.status
 
 @frappe.whitelist()
 def an_va_zurueckweisen(mandat, grund):
-    _check_rolle(ROLLE_VORPRUEFUNG)
+    _check_rolle_vorpruefung()
     doc = _get_mandat(mandat)
     _check_status(doc, "Gesuch eingereicht")
     if not (grund or "").strip():
@@ -301,7 +314,7 @@ def an_va_zurueckweisen(mandat, grund):
     doc.gesuch_eingereicht_am = None
     doc.gesuch_eingereicht_von = None
     doc.save(ignore_permissions=True)
-    _kommentar(doc, _("Gesuch an die VA zurückgewiesen: {0}").format(escape_html(grund)))
+    _kommentar(doc, _("Gesuch an die VA zurückgewiesen: {0}").format(escape_html(grund)) + _durch_gl())
     _sende_mail(doc, get_va_empfaenger(doc),
         _("Solifonds-Gesuch zurückgewiesen: {0}").format(doc.name),
         "<p>{0}</p><p>{1}</p><p><a href='{2}'>{3}</a></p>".format(
@@ -311,7 +324,7 @@ def an_va_zurueckweisen(mandat, grund):
 
 @frappe.whitelist()
 def vorpruefung_zuruecknehmen(mandat):
-    _check_rolle(ROLLE_VORPRUEFUNG)
+    _check_rolle_vorpruefung()
     doc = _get_mandat(mandat)
     _check_status(doc, "Vorgeprüft")
 
@@ -320,7 +333,7 @@ def vorpruefung_zuruecknehmen(mandat):
     doc.vorgeprueft_von = None
     _status_setzen(doc, "Gesuch eingereicht", _("Vorprüfung zurückgenommen"))
     doc.save(ignore_permissions=True)
-    _kommentar(doc, _("Vorprüfung zurückgenommen."))
+    _kommentar(doc, _("Vorprüfung zurückgenommen.") + _durch_gl())
     return doc.status
 
 
