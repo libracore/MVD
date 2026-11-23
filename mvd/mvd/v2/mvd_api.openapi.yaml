@@ -390,6 +390,10 @@ paths:
       description: |
         Dieser Endpunkt dient der Website zur Anlage einer neuen Beratung.
 
+        Das aufrufende Konto benötigt die Rolle `update.ch API`, `Administrator` ist ebenfalls zugelassen.
+        Die Website muss das Mitglied authentifizieren und dessen Berechtigung für die Mitglied-ID prüfen.
+        MVD authentifiziert hier das zentrale API-Konto.
+
         Zur Beratung zugehörige Files müssen nachgelagert einzeln an den entsprechenden Endpunkt `upload_file_to_beratung` gesendet werden.
 
         Wenn es keine Files zum Nachsenden gibt, muss zwingend der Parameter `without_files` auf `true` gesetzt werden.
@@ -476,6 +480,8 @@ paths:
                   message:
                     type: string
                     example: "Parameter email missing"
+        '403':
+          description: Aufrufendes Konto besitzt keine Berechtigung für die Beratungs-API
         '404':
           description: Mitglied nicht gefunden
           content:
@@ -636,6 +642,9 @@ paths:
       description: |
         Dieser Endpunkt dient der Website zum upload eines Files zu einer Beratung.
 
+        Das aufrufende Konto benötigt die Rolle `update.ch API`, `Administrator` ist ebenfalls zugelassen.
+        Die Website muss die Berechtigung des Mitglieds für die angegebene Beratung prüfen.
+
         Example CURL Request:
         ```
         curl https://[URL]/api/method/mvd.mvd.v2.api.upload_file_to_beratung \
@@ -689,6 +698,8 @@ paths:
                   message:
                     type: string
                     example: "File saved"
+        '403':
+          description: Keine Berechtigung für die Beratungs-API oder nicht erlaubter Dateityp
         '409':
           description: Duplicate Entry Error
           content:

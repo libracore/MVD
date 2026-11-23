@@ -313,12 +313,23 @@ def kampagne(**kwargs):
 '''
     API endpoints for creating consultations and uploading files related to consultations via the website
 '''
+def _check_beratungs_api_permission():
+    # Die Website ruft diese Endpunkte über ihr zentrales API-Konto auf.
+    # Deshalb wird die API-Rolle geprüft und nicht die übergebene Mitglied-ID mit dem angemeldeten Konto verglichen.
+    user = frappe.session.user
+    if user != 'Guest' and (user == 'Administrator' or 'update.ch API' in frappe.get_roles(user)):
+        return
+    
+    raise frappe.PermissionError('Diese Aktion benötigt die Rolle update.ch API.')
+
+
 @frappe.whitelist()
 def create_beratung(**args):
     '''
         API endpoint for creating a new consultation.
         Returns consultation ID in case of success.
     '''
+    _check_beratungs_api_permission()
     try:
         create_beratungs_log(error=0, info=1, beratung=None, method='create_beratung', title='Neue Beratung wird duch Website angelegt', json="{0}".format(str(args)))
 
@@ -468,6 +479,7 @@ def upload_file_to_beratung():
         -F "beratung=25-08-12-446182"
 
     '''
+    _check_beratungs_api_permission()
     files = frappe.request.files
     is_private = 1 #frappe.form_dict.is_private
     doctype = "Beratung" #frappe.form_dict.doctype

@@ -207,17 +207,15 @@
    "options": "Ja\nNein"
   },
   {
+   "description": "Empf\u00e4ngerkonto f\u00fcr den QR-Zahlteil. Vorgabe: Standard-Bankkonto des Unternehmens.",
    "fieldname": "rechnungs_bankkonto",
    "fieldtype": "Link",
    "label": "Rechnungs-Bankkonto",
-   "options": "Account",
-   "description": "Empf\u00e4ngerkonto f\u00fcr den QR-Zahlteil. Vorgabe: Standard-Bankkonto des Unternehmens.",
-   "allow_on_submit": 0,
-   "no_copy": 0
+   "options": "Account"
   }
  ],
  "is_submittable": 1,
- "modified": "2026-11-11 14:11:10.068524",
+ "modified": "2026-11-23 12:01:40.335459",
  "modified_by": "Administrator",
  "module": "MVD",
  "name": "MRJ Sektions Selektion",
@@ -234,18 +232,6 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
-   "submit": 1,
-   "write": 1
-  },
-  {
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "read": 1,
-   "report": 1,
-   "role": "All",
    "submit": 1,
    "write": 1
   }
