@@ -2011,7 +2011,7 @@ function mitglied_inaktivieren(frm) {
 
 function wieder_beitritt(frm) {
     frappe.confirm(
-        'Möchten Sie das inaktivierte Mitglied in eine <b>Neu Anmeldung</b> umwandeln?',
+        'Möchten Sie für den Wiedereintritt eine <b>neue Mitgliedschaft als Anmeldung mit neuer Mitgliedernummer</b> erstellen? Die bisherige Mitgliedschaft bleibt bestehen. Der Eintritt und der Wechsel auf "Regulär" erfolgen mit dem Zahlungseingang.',
         function(){
             // on yes
             frappe.call({
@@ -2085,7 +2085,7 @@ function dirty_observer(frm) {
 
 function mitglied_reaktivieren(frm) {
     frappe.confirm(
-        'Mitglieder sollten nur reaktiviert werden, wenn die Beiträge lückenlos bezahlt wurden. Bei Bedarf müssen fehlende Rechnungen revisioniert und nach der Reaktivierung nochmals gestellt bzw. gebucht werden.',
+        'Möchten Sie die <b>bestehende Mitgliedschaft reaktivieren</b>? Die Mitgliedernummer und das bisherige Eintrittsdatum bleiben erhalten und der Status wird direkt auf "Regulär" gesetzt. Mitglieder sollten nur reaktiviert werden, wenn die Beiträge lückenlos bezahlt wurden. Bei Bedarf müssen fehlende Rechnungen revisioniert und nach der Reaktivierung nochmals gestellt bzw. gebucht werden.',
         function(){
             // on yes
             frappe.prompt([

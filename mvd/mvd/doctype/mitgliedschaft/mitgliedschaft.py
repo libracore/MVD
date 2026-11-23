@@ -217,6 +217,8 @@ class Mitgliedschaft(Document):
                 frappe.log_error("Mitglied: {0}\nDigitalrechnung: {1}".format(self.mitglied_hash, mitglied_hash), 'Unmatching Mitglied-Hash')
 
             # #1259
+            if not self.flags.from_import:
+                reactivate_web_login(self)
             if cint(self.web_login_user_created) != 1:
                 create_web_login_user(self.mitglied_nr)
                 self.web_login_user_created = 1
@@ -2676,7 +2678,9 @@ def wieder_beitritt(mitgliedschaft):
     mitgliedschafts_copy.mitglied_nr = None
     mitgliedschafts_copy.mitglied_id = None
     mitgliedschafts_copy.status_c = 'Anmeldung'
-    mitgliedschafts_copy.eintrittsdatum = today()
+    # Der Eintritt erfolgt erst durch den Zahlungseingang.
+    mitgliedschafts_copy.eintrittsdatum = None
+    mitgliedschafts_copy.web_login_user_created = 0
     mitgliedschafts_copy.zuzug = None
     mitgliedschafts_copy.zuzug_von = None
     mitgliedschafts_copy.wegzug = None
@@ -2696,6 +2700,7 @@ def wieder_beitritt(mitgliedschaft):
     mitgliedschafts_copy.datum_online_gutschrift = None
     mitgliedschafts_copy.online_payment_method = None
     mitgliedschafts_copy.online_payment_id = None
+    mitgliedschafts_copy.online_payment_zahlungsfile = None
     mitgliedschafts_copy.anmeldung_mit_ez = 1
     mitgliedschafts_copy.validierung_notwendig = 1
     mitgliedschafts_copy.kuendigung_verarbeiten = 0
@@ -2716,8 +2721,8 @@ def wieder_beitritt(mitgliedschaft):
     mitgliedschafts_copy.validierung_notwendig = 0
     mitgliedschafts_copy.save(ignore_permissions=True)
     
-    alte_mitgliedschaft.add_comment('Comment', text='Mitgliedschaft (als Anmeldung) mittels {0} ({1}) reaktiviert.'.format(mitgliedschafts_copy.mitglied_nr, mitgliedschafts_copy.name))
-    mitgliedschafts_copy.add_comment('Comment', text='Reaktivierte Mitgliedschaft aus {0} ({1})'.format(alte_mitgliedschaft.mitglied_nr, alte_mitgliedschaft.name))
+    alte_mitgliedschaft.add_comment('Comment', text='Wiedereintritt: Neue Mitgliedschaft als Anmeldung erstellt: {0} ({1}).'.format(mitgliedschafts_copy.mitglied_nr, mitgliedschafts_copy.name))
+    mitgliedschafts_copy.add_comment('Comment', text='Wiedereintritt: Neue Mitgliedschaft aus {0} ({1}) erstellt.'.format(alte_mitgliedschaft.mitglied_nr, alte_mitgliedschaft.name))
     
     return mitgliedschafts_copy.name
 
@@ -3098,6 +3103,22 @@ def format_phone_number(number):
 
         # Fallback: Einfach die bereinigte Nummer zurückgeben
         return num
+
+def reactivate_web_login(mitgliedschaft):
+    old_doc = mitgliedschaft.get_doc_before_save()
+    if not old_doc or old_doc.status_c != 'Inaktiv' or mitgliedschaft.status_c != 'Regulär':
+        return
+
+    user_id = "{0}@login.ch".format(mitgliedschaft.mitglied_nr)
+    if not frappe.db.exists("User", user_id):
+        # Ein fehlendes Konto wird anschliessend in validate() erstellt
+        mitgliedschaft.web_login_user_created = 0
+        return
+
+    web_login_user = frappe.get_doc("User", user_id)
+    if cint(web_login_user.enabled) != 1:
+        web_login_user.enabled = 1
+        web_login_user.save(ignore_permissions=True)
 
 def disable_web_login(mitglied_nr):
     if not is_job_already_running("Disable Web-Login ({0})".format(mitglied_nr)):
