@@ -462,7 +462,8 @@ function add_solifonds_buttons(frm) {
         }, gruppe);
     }
 
-    if (frappe.user.has_role('MV_Solifonds_Vorpruefung')) {
+    // #2274: Aufgaben der Vorprüfung kann auch die GL erledigen
+    if (frappe.user.has_role(['MV_Solifonds_Vorpruefung', 'MV_Solifonds_GL'])) {
         if (status == 'Gesuch eingereicht') {
             frm.add_custom_button(__('Vorprüfung abschliessen'), function() {
                 let d = new frappe.ui.Dialog({
