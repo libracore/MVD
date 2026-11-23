@@ -197,10 +197,15 @@ frappe.mvd.mandat_status.darf_nach_abgelehnt_aendern = function() {
 // Der MailComposer hat pro Person und Mandat nur EINEN Entwurf (Suche VA, Vormerkung, … teilen ihn).
 // Für load_draft: einen Entwurf nur wiederherstellen, wenn er mit derselben Vorlage begonnen wurde – sonst frisch öffnen
 // (z. B. Vormerkung nach einer Suche VA, deren Entwurf noch liegt).
-function entwurf_nur_mit_vorlage(vorlage) {
+// Bei einer Vormerkung muss zusätzlich der VA passen, alte Entwürfe ohne VA-Zuordnung bleiben unberücksichtigt
+function entwurf_nur_mit_vorlage(vorlage, kontaktperson) {
     return function() {
         return frappe.mvd.MailComposer.prototype.load_draft.call(this).then(function(entwurf) {
             let felder = (entwurf && entwurf.state && entwurf.state.fields) || {};
+            let kontext = (entwurf && entwurf.state && entwurf.state.context) || {};
+            if (kontaktperson && kontext.vormerkung_kontaktperson !== kontaktperson) {
+                return null;
+            }
             return (entwurf && (felder.email_template || '') === (vorlage || '')) ? entwurf : null;
         });
     };
@@ -208,6 +213,7 @@ function entwurf_nur_mit_vorlage(vorlage) {
 
 // Solifonds: Mail-Dialog «Vormerkung» an die zugewiesene VA (Empfänger*innen, Betreff und Vorlage vom Server)
 function vormerkung_mail_dialog(frm) {
+    let kontaktperson = frm.doc.kontaktperson;
     frappe.call({
         method: 'mvd.mvd.doctype.mandat.solifonds.vormerkung_mail_daten',
         args: {'mandat': frm.doc.name},
@@ -226,7 +232,12 @@ function vormerkung_mail_dialog(frm) {
                 last_email: '',
                 is_a_reply: false,
                 sender: frappe.session.user_fullname + ' <' + frappe.session.user + '>',
-                load_draft: entwurf_nur_mit_vorlage(r.message.email_template),
+                load_draft: entwurf_nur_mit_vorlage(r.message.email_template, kontaktperson),
+                get_draft_state: function() {
+                    let entwurf = frappe.mvd.MailComposer.prototype.get_draft_state.call(this);
+                    entwurf.context.vormerkung_kontaktperson = kontaktperson;
+                    return entwurf;
+                },
                 // Die Vorlage überschreibt den Betreff; Mandatsnummer anhängen, falls sie fehlt (wie bei den automatischen Mails).
                 // Der Dialog entsteht erst asynchron, darum hier statt nach dem Erstellen.
                 setup_email_template: function() {
