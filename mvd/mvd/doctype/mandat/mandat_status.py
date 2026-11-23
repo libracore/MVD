@@ -8,6 +8,8 @@
 # - RSV: Status von Hand wählbar (nur RSV-Status). Solifonds: Status nur über die Knöpfe.
 # - Automatik Unzugewiesen/Vorgemerkt nur vor dem Einreichen (behebt #2207).
 # - Ab «Gesuch eingereicht» sind VA und Typ gesperrt; die GL (MV_Solifonds_GL) kann die VA trotzdem ändern.
+# - «Unzugewiesen»/«Vorgemerkt» setzt nur die Automatik (nicht von Hand); «Gelöscht» nur MV_MA/MV_GL;
+#   aus «Abgelehnt» darf die GL (MV_GL) jeden Status setzen, alle anderen nur «Rückzug»/«Gelöscht» (#2269).
 # - Jede Statusänderung kommt in die Untertabelle «Statusverlauf» (Statusaenderung): wann, wer, von/nach, wodurch.
 
 from __future__ import unicode_literals
@@ -41,6 +43,12 @@ QUELLE_AUTOMATIK = "Automatik"
 QUELLE_MIGRATION = "Migration"
 
 ROLLE_GL = "MV_Solifonds_GL"
+# «Unzugewiesen»/«Vorgemerkt» ergeben sich aus der VA (Automatik), von Hand nicht wählbar
+NUR_AUTOMATIK = ("Unzugewiesen", "Vorgemerkt")
+# «Gelöscht» setzen dürfen nur diese Rollen (nicht die Rechtsberatung MV_RB)
+ROLLEN_LOESCHEN = {"MV_MA", "MV_GL", "System Manager"}
+# Aus «Abgelehnt» darf die Geschäftsleitung jeden Status setzen; alle anderen nur «Rückzug»/«Gelöscht»
+ROLLEN_NACH_ABGELEHNT = {"MV_GL", "System Manager"}
 
 
 def status_fuer_typ(typ):
@@ -48,6 +56,12 @@ def status_fuer_typ(typ):
 
 def darf_va_sperre_uebersteuern():
     return bool({ROLLE_GL, "System Manager"} & set(frappe.get_roles()))
+
+def darf_loeschen():
+    return bool(ROLLEN_LOESCHEN & set(frappe.get_roles()))
+
+def darf_nach_abgelehnt_aendern():
+    return bool(ROLLEN_NACH_ABGELEHNT & set(frappe.get_roles()))
 
 
 def status_vor_speichern(doc):
@@ -71,6 +85,13 @@ def status_vor_speichern(doc):
                 and not darf_va_sperre_uebersteuern():
             frappe.throw(_("Ab dem Status «Gesuch eingereicht» lässt sich die Vertrauensanwält*in nicht mehr ändern. Bitte die Geschäftsleitung fragen."))
 
+    # «Unzugewiesen»/«Vorgemerkt» nicht von Hand wählbar (z. B. nicht zurück aus «Gesuch eingereicht»);
+    # die Rückweisung durch die Vorprüfung (Knopf) setzt «Vorgemerkt» weiterhin
+    if alt and doc.status != alt.status and doc.status in NUR_AUTOMATIK and alt.status not in VOR_EINREICHUNG \
+            and doc.flags.status_quelle not in (QUELLE_KNOPF, QUELLE_AUTOMATIK):
+        frappe.throw(_("Den Status «{0}» setzt Libracore selbst (je nachdem, ob eine Vertrauensanwält*in eingetragen ist). "
+                       "Er lässt sich nicht von Hand wählen.").format(doc.status))
+
     # Automatik Unzugewiesen/Vorgemerkt, nur vor dem Einreichen (#2207)
     vorher = doc.status
     if doc.is_new() or doc.status in ("Unzugewiesen", "Vorgemerkt"):
@@ -91,8 +112,12 @@ def status_vor_speichern(doc):
     if doc.status not in VOR_EINREICHUNG + JEDERZEIT and not doc.kontaktperson:
         frappe.throw(_("Für den Status «{0}» braucht es eine Vertrauensanwält*in.").format(doc.status))
 
-    if alt_status == "Abgelehnt" and doc.status not in JEDERZEIT:
-        frappe.throw(_("«Abgelehnt» ist ein Endstatus. Möglich sind nur noch «Rückzug» und «Gelöscht»."))
+    if alt_status == "Abgelehnt" and doc.status not in JEDERZEIT and not darf_nach_abgelehnt_aendern():
+        frappe.throw(_("«Abgelehnt» ist ein Endstatus. Möglich sind nur noch «Rückzug» und «Gelöscht»; "
+                       "einen anderen Status kann die Geschäftsleitung setzen."))
+
+    if doc.status == "Gelöscht" and not darf_loeschen():
+        frappe.throw(_("Den Status «Gelöscht» können nur Mitarbeitende und die Geschäftsleitung setzen."))
 
     if doc.status == NICHT_VERGEBEN:
         if alt_status != "Unzugewiesen":

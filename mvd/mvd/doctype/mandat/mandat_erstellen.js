@@ -260,6 +260,7 @@ frappe.mvd.mandat.rueckmeldung = function(frm, mandat, values, uebernehmen, soli
                     freeze: true,
                     always: () => f.get_primary_btn().prop('disabled', false),
                     callback: function() {
+                        eingereicht = true;
                         f.hide();
                         frappe.msgprint({
                             title: __('Gesuch eingereicht'),
@@ -274,6 +275,17 @@ frappe.mvd.mandat.rueckmeldung = function(frm, mandat, values, uebernehmen, soli
         $(`<button class="btn btn-default btn-sm" style="margin-right: 5px;">${__('Später')}</button>`)
             .insertBefore(f.get_primary_btn())
             .on('click', () => f.hide());
+        // Nicht gleich eingereicht («Später» oder Dialog geschlossen): Vormerkungs-Mail an die VA.
+        // Wird gleich eingereicht, geht sie nicht raus.
+        let eingereicht = false;
+        f.onhide = function() {
+            if (!eingereicht) {
+                frappe.call({
+                    method: 'mvd.mvd.doctype.mandat.solifonds.vormerkung_mail_senden',
+                    args: {'mandat': mandat}
+                });
+            }
+        };
         f.show();
     }
 };

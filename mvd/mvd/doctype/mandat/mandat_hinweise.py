@@ -88,6 +88,9 @@ HINWEISE = [
 
     ("Abgelehnt", "*", "va", None, "red",
      "Das Gesuch wurde abgelehnt. Weiter bearbeitet wird es nicht; möglich ist nur noch der Status «Rückzug»."),
+    ("Abgelehnt", "RSV", "*", None, "red",
+     "Das Gesuch wurde abgelehnt. Weiter bearbeitet wird es nicht; möglich ist nur noch der Status «Rückzug» bzw. «Gelöscht». "
+     "Ändert sich der Entscheid, kann die Geschäftsleitung den Status im Feld <b>Status</b> anpassen."),
     ("Abgelehnt", "*", "*", None, "red",
      "Das Gesuch wurde abgelehnt. Weiter bearbeitet wird es nicht; möglich ist nur noch der Status «Rückzug» bzw. «Gelöscht»."),
 

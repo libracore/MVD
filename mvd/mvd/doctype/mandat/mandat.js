@@ -4,7 +4,18 @@
 {% include "mvd/mvd/doctype/mandat/solifonds_dialoge.js" %}
 
 frappe.ui.form.on('Mandat', {
+    after_save: function(frm) {
+        // Solifonds: VA zugewiesen (Mandat «Vorgemerkt») -> Mail-Dialog mit der Vorlage «Template Vormerkung Solifonds»;
+        // abgeschickt wird von Hand. after_save läuft vor refresh, _va_gespeichert ist also noch der Stand vor dem Speichern.
+        if (frm.doc.typ == 'Solidaritätsfonds' && frm.doc.status == 'Vorgemerkt' && frm.doc.kontaktperson
+                && frm.doc.kontaktperson !== frm._va_gespeichert) {
+            vormerkung_mail_dialog(frm);
+        }
+    },
     refresh: function(frm) {
+        // VA beim Laden bzw. nach dem Speichern merken (für after_save: VA neu zugewiesen?)
+        frm._va_gespeichert = frm.is_new() ? null : (frm.doc.kontaktperson || null);
+
         // Solifonds nach dem Einreichen: «nur RB» darf nur noch ansehen (Server: mandat_permissions.ist_rb_gesperrt);
         // möglich bleiben Abschliessen, Rückzug und Anhänge
         if (rb_gesperrt(frm)) {
@@ -96,7 +107,8 @@ frappe.ui.form.on('Mandat', {
                                 email_template: mail_data.email_template,       
                                 last_email: '',                   
                                 is_a_reply: false,                
-                                sender: current_user_sender                        
+                                sender: current_user_sender,
+                                load_draft: entwurf_nur_mit_vorlage(mail_data.email_template)
                             });
                         }
                     }
@@ -173,6 +185,68 @@ frappe.mvd.mandat_status.STATUS_RSV = ['Unzugewiesen', 'Nicht vergeben', 'Vorgem
 frappe.mvd.mandat_status.VOR_EINREICHUNG = ['Unzugewiesen', 'Nicht vergeben', 'Vorgemerkt'];
 frappe.mvd.mandat_status.JEDERZEIT = ['Rückzug', 'Gelöscht'];
 frappe.mvd.mandat_status.METHOD = 'mvd.mvd.doctype.mandat.mandat_status.status_aendern';
+// #2269: gleiche Regeln wie mandat_status.py (NUR_AUTOMATIK, ROLLEN_LOESCHEN, ROLLEN_NACH_ABGELEHNT)
+frappe.mvd.mandat_status.NUR_AUTOMATIK = ['Unzugewiesen', 'Vorgemerkt'];
+frappe.mvd.mandat_status.darf_loeschen = function() {
+    return frappe.user.has_role(['MV_MA', 'MV_GL', 'System Manager']);
+};
+frappe.mvd.mandat_status.darf_nach_abgelehnt_aendern = function() {
+    return frappe.user.has_role(['MV_GL', 'System Manager']);
+};
+
+// Der MailComposer hat pro Person und Mandat nur EINEN Entwurf (Suche VA, Vormerkung, … teilen ihn).
+// Für load_draft: einen Entwurf nur wiederherstellen, wenn er mit derselben Vorlage begonnen wurde – sonst frisch öffnen
+// (z. B. Vormerkung nach einer Suche VA, deren Entwurf noch liegt).
+function entwurf_nur_mit_vorlage(vorlage) {
+    return function() {
+        return frappe.mvd.MailComposer.prototype.load_draft.call(this).then(function(entwurf) {
+            let felder = (entwurf && entwurf.state && entwurf.state.fields) || {};
+            return (entwurf && (felder.email_template || '') === (vorlage || '')) ? entwurf : null;
+        });
+    };
+}
+
+// Solifonds: Mail-Dialog «Vormerkung» an die zugewiesene VA (Empfänger*innen, Betreff und Vorlage vom Server)
+function vormerkung_mail_dialog(frm) {
+    frappe.call({
+        method: 'mvd.mvd.doctype.mandat.solifonds.vormerkung_mail_daten',
+        args: {'mandat': frm.doc.name},
+        callback: function(r) {
+            if (r.exc || !r.message) return;
+            new frappe.mvd.MailComposer({
+                doc: frm.doc,
+                frm: frm,
+                title: __('Info an die VA: Vormerkung Solifonds'),
+                subject: r.message.subject,
+                recipients: r.message.recipients,
+                cc: '',
+                attach_document_print: false,
+                txt: '',
+                email_template: r.message.email_template,
+                last_email: '',
+                is_a_reply: false,
+                sender: frappe.session.user_fullname + ' <' + frappe.session.user + '>',
+                load_draft: entwurf_nur_mit_vorlage(r.message.email_template),
+                // Die Vorlage überschreibt den Betreff; Mandatsnummer anhängen, falls sie fehlt (wie bei den automatischen Mails).
+                // Der Dialog entsteht erst asynchron, darum hier statt nach dem Erstellen.
+                setup_email_template: function() {
+                    let composer = this;
+                    frappe.mvd.MailComposer.prototype.setup_email_template.call(composer);
+                    let df = composer.dialog.fields_dict.email_template.df;
+                    let vorlage_onchange = df.onchange;
+                    df.onchange = function() {
+                        return Promise.resolve(vorlage_onchange && vorlage_onchange.apply(this, arguments)).then(function() {
+                            let betreff = composer.dialog.get_value('subject') || '';
+                            if (betreff.indexOf(frm.doc.name) === -1) {
+                                return composer.dialog.set_value('subject', (betreff || 'Vormerkung Solidaritätsfonds') + ': ' + frm.doc.name);
+                            }
+                        });
+                    };
+                }
+            });
+        }
+    });
+}
 
 function setup_status_felder(frm) {
     let ms = frappe.mvd.mandat_status;
@@ -187,13 +261,23 @@ function setup_status_felder(frm) {
         // Solifonds: Status nur über die Knöpfe
         frm.set_df_property('status', 'read_only', 1);
     } else {
-        // RSV: von Hand wählbar, nur RSV-Status; «Nicht vergeben» über den Knopf (Bemerkung Pflicht)
+        // RSV: von Hand wählbar, nur RSV-Status; «Nicht vergeben» über den Knopf (Bemerkung Pflicht).
+        // «Unzugewiesen»/«Vorgemerkt» setzt die Automatik (VA ja/nein), «Gelöscht» nur MV_MA/MV_GL,
+        // aus «Abgelehnt» nur «Rückzug»/«Gelöscht» – ausser für die Geschäftsleitung (MV_GL).
+        // Der aktuelle Status bleibt immer in der Liste.
+        let gespeichert = frm.doc.status;
         let optionen = ms.STATUS_RSV.filter(function(s) {
-            if (s == 'Nicht vergeben') {
-                return frm.doc.status == s;
+            if (s == gespeichert) {
+                return true;
             }
-            if (frm.doc.status == 'Abgelehnt') {
-                return s == 'Abgelehnt' || ms.JEDERZEIT.includes(s);
+            if (s == 'Nicht vergeben' || ms.NUR_AUTOMATIK.includes(s)) {
+                return false;
+            }
+            if (s == 'Gelöscht' && !ms.darf_loeschen()) {
+                return false;
+            }
+            if (gespeichert == 'Abgelehnt' && !ms.darf_nach_abgelehnt_aendern()) {
+                return ms.JEDERZEIT.includes(s);
             }
             return true;
         });
@@ -266,7 +350,7 @@ function add_status_buttons(frm) {
         }, gruppe);
     }
     ms.JEDERZEIT.forEach(function(ziel) {
-        if (status == ziel || (nur_rb && ziel != 'Rückzug')) {
+        if (status == ziel || (nur_rb && ziel != 'Rückzug') || (ziel == 'Gelöscht' && !ms.darf_loeschen())) {
             return;
         }
         frm.add_custom_button(__(ziel), function() {

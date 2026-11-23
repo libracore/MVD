@@ -45,3 +45,4 @@ mvd.patches.issue_2209.mitglied_nr_nachtragen
 mvd.patches.issue_2205.status_konzept
 mvd.patches.issue_2211.sprache_aus_mitgliedschaft
 mvd.patches.solifonds_va_bestaetigung.bestehende_als_gesendet
+mvd.patches.solifonds_vormerkung.template_mvbe
