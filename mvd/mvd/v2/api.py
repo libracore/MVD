@@ -567,6 +567,14 @@ def webshop_download(token):
     Serve a PDF download for a given token.
     Prüft zuerst den aktuellen Link, dann die Historie (Child Table).
     """
+    # Filterlisten wie ["like", "%"] dürfen nicht als Token interpretiert werden.
+    # Diese Prüfung gilt vor der Suche im aktuellen Link und in der Historie.
+    # Siehe libracore/vulnerabilities#11
+    if not isinstance(token, str) or len(token) < 32:
+        frappe.local.response.http_status_code = 404
+        frappe.local.response.message = 'Dieser Download-Link ist ungültig. Bitte überprüfen Sie Ihre E-Mail für den richtigen Link oder kontaktieren Sie den Support (info@mieterverband.ch).'
+        return
+
     target_file = None
     target_name = None
 
