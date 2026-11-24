@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2025, libracore and contributors
+# Copyright (c) 2025-2026, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -11,6 +11,7 @@ from frappe.utils.background_jobs import enqueue
 from frappe.utils import cint
 import copy
 import json
+from time import sleep
 from frappe.utils.data import now, add_days, today, add_to_date
 from mvd.mvd.utils.manuelle_rechnungs_items import get_item_price, get_mitgliedschafts_artikel_geschaeft
 from mvd.mvd.utils.qrr_reference import get_qrr_reference
@@ -19,6 +20,7 @@ from frappe.utils.pdf import get_file_data_from_writer
 from mvd.mvd.doctype.druckvorlage.druckvorlage import replace_mv_keywords
 from frappe.utils.csvutils import to_csv as make_csv
 from mvd.mvd.utils import is_job_already_running
+from mvd.mvd.doctype.mitgliedschaft.process_utils.update_zahlungsdaten import run as run_update_zahlungsdaten
 
 class MitgliedRGJahreslauf(Document):
     def autoname(self):
@@ -453,14 +455,36 @@ def create_invoices(mrj):
     sinv_date = sektions_selektion.sinv_date
     due_date_days = cint(sektions_selektion.due_date_days) or 30
     due_date = add_days(sinv_date, due_date_days)
+
     item_defaults = {
         'Privat': [{"item_code": sektion.mitgliedschafts_artikel,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel).get("price")}],
         'Geschäft': [{"item_code": sektion.mitgliedschafts_artikel_geschaeft,"qty": 1, "cost_center": company.cost_center, "rate": get_item_price(sektion.mitgliedschafts_artikel_geschaeft).get("price")}]
     }
+
+    invoice_args = {
+        'sektion': sektion, 'company': company, 'sinv_date': sinv_date, 'due_date': due_date,
+        'item_defaults': item_defaults, 'jahr': sektions_selektion.bezugsjahr,
+        'druckvorlage_rg': sektions_selektion.druckvorlage,
+        'druckvorlage_hv': sektions_selektion.druckvorlage_hv,
+        'druckvorlage_email': sektions_selektion.druckvorlage_email,
+        'druckvorlage_digitalrechnung': sektions_selektion.druckvorlage_digitalrechnung,
+        'mrj': mrj, 'sektions_selektion': sektions_selektion.name,
+        'rechnungs_bankkonto': rechnungs_bankkonto
+    }
+
+    frappe.db.commit() # Alte Lese-Ansichten der DB freigeben vor der Rechnungserstellung
+
     for mitglied in mitglieder:
         aktuelle_uhrzeit = add_to_date(None, minutes=0, as_datetime=True)
-        mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied)
-        create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, sektions_selektion.bezugsjahr, sektions_selektion.druckvorlage, sektions_selektion.druckvorlage_hv, sektions_selektion.druckvorlage_email, sektions_selektion.druckvorlage_digitalrechnung, mrj, sektions_selektion.name, rechnungs_bankkonto=rechnungs_bankkonto)
+        try:
+            _create_invoice_with_retry(mitglied.name, invoice_args)
+        except Exception:
+            # Ein Deadlock wird in der Rechnungserstellung aktiv behandelt.
+            # Eine Exception wird erst nach 3 Deadlocks oder einem anderen Fehler geworfen.
+            frappe.db.rollback()
+            frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "Fehlgeschlagen")
+            frappe.db.commit()
+            raise
         if aktuelle_uhrzeit > stop_time:
             # autom. stoppzeit erreicht, prozess unterbrechen
             breaked_loop = True
@@ -476,6 +500,42 @@ def create_invoices(mrj):
         frappe.db.set_value("Mitglied RG Jahreslauf", mrj, "status", "Rechnungserstellung pausiert")
         frappe.db.commit()
         return
+
+def _create_invoice_with_retry(mitglied, invoice_args):
+    # Deadlock-sicherer RG-Erstellungs-Wrapper
+    for attempt in range(4):
+        try:
+            frappe.db.sql("""SELECT name FROM `tabMitgliedschaft` WHERE name = %s FOR UPDATE""", (mitglied,))
+            if frappe.db.exists("Sales Invoice", {
+                'mv_mitgliedschaft': mitglied,
+                'sektion_id': invoice_args['sektion'].name,
+                'mitgliedschafts_jahr': invoice_args['jahr'],
+                'ist_mitgliedschaftsrechnung': 1,
+                'docstatus': 1
+            }):
+                # Gewünschte RG existiert bereits -> skip
+                frappe.db.commit()
+                return
+            
+            mitgliedschaft = frappe.get_doc("Mitgliedschaft", mitglied)
+            previous_skip = frappe.flags.get('skip_mitgliedschaft_zahlungsdaten')
+            try:
+                frappe.flags.skip_mitgliedschaft_zahlungsdaten = True
+                create_invoice(mitgliedschaft, **invoice_args)
+            finally:
+                frappe.flags.skip_mitgliedschaft_zahlungsdaten = previous_skip
+            return
+        
+        except Exception as error:
+            frappe.db.rollback()
+            if (
+                not isinstance(error, (frappe.db.OperationalError, frappe.db.InternalError))
+                or not (frappe.db.is_deadlocked(error)
+                or frappe.db.is_timedout(error))
+                or attempt == 3
+            ):
+                raise
+            sleep(attempt + 1)
 
 def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_defaults, jahr, druckvorlage_rg, druckvorlage_hv, druckvorlage_email, druckvorlage_digitalrechnung, mrj, sektions_selektion, rechnungs_bankkonto=None):
     # ------------------------------------------------------------------------------------
@@ -570,7 +630,9 @@ def create_invoice(mitgliedschaft, sektion, company, sinv_date, due_date, item_d
             fr.qrr_referenz = get_qrr_reference(fr=fr.name)
             fr.submit()
 
-        frappe.db.commit()
+        run_update_zahlungsdaten(mitgliedschaft.name)
+
+    frappe.db.commit()
 
 def create_pdfs(mrj):
     # Festlegen der Stop-Zeit
