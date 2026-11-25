@@ -65,8 +65,9 @@ class Wohnungsabgabe(Document):
                     header=None,
                     print_letterhead=False
                 )
-                self.qa_mail_sended = 1
-                self.save()
+                # Nur den Versandstatus aktualisieren: historische Auftragstypen
+                # können inzwischen aus den Select-Optionen entfernt worden sein.
+                self.db_set("qa_mail_sended", 1)
 
 def qa_mail():
     if cint(frappe.get_value("MVD Settings", "MVD Settings", "qa_mailversand")) == 1:
