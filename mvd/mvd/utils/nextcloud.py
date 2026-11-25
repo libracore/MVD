@@ -1422,6 +1422,11 @@ def list_children_tree(sektion=None, mitglied=None, parent=None, parent_path=Non
             verify=ncs.VERIFY_TLS
         )
 
+        # Ein fehlender Ordner wird im Dateibaum als leer angezeigt.
+        # Wiederholtes Öffnen soll dafür keinen Error Log erzeugen.
+        if resp.status_code == 404:
+            return []
+
         if resp.status_code != 207:
             frappe.log_error(
                 "status_code: {status_code}\nError: {text}\nurl: {url}".format(
