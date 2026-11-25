@@ -319,6 +319,17 @@ class Beratung(Document):
             self.naechster_termin = None
     
     def synchron_kontaktperson(self):
+        if self.termin and self.termin[-1].abp_referenz:
+            # Eine Änderung der Kontaktperson darf die gebuchte Beratungsperson nicht ändern
+            termin = self.termin[-1]
+            old_doc = self.get_doc_before_save()
+            alter_termin = old_doc.termin[-1] if old_doc and old_doc.termin else None
+            if not old_doc or (old_doc.kontaktperson == self.kontaktperson and (
+                    not alter_termin or alter_termin.name != termin.name or
+                    alter_termin.berater_in != termin.berater_in)):
+                # Bei einem neuen Termin weiterhin die Kontaktperson übernehmen
+                self.kontaktperson = termin.berater_in
+            return
         if len(self.termin) > 0:
             if self.kontaktperson != self.termin[len(self.termin) - 1].berater_in:
                 kontaktperson_alt = frappe.db.get_value("Beratung", self.name, 'kontaktperson')
@@ -992,8 +1003,11 @@ def create_neue_beratung(termin_block_data, art, ort, berater_in, telefonnummer,
             sektion_id = frappe.db.get_value("Kunden", faktura_kunde, 'sektion_id')
         
         termin_block_data = json.loads(termin_block_data)
-        # Berater*in und Ort kommen vom gebuchten Slot, nicht aus dem Dialog (#2168)
-        berater_in, slot_orte = get_berater_in_und_orte_aus_slots(termin_block_data)
+        # Den aktuellen Slot mit der ursprünglichen Auswahl abgleichen (#2168)
+        slot_berater_in, slot_orte = get_berater_in_und_orte_aus_slots(termin_block_data)
+        if berater_in != slot_berater_in:
+            frappe.throw("Die Berater*in des gewählten Termins wurde in der Zwischenzeit im Arbeitsplan geändert. Bitte wählen Sie die Termine erneut aus.")
+        berater_in = slot_berater_in
         if not beratung:
             # erstelle neue Beratung
             beratung = frappe.get_doc({

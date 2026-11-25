@@ -1501,6 +1501,8 @@ frappe.mvd.termin_quick_entry = function(config) {
                                 frappe.msgprint("Bitte wählen Sie mindestens einen Termin aus.");
                                 return;
                             }
+                            // Die beim Auswählen angezeigte Person für den Abgleich festhalten
+                            var berater_in = d.selected_beratungsperson;
                             frappe.call({
                                 method: "mvd.mvd.doctype.beratung.beratung.get_termin_block_data",
                                 args:{
@@ -1510,9 +1512,12 @@ frappe.mvd.termin_quick_entry = function(config) {
                                     console.log(r.message)
                                     if (r.message && r.message.length > 0) {
                                         var termin_block_data = r.message;
-                                        // Berater*in gem. gebuchtem Slot, nicht gem. Dialogfeld (#2168)
-                                        var berater_in = termin_block_data[0].beratungsperson;
-                                        d.hide();
+                                        if (termin_block_data.some(function(termin) {
+                                            return termin.beratungsperson != berater_in;
+                                        })) {
+                                            frappe.msgprint("Die Berater*in des gewählten Termins wurde in der Zwischenzeit im Arbeitsplan geändert. Bitte wählen Sie die Termine erneut aus.");
+                                            return;
+                                        }
 
                                         var kwargs = Object.assign({
                                             'termin_block_data': termin_block_data,
@@ -1538,6 +1543,7 @@ frappe.mvd.termin_quick_entry = function(config) {
                                             callback: function(r)
                                             {
                                                 if (r.message) {
+                                                    d.hide();
                                                     // Maildaten nur in diesem Tab und für die gebuchte Beratung übergeben.
                                                     sessionStorage.setItem("mvd_termin_mail:" + r.message, JSON.stringify({
                                                         termin_block_data: termin_block_data,
