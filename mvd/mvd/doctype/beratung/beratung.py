@@ -203,8 +203,9 @@ class Beratung(Document):
         if nc_enabled != 1: return
 
         old_doc = self.get_doc_before_save()
-        if not old_doc or self.flags.force_nextcloud_creation:
-            # Neu angelegte Beratung
+        if not old_doc or not old_doc.sektion_id or self.flags.force_nextcloud_creation:
+            # Neue Beratung oder erstmals gesetzte Sektion (z.B. nach Mail-Eingang).
+            # Ohne bisherige Sektion wurde noch kein Nextcloud-Ordner angelegt.
             create_nextcloud_beratungs_folder(self)
         elif (not old_doc.mv_mitgliedschaft) and (self.mv_mitgliedschaft):
             # Mitgliedschaft wurde hinzugefügt
