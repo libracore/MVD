@@ -77,6 +77,7 @@ def get_table_content():
                     SELECT 1
                     FROM `tabRSVMitglied` mi
                     WHERE mi.`rsvmandat` = m.`name`
+                    AND IFNULL(mi.`status`, '') != 'Gelöscht'
                     AND IFNULL(mi.`abschluss_datum`, '') = ''
                     AND IFNULL(mi.`abgelehnt_datum`, '') = ''
                 ) AS `inaktiv`
@@ -87,7 +88,7 @@ def get_table_content():
                 SELECT 1
                 FROM `tabRSVMitglied` mi
                 WHERE mi.`rsvmandat` = m.`name`
-                AND mi.`status` NOT IN ('Provisorisch EM', 'Provisorisch GM', 'Vorprüfung')
+                AND mi.`status` NOT IN ('Provisorisch EM', 'Provisorisch GM', 'Vorprüfung', 'Gelöscht')
             )
             ORDER BY `inaktiv` ASC, `datum_va_vergabe` DESC
         """,
@@ -153,7 +154,7 @@ def get_table_content():
                     `mitglied_seit`
                 FROM `tabRSVMitglied`
                 WHERE `rsvmandat` = '{mandat}'
-                AND `status` NOT IN ('Provisorisch EM', 'Provisorisch GM', 'Vorprüfung') -- Achtung, Filter-Duplikat in RSV-Mandat Query
+                AND `status` NOT IN ('Provisorisch EM', 'Provisorisch GM', 'Vorprüfung', 'Gelöscht') -- Achtung, Filter-Duplikat in RSV-Mandat Query
             """.format(mandat=mandat.name),
             as_dict=True
         )

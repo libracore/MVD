@@ -110,6 +110,7 @@ def get_cards():
                         m.*
                     FROM `tabRSVMitglied` m
                     WHERE m.rsvmandat = '{0}'
+                    AND IFNULL(m.`status`, '') != 'Gelöscht'
                     GROUP BY m.name
                 """.format(mandat.name),
                 as_dict=True
@@ -375,6 +376,7 @@ def close_rsvmandat(rsv_mandat, verfahrensinstanz, feedback=None):
             SELECT `name`
             FROM `tabRSVMitglied`
             WHERE `rsvmandat` = %s
+            AND IFNULL(`status`, '') != 'Gelöscht'
         """, (mandat.name,),
         as_dict=True
     )
@@ -389,8 +391,10 @@ def check_if_is_closed(rsv_mandat):
         """
             SELECT `status`
             FROM `tabRSVMitglied`
-            WHERE `rsvmandat` = '{0}'
-        """.format(rsv_mandat),
+            WHERE `rsvmandat` = %s
+            AND IFNULL(`status`, '') != 'Gelöscht'
+        """,
+        (rsv_mandat,),
         as_dict=True
     )
     for rsv_mitglied in rsv_mitglieder:
