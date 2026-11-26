@@ -40,8 +40,8 @@ def execute(filters=None):
     """, as_dict=True)
 
     for row in data:
-        row["action_button"] = f'''<button class="btn btn-xs btn-primary btn-send-coop-email" data-name="{row["name"]}">
+        row["action_button"] = '''<button class="btn btn-xs btn-primary btn-send-coop-email" data-name="{0}">
             <i class="fa fa-envelope"></i> E-Mail an Coop senden
-        </button>'''
+        </button>'''.format(row["name"])
 
     return columns, data
