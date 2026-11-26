@@ -19,7 +19,7 @@ import pyzipper
 import io
 import os
 import zipfile
-from urllib.parse import unquote, urlparse
+from urllib.parse import quote, unquote, urlparse
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_doc_from_ctx
 from html import escape
 from mvd.mvd.doctype.rsvmandat.rsvmandat import count_aktive_rsvmitglieder
@@ -810,7 +810,7 @@ def get_coop_email_data(docname):
     doc.get_rsvmitglied_zip_attachment()
 
     # Zwei Download-Links: verschluesseltes ZIP (oeffentlich, Passwort aus Sektion)
-    # und unverschluesseltes ZIP im /private/-Bereich (Zugriff ueber ERPNext-Login/Berechtigungen)
+    # und unverschluesseltes ZIP ueber den Portal-Endpunkt (Session und VA-Zuordnung)
     zip_links = []
     if doc.zip_file_verschluesselt:
         zip_links.append(
@@ -823,7 +823,7 @@ def get_coop_email_data(docname):
         zip_links.append(
             '<a href="{0}">Download der Anlagen als ZIP (Login)</a>'
             ' – für Vertrauensanwält:innen (Achtung: Man muss bereits im Libracore eingeloggt sein)'.format(
-                get_url(doc.zip_file)
+                get_url("/api/method/mvd.www.va.meine_mandate.download_zip?mandat={0}".format(quote(doc.name, safe="")))
             )
         )
 

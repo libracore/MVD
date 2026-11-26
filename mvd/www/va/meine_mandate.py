@@ -303,8 +303,18 @@ def get_cards():
 
 @frappe.whitelist()
 def download_zip(mandat):
+    if frappe.session.user == "Guest":
+        frappe.throw("Bitte melden Sie sich an, um die ZIP-Datei herunterzuladen.", frappe.PermissionError)
+
     m = frappe.get_doc("RSVMitglied", mandat)
+    get_authorized_rsvmandat(m.rsvmandat)
+
+    if not m.zip_file:
+        frappe.throw("Für dieses RSV-Mitglied ist keine ZIP-Datei hinterlegt.")
+
     file_path = resolve_file_path(m.zip_file)
+    if not file_path or not os.path.isfile(file_path):
+        frappe.throw("Die ZIP-Datei wurde nicht gefunden.", frappe.DoesNotExistError)
 
     with open(file_path, "rb") as f:
         file_content = f.read()
