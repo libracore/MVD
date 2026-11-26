@@ -24,7 +24,7 @@ def get_children(parent_name=None, sektion_id=None):
 
     if parent_name:
         filters["parent_vorlagen_baum"] = parent_name
-    else:
+    elif not sektion_id:
         filters["parent_vorlagen_baum"] = ["in", ["", None]]
 
     if sektion_id:
@@ -46,6 +46,13 @@ def get_children(parent_name=None, sektion_id=None):
         ],
         order_by="vorlagen_baum_name asc"
     )
+
+    if not parent_name and sektion_id:
+        section_names = set(row.name for row in rows)
+        rows = [
+            row for row in rows
+            if row.parent_vorlagen_baum not in section_names
+        ]
 
     result = []
 
