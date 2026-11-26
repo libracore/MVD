@@ -10,6 +10,10 @@ import re
 from mvd.mvd.utils.nextcloud import NCSettings
 import os
 
+# Absender der Zahlungsbestaetigungen per Mail (#2278)
+ZAHLUNGSBESTAETIGUNG_SENDER = 'no-reply@m.mieterverband.ch'
+ZAHLUNGSBESTAETIGUNG_REPLY_TO = '{0}@m.mieterverband.ch' # {0} = Sektionskuerzel (klein)
+
 def resave_mitgliedschaft(sinv, event):
     if sinv.mv_mitgliedschaft:
         mitgliedschaft = frappe.get_doc("Mitgliedschaft", sinv.mv_mitgliedschaft)
@@ -212,11 +216,9 @@ def send_zahlungsbestaetigungen(pe):
             continue
 
         if sinv.sektion_id not in absender:
-            absender[sinv.sektion_id] = frappe.db.get_value('Sektion', sinv.sektion_id, ['serien_email_absender_name', 'serien_email_absender_adresse'], as_dict=True)
-        sender = absender[sinv.sektion_id]
-        if not sender or not sender.serien_email_absender_adresse:
-            # Kein Absender -> Skip
-            continue
+            absender[sinv.sektion_id] = frappe.db.get_value('Sektion', sinv.sektion_id, 'serien_email_absender_name')
+        sender_name = absender[sinv.sektion_id]
+        reply_to = ZAHLUNGSBESTAETIGUNG_REPLY_TO.format(sinv.sektion_id.lower())
 
         try:
             subject = vorlage.subject or 'Zahlungsbestätigung'
@@ -246,8 +248,8 @@ def send_zahlungsbestaetigungen(pe):
                 'communication_type': 'Communication',
                 'communication_medium': 'Email',
                 'sent_or_received': 'Sent',
-                'sender': sender.serien_email_absender_adresse,
-                'sender_full_name': sender.serien_email_absender_name,
+                'sender': ZAHLUNGSBESTAETIGUNG_SENDER,
+                'sender_full_name': sender_name,
                 'recipients': recipient,
                 'subject': subject,
                 'content': message,
@@ -257,11 +259,11 @@ def send_zahlungsbestaetigungen(pe):
             }).insert(ignore_permissions=True)
 
             frappe.sendmail(
-                sender='{0} <{1}>'.format(sender.serien_email_absender_name or '', sender.serien_email_absender_adresse),
+                sender='{0} <{1}>'.format(sender_name or '', ZAHLUNGSBESTAETIGUNG_SENDER),
                 recipients=[recipient],
                 message=message,
                 subject=subject,
-                reply_to=sender.serien_email_absender_adresse,
+                reply_to=reply_to,
                 reference_doctype='Sales Invoice',
                 reference_name=sinv.name,
                 communication=communication.name,
