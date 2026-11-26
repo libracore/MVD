@@ -37,6 +37,7 @@ def get_data():
         """
             SELECT *
             FROM `tabRSVMitglied`
+            WHERE IFNULL(`status`, '') != 'Gelöscht'
         """,
         as_dict=True
     )

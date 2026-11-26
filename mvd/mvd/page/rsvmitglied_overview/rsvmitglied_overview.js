@@ -106,6 +106,7 @@ function load_rsv_status_counts() {
                 'Rückzug': '#78716c',
                 'keine Antwort': '#f97316',
                 'Doppelversicherung': '#dc2626',
+                'Gelöscht': '#6b7280',
                 'Ohne Status': '#6b7280'
             };
 

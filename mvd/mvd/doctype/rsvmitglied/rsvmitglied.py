@@ -22,6 +22,7 @@ import zipfile
 from urllib.parse import unquote, urlparse
 from mvd.mvd.doctype.druckvorlage.druckvorlage import get_doc_from_ctx
 from html import escape
+from mvd.mvd.doctype.rsvmandat.rsvmandat import count_aktive_rsvmitglieder
 from mvd.mvd.utils.nextcloud import NCSettings, handle_rsvmitglied_folder
 try:
     from jinja2 import pass_context as context_decorator
@@ -801,7 +802,7 @@ def get_coop_email_data(docname):
     # Zusatzzeile für KGM & GGM vorbereiten
     anzahl_info_html = ""
     if rsvmandat.typ in ('KGM', 'GGM'):
-        anzahl_mitglieder = frappe.db.count("RSVMitglied", {"rsvmandat": doc.rsvmandat})
+        anzahl_mitglieder = count_aktive_rsvmitglieder(doc.rsvmandat)
         anzahl_info_html = "<br><p><strong>Anzahl RSV-Mitglieder im Mandat:</strong> {0}</p>".format(anzahl_mitglieder)
         
     template_bestaetigung_rsv = get_email_template(template_bestaetigung_rsv_name, {"doc": doc})

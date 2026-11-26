@@ -14,8 +14,10 @@ class RSVMandat(Document):
             """
                 SELECT `name`, `bfs_nr`, `sektion_id`
                 FROM `tabRSVMitglied`
-                WHERE `rsvmandat` = '{0}'
-            """.format(self.name),
+                WHERE `rsvmandat` = %s
+                AND IFNULL(`status`, '') != 'Gelöscht'
+            """,
+            (self.name,),
             as_dict=True
         )
 
@@ -52,13 +54,25 @@ class RSVMandat(Document):
     def reset_status(self):
         # Wird via "Speichern" von RSVMitglied getriggert
         if not self.set_type_manually:
-            refs = frappe.db.count("RSVMitglied", {'rsvmandat': self.name}, ['name'])
+            refs = count_aktive_rsvmitglieder(self.name)
             if cint(refs) < 2 and self.typ != 'EM':
                 self.typ = 'EM'
             elif cint(refs) >= 2 and cint(refs) <= 9 and self.typ != 'KGM':
                 self.typ = 'KGM'
             elif cint(refs) > 9 and self.typ != 'GGM':
                 self.typ = 'GGM'
+
+def count_aktive_rsvmitglieder(rsvmandat):
+    # Gelöschte RSV-Mitglieder (#2281) zählen nicht mit; RSV-Mitglieder ohne Status schon
+    return cint(frappe.db.sql(
+        """
+            SELECT COUNT(`name`)
+            FROM `tabRSVMitglied`
+            WHERE `rsvmandat` = %s
+            AND IFNULL(`status`, '') != 'Gelöscht'
+        """,
+        (rsvmandat,)
+    )[0][0])
 
 def get_va_from_user(va_user):
     va = frappe.db.sql(
@@ -146,8 +160,10 @@ def get_rsvmitglieder_html(rsv_mandat):
                 `hausnummer`,
                 `status`
             FROM `tabRSVMitglied`
-            WHERE `rsvmandat` = '{0}'
-        """.format(rsv_mandat),
+            WHERE `rsvmandat` = %s
+            AND IFNULL(`status`, '') != 'Gelöscht'
+        """,
+        (rsv_mandat,),
         as_dict=True
     )
 
