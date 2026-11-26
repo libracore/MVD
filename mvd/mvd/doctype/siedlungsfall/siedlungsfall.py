@@ -96,6 +96,7 @@ def get_letztes_mandat(mitglied):
                     `status`
                 FROM `tabRSVMitglied`
                 WHERE `mv_mitgliedschaft` = '{0}'
+                AND IFNULL(`status`, '') != 'Gelöscht'
                 ORDER BY `creation` DESC
                 LIMIT 1
             """.format(mitglied),

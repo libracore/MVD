@@ -89,7 +89,7 @@ function load_rsvmandat_typ_counts() {
                     $(this).closest('.rsv-card').attr('data-mandate') || '[]'
                 ));
 
-                frappe.route_options = {rsvmandat: ['in', mandate]};
+                frappe.route_options = {rsvmandat: ['in', mandate], status: ['!=', 'Gelöscht']};
 
                 frappe.set_route('List', 'RSVMitglied');
             });

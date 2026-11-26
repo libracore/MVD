@@ -32,6 +32,7 @@ def execute(filters=None):
             `tabRSVMandat` rm ON m.rsvmandat = rm.name
         WHERE 
             m.sendung_an_coop IS NULL
+            AND IFNULL(m.status, '') != 'Gelöscht'
             AND rm.anwalt IS NOT NULL 
             AND rm.anwalt != ''
         ORDER BY 

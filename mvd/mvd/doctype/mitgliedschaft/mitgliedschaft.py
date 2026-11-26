@@ -1523,7 +1523,7 @@ def get_uebersicht_html(name):
             mandat = False
 
         rsv_mandate = []
-        rsv_mandate_list = frappe.get_all('RSVMitglied', filters={'mv_mitgliedschaft': name}, fields=['name', 'creation', 'status'], order_by='creation asc')
+        rsv_mandate_list = frappe.get_all('RSVMitglied', filters={'mv_mitgliedschaft': name, 'status': ['not in', ['Gelöscht']]}, fields=['name', 'creation', 'status'], order_by='creation asc')
         for mnd in rsv_mandate_list:
             rsv_mandate.append({
                 'name': mnd.name,
